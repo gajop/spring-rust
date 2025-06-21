@@ -4,10 +4,6 @@
 [submodule "tools/pr-downloader"]
 	path = tools/pr-downloader
 	url = https://github.com/beyond-all-reason/pr-downloader
-[submodule "AI/Skirmish/BARb"]
-	path = AI/Skirmish/BARb
-	url = https://github.com/rlcevg/CircuitAI.git
-	branch = barbarian
 [submodule "AI/Skirmish/CircuitAI"]
 	path = AI/Skirmish/CircuitAI
 	url = https://github.com/rlcevg/CircuitAI.git

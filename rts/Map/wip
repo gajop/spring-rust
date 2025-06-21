@@ -1,0 +1,342 @@
+int LuaSyncedCtrl::SetAlly(int firstAllyTeamID, int secondAllyTeamID, bool allied)
+{
+    if (!teamHandler.IsValidAllyTeam(firstAllyTeamID))
+        return 0;
+
+    if (!teamHandler.IsValidAllyTeam(secondAllyTeamID))
+        return 0;
+
+    teamHandler.SetAlly(firstAllyTeamID, secondAllyTeamID, allied);
+    return 0;
+}
+
+int LuaSyncedCtrl::SetAllyTeamStartBox(unsigned int allyTeamID, float xMin, float zMin, float xMax, float zMax) {
+    if (!teamHandler.IsValidAllyTeam(allyTeamID)) {
+        return 0;
+    }
+
+    const float startRectLeft   = xMin / (mapDims.mapx * SQUARE_SIZE);
+    const float startRectTop    = zMin / (mapDims.mapy * SQUARE_SIZE);
+    const float startRectRight  = xMax / (mapDims.mapx * SQUARE_SIZE);
+    const float startRectBottom = zMax / (mapDims.mapy * SQUARE_SIZE);
+
+    teamHandler.SetAllyTeamStartBox(allyTeamID, startRectLeft, startRectTop, startRectRight, startRectBottom);
+    return 0;
+}
+
+int LuaSyncedCtrl::AssignPlayerToTeam(int playerID, int teamID) {
+    const CPlayer* player = playerHandler.IsValidPlayer(playerID) ? playerHandler.Player(playerID) : nullptr;
+
+    if (player == nullptr)
+        return 0;
+
+    if (!IsPlayerSynced(player))
+        return 0;
+
+    if (!teamHandler.IsValidTeam(teamID))
+        return 0;
+
+    teamHandler.Team(teamID)->AddPlayer(playerID);
+    return 0;
+}
+
+int LuaSyncedCtrl::SetGlobalLos(int allyTeam, bool globallos) {
+    if (!teamHandler.IsValidAllyTeam(allyTeam))
+        luaL_error(L, "bad allyTeam");
+
+    losHandler->SetGlobalLOS(allyTeam, globallos);
+    return 0;
+}
+
+int LuaSyncedCtrl::KillTeam(int teamID) {
+    if (!teamHandler.IsValidTeam(teamID))
+        return 0;
+
+    if (teamID == teamHandler.GaiaTeamID())
+        return 0;
+
+    CTeam* team = teamHandler.Team(teamID);
+
+    if (team == nullptr)
+        return 0;
+
+    team->Died();
+    return 0;
+}
+
+int LuaSyncedCtrl::GameOver(std::vector<unsigned char> winningAllyTeams) {
+    game->GameEnd(winningAllyTeams);
+    lua_pushnumber(L, winningAllyTeams.size());
+    return 1;
+}
+
+int LuaSyncedCtrl::SetTidal(float strength) {
+    envResHandler.LoadTidal(strength);
+    return 0;
+}
+
+int LuaSyncedCtrl::SetWind(float minStrength, float maxStrength) {
+    envResHandler.LoadWind(minStrength, maxStrength);
+    return 0;
+}
+
+int LuaSyncedCtrl::AddTeamResource(int teamID, std::string type, float amount) {
+    if (!teamHandler.IsValidTeam(teamID))
+        return 0;
+
+    if (!CanControlTeam(L, teamID))
+        return 0;
+
+    CTeam* team = teamHandler.Team(teamID);
+
+    if (team == nullptr)
+        return 0;
+
+    const float value = std::max(0.0f, amount);
+
+    switch (type[0]) {
+        case 'm': { team->AddMetal (value); } break;
+        case 'e': { team->AddEnergy(value); } break;
+        default : {                         } break;
+    }
+
+    return 0;
+}
+
+int LuaSyncedCtrl::UseTeamResource(int teamID, std::string type, std::variant<float, std::unordered_map<std::string, float>> amount) {
+    if (!teamHandler.IsValidTeam(teamID))
+        return 0;
+
+    if (!CanControlTeam(L, teamID))
+        return 0;
+
+    CTeam* team = teamHandler.Team(teamID);
+
+    if (team == nullptr)
+        return 0;
+
+    if (std::holds_alternative<float>(amount)) {
+        const float value = std::max(0.0f, std::get<float>(amount));
+
+        switch (type[0]) {
+            case 'm': {
+                team->resPull.metal += value;
+                lua_pushboolean(L, team->UseMetal(value));
+                return 1;
+            } break;
+            case 'e': {
+                team->resPull.energy += value;
+                lua_pushboolean(L, team->UseEnergy(value));
+                return 1;
+            } break;
+            default: {
+            } break;
+        }
+
+        return 0;
+    }
+
+    if (std::holds_alternative<std::unordered_map<std::string, float>>(amount)) {
+        float metal  = 0.0f;
+        float energy = 0.0f;
+
+        const auto& map = std::get<std::unordered_map<std::string, float>>(amount);
+
+        for (const auto& [key, value] : map) {
+            switch (key[0]) {
+                case 'm': { metal  = std::max(0.0f, value); } break;
+                case 'e': { energy = std::max(0.0f, value); } break;
+                default : {                                 } break;
+            }
+        }
+
+        team->resPull.metal  += metal;
+        team->resPull.energy += energy;
+
+        if ((team->res.metal >= metal) && (team->res.energy >= energy)) {
+            team->UseMetal(metal);
+            team->UseEnergy(energy);
+            lua_pushboolean(L, true);
+        } else {
+            lua_pushboolean(L, false);
+        }
+
+        return 1;
+    }
+
+    luaL_error(L, "bad arguments");
+    return 0;
+}
+
+int LuaSyncedCtrl::SetTeamResource(int teamID, std::string res, float amount) {
+    if (!teamHandler.IsValidTeam(teamID))
+        return 0;
+
+    if (!CanControlTeam(L, teamID))
+        return 0;
+
+    CTeam* team = teamHandler.Team(teamID);
+
+    if (team == nullptr)
+        return 0;
+
+    const float value = std::max(0.0f, amount);
+
+    switch (hashString(res)) {
+        case hashString("m"):
+        case hashString("metal"): {
+            team->res.metal = std::min<float>(team->resStorage.metal, value);
+        } break;
+
+        case hashString("e"):
+        case hashString("energy"): {
+            team->res.energy = std::min<float>(team->resStorage.energy, value);
+        } break;
+
+        case hashString("ms"):
+        case hashString("metalStorage"): {
+            team->res.metal = std::min<float>(team->res.metal, team->resStorage.metal = value);
+        } break;
+
+        case hashString("es"):
+        case hashString("energyStorage"): {
+            team->res.energy = std::min<float>(team->res.energy, team->resStorage.energy = value);
+        } break;
+    }
+
+    return 0;
+}
+
+int LuaSyncedCtrl::SetTeamShareLevel(int teamID, std::string type, float amount) {
+    if (!teamHandler.IsValidTeam(teamID))
+        return 0;
+
+    if (!CanControlTeam(L, teamID))
+        return 0;
+
+    CTeam* team = teamHandler.Team(teamID);
+
+    if (team == nullptr)
+        return 0;
+
+    const float value = std::clamp(amount, 0.0f, 1.0f);
+
+    switch (type[0]) {
+        case 'm': { team->resShare.metal  = value; } break;
+        case 'e': { team->resShare.energy = value; } break;
+        default : {                                } break;
+    }
+
+    return 0;
+}
+
+int LuaSyncedCtrl::ShareTeamResource(int teamID1, int teamID2, std::string type, float amount) {
+    if (!teamHandler.IsValidTeam(teamID1))
+        luaL_error(L, "Incorrect arguments to ShareTeamResource(teamID1, teamID2, type, amount)");
+
+    if (!CanControlTeam(L, teamID1))
+        return 0;
+
+    CTeam* team1 = teamHandler.Team(teamID1);
+
+    if (team1 == nullptr)
+        return 0;
+
+    if (!teamHandler.IsValidTeam(teamID2))
+        luaL_error(L, "Incorrect arguments to ShareTeamResource(teamID1, teamID2, type, amount)");
+
+    CTeam* team2 = teamHandler.Team(teamID2);
+
+    if (team2 == nullptr)
+        return 0;
+
+    switch (type[0]) {
+        case 'm': {
+            amount = std::min(amount, (float)team1->res.metal);
+
+            if (eventHandler.AllowResourceTransfer(teamID1, teamID2, "m", amount)) {
+                team1->res.metal                       -= amount;
+                team1->resSent.metal                   += amount;
+                team1->GetCurrentStats().metalSent     += amount;
+                team2->res.metal                       += amount;
+                team2->resReceived.metal               += amount;
+                team2->GetCurrentStats().metalReceived += amount;
+            }
+        } break;
+        case 'e': {
+            amount = std::min(amount, (float)team1->res.energy);
+
+            if (eventHandler.AllowResourceTransfer(teamID1, teamID2, "e", amount)) {
+                team1->res.energy                       -= amount;
+                team1->resSent.energy                   += amount;
+                team1->GetCurrentStats().energySent     += amount;
+                team2->res.energy                       += amount;
+                team2->resReceived.energy               += amount;
+                team2->GetCurrentStats().energyReceived += amount;
+            }
+        } break;
+        default: {
+        } break;
+    }
+
+    return 0;
+}
+
+int LuaSyncedCtrl::CreateUnit(std::string_view unitDefName, float x, float y, float z, int facing, int teamID, bool build, bool flattenGround, int unitID, int builderID) {
+    CheckAllowGameChanges(L);
+
+    if (inCreateUnit >= MAX_CMD_RECURSION_DEPTH) {
+        luaL_error(L, "[%s()]: recursion is not permitted, max depth: %d", __func__, MAX_CMD_RECURSION_DEPTH);
+        return 0;
+    }
+
+    const UnitDef* unitDef = unitDefHandler->GetUnitDefByName(unitDefName.data());
+
+    if (unitDef == nullptr) {
+        luaL_error(L, "[%s()]: bad unitDef name: %s", __func__, unitDefName.data());
+        return 0;
+    }
+
+    const float3 pos(x, y, z);
+    const int teamIDValue = teamID;
+
+    if (!teamHandler.IsValidTeam(teamIDValue)) {
+        luaL_error(L, "[%s()]: invalid team number (%d)", __func__, teamIDValue);
+        return 0;
+    }
+    if (!FullCtrl(L) && (CtrlTeam(L) != teamIDValue)) {
+        luaL_error(L, "[%s()]: not a controllable team (%d)", __func__, teamIDValue);
+        return 0;
+    }
+    if (!unitHandler.CanBuildUnit(unitDef, teamIDValue))
+        return 0;
+
+    ASSERT_SYNCED(pos);
+    ASSERT_SYNCED(facing);
+
+    inCreateUnit++;
+
+    CUnit* builder = unitHandler.GetUnit(builderID);
+
+    UnitLoadParams params;
+    params.unitDef = unitDef;
+    params.builder = builder;
+    params.pos     = pos;
+    params.speed   = ZeroVector;
+    params.unitID  = unitID;
+    params.teamID  = teamIDValue;
+    params.facing  = facing;
+    params.beingBuilt = build;
+    params.flattenGround = flattenGround;
+
+    CUnit* unit = unitLoader->LoadUnit(params);
+    inCreateUnit--;
+
+    if (unit == nullptr)
+        return 0;
+
+    unit->SetSoloBuilder(builder, unitDef);
+
+    lua_pushnumber(L, unit->id);
+    return 1;
+}

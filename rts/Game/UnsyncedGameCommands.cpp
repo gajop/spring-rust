@@ -47,6 +47,7 @@
 #include "Game/UI/UnitTracker.h"
 #include "Game/UI/Groups/GroupHandler.h"
 #include "Game/UI/PlayerRoster.h"
+#include "Game/Rust/RustSystem.h"
 
 #include "Lua/LuaOpenGL.h"
 #include "Lua/LuaUI.h"
@@ -2433,6 +2434,20 @@ public:
 };
 
 
+class ReloadNativeModules : public IUnsyncedActionExecutor {
+public:
+	ReloadNativeModules() : IUnsyncedActionExecutor("ReloadNativeModules", "Reloads Native Modules") {
+	}
+
+	bool Execute(const UnsyncedAction& action) const final {
+		LOG("[ReloadNativeModules] Reloading Native Modules...");
+
+		RustSystem::s_instance->Reload();
+
+		return true;
+	}
+};
+
 
 class IncreaseGUIOpacityActionExecutor : public IUnsyncedActionExecutor {
 public:
@@ -4111,6 +4126,7 @@ void UnsyncedGameCommands::AddDefaultActionExecutors()
 	AddActionExecutor(AllocActionExecutor<QuitMenuActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<QuitActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<ReloadActionExecutor>());
+	AddActionExecutor(AllocActionExecutor<ReloadNativeModules>());
 	AddActionExecutor(AllocActionExecutor<IncreaseGUIOpacityActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<DecreaseGUIOpacityActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<ScreenShotActionExecutor>());

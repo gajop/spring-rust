@@ -1,0 +1,18 @@
+[GAME]
+{
+	MapName=Fairyland 1.31;
+	GameType=Beyond All Reason test-18744-2ac3583;
+	IsHost=1;
+	[PLAYER0]
+	{
+		Team=0;
+	}
+	[TEAM0]
+	{
+		TeamLeader=0;
+		AllyTeam=0;
+	}
+	[ALLYTEAM0]
+	{
+	}
+}

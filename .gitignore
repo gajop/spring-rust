@@ -173,3 +173,6 @@ build-*
 
 # lua-doc-extractor generated library
 /rts/Lua/library/generated
+
+out/
+docs/

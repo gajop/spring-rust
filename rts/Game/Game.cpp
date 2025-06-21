@@ -13,6 +13,7 @@
 #include "GameHelper.h"
 #include "GameSetup.h"
 #include "GlobalUnsynced.h"
+#include "Rust/RustSystem.h"
 #include "LoadScreen.h"
 #include "SelectedUnitsHandler.h"
 #include "WaitCommandsAI.h"
@@ -510,6 +511,8 @@ void CGame::Load(const std::string& mapFileName)
 			forcedQuit = true;
 		}
 	}
+
+	rustSystem = std::make_unique<RustSystem>();
 
 	Watchdog::DeregisterThread(WDT_LOAD);
 	AddTimedJobs();
@@ -1684,9 +1687,6 @@ void CGame::SimFrame() {
 
 	// note: starts at -1, first actual frame is 0
 	gs->frameNum += 1;
-#ifdef SYNC_HISTORY
-	CSyncChecker::NewGameFrame();
-#endif
 	lastFrameTime = spring_gettime();
 	// This is not very ideal, as the timeoffset of each new draw frame is also calculated from this
 	// with a strange side effect: if the timeOffset was a high number, like 0.9, then this will force the next draw frame to have an offset of 0.0x
