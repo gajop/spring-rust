@@ -6,6 +6,8 @@
 
 #include "spring-rust-plugin.h"
 
+#include "Game/Rust/api/MetalMap.h"
+
 #include "System/Log/ILog.h"
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitDef.h"
@@ -25,6 +27,7 @@
 #include "Map/MapDamage.h"
 #include "Map/MapInfo.h"
 #include "Map/MapParser.h"
+#include "Map/MetalMap.h"
 #include "Map/ReadMap.h"
 #include "Rendering/Env/GrassDrawer.h"
 #include "Rendering/Models/IModelParser.h"
@@ -70,7 +73,6 @@
 #include "Sim/Weapons/PlasmaRepulser.h"
 #include "Sim/Weapons/Weapon.h"
 #include "Sim/Weapons/WeaponDefHandler.h"
-#include "System/bitops.h"
 #include "System/MainDefines.h"
 #include "System/SpringMath.h"
 #include "System/FileSystem/FileHandler.h"
@@ -85,6 +87,7 @@
 
 
 #include <vector>
+#include <algorithm>
 #include <cctype>
 
 #include "Game/Game.h"
@@ -118,6 +121,13 @@
 #include "Sim/Misc/QuadField.h"
 #include "Sim/Misc/Wind.h"
 #include "Sim/MoveTypes/AAirMoveType.h"
+
+#include <vector>
+#include <algorithm>
+#include <cctype>
+
+#include "Game/Game.h"
+#include "Game/GameSetup.h"
 #include "Sim/Path/IPathManager.h"
 #include "Sim/Projectiles/ExplosionGenerator.h"
 #include "Sim/Projectiles/Projectile.h"
@@ -150,8 +160,6 @@
 #include "System/ObjectDependenceTypes.h"
 #include "System/Log/ILog.h"
 
-using std::max;
-
 //
 
 
@@ -162,6 +170,10 @@ RustSystem* RustSystem::s_instance = nullptr;
 RustSystem::RustSystem() :
   CEventClient("[RustSystem]", 23253, false),
   m_NativeInterface {
+    .f_HandleRustPanic = [](NativeInterface* ptr) {
+        return ptr->bridge->HandleRustPanic();
+    },
+
     .f_IsPosInMap = [](NativeInterface* ptr, float x, float z) {
       return ptr->bridge->IsPosInMap(x, z);
     },
@@ -192,6 +204,7 @@ RustSystem::RustSystem() :
     .f_GetSmoothMeshHeight= [](NativeInterface* ptr, float x, float z){
       return ptr->bridge->GetSmoothMeshHeight(x, z);
     },
+    // SyncedCtrl START
     .f_AddHeightMap = [](NativeInterface* ptr, float xl, float zl, float height) {
         return ptr->bridge->AddHeightMap(xl, zl, height);
     },
@@ -256,6 +269,8 @@ RustSystem::RustSystem() :
       float* hardness, bool* receiveTracks, const char* name) {
         return ptr->bridge->SetTerrainTypeData(typeIndex, tankSpeed, kbotSpeed, hoverSpeed, shipSpeed, hardness, receiveTracks, name);
     },
+    // SyncedCtrl END
+
     .f_Echo = [](NativeInterface* ptr, const char* msg) {
       return ptr->bridge->Echo(msg);
     },
@@ -271,6 +286,8 @@ RustSystem::RustSystem() :
     .f_GameMapSizeZ = [](NativeInterface* ptr) {
       return ptr->bridge->GameMapSizeZ();
     },
+
+    .metalMap = &METAL_MAP_API,
 
     .bridge=this
   } {
@@ -341,6 +358,7 @@ std::optional<fs::path> copy_so_to_temp(const std::string& source_path) {
         }
 
         // Generate random name for the temporary file
+
         std::string random_name = generate_random_name(10) + ".so";
         fs::path temp_dir = fs::temp_directory_path();
         fs::path dest_path = temp_dir / random_name;
@@ -514,7 +532,7 @@ void RustSystem::UnitCreated(const CUnit* unit, const CUnit* builder) {
   m_UnitCreatedFuncPtr(&m_NativeInterface, m_data, unit->id, builder != nullptr ? builder->id : -1);
 }
 
-void RustSystem::UnitDestroyed(const CUnit *unit, const CUnit *attacker) {
+void RustSystem::UnitDestroyed(const CUnit* unit, const CUnit* attacker, int weaponDefID) {
   LOG_L(L_DEBUG, "NativeModule::%s", __func__);
   m_UnitDestroyedFuncPtr(&m_NativeInterface, m_data, unit->id, attacker != nullptr ? attacker->id : -1);
 }
@@ -573,6 +591,10 @@ void RustSystem::HandleLuaCall(const char* msg)
 
 bool isSynced = true;
 
+void RustSystem::HandleRustPanic() {
+    LOG_L(L_WARNING, "Rust module panicked. Reloading...");
+    Reload();
+}
 
 IsPosInMapReturn RustSystem::IsPosInMap(float x, float z) {
     return {};
@@ -1162,6 +1184,7 @@ bool RustSystem::SetTerrainTypeData(uint32_t typeIndex, float* tankSpeed, float*
 
     return true;
 }
+
 
 // SyncedCtrl END
 

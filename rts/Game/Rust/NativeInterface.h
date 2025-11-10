@@ -1,5 +1,10 @@
 #pragma once
 
+#include <stdint.h>
+
+#include "Game/Rust/api/Common.h"
+#include "Game/Rust/api/MetalMap.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,6 +60,10 @@ struct GetTerrainTypeDataReturn {
 #endif
 
 struct NativeInterfaceBridge {
+  // System
+  virtual void HandleRustPanic() = 0;
+
+  //
   virtual IsPosInMapReturn IsPosInMap(float x, float z) = 0;
   virtual float GetGroundHeight(float x, float z) = 0;
   virtual float GetGroundOrigHeight(float x, float z) = 0;
@@ -93,7 +102,6 @@ struct NativeInterfaceBridge {
   virtual void SetMapSquareTerrainType(uint32_t x, uint32_t z, uint32_t newType) = 0;
   virtual bool SetTerrainTypeData(uint32_t typeIndex, float* tankSpeed, float* kbotSpeed, float* hoverSpeed, float* shipSpeed,
 	  float* hardness, bool* receiveTracks, const char* name) = 0;
-
 // SyncedCtrl END
 
 // UnsyncedCtrl START
@@ -115,6 +123,8 @@ extern "C" {
 #endif
 
 struct NativeInterface {
+  using HandleRustPanic = void(*)(NativeInterface* ptr);
+
   using IsPosInMap = IsPosInMapReturn(*)(NativeInterface* ptr, float x, float z);
   using GetGroundHeight = float(*)(NativeInterface* ptr, float x, float z);
   using GetGroundOrigHeight = float(*)(NativeInterface* ptr, float x, float z);
@@ -153,6 +163,9 @@ struct NativeInterface {
   using SetMapSquareTerrainType = void(*)(NativeInterface* ptr, uint32_t x, uint32_t z, uint32_t newType);
   using SetTerrainTypeData = bool(*)(NativeInterface* ptr, uint32_t typeIndex, float* tankSpeed, float* kbotSpeed, float* hoverSpeed, float* shipSpeed,
 	  float* hardness, bool* receiveTracks, const char* name);
+
+  using GetMetalAmount = float(*)(NativeInterface* ptr, uint32_t x, uint32_t z);
+  using SetMetalAmount = void(*)(NativeInterface* ptr, uint32_t x, uint32_t z, float amount);
 // UnsyncedCtrl START
   using Echo = void(*)(NativeInterface* ptr, const char* msg);
 // UnsyncedCtrl END
@@ -162,6 +175,8 @@ struct NativeInterface {
   using GameMapY = float(*)(NativeInterface* ptr);
   using GameMapSizeX = float(*)(NativeInterface* ptr);
   using GameMapSizeZ = float(*)(NativeInterface* ptr);
+
+  HandleRustPanic f_HandleRustPanic;
 
 	IsPosInMap f_IsPosInMap;
 	GetGroundHeight f_GetGroundHeight;
@@ -198,6 +213,8 @@ struct NativeInterface {
 
   SetMapSquareTerrainType f_SetMapSquareTerrainType;
   SetTerrainTypeData f_SetTerrainTypeData;
+
+
   // SyncedCtrl END
 
   // UnsyncedCtrl START
@@ -205,10 +222,12 @@ struct NativeInterface {
   // UnsyncedCtrl END
 
 
-  GameMapX f_GameMapX;
-  GameMapY f_GameMapY;
-  GameMapSizeX f_GameMapSizeX;
-  GameMapSizeZ f_GameMapSizeZ;
+	GameMapX f_GameMapX;
+	GameMapY f_GameMapY;
+	GameMapSizeX f_GameMapSizeX;
+	GameMapSizeZ f_GameMapSizeZ;
+
+	const MetalMapApi* metalMap;
 
 
 	NativeInterfaceBridge *bridge;

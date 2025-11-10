@@ -91,7 +91,7 @@ public:
   void UnitFinished(const CUnit *unit) override;
   // void UnitReverseBuilt(const CUnit *unit) override;
   void UnitFromFactory(const CUnit* unit, const CUnit* factory, bool userOrders) override;
-  void UnitDestroyed(const CUnit *unit, const CUnit *attacker) override;
+  void UnitDestroyed(const CUnit* unit, const CUnit* attacker, int weaponDefID) override;
   void UnitTaken(const CUnit* unit, int oldTeam, int newTeam) override;
   void UnitGiven(const CUnit* unit, int oldTeam, int newTeam) override;
 
@@ -233,6 +233,9 @@ public:
   // bool SyncedActionFallback(const string& line, int playerID) override { return false; }
 
 
+public:
+  void HandleRustPanic() override;
+
 // Unsyced Event START
 public:
   void DownloadFailed(int ID, int errorID) override;
@@ -289,6 +292,7 @@ public:
   void SetMapSquareTerrainType(uint32_t x, uint32_t z, uint32_t newType) override;
   bool SetTerrainTypeData(uint32_t typeIndex, float* tankSpeed, float* kbotSpeed, float* hoverSpeed, float* shipSpeed,
     float* hardness, bool* receiveTracks, const char* name) override;
+
 // SyncedCtrl END
 
 // TODO: Should figure out what stuff to add
