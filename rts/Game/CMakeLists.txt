@@ -52,6 +52,7 @@ make_global_var(sources_engine_Game
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Teams.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Terrain.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/UnitsQuery.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/VFS.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/RustSystem.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/SelectedUnitsHandler.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/SelectedUnitsAI.cpp"
