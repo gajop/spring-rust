@@ -6,8 +6,17 @@ This document tracks the progress of porting all Lua APIs to native Rust FFI int
 
 - **Total API Headers**: 34 (generated from 45+ Lua API files)
 - **Headers Complete**: 34/34 (100%) ✅
-- **Implementations Complete**: 1/34 (3%)
-- **Total Lines of Code**: 3,727 lines of header definitions
+- **Implementations Complete**: 7/34 (21%)
+  - Game.cpp ✅ (582 lines)
+  - Memory.cpp ✅ (82 lines)
+  - Player.cpp ✅ (268 lines)
+  - Teams.cpp ✅ (709 lines)
+  - MathExtra.cpp ✅ (137 lines)
+  - Terrain.cpp ✅ (264 lines)
+  - MetalMap.cpp ✅ (existing)
+- **Total Lines of Code**:
+  - Headers: 3,727 lines
+  - Implementations: ~2,042 lines (new)
 
 ## All Generated Headers (34 files)
 
@@ -68,11 +77,14 @@ This document tracks the progress of porting all Lua APIs to native Rust FFI int
 | MetalMap.h | ✅ Complete | High | Reference implementation (MetalMap.cpp) |
 | CommonTypes.h | N/A | - | Header-only types |
 | Constants.h | N/A | - | Header-only constants |
-| Game.h | ⬜ Todo | High | Core game queries |
-| Terrain.h | ⬜ Todo | High | Already in NativeInterface.h |
-| Teams.h | ⬜ Todo | High | Team/player queries |
+| Memory.h | ✅ Complete | High | Memory management for FFI arrays |
+| Game.h | ✅ Complete | High | Core game queries (20+ functions) |
+| Terrain.h | ✅ Complete | High | Terrain queries (14 functions) |
+| Teams.h | ✅ Complete | High | Team/player queries (20 functions) |
+| Player.h | ✅ Complete | High | Player roster, traffic, stats (7 functions) |
+| MathExtra.h | ✅ Complete | Medium | Extended math (14 functions) |
 | UnitsQuery.h | ⬜ Todo | High | Unit spatial queries |
-| UnitsInfo.h | ⬜ Todo | High | Unit property queries |
+| UnitsInfo.h | ⬜ Todo | High | Unit property queries (~80 functions) |
 | UnitsCommands.h | ⬜ Todo | Medium | Command queue queries |
 | UnitsWeapons.h | ⬜ Todo | Medium | Weapon queries |
 | Features.h | ⬜ Todo | Medium | Feature queries |
