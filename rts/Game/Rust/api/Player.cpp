@@ -88,36 +88,11 @@ static PlayerRosterResult NativeGetPlayerRoster(int32_t sortMode)
 	const std::vector<int>& playerIndices = playerRoster.GetIndices(false);
 	playerRoster.SetSortTypeByCode(oldSortType);
 
-	// Count active players
-	uint32_t count = 0;
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<RosterEntry> entries;
+	entries.clear();
+
 	for (size_t i = 0; i < playerIndices.size(); i++) {
-		const CPlayer* p = playerHandler.Player(playerIndices[i]);
-		if (p != nullptr && p->active) {
-			count++;
-		}
-	}
-
-	if (count == 0) {
-		result.count = 0;
-		result.entries = nullptr;
-		return result;
-	}
-
-	// Allocate array
-	result.entries = static_cast<RosterEntry*>(std::malloc(count * sizeof(RosterEntry)));
-	if (result.entries == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory for roster"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.count = 0;
-		return result;
-	}
-
-	// Fill array
-	uint32_t idx = 0;
-	for (size_t i = 0; i < playerIndices.size() && idx < count; i++) {
 		const int playerID = playerIndices[i];
 		const CPlayer* p = playerHandler.Player(playerID);
 
@@ -125,33 +100,8 @@ static PlayerRosterResult NativeGetPlayerRoster(int32_t sortMode)
 			continue;
 		}
 
-		RosterEntry& entry = result.entries[idx++];
-
-		// Allocate and copy name string
-		const size_t nameLen = p->name.length() + 1;
-		char* nameCopy = static_cast<char*>(std::malloc(nameLen));
-		if (nameCopy == nullptr) {
-			// Free previously allocated entries on error
-			for (uint32_t j = 0; j < idx - 1; j++) {
-				std::free(const_cast<char*>(result.entries[j].name));
-				if (result.entries[j].country != nullptr) {
-					std::free(const_cast<char*>(result.entries[j].country));
-				}
-			}
-			std::free(result.entries);
-
-			static const Error OUT_OF_MEMORY = {
-				.code = ERROR_INTERNAL,
-				.message = "Failed to allocate memory for player name"
-			};
-			result.error = &OUT_OF_MEMORY;
-			result.entries = nullptr;
-			result.count = 0;
-			return result;
-		}
-		std::memcpy(nameCopy, p->name.c_str(), nameLen);
-		entry.name = nameCopy;
-
+		RosterEntry entry;
+		entry.name = p->name.c_str(); // Point to internal CPlayer string
 		entry.playerID = playerID;
 		entry.teamID = p->team;
 		entry.allyTeamID = teamHandler.AllyTeam(p->team);
@@ -160,25 +110,15 @@ static PlayerRosterResult NativeGetPlayerRoster(int32_t sortMode)
 		entry.isActive = p->active;
 		entry.pingTime = p->ping;
 		entry.cpuUsage = p->cpuUsage;
-
-		// Country string (may be empty)
-		if (!p->countryCode.empty()) {
-			const size_t countryLen = p->countryCode.length() + 1;
-			char* countryCopy = static_cast<char*>(std::malloc(countryLen));
-			if (countryCopy != nullptr) {
-				std::memcpy(countryCopy, p->countryCode.c_str(), countryLen);
-				entry.country = countryCopy;
-			} else {
-				entry.country = nullptr;
-			}
-		} else {
-			entry.country = nullptr;
-		}
-
+		entry.country = p->countryCode.empty() ? nullptr : p->countryCode.c_str();
 		entry.rank = p->rank;
+
+		entries.push_back(entry);
 	}
 
-	result.count = idx;
+	result.entries = entries.data();
+	result.count = static_cast<uint32_t>(entries.size());
+
 	return result;
 }
 
@@ -200,24 +140,17 @@ static PlayerTrafficResult NativeGetPlayerTraffic(int32_t playerID)
 		return result;
 	}
 
-	// Allocate single entry
-	result.traffic = static_cast<PlayerTraffic*>(std::malloc(sizeof(PlayerTraffic)));
-	if (result.traffic == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory for traffic"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.count = 0;
-		return result;
-	}
+	// Use static storage - valid for call duration only
+	static thread_local PlayerTraffic trafficData;
 
 	const CGame::PlayerTrafficInfo& pti = it->second;
-	result.traffic->playerID = playerID;
-	result.traffic->packetsSent = 0; // Not directly available
-	result.traffic->packetsReceived = 0; // Not directly available
-	result.traffic->bytesSent = pti.total;
-	result.traffic->bytesReceived = 0; // Not directly available
+	trafficData.playerID = playerID;
+	trafficData.packetsSent = 0; // Not directly available
+	trafficData.packetsReceived = 0; // Not directly available
+	trafficData.bytesSent = pti.total;
+	trafficData.bytesReceived = 0; // Not directly available
+
+	result.traffic = &trafficData;
 	result.count = 1;
 
 	return result;

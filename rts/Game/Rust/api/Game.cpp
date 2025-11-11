@@ -212,43 +212,19 @@ static StringArray NativeGetMapOptions()
 		return result;
 	}
 
-	// Allocate array of string pointers
-	result.data = static_cast<const char**>(std::malloc(result.length * sizeof(char*)));
-	if (result.data == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory for options array"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.length = 0;
-		return result;
-	}
+	// Allocate array of string pointers (caller must free with Memory API)
+	// Strings themselves point to internal gameSetup data (valid for call duration)
+	static thread_local std::vector<const char*> optionKeys;
+	optionKeys.clear();
+	optionKeys.reserve(options.size());
 
-	// Copy each key string
-	uint32_t idx = 0;
 	for (const auto& [key, value] : options) {
 		(void)value; // We only return keys
-		const size_t keyLen = key.length() + 1;
-		char* keyCopy = static_cast<char*>(std::malloc(keyLen));
-		if (keyCopy == nullptr) {
-			// Free previously allocated strings on error
-			for (uint32_t i = 0; i < idx; i++) {
-				std::free(const_cast<char*>(result.data[i]));
-			}
-			std::free(const_cast<char**>(result.data));
-
-			static const Error OUT_OF_MEMORY = {
-				.code = ERROR_INTERNAL,
-				.message = "Failed to allocate memory for option key"
-			};
-			result.error = &OUT_OF_MEMORY;
-			result.data = nullptr;
-			result.length = 0;
-			return result;
-		}
-		std::memcpy(keyCopy, key.c_str(), keyLen);
-		const_cast<const char**>(result.data)[idx++] = keyCopy;
+		optionKeys.push_back(key.c_str());
 	}
+
+	result.data = optionKeys.data();
+	result.length = static_cast<uint32_t>(optionKeys.size());
 
 	return result;
 }
@@ -288,43 +264,18 @@ static StringArray NativeGetModOptions()
 		return result;
 	}
 
-	// Allocate array of string pointers
-	result.data = static_cast<const char**>(std::malloc(result.length * sizeof(char*)));
-	if (result.data == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory for options array"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.length = 0;
-		return result;
-	}
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<const char*> optionKeys;
+	optionKeys.clear();
+	optionKeys.reserve(options.size());
 
-	// Copy each key string
-	uint32_t idx = 0;
 	for (const auto& [key, value] : options) {
 		(void)value; // We only return keys
-		const size_t keyLen = key.length() + 1;
-		char* keyCopy = static_cast<char*>(std::malloc(keyLen));
-		if (keyCopy == nullptr) {
-			// Free previously allocated strings on error
-			for (uint32_t i = 0; i < idx; i++) {
-				std::free(const_cast<char*>(result.data[i]));
-			}
-			std::free(const_cast<char**>(result.data));
-
-			static const Error OUT_OF_MEMORY = {
-				.code = ERROR_INTERNAL,
-				.message = "Failed to allocate memory for option key"
-			};
-			result.error = &OUT_OF_MEMORY;
-			result.data = nullptr;
-			result.length = 0;
-			return result;
-		}
-		std::memcpy(keyCopy, key.c_str(), keyLen);
-		const_cast<const char**>(result.data)[idx++] = keyCopy;
+		optionKeys.push_back(key.c_str());
 	}
+
+	result.data = optionKeys.data();
+	result.length = static_cast<uint32_t>(optionKeys.size());
 
 	return result;
 }
@@ -403,7 +354,7 @@ static SideDataResult NativeGetSideData(const char* sideName)
 		return result;
 	}
 
-	const std::string startUnit = sideParser.GetStartUnit(sideName);
+	const std::string& startUnit = sideParser.GetStartUnit(sideName);
 	if (startUnit.empty()) {
 		static const Error NOT_FOUND = {
 			.code = ERROR_NOT_FOUND,
@@ -413,9 +364,11 @@ static SideDataResult NativeGetSideData(const char* sideName)
 		return result;
 	}
 
-	// Note: Returning pointers to internal sideParser strings
-	// These remain valid for the lifetime of the program
-	result.data.sideName = StringToLower(sideName).c_str();
+	// Store lowercase version in static storage (valid for call duration)
+	static thread_local std::string lowerSideName;
+	lowerSideName = StringToLower(sideName);
+
+	result.data.sideName = lowerSideName.c_str();
 	result.data.caseName = sideParser.GetCaseName(sideName).c_str();
 	result.data.sideIndex = 0; // Would need to search for index if needed
 
@@ -497,49 +450,26 @@ static StartPositionsResult NativeGetMapStartPositions()
 		return result;
 	}
 
-	// First count how many positions we have
-	uint32_t count = 0;
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<StartPosition> positions;
+	positions.clear();
+
 	gameSetup->LoadStartPositionsFromMap(MAX_TEAMS, [&](MapParser& mapParser, int teamNum) {
 		float3 pos;
 		if (mapParser.GetStartPos(teamNum, pos)) {
-			count++;
+			StartPosition sp;
+			sp.pos.x = pos.x;
+			sp.pos.y = pos.y;
+			sp.pos.z = pos.z;
+			sp.teamID = teamNum;
+			positions.push_back(sp);
 		}
 		return true;
 	});
 
-	if (count == 0) {
-		result.count = 0;
-		result.positions = nullptr;
-		return result;
-	}
+	result.positions = positions.data();
+	result.count = static_cast<uint32_t>(positions.size());
 
-	// Allocate array
-	result.positions = static_cast<StartPosition*>(std::malloc(count * sizeof(StartPosition)));
-	if (result.positions == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory for start positions"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.count = 0;
-		return result;
-	}
-
-	// Fill array
-	uint32_t idx = 0;
-	gameSetup->LoadStartPositionsFromMap(MAX_TEAMS, [&](MapParser& mapParser, int teamNum) {
-		float3 pos;
-		if (mapParser.GetStartPos(teamNum, pos)) {
-			result.positions[idx].pos.x = pos.x;
-			result.positions[idx].pos.y = pos.y;
-			result.positions[idx].pos.z = pos.z;
-			result.positions[idx].teamID = teamNum;
-			idx++;
-		}
-		return true;
-	});
-
-	result.count = count;
 	return result;
 }
 
