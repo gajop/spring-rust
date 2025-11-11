@@ -6,7 +6,38 @@
 
 #include "spring-rust-plugin.h"
 
+#include "Game/Rust/api/Memory.h"
+#include "Game/Rust/api/Game.h"
+#include "Game/Rust/api/Terrain.h"
+#include "Game/Rust/api/Teams.h"
+#include "Game/Rust/api/UnitsQuery.h"
+#include "Game/Rust/api/UnitsInfo.h"
+#include "Game/Rust/api/UnitsWeapons.h"
+#include "Game/Rust/api/UnitsCommands.h"
+#include "Game/Rust/api/UnitsPieces.h"
+#include "Game/Rust/api/Features.h"
+#include "Game/Rust/api/Projectiles.h"
+#include "Game/Rust/api/LOS.h"
+#include "Game/Rust/api/UnitDefs.h"
+#include "Game/Rust/api/FeatureDefs.h"
+#include "Game/Rust/api/WeaponDefs.h"
 #include "Game/Rust/api/MetalMap.h"
+#include "Game/Rust/api/PathFinder.h"
+#include "Game/Rust/api/RulesParams.h"
+#include "Game/Rust/api/MathExtra.h"
+#include "Game/Rust/api/MoveCtrl.h"
+#include "Game/Rust/api/SyncedCtrl.h"
+#include "Game/Rust/api/Camera.h"
+#include "Game/Rust/api/Input.h"
+#include "Game/Rust/api/Display.h"
+#include "Game/Rust/api/Selection.h"
+#include "Game/Rust/api/VFS.h"
+#include "Game/Rust/api/Sound.h"
+#include "Game/Rust/api/Messages.h"
+#include "Game/Rust/api/Config.h"
+#include "Game/Rust/api/Tracing.h"
+#include "Game/Rust/api/Utils.h"
+#include "Game/Rust/api/Player.h"
 
 #include "System/Log/ILog.h"
 #include "Sim/Units/Unit.h"
@@ -287,7 +318,53 @@ RustSystem::RustSystem() :
       return ptr->bridge->GameMapSizeZ();
     },
 
+    // Memory management
+    .memory = &MEMORY_API,
+
+    // Core game state (synced read)
+    .game = &GAME_API,
+    .terrain = &TERRAIN_API,
+    .teams = &TEAMS_API,
+    .unitsQuery = &UNITS_QUERY_API,
+    .unitsInfo = &UNITS_INFO_API,
+    .unitsWeapons = &UNITS_WEAPONS_API,
+    .unitsCommands = &UNITS_COMMANDS_API,
+    .unitsPieces = &UNITS_PIECES_API,
+    .features = &FEATURES_API,
+    .projectiles = &PROJECTILES_API,
+    .los = &LOS_API,
+
+    // Definitions (static data)
+    .unitDefs = &UNIT_DEFS_API,
+    .featureDefs = &FEATURE_DEFS_API,
+    .weaponDefs = &WEAPON_DEFS_API,
+
+    // Specialized systems
     .metalMap = &METAL_MAP_API,
+    .pathFinder = &PATH_FINDER_API,
+    .rulesParams = &RULES_PARAMS_API,
+    .mathExtra = &MATH_EXTRA_API,
+    .moveCtrl = &MOVE_CTRL_API,
+
+    // Control (synced write)
+    .syncedCtrl = &SYNCED_CTRL_API,
+
+    // UI/Rendering (unsynced)
+    .camera = &CAMERA_API,
+    .input = &INPUT_API,
+    .display = &DISPLAY_API,
+    .selection = &SELECTION_API,
+
+    // System/IO
+    .vfs = &VFS_API,
+    .sound = &SOUND_API,
+    .messages = &MESSAGES_API,
+    .config = &CONFIG_API,
+
+    // Utilities
+    .tracing = &TRACING_API,
+    .utils = &UTILS_API,
+    .player = &PLAYER_API,
 
     .bridge=this
   } {
