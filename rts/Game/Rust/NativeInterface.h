@@ -3,7 +3,39 @@
 #include <stdint.h>
 
 #include "Game/Rust/api/Common.h"
+#include "Game/Rust/api/CommonTypes.h"
 #include "Game/Rust/api/MetalMap.h"
+#include "Game/Rust/api/PathFinder.h"
+#include "Game/Rust/api/RulesParams.h"
+#include "Game/Rust/api/MathExtra.h"
+#include "Game/Rust/api/Game.h"
+#include "Game/Rust/api/Terrain.h"
+#include "Game/Rust/api/Teams.h"
+#include "Game/Rust/api/UnitsQuery.h"
+#include "Game/Rust/api/UnitsInfo.h"
+#include "Game/Rust/api/UnitsWeapons.h"
+#include "Game/Rust/api/UnitsCommands.h"
+#include "Game/Rust/api/UnitsPieces.h"
+#include "Game/Rust/api/Features.h"
+#include "Game/Rust/api/Projectiles.h"
+#include "Game/Rust/api/LOS.h"
+#include "Game/Rust/api/UnitDefs.h"
+#include "Game/Rust/api/FeatureDefs.h"
+#include "Game/Rust/api/WeaponDefs.h"
+#include "Game/Rust/api/MoveCtrl.h"
+#include "Game/Rust/api/SyncedCtrl.h"
+#include "Game/Rust/api/Camera.h"
+#include "Game/Rust/api/Input.h"
+#include "Game/Rust/api/Display.h"
+#include "Game/Rust/api/Selection.h"
+#include "Game/Rust/api/VFS.h"
+#include "Game/Rust/api/Sound.h"
+#include "Game/Rust/api/Messages.h"
+#include "Game/Rust/api/Config.h"
+#include "Game/Rust/api/Tracing.h"
+#include "Game/Rust/api/Utils.h"
+#include "Game/Rust/api/Player.h"
+#include "Game/Rust/api/Constants.h"
 
 
 #ifdef __cplusplus
@@ -227,8 +259,54 @@ struct NativeInterface {
 	GameMapSizeX f_GameMapSizeX;
 	GameMapSizeZ f_GameMapSizeZ;
 
-	const MetalMapApi* metalMap;
+	// ==================================================
+	// New Modular API Pointers
+	// ==================================================
 
+	// Core game state (synced read)
+	const GameApi* game;
+	const TerrainApi* terrain;
+	const TeamsApi* teams;
+	const UnitsQueryApi* unitsQuery;
+	const UnitsInfoApi* unitsInfo;
+	const UnitsWeaponsApi* unitsWeapons;
+	const UnitsCommandsApi* unitsCommands;
+	const UnitsPiecesApi* unitsPieces;
+	const FeaturesApi* features;
+	const ProjectilesApi* projectiles;
+	const LOSApi* los;
+
+	// Definitions (static data)
+	const UnitDefsApi* unitDefs;
+	const FeatureDefsApi* featureDefs;
+	const WeaponDefsApi* weaponDefs;
+
+	// Specialized systems
+	const MetalMapApi* metalMap;
+	const PathFinderApi* pathFinder;
+	const RulesParamsApi* rulesParams;
+	const MathExtraApi* mathExtra;
+	const MoveCtrlApi* moveCtrl;
+
+	// Control (synced write)
+	const SyncedCtrlApi* syncedCtrl;
+
+	// UI/Rendering (unsynced)
+	const CameraApi* camera;
+	const InputApi* input;
+	const DisplayApi* display;
+	const SelectionApi* selection;
+
+	// System/IO
+	const VFSApi* vfs;
+	const SoundApi* sound;
+	const MessagesApi* messages;
+	const ConfigApi* config;
+
+	// Utilities
+	const TracingApi* tracing;
+	const UtilsApi* utils;
+	const PlayerApi* player;
 
 	NativeInterfaceBridge *bridge;
 };
