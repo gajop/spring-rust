@@ -47,6 +47,7 @@ make_global_var(sources_engine_Game
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/LOS.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/MathExtra.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Memory.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Messages.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/MetalMap.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Player.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Projectiles.cpp"
