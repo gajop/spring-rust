@@ -48,32 +48,18 @@ static Int32Array NativeGetTeamList()
 		return result;
 	}
 
-	const int count = teamHandler.ActiveTeams();
-	if (count == 0) {
-		result.length = 0;
-		result.data = nullptr;
-		return result;
-	}
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<int32_t> teams;
+	teams.clear();
 
-	result.data = static_cast<int32_t*>(std::malloc(count * sizeof(int32_t)));
-	if (result.data == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.length = 0;
-		return result;
-	}
-
-	uint32_t idx = 0;
 	for (int t = 0; t < teamHandler.ActiveTeams(); t++) {
 		if (teamHandler.Team(t) != nullptr) {
-			result.data[idx++] = t;
+			teams.push_back(t);
 		}
 	}
 
-	result.length = idx;
+	result.data = teams.data();
+	result.length = static_cast<uint32_t>(teams.size());
 	return result;
 }
 
@@ -85,29 +71,16 @@ static Int32Array NativeGetAllyTeamList()
 		return result;
 	}
 
-	const int count = teamHandler.ActiveAllyTeams();
-	if (count == 0) {
-		result.length = 0;
-		result.data = nullptr;
-		return result;
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<int32_t> allyTeams;
+	allyTeams.clear();
+
+	for (int at = 0; at < teamHandler.ActiveAllyTeams(); at++) {
+		allyTeams.push_back(at);
 	}
 
-	result.data = static_cast<int32_t*>(std::malloc(count * sizeof(int32_t)));
-	if (result.data == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.length = 0;
-		return result;
-	}
-
-	for (int at = 0; at < count; at++) {
-		result.data[at] = at;
-	}
-
-	result.length = count;
+	result.data = allyTeams.data();
+	result.length = static_cast<uint32_t>(allyTeams.size());
 	return result;
 }
 
@@ -299,48 +272,37 @@ static TeamStatsHistoryResult NativeGetTeamStatsHistory(int32_t teamID)
 	}
 
 	const auto& history = team->statHistory;
-	result.count = static_cast<uint32_t>(history.size());
 
-	if (result.count == 0) {
-		result.history = nullptr;
-		return result;
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<TeamStatsHistoryPoint> historyPoints;
+	historyPoints.clear();
+
+	for (const TeamStatistics& stats : history) {
+		TeamStatsHistoryPoint point;
+		point.metalUsed = stats.metalUsed;
+		point.metalProduced = stats.metalProduced;
+		point.metalExcess = stats.metalExcess;
+		point.metalReceived = stats.metalReceived;
+		point.metalSent = stats.metalSent;
+		point.energyUsed = stats.energyUsed;
+		point.energyProduced = stats.energyProduced;
+		point.energyExcess = stats.energyExcess;
+		point.energyReceived = stats.energyReceived;
+		point.energySent = stats.energySent;
+		point.damageDealt = stats.damageDealt;
+		point.damageReceived = stats.damageReceived;
+		point.unitsProduced = stats.unitsProduced;
+		point.unitsDied = stats.unitsDied;
+		point.unitsReceived = stats.unitsReceived;
+		point.unitsSent = stats.unitsSent;
+		point.unitsCaptured = stats.unitsCaptured;
+		point.unitsOutCaptured = stats.unitsOutCaptured;
+		point.unitsKilled = stats.unitsKilled;
+		historyPoints.push_back(point);
 	}
 
-	result.history = static_cast<TeamStatsHistoryPoint*>(
-		std::malloc(result.count * sizeof(TeamStatsHistoryPoint)));
-
-	if (result.history == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.count = 0;
-		return result;
-	}
-
-	for (uint32_t i = 0; i < result.count; i++) {
-		const TeamStatistics& stats = history[i];
-		result.history[i].metalUsed = stats.metalUsed;
-		result.history[i].metalProduced = stats.metalProduced;
-		result.history[i].metalExcess = stats.metalExcess;
-		result.history[i].metalReceived = stats.metalReceived;
-		result.history[i].metalSent = stats.metalSent;
-		result.history[i].energyUsed = stats.energyUsed;
-		result.history[i].energyProduced = stats.energyProduced;
-		result.history[i].energyExcess = stats.energyExcess;
-		result.history[i].energyReceived = stats.energyReceived;
-		result.history[i].energySent = stats.energySent;
-		result.history[i].damageDealt = stats.damageDealt;
-		result.history[i].damageReceived = stats.damageReceived;
-		result.history[i].unitsProduced = stats.unitsProduced;
-		result.history[i].unitsDied = stats.unitsDied;
-		result.history[i].unitsReceived = stats.unitsReceived;
-		result.history[i].unitsSent = stats.unitsSent;
-		result.history[i].unitsCaptured = stats.unitsCaptured;
-		result.history[i].unitsOutCaptured = stats.unitsOutCaptured;
-		result.history[i].unitsKilled = stats.unitsKilled;
-	}
+	result.history = historyPoints.data();
+	result.count = static_cast<uint32_t>(historyPoints.size());
 
 	return result;
 }
@@ -433,41 +395,19 @@ static Int32Array NativeGetPlayerList()
 		return result;
 	}
 
-	// Count active players
-	uint32_t count = 0;
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<int32_t> players;
+	players.clear();
+
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
 		if (player != nullptr && player->active) {
-			count++;
+			players.push_back(p);
 		}
 	}
 
-	if (count == 0) {
-		result.length = 0;
-		result.data = nullptr;
-		return result;
-	}
-
-	result.data = static_cast<int32_t*>(std::malloc(count * sizeof(int32_t)));
-	if (result.data == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.length = 0;
-		return result;
-	}
-
-	uint32_t idx = 0;
-	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
-		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active) {
-			result.data[idx++] = p;
-		}
-	}
-
-	result.length = idx;
+	result.data = players.data();
+	result.length = static_cast<uint32_t>(players.size());
 	return result;
 }
 
@@ -484,41 +424,19 @@ static Int32Array NativeGetPlayerListInTeam(int32_t teamID)
 		return result;
 	}
 
-	// Count players in team
-	uint32_t count = 0;
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<int32_t> players;
+	players.clear();
+
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
 		if (player != nullptr && player->active && player->team == teamID) {
-			count++;
+			players.push_back(p);
 		}
 	}
 
-	if (count == 0) {
-		result.length = 0;
-		result.data = nullptr;
-		return result;
-	}
-
-	result.data = static_cast<int32_t*>(std::malloc(count * sizeof(int32_t)));
-	if (result.data == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.length = 0;
-		return result;
-	}
-
-	uint32_t idx = 0;
-	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
-		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active && player->team == teamID) {
-			result.data[idx++] = p;
-		}
-	}
-
-	result.length = idx;
+	result.data = players.data();
+	result.length = static_cast<uint32_t>(players.size());
 	return result;
 }
 
@@ -535,47 +453,22 @@ static Int32Array NativeGetPlayerListInAllyTeam(int32_t allyTeamID)
 		return result;
 	}
 
-	// Count players in ally team
-	uint32_t count = 0;
+	// Use static storage - valid for call duration only
+	static thread_local std::vector<int32_t> players;
+	players.clear();
+
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
 		if (player != nullptr && player->active) {
 			const int playerAllyTeam = teamHandler.AllyTeam(player->team);
 			if (playerAllyTeam == allyTeamID) {
-				count++;
+				players.push_back(p);
 			}
 		}
 	}
 
-	if (count == 0) {
-		result.length = 0;
-		result.data = nullptr;
-		return result;
-	}
-
-	result.data = static_cast<int32_t*>(std::malloc(count * sizeof(int32_t)));
-	if (result.data == nullptr) {
-		static const Error OUT_OF_MEMORY = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to allocate memory"
-		};
-		result.error = &OUT_OF_MEMORY;
-		result.length = 0;
-		return result;
-	}
-
-	uint32_t idx = 0;
-	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
-		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active) {
-			const int playerAllyTeam = teamHandler.AllyTeam(player->team);
-			if (playerAllyTeam == allyTeamID) {
-				result.data[idx++] = p;
-			}
-		}
-	}
-
-	result.length = idx;
+	result.data = players.data();
+	result.length = static_cast<uint32_t>(players.size());
 	return result;
 }
 
