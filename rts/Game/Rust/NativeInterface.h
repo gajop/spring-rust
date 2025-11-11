@@ -4,6 +4,7 @@
 
 #include "Game/Rust/api/Common.h"
 #include "Game/Rust/api/CommonTypes.h"
+#include "Game/Rust/api/Memory.h"
 #include "Game/Rust/api/MetalMap.h"
 #include "Game/Rust/api/PathFinder.h"
 #include "Game/Rust/api/RulesParams.h"
@@ -262,6 +263,9 @@ struct NativeInterface {
 	// ==================================================
 	// New Modular API Pointers
 	// ==================================================
+
+	// Memory management
+	const MemoryApi* memory;
 
 	// Core game state (synced read)
 	const GameApi* game;
