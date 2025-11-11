@@ -41,6 +41,7 @@ make_global_var(sources_engine_Game
 		"${CMAKE_CURRENT_SOURCE_DIR}/Players/PlayerStatistics.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Players/TeamController.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/PreGame.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Camera.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Features.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/Game.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Rust/api/LOS.cpp"
