@@ -29,12 +29,6 @@ struct RosterEntry {
 	int32_t rank;
 };
 
-struct PlayerRosterResult {
-	const Error* error;
-	RosterEntry* entries;
-	uint32_t count;
-};
-
 // Player traffic stats
 struct PlayerTraffic {
 	int32_t playerID;
@@ -42,12 +36,6 @@ struct PlayerTraffic {
 	uint32_t packetsReceived;
 	uint32_t bytesSent;
 	uint32_t bytesReceived;
-};
-
-struct PlayerTrafficResult {
-	const Error* error;
-	PlayerTraffic* traffic;
-	uint32_t count;
 };
 
 // Player statistics
@@ -59,27 +47,108 @@ struct PlayerStats {
 	float avgCommandSize;
 };
 
-struct PlayerStatsResult {
+// Queries
+struct GetLocalPlayerIDQuery {
+	uint8_t _unused;
+};
+
+struct GetLocalPlayerIDResult {
+	const Error* error;
+	int32_t playerID;
+};
+
+struct GetLocalTeamIDQuery {
+	uint8_t _unused;
+};
+
+struct GetLocalTeamIDResult {
+	const Error* error;
+	int32_t teamID;
+};
+
+struct GetLocalAllyTeamIDQuery {
+	uint8_t _unused;
+};
+
+struct GetLocalAllyTeamIDResult {
+	const Error* error;
+	int32_t allyTeamID;
+};
+
+struct GetSpectatingStateQuery {
+	uint8_t _unused;
+};
+
+struct GetSpectatingStateResult {
+	const Error* error;
+	bool spectating;
+};
+
+struct GetPlayerRosterQuery {
+	int32_t sortMode;
+};
+
+struct GetPlayerRosterResult {
+	const Error* error;
+	RosterEntry* entries;
+	uint32_t count;
+};
+
+struct GetPlayerTrafficQuery {
+	int32_t playerID;
+};
+
+struct GetPlayerTrafficResult {
+	const Error* error;
+	PlayerTraffic* traffic;
+	uint32_t count;
+};
+
+struct GetPlayerStatisticsQuery {
+	int32_t playerID;
+};
+
+struct GetPlayerStatisticsResult {
 	const Error* error;
 	PlayerStats stats;
 };
 
 // API structure
 struct PlayerApi {
-	// Local player
-	Int32Result (*GetLocalPlayerID)();
-	Int32Result (*GetLocalTeamID)();
-	Int32Result (*GetLocalAllyTeamID)();
-	BoolResult (*GetSpectatingState)();
+	void (*GetLocalPlayerID)(
+		const GetLocalPlayerIDQuery* query,
+		GetLocalPlayerIDResult* result
+	);
 
-	// Player roster
-	PlayerRosterResult (*GetPlayerRoster)(int32_t sortMode);
+	void (*GetLocalTeamID)(
+		const GetLocalTeamIDQuery* query,
+		GetLocalTeamIDResult* result
+	);
 
-	// Player traffic
-	PlayerTrafficResult (*GetPlayerTraffic)(int32_t playerID);
+	void (*GetLocalAllyTeamID)(
+		const GetLocalAllyTeamIDQuery* query,
+		GetLocalAllyTeamIDResult* result
+	);
 
-	// Player statistics
-	PlayerStatsResult (*GetPlayerStatistics)(int32_t playerID);
+	void (*GetSpectatingState)(
+		const GetSpectatingStateQuery* query,
+		GetSpectatingStateResult* result
+	);
+
+	void (*GetPlayerRoster)(
+		const GetPlayerRosterQuery* query,
+		GetPlayerRosterResult* result
+	);
+
+	void (*GetPlayerTraffic)(
+		const GetPlayerTrafficQuery* query,
+		GetPlayerTrafficResult* result
+	);
+
+	void (*GetPlayerStatistics)(
+		const GetPlayerStatisticsQuery* query,
+		GetPlayerStatisticsResult* result
+	);
 };
 
 extern const PlayerApi PLAYER_API;

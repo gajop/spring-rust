@@ -11,7 +11,12 @@
 
 namespace {
 
-// Error constants
+// Scratch buffer for dynamic data
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
 static const Error PLAYER_NOT_AVAILABLE_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Player system is not available"
@@ -29,70 +34,84 @@ static bool PlayerSystemReady()
 }
 
 // Local player info
-static Int32Result NativeGetLocalPlayerID()
+static void NativeGetLocalPlayerID(const GetLocalPlayerIDQuery* query, GetLocalPlayerIDResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+
 	if (!PlayerSystemReady()) {
-		result.error = &PLAYER_NOT_AVAILABLE_ERROR;
-		return result;
+		result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+		return;
 	}
-	result.value = gu->myPlayerNum;
-	return result;
+
+	result->error = nullptr;
+	result->playerID = gu->myPlayerNum;
 }
 
-static Int32Result NativeGetLocalTeamID()
+static void NativeGetLocalTeamID(const GetLocalTeamIDQuery* query, GetLocalTeamIDResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+
 	if (!PlayerSystemReady()) {
-		result.error = &PLAYER_NOT_AVAILABLE_ERROR;
-		return result;
+		result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+		return;
 	}
-	result.value = gu->myTeam;
-	return result;
+
+	result->error = nullptr;
+	result->teamID = gu->myTeam;
 }
 
-static Int32Result NativeGetLocalAllyTeamID()
+static void NativeGetLocalAllyTeamID(const GetLocalAllyTeamIDQuery* query, GetLocalAllyTeamIDResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+
 	if (!PlayerSystemReady()) {
-		result.error = &PLAYER_NOT_AVAILABLE_ERROR;
-		return result;
+		result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+		return;
 	}
-	result.value = gu->myAllyTeam;
-	return result;
+
+	result->error = nullptr;
+	result->allyTeamID = gu->myAllyTeam;
 }
 
-static BoolResult NativeGetSpectatingState()
+static void NativeGetSpectatingState(const GetSpectatingStateQuery* query, GetSpectatingStateResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+
 	if (!PlayerSystemReady()) {
-		result.error = &PLAYER_NOT_AVAILABLE_ERROR;
-		return result;
+		result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+		return;
 	}
-	result.value = gu->spectating;
-	return result;
+
+	result->error = nullptr;
+	result->spectating = gu->spectating;
 }
 
 // Player roster
-static PlayerRosterResult NativeGetPlayerRoster(int32_t sortMode)
+static void NativeGetPlayerRoster(const GetPlayerRosterQuery* query, GetPlayerRosterResult* result)
 {
-	PlayerRosterResult result = {};
+	bufferPos = 0;
+
 	if (!PlayerSystemReady()) {
-		result.error = &PLAYER_NOT_AVAILABLE_ERROR;
-		return result;
+		result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+		return;
 	}
 
 	const PlayerRoster::SortType oldSortType = playerRoster.GetSortType();
-	playerRoster.SetSortTypeByCode(static_cast<PlayerRoster::SortType>(sortMode));
+	playerRoster.SetSortTypeByCode(static_cast<PlayerRoster::SortType>(query->sortMode));
 
 	const std::vector<int>& playerIndices = playerRoster.GetIndices(false);
 	playerRoster.SetSortTypeByCode(oldSortType);
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<RosterEntry> entries;
-	entries.clear();
+	// Write roster entries to scratch buffer
+	RosterEntry* entries = reinterpret_cast<RosterEntry*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
 
 	for (size_t i = 0; i < playerIndices.size(); i++) {
+		if (bufferPos + sizeof(RosterEntry) > sizeof(scratchBuffer)) {
+			result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+			return;
+		}
+
 		const int playerID = playerIndices[i];
 		const CPlayer* p = playerHandler.Player(playerID);
 
@@ -100,12 +119,12 @@ static PlayerRosterResult NativeGetPlayerRoster(int32_t sortMode)
 			continue;
 		}
 
-		RosterEntry entry;
-		entry.name = p->name.c_str(); // Point to internal CPlayer string
+		RosterEntry& entry = entries[count];
+		entry.name = p->name.c_str();
 		entry.playerID = playerID;
 		entry.teamID = p->team;
 		entry.allyTeamID = teamHandler.AllyTeam(p->team);
-		entry.isAI = false; // TODO: detect AI players
+		entry.isAI = false;
 		entry.isSpec = p->spectator;
 		entry.isActive = p->active;
 		entry.pingTime = p->ping;
@@ -113,78 +132,85 @@ static PlayerRosterResult NativeGetPlayerRoster(int32_t sortMode)
 		entry.country = p->countryCode.empty() ? nullptr : p->countryCode.c_str();
 		entry.rank = p->rank;
 
-		entries.push_back(entry);
+		bufferPos += sizeof(RosterEntry);
+		count++;
 	}
 
-	result.entries = entries.data();
-	result.count = static_cast<uint32_t>(entries.size());
-
-	return result;
+	result->error = nullptr;
+	result->entries = entries;
+	result->count = count;
 }
 
 // Player traffic
-static PlayerTrafficResult NativeGetPlayerTraffic(int32_t playerID)
+static void NativeGetPlayerTraffic(const GetPlayerTrafficQuery* query, GetPlayerTrafficResult* result)
 {
-	PlayerTrafficResult result = {};
+	bufferPos = 0;
+
 	if (!PlayerSystemReady()) {
-		result.error = &PLAYER_NOT_AVAILABLE_ERROR;
-		return result;
+		result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+		return;
 	}
 
 	const auto& traffic = game->GetPlayerTraffic();
-	const auto it = traffic.find(playerID);
+	const auto it = traffic.find(query->playerID);
 
 	if (it == traffic.end()) {
-		result.count = 0;
-		result.traffic = nullptr;
-		return result;
+		result->error = nullptr;
+		result->count = 0;
+		result->traffic = nullptr;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local PlayerTraffic trafficData;
+	// Write traffic data to scratch buffer
+	PlayerTraffic* trafficData = reinterpret_cast<PlayerTraffic*>(&scratchBuffer[bufferPos]);
+	if (bufferPos + sizeof(PlayerTraffic) > sizeof(scratchBuffer)) {
+		result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+		return;
+	}
 
 	const CGame::PlayerTrafficInfo& pti = it->second;
-	trafficData.playerID = playerID;
-	trafficData.packetsSent = 0; // Not directly available
-	trafficData.packetsReceived = 0; // Not directly available
-	trafficData.bytesSent = pti.total;
-	trafficData.bytesReceived = 0; // Not directly available
+	trafficData->playerID = query->playerID;
+	trafficData->packetsSent = 0;
+	trafficData->packetsReceived = 0;
+	trafficData->bytesSent = pti.total;
+	trafficData->bytesReceived = 0;
 
-	result.traffic = &trafficData;
-	result.count = 1;
+	bufferPos += sizeof(PlayerTraffic);
 
-	return result;
+	result->error = nullptr;
+	result->traffic = trafficData;
+	result->count = 1;
 }
 
 // Player statistics
-static PlayerStatsResult NativeGetPlayerStatistics(int32_t playerID)
+static void NativeGetPlayerStatistics(const GetPlayerStatisticsQuery* query, GetPlayerStatisticsResult* result)
 {
-	PlayerStatsResult result = {};
+	bufferPos = 0;
+
 	if (!PlayerSystemReady()) {
-		result.error = &PLAYER_NOT_AVAILABLE_ERROR;
-		return result;
+		result->error = &PLAYER_NOT_AVAILABLE_ERROR;
+		return;
 	}
 
-	if (!playerHandler.IsValidPlayer(playerID)) {
-		result.error = &INVALID_PLAYER_ERROR;
-		return result;
+	if (!playerHandler.IsValidPlayer(query->playerID)) {
+		result->error = &INVALID_PLAYER_ERROR;
+		return;
 	}
 
-	const CPlayer* player = playerHandler.Player(playerID);
+	const CPlayer* player = playerHandler.Player(query->playerID);
 	if (player == nullptr) {
-		result.error = &INVALID_PLAYER_ERROR;
-		return result;
+		result->error = &INVALID_PLAYER_ERROR;
+		return;
 	}
 
 	const PlayerStatistics& pStats = player->currentStats;
-	result.stats.mousePixels = pStats.mousePixels;
-	result.stats.mouseClicks = pStats.mouseClicks;
-	result.stats.keyPresses = pStats.keyPresses;
-	result.stats.unitCommands = pStats.unitCommands;
-	result.stats.avgCommandSize = (pStats.numCommands > 0) ?
+	result->error = nullptr;
+	result->stats.mousePixels = pStats.mousePixels;
+	result->stats.mouseClicks = pStats.mouseClicks;
+	result->stats.keyPresses = pStats.keyPresses;
+	result->stats.unitCommands = pStats.unitCommands;
+	result->stats.avgCommandSize = (pStats.numCommands > 0) ?
 		(static_cast<float>(pStats.unitCommands) / static_cast<float>(pStats.numCommands)) : 0.0f;
-
-	return result;
 }
 
 } // namespace
