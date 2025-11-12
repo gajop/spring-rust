@@ -11,7 +11,12 @@
 
 namespace {
 
-// Error constants
+// Scratch buffer for dynamic data
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
 static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Display system not ready"
@@ -24,252 +29,270 @@ static bool IsReady()
 }
 
 // View geometry
-static UInt32Result NativeGetNumDisplays()
+static void NativeGetNumDisplays(const GetNumDisplaysQuery* query, GetNumDisplaysResult* result)
 {
-	UInt32Result result = {};
-	result.value = 1; // Simplified: single display
-	return result;
+	bufferPos = 0;
+
+	result->error = nullptr;
+	result->count = 1; // Simplified: single display
 }
 
-static ViewGeometryResult NativeGetViewGeometry()
+static void NativeGetViewGeometry(const GetViewGeometryQuery* query, GetViewGeometryResult* result)
 {
-	ViewGeometryResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.geom.viewSizeX = globalRendering->viewSizeX;
-	result.geom.viewSizeY = globalRendering->viewSizeY;
-	result.geom.viewPosX = globalRendering->viewPosX;
-	result.geom.viewPosY = globalRendering->viewPosY;
-	return result;
+	result->error = nullptr;
+	result->geom.viewSizeX = globalRendering->viewSizeX;
+	result->geom.viewSizeY = globalRendering->viewSizeY;
+	result->geom.viewPosX = globalRendering->viewPosX;
+	result->geom.viewPosY = globalRendering->viewPosY;
 }
 
-static ViewGeometryResult NativeGetWindowGeometry()
+static void NativeGetWindowGeometry(const GetWindowGeometryQuery* query, GetWindowGeometryResult* result)
 {
-	ViewGeometryResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.geom.viewSizeX = globalRendering->winSizeX;
-	result.geom.viewSizeY = globalRendering->winSizeY;
-	result.geom.viewPosX = globalRendering->winPosX;
-	result.geom.viewPosY = globalRendering->winPosY;
-	return result;
+	result->error = nullptr;
+	result->geom.viewSizeX = globalRendering->winSizeX;
+	result->geom.viewSizeY = globalRendering->winSizeY;
+	result->geom.viewPosX = globalRendering->winPosX;
+	result->geom.viewPosY = globalRendering->winPosY;
 }
 
-static ViewGeometryResult NativeGetScreenGeometry(int32_t screenNum)
+static void NativeGetScreenGeometry(const GetScreenGeometryQuery* query, GetScreenGeometryResult* result)
 {
-	ViewGeometryResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
 	// Simplified: return window geometry (multi-screen not fully supported)
-	result.geom.viewSizeX = globalRendering->screenSizeX;
-	result.geom.viewSizeY = globalRendering->screenSizeY;
-	result.geom.viewPosX = 0;
-	result.geom.viewPosY = 0;
-	return result;
+	result->error = nullptr;
+	result->geom.viewSizeX = globalRendering->screenSizeX;
+	result->geom.viewSizeY = globalRendering->screenSizeY;
+	result->geom.viewPosX = 0;
+	result->geom.viewPosY = 0;
 }
 
-static MinimapGeometryResult NativeGetMiniMapGeometry()
+static void NativeGetMiniMapGeometry(const GetMiniMapGeometryQuery* query, GetMiniMapGeometryResult* result)
 {
-	MinimapGeometryResult result = {};
+	bufferPos = 0;
+
 	if (minimap == nullptr) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.geom.sizeX = minimap->GetSizeX();
-	result.geom.sizeY = minimap->GetSizeY();
-	result.geom.posX = minimap->GetPosX();
-	result.geom.posY = minimap->GetPosY();
-	result.geom.minimized = minimap->GetMinimized();
-	result.geom.maximized = minimap->GetMaximized();
-	return result;
+	result->error = nullptr;
+	result->geom.sizeX = minimap->GetSizeX();
+	result->geom.sizeY = minimap->GetSizeY();
+	result->geom.posX = minimap->GetPosX();
+	result->geom.posY = minimap->GetPosY();
+	result->geom.minimized = minimap->GetMinimized();
+	result->geom.maximized = minimap->GetMaximized();
 }
 
 // Frame info
-static UInt32Result NativeGetDrawFrame()
+static void NativeGetDrawFrame(const GetDrawFrameQuery* query, GetDrawFrameResult* result)
 {
-	UInt32Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = globalRendering->drawFrame;
-	return result;
+	result->error = nullptr;
+	result->frame = globalRendering->drawFrame;
 }
 
-static FloatResult NativeGetFrameTimeOffset()
+static void NativeGetFrameTimeOffset(const GetFrameTimeOffsetQuery* query, GetFrameTimeOffsetResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = globalRendering->timeOffset;
-	return result;
+	result->error = nullptr;
+	result->offset = globalRendering->timeOffset;
 }
 
-static FloatResult NativeGetLastUpdateSeconds()
+static void NativeGetLastUpdateSeconds(const GetLastUpdateSecondsQuery* query, GetLastUpdateSecondsResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (game == nullptr) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = game->lastUpdateTime;
-	return result;
+	result->error = nullptr;
+	result->seconds = game->lastUpdateTime;
 }
 
 // FPS and performance
-static UInt32Result NativeGetFPS()
+static void NativeGetFPS(const GetFPSQuery* query, GetFPSResult* result)
 {
-	UInt32Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = static_cast<uint32_t>(globalRendering->FPS);
-	return result;
+	result->error = nullptr;
+	result->fps = static_cast<uint32_t>(globalRendering->FPS);
 }
 
-static FloatResult NativeGetGameSpeed()
+static void NativeGetGameSpeed(const GetGameSpeedQuery* query, GetGameSpeedResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (game == nullptr || gu == nullptr) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = gu->simSpeed;
-	return result;
+	result->error = nullptr;
+	result->speed = gu->simSpeed;
 }
 
 // Team colors
-static TeamColorResult NativeGetTeamColor(int32_t teamID)
+static void NativeGetTeamColor(const GetTeamColorQuery* query, GetTeamColorResult* result)
 {
-	TeamColorResult result = {};
+	bufferPos = 0;
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.color.r = 1.0f;
-		result.color.g = 1.0f;
-		result.color.b = 1.0f;
-		result.color.a = 1.0f;
-		return result;
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = nullptr;
+		result->color.r = 1.0f;
+		result->color.g = 1.0f;
+		result->color.b = 1.0f;
+		result->color.a = 1.0f;
+		return;
 	}
 
-	const CTeam* team = teamHandler.Team(teamID);
+	const CTeam* team = teamHandler.Team(query->teamID);
 	const auto& color = team->color;
 
-	result.color.r = color[0];
-	result.color.g = color[1];
-	result.color.b = color[2];
-	result.color.a = color[3];
-	return result;
+	result->error = nullptr;
+	result->color.r = color[0];
+	result->color.g = color[1];
+	result->color.b = color[2];
+	result->color.a = color[3];
 }
 
-static TeamColorResult NativeGetTeamOrigColor(int32_t teamID)
+static void NativeGetTeamOrigColor(const GetTeamOrigColorQuery* query, GetTeamOrigColorResult* result)
 {
-	TeamColorResult result = {};
+	bufferPos = 0;
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.color.r = 1.0f;
-		result.color.g = 1.0f;
-		result.color.b = 1.0f;
-		result.color.a = 1.0f;
-		return result;
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = nullptr;
+		result->color.r = 1.0f;
+		result->color.g = 1.0f;
+		result->color.b = 1.0f;
+		result->color.a = 1.0f;
+		return;
 	}
 
-	const CTeam* team = teamHandler.Team(teamID);
+	const CTeam* team = teamHandler.Team(query->teamID);
 	const auto& color = team->origColor;
 
-	result.color.r = color[0];
-	result.color.g = color[1];
-	result.color.b = color[2];
-	result.color.a = color[3];
-	return result;
+	result->error = nullptr;
+	result->color.r = color[0];
+	result->color.g = color[1];
+	result->color.b = color[2];
+	result->color.a = color[3];
 }
 
 // Visibility queries
-static BoolResult NativeIsAABBInView(Float3 mins, Float3 maxs)
+static void NativeIsAABBInView(const IsAABBInViewQuery* query, IsAABBInViewResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+
 	if (camera == nullptr) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const float3 vMins(mins.x, mins.y, mins.z);
-	const float3 vMaxs(maxs.x, maxs.y, maxs.z);
+	const float3 vMins(query->mins.x, query->mins.y, query->mins.z);
+	const float3 vMaxs(query->maxs.x, query->maxs.y, query->maxs.z);
 
-	result.value = camera->InView(vMins, vMaxs);
-	return result;
+	result->error = nullptr;
+	result->inView = camera->InView(vMins, vMaxs);
 }
 
-static BoolResult NativeIsSphereInView(Float3 center, float radius)
+static void NativeIsSphereInView(const IsSphereInViewQuery* query, IsSphereInViewResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+
 	if (camera == nullptr) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const float3 vCenter(center.x, center.y, center.z);
-	result.value = camera->InView(vCenter, radius);
-	return result;
+	const float3 vCenter(query->center.x, query->center.y, query->center.z);
+	result->error = nullptr;
+	result->inView = camera->InView(vCenter, query->radius);
 }
 
 // GUI state
-static BoolResult NativeIsGUIHidden()
+static void NativeIsGUIHidden(const IsGUIHiddenQuery* query, IsGUIHiddenResult* result)
 {
-	BoolResult result = {};
-	result.value = (game != nullptr) && game->hideInterface;
-	return result;
+	bufferPos = 0;
+
+	result->error = nullptr;
+	result->hidden = (game != nullptr) && game->hideInterface;
 }
 
-static BoolResult NativeHaveShadows()
+static void NativeHaveShadows(const HaveShadowsQuery* query, HaveShadowsResult* result)
 {
-	BoolResult result = {};
-	result.value = shadowHandler.ShadowsLoaded();
-	return result;
+	bufferPos = 0;
+
+	result->error = nullptr;
+	result->enabled = shadowHandler.ShadowsLoaded();
 }
 
-static BoolResult NativeHaveAdvShading()
+static void NativeHaveAdvShading(const HaveAdvShadingQuery* query, HaveAdvShadingResult* result)
 {
-	BoolResult result = {};
-	result.value = true; // Simplified: assume advanced shading available
-	return result;
+	bufferPos = 0;
+
+	result->error = nullptr;
+	result->enabled = true; // Simplified: assume advanced shading available
 }
 
 // Control
-static BoolResult NativeSetTeamColor(int32_t teamID, TeamColor color)
+static void NativeSetTeamColor(const SetTeamColorQuery* query, SetTeamColorResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.value = false;
-		return result;
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = nullptr;
+		result->success = false;
+		return;
 	}
 
-	CTeam* team = teamHandler.Team(teamID);
-	team->color[0] = color.r;
-	team->color[1] = color.g;
-	team->color[2] = color.b;
-	team->color[3] = color.a;
+	CTeam* team = teamHandler.Team(query->teamID);
+	team->color[0] = query->color.r;
+	team->color[1] = query->color.g;
+	team->color[2] = query->color.b;
+	team->color[3] = query->color.a;
 
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
 } // namespace

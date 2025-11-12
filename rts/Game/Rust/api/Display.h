@@ -22,11 +22,6 @@ struct ViewGeometry {
 	int32_t viewPosY;
 };
 
-struct ViewGeometryResult {
-	const Error* error;
-	ViewGeometry geom;
-};
-
 // Minimap geometry
 struct MinimapGeometry {
 	int32_t sizeX;
@@ -37,11 +32,6 @@ struct MinimapGeometry {
 	bool maximized;
 };
 
-struct MinimapGeometryResult {
-	const Error* error;
-	MinimapGeometry geom;
-};
-
 // Team colors
 struct TeamColor {
 	float r;
@@ -50,44 +40,263 @@ struct TeamColor {
 	float a;
 };
 
-struct TeamColorResult {
+// Queries
+struct GetNumDisplaysQuery {
+	uint8_t _unused;
+};
+
+struct GetNumDisplaysResult {
+	const Error* error;
+	uint32_t count;
+};
+
+struct GetViewGeometryQuery {
+	uint8_t _unused;
+};
+
+struct GetViewGeometryResult {
+	const Error* error;
+	ViewGeometry geom;
+};
+
+struct GetWindowGeometryQuery {
+	uint8_t _unused;
+};
+
+struct GetWindowGeometryResult {
+	const Error* error;
+	ViewGeometry geom;
+};
+
+struct GetScreenGeometryQuery {
+	int32_t screenNum;
+};
+
+struct GetScreenGeometryResult {
+	const Error* error;
+	ViewGeometry geom;
+};
+
+struct GetMiniMapGeometryQuery {
+	uint8_t _unused;
+};
+
+struct GetMiniMapGeometryResult {
+	const Error* error;
+	MinimapGeometry geom;
+};
+
+struct GetDrawFrameQuery {
+	uint8_t _unused;
+};
+
+struct GetDrawFrameResult {
+	const Error* error;
+	uint32_t frame;
+};
+
+struct GetFrameTimeOffsetQuery {
+	uint8_t _unused;
+};
+
+struct GetFrameTimeOffsetResult {
+	const Error* error;
+	float offset;
+};
+
+struct GetLastUpdateSecondsQuery {
+	uint8_t _unused;
+};
+
+struct GetLastUpdateSecondsResult {
+	const Error* error;
+	float seconds;
+};
+
+struct GetFPSQuery {
+	uint8_t _unused;
+};
+
+struct GetFPSResult {
+	const Error* error;
+	uint32_t fps;
+};
+
+struct GetGameSpeedQuery {
+	uint8_t _unused;
+};
+
+struct GetGameSpeedResult {
+	const Error* error;
+	float speed;
+};
+
+struct GetTeamColorQuery {
+	int32_t teamID;
+};
+
+struct GetTeamColorResult {
 	const Error* error;
 	TeamColor color;
 };
 
+struct GetTeamOrigColorQuery {
+	int32_t teamID;
+};
+
+struct GetTeamOrigColorResult {
+	const Error* error;
+	TeamColor color;
+};
+
+struct IsAABBInViewQuery {
+	Float3 mins;
+	Float3 maxs;
+};
+
+struct IsAABBInViewResult {
+	const Error* error;
+	bool inView;
+};
+
+struct IsSphereInViewQuery {
+	Float3 center;
+	float radius;
+};
+
+struct IsSphereInViewResult {
+	const Error* error;
+	bool inView;
+};
+
+struct IsGUIHiddenQuery {
+	uint8_t _unused;
+};
+
+struct IsGUIHiddenResult {
+	const Error* error;
+	bool hidden;
+};
+
+struct HaveShadowsQuery {
+	uint8_t _unused;
+};
+
+struct HaveShadowsResult {
+	const Error* error;
+	bool enabled;
+};
+
+struct HaveAdvShadingQuery {
+	uint8_t _unused;
+};
+
+struct HaveAdvShadingResult {
+	const Error* error;
+	bool enabled;
+};
+
+struct SetTeamColorQuery {
+	int32_t teamID;
+	TeamColor color;
+};
+
+struct SetTeamColorResult {
+	const Error* error;
+	bool success;
+};
+
 // API structure
 struct DisplayApi {
-	// View geometry
-	UInt32Result (*GetNumDisplays)();
-	ViewGeometryResult (*GetViewGeometry)();
-	ViewGeometryResult (*GetWindowGeometry)();
-	ViewGeometryResult (*GetScreenGeometry)(int32_t screenNum);
-	MinimapGeometryResult (*GetMiniMapGeometry)();
+	void (*GetNumDisplays)(
+		const GetNumDisplaysQuery* query,
+		GetNumDisplaysResult* result
+	);
 
-	// Frame info
-	UInt32Result (*GetDrawFrame)();
-	FloatResult (*GetFrameTimeOffset)();
-	FloatResult (*GetLastUpdateSeconds)();
+	void (*GetViewGeometry)(
+		const GetViewGeometryQuery* query,
+		GetViewGeometryResult* result
+	);
 
-	// FPS and performance
-	UInt32Result (*GetFPS)();
-	FloatResult (*GetGameSpeed)();
+	void (*GetWindowGeometry)(
+		const GetWindowGeometryQuery* query,
+		GetWindowGeometryResult* result
+	);
 
-	// Team colors
-	TeamColorResult (*GetTeamColor)(int32_t teamID);
-	TeamColorResult (*GetTeamOrigColor)(int32_t teamID);
+	void (*GetScreenGeometry)(
+		const GetScreenGeometryQuery* query,
+		GetScreenGeometryResult* result
+	);
 
-	// Visibility queries
-	BoolResult (*IsAABBInView)(Float3 mins, Float3 maxs);
-	BoolResult (*IsSphereInView)(Float3 center, float radius);
+	void (*GetMiniMapGeometry)(
+		const GetMiniMapGeometryQuery* query,
+		GetMiniMapGeometryResult* result
+	);
 
-	// GUI state
-	BoolResult (*IsGUIHidden)();
-	BoolResult (*HaveShadows)();
-	BoolResult (*HaveAdvShading)();
+	void (*GetDrawFrame)(
+		const GetDrawFrameQuery* query,
+		GetDrawFrameResult* result
+	);
 
-	// Control
-	BoolResult (*SetTeamColor)(int32_t teamID, TeamColor color);
+	void (*GetFrameTimeOffset)(
+		const GetFrameTimeOffsetQuery* query,
+		GetFrameTimeOffsetResult* result
+	);
+
+	void (*GetLastUpdateSeconds)(
+		const GetLastUpdateSecondsQuery* query,
+		GetLastUpdateSecondsResult* result
+	);
+
+	void (*GetFPS)(
+		const GetFPSQuery* query,
+		GetFPSResult* result
+	);
+
+	void (*GetGameSpeed)(
+		const GetGameSpeedQuery* query,
+		GetGameSpeedResult* result
+	);
+
+	void (*GetTeamColor)(
+		const GetTeamColorQuery* query,
+		GetTeamColorResult* result
+	);
+
+	void (*GetTeamOrigColor)(
+		const GetTeamOrigColorQuery* query,
+		GetTeamOrigColorResult* result
+	);
+
+	void (*IsAABBInView)(
+		const IsAABBInViewQuery* query,
+		IsAABBInViewResult* result
+	);
+
+	void (*IsSphereInView)(
+		const IsSphereInViewQuery* query,
+		IsSphereInViewResult* result
+	);
+
+	void (*IsGUIHidden)(
+		const IsGUIHiddenQuery* query,
+		IsGUIHiddenResult* result
+	);
+
+	void (*HaveShadows)(
+		const HaveShadowsQuery* query,
+		HaveShadowsResult* result
+	);
+
+	void (*HaveAdvShading)(
+		const HaveAdvShadingQuery* query,
+		HaveAdvShadingResult* result
+	);
+
+	void (*SetTeamColor)(
+		const SetTeamColorQuery* query,
+		SetTeamColorResult* result
+	);
 };
 
 extern const DisplayApi DISPLAY_API;
