@@ -20,462 +20,231 @@
 
 namespace {
 
-// Error constants
-static const Error GAME_NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "Game is not initialized"
-};
+// Scratch buffer for dynamic data
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-static const Error INVALID_OPTION_ERROR = {
-	.code = ERROR_NOT_FOUND,
-	.message = "Option key not found"
-};
+// Static errors
+static const Error GAME_NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game is not initialized" };
+static const Error INVALID_OPTION_ERROR = { .code = ERROR_NOT_FOUND, .message = "Option key not found" };
+static const Error INVALID_ARG = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid argument" };
+static const Error INVALID_TEAM = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
+static const Error NOT_FOUND = { .code = ERROR_NOT_FOUND, .message = "Not found" };
+static const Error INTERNAL = { .code = ERROR_INTERNAL, .message = "Internal error" };
 
-// Helper: check if game is ready
-static bool GameReady()
-{
-	return (game != nullptr) && (gs != nullptr);
+static bool GameReady() { return (game != nullptr) && (gs != nullptr); }
+
+#define IMPL_SIMPLE_QUERY(name, check, value) \
+	static void Native##name(const name##Query* query, name##Result* result) { \
+		bufferPos = 0; \
+		if (!(check)) { result->error = &GAME_NOT_READY_ERROR; return; } \
+		result->error = nullptr; \
+		value; \
+	}
+
+IMPL_SIMPLE_QUERY(IsCheatingEnabled, GameReady(), result->enabled = gs->cheatEnabled)
+IMPL_SIMPLE_QUERY(IsGodModeEnabled, GameReady(), result->enabled = gs->godMode)
+IMPL_SIMPLE_QUERY(IsDevLuaEnabled, GameReady(), result->enabled = gs->devLuaEnabled)
+IMPL_SIMPLE_QUERY(IsEditDefsEnabled, GameReady(), result->enabled = gs->editDefsEnabled)
+IMPL_SIMPLE_QUERY(IsNoCostEnabled, GameReady(), result->enabled = gs->noCostEnabled)
+IMPL_SIMPLE_QUERY(AreHelperAIsEnabled, GameReady(), result->enabled = !gs->noHelperAIs)
+IMPL_SIMPLE_QUERY(FixedAllies, GameReady(), result->fixed = (gameSetup != nullptr) && gameSetup->fixedAllies)
+IMPL_SIMPLE_QUERY(IsGameOver, GameReady(), result->gameOver = game->IsGameOver())
+IMPL_SIMPLE_QUERY(GetGameFrame, GameReady(), result->frame = gs->frameNum)
+IMPL_SIMPLE_QUERY(GetGameSeconds, GameReady(), result->seconds = gs->frameNum / static_cast<float>(GAME_SPEED))
+IMPL_SIMPLE_QUERY(GetGaiaTeamID, GameReady(), result->teamID = teamHandler.GaiaTeamID())
+IMPL_SIMPLE_QUERY(GetTidal, GameReady(), result->strength = mapInfo->map.tidalStrength)
+
+static void NativeGetGlobalLos(const GetGlobalLosQuery* query, GetGlobalLosResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+	if (query->allyTeamID < 0 || query->allyTeamID >= gs->activeAllyTeams) { result->error = &INVALID_OPTION_ERROR; return; }
+	result->error = nullptr;
+	result->los = gs->globalLOS[query->allyTeamID];
 }
 
-// Game state queries
-static BoolResult NativeIsCheatingEnabled()
-{
-	BoolResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = gs->cheatEnabled;
-	return result;
-}
-
-static BoolResult NativeIsGodModeEnabled()
-{
-	BoolResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = gs->godMode;
-	return result;
-}
-
-static BoolResult NativeIsDevLuaEnabled()
-{
-	BoolResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = gs->devLuaEnabled;
-	return result;
-}
-
-static BoolResult NativeIsEditDefsEnabled()
-{
-	BoolResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = gs->editDefsEnabled;
-	return result;
-}
-
-static BoolResult NativeIsNoCostEnabled()
-{
-	BoolResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = gs->noCostEnabled;
-	return result;
-}
-
-static Int32Result NativeGetGlobalLos(int32_t allyTeamID)
-{
-	Int32Result result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	if (allyTeamID < 0 || allyTeamID >= gs->activeAllyTeams) {
-		result.error = &INVALID_OPTION_ERROR;
-		return result;
-	}
-	result.value = gs->globalLOS[allyTeamID];
-	return result;
-}
-
-static BoolResult NativeAreHelperAIsEnabled()
-{
-	BoolResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = !gs->noHelperAIs;
-	return result;
-}
-
-static BoolResult NativeFixedAllies()
-{
-	BoolResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = (gameSetup != nullptr) && gameSetup->fixedAllies;
-	return result;
-}
-
-static BoolResult NativeIsGameOver()
-{
-	BoolResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = game->IsGameOver();
-	return result;
-}
-
-// Frame and time
-static UInt32Result NativeGetGameFrame()
-{
-	UInt32Result result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = gs->frameNum;
-	return result;
-}
-
-static FloatResult NativeGetGameSeconds()
-{
-	UInt32Result result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = gs->frameNum / static_cast<float>(GAME_SPEED);
-	return result;
-}
-
-// Gaia team
-static Int32Result NativeGetGaiaTeamID()
-{
-	Int32Result result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = teamHandler.GaiaTeamID();
-	return result;
-}
-
-// Map and mod options
-static GameOptionResult NativeGetMapOption(const char* key)
-{
-	GameOptionResult result = {};
-	if (!GameReady() || !gameSetup) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-
+static void NativeGetMapOption(const GetMapOptionQuery* query, GetMapOptionResult* result) {
+	bufferPos = 0;
+	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 	const auto& options = gameSetup->GetMapOptions();
-	auto it = options.find(key);
+	auto it = options.find(query->key);
+	result->error = nullptr;
 	if (it != options.end()) {
-		result.value = it->second.c_str();
-		result.exists = true;
+		result->value = it->second.c_str();
+		result->exists = true;
 	} else {
-		result.exists = false;
+		result->exists = false;
 	}
-	return result;
 }
 
-static StringArray NativeGetMapOptions()
-{
-	StringArray result = {};
-	if (!GameReady() || !gameSetup) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-
+static void NativeGetMapOptions(const GetMapOptionsQuery* query, GetMapOptionsResult* result) {
+	bufferPos = 0;
+	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 	const auto& options = gameSetup->GetMapOptions();
-	result.length = static_cast<uint32_t>(options.size());
 
-	if (result.length == 0) {
-		result.data = nullptr;
-		return result;
-	}
-
-	// Allocate array of string pointers (caller must free with Memory API)
-	// Strings themselves point to internal gameSetup data (valid for call duration)
-	static thread_local std::vector<const char*> optionKeys;
-	optionKeys.clear();
-	optionKeys.reserve(options.size());
+	const char** keys = reinterpret_cast<const char**>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
 
 	for (const auto& [key, value] : options) {
-		(void)value; // We only return keys
-		optionKeys.push_back(key.c_str());
+		if (bufferPos + sizeof(const char*) > sizeof(scratchBuffer)) { result->error = &INTERNAL; return; }
+		keys[count++] = key.c_str();
+		bufferPos += sizeof(const char*);
 	}
 
-	result.data = optionKeys.data();
-	result.length = static_cast<uint32_t>(optionKeys.size());
-
-	return result;
+	result->error = nullptr;
+	result->keys = keys;
+	result->count = count;
 }
 
-static GameOptionResult NativeGetModOption(const char* key)
-{
-	GameOptionResult result = {};
-	if (!GameReady() || !gameSetup) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-
+static void NativeGetModOption(const GetModOptionQuery* query, GetModOptionResult* result) {
+	bufferPos = 0;
+	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 	const auto& options = gameSetup->GetModOptions();
-	auto it = options.find(key);
+	auto it = options.find(query->key);
+	result->error = nullptr;
 	if (it != options.end()) {
-		result.value = it->second.c_str();
-		result.exists = true;
+		result->value = it->second.c_str();
+		result->exists = true;
 	} else {
-		result.exists = false;
+		result->exists = false;
 	}
-	return result;
 }
 
-static StringArray NativeGetModOptions()
-{
-	StringArray result = {};
-	if (!GameReady() || !gameSetup) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-
+static void NativeGetModOptions(const GetModOptionsQuery* query, GetModOptionsResult* result) {
+	bufferPos = 0;
+	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 	const auto& options = gameSetup->GetModOptions();
-	result.length = static_cast<uint32_t>(options.size());
 
-	if (result.length == 0) {
-		result.data = nullptr;
-		return result;
-	}
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<const char*> optionKeys;
-	optionKeys.clear();
-	optionKeys.reserve(options.size());
+	const char** keys = reinterpret_cast<const char**>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
 
 	for (const auto& [key, value] : options) {
-		(void)value; // We only return keys
-		optionKeys.push_back(key.c_str());
+		if (bufferPos + sizeof(const char*) > sizeof(scratchBuffer)) { result->error = &INTERNAL; return; }
+		keys[count++] = key.c_str();
+		bufferPos += sizeof(const char*);
 	}
 
-	result.data = optionKeys.data();
-	result.length = static_cast<uint32_t>(optionKeys.size());
-
-	return result;
+	result->error = nullptr;
+	result->keys = keys;
+	result->count = count;
 }
 
-// Environmental
-static FloatResult NativeGetTidal()
-{
-	FloatResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.value = mapInfo->map.tidalStrength;
-	return result;
+static void NativeGetWind(const GetWindQuery* query, GetWindResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+	result->error = nullptr;
+	result->data.min = envResHandler.GetMinWindStrength();
+	result->data.max = envResHandler.GetMaxWindStrength();
+	result->data.current = envResHandler.GetCurrentWindStrength();
 }
 
-static WindDataResult NativeGetWind()
-{
-	WindDataResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-	result.data.min = envResHandler.GetMinWindStrength();
-	result.data.max = envResHandler.GetMaxWindStrength();
-	result.data.current = envResHandler.GetCurrentWindStrength();
-	return result;
+static void NativeGetHeadingFromVector(const GetHeadingFromVectorQuery* query, GetHeadingFromVectorResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->heading = GetHeadingFromVector(query->x, query->z);
 }
 
-// Heading/vector conversions
-static Int32Result NativeGetHeadingFromVector(float x, float z)
-{
-	Int32Result result = {};
-	result.value = GetHeadingFromVector(x, z);
-	return result;
+static void NativeGetVectorFromHeading(const GetVectorFromHeadingQuery* query, GetVectorFromHeadingResult* result) {
+	bufferPos = 0;
+	float3 dir = GetVectorFromHeading(query->heading);
+	result->error = nullptr;
+	result->vector.x = dir.x;
+	result->vector.y = dir.z;
 }
 
-static Float2Result NativeGetVectorFromHeading(int32_t heading)
-{
-	Float2Result result = {};
-	float3 dir = GetVectorFromHeading(heading);
-	result.value.x = dir.x;
-	result.value.y = dir.z;
-	return result;
+static void NativeGetFacingFromHeading(const GetFacingFromHeadingQuery* query, GetFacingFromHeadingResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->facing = GetFacingFromHeading(query->heading);
 }
 
-static Int32Result NativeGetFacingFromHeading(int32_t heading)
-{
-	Int32Result result = {};
-	result.value = GetFacingFromHeading(heading);
-	return result;
+static void NativeGetHeadingFromFacing(const GetHeadingFromFacingQuery* query, GetHeadingFromFacingResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->heading = GetHeadingFromFacing(query->facing);
 }
 
-static Int32Result NativeGetHeadingFromFacing(int32_t facing)
-{
-	Int32Result result = {};
-	result.value = GetHeadingFromFacing(facing);
-	return result;
+static void NativeGetSideData(const GetSideDataQuery* query, GetSideDataResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+	if (query->sideName == nullptr) { result->error = &INVALID_ARG; return; }
+
+	const std::string& startUnit = sideParser.GetStartUnit(query->sideName);
+	if (startUnit.empty()) { result->error = &NOT_FOUND; return; }
+
+	// Copy strings to scratch buffer
+	std::string lowerName = StringToLower(query->sideName);
+	char* nameBuf = &scratchBuffer[bufferPos];
+	size_t len = lowerName.length();
+	if (bufferPos + len + 1 > sizeof(scratchBuffer)) { result->error = &INTERNAL; return; }
+	memcpy(nameBuf, lowerName.c_str(), len + 1);
+	bufferPos += len + 1;
+
+	result->error = nullptr;
+	result->data.sideName = nameBuf;
+	result->data.caseName = sideParser.GetCaseName(query->sideName).c_str();
+	result->data.sideIndex = 0;
 }
 
-// Side (faction) data
-static SideDataResult NativeGetSideData(const char* sideName)
-{
-	SideDataResult result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetAllyTeamStartBox(const GetAllyTeamStartBoxQuery* query, GetAllyTeamStartBoxResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) { result->error = &INVALID_TEAM; return; }
 
-	if (sideName == nullptr) {
-		static const Error INVALID_ARG = {
-			.code = ERROR_INVALID_ARGUMENT,
-			.message = "sideName cannot be null"
-		};
-		result.error = &INVALID_ARG;
-		return result;
-	}
-
-	const std::string& startUnit = sideParser.GetStartUnit(sideName);
-	if (startUnit.empty()) {
-		static const Error NOT_FOUND = {
-			.code = ERROR_NOT_FOUND,
-			.message = "Side not found"
-		};
-		result.error = &NOT_FOUND;
-		return result;
-	}
-
-	// Store lowercase version in static storage (valid for call duration)
-	static thread_local std::string lowerSideName;
-	lowerSideName = StringToLower(sideName);
-
-	result.data.sideName = lowerSideName.c_str();
-	result.data.caseName = sideParser.GetCaseName(sideName).c_str();
-	result.data.sideIndex = 0; // Would need to search for index if needed
-
-	return result;
+	const AllyTeam& allyTeam = teamHandler.GetAllyTeam(query->allyTeamID);
+	result->error = nullptr;
+	result->box.minX = (mapDims.mapx * SQUARE_SIZE) * allyTeam.startRectLeft;
+	result->box.minZ = (mapDims.mapy * SQUARE_SIZE) * allyTeam.startRectTop;
+	result->box.maxX = (mapDims.mapx * SQUARE_SIZE) * allyTeam.startRectRight;
+	result->box.maxZ = (mapDims.mapy * SQUARE_SIZE) * allyTeam.startRectBottom;
+	result->exists = true;
 }
 
-// Start box for ally team
-static StartBoxResult NativeGetAllyTeamStartBox(int32_t allyTeamID)
-{
-	StartBoxResult result = {};
-	result.exists = false;
+static void NativeGetTeamStartPosition(const GetTeamStartPositionQuery* query, GetTeamStartPositionResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM; return; }
 
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-
-	if (!teamHandler.IsValidAllyTeam(allyTeamID)) {
-		static const Error INVALID_TEAM = {
-			.code = ERROR_INVALID_ARGUMENT,
-			.message = "Invalid ally team ID"
-		};
-		result.error = &INVALID_TEAM;
-		return result;
-	}
-
-	const AllyTeam& allyTeam = teamHandler.GetAllyTeam(allyTeamID);
-	result.box.minX = (mapDims.mapx * SQUARE_SIZE) * allyTeam.startRectLeft;
-	result.box.minZ = (mapDims.mapy * SQUARE_SIZE) * allyTeam.startRectTop;
-	result.box.maxX = (mapDims.mapx * SQUARE_SIZE) * allyTeam.startRectRight;
-	result.box.maxZ = (mapDims.mapy * SQUARE_SIZE) * allyTeam.startRectBottom;
-	result.exists = true;
-
-	return result;
-}
-
-// Team start position
-static Float3Result NativeGetTeamStartPosition(int32_t teamID)
-{
-	Float3Result result = {};
-	if (!GameReady()) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
-
-	if (!teamHandler.IsValidTeam(teamID)) {
-		static const Error INVALID_TEAM = {
-			.code = ERROR_INVALID_ARGUMENT,
-			.message = "Invalid team ID"
-		};
-		result.error = &INVALID_TEAM;
-		return result;
-	}
-
-	const CTeam* team = teamHandler.Team(teamID);
-	if (team == nullptr) {
-		static const Error INTERNAL = {
-			.code = ERROR_INTERNAL,
-			.message = "Failed to get team"
-		};
-		result.error = &INTERNAL;
-		return result;
-	}
+	const CTeam* team = teamHandler.Team(query->teamID);
+	if (team == nullptr) { result->error = &INTERNAL; return; }
 
 	const float3& pos = team->GetStartPos();
-	result.value.x = pos.x;
-	result.value.y = pos.y;
-	result.value.z = pos.z;
-
-	return result;
+	result->error = nullptr;
+	result->position.x = pos.x;
+	result->position.y = pos.y;
+	result->position.z = pos.z;
 }
 
-// Map start positions
-static StartPositionsResult NativeGetMapStartPositions()
-{
-	StartPositionsResult result = {};
-	if (!GameReady() || !gameSetup) {
-		result.error = &GAME_NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetMapStartPositions(const GetMapStartPositionsQuery* query, GetMapStartPositionsResult* result) {
+	bufferPos = 0;
+	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<StartPosition> positions;
-	positions.clear();
+	StartPosition* positions = reinterpret_cast<StartPosition*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
 
 	gameSetup->LoadStartPositionsFromMap(MAX_TEAMS, [&](MapParser& mapParser, int teamNum) {
+		if (bufferPos + sizeof(StartPosition) > sizeof(scratchBuffer)) return false;
+
 		float3 pos;
 		if (mapParser.GetStartPos(teamNum, pos)) {
-			StartPosition sp;
-			sp.pos.x = pos.x;
-			sp.pos.y = pos.y;
-			sp.pos.z = pos.z;
-			sp.teamID = teamNum;
-			positions.push_back(sp);
+			positions[count].pos.x = pos.x;
+			positions[count].pos.y = pos.y;
+			positions[count].pos.z = pos.z;
+			positions[count].teamID = teamNum;
+			bufferPos += sizeof(StartPosition);
+			count++;
 		}
 		return true;
 	});
 
-	result.positions = positions.data();
-	result.count = static_cast<uint32_t>(positions.size());
-
-	return result;
+	result->error = nullptr;
+	result->positions = positions;
+	result->count = count;
 }
 
 } // namespace
 
-// Export the API
 const GameApi GAME_API = {
 	.IsCheatingEnabled = NativeIsCheatingEnabled,
 	.IsGodModeEnabled = NativeIsGodModeEnabled,
@@ -486,25 +255,19 @@ const GameApi GAME_API = {
 	.AreHelperAIsEnabled = NativeAreHelperAIsEnabled,
 	.FixedAllies = NativeFixedAllies,
 	.IsGameOver = NativeIsGameOver,
-
 	.GetGameFrame = NativeGetGameFrame,
 	.GetGameSeconds = NativeGetGameSeconds,
-
 	.GetGaiaTeamID = NativeGetGaiaTeamID,
-
 	.GetMapOption = NativeGetMapOption,
 	.GetMapOptions = NativeGetMapOptions,
 	.GetModOption = NativeGetModOption,
 	.GetModOptions = NativeGetModOptions,
-
 	.GetTidal = NativeGetTidal,
 	.GetWind = NativeGetWind,
-
 	.GetHeadingFromVector = NativeGetHeadingFromVector,
 	.GetVectorFromHeading = NativeGetVectorFromHeading,
 	.GetFacingFromHeading = NativeGetFacingFromHeading,
 	.GetHeadingFromFacing = NativeGetHeadingFromFacing,
-
 	.GetSideData = NativeGetSideData,
 	.GetAllyTeamStartBox = NativeGetAllyTeamStartBox,
 	.GetTeamStartPosition = NativeGetTeamStartPosition,
