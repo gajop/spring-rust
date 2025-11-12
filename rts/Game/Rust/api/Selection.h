@@ -21,37 +21,61 @@ struct SelectionCounts {
 	uint32_t uniqueCount;
 };
 
-struct SelectionCountsResult {
-	const Error* error;
-	SelectionCounts counts;
-};
+// Queries
+struct GetSelectedUnitsQuery { uint8_t _unused; };
+struct GetSelectedUnitsResult { const Error* error; int32_t* units; uint32_t count; };
 
-// Group info
-struct GroupInfo {
-	int32_t groupID;
-	uint32_t unitCount;
-};
+struct GetSelectedUnitsSortedQuery { uint8_t _unused; };
+struct GetSelectedUnitsSortedResult { const Error* error; int32_t* units; uint32_t count; };
+
+struct GetSelectedUnitsCountsQuery { uint8_t _unused; };
+struct GetSelectedUnitsCountsResult { const Error* error; SelectionCounts counts; };
+
+struct GetSelectedUnitsCountQuery { uint8_t _unused; };
+struct GetSelectedUnitsCountResult { const Error* error; uint32_t count; };
+
+struct SelectUnitQuery { int32_t unitID; bool append; };
+struct SelectUnitResult { const Error* error; bool success; };
+
+struct SelectUnitArrayQuery { const int32_t* unitIDs; uint32_t count; bool append; };
+struct SelectUnitArrayResult { const Error* error; bool success; };
+
+struct DeselectUnitQuery { int32_t unitID; };
+struct DeselectUnitResult { const Error* error; bool success; };
+
+struct DeselectUnitArrayQuery { const int32_t* unitIDs; uint32_t count; };
+struct DeselectUnitArrayResult { const Error* error; bool success; };
+
+struct GetGroupListQuery { uint8_t _unused; };
+struct GetGroupListResult { const Error* error; int32_t* groups; uint32_t count; };
+
+struct GetSelectedGroupQuery { uint8_t _unused; };
+struct GetSelectedGroupResult { const Error* error; int32_t groupID; };
+
+struct GetGroupUnitsQuery { int32_t groupID; };
+struct GetGroupUnitsResult { const Error* error; int32_t* units; uint32_t count; };
+
+struct GetUnitGroupQuery { int32_t unitID; };
+struct GetUnitGroupResult { const Error* error; int32_t groupID; };
+
+struct SetUnitGroupQuery { int32_t unitID; int32_t groupID; };
+struct SetUnitGroupResult { const Error* error; bool success; };
 
 // API structure
 struct SelectionApi {
-	// Query selection
-	Int32Array (*GetSelectedUnits)();
-	Int32Array (*GetSelectedUnitsSorted)();
-	SelectionCountsResult (*GetSelectedUnitsCounts)();
-	UInt32Result (*GetSelectedUnitsCount)();
-
-	// Control selection (unsynced)
-	BoolResult (*SelectUnit)(int32_t unitID, bool append);
-	BoolResult (*SelectUnitArray)(const int32_t* unitIDs, uint32_t count, bool append);
-	BoolResult (*DeselectUnit)(int32_t unitID);
-	BoolResult (*DeselectUnitArray)(const int32_t* unitIDs, uint32_t count);
-
-	// Groups
-	Int32Array (*GetGroupList)();
-	Int32Result (*GetSelectedGroup)();
-	Int32Array (*GetGroupUnits)(int32_t groupID);
-	Int32Result (*GetUnitGroup)(int32_t unitID);
-	BoolResult (*SetUnitGroup)(int32_t unitID, int32_t groupID);
+	void (*GetSelectedUnits)(const GetSelectedUnitsQuery* query, GetSelectedUnitsResult* result);
+	void (*GetSelectedUnitsSorted)(const GetSelectedUnitsSortedQuery* query, GetSelectedUnitsSortedResult* result);
+	void (*GetSelectedUnitsCounts)(const GetSelectedUnitsCountsQuery* query, GetSelectedUnitsCountsResult* result);
+	void (*GetSelectedUnitsCount)(const GetSelectedUnitsCountQuery* query, GetSelectedUnitsCountResult* result);
+	void (*SelectUnit)(const SelectUnitQuery* query, SelectUnitResult* result);
+	void (*SelectUnitArray)(const SelectUnitArrayQuery* query, SelectUnitArrayResult* result);
+	void (*DeselectUnit)(const DeselectUnitQuery* query, DeselectUnitResult* result);
+	void (*DeselectUnitArray)(const DeselectUnitArrayQuery* query, DeselectUnitArrayResult* result);
+	void (*GetGroupList)(const GetGroupListQuery* query, GetGroupListResult* result);
+	void (*GetSelectedGroup)(const GetSelectedGroupQuery* query, GetSelectedGroupResult* result);
+	void (*GetGroupUnits)(const GetGroupUnitsQuery* query, GetGroupUnitsResult* result);
+	void (*GetUnitGroup)(const GetUnitGroupQuery* query, GetUnitGroupResult* result);
+	void (*SetUnitGroup)(const SetUnitGroupQuery* query, SetUnitGroupResult* result);
 };
 
 extern const SelectionApi SELECTION_API;
