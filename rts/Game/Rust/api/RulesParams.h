@@ -50,85 +50,69 @@ struct RulesParamValue {
 	};
 };
 
-// Query for a single parameter
-struct RulesParamQuery {
-	const char* paramName;
-	int32_t teamID;      // For team params (-1 if not applicable)
-	int32_t playerID;    // For player params (-1 if not applicable)
-	int32_t unitID;      // For unit params (-1 if not applicable)
-	int32_t featureID;   // For feature params (-1 if not applicable)
-};
+// Queries
+struct GetGameRulesParamQuery { const char* paramName; };
+struct GetGameRulesParamResult { const Error* error; RulesParamValue value; int32_t los; bool exists; };
 
-struct RulesParamResult {
-	const Error* error;
-	RulesParamValue value;
-	int32_t los;  // LOS mask for this param
-	bool exists;  // false if param doesn't exist
-};
+struct GetGameRulesParamsQuery { uint8_t _unused; };
+struct GetGameRulesParamsResult { const Error* error; const char** names; uint32_t count; };
 
-// Get all param names for an object
-struct RulesParamNamesQuery {
-	int32_t teamID;      // -1 if not applicable
-	int32_t playerID;    // -1 if not applicable
-	int32_t unitID;      // -1 if not applicable
-	int32_t featureID;   // -1 if not applicable
-};
+struct GetTeamRulesParamQuery { int32_t teamID; const char* paramName; };
+struct GetTeamRulesParamResult { const Error* error; RulesParamValue value; int32_t los; bool exists; };
 
-struct RulesParamNamesResult {
-	const Error* error;
-	StringArray names;
-};
+struct GetTeamRulesParamsQuery { int32_t teamID; };
+struct GetTeamRulesParamsResult { const Error* error; const char** names; uint32_t count; };
 
-// Set a parameter (synced control only)
-struct RulesParamSet {
-	const char* paramName;
-	RulesParamValue value;
-	int32_t los;  // LOS mask
+struct GetPlayerRulesParamQuery { int32_t playerID; const char* paramName; };
+struct GetPlayerRulesParamResult { const Error* error; RulesParamValue value; int32_t los; bool exists; };
 
-	int32_t teamID;      // -1 if not applicable
-	int32_t playerID;    // -1 if not applicable
-	int32_t unitID;      // -1 if not applicable
-	int32_t featureID;   // -1 if not applicable
-};
+struct GetPlayerRulesParamsQuery { int32_t playerID; };
+struct GetPlayerRulesParamsResult { const Error* error; const char** names; uint32_t count; };
+
+struct GetUnitRulesParamQuery { int32_t unitID; const char* paramName; };
+struct GetUnitRulesParamResult { const Error* error; RulesParamValue value; int32_t los; bool exists; };
+
+struct GetUnitRulesParamsQuery { int32_t unitID; };
+struct GetUnitRulesParamsResult { const Error* error; const char** names; uint32_t count; };
+
+struct GetFeatureRulesParamQuery { int32_t featureID; const char* paramName; };
+struct GetFeatureRulesParamResult { const Error* error; RulesParamValue value; int32_t los; bool exists; };
+
+struct GetFeatureRulesParamsQuery { int32_t featureID; };
+struct GetFeatureRulesParamsResult { const Error* error; const char** names; uint32_t count; };
+
+struct SetGameRulesParamQuery { const char* paramName; RulesParamValue value; int32_t los; };
+struct SetGameRulesParamResult { const Error* error; bool success; };
+
+struct SetTeamRulesParamQuery { int32_t teamID; const char* paramName; RulesParamValue value; int32_t los; };
+struct SetTeamRulesParamResult { const Error* error; bool success; };
+
+struct SetPlayerRulesParamQuery { int32_t playerID; const char* paramName; RulesParamValue value; int32_t los; };
+struct SetPlayerRulesParamResult { const Error* error; bool success; };
+
+struct SetUnitRulesParamQuery { int32_t unitID; const char* paramName; RulesParamValue value; int32_t los; };
+struct SetUnitRulesParamResult { const Error* error; bool success; };
+
+struct SetFeatureRulesParamQuery { int32_t featureID; const char* paramName; RulesParamValue value; int32_t los; };
+struct SetFeatureRulesParamResult { const Error* error; bool success; };
 
 // API structure
 struct RulesParamsApi {
-	// Get a game rules param
-	RulesParamResult (*GetGameRulesParam)(const char* paramName);
-
-	// Get all game rules param names
-	RulesParamNamesResult (*GetGameRulesParams)();
-
-	// Get a team rules param
-	RulesParamResult (*GetTeamRulesParam)(int32_t teamID, const char* paramName);
-
-	// Get all team rules param names
-	RulesParamNamesResult (*GetTeamRulesParams)(int32_t teamID);
-
-	// Get a player rules param
-	RulesParamResult (*GetPlayerRulesParam)(int32_t playerID, const char* paramName);
-
-	// Get all player rules param names
-	RulesParamNamesResult (*GetPlayerRulesParams)(int32_t playerID);
-
-	// Get a unit rules param
-	RulesParamResult (*GetUnitRulesParam)(int32_t unitID, const char* paramName);
-
-	// Get all unit rules param names
-	RulesParamNamesResult (*GetUnitRulesParams)(int32_t unitID);
-
-	// Get a feature rules param
-	RulesParamResult (*GetFeatureRulesParam)(int32_t featureID, const char* paramName);
-
-	// Get all feature rules param names
-	RulesParamNamesResult (*GetFeatureRulesParams)(int32_t featureID);
-
-	// Set params (synced control only - would be in SyncedCtrl API)
-	BoolResult (*SetGameRulesParam)(const char* paramName, RulesParamValue value, int32_t los);
-	BoolResult (*SetTeamRulesParam)(int32_t teamID, const char* paramName, RulesParamValue value, int32_t los);
-	BoolResult (*SetPlayerRulesParam)(int32_t playerID, const char* paramName, RulesParamValue value, int32_t los);
-	BoolResult (*SetUnitRulesParam)(int32_t unitID, const char* paramName, RulesParamValue value, int32_t los);
-	BoolResult (*SetFeatureRulesParam)(int32_t featureID, const char* paramName, RulesParamValue value, int32_t los);
+	void (*GetGameRulesParam)(const GetGameRulesParamQuery* query, GetGameRulesParamResult* result);
+	void (*GetGameRulesParams)(const GetGameRulesParamsQuery* query, GetGameRulesParamsResult* result);
+	void (*GetTeamRulesParam)(const GetTeamRulesParamQuery* query, GetTeamRulesParamResult* result);
+	void (*GetTeamRulesParams)(const GetTeamRulesParamsQuery* query, GetTeamRulesParamsResult* result);
+	void (*GetPlayerRulesParam)(const GetPlayerRulesParamQuery* query, GetPlayerRulesParamResult* result);
+	void (*GetPlayerRulesParams)(const GetPlayerRulesParamsQuery* query, GetPlayerRulesParamsResult* result);
+	void (*GetUnitRulesParam)(const GetUnitRulesParamQuery* query, GetUnitRulesParamResult* result);
+	void (*GetUnitRulesParams)(const GetUnitRulesParamsQuery* query, GetUnitRulesParamsResult* result);
+	void (*GetFeatureRulesParam)(const GetFeatureRulesParamQuery* query, GetFeatureRulesParamResult* result);
+	void (*GetFeatureRulesParams)(const GetFeatureRulesParamsQuery* query, GetFeatureRulesParamsResult* result);
+	void (*SetGameRulesParam)(const SetGameRulesParamQuery* query, SetGameRulesParamResult* result);
+	void (*SetTeamRulesParam)(const SetTeamRulesParamQuery* query, SetTeamRulesParamResult* result);
+	void (*SetPlayerRulesParam)(const SetPlayerRulesParamQuery* query, SetPlayerRulesParamResult* result);
+	void (*SetUnitRulesParam)(const SetUnitRulesParamQuery* query, SetUnitRulesParamResult* result);
+	void (*SetFeatureRulesParam)(const SetFeatureRulesParamQuery* query, SetFeatureRulesParamResult* result);
 };
 
 extern const RulesParamsApi RULES_PARAMS_API;

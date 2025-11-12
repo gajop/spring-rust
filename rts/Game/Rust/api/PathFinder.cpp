@@ -5,98 +5,76 @@
 
 namespace {
 
-// Error constants
-static const Error NOT_IMPLEMENTED_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "PathFinder API not yet fully implemented"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-// Request a path
-static PathResult NativeRequestPath(PathRequest request)
-{
-	PathResult result = {};
-	result.pathID = 0; // No path (not implemented)
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+// Static errors
+static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "PathFinder API not yet fully implemented" };
+
+static void NativeRequestPath(const RequestPathQuery* query, RequestPathResult* result) {
+	bufferPos = 0;
+	result->pathID = 0; // No path (not implemented)
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-// Delete a path
-static BoolResult NativeDeletePath(uint32_t pathID)
-{
-	BoolResult result = {};
-	result.value = false;
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeDeletePath(const DeletePathQuery* query, DeletePathResult* result) {
+	bufferPos = 0;
+	result->success = false;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-// Get all waypoints for a path
-static PathWayPointsResult NativeGetPathWayPoints(uint32_t pathID)
-{
-	PathWayPointsResult result = {};
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeGetPathWayPoints(const GetPathWayPointsQuery* query, GetPathWayPointsResult* result) {
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->points = nullptr;
+	result->pointCount = 0;
+	result->starts = nullptr;
+	result->startCount = 0;
 }
 
-// Get next waypoint from current position
-static NextWayPointResult NativeGetNextWayPoint(NextWayPointRequest request)
-{
-	NextWayPointResult result = {};
-	result.hasWaypoint = false;
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeGetNextWayPoint(const GetNextWayPointQuery* query, GetNextWayPointResult* result) {
+	bufferPos = 0;
+	result->hasWaypoint = false;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-// Initialize a node cost overlay array
-static BoolResult NativeInitPathNodeCostsArray(NodeCostOverlayInit init)
-{
-	BoolResult result = {};
-	result.value = false;
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeInitPathNodeCostsArray(const InitPathNodeCostsArrayQuery* query, InitPathNodeCostsArrayResult* result) {
+	bufferPos = 0;
+	result->success = false;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-// Free a node cost overlay array
-static BoolResult NativeFreePathNodeCostsArray(uint32_t overlayIndex)
-{
-	BoolResult result = {};
-	result.value = false;
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeFreePathNodeCostsArray(const FreePathNodeCostsArrayQuery* query, FreePathNodeCostsArrayResult* result) {
+	bufferPos = 0;
+	result->success = false;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-// Set the active node cost overlay
-static BoolResult NativeSetPathNodeCosts(NodeCostOverlaySet set)
-{
-	BoolResult result = {};
-	result.value = false;
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeSetPathNodeCosts(const SetPathNodeCostsQuery* query, SetPathNodeCostsResult* result) {
+	bufferPos = 0;
+	result->success = false;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-// Get all costs from an overlay
-static FloatArray NativeGetPathNodeCosts(uint32_t overlayIndex)
-{
-	FloatArray result = {};
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeGetPathNodeCosts(const GetPathNodeCostsQuery* query, GetPathNodeCostsResult* result) {
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->costs = nullptr;
+	result->count = 0;
 }
 
-// Set a specific node cost in an overlay
-static BoolResult NativeSetPathNodeCost(NodeCostSet set)
-{
-	BoolResult result = {};
-	result.value = false;
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeSetPathNodeCost(const SetPathNodeCostQuery* query, SetPathNodeCostResult* result) {
+	bufferPos = 0;
+	result->success = false;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-// Get the cost of a specific node from the active overlay
-static FloatResult NativeGetPathNodeCost(NodeCostGet get)
-{
-	FloatResult result = {};
-	result.value = 0.0f;
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+static void NativeGetPathNodeCost(const GetPathNodeCostQuery* query, GetPathNodeCostResult* result) {
+	bufferPos = 0;
+	result->cost = 0.0f;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
 } // namespace
