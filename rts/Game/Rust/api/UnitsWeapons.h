@@ -31,11 +31,6 @@ struct UnitWeaponState {
 	bool autoTarget;
 };
 
-struct UnitWeaponStateResult {
-	const Error* error;
-	UnitWeaponState state;
-};
-
 // Weapon damages
 struct UnitWeaponDamages {
 	float* damages;           // Indexed by armor type
@@ -48,21 +43,11 @@ struct UnitWeaponDamages {
 	float defaultDamage;
 };
 
-struct UnitWeaponDamagesResult {
-	const Error* error;
-	UnitWeaponDamages damages;
-};
-
 // Weapon vectors
 struct UnitWeaponVectors {
 	Float3 weaponMuzzlePos;
 	Float3 weaponAimPos;
 	Float3 weaponDir;
-};
-
-struct UnitWeaponVectorsResult {
-	const Error* error;
-	UnitWeaponVectors vectors;
 };
 
 // Weapon targeting
@@ -72,76 +57,53 @@ struct UnitWeaponTarget {
 	Float3 targetPos;
 };
 
-struct UnitWeaponTargetResult {
-	const Error* error;
-	UnitWeaponTarget target;
-};
+// Queries
+struct GetUnitWeaponCountQuery { int32_t unitID; };
+struct GetUnitWeaponCountResult { const Error* error; uint32_t count; };
 
-// Try target query
-struct WeaponTryTargetQuery {
-	int32_t unitID;
-	int32_t weaponNum;
-	int32_t targetID;       // For unit target
-	Float3 targetPos;       // For ground target
-	bool userTarget;        // User-issued target
-	bool isGroundTarget;    // false for unit target, true for ground
-};
+struct GetUnitMaxRangeQuery { int32_t unitID; };
+struct GetUnitMaxRangeResult { const Error* error; float maxRange; };
 
-// Test target query
-struct WeaponTestTargetQuery {
-	int32_t unitID;
-	int32_t weaponNum;
-	int32_t targetID;       // For unit target
-	Float3 targetPos;       // For ground target
-	bool isGroundTarget;
-};
+struct GetUnitWeaponStateQuery { int32_t unitID; int32_t weaponNum; };
+struct GetUnitWeaponStateResult { const Error* error; UnitWeaponState state; };
 
-// Test range query
-struct WeaponTestRangeQuery {
-	int32_t unitID;
-	int32_t weaponNum;
-	Float3 targetPos;
-};
+struct GetUnitWeaponDamagesQuery { int32_t unitID; int32_t weaponNum; };
+struct GetUnitWeaponDamagesResult { const Error* error; UnitWeaponDamages damages; };
 
-// Line of fire query
-struct WeaponLineOfFireQuery {
-	int32_t unitID;
-	int32_t weaponNum;
-	int32_t targetID;       // For unit target
-	Float3 targetPos;       // For ground target
-	bool isGroundTarget;
-};
+struct GetUnitWeaponVectorsQuery { int32_t unitID; int32_t weaponNum; };
+struct GetUnitWeaponVectorsResult { const Error* error; UnitWeaponVectors vectors; };
 
-// Can fire query
-struct WeaponCanFireQuery {
-	int32_t unitID;
-	int32_t weaponNum;
-};
+struct GetUnitWeaponTryTargetQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 targetPos; bool userTarget; bool isGroundTarget; };
+struct GetUnitWeaponTryTargetResult { const Error* error; bool canTarget; };
+
+struct GetUnitWeaponTestTargetQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 targetPos; bool isGroundTarget; };
+struct GetUnitWeaponTestTargetResult { const Error* error; bool canTarget; };
+
+struct GetUnitWeaponTestRangeQuery { int32_t unitID; int32_t weaponNum; Float3 targetPos; };
+struct GetUnitWeaponTestRangeResult { const Error* error; bool inRange; };
+
+struct GetUnitWeaponHaveFreeLineOfFireQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 targetPos; bool isGroundTarget; };
+struct GetUnitWeaponHaveFreeLineOfFireResult { const Error* error; bool hasFreeLineOfFire; };
+
+struct GetUnitWeaponCanFireQuery { int32_t unitID; int32_t weaponNum; };
+struct GetUnitWeaponCanFireResult { const Error* error; bool canFire; };
+
+struct GetUnitWeaponTargetQuery { int32_t unitID; int32_t weaponNum; };
+struct GetUnitWeaponTargetResult { const Error* error; UnitWeaponTarget target; };
 
 // API structure
 struct UnitsWeaponsApi {
-	// Weapon count
-	UInt32Result (*GetUnitWeaponCount)(int32_t unitID);
-
-	// Max range (any weapon)
-	FloatResult (*GetUnitMaxRange)(int32_t unitID);
-
-	// Weapon state
-	UnitWeaponStateResult (*GetUnitWeaponState)(int32_t unitID, int32_t weaponNum);
-
-	// Weapon damages
-	UnitWeaponDamagesResult (*GetUnitWeaponDamages)(int32_t unitID, int32_t weaponNum);
-
-	// Weapon vectors
-	UnitWeaponVectorsResult (*GetUnitWeaponVectors)(int32_t unitID, int32_t weaponNum);
-
-	// Weapon targeting
-	BoolResult (*GetUnitWeaponTryTarget)(WeaponTryTargetQuery query);
-	BoolResult (*GetUnitWeaponTestTarget)(WeaponTestTargetQuery query);
-	BoolResult (*GetUnitWeaponTestRange)(WeaponTestRangeQuery query);
-	BoolResult (*GetUnitWeaponHaveFreeLineOfFire)(WeaponLineOfFireQuery query);
-	BoolResult (*GetUnitWeaponCanFire)(WeaponCanFireQuery query);
-	UnitWeaponTargetResult (*GetUnitWeaponTarget)(int32_t unitID, int32_t weaponNum);
+	void (*GetUnitWeaponCount)(const GetUnitWeaponCountQuery* query, GetUnitWeaponCountResult* result);
+	void (*GetUnitMaxRange)(const GetUnitMaxRangeQuery* query, GetUnitMaxRangeResult* result);
+	void (*GetUnitWeaponState)(const GetUnitWeaponStateQuery* query, GetUnitWeaponStateResult* result);
+	void (*GetUnitWeaponDamages)(const GetUnitWeaponDamagesQuery* query, GetUnitWeaponDamagesResult* result);
+	void (*GetUnitWeaponVectors)(const GetUnitWeaponVectorsQuery* query, GetUnitWeaponVectorsResult* result);
+	void (*GetUnitWeaponTryTarget)(const GetUnitWeaponTryTargetQuery* query, GetUnitWeaponTryTargetResult* result);
+	void (*GetUnitWeaponTestTarget)(const GetUnitWeaponTestTargetQuery* query, GetUnitWeaponTestTargetResult* result);
+	void (*GetUnitWeaponTestRange)(const GetUnitWeaponTestRangeQuery* query, GetUnitWeaponTestRangeResult* result);
+	void (*GetUnitWeaponHaveFreeLineOfFire)(const GetUnitWeaponHaveFreeLineOfFireQuery* query, GetUnitWeaponHaveFreeLineOfFireResult* result);
+	void (*GetUnitWeaponCanFire)(const GetUnitWeaponCanFireQuery* query, GetUnitWeaponCanFireResult* result);
+	void (*GetUnitWeaponTarget)(const GetUnitWeaponTargetQuery* query, GetUnitWeaponTargetResult* result);
 };
 
 extern const UnitsWeaponsApi UNITS_WEAPONS_API;

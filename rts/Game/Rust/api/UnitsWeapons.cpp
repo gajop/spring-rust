@@ -1,56 +1,105 @@
 #include "UnitsWeapons.h"
 
-#include "Sim/Units/Unit.h"
-#include "Sim/Units/UnitHandler.h"
-#include "Sim/Weapons/Weapon.h"
-#include <vector>
-
 namespace {
 
-static const Error NOT_IMPLEMENTED_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "UnitsWeapons API partially implemented"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-static const Error INVALID_UNIT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid unit or weapon ID"
-};
+// Static errors
+static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "UnitsWeapons API not yet fully implemented" };
+static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit or weapon ID" };
 
-// Basic stubs - weapons system is complex
-static UnitWeaponStateResult NativeGetUnitWeaponState(int32_t unitID, int32_t weaponNum)
+static void NativeGetUnitWeaponCount(const GetUnitWeaponCountQuery* query, GetUnitWeaponCountResult* result)
 {
-	UnitWeaponStateResult result = {};
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->count = 0;
 }
 
-static UnitWeaponDamagesResult NativeGetUnitWeaponDamages(int32_t unitID, int32_t weaponNum)
+static void NativeGetUnitMaxRange(const GetUnitMaxRangeQuery* query, GetUnitMaxRangeResult* result)
 {
-	UnitWeaponDamagesResult result = {};
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->maxRange = 0.0f;
 }
 
-static UnitWeaponVectorsResult NativeGetUnitWeaponVectors(int32_t unitID, int32_t weaponNum)
+static void NativeGetUnitWeaponState(const GetUnitWeaponStateQuery* query, GetUnitWeaponStateResult* result)
 {
-	UnitWeaponVectorsResult result = {};
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-static UnitWeaponTargetResult NativeGetUnitWeaponTarget(int32_t unitID, int32_t weaponNum)
+static void NativeGetUnitWeaponDamages(const GetUnitWeaponDamagesQuery* query, GetUnitWeaponDamagesResult* result)
 {
-	UnitWeaponTargetResult result = {};
-	result.error = &NOT_IMPLEMENTED_ERROR;
-	return result;
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->damages.damages = nullptr;
+	result->damages.damageCount = 0;
+}
+
+static void NativeGetUnitWeaponVectors(const GetUnitWeaponVectorsQuery* query, GetUnitWeaponVectorsResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+}
+
+static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* query, GetUnitWeaponTryTargetResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->canTarget = false;
+}
+
+static void NativeGetUnitWeaponTestTarget(const GetUnitWeaponTestTargetQuery* query, GetUnitWeaponTestTargetResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->canTarget = false;
+}
+
+static void NativeGetUnitWeaponTestRange(const GetUnitWeaponTestRangeQuery* query, GetUnitWeaponTestRangeResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->inRange = false;
+}
+
+static void NativeGetUnitWeaponHaveFreeLineOfFire(const GetUnitWeaponHaveFreeLineOfFireQuery* query, GetUnitWeaponHaveFreeLineOfFireResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->hasFreeLineOfFire = false;
+}
+
+static void NativeGetUnitWeaponCanFire(const GetUnitWeaponCanFireQuery* query, GetUnitWeaponCanFireResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->canFire = false;
+}
+
+static void NativeGetUnitWeaponTarget(const GetUnitWeaponTargetQuery* query, GetUnitWeaponTargetResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->target.targetType = 0;
+	result->target.targetID = -1;
 }
 
 } // namespace
 
 const UnitsWeaponsApi UNITS_WEAPONS_API = {
+	.GetUnitWeaponCount = NativeGetUnitWeaponCount,
+	.GetUnitMaxRange = NativeGetUnitMaxRange,
 	.GetUnitWeaponState = NativeGetUnitWeaponState,
 	.GetUnitWeaponDamages = NativeGetUnitWeaponDamages,
 	.GetUnitWeaponVectors = NativeGetUnitWeaponVectors,
+	.GetUnitWeaponTryTarget = NativeGetUnitWeaponTryTarget,
+	.GetUnitWeaponTestTarget = NativeGetUnitWeaponTestTarget,
+	.GetUnitWeaponTestRange = NativeGetUnitWeaponTestRange,
+	.GetUnitWeaponHaveFreeLineOfFire = NativeGetUnitWeaponHaveFreeLineOfFire,
+	.GetUnitWeaponCanFire = NativeGetUnitWeaponCanFire,
 	.GetUnitWeaponTarget = NativeGetUnitWeaponTarget,
 };
