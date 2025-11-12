@@ -9,96 +9,64 @@
 
 namespace {
 
-// Error constants
-static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "VFS system not ready"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-static const Error FILE_NOT_FOUND_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "File not found"
-};
+// Static errors
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "VFS system not ready" };
+static const Error FILE_NOT_FOUND_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "File not found" };
+static const Error READ_ERROR = { .code = ERROR_INTERNAL, .message = "Failed to read file" };
 
-static const Error READ_ERROR = {
-	.code = ERROR_INTERNAL,
-	.message = "Failed to read file"
-};
+static bool IsReady() { return (vfsHandler != nullptr); }
+static bool IsArchiveScannerReady() { return (archiveScanner != nullptr); }
 
-// Helper: check if VFS is ready
-static bool IsReady()
-{
-	return (vfsHandler != nullptr);
+static void NativeFileExists(const FileExistsQuery* query, FileExistsResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->exists = CFileHandler::FileExists(query->path, SPRING_VFS_ALL);
 }
 
-// Helper: check if archiveScanner is ready
-static bool IsArchiveScannerReady()
-{
-	return (archiveScanner != nullptr);
-}
+static void NativeGetFileInfo(const GetFileInfoQuery* query, GetFileInfoResult* result) {
+	bufferPos = 0;
+	result->exists = false;
 
-// File queries
-static BoolResult NativeFileExists(const char* path)
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	result.value = CFileHandler::FileExists(path, SPRING_VFS_ALL);
-	return result;
-}
-
-static FileInfoResult NativeGetFileInfo(const char* path)
-{
-	FileInfoResult result = {};
-	result.exists = false;
-
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
-
-	CFileHandler fh(path, SPRING_VFS_ALL);
+	CFileHandler fh(query->path, SPRING_VFS_ALL);
 	if (!fh.FileExists()) {
-		return result; // Not an error, just doesn't exist
+		result->error = nullptr;
+		return; // Not an error, just doesn't exist
 	}
 
-	result.exists = true;
-	result.info.name = path;
-	result.info.size = static_cast<uint32_t>(fh.FileSize());
-	result.info.mode = 0644; // Default read permissions
-	result.info.isDirectory = false; // Files only, VFS doesn't track directory metadata
-	return result;
+	result->error = nullptr;
+	result->exists = true;
+	result->info.name = query->path;
+	result->info.size = static_cast<uint32_t>(fh.FileSize());
+	result->info.mode = 0644; // Default read permissions
+	result->info.isDirectory = false; // Files only, VFS doesn't track directory metadata
 }
 
-static UInt32Result NativeGetFileSize(const char* path)
-{
-	UInt32Result result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetFileSize(const GetFileSizeQuery* query, GetFileSizeResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	CFileHandler fh(path, SPRING_VFS_ALL);
+	CFileHandler fh(query->path, SPRING_VFS_ALL);
 	if (!fh.FileExists()) {
-		result.error = &FILE_NOT_FOUND_ERROR;
-		return result;
+		result->error = &FILE_NOT_FOUND_ERROR;
+		return;
 	}
 
-	result.value = static_cast<uint32_t>(fh.FileSize());
-	return result;
+	result->error = nullptr;
+	result->size = static_cast<uint32_t>(fh.FileSize());
 }
 
-// Directory operations
-static DirListingResult NativeListDir(const char* path, const char* pattern)
-{
-	DirListingResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeListDir(const ListDirQuery* query, ListDirResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	// Use static storage - valid for call duration only
 	static thread_local std::vector<DirEntry> entries;
@@ -109,8 +77,8 @@ static DirListingResult NativeListDir(const char* path, const char* pattern)
 	fileStrings.clear();
 	dirStrings.clear();
 
-	const std::string dirPath = path ? path : "";
-	const std::string patternStr = pattern ? pattern : "*";
+	const std::string dirPath = query->path ? query->path : "";
+	const std::string patternStr = query->pattern ? query->pattern : "*";
 
 	// Get files
 	const auto files = vfsHandler->GetFilesInDir(dirPath, false, CVFSHandler::Section::Mod);
@@ -142,42 +110,33 @@ static DirListingResult NativeListDir(const char* path, const char* pattern)
 		entries.push_back(entry);
 	}
 
-	result.entries = entries.data();
-	result.count = static_cast<uint32_t>(entries.size());
-	return result;
+	result->error = nullptr;
+	result->entries = entries.data();
+	result->count = static_cast<uint32_t>(entries.size());
 }
 
-static BoolResult NativeIsDirectory(const char* path)
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeIsDirectory(const IsDirectoryQuery* query, IsDirectoryResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	// VFS doesn't have explicit directory metadata
 	// Check if directory listing returns results
-	const std::string dirPath = path ? path : "";
+	const std::string dirPath = query->path ? query->path : "";
 	const auto files = vfsHandler->GetFilesInDir(dirPath, false, CVFSHandler::Section::Mod);
 	const auto dirs = vfsHandler->GetDirsInDir(dirPath, false, CVFSHandler::Section::Mod);
 
-	result.value = (!files.empty() || !dirs.empty());
-	return result;
+	result->error = nullptr;
+	result->isDirectory = (!files.empty() || !dirs.empty());
 }
 
-// File reading
-static FileContentResult NativeReadFile(const char* path)
-{
-	FileContentResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeReadFile(const ReadFileQuery* query, ReadFileResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	CFileHandler fh(path, SPRING_VFS_ALL);
+	CFileHandler fh(query->path, SPRING_VFS_ALL);
 	if (!fh.FileExists()) {
-		result.error = &FILE_NOT_FOUND_ERROR;
-		return result;
+		result->error = &FILE_NOT_FOUND_ERROR;
+		return;
 	}
 
 	// Use static storage - valid for call duration only
@@ -186,36 +145,33 @@ static FileContentResult NativeReadFile(const char* path)
 
 	const int fileSize = fh.FileSize();
 	if (fileSize <= 0) {
-		result.data = nullptr;
-		result.size = 0;
-		return result;
+		result->error = nullptr;
+		result->data = nullptr;
+		result->size = 0;
+		return;
 	}
 
 	buffer.resize(fileSize);
 	const int bytesRead = fh.Read(buffer.data(), fileSize);
 
 	if (bytesRead != fileSize) {
-		result.error = &READ_ERROR;
-		return result;
+		result->error = &READ_ERROR;
+		return;
 	}
 
-	result.data = buffer.data();
-	result.size = static_cast<uint32_t>(buffer.size());
-	return result;
+	result->error = nullptr;
+	result->data = buffer.data();
+	result->size = static_cast<uint32_t>(buffer.size());
 }
 
-static StringResult NativeReadFileAsString(const char* path)
-{
-	StringResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeReadFileAsString(const ReadFileAsStringQuery* query, ReadFileAsStringResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	CFileHandler fh(path, SPRING_VFS_ALL);
+	CFileHandler fh(query->path, SPRING_VFS_ALL);
 	if (!fh.FileExists()) {
-		result.error = &FILE_NOT_FOUND_ERROR;
-		return result;
+		result->error = &FILE_NOT_FOUND_ERROR;
+		return;
 	}
 
 	// Use static storage - valid for call duration only
@@ -224,30 +180,26 @@ static StringResult NativeReadFileAsString(const char* path)
 
 	const int fileSize = fh.FileSize();
 	if (fileSize <= 0) {
-		result.value = "";
-		return result;
+		result->error = nullptr;
+		result->content = "";
+		return;
 	}
 
 	content.resize(fileSize);
 	const int bytesRead = fh.Read(&content[0], fileSize);
 
 	if (bytesRead != fileSize) {
-		result.error = &READ_ERROR;
-		return result;
+		result->error = &READ_ERROR;
+		return;
 	}
 
-	result.value = content.c_str();
-	return result;
+	result->error = nullptr;
+	result->content = content.c_str();
 }
 
-// Archives
-static StringArray NativeGetArchives()
-{
-	StringArray result = {};
-	if (!IsArchiveScannerReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetArchives(const GetArchivesQuery* query, GetArchivesResult* result) {
+	bufferPos = 0;
+	if (!IsArchiveScannerReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	// Use static storage - valid for call duration only
 	static thread_local std::vector<const char*> archiveNames;
@@ -265,18 +217,14 @@ static StringArray NativeGetArchives()
 		archiveNames.push_back(str.c_str());
 	}
 
-	result.data = archiveNames.data();
-	result.length = static_cast<uint32_t>(archiveNames.size());
-	return result;
+	result->error = nullptr;
+	result->archives = archiveNames.data();
+	result->count = static_cast<uint32_t>(archiveNames.size());
 }
 
-static StringArray NativeGetMaps()
-{
-	StringArray result = {};
-	if (!IsArchiveScannerReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetMaps(const GetMapsQuery* query, GetMapsResult* result) {
+	bufferPos = 0;
+	if (!IsArchiveScannerReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	// Use static storage - valid for call duration only
 	static thread_local std::vector<const char*> mapNames;
@@ -291,18 +239,14 @@ static StringArray NativeGetMaps()
 		mapNames.push_back(str.c_str());
 	}
 
-	result.data = mapNames.data();
-	result.length = static_cast<uint32_t>(mapNames.size());
-	return result;
+	result->error = nullptr;
+	result->maps = mapNames.data();
+	result->count = static_cast<uint32_t>(mapNames.size());
 }
 
-static StringArray NativeGetGames()
-{
-	StringArray result = {};
-	if (!IsArchiveScannerReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetGames(const GetGamesQuery* query, GetGamesResult* result) {
+	bufferPos = 0;
+	if (!IsArchiveScannerReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	// Use static storage - valid for call duration only
 	static thread_local std::vector<const char*> gameNames;
@@ -320,9 +264,9 @@ static StringArray NativeGetGames()
 		gameNames.push_back(str.c_str());
 	}
 
-	result.data = gameNames.data();
-	result.length = static_cast<uint32_t>(gameNames.size());
-	return result;
+	result->error = nullptr;
+	result->games = gameNames.data();
+	result->count = static_cast<uint32_t>(gameNames.size());
 }
 
 } // namespace
@@ -331,13 +275,10 @@ const VFSApi VFS_API = {
 	.FileExists = NativeFileExists,
 	.GetFileInfo = NativeGetFileInfo,
 	.GetFileSize = NativeGetFileSize,
-
 	.ListDir = NativeListDir,
 	.IsDirectory = NativeIsDirectory,
-
 	.ReadFile = NativeReadFile,
 	.ReadFileAsString = NativeReadFileAsString,
-
 	.GetArchives = NativeGetArchives,
 	.GetMaps = NativeGetMaps,
 	.GetGames = NativeGetGames,

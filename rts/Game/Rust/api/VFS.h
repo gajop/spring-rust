@@ -22,50 +22,55 @@ struct FileInfo {
 	bool isDirectory;
 };
 
-struct FileInfoResult {
-	const Error* error;
-	FileInfo info;
-	bool exists;
-};
-
 // Directory listing entry
 struct DirEntry {
 	const char* name;
 	bool isDirectory;
 };
 
-struct DirListingResult {
-	const Error* error;
-	DirEntry* entries;
-	uint32_t count;
-};
+// Queries
+struct FileExistsQuery { const char* path; };
+struct FileExistsResult { const Error* error; bool exists; };
 
-// File content
-struct FileContentResult {
-	const Error* error;
-	const uint8_t* data;
-	uint32_t size;
-};
+struct GetFileInfoQuery { const char* path; };
+struct GetFileInfoResult { const Error* error; FileInfo info; bool exists; };
+
+struct GetFileSizeQuery { const char* path; };
+struct GetFileSizeResult { const Error* error; uint32_t size; };
+
+struct ListDirQuery { const char* path; const char* pattern; };
+struct ListDirResult { const Error* error; DirEntry* entries; uint32_t count; };
+
+struct IsDirectoryQuery { const char* path; };
+struct IsDirectoryResult { const Error* error; bool isDirectory; };
+
+struct ReadFileQuery { const char* path; };
+struct ReadFileResult { const Error* error; const uint8_t* data; uint32_t size; };
+
+struct ReadFileAsStringQuery { const char* path; };
+struct ReadFileAsStringResult { const Error* error; const char* content; };
+
+struct GetArchivesQuery { uint8_t _unused; };
+struct GetArchivesResult { const Error* error; const char** archives; uint32_t count; };
+
+struct GetMapsQuery { uint8_t _unused; };
+struct GetMapsResult { const Error* error; const char** maps; uint32_t count; };
+
+struct GetGamesQuery { uint8_t _unused; };
+struct GetGamesResult { const Error* error; const char** games; uint32_t count; };
 
 // API structure
 struct VFSApi {
-	// File queries
-	BoolResult (*FileExists)(const char* path);
-	FileInfoResult (*GetFileInfo)(const char* path);
-	UInt32Result (*GetFileSize)(const char* path);
-
-	// Directory operations
-	DirListingResult (*ListDir)(const char* path, const char* pattern);
-	BoolResult (*IsDirectory)(const char* path);
-
-	// File reading
-	FileContentResult (*ReadFile)(const char* path);
-	StringResult (*ReadFileAsString)(const char* path);
-
-	// Archives
-	StringArray (*GetArchives)();
-	StringArray (*GetMaps)();
-	StringArray (*GetGames)();
+	void (*FileExists)(const FileExistsQuery* query, FileExistsResult* result);
+	void (*GetFileInfo)(const GetFileInfoQuery* query, GetFileInfoResult* result);
+	void (*GetFileSize)(const GetFileSizeQuery* query, GetFileSizeResult* result);
+	void (*ListDir)(const ListDirQuery* query, ListDirResult* result);
+	void (*IsDirectory)(const IsDirectoryQuery* query, IsDirectoryResult* result);
+	void (*ReadFile)(const ReadFileQuery* query, ReadFileResult* result);
+	void (*ReadFileAsString)(const ReadFileAsStringQuery* query, ReadFileAsStringResult* result);
+	void (*GetArchives)(const GetArchivesQuery* query, GetArchivesResult* result);
+	void (*GetMaps)(const GetMapsQuery* query, GetMapsResult* result);
+	void (*GetGames)(const GetGamesQuery* query, GetGamesResult* result);
 };
 
 extern const VFSApi VFS_API;

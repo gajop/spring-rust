@@ -5,116 +5,139 @@
 
 namespace {
 
-static float NativeHypot(float x, float y)
-{
-	return std::hypot(x, y);
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
+static const Error NULL_PTR_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Vector pointer is null" };
+
+static void NativeHypot(const HypotQuery* query, HypotResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = std::hypot(query->x, query->y);
 }
 
-static float NativeDiag(const float* values, uint32_t count)
-{
-	if (values == nullptr || count == 0) {
-		return 0.0f;
+static void NativeDiag(const DiagQuery* query, DiagResult* result) {
+	bufferPos = 0;
+	if (query->values == nullptr || query->count == 0) {
+		result->error = nullptr;
+		result->length = 0.0f;
+		return;
 	}
 
 	float sumSquares = 0.0f;
-	for (uint32_t i = 0; i < count; i++) {
-		sumSquares += values[i] * values[i];
+	for (uint32_t i = 0; i < query->count; i++) {
+		sumSquares += query->values[i] * query->values[i];
 	}
 
-	return std::sqrt(sumSquares);
+	result->error = nullptr;
+	result->length = std::sqrt(sumSquares);
 }
 
-static float NativeClamp(float value, float min, float max)
-{
-	return std::clamp(value, min, max);
+static void NativeClamp(const ClampQuery* query, ClampResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->clamped = std::clamp(query->value, query->min, query->max);
 }
 
-static float NativeSgn(float value)
-{
-	if (value > 0.0f) return 1.0f;
-	if (value < 0.0f) return -1.0f;
-	return 0.0f;
+static void NativeSgn(const SgnQuery* query, SgnResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	if (query->value > 0.0f) {
+		result->sign = 1.0f;
+	} else if (query->value < 0.0f) {
+		result->sign = -1.0f;
+	} else {
+		result->sign = 0.0f;
+	}
 }
 
-static float NativeMix(float a, float b, float t)
-{
-	return a * (1.0f - t) + b * t;
+static void NativeMix(const MixQuery* query, MixResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->mixed = query->a * (1.0f - query->t) + query->b * query->t;
 }
 
-static float NativeRound(float value)
-{
-	return std::round(value);
+static void NativeRound(const RoundQuery* query, RoundResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->rounded = std::round(query->value);
 }
 
-static float NativeErf(float value)
-{
-	return std::erf(value);
+static void NativeErf(const ErfQuery* query, ErfResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->result = std::erf(query->value);
 }
 
-static float NativeSmoothStep(float edge0, float edge1, float x)
-{
-	// Standard smoothstep function
-	float t = std::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
-	return t * t * (3.0f - 2.0f * t);
+static void NativeSmoothStep(const SmoothStepQuery* query, SmoothStepResult* result) {
+	bufferPos = 0;
+	float t = std::clamp((query->x - query->edge0) / (query->edge1 - query->edge0), 0.0f, 1.0f);
+	result->error = nullptr;
+	result->value = t * t * (3.0f - 2.0f * t);
 }
 
-static FloatResult NativeNormalize(Float3* vec)
-{
-	FloatResult result = {};
-
-	if (vec == nullptr) {
-		static const Error NULL_PTR = {
-			.code = ERROR_INVALID_ARGUMENT,
-			.message = "Vector pointer is null"
-		};
-		result.error = &NULL_PTR;
-		return result;
+static void NativeNormalize(const NormalizeQuery* query, NormalizeResult* result) {
+	bufferPos = 0;
+	if (query->vec == nullptr) {
+		result->error = &NULL_PTR_ERROR;
+		return;
 	}
 
-	const float length = std::sqrt(vec->x * vec->x + vec->y * vec->y + vec->z * vec->z);
+	const float length = std::sqrt(query->vec->x * query->vec->x +
+	                               query->vec->y * query->vec->y +
+	                               query->vec->z * query->vec->z);
 
 	if (length > 0.0f) {
 		const float invLength = 1.0f / length;
-		vec->x *= invLength;
-		vec->y *= invLength;
-		vec->z *= invLength;
+		query->vec->x *= invLength;
+		query->vec->y *= invLength;
+		query->vec->z *= invLength;
 	}
 
-	result.value = length;
-	return result;
+	result->error = nullptr;
+	result->length = length;
 }
 
-// Bitwise operations
-static uint32_t NativeBitOr(uint32_t a, uint32_t b)
-{
-	return a | b;
+static void NativeBitOr(const BitOrQuery* query, BitOrResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = query->a | query->b;
 }
 
-static uint32_t NativeBitAnd(uint32_t a, uint32_t b)
-{
-	return a & b;
+static void NativeBitAnd(const BitAndQuery* query, BitAndResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = query->a & query->b;
 }
 
-static uint32_t NativeBitXor(uint32_t a, uint32_t b)
-{
-	return a ^ b;
+static void NativeBitXor(const BitXorQuery* query, BitXorResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = query->a ^ query->b;
 }
 
-static uint32_t NativeBitInv(uint32_t a)
-{
-	return ~a;
+static void NativeBitInv(const BitInvQuery* query, BitInvResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = ~query->a;
 }
 
-static uint32_t NativeBitBits(uint32_t value, uint32_t startBit, uint32_t endBit)
-{
-	if (startBit > endBit || endBit > 31) {
-		return 0;
+static void NativeBitBits(const BitBitsQuery* query, BitBitsResult* result) {
+	bufferPos = 0;
+	if (query->startBit > query->endBit || query->endBit > 31) {
+		result->error = nullptr;
+		result->bits = 0;
+		return;
 	}
 
-	const uint32_t numBits = endBit - startBit + 1;
+	const uint32_t numBits = query->endBit - query->startBit + 1;
 	const uint32_t mask = (numBits == 32) ? 0xFFFFFFFF : ((1u << numBits) - 1);
 
-	return (value >> startBit) & mask;
+	result->error = nullptr;
+	result->bits = (query->value >> query->startBit) & mask;
 }
 
 } // namespace
