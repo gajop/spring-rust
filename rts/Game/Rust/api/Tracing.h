@@ -24,16 +24,6 @@ enum TraceFlags {
 	TRACE_ONLY_ENEMY = (1 << 5),
 };
 
-// Trace result
-struct TraceResult {
-	const Error* error;
-	bool hit;
-	int32_t hitType;  // 0=none, 1=unit, 2=feature, 3=ground, 4=water
-	int32_t hitID;    // Unit or feature ID
-	Float3 hitPos;
-	Float3 hitNormal;
-};
-
 // Ray definition
 struct Ray {
 	Float3 origin;
@@ -43,28 +33,97 @@ struct Ray {
 	int32_t allyTeamID;  // For LOS filtering
 };
 
-// Ground trace
-struct GroundTraceQuery {
+// Queries
+struct TraceRayQuery {
+	Ray ray;
+};
+
+struct TraceRayResult {
+	const Error* error;
+	bool hit;
+	int32_t hitType;  // 0=none, 1=unit, 2=feature, 3=ground, 4=water
+	int32_t hitID;    // Unit or feature ID
+	Float3 hitPos;
+	Float3 hitNormal;
+};
+
+struct TraceRayUnitsQuery {
+	Ray ray;
+};
+
+struct TraceRayUnitsResult {
+	const Error* error;
+	bool hit;
+	int32_t hitType;  // 0=none, 1=unit
+	int32_t hitID;    // Unit ID
+	Float3 hitPos;
+	Float3 hitNormal;
+};
+
+struct TraceRayFeaturesQuery {
+	Ray ray;
+};
+
+struct TraceRayFeaturesResult {
+	const Error* error;
+	bool hit;
+	int32_t hitType;  // 0=none, 2=feature
+	int32_t hitID;    // Feature ID
+	Float3 hitPos;
+	Float3 hitNormal;
+};
+
+struct TraceRayGroundBetweenPositionsQuery {
 	Float3 start;
 	Float3 end;
 };
 
+struct TraceRayGroundBetweenPositionsResult {
+	const Error* error;
+	bool hit;
+	Float3 hitPos;
+	Float3 hitNormal;
+};
+
+struct TraceRayGroundInDirectionQuery {
+	Float3 start;
+	Float3 dir;
+	float length;
+};
+
+struct TraceRayGroundInDirectionResult {
+	const Error* error;
+	bool hit;
+	Float3 hitPos;
+	Float3 hitNormal;
+};
+
 // API structure
 struct TracingApi {
-	// General ray trace (not yet implemented in Lua)
-	TraceResult (*TraceRay)(Ray ray);
+	void (*TraceRay)(
+		const TraceRayQuery* query,
+		TraceRayResult* result
+	);
 
-	// Unit-only trace (not yet implemented)
-	TraceResult (*TraceRayUnits)(Ray ray);
+	void (*TraceRayUnits)(
+		const TraceRayUnitsQuery* query,
+		TraceRayUnitsResult* result
+	);
 
-	// Feature-only trace (not yet implemented)
-	TraceResult (*TraceRayFeatures)(Ray ray);
+	void (*TraceRayFeatures)(
+		const TraceRayFeaturesQuery* query,
+		TraceRayFeaturesResult* result
+	);
 
-	// Ground trace between positions
-	TraceResult (*TraceRayGroundBetweenPositions)(GroundTraceQuery query);
+	void (*TraceRayGroundBetweenPositions)(
+		const TraceRayGroundBetweenPositionsQuery* query,
+		TraceRayGroundBetweenPositionsResult* result
+	);
 
-	// Ground trace in direction
-	TraceResult (*TraceRayGroundInDirection)(Float3 start, Float3 dir, float length);
+	void (*TraceRayGroundInDirection)(
+		const TraceRayGroundInDirectionQuery* query,
+		TraceRayGroundInDirectionResult* result
+	);
 };
 
 extern const TracingApi TRACING_API;

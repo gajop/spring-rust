@@ -4,12 +4,15 @@
 #include "Game/CameraHandler.h"
 #include "Game/TraceRay.h"
 #include "System/float3.h"
-#include <vector>
-#include <string>
 
 namespace {
 
-// Error constants
+// Scratch buffer for dynamic data
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
 static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Camera system not ready"
@@ -22,166 +25,188 @@ static bool IsReady()
 }
 
 // Query camera state
-static StringArray NativeGetCameraNames()
+static void NativeGetCameraNames(const GetCameraNamesQuery* query, GetCameraNamesResult* result)
 {
-	StringArray result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<const char*> cameraNames;
-	static thread_local std::vector<std::string> cameraStrings;
-
-	cameraNames.clear();
-	cameraStrings.clear();
-
 	const auto& controllers = camHandler->GetControllers();
+
+	// First, write all strings to scratch buffer
+	const char** namePointers = reinterpret_cast<const char**>(&scratchBuffer[bufferPos]);
+	size_t count = 0;
+	size_t ptrArraySize = controllers.size() * sizeof(const char*);
+
+	if (bufferPos + ptrArraySize > sizeof(scratchBuffer)) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	bufferPos += ptrArraySize;
+
 	for (size_t i = 0; i < controllers.size(); ++i) {
 		if (controllers[i] != nullptr) {
-			cameraStrings.push_back(controllers[i]->GetName());
+			std::string name = controllers[i]->GetName();
+			char* strBuf = &scratchBuffer[bufferPos];
+			size_t len = name.length();
+
+			if (bufferPos + len + 1 > sizeof(scratchBuffer)) {
+				result->error = &NOT_READY_ERROR;
+				return;
+			}
+
+			memcpy(strBuf, name.c_str(), len + 1);
+			namePointers[count++] = strBuf;
+			bufferPos += len + 1;
 		}
 	}
 
-	for (const auto& str : cameraStrings) {
-		cameraNames.push_back(str.c_str());
-	}
-
-	result.data = cameraNames.data();
-	result.length = static_cast<uint32_t>(cameraNames.size());
-	return result;
+	result->error = nullptr;
+	result->names = namePointers;
+	result->count = static_cast<uint32_t>(count);
 }
 
-static CameraStateResult NativeGetCameraState()
+static void NativeGetCameraState(const GetCameraStateQuery* query, GetCameraStateResult* result)
 {
-	CameraStateResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage for name
-	static thread_local std::string cameraName;
-	cameraName = camHandler->GetCurrentController().GetName();
+	// Copy camera name to scratch buffer
+	std::string cameraName = camHandler->GetCurrentController().GetName();
+	char* nameBuf = &scratchBuffer[bufferPos];
+	size_t len = cameraName.length();
 
-	result.state.name = cameraName.c_str();
+	if (bufferPos + len + 1 > sizeof(scratchBuffer)) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	memcpy(nameBuf, cameraName.c_str(), len + 1);
+	bufferPos += len + 1;
+
+	result->error = nullptr;
+	result->state.name = nameBuf;
 
 	const float3& pos = camera->GetPos();
-	result.state.pos.x = pos.x;
-	result.state.pos.y = pos.y;
-	result.state.pos.z = pos.z;
+	result->state.pos.x = pos.x;
+	result->state.pos.y = pos.y;
+	result->state.pos.z = pos.z;
 
 	const float3& dir = camera->GetDir();
-	result.state.dir.x = dir.x;
-	result.state.dir.y = dir.y;
-	result.state.dir.z = dir.z;
+	result->state.dir.x = dir.x;
+	result->state.dir.y = dir.y;
+	result->state.dir.z = dir.z;
 
 	const float3& up = camera->GetUp();
-	result.state.up.x = up.x;
-	result.state.up.y = up.y;
-	result.state.up.z = up.z;
+	result->state.up.x = up.x;
+	result->state.up.y = up.y;
+	result->state.up.z = up.z;
 
 	const float3& right = camera->GetRight();
-	result.state.right.x = right.x;
-	result.state.right.y = right.y;
-	result.state.right.z = right.z;
+	result->state.right.x = right.x;
+	result->state.right.y = right.y;
+	result->state.right.z = right.z;
 
-	result.state.fov = camera->GetVFOV();
+	result->state.fov = camera->GetVFOV();
 
 	const float3& rot = camera->GetRot();
-	result.state.rx = rot.x;
-	result.state.ry = rot.y;
-	result.state.rz = rot.z;
+	result->state.rx = rot.x;
+	result->state.ry = rot.y;
+	result->state.rz = rot.z;
 
 	// Controller-specific state (simplified)
 	CCameraController::StateMap camState;
 	camHandler->GetState(camState);
 
-	result.state.dist = camState["dist"];
-	result.state.height = camState["height"];
-	result.state.angle = camState["angle"];
-
-	return result;
+	result->state.dist = camState["dist"];
+	result->state.height = camState["height"];
+	result->state.angle = camState["angle"];
 }
 
-static Float3Result NativeGetCameraPosition()
+static void NativeGetCameraPosition(const GetCameraPositionQuery* query, GetCameraPositionResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
 	const float3& pos = camera->GetPos();
-	result.value.x = pos.x;
-	result.value.y = pos.y;
-	result.value.z = pos.z;
-	return result;
+	result->error = nullptr;
+	result->position.x = pos.x;
+	result->position.y = pos.y;
+	result->position.z = pos.z;
 }
 
-static Float3Result NativeGetCameraDirection()
+static void NativeGetCameraDirection(const GetCameraDirectionQuery* query, GetCameraDirectionResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
 	const float3& dir = camera->GetDir();
-	result.value.x = dir.x;
-	result.value.y = dir.y;
-	result.value.z = dir.z;
-	return result;
+	result->error = nullptr;
+	result->direction.x = dir.x;
+	result->direction.y = dir.y;
+	result->direction.z = dir.z;
 }
 
-static FloatResult NativeGetCameraFOV()
+static void NativeGetCameraFOV(const GetCameraFOVQuery* query, GetCameraFOVResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = camera->GetVFOV();
-	return result;
+	result->error = nullptr;
+	result->fov = camera->GetVFOV();
 }
 
 // Conversions
-static WorldCoordResult NativeWorldToScreenCoords(Float3 worldPos)
+static void NativeWorldToScreenCoords(const WorldToScreenCoordsQuery* query, WorldToScreenCoordsResult* result)
 {
-	WorldCoordResult result = {};
-	result.valid = false;
+	bufferPos = 0;
 
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const float3 pos(worldPos.x, worldPos.y, worldPos.z);
+	const float3 pos(query->worldPos.x, query->worldPos.y, query->worldPos.z);
 	const float3 vpPos = camera->CalcViewPortCoordinates(pos);
 
-	result.worldPos.x = vpPos.x;
-	result.worldPos.y = vpPos.y;
-	result.worldPos.z = vpPos.z;
-	result.valid = true;
-
-	return result;
+	result->error = nullptr;
+	result->screenPos.x = vpPos.x;
+	result->screenPos.y = vpPos.y;
+	result->screenPos.z = vpPos.z;
+	result->valid = true;
 }
 
-static TraceRayResult NativeTraceScreenRay(float screenX, float screenY, bool onlyCoords)
+static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRayResult* result)
 {
-	TraceRayResult result = {};
-	result.hitType = 0; // No hit
-	result.hitID = -1;
+	bufferPos = 0;
 
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
 	// Get pixel direction
-	const float3 dir = camera->CalcPixelDir(static_cast<int>(screenX), static_cast<int>(screenY));
+	const float3 dir = camera->CalcPixelDir(static_cast<int>(query->screenX), static_cast<int>(query->screenY));
 	const float3& pos = camera->GetPos();
 
 	// Simplified: trace against units, features, and ground
@@ -190,72 +215,77 @@ static TraceRayResult NativeTraceScreenRay(float screenX, float screenY, bool on
 
 	const float dist = TraceRay::GuiTraceRay(pos, dir, 9999999.0f, nullptr, hitUnit, hitFeature, false, false, true);
 
-	if (hitUnit != nullptr) {
-		result.hitType = 1; // Unit
-		result.hitID = hitUnit->id;
-		const float3 hitPos = pos + (dir * dist);
-		result.hitPos.x = hitPos.x;
-		result.hitPos.y = hitPos.y;
-		result.hitPos.z = hitPos.z;
-	} else if (hitFeature != nullptr) {
-		result.hitType = 2; // Feature
-		result.hitID = hitFeature->id;
-		const float3 hitPos = pos + (dir * dist);
-		result.hitPos.x = hitPos.x;
-		result.hitPos.y = hitPos.y;
-		result.hitPos.z = hitPos.z;
-	} else if (dist > 0.0f) {
-		result.hitType = 3; // Ground
-		const float3 hitPos = pos + (dir * dist);
-		result.hitPos.x = hitPos.x;
-		result.hitPos.y = hitPos.y;
-		result.hitPos.z = hitPos.z;
-	}
+	result->error = nullptr;
+	result->hitType = 0; // No hit
+	result->hitID = -1;
 
-	return result;
+	if (hitUnit != nullptr) {
+		result->hitType = 1; // Unit
+		result->hitID = hitUnit->id;
+		const float3 hitPos = pos + (dir * dist);
+		result->hitPos.x = hitPos.x;
+		result->hitPos.y = hitPos.y;
+		result->hitPos.z = hitPos.z;
+	} else if (hitFeature != nullptr) {
+		result->hitType = 2; // Feature
+		result->hitID = hitFeature->id;
+		const float3 hitPos = pos + (dir * dist);
+		result->hitPos.x = hitPos.x;
+		result->hitPos.y = hitPos.y;
+		result->hitPos.z = hitPos.z;
+	} else if (dist > 0.0f) {
+		result->hitType = 3; // Ground
+		const float3 hitPos = pos + (dir * dist);
+		result->hitPos.x = hitPos.x;
+		result->hitPos.y = hitPos.y;
+		result->hitPos.z = hitPos.z;
+	}
 }
 
-static Float3Result NativeGetPixelDir(float screenX, float screenY)
+static void NativeGetPixelDir(const GetPixelDirQuery* query, GetPixelDirResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const float3 dir = camera->CalcPixelDir(static_cast<int>(screenX), static_cast<int>(screenY));
-	result.value.x = dir.x;
-	result.value.y = dir.y;
-	result.value.z = dir.z;
-	return result;
+	const float3 dir = camera->CalcPixelDir(static_cast<int>(query->screenX), static_cast<int>(query->screenY));
+	result->error = nullptr;
+	result->direction.x = dir.x;
+	result->direction.y = dir.y;
+	result->direction.z = dir.z;
 }
 
 // Control (unsynced) - simplified implementations
-static BoolResult NativeSetCameraState(CameraState state, float transitionTime)
+static void NativeSetCameraState(const SetCameraStateQuery* query, SetCameraStateResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
 	// Simplified: just return false as camera state setting requires
 	// complex controller-specific logic
-	result.value = false;
-	return result;
+	result->error = nullptr;
+	result->success = false;
 }
 
-static BoolResult NativeSetCameraTarget(Float3 target, float transitionTime)
+static void NativeSetCameraTarget(const SetCameraTargetQuery* query, SetCameraTargetResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
 	// Simplified: not implemented
-	result.value = false;
-	return result;
+	result->error = nullptr;
+	result->success = false;
 }
 
 } // namespace
