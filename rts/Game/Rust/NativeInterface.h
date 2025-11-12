@@ -156,6 +156,9 @@ extern "C" {
 #endif
 
 struct NativeInterface {
+  // Version handshake - MUST be first field
+  uint32_t hostVersion;  // e.g., 10000 = v1.0.0
+
   using HandleRustPanic = void(*)(NativeInterface* ptr);
 
   using IsPosInMap = IsPosInMapReturn(*)(NativeInterface* ptr, float x, float z);

@@ -1,13 +1,18 @@
-#include "Game/Rust/api/MetalMap.h"
+#include "MetalMap.h"
 
 #include <algorithm>
-
 #include "Map/MetalMap.h"
 
 namespace {
 
+// Scratch buffer for dynamic data (errors, arrays, strings)
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
 static const Error METAL_MAP_UNAVAILABLE_ERROR = {
-	.code = 1,
+	.code = ERROR_NOT_AVAILABLE,
 	.message = "Metal map is not available"
 };
 
@@ -16,75 +21,99 @@ static bool MetalMapReady()
 	return (metalMap.GetSizeX() > 0) && (metalMap.GetSizeZ() > 0);
 }
 
-static MetalMapQuery ClampMetalMapQuery(MetalMapQuery query)
+static void NativeGetMetalMapSize(const GetMetalMapSizeQuery* query, GetMetalMapSizeResult* result)
 {
-	MetalMapQuery clamped = query;
-	if (!MetalMapReady())
-		return clamped;
+	bufferPos = 0;
 
-	const int32_t maxX = std::max(metalMap.GetSizeX() - 1, 0);
-	const int32_t maxZ = std::max(metalMap.GetSizeZ() - 1, 0);
-
-	clamped.x = std::clamp(query.x, 0, maxX);
-	clamped.z = std::clamp(query.z, 0, maxZ);
-	return clamped;
-}
-
-static MetalMapSizeResult NativeGetMetalMapSize()
-{
-	MetalMapSizeResult result = {};
 	if (!MetalMapReady()) {
-		result.error = &METAL_MAP_UNAVAILABLE_ERROR;
-		return result;
+		result->error = &METAL_MAP_UNAVAILABLE_ERROR;
+		return;
 	}
 
-	result.mapWidth = metalMap.GetSizeX();
-	result.mapHeight = metalMap.GetSizeZ();
-	return result;
+	result->error = nullptr;
+	result->width = metalMap.GetSizeX();
+	result->height = metalMap.GetSizeZ();
 }
 
-static MetalMapSampleResult NativeGetMetalAmount(MetalMapQuery query)
+static void NativeGetMetalAmount(const GetMetalAmountQuery* query, GetMetalAmountResult* result)
 {
-	MetalMapSampleResult result = {};
+	bufferPos = 0;
+
 	if (!MetalMapReady()) {
-		result.error = &METAL_MAP_UNAVAILABLE_ERROR;
-		return result;
+		result->error = &METAL_MAP_UNAVAILABLE_ERROR;
+		return;
 	}
 
-	const MetalMapQuery clamped = ClampMetalMapQuery(query);
-	result.sample.query = clamped;
-	result.sample.amount = metalMap.GetMetalAmount(clamped.x, clamped.z);
-	return result;
+	const int32_t maxX = metalMap.GetSizeX() - 1;
+	const int32_t maxZ = metalMap.GetSizeZ() - 1;
+
+	if (query->x < 0 || query->x > maxX || query->z < 0 || query->z > maxZ) {
+		char* msg = &scratchBuffer[bufferPos];
+		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
+			"Coordinates (%d, %d) out of bounds [0-%d, 0-%d]",
+			query->x, query->z, maxX, maxZ) + 1;
+		dynamicError.code = ERROR_OUT_OF_BOUNDS;
+		dynamicError.message = msg;
+		result->error = &dynamicError;
+		return;
+	}
+
+	result->error = nullptr;
+	result->amount = metalMap.GetMetalAmount(query->x, query->z);
 }
 
-static MetalMapSampleResult NativeGetMetalExtraction(MetalMapQuery query)
+static void NativeGetMetalExtraction(const GetMetalExtractionQuery* query, GetMetalExtractionResult* result)
 {
-	MetalMapSampleResult result = {};
+	bufferPos = 0;
+
 	if (!MetalMapReady()) {
-		result.error = &METAL_MAP_UNAVAILABLE_ERROR;
-		return result;
+		result->error = &METAL_MAP_UNAVAILABLE_ERROR;
+		return;
 	}
 
-	const MetalMapQuery clamped = ClampMetalMapQuery(query);
-	result.sample.query = clamped;
-	result.sample.amount = static_cast<float>(metalMap.GetMetalExtraction(clamped.x, clamped.z));
-	return result;
+	const int32_t maxX = metalMap.GetSizeX() - 1;
+	const int32_t maxZ = metalMap.GetSizeZ() - 1;
+
+	if (query->x < 0 || query->x > maxX || query->z < 0 || query->z > maxZ) {
+		char* msg = &scratchBuffer[bufferPos];
+		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
+			"Coordinates (%d, %d) out of bounds [0-%d, 0-%d]",
+			query->x, query->z, maxX, maxZ) + 1;
+		dynamicError.code = ERROR_OUT_OF_BOUNDS;
+		dynamicError.message = msg;
+		result->error = &dynamicError;
+		return;
+	}
+
+	result->error = nullptr;
+	result->extraction = static_cast<float>(metalMap.GetMetalExtraction(query->x, query->z));
 }
 
-static MetalMapWriteResult NativeSetMetalAmount(MetalMapWriteRequest request)
+static void NativeSetMetalAmount(const SetMetalAmountQuery* query, SetMetalAmountResult* result)
 {
-	MetalMapWriteResult result = {};
+	bufferPos = 0;
+
 	if (!MetalMapReady()) {
-		result.error = &METAL_MAP_UNAVAILABLE_ERROR;
-		return result;
+		result->error = &METAL_MAP_UNAVAILABLE_ERROR;
+		return;
 	}
 
-	const MetalMapQuery clamped = ClampMetalMapQuery(request.query);
-	metalMap.SetMetalAmount(clamped.x, clamped.z, request.amount);
+	const int32_t maxX = metalMap.GetSizeX() - 1;
+	const int32_t maxZ = metalMap.GetSizeZ() - 1;
 
-	result.sample.query = clamped;
-	result.sample.amount = metalMap.GetMetalAmount(clamped.x, clamped.z);
-	return result;
+	if (query->x < 0 || query->x > maxX || query->z < 0 || query->z > maxZ) {
+		char* msg = &scratchBuffer[bufferPos];
+		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
+			"Coordinates (%d, %d) out of bounds [0-%d, 0-%d]",
+			query->x, query->z, maxX, maxZ) + 1;
+		dynamicError.code = ERROR_OUT_OF_BOUNDS;
+		dynamicError.message = msg;
+		result->error = &dynamicError;
+		return;
+	}
+
+	metalMap.SetMetalAmount(query->x, query->z, query->amount);
+	result->error = nullptr;
 }
 
 } // namespace
@@ -95,4 +124,3 @@ const MetalMapApi METAL_MAP_API = {
 	.GetMetalExtraction = NativeGetMetalExtraction,
 	.SetMetalAmount = NativeSetMetalAmount,
 };
-

@@ -201,6 +201,8 @@ RustSystem* RustSystem::s_instance = nullptr;
 RustSystem::RustSystem() :
   CEventClient("[RustSystem]", 23253, false),
   m_NativeInterface {
+    .hostVersion = 10000,  // v1.0.0
+
     .f_HandleRustPanic = [](NativeInterface* ptr) {
         return ptr->bridge->HandleRustPanic();
     },
