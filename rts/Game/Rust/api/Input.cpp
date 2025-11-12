@@ -9,7 +9,6 @@
 #include "Rendering/GlobalRendering.h"
 #include "System/Input/KeyInput.h"
 #include "System/float3.h"
-#include <vector>
 
 #ifndef SDL_BUTTON_LEFT
 #define SDL_BUTTON_LEFT 1
@@ -19,10 +18,20 @@
 
 namespace {
 
-// Error constants
+// Scratch buffer for dynamic data
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
 static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Input system not ready"
+};
+
+static const Error INVALID_ARG_ERROR = {
+	.code = ERROR_INVALID_ARGUMENT,
+	.message = "Invalid argument"
 };
 
 // Helper: check if ready
@@ -32,114 +41,139 @@ static bool IsReady()
 }
 
 // Mouse
-static MouseStateResult NativeGetMouseState()
+static void NativeGetMouseState(const GetMouseStateQuery* query, GetMouseStateResult* result)
 {
-	MouseStateResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.state.x = static_cast<float>(mouse->lastx - globalRendering->viewPosX);
-	result.state.y = static_cast<float>(globalRendering->viewSizeY - mouse->lasty - 1);
-	result.state.dx = 0.0f; // Delta not directly available
-	result.state.dy = 0.0f;
-	result.state.left = mouse->buttons[SDL_BUTTON_LEFT].pressed;
-	result.state.middle = mouse->buttons[SDL_BUTTON_MIDDLE].pressed;
-	result.state.right = mouse->buttons[SDL_BUTTON_RIGHT].pressed;
-	result.state.offscreen = mouse->offscreen;
-
-	return result;
+	result->error = nullptr;
+	result->state.x = static_cast<float>(mouse->lastx - globalRendering->viewPosX);
+	result->state.y = static_cast<float>(globalRendering->viewSizeY - mouse->lasty - 1);
+	result->state.dx = 0.0f; // Delta not directly available
+	result->state.dy = 0.0f;
+	result->state.left = mouse->buttons[SDL_BUTTON_LEFT].pressed;
+	result->state.middle = mouse->buttons[SDL_BUTTON_MIDDLE].pressed;
+	result->state.right = mouse->buttons[SDL_BUTTON_RIGHT].pressed;
+	result->state.offscreen = mouse->offscreen;
 }
 
-static StringResult NativeGetMouseCursor()
+static void NativeGetMouseCursor(const GetMouseCursorQuery* query, GetMouseCursorResult* result)
 {
-	StringResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage
-	static thread_local std::string cursorName;
-	cursorName = mouse->GetCurrentCursor();
-	result.value = cursorName.c_str();
-	return result;
+	// Copy cursor name to scratch buffer
+	std::string cursorName = mouse->GetCurrentCursor();
+	char* strBuf = &scratchBuffer[bufferPos];
+	size_t len = cursorName.length();
+
+	if (bufferPos + len + 1 > sizeof(scratchBuffer)) {
+		result->error = &INVALID_ARG_ERROR;
+		return;
+	}
+
+	memcpy(strBuf, cursorName.c_str(), len + 1);
+	bufferPos += len + 1;
+
+	result->error = nullptr;
+	result->cursor = strBuf;
 }
 
-static Float2Result NativeGetMouseStartPosition(int32_t button)
+static void NativeGetMouseStartPosition(const GetMouseStartPositionQuery* query, GetMouseStartPositionResult* result)
 {
-	Float2Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
 	// Validate button index (1-based in Spring)
-	if (button <= 0 || button > NUM_BUTTONS) {
-		result.value.x = 0.0f;
-		result.value.y = 0.0f;
-		return result;
+	if (query->button <= 0 || query->button > NUM_BUTTONS) {
+		result->error = &INVALID_ARG_ERROR;
+		return;
 	}
 
-	const CMouseHandler::ButtonPressEvt& bp = mouse->buttons[button];
-	result.value.x = static_cast<float>(bp.x);
-	result.value.y = static_cast<float>(bp.y);
-	return result;
+	const CMouseHandler::ButtonPressEvt& bp = mouse->buttons[query->button];
+	result->error = nullptr;
+	result->position.x = static_cast<float>(bp.x);
+	result->position.y = static_cast<float>(bp.y);
 }
 
 // Keyboard
-static BoolResult NativeGetKeyState(int32_t keyCode)
+static void NativeGetKeyState(const GetKeyStateQuery* query, GetKeyStateResult* result)
 {
-	BoolResult result = {};
-	result.value = KeyInput::IsKeyPressed(keyCode);
-	return result;
+	bufferPos = 0;
+
+	result->error = nullptr;
+	result->pressed = KeyInput::IsKeyPressed(query->keyCode);
 }
 
-static Int32Array NativeGetPressedKeys()
+static void NativeGetPressedKeys(const GetPressedKeysQuery* query, GetPressedKeysResult* result)
 {
-	Int32Array result = {};
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> keys;
-	keys.clear();
+	bufferPos = 0;
 
 	const auto& pressedKeys = KeyInput::GetPressedKeys();
+
+	// Write keys to scratch buffer
+	int32_t* keys = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
+
 	for (const auto& pair : pressedKeys) {
 		if (pair.second) {
-			keys.push_back(pair.first);
+			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
+				result->error = &INVALID_ARG_ERROR;
+				return;
+			}
+			keys[count++] = pair.first;
+			bufferPos += sizeof(int32_t);
 		}
 	}
 
-	result.data = keys.data();
-	result.length = static_cast<uint32_t>(keys.size());
-	return result;
+	result->error = nullptr;
+	result->keys = keys;
+	result->count = count;
 }
 
-static Int32Array NativeGetPressedScans()
+static void NativeGetPressedScans(const GetPressedScansQuery* query, GetPressedScansResult* result)
 {
-	Int32Array result = {};
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> scans;
-	scans.clear();
+	bufferPos = 0;
 
 	const auto& pressedScans = KeyInput::GetPressedScans();
+
+	// Write scans to scratch buffer
+	int32_t* scans = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
+
 	for (const auto& pair : pressedScans) {
 		if (pair.second) {
-			scans.push_back(pair.first);
+			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) {
+				result->error = &INVALID_ARG_ERROR;
+				return;
+			}
+			scans[count++] = pair.first;
+			bufferPos += sizeof(int32_t);
 		}
 	}
 
-	result.data = scans.data();
-	result.length = static_cast<uint32_t>(scans.size());
-	return result;
+	result->error = nullptr;
+	result->scans = scans;
+	result->count = count;
 }
 
 // Modifier keys
-static BoolResult NativeGetModKeyState()
+static void NativeGetModKeyState(const GetModKeyStateQuery* query, GetModKeyStateResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+
 	// Return as bitfield: shift | ctrl | alt | meta
 	uint32_t modState = 0;
 	if (KeyInput::GetKeyModState(KMOD_SHIFT)) modState |= (1 << 0);
@@ -147,87 +181,91 @@ static BoolResult NativeGetModKeyState()
 	if (KeyInput::GetKeyModState(KMOD_ALT))   modState |= (1 << 2);
 	if (KeyInput::GetKeyModState(KMOD_GUI))   modState |= (1 << 3);
 
-	result.value = (modState != 0);
-	return result;
+	result->error = nullptr;
+	result->modState = modState;
 }
 
 // Selection
-static SelectionBoxResult NativeGetSelectionBox()
+static void NativeGetSelectionBox(const GetSelectionBoxQuery* query, GetSelectionBoxResult* result)
 {
-	SelectionBoxResult result = {};
+	bufferPos = 0;
+
 	if (!IsReady() || camera == nullptr) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
 	float3 bl, br, tl, tr;
 	if (!mouse->GetSelectionBoxVertices(bl, br, tl, tr)) {
-		result.box.active = false;
-		return result;
+		result->error = nullptr;
+		result->box.active = false;
+		return;
 	}
 
 	const float3 bottomLeft = camera->CalcViewPortCoordinates(bl);
 	const float3 topRight = camera->CalcViewPortCoordinates(tr);
 
-	result.box.left = bottomLeft.x;
-	result.box.top = topRight.y;
-	result.box.right = topRight.x;
-	result.box.bottom = bottomLeft.y;
-	result.box.active = true;
-
-	return result;
+	result->error = nullptr;
+	result->box.left = bottomLeft.x;
+	result->box.top = topRight.y;
+	result->box.right = topRight.x;
+	result->box.bottom = bottomLeft.y;
+	result->box.active = true;
 }
 
-static BoolResult NativeIsAboveMiniMap(float screenX, float screenY)
+static void NativeIsAboveMiniMap(const IsAboveMiniMapQuery* query, IsAboveMiniMapResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+
 	if (minimap == nullptr || !IsReady()) {
-		result.value = false;
-		return result;
+		result->error = nullptr;
+		result->above = false;
+		return;
 	}
 
 	if (minimap->GetMinimized() || (game != nullptr && game->hideInterface)) {
-		result.value = false;
-		return result;
+		result->error = nullptr;
+		result->above = false;
+		return;
 	}
 
-	const int x = static_cast<int>(screenX) + globalRendering->viewPosX;
-	const int y = static_cast<int>(screenY) + globalRendering->viewPosY;
+	const int x = static_cast<int>(query->screenX) + globalRendering->viewPosX;
+	const int y = static_cast<int>(query->screenY) + globalRendering->viewPosY;
 
 	const int x0 = minimap->GetPosX();
 	const int y0 = minimap->GetPosY();
 	const int x1 = x0 + minimap->GetSizeX();
 	const int y1 = y0 + minimap->GetSizeY();
 
-	result.value = (x >= x0) && (x < x1) && (y >= y0) && (y < y1);
-	return result;
+	result->error = nullptr;
+	result->above = (x >= x0) && (x < x1) && (y >= y0) && (y < y1);
 }
 
 // Active command
-static Int32Result NativeGetActiveCommand()
+static void NativeGetActiveCommand(const GetActiveCommandQuery* query, GetActiveCommandResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+
 	if (guihandler == nullptr) {
-		result.value = -1;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const int inCommand = guihandler->inCommand;
-	result.value = inCommand; // Return index
-	return result;
+	result->error = nullptr;
+	result->commandIndex = guihandler->inCommand;
 }
 
-static Int32Result NativeGetDefaultCommand()
+static void NativeGetDefaultCommand(const GetDefaultCommandQuery* query, GetDefaultCommandResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+
 	if (guihandler == nullptr || !IsReady()) {
-		result.value = -1;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const int defCmd = guihandler->GetDefaultCommand(mouse->lastx, mouse->lasty);
-	result.value = defCmd;
-	return result;
+	result->error = nullptr;
+	result->commandIndex = guihandler->GetDefaultCommand(mouse->lastx, mouse->lasty);
 }
 
 } // namespace

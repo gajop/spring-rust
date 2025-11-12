@@ -26,17 +26,6 @@ struct MouseState {
 	bool offscreen;
 };
 
-struct MouseStateResult {
-	const Error* error;
-	MouseState state;
-};
-
-// Key state
-struct KeyState {
-	bool pressed;
-	bool released;
-};
-
 // Selection box
 struct SelectionBox {
 	float left;
@@ -46,33 +35,165 @@ struct SelectionBox {
 	bool active;
 };
 
-struct SelectionBoxResult {
+// Queries
+struct GetMouseStateQuery {
+	uint8_t _unused;
+};
+
+struct GetMouseStateResult {
+	const Error* error;
+	MouseState state;
+};
+
+struct GetMouseCursorQuery {
+	uint8_t _unused;
+};
+
+struct GetMouseCursorResult {
+	const Error* error;
+	const char* cursor;
+};
+
+struct GetMouseStartPositionQuery {
+	int32_t button;
+};
+
+struct GetMouseStartPositionResult {
+	const Error* error;
+	Float2 position;
+};
+
+struct GetKeyStateQuery {
+	int32_t keyCode;
+};
+
+struct GetKeyStateResult {
+	const Error* error;
+	bool pressed;
+};
+
+struct GetPressedKeysQuery {
+	uint8_t _unused;
+};
+
+struct GetPressedKeysResult {
+	const Error* error;
+	int32_t* keys;
+	uint32_t count;
+};
+
+struct GetPressedScansQuery {
+	uint8_t _unused;
+};
+
+struct GetPressedScansResult {
+	const Error* error;
+	int32_t* scans;
+	uint32_t count;
+};
+
+struct GetModKeyStateQuery {
+	uint8_t _unused;
+};
+
+struct GetModKeyStateResult {
+	const Error* error;
+	uint32_t modState;  // Bitfield: shift | ctrl | alt | meta
+};
+
+struct GetSelectionBoxQuery {
+	uint8_t _unused;
+};
+
+struct GetSelectionBoxResult {
 	const Error* error;
 	SelectionBox box;
 };
 
+struct IsAboveMiniMapQuery {
+	float screenX;
+	float screenY;
+};
+
+struct IsAboveMiniMapResult {
+	const Error* error;
+	bool above;
+};
+
+struct GetActiveCommandQuery {
+	uint8_t _unused;
+};
+
+struct GetActiveCommandResult {
+	const Error* error;
+	int32_t commandIndex;
+};
+
+struct GetDefaultCommandQuery {
+	uint8_t _unused;
+};
+
+struct GetDefaultCommandResult {
+	const Error* error;
+	int32_t commandIndex;
+};
+
 // API structure
 struct InputApi {
-	// Mouse
-	MouseStateResult (*GetMouseState)();
-	StringResult (*GetMouseCursor)();
-	Float2Result (*GetMouseStartPosition)(int32_t button);
+	void (*GetMouseState)(
+		const GetMouseStateQuery* query,
+		GetMouseStateResult* result
+	);
 
-	// Keyboard
-	BoolResult (*GetKeyState)(int32_t keyCode);
-	Int32Array (*GetPressedKeys)();
-	Int32Array (*GetPressedScans)();
+	void (*GetMouseCursor)(
+		const GetMouseCursorQuery* query,
+		GetMouseCursorResult* result
+	);
 
-	// Modifier keys
-	BoolResult (*GetModKeyState)();  // Returns shift/ctrl/alt/meta as bitfield
+	void (*GetMouseStartPosition)(
+		const GetMouseStartPositionQuery* query,
+		GetMouseStartPositionResult* result
+	);
 
-	// Selection
-	SelectionBoxResult (*GetSelectionBox)();
-	BoolResult (*IsAboveMiniMap)(float screenX, float screenY);
+	void (*GetKeyState)(
+		const GetKeyStateQuery* query,
+		GetKeyStateResult* result
+	);
 
-	// Active command
-	Int32Result (*GetActiveCommand)();
-	Int32Result (*GetDefaultCommand)();
+	void (*GetPressedKeys)(
+		const GetPressedKeysQuery* query,
+		GetPressedKeysResult* result
+	);
+
+	void (*GetPressedScans)(
+		const GetPressedScansQuery* query,
+		GetPressedScansResult* result
+	);
+
+	void (*GetModKeyState)(
+		const GetModKeyStateQuery* query,
+		GetModKeyStateResult* result
+	);
+
+	void (*GetSelectionBox)(
+		const GetSelectionBoxQuery* query,
+		GetSelectionBoxResult* result
+	);
+
+	void (*IsAboveMiniMap)(
+		const IsAboveMiniMapQuery* query,
+		IsAboveMiniMapResult* result
+	);
+
+	void (*GetActiveCommand)(
+		const GetActiveCommandQuery* query,
+		GetActiveCommandResult* result
+	);
+
+	void (*GetDefaultCommand)(
+		const GetDefaultCommandQuery* query,
+		GetDefaultCommandResult* result
+	);
 };
 
 extern const InputApi INPUT_API;

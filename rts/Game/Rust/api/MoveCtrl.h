@@ -14,7 +14,7 @@ extern "C" {
 // Direct unit movement control (bypasses command queue)
 // ============================================================================
 
-// Move type data queries
+// Move type data
 struct MoveTypeData {
 	const char* name;  // "ground", "air", "static", etc.
 
@@ -42,30 +42,43 @@ struct MoveTypeData {
 	float maxRudder;
 };
 
-struct MoveTypeDataResult {
-	const Error* error;
-	MoveTypeData data;
-};
-
-// Estimated path
+// Path waypoint
 struct PathWaypoint {
 	Float3 pos;
 	float eta;  // Estimated time of arrival
 };
 
-struct EstimatedPathResult {
+// Queries
+struct GetUnitMoveTypeDataQuery {
+	int32_t unitID;
+};
+
+struct GetUnitMoveTypeDataResult {
+	const Error* error;
+	MoveTypeData data;
+};
+
+struct GetUnitEstimatedPathQuery {
+	int32_t unitID;
+};
+
+struct GetUnitEstimatedPathResult {
 	const Error* error;
 	PathWaypoint* waypoints;
 	uint32_t count;
 };
 
-// API structure (read-only queries)
+// API structure
 struct MoveCtrlApi {
-	// Get move type data
-	MoveTypeDataResult (*GetUnitMoveTypeData)(int32_t unitID);
+	void (*GetUnitMoveTypeData)(
+		const GetUnitMoveTypeDataQuery* query,
+		GetUnitMoveTypeDataResult* result
+	);
 
-	// Get estimated path
-	EstimatedPathResult (*GetUnitEstimatedPath)(int32_t unitID);
+	void (*GetUnitEstimatedPath)(
+		const GetUnitEstimatedPathQuery* query,
+		GetUnitEstimatedPathResult* result
+	);
 };
 
 extern const MoveCtrlApi MOVE_CTRL_API;
