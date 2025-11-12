@@ -7,145 +7,107 @@
 
 namespace {
 
-// Error constants
-static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "Sound system not ready"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-static const Error INVALID_SOUND_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid sound file or ID"
-};
+// Static errors
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Sound system not ready" };
+static const Error INVALID_SOUND_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid sound file or ID" };
 
-// Helper: check if sound system is ready
-static bool IsReady()
-{
-	return (sound != nullptr) && ISound::IsInitialized();
-}
+static bool IsReady() { return (sound != nullptr) && ISound::IsInitialized(); }
 
-// Sound effects
-static BoolResult NativePlaySoundFile(SoundPlayRequest request)
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+static void NativePlaySoundFile(const PlaySoundFileQuery* query, PlaySoundFileResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (query->soundFile == nullptr || query->soundFile[0] == '\0') {
+		result->error = &INVALID_SOUND_ERROR;
+		return;
 	}
 
-	if (request.soundFile == nullptr || request.soundFile[0] == '\0') {
-		result.error = &INVALID_SOUND_ERROR;
-		return result;
-	}
-
-	const unsigned int soundID = sound->GetSoundId(request.soundFile);
+	const unsigned int soundID = sound->GetSoundId(query->soundFile);
 	if (soundID == 0) {
-		result.error = &INVALID_SOUND_ERROR;
-		return result;
+		result->error = &INVALID_SOUND_ERROR;
+		return;
 	}
 
-	// Use General channel by default (could be extended to support channel selection)
 	IAudioChannel* channel = Channels::General;
 
-	if (request.positional) {
-		const float3 pos(request.pos.x, request.pos.y, request.pos.z);
-		const float3 velocity(request.velocity.x, request.velocity.y, request.velocity.z);
-		channel->PlaySample(soundID, pos, velocity, request.volume);
+	if (query->positional) {
+		const float3 pos(query->pos.x, query->pos.y, query->pos.z);
+		const float3 velocity(query->velocity.x, query->velocity.y, query->velocity.z);
+		channel->PlaySample(soundID, pos, velocity, query->volume);
 	} else {
-		channel->PlaySample(soundID, request.volume);
+		channel->PlaySample(soundID, query->volume);
 	}
 
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativeLoadSoundDef(const char* soundName)
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+static void NativeLoadSoundDef(const LoadSoundDefQuery* query, LoadSoundDefResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (query->soundName == nullptr || query->soundName[0] == '\0') {
+		result->error = &INVALID_SOUND_ERROR;
+		return;
 	}
 
-	if (soundName == nullptr || soundName[0] == '\0') {
-		result.error = &INVALID_SOUND_ERROR;
-		return result;
-	}
-
-	result.value = sound->PreloadSoundItem(soundName);
-	return result;
+	result->error = nullptr;
+	result->success = sound->PreloadSoundItem(query->soundName);
 }
 
-// Music streams
-static BoolResult NativePlaySoundStream(SoundStreamRequest request)
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+static void NativePlaySoundStream(const PlaySoundStreamQuery* query, PlaySoundStreamResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (query->oggFile == nullptr || query->oggFile[0] == '\0') {
+		result->error = &INVALID_SOUND_ERROR;
+		return;
 	}
 
-	if (request.oggFile == nullptr || request.oggFile[0] == '\0') {
-		result.error = &INVALID_SOUND_ERROR;
-		return result;
-	}
+	Channels::BGMusic->StreamPlay(query->oggFile, query->volume, false);
 
-	// BGMusic channel is used for music streams
-	Channels::BGMusic->StreamPlay(request.oggFile, request.volume, false);
-
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativeStopSoundStream()
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeStopSoundStream(const StopSoundStreamQuery* query, StopSoundStreamResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	Channels::BGMusic->StreamStop();
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativePauseSoundStream()
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativePauseSoundStream(const PauseSoundStreamQuery* query, PauseSoundStreamResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	Channels::BGMusic->StreamPause();
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativeSetSoundStreamVolume(float volume)
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeSetSoundStreamVolume(const SetSoundStreamVolumeQuery* query, SetSoundStreamVolumeResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	Channels::BGMusic->SetVolume(volume);
-	result.value = true;
-	return result;
+	Channels::BGMusic->SetVolume(query->volume);
+	result->error = nullptr;
+	result->success = true;
 }
 
-static FloatResult NativeGetSoundStreamTime()
-{
-	FloatResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetSoundStreamTime(const GetSoundStreamTimeQuery* query, GetSoundStreamTimeResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	result.value = Channels::BGMusic->StreamGetTime();
-	return result;
+	result->error = nullptr;
+	result->time = Channels::BGMusic->StreamGetTime();
 }
 
 } // namespace
@@ -153,7 +115,6 @@ static FloatResult NativeGetSoundStreamTime()
 const SoundApi SOUND_API = {
 	.PlaySoundFile = NativePlaySoundFile,
 	.LoadSoundDef = NativeLoadSoundDef,
-
 	.PlaySoundStream = NativePlaySoundStream,
 	.StopSoundStream = NativeStopSoundStream,
 	.PauseSoundStream = NativePauseSoundStream,

@@ -21,11 +21,6 @@ struct PositionLosState {
 	bool prevLos;    // Was in LOS last check
 };
 
-struct PositionLosStateResult {
-	const Error* error;
-	PositionLosState state;
-};
-
 // Radar error params (position error in fog of war)
 struct RadarErrorParams {
 	float baseErrMult;
@@ -36,38 +31,55 @@ struct RadarErrorParams {
 	float speedMult;
 };
 
-struct RadarErrorParamsResult {
-	const Error* error;
-	RadarErrorParams params;
-};
+// Queries
+struct GetPositionLosStateQuery { Float3 pos; int32_t allyTeamID; };
+struct GetPositionLosStateResult { const Error* error; PositionLosState state; };
 
-// Closest valid position (for unit placement)
-struct ClosestValidPositionQuery {
+struct IsPosInLosQuery { Float3 pos; int32_t allyTeamID; };
+struct IsPosInLosResult { const Error* error; bool inLos; };
+
+struct IsPosInRadarQuery { Float3 pos; int32_t allyTeamID; };
+struct IsPosInRadarResult { const Error* error; bool inRadar; };
+
+struct IsPosInAirLosQuery { Float3 pos; int32_t allyTeamID; };
+struct IsPosInAirLosResult { const Error* error; bool inAirLos; };
+
+struct IsUnitInLosQuery { int32_t unitID; int32_t allyTeamID; };
+struct IsUnitInLosResult { const Error* error; bool inLos; };
+
+struct IsUnitInAirLosQuery { int32_t unitID; int32_t allyTeamID; };
+struct IsUnitInAirLosResult { const Error* error; bool inAirLos; };
+
+struct IsUnitInRadarQuery { int32_t unitID; int32_t allyTeamID; };
+struct IsUnitInRadarResult { const Error* error; bool inRadar; };
+
+struct IsUnitInJammerQuery { int32_t unitID; int32_t allyTeamID; };
+struct IsUnitInJammerResult { const Error* error; bool inJammer; };
+
+struct GetRadarErrorParamsQuery { int32_t allyTeamID; };
+struct GetRadarErrorParamsResult { const Error* error; RadarErrorParams params; };
+
+struct GetClosestValidPositionQuery {
 	Float3 pos;
 	float radius;
 	int32_t unitDefID;
 	int32_t teamID;
 };
 
+struct GetClosestValidPositionResult { const Error* error; Float3 position; };
+
 // API structure
 struct LOSApi {
-	// Position-based LOS
-	PositionLosStateResult (*GetPositionLosState)(Float3 pos, int32_t allyTeamID);
-	BoolResult (*IsPosInLos)(Float3 pos, int32_t allyTeamID);
-	BoolResult (*IsPosInRadar)(Float3 pos, int32_t allyTeamID);
-	BoolResult (*IsPosInAirLos)(Float3 pos, int32_t allyTeamID);
-
-	// Unit-based LOS
-	BoolResult (*IsUnitInLos)(int32_t unitID, int32_t allyTeamID);
-	BoolResult (*IsUnitInAirLos)(int32_t unitID, int32_t allyTeamID);
-	BoolResult (*IsUnitInRadar)(int32_t unitID, int32_t allyTeamID);
-	BoolResult (*IsUnitInJammer)(int32_t unitID, int32_t allyTeamID);
-
-	// Radar error
-	RadarErrorParamsResult (*GetRadarErrorParams)(int32_t allyTeamID);
-
-	// Closest valid position (for placement)
-	Float3Result (*GetClosestValidPosition)(ClosestValidPositionQuery query);
+	void (*GetPositionLosState)(const GetPositionLosStateQuery* query, GetPositionLosStateResult* result);
+	void (*IsPosInLos)(const IsPosInLosQuery* query, IsPosInLosResult* result);
+	void (*IsPosInRadar)(const IsPosInRadarQuery* query, IsPosInRadarResult* result);
+	void (*IsPosInAirLos)(const IsPosInAirLosQuery* query, IsPosInAirLosResult* result);
+	void (*IsUnitInLos)(const IsUnitInLosQuery* query, IsUnitInLosResult* result);
+	void (*IsUnitInAirLos)(const IsUnitInAirLosQuery* query, IsUnitInAirLosResult* result);
+	void (*IsUnitInRadar)(const IsUnitInRadarQuery* query, IsUnitInRadarResult* result);
+	void (*IsUnitInJammer)(const IsUnitInJammerQuery* query, IsUnitInJammerResult* result);
+	void (*GetRadarErrorParams)(const GetRadarErrorParamsQuery* query, GetRadarErrorParamsResult* result);
+	void (*GetClosestValidPosition)(const GetClosestValidPositionQuery* query, GetClosestValidPositionResult* result);
 };
 
 extern const LOSApi LOS_API;

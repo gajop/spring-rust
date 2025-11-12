@@ -11,177 +11,180 @@
 
 namespace {
 
-// Error constants
-static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "Message system not ready"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-// Console output
-static BoolResult NativeEcho(const char* message)
-{
-	BoolResult result = {};
-	if (message == nullptr) {
-		result.value = false;
-		return result;
+// Static errors
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Message system not ready" };
+
+static void NativeEcho(const EchoQuery* query, EchoResult* result) {
+	bufferPos = 0;
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
 	}
 
-	LOG("%s", message);
-	result.value = true;
-	return result;
+	LOG("%s", query->message);
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativeLog(const char* section, int32_t level, const char* message)
-{
-	BoolResult result = {};
-	if (message == nullptr) {
-		result.value = false;
-		return result;
+static void NativeLog(const LogQuery* query, LogResult* result) {
+	bufferPos = 0;
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
 	}
 
-	// Use LOG system with section filtering
 	// Simplified: just log to default section
-	LOG("%s", message);
-	result.value = true;
-	return result;
+	LOG("%s", query->message);
+	result->error = nullptr;
+	result->success = true;
 }
 
-// Chat
-static BoolResult NativeSendMessage(const char* message)
-{
-	BoolResult result = {};
-	if (message == nullptr) {
-		result.value = false;
-		return result;
+static void NativeSendMessage(const SendMessageQuery* query, SendMessageResult* result) {
+	bufferPos = 0;
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
 	}
 
-	LOG("%s", message);
-	result.value = true;
-	return result;
+	LOG("%s", query->message);
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativeSendMessageToPlayer(int32_t playerID, const char* message)
-{
-	BoolResult result = {};
-	if (message == nullptr || gu == nullptr) {
-		result.value = false;
-		return result;
+static void NativeSendMessageToPlayer(const SendMessageToPlayerQuery* query, SendMessageToPlayerResult* result) {
+	bufferPos = 0;
+	if (query->message == nullptr || gu == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
 	}
 
 	// Only display if it's for the local player
-	if (playerID == gu->myPlayerNum) {
-		LOG("%s", message);
+	if (query->playerID == gu->myPlayerNum) {
+		LOG("%s", query->message);
 	}
 
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativeSendMessageToTeam(int32_t teamID, const char* message)
-{
-	BoolResult result = {};
-	if (message == nullptr || gu == nullptr) {
-		result.value = false;
-		return result;
+static void NativeSendMessageToTeam(const SendMessageToTeamQuery* query, SendMessageToTeamResult* result) {
+	bufferPos = 0;
+	if (query->message == nullptr || gu == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
 	}
 
 	// Only display if it's for the local player's team
-	if (teamID == gu->myTeam) {
-		LOG("%s", message);
+	if (query->teamID == gu->myTeam) {
+		LOG("%s", query->message);
 	}
 
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativeSendMessageToAllyTeam(int32_t allyTeamID, const char* message)
-{
-	BoolResult result = {};
-	if (message == nullptr || gu == nullptr) {
-		result.value = false;
-		return result;
+static void NativeSendMessageToAllyTeam(const SendMessageToAllyTeamQuery* query, SendMessageToAllyTeamResult* result) {
+	bufferPos = 0;
+	if (query->message == nullptr || gu == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
 	}
 
 	// Only display if it's for the local player's ally team
-	if (allyTeamID == gu->myAllyTeam) {
-		LOG("%s", message);
+	if (query->allyTeamID == gu->myAllyTeam) {
+		LOG("%s", query->message);
 	}
 
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
-static BoolResult NativeSendMessageToSpectators(const char* message)
-{
-	BoolResult result = {};
-	if (message == nullptr || gu == nullptr) {
-		result.value = false;
-		return result;
+static void NativeSendMessageToSpectators(const SendMessageToSpectatorsQuery* query, SendMessageToSpectatorsResult* result) {
+	bufferPos = 0;
+	if (query->message == nullptr || gu == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
 	}
 
 	// Only display if local player is spectating
 	if (gu->spectating) {
-		LOG("%s", message);
+		LOG("%s", query->message);
 	}
 
-	result.value = true;
-	return result;
+	result->error = nullptr;
+	result->success = true;
 }
 
-// Inter-Lua messaging (simplified - just return success)
-static BoolResult NativeSendLuaUIMsg(const char* message)
-{
-	BoolResult result = {};
-	result.value = (message != nullptr);
-	return result;
+static void NativeSendLuaUIMsg(const SendLuaUIQuery* query, SendLuaUIResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = (query->message != nullptr);
 }
 
-static BoolResult NativeSendLuaGaiaMsg(const char* message)
-{
-	BoolResult result = {};
-	result.value = (message != nullptr);
-	return result;
+static void NativeSendLuaGaiaMsg(const SendLuaGaiaQuery* query, SendLuaGaiaResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = (query->message != nullptr);
 }
 
-static BoolResult NativeSendLuaRulesMsg(const char* message)
-{
-	BoolResult result = {};
-	result.value = (message != nullptr);
-	return result;
+static void NativeSendLuaRulesMsg(const SendLuaRulesQuery* query, SendLuaRulesResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = (query->message != nullptr);
 }
 
-// Console (simplified - not fully implemented)
-static ConsoleBufferResult NativeGetConsoleBuffer(uint32_t maxLines)
-{
-	ConsoleBufferResult result = {};
+static void NativeGetConsoleBuffer(const GetConsoleBufferQuery* query, GetConsoleBufferResult* result) {
+	bufferPos = 0;
 	// Console buffer access would require interfacing with the logging system
 	// which stores messages internally - simplified implementation
-	result.entries = nullptr;
-	result.count = 0;
-	return result;
+	result->error = nullptr;
+	result->entries = nullptr;
+	result->count = 0;
 }
 
-static StringResult NativeGetCurrentTooltip()
-{
-	StringResult result = {};
+static void NativeGetCurrentTooltip(const GetCurrentTooltipQuery* query, GetCurrentTooltipResult* result) {
+	bufferPos = 0;
 
 	if (tooltip == nullptr) {
-		result.value = "";
-		return result;
+		result->error = nullptr;
+		result->tooltip = "";
+		return;
 	}
 
-	// Use static storage
+	// Use scratch buffer for tooltip text
 	static thread_local std::string tooltipText;
 	tooltipText = tooltip->GetTooltip();
-	result.value = tooltipText.c_str();
-	return result;
+
+	// Copy to scratch buffer if needed
+	const size_t len = tooltipText.length() + 1;
+	if (bufferPos + len <= sizeof(scratchBuffer)) {
+		char* str = &scratchBuffer[bufferPos];
+		memcpy(str, tooltipText.c_str(), len);
+		bufferPos += len;
+		result->tooltip = str;
+	} else {
+		result->tooltip = "";
+	}
+
+	result->error = nullptr;
 }
 
-static BoolResult NativeIsUserWriting()
-{
-	BoolResult result = {};
-	result.value = (mouse != nullptr) && mouse->locked;
-	return result;
+static void NativeIsUserWriting(const IsUserWritingQuery* query, IsUserWritingResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->writing = (mouse != nullptr) && mouse->locked;
 }
 
 } // namespace
@@ -189,17 +192,14 @@ static BoolResult NativeIsUserWriting()
 const MessagesApi MESSAGES_API = {
 	.Echo = NativeEcho,
 	.Log = NativeLog,
-
 	.SendMessage = NativeSendMessage,
 	.SendMessageToPlayer = NativeSendMessageToPlayer,
 	.SendMessageToTeam = NativeSendMessageToTeam,
 	.SendMessageToAllyTeam = NativeSendMessageToAllyTeam,
 	.SendMessageToSpectators = NativeSendMessageToSpectators,
-
 	.SendLuaUIMsg = NativeSendLuaUIMsg,
 	.SendLuaGaiaMsg = NativeSendLuaGaiaMsg,
 	.SendLuaRulesMsg = NativeSendLuaRulesMsg,
-
 	.GetConsoleBuffer = NativeGetConsoleBuffer,
 	.GetCurrentTooltip = NativeGetCurrentTooltip,
 	.IsUserWriting = NativeIsUserWriting,
