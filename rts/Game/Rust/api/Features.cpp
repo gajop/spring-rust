@@ -8,16 +8,15 @@
 
 namespace {
 
-// Error constants
-static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "Feature system not ready"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-static const Error INVALID_FEATURE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid feature ID"
-};
+// Static errors
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Feature system not ready" };
+static const Error INVALID_FEATURE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid feature ID" };
+static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Collision volume data not yet implemented" };
 
 // Helper: check if ready
 static bool IsReady()
@@ -26,116 +25,138 @@ static bool IsReady()
 }
 
 // Validation
-static BoolResult NativeValidFeatureID(int32_t featureID)
+static void NativeValidFeatureID(const ValidFeatureIDQuery* query, ValidFeatureIDResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->valid = false;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
-	result.value = featureHandler.GetFeature(featureID) != nullptr;
-	return result;
+	result->valid = featureHandler.GetFeature(query->featureID) != nullptr;
 }
 
 // Get all features
-static Int32Array NativeGetAllFeatures()
+static void NativeGetAllFeatures(const GetAllFeaturesQuery* query, GetAllFeaturesResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->features = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> features;
-	features.clear();
+	// Use scratch buffer for array
+	int32_t* features = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	for (const auto& pair : featureHandler.GetActiveFeatures()) {
-		if (pair.second != nullptr) {
-			features.push_back(pair.first);
+		if (pair.second != nullptr && count < maxFeatures) {
+			features[count++] = pair.first;
 		}
 	}
 
-	result.data = features.data();
-	result.length = static_cast<uint32_t>(features.size());
-	return result;
+	result->features = features;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
 // Spatial queries
-static Int32Array NativeGetFeaturesInRectangle(float minX, float minZ, float maxX, float maxZ)
+static void NativeGetFeaturesInRectangle(const GetFeaturesInRectangleQuery* query, GetFeaturesInRectangleResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->features = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> features;
-	features.clear();
+	const float3 mins(query->minX, 0.0f, query->minZ);
+	const float3 maxs(query->maxX, 0.0f, query->maxZ);
 
-	const float3 mins(minX, 0.0f, minZ);
-	const float3 maxs(maxX, 0.0f, maxZ);
+	// Use scratch buffer for array
+	int32_t* features = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	const auto& foundFeatures = quadField.GetFeaturesExact(mins, maxs);
 	for (const CFeature* feature : foundFeatures) {
-		if (feature != nullptr) {
-			features.push_back(feature->id);
+		if (feature != nullptr && count < maxFeatures) {
+			features[count++] = feature->id;
 		}
 	}
 
-	result.data = features.data();
-	result.length = static_cast<uint32_t>(features.size());
-	return result;
+	result->features = features;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
-static Int32Array NativeGetFeaturesInSphere(Float3 center, float radius)
+static void NativeGetFeaturesInSphere(const GetFeaturesInSphereQuery* query, GetFeaturesInSphereResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->features = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> features;
-	features.clear();
+	const float3 pos(query->center.x, query->center.y, query->center.z);
+	const float radiusSq = query->radius * query->radius;
 
-	const float3 pos(center.x, center.y, center.z);
-	const float radiusSq = radius * radius;
+	// Use scratch buffer for array
+	int32_t* features = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundFeatures = quadField.GetFeaturesExact(pos, radius);
+	const auto& foundFeatures = quadField.GetFeaturesExact(pos, query->radius);
 	for (const CFeature* feature : foundFeatures) {
 		if (feature != nullptr) {
 			const float distSq = feature->pos.SqDistance(pos);
-			if (distSq <= radiusSq) {
-				features.push_back(feature->id);
+			if (distSq <= radiusSq && count < maxFeatures) {
+				features[count++] = feature->id;
 			}
 		}
 	}
 
-	result.data = features.data();
-	result.length = static_cast<uint32_t>(features.size());
-	return result;
+	result->features = features;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
-static Int32Array NativeGetFeaturesInCylinder(Float3 center, float radius, float height)
+static void NativeGetFeaturesInCylinder(const GetFeaturesInCylinderQuery* query, GetFeaturesInCylinderResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->features = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> features;
-	features.clear();
+	const float3 pos(query->center.x, query->center.y, query->center.z);
+	const float radiusSq = query->radius * query->radius;
+	const float halfHeight = query->height * 0.5f;
 
-	const float3 pos(center.x, center.y, center.z);
-	const float radiusSq = radius * radius;
-	const float halfHeight = height * 0.5f;
+	// Use scratch buffer for array
+	int32_t* features = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundFeatures = quadField.GetFeaturesExact(pos, radius);
+	const auto& foundFeatures = quadField.GetFeaturesExact(pos, query->radius);
 	for (const CFeature* feature : foundFeatures) {
 		if (feature != nullptr) {
 			const float3& fpos = feature->pos;
@@ -144,404 +165,430 @@ static Int32Array NativeGetFeaturesInCylinder(Float3 center, float radius, float
 			const float distXZSq = dx * dx + dz * dz;
 			const float dy = std::abs(fpos.y - pos.y);
 
-			if (distXZSq <= radiusSq && dy <= halfHeight) {
-				features.push_back(feature->id);
+			if (distXZSq <= radiusSq && dy <= halfHeight && count < maxFeatures) {
+				features[count++] = feature->id;
 			}
 		}
 	}
 
-	result.data = features.data();
-	result.length = static_cast<uint32_t>(features.size());
-	return result;
+	result->features = features;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
 // Basic info
-static Int32Result NativeGetFeatureDefID(int32_t featureID)
+static void NativeGetFeatureDefID(const GetFeatureDefIDQuery* query, GetFeatureDefIDResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->defID = -1;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->def->id;
-	return result;
+	result->defID = feature->def->id;
 }
 
-static Int32Result NativeGetFeatureTeam(int32_t featureID)
+static void NativeGetFeatureTeam(const GetFeatureTeamQuery* query, GetFeatureTeamResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->teamID = -1;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->team;
-	return result;
+	result->teamID = feature->team;
 }
 
-static Int32Result NativeGetFeatureAllyTeam(int32_t featureID)
+static void NativeGetFeatureAllyTeam(const GetFeatureAllyTeamQuery* query, GetFeatureAllyTeamResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->allyTeamID = -1;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->allyteam;
-	return result;
+	result->allyTeamID = feature->allyteam;
 }
 
 // Health
-static FeatureHealthResult NativeGetFeatureHealth(int32_t featureID)
+static void NativeGetFeatureHealth(const GetFeatureHealthQuery* query, GetFeatureHealthResult* result)
 {
-	FeatureHealthResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.health.health = feature->health;
-	result.health.maxHealth = feature->maxHealth;
-	result.health.reclaimLeft = feature->reclaimLeft;
-	result.health.resurrectProgress = feature->resurrectProgress;
-
-	return result;
+	result->health.health = feature->health;
+	result->health.maxHealth = feature->maxHealth;
+	result->health.reclaimLeft = feature->reclaimLeft;
+	result->health.resurrectProgress = feature->resurrectProgress;
 }
 
 // Physical properties
-static FloatResult NativeGetFeatureHeight(int32_t featureID)
+static void NativeGetFeatureHeight(const GetFeatureHeightQuery* query, GetFeatureHeightResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->height = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->height;
-	return result;
+	result->height = feature->height;
 }
 
-static FloatResult NativeGetFeatureRadius(int32_t featureID)
+static void NativeGetFeatureRadius(const GetFeatureRadiusQuery* query, GetFeatureRadiusResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->radius = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->radius;
-	return result;
+	result->radius = feature->radius;
 }
 
-static FloatResult NativeGetFeatureMass(int32_t featureID)
+static void NativeGetFeatureMass(const GetFeatureMassQuery* query, GetFeatureMassResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->mass = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->mass;
-	return result;
+	result->mass = feature->mass;
 }
 
 // Position and orientation
-static Float3Result NativeGetFeaturePosition(int32_t featureID)
+static void NativeGetFeaturePosition(const GetFeaturePositionQuery* query, GetFeaturePositionResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->position.x = 0.0f;
+	result->position.y = 0.0f;
+	result->position.z = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value.x = feature->pos.x;
-	result.value.y = feature->pos.y;
-	result.value.z = feature->pos.z;
-	return result;
+	result->position.x = feature->pos.x;
+	result->position.y = feature->pos.y;
+	result->position.z = feature->pos.z;
 }
 
-static FloatResult NativeGetFeatureSeparation(int32_t featureID1, int32_t featureID2, bool positional)
+static void NativeGetFeatureSeparation(const GetFeatureSeparationQuery* query, GetFeatureSeparationResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->separation = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature1 = featureHandler.GetFeature(featureID1);
-	const CFeature* feature2 = featureHandler.GetFeature(featureID2);
+	const CFeature* feature1 = featureHandler.GetFeature(query->featureID1);
+	const CFeature* feature2 = featureHandler.GetFeature(query->featureID2);
 
 	if (feature1 == nullptr || feature2 == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	if (positional) {
-		result.value = feature1->pos.distance(feature2->pos);
+	if (query->positional) {
+		result->separation = feature1->pos.distance(feature2->pos);
 	} else {
 		const float radSum = feature1->radius + feature2->radius;
 		const float dist = feature1->pos.distance(feature2->pos);
-		result.value = std::max(0.0f, dist - radSum);
+		result->separation = std::max(0.0f, dist - radSum);
 	}
-
-	return result;
 }
 
-static Float3Result NativeGetFeatureDirection(int32_t featureID)
+static void NativeGetFeatureDirection(const GetFeatureDirectionQuery* query, GetFeatureDirectionResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->direction.x = 0.0f;
+	result->direction.y = 0.0f;
+	result->direction.z = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	// Direction is the forward vector (heading)
 	const float3 dir = feature->frontdir;
-	result.value.x = dir.x;
-	result.value.y = dir.y;
-	result.value.z = dir.z;
-	return result;
+	result->direction.x = dir.x;
+	result->direction.y = dir.y;
+	result->direction.z = dir.z;
 }
 
-static Float3Result NativeGetFeatureVelocity(int32_t featureID)
+static void NativeGetFeatureVelocity(const GetFeatureVelocityQuery* query, GetFeatureVelocityResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->velocity.x = 0.0f;
+	result->velocity.y = 0.0f;
+	result->velocity.z = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
 	// Features typically don't move
-	result.value.x = 0.0f;
-	result.value.y = 0.0f;
-	result.value.z = 0.0f;
-	return result;
 }
 
-static Int32Result NativeGetFeatureHeading(int32_t featureID)
+static void NativeGetFeatureHeading(const GetFeatureHeadingQuery* query, GetFeatureHeadingResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->heading = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->heading;
-	return result;
+	result->heading = feature->heading;
+}
+
+static void NativeGetFeatureRotation(const GetFeatureRotationQuery* query, GetFeatureRotationResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->rotation.col1 = {1.0f, 0.0f, 0.0f};
+	result->rotation.col2 = {0.0f, 1.0f, 0.0f};
+	result->rotation.col3 = {0.0f, 0.0f, 1.0f};
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	// Return identity for now
 }
 
 // Resources
-static FeatureResourcesResult NativeGetFeatureResources(int32_t featureID)
+static void NativeGetFeatureResources(const GetFeatureResourcesQuery* query, GetFeatureResourcesResult* result)
 {
-	FeatureResourcesResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.resources.metal = feature->def->metal * feature->reclaimLeft;
-	result.resources.energy = feature->def->energy * feature->reclaimLeft;
-	result.resources.reclaimTime = feature->def->reclaimTime;
-
-	return result;
+	result->resources.metal = feature->def->metal * feature->reclaimLeft;
+	result->resources.energy = feature->def->energy * feature->reclaimLeft;
+	result->resources.reclaimTime = feature->def->reclaimTime;
 }
 
 // Blocking
-static BoolResult NativeGetFeatureBlocking(int32_t featureID, bool* isBlocking, bool* isSolidObjectCollidable,
-	bool* isProjectileCollidable, bool* isRaySegmentCollidable, bool* crushable, bool* blockHeightChanges)
+static void NativeGetFeatureBlocking(const GetFeatureBlockingQuery* query, GetFeatureBlockingResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	if (isBlocking) *isBlocking = feature->blocking;
-	if (isSolidObjectCollidable) *isSolidObjectCollidable = feature->collisionVolume->DefaultToFeature();
-	if (isProjectileCollidable) *isProjectileCollidable = feature->collisionVolume->DefaultToFeature();
-	if (isRaySegmentCollidable) *isRaySegmentCollidable = feature->collisionVolume->DefaultToFeature();
-	if (crushable) *crushable = false; // Features generally not crushable
-	if (blockHeightChanges) *blockHeightChanges = feature->def->floating;
-
-	result.value = feature->blocking;
-	return result;
+	result->blockingState.isBlocking = feature->blocking;
+	result->blockingState.isSolidObjectCollidable = feature->collisionVolume->DefaultToFeature();
+	result->blockingState.isProjectileCollidable = feature->collisionVolume->DefaultToFeature();
+	result->blockingState.isRaySegmentCollidable = feature->collisionVolume->DefaultToFeature();
+	result->blockingState.crushable = false;
+	result->blockingState.blockHeightChanges = feature->def->floating;
 }
 
 // No select
-static BoolResult NativeGetFeatureNoSelect(int32_t featureID)
+static void NativeGetFeatureNoSelect(const GetFeatureNoSelectQuery* query, GetFeatureNoSelectResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->noSelect = false;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->noSelect;
-	return result;
+	result->noSelect = feature->noSelect;
 }
 
 // Resurrection
-static FeatureResurrectResult NativeGetFeatureResurrect(int32_t featureID)
+static void NativeGetFeatureResurrect(const GetFeatureResurrectQuery* query, GetFeatureResurrectResult* result)
 {
-	FeatureResurrectResult result = {};
-	result.canResurrect = false;
+	bufferPos = 0;
+	result->error = nullptr;
+	result->canResurrect = false;
 
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
 	if (feature->udef != nullptr) {
-		result.canResurrect = true;
-		result.resurrect.resurrectAs = feature->udef->name.c_str();
-		result.resurrect.resurrectDefID = feature->udef->id;
-		result.resurrect.facingDir = feature->buildFacing;
+		result->canResurrect = true;
+		result->resurrect.resurrectAs = feature->udef->name.c_str();
+		result->resurrect.resurrectDefID = feature->udef->id;
+		result->resurrect.facingDir = feature->buildFacing;
 	}
-
-	return result;
 }
 
 // Last attacked piece
-static Int32Result NativeGetFeatureLastAttackedPiece(int32_t featureID)
+static void NativeGetFeatureLastAttackedPiece(const GetFeatureLastAttackedPieceQuery* query, GetFeatureLastAttackedPieceResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->pieceNum = -1;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(featureID);
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
 	if (feature == nullptr) {
-		result.error = &INVALID_FEATURE_ERROR;
-		return result;
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
 	}
 
-	result.value = feature->lastAttackedPiece;
-	return result;
+	result->pieceNum = feature->lastAttackedPiece;
 }
 
-// Stub rotation function (returning identity for now)
-static struct { Float3 col1; Float3 col2; Float3 col3; } NativeGetFeatureRotation(int32_t featureID)
+// Collision volumes (stubs)
+static void NativeGetFeatureCollisionVolumeData(const GetFeatureCollisionVolumeDataQuery* query, GetFeatureCollisionVolumeDataResult* result)
 {
-	struct { Float3 col1; Float3 col2; Float3 col3; } result;
-	result.col1 = {1.0f, 0.0f, 0.0f};
-	result.col2 = {0.0f, 1.0f, 0.0f};
-	result.col3 = {0.0f, 0.0f, 1.0f};
-	return result;
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
-// Stub collision volume functions
-static CollisionVolumeDataResult NativeGetFeatureCollisionVolumeData(int32_t featureID)
+static void NativeGetFeaturePieceCollisionVolumeData(const GetFeaturePieceCollisionVolumeDataQuery* query, GetFeaturePieceCollisionVolumeDataResult* result)
 {
-	CollisionVolumeDataResult result = {};
-	static const Error NOT_IMPLEMENTED = {
-		.code = ERROR_NOT_AVAILABLE,
-		.message = "Collision volume data not yet implemented"
-	};
-	result.error = &NOT_IMPLEMENTED;
-	return result;
-}
-
-static CollisionVolumeDataResult NativeGetFeaturePieceCollisionVolumeData(int32_t featureID, int32_t pieceNum)
-{
-	CollisionVolumeDataResult result = {};
-	static const Error NOT_IMPLEMENTED = {
-		.code = ERROR_NOT_AVAILABLE,
-		.message = "Collision volume data not yet implemented"
-	};
-	result.error = &NOT_IMPLEMENTED;
-	return result;
+	bufferPos = 0;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
 } // namespace

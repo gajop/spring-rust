@@ -14,31 +14,12 @@ extern "C" {
 // Feature queries (wrecks, rocks, trees, etc.)
 // ============================================================================
 
-// Feature basic info
-struct FeatureInfo {
-	int32_t featureID;
-	int32_t featureDefID;
-	int32_t teamID;
-	int32_t allyTeamID;
-	const char* tooltip;
-};
-
-struct FeatureInfoResult {
-	const Error* error;
-	FeatureInfo info;
-};
-
 // Feature health
 struct FeatureHealth {
 	float health;
 	float maxHealth;
 	float reclaimLeft;
 	float resurrectProgress;
-};
-
-struct FeatureHealthResult {
-	const Error* error;
-	FeatureHealth health;
 };
 
 // Feature resources
@@ -48,11 +29,6 @@ struct FeatureResources {
 	float reclaimTime;
 };
 
-struct FeatureResourcesResult {
-	const Error* error;
-	FeatureResources resources;
-};
-
 // Feature resurrection
 struct FeatureResurrect {
 	const char* resurrectAs;  // Unit def name
@@ -60,70 +36,126 @@ struct FeatureResurrect {
 	int32_t facingDir;
 };
 
-struct FeatureResurrectResult {
-	const Error* error;
-	FeatureResurrect resurrect;
-	bool canResurrect;
+// Feature rotation (matrix)
+struct FeatureRotation {
+	Float3 col1;
+	Float3 col2;
+	Float3 col3;
 };
+
+// Feature blocking state
+struct FeatureBlockingState {
+	bool isBlocking;
+	bool isSolidObjectCollidable;
+	bool isProjectileCollidable;
+	bool isRaySegmentCollidable;
+	bool crushable;
+	bool blockHeightChanges;
+};
+
+// Queries
+struct ValidFeatureIDQuery { int32_t featureID; };
+struct ValidFeatureIDResult { const Error* error; bool valid; };
+
+struct GetAllFeaturesQuery { uint8_t _unused; };
+struct GetAllFeaturesResult { const Error* error; int32_t* features; uint32_t count; };
+
+struct GetFeaturesInRectangleQuery { float minX; float minZ; float maxX; float maxZ; };
+struct GetFeaturesInRectangleResult { const Error* error; int32_t* features; uint32_t count; };
+
+struct GetFeaturesInSphereQuery { Float3 center; float radius; };
+struct GetFeaturesInSphereResult { const Error* error; int32_t* features; uint32_t count; };
+
+struct GetFeaturesInCylinderQuery { Float3 center; float radius; float height; };
+struct GetFeaturesInCylinderResult { const Error* error; int32_t* features; uint32_t count; };
+
+struct GetFeatureDefIDQuery { int32_t featureID; };
+struct GetFeatureDefIDResult { const Error* error; int32_t defID; };
+
+struct GetFeatureTeamQuery { int32_t featureID; };
+struct GetFeatureTeamResult { const Error* error; int32_t teamID; };
+
+struct GetFeatureAllyTeamQuery { int32_t featureID; };
+struct GetFeatureAllyTeamResult { const Error* error; int32_t allyTeamID; };
+
+struct GetFeatureHealthQuery { int32_t featureID; };
+struct GetFeatureHealthResult { const Error* error; FeatureHealth health; };
+
+struct GetFeatureHeightQuery { int32_t featureID; };
+struct GetFeatureHeightResult { const Error* error; float height; };
+
+struct GetFeatureRadiusQuery { int32_t featureID; };
+struct GetFeatureRadiusResult { const Error* error; float radius; };
+
+struct GetFeatureMassQuery { int32_t featureID; };
+struct GetFeatureMassResult { const Error* error; float mass; };
+
+struct GetFeaturePositionQuery { int32_t featureID; };
+struct GetFeaturePositionResult { const Error* error; Float3 position; };
+
+struct GetFeatureSeparationQuery { int32_t featureID1; int32_t featureID2; bool positional; };
+struct GetFeatureSeparationResult { const Error* error; float separation; };
+
+struct GetFeatureDirectionQuery { int32_t featureID; };
+struct GetFeatureDirectionResult { const Error* error; Float3 direction; };
+
+struct GetFeatureVelocityQuery { int32_t featureID; };
+struct GetFeatureVelocityResult { const Error* error; Float3 velocity; };
+
+struct GetFeatureHeadingQuery { int32_t featureID; };
+struct GetFeatureHeadingResult { const Error* error; int32_t heading; };
+
+struct GetFeatureRotationQuery { int32_t featureID; };
+struct GetFeatureRotationResult { const Error* error; FeatureRotation rotation; };
+
+struct GetFeatureResourcesQuery { int32_t featureID; };
+struct GetFeatureResourcesResult { const Error* error; FeatureResources resources; };
+
+struct GetFeatureBlockingQuery { int32_t featureID; };
+struct GetFeatureBlockingResult { const Error* error; FeatureBlockingState blockingState; };
+
+struct GetFeatureNoSelectQuery { int32_t featureID; };
+struct GetFeatureNoSelectResult { const Error* error; bool noSelect; };
+
+struct GetFeatureResurrectQuery { int32_t featureID; };
+struct GetFeatureResurrectResult { const Error* error; FeatureResurrect resurrect; bool canResurrect; };
+
+struct GetFeatureLastAttackedPieceQuery { int32_t featureID; };
+struct GetFeatureLastAttackedPieceResult { const Error* error; int32_t pieceNum; };
+
+struct GetFeatureCollisionVolumeDataQuery { int32_t featureID; };
+struct GetFeatureCollisionVolumeDataResult { const Error* error; CollisionVolumeData volume; };
+
+struct GetFeaturePieceCollisionVolumeDataQuery { int32_t featureID; int32_t pieceNum; };
+struct GetFeaturePieceCollisionVolumeDataResult { const Error* error; CollisionVolumeData volume; };
 
 // API structure
 struct FeaturesApi {
-	// Validation
-	BoolResult (*ValidFeatureID)(int32_t featureID);
-
-	// Get all features
-	Int32Array (*GetAllFeatures)();
-
-	// Spatial queries
-	Int32Array (*GetFeaturesInRectangle)(float minX, float minZ, float maxX, float maxZ);
-	Int32Array (*GetFeaturesInSphere)(Float3 center, float radius);
-	Int32Array (*GetFeaturesInCylinder)(Float3 center, float radius, float height);
-
-	// Basic info
-	Int32Result (*GetFeatureDefID)(int32_t featureID);
-	Int32Result (*GetFeatureTeam)(int32_t featureID);
-	Int32Result (*GetFeatureAllyTeam)(int32_t featureID);
-
-	// Health
-	FeatureHealthResult (*GetFeatureHealth)(int32_t featureID);
-
-	// Physical properties
-	FloatResult (*GetFeatureHeight)(int32_t featureID);
-	FloatResult (*GetFeatureRadius)(int32_t featureID);
-	FloatResult (*GetFeatureMass)(int32_t featureID);
-
-	// Position and orientation
-	Float3Result (*GetFeaturePosition)(int32_t featureID);
-	FloatResult (*GetFeatureSeparation)(int32_t featureID1, int32_t featureID2, bool positional);
-	Float3Result (*GetFeatureDirection)(int32_t featureID);
-	Float3Result (*GetFeatureVelocity)(int32_t featureID);
-	Int32Result (*GetFeatureHeading)(int32_t featureID);
-
-	// Rotation (matrix)
-	struct {
-		Float3 col1;
-		Float3 col2;
-		Float3 col3;
-	} (*GetFeatureRotation)(int32_t featureID);
-
-	// Resources
-	FeatureResourcesResult (*GetFeatureResources)(int32_t featureID);
-
-	// Blocking
-	BoolResult (*GetFeatureBlocking)(int32_t featureID, bool* isBlocking, bool* isSolidObjectCollidable, bool* isProjectileCollidable, bool* isRaySegmentCollidable, bool* crushable, bool* blockHeightChanges);
-
-	// No select
-	BoolResult (*GetFeatureNoSelect)(int32_t featureID);
-
-	// Resurrection
-	FeatureResurrectResult (*GetFeatureResurrect)(int32_t featureID);
-
-	// Last attacked piece
-	Int32Result (*GetFeatureLastAttackedPiece)(int32_t featureID);
-
-	// Collision volumes
-	CollisionVolumeDataResult (*GetFeatureCollisionVolumeData)(int32_t featureID);
-	CollisionVolumeDataResult (*GetFeaturePieceCollisionVolumeData)(int32_t featureID, int32_t pieceNum);
+	void (*ValidFeatureID)(const ValidFeatureIDQuery* query, ValidFeatureIDResult* result);
+	void (*GetAllFeatures)(const GetAllFeaturesQuery* query, GetAllFeaturesResult* result);
+	void (*GetFeaturesInRectangle)(const GetFeaturesInRectangleQuery* query, GetFeaturesInRectangleResult* result);
+	void (*GetFeaturesInSphere)(const GetFeaturesInSphereQuery* query, GetFeaturesInSphereResult* result);
+	void (*GetFeaturesInCylinder)(const GetFeaturesInCylinderQuery* query, GetFeaturesInCylinderResult* result);
+	void (*GetFeatureDefID)(const GetFeatureDefIDQuery* query, GetFeatureDefIDResult* result);
+	void (*GetFeatureTeam)(const GetFeatureTeamQuery* query, GetFeatureTeamResult* result);
+	void (*GetFeatureAllyTeam)(const GetFeatureAllyTeamQuery* query, GetFeatureAllyTeamResult* result);
+	void (*GetFeatureHealth)(const GetFeatureHealthQuery* query, GetFeatureHealthResult* result);
+	void (*GetFeatureHeight)(const GetFeatureHeightQuery* query, GetFeatureHeightResult* result);
+	void (*GetFeatureRadius)(const GetFeatureRadiusQuery* query, GetFeatureRadiusResult* result);
+	void (*GetFeatureMass)(const GetFeatureMassQuery* query, GetFeatureMassResult* result);
+	void (*GetFeaturePosition)(const GetFeaturePositionQuery* query, GetFeaturePositionResult* result);
+	void (*GetFeatureSeparation)(const GetFeatureSeparationQuery* query, GetFeatureSeparationResult* result);
+	void (*GetFeatureDirection)(const GetFeatureDirectionQuery* query, GetFeatureDirectionResult* result);
+	void (*GetFeatureVelocity)(const GetFeatureVelocityQuery* query, GetFeatureVelocityResult* result);
+	void (*GetFeatureHeading)(const GetFeatureHeadingQuery* query, GetFeatureHeadingResult* result);
+	void (*GetFeatureRotation)(const GetFeatureRotationQuery* query, GetFeatureRotationResult* result);
+	void (*GetFeatureResources)(const GetFeatureResourcesQuery* query, GetFeatureResourcesResult* result);
+	void (*GetFeatureBlocking)(const GetFeatureBlockingQuery* query, GetFeatureBlockingResult* result);
+	void (*GetFeatureNoSelect)(const GetFeatureNoSelectQuery* query, GetFeatureNoSelectResult* result);
+	void (*GetFeatureResurrect)(const GetFeatureResurrectQuery* query, GetFeatureResurrectResult* result);
+	void (*GetFeatureLastAttackedPiece)(const GetFeatureLastAttackedPieceQuery* query, GetFeatureLastAttackedPieceResult* result);
+	void (*GetFeatureCollisionVolumeData)(const GetFeatureCollisionVolumeDataQuery* query, GetFeatureCollisionVolumeDataResult* result);
+	void (*GetFeaturePieceCollisionVolumeData)(const GetFeaturePieceCollisionVolumeDataQuery* query, GetFeaturePieceCollisionVolumeDataResult* result);
 };
 
 extern const FeaturesApi FEATURES_API;

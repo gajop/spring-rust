@@ -12,16 +12,14 @@
 
 namespace {
 
-// Error constants
-static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "Projectile system not ready"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-static const Error INVALID_PROJECTILE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid projectile ID"
-};
+// Static errors
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Projectile system not ready" };
+static const Error INVALID_PROJECTILE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid projectile ID" };
 
 // Helper: check if ready
 static bool IsReady()
@@ -30,428 +28,454 @@ static bool IsReady()
 }
 
 // Spatial queries
-static Int32Array NativeGetProjectilesInRectangle(float minX, float minZ, float maxX, float maxZ, bool synced, bool weapon)
+static void NativeGetProjectilesInRectangle(const GetProjectilesInRectangleQuery* query, GetProjectilesInRectangleResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->projectiles = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> projectiles;
-	projectiles.clear();
+	const float3 mins(query->minX, 0.0f, query->minZ);
+	const float3 maxs(query->maxX, 0.0f, query->maxZ);
 
-	const float3 mins(minX, 0.0f, minZ);
-	const float3 maxs(maxX, 0.0f, maxZ);
+	// Use scratch buffer for array
+	int32_t* projectiles = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxProjectiles = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	const auto& foundProjectiles = quadField.GetProjectilesExact(mins, maxs);
 	for (const CProjectile* proj : foundProjectiles) {
 		if (proj != nullptr) {
-			if (synced && !proj->synced) continue;
-			if (weapon && !proj->weapon) continue;
-			projectiles.push_back(proj->id);
-		}
-	}
-
-	result.data = projectiles.data();
-	result.length = static_cast<uint32_t>(projectiles.size());
-	return result;
-}
-
-static Int32Array NativeGetProjectilesInSphere(Float3 center, float radius, bool synced, bool weapon)
-{
-	Int32Array result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> projectiles;
-	projectiles.clear();
-
-	const float3 pos(center.x, center.y, center.z);
-	const float radiusSq = radius * radius;
-
-	const auto& foundProjectiles = quadField.GetProjectilesExact(pos, radius);
-	for (const CProjectile* proj : foundProjectiles) {
-		if (proj != nullptr) {
-			if (synced && !proj->synced) continue;
-			if (weapon && !proj->weapon) continue;
-
-			const float distSq = proj->pos.SqDistance(pos);
-			if (distSq <= radiusSq) {
-				projectiles.push_back(proj->id);
+			if (query->synced && !proj->synced) continue;
+			if (query->weapon && !proj->weapon) continue;
+			if (count < maxProjectiles) {
+				projectiles[count++] = proj->id;
 			}
 		}
 	}
 
-	result.data = projectiles.data();
-	result.length = static_cast<uint32_t>(projectiles.size());
-	return result;
+	result->projectiles = projectiles;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
+}
+
+static void NativeGetProjectilesInSphere(const GetProjectilesInSphereQuery* query, GetProjectilesInSphereResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->projectiles = nullptr;
+	result->count = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const float3 pos(query->center.x, query->center.y, query->center.z);
+	const float radiusSq = query->radius * query->radius;
+
+	// Use scratch buffer for array
+	int32_t* projectiles = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxProjectiles = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+
+	const auto& foundProjectiles = quadField.GetProjectilesExact(pos, query->radius);
+	for (const CProjectile* proj : foundProjectiles) {
+		if (proj != nullptr) {
+			if (query->synced && !proj->synced) continue;
+			if (query->weapon && !proj->weapon) continue;
+
+			const float distSq = proj->pos.SqDistance(pos);
+			if (distSq <= radiusSq && count < maxProjectiles) {
+				projectiles[count++] = proj->id;
+			}
+		}
+	}
+
+	result->projectiles = projectiles;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
 // Basic info
-static Float3Result NativeGetProjectilePosition(int32_t projectileID)
+static void NativeGetProjectilePosition(const GetProjectilePositionQuery* query, GetProjectilePositionResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->position.x = 0.0f;
+	result->position.y = 0.0f;
+	result->position.z = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
-	result.value.x = proj->pos.x;
-	result.value.y = proj->pos.y;
-	result.value.z = proj->pos.z;
-	return result;
+	result->position.x = proj->pos.x;
+	result->position.y = proj->pos.y;
+	result->position.z = proj->pos.z;
 }
 
-static Float3Result NativeGetProjectileDirection(int32_t projectileID)
+static void NativeGetProjectileDirection(const GetProjectileDirectionQuery* query, GetProjectileDirectionResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->direction.x = 0.0f;
+	result->direction.y = 0.0f;
+	result->direction.z = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
 	const float3 dir = proj->dir;
-	result.value.x = dir.x;
-	result.value.y = dir.y;
-	result.value.z = dir.z;
-	return result;
+	result->direction.x = dir.x;
+	result->direction.y = dir.y;
+	result->direction.z = dir.z;
 }
 
-static Float3Result NativeGetProjectileVelocity(int32_t projectileID)
+static void NativeGetProjectileVelocity(const GetProjectileVelocityQuery* query, GetProjectileVelocityResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->velocity.x = 0.0f;
+	result->velocity.y = 0.0f;
+	result->velocity.z = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
 	const float3 speed = proj->speed;
-	result.value.x = speed.x;
-	result.value.y = speed.y;
-	result.value.z = speed.z;
-	return result;
+	result->velocity.x = speed.x;
+	result->velocity.y = speed.y;
+	result->velocity.z = speed.z;
 }
 
-static Float3Result NativeGetProjectileGravity(int32_t projectileID)
+static void NativeGetProjectileGravity(const GetProjectileGravityQuery* query, GetProjectileGravityResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->gravity.x = 0.0f;
+	result->gravity.y = 0.0f;
+	result->gravity.z = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
-	// Most projectiles use standard gravity
-	result.value.x = 0.0f;
-	result.value.y = -proj->mygravity;
-	result.value.z = 0.0f;
-	return result;
+	result->gravity.y = -proj->mygravity;
 }
-
 // Piece projectile
-static PieceProjectileParamsResult NativeGetPieceProjectileParams(int32_t projectileID)
+static void NativeGetPieceProjectileParams(const GetPieceProjectileParamsQuery* query, GetPieceProjectileParamsResult* result)
 {
-	PieceProjectileParamsResult result = {};
-	result.isPieceProjectile = false;
+	bufferPos = 0;
+	result->error = nullptr;
+	result->isPieceProjectile = false;
 
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
 	const CPieceProjectile* pProj = dynamic_cast<const CPieceProjectile*>(proj);
 	if (pProj == nullptr) {
-		return result; // Not a piece projectile
+		return; // Not a piece projectile
 	}
 
-	result.isPieceProjectile = true;
-	result.params.pos.x = pProj->pos.x;
-	result.params.pos.y = pProj->pos.y;
-	result.params.pos.z = pProj->pos.z;
-	result.params.speed.x = pProj->speed.x;
-	result.params.speed.y = pProj->speed.y;
-	result.params.speed.z = pProj->speed.z;
-	result.params.gravity.x = 0.0f;
-	result.params.gravity.y = -pProj->mygravity;
-	result.params.gravity.z = 0.0f;
-	result.params.spinVec.x = 0.0f;
-	result.params.spinVec.y = 0.0f;
-	result.params.spinVec.z = 0.0f;
-	result.params.modelPieceNum = 0; // Not directly accessible
-	result.params.modelObjectType = 0;
-	result.params.modelName = "";
-	result.params.team = pProj->GetTeamID();
-
-	return result;
+	result->isPieceProjectile = true;
+	result->params.pos.x = pProj->pos.x;
+	result->params.pos.y = pProj->pos.y;
+	result->params.pos.z = pProj->pos.z;
+	result->params.speed.x = pProj->speed.x;
+	result->params.speed.y = pProj->speed.y;
+	result->params.speed.z = pProj->speed.z;
+	result->params.gravity.x = 0.0f;
+	result->params.gravity.y = -pProj->mygravity;
+	result->params.gravity.z = 0.0f;
+	result->params.spinVec.x = 0.0f;
+	result->params.spinVec.y = 0.0f;
+	result->params.spinVec.z = 0.0f;
+	result->params.modelPieceNum = 0;
+	result->params.modelObjectType = 0;
+	result->params.modelName = "";
+	result->params.team = pProj->GetTeamID();
 }
 
 // Target
-static ProjectileTargetResult NativeGetProjectileTarget(int32_t projectileID)
+static void NativeGetProjectileTarget(const GetProjectileTargetQuery* query, GetProjectileTargetResult* result)
 {
-	ProjectileTargetResult result = {};
-	result.target.targetType = 0; // No target
+	bufferPos = 0;
+	result->error = nullptr;
+	result->target.targetType = 0; // No target
 
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
 	const CWeaponProjectile* wProj = dynamic_cast<const CWeaponProjectile*>(proj);
 	if (wProj == nullptr) {
-		return result; // Not a weapon projectile
+		return; // Not a weapon projectile
 	}
 
 	if (wProj->GetTargetObject() != nullptr) {
-		// Has unit/feature target
-		result.target.targetType = 1; // Unit (could be feature too)
-		result.target.targetID = wProj->GetTargetObject()->id;
-		result.target.targetPos.x = wProj->GetTargetPos().x;
-		result.target.targetPos.y = wProj->GetTargetPos().y;
-		result.target.targetPos.z = wProj->GetTargetPos().z;
+		result->target.targetType = 1; // Unit (could be feature too)
+		result->target.targetID = wProj->GetTargetObject()->id;
+		result->target.targetPos.x = wProj->GetTargetPos().x;
+		result->target.targetPos.y = wProj->GetTargetPos().y;
+		result->target.targetPos.z = wProj->GetTargetPos().z;
 	} else {
-		// Ground target
-		result.target.targetType = 2; // Ground
-		result.target.targetID = -1;
-		result.target.targetPos.x = wProj->GetTargetPos().x;
-		result.target.targetPos.y = wProj->GetTargetPos().y;
-		result.target.targetPos.z = wProj->GetTargetPos().z;
+		result->target.targetType = 2; // Ground
+		result->target.targetID = -1;
+		result->target.targetPos.x = wProj->GetTargetPos().x;
+		result->target.targetPos.y = wProj->GetTargetPos().y;
+		result->target.targetPos.z = wProj->GetTargetPos().z;
 	}
-
-	return result;
 }
 
 // State
-static BoolResult NativeGetProjectileIsIntercepted(int32_t projectileID)
+static void NativeGetProjectileIsIntercepted(const GetProjectileIsInterceptedQuery* query, GetProjectileIsInterceptedResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->isIntercepted = false;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
 	const CWeaponProjectile* wProj = dynamic_cast<const CWeaponProjectile*>(proj);
 	if (wProj != nullptr) {
-		result.value = (wProj->GetTargetObject() == nullptr && wProj->GetTargetPos() == ZeroVector);
-	} else {
-		result.value = false;
+		result->isIntercepted = (wProj->GetTargetObject() == nullptr && wProj->GetTargetPos() == ZeroVector);
 	}
-
-	return result;
 }
 
-static FloatResult NativeGetProjectileTimeToLive(int32_t projectileID)
+static void NativeGetProjectileTimeToLive(const GetProjectileTimeToLiveQuery* query, GetProjectileTimeToLiveResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->ttl = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
 	const CWeaponProjectile* wProj = dynamic_cast<const CWeaponProjectile*>(proj);
 	if (wProj != nullptr) {
-		result.value = wProj->GetTTL();
-	} else {
-		result.value = 0.0f;
+		result->ttl = wProj->GetTTL();
 	}
-
-	return result;
 }
 
 // Owner
-static Int32Result NativeGetProjectileOwnerID(int32_t projectileID)
+static void NativeGetProjectileOwnerID(const GetProjectileOwnerIDQuery* query, GetProjectileOwnerIDResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->ownerID = -1;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
-	result.value = proj->GetOwnerID();
-	return result;
+	result->ownerID = proj->GetOwnerID();
 }
 
-static Int32Result NativeGetProjectileTeamID(int32_t projectileID)
+static void NativeGetProjectileTeamID(const GetProjectileTeamIDQuery* query, GetProjectileTeamIDResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->teamID = -1;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
-	result.value = proj->GetTeamID();
-	return result;
+	result->teamID = proj->GetTeamID();
 }
 
-static Int32Result NativeGetProjectileAllyTeamID(int32_t projectileID)
+static void NativeGetProjectileAllyTeamID(const GetProjectileAllyTeamIDQuery* query, GetProjectileAllyTeamIDResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->allyTeamID = -1;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
-	result.value = proj->GetAllyteamID();
-	return result;
+	result->allyTeamID = proj->GetAllyteamID();
 }
 
 // Type
-static UInt32Result NativeGetProjectileType(int32_t projectileID)
+static void NativeGetProjectileType(const GetProjectileTypeQuery* query, GetProjectileTypeResult* result)
 {
-	UInt32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->type = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
-	result.value = proj->GetProjectileType();
-	return result;
+	result->type = proj->GetProjectileType();
 }
 
-static Int32Result NativeGetProjectileDefID(int32_t projectileID)
+static void NativeGetProjectileDefID(const GetProjectileDefIDQuery* query, GetProjectileDefIDResult* result)
 {
-	Int32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->defID = -1;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
 	const CWeaponProjectile* wProj = dynamic_cast<const CWeaponProjectile*>(proj);
 	if (wProj != nullptr && wProj->weaponDef != nullptr) {
-		result.value = wProj->weaponDef->id;
-	} else {
-		result.value = -1;
+		result->defID = wProj->weaponDef->id;
 	}
-
-	return result;
 }
 
 // Damages
-static ProjectileDamagesResult NativeGetProjectileDamages(int32_t projectileID)
+static void NativeGetProjectileDamages(const GetProjectileDamagesQuery* query, GetProjectileDamagesResult* result)
 {
-	ProjectileDamagesResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->damages.damages = nullptr;
+	result->damages.damageCount = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(projectileID);
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr) {
-		result.error = &INVALID_PROJECTILE_ERROR;
-		return result;
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
 	}
 
 	const CWeaponProjectile* wProj = dynamic_cast<const CWeaponProjectile*>(proj);
 	if (wProj == nullptr || wProj->weaponDef == nullptr) {
-		// No damage info available
-		result.damages.damages = nullptr;
-		result.damages.damageCount = 0;
-		result.damages.defaultDamage = 0.0f;
-		return result;
+		result->damages.defaultDamage = 0.0f;
+		return;
 	}
 
 	const WeaponDef* weaponDef = wProj->weaponDef;
 	const DamageArray& damages = weaponDef->damages;
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<float> damageValues;
-	damageValues.clear();
+	// Use scratch buffer for array
+	float* damageValues = reinterpret_cast<float*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxDamages = (sizeof(scratchBuffer) - bufferPos) / sizeof(float);
 
-	for (int i = 0; i < damages.GetNumTypes(); i++) {
-		damageValues.push_back(damages.Get(i));
+	for (int i = 0; i < damages.GetNumTypes() && count < maxDamages; i++) {
+		damageValues[count++] = damages.Get(i);
 	}
 
-	result.damages.damages = damageValues.data();
-	result.damages.damageCount = static_cast<uint32_t>(damageValues.size());
-	result.damages.paralyzeDamageTime = weaponDef->damages.paralyzeDamageTime;
-	result.damages.impulseFactor = weaponDef->damages.impulseFactor;
-	result.damages.impulseBoost = weaponDef->damages.impulseBoost;
-	result.damages.craterMult = weaponDef->damages.craterMult;
-	result.damages.craterBoost = weaponDef->damages.craterBoost;
-	result.damages.defaultDamage = weaponDef->damages.GetDefault();
-
-	return result;
+	result->damages.damages = damageValues;
+	result->damages.damageCount = count;
+	result->damages.paralyzeDamageTime = weaponDef->damages.paralyzeDamageTime;
+	result->damages.impulseFactor = weaponDef->damages.impulseFactor;
+	result->damages.impulseBoost = weaponDef->damages.impulseBoost;
+	result->damages.craterMult = weaponDef->damages.craterMult;
+	result->damages.craterBoost = weaponDef->damages.craterBoost;
+	result->damages.defaultDamage = weaponDef->damages.GetDefault();
+	bufferPos += count * sizeof(float);
 }
 
 } // namespace

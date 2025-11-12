@@ -21,11 +21,6 @@ struct ProjectileTarget {
 	Float3 targetPos;
 };
 
-struct ProjectileTargetResult {
-	const Error* error;
-	ProjectileTarget target;
-};
-
 // Piece projectile params
 struct PieceProjectileParams {
 	Float3 pos;
@@ -36,12 +31,6 @@ struct PieceProjectileParams {
 	int32_t modelObjectType;  // 1=s3o, 2=obj, etc.
 	const char* modelName;
 	int32_t team;
-};
-
-struct PieceProjectileParamsResult {
-	const Error* error;
-	PieceProjectileParams params;
-	bool isPieceProjectile;
 };
 
 // Projectile damages
@@ -56,44 +45,73 @@ struct ProjectileDamages {
 	float defaultDamage;
 };
 
-struct ProjectileDamagesResult {
-	const Error* error;
-	ProjectileDamages damages;
-};
+// Queries
+struct GetProjectilesInRectangleQuery { float minX; float minZ; float maxX; float maxZ; bool synced; bool weapon; };
+struct GetProjectilesInRectangleResult { const Error* error; int32_t* projectiles; uint32_t count; };
+
+struct GetProjectilesInSphereQuery { Float3 center; float radius; bool synced; bool weapon; };
+struct GetProjectilesInSphereResult { const Error* error; int32_t* projectiles; uint32_t count; };
+
+struct GetProjectilePositionQuery { int32_t projectileID; };
+struct GetProjectilePositionResult { const Error* error; Float3 position; };
+
+struct GetProjectileDirectionQuery { int32_t projectileID; };
+struct GetProjectileDirectionResult { const Error* error; Float3 direction; };
+
+struct GetProjectileVelocityQuery { int32_t projectileID; };
+struct GetProjectileVelocityResult { const Error* error; Float3 velocity; };
+
+struct GetProjectileGravityQuery { int32_t projectileID; };
+struct GetProjectileGravityResult { const Error* error; Float3 gravity; };
+
+struct GetPieceProjectileParamsQuery { int32_t projectileID; };
+struct GetPieceProjectileParamsResult { const Error* error; PieceProjectileParams params; bool isPieceProjectile; };
+
+struct GetProjectileTargetQuery { int32_t projectileID; };
+struct GetProjectileTargetResult { const Error* error; ProjectileTarget target; };
+
+struct GetProjectileIsInterceptedQuery { int32_t projectileID; };
+struct GetProjectileIsInterceptedResult { const Error* error; bool isIntercepted; };
+
+struct GetProjectileTimeToLiveQuery { int32_t projectileID; };
+struct GetProjectileTimeToLiveResult { const Error* error; float ttl; };
+
+struct GetProjectileOwnerIDQuery { int32_t projectileID; };
+struct GetProjectileOwnerIDResult { const Error* error; int32_t ownerID; };
+
+struct GetProjectileTeamIDQuery { int32_t projectileID; };
+struct GetProjectileTeamIDResult { const Error* error; int32_t teamID; };
+
+struct GetProjectileAllyTeamIDQuery { int32_t projectileID; };
+struct GetProjectileAllyTeamIDResult { const Error* error; int32_t allyTeamID; };
+
+struct GetProjectileTypeQuery { int32_t projectileID; };
+struct GetProjectileTypeResult { const Error* error; uint32_t type; };
+
+struct GetProjectileDefIDQuery { int32_t projectileID; };
+struct GetProjectileDefIDResult { const Error* error; int32_t defID; };
+
+struct GetProjectileDamagesQuery { int32_t projectileID; };
+struct GetProjectileDamagesResult { const Error* error; ProjectileDamages damages; };
 
 // API structure
 struct ProjectilesApi {
-	// Spatial queries
-	Int32Array (*GetProjectilesInRectangle)(float minX, float minZ, float maxX, float maxZ, bool synced, bool weapon);
-	Int32Array (*GetProjectilesInSphere)(Float3 center, float radius, bool synced, bool weapon);
-
-	// Basic info
-	Float3Result (*GetProjectilePosition)(int32_t projectileID);
-	Float3Result (*GetProjectileDirection)(int32_t projectileID);
-	Float3Result (*GetProjectileVelocity)(int32_t projectileID);
-	Float3Result (*GetProjectileGravity)(int32_t projectileID);
-
-	// Piece projectile
-	PieceProjectileParamsResult (*GetPieceProjectileParams)(int32_t projectileID);
-
-	// Target
-	ProjectileTargetResult (*GetProjectileTarget)(int32_t projectileID);
-
-	// State
-	BoolResult (*GetProjectileIsIntercepted)(int32_t projectileID);
-	FloatResult (*GetProjectileTimeToLive)(int32_t projectileID);
-
-	// Owner
-	Int32Result (*GetProjectileOwnerID)(int32_t projectileID);
-	Int32Result (*GetProjectileTeamID)(int32_t projectileID);
-	Int32Result (*GetProjectileAllyTeamID)(int32_t projectileID);
-
-	// Type
-	UInt32Result (*GetProjectileType)(int32_t projectileID);
-	Int32Result (*GetProjectileDefID)(int32_t projectileID);  // Weapon def ID
-
-	// Damages
-	ProjectileDamagesResult (*GetProjectileDamages)(int32_t projectileID);
+	void (*GetProjectilesInRectangle)(const GetProjectilesInRectangleQuery* query, GetProjectilesInRectangleResult* result);
+	void (*GetProjectilesInSphere)(const GetProjectilesInSphereQuery* query, GetProjectilesInSphereResult* result);
+	void (*GetProjectilePosition)(const GetProjectilePositionQuery* query, GetProjectilePositionResult* result);
+	void (*GetProjectileDirection)(const GetProjectileDirectionQuery* query, GetProjectileDirectionResult* result);
+	void (*GetProjectileVelocity)(const GetProjectileVelocityQuery* query, GetProjectileVelocityResult* result);
+	void (*GetProjectileGravity)(const GetProjectileGravityQuery* query, GetProjectileGravityResult* result);
+	void (*GetPieceProjectileParams)(const GetPieceProjectileParamsQuery* query, GetPieceProjectileParamsResult* result);
+	void (*GetProjectileTarget)(const GetProjectileTargetQuery* query, GetProjectileTargetResult* result);
+	void (*GetProjectileIsIntercepted)(const GetProjectileIsInterceptedQuery* query, GetProjectileIsInterceptedResult* result);
+	void (*GetProjectileTimeToLive)(const GetProjectileTimeToLiveQuery* query, GetProjectileTimeToLiveResult* result);
+	void (*GetProjectileOwnerID)(const GetProjectileOwnerIDQuery* query, GetProjectileOwnerIDResult* result);
+	void (*GetProjectileTeamID)(const GetProjectileTeamIDQuery* query, GetProjectileTeamIDResult* result);
+	void (*GetProjectileAllyTeamID)(const GetProjectileAllyTeamIDQuery* query, GetProjectileAllyTeamIDResult* result);
+	void (*GetProjectileType)(const GetProjectileTypeQuery* query, GetProjectileTypeResult* result);
+	void (*GetProjectileDefID)(const GetProjectileDefIDQuery* query, GetProjectileDefIDResult* result);
+	void (*GetProjectileDamages)(const GetProjectileDamagesQuery* query, GetProjectileDamagesResult* result);
 };
 
 extern const ProjectilesApi PROJECTILES_API;
