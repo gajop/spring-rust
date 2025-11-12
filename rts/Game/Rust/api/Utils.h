@@ -14,17 +14,56 @@ extern "C" {
 // General utility functions
 // ============================================================================
 
-// CEG (Custom Explosion Generator) ID
-struct CEGIDResult {
+// Queries
+struct GetCEGIDQuery {
+	const char* cegName;
+};
+
+struct GetCEGIDResult {
 	const Error* error;
 	int32_t cegID;
 };
 
-// Test order results
+struct TestBuildOrderQuery {
+	int32_t unitDefID;
+	Float3 pos;
+	int32_t facing;
+};
+
 struct TestBuildOrderResult {
 	const Error* error;
 	bool canBuild;
 	int32_t feature;  // Blocking feature ID or -1
+};
+
+struct Pos2BuildPosQuery {
+	int32_t unitDefID;
+	Float3 pos;
+	int32_t facing;
+};
+
+struct Pos2BuildPosResult {
+	const Error* error;
+	Float3 buildPos;
+};
+
+struct ClosestBuildPosQuery {
+	int32_t teamID;
+	int32_t unitDefID;
+	Float3 pos;
+	float searchRadius;
+	int32_t minDist;
+	int32_t facing;
+};
+
+struct ClosestBuildPosResult {
+	const Error* error;
+	Float3 buildPos;
+};
+
+struct TestMoveOrderQuery {
+	int32_t unitDefID;
+	Float3 pos;
 };
 
 struct TestMoveOrderResult {
@@ -32,28 +71,46 @@ struct TestMoveOrderResult {
 	bool canMove;
 };
 
-// Build position adjustment
-struct BuildPosQuery {
+struct GetUnitDefDimensionsQuery {
 	int32_t unitDefID;
-	Float3 pos;
-	int32_t facing;
+};
+
+struct GetUnitDefDimensionsResult {
+	const Error* error;
+	Float3 dimensions;
 };
 
 // API structure
 struct UtilsApi {
-	// CEG
-	CEGIDResult (*GetCEGID)(const char* cegName);
+	void (*GetCEGID)(
+		const GetCEGIDQuery* query,
+		GetCEGIDResult* result
+	);
 
-	// Build testing
-	TestBuildOrderResult (*TestBuildOrder)(int32_t unitDefID, Float3 pos, int32_t facing);
-	Float3Result (*Pos2BuildPos)(BuildPosQuery query);
-	Float3Result (*ClosestBuildPos)(int32_t teamID, int32_t unitDefID, Float3 pos, float searchRadius, int32_t minDist, int32_t facing);
+	void (*TestBuildOrder)(
+		const TestBuildOrderQuery* query,
+		TestBuildOrderResult* result
+	);
 
-	// Move testing
-	TestMoveOrderResult (*TestMoveOrder)(int32_t unitDefID, Float3 pos);
+	void (*Pos2BuildPos)(
+		const Pos2BuildPosQuery* query,
+		Pos2BuildPosResult* result
+	);
 
-	// Unit dimensions
-	Float3Result (*GetUnitDefDimensions)(int32_t unitDefID);
+	void (*ClosestBuildPos)(
+		const ClosestBuildPosQuery* query,
+		ClosestBuildPosResult* result
+	);
+
+	void (*TestMoveOrder)(
+		const TestMoveOrderQuery* query,
+		TestMoveOrderResult* result
+	);
+
+	void (*GetUnitDefDimensions)(
+		const GetUnitDefDimensionsQuery* query,
+		GetUnitDefDimensionsResult* result
+	);
 };
 
 extern const UtilsApi UTILS_API;

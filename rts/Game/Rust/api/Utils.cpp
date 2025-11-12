@@ -9,7 +9,12 @@
 
 namespace {
 
-// Error constants
+// Scratch buffer for dynamic data
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
 static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "System not ready"
@@ -27,40 +32,40 @@ static bool IsReady()
 }
 
 // CEG
-static CEGIDResult NativeGetCEGID(const char* cegName)
+static void NativeGetCEGID(const GetCEGIDQuery* query, GetCEGIDResult* result)
 {
-	CEGIDResult result = {};
-	if (cegName == nullptr || cegName[0] == '\0') {
-		result.cegID = -1;
-		return result;
+	bufferPos = 0;
+
+	if (query->cegName == nullptr || query->cegName[0] == '\0') {
+		result->error = nullptr;
+		result->cegID = -1;
+		return;
 	}
 
-	result.cegID = static_cast<int32_t>(explGenHandler.LoadCustomGeneratorID(cegName));
-	return result;
+	result->error = nullptr;
+	result->cegID = static_cast<int32_t>(explGenHandler.LoadCustomGeneratorID(query->cegName));
 }
 
 // Build testing
-static TestBuildOrderResult NativeTestBuildOrder(int32_t unitDefID, Float3 pos, int32_t facing)
+static void NativeTestBuildOrder(const TestBuildOrderQuery* query, TestBuildOrderResult* result)
 {
-	TestBuildOrderResult result = {};
-	result.canBuild = false;
-	result.feature = -1;
+	bufferPos = 0;
 
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(unitDefID);
+	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(query->unitDefID);
 	if (unitDef == nullptr) {
-		result.error = &INVALID_UNITDEF_ERROR;
-		return result;
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
 	}
 
 	BuildInfo bi;
 	bi.def = unitDef;
-	bi.pos = float3(pos.x, pos.y, pos.z);
-	bi.buildFacing = facing;
+	bi.pos = float3(query->pos.x, query->pos.y, query->pos.z);
+	bi.buildFacing = query->facing;
 	bi.pos = CGameHelper::Pos2BuildPos(bi, true); // synced=true
 
 	CFeature* feature = nullptr;
@@ -73,114 +78,115 @@ static TestBuildOrderResult NativeTestBuildOrder(int32_t unitDefID, Float3 pos, 
 	const int mappedStatus = (status == CGameHelper::BUILDSQUARE_OPEN) ?
 		CGameHelper::BUILDSQUARE_RECLAIMABLE : status;
 
-	result.canBuild = (mappedStatus >= CGameHelper::BUILDSQUARE_RECLAIMABLE);
-	result.feature = (feature != nullptr) ? feature->id : -1;
-
-	return result;
+	result->error = nullptr;
+	result->canBuild = (mappedStatus >= CGameHelper::BUILDSQUARE_RECLAIMABLE);
+	result->feature = (feature != nullptr) ? feature->id : -1;
 }
 
-static Float3Result NativePos2BuildPos(BuildPosQuery query)
+static void NativePos2BuildPos(const Pos2BuildPosQuery* query, Pos2BuildPosResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(query.unitDefID);
+	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(query->unitDefID);
 	if (unitDef == nullptr) {
-		result.error = &INVALID_UNITDEF_ERROR;
-		return result;
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
 	}
 
 	BuildInfo bi;
 	bi.def = unitDef;
-	bi.pos = float3(query.pos.x, query.pos.y, query.pos.z);
-	bi.buildFacing = query.facing;
+	bi.pos = float3(query->pos.x, query->pos.y, query->pos.z);
+	bi.buildFacing = query->facing;
 
 	const float3 buildPos = CGameHelper::Pos2BuildPos(bi, true); // synced=true
 
-	result.value.x = buildPos.x;
-	result.value.y = buildPos.y;
-	result.value.z = buildPos.z;
-	return result;
+	result->error = nullptr;
+	result->buildPos.x = buildPos.x;
+	result->buildPos.y = buildPos.y;
+	result->buildPos.z = buildPos.z;
 }
 
-static Float3Result NativeClosestBuildPos(int32_t teamID, int32_t unitDefID, Float3 pos, float searchRadius, int32_t minDist, int32_t facing)
+static void NativeClosestBuildPos(const ClosestBuildPosQuery* query, ClosestBuildPosResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(unitDefID);
+	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(query->unitDefID);
 	if (unitDef == nullptr) {
-		result.error = &INVALID_UNITDEF_ERROR;
-		return result;
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
 	}
 
-	const float3 worldPos(pos.x, pos.y, pos.z);
-	const float3 buildPos = CGameHelper::ClosestBuildPos(teamID, unitDef, worldPos, searchRadius, minDist, facing, true);
+	const float3 worldPos(query->pos.x, query->pos.y, query->pos.z);
+	const float3 buildPos = CGameHelper::ClosestBuildPos(query->teamID, unitDef, worldPos, query->searchRadius, query->minDist, query->facing, true);
 
-	result.value.x = buildPos.x;
-	result.value.y = buildPos.y;
-	result.value.z = buildPos.z;
-	return result;
+	result->error = nullptr;
+	result->buildPos.x = buildPos.x;
+	result->buildPos.y = buildPos.y;
+	result->buildPos.z = buildPos.z;
 }
 
 // Move testing
-static TestMoveOrderResult NativeTestMoveOrder(int32_t unitDefID, Float3 pos)
+static void NativeTestMoveOrder(const TestMoveOrderQuery* query, TestMoveOrderResult* result)
 {
-	TestMoveOrderResult result = {};
-	result.canMove = false;
+	bufferPos = 0;
 
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(unitDefID);
+	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(query->unitDefID);
 	if (unitDef == nullptr || unitDef->pathType == -1u) {
-		result.canMove = false;
-		return result;
+		result->error = nullptr;
+		result->canMove = false;
+		return;
 	}
 
 	// Simplified: just check if unit has a valid path type
 	// Full implementation would query pathfinder
-	result.canMove = true;
-	return result;
+	result->error = nullptr;
+	result->canMove = true;
 }
 
 // Unit dimensions
-static Float3Result NativeGetUnitDefDimensions(int32_t unitDefID)
+static void NativeGetUnitDefDimensions(const GetUnitDefDimensionsQuery* query, GetUnitDefDimensionsResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(unitDefID);
+	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(query->unitDefID);
 	if (unitDef == nullptr) {
-		result.error = &INVALID_UNITDEF_ERROR;
-		return result;
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
 	}
 
 	// Return model dimensions
 	const S3DModel* model = unitDef->model;
+	result->error = nullptr;
 	if (model != nullptr) {
 		const float3 mid = (model->maxs + model->mins) * 0.5f;
-		result.value.x = mid.x;
-		result.value.y = mid.y;
-		result.value.z = mid.z;
+		result->dimensions.x = mid.x;
+		result->dimensions.y = mid.y;
+		result->dimensions.z = mid.z;
 	} else {
-		result.value.x = 0.0f;
-		result.value.y = 0.0f;
-		result.value.z = 0.0f;
+		result->dimensions.x = 0.0f;
+		result->dimensions.y = 0.0f;
+		result->dimensions.z = 0.0f;
 	}
-
-	return result;
 }
 
 } // namespace
