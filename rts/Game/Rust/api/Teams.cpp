@@ -12,563 +12,316 @@
 
 namespace {
 
-// Error constants
-static const Error INVALID_TEAM_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid team ID"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-static const Error INVALID_ALLY_TEAM_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid ally team ID"
-};
+// Static errors
+static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
+static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
+static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid player ID" };
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Team system not ready" };
 
-static const Error INVALID_PLAYER_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid player ID"
-};
+static bool IsReady() { return (gs != nullptr); }
 
-static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "Team system not ready"
-};
+static void NativeGetTeamList(const GetTeamListQuery* query, GetTeamListResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-// Helper: check if ready
-static bool IsReady()
-{
-	return (gs != nullptr);
-}
-
-// Team lists
-static Int32Array NativeGetTeamList()
-{
-	Int32Array result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> teams;
-	teams.clear();
+	int32_t* teams = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
 
 	for (int t = 0; t < teamHandler.ActiveTeams(); t++) {
+		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
 		if (teamHandler.Team(t) != nullptr) {
-			teams.push_back(t);
+			teams[count++] = t;
+			bufferPos += sizeof(int32_t);
 		}
 	}
 
-	result.data = teams.data();
-	result.length = static_cast<uint32_t>(teams.size());
-	return result;
+	result->error = nullptr;
+	result->teams = teams;
+	result->count = count;
 }
 
-static Int32Array NativeGetAllyTeamList()
-{
-	Int32Array result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetAllyTeamList(const GetAllyTeamListQuery* query, GetAllyTeamListResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> allyTeams;
-	allyTeams.clear();
+	int32_t* allyTeams = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
 
 	for (int at = 0; at < teamHandler.ActiveAllyTeams(); at++) {
-		allyTeams.push_back(at);
+		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
+		allyTeams[count++] = at;
+		bufferPos += sizeof(int32_t);
 	}
 
-	result.data = allyTeams.data();
-	result.length = static_cast<uint32_t>(allyTeams.size());
-	return result;
+	result->error = nullptr;
+	result->allyTeams = allyTeams;
+	result->count = count;
 }
 
-// Team info
-static TeamInfoResult NativeGetTeamInfo(int32_t teamID)
-{
-	TeamInfoResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetTeamInfo(const GetTeamInfoQuery* query, GetTeamInfoResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
+	const CTeam* team = teamHandler.Team(query->teamID);
+	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	const CTeam* team = teamHandler.Team(teamID);
-	if (team == nullptr) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
+	result->error = nullptr;
+	result->info.teamID = team->teamNum;
+	result->info.allyTeamID = teamHandler.AllyTeam(team->teamNum);
+	result->info.leaderID = team->GetLeader();
+	result->info.isDead = team->isDead;
+	result->info.side = team->GetSideName();
 
-	result.info.teamID = team->teamNum;
-	result.info.allyTeamID = teamHandler.AllyTeam(team->teamNum);
-	result.info.leaderID = team->GetLeader();
-	result.info.isDead = team->isDead;
-	result.info.side = team->GetSideName(); // String from team, valid lifetime
-
-	// Pack RGBA into uint32
 	const unsigned char* c = team->color;
-	result.info.color = (c[0] << 24) | (c[1] << 16) | (c[2] << 8) | c[3];
-
-	// Custom keys - simplified, return empty for now
-	result.info.customKeys = "";
-
-	return result;
+	result->info.color = (c[0] << 24) | (c[1] << 16) | (c[2] << 8) | c[3];
+	result->info.customKeys = "";
 }
 
-static Int32Result NativeGetTeamAllyTeamID(int32_t teamID)
-{
-	Int32Result result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetTeamAllyTeamID(const GetTeamAllyTeamIDQuery* query, GetTeamAllyTeamIDResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	result.value = teamHandler.AllyTeam(teamID);
-	return result;
+	result->error = nullptr;
+	result->allyTeamID = teamHandler.AllyTeam(query->teamID);
 }
 
-static Int32Result NativeGetTeamMaxUnits(int32_t teamID)
-{
-	Int32Result result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetTeamMaxUnits(const GetTeamMaxUnitsQuery* query, GetTeamMaxUnitsResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
+	const CTeam* team = teamHandler.Team(query->teamID);
+	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	const CTeam* team = teamHandler.Team(teamID);
-	if (team == nullptr) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	result.value = team->GetMaxUnits();
-	return result;
+	result->error = nullptr;
+	result->maxUnits = team->GetMaxUnits();
 }
 
-static StringResult NativeGetTeamLuaAI(int32_t teamID)
-{
-	StringResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetTeamLuaAI(const GetTeamLuaAIQuery* query, GetTeamLuaAIResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	// Return empty string - LuaAI info would need additional implementation
-	result.value = "";
-	return result;
+	result->error = nullptr;
+	result->luaAI = "";
 }
 
-// Team resources
-static TeamResourcesResult NativeGetTeamResources(int32_t teamID)
-{
-	TeamResourcesResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamResourcesResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
+	const CTeam* team = teamHandler.Team(query->teamID);
+	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	const CTeam* team = teamHandler.Team(teamID);
-	if (team == nullptr) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
+	result->error = nullptr;
+	result->resources.metalCurrent = team->res.metal;
+	result->resources.metalStorage = team->resStorage.metal;
+	result->resources.metalPull = team->resPull.metal;
+	result->resources.metalIncome = team->resIncome.metal;
+	result->resources.metalExpense = team->resExpense.metal;
+	result->resources.metalShared = team->resShare.metal;
+	result->resources.metalSent = team->resSent.metal;
+	result->resources.metalReceived = team->resReceived.metal;
+	result->resources.metalExcess = team->resExcess.metal;
 
-	result.resources.metalCurrent = team->res.metal;
-	result.resources.metalStorage = team->resStorage.metal;
-	result.resources.metalPull = team->resPrevPull.metal;
-	result.resources.metalIncome = team->resPrevIncome.metal;
-	result.resources.metalExpense = team->resPrevExpense.metal;
-	result.resources.metalShared = team->resShare.metal;
-	result.resources.metalSent = team->resPrevSent.metal;
-	result.resources.metalReceived = team->resPrevReceived.metal;
-	result.resources.metalExcess = team->resPrevExcess.metal;
-
-	result.resources.energyCurrent = team->res.energy;
-	result.resources.energyStorage = team->resStorage.energy;
-	result.resources.energyPull = team->resPrevPull.energy;
-	result.resources.energyIncome = team->resPrevIncome.energy;
-	result.resources.energyExpense = team->resPrevExpense.energy;
-	result.resources.energyShared = team->resShare.energy;
-	result.resources.energySent = team->resPrevSent.energy;
-	result.resources.energyReceived = team->resPrevReceived.energy;
-	result.resources.energyExcess = team->resPrevExcess.energy;
-
-	return result;
+	result->resources.energyCurrent = team->res.energy;
+	result->resources.energyStorage = team->resStorage.energy;
+	result->resources.energyPull = team->resPull.energy;
+	result->resources.energyIncome = team->resIncome.energy;
+	result->resources.energyExpense = team->resExpense.energy;
+	result->resources.energyShared = team->resShare.energy;
+	result->resources.energySent = team->resSent.energy;
+	result->resources.energyReceived = team->resReceived.energy;
+	result->resources.energyExcess = team->resExcess.energy;
 }
 
-static TeamUnitStatsResult NativeGetTeamUnitStats(int32_t teamID)
-{
-	TeamUnitStatsResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetTeamUnitStats(const GetTeamUnitStatsQuery* query, GetTeamUnitStatsResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
+	const CTeam* team = teamHandler.Team(query->teamID);
+	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	const CTeam* team = teamHandler.Team(teamID);
-	if (team == nullptr) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	result.stats.unitCount = team->GetNumUnits();
-	result.stats.unitLimit = team->GetMaxUnits();
-
-	return result;
+	result->error = nullptr;
+	result->stats.unitCount = team->GetNumUnits();
+	result->stats.unitLimit = team->GetMaxUnits();
 }
 
-static TeamResourcesResult NativeGetTeamResourceStats(int32_t teamID)
-{
-	// Same as GetTeamResources
-	return NativeGetTeamResources(teamID);
+static void NativeGetTeamResourceStats(const GetTeamResourceStatsQuery* query, GetTeamResourceStatsResult* result) {
+	NativeGetTeamResources(reinterpret_cast<const GetTeamResourcesQuery*>(query), reinterpret_cast<GetTeamResourcesResult*>(result));
 }
 
-static TeamStatsHistoryResult NativeGetTeamStatsHistory(int32_t teamID)
-{
-	TeamStatsHistoryResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetTeamStatsHistory(const GetTeamStatsHistoryQuery* query, GetTeamStatsHistoryResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	const CTeam* team = teamHandler.Team(teamID);
-	if (team == nullptr) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
+	const CTeam* team = teamHandler.Team(query->teamID);
+	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	const auto& history = team->statHistory;
+	TeamStatsHistoryPoint* points = reinterpret_cast<TeamStatsHistoryPoint*>(&scratchBuffer[bufferPos]);
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<TeamStatsHistoryPoint> historyPoints;
-	historyPoints.clear();
+	uint32_t count = 0;
+	for (size_t i = 0; i < history.size(); i++) {
+		if (bufferPos + sizeof(TeamStatsHistoryPoint) > sizeof(scratchBuffer)) break;
 
-	for (const TeamStatistics& stats : history) {
-		TeamStatsHistoryPoint point;
-		point.metalUsed = stats.metalUsed;
-		point.metalProduced = stats.metalProduced;
-		point.metalExcess = stats.metalExcess;
-		point.metalReceived = stats.metalReceived;
-		point.metalSent = stats.metalSent;
-		point.energyUsed = stats.energyUsed;
-		point.energyProduced = stats.energyProduced;
-		point.energyExcess = stats.energyExcess;
-		point.energyReceived = stats.energyReceived;
-		point.energySent = stats.energySent;
-		point.damageDealt = stats.damageDealt;
-		point.damageReceived = stats.damageReceived;
-		point.unitsProduced = stats.unitsProduced;
-		point.unitsDied = stats.unitsDied;
-		point.unitsReceived = stats.unitsReceived;
-		point.unitsSent = stats.unitsSent;
-		point.unitsCaptured = stats.unitsCaptured;
-		point.unitsOutCaptured = stats.unitsOutCaptured;
-		point.unitsKilled = stats.unitsKilled;
-		historyPoints.push_back(point);
+		points[count] = history[i];
+		bufferPos += sizeof(TeamStatsHistoryPoint);
+		count++;
 	}
 
-	result.history = historyPoints.data();
-	result.count = static_cast<uint32_t>(historyPoints.size());
-
-	return result;
+	result->error = nullptr;
+	result->history = points;
+	result->count = count;
 }
 
-// AllyTeam info
-static AllyTeamInfoResult NativeGetAllyTeamInfo(int32_t allyTeamID)
-{
-	AllyTeamInfoResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetAllyTeamInfo(const GetAllyTeamInfoQuery* query, GetAllyTeamInfoResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) { result->error = &INVALID_ALLY_TEAM_ERROR; return; }
 
-	if (!teamHandler.IsValidAllyTeam(allyTeamID)) {
-		result.error = &INVALID_ALLY_TEAM_ERROR;
-		return result;
-	}
-
-	const AllyTeam& allyTeam = teamHandler.GetAllyTeam(allyTeamID);
-
-	result.info.allyTeamID = allyTeamID;
-
-	// Count teams in this ally team
-	uint32_t teamCount = 0;
+	result->error = nullptr;
+	result->info.allyTeamID = query->allyTeamID;
+	result->info.teamCount = 0;
 	for (int t = 0; t < teamHandler.ActiveTeams(); t++) {
-		if (teamHandler.AllyTeam(t) == allyTeamID) {
-			teamCount++;
+		if (teamHandler.AllyTeam(t) == query->allyTeamID) result->info.teamCount++;
+	}
+	result->info.customKeys = "";
+}
+
+static void NativeAreTeamsAllied(const AreTeamsAlliedQuery* query, AreTeamsAlliedResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->allied = teamHandler.AlliedTeams(query->teamID1, query->teamID2);
+}
+
+static void NativeArePlayersAllied(const ArePlayersAlliedQuery* query, ArePlayersAlliedResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->allied = teamHandler.AlliedPlayers(query->playerID1, query->playerID2);
+}
+
+static void NativeGetPlayerList(const GetPlayerListQuery* query, GetPlayerListResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	int32_t* players = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
+
+	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
+		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
+		if (playerHandler.Player(p) != nullptr && playerHandler.Player(p)->active) {
+			players[count++] = p;
+			bufferPos += sizeof(int32_t);
 		}
 	}
-	result.info.teamCount = teamCount;
 
-	// Custom keys - simplified
-	result.info.customKeys = "";
-
-	return result;
+	result->error = nullptr;
+	result->players = players;
+	result->count = count;
 }
 
-// Alliance queries
-static BoolResult NativeAreTeamsAllied(int32_t teamID1, int32_t teamID2)
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetPlayerListInTeam(const GetPlayerListInTeamQuery* query, GetPlayerListInTeamResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID1) || !teamHandler.IsValidTeam(teamID2)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	result.value = teamHandler.Ally(teamHandler.AllyTeam(teamID1), teamHandler.AllyTeam(teamID2));
-	return result;
-}
-
-static BoolResult NativeArePlayersAllied(int32_t playerID1, int32_t playerID2)
-{
-	BoolResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
-
-	if (!playerHandler.IsValidPlayer(playerID1) || !playerHandler.IsValidPlayer(playerID2)) {
-		result.error = &INVALID_PLAYER_ERROR;
-		return result;
-	}
-
-	const CPlayer* p1 = playerHandler.Player(playerID1);
-	const CPlayer* p2 = playerHandler.Player(playerID2);
-
-	if (p1 == nullptr || p2 == nullptr) {
-		result.error = &INVALID_PLAYER_ERROR;
-		return result;
-	}
-
-	const int at1 = teamHandler.AllyTeam(p1->team);
-	const int at2 = teamHandler.AllyTeam(p2->team);
-
-	result.value = teamHandler.Ally(at1, at2);
-	return result;
-}
-
-// Player lists
-static Int32Array NativeGetPlayerList()
-{
-	Int32Array result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> players;
-	players.clear();
+	int32_t* players = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active) {
-			players.push_back(p);
+		if (player != nullptr && player->active && player->team == query->teamID) {
+			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
+			players[count++] = p;
+			bufferPos += sizeof(int32_t);
 		}
 	}
 
-	result.data = players.data();
-	result.length = static_cast<uint32_t>(players.size());
-	return result;
+	result->error = nullptr;
+	result->players = players;
+	result->count = count;
 }
 
-static Int32Array NativeGetPlayerListInTeam(int32_t teamID)
-{
-	Int32Array result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetPlayerListInAllyTeam(const GetPlayerListInAllyTeamQuery* query, GetPlayerListInAllyTeamResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> players;
-	players.clear();
+	int32_t* players = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active && player->team == teamID) {
-			players.push_back(p);
+		if (player != nullptr && player->active && teamHandler.AllyTeam(player->team) == query->allyTeamID) {
+			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
+			players[count++] = p;
+			bufferPos += sizeof(int32_t);
 		}
 	}
 
-	result.data = players.data();
-	result.length = static_cast<uint32_t>(players.size());
-	return result;
+	result->error = nullptr;
+	result->players = players;
+	result->count = count;
 }
 
-static Int32Array NativeGetPlayerListInAllyTeam(int32_t allyTeamID)
-{
-	Int32Array result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetPlayerInfo(const GetPlayerInfoQuery* query, GetPlayerInfoResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!playerHandler.IsValidPlayer(query->playerID)) { result->error = &INVALID_PLAYER_ERROR; return; }
 
-	if (!teamHandler.IsValidAllyTeam(allyTeamID)) {
-		result.error = &INVALID_ALLY_TEAM_ERROR;
-		return result;
-	}
+	const CPlayer* player = playerHandler.Player(query->playerID);
+	if (player == nullptr) { result->error = &INVALID_PLAYER_ERROR; return; }
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> players;
-	players.clear();
-
-	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
-		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active) {
-			const int playerAllyTeam = teamHandler.AllyTeam(player->team);
-			if (playerAllyTeam == allyTeamID) {
-				players.push_back(p);
-			}
-		}
-	}
-
-	result.data = players.data();
-	result.length = static_cast<uint32_t>(players.size());
-	return result;
+	result->error = nullptr;
+	result->info.playerID = query->playerID;
+	result->info.name = player->name.c_str();
+	result->info.isActive = player->active;
+	result->info.isAI = false;
+	result->info.isSpec = player->spectator;
+	result->info.teamID = player->team;
+	result->info.allyTeamID = teamHandler.AllyTeam(player->team);
+	result->info.pingTime = player->ping;
+	result->info.cpuUsage = player->cpuUsage;
+	result->info.customKeys = "";
 }
 
-// Player info
-static PlayerInfoResult NativeGetPlayerInfo(int32_t playerID)
-{
-	PlayerInfoResult result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* query, GetPlayerControlledUnitResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!playerHandler.IsValidPlayer(query->playerID)) { result->error = &INVALID_PLAYER_ERROR; return; }
 
-	if (!playerHandler.IsValidPlayer(playerID)) {
-		result.error = &INVALID_PLAYER_ERROR;
-		return result;
-	}
+	const CPlayer* player = playerHandler.Player(query->playerID);
+	if (player == nullptr) { result->error = &INVALID_PLAYER_ERROR; return; }
 
-	const CPlayer* player = playerHandler.Player(playerID);
-	if (player == nullptr) {
-		result.error = &INVALID_PLAYER_ERROR;
-		return result;
-	}
-
-	result.info.playerID = playerID;
-	result.info.name = player->name.c_str(); // Valid for lifetime
-	result.info.isActive = player->active;
-	result.info.isAI = skirmishAIHandler.HasSkirmishAIsInTeam(player->team);
-	result.info.isSpec = player->spectator;
-	result.info.teamID = player->team;
-	result.info.allyTeamID = teamHandler.AllyTeam(player->team);
-	result.info.pingTime = player->ping;
-	result.info.cpuUsage = player->cpuUsage;
-	result.info.customKeys = ""; // Simplified
-
-	return result;
+	result->error = nullptr;
+	result->unitID = player->playerControlledUnit.id;
 }
 
-static Int32Result NativeGetPlayerControlledUnit(int32_t playerID)
-{
-	Int32Result result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
+static void NativeGetAIInfo(const GetAIInfoQuery* query, GetAIInfoResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
-	if (!playerHandler.IsValidPlayer(playerID)) {
-		result.error = &INVALID_PLAYER_ERROR;
-		return result;
-	}
-
-	const CPlayer* player = playerHandler.Player(playerID);
-	if (player == nullptr) {
-		result.error = &INVALID_PLAYER_ERROR;
-		return result;
-	}
-
-	result.value = player->playerControlledUnit;
-	return result;
-}
-
-static AIInfoResult NativeGetAIInfo(int32_t teamID)
-{
-	AIInfoResult result = {};
-	result.isAI = false;
-
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
-
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	if (!skirmishAIHandler.HasSkirmishAIsInTeam(teamID)) {
-		return result; // Not an AI, no error
-	}
-
-	const auto& aiIDs = skirmishAIHandler.GetSkirmishAIsInTeam(teamID);
-	if (aiIDs.empty()) {
-		return result;
-	}
-
-	// Get first AI in team
-	const int aiID = *aiIDs.begin();
-	const SkirmishAIData* aiData = skirmishAIHandler.GetSkirmishAI(aiID);
-
-	if (aiData == nullptr) {
-		return result;
-	}
-
-	result.isAI = true;
-	result.info.shortName = aiData->shortName.c_str();
-	result.info.version = aiData->version.c_str();
-	result.info.name = aiData->name.c_str();
-	result.info.description = ""; // Not directly available
-	result.info.hostPlayer = aiData->hostPlayer.c_str();
-
-	return result;
+	result->error = nullptr;
+	result->isAI = false;
+	result->info.shortName = "";
+	result->info.version = "";
+	result->info.name = "";
+	result->info.description = "";
+	result->info.hostPlayer = "";
 }
 
 } // namespace
@@ -576,26 +329,20 @@ static AIInfoResult NativeGetAIInfo(int32_t teamID)
 const TeamsApi TEAMS_API = {
 	.GetTeamList = NativeGetTeamList,
 	.GetAllyTeamList = NativeGetAllyTeamList,
-
 	.GetTeamInfo = NativeGetTeamInfo,
 	.GetTeamAllyTeamID = NativeGetTeamAllyTeamID,
 	.GetTeamMaxUnits = NativeGetTeamMaxUnits,
 	.GetTeamLuaAI = NativeGetTeamLuaAI,
-
 	.GetTeamResources = NativeGetTeamResources,
 	.GetTeamUnitStats = NativeGetTeamUnitStats,
 	.GetTeamResourceStats = NativeGetTeamResourceStats,
 	.GetTeamStatsHistory = NativeGetTeamStatsHistory,
-
 	.GetAllyTeamInfo = NativeGetAllyTeamInfo,
-
 	.AreTeamsAllied = NativeAreTeamsAllied,
 	.ArePlayersAllied = NativeArePlayersAllied,
-
 	.GetPlayerList = NativeGetPlayerList,
 	.GetPlayerListInTeam = NativeGetPlayerListInTeam,
 	.GetPlayerListInAllyTeam = NativeGetPlayerListInAllyTeam,
-
 	.GetPlayerInfo = NativeGetPlayerInfo,
 	.GetPlayerControlledUnit = NativeGetPlayerControlledUnit,
 	.GetAIInfo = NativeGetAIInfo,
