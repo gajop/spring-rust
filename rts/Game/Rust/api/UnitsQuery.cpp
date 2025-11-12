@@ -8,21 +8,15 @@
 
 namespace {
 
-// Error constants
-static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
-	.message = "Unit system not ready"
-};
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
 
-static const Error INVALID_UNIT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid unit ID"
-};
-
-static const Error INVALID_TEAM_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
-	.message = "Invalid team ID"
-};
+// Static errors
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit system not ready" };
+static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
+static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
 
 // Helper: check if ready
 static bool IsReady()
@@ -48,357 +42,417 @@ static bool UnitMatchesFilter(const CUnit* unit, const UnitFilterParams& filter)
 }
 
 // Validation
-static BoolResult NativeValidUnitID(int32_t unitID)
+static void NativeValidUnitID(const ValidUnitIDQuery* query, ValidUnitIDResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->valid = false;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
-	result.value = unitHandler.IsValidUnit(unitID);
-	return result;
+	result->valid = unitHandler.IsValidUnit(query->unitID);
 }
 
 // Get all units
-static Int32Array NativeGetAllUnits()
+static void NativeGetAllUnits(const GetAllUnitsQuery* query, GetAllUnitsResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> units;
-	units.clear();
+	// Use scratch buffer for array
+	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	for (const CUnit* unit : unitHandler.GetActiveUnits()) {
-		if (unit != nullptr) {
-			units.push_back(unit->id);
+		if (unit != nullptr && count < maxUnits) {
+			units[count++] = unit->id;
 		}
 	}
 
-	result.data = units.data();
-	result.length = static_cast<uint32_t>(units.size());
-	return result;
+	result->units = units;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
 // Get units by team
-static Int32Array NativeGetTeamUnits(int32_t teamID)
+static void NativeGetTeamUnits(const GetTeamUnitsQuery* query, GetTeamUnitsResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> units;
-	units.clear();
+	// Use scratch buffer for array
+	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	for (const CUnit* unit : unitHandler.GetUnitsByTeam(teamID)) {
-		if (unit != nullptr) {
-			units.push_back(unit->id);
+	for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
+		if (unit != nullptr && count < maxUnits) {
+			units[count++] = unit->id;
 		}
 	}
 
-	result.data = units.data();
-	result.length = static_cast<uint32_t>(units.size());
-	return result;
+	result->units = units;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
-static Int32Array NativeGetTeamUnitsSorted(int32_t teamID)
+static void NativeGetTeamUnitsSorted(const GetTeamUnitsSortedQuery* query, GetTeamUnitsSortedResult* result)
 {
 	// For now, return same as GetTeamUnits
 	// Full sorting by def would require more complex structure
-	return NativeGetTeamUnits(teamID);
+	GetTeamUnitsQuery q = { .teamID = query->teamID };
+	GetTeamUnitsResult r;
+	NativeGetTeamUnits(&q, &r);
+	result->error = r.error;
+	result->units = r.units;
+	result->count = r.count;
 }
 
-static UnitDefCountsResult NativeGetTeamUnitsCounts(int32_t teamID)
+static void NativeGetTeamUnitsCounts(const GetTeamUnitsCountsQuery* query, GetTeamUnitsCountsResult* result)
 {
-	UnitDefCountsResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->counts = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
 	}
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<UnitDefCount> counts;
-	counts.clear();
 
 	// Count units by def
 	std::unordered_map<int32_t, uint32_t> defCounts;
-	for (const CUnit* unit : unitHandler.GetUnitsByTeam(teamID)) {
+	for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
 		if (unit != nullptr) {
 			defCounts[unit->unitDef->id]++;
 		}
 	}
 
-	for (const auto& [defID, count] : defCounts) {
-		UnitDefCount udc;
-		udc.unitDefID = defID;
-		udc.count = count;
-		counts.push_back(udc);
-	}
-
-	result.counts = counts.data();
-	result.countCount = static_cast<uint32_t>(counts.size());
-	return result;
-}
-
-static Int32Array NativeGetTeamUnitsByDefs(int32_t teamID, const int32_t* unitDefIDs, uint32_t count)
-{
-	Int32Array result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
-
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
-	// Build set of requested defs
-	std::unordered_set<int32_t> requestedDefs(unitDefIDs, unitDefIDs + count);
-
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> units;
-	units.clear();
-
-	for (const CUnit* unit : unitHandler.GetUnitsByTeam(teamID)) {
-		if (unit != nullptr && requestedDefs.count(unit->unitDef->id) > 0) {
-			units.push_back(unit->id);
-		}
-	}
-
-	result.data = units.data();
-	result.length = static_cast<uint32_t>(units.size());
-	return result;
-}
-
-static UInt32Result NativeGetTeamUnitDefCount(int32_t teamID, int32_t unitDefID)
-{
-	UInt32Result result = {};
-	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
-	}
-
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
-	}
-
+	// Use scratch buffer for array
+	UnitDefCount* counts = reinterpret_cast<UnitDefCount*>(scratchBuffer + bufferPos);
 	uint32_t count = 0;
-	for (const CUnit* unit : unitHandler.GetUnitsByTeam(teamID)) {
-		if (unit != nullptr && unit->unitDef->id == unitDefID) {
+	const size_t maxCounts = (sizeof(scratchBuffer) - bufferPos) / sizeof(UnitDefCount);
+
+	for (const auto& [defID, defCount] : defCounts) {
+		if (count < maxCounts) {
+			counts[count].unitDefID = defID;
+			counts[count].count = defCount;
 			count++;
 		}
 	}
 
-	result.value = count;
-	return result;
+	result->counts = counts;
+	result->count = count;
+	bufferPos += count * sizeof(UnitDefCount);
 }
 
-static UInt32Result NativeGetTeamUnitCount(int32_t teamID)
+static void NativeGetTeamUnitsByDefs(const GetTeamUnitsByDefsQuery* query, GetTeamUnitsByDefsResult* result)
 {
-	UInt32Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	if (!teamHandler.IsValidTeam(teamID)) {
-		result.error = &INVALID_TEAM_ERROR;
-		return result;
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
 	}
 
-	result.value = unitHandler.NumUnitsByTeam(teamID);
-	return result;
+	// Build set of requested defs
+	std::unordered_set<int32_t> requestedDefs(query->unitDefIDs, query->unitDefIDs + query->defCount);
+
+	// Use scratch buffer for array
+	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+
+	for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
+		if (unit != nullptr && requestedDefs.count(unit->unitDef->id) > 0 && count < maxUnits) {
+			units[count++] = unit->id;
+		}
+	}
+
+	result->units = units;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
+}
+
+static void NativeGetTeamUnitDefCount(const GetTeamUnitDefCountQuery* query, GetTeamUnitDefCountResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->count = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
+
+	uint32_t count = 0;
+	for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
+		if (unit != nullptr && unit->unitDef->id == query->unitDefID) {
+			count++;
+		}
+	}
+
+	result->count = count;
+}
+
+static void NativeGetTeamUnitCount(const GetTeamUnitCountQuery* query, GetTeamUnitCountResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->count = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
+
+	result->count = unitHandler.NumUnitsByTeam(query->teamID);
 }
 
 // Spatial queries
-static Int32Array NativeGetUnitsInRectangle(RectangleQuery query, UnitFilterParams filter)
+static void NativeGetUnitsInRectangle(const GetUnitsInRectangleQuery* query, GetUnitsInRectangleResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> units;
-	units.clear();
+	const float3 mins(query->rect.minX, 0.0f, query->rect.minZ);
+	const float3 maxs(query->rect.maxX, 0.0f, query->rect.maxZ);
 
-	const float3 mins(query.minX, 0.0f, query.minZ);
-	const float3 maxs(query.maxX, 0.0f, query.maxZ);
+	// Use scratch buffer for array
+	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	const auto& foundUnits = quadField.GetUnitsExact(mins, maxs);
 	for (const CUnit* unit : foundUnits) {
-		if (UnitMatchesFilter(unit, filter)) {
-			units.push_back(unit->id);
+		if (UnitMatchesFilter(unit, query->filter) && count < maxUnits) {
+			units[count++] = unit->id;
 		}
 	}
 
-	result.data = units.data();
-	result.length = static_cast<uint32_t>(units.size());
-	return result;
+	result->units = units;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
-static Int32Array NativeGetUnitsInBox(BoxQuery query, UnitFilterParams filter)
+static void NativeGetUnitsInBox(const GetUnitsInBoxQuery* query, GetUnitsInBoxResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> units;
-	units.clear();
+	const float3 mins(query->box.min.x, query->box.min.y, query->box.min.z);
+	const float3 maxs(query->box.max.x, query->box.max.y, query->box.max.z);
 
-	const float3 mins(query.min.x, query.min.y, query.min.z);
-	const float3 maxs(query.max.x, query.max.y, query.max.z);
+	// Use scratch buffer for array
+	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	const auto& foundUnits = quadField.GetUnitsExact(mins, maxs);
 	for (const CUnit* unit : foundUnits) {
-		if (UnitMatchesFilter(unit, filter)) {
+		if (UnitMatchesFilter(unit, query->filter)) {
 			const float3& pos = unit->pos;
 			if (pos.x >= mins.x && pos.x <= maxs.x &&
 				pos.y >= mins.y && pos.y <= maxs.y &&
-				pos.z >= mins.z && pos.z <= maxs.z) {
-				units.push_back(unit->id);
+				pos.z >= mins.z && pos.z <= maxs.z &&
+				count < maxUnits) {
+				units[count++] = unit->id;
 			}
 		}
 	}
 
-	result.data = units.data();
-	result.length = static_cast<uint32_t>(units.size());
-	return result;
+	result->units = units;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
-static Int32Array NativeGetUnitsInPlanes(PlanesQuery query, UnitFilterParams filter)
+static void NativeGetUnitsInPlanes(const GetUnitsInPlanesQuery* query, GetUnitsInPlanesResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> units;
-	units.clear();
+	// Use scratch buffer for array
+	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	// Simplified - would need proper frustum culling
 	for (const CUnit* unit : unitHandler.GetActiveUnits()) {
-		if (UnitMatchesFilter(unit, filter)) {
-			units.push_back(unit->id);
+		if (UnitMatchesFilter(unit, query->filter) && count < maxUnits) {
+			units[count++] = unit->id;
 		}
 	}
 
-	result.data = units.data();
-	result.length = static_cast<uint32_t>(units.size());
-	return result;
+	result->units = units;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
-static Int32Array NativeGetUnitsInSphere(SphereQuery query, UnitFilterParams filter)
+static void NativeGetUnitsInSphere(const GetUnitsInSphereQuery* query, GetUnitsInSphereResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> units;
-	units.clear();
+	const float3 center(query->sphere.center.x, query->sphere.center.y, query->sphere.center.z);
+	const float radiusSq = query->sphere.radius * query->sphere.radius;
 
-	const float3 center(query.center.x, query.center.y, query.center.z);
-	const float radiusSq = query.radius * query.radius;
+	// Use scratch buffer for array
+	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundUnits = quadField.GetUnitsExact(center, query.radius);
+	const auto& foundUnits = quadField.GetUnitsExact(center, query->sphere.radius);
 	for (const CUnit* unit : foundUnits) {
-		if (UnitMatchesFilter(unit, filter)) {
+		if (UnitMatchesFilter(unit, query->filter)) {
 			const float distSq = unit->pos.SqDistance(center);
-			if (distSq <= radiusSq) {
-				units.push_back(unit->id);
+			if (distSq <= radiusSq && count < maxUnits) {
+				units[count++] = unit->id;
 			}
 		}
 	}
 
-	result.data = units.data();
-	result.length = static_cast<uint32_t>(units.size());
-	return result;
+	result->units = units;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
-static Int32Array NativeGetUnitsInCylinder(CylinderQuery query, UnitFilterParams filter)
+static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUnitsInCylinderResult* result)
 {
-	Int32Array result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Use static storage - valid for call duration only
-	static thread_local std::vector<int32_t> units;
-	units.clear();
+	const float3 center(query->cylinder.center.x, query->cylinder.center.y, query->cylinder.center.z);
+	const float radiusSq = query->cylinder.radius * query->cylinder.radius;
+	const float halfHeight = query->cylinder.height * 0.5f;
 
-	const float3 center(query.center.x, query.center.y, query.center.z);
-	const float radiusSq = query.radius * query.radius;
-	const float halfHeight = query.height * 0.5f;
+	// Use scratch buffer for array
+	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundUnits = quadField.GetUnitsExact(center, query.radius);
+	const auto& foundUnits = quadField.GetUnitsExact(center, query->cylinder.radius);
 	for (const CUnit* unit : foundUnits) {
-		if (UnitMatchesFilter(unit, filter)) {
+		if (UnitMatchesFilter(unit, query->filter)) {
 			const float3& pos = unit->pos;
 			const float dx = pos.x - center.x;
 			const float dz = pos.z - center.z;
 			const float distXZSq = dx * dx + dz * dz;
 			const float dy = std::abs(pos.y - center.y);
 
-			if (distXZSq <= radiusSq && dy <= halfHeight) {
-				units.push_back(unit->id);
+			if (distXZSq <= radiusSq && dy <= halfHeight && count < maxUnits) {
+				units[count++] = unit->id;
 			}
 		}
 	}
 
-	result.data = units.data();
-	result.length = static_cast<uint32_t>(units.size());
-	return result;
+	result->units = units;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
 }
 
 // Centroid calculations
-static Float3Result NativeGetUnitArrayCentroid(const int32_t* unitIDs, uint32_t count)
+static void NativeGetUnitArrayCentroid(const GetUnitArrayCentroidQuery* query, GetUnitArrayCentroidResult* result)
 {
-	Float3Result result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->centroid.x = 0.0f;
+	result->centroid.y = 0.0f;
+	result->centroid.z = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	if (count == 0 || unitIDs == nullptr) {
-		result.value.x = 0.0f;
-		result.value.y = 0.0f;
-		result.value.z = 0.0f;
-		return result;
+	if (query->count == 0 || query->unitIDs == nullptr) {
+		return;
 	}
 
 	float3 centroid(0.0f, 0.0f, 0.0f);
 	uint32_t validCount = 0;
 
-	for (uint32_t i = 0; i < count; i++) {
-		const CUnit* unit = unitHandler.GetUnit(unitIDs[i]);
+	for (uint32_t i = 0; i < query->count; i++) {
+		const CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
 		if (unit != nullptr) {
 			centroid += unit->pos;
 			validCount++;
@@ -409,79 +463,86 @@ static Float3Result NativeGetUnitArrayCentroid(const int32_t* unitIDs, uint32_t 
 		centroid /= static_cast<float>(validCount);
 	}
 
-	result.value.x = centroid.x;
-	result.value.y = centroid.y;
-	result.value.z = centroid.z;
-	return result;
+	result->centroid.x = centroid.x;
+	result->centroid.y = centroid.y;
+	result->centroid.z = centroid.z;
 }
 
-static Float3Result NativeGetUnitMapCentroid(const int32_t* unitIDs, uint32_t count)
+static void NativeGetUnitMapCentroid(const GetUnitMapCentroidQuery* query, GetUnitMapCentroidResult* result)
 {
 	// Same as array centroid for now
-	return NativeGetUnitArrayCentroid(unitIDs, count);
+	GetUnitArrayCentroidQuery q = { .unitIDs = query->unitIDs, .count = query->count };
+	GetUnitArrayCentroidResult r;
+	NativeGetUnitArrayCentroid(&q, &r);
+	result->error = r.error;
+	result->centroid = r.centroid;
 }
 
 // Nearest unit
-static Int32Result NativeGetUnitNearestAlly(Float3 pos, float radius)
+static void NativeGetUnitNearestAlly(const GetUnitNearestAllyQuery* query, GetUnitNearestAllyResult* result)
 {
-	Int32Result result = {};
-	result.value = -1; // No unit found
+	bufferPos = 0;
+	result->error = nullptr;
+	result->unitID = -1; // No unit found
 
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const float3 position(pos.x, pos.y, pos.z);
-	float minDistSq = radius * radius;
+	const float3 position(query->pos.x, query->pos.y, query->pos.z);
+	float minDistSq = query->radius * query->radius;
 
-	const auto& foundUnits = quadField.GetUnitsExact(position, radius);
+	const auto& foundUnits = quadField.GetUnitsExact(position, query->radius);
 	for (const CUnit* unit : foundUnits) {
 		if (unit != nullptr) {
 			const float distSq = unit->pos.SqDistance(position);
 			if (distSq < minDistSq) {
 				minDistSq = distSq;
-				result.value = unit->id;
+				result->unitID = unit->id;
 			}
 		}
 	}
-
-	return result;
 }
 
-static Int32Result NativeGetUnitNearestEnemy(Float3 pos, float radius)
+static void NativeGetUnitNearestEnemy(const GetUnitNearestEnemyQuery* query, GetUnitNearestEnemyResult* result)
 {
 	// Same as ally for now - would need ally/enemy filtering
-	return NativeGetUnitNearestAlly(pos, radius);
+	GetUnitNearestAllyQuery q = { .pos = query->pos, .radius = query->radius };
+	GetUnitNearestAllyResult r;
+	NativeGetUnitNearestAlly(&q, &r);
+	result->error = r.error;
+	result->unitID = r.unitID;
 }
 
 // Separation
-static FloatResult NativeGetUnitSeparation(int32_t unitID1, int32_t unitID2, bool positional, bool checkMap)
+static void NativeGetUnitSeparation(const GetUnitSeparationQuery* query, GetUnitSeparationResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+	result->error = nullptr;
+	result->separation = 0.0f;
+
 	if (!IsReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const CUnit* unit1 = unitHandler.GetUnit(unitID1);
-	const CUnit* unit2 = unitHandler.GetUnit(unitID2);
+	const CUnit* unit1 = unitHandler.GetUnit(query->unitID1);
+	const CUnit* unit2 = unitHandler.GetUnit(query->unitID2);
 
 	if (unit1 == nullptr || unit2 == nullptr) {
-		result.error = &INVALID_UNIT_ERROR;
-		return result;
+		result->error = &INVALID_UNIT_ERROR;
+		return;
 	}
 
-	if (positional) {
-		result.value = unit1->pos.distance(unit2->pos);
+	if (query->positional) {
+		result->separation = unit1->pos.distance(unit2->pos);
 	} else {
 		// Collision volume based distance
 		const float radSum = unit1->radius + unit2->radius;
 		const float dist = unit1->pos.distance(unit2->pos);
-		result.value = std::max(0.0f, dist - radSum);
+		result->separation = std::max(0.0f, dist - radSum);
 	}
-
-	return result;
 }
 
 } // namespace
