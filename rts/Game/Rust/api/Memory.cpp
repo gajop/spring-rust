@@ -3,68 +3,75 @@
 
 namespace {
 
-static void NativeFreeStringArray(const char** data, uint32_t length)
+// NOTE: With scratch buffer pattern, these free functions are mostly unused.
+// The scratch buffer is reused per-call, so no explicit freeing needed.
+// These are kept for compatibility with any APIs that might allocate separately.
+
+static void NativeFreeStringArray(const FreeStringArrayQuery* query, FreeStringArrayResult* result)
 {
-	if (data == nullptr) {
+	if (query->data == nullptr) {
+		result->error = nullptr;
 		return;
 	}
 
 	// Free each individual string
-	for (uint32_t i = 0; i < length; i++) {
-		if (data[i] != nullptr) {
-			std::free(const_cast<char*>(data[i]));
+	for (uint32_t i = 0; i < query->length; i++) {
+		if (query->data[i] != nullptr) {
+			std::free(const_cast<char*>(query->data[i]));
 		}
 	}
 
 	// Free the array of pointers
-	std::free(const_cast<char**>(data));
+	std::free(const_cast<char**>(query->data));
+	result->error = nullptr;
 }
 
-static void NativeFreeInt32Array(int32_t* data, uint32_t length)
+static void NativeFreeInt32Array(const FreeInt32ArrayQuery* query, FreeInt32ArrayResult* result)
 {
-	(void)length;  // Unused, but kept for API consistency
-	std::free(data);
+	std::free(query->data);
+	result->error = nullptr;
 }
 
-static void NativeFreeUInt32Array(uint32_t* data, uint32_t length)
+static void NativeFreeUInt32Array(const FreeUInt32ArrayQuery* query, FreeUInt32ArrayResult* result)
 {
-	(void)length;
-	std::free(data);
+	std::free(query->data);
+	result->error = nullptr;
 }
 
-static void NativeFreeFloatArray(float* data, uint32_t length)
+static void NativeFreeFloatArray(const FreeFloatArrayQuery* query, FreeFloatArrayResult* result)
 {
-	(void)length;
-	std::free(data);
+	std::free(query->data);
+	result->error = nullptr;
 }
 
-static void NativeFreeFloat2Array(Float2* data, uint32_t length)
+static void NativeFreeFloat2Array(const FreeFloat2ArrayQuery* query, FreeFloat2ArrayResult* result)
 {
-	(void)length;
-	std::free(data);
+	std::free(query->data);
+	result->error = nullptr;
 }
 
-static void NativeFreeFloat3Array(Float3* data, uint32_t length)
+static void NativeFreeFloat3Array(const FreeFloat3ArrayQuery* query, FreeFloat3ArrayResult* result)
 {
-	(void)length;
-	std::free(data);
+	std::free(query->data);
+	result->error = nullptr;
 }
 
-static void NativeFreeFloat4Array(Float4* data, uint32_t length)
+static void NativeFreeFloat4Array(const FreeFloat4ArrayQuery* query, FreeFloat4ArrayResult* result)
 {
-	(void)length;
-	std::free(data);
+	std::free(query->data);
+	result->error = nullptr;
 }
 
-static void NativeFreeInt3Array(Int3* data, uint32_t length)
+static void NativeFreeInt3Array(const FreeInt3ArrayQuery* query, FreeInt3ArrayResult* result)
 {
-	(void)length;
-	std::free(data);
+	std::free(query->data);
+	result->error = nullptr;
 }
 
-static void NativeFree(void* ptr)
+static void NativeFree(const FreeQuery* query, FreeResult* result)
 {
-	std::free(ptr);
+	std::free(query->ptr);
+	result->error = nullptr;
 }
 
 } // namespace

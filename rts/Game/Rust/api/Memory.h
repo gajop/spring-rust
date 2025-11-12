@@ -11,27 +11,136 @@ extern "C" {
 // Memory Management API
 //
 // Provides functions for Rust to deallocate memory allocated by C++ APIs
-// All arrays returned by the API must be freed using these functions
+// Note: With scratch buffer pattern, most arrays don't need explicit freeing
+// as they're reused per-call. These functions are for special cases.
 // ============================================================================
 
+// Queries (for consistency, though most don't need results)
+struct FreeStringArrayQuery {
+	const char** data;
+	uint32_t length;
+};
+
+struct FreeStringArrayResult {
+	const Error* error;
+};
+
+struct FreeInt32ArrayQuery {
+	int32_t* data;
+	uint32_t length;
+};
+
+struct FreeInt32ArrayResult {
+	const Error* error;
+};
+
+struct FreeUInt32ArrayQuery {
+	uint32_t* data;
+	uint32_t length;
+};
+
+struct FreeUInt32ArrayResult {
+	const Error* error;
+};
+
+struct FreeFloatArrayQuery {
+	float* data;
+	uint32_t length;
+};
+
+struct FreeFloatArrayResult {
+	const Error* error;
+};
+
+struct FreeFloat2ArrayQuery {
+	Float2* data;
+	uint32_t length;
+};
+
+struct FreeFloat2ArrayResult {
+	const Error* error;
+};
+
+struct FreeFloat3ArrayQuery {
+	Float3* data;
+	uint32_t length;
+};
+
+struct FreeFloat3ArrayResult {
+	const Error* error;
+};
+
+struct FreeFloat4ArrayQuery {
+	Float4* data;
+	uint32_t length;
+};
+
+struct FreeFloat4ArrayResult {
+	const Error* error;
+};
+
+struct FreeInt3ArrayQuery {
+	Int3* data;
+	uint32_t length;
+};
+
+struct FreeInt3ArrayResult {
+	const Error* error;
+};
+
+struct FreeQuery {
+	void* ptr;
+};
+
+struct FreeResult {
+	const Error* error;
+};
+
 struct MemoryApi {
-	// Free string arrays (array of string pointers)
-	// This frees both the array of pointers AND the individual strings
-	void (*FreeStringArray)(const char** data, uint32_t length);
+	void (*FreeStringArray)(
+		const FreeStringArrayQuery* query,
+		FreeStringArrayResult* result
+	);
 
-	// Free simple arrays (just the array itself, not contents)
-	void (*FreeInt32Array)(int32_t* data, uint32_t length);
-	void (*FreeUInt32Array)(uint32_t* data, uint32_t length);
-	void (*FreeFloatArray)(float* data, uint32_t length);
+	void (*FreeInt32Array)(
+		const FreeInt32ArrayQuery* query,
+		FreeInt32ArrayResult* result
+	);
 
-	// Free structured arrays
-	void (*FreeFloat2Array)(Float2* data, uint32_t length);
-	void (*FreeFloat3Array)(Float3* data, uint32_t length);
-	void (*FreeFloat4Array)(Float4* data, uint32_t length);
-	void (*FreeInt3Array)(Int3* data, uint32_t length);
+	void (*FreeUInt32Array)(
+		const FreeUInt32ArrayQuery* query,
+		FreeUInt32ArrayResult* result
+	);
 
-	// Generic free for opaque pointers
-	void (*Free)(void* ptr);
+	void (*FreeFloatArray)(
+		const FreeFloatArrayQuery* query,
+		FreeFloatArrayResult* result
+	);
+
+	void (*FreeFloat2Array)(
+		const FreeFloat2ArrayQuery* query,
+		FreeFloat2ArrayResult* result
+	);
+
+	void (*FreeFloat3Array)(
+		const FreeFloat3ArrayQuery* query,
+		FreeFloat3ArrayResult* result
+	);
+
+	void (*FreeFloat4Array)(
+		const FreeFloat4ArrayQuery* query,
+		FreeFloat4ArrayResult* result
+	);
+
+	void (*FreeInt3Array)(
+		const FreeInt3ArrayQuery* query,
+		FreeInt3ArrayResult* result
+	);
+
+	void (*Free)(
+		const FreeQuery* query,
+		FreeResult* result
+	);
 };
 
 extern const MemoryApi MEMORY_API;
