@@ -4,12 +4,16 @@
 #include "Map/MapInfo.h"
 #include "Map/MapDimensions.h"
 #include "Map/Ground.h"
-#include "Map/SMF/SMFReadMap.h"
 #include "System/float3.h"
 
 namespace {
 
-// Error constants
+// Scratch buffer for dynamic data
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
 static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Map not ready"
@@ -20,244 +24,234 @@ static const Error INVALID_ARG_ERROR = {
 	.message = "Invalid argument"
 };
 
-// Helper: check if map is ready
 static bool MapReady()
 {
 	return (readMap != nullptr);
 }
 
-// Position queries
-static PosInMapResult NativeIsPosInMap(float x, float z)
+static void NativeIsPosInMap(const IsPosInMapQuery* query, IsPosInMapResult* result)
 {
-	PosInMapResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.inMap = (x >= 0.0f && z >= 0.0f &&
-		x < mapDims.mapx * SQUARE_SIZE && z < mapDims.mapy * SQUARE_SIZE);
-	result.inPlayArea = (x >= 0.0f && z >= 0.0f &&
-		x < mapDims.pwr2mapx * SQUARE_SIZE && z < mapDims.pwr2mapy * SQUARE_SIZE);
-
-	return result;
+	result->error = nullptr;
+	result->inMap = (query->x >= 0.0f && query->z >= 0.0f &&
+		query->x < mapDims.mapx * SQUARE_SIZE && query->z < mapDims.mapy * SQUARE_SIZE);
+	result->inPlayArea = (query->x >= 0.0f && query->z >= 0.0f &&
+		query->x < mapDims.pwr2mapx * SQUARE_SIZE && query->z < mapDims.pwr2mapy * SQUARE_SIZE);
 }
 
-// Height queries
-static FloatResult NativeGetGroundHeight(float x, float z)
+static void NativeGetGroundHeight(const GetGroundHeightQuery* query, GetGroundHeightResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = CGround::GetHeightReal(x, z);
-	return result;
+	result->error = nullptr;
+	result->height = CGround::GetHeightReal(query->x, query->z);
 }
 
-static FloatResult NativeGetGroundOrigHeight(float x, float z)
+static void NativeGetGroundOrigHeight(const GetGroundOrigHeightQuery* query, GetGroundOrigHeightResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = CGround::GetOrigHeight(x, z);
-	return result;
+	result->error = nullptr;
+	result->height = CGround::GetOrigHeight(query->x, query->z);
 }
 
-static FloatResult NativeGetSmoothMeshHeight(float x, float z)
+static void NativeGetSmoothMeshHeight(const GetSmoothMeshHeightQuery* query, GetSmoothMeshHeightResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = CGround::GetSmoothMeshHeight(x, z);
-	return result;
+	result->error = nullptr;
+	result->height = CGround::GetSmoothMeshHeight(query->x, query->z);
 }
 
-static FloatResult NativeGetWaterPlaneLevel()
+static void NativeGetWaterPlaneLevel(const GetWaterPlaneLevelQuery* query, GetWaterPlaneLevelResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.value = 0.0f; // Default water level is 0
-	return result;
+	result->error = nullptr;
+	result->level = 0.0f;  // Default water level
 }
 
-static FloatResult NativeGetWaterLevel(float x, float z)
+static void NativeGetWaterLevel(const GetWaterLevelQuery* query, GetWaterLevelResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Water level is same everywhere (for now)
-	result.value = 0.0f;
-	return result;
+	result->error = nullptr;
+	result->level = 0.0f;  // Water level same everywhere
 }
 
-// Normal queries
-static GroundNormalResult NativeGetGroundNormal(float x, float z)
+static void NativeGetGroundNormal(const GetGroundNormalQuery* query, GetGroundNormalResult* result)
 {
-	GroundNormalResult result = {};
-	result.valid = true;
+	bufferPos = 0;
 
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		result.valid = false;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const float3 normal = CGround::GetNormal(x, z);
-	result.data.normal.x = normal.x;
-	result.data.normal.y = normal.y;
-	result.data.normal.z = normal.z;
-
-	// Calculate slope from normal (angle from vertical)
-	result.data.slope = std::acos(normal.y); // y is up
-
-	return result;
+	const float3 normal = CGround::GetNormal(query->x, query->z);
+	result->error = nullptr;
+	result->normal.x = normal.x;
+	result->normal.y = normal.y;
+	result->normal.z = normal.z;
+	result->slope = std::acos(normal.y);  // Angle from vertical
 }
 
-// Terrain info
-static GroundInfoResult NativeGetGroundInfo(float x, float z)
+static void NativeGetGroundInfo(const GetGroundInfoQuery* query, GetGroundInfoResult* result)
 {
-	GroundInfoResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	const int hmx = Clamp(int(x / SQUARE_SIZE), 0, mapDims.mapxm1);
-	const int hmz = Clamp(int(z / SQUARE_SIZE), 0, mapDims.mapym1);
+	const int hmx = Clamp(int(query->x / SQUARE_SIZE), 0, mapDims.mapxm1);
+	const int hmz = Clamp(int(query->z / SQUARE_SIZE), 0, mapDims.mapym1);
 	const int typeIndex = readMap->GetTypeMapSynced()[hmz * mapDims.mapx + hmx];
 
-	result.info.x = x;
-	result.info.z = z;
-	result.info.terrainTypeIndex = typeIndex;
-
 	const CMapInfo::TerrainType& tt = mapInfo->terrainTypes[typeIndex];
-	result.info.terrainTypeName = tt.name.c_str();
-	result.info.metalExtraction = readMap->GetMetalAmount(hmx, hmz);
-	result.info.hardness = tt.hardness;
-	result.info.tankSpeed = tt.tankSpeed;
-	result.info.kbotSpeed = tt.kbotSpeed;
-	result.info.hoverSpeed = tt.hoverSpeed;
-	result.info.shipSpeed = tt.shipSpeed;
-	result.info.receiveTracks = tt.receiveTracks;
 
-	return result;
+	result->error = nullptr;
+	result->terrainTypeIndex = typeIndex;
+	result->terrainTypeName = tt.name.c_str();
+	result->metalExtraction = readMap->GetMetalAmount(hmx, hmz);
+	result->hardness = tt.hardness;
+	result->tankSpeed = tt.tankSpeed;
+	result->kbotSpeed = tt.kbotSpeed;
+	result->hoverSpeed = tt.hoverSpeed;
+	result->shipSpeed = tt.shipSpeed;
+	result->receiveTracks = tt.receiveTracks;
 }
 
-static TerrainTypeDataResult NativeGetTerrainTypeData(int32_t terrainTypeIndex)
+static void NativeGetTerrainTypeData(const GetTerrainTypeDataQuery* query, GetTerrainTypeDataResult* result)
 {
-	TerrainTypeDataResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	if (terrainTypeIndex < 0 || terrainTypeIndex >= static_cast<int32_t>(mapInfo->terrainTypes.size())) {
-		result.error = &INVALID_ARG_ERROR;
-		return result;
+	if (query->terrainTypeIndex < 0 || query->terrainTypeIndex >= static_cast<int32_t>(mapInfo->terrainTypes.size())) {
+		char* msg = &scratchBuffer[bufferPos];
+		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
+			"Terrain type index %d out of range [0-%zu]",
+			query->terrainTypeIndex, mapInfo->terrainTypes.size() - 1) + 1;
+		dynamicError.code = ERROR_OUT_OF_BOUNDS;
+		dynamicError.message = msg;
+		result->error = &dynamicError;
+		return;
 	}
 
-	const CMapInfo::TerrainType& tt = mapInfo->terrainTypes[terrainTypeIndex];
-	result.data.index = terrainTypeIndex;
-	result.data.name = tt.name.c_str();
-	result.data.hardness = tt.hardness;
-	result.data.tankSpeed = tt.tankSpeed;
-	result.data.kbotSpeed = tt.kbotSpeed;
-	result.data.hoverSpeed = tt.hoverSpeed;
-	result.data.shipSpeed = tt.shipSpeed;
-	result.data.receiveTracks = tt.receiveTracks;
+	const CMapInfo::TerrainType& tt = mapInfo->terrainTypes[query->terrainTypeIndex];
 
-	return result;
+	result->error = nullptr;
+	result->index = query->terrainTypeIndex;
+	result->name = tt.name.c_str();
+	result->hardness = tt.hardness;
+	result->tankSpeed = tt.tankSpeed;
+	result->kbotSpeed = tt.kbotSpeed;
+	result->hoverSpeed = tt.hoverSpeed;
+	result->shipSpeed = tt.shipSpeed;
+	result->receiveTracks = tt.receiveTracks;
 }
 
-static GroundExtremesResult NativeGetGroundExtremes()
+static void NativeGetGroundExtremes(const GetGroundExtremesQuery* query, GetGroundExtremesResult* result)
 {
-	GroundExtremesResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	result.extremes.initMinHeight = readMap->GetInitMinHeight();
-	result.extremes.initMaxHeight = readMap->GetInitMaxHeight();
-	result.extremes.currMinHeight = readMap->GetCurrMinHeight();
-	result.extremes.currMaxHeight = readMap->GetCurrMaxHeight();
-
-	return result;
+	result->error = nullptr;
+	result->initMinHeight = readMap->GetInitMinHeight();
+	result->initMaxHeight = readMap->GetInitMaxHeight();
+	result->currMinHeight = readMap->GetCurrMinHeight();
+	result->currMaxHeight = readMap->GetCurrMaxHeight();
 }
 
-// Blocking
-static BoolResult NativeGetGroundBlocked(float x1, float z1, float x2, float z2)
+static void NativeGetGroundBlocked(const GetGroundBlockedQuery* query, GetGroundBlockedResult* result)
 {
-	BoolResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Check if position is blocked by features or ground
-	result.value = CGround::GetBlocked(x1, z1) || CGround::GetBlocked(x2, z2);
-
-	return result;
+	result->error = nullptr;
+	result->blocked = CGround::GetBlocked(query->x1, query->z1) || CGround::GetBlocked(query->x2, query->z2);
 }
 
-// Grass (decoration)
-static FloatResult NativeGetGrass(float x, float z)
+static void NativeGetGrass(const GetGrassQuery* query, GetGrassResult* result)
 {
-	FloatResult result = {};
+	bufferPos = 0;
+
 	if (!MapReady()) {
-		result.error = &NOT_READY_ERROR;
-		return result;
+		result->error = &NOT_READY_ERROR;
+		return;
 	}
 
-	// Grass level (for rendering grass decoration)
-	const int gx = Clamp(int(x / SQUARE_SIZE), 0, mapDims.mapxm1);
-	const int gz = Clamp(int(z / SQUARE_SIZE), 0, mapDims.mapym1);
+	const int gx = Clamp(int(query->x / SQUARE_SIZE), 0, mapDims.mapxm1);
+	const int gz = Clamp(int(query->z / SQUARE_SIZE), 0, mapDims.mapym1);
 
-	// Grass map might not exist
 	const unsigned char* grassMap = readMap->GetGrassMap();
 	if (grassMap == nullptr) {
-		result.value = 0.0f;
-		return result;
+		result->error = nullptr;
+		result->grassLevel = 0.0f;
+		return;
 	}
 
-	result.value = grassMap[gz * mapDims.mapx + gx] / 255.0f;
-
-	return result;
+	result->error = nullptr;
+	result->grassLevel = grassMap[gz * mapDims.mapx + gx] / 255.0f;
 }
 
 } // namespace
 
 const TerrainApi TERRAIN_API = {
 	.IsPosInMap = NativeIsPosInMap,
-
 	.GetGroundHeight = NativeGetGroundHeight,
 	.GetGroundOrigHeight = NativeGetGroundOrigHeight,
 	.GetSmoothMeshHeight = NativeGetSmoothMeshHeight,
 	.GetWaterPlaneLevel = NativeGetWaterPlaneLevel,
 	.GetWaterLevel = NativeGetWaterLevel,
-
 	.GetGroundNormal = NativeGetGroundNormal,
-
 	.GetGroundInfo = NativeGetGroundInfo,
 	.GetTerrainTypeData = NativeGetTerrainTypeData,
 	.GetGroundExtremes = NativeGetGroundExtremes,
-
 	.GetGroundBlocked = NativeGetGroundBlocked,
-
 	.GetGrass = NativeGetGrass,
 };

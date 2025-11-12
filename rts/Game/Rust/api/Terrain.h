@@ -12,30 +12,87 @@ extern "C" {
 // @see rts/Lua/LuaSyncedRead.cpp, NativeInterface.h
 //
 // Terrain height, normals, blocking, terrain types, etc.
-// (Already partially exposed in NativeInterface - this consolidates it)
 // ============================================================================
 
-// Terrain type data
-struct TerrainTypeData {
-	int32_t index;
-	const char* name;
-	float hardness;
-	float tankSpeed;
-	float kbotSpeed;
-	float hoverSpeed;
-	float shipSpeed;
-	bool receiveTracks;
-};
-
-struct TerrainTypeDataResult {
-	const Error* error;
-	TerrainTypeData data;
-};
-
-// Ground info at a position
-struct GroundInfo {
+// Queries
+struct IsPosInMapQuery {
 	float x;
 	float z;
+};
+
+struct IsPosInMapResult {
+	const Error* error;
+	bool inMap;
+	bool inPlayArea;
+};
+
+struct GetGroundHeightQuery {
+	float x;
+	float z;
+};
+
+struct GetGroundHeightResult {
+	const Error* error;
+	float height;
+};
+
+struct GetGroundOrigHeightQuery {
+	float x;
+	float z;
+};
+
+struct GetGroundOrigHeightResult {
+	const Error* error;
+	float height;
+};
+
+struct GetSmoothMeshHeightQuery {
+	float x;
+	float z;
+};
+
+struct GetSmoothMeshHeightResult {
+	const Error* error;
+	float height;
+};
+
+struct GetWaterPlaneLevelQuery {
+	uint8_t _unused;
+};
+
+struct GetWaterPlaneLevelResult {
+	const Error* error;
+	float level;
+};
+
+struct GetWaterLevelQuery {
+	float x;
+	float z;
+};
+
+struct GetWaterLevelResult {
+	const Error* error;
+	float level;
+};
+
+struct GetGroundNormalQuery {
+	float x;
+	float z;
+};
+
+struct GetGroundNormalResult {
+	const Error* error;
+	Float3 normal;
+	float slope;
+};
+
+struct GetGroundInfoQuery {
+	float x;
+	float z;
+};
+
+struct GetGroundInfoResult {
+	const Error* error;
 	int32_t terrainTypeIndex;
 	const char* terrainTypeName;
 	float metalExtraction;
@@ -47,75 +104,117 @@ struct GroundInfo {
 	bool receiveTracks;
 };
 
-struct GroundInfoResult {
+struct GetTerrainTypeDataQuery {
+	int32_t terrainTypeIndex;
+};
+
+struct GetTerrainTypeDataResult {
 	const Error* error;
-	GroundInfo info;
+	int32_t index;
+	const char* name;
+	float hardness;
+	float tankSpeed;
+	float kbotSpeed;
+	float hoverSpeed;
+	float shipSpeed;
+	bool receiveTracks;
 };
 
-// Ground normal
-struct GroundNormal {
-	Float3 normal;
-	float slope;  // Angle in radians
+struct GetGroundExtremesQuery {
+	uint8_t _unused;
 };
 
-struct GroundNormalResult {
+struct GetGroundExtremesResult {
 	const Error* error;
-	GroundNormal data;
-	bool valid;
-};
-
-// Ground extremes (height range)
-struct GroundExtremes {
 	float initMinHeight;
 	float initMaxHeight;
 	float currMinHeight;
 	float currMaxHeight;
 };
 
-struct GroundExtremesResult {
-	const Error* error;
-	GroundExtremes extremes;
+struct GetGroundBlockedQuery {
+	float x1;
+	float z1;
+	float x2;
+	float z2;
 };
 
-// Position in map check
-struct PosInMapResult {
+struct GetGroundBlockedResult {
 	const Error* error;
-	bool inMap;
-	bool inPlayArea;
+	bool blocked;
 };
 
-// Blocking check
-struct BlockingQuery {
-	Float2 pos1;
-	Float2 pos2;  // Optional second position
-	bool hasPos2;
+struct GetGrassQuery {
+	float x;
+	float z;
+};
+
+struct GetGrassResult {
+	const Error* error;
+	float grassLevel;
 };
 
 // API structure
 struct TerrainApi {
-	// Position queries
-	PosInMapResult (*IsPosInMap)(float x, float z);
+	void (*IsPosInMap)(
+		const IsPosInMapQuery* query,
+		IsPosInMapResult* result
+	);
 
-	// Height queries
-	FloatResult (*GetGroundHeight)(float x, float z);
-	FloatResult (*GetGroundOrigHeight)(float x, float z);
-	FloatResult (*GetSmoothMeshHeight)(float x, float z);
-	FloatResult (*GetWaterPlaneLevel)();  // Global water level
-	FloatResult (*GetWaterLevel)(float x, float z);  // Water level at position
+	void (*GetGroundHeight)(
+		const GetGroundHeightQuery* query,
+		GetGroundHeightResult* result
+	);
 
-	// Normal queries
-	GroundNormalResult (*GetGroundNormal)(float x, float z);
+	void (*GetGroundOrigHeight)(
+		const GetGroundOrigHeightQuery* query,
+		GetGroundOrigHeightResult* result
+	);
 
-	// Terrain info
-	GroundInfoResult (*GetGroundInfo)(float x, float z);
-	TerrainTypeDataResult (*GetTerrainTypeData)(int32_t terrainTypeIndex);
-	GroundExtremesResult (*GetGroundExtremes)();
+	void (*GetSmoothMeshHeight)(
+		const GetSmoothMeshHeightQuery* query,
+		GetSmoothMeshHeightResult* result
+	);
 
-	// Blocking
-	BoolResult (*GetGroundBlocked)(float x1, float z1, float x2, float z2);
+	void (*GetWaterPlaneLevel)(
+		const GetWaterPlaneLevelQuery* query,
+		GetWaterPlaneLevelResult* result
+	);
 
-	// Grass (decoration)
-	FloatResult (*GetGrass)(float x, float z);
+	void (*GetWaterLevel)(
+		const GetWaterLevelQuery* query,
+		GetWaterLevelResult* result
+	);
+
+	void (*GetGroundNormal)(
+		const GetGroundNormalQuery* query,
+		GetGroundNormalResult* result
+	);
+
+	void (*GetGroundInfo)(
+		const GetGroundInfoQuery* query,
+		GetGroundInfoResult* result
+	);
+
+	void (*GetTerrainTypeData)(
+		const GetTerrainTypeDataQuery* query,
+		GetTerrainTypeDataResult* result
+	);
+
+	void (*GetGroundExtremes)(
+		const GetGroundExtremesQuery* query,
+		GetGroundExtremesResult* result
+	);
+
+	void (*GetGroundBlocked)(
+		const GetGroundBlockedQuery* query,
+		GetGroundBlockedResult* result
+	);
+
+	void (*GetGrass)(
+		const GetGrassQuery* query,
+		GetGrassResult* result
+	);
 };
 
 extern const TerrainApi TERRAIN_API;
