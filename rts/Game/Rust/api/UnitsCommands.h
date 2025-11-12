@@ -27,19 +27,6 @@ struct Command {
 	uint32_t paramCount;
 };
 
-struct CommandResult {
-	const Error* error;
-	Command command;
-	bool hasCommand;
-};
-
-// Command array
-struct CommandArray {
-	const Error* error;
-	Command* commands;
-	uint32_t count;
-};
-
 // Command description
 struct CommandDescription {
 	int32_t cmdID;
@@ -56,18 +43,8 @@ struct CommandDescription {
 	bool onlyTexture;
 
 	// Custom params
-	StringArray params;
-};
-
-struct CommandDescriptionResult {
-	const Error* error;
-	CommandDescription cmdDesc;
-};
-
-struct CommandDescriptionArray {
-	const Error* error;
-	CommandDescription* cmdDescs;
-	uint32_t count;
+	const char** params;
+	uint32_t paramCount;
 };
 
 // Factory queue info
@@ -79,50 +56,63 @@ struct FactoryQueueInfo {
 	uint32_t uniqueCount;
 };
 
-struct FactoryQueueInfoResult {
-	const Error* error;
-	FactoryQueueInfo info;
-};
-
-// Build queue
+// Build queue entry
 struct BuildQueueEntry {
 	int32_t unitDefID;
 	uint32_t numOrdered;
 };
 
-struct BuildQueue {
-	const Error* error;
-	BuildQueueEntry* entries;
-	uint32_t count;
-};
+// Queries
+struct GetUnitCommandCountQuery { int32_t unitID; };
+struct GetUnitCommandCountResult { const Error* error; uint32_t count; };
+
+struct GetUnitCommandsQuery { int32_t unitID; uint32_t maxCommands; };
+struct GetUnitCommandsResult { const Error* error; Command* commands; uint32_t count; };
+
+struct GetUnitCurrentCommandQuery { int32_t unitID; };
+struct GetUnitCurrentCommandResult { const Error* error; Command command; bool hasCommand; };
+
+struct GetFactoryCountsQuery { int32_t unitID; };
+struct GetFactoryCountsResult { const Error* error; FactoryQueueInfo info; };
+
+struct GetFactoryCommandCountQuery { int32_t unitID; };
+struct GetFactoryCommandCountResult { const Error* error; uint32_t count; };
+
+struct GetFactoryCommandsQuery { int32_t unitID; uint32_t maxCommands; };
+struct GetFactoryCommandsResult { const Error* error; Command* commands; uint32_t count; };
+
+struct GetFactoryBuggerOffQuery { int32_t unitID; };
+struct GetFactoryBuggerOffResult { const Error* error; bool isBuggingOff; Float3 buggerOffPos; float buggerOffRadius; };
+
+struct GetCommandQueueQuery { int32_t unitID; uint32_t maxCommands; };
+struct GetCommandQueueResult { const Error* error; Command* commands; uint32_t count; };
+
+struct GetFullBuildQueueQuery { int32_t unitID; };
+struct GetFullBuildQueueResult { const Error* error; BuildQueueEntry* entries; uint32_t count; };
+
+struct GetRealBuildQueueQuery { int32_t unitID; };
+struct GetRealBuildQueueResult { const Error* error; int32_t* unitDefIDs; uint32_t count; };
+
+struct GetUnitCmdDescsQuery { int32_t unitID; };
+struct GetUnitCmdDescsResult { const Error* error; CommandDescription* cmdDescs; uint32_t count; };
+
+struct FindUnitCmdDescQuery { int32_t unitID; int32_t cmdID; };
+struct FindUnitCmdDescResult { const Error* error; CommandDescription cmdDesc; bool found; };
 
 // API structure
 struct UnitsCommandsApi {
-	// Command count
-	UInt32Result (*GetUnitCommandCount)(int32_t unitID);
-
-	// Get commands
-	CommandArray (*GetUnitCommands)(int32_t unitID, uint32_t maxCommands);
-	CommandResult (*GetUnitCurrentCommand)(int32_t unitID);
-
-	// Factory commands
-	FactoryQueueInfoResult (*GetFactoryCounts)(int32_t unitID);
-	UInt32Result (*GetFactoryCommandCount)(int32_t unitID);
-	CommandArray (*GetFactoryCommands)(int32_t unitID, uint32_t maxCommands);
-
-	// Factory bugger-off
-	BoolResult (*GetFactoryBuggerOff)(int32_t unitID, bool* isBuggingOff, Float3* buggerOffPos, float* buggerOffRadius);
-
-	// Command queue
-	CommandArray (*GetCommandQueue)(int32_t unitID, uint32_t maxCommands);
-
-	// Build queue
-	BuildQueue (*GetFullBuildQueue)(int32_t unitID);
-	Int32Array (*GetRealBuildQueue)(int32_t unitID);
-
-	// Command descriptions
-	CommandDescriptionArray (*GetUnitCmdDescs)(int32_t unitID);
-	CommandDescriptionResult (*FindUnitCmdDesc)(int32_t unitID, int32_t cmdID);
+	void (*GetUnitCommandCount)(const GetUnitCommandCountQuery* query, GetUnitCommandCountResult* result);
+	void (*GetUnitCommands)(const GetUnitCommandsQuery* query, GetUnitCommandsResult* result);
+	void (*GetUnitCurrentCommand)(const GetUnitCurrentCommandQuery* query, GetUnitCurrentCommandResult* result);
+	void (*GetFactoryCounts)(const GetFactoryCountsQuery* query, GetFactoryCountsResult* result);
+	void (*GetFactoryCommandCount)(const GetFactoryCommandCountQuery* query, GetFactoryCommandCountResult* result);
+	void (*GetFactoryCommands)(const GetFactoryCommandsQuery* query, GetFactoryCommandsResult* result);
+	void (*GetFactoryBuggerOff)(const GetFactoryBuggerOffQuery* query, GetFactoryBuggerOffResult* result);
+	void (*GetCommandQueue)(const GetCommandQueueQuery* query, GetCommandQueueResult* result);
+	void (*GetFullBuildQueue)(const GetFullBuildQueueQuery* query, GetFullBuildQueueResult* result);
+	void (*GetRealBuildQueue)(const GetRealBuildQueueQuery* query, GetRealBuildQueueResult* result);
+	void (*GetUnitCmdDescs)(const GetUnitCmdDescsQuery* query, GetUnitCmdDescsResult* result);
+	void (*FindUnitCmdDesc)(const FindUnitCmdDescQuery* query, FindUnitCmdDescResult* result);
 };
 
 extern const UnitsCommandsApi UNITS_COMMANDS_API;
