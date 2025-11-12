@@ -9,7 +9,7 @@ extern "C" {
 
 // ============================================================================
 // Weapon Definitions API
-// @see rts/Sim/Weapons/WeaponDef.h
+// @see rts/Lua/LuaWeaponDefs.cpp
 //
 // Static weapon definition data
 // ============================================================================
@@ -17,92 +17,61 @@ extern "C" {
 struct WeaponDefInfo {
 	int32_t id;
 	const char* name;
-	const char* type;  // "Cannon", "BeamLaser", "MissileLauncher", etc.
+	const char* type;
 	const char* description;
-
-	// Damage
-	float* damages;          // Array indexed by armor type
-	uint32_t damageCount;
-	float defaultDamage;
-	float paralyzeDamageTime;
-
-	// Range and accuracy
 	float range;
-	float heightMod;
-	float accuracy;
-	float sprayAngle;
-	float movingAccuracy;
-	float targetMoveError;
-
-	// Projectile
-	float projectileSpeed;
-	float startVelocity;
-	float weaponAcceleration;
-	bool turret;
-	float turnRate;
-
-	// Timings
-	float reload;
-	float beamTime;
-	int32_t salvoSize;
-	float salvoDelay;
-
-	// Area of effect
+	float reloadTime;
+	float damage;
 	float areaOfEffect;
-	float edgeEffectiveness;
-	float craterMult;
-	float craterBoost;
-
-	// Ballistics
-	float myGravity;
-	bool noSelfDamage;
-	float impulseFactor;
-	float impulseBoost;
-
-	// Targeting
-	bool waterWeapon;
-	bool fireSubmersed;
-	bool submarineWeapon;
-	bool canAttackGround;
-	bool groundBounce;
-	float heightBoostFactor;
-	float proximityPriority;
-
-	// Visual/Effects
-	const char* cegTag;
+	float projectileSpeed;
+	bool paralyzer;
+	bool impactOnly;
+	bool turret;
 };
 
-struct WeaponDefResult {
-	const Error* error;
-	WeaponDefInfo info;
-	bool exists;
-};
+// Queries
+struct GetWeaponDefIDsQuery { uint8_t _unused; };
+struct GetWeaponDefIDsResult { const Error* error; int32_t* ids; uint32_t count; };
+
+struct GetWeaponDefCountQuery { uint8_t _unused; };
+struct GetWeaponDefCountResult { const Error* error; uint32_t count; };
+
+struct GetWeaponDefByIDQuery { int32_t weaponDefID; };
+struct GetWeaponDefByIDResult { const Error* error; WeaponDefInfo info; bool exists; };
+
+struct GetWeaponDefIDQuery { const char* weaponDefName; };
+struct GetWeaponDefIDResult { const Error* error; int32_t id; };
+
+struct ValidWeaponDefIDQuery { int32_t weaponDefID; };
+struct ValidWeaponDefIDResult { const Error* error; bool valid; };
+
+struct GetWeaponDefNameQuery { int32_t weaponDefID; };
+struct GetWeaponDefNameResult { const Error* error; const char* name; };
+
+struct GetWeaponDefRangeQuery { int32_t weaponDefID; };
+struct GetWeaponDefRangeResult { const Error* error; float range; };
+
+struct GetWeaponDefDamageQuery { int32_t weaponDefID; };
+struct GetWeaponDefDamageResult { const Error* error; float damage; };
+
+struct GetWeaponDefCustomParamQuery { int32_t weaponDefID; const char* key; };
+struct GetWeaponDefCustomParamResult { const Error* error; const char* value; };
+
+struct GetWeaponDefCustomParamKeysQuery { int32_t weaponDefID; };
+struct GetWeaponDefCustomParamKeysResult { const Error* error; const char** keys; uint32_t count; };
 
 // API structure
 struct WeaponDefsApi {
-	// Get all weapon def IDs
-	Int32Array (*GetWeaponDefIDs)();
-
-	// Get weapon def count
-	UInt32Result (*GetWeaponDefCount)();
-
-	// Get weapon def by ID
-	WeaponDefResult (*GetWeaponDefByID)(int32_t weaponDefID);
-
-	// Get weapon def ID by name
-	Int32Result (*GetWeaponDefID)(const char* weaponDefName);
-
-	// Check if weapon def is valid
-	BoolResult (*ValidWeaponDefID)(int32_t weaponDefID);
-
-	// Quick property accessors
-	StringResult (*GetWeaponDefName)(int32_t weaponDefID);
-	FloatResult (*GetWeaponDefRange)(int32_t weaponDefID);
-	FloatResult (*GetWeaponDefDamage)(int32_t weaponDefID);
-
-	// Custom params
-	StringResult (*GetWeaponDefCustomParam)(int32_t weaponDefID, const char* key);
-	StringArray (*GetWeaponDefCustomParamKeys)(int32_t weaponDefID);
+	void (*GetWeaponDefIDs)(const GetWeaponDefIDsQuery* query, GetWeaponDefIDsResult* result);
+	void (*GetWeaponDefCount)(const GetWeaponDefCountQuery* query, GetWeaponDefCountResult* result);
+	void (*GetWeaponDefByID)(const GetWeaponDefByIDQuery* query, GetWeaponDefByIDResult* result);
+	void (*GetWeaponDefID)(const GetWeaponDefIDQuery* query, GetWeaponDefIDResult* result);
+	void (*ValidWeaponDefID)(const ValidWeaponDefIDQuery* query, ValidWeaponDefIDResult* result);
+	void (*GetWeaponDefName)(const GetWeaponDefNameQuery* query, GetWeaponDefNameResult* result);
+	void (*GetWeaponDefRange)(const GetWeaponDefRangeQuery* query, GetWeaponDefRangeResult* result);
+	void (*GetWeaponDefDamage)(const GetWeaponDefDamageQuery* query, GetWeaponDefDamageResult* result);
+	void (*GetWeaponDefCustomParam)(const GetWeaponDefCustomParamQuery* query, GetWeaponDefCustomParamResult* result);
+	void (*GetWeaponDefCustomParamKeys)(const GetWeaponDefCustomParamKeysQuery* query, GetWeaponDefCustomParamKeysResult* result);
 };
 
 extern const WeaponDefsApi WEAPON_DEFS_API;

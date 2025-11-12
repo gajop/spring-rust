@@ -73,7 +73,15 @@ struct UnitDefHealth {
 	int32_t idleTime;
 };
 
-struct UnitDefResult {
+// Queries
+struct GetUnitDefIDsQuery { uint8_t _unused; };
+struct GetUnitDefIDsResult { const Error* error; int32_t* ids; uint32_t count; };
+
+struct GetUnitDefCountQuery { uint8_t _unused; };
+struct GetUnitDefCountResult { const Error* error; uint32_t count; };
+
+struct GetUnitDefByIDQuery { int32_t unitDefID; };
+struct GetUnitDefByIDResult {
 	const Error* error;
 	bool exists;
 	UnitDefBasicInfo basic;
@@ -85,38 +93,47 @@ struct UnitDefResult {
 	UnitDefHealth health;
 };
 
-// Get unit def ID from name
-struct UnitDefIDQuery {
-	const char* unitDefName;
-};
+struct GetUnitDefIDQuery { const char* unitDefName; };
+struct GetUnitDefIDResult { const Error* error; int32_t id; };
+
+struct ValidUnitDefIDQuery { int32_t unitDefID; };
+struct ValidUnitDefIDResult { const Error* error; bool valid; };
+
+struct GetUnitDefNameQuery { int32_t unitDefID; };
+struct GetUnitDefNameResult { const Error* error; const char* name; };
+
+struct GetUnitDefHumanNameQuery { int32_t unitDefID; };
+struct GetUnitDefHumanNameResult { const Error* error; const char* humanName; };
+
+struct GetUnitDefCostsQuery { int32_t unitDefID; };
+struct GetUnitDefCostsResult { const Error* error; UnitDefCosts costs; };
+
+struct GetUnitDefSpeedQuery { int32_t unitDefID; };
+struct GetUnitDefSpeedResult { const Error* error; float speed; };
+
+struct GetUnitDefHealthQuery { int32_t unitDefID; };
+struct GetUnitDefHealthResult { const Error* error; float health; };
+
+struct GetUnitDefCustomParamQuery { int32_t unitDefID; const char* key; };
+struct GetUnitDefCustomParamResult { const Error* error; const char* value; };
+
+struct GetUnitDefCustomParamKeysQuery { int32_t unitDefID; };
+struct GetUnitDefCustomParamKeysResult { const Error* error; const char** keys; uint32_t count; };
 
 // API structure
 struct UnitDefsApi {
-	// Get all unit def IDs
-	Int32Array (*GetUnitDefIDs)();
-
-	// Get unit def count
-	UInt32Result (*GetUnitDefCount)();
-
-	// Get unit def by ID
-	UnitDefResult (*GetUnitDefByID)(int32_t unitDefID);
-
-	// Get unit def ID by name
-	Int32Result (*GetUnitDefID)(const char* unitDefName);
-
-	// Check if unit def is valid
-	BoolResult (*ValidUnitDefID)(int32_t unitDefID);
-
-	// Get specific property queries (for most common queries)
-	StringResult (*GetUnitDefName)(int32_t unitDefID);
-	StringResult (*GetUnitDefHumanName)(int32_t unitDefID);
-	UnitDefCosts (*GetUnitDefCosts)(int32_t unitDefID);
-	FloatResult (*GetUnitDefSpeed)(int32_t unitDefID);
-	FloatResult (*GetUnitDefHealth)(int32_t unitDefID);
-
-	// Custom params
-	StringResult (*GetUnitDefCustomParam)(int32_t unitDefID, const char* key);
-	StringArray (*GetUnitDefCustomParamKeys)(int32_t unitDefID);
+	void (*GetUnitDefIDs)(const GetUnitDefIDsQuery* query, GetUnitDefIDsResult* result);
+	void (*GetUnitDefCount)(const GetUnitDefCountQuery* query, GetUnitDefCountResult* result);
+	void (*GetUnitDefByID)(const GetUnitDefByIDQuery* query, GetUnitDefByIDResult* result);
+	void (*GetUnitDefID)(const GetUnitDefIDQuery* query, GetUnitDefIDResult* result);
+	void (*ValidUnitDefID)(const ValidUnitDefIDQuery* query, ValidUnitDefIDResult* result);
+	void (*GetUnitDefName)(const GetUnitDefNameQuery* query, GetUnitDefNameResult* result);
+	void (*GetUnitDefHumanName)(const GetUnitDefHumanNameQuery* query, GetUnitDefHumanNameResult* result);
+	void (*GetUnitDefCosts)(const GetUnitDefCostsQuery* query, GetUnitDefCostsResult* result);
+	void (*GetUnitDefSpeed)(const GetUnitDefSpeedQuery* query, GetUnitDefSpeedResult* result);
+	void (*GetUnitDefHealth)(const GetUnitDefHealthQuery* query, GetUnitDefHealthResult* result);
+	void (*GetUnitDefCustomParam)(const GetUnitDefCustomParamQuery* query, GetUnitDefCustomParamResult* result);
+	void (*GetUnitDefCustomParamKeys)(const GetUnitDefCustomParamKeysQuery* query, GetUnitDefCustomParamKeysResult* result);
 };
 
 extern const UnitDefsApi UNIT_DEFS_API;
