@@ -4,6 +4,10 @@
 #include "Map/MapInfo.h"
 #include "Map/MapDimensions.h"
 #include "Map/Ground.h"
+#include "Map/MetalMap.h"
+#include "Sim/Misc/SmoothHeightMesh.h"
+#include "Sim/Misc/GroundBlockingObjectMap.h"
+#include "Rendering/Env/GrassDrawer.h"
 #include "System/float3.h"
 
 namespace {
@@ -81,7 +85,7 @@ static void NativeGetSmoothMeshHeight(const GetSmoothMeshHeightQuery* query, Get
 	}
 
 	result->error = nullptr;
-	result->height = CGround::GetSmoothMeshHeight(query->x, query->z);
+	result->height = smoothGround.GetHeight(query->x, query->z);
 }
 
 static void NativeGetWaterPlaneLevel(const GetWaterPlaneLevelQuery* query, GetWaterPlaneLevelResult* result)
@@ -136,8 +140,8 @@ static void NativeGetGroundInfo(const GetGroundInfoQuery* query, GetGroundInfoRe
 		return;
 	}
 
-	const int hmx = Clamp(int(query->x / SQUARE_SIZE), 0, mapDims.mapxm1);
-	const int hmz = Clamp(int(query->z / SQUARE_SIZE), 0, mapDims.mapym1);
+	const int hmx = std::clamp(int(query->x / SQUARE_SIZE), 0, mapDims.mapxm1);
+	const int hmz = std::clamp(int(query->z / SQUARE_SIZE), 0, mapDims.mapym1);
 	const int typeIndex = readMap->GetTypeMapSynced()[hmz * mapDims.mapx + hmx];
 
 	const CMapInfo::TerrainType& tt = mapInfo->terrainTypes[typeIndex];
@@ -145,7 +149,7 @@ static void NativeGetGroundInfo(const GetGroundInfoQuery* query, GetGroundInfoRe
 	result->error = nullptr;
 	result->terrainTypeIndex = typeIndex;
 	result->terrainTypeName = tt.name.c_str();
-	result->metalExtraction = readMap->GetMetalAmount(hmx, hmz);
+	result->metalExtraction = metalMap.GetMetalAmount(hmx, hmz);
 	result->hardness = tt.hardness;
 	result->tankSpeed = tt.tankSpeed;
 	result->kbotSpeed = tt.kbotSpeed;
@@ -163,11 +167,11 @@ static void NativeGetTerrainTypeData(const GetTerrainTypeDataQuery* query, GetTe
 		return;
 	}
 
-	if (query->terrainTypeIndex < 0 || query->terrainTypeIndex >= static_cast<int32_t>(mapInfo->terrainTypes.size())) {
+	if (query->terrainTypeIndex < 0 || query->terrainTypeIndex >= NUM_TERRAIN_TYPES) {
 		char* msg = &scratchBuffer[bufferPos];
 		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
-			"Terrain type index %d out of range [0-%zu]",
-			query->terrainTypeIndex, mapInfo->terrainTypes.size() - 1) + 1;
+			"Terrain type index %d out of range [0-%d]",
+			query->terrainTypeIndex, NUM_TERRAIN_TYPES - 1) + 1;
 		dynamicError.code = ERROR_OUT_OF_BOUNDS;
 		dynamicError.message = msg;
 		result->error = &dynamicError;
@@ -212,8 +216,14 @@ static void NativeGetGroundBlocked(const GetGroundBlockedQuery* query, GetGround
 		return;
 	}
 
+	const int x1 = query->x1 / SQUARE_SIZE;
+	const int z1 = query->z1 / SQUARE_SIZE;
+	const int x2 = query->x2 / SQUARE_SIZE;
+	const int z2 = query->z2 / SQUARE_SIZE;
+
 	result->error = nullptr;
-	result->blocked = CGround::GetBlocked(query->x1, query->z1) || CGround::GetBlocked(query->x2, query->z2);
+	result->blocked = (groundBlockingObjectMap.GroundBlocked(x1, z1) != nullptr) ||
+	                  (groundBlockingObjectMap.GroundBlocked(x2, z2) != nullptr);
 }
 
 static void NativeGetGrass(const GetGrassQuery* query, GetGrassResult* result)
@@ -225,18 +235,15 @@ static void NativeGetGrass(const GetGrassQuery* query, GetGrassResult* result)
 		return;
 	}
 
-	const int gx = Clamp(int(query->x / SQUARE_SIZE), 0, mapDims.mapxm1);
-	const int gz = Clamp(int(query->z / SQUARE_SIZE), 0, mapDims.mapym1);
-
-	const unsigned char* grassMap = readMap->GetGrassMap();
-	if (grassMap == nullptr) {
+	if (grassDrawer == nullptr) {
 		result->error = nullptr;
 		result->grassLevel = 0.0f;
 		return;
 	}
 
+	const float3 pos(query->x, 0.0f, query->z);
 	result->error = nullptr;
-	result->grassLevel = grassMap[gz * mapDims.mapx + gx] / 255.0f;
+	result->grassLevel = grassDrawer->GetGrass(pos.cClampInBounds()) / 255.0f;
 }
 
 } // namespace
