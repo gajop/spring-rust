@@ -4,6 +4,8 @@
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Units/BuildInfo.h"
+#include "Sim/Units/UnitTypes/Builder.h"
+#include "Sim/Units/UnitTypes/Factory.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Weapons/PlasmaRepulser.h"
@@ -859,7 +861,46 @@ static void NativeGetUnitNanoPieces(const GetUnitNanoPiecesQuery* query, GetUnit
 		return;
 	}
 
-	// Nano pieces would require script integration - return empty for now
+	const NanoPieceCache* pieceCache = nullptr;
+	const std::vector<int>* nanoPieces = nullptr;
+
+	// Try to get nano pieces from builder
+	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
+	if (builder != nullptr) {
+		pieceCache = &builder->GetNanoPieceCache();
+		nanoPieces = &pieceCache->GetNanoPieces();
+	}
+
+	// Try to get nano pieces from factory
+	const CFactory* factory = dynamic_cast<const CFactory*>(unit);
+	if (factory != nullptr) {
+		pieceCache = &factory->GetNanoPieceCache();
+		nanoPieces = &pieceCache->GetNanoPieces();
+	}
+
+	// Return empty if unit is not a builder/factory or has no nano pieces
+	if (nanoPieces == nullptr || nanoPieces->empty()) {
+		return;
+	}
+
+	// Copy nano pieces to scratch buffer
+	const size_t count = nanoPieces->size();
+	const size_t bytesNeeded = count * sizeof(int32_t);
+
+	if (bufferPos + bytesNeeded > sizeof(scratchBuffer)) {
+		static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	int32_t* piecesBuf = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	for (size_t i = 0; i < count; i++) {
+		piecesBuf[i] = (*nanoPieces)[i] + 1;  // Convert from 0-indexed C++ to 1-indexed Lua
+	}
+	bufferPos += bytesNeeded;
+
+	result->pieces = piecesBuf;
+	result->count = static_cast<uint32_t>(count);
 }
 
 static void NativeGetUnitTransporter(const GetUnitTransporterQuery* query, GetUnitTransporterResult* result) {
