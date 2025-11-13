@@ -43,7 +43,7 @@ static void NativeGetConfigInt(const GetConfigIntQuery* query, GetConfigIntResul
 	}
 
 	result->error = nullptr;
-	result->value = configHandler->GetInt(query->key, query->defaultValue);
+	result->value = configHandler->GetIntSafe(query->key, query->defaultValue);
 }
 
 static void NativeGetConfigFloat(const GetConfigFloatQuery* query, GetConfigFloatResult* result)
@@ -61,7 +61,7 @@ static void NativeGetConfigFloat(const GetConfigFloatQuery* query, GetConfigFloa
 	}
 
 	result->error = nullptr;
-	result->value = configHandler->GetFloat(query->key, query->defaultValue);
+	result->value = configHandler->GetFloatSafe(query->key, query->defaultValue);
 }
 
 static void NativeGetConfigString(const GetConfigStringQuery* query, GetConfigStringResult* result)
@@ -79,8 +79,8 @@ static void NativeGetConfigString(const GetConfigStringQuery* query, GetConfigSt
 	}
 
 	// Get config string into scratch buffer
-	const char* defaultStr = (query->defaultValue != nullptr) ? query->defaultValue : "";
-	std::string value = configHandler->GetString(query->key, defaultStr);
+	const std::string defaultStr = (query->defaultValue != nullptr) ? query->defaultValue : "";
+	std::string value = configHandler->GetStringSafe(query->key, defaultStr);
 
 	// Copy string to scratch buffer
 	char* strBuf = &scratchBuffer[bufferPos];

@@ -6,7 +6,7 @@
 #include "Game/Game.h"
 #include "Game/GlobalUnsynced.h"
 #include "Game/Players/PlayerHandler.h"
-#include "Game/Players/PlayerRoster.h"
+#include "Game/UI/PlayerRoster.h"
 #include "Sim/Misc/TeamHandler.h"
 
 namespace {
