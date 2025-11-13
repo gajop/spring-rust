@@ -352,7 +352,7 @@ RustSystem::RustSystem() :
     .syncedCtrl = &SYNCED_CTRL_API,
 
     // UI/Rendering (unsynced)
-    .camera = &CAMERA_API,
+    .cameraApi = &CAMERA_API,
     .input = &INPUT_API,
     .display = &DISPLAY_API,
     .selection = &SELECTION_API,

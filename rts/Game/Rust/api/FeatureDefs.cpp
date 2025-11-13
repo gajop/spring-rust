@@ -92,7 +92,7 @@ static void NativeGetFeatureDefByID(const GetFeatureDefByIDQuery* query, GetFeat
 	result->info.resurrectAs = ""; // Would need to look up unit def by ID
 }
 
-static void NativeGetFeatureDefID(const GetFeatureDefIDQuery* query, GetFeatureDefIDResult* result) {
+static void NativeGetFeatureDefIDByName(const GetFeatureDefIDByNameQuery* query, GetFeatureDefIDByNameResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
 	result->id = -1;
@@ -241,7 +241,7 @@ const FeatureDefsApi FEATURE_DEFS_API = {
 	.GetFeatureDefIDs = NativeGetFeatureDefIDs,
 	.GetFeatureDefCount = NativeGetFeatureDefCount,
 	.GetFeatureDefByID = NativeGetFeatureDefByID,
-	.GetFeatureDefID = NativeGetFeatureDefID,
+	.GetFeatureDefIDByName = NativeGetFeatureDefIDByName,
 	.ValidFeatureDefID = NativeValidFeatureDefID,
 	.GetFeatureDefName = NativeGetFeatureDefName,
 	.GetFeatureDefMetal = NativeGetFeatureDefMetal,

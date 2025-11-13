@@ -14,8 +14,8 @@ extern "C" {
 // Unit command queue and command description queries
 // ============================================================================
 
-// Command structure
-struct Command {
+// Command structure (FFI version to avoid conflicts with engine Command)
+struct CommandFFI {
 	int32_t cmdID;
 	uint8_t options;  // Bitfield: shift, alt, ctrl, etc.
 	int32_t tag;      // User-defined tag
@@ -67,10 +67,10 @@ struct GetUnitCommandCountQuery { int32_t unitID; };
 struct GetUnitCommandCountResult { const Error* error; uint32_t count; };
 
 struct GetUnitCommandsQuery { int32_t unitID; uint32_t maxCommands; };
-struct GetUnitCommandsResult { const Error* error; Command* commands; uint32_t count; };
+struct GetUnitCommandsResult { const Error* error; CommandFFI* commands; uint32_t count; };
 
 struct GetUnitCurrentCommandQuery { int32_t unitID; };
-struct GetUnitCurrentCommandResult { const Error* error; Command command; bool hasCommand; };
+struct GetUnitCurrentCommandResult { const Error* error; CommandFFI command; bool hasCommand; };
 
 struct GetFactoryCountsQuery { int32_t unitID; };
 struct GetFactoryCountsResult { const Error* error; FactoryQueueInfo info; };
@@ -79,13 +79,13 @@ struct GetFactoryCommandCountQuery { int32_t unitID; };
 struct GetFactoryCommandCountResult { const Error* error; uint32_t count; };
 
 struct GetFactoryCommandsQuery { int32_t unitID; uint32_t maxCommands; };
-struct GetFactoryCommandsResult { const Error* error; Command* commands; uint32_t count; };
+struct GetFactoryCommandsResult { const Error* error; CommandFFI* commands; uint32_t count; };
 
 struct GetFactoryBuggerOffQuery { int32_t unitID; };
 struct GetFactoryBuggerOffResult { const Error* error; bool isBuggingOff; Float3 buggerOffPos; float buggerOffRadius; };
 
 struct GetCommandQueueQuery { int32_t unitID; uint32_t maxCommands; };
-struct GetCommandQueueResult { const Error* error; Command* commands; uint32_t count; };
+struct GetCommandQueueResult { const Error* error; CommandFFI* commands; uint32_t count; };
 
 struct GetFullBuildQueueQuery { int32_t unitID; };
 struct GetFullBuildQueueResult { const Error* error; BuildQueueEntry* entries; uint32_t count; };

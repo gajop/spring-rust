@@ -44,8 +44,8 @@ struct GetFeatureDefCountResult { const Error* error; uint32_t count; };
 struct GetFeatureDefByIDQuery { int32_t featureDefID; };
 struct GetFeatureDefByIDResult { const Error* error; FeatureDefInfo info; bool exists; };
 
-struct GetFeatureDefIDQuery { const char* featureDefName; };
-struct GetFeatureDefIDResult { const Error* error; int32_t id; };
+struct GetFeatureDefIDByNameQuery { const char* featureDefName; };
+struct GetFeatureDefIDByNameResult { const Error* error; int32_t id; };
 
 struct ValidFeatureDefIDQuery { int32_t featureDefID; };
 struct ValidFeatureDefIDResult { const Error* error; bool valid; };
@@ -70,7 +70,7 @@ struct FeatureDefsApi {
 	void (*GetFeatureDefIDs)(const GetFeatureDefIDsQuery* query, GetFeatureDefIDsResult* result);
 	void (*GetFeatureDefCount)(const GetFeatureDefCountQuery* query, GetFeatureDefCountResult* result);
 	void (*GetFeatureDefByID)(const GetFeatureDefByIDQuery* query, GetFeatureDefByIDResult* result);
-	void (*GetFeatureDefID)(const GetFeatureDefIDQuery* query, GetFeatureDefIDResult* result);
+	void (*GetFeatureDefIDByName)(const GetFeatureDefIDByNameQuery* query, GetFeatureDefIDByNameResult* result);
 	void (*ValidFeatureDefID)(const ValidFeatureDefIDQuery* query, ValidFeatureDefIDResult* result);
 	void (*GetFeatureDefName)(const GetFeatureDefNameQuery* query, GetFeatureDefNameResult* result);
 	void (*GetFeatureDefMetal)(const GetFeatureDefMetalQuery* query, GetFeatureDefMetalResult* result);

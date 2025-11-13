@@ -299,7 +299,7 @@ struct NativeInterface {
 	const SyncedCtrlApi* syncedCtrl;
 
 	// UI/Rendering (unsynced)
-	const CameraApi* camera;
+	const CameraApi* cameraApi;
 	const InputApi* input;
 	const DisplayApi* display;
 	const SelectionApi* selection;

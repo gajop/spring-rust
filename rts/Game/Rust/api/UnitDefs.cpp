@@ -153,7 +153,7 @@ static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByI
 	result->health.idleTime = ud->idleTime;
 }
 
-static void NativeGetUnitDefID(const GetUnitDefIDQuery* query, GetUnitDefIDResult* result) {
+static void NativeGetUnitDefIDByName(const GetUnitDefIDByNameQuery* query, GetUnitDefIDByNameResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
 	result->id = -1;
@@ -347,7 +347,7 @@ const UnitDefsApi UNIT_DEFS_API = {
 	.GetUnitDefIDs = NativeGetUnitDefIDs,
 	.GetUnitDefCount = NativeGetUnitDefCount,
 	.GetUnitDefByID = NativeGetUnitDefByID,
-	.GetUnitDefID = NativeGetUnitDefID,
+	.GetUnitDefIDByName = NativeGetUnitDefIDByName,
 	.ValidUnitDefID = NativeValidUnitDefID,
 	.GetUnitDefName = NativeGetUnitDefName,
 	.GetUnitDefHumanName = NativeGetUnitDefHumanName,

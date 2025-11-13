@@ -93,8 +93,8 @@ struct GetUnitDefByIDResult {
 	UnitDefHealth health;
 };
 
-struct GetUnitDefIDQuery { const char* unitDefName; };
-struct GetUnitDefIDResult { const Error* error; int32_t id; };
+struct GetUnitDefIDByNameQuery { const char* unitDefName; };
+struct GetUnitDefIDByNameResult { const Error* error; int32_t id; };
 
 struct ValidUnitDefIDQuery { int32_t unitDefID; };
 struct ValidUnitDefIDResult { const Error* error; bool valid; };
@@ -125,7 +125,7 @@ struct UnitDefsApi {
 	void (*GetUnitDefIDs)(const GetUnitDefIDsQuery* query, GetUnitDefIDsResult* result);
 	void (*GetUnitDefCount)(const GetUnitDefCountQuery* query, GetUnitDefCountResult* result);
 	void (*GetUnitDefByID)(const GetUnitDefByIDQuery* query, GetUnitDefByIDResult* result);
-	void (*GetUnitDefID)(const GetUnitDefIDQuery* query, GetUnitDefIDResult* result);
+	void (*GetUnitDefIDByName)(const GetUnitDefIDByNameQuery* query, GetUnitDefIDByNameResult* result);
 	void (*ValidUnitDefID)(const ValidUnitDefIDQuery* query, ValidUnitDefIDResult* result);
 	void (*GetUnitDefName)(const GetUnitDefNameQuery* query, GetUnitDefNameResult* result);
 	void (*GetUnitDefHumanName)(const GetUnitDefHumanNameQuery* query, GetUnitDefHumanNameResult* result);

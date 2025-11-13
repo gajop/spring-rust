@@ -14,6 +14,8 @@ extern "C" {
 // ============================================================================
 
 // Command IDs (subset of most common)
+// Note: When included in C++ with Command.h, these are already defined as constexpr
+#ifndef SPRING_COMMAND_H
 enum CommandID {
 	CMD_STOP = 0,
 	CMD_WAIT = 5,
@@ -77,6 +79,7 @@ enum MoveState {
 	MOVESTATE_MANEUVER = 1,
 	MOVESTATE_ROAM = 2,
 };
+#endif // SPRING_COMMAND_H
 
 // Unit categories (bitfield)
 enum UnitCategory {
