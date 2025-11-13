@@ -4,6 +4,7 @@
 
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
+#include "Sim/Units/UnitLoader.h"
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Units/UnitDefHandler.h"
 #include "Sim/Units/CommandAI/CommandAI.h"
@@ -553,15 +554,29 @@ static void NativeCreateUnit(const CreateUnitQuery* query, CreateUnitResult* res
 
 	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
 
-	CUnit* builder = nullptr;
+	const CUnit* builder = nullptr;
 	if (query->builderID >= 0) {
 		builder = unitHandler.GetUnit(query->builderID);
 	}
 
-	CUnit* unit = unitHandler.CreateUnit(unitDef, pos, query->teamID, query->build, query->facing, builder);
+	UnitLoadParams params;
+	params.unitDef = unitDef;
+	params.builder = builder;
+	params.pos = pos;
+	params.speed = ZeroVector;
+	params.unitID = -1;
+	params.teamID = query->teamID;
+	params.facing = query->facing;
+	params.beingBuilt = query->build;
+	params.flattenGround = true;
+
+	CUnit* unit = unitLoader->LoadUnit(params);
 
 	if (unit != nullptr) {
 		result->unitID = unit->id;
+		if (builder != nullptr && unitDef != nullptr) {
+			unit->SetSoloBuilder(const_cast<CUnit*>(builder), unitDef);
+		}
 	}
 }
 
@@ -634,9 +649,7 @@ static void NativeGiveOrderToUnit(const GiveOrderToUnitQuery* query, GiveOrderTo
 		return;
 	}
 
-	Command cmd;
-	cmd.SetID(query->cmdID);
-	cmd.SetOpts(query->options);
+	Command cmd(query->cmdID, query->options);
 
 	for (uint32_t i = 0; i < query->paramCount; ++i) {
 		cmd.PushParam(query->params[i]);
@@ -657,9 +670,7 @@ static void NativeGiveOrderToUnitArray(const GiveOrderToUnitArrayQuery* query, G
 		return;
 	}
 
-	Command cmd;
-	cmd.SetID(query->cmdID);
-	cmd.SetOpts(query->options);
+	Command cmd(query->cmdID, query->options);
 
 	for (uint32_t i = 0; i < query->paramCount; ++i) {
 		cmd.PushParam(query->params[i]);
