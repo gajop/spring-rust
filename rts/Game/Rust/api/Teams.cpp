@@ -130,7 +130,7 @@ static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamRe
 	result->resources.metalShared = team->resShare.metal;
 	result->resources.metalSent = team->resSent.metal;
 	result->resources.metalReceived = team->resReceived.metal;
-	result->resources.metalExcess = team->resExcess.metal;
+	result->resources.metalExcess = team->resPrevExcess.metal;
 
 	result->resources.energyCurrent = team->res.energy;
 	result->resources.energyStorage = team->resStorage.energy;
@@ -140,7 +140,7 @@ static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamRe
 	result->resources.energyShared = team->resShare.energy;
 	result->resources.energySent = team->resSent.energy;
 	result->resources.energyReceived = team->resReceived.energy;
-	result->resources.energyExcess = team->resExcess.energy;
+	result->resources.energyExcess = team->resPrevExcess.energy;
 }
 
 static void NativeGetTeamUnitStats(const GetTeamUnitStatsQuery* query, GetTeamUnitStatsResult* result) {
@@ -211,8 +211,16 @@ static void NativeArePlayersAllied(const ArePlayersAlliedQuery* query, ArePlayer
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
+	const CPlayer* player1 = playerHandler.Player(query->playerID1);
+	const CPlayer* player2 = playerHandler.Player(query->playerID2);
+
+	if (player1 == nullptr || player2 == nullptr) {
+		result->error = &INVALID_PLAYER_ERROR;
+		return;
+	}
+
 	result->error = nullptr;
-	result->allied = teamHandler.AlliedPlayers(query->playerID1, query->playerID2);
+	result->allied = teamHandler.AlliedTeams(player1->team, player2->team);
 }
 
 static void NativeGetPlayerList(const GetPlayerListQuery* query, GetPlayerListResult* result) {
@@ -306,8 +314,10 @@ static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* qu
 	const CPlayer* player = playerHandler.Player(query->playerID);
 	if (player == nullptr) { result->error = &INVALID_PLAYER_ERROR; return; }
 
+	const CUnit* controllee = player->fpsController.GetControllee();
+
 	result->error = nullptr;
-	result->unitID = player->playerControlledUnit.id;
+	result->unitID = (controllee != nullptr) ? controllee->id : -1;
 }
 
 static void NativeGetAIInfo(const GetAIInfoQuery* query, GetAIInfoResult* result) {

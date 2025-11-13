@@ -1,5 +1,7 @@
 #include "Input.h"
 
+#include <SDL_keyboard.h>
+
 #include "Game/UI/MouseHandler.h"
 #include "Game/UI/GuiHandler.h"
 #include "Game/UI/MiniMap.h"

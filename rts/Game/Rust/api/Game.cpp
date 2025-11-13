@@ -45,9 +45,11 @@ static bool GameReady() { return (game != nullptr) && (gs != nullptr); }
 
 IMPL_SIMPLE_QUERY(IsCheatingEnabled, GameReady(), result->enabled = gs->cheatEnabled)
 IMPL_SIMPLE_QUERY(IsGodModeEnabled, GameReady(), result->enabled = gs->godMode)
-IMPL_SIMPLE_QUERY(IsDevLuaEnabled, GameReady(), result->enabled = false // devLuaEnabled not available)
+// devLuaEnabled not available in engine
+IMPL_SIMPLE_QUERY(IsDevLuaEnabled, GameReady(), result->enabled = false)
 IMPL_SIMPLE_QUERY(IsEditDefsEnabled, GameReady(), result->enabled = gs->editDefsEnabled)
-IMPL_SIMPLE_QUERY(IsNoCostEnabled, GameReady(), result->enabled = false // noCostEnabled not available)
+// noCostEnabled not available in engine
+IMPL_SIMPLE_QUERY(IsNoCostEnabled, GameReady(), result->enabled = false)
 IMPL_SIMPLE_QUERY(AreHelperAIsEnabled, GameReady(), result->enabled = !gs->noHelperAIs)
 IMPL_SIMPLE_QUERY(FixedAllies, GameReady(), result->fixed = (gameSetup != nullptr) && gameSetup->fixedAllies)
 IMPL_SIMPLE_QUERY(IsGameOver, GameReady(), result->gameOver = game->IsGameOver())

@@ -1,4 +1,5 @@
 #include "MetalMap.h"
+#include "CommonTypes.h"
 
 #include <algorithm>
 #include "Map/MetalMap.h"

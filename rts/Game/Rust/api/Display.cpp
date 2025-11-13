@@ -2,6 +2,7 @@
 
 #include "Game/Game.h"
 #include "Game/GlobalUnsynced.h"
+#include "Sim/Misc/GlobalSynced.h"
 #include "Game/UI/MiniMap.h"
 #include "Game/Camera.h"
 #include "Rendering/GlobalRendering.h"
@@ -141,7 +142,7 @@ static void NativeGetLastUpdateSeconds(const GetLastUpdateSecondsQuery* query, G
 	}
 
 	result->error = nullptr;
-	result->seconds = game->lastFrameTime;
+	result->seconds = game->lastFrameTime.toSecsf();
 }
 
 // FPS and performance
@@ -162,7 +163,7 @@ static void NativeGetGameSpeed(const GetGameSpeedQuery* query, GetGameSpeedResul
 {
 	bufferPos = 0;
 
-	if (game == nullptr || gu == nullptr) {
+	if (game == nullptr || gs == nullptr) {
 		result->error = &NOT_READY_ERROR;
 		return;
 	}

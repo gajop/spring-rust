@@ -94,7 +94,7 @@ static void NativeGetWeaponDefByID(const GetWeaponDefByIDQuery* query, GetWeapon
 	result->info.range = wd->range;
 	result->info.reloadTime = wd->reload;
 	result->info.damage = wd->damages.GetDefault();
-	result->info.areaOfEffect = wd->damageAreaOfEffect;
+	result->info.areaOfEffect = wd->damages.damageAreaOfEffect;
 	result->info.projectileSpeed = wd->projectilespeed;
 	result->info.paralyzer = wd->paralyzer;
 	result->info.impactOnly = wd->impactOnly;
