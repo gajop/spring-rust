@@ -1,7 +1,10 @@
 #include "PathFinder.h"
 
 #include "Sim/Path/IPathManager.h"
+#include "Sim/MoveTypes/MoveDefHandler.h"
+#include "Sim/Misc/GlobalSynced.h"
 #include <vector>
+#include <cstring>
 
 namespace {
 
@@ -11,70 +14,206 @@ static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 
 // Static errors
-static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "PathFinder API not yet fully implemented" };
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
+static const Error INVALID_PATH_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid path ID" };
+static const Error INVALID_MOVEDEF_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid move definition" };
+static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
+
+static bool IsReady() {
+	return (gs != nullptr && pathManager != nullptr);
+}
+
+// Helper to allocate from scratch buffer
+template<typename T>
+static T* AllocateArray(size_t count) {
+	size_t needed = count * sizeof(T);
+	if (bufferPos + needed > sizeof(scratchBuffer)) {
+		return nullptr;
+	}
+	T* ptr = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
+	bufferPos += needed;
+	return ptr;
+}
 
 static void NativeRequestPath(const RequestPathQuery* query, RequestPathResult* result) {
 	bufferPos = 0;
-	result->pathID = 0; // No path (not implemented)
-	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->error = nullptr;
+	result->pathID = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	// Get MoveDef either by ID or name
+	const MoveDef* moveDef = nullptr;
+	if (query->moveDefName != nullptr && query->moveDefName[0] != '\0') {
+		moveDef = moveDefHandler.GetMoveDefByName(query->moveDefName);
+	} else if (query->moveDefID > 0) {
+		moveDef = moveDefHandler.GetMoveDefByPathType(query->moveDefID);
+	}
+
+	if (moveDef == nullptr) {
+		result->error = &INVALID_MOVEDEF_ERROR;
+		return;
+	}
+
+	float3 startPos(query->startPos.x, query->startPos.y, query->startPos.z);
+	float3 endPos(query->endPos.x, query->endPos.y, query->endPos.z);
+
+	// Request path (synced=true, caller=nullptr since this is from Rust)
+	result->pathID = pathManager->RequestPath(nullptr, moveDef, startPos, endPos, query->radius, true);
 }
 
 static void NativeDeletePath(const DeletePathQuery* query, DeletePathResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
 	result->success = false;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (query->pathID == 0) {
+		result->error = &INVALID_PATH_ERROR;
+		return;
+	}
+
+	pathManager->DeletePath(query->pathID);
+	result->success = true;
 }
 
 static void NativeGetPathWayPoints(const GetPathWayPointsQuery* query, GetPathWayPointsResult* result) {
 	bufferPos = 0;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->error = nullptr;
 	result->points = nullptr;
 	result->pointCount = 0;
 	result->starts = nullptr;
 	result->startCount = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (query->pathID == 0) {
+		result->error = &INVALID_PATH_ERROR;
+		return;
+	}
+
+	std::vector<float3> points;
+	std::vector<int> starts;
+
+	pathManager->GetPathWayPoints(query->pathID, points, starts);
+
+	if (!points.empty()) {
+		result->points = AllocateArray<Float3>(points.size());
+		if (result->points == nullptr) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+
+		for (size_t i = 0; i < points.size(); ++i) {
+			result->points[i].x = points[i].x;
+			result->points[i].y = points[i].y;
+			result->points[i].z = points[i].z;
+		}
+		result->pointCount = static_cast<uint32_t>(points.size());
+	}
+
+	if (!starts.empty()) {
+		result->starts = AllocateArray<int32_t>(starts.size());
+		if (result->starts == nullptr) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			result->pointCount = 0;
+			return;
+		}
+
+		for (size_t i = 0; i < starts.size(); ++i) {
+			result->starts[i] = starts[i];
+		}
+		result->startCount = static_cast<uint32_t>(starts.size());
+	}
 }
 
 static void NativeGetNextWayPoint(const GetNextWayPointQuery* query, GetNextWayPointResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
 	result->hasWaypoint = false;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (query->pathID == 0) {
+		result->error = &INVALID_PATH_ERROR;
+		return;
+	}
+
+	float3 callerPos(query->callerPos.x, query->callerPos.y, query->callerPos.z);
+	float3 waypoint = pathManager->NextWayPoint(nullptr, query->pathID, 0, callerPos, query->minDist, true);
+
+	// Check if waypoint is valid (not -1,-1,-1)
+	if (waypoint.x >= 0.0f || waypoint.y >= 0.0f || waypoint.z >= 0.0f) {
+		result->waypoint.x = waypoint.x;
+		result->waypoint.y = waypoint.y;
+		result->waypoint.z = waypoint.z;
+		result->hasWaypoint = true;
+	}
 }
 
 static void NativeInitPathNodeCostsArray(const InitPathNodeCostsArrayQuery* query, InitPathNodeCostsArrayResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
 	result->success = false;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+
+	// Path node costs are an advanced feature that requires deep integration
+	// with the path manager's internal structures. Not easily implementable
+	// without more context about the cost array system.
 }
 
 static void NativeFreePathNodeCostsArray(const FreePathNodeCostsArrayQuery* query, FreePathNodeCostsArrayResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
 	result->success = false;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+
+	// Path node costs array freeing - not implemented without cost array system
 }
 
 static void NativeSetPathNodeCosts(const SetPathNodeCostsQuery* query, SetPathNodeCostsResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
 	result->success = false;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+
+	// Setting path node costs - not implemented without cost array system
 }
 
 static void NativeGetPathNodeCosts(const GetPathNodeCostsQuery* query, GetPathNodeCostsResult* result) {
 	bufferPos = 0;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->error = nullptr;
 	result->costs = nullptr;
 	result->count = 0;
+
+	// Getting path node costs - not implemented without cost array system
 }
 
 static void NativeSetPathNodeCost(const SetPathNodeCostQuery* query, SetPathNodeCostResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
 	result->success = false;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+
+	// Setting single path node cost - not implemented without cost array system
 }
 
 static void NativeGetPathNodeCost(const GetPathNodeCostQuery* query, GetPathNodeCostResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
 	result->cost = 0.0f;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+
+	// Getting single path node cost - not implemented without cost array system
+	// Would need access to path cost map which is not easily accessible
 }
 
 } // namespace

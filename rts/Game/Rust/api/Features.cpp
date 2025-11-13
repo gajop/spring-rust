@@ -578,17 +578,65 @@ static void NativeGetFeatureLastAttackedPiece(const GetFeatureLastAttackedPieceQ
 	result->pieceNum = feature->lastAttackedPiece;
 }
 
-// Collision volumes (stubs)
+// Collision volumes
 static void NativeGetFeatureCollisionVolumeData(const GetFeatureCollisionVolumeDataQuery* query, GetFeatureCollisionVolumeDataResult* result)
 {
 	bufferPos = 0;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->error = nullptr;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	const CollisionVolume& cv = feature->collisionVolume;
+	result->volume.scaleX = cv.GetScales().x;
+	result->volume.scaleY = cv.GetScales().y;
+	result->volume.scaleZ = cv.GetScales().z;
+	result->volume.offsetX = cv.GetOffsets().x;
+	result->volume.offsetY = cv.GetOffsets().y;
+	result->volume.offsetZ = cv.GetOffsets().z;
+	result->volume.volumeType = cv.GetVolumeType();
+	result->volume.testType = cv.GetTestType();
+	result->volume.primaryAxis = cv.GetPrimaryAxis();
+	result->volume.disabled = cv.IgnoreHits();
 }
 
 static void NativeGetFeaturePieceCollisionVolumeData(const GetFeaturePieceCollisionVolumeDataQuery* query, GetFeaturePieceCollisionVolumeDataResult* result)
 {
 	bufferPos = 0;
-	result->error = &NOT_IMPLEMENTED_ERROR;
+	result->error = nullptr;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	// Features don't have piece-specific collision volumes in Spring
+	// Return the main collision volume
+	const CollisionVolume& cv = feature->collisionVolume;
+	result->volume.scaleX = cv.GetScales().x;
+	result->volume.scaleY = cv.GetScales().y;
+	result->volume.scaleZ = cv.GetScales().z;
+	result->volume.offsetX = cv.GetOffsets().x;
+	result->volume.offsetY = cv.GetOffsets().y;
+	result->volume.offsetZ = cv.GetOffsets().z;
+	result->volume.volumeType = cv.GetVolumeType();
+	result->volume.testType = cv.GetTestType();
+	result->volume.primaryAxis = cv.GetPrimaryAxis();
+	result->volume.disabled = cv.IgnoreHits();
 }
 
 } // namespace
