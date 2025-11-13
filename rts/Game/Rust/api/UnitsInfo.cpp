@@ -1171,9 +1171,9 @@ static void NativeGetUnitCollisionVolumeData(const GetUnitCollisionVolumeDataQue
 	result->volume.offsetY = cv.GetOffsets().y;
 	result->volume.offsetZ = cv.GetOffsets().z;
 	result->volume.volumeType = cv.GetVolumeType();
-	result->volume.testType = cv.GetTestType();
+	result->volume.testType = cv.UseContHitTest() ? 1 : 0;  // 1=continuous, 0=discrete
 	result->volume.primaryAxis = cv.GetPrimaryAxis();
-	result->volume.disabled = cv.IsDisabled();
+	result->volume.disabled = cv.IgnoreHits();
 }
 
 static void NativeGetUnitPieceCollisionVolumeData(const GetUnitPieceCollisionVolumeDataQuery* query, GetUnitPieceCollisionVolumeDataResult* result) {
@@ -1201,9 +1201,9 @@ static void NativeGetUnitPieceCollisionVolumeData(const GetUnitPieceCollisionVol
 	result->volume.offsetY = cv.GetOffsets().y;
 	result->volume.offsetZ = cv.GetOffsets().z;
 	result->volume.volumeType = cv.GetVolumeType();
-	result->volume.testType = cv.GetTestType();
+	result->volume.testType = cv.UseContHitTest() ? 1 : 0;  // 1=continuous, 0=discrete
 	result->volume.primaryAxis = cv.GetPrimaryAxis();
-	result->volume.disabled = cv.IsDisabled();
+	result->volume.disabled = cv.IgnoreHits();
 }
 
 static void NativeGetUnitBlocking(const GetUnitBlockingQuery* query, GetUnitBlockingResult* result) {

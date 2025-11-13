@@ -3,6 +3,8 @@
 #include "Game/Camera.h"
 #include "Game/CameraHandler.h"
 #include "Game/TraceRay.h"
+#include "Sim/Units/Unit.h"
+#include "Sim/Features/Feature.h"
 #include "System/float3.h"
 
 namespace {

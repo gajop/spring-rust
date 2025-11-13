@@ -141,7 +141,7 @@ static void NativeGetLastUpdateSeconds(const GetLastUpdateSecondsQuery* query, G
 	}
 
 	result->error = nullptr;
-	result->seconds = game->lastUpdateTime;
+	result->seconds = game->lastFrameTime;
 }
 
 // FPS and performance
@@ -168,7 +168,7 @@ static void NativeGetGameSpeed(const GetGameSpeedQuery* query, GetGameSpeedResul
 	}
 
 	result->error = nullptr;
-	result->speed = gu->simSpeed;
+	result->speed = gs->wantedSpeedFactor;
 }
 
 // Team colors

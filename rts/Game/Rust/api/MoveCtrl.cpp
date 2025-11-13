@@ -5,6 +5,7 @@
 #include "Sim/MoveTypes/MoveType.h"
 #include "Sim/MoveTypes/GroundMoveType.h"
 #include "Sim/MoveTypes/AAirMoveType.h"
+#include "Sim/MoveTypes/StrafeAirMoveType.h"
 #include "System/StringUtil.h"
 
 namespace {
@@ -44,30 +45,33 @@ static void NativeGetUnitMoveTypeData(const GetUnitMoveTypeDataQuery* query, Get
 		moveTypeName = "ground";
 		const CGroundMoveType* gmt = static_cast<const CGroundMoveType*>(mt);
 
-		result->data.turnRate = gmt->turnRate;
-		result->data.accRate = gmt->accRate;
-		result->data.decRate = gmt->decRate;
-		result->data.maxReverseSpeed = gmt->maxReverseSpeed;
-		result->data.wantedSpeed = gmt->wantedSpeed;
-		result->data.currentSpeed = gmt->currentSpeed;
-		result->data.deltaSpeed = gmt->deltaSpeed;
+		result->data.turnRate = gmt->GetTurnRate();
+		result->data.accRate = gmt->GetAccRate();
+		result->data.decRate = gmt->GetDecRate();
+		result->data.maxReverseSpeed = gmt->GetMaxReverseSpeed();
+		result->data.wantedSpeed = gmt->GetWantedSpeed();
+		result->data.currentSpeed = gmt->GetCurrentSpeed();
+		result->data.deltaSpeed = gmt->GetDeltaSpeed();
 	} else if (dynamic_cast<const AAirMoveType*>(mt) != nullptr) {
 		moveTypeName = "air";
-		const AAirMoveType* amt = static_cast<const AAirMoveType*>(mt);
 
-		result->data.maxBank = amt->maxBank;
-		result->data.maxPitch = amt->maxPitch;
-		result->data.maxAileron = amt->maxAileron;
-		result->data.maxElevator = amt->maxElevator;
-		result->data.maxRudder = amt->maxRudder;
+		// StrafeAirMoveType-specific fields (not all air move types have these)
+		const CStrafeAirMoveType* samt = dynamic_cast<const CStrafeAirMoveType*>(mt);
+		if (samt != nullptr) {
+			result->data.maxBank = samt->maxBank;
+			result->data.maxPitch = samt->maxPitch;
+			result->data.maxAileron = samt->maxAileron;
+			result->data.maxElevator = samt->maxElevator;
+			result->data.maxRudder = samt->maxRudder;
+		}
 	} else {
 		moveTypeName = "static";
 	}
 
 	result->error = nullptr;
 	result->data.name = moveTypeName;
-	result->data.maxSpeed = mt->maxSpeed;
-	result->data.maxWantedSpeed = mt->maxWantedSpeed;
+	result->data.maxSpeed = mt->GetMaxSpeed();
+	result->data.maxWantedSpeed = mt->GetMaxWantedSpeed();
 	result->data.goalX = mt->goalPos.x;
 	result->data.goalY = mt->goalPos.y;
 	result->data.goalZ = mt->goalPos.z;

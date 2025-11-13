@@ -1,6 +1,8 @@
 #include "Features.h"
 
 #include "Sim/Features/Feature.h"
+#include "Sim/Features/FeatureDef.h"
+#include "Sim/Units/UnitDef.h"
 #include "Sim/Features/FeatureHandler.h"
 #include "Sim/Misc/QuadField.h"
 #include "Sim/Misc/GlobalSynced.h"
@@ -55,7 +57,7 @@ static void NativeGetAllFeatures(const GetAllFeaturesQuery* query, GetAllFeature
 	uint32_t count = 0;
 	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	for (const auto& pair : featureHandler.GetActiveFeatures()) {
+	for (const auto featureID : featureHandler.GetActiveFeatureIDs()) {
 		if (pair.second != nullptr && count < maxFeatures) {
 			features[count++] = pair.first;
 		}
@@ -87,10 +89,13 @@ static void NativeGetFeaturesInRectangle(const GetFeaturesInRectangleQuery* quer
 	uint32_t count = 0;
 	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundFeatures = quadField.GetFeaturesExact(mins, maxs);
-	for (const CFeature* feature : foundFeatures) {
-		if (feature != nullptr && count < maxFeatures) {
-			features[count++] = feature->id;
+	QuadFieldQuery qfq;
+	quadField.GetFeaturesExact(qfq, mins, maxs);
+	if (qfq.features != nullptr) {
+		for (const CFeature* feature : *(qfq.features)) {
+			if (feature != nullptr && count < maxFeatures) {
+				features[count++] = feature->id;
+			}
 		}
 	}
 
@@ -119,12 +124,15 @@ static void NativeGetFeaturesInSphere(const GetFeaturesInSphereQuery* query, Get
 	uint32_t count = 0;
 	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundFeatures = quadField.GetFeaturesExact(pos, query->radius);
-	for (const CFeature* feature : foundFeatures) {
-		if (feature != nullptr) {
-			const float distSq = feature->pos.SqDistance(pos);
-			if (distSq <= radiusSq && count < maxFeatures) {
-				features[count++] = feature->id;
+	QuadFieldQuery qfq;
+	quadField.GetFeaturesExact(qfq, pos, query->radius);
+	if (qfq.features != nullptr) {
+		for (const CFeature* feature : *(qfq.features)) {
+			if (feature != nullptr) {
+				const float distSq = feature->pos.SqDistance(pos);
+				if (distSq <= radiusSq && count < maxFeatures) {
+					features[count++] = feature->id;
+				}
 			}
 		}
 	}
@@ -155,17 +163,20 @@ static void NativeGetFeaturesInCylinder(const GetFeaturesInCylinderQuery* query,
 	uint32_t count = 0;
 	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundFeatures = quadField.GetFeaturesExact(pos, query->radius);
-	for (const CFeature* feature : foundFeatures) {
-		if (feature != nullptr) {
-			const float3& fpos = feature->pos;
-			const float dx = fpos.x - pos.x;
-			const float dz = fpos.z - pos.z;
-			const float distXZSq = dx * dx + dz * dz;
-			const float dy = std::abs(fpos.y - pos.y);
+	QuadFieldQuery qfq;
+	quadField.GetFeaturesExact(qfq, pos, query->radius);
+	if (qfq.features != nullptr) {
+		for (const CFeature* feature : *(qfq.features)) {
+			if (feature != nullptr) {
+				const float3& fpos = feature->pos;
+				const float dx = fpos.x - pos.x;
+				const float dz = fpos.z - pos.z;
+				const float distXZSq = dx * dx + dz * dz;
+				const float dy = std::abs(fpos.y - pos.y);
 
-			if (distXZSq <= radiusSq && dy <= halfHeight && count < maxFeatures) {
-				features[count++] = feature->id;
+				if (distXZSq <= radiusSq && dy <= halfHeight && count < maxFeatures) {
+					features[count++] = feature->id;
+				}
 			}
 		}
 	}
@@ -501,10 +512,10 @@ static void NativeGetFeatureBlocking(const GetFeatureBlockingQuery* query, GetFe
 		return;
 	}
 
-	result->blockingState.isBlocking = feature->blocking;
-	result->blockingState.isSolidObjectCollidable = feature->collisionVolume->DefaultToFeature();
-	result->blockingState.isProjectileCollidable = feature->collisionVolume->DefaultToFeature();
-	result->blockingState.isRaySegmentCollidable = feature->collisionVolume->DefaultToFeature();
+	result->blockingState.isBlocking = feature->IsBlocking();
+	result->blockingState.isSolidObjectCollidable = feature->collisionVolume.DefaultToFeature();
+	result->blockingState.isProjectileCollidable = feature->collisionVolume.DefaultToFeature();
+	result->blockingState.isRaySegmentCollidable = feature->collisionVolume.DefaultToFeature();
 	result->blockingState.crushable = false;
 	result->blockingState.blockHeightChanges = feature->def->floating;
 }
@@ -574,7 +585,7 @@ static void NativeGetFeatureLastAttackedPiece(const GetFeatureLastAttackedPieceQ
 		return;
 	}
 
-	result->pieceNum = feature->lastAttackedPiece;
+	result->pieceNum = -1; // lastAttackedPiece not available
 }
 
 // Collision volumes
@@ -602,7 +613,7 @@ static void NativeGetFeatureCollisionVolumeData(const GetFeatureCollisionVolumeD
 	result->volume.offsetY = cv.GetOffsets().y;
 	result->volume.offsetZ = cv.GetOffsets().z;
 	result->volume.volumeType = cv.GetVolumeType();
-	result->volume.testType = cv.GetTestType();
+	result->volume.testType = cv.UseContHitTest() ? 1 : 0;  // 1=continuous, 0=discrete
 	result->volume.primaryAxis = cv.GetPrimaryAxis();
 	result->volume.disabled = cv.IgnoreHits();
 }
@@ -633,7 +644,7 @@ static void NativeGetFeaturePieceCollisionVolumeData(const GetFeaturePieceCollis
 	result->volume.offsetY = cv.GetOffsets().y;
 	result->volume.offsetZ = cv.GetOffsets().z;
 	result->volume.volumeType = cv.GetVolumeType();
-	result->volume.testType = cv.GetTestType();
+	result->volume.testType = cv.UseContHitTest() ? 1 : 0;  // 1=continuous, 0=discrete
 	result->volume.primaryAxis = cv.GetPrimaryAxis();
 	result->volume.disabled = cv.IgnoreHits();
 }

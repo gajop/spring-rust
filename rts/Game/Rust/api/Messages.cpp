@@ -165,7 +165,7 @@ static void NativeGetCurrentTooltip(const GetCurrentTooltipQuery* query, GetCurr
 
 	// Use scratch buffer for tooltip text
 	static thread_local std::string tooltipText;
-	tooltipText = tooltip->GetTooltip();
+	tooltipText = tooltip->GetTooltip(0, 0);
 
 	// Copy to scratch buffer if needed
 	const size_t len = tooltipText.length() + 1;

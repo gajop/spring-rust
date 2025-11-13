@@ -45,9 +45,9 @@ static bool GameReady() { return (game != nullptr) && (gs != nullptr); }
 
 IMPL_SIMPLE_QUERY(IsCheatingEnabled, GameReady(), result->enabled = gs->cheatEnabled)
 IMPL_SIMPLE_QUERY(IsGodModeEnabled, GameReady(), result->enabled = gs->godMode)
-IMPL_SIMPLE_QUERY(IsDevLuaEnabled, GameReady(), result->enabled = gs->devLuaEnabled)
+IMPL_SIMPLE_QUERY(IsDevLuaEnabled, GameReady(), result->enabled = false // devLuaEnabled not available)
 IMPL_SIMPLE_QUERY(IsEditDefsEnabled, GameReady(), result->enabled = gs->editDefsEnabled)
-IMPL_SIMPLE_QUERY(IsNoCostEnabled, GameReady(), result->enabled = gs->noCostEnabled)
+IMPL_SIMPLE_QUERY(IsNoCostEnabled, GameReady(), result->enabled = false // noCostEnabled not available)
 IMPL_SIMPLE_QUERY(AreHelperAIsEnabled, GameReady(), result->enabled = !gs->noHelperAIs)
 IMPL_SIMPLE_QUERY(FixedAllies, GameReady(), result->fixed = (gameSetup != nullptr) && gameSetup->fixedAllies)
 IMPL_SIMPLE_QUERY(IsGameOver, GameReady(), result->gameOver = game->IsGameOver())
@@ -59,9 +59,9 @@ IMPL_SIMPLE_QUERY(GetTidal, GameReady(), result->strength = mapInfo->map.tidalSt
 static void NativeGetGlobalLos(const GetGlobalLosQuery* query, GetGlobalLosResult* result) {
 	bufferPos = 0;
 	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
-	if (query->allyTeamID < 0 || query->allyTeamID >= gs->activeAllyTeams) { result->error = &INVALID_OPTION_ERROR; return; }
+	if (query->allyTeamID < 0 || query->allyTeamID >= teamHandler.ActiveAllyTeams()) { result->error = &INVALID_OPTION_ERROR; return; }
 	result->error = nullptr;
-	result->los = gs->globalLOS[query->allyTeamID];
+	result->los = losHandler->GetGlobalLOS(query->allyTeamID);
 }
 
 static void NativeGetMapOption(const GetMapOptionQuery* query, GetMapOptionResult* result) {

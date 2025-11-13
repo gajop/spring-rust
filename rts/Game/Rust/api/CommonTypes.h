@@ -40,6 +40,20 @@ struct Int3 {
 	int32_t z;
 };
 
+// Collision volume data (used by units and features)
+struct CollisionVolumeData {
+	float scaleX;
+	float scaleY;
+	float scaleZ;
+	float offsetX;
+	float offsetY;
+	float offsetZ;
+	int32_t volumeType;  // 0=ellipsoid, 1=cylinder, 2=box
+	int32_t testType;    // Collision test type
+	int32_t primaryAxis; // For cylinders
+	bool disabled;
+};
+
 // ============================================================================
 // Dynamic Array Types
 // ============================================================================

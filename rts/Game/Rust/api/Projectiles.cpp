@@ -48,13 +48,16 @@ static void NativeGetProjectilesInRectangle(const GetProjectilesInRectangleQuery
 	uint32_t count = 0;
 	const size_t maxProjectiles = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundProjectiles = quadField.GetProjectilesExact(mins, maxs);
-	for (const CProjectile* proj : foundProjectiles) {
-		if (proj != nullptr) {
-			if (query->synced && !proj->synced) continue;
-			if (query->weapon && !proj->weapon) continue;
-			if (count < maxProjectiles) {
-				projectiles[count++] = proj->id;
+	QuadFieldQuery qfq;
+	quadField.GetProjectilesExact(qfq, mins, maxs);
+	if (qfq.projectiles != nullptr) {
+		for (const CProjectile* proj : *(qfq.projectiles)) {
+			if (proj != nullptr) {
+				if (query->synced && !proj->synced) continue;
+				if (query->weapon && !proj->weapon) continue;
+				if (count < maxProjectiles) {
+					projectiles[count++] = proj->id;
+				}
 			}
 		}
 	}
@@ -84,15 +87,18 @@ static void NativeGetProjectilesInSphere(const GetProjectilesInSphereQuery* quer
 	uint32_t count = 0;
 	const size_t maxProjectiles = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundProjectiles = quadField.GetProjectilesExact(pos, query->radius);
-	for (const CProjectile* proj : foundProjectiles) {
-		if (proj != nullptr) {
-			if (query->synced && !proj->synced) continue;
-			if (query->weapon && !proj->weapon) continue;
+	QuadFieldQuery qfq;
+	quadField.GetProjectilesExact(qfq, pos, query->radius);
+	if (qfq.projectiles != nullptr) {
+		for (const CProjectile* proj : *(qfq.projectiles)) {
+			if (proj != nullptr) {
+				if (query->synced && !proj->synced) continue;
+				if (query->weapon && !proj->weapon) continue;
 
-			const float distSq = proj->pos.SqDistance(pos);
-			if (distSq <= radiusSq && count < maxProjectiles) {
-				projectiles[count++] = proj->id;
+				const float distSq = proj->pos.SqDistance(pos);
+				if (distSq <= radiusSq && count < maxProjectiles) {
+					projectiles[count++] = proj->id;
+				}
 			}
 		}
 	}
@@ -321,7 +327,7 @@ static void NativeGetProjectileTimeToLive(const GetProjectileTimeToLiveQuery* qu
 
 	const CWeaponProjectile* wProj = dynamic_cast<const CWeaponProjectile*>(proj);
 	if (wProj != nullptr) {
-		result->ttl = wProj->GetTTL();
+		result->ttl = wProj->GetTimeToLive();
 	}
 }
 
@@ -425,8 +431,8 @@ static void NativeGetProjectileDefID(const GetProjectileDefIDQuery* query, GetPr
 	}
 
 	const CWeaponProjectile* wProj = dynamic_cast<const CWeaponProjectile*>(proj);
-	if (wProj != nullptr && wProj->weaponDef != nullptr) {
-		result->defID = wProj->weaponDef->id;
+	if (wProj != nullptr && wProj->GetWeaponDef() != nullptr) {
+		result->defID = wProj->GetWeaponDef()->id;
 	}
 }
 
@@ -450,12 +456,12 @@ static void NativeGetProjectileDamages(const GetProjectileDamagesQuery* query, G
 	}
 
 	const CWeaponProjectile* wProj = dynamic_cast<const CWeaponProjectile*>(proj);
-	if (wProj == nullptr || wProj->weaponDef == nullptr) {
+	if (wProj == nullptr || wProj->GetWeaponDef() == nullptr) {
 		result->damages.defaultDamage = 0.0f;
 		return;
 	}
 
-	const WeaponDef* weaponDef = wProj->weaponDef;
+	const WeaponDef* weaponDef = wProj->GetWeaponDef();
 	const DamageArray& damages = weaponDef->damages;
 
 	// Use scratch buffer for array
