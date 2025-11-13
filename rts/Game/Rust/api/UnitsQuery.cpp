@@ -4,6 +4,7 @@
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
+#include "Sim/Misc/QuadField.h"
 #include "System/float3.h"
 
 namespace {
@@ -52,7 +53,7 @@ static void NativeValidUnitID(const ValidUnitIDQuery* query, ValidUnitIDResult* 
 		result->error = &NOT_READY_ERROR;
 		return;
 	}
-	result->valid = unitHandler.IsValidUnit(query->unitID);
+	result->valid = (unitHandler.GetUnit(query->unitID) != nullptr);
 }
 
 // Get all units
@@ -275,10 +276,13 @@ static void NativeGetUnitsInRectangle(const GetUnitsInRectangleQuery* query, Get
 	uint32_t count = 0;
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundUnits = quadField.GetUnitsExact(mins, maxs);
-	for (const CUnit* unit : foundUnits) {
-		if (UnitMatchesFilter(unit, query->filter) && count < maxUnits) {
-			units[count++] = unit->id;
+	QuadFieldQuery qfq;
+	quadField.GetUnitsExact(qfq, mins, maxs);
+	if (qfq.units != nullptr) {
+		for (const CUnit* unit : *(qfq.units)) {
+			if (UnitMatchesFilter(unit, query->filter) && count < maxUnits) {
+				units[count++] = unit->id;
+			}
 		}
 	}
 
@@ -307,15 +311,18 @@ static void NativeGetUnitsInBox(const GetUnitsInBoxQuery* query, GetUnitsInBoxRe
 	uint32_t count = 0;
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundUnits = quadField.GetUnitsExact(mins, maxs);
-	for (const CUnit* unit : foundUnits) {
-		if (UnitMatchesFilter(unit, query->filter)) {
-			const float3& pos = unit->pos;
-			if (pos.x >= mins.x && pos.x <= maxs.x &&
-				pos.y >= mins.y && pos.y <= maxs.y &&
-				pos.z >= mins.z && pos.z <= maxs.z &&
-				count < maxUnits) {
-				units[count++] = unit->id;
+	QuadFieldQuery qfq;
+	quadField.GetUnitsExact(qfq, mins, maxs);
+	if (qfq.units != nullptr) {
+		for (const CUnit* unit : *(qfq.units)) {
+			if (UnitMatchesFilter(unit, query->filter)) {
+				const float3& pos = unit->pos;
+				if (pos.x >= mins.x && pos.x <= maxs.x &&
+					pos.y >= mins.y && pos.y <= maxs.y &&
+					pos.z >= mins.z && pos.z <= maxs.z &&
+					count < maxUnits) {
+					units[count++] = unit->id;
+				}
 			}
 		}
 	}
@@ -374,12 +381,15 @@ static void NativeGetUnitsInSphere(const GetUnitsInSphereQuery* query, GetUnitsI
 	uint32_t count = 0;
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundUnits = quadField.GetUnitsExact(center, query->sphere.radius);
-	for (const CUnit* unit : foundUnits) {
-		if (UnitMatchesFilter(unit, query->filter)) {
-			const float distSq = unit->pos.SqDistance(center);
-			if (distSq <= radiusSq && count < maxUnits) {
-				units[count++] = unit->id;
+	QuadFieldQuery qfq;
+	quadField.GetUnitsExact(qfq, center, query->sphere.radius);
+	if (qfq.units != nullptr) {
+		for (const CUnit* unit : *(qfq.units)) {
+			if (UnitMatchesFilter(unit, query->filter)) {
+				const float distSq = unit->pos.SqDistance(center);
+				if (distSq <= radiusSq && count < maxUnits) {
+					units[count++] = unit->id;
+				}
 			}
 		}
 	}
@@ -410,17 +420,20 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 	uint32_t count = 0;
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	const auto& foundUnits = quadField.GetUnitsExact(center, query->cylinder.radius);
-	for (const CUnit* unit : foundUnits) {
-		if (UnitMatchesFilter(unit, query->filter)) {
-			const float3& pos = unit->pos;
-			const float dx = pos.x - center.x;
-			const float dz = pos.z - center.z;
-			const float distXZSq = dx * dx + dz * dz;
-			const float dy = std::abs(pos.y - center.y);
+	QuadFieldQuery qfq;
+	quadField.GetUnitsExact(qfq, center, query->cylinder.radius);
+	if (qfq.units != nullptr) {
+		for (const CUnit* unit : *(qfq.units)) {
+			if (UnitMatchesFilter(unit, query->filter)) {
+				const float3& pos = unit->pos;
+				const float dx = pos.x - center.x;
+				const float dz = pos.z - center.z;
+				const float distXZSq = dx * dx + dz * dz;
+				const float dy = std::abs(pos.y - center.y);
 
-			if (distXZSq <= radiusSq && dy <= halfHeight && count < maxUnits) {
-				units[count++] = unit->id;
+				if (distXZSq <= radiusSq && dy <= halfHeight && count < maxUnits) {
+					units[count++] = unit->id;
+				}
 			}
 		}
 	}
@@ -493,13 +506,16 @@ static void NativeGetUnitNearestAlly(const GetUnitNearestAllyQuery* query, GetUn
 	const float3 position(query->pos.x, query->pos.y, query->pos.z);
 	float minDistSq = query->radius * query->radius;
 
-	const auto& foundUnits = quadField.GetUnitsExact(position, query->radius);
-	for (const CUnit* unit : foundUnits) {
-		if (unit != nullptr) {
-			const float distSq = unit->pos.SqDistance(position);
-			if (distSq < minDistSq) {
-				minDistSq = distSq;
-				result->unitID = unit->id;
+	QuadFieldQuery qfq;
+	quadField.GetUnitsExact(qfq, position, query->radius);
+	if (qfq.units != nullptr) {
+		for (const CUnit* unit : *(qfq.units)) {
+			if (unit != nullptr) {
+				const float distSq = unit->pos.SqDistance(position);
+				if (distSq < minDistSq) {
+					minDistSq = distSq;
+					result->unitID = unit->id;
+				}
 			}
 		}
 	}

@@ -177,7 +177,7 @@ static void NativeGetGroupList(const GetGroupListQuery* query, GetGroupListResul
 	uint32_t count = 0;
 
 	for (int g = 0; g < 10; g++) {
-		if (!uiGroupHandlers[gu->myTeam]->groups[g]->units.empty()) {
+		if (!uiGroupHandlers[gu->myTeam].groups[g].units.empty()) {
 			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
 			groups[count++] = g;
 			bufferPos += sizeof(int32_t);
@@ -194,7 +194,7 @@ static void NativeGetSelectedGroup(const GetSelectedGroupQuery* query, GetSelect
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	result->error = nullptr;
-	result->groupID = selectedUnitsHandler.GetDefaultGroup(gu->myTeam);
+	result->groupID = -1;  // GetDefaultGroup no longer available
 }
 
 static void NativeGetGroupUnits(const GetGroupUnitsQuery* query, GetGroupUnitsResult* result) {
@@ -203,13 +203,13 @@ static void NativeGetGroupUnits(const GetGroupUnitsQuery* query, GetGroupUnitsRe
 
 	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
 
-	const auto& group = uiGroupHandlers[gu->myTeam]->groups[query->groupID];
+	const auto& group = uiGroupHandlers[gu->myTeam].groups[query->groupID];
 	int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
 	uint32_t count = 0;
 
-	for (const CUnit* unit : group->units) {
+	for (int unitID : group.units) {
 		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
-		units[count++] = unit->id;
+		units[count++] = unitID;
 		bufferPos += sizeof(int32_t);
 	}
 
@@ -230,12 +230,10 @@ static void NativeGetUnitGroup(const GetUnitGroupQuery* query, GetUnitGroupResul
 
 	// Find which group contains this unit (units don't track their group directly)
 	for (int g = 0; g < 10; g++) {
-		const CGroup* group = uiGroupHandlers[unit->team]->groups[g];
-		for (const CUnit* groupUnit : group->units) {
-			if (groupUnit == unit) {
-				result->groupID = g;
-				return;
-			}
+		const CGroup& group = uiGroupHandlers[unit->team].groups[g];
+		if (group.units.count(unit->id) > 0) {
+			result->groupID = g;
+			return;
 		}
 	}
 }
@@ -250,27 +248,23 @@ static void NativeSetUnitGroup(const SetUnitGroupQuery* query, SetUnitGroupResul
 	if (query->groupID >= 0 && query->groupID < 10) {
 		// First remove from current group (if any)
 		for (int g = 0; g < 10; g++) {
-			CGroup* group = uiGroupHandlers[unit->team]->groups[g];
-			for (const CUnit* groupUnit : group->units) {
-				if (groupUnit == unit) {
-					group->Remove(const_cast<CUnit*>(unit));
-					break;
-				}
+			CGroup& group = uiGroupHandlers[unit->team].groups[g];
+			if (group.units.count(unit->id) > 0) {
+				group.RemoveUnit(unit);
+				break;
 			}
 		}
 		// Then add to new group
-		uiGroupHandlers[unit->team]->groups[query->groupID]->Add(unit);
+		uiGroupHandlers[unit->team].groups[query->groupID].AddUnit(unit);
 		result->error = nullptr;
 		result->success = true;
 	} else {
 		// Remove from any group
 		for (int g = 0; g < 10; g++) {
-			CGroup* group = uiGroupHandlers[unit->team]->groups[g];
-			for (const CUnit* groupUnit : group->units) {
-				if (groupUnit == unit) {
-					group->Remove(const_cast<CUnit*>(unit));
-					break;
-				}
+			CGroup& group = uiGroupHandlers[unit->team].groups[g];
+			if (group.units.count(unit->id) > 0) {
+				group.RemoveUnit(unit);
+				break;
 			}
 		}
 		result->error = nullptr;
