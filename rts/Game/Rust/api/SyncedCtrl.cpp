@@ -182,9 +182,12 @@ static void NativeSetAllyTeamStartBox(const SetAllyTeamStartBoxQuery* query, Set
 		return;
 	}
 
-	// Set the start box for the ally team
+	// Set the start box for the ally team (convert to normalized coordinates)
 	AllyTeam& allyTeam = teamHandler.AllyTeams()[query->allyTeamID];
-	allyTeam.SetStartBox(query->minX, query->minZ, query->maxX, query->maxZ);
+	allyTeam.startRectLeft   = query->minX / float(mapDims.mapx * SQUARE_SIZE);
+	allyTeam.startRectRight  = query->maxX / float(mapDims.mapx * SQUARE_SIZE);
+	allyTeam.startRectTop    = query->minZ / float(mapDims.mapy * SQUARE_SIZE);
+	allyTeam.startRectBottom = query->maxZ / float(mapDims.mapy * SQUARE_SIZE);
 	result->success = true;
 }
 
@@ -300,7 +303,7 @@ static void NativeSetGlobalLos(const SetGlobalLosQuery* query, SetGlobalLosResul
 	}
 
 	if (losHandler != nullptr) {
-		losHandler->SetGlobalLos(query->allyTeamID, query->enabled);
+		losHandler->SetGlobalLOS(query->allyTeamID, query->enabled);
 		result->success = true;
 	}
 }
