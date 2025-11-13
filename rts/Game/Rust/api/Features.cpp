@@ -16,7 +16,6 @@ static thread_local Error dynamicError;
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Feature system not ready" };
 static const Error INVALID_FEATURE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid feature ID" };
-static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Collision volume data not yet implemented" };
 
 // Helper: check if ready
 static bool IsReady()
