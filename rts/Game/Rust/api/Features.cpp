@@ -58,8 +58,8 @@ static void NativeGetAllFeatures(const GetAllFeaturesQuery* query, GetAllFeature
 	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	for (const auto featureID : featureHandler.GetActiveFeatureIDs()) {
-		if (pair.second != nullptr && count < maxFeatures) {
-			features[count++] = pair.first;
+		if (count < maxFeatures) {
+			features[count++] = featureID;
 		}
 	}
 
@@ -513,9 +513,9 @@ static void NativeGetFeatureBlocking(const GetFeatureBlockingQuery* query, GetFe
 	}
 
 	result->blockingState.isBlocking = feature->IsBlocking();
-	result->blockingState.isSolidObjectCollidable = feature->collisionVolume.DefaultToFeature();
-	result->blockingState.isProjectileCollidable = feature->collisionVolume.DefaultToFeature();
-	result->blockingState.isRaySegmentCollidable = feature->collisionVolume.DefaultToFeature();
+	result->blockingState.isSolidObjectCollidable = !feature->collisionVolume.IgnoreHits();
+	result->blockingState.isProjectileCollidable = !feature->collisionVolume.IgnoreHits();
+	result->blockingState.isRaySegmentCollidable = !feature->collisionVolume.IgnoreHits();
 	result->blockingState.crushable = false;
 	result->blockingState.blockHeightChanges = feature->def->floating;
 }

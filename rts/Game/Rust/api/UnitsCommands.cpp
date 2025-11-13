@@ -51,8 +51,8 @@ static const char* CopyString(const std::string& str) {
 	return ptr;
 }
 
-// Helper to convert CommandFFI to API Command
-static bool ConvertCommand(const ::Command& cmd, Command& outCmd) {
+// Helper to convert engine Command to FFI CommandFFI
+static bool ConvertCommand(const ::Command& cmd, CommandFFI& outCmd) {
 	outCmd.cmdID = cmd.GetID(false);
 	outCmd.options = cmd.GetOpts();
 	outCmd.tag = cmd.GetTag();
