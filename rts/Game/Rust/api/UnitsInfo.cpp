@@ -240,12 +240,12 @@ static void NativeGetUnitResources(const GetUnitResourcesQuery* query, GetUnitRe
 	}
 
 	const UnitDef* ud = unit->unitDef;
-	result->resources.metalMake = ud->metalMake;
-	result->resources.metalUse = ud->metalUpkeep;
-	result->resources.energyMake = ud->energyMake;
-	result->resources.energyUse = ud->energyUpkeep;
-	result->resources.metalIncome = ud->metalMake - ud->metalUpkeep;
-	result->resources.energyIncome = ud->energyMake - ud->energyUpkeep;
+	result->resources.metalMake = ud->resourceMake.metal;
+	result->resources.metalUse = ud->upkeep.metal;
+	result->resources.energyMake = ud->resourceMake.energy;
+	result->resources.energyUse = ud->upkeep.energy;
+	result->resources.metalIncome = ud->resourceMake.metal - ud->upkeep.metal;
+	result->resources.energyIncome = ud->resourceMake.energy - ud->upkeep.energy;
 }
 
 static void NativeGetUnitStorage(const GetUnitStorageQuery* query, GetUnitStorageResult* result) {
@@ -263,8 +263,8 @@ static void NativeGetUnitStorage(const GetUnitStorageQuery* query, GetUnitStorag
 		return;
 	}
 
-	result->storage.metalStorage = unit->unitDef->metalStorage;
-	result->storage.energyStorage = unit->unitDef->energyStorage;
+	result->storage.metalStorage = unit->unitDef->storage.metal;
+	result->storage.energyStorage = unit->unitDef->storage.energy;
 }
 
 static void NativeGetUnitMetalExtraction(const GetUnitMetalExtractionQuery* query, GetUnitMetalExtractionResult* result) {
@@ -510,8 +510,9 @@ static void NativeGetUnitBuildeeRadius(const GetUnitBuildeeRadiusQuery* query, G
 	}
 
 	// Return buildee's radius if it exists, otherwise unit's radius
-	if (unit->curBuild != nullptr) {
-		result->radius = unit->curBuild->radius;
+	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
+	if (builder != nullptr && builder->curBuild != nullptr) {
+		result->radius = builder->curBuild->radius;
 	} else {
 		result->radius = unit->radius;
 	}
@@ -727,8 +728,9 @@ static void NativeGetUnitIsBuilding(const GetUnitIsBuildingQuery* query, GetUnit
 		return;
 	}
 
-	if (unit->curBuild != nullptr) {
-		result->buildeeID = unit->curBuild->id;
+	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
+	if (builder != nullptr && builder->curBuild != nullptr) {
+		result->buildeeID = builder->curBuild->id;
 	}
 }
 
@@ -749,13 +751,14 @@ static void NativeGetUnitWorkerTask(const GetUnitWorkerTaskQuery* query, GetUnit
 	}
 
 	// Determine task based on current state
-	if (unit->curBuild != nullptr) {
+	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
+	if (builder != nullptr && builder->curBuild != nullptr) {
 		result->task = "building";
-	} else if (unit->curReclaim != nullptr) {
+	} else if (builder != nullptr && builder->curReclaim != nullptr) {
 		result->task = "reclaiming";
-	} else if (unit->curResurrect != nullptr) {
+	} else if (builder != nullptr && builder->curResurrect != nullptr) {
 		result->task = "resurrecting";
-	} else if (unit->curCapture != nullptr) {
+	} else if (builder != nullptr && builder->curCapture != nullptr) {
 		result->task = "capturing";
 	} else {
 		result->task = "idle";
@@ -1071,9 +1074,9 @@ static void NativeGetUnitFuel(const GetUnitFuelQuery* query, GetUnitFuelResult* 
 		return;
 	}
 
-	// Fuel is not directly tracked in Spring - return max fuel from def
-	result->fuel.fuel = unit->unitDef->maxFuel;
-	result->fuel.maxFuel = unit->unitDef->maxFuel;
+	// Fuel is not directly tracked in Spring - use 0 as it's not available
+	result->fuel.fuel = 0.0f;
+	result->fuel.maxFuel = 0.0f;
 }
 
 static void NativeGetUnitLastAttacker(const GetUnitLastAttackerQuery* query, GetUnitLastAttackerResult* result) {
@@ -1116,7 +1119,7 @@ static void NativeGetUnitLastAttackedPiece(const GetUnitLastAttackedPieceQuery* 
 		return;
 	}
 
-	result->pieceNum = unit->lastAttackedPiece;
+	result->pieceNum = -1;  // lastAttackedPiece no longer available
 }
 
 static void NativeGetUnitLosState(const GetUnitLosStateQuery* query, GetUnitLosStateResult* result) {
@@ -1221,13 +1224,13 @@ static void NativeGetUnitBlocking(const GetUnitBlockingQuery* query, GetUnitBloc
 		return;
 	}
 
-	result->blockingState.isBlocking = unit->blocking;
-	result->blockingState.isSolidObjectCollidable = unit->collisionVolume.DefaultToPieceTree();
-	result->blockingState.isProjectileCollidable = unit->collisionVolume.DefaultToPieceTree();
-	result->blockingState.isRaySegmentCollidable = unit->collisionVolume.DefaultToPieceTree();
+	result->blockingState.isBlocking = unit->immobile;  // blocking field removed, use immobile
+	result->blockingState.isSolidObjectCollidable = !unit->collisionVolume.IgnoreHits();
+	result->blockingState.isProjectileCollidable = !unit->collisionVolume.IgnoreHits();
+	result->blockingState.isRaySegmentCollidable = !unit->collisionVolume.IgnoreHits();
 	result->blockingState.crushable = unit->crushResistance > 0.0f;
 	result->blockingState.blockEnemyPushing = unit->blockEnemyPushing;
-	result->blockingState.blockHeightChanges = unit->unitDef != nullptr && unit->unitDef->levelGround;
+	result->blockingState.blockHeightChanges = false;  // levelGround no longer available
 }
 
 static void NativeGetUnitHarvestStorage(const GetUnitHarvestStorageQuery* query, GetUnitHarvestStorageResult* result) {

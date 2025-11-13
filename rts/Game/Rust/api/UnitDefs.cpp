@@ -101,15 +101,15 @@ static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByI
 
 	// Physics
 	result->physics.mass = ud->mass;
-	result->physics.height = ud->height;
-	result->physics.radius = ud->radius;
+	result->physics.height = ud->collisionVolume.GetScale(1);  // Y axis
+	result->physics.radius = ud->collisionVolume.GetBoundingRadius();
 	result->physics.speed = ud->speed;
 	result->physics.turnRate = ud->turnRate;
-	result->physics.acceleration = ud->acceleration;
-	result->physics.brakeRate = ud->brakeRate;
+	result->physics.acceleration = 0.0f;  // No longer available in engine
+	result->physics.brakeRate = 0.0f;     // No longer available in engine
 	result->physics.canFly = ud->canfly;
 	result->physics.canMove = ud->canmove;
-	result->physics.canHover = ud->canHover;
+	result->physics.canHover = ud->hoverAttack;  // Closest equivalent
 	result->physics.floatOnWater = ud->floatOnWater;
 	result->physics.moveDefID = (ud->pathType != -1U) ? static_cast<int32_t>(ud->pathType) : -1;
 
@@ -126,12 +126,13 @@ static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByI
 	result->weapons.weaponCount = weaponCount;
 	bufferPos += weaponCount * sizeof(int32_t);
 
-	// Build options
+	// Build options (now a map<int, string>)
 	const size_t maxBuildable = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 	int32_t* buildableIDs = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
 	uint32_t buildableCount = 0;
-	for (size_t i = 0; i < ud->buildOptions.size() && buildableCount < maxBuildable; i++) {
-		buildableIDs[buildableCount++] = ud->buildOptions[i];
+	for (const auto& buildOption : ud->buildOptions) {
+		if (buildableCount >= maxBuildable) break;
+		buildableIDs[buildableCount++] = buildOption.first;  // first is the unit def ID
 	}
 	result->buildOptions.buildableUnitDefIDs = buildableIDs;
 	result->buildOptions.buildableCount = buildableCount;
