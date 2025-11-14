@@ -91,7 +91,7 @@
 #include "System/Platform/WindowManagerHelper.h"
 #include "System/SpringHash.h"
 #include "System/LoadLock.h"
-#include "NativeInterface/NativeInterface.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 
 
 #if !defined(HEADLESS) && !defined(NO_SOUND)

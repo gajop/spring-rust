@@ -75,7 +75,7 @@
 #include "System/EventHandler.h"
 #include "System/ObjectDependenceTypes.h"
 #include "System/Log/ILog.h"
-#include "NativeInterface/NativeInterface.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 
 using std::max;
 

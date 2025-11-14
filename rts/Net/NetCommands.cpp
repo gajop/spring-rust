@@ -38,7 +38,7 @@
 #include "System/Sound/ISound.h"
 #include "System/Sync/DumpState.h"
 #include "System/Sync/DumpHistory.h"
-#include "NativeInterface/NativeInterface.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 
 #include "System/Misc/TracyDefs.h"
 

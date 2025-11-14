@@ -13,7 +13,7 @@
 #include "GameHelper.h"
 #include "GameSetup.h"
 #include "GlobalUnsynced.h"
-#include "NativeInterface/NativeInterface.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 #include "LoadScreen.h"
 #include "SelectedUnitsHandler.h"
 #include "WaitCommandsAI.h"

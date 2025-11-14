@@ -47,7 +47,7 @@
 #include "Game/UI/UnitTracker.h"
 #include "Game/UI/Groups/GroupHandler.h"
 #include "Game/UI/PlayerRoster.h"
-#include "NativeInterface/NativeInterface.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 
 #include "Lua/LuaOpenGL.h"
 #include "Lua/LuaUI.h"
