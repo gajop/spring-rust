@@ -47,7 +47,7 @@
 #include "Game/UI/UnitTracker.h"
 #include "Game/UI/Groups/GroupHandler.h"
 #include "Game/UI/PlayerRoster.h"
-#include "Game/Rust/RustSystem.h"
+#include "NativeInterface/NativeInterface.h"
 
 #include "Lua/LuaOpenGL.h"
 #include "Lua/LuaUI.h"
@@ -2442,7 +2442,7 @@ public:
 	bool Execute(const UnsyncedAction& action) const final {
 		LOG("[ReloadNativeModules] Reloading Native Modules...");
 
-		RustSystem::s_instance->Reload();
+		NativeInterfaceSystem::s_instance->Reload();
 
 		return true;
 	}

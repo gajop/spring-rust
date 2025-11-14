@@ -13,7 +13,7 @@
 #include "GameHelper.h"
 #include "GameSetup.h"
 #include "GlobalUnsynced.h"
-#include "Rust/RustSystem.h"
+#include "NativeInterface/NativeInterface.h"
 #include "LoadScreen.h"
 #include "SelectedUnitsHandler.h"
 #include "WaitCommandsAI.h"
@@ -512,7 +512,7 @@ void CGame::Load(const std::string& mapFileName)
 		}
 	}
 
-	rustSystem = std::make_unique<RustSystem>();
+	rustSystem = std::make_unique<NativeInterfaceSystem>();
 
 	Watchdog::DeregisterThread(WDT_LOAD);
 	AddTimedJobs();

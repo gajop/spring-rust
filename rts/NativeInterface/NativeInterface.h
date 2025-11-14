@@ -1,154 +1,55 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
+#include <vector>
 
-#include "Game/Rust/api/Common.h"
-#include "Game/Rust/api/CommonTypes.h"
-#include "Game/Rust/api/Memory.h"
-#include "Game/Rust/api/MetalMap.h"
-#include "Game/Rust/api/PathFinder.h"
-#include "Game/Rust/api/RulesParams.h"
-#include "Game/Rust/api/MathExtra.h"
-#include "Game/Rust/api/Game.h"
-#include "Game/Rust/api/Terrain.h"
-#include "Game/Rust/api/Teams.h"
-#include "Game/Rust/api/UnitsQuery.h"
-#include "Game/Rust/api/UnitsInfo.h"
-#include "Game/Rust/api/UnitsWeapons.h"
-#include "Game/Rust/api/UnitsCommands.h"
-#include "Game/Rust/api/UnitsPieces.h"
-#include "Game/Rust/api/Features.h"
-#include "Game/Rust/api/Projectiles.h"
-#include "Game/Rust/api/LOS.h"
-#include "Game/Rust/api/UnitDefs.h"
-#include "Game/Rust/api/FeatureDefs.h"
-#include "Game/Rust/api/WeaponDefs.h"
-#include "Game/Rust/api/MoveCtrl.h"
-#include "Game/Rust/api/SyncedCtrl.h"
-#include "Game/Rust/api/Camera.h"
-#include "Game/Rust/api/Input.h"
-#include "Game/Rust/api/Display.h"
-#include "Game/Rust/api/Selection.h"
-#include "Game/Rust/api/VFS.h"
-#include "Game/Rust/api/Sound.h"
-#include "Game/Rust/api/Messages.h"
-#include "Game/Rust/api/Config.h"
-#include "Game/Rust/api/Tracing.h"
-#include "Game/Rust/api/Utils.h"
-#include "Game/Rust/api/Player.h"
-#include "Game/Rust/api/Constants.h"
+#include "NativeInterface/api/Common.h"
+#include "NativeInterface/api/CommonTypes.h"
+#include "NativeInterface/api/Memory.h"
+#include "NativeInterface/api/MetalMap.h"
+#include "NativeInterface/api/PathFinder.h"
+#include "NativeInterface/api/RulesParams.h"
+#include "NativeInterface/api/MathExtra.h"
+#include "NativeInterface/api/Game.h"
+#include "NativeInterface/api/Terrain.h"
+#include "NativeInterface/api/Teams.h"
+#include "NativeInterface/api/UnitsQuery.h"
+#include "NativeInterface/api/UnitsInfo.h"
+#include "NativeInterface/api/UnitsWeapons.h"
+#include "NativeInterface/api/UnitsCommands.h"
+#include "NativeInterface/api/UnitsPieces.h"
+#include "NativeInterface/api/Features.h"
+#include "NativeInterface/api/Projectiles.h"
+#include "NativeInterface/api/LOS.h"
+#include "NativeInterface/api/UnitDefs.h"
+#include "NativeInterface/api/FeatureDefs.h"
+#include "NativeInterface/api/WeaponDefs.h"
+#include "NativeInterface/api/MoveCtrl.h"
+#include "NativeInterface/api/SyncedCtrl.h"
+#include "NativeInterface/api/Camera.h"
+#include "NativeInterface/api/Input.h"
+#include "NativeInterface/api/Display.h"
+#include "NativeInterface/api/Selection.h"
+#include "NativeInterface/api/VFS.h"
+#include "NativeInterface/api/Sound.h"
+#include "NativeInterface/api/Messages.h"
+#include "NativeInterface/api/Config.h"
+#include "NativeInterface/api/Tracing.h"
+#include "NativeInterface/api/Utils.h"
+#include "NativeInterface/api/Player.h"
+#include "NativeInterface/api/Constants.h"
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct IsPosInMapReturn {
-  bool inPlayArea;
-  bool inMap;
-};
-
-struct GetGroundNormalReturn {
-  float x;
-  float y;
-  float z;
-  float slope;
-};
-
-struct GetGroundInfoReturn {
-  float ix;
-  float iz;
-  float terrainTypeIndex;
-  const char *name;
-  float metalExtraction;
-  float hardness;
-  float tankSpeed;
-  float kbotSpeed;
-  float hoverSpeed;
-  float shipSpeed;
-  bool receiveTracks;
-};
-
-struct GetGroundExtremesReturn {
-  float initMinHeight;
-  float initMaxHeight;
-  float currMinHeight;
-  float currMaxHeight;
-};
-
-struct GetTerrainTypeDataReturn {
-  int index;
-  const char *name;
-  float hardness;
-  float tankSpeed;
-  float kbotSpeed;
-  float hoverSpeed;
-  float shipSpeed;
-  bool receiveTracks;
-};
+#include "System/EventClient.h"
+#include "System/Log/ILog.h"
 
 
-#ifdef __cplusplus
-}
-#endif
-
-struct NativeInterfaceBridge {
-  // System
-  virtual void HandleRustPanic() = 0;
-
-  //
-  virtual IsPosInMapReturn IsPosInMap(float x, float z) = 0;
-  virtual float GetGroundHeight(float x, float z) = 0;
-  virtual float GetGroundOrigHeight(float x, float z) = 0;
-  virtual GetGroundNormalReturn GetGroundNormal(const float x, const float z, bool *normal) = 0;
-  virtual GetGroundInfoReturn GetGroundInfo(float x, float z) = 0;
-  virtual bool GetGroundBlocked(float fx1, float fz1, const float *fx2, const float *fz2) = 0;
-  virtual GetGroundExtremesReturn GetGroundExtremes() = 0;
-  virtual GetTerrainTypeDataReturn GetTerrainTypeData(int terrainTypeInfo) = 0;
-  virtual float GetGrass(float x, float z) = 0;
-  virtual float GetSmoothMeshHeight(float x, float z) = 0;
-
-  // SyncedCtrl START
-  virtual float AddHeightMap(float xl, float zl, float height) = 0;
-  virtual float SetHeightMap(float xl, float zl, float height, float* scalingFactor) = 0;
-  virtual float SetHeightMapFunc(void (*function)(void* data), void* data) = 0;
-
-  virtual void RevertHeightMap(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height, float origFactor) = 0;
-
-  // virtual void SetHeightMap(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height) = 0;
-  // virtual void AddHeightMap(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height) = 0;
-  // virtual void SetHeightMapArray(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height) = 0;
-  // virtual void AddHeightMapArray(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height) = 0;
-
-  // virtual void SetOriginalHeightMap(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height) = 0;
-  // virtual void AddOriginalHeightMap(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height) = 0;
-  // virtual void RevertOriginalHeightMap(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float origFactor) = 0;
-  // virtual void SetOriginalHeightMapArray(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height) = 0;
-  // virtual void AddOriginalHeightMapArray(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height) = 0;
-
-  virtual void SetSmoothMesh(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height) = 0;
-  virtual void AddSmoothMesh(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height) = 0;
-  virtual void RevertSmoothMesh(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float origFactor) = 0;
-  virtual void SetSmoothMeshArray(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height) = 0;
-  virtual void AddSmoothMeshArray(uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height) = 0;
-
-  virtual void SetMapSquareTerrainType(uint32_t x, uint32_t z, uint32_t newType) = 0;
-  virtual bool SetTerrainTypeData(uint32_t typeIndex, float* tankSpeed, float* kbotSpeed, float* hoverSpeed, float* shipSpeed,
-	  float* hardness, bool* receiveTracks, const char* name) = 0;
-// SyncedCtrl END
-
-// UnsyncedCtrl START
-	virtual void Echo(const char* msg) const = 0;
-// UnsyncedCtrl END
-
-// Game constants STAT
-  virtual float GameMapX() const = 0;
-  virtual float GameMapY() const = 0;
-  virtual float GameMapSizeX() const = 0;
-  virtual float GameMapSizeZ() const = 0;
-// Game constants END
-};
-
+class CUnit;
+class CWeapon;
+class CFeature;
+class CProjectile;
+struct Command;
+struct SRectangle;
 
 
 #ifdef __cplusplus
@@ -156,121 +57,7 @@ extern "C" {
 #endif
 
 struct NativeInterface {
-  // Version handshake - MUST be first field
-  uint32_t hostVersion;  // e.g., 10000 = v1.0.0
-
-  using HandleRustPanic = void(*)(NativeInterface* ptr);
-
-  using IsPosInMap = IsPosInMapReturn(*)(NativeInterface* ptr, float x, float z);
-  using GetGroundHeight = float(*)(NativeInterface* ptr, float x, float z);
-  using GetGroundOrigHeight = float(*)(NativeInterface* ptr, float x, float z);
-  using GetGroundNormal = GetGroundNormalReturn(*)(NativeInterface* ptr, const float x, const float z, bool *normal);
-  using GetGroundInfo = GetGroundInfoReturn(*)(NativeInterface* ptr, float x, float z);
-  using GetGroundBlocked = bool(*)(NativeInterface* ptr, float fx1, float fz1, const float *fx2, const float *fz2);
-  using GetGroundExtremes = GetGroundExtremesReturn(*)(NativeInterface* ptr);
-  using GetTerrainTypeData = GetTerrainTypeDataReturn(*)(NativeInterface* ptr, int terrainTypeInfo);
-  using GetGrass = float(*)(NativeInterface* ptr, float x, float z);
-  using GetSmoothMeshHeight = float(*)(NativeInterface* ptr, float x, float z);
-
-  // SyncedCtrl START
-  using AddHeightMap = float(*)(NativeInterface* ptr, float xl, float zl, float height);
-  using SetHeightMap = float(*)(NativeInterface* ptr, float xl, float zl, float height, float* scalingFactor);
-  using SetHeightMapFunc = float(*)(NativeInterface* ptr, void (*function)(void* data), void* data);
-
-  using RevertHeightMap = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height, float origFactor);
-
-  // using SetHeightMap = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height);
-  // using AddHeightMap = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height);
-  // using SetHeightMapArray = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height);
-  // using AddHeightMapArray = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height);
-
-  // using SetOriginalHeightMap = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height);
-  // using AddOriginalHeightMap = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height);
-  // using RevertOriginalHeightMap = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float origFactor);
-  // using SetOriginalHeightMapArray = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height);
-  // using AddOriginalHeightMapArray = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height);
-
-  using SetSmoothMesh = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height);
-  using AddSmoothMesh = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float height);
-  using RevertSmoothMesh = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, float origFactor);
-  using SetSmoothMeshArray = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height);
-  using AddSmoothMeshArray = void(*)(NativeInterface* ptr, uint32_t x1, uint32_t z1, uint32_t x2, uint32_t z2, const float* height);
-
-  using SetMapSquareTerrainType = void(*)(NativeInterface* ptr, uint32_t x, uint32_t z, uint32_t newType);
-  using SetTerrainTypeData = bool(*)(NativeInterface* ptr, uint32_t typeIndex, float* tankSpeed, float* kbotSpeed, float* hoverSpeed, float* shipSpeed,
-	  float* hardness, bool* receiveTracks, const char* name);
-
-  using GetMetalAmount = float(*)(NativeInterface* ptr, uint32_t x, uint32_t z);
-  using SetMetalAmount = void(*)(NativeInterface* ptr, uint32_t x, uint32_t z, float amount);
-// UnsyncedCtrl START
-  using Echo = void(*)(NativeInterface* ptr, const char* msg);
-// UnsyncedCtrl END
-
-  // SyncedCtrl END
-  using GameMapX = float(*)(NativeInterface* ptr);
-  using GameMapY = float(*)(NativeInterface* ptr);
-  using GameMapSizeX = float(*)(NativeInterface* ptr);
-  using GameMapSizeZ = float(*)(NativeInterface* ptr);
-
-  HandleRustPanic f_HandleRustPanic;
-
-	IsPosInMap f_IsPosInMap;
-	GetGroundHeight f_GetGroundHeight;
-	GetGroundOrigHeight f_GetGroundOrigHeight;
-	GetGroundNormal f_GetGroundNormal;
-	GetGroundInfo f_GetGroundInfo;
-	GetGroundBlocked f_GetGroundBlocked;
-	GetGroundExtremes f_GetGroundExtremes;
-	GetTerrainTypeData f_GetTerrainTypeData;
-	GetGrass f_GetGrass;
-	GetSmoothMeshHeight f_GetSmoothMeshHeight;
-
-// SyncedCtrl START
-  AddHeightMap f_AddHeightMap;
-  SetHeightMap f_SetHeightMap;
-  SetHeightMapFunc f_SetHeightMapFunc;
-
-  RevertHeightMap f_RevertHeightMap;
-
-  // SetHeightMapArray f_SetHeightMapArray;
-  // AddHeightMapArray f_AddHeightMapArray;
-
-  // SetOriginalHeightMap f_SetOriginalHeightMap;
-  // AddOriginalHeightMap f_AddOriginalHeightMap;
-  // RevertOriginalHeightMap f_RevertOriginalHeightMap;
-  // SetOriginalHeightMapArray f_SetOriginalHeightMapArray;
-  // AddOriginalHeightMapArray f_AddOriginalHeightMapArray;
-
-  SetSmoothMesh f_SetSmoothMesh;
-  AddSmoothMesh f_AddSmoothMesh;
-  RevertSmoothMesh f_RevertSmoothMesh;
-  SetSmoothMeshArray f_SetSmoothMeshArray;
-  AddSmoothMeshArray f_AddSmoothMeshArray;
-
-  SetMapSquareTerrainType f_SetMapSquareTerrainType;
-  SetTerrainTypeData f_SetTerrainTypeData;
-
-
-  // SyncedCtrl END
-
-  // UnsyncedCtrl START
-  Echo f_Echo;
-  // UnsyncedCtrl END
-
-
-	GameMapX f_GameMapX;
-	GameMapY f_GameMapY;
-	GameMapSizeX f_GameMapSizeX;
-	GameMapSizeZ f_GameMapSizeZ;
-
-	// ==================================================
-	// New Modular API Pointers
-	// ==================================================
-
-	// Memory management
 	const MemoryApi* memory;
-
-	// Core game state (synced read)
 	const GameApi* game;
 	const TerrainApi* terrain;
 	const TeamsApi* teams;
@@ -282,43 +69,156 @@ struct NativeInterface {
 	const FeaturesApi* features;
 	const ProjectilesApi* projectiles;
 	const LOSApi* los;
-
-	// Definitions (static data)
 	const UnitDefsApi* unitDefs;
 	const FeatureDefsApi* featureDefs;
 	const WeaponDefsApi* weaponDefs;
-
-	// Specialized systems
 	const MetalMapApi* metalMap;
 	const PathFinderApi* pathFinder;
 	const RulesParamsApi* rulesParams;
 	const MathExtraApi* mathExtra;
 	const MoveCtrlApi* moveCtrl;
-
-	// Control (synced write)
 	const SyncedCtrlApi* syncedCtrl;
-
-	// UI/Rendering (unsynced)
 	const CameraApi* cameraApi;
 	const InputApi* input;
 	const DisplayApi* display;
 	const SelectionApi* selection;
-
-	// System/IO
 	const VFSApi* vfs;
 	const SoundApi* soundApi;
 	const MessagesApi* messages;
 	const ConfigApi* config;
-
-	// Utilities
 	const TracingApi* tracing;
 	const UtilsApi* utils;
 	const PlayerApi* player;
-
-	NativeInterfaceBridge *bridge;
 };
-
 
 #ifdef __cplusplus
 }
 #endif
+
+
+namespace fptr {
+  using InitializeNativeModuleFuncPtr = void* (*)(NativeInterface*);
+  using DownloadFailedFuncPtr = void(*)(NativeInterface*,void*,int, int);
+  using DownloadFinishedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using DownloadProgressFuncPtr = void(*)(NativeInterface*,void*,int, long, long);
+  using DownloadQueuedFuncPtr = void(*)(NativeInterface*,void*,int, const char*, const char*);
+  using DownloadStartedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using FeatureCreatedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using FeatureDestroyedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using GameIDFuncPtr = void(*)(NativeInterface*,void*,const unsigned char*, unsigned int);
+  using GamePausedFuncPtr = void(*)(NativeInterface*,void*,int, bool);
+  using GamePreloadFuncPtr = void(*)(void*);
+  using GameStartFuncPtr = void(*)(void*);
+  using PlayerAddedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using PlayerChangedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using PlayerRemovedFuncPtr = void(*)(NativeInterface*,void*,int, int);
+  using RenderUnitDestroyedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using RunDelayedFunctionsFuncPtr = void(*)(NativeInterface*,void*,int);
+  using ShutdownFuncPtr = void(*)(void*);
+  using TeamChangedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using TeamDiedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using UnitCreatedFuncPtr = void(*)(NativeInterface*,void*,int, int);
+  using UnitDestroyedFuncPtr = void(*)(NativeInterface*,void*,int, int);
+  using UnitExperienceFuncPtr = void(*)(NativeInterface*,void*,int, float);
+  using UnitFinishedFuncPtr = void(*)(NativeInterface*,void*,int);
+  using UnitFromFactoryFuncPtr = void(*)(NativeInterface*,void*,int, int, bool);
+  using UnitGivenFuncPtr = void(*)(NativeInterface*,void*,int, int, int);
+  using UnitLoadedFuncPtr = void(*)(NativeInterface*,void*,int, int);
+  using UnitStunnedFuncPtr = void(*)(NativeInterface*,void*,int, bool);
+  using UnitTakenFuncPtr = void(*)(NativeInterface*,void*,int, int, int);
+  using UnitUnloadedFuncPtr = void(*)(NativeInterface*,void*,int, int);
+  using HandleLuaMsgFuncPtr = void(*)(NativeInterface*,void*,int,int,int,const std::uint8_t*, int);
+  using HandleLuaCallFuncPtr = void(*)(NativeInterface*,void*,const char*);
+}
+
+
+class NativeInterfaceSystem : public CEventClient
+{
+public:
+  NativeInterfaceSystem();
+
+  void Reload();
+
+  bool WantsEvent(const std::string &eventName) override
+  {
+    return true;
+  }
+  bool GetFullRead() const override { return true; }
+  int GetReadAllyTeam() const override { return AllAccessTeam; }
+
+  void GamePreload() override;
+  void GameStart() override;
+  void GamePaused(int playerID, bool paused) override;
+  void GameID(const unsigned char* gameID, unsigned int numBytes) override;
+
+  void TeamDied(int teamID) override;
+  void TeamChanged(int teamID) override;
+  void PlayerChanged(int playerID) override;
+  void PlayerAdded(int playerID) override;
+  void PlayerRemoved(int playerID, int reason) override;
+
+  void UnitCreated(const CUnit* unit, const CUnit* builder) override;
+  void UnitFinished(const CUnit *unit) override;
+  void UnitFromFactory(const CUnit* unit, const CUnit* factory, bool userOrders) override;
+  void UnitDestroyed(const CUnit* unit, const CUnit* attacker, int weaponDefID) override;
+  void UnitTaken(const CUnit* unit, int oldTeam, int newTeam) override;
+  void UnitGiven(const CUnit* unit, int oldTeam, int newTeam) override;
+  void UnitStunned(const CUnit* unit, bool stunned) override;
+  void UnitExperience(const CUnit* unit, float oldExperience) override;
+  void UnitLoaded(const CUnit* unit, const CUnit* transport) override;
+  void UnitUnloaded(const CUnit* unit, const CUnit* transport) override;
+  void RenderUnitDestroyed(const CUnit* unit) override;
+
+  void FeatureCreated(const CFeature* feature) override;
+  void FeatureDestroyed(const CFeature* feature) override;
+
+  void DownloadFailed(int ID, int errorID) override;
+  void DownloadFinished(int ID) override;
+  void DownloadProgress(int ID, long downloaded, long total) override;
+  void DownloadQueued(int ID, const std::string& archiveName, const std::string& archiveType) override;
+  void DownloadStarted(int ID) override;
+
+  void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
+  void HandleLuaCall(const char* msg);
+
+public:
+  static NativeInterfaceSystem* s_instance;
+
+private:
+  NativeInterface m_NativeInterface;
+  void *m_handle = nullptr;
+  void *m_data = nullptr;
+
+  fptr::InitializeNativeModuleFuncPtr m_InitializeNativeModuleFuncPtr = nullptr;
+  fptr::DownloadFailedFuncPtr m_DownloadFailedFuncPtr = nullptr;
+  fptr::DownloadFinishedFuncPtr m_DownloadFinishedFuncPtr = nullptr;
+  fptr::DownloadProgressFuncPtr m_DownloadProgressFuncPtr = nullptr;
+  fptr::DownloadQueuedFuncPtr m_DownloadQueuedFuncPtr = nullptr;
+  fptr::DownloadStartedFuncPtr m_DownloadStartedFuncPtr = nullptr;
+  fptr::FeatureCreatedFuncPtr m_FeatureCreatedFuncPtr = nullptr;
+  fptr::FeatureDestroyedFuncPtr m_FeatureDestroyedFuncPtr = nullptr;
+  fptr::GameIDFuncPtr m_GameIDFuncPtr = nullptr;
+  fptr::GamePausedFuncPtr m_GamePausedFuncPtr = nullptr;
+  fptr::GamePreloadFuncPtr m_GamePreloadFuncPtr = nullptr;
+  fptr::GameStartFuncPtr m_GameStartFuncPtr = nullptr;
+  fptr::PlayerAddedFuncPtr m_PlayerAddedFuncPtr = nullptr;
+  fptr::PlayerChangedFuncPtr m_PlayerChangedFuncPtr = nullptr;
+  fptr::PlayerRemovedFuncPtr m_PlayerRemovedFuncPtr = nullptr;
+  fptr::RenderUnitDestroyedFuncPtr m_RenderUnitDestroyedFuncPtr = nullptr;
+  fptr::RunDelayedFunctionsFuncPtr m_RunDelayedFunctionsFuncPtr = nullptr;
+  fptr::ShutdownFuncPtr m_ShutdownFuncPtr = nullptr;
+  fptr::TeamChangedFuncPtr m_TeamChangedFuncPtr = nullptr;
+  fptr::TeamDiedFuncPtr m_TeamDiedFuncPtr = nullptr;
+  fptr::UnitCreatedFuncPtr m_UnitCreatedFuncPtr = nullptr;
+  fptr::UnitDestroyedFuncPtr m_UnitDestroyedFuncPtr = nullptr;
+  fptr::UnitExperienceFuncPtr m_UnitExperienceFuncPtr = nullptr;
+  fptr::UnitFinishedFuncPtr m_UnitFinishedFuncPtr = nullptr;
+  fptr::UnitFromFactoryFuncPtr m_UnitFromFactoryFuncPtr = nullptr;
+  fptr::UnitGivenFuncPtr m_UnitGivenFuncPtr = nullptr;
+  fptr::UnitLoadedFuncPtr m_UnitLoadedFuncPtr = nullptr;
+  fptr::UnitStunnedFuncPtr m_UnitStunnedFuncPtr = nullptr;
+  fptr::UnitTakenFuncPtr m_UnitTakenFuncPtr = nullptr;
+  fptr::UnitUnloadedFuncPtr m_UnitUnloadedFuncPtr = nullptr;
+  fptr::HandleLuaMsgFuncPtr m_HandleLuaMsgFuncPtr = nullptr;
+  fptr::HandleLuaCallFuncPtr m_HandleLuaCallFuncPtr = nullptr;
+};

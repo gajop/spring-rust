@@ -38,7 +38,7 @@
 #include "System/Sound/ISound.h"
 #include "System/Sync/DumpState.h"
 #include "System/Sync/DumpHistory.h"
-#include "Game/Rust/RustSystem.h"
+#include "NativeInterface/NativeInterface.h"
 
 #include "System/Misc/TracyDefs.h"
 
@@ -1025,7 +1025,7 @@ void CGame::ClientReadNet()
 					unpack >> mode;
 					unpack >> data;
 
-					RustSystem::s_instance->HandleLuaMsg(playerNum, script, mode, data);
+					NativeInterfaceSystem::s_instance->HandleLuaMsg(playerNum, script, mode, data);
 					CLuaHandle::HandleLuaMsg(playerNum, script, mode, data);
 					AddTraffic(playerNum, packetCode, dataLength);
 				} catch (const netcode::UnpackPacketException& ex) {

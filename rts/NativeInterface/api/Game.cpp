@@ -1,4 +1,4 @@
-#include "Game/Rust/api/Game.h"
+#include "NativeInterface/api/Game.h"
 
 #include <algorithm>
 #include <cstring>

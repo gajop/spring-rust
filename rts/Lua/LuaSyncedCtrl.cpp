@@ -75,7 +75,7 @@
 #include "System/EventHandler.h"
 #include "System/ObjectDependenceTypes.h"
 #include "System/Log/ILog.h"
-#include "Game/Rust/RustSystem.h"
+#include "NativeInterface/NativeInterface.h"
 
 using std::max;
 
@@ -7571,7 +7571,7 @@ int LuaSyncedCtrl::InvokeNativeModule(lua_State* L)
 {
 	const char* msg = luaL_checkstring(L, 1);
 
-	RustSystem::s_instance->HandleLuaCall(msg);
+	NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
 
 	return 0;
 }

@@ -91,7 +91,7 @@
 #include "System/Platform/WindowManagerHelper.h"
 #include "System/SpringHash.h"
 #include "System/LoadLock.h"
-#include "Game/Rust/RustSystem.h"
+#include "NativeInterface/NativeInterface.h"
 
 
 #if !defined(HEADLESS) && !defined(NO_SOUND)
@@ -5341,7 +5341,7 @@ int LuaUnsyncedCtrl::InvokeNativeModule(lua_State* L)
 {
 	const char* msg = luaL_checkstring(L, 1);
 
-	RustSystem::s_instance->HandleLuaCall(msg);
+	NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
 
 	return 0;
 }

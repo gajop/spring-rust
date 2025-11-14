@@ -19,7 +19,7 @@
 class LuaParser;
 class ILoadSaveHandler;
 class ChatMessage;
-class RustSystem;
+class NativeInterfaceSystem;
 
 
 class CGame : public CGameController
@@ -230,7 +230,7 @@ private:
 	std::atomic<bool> loadDone = {false};
 	std::atomic<bool> gameOver = {false};
 
-	std::unique_ptr<RustSystem> rustSystem;
+	std::unique_ptr<NativeInterfaceSystem> rustSystem;
 };
 
 
