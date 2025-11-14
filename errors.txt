@@ -1,0 +1,701 @@
+latest: Pulling from beyond-all-reason/recoil-build-amd64-linux
+Digest: sha256:edb29a1d4234229c475fd6e8b70f99bbf3c31a326f99da68b08adbe22eb76725
+Status: Image is up to date for ghcr.io/beyond-all-reason/recoil-build-amd64-linux:latest
+ghcr.io/beyond-all-reason/recoil-build-amd64-linux:latest
+
+[0mCMake Deprecation Warning at CMakeLists.txt:2 (cmake_policy):
+  The OLD behavior for policy CMP0060 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+
+[0m
+[0mCMake Deprecation Warning at CMakeLists.txt:3 (cmake_policy):
+  The OLD behavior for policy CMP0065 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+
+[0m
+-- The C compiler identification is GNU 13.1.0
+-- The CXX compiler identification is GNU 13.1.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/gcc-13 - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/g++-13 - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Prefer static-linking!
+-- Checking to see if CXX compiler accepts flag -static-libgcc
+-- Checking to see if CXX compiler accepts flag -static-libgcc - yes
+-- Checking to see if CXX compiler accepts flag -static-libstdc++
+-- Checking to see if CXX compiler accepts flag -static-libstdc++ - yes
+-- gcc 13.1.0 detected
+-- Checking to see if CXX compiler accepts flag -fvisibility=hidden
+-- Checking to see if CXX compiler accepts flag -fvisibility=hidden - yes
+-- Checking to see if CXX compiler accepts flag -fvisibility-inlines-hidden
+-- Checking to see if CXX compiler accepts flag -fvisibility-inlines-hidden - yes
+-- Checking to see if CXX compiler accepts flag -mieee-fp
+-- Checking to see if CXX compiler accepts flag -mieee-fp - yes
+-- Checking to see if CXX compiler accepts flag -std=c++17
+-- Checking to see if CXX compiler accepts flag -std=c++17 - yes
+-- Checking to see if CXX compiler accepts flag -flto
+-- Checking to see if CXX compiler accepts flag -flto - yes
+-- Checking to see if CXX compiler accepts flag -march=i686
+-- Checking to see if CXX compiler accepts flag -march=i686 - no
+-- Checking to see if CXX compiler accepts flag -march=x86_64
+-- Checking to see if CXX compiler accepts flag -march=x86_64 - no
+-- Checking to see if CXX compiler accepts flag -mno-tls-direct-seg-refs
+-- Checking to see if CXX compiler accepts flag -mno-tls-direct-seg-refs - yes
+-- Checking to see if CXX compiler accepts flag -fuse-ld=gold
+-- Checking to see if CXX compiler accepts flag -fuse-ld=gold - yes
+-- Checking to see if CXX compiler accepts flag -fcheck-pointer-bounds
+-- Checking to see if CXX compiler accepts flag -fcheck-pointer-bounds - yes
+-- Checking to see if CXX compiler accepts flag -mmpx
+-- Checking to see if CXX compiler accepts flag -mmpx - yes
+-- Checking to see if CXX compiler accepts flag -Wchkp
+-- Checking to see if CXX compiler accepts flag -Wchkp - yes
+-- Building Spring on 64bit environment
+-- Targetting 64bit
+-- Found SDL2: /usr/include/SDL2  
+-- Found DevIL: /build/spring-static-libs/lib/libIL.a (Required is at least version "1.8.0") 
+-- Looking for strnlen
+-- Looking for strnlen - found
+-- Found ld.gold
+-- Checking to see if CXX compiler accepts flag -fdiagnostics-color=auto
+-- Checking to see if CXX compiler accepts flag -fdiagnostics-color=auto - yes
+-- Using CMAKE_CXX_FLAGS: -fuse-ld=gold -fdiagnostics-color=auto -march=x86-64 -mtune=generic -msse -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-sse4a -mno-avx -mno-fma -mno-fma4 -mno-xop -mno-lwp -mno-avx2  -mfpmath=sse -fsingle-precision-constant -frounding-math -mieee-fp -pipe -fno-strict-aliasing  -fvisibility=hidden  -fvisibility-inlines-hidden -pthread
+-- Using CMAKE_CXX_FLAGS_RELWITHDEBINFO:-O3 -g -DNDEBUG  -Wformat -Wformat-security -DNDEBUG
+-- Found Git: /usr/bin/git  
+[0mCMake Deprecation Warning at rts/lib/glad/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+[0m
+-- Found MiniZip: /build/spring-static-libs/lib/libminizip.a  
+-- Using minizip library: /build/spring-static-libs/lib/libminizip.a
+[0mCMake Deprecation Warning at rts/lib/gflags/CMakeLists.txt:73 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+[0m
+-- Looking for C++ include unistd.h
+-- Looking for C++ include unistd.h - found
+-- Looking for C++ include stdint.h
+-- Looking for C++ include stdint.h - found
+-- Looking for C++ include inttypes.h
+-- Looking for C++ include inttypes.h - found
+-- Looking for C++ include sys/types.h
+-- Looking for C++ include sys/types.h - found
+-- Looking for C++ include sys/stat.h
+-- Looking for C++ include sys/stat.h - found
+-- Looking for C++ include fnmatch.h
+-- Looking for C++ include fnmatch.h - found
+-- Looking for C++ include stddef.h
+-- Looking for C++ include stddef.h - found
+-- Check size of uint32_t
+-- Check size of uint32_t - done
+-- Looking for strtoll
+-- Looking for strtoll - found
+-- Forcing assimp option ASSIMP_BUILD_STATIC_LIB to on
+-- Forcing assimp option ASSIMP_NO_EXPORT to on
+[0mCMake Deprecation Warning at rts/lib/assimp/CMakeLists.txt:37 (CMAKE_MINIMUM_REQUIRED):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+[0m
+-- Shared libraries disabled
+-- Build an import-only version of Assimp.
+[0mCMake Deprecation Warning at rts/lib/assimp/code/CMakeLists.txt:46 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+[0m
+[0mINFO RT-extension not found. glTF import/export will be built without Open3DGC-compression.[0m
+-- Enabled formats: 3DS COLLADA LWO OBJ BLEND
+-- Disabled formats: AMF AC ASE ASSBIN ASSXML B3D BVH DXF CSM HMP IRRMESH IRR LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OGRE OPENGEX PLY MS3D COB IFC XGL FBX Q3D Q3BSP RAW SIB SMD STL TERRAGEN 3D X X3D GLTF 3MF MMD
+-- Including implementation fallback due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation westmere due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation haswell due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation icelake due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation arm64 due to SIMDJSON_IMPLEMENTATION=fallback
+-- Excluding implementation ppc64 due to SIMDJSON_IMPLEMENTATION=fallback
+-- Selected implementation fallback as builtin implementation based on fallback
+[0mCMake Deprecation Warning at rts/lib/simdjson/cmake/implementation-flags.cmake:98 (message):
+  SIMDJSON_IMPLEMENTATION_WESTMERE is deprecated.  Use
+  SIMDJSON_IMPLEMENTATION=-westmere instead
+Call Stack (most recent call first):
+  rts/lib/simdjson/CMakeLists.txt:37 (include)
+
+[0m
+[0mCMake Deprecation Warning at rts/lib/simdjson/cmake/implementation-flags.cmake:98 (message):
+  SIMDJSON_IMPLEMENTATION_HASWELL is deprecated.  Use
+  SIMDJSON_IMPLEMENTATION=-haswell instead
+Call Stack (most recent call first):
+  rts/lib/simdjson/CMakeLists.txt:37 (include)
+
+[0m
+[0mCMake Deprecation Warning at rts/lib/simdjson/cmake/implementation-flags.cmake:98 (message):
+  SIMDJSON_IMPLEMENTATION_ICELAKE is deprecated.  Use
+  SIMDJSON_IMPLEMENTATION=-icelake instead
+Call Stack (most recent call first):
+  rts/lib/simdjson/CMakeLists.txt:37 (include)
+
+[0m
+[0mCMake Deprecation Warning at rts/lib/simdjson/cmake/implementation-flags.cmake:98 (message):
+  SIMDJSON_IMPLEMENTATION_ARM64 is deprecated.  Use
+  SIMDJSON_IMPLEMENTATION=-arm64 instead
+Call Stack (most recent call first):
+  rts/lib/simdjson/CMakeLists.txt:37 (include)
+
+[0m
+[0mCMake Deprecation Warning at rts/lib/simdjson/cmake/implementation-flags.cmake:98 (message):
+  SIMDJSON_IMPLEMENTATION_PPC64 is deprecated.  Use
+  SIMDJSON_IMPLEMENTATION=-ppc64 instead
+Call Stack (most recent call first):
+  rts/lib/simdjson/CMakeLists.txt:37 (include)
+
+[0m
+-- AVX-512 instructions are not allowed.
+-- Looking for fork
+-- Looking for fork - found
+-- Looking for wait
+-- Looking for wait - found
+-- Adding -Og to compile flag
+[0mParsing public/common/TracyVersion.hpp file[0m
+[0mVERSION 0.11.1[0m
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- TRACY_ENABLE: OFF
+-- TRACY_ON_DEMAND: ON
+-- TRACY_CALLSTACK: OFF
+-- TRACY_NO_CALLSTACK: OFF
+-- TRACY_NO_CALLSTACK_INLINES: OFF
+-- TRACY_ONLY_LOCALHOST: OFF
+-- TRACY_NO_BROADCAST: OFF
+-- TRACY_ONLY_IPV4: OFF
+-- TRACY_NO_CODE_TRANSFER: OFF
+-- TRACY_NO_CONTEXT_SWITCH: OFF
+-- TRACY_NO_EXIT: OFF
+-- TRACY_NO_SAMPLING: OFF
+-- TRACY_NO_VERIFY: OFF
+-- TRACY_NO_VSYNC_CAPTURE: OFF
+-- TRACY_NO_FRAME_IMAGE: OFF
+-- TRACY_NO_SYSTEM_TRACING: OFF
+-- TRACY_PATCHABLE_NOPSLEDS: OFF
+-- TRACY_DELAYED_INIT: OFF
+-- TRACY_MANUAL_LIFETIME: OFF
+-- TRACY_FIBERS: OFF
+-- TRACY_NO_CRASH_HANDLER: OFF
+-- TRACY_TIMER_FALLBACK: OFF
+-- TRACY_LIBUNWIND_BACKTRACE: OFF
+-- TRACY_SYMBOL_OFFLINE_RESOLVE: OFF
+-- TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT: OFF
+-- TRACY_VERBOSE: OFF
+-- TRACY_DEMANGLE: OFF
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found suitable version "2.8.1", minimum required is "2.8.1") 
+[0mCMake Deprecation Warning at rts/lib/lunasvg/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+[0m
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found version "2.8.1") 
+-- Found Freetype::Freetype - Freetype font engine enabled
+-- Found AWK: /usr/bin/awk  
+-- AWK version: mawk 1.3.3 Nov 1996, Copyright (C) Michael D. Brennan
+-- Found AI Wrapper: CUtils (sources only wrapper)
+-- Found AI Interface: C-AIInterface 0.1
+[0mwarning: Java AI Interface will not be built![0m
+-- Found AI Wrapper: Cpp-AIWrapper
+[0mwarning: Java OO AI Wrapper will not be built![0m
+-- Found AI Wrapper: LegacyCpp-AIWrapper
+-- Found AI Wrapper: LegacyCpp-Creg-AIWrapper
+-- Found Skirmish AI: CircuitAI stable
+[0mwarning: CppTestAI Skirmish AI will not be built![0m
+-- Found Skirmish AI: NullAI 0.1
+[0mwarning: NullJavaAI Skirmish AI will not be built![0m
+[0mwarning: NullOOJavaAI Skirmish AI will not be built![0m
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found suitable version "1.2.13", minimum required is "1.2.7")  
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found version "1.2.13")  
+-- PR-Downloader version: rapidtools-v0.1.1281-55-g8263d01
+-- Found PkgConfig: /usr/bin/pkg-config (found version "0.29.1") 
+-- Checking for module 'libcurl>=7.84'
+--   Found libcurl, version 7.86.0
+-- Checking for module 'jsoncpp'
+--   No package 'jsoncpp' found
+-- Not found jsoncpp in system, using integrated version
+-- Checking for module 'minizip'
+--   Found minizip, version 3.0.7
+-- user-docs (plain/text) will be installed to {INSTALL_PREFIX}/doc
+-- Found SevenZip: /usr/bin/7z  
+-- /build/out/springsettings.cfg already exists!
+-- Found DevIL: /build/spring-static-libs/lib/libIL.a  
+-- Found OpenAL: /usr/lib/x86_64-linux-gnu/libopenal.so (Required is at least version "1.18.2") 
+-- Looking for vorbis_bitrate_addblock in vorbis
+-- Looking for vorbis_bitrate_addblock in vorbis - not found
+-- Found OggVorbis: /build/spring-static-libs/lib/libvorbis.a (Required is at least version "1.3.4") 
+-- Found ZLIB: /build/spring-static-libs/lib/libz.a (found suitable version "1.2.13", minimum required is "1.2.7")  
+-- Found Libunwind: /build/spring-static-libs/lib/libunwind.a (found suitable version "1.4.0", minimum required is "1.4.0") 
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libOpenGL.so (Required is at least version "3.0")  
+-- Found Fontconfig: /usr/lib/x86_64-linux-gnu/libfontconfig.a (found suitable version "2.12.6", minimum required is "2.11") 
+-- Found EXPAT: /usr/lib/x86_64-linux-gnu/libexpat.a (found suitable version "2.2.5", minimum required is "2.2.5") 
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.a (found suitable version "2.8.1", minimum required is "2.8.1") 
+-- Found X11: /usr/include   
+-- Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so
+-- Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so - found
+-- Looking for gethostbyname
+-- Looking for gethostbyname - found
+-- Looking for connect
+-- Looking for connect - found
+-- Looking for remove
+-- Looking for remove - found
+-- Looking for shmat
+-- Looking for shmat - found
+-- Looking for IceConnectionNumber in ICE
+-- Looking for IceConnectionNumber in ICE - found
+-- Using legacy as default engine
+[0mCMake Deprecation Warning at test/lib/catch2/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+[0m
+-- No ipv6 support, disabling test
+-- Configuring done (2.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /build/out
+[0/2] Re-checking globbed directories...[K
+[0/13] Running utility command for generateVersionFiles[K[0/13] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/GameVersion.cpp.o[K[0/13] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Rust/api/SyncedCtrl.cpp.o[K[1/13] Running utility command for generateVersionFiles[K
+Spring engine version: 2025.03.1-277-g55f3294 claude-rust ()
+[1/13] Building CXX object tools/unitsync/CMakeFiles/unitsync.dir/__/__/rts/Game/GameVersion.cpp.o[K[1/13] Building CXX object rts/builds/legacy/CMakeFiles/Game.dir/__/__/Game/GameVersion.cpp.o[K[1/13] Building CXX object rts/builds/legacy/CMakeFiles/Game.dir/__/__/Game/Rust/api/SyncedCtrl.cpp.o[K[1/13] Building CXX object rts/builds/dedicated/CMakeFiles/engine-dedicated.dir/__/__/Game/GameVersion.cpp.o[K[2/13] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/GameVersion.cpp.o[K[3/13] Building CXX object rts/builds/legacy/CMakeFiles/Game.dir/__/__/Game/GameVersion.cpp.o[K[4/13] Building CXX object rts/builds/dedicated/CMakeFiles/engine-dedicated.dir/__/__/Game/GameVersion.cpp.o[K[4/13] Linking CXX executable spring-dedicated[K[5/13] Building CXX object tools/unitsync/CMakeFiles/unitsync.dir/__/__/rts/Game/GameVersion.cpp.o[K[5/13] Linking CXX shared library libunitsync.so[K[6/13] Linking CXX shared library libunitsync.so[K[7/13] Linking CXX executable spring-dedicated[K[8/13] Building CXX object rts/builds/headless/CMakeFiles/GameHeadless.dir/__/__/Game/Rust/api/SyncedCtrl.cpp.o[K[8/13] Linking CXX static library rts/builds/headless/libGameHeadless.a[K[9/13] Building CXX object rts/builds/legacy/CMakeFiles/Game.dir/__/__/Game/Rust/api/SyncedCtrl.cpp.o[K[9/13] Linking CXX static library rts/builds/legacy/libGame.a[K[10/13] Linking CXX static library rts/builds/headless/libGameHeadless.a[K[10/13] Linking CXX executable spring-headless[K[11/13] Linking CXX static library rts/builds/legacy/libGame.a[K[11/13] Linking CXX executable spring[K[12/13] Linking CXX executable spring-headless[K[13/13] Linking CXX executable spring[K
+-- Install configuration: "RELWITHDEBINFO"
+-- Installing: /build/out/install/lib/pkgconfig/gflags.pc
+-- Installing: /build/out/install/lib/libsimdjson.a
+-- Installing: /build/out/install/lib/cmake/simdjson/simdjson-config.cmake
+-- Installing: /build/out/install/lib/cmake/simdjson/simdjson-config-version.cmake
+-- Installing: /build/out/install/lib/cmake/simdjson/simdjsonTargets.cmake
+-- Installing: /build/out/install/lib/cmake/simdjson/simdjsonTargets-relwithdebinfo.cmake
+-- Installing: /build/out/install/lib/pkgconfig/simdjson.pc
+-- Installing: /build/out/install/include/fastgltf/base64.hpp
+-- Installing: /build/out/install/include/fastgltf/core.hpp
+-- Installing: /build/out/install/include/fastgltf/dxmath_element_traits.hpp
+-- Installing: /build/out/install/include/fastgltf/glm_element_traits.hpp
+-- Installing: /build/out/install/include/fastgltf/tools.hpp
+-- Installing: /build/out/install/include/fastgltf/types.hpp
+-- Installing: /build/out/install/include/fastgltf/util.hpp
+-- Installing: /build/out/install/include/fastgltf/math.hpp
+-- Installing: /build/out/install/lib/cmake/fastgltf/fastgltfConfigVersion.cmake
+-- Installing: /build/out/install/lib/libfastgltf.a
+-- Installing: /build/out/install/lib/cmake/fastgltf/fastgltfConfig.cmake
+-- Installing: /build/out/install/lib/cmake/fastgltf/fastgltfConfig-relwithdebinfo.cmake
+-- Installing: /build/out/install/lib/libTracyClient.a
+-- Installing: /build/out/install/include/tracy/TracyC.h
+-- Installing: /build/out/install/include/tracy/Tracy.hpp
+-- Installing: /build/out/install/include/tracy/TracyD3D11.hpp
+-- Installing: /build/out/install/include/tracy/TracyD3D12.hpp
+-- Installing: /build/out/install/include/tracy/TracyLua.hpp
+-- Installing: /build/out/install/include/tracy/TracyOpenCL.hpp
+-- Installing: /build/out/install/include/tracy/TracyOpenGL.hpp
+-- Installing: /build/out/install/include/tracy/TracyVulkan.hpp
+-- Installing: /build/out/install/include/client/tracy_concurrentqueue.h
+-- Installing: /build/out/install/include/client/tracy_rpmalloc.hpp
+-- Installing: /build/out/install/include/client/tracy_SPSCQueue.h
+-- Installing: /build/out/install/include/client/TracyKCore.hpp
+-- Installing: /build/out/install/include/client/TracyArmCpuTable.hpp
+-- Installing: /build/out/install/include/client/TracyCallstack.h
+-- Installing: /build/out/install/include/client/TracyCallstack.hpp
+-- Installing: /build/out/install/include/client/TracyCpuid.hpp
+-- Installing: /build/out/install/include/client/TracyDebug.hpp
+-- Installing: /build/out/install/include/client/TracyDxt1.hpp
+-- Installing: /build/out/install/include/client/TracyFastVector.hpp
+-- Installing: /build/out/install/include/client/TracyLock.hpp
+-- Installing: /build/out/install/include/client/TracyProfiler.hpp
+-- Installing: /build/out/install/include/client/TracyRingBuffer.hpp
+-- Installing: /build/out/install/include/client/TracyScoped.hpp
+-- Installing: /build/out/install/include/client/TracyStringHelpers.hpp
+-- Installing: /build/out/install/include/client/TracySysPower.hpp
+-- Installing: /build/out/install/include/client/TracySysTime.hpp
+-- Installing: /build/out/install/include/client/TracySysTrace.hpp
+-- Installing: /build/out/install/include/client/TracyThread.hpp
+-- Installing: /build/out/install/include/common/tracy_lz4.hpp
+-- Installing: /build/out/install/include/common/tracy_lz4hc.hpp
+-- Installing: /build/out/install/include/common/TracyAlign.hpp
+-- Installing: /build/out/install/include/common/TracyAlloc.hpp
+-- Installing: /build/out/install/include/common/TracyApi.h
+-- Installing: /build/out/install/include/common/TracyColor.hpp
+-- Installing: /build/out/install/include/common/TracyForceInline.hpp
+-- Installing: /build/out/install/include/common/TracyMutex.hpp
+-- Installing: /build/out/install/include/common/TracyProtocol.hpp
+-- Installing: /build/out/install/include/common/TracyQueue.hpp
+-- Installing: /build/out/install/include/common/TracySocket.hpp
+-- Installing: /build/out/install/include/common/TracyStackFrames.hpp
+-- Installing: /build/out/install/include/common/TracySystem.hpp
+-- Installing: /build/out/install/include/common/TracyUwp.hpp
+-- Installing: /build/out/install/include/common/TracyYield.hpp
+-- Installing: /build/out/install/share/Tracy/TracyTargets.cmake
+-- Installing: /build/out/install/share/Tracy/TracyTargets-relwithdebinfo.cmake
+-- Installing: /build/out/install/share/Tracy/TracyConfig.cmake
+-- Installing: /build/out/install/include/lunasvg.h
+-- Installing: /build/out/install/lib/liblunasvg.a
+-- Installing: /build/out/install/lib/librmlui.a
+-- Installing: /build/out/install/lib/librmlui_debugger.a
+-- Installing: /build/out/install/include/RmlUi
+-- Installing: /build/out/install/include/RmlUi/Lottie
+-- Installing: /build/out/install/include/RmlUi/Lottie/ElementLottie.h
+-- Installing: /build/out/install/include/RmlUi/SVG
+-- Installing: /build/out/install/include/RmlUi/SVG/ElementSVG.h
+-- Installing: /build/out/install/include/RmlUi/Lua.h
+-- Installing: /build/out/install/include/RmlUi/Lua
+-- Installing: /build/out/install/include/RmlUi/Lua/IncludeLua.h
+-- Installing: /build/out/install/include/RmlUi/Lua/Header.h
+-- Installing: /build/out/install/include/RmlUi/Lua/Lua.h
+-- Installing: /build/out/install/include/RmlUi/Lua/LuaType.inl
+-- Installing: /build/out/install/include/RmlUi/Lua/LuaType.h
+-- Installing: /build/out/install/include/RmlUi/Lua/Interpreter.h
+-- Installing: /build/out/install/include/RmlUi/Lua/Utilities.h
+-- Installing: /build/out/install/include/RmlUi/Config
+-- Installing: /build/out/install/include/RmlUi/Config/Config.h
+-- Installing: /build/out/install/include/RmlUi/Core.h
+-- Installing: /build/out/install/include/RmlUi/Core
+-- Installing: /build/out/install/include/RmlUi/Core/Geometry.h
+-- Installing: /build/out/install/include/RmlUi/Core/Debug.h
+-- Installing: /build/out/install/include/RmlUi/Core/URL.h
+-- Installing: /build/out/install/include/RmlUi/Core/FontGlyph.h
+-- Installing: /build/out/install/include/RmlUi/Core/Colour.inl
+-- Installing: /build/out/install/include/RmlUi/Core/Event.h
+-- Installing: /build/out/install/include/RmlUi/Core/Vector3.h
+-- Installing: /build/out/install/include/RmlUi/Core/Decorator.h
+-- Installing: /build/out/install/include/RmlUi/Core/Elements
+-- Installing: /build/out/install/include/RmlUi/Core/Elements/ElementTabSet.h
+-- Installing: /build/out/install/include/RmlUi/Core/Elements/ElementFormControlSelect.h
+-- Installing: /build/out/install/include/RmlUi/Core/Elements/ElementFormControl.h
+-- Installing: /build/out/install/include/RmlUi/Core/Elements/ElementFormControlInput.h
+-- Installing: /build/out/install/include/RmlUi/Core/Elements/ElementForm.h
+-- Installing: /build/out/install/include/RmlUi/Core/Elements/ElementProgress.h
+-- Installing: /build/out/install/include/RmlUi/Core/Elements/ElementFormControlTextArea.h
+-- Installing: /build/out/install/include/RmlUi/Core/TransformPrimitive.h
+-- Installing: /build/out/install/include/RmlUi/Core/Containers
+-- Installing: /build/out/install/include/RmlUi/Core/Containers/LICENSE.txt
+-- Installing: /build/out/install/include/RmlUi/Core/Containers/robin_hood.h
+-- Installing: /build/out/install/include/RmlUi/Core/Containers/itlib
+-- Installing: /build/out/install/include/RmlUi/Core/Containers/itlib/flat_set.hpp
+-- Installing: /build/out/install/include/RmlUi/Core/Containers/itlib/flat_map.hpp
+-- Installing: /build/out/install/include/RmlUi/Core/Vector4.inl
+-- Installing: /build/out/install/include/RmlUi/Core/Span.h
+-- Installing: /build/out/install/include/RmlUi/Core/TextInputContext.h
+-- Installing: /build/out/install/include/RmlUi/Core/Header.h
+-- Installing: /build/out/install/include/RmlUi/Core/Rectangle.h
+-- Installing: /build/out/install/include/RmlUi/Core/MeshUtilities.h
+-- Installing: /build/out/install/include/RmlUi/Core/ElementDocument.h
+-- Installing: /build/out/install/include/RmlUi/Core/PropertySpecification.h
+-- Installing: /build/out/install/include/RmlUi/Core/DataVariable.h
+-- Installing: /build/out/install/include/RmlUi/Core/Platform.h
+-- Installing: /build/out/install/include/RmlUi/Core/Box.h
+-- Installing: /build/out/install/include/RmlUi/Core/SystemInterface.h
+-- Installing: /build/out/install/include/RmlUi/Core/FontEffect.h
+-- Installing: /build/out/install/include/RmlUi/Core/PropertyDefinition.h
+-- Installing: /build/out/install/include/RmlUi/Core/ScriptInterface.h
+-- Installing: /build/out/install/include/RmlUi/Core/Vertex.h
+-- Installing: /build/out/install/include/RmlUi/Core/DecorationTypes.h
+-- Installing: /build/out/install/include/RmlUi/Core/Vector2.h
+-- Installing: /build/out/install/include/RmlUi/Core/Property.h
+-- Installing: /build/out/install/include/RmlUi/Core/TypeConverter.inl
+-- Installing: /build/out/install/include/RmlUi/Core/PropertyDictionary.h
+-- Installing: /build/out/install/include/RmlUi/Core/XMLNodeHandler.h
+-- Installing: /build/out/install/include/RmlUi/Core/ObserverPtr.h
+-- Installing: /build/out/install/include/RmlUi/Core/TextShapingContext.h
+-- Installing: /build/out/install/include/RmlUi/Core/StyleTypes.h
+-- Installing: /build/out/install/include/RmlUi/Core/Profiling.h
+-- Installing: /build/out/install/include/RmlUi/Core/Vector3.inl
+-- Installing: /build/out/install/include/RmlUi/Core/XMLParser.h
+-- Installing: /build/out/install/include/RmlUi/Core/PropertyParser.h
+-- Installing: /build/out/install/include/RmlUi/Core/StringUtilities.h
+-- Installing: /build/out/install/include/RmlUi/Core/NumericValue.h
+-- Installing: /build/out/install/include/RmlUi/Core/EventListenerInstancer.h
+-- Installing: /build/out/install/include/RmlUi/Core/Types.h
+-- Installing: /build/out/install/include/RmlUi/Core/ElementInstancer.h
+-- Installing: /build/out/install/include/RmlUi/Core/ConvolutionFilter.h
+-- Installing: /build/out/install/include/RmlUi/Core/StableVector.h
+-- Installing: /build/out/install/include/RmlUi/Core/Filter.h
+-- Installing: /build/out/install/include/RmlUi/Core/FontMetrics.h
+-- Installing: /build/out/install/include/RmlUi/Core/Core.h
+-- Installing: /build/out/install/include/RmlUi/Core/Animation.h
+-- Installing: /build/out/install/include/RmlUi/Core/PropertiesIteratorView.h
+-- Installing: /build/out/install/include/RmlUi/Core/Spritesheet.h
+-- Installing: /build/out/install/include/RmlUi/Core/ContextInstancer.h
+-- Installing: /build/out/install/include/RmlUi/Core/Matrix4.h
+-- Installing: /build/out/install/include/RmlUi/Core/Element.inl
+-- Installing: /build/out/install/include/RmlUi/Core/UniqueRenderResource.h
+-- Installing: /build/out/install/include/RmlUi/Core/Element.h
+-- Installing: /build/out/install/include/RmlUi/Core/CompiledFilterShader.h
+-- Installing: /build/out/install/include/RmlUi/Core/Vector2.inl
+-- Installing: /build/out/install/include/RmlUi/Core/PropertyIdSet.h
+-- Installing: /build/out/install/include/RmlUi/Core/Stream.h
+-- Installing: /build/out/install/include/RmlUi/Core/DataTypes.h
+-- Installing: /build/out/install/include/RmlUi/Core/BaseXMLParser.h
+-- Installing: /build/out/install/include/RmlUi/Core/Variant.inl
+-- Installing: /build/out/install/include/RmlUi/Core/DataModelHandle.h
+-- Installing: /build/out/install/include/RmlUi/Core/Dictionary.h
+-- Installing: /build/out/install/include/RmlUi/Core/CallbackTexture.h
+-- Installing: /build/out/install/include/RmlUi/Core/FontEngineInterface.h
+-- Installing: /build/out/install/include/RmlUi/Core/Transform.h
+-- Installing: /build/out/install/include/RmlUi/Core/StyleSheet.h
+-- Installing: /build/out/install/include/RmlUi/Core/DataStructHandle.h
+-- Installing: /build/out/install/include/RmlUi/Core/EffectSpecification.h
+-- Installing: /build/out/install/include/RmlUi/Core/Factory.h
+-- Installing: /build/out/install/include/RmlUi/Core/Matrix4.inl
+-- Installing: /build/out/install/include/RmlUi/Core/RenderInterface.h
+-- Installing: /build/out/install/include/RmlUi/Core/Vector4.h
+-- Installing: /build/out/install/include/RmlUi/Core/EventListener.h
+-- Installing: /build/out/install/include/RmlUi/Core/EventInstancer.h
+-- Installing: /build/out/install/include/RmlUi/Core/Context.h
+-- Installing: /build/out/install/include/RmlUi/Core/FontEffectInstancer.h
+-- Installing: /build/out/install/include/RmlUi/Core/ElementUtilities.h
+-- Installing: /build/out/install/include/RmlUi/Core/ElementScroll.h
+-- Installing: /build/out/install/include/RmlUi/Core/Variant.h
+-- Installing: /build/out/install/include/RmlUi/Core/Log.h
+-- Installing: /build/out/install/include/RmlUi/Core/Texture.h
+-- Installing: /build/out/install/include/RmlUi/Core/DataTypeRegister.h
+-- Installing: /build/out/install/include/RmlUi/Core/TextInputHandler.h
+-- Installing: /build/out/install/include/RmlUi/Core/RenderManager.h
+-- Installing: /build/out/install/include/RmlUi/Core/FileInterface.h
+-- Installing: /build/out/install/include/RmlUi/Core/Traits.h
+-- Installing: /build/out/install/include/RmlUi/Core/Tween.h
+-- Installing: /build/out/install/include/RmlUi/Core/Input.h
+-- Installing: /build/out/install/include/RmlUi/Core/ElementText.h
+-- Installing: /build/out/install/include/RmlUi/Core/Unit.h
+-- Installing: /build/out/install/include/RmlUi/Core/Mesh.h
+-- Installing: /build/out/install/include/RmlUi/Core/StreamMemory.h
+-- Installing: /build/out/install/include/RmlUi/Core/StyleSheetSpecification.h
+-- Installing: /build/out/install/include/RmlUi/Core/StyleSheetContainer.h
+-- Installing: /build/out/install/include/RmlUi/Core/StyleSheetTypes.h
+-- Installing: /build/out/install/include/RmlUi/Core/TypeConverter.h
+-- Installing: /build/out/install/include/RmlUi/Core/Math.h
+-- Installing: /build/out/install/include/RmlUi/Core/Colour.h
+-- Installing: /build/out/install/include/RmlUi/Core/Plugin.h
+-- Installing: /build/out/install/include/RmlUi/Core/ScrollTypes.h
+-- Installing: /build/out/install/include/RmlUi/Core/ComputedValues.h
+-- Installing: /build/out/install/include/RmlUi/Core/ID.h
+-- Installing: /build/out/install/include/RmlUi/Core/RenderInterfaceCompatibility.h
+-- Installing: /build/out/install/include/RmlUi/Core/Utilities.h
+-- Installing: /build/out/install/include/RmlUi/Debugger.h
+-- Installing: /build/out/install/include/RmlUi/Debugger
+-- Installing: /build/out/install/include/RmlUi/Debugger/Header.h
+-- Installing: /build/out/install/include/RmlUi/Debugger/Debugger.h
+-- Installing: /build/out/install/lib/cmake/RmlUi/RmlUiConfig.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/RmlUiConfigVersion.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Dependencies.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/Findlunasvg.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/Emscripten
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/Emscripten/Findglfw3.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/Emscripten/FindOpenGL.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/Emscripten/FindSDL2.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/Emscripten/FindFreetype.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/Emscripten/FindSDL2_image.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/FindHarfBuzz.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/FindLuaJIT.cmake
+-- Installing: /build/out/install/lib/cmake/RmlUi/Modules/FindSDL2_image.cmake
+-- Up-to-date: /build/out/install/./AI/Interfaces/C/0.1
+-- Up-to-date: /build/out/install/./AI/Interfaces/C/0.1/InterfaceInfo.lua
+-- Up-to-date: /build/out/install/./AI/Interfaces/C/0.1
+-- Up-to-date: /build/out/install/./AI/Interfaces/C/0.1/libAIInterface.so
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/AIInfo.lua
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/script
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/easy
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/AIOptions.lua
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/script
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/script/role.as
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/script/init.as
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/script/side.as
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/easy
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/easy/economy.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/commander.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/economy.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/response.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/behaviour.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/block_map.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/factory.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/build_chain.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous/commander.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous/economy.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous/response.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous/behaviour.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous/block_map.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous/factory.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/config/previous/build_chain.json
+-- Up-to-date: /build/out/install/./AI/Skirmish/CircuitAI/stable/libSkirmishAI.so
+-- Up-to-date: /build/out/install/./AI/Skirmish/NullAI/0.1
+-- Up-to-date: /build/out/install/./AI/Skirmish/NullAI/0.1/AIInfo.lua
+-- Up-to-date: /build/out/install/./AI/Skirmish/NullAI/0.1/AIOptions.lua
+-- Up-to-date: /build/out/install/./AI/Skirmish/NullAI/0.1
+-- Up-to-date: /build/out/install/./AI/Skirmish/NullAI/0.1/libSkirmishAI.so
+-- Installing: /build/out/install/./libunitsync.so
+-- Installing: /build/out/install/include/readerwriterqueue/atomicops.h
+-- Installing: /build/out/install/include/readerwriterqueue/readerwriterqueue.h
+-- Installing: /build/out/install/include/readerwriterqueue/readerwritercircularbuffer.h
+-- Installing: /build/out/install/include/readerwriterqueue/LICENSE.md
+-- Up-to-date: /build/out/install/./pr-downloader
+-- Up-to-date: /build/out/install/doc/AUTHORS
+-- Up-to-date: /build/out/install/doc/README.markdown
+-- Up-to-date: /build/out/install/doc/COPYING
+-- Up-to-date: /build/out/install/doc/LICENSE
+-- Up-to-date: /build/out/install/doc/THANKS
+-- Up-to-date: /build/out/install/doc/gpl-2.0.txt
+-- Up-to-date: /build/out/install/doc/gpl-3.0.txt
+-- Up-to-date: /build/out/install/./base/spring/bitmaps.sdz
+-- Up-to-date: /build/out/install/./base/springcontent.sdz
+-- Up-to-date: /build/out/install/./base/maphelper.sdz
+-- Up-to-date: /build/out/install/./base/cursors.sdz
+-- Up-to-date: /build/out/install/./base/RecoilEngine_4K.png
+-- Up-to-date: /build/out/install/.
+-- Up-to-date: /build/out/install/./LuaUI
+-- Up-to-date: /build/out/install/./LuaUI/Fonts
+-- Up-to-date: /build/out/install/./LuaUI/Fonts/FreeMonoBold_12.lua
+-- Up-to-date: /build/out/install/./LuaUI/Fonts/FreeMonoBold_12.png
+-- Up-to-date: /build/out/install/./LuaUI/layout.lua
+-- Up-to-date: /build/out/install/./LuaUI/loadmodel.lua
+-- Up-to-date: /build/out/install/./LuaUI/selector.lua
+-- Up-to-date: /build/out/install/./LuaUI/ctrlpanel.txt
+-- Up-to-date: /build/out/install/./LuaUI/Config
+-- Up-to-date: /build/out/install/./LuaUI/Config/README.txt
+-- Up-to-date: /build/out/install/./LuaUI/callins.lua
+-- Up-to-date: /build/out/install/./LuaUI/fonts.lua
+-- Up-to-date: /build/out/install/./LuaUI/system.lua
+-- Up-to-date: /build/out/install/./LuaUI/Icons
+-- Up-to-date: /build/out/install/./LuaUI/Icons/m-down.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/sphere.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/diamond.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/hourglass-side.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/triangle-down.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/x.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/square.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/chi.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/triangle-up.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/cross.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/star-dark.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/tri-up.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/e.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/square_x.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/hourglass.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/star.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/hemi.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/m-up.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/m.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/hemi-down.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/hemi-up.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/square_+.png
+-- Up-to-date: /build/out/install/./LuaUI/Icons/tri-down.png
+-- Up-to-date: /build/out/install/./LuaUI/setupdefs.lua
+-- Up-to-date: /build/out/install/./LuaUI/actions.lua
+-- Up-to-date: /build/out/install/./LuaUI/rml_setup.lua
+-- Up-to-date: /build/out/install/./LuaUI/Headers
+-- Up-to-date: /build/out/install/./LuaUI/Headers/keysym.h.lua
+-- Up-to-date: /build/out/install/./LuaUI/Headers/scansym.h.lua
+-- Up-to-date: /build/out/install/./LuaUI/Headers/colors.h.lua
+-- Up-to-date: /build/out/install/./LuaUI/debug.lua
+-- Up-to-date: /build/out/install/./LuaUI/savetable.lua
+-- Up-to-date: /build/out/install/./LuaUI/tweakmode.lua
+-- Up-to-date: /build/out/install/./LuaUI/main.lua
+-- Up-to-date: /build/out/install/./LuaUI/flags.lua
+-- Up-to-date: /build/out/install/./LuaUI/widgets.lua
+-- Up-to-date: /build/out/install/./LuaUI/Sounds
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/message_admin.wav
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/message_private.wav
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/bounce.wav
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/teamgrab.wav
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/pop.wav
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/flag_grab.wav
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/message_team.wav
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/land.wav
+-- Up-to-date: /build/out/install/./LuaUI/Sounds/README.txt
+-- Up-to-date: /build/out/install/./LuaUI/utils.lua
+-- Up-to-date: /build/out/install/./LuaUI/Images
+-- Up-to-date: /build/out/install/./LuaUI/Images/players.png
+-- Up-to-date: /build/out/install/./LuaUI/Images/flags25x15.png
+-- Up-to-date: /build/out/install/./LuaUI/Images/highlight_strip.png
+-- Up-to-date: /build/out/install/./LuaUI/Models
+-- Up-to-date: /build/out/install/./LuaUI/Models/colors.mtl
+-- Up-to-date: /build/out/install/./LuaUI/Models/colors.lua
+-- Up-to-date: /build/out/install/./LuaUI/Models/colors.obj
+-- Up-to-date: /build/out/install/./fonts
+-- Up-to-date: /build/out/install/./fonts/AUTHORS
+-- Up-to-date: /build/out/install/./fonts/COPYING
+-- Up-to-date: /build/out/install/./fonts/README
+-- Up-to-date: /build/out/install/./fonts/CREDITS
+-- Up-to-date: /build/out/install/./fonts/FreeSansBold.otf
+-- Up-to-date: /build/out/install/./ctrlpanel.txt
+-- Up-to-date: /build/out/install/./cmdcolors.txt
+-- Up-to-date: /build/out/install/./examples
+-- Up-to-date: /build/out/install/./examples/Widgets
+-- Up-to-date: /build/out/install/./examples/Widgets/minimap_startbox.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/gui_team_platter.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/unit_factory_guard.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/gui_xray_shader.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/download.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/headless_setup.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/gui_selbuttons.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/gui_hilight_unit.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/camera_smooth_move.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/luasocket.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/gui_buildspacing.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/unit_metal_maker.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/init_start_marker.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/luasocket_console.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/game_messages.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/minimap_follow_cam.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/unit_stockpile.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/gui_autoshowmetal.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/watchdog.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/unit_immobile_builder.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/minimap_relative.lua
+-- Up-to-date: /build/out/install/./examples/Widgets/camera_shake.lua
+-- Up-to-date: /build/out/install/./luaui.lua
+-- Installing: /build/out/install/share/applications/spring.desktop
+-- Installing: /build/out/install/share/mime/packages/spring.xml
+-- Installing: /build/out/install/share/pixmaps/spring.png
+-- Installing: /build/out/install/share/pixmaps/application-x-spring-demo.png
+-- Installing: /build/out/install/./spring
+-- Installing: /build/out/install/./spring-dedicated
+-- Installing: /build/out/install/./spring-headless
+-- Up-to-date: /build/out/install/games
+-- Up-to-date: /build/out/install/maps
+-- Installing: /build/out/install/./springsettings.cfg
