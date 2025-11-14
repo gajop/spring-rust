@@ -490,8 +490,8 @@ static void NativeGetFeatureResources(const GetFeatureResourcesQuery* query, Get
 		return;
 	}
 
-	result->resources.metal = feature->def->metal * feature->reclaimLeft;
-	result->resources.energy = feature->def->energy * feature->reclaimLeft;
+	result->resources.metal = feature->def->cost.metal * feature->reclaimLeft;
+	result->resources.energy = feature->def->cost.energy * feature->reclaimLeft;
 	result->resources.reclaimTime = feature->def->reclaimTime;
 }
 

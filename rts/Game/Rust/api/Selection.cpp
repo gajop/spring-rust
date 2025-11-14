@@ -177,7 +177,8 @@ static void NativeGetGroupList(const GetGroupListQuery* query, GetGroupListResul
 	uint32_t count = 0;
 
 	for (int g = 0; g < 10; g++) {
-		if (!uiGroupHandlers[gu->myTeam].groups[g].units.empty()) {
+		const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(g);
+		if (group != nullptr && !group->units.empty()) {
 			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
 			groups[count++] = g;
 			bufferPos += sizeof(int32_t);
@@ -203,11 +204,13 @@ static void NativeGetGroupUnits(const GetGroupUnitsQuery* query, GetGroupUnitsRe
 
 	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
 
-	const auto& group = uiGroupHandlers[gu->myTeam].groups[query->groupID];
+	const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(query->groupID);
+	if (group == nullptr) { result->error = &INVALID_GROUP_ERROR; return; }
+
 	int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
 	uint32_t count = 0;
 
-	for (int unitID : group.units) {
+	for (int unitID : group->units) {
 		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
 		units[count++] = unitID;
 		bufferPos += sizeof(int32_t);
@@ -230,8 +233,8 @@ static void NativeGetUnitGroup(const GetUnitGroupQuery* query, GetUnitGroupResul
 
 	// Find which group contains this unit (units don't track their group directly)
 	for (int g = 0; g < 10; g++) {
-		const CGroup& group = uiGroupHandlers[unit->team].groups[g];
-		if (group.units.count(unit->id) > 0) {
+		const CGroup* group = uiGroupHandlers[unit->team].GetGroup(g);
+		if (group != nullptr && group->units.count(unit->id) > 0) {
 			result->groupID = g;
 			return;
 		}
@@ -248,22 +251,25 @@ static void NativeSetUnitGroup(const SetUnitGroupQuery* query, SetUnitGroupResul
 	if (query->groupID >= 0 && query->groupID < 10) {
 		// First remove from current group (if any)
 		for (int g = 0; g < 10; g++) {
-			CGroup& group = uiGroupHandlers[unit->team].groups[g];
-			if (group.units.count(unit->id) > 0) {
-				group.RemoveUnit(unit);
+			CGroup* group = uiGroupHandlers[unit->team].GetGroup(g);
+			if (group != nullptr && group->units.count(unit->id) > 0) {
+				group->RemoveUnit(unit);
 				break;
 			}
 		}
 		// Then add to new group
-		uiGroupHandlers[unit->team].groups[query->groupID].AddUnit(unit);
+		CGroup* newGroup = uiGroupHandlers[unit->team].GetGroup(query->groupID);
+		if (newGroup != nullptr) {
+			newGroup->AddUnit(unit);
+		}
 		result->error = nullptr;
 		result->success = true;
 	} else {
 		// Remove from any group
 		for (int g = 0; g < 10; g++) {
-			CGroup& group = uiGroupHandlers[unit->team].groups[g];
-			if (group.units.count(unit->id) > 0) {
-				group.RemoveUnit(unit);
+			CGroup* group = uiGroupHandlers[unit->team].GetGroup(g);
+			if (group != nullptr && group->units.count(unit->id) > 0) {
+				group->RemoveUnit(unit);
 				break;
 			}
 		}

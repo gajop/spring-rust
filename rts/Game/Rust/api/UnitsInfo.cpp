@@ -1012,9 +1012,9 @@ static void NativeGetUnitShieldState(const GetUnitShieldStateQuery* query, GetUn
 		CPlasmaRepulser* shield = dynamic_cast<CPlasmaRepulser*>(w);
 		if (shield != nullptr) {
 			result->hasShield = true;
-			result->shieldState.shieldEnabled = shield->IsEnabled();
-			result->shieldState.shieldPower = shield->GetCurPower();
-			result->shieldState.shieldAlpha = 1.0f;
+			result->shield.shieldEnabled = shield->IsEnabled();
+			result->shield.shieldPower = shield->GetCurPower();
+			result->shield.shieldAlpha = 1.0f;
 			break;
 		}
 	}

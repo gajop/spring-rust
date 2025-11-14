@@ -7,6 +7,7 @@
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Misc/Team.h"
+#include "Sim/Units/Unit.h"
 #include "Game/Players/PlayerHandler.h"
 #include "ExternalAI/SkirmishAIHandler.h"
 
@@ -175,7 +176,27 @@ static void NativeGetTeamStatsHistory(const GetTeamStatsHistoryQuery* query, Get
 	for (size_t i = 0; i < history.size(); i++) {
 		if (bufferPos + sizeof(TeamStatsHistoryPoint) > sizeof(scratchBuffer)) break;
 
-		points[count] = history[i];
+		const TeamStatistics& stats = history[i];
+		points[count].metalUsed = stats.metalUsed;
+		points[count].metalProduced = stats.metalProduced;
+		points[count].metalExcess = stats.metalExcess;
+		points[count].metalReceived = stats.metalReceived;
+		points[count].metalSent = stats.metalSent;
+		points[count].energyUsed = stats.energyUsed;
+		points[count].energyProduced = stats.energyProduced;
+		points[count].energyExcess = stats.energyExcess;
+		points[count].energyReceived = stats.energyReceived;
+		points[count].energySent = stats.energySent;
+		points[count].damageDealt = stats.damageDealt;
+		points[count].damageReceived = stats.damageReceived;
+		points[count].unitsProduced = static_cast<uint32_t>(stats.unitsProduced);
+		points[count].unitsDied = static_cast<uint32_t>(stats.unitsDied);
+		points[count].unitsReceived = static_cast<uint32_t>(stats.unitsReceived);
+		points[count].unitsSent = static_cast<uint32_t>(stats.unitsSent);
+		points[count].unitsCaptured = static_cast<uint32_t>(stats.unitsCaptured);
+		points[count].unitsOutCaptured = static_cast<uint32_t>(stats.unitsOutCaptured);
+		points[count].unitsKilled = static_cast<uint32_t>(stats.unitsKilled);
+
 		bufferPos += sizeof(TeamStatsHistoryPoint);
 		count++;
 	}

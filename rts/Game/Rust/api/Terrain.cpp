@@ -167,11 +167,11 @@ static void NativeGetTerrainTypeData(const GetTerrainTypeDataQuery* query, GetTe
 		return;
 	}
 
-	if (query->terrainTypeIndex < 0 || query->terrainTypeIndex >= NUM_TERRAIN_TYPES) {
+	if (query->terrainTypeIndex < 0 || query->terrainTypeIndex >= CMapInfo::NUM_TERRAIN_TYPES) {
 		char* msg = &scratchBuffer[bufferPos];
 		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
 			"Terrain type index %d out of range [0-%d]",
-			query->terrainTypeIndex, NUM_TERRAIN_TYPES - 1) + 1;
+			query->terrainTypeIndex, CMapInfo::NUM_TERRAIN_TYPES - 1) + 1;
 		dynamicError.code = ERROR_OUT_OF_BOUNDS;
 		dynamicError.message = msg;
 		result->error = &dynamicError;

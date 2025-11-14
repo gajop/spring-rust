@@ -1,6 +1,7 @@
 #include "UnitDefs.h"
 
 #include "Sim/Units/UnitDefHandler.h"
+#include "Sim/Weapons/WeaponDef.h"
 #include <cstring>
 
 namespace {

@@ -51,6 +51,28 @@ static const char* CopyString(const std::string& str) {
 	return ptr;
 }
 
+// Helper to convert CMDTYPE_* int to string
+static const char* CmdTypeToString(int type) {
+	switch (type) {
+		case 0:  return "icon";
+		case 5:  return "iconMode";
+		case 10: return "iconMap";
+		case 11: return "iconArea";
+		case 12: return "iconUnit";
+		case 13: return "iconUnitOrMap";
+		case 14: return "iconFront";
+		case 16: return "iconUnitOrArea";
+		case 17: return "next";
+		case 18: return "prev";
+		case 19: return "iconUnitFeatureOrArea";
+		case 20: return "iconBuilding";
+		case 21: return "custom";
+		case 22: return "iconUnitOrRectangle";
+		case 23: return "number";
+		default: return "icon";
+	}
+}
+
 // Helper to convert engine Command to FFI CommandFFI
 static bool ConvertCommand(const ::Command& cmd, CommandFFI& outCmd) {
 	outCmd.cmdID = cmd.GetID(false);
@@ -128,7 +150,7 @@ static void NativeGetUnitCommands(const GetUnitCommandsQuery* query, GetUnitComm
 	uint32_t count = std::min(static_cast<uint32_t>(queue.size()), query->maxCommands);
 
 	if (count > 0) {
-		result->commands = AllocateArray<Command>(count);
+		result->commands = AllocateArray<CommandFFI>(count);
 		if (result->commands == nullptr) {
 			result->error = &BUFFER_OVERFLOW_ERROR;
 			return;
@@ -284,7 +306,7 @@ static void NativeGetFactoryCommands(const GetFactoryCommandsQuery* query, GetFa
 	uint32_t count = std::min(static_cast<uint32_t>(queue.size()), query->maxCommands);
 
 	if (count > 0) {
-		result->commands = AllocateArray<Command>(count);
+		result->commands = AllocateArray<CommandFFI>(count);
 		if (result->commands == nullptr) {
 			result->error = &BUFFER_OVERFLOW_ERROR;
 			return;
@@ -354,7 +376,7 @@ static void NativeGetCommandQueue(const GetCommandQueueQuery* query, GetCommandQ
 	uint32_t count = std::min(static_cast<uint32_t>(queue.size()), query->maxCommands);
 
 	if (count > 0) {
-		result->commands = AllocateArray<Command>(count);
+		result->commands = AllocateArray<CommandFFI>(count);
 		if (result->commands == nullptr) {
 			result->error = &BUFFER_OVERFLOW_ERROR;
 			return;
@@ -508,8 +530,8 @@ static void NativeGetUnitCmdDescs(const GetUnitCmdDescsQuery* query, GetUnitCmdD
 		CommandDescription& outDesc = result->cmdDescs[i];
 
 		outDesc.cmdID = desc->id;
-		outDesc.action = desc->action;
-		outDesc.type = CopyString(desc->type);
+		outDesc.action = 0; // action string not mapped to int currently
+		outDesc.type = CmdTypeToString(desc->type);
 		outDesc.name = CopyString(desc->name);
 		outDesc.tooltip = CopyString(desc->tooltip);
 		outDesc.texture = CopyString(desc->iconname);
@@ -580,8 +602,8 @@ static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmd
 			CommandDescription& outDesc = result->cmdDesc;
 
 			outDesc.cmdID = desc->id;
-			outDesc.action = desc->action;
-			outDesc.type = CopyString(desc->type);
+			outDesc.action = 0; // action string not mapped to int currently
+			outDesc.type = CmdTypeToString(desc->type);
 			outDesc.name = CopyString(desc->name);
 			outDesc.tooltip = CopyString(desc->tooltip);
 			outDesc.texture = CopyString(desc->iconname);
