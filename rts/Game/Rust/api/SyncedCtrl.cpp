@@ -882,8 +882,8 @@ static void NativeSetUnitMetalExtraction(const SetUnitMetalExtractionQuery* quer
 	if (extractor != nullptr) {
 		// Note: Direct extraction rate setting not supported by engine API
 		// The extraction rate is calculated based on extraction range/depth and metal map
-		// Consider using SetExtractionRangeAndDepth() or modifying metalMake directly
-		unit->metalMake = query->amount;
+		// Consider using SetExtractionRangeAndDepth() or modifying resourcesMake directly
+		unit->resourcesMake.metal = query->amount;
 		result->success = true;
 	}
 }
@@ -1651,7 +1651,7 @@ static void NativeDeleteProjectile(const DeleteProjectileQuery* query, DeletePro
 	}
 
 	projectile->DeleteDeathDependence(nullptr, DEPENDENCE_WEAPONTARGET);
-	projectileHandler.DestroyProjectile(projectile);
+	projectile->deleteMe = true;
 
 	result->success = true;
 }
