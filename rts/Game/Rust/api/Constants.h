@@ -14,8 +14,8 @@ extern "C" {
 // ============================================================================
 
 // Command IDs (subset of most common)
-// Note: When included in C++ with Command.h, these are already defined as constexpr
-#ifndef COMMAND_H
+// Note: When compiling C++, Command.h constants are used instead
+#ifndef __cplusplus
 enum CommandID {
 	CMD_STOP = 0,
 	CMD_WAIT = 5,
@@ -79,7 +79,7 @@ enum MoveState {
 	MOVESTATE_MANEUVER = 1,
 	MOVESTATE_ROAM = 2,
 };
-#endif // COMMAND_H
+#endif // __cplusplus
 
 // Unit categories (bitfield)
 enum UnitCategory {

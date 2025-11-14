@@ -306,7 +306,7 @@ struct NativeInterface {
 
 	// System/IO
 	const VFSApi* vfs;
-	const SoundApi* sound;
+	const SoundApi* soundApi;
 	const MessagesApi* messages;
 	const ConfigApi* config;
 

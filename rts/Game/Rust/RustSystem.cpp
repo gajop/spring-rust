@@ -359,7 +359,7 @@ RustSystem::RustSystem() :
 
     // System/IO
     .vfs = &VFS_API,
-    .sound = &SOUND_API,
+    .soundApi = &SOUND_API,
     .messages = &MESSAGES_API,
     .config = &CONFIG_API,
 

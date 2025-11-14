@@ -184,7 +184,7 @@ static void NativeSetAllyTeamStartBox(const SetAllyTeamStartBoxQuery* query, Set
 	}
 
 	// Set the start box for the ally team (convert to normalized coordinates)
-	AllyTeam& allyTeam = teamHandler.AllyTeams()[query->allyTeamID];
+	AllyTeam& allyTeam = teamHandler.GetAllyTeam(query->allyTeamID);
 	allyTeam.startRectLeft   = query->minX / float(mapDims.mapx * SQUARE_SIZE);
 	allyTeam.startRectRight  = query->maxX / float(mapDims.mapx * SQUARE_SIZE);
 	allyTeam.startRectTop    = query->minZ / float(mapDims.mapy * SQUARE_SIZE);
@@ -879,7 +879,10 @@ static void NativeSetUnitMetalExtraction(const SetUnitMetalExtractionQuery* quer
 
 	CExtractorBuilding* extractor = dynamic_cast<CExtractorBuilding*>(unit);
 	if (extractor != nullptr) {
-		extractor->SetExtractionRate(query->amount);
+		// Note: Direct extraction rate setting not supported by engine API
+		// The extraction rate is calculated based on extraction range/depth and metal map
+		// Consider using SetExtractionRangeAndDepth() or modifying metalMake directly
+		unit->metalMake = query->amount;
 		result->success = true;
 	}
 }
@@ -1040,7 +1043,7 @@ static void NativeAddUnitDamage(const AddUnitDamageQuery* query, AddUnitDamageRe
 	DamageArray damages;
 	if (weaponDef != nullptr) {
 		damages = weaponDef->damages;
-		damages *= query->damage / damages.GetDefault();
+		damages = damages * (query->damage / damages.GetDefault());
 	} else {
 		damages.SetDefaultDamage(query->damage);
 	}
@@ -1295,8 +1298,8 @@ static void NativeSetFeatureResources(const SetFeatureResourcesQuery* query, Set
 
 	// Modify the feature's resource values through reclaimLeft
 	if (feature->def != nullptr) {
-		float metalTotal = feature->def->metal;
-		float energyTotal = feature->def->energy;
+		float metalTotal = feature->def->cost.metal;
+		float energyTotal = feature->def->cost.energy;
 
 		if (metalTotal > 0.0f) {
 			feature->reclaimLeft = query->metal / metalTotal;
