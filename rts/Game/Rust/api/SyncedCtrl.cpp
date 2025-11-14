@@ -35,6 +35,7 @@
 #include "Map/ReadMap.h"
 #include "Map/MapDamage.h"
 #include "Map/MapInfo.h"
+#include "Map/MapDimensions.h"
 #include "Map/Ground.h"
 #include "Sim/Misc/GroundBlockingObjectMap.h"
 #include "Sim/Misc/CollisionVolume.h"
@@ -1335,10 +1336,13 @@ static void NativeAddHeightMap(const AddHeightMapQuery* query, AddHeightMapResul
 		return;
 	}
 
-	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
+	// Convert world coordinates to heightmap coordinates
+	const int x = query->pos.x / SQUARE_SIZE;
+	const int z = query->pos.z / SQUARE_SIZE;
 
-	if (mapDamage != nullptr) {
-		mapDamage->AddHeight(pos, query->height);
+	if (x >= 0 && x <= mapDims.mapx && z >= 0 && z <= mapDims.mapy) {
+		const int idx = z * mapDims.mapxp1 + x;
+		readMap->AddHeight(idx, query->height);
 		result->success = true;
 	}
 }
@@ -1354,10 +1358,13 @@ static void NativeSetHeightMap(const SetHeightMapQuery* query, SetHeightMapResul
 		return;
 	}
 
-	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
+	// Convert world coordinates to heightmap coordinates
+	const int x = query->pos.x / SQUARE_SIZE;
+	const int z = query->pos.z / SQUARE_SIZE;
 
-	if (mapDamage != nullptr) {
-		mapDamage->SetHeight(pos, query->height);
+	if (x >= 0 && x <= mapDims.mapx && z >= 0 && z <= mapDims.mapy) {
+		const int idx = z * mapDims.mapxp1 + x;
+		readMap->SetHeight(idx, query->height);
 		result->success = true;
 	}
 }
@@ -1410,7 +1417,7 @@ static void NativeAddSmoothMesh(const AddSmoothMeshQuery* query, AddSmoothMeshRe
 		for (int x = minx; x <= maxx; ++x) {
 			const int idx = z * smoothGround.GetMaxX() + x;
 			if (idx >= 0 && idx < smoothGround.GetMaxX() * smoothGround.GetMaxY()) {
-				smoothGround.AddHeight(x, z, query->height);
+				smoothGround.AddHeight(idx, query->height);
 			}
 		}
 	}
@@ -1440,7 +1447,7 @@ static void NativeSetSmoothMesh(const SetSmoothMeshQuery* query, SetSmoothMeshRe
 		for (int x = minx; x <= maxx; ++x) {
 			const int idx = z * smoothGround.GetMaxX() + x;
 			if (idx >= 0 && idx < smoothGround.GetMaxX() * smoothGround.GetMaxY()) {
-				smoothGround.SetHeight(x, z, query->height);
+				smoothGround.SetHeight(idx, query->height);
 			}
 		}
 	}
@@ -1466,9 +1473,13 @@ static void NativeRevertSmoothMesh(const RevertSmoothMeshQuery* query, RevertSmo
 	const int minz = static_cast<int>(std::min(pos1.z, pos2.z) / (SQUARE_SIZE * 2));
 	const int maxz = static_cast<int>(std::max(pos1.z, pos2.z) / (SQUARE_SIZE * 2));
 
+	const float* origMesh = smoothGround.GetOriginalMeshData();
 	for (int z = minz; z <= maxz; ++z) {
 		for (int x = minx; x <= maxx; ++x) {
-			smoothGround.SetHeight(x, z, smoothGround.GetOrigHeight(x, z));
+			const int idx = z * smoothGround.GetMaxX() + x;
+			if (idx >= 0 && idx < smoothGround.GetMaxX() * smoothGround.GetMaxY()) {
+				smoothGround.SetHeight(idx, origMesh[idx]);
+			}
 		}
 	}
 	result->success = true;
@@ -1486,8 +1497,12 @@ static void NativeSetMapSquareTerrainType(const SetMapSquareTerrainTypeQuery* qu
 	}
 
 	if (readMap != nullptr) {
-		readMap->SetTypeMapSynced(query->x, query->z, query->terrainType);
-		result->success = true;
+		uint8_t* typeMap = readMap->GetTypeMapSynced();
+		const int idx = query->z * mapDims.mapx + query->x;
+		if (idx >= 0 && idx < mapDims.mapx * mapDims.mapy) {
+			typeMap[idx] = query->terrainType;
+			result->success = true;
+		}
 	}
 }
 
@@ -1507,18 +1522,15 @@ static void NativeSetTerrainTypeData(const SetTerrainTypeDataQuery* query, SetTe
 		return;
 	}
 
-	if (query->typeIndex < 0 || query->typeIndex >= static_cast<int32_t>(mapInfo->terrainTypes.size())) {
+	if (query->typeIndex < 0 || query->typeIndex >= CMapInfo::NUM_TERRAIN_TYPES) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid terrain type index");
 		return;
 	}
 
-	CMapInfo::TerrainType& terrainType = mapInfo->terrainTypes[query->typeIndex];
-	terrainType.name = query->name;
-	terrainType.hardness = query->hardness;
-	terrainType.tankSpeed = query->tankSpeed;
-	terrainType.kbotSpeed = query->kbotSpeed;
-
-	result->success = true;
+	// Note: mapInfo is const, so terrain type data cannot be modified at runtime
+	// This is a limitation of the current engine API
+	// terrainType modifications would require making mapInfo non-const
+	result->success = false;
 }
 
 static void NativeSetTidal(const SetTidalQuery* query, SetTidalResult* result)
@@ -1532,8 +1544,10 @@ static void NativeSetTidal(const SetTidalQuery* query, SetTidalResult* result)
 		return;
 	}
 
+	// Note: mapInfo is const, cannot modify tidalStrength at runtime
+	// The tidal strength can only be set during map initialization via LoadTidal()
 	if (mapInfo != nullptr) {
-		mapInfo->map.tidalStrength = query->tidal;
+		envResHandler.LoadTidal(query->tidal);
 		result->success = true;
 	}
 }
@@ -1549,7 +1563,7 @@ static void NativeSetWind(const SetWindQuery* query, SetWindResult* result)
 		return;
 	}
 
-	envResHandler.SetWindMinMax(query->minWind, query->maxWind);
+	envResHandler.LoadWind(query->minWind, query->maxWind);
 	result->success = true;
 }
 
@@ -1614,11 +1628,8 @@ static void NativeSpawnProjectile(const SpawnProjectileQuery* query, SpawnProjec
 		params.gravity = query->gravity;
 		params.weaponDef = weaponDef;
 
-		CWeaponProjectile* projectile = WeaponProjectileFactory::LoadProjectile(params);
-
-		if (projectile != nullptr) {
-			result->projectileID = projectile->id;
-		}
+		unsigned int projectileID = WeaponProjectileFactory::LoadProjectile(params);
+		result->projectileID = static_cast<int32_t>(projectileID);
 	}
 }
 
@@ -1640,7 +1651,7 @@ static void NativeDeleteProjectile(const DeleteProjectileQuery* query, DeletePro
 	}
 
 	projectile->DeleteDeathDependence(nullptr, DEPENDENCE_WEAPONTARGET);
-	projectileHandler.DeleteProjectileBySyncedID(query->projectileID);
+	projectileHandler.DestroyProjectile(projectile);
 
 	result->success = true;
 }
