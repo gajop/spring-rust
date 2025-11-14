@@ -5,7 +5,10 @@
 #include <stdint.h>
 
 // Include all API implementations
+// - Callouts: Module calls Spring (Query/Result pattern - e.g., GetUnitPosition)
+// - Callins: Spring calls Module (Event pattern - e.g., UnitCreated)
 #include "NativeInterface/api/Camera.h"
+#include "NativeInterface/api/Callins.h"
 #include "NativeInterface/api/Config.h"
 #include "NativeInterface/api/Display.h"
 #include "NativeInterface/api/FeatureDefs.h"

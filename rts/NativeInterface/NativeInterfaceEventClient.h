@@ -7,47 +7,47 @@
 #include <vector>
 
 #include "NativeInterface.h"
+#include "NativeInterface/api/Callins.h"
 #include "System/EventClient.h"
 
 class CUnit;
 class CFeature;
 
 /**
- * Function pointer types for native module callbacks
+ * Function pointer types for native module callbacks (using Query/Result pattern)
  */
 namespace fptr {
-	using InitializeNativeModuleFuncPtr = void* (*)(NativeInterface*);
-	using DownloadFailedFuncPtr = void(*)(NativeInterface*,void*,int, int);
-	using DownloadFinishedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using DownloadProgressFuncPtr = void(*)(NativeInterface*,void*,int, long, long);
-	using DownloadQueuedFuncPtr = void(*)(NativeInterface*,void*,int, const char*, const char*);
-	using DownloadStartedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using FeatureCreatedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using FeatureDestroyedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using GameIDFuncPtr = void(*)(NativeInterface*,void*,const unsigned char*, unsigned int);
-	using GamePausedFuncPtr = void(*)(NativeInterface*,void*,int, bool);
-	using GamePreloadFuncPtr = void(*)(NativeInterface*, void*);
-	using GameStartFuncPtr = void(*)(NativeInterface*, void*);
-	using PlayerAddedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using PlayerChangedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using PlayerRemovedFuncPtr = void(*)(NativeInterface*,void*,int, int);
-	using RenderUnitDestroyedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using RunDelayedFunctionsFuncPtr = void(*)(NativeInterface*,void*,int);
-	using ShutdownFuncPtr = void(*)(NativeInterface*, void*);
-	using TeamChangedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using TeamDiedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using UnitCreatedFuncPtr = void(*)(NativeInterface*,void*,int, int);
-	using UnitDestroyedFuncPtr = void(*)(NativeInterface*,void*,int, int);
-	using UnitExperienceFuncPtr = void(*)(NativeInterface*,void*,int, float);
-	using UnitFinishedFuncPtr = void(*)(NativeInterface*,void*,int);
-	using UnitFromFactoryFuncPtr = void(*)(NativeInterface*,void*,int, int, bool);
-	using UnitGivenFuncPtr = void(*)(NativeInterface*,void*,int, int, int);
-	using UnitLoadedFuncPtr = void(*)(NativeInterface*,void*,int, int);
-	using UnitStunnedFuncPtr = void(*)(NativeInterface*,void*,int, bool);
-	using UnitTakenFuncPtr = void(*)(NativeInterface*,void*,int, int, int);
-	using UnitUnloadedFuncPtr = void(*)(NativeInterface*,void*,int, int);
-	using HandleLuaMsgFuncPtr = void(*)(NativeInterface*,void*,int,int,int,const std::uint8_t*, int);
-	using HandleLuaCallFuncPtr = void(*)(NativeInterface*,void*,const char*);
+	using InitializeNativeModuleFuncPtr = void(*)(NativeInterface*, const InitializeNativeModuleQuery*, InitializeNativeModuleResult*);
+	using DownloadFailedFuncPtr = void(*)(NativeInterface*, void*, const DownloadFailedQuery*, DownloadFailedResult*);
+	using DownloadFinishedFuncPtr = void(*)(NativeInterface*, void*, const DownloadFinishedQuery*, DownloadFinishedResult*);
+	using DownloadProgressFuncPtr = void(*)(NativeInterface*, void*, const DownloadProgressQuery*, DownloadProgressResult*);
+	using DownloadQueuedFuncPtr = void(*)(NativeInterface*, void*, const DownloadQueuedQuery*, DownloadQueuedResult*);
+	using DownloadStartedFuncPtr = void(*)(NativeInterface*, void*, const DownloadStartedQuery*, DownloadStartedResult*);
+	using FeatureCreatedFuncPtr = void(*)(NativeInterface*, void*, const FeatureCreatedQuery*, FeatureCreatedResult*);
+	using FeatureDestroyedFuncPtr = void(*)(NativeInterface*, void*, const FeatureDestroyedQuery*, FeatureDestroyedResult*);
+	using GameIDFuncPtr = void(*)(NativeInterface*, void*, const GameIDQuery*, GameIDResult*);
+	using GamePausedFuncPtr = void(*)(NativeInterface*, void*, const GamePausedQuery*, GamePausedResult*);
+	using GamePreloadFuncPtr = void(*)(NativeInterface*, void*, const GamePreloadQuery*, GamePreloadResult*);
+	using GameStartFuncPtr = void(*)(NativeInterface*, void*, const GameStartQuery*, GameStartResult*);
+	using PlayerAddedFuncPtr = void(*)(NativeInterface*, void*, const PlayerAddedQuery*, PlayerAddedResult*);
+	using PlayerChangedFuncPtr = void(*)(NativeInterface*, void*, const PlayerChangedQuery*, PlayerChangedResult*);
+	using PlayerRemovedFuncPtr = void(*)(NativeInterface*, void*, const PlayerRemovedQuery*, PlayerRemovedResult*);
+	using RenderUnitDestroyedFuncPtr = void(*)(NativeInterface*, void*, const RenderUnitDestroyedQuery*, RenderUnitDestroyedResult*);
+	using ShutdownFuncPtr = void(*)(NativeInterface*, void*, const ShutdownQuery*, ShutdownResult*);
+	using TeamChangedFuncPtr = void(*)(NativeInterface*, void*, const TeamChangedQuery*, TeamChangedResult*);
+	using TeamDiedFuncPtr = void(*)(NativeInterface*, void*, const TeamDiedQuery*, TeamDiedResult*);
+	using UnitCreatedFuncPtr = void(*)(NativeInterface*, void*, const UnitCreatedQuery*, UnitCreatedResult*);
+	using UnitDestroyedFuncPtr = void(*)(NativeInterface*, void*, const UnitDestroyedQuery*, UnitDestroyedResult*);
+	using UnitExperienceFuncPtr = void(*)(NativeInterface*, void*, const UnitExperienceQuery*, UnitExperienceResult*);
+	using UnitFinishedFuncPtr = void(*)(NativeInterface*, void*, const UnitFinishedQuery*, UnitFinishedResult*);
+	using UnitFromFactoryFuncPtr = void(*)(NativeInterface*, void*, const UnitFromFactoryQuery*, UnitFromFactoryResult*);
+	using UnitGivenFuncPtr = void(*)(NativeInterface*, void*, const UnitGivenQuery*, UnitGivenResult*);
+	using UnitLoadedFuncPtr = void(*)(NativeInterface*, void*, const UnitLoadedQuery*, UnitLoadedResult*);
+	using UnitStunnedFuncPtr = void(*)(NativeInterface*, void*, const UnitStunnedQuery*, UnitStunnedResult*);
+	using UnitTakenFuncPtr = void(*)(NativeInterface*, void*, const UnitTakenQuery*, UnitTakenResult*);
+	using UnitUnloadedFuncPtr = void(*)(NativeInterface*, void*, const UnitUnloadedQuery*, UnitUnloadedResult*);
+	using HandleLuaMsgFuncPtr = void(*)(NativeInterface*, void*, const HandleLuaMsgQuery*, HandleLuaMsgResult*);
+	using HandleLuaCallFuncPtr = void(*)(NativeInterface*, void*, const HandleLuaCallQuery*, HandleLuaCallResult*);
 }
 
 /**
@@ -138,7 +138,6 @@ private:
 	fptr::PlayerChangedFuncPtr m_PlayerChangedFuncPtr = nullptr;
 	fptr::PlayerRemovedFuncPtr m_PlayerRemovedFuncPtr = nullptr;
 	fptr::RenderUnitDestroyedFuncPtr m_RenderUnitDestroyedFuncPtr = nullptr;
-	fptr::RunDelayedFunctionsFuncPtr m_RunDelayedFunctionsFuncPtr = nullptr;
 	fptr::ShutdownFuncPtr m_ShutdownFuncPtr = nullptr;
 	fptr::TeamChangedFuncPtr m_TeamChangedFuncPtr = nullptr;
 	fptr::TeamDiedFuncPtr m_TeamDiedFuncPtr = nullptr;
