@@ -38,6 +38,7 @@
 #include "System/Sound/ISound.h"
 #include "System/Sync/DumpState.h"
 #include "System/Sync/DumpHistory.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 
 #include "System/Misc/TracyDefs.h"
 
@@ -91,7 +92,7 @@ void CGame::SendClientProcUsage()
 			// a minimum threshold. Generally we want that to be a little more than the typical sim
 			// CPU target of 60% (if it has been set to 75% that's rather high and the threshold
 			// should start to kick in before that point.)
-			// 
+			//
 			// Max threshold needs to kick in before CPU can hit 100%. Hence the ceiling of 0.9
 			// Min threshold may need to kick in sooner than 65% if it is especially large. A small
 			// space should be created to smooth out the transition of a large number being applied
@@ -99,7 +100,7 @@ void CGame::SendClientProcUsage()
 			// transition space.
 			// These numbers are somewhat arbitrary and were determined empirically,
 			// so there may well be room for improvement if measurements say so.
-			// 
+			//
 			const float lowThreshold = std::min(0.65f, 0.8f - drawProcUsage);
 			const float highThreshold = std::max(lowThreshold + 0.001f, 0.9f - drawProcUsage);
 			const float cpuUsageAdjust = linearstep(lowThreshold, highThreshold, simProcUsage) * drawProcUsage;
@@ -611,7 +612,7 @@ void CGame::ClientReadNet()
 				// Just a checkpoint for the speed factors plots.
 				TracyPlot(tracingSpeedFactor, gs->speedFactor);
 				TracyPlot(tracingWantedSpeedFactor, gs->wantedSpeedFactor);
-				
+
 				msgProcTimeLeft -= 1000.0f;
 				lastSimFrameNetPacketTime = spring_gettime();
 
@@ -1024,6 +1025,7 @@ void CGame::ClientReadNet()
 					unpack >> mode;
 					unpack >> data;
 
+					NativeInterfaceSystem::s_instance->HandleLuaMsg(playerNum, script, mode, data);
 					CLuaHandle::HandleLuaMsg(playerNum, script, mode, data);
 					AddTraffic(playerNum, packetCode, dataLength);
 				} catch (const netcode::UnpackPacketException& ex) {

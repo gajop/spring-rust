@@ -90,6 +90,7 @@
 #include "System/Platform/WindowManagerHelper.h"
 #include "System/SpringHash.h"
 #include "System/LoadLock.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 
 
 #if !defined(HEADLESS) && !defined(NO_SOUND)
@@ -338,6 +339,8 @@ bool LuaUnsyncedCtrl::PushEntries(lua_State* L)
 	REGISTER_LUA_CFUNC(RequestStartPosition);
 
 	REGISTER_LUA_CFUNC(Yield);
+
+	REGISTER_LUA_CFUNC(InvokeNativeModule);
 
 	return true;
 }
@@ -665,12 +668,12 @@ int LuaUnsyncedCtrl::SendMessage(lua_State* L)
 
 /*** @function Spring.SendMessageToSpectators
  * @param message string ``"`<PLAYER#>`"`` where `#` is a player ID.
- * 
+ *
  * This will be replaced with the player's name. e.g.
  * ```lua
  * Spring.SendMessage("`<PLAYER1>` did something") -- "ProRusher did something"
  * ```
- * 
+ *
  * @return nil
  */
 int LuaUnsyncedCtrl::SendMessageToSpectators(lua_State* L)
@@ -1265,7 +1268,7 @@ int LuaUnsyncedCtrl::SetCameraOffset(lua_State* L)
  * @function Spring.SetCameraState
  *
  * @param cameraState CameraState The fields must be consistent with the name/mode and current/new camera mode.
- * 
+ *
  * @param transitionTime number? (Default: `0`) in nanoseconds
  *
  * @param transitionTimeFactor number?
@@ -1369,7 +1372,7 @@ int LuaUnsyncedCtrl::SetDollyCameraPosition(lua_State* L)
  *
  * @class ControlPoint
  * @x_helper
- * 
+ *
  * @field [1] number x
  * @field [2] number y
  * @field [3] number z
@@ -2237,12 +2240,12 @@ int LuaUnsyncedCtrl::SetUnitNoMinimap(lua_State* L)
  */
 int LuaUnsyncedCtrl::SetMiniMapRotation(lua_State* L)
 {
-	
+
 	const float radians = luaL_checkfloat(L, 1);
-	
+
 	if (minimap == nullptr)
 		return 0;
-	
+
 	if (minimap->minimapCanFlip)
 		return 0;
 
@@ -5441,4 +5444,13 @@ int LuaUnsyncedCtrl::Yield(lua_State* L)
 
 	lua_pushboolean(L, true); //hint Lua should keep calling Yield
 	return 1;
+}
+
+int LuaUnsyncedCtrl::InvokeNativeModule(lua_State* L)
+{
+	const char* msg = luaL_checkstring(L, 1);
+
+	NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
+
+	return 0;
 }

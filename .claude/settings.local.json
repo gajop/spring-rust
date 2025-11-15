@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./docker-build-v2/build.sh:*)",
+      "Bash(cargo build:*)",
+      "Bash(RUST_BACKTRACE=1 cargo build:*)",
+      "Bash(find:*)",
+      "Bash(xargs:*)",
+      "Bash(cat:*)",
+      "Bash(cargo fix:*)",
+      "Bash(cargo doc:*)",
+      "Bash(tree:*)",
+      "Bash(cargo run:*)",
+      "Bash(cargo clippy:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

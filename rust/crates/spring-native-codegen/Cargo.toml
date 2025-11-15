@@ -1,0 +1,12 @@
+[package]
+name = "spring-native-codegen"
+version = "0.1.0"
+edition = "2021"
+description = "Code generator for Spring NativeInterface Rust bindings"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+anyhow = "1.0"
+clang = { version = "2.0", features = ["runtime"] }
+heck = "0.4"
+regex = "1.10"

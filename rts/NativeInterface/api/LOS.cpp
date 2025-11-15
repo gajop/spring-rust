@@ -1,0 +1,191 @@
+#include "LOS.h"
+
+#include "Sim/Units/Unit.h"
+#include "Sim/Units/UnitHandler.h"
+#include "Sim/Misc/LosHandler.h"
+#include "Sim/Misc/GlobalSynced.h"
+#include "Sim/Misc/TeamHandler.h"
+#include "Map/ReadMap.h"
+#include "System/float3.h"
+
+namespace {
+
+// Scratch buffer
+static thread_local char scratchBuffer[8192];
+static thread_local size_t bufferPos = 0;
+static thread_local Error dynamicError;
+
+// Static errors
+static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "LOS system not ready" };
+static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
+static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
+
+static bool IsReady() { return (gs != nullptr) && (losHandler != nullptr); }
+
+static void NativeGetPositionLosState(const GetPositionLosStateQuery* query, GetPositionLosStateResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	const float3 position(query->pos.x, query->pos.y, query->pos.z);
+	result->error = nullptr;
+	result->state.los = losHandler->InLos(position, query->allyTeamID);
+	result->state.radar = losHandler->InRadar(position, query->allyTeamID);
+	result->state.prevLos = false; // Not directly available
+}
+
+static void NativeIsPosInLos(const IsPosInLosQuery* query, IsPosInLosResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	const float3 position(query->pos.x, query->pos.y, query->pos.z);
+	result->error = nullptr;
+	result->inLos = losHandler->InLos(position, query->allyTeamID);
+}
+
+static void NativeIsPosInRadar(const IsPosInRadarQuery* query, IsPosInRadarResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	const float3 position(query->pos.x, query->pos.y, query->pos.z);
+	result->error = nullptr;
+	result->inRadar = losHandler->InRadar(position, query->allyTeamID);
+}
+
+static void NativeIsPosInAirLos(const IsPosInAirLosQuery* query, IsPosInAirLosResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	const float3 position(query->pos.x, query->pos.y, query->pos.z);
+	result->error = nullptr;
+	result->inAirLos = losHandler->InAirLos(position, query->allyTeamID);
+}
+
+static void NativeIsUnitInLos(const IsUnitInLosQuery* query, IsUnitInLosResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
+
+	result->error = nullptr;
+	result->inLos = losHandler->InLos(unit, query->allyTeamID);
+}
+
+static void NativeIsUnitInAirLos(const IsUnitInAirLosQuery* query, IsUnitInAirLosResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
+
+	result->error = nullptr;
+	result->inAirLos = losHandler->InAirLos(unit, query->allyTeamID);
+}
+
+static void NativeIsUnitInRadar(const IsUnitInRadarQuery* query, IsUnitInRadarResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
+
+	result->error = nullptr;
+	result->inRadar = losHandler->InRadar(unit, query->allyTeamID);
+}
+
+static void NativeIsUnitInJammer(const IsUnitInJammerQuery* query, IsUnitInJammerResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
+
+	result->error = nullptr;
+	result->inJammer = losHandler->InJammer(unit, query->allyTeamID);
+}
+
+static void NativeGetRadarErrorParams(const GetRadarErrorParamsQuery* query, GetRadarErrorParamsResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+
+	// Default radar error params (actual values would come from modRules)
+	result->error = nullptr;
+	result->params.baseErrMult = 1.0f;
+	result->params.baseErrSize = 0.0f;
+	result->params.errorMult = 0.1f;
+	result->params.errorSize = 10.0f;
+	result->params.baseSpeed = 0.0f;
+	result->params.speedMult = 0.0f;
+}
+
+static void NativeGetClosestValidPosition(const GetClosestValidPositionQuery* query, GetClosestValidPositionResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	// Simplified - just return the input position
+	// Full implementation would check terrain, blocking, etc.
+	result->error = nullptr;
+	result->position.x = query->pos.x;
+	result->position.y = query->pos.y;
+	result->position.z = query->pos.z;
+}
+
+} // namespace
+
+const LOSApi LOS_API = {
+	.GetPositionLosState = NativeGetPositionLosState,
+	.IsPosInLos = NativeIsPosInLos,
+	.IsPosInRadar = NativeIsPosInRadar,
+	.IsPosInAirLos = NativeIsPosInAirLos,
+	.IsUnitInLos = NativeIsUnitInLos,
+	.IsUnitInAirLos = NativeIsUnitInAirLos,
+	.IsUnitInRadar = NativeIsUnitInRadar,
+	.IsUnitInJammer = NativeIsUnitInJammer,
+	.GetRadarErrorParams = NativeGetRadarErrorParams,
+	.GetClosestValidPosition = NativeGetClosestValidPosition,
+};

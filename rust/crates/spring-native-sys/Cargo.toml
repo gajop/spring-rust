@@ -1,0 +1,15 @@
+[package]
+name = "spring-native-sys"
+version = "0.1.0"
+edition = "2021"
+description = "Raw Rust bindings to Spring's NativeInterface C API"
+license = "GPL-2.0-or-later"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+bindgen = { version = "0.69", default-features = false, features = ["runtime"] }

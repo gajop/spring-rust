@@ -264,6 +264,8 @@ class LuaSyncedCtrl
 		static int SetExperienceGrade(lua_State* L);
 
 		static int SetRadarErrorParams(lua_State* L);
+
+		static int InvokeNativeModule(lua_State* L);
 };
 
 

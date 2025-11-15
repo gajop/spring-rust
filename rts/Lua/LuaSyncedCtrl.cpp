@@ -76,6 +76,7 @@
 #include "System/EventHandler.h"
 #include "System/ObjectDependenceTypes.h"
 #include "System/Log/ILog.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 
 using std::max;
 
@@ -368,7 +369,8 @@ bool LuaSyncedCtrl::PushEntries(lua_State* L)
 
 	REGISTER_LUA_CFUNC(SetRadarErrorParams);
 
-	// Unfortunatly classes within classes does not work well in emmylua
+	REGISTER_LUA_CFUNC(InvokeNativeModule);
+
 	/*** @field Spring.MoveCtrl MoveCtrl */
 	if (!LuaSyncedMoveCtrl::PushMoveCtrl(L))
 		return false;
@@ -585,9 +587,9 @@ static int SetSolidObjectCollisionVolumeData(lua_State* L, CSolidObject* o)
 }
 
 /** - Not exported
- * 
+ *
  * Parses the following params, starting from the 2nd index:
- * 
+ *
  * @param isBlocking boolean? If `true` add this object to the `GroundBlockingMap`, but only if it collides with solid objects (or is being set to collide with the `isSolidObjectCollidable` argument). If `false`, remove this object from the `GroundBlockingMap`. No change if `nil`.
  * @param isSolidObjectCollidable boolean? Enable or disable collision with solid objects, or no change if `nil`.
  * @param isProjectileCollidable boolean? Enable or disable collision with projectiles, or no change if `nil`.
@@ -951,7 +953,7 @@ int LuaSyncedCtrl::AssignPlayerToTeam(lua_State* L)
 /*** Set the starting position of a team.
  *
  * If the position argument is outside the team's startbox, the position is clamped.
- * 
+ *
  * @function Spring.SetTeamStartPosition
  * @param teamID integer
  * @param x number left position (elmos)
@@ -1062,7 +1064,7 @@ int LuaSyncedCtrl::KillTeam(lua_State* L)
 
 
 /*** Declare game over.
- * 
+ *
  * @function Spring.GameOver
  * @param winningAllyTeamIDs integer[] A list of winning ally team IDs.
  *
@@ -2264,7 +2266,7 @@ int LuaSyncedCtrl::SetUnitTooltip(lua_State* L)
  * to that value. Pass a table to update health, capture progress, paralyze
  * damage, and build progress.
  * @return nil
- * 
+ *
  * @see SetUnitHealthAmounts
  */
 int LuaSyncedCtrl::SetUnitHealth(lua_State* L)
@@ -2391,7 +2393,7 @@ int LuaSyncedCtrl::SetUnitStockpile(lua_State* L)
  * @field forceAim integer?
  * @field avoidFlags integer?
  * @field collisionFlags integer?
- * @field ttl number? How many seconds the projectile should live 
+ * @field ttl number? How many seconds the projectile should live
  */
 
 static bool SetSingleUnitWeaponState(lua_State* L, CWeapon* weapon, int index)
@@ -4147,11 +4149,11 @@ int LuaSyncedCtrl::SetUnitDirection(lua_State* L)
 
 /***
  * Integer in range `[-32768, 32767]` that represents a 2D (xz plane) unit
- * orientation. 
- * 
+ * orientation.
+ *
  * ```
  *                   F(N=2) = H(-32768 / 32767)
- * 
+ *
  *                          ^
  *                          |
  *                          |
@@ -4159,7 +4161,7 @@ int LuaSyncedCtrl::SetUnitDirection(lua_State* L)
  *                          |
  *                          |
  *                          v
- * 
+ *
  *                   F(S=0) = H(0)
  * ```
  * @alias Heading integer
@@ -4170,7 +4172,7 @@ int LuaSyncedCtrl::SetUnitDirection(lua_State* L)
  * Use this call to set up unit direction in a robust way. If unit was
  * completely upright, new `{upx, upy, upz}` direction will be used as new "up"
  * vector, the rotation set by "heading" will remain preserved.
- * 
+ *
  * @param unitID integer
  * @param heading Heading
  * @param upx number
@@ -4907,7 +4909,7 @@ int LuaSyncedCtrl::SetFeatureResurrect(lua_State* L)
 
 /***
  * Enable feature movement control.
- * 
+ *
  * @function Spring.SetFeatureMoveCtrl
  * @param featureID integer
  * @param enabled true Enable feature movement.
@@ -4921,22 +4923,22 @@ int LuaSyncedCtrl::SetFeatureResurrect(lua_State* L)
 
 /***
  * Disable feature movement control.
- * 
+ *
  * Optional parameter allow physics vectors to build when not using `MoveCtrl`.
- * 
+ *
  * It is necessary to unlock feature movement on x, z axis before changing
  * feature physics.
  *
  * For example:
- * 
+ *
  * ```lua
  * -- Unlock all movement before setting velocity.
  * Spring.SetFeatureMoveCtrl(featureID,false,1,1,1,1,1,1,1,1,1)
- * 
+ *
  * -- Set velocity.
  * Spring.SetFeatureVelocity(featureID,10,0,10)
  * ```
- * 
+ *
  * @function Spring.SetFeatureMoveCtrl
  * @param featureID integer
  * @param enabled false Disable feature movement.
@@ -5096,7 +5098,7 @@ int LuaSyncedCtrl::SetFeatureDirection(lua_State* L)
  * Use this call to set up feature direction in a robust way. If feature was
  * completely upright, new `{upx, upy, upz}` direction will be used as new "up"
  * vector, the rotation set by "heading" will remain preserved.
- * 
+ *
  * @param featureID integer
  * @param heading Heading
  * @param upx number
@@ -5383,7 +5385,7 @@ int LuaSyncedCtrl::SetFeatureSmokeTime(lua_State* L)
  *
  * @param unitID integer
  * @param wreckLevel integer? (Default: `1`) Wreck index to use.
- * @param doSmoke boolean? (Default: `true`) Wreck emits smoke when `true`. 
+ * @param doSmoke boolean? (Default: `true`) Wreck emits smoke when `true`.
  * @return integer? featureID The wreck featureID, or nil if it couldn't be created or unit doesn't exist.
  */
 int LuaSyncedCtrl::CreateUnitWreck(lua_State* L)
@@ -5912,7 +5914,7 @@ int LuaSyncedCtrl::GiveOrderToUnit(lua_State* L)
 
 /***
  * Give order to multiple units, specified by table keys.
- * 
+ *
  * @function Spring.GiveOrderToUnitMap
  * @param unitMap table<integer, any> A table with unit IDs as keys.
  * @param cmdID CMD|integer The command ID.
@@ -6214,9 +6216,9 @@ static inline void ParseMapParams(lua_State* L, const char* caller,
 ******************************************************************************/
 
 
-/*** 
+/***
  * Set the height of a point in the world.
- * 
+ *
  * @function Spring.LevelHeightMap
  * @param x number
  * @param z number
@@ -6224,7 +6226,7 @@ static inline void ParseMapParams(lua_State* L, const char* caller,
  */
 /***
  * Set the height of a rectangle area in the world.
- * 
+ *
  * @function Spring.LevelHeightMap
  * @param x1 number
  * @param z1 number
@@ -6253,7 +6255,7 @@ int LuaSyncedCtrl::LevelHeightMap(lua_State* L)
 }
 
 
-/*** 
+/***
  * Add height to a point in the world.
  *
  * @function Spring.AdjustHeightMap
@@ -6264,7 +6266,7 @@ int LuaSyncedCtrl::LevelHeightMap(lua_State* L)
 
 /***
  * Add height to a rectangle in the world.
- * 
+ *
  * @function Spring.AdjustHeightMap
  * @param x1 number
  * @param z1 number
@@ -6294,7 +6296,7 @@ int LuaSyncedCtrl::AdjustHeightMap(lua_State* L)
 	return 0;
 }
 
-/*** 
+/***
  * Restore map height at a point in the world.
  *
  * @function Spring.RevertHeightMap
@@ -6304,7 +6306,7 @@ int LuaSyncedCtrl::AdjustHeightMap(lua_State* L)
  */
 /***
  * Restore map height of a rectangle area in the world.
- * 
+ *
  * @function Spring.RevertHeightMap
  * @param x1 number
  * @param z1 number
@@ -6595,7 +6597,7 @@ int LuaSyncedCtrl::AdjustOriginalHeightMap(lua_State* L)
 }
 
 
-/*** 
+/***
  * Restore original map height at a point in the world.
  *
  * @function Spring.RevertOriginalHeightMap
@@ -6605,7 +6607,7 @@ int LuaSyncedCtrl::AdjustOriginalHeightMap(lua_State* L)
  */
 /***
  * Restore original map height over a rectangle in the world.
- * 
+ *
  * @function Spring.RevertOriginalHeightMap
  * @param x1 number
  * @param z1 number
@@ -7914,7 +7916,7 @@ int LuaSyncedCtrl::EditUnitCmdDesc(lua_State* L)
 
 /***
  * Insert a command description at a specific index.
- * 
+ *
  * @function Spring.InsertUnitCmdDesc
  * @param unitID integer
  * @param index integer
@@ -7922,7 +7924,7 @@ int LuaSyncedCtrl::EditUnitCmdDesc(lua_State* L)
  */
 /***
  * Insert a command description at the last position.
- * 
+ *
  * @function Spring.InsertUnitCmdDesc
  * @param unitID integer
  * @param cmdDesc CommandDescription
@@ -7983,5 +7985,14 @@ int LuaSyncedCtrl::RemoveUnitCmdDesc(lua_State* L)
 		cmdDescIdx = lua_toint(L, 2) - 1;
 
 	unit->commandAI->RemoveCommandDescription(cmdDescIdx);
+	return 0;
+}
+
+int LuaSyncedCtrl::InvokeNativeModule(lua_State* L)
+{
+	const char* msg = luaL_checkstring(L, 1);
+
+	NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
+
 	return 0;
 }

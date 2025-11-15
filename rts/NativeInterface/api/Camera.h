@@ -1,0 +1,190 @@
+#pragma once
+
+#include <stdint.h>
+#include "CommonTypes.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// ============================================================================
+// Camera API
+// @see rts/Lua/LuaUnsyncedRead.cpp, LuaUnsyncedCtrl.cpp
+//
+// Camera queries and control (unsynced)
+// ============================================================================
+
+// Camera state
+struct CameraState {
+	const char* name;  // "fps", "ta", "spring", "rot", "ov", etc.
+	Float3 pos;
+	Float3 dir;
+	Float3 up;
+	Float3 right;
+	float fov;
+	float rx;  // Rotation x
+	float ry;  // Rotation y
+	float rz;  // Rotation z
+	float dist;
+	float height;
+	float angle;
+};
+
+// Queries
+struct GetCameraNamesQuery {
+	uint8_t _unused;
+};
+
+struct GetCameraNamesResult {
+	const Error* error;
+	const char** names;
+	uint32_t count;
+};
+
+struct GetCameraStateQuery {
+	uint8_t _unused;
+};
+
+struct GetCameraStateResult {
+	const Error* error;
+	CameraState state;
+};
+
+struct GetCameraPositionQuery {
+	uint8_t _unused;
+};
+
+struct GetCameraPositionResult {
+	const Error* error;
+	Float3 position;
+};
+
+struct GetCameraDirectionQuery {
+	uint8_t _unused;
+};
+
+struct GetCameraDirectionResult {
+	const Error* error;
+	Float3 direction;
+};
+
+struct GetCameraFOVQuery {
+	uint8_t _unused;
+};
+
+struct GetCameraFOVResult {
+	const Error* error;
+	float fov;
+};
+
+struct WorldToScreenCoordsQuery {
+	Float3 worldPos;
+};
+
+struct WorldToScreenCoordsResult {
+	const Error* error;
+	Float3 screenPos;
+	bool valid;
+};
+
+struct TraceScreenRayQuery {
+	float screenX;
+	float screenY;
+	bool onlyCoords;
+};
+
+struct TraceScreenRayResult {
+	const Error* error;
+	int32_t hitType;  // 0=none, 1=unit, 2=feature, 3=ground
+	int32_t hitID;    // Unit or feature ID
+	Float3 hitPos;
+};
+
+struct GetPixelDirQuery {
+	float screenX;
+	float screenY;
+};
+
+struct GetPixelDirResult {
+	const Error* error;
+	Float3 direction;
+};
+
+struct SetCameraStateQuery {
+	CameraState state;
+	float transitionTime;
+};
+
+struct SetCameraStateResult {
+	const Error* error;
+	bool success;
+};
+
+struct SetCameraTargetQuery {
+	Float3 target;
+	float transitionTime;
+};
+
+struct SetCameraTargetResult {
+	const Error* error;
+	bool success;
+};
+
+// API structure
+struct CameraApi {
+	void (*GetCameraNames)(
+		const GetCameraNamesQuery* query,
+		GetCameraNamesResult* result
+	);
+
+	void (*GetCameraState)(
+		const GetCameraStateQuery* query,
+		GetCameraStateResult* result
+	);
+
+	void (*GetCameraPosition)(
+		const GetCameraPositionQuery* query,
+		GetCameraPositionResult* result
+	);
+
+	void (*GetCameraDirection)(
+		const GetCameraDirectionQuery* query,
+		GetCameraDirectionResult* result
+	);
+
+	void (*GetCameraFOV)(
+		const GetCameraFOVQuery* query,
+		GetCameraFOVResult* result
+	);
+
+	void (*WorldToScreenCoords)(
+		const WorldToScreenCoordsQuery* query,
+		WorldToScreenCoordsResult* result
+	);
+
+	void (*TraceScreenRay)(
+		const TraceScreenRayQuery* query,
+		TraceScreenRayResult* result
+	);
+
+	void (*GetPixelDir)(
+		const GetPixelDirQuery* query,
+		GetPixelDirResult* result
+	);
+
+	void (*SetCameraState)(
+		const SetCameraStateQuery* query,
+		SetCameraStateResult* result
+	);
+
+	void (*SetCameraTarget)(
+		const SetCameraTargetQuery* query,
+		SetCameraTargetResult* result
+	);
+};
+
+extern const CameraApi CAMERA_API;
+
+#ifdef __cplusplus
+}
+#endif
