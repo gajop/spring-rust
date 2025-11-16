@@ -2448,7 +2448,8 @@ public:
 	bool Execute(const UnsyncedAction& action) const final {
 		LOG("[ReloadNativeModules] Reloading Native Modules...");
 
-		NativeInterfaceSystem::s_instance->Reload();
+		if (NativeInterfaceSystem::s_instance)
+			NativeInterfaceSystem::s_instance->Reload();
 
 		return true;
 	}

@@ -447,7 +447,9 @@ enum CType {
     Primitive(Primitive),
     Record(String),
     Pointer { pointee: Box<CType>, is_const: bool },
+    #[allow(dead_code)]
     Array { element: Box<CType>, length: u64 },
+    #[allow(dead_code)]
     Unknown(String),
 }
 
@@ -478,7 +480,6 @@ impl Primitive {
 
 #[derive(Debug, Clone)]
 struct ApiDef {
-    name: String,
     functions: Vec<ApiFunction>,
 }
 
@@ -572,10 +573,7 @@ fn parse_api_struct(entity: Entity) -> ApiDef {
         }
         clang::EntityVisitResult::Continue
     });
-    ApiDef {
-        name: entity.get_name().unwrap_or_default(),
-        functions,
-    }
+    ApiDef { functions }
 }
 
 fn parse_api_function(name: &str, ty: Type) -> Option<ApiFunction> {
@@ -832,7 +830,7 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
         result.name
     ));
     body.push_str(&format!(
-        "            let func = Self::get_fn(self.api.{}, \"{}\")?;\n",
+        "            let func = self.api.{}.expect(\"{} function pointer must be initialized\");\n",
         func.name, func.name
     ));
     body.push_str("            func(&query, result.as_mut_ptr());\n");

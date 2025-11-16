@@ -71,7 +71,7 @@ public:
 	std::unique_ptr<NativeInterfaceEventClient> eventClient;
 
 	Impl() {
-		// Initialize NativeInterface with all API pointers
+		// Initialize all API pointers
 		nativeInterface.memory = &MEMORY_API;
 		nativeInterface.game = &GAME_API;
 		nativeInterface.terrain = &TERRAIN_API;
@@ -196,12 +196,14 @@ NativeInterfaceSystem::NativeInterfaceSystem()
 {
 	LOG("Native interface system initialization...");
 
-	Reload();
+	// Note: Reload() is called later after sound system is initialized
+	// to avoid interfering with sound thread startup
 
 	s_instance = this;
 }
 
 NativeInterfaceSystem::~NativeInterfaceSystem() {
+	s_instance = nullptr;
 	// pImpl destructor handles cleanup
 }
 

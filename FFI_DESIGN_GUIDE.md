@@ -85,7 +85,7 @@ static const Error NOT_READY_ERROR = {
 };
 
 // Dynamic errors (with context, use scratch buffer)
-static thread_local char scratchBuffer[8192];
+static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 
@@ -112,7 +112,7 @@ void NativeGetMetalAmount(const GetMetalAmountQuery* q, GetMetalAmountResult* r)
 **All dynamic data (errors, arrays, strings) uses the shared scratch buffer:**
 
 ```cpp
-static thread_local char scratchBuffer[8192];
+static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 
 void NativeGetUnitsInArea(const GetUnitsInAreaQuery* q, GetUnitsInAreaResult* r) {

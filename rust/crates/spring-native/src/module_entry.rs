@@ -81,6 +81,30 @@ pub fn result_to_error_ptr(result: Result<(), crate::Error>) -> *const crate::sy
     }
 }
 
+/// Catch panics at FFI boundary and convert to error pointer.
+///
+/// This prevents panics from unwinding across the C ABI boundary, which would
+/// cause undefined behavior and crash Spring.
+pub fn catch_panic_ffi<F>(f: F) -> *const crate::sys::Error
+where
+    F: FnOnce() -> Result<(), crate::Error> + std::panic::UnwindSafe,
+{
+    match std::panic::catch_unwind(f) {
+        Ok(result) => result_to_error_ptr(result),
+        Err(panic_info) => {
+            // Convert panic to error
+            let panic_msg = if let Some(s) = panic_info.downcast_ref::<&str>() {
+                format!("Panic: {}", s)
+            } else if let Some(s) = panic_info.downcast_ref::<String>() {
+                format!("Panic: {}", s)
+            } else {
+                "Panic: unknown cause".to_string()
+            };
+            result_to_error_ptr(Err(crate::Error::new(1, panic_msg)))
+        }
+    }
+}
+
 /// Macro to generate callback export boilerplate.
 ///
 /// This macro generates the `#[no_mangle] extern "C"` function that Spring
@@ -238,9 +262,10 @@ macro_rules! export_module {
                         return;
                     }
                     unsafe {
-                        let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                        let res = data.module().$method();
-                        (*result).error = $crate::module_entry::result_to_error_ptr(res);
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            data.module().$method()
+                        });
                     }
                 }
             };
@@ -261,11 +286,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().download_failed(q.downloadID, q.errorID)
-                );
+                });
             }
         }
 
@@ -278,10 +303,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().download_finished((&*query).downloadID)
-                );
+                });
             }
         }
 
@@ -294,11 +319,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().download_progress(q.downloadID, q.downloaded, q.total)
-                );
+                });
             }
         }
 
@@ -311,20 +336,21 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                let res = if q.archiveName.is_null() || q.archiveType.is_null() {
-                    Err($crate::Error::new(1, "Null string pointer".to_string()))
-                } else {
-                    match std::ffi::CStr::from_ptr(q.archiveName).to_str() {
-                        Ok(name) => match std::ffi::CStr::from_ptr(q.archiveType).to_str() {
-                            Ok(atype) => data.module().download_queued(q.downloadID, name, atype),
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    if q.archiveName.is_null() || q.archiveType.is_null() {
+                        Err($crate::Error::new(1, "Null string pointer".to_string()))
+                    } else {
+                        match std::ffi::CStr::from_ptr(q.archiveName).to_str() {
+                            Ok(name) => match std::ffi::CStr::from_ptr(q.archiveType).to_str() {
+                                Ok(atype) => data.module().download_queued(q.downloadID, name, atype),
+                                Err(e) => Err($crate::Error::new(1, format!("Invalid UTF-8: {}", e))),
+                            },
                             Err(e) => Err($crate::Error::new(1, format!("Invalid UTF-8: {}", e))),
-                        },
-                        Err(e) => Err($crate::Error::new(1, format!("Invalid UTF-8: {}", e))),
+                        }
                     }
-                };
-                (*result).error = $crate::module_entry::result_to_error_ptr(res);
+                });
             }
         }
 
@@ -337,10 +363,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().download_started((&*query).downloadID)
-                );
+                });
             }
         }
 
@@ -354,10 +380,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().feature_created((&*query).featureID)
-                );
+                });
             }
         }
 
@@ -370,10 +396,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().feature_destroyed((&*query).featureID)
-                );
+                });
             }
         }
 
@@ -387,15 +413,16 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                let res = if q.gameID.is_null() || q.numBytes == 0 {
-                    data.module().game_id(&[])
-                } else {
-                    let slice = std::slice::from_raw_parts(q.gameID, q.numBytes as usize);
-                    data.module().game_id(slice)
-                };
-                (*result).error = $crate::module_entry::result_to_error_ptr(res);
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    if q.gameID.is_null() || q.numBytes == 0 {
+                        data.module().game_id(&[])
+                    } else {
+                        let slice = std::slice::from_raw_parts(q.gameID, q.numBytes as usize);
+                        data.module().game_id(slice)
+                    }
+                });
             }
         }
 
@@ -408,11 +435,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().game_paused(q.playerID, q.paused)
-                );
+                });
             }
         }
 
@@ -426,10 +453,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().player_added((&*query).playerID)
-                );
+                });
             }
         }
 
@@ -442,10 +469,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().player_changed((&*query).playerID)
-                );
+                });
             }
         }
 
@@ -458,11 +485,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().player_removed(q.playerID, q.reason)
-                );
+                });
             }
         }
 
@@ -476,10 +503,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().team_changed((&*query).teamID)
-                );
+                });
             }
         }
 
@@ -492,10 +519,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().team_died((&*query).teamID)
-                );
+                });
             }
         }
 
@@ -509,11 +536,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_created(q.unitID, q.builderID)
-                );
+                });
             }
         }
 
@@ -526,11 +553,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_destroyed(q.unitID, q.attackerID)
-                );
+                });
             }
         }
 
@@ -543,11 +570,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_experience(q.unitID, q.oldExperience)
-                );
+                });
             }
         }
 
@@ -560,10 +587,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().unit_finished((&*query).unitID)
-                );
+                });
             }
         }
 
@@ -576,11 +603,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_from_factory(q.unitID, q.factoryID, q.userOrders)
-                );
+                });
             }
         }
 
@@ -593,11 +620,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_given(q.unitID, q.oldTeam, q.newTeam)
-                );
+                });
             }
         }
 
@@ -610,11 +637,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_loaded(q.unitID, q.transportID)
-                );
+                });
             }
         }
 
@@ -627,11 +654,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_stunned(q.unitID, q.stunned)
-                );
+                });
             }
         }
 
@@ -644,11 +671,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_taken(q.unitID, q.oldTeam, q.newTeam)
-                );
+                });
             }
         }
 
@@ -661,11 +688,11 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
                     data.module().unit_unloaded(q.unitID, q.transportID)
-                );
+                });
             }
         }
 
@@ -678,10 +705,10 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error = $crate::module_entry::result_to_error_ptr(
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     data.module().render_unit_destroyed((&*query).unitID)
-                );
+                });
             }
         }
 
@@ -695,15 +722,16 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                let res = if q.data.is_null() || q.dataLength == 0 {
-                    data.module().handle_lua_msg(q.playerID, q.script, q.mode, &[])
-                } else {
-                    let slice = std::slice::from_raw_parts(q.data, q.dataLength as usize);
-                    data.module().handle_lua_msg(q.playerID, q.script, q.mode, slice)
-                };
-                (*result).error = $crate::module_entry::result_to_error_ptr(res);
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    if q.data.is_null() || q.dataLength == 0 {
+                        data.module().handle_lua_msg(q.playerID, q.script, q.mode, &[])
+                    } else {
+                        let slice = std::slice::from_raw_parts(q.data, q.dataLength as usize);
+                        data.module().handle_lua_msg(q.playerID, q.script, q.mode, slice)
+                    }
+                });
             }
         }
 
@@ -716,17 +744,18 @@ macro_rules! export_module {
         ) {
             if module_data.is_null() || query.is_null() || result.is_null() { return; }
             unsafe {
-                let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                let q = &*query;
-                let res = if q.message.is_null() {
-                    Err($crate::Error::new(1, "Null message pointer"))
-                } else {
-                    match std::ffi::CStr::from_ptr(q.message).to_str() {
-                        Ok(message) => data.module().handle_lua_call(message),
-                        Err(e) => Err($crate::Error::new(1, format!("Invalid UTF-8: {}", e))),
+                (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    if q.message.is_null() {
+                        Err($crate::Error::new(1, "Null message pointer".to_string()))
+                    } else {
+                        match std::ffi::CStr::from_ptr(q.message).to_str() {
+                            Ok(message) => data.module().handle_lua_call(message),
+                            Err(e) => Err($crate::Error::new(1, format!("Invalid UTF-8: {}", e))),
+                        }
                     }
-                };
-                (*result).error = $crate::module_entry::result_to_error_ptr(res);
+                });
             }
         }
     };

@@ -20,6 +20,7 @@
 #include "Game/SelectedUnitsHandler.h"
 #include "Game/Players/PlayerHandler.h"
 #include "Game/Players/Player.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 #include "Net/GameServer.h"
 #include "Map/Ground.h"
 #include "Map/MapDamage.h"
@@ -76,7 +77,7 @@
 #include "System/EventHandler.h"
 #include "System/ObjectDependenceTypes.h"
 #include "System/Log/ILog.h"
-#include "NativeInterface/NativeInterfaceSystem.h"
+// #include "NativeInterface/NativeInterfaceSystem.h"
 
 using std::max;
 
@@ -7992,7 +7993,8 @@ int LuaSyncedCtrl::InvokeNativeModule(lua_State* L)
 {
 	const char* msg = luaL_checkstring(L, 1);
 
-	NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
+	if (NativeInterfaceSystem::s_instance)
+		NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
 
 	return 0;
 }

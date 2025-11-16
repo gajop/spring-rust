@@ -230,7 +230,8 @@ private:
 	std::atomic<bool> loadDone = {false};
 	std::atomic<bool> gameOver = {false};
 
-	std::unique_ptr<NativeInterfaceSystem> rustSystem;
+	// NativeInterfaceSystem - owned by Game, accessed globally via s_instance
+	std::unique_ptr<NativeInterfaceSystem> nativeInterfaceSystem;
 };
 
 

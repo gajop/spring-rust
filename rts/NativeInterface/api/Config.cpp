@@ -7,7 +7,8 @@
 namespace {
 
 // Scratch buffer for dynamic data
-static thread_local char scratchBuffer[8192];
+// NOTE: Reduced from 8192 to 1024 to avoid static initialization issues with sound thread
+static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 

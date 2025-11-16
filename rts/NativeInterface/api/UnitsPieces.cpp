@@ -5,7 +5,7 @@
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureHandler.h"
 #include "Sim/Misc/GlobalSynced.h"
-#include "Rendering/Models/3DModel.h"
+#include "Rendering/Models/3DModelPiece.hpp"
 #include "System/Matrix44f.h"
 #include <vector>
 #include <string>
@@ -14,7 +14,7 @@
 namespace {
 
 // Scratch buffer
-static thread_local char scratchBuffer[8192];
+static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 

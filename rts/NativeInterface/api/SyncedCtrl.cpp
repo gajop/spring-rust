@@ -47,7 +47,7 @@
 namespace {
 
 // Thread-local scratch buffer for dynamic data
-thread_local uint8_t scratchBuffer[8192];
+thread_local uint8_t scratchBuffer[1024];
 thread_local size_t bufferPos = 0;
 
 // Error messages

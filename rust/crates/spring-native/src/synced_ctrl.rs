@@ -11,37 +11,51 @@ use crate::{error::Error, sys};
 /// - `terrain()` - Terrain height and type modification
 /// - `projectile()` - Projectile spawning and control
 pub struct SyncedCtrl<'a> {
-    api: &'a sys::SyncedCtrlApi,
+    // Cache unwrapped sub-API pointers - guaranteed to be initialized by the engine
+    team_api: &'a sys::TeamControlApi,
+    unit_api: &'a sys::UnitControlApi,
+    feature_api: &'a sys::FeatureControlApi,
+    terrain_api: &'a sys::TerrainControlApi,
+    projectile_api: &'a sys::ProjectileControlApi,
 }
 
 impl<'a> SyncedCtrl<'a> {
     pub(crate) fn new(api: &'a sys::SyncedCtrlApi) -> Self {
-        Self { api }
+        // Unwrap all sub-API pointers at initialization - they are guaranteed to be set by the engine
+        unsafe {
+            Self {
+                team_api: api.team.as_ref().expect("team API must be initialized"),
+                unit_api: api.unit.as_ref().expect("unit API must be initialized"),
+                feature_api: api.feature.as_ref().expect("feature API must be initialized"),
+                terrain_api: api.terrain.as_ref().expect("terrain API must be initialized"),
+                projectile_api: api.projectile.as_ref().expect("projectile API must be initialized"),
+            }
+        }
     }
 
     /// Team and ally team control (alliances, resources, start boxes)
-    pub fn team(&self) -> Option<TeamControl<'_>> {
-        unsafe { self.api.team.as_ref().map(TeamControl::new) }
+    pub fn team(&self) -> TeamControl<'_> {
+        TeamControl::new(self.team_api)
     }
 
     /// Unit creation, destruction, orders, and property modification
-    pub fn unit(&self) -> Option<UnitControl<'_>> {
-        unsafe { self.api.unit.as_ref().map(UnitControl::new) }
+    pub fn unit(&self) -> UnitControl<'_> {
+        UnitControl::new(self.unit_api)
     }
 
     /// Feature creation, destruction, and property modification
-    pub fn feature(&self) -> Option<FeatureControl<'_>> {
-        unsafe { self.api.feature.as_ref().map(FeatureControl::new) }
+    pub fn feature(&self) -> FeatureControl<'_> {
+        FeatureControl::new(self.feature_api)
     }
 
     /// Terrain height map and smooth mesh modification
-    pub fn terrain(&self) -> Option<TerrainControl<'_>> {
-        unsafe { self.api.terrain.as_ref().map(TerrainControl::new) }
+    pub fn terrain(&self) -> TerrainControl<'_> {
+        TerrainControl::new(self.terrain_api)
     }
 
     /// Projectile spawning and modification
-    pub fn projectile(&self) -> Option<ProjectileControl<'_>> {
-        unsafe { self.api.projectile.as_ref().map(ProjectileControl::new) }
+    pub fn projectile(&self) -> ProjectileControl<'_> {
+        ProjectileControl::new(self.projectile_api)
     }
 }
 
@@ -53,11 +67,6 @@ pub struct TeamControl<'a> {
 impl<'a> TeamControl<'a> {
     pub(crate) fn new(api: &'a sys::TeamControlApi) -> Self {
         Self { api }
-    }
-
-    #[inline(always)]
-    fn get_fn<T>(option: Option<T>, name: &str) -> Result<T, Error> {
-        option.ok_or_else(|| Error::unavailable(name))
     }
 }
 
@@ -71,11 +80,6 @@ impl<'a> UnitControl<'a> {
     pub(crate) fn new(api: &'a sys::UnitControlApi) -> Self {
         Self { api }
     }
-
-    #[inline(always)]
-    fn get_fn<T>(option: Option<T>, name: &str) -> Result<T, Error> {
-        option.ok_or_else(|| Error::unavailable(name))
-    }
 }
 
 include!(concat!(env!("OUT_DIR"), "/unit_control_generated.rs"));
@@ -87,11 +91,6 @@ pub struct FeatureControl<'a> {
 impl<'a> FeatureControl<'a> {
     pub(crate) fn new(api: &'a sys::FeatureControlApi) -> Self {
         Self { api }
-    }
-
-    #[inline(always)]
-    fn get_fn<T>(option: Option<T>, name: &str) -> Result<T, Error> {
-        option.ok_or_else(|| Error::unavailable(name))
     }
 }
 
@@ -105,11 +104,6 @@ impl<'a> TerrainControl<'a> {
     pub(crate) fn new(api: &'a sys::TerrainControlApi) -> Self {
         Self { api }
     }
-
-    #[inline(always)]
-    fn get_fn<T>(option: Option<T>, name: &str) -> Result<T, Error> {
-        option.ok_or_else(|| Error::unavailable(name))
-    }
 }
 
 include!(concat!(env!("OUT_DIR"), "/terrain_control_generated.rs"));
@@ -121,11 +115,6 @@ pub struct ProjectileControl<'a> {
 impl<'a> ProjectileControl<'a> {
     pub(crate) fn new(api: &'a sys::ProjectileControlApi) -> Self {
         Self { api }
-    }
-
-    #[inline(always)]
-    fn get_fn<T>(option: Option<T>, name: &str) -> Result<T, Error> {
-        option.ok_or_else(|| Error::unavailable(name))
     }
 }
 

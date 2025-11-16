@@ -21,7 +21,7 @@
 namespace {
 
 // Scratch buffer for dynamic data
-static thread_local char scratchBuffer[8192];
+static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 

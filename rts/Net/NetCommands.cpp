@@ -21,6 +21,7 @@
 #include "Game/UI/GameSetupDrawer.h"
 #include "Game/UI/MouseHandler.h"
 #include "Lua/LuaHandle.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 #include "Net/Protocol/NetProtocol.h"
 #include "Rendering/GlobalRendering.h"
 #include "Sim/Misc/GlobalSynced.h"
@@ -38,7 +39,7 @@
 #include "System/Sound/ISound.h"
 #include "System/Sync/DumpState.h"
 #include "System/Sync/DumpHistory.h"
-#include "NativeInterface/NativeInterfaceSystem.h"
+// #include "NativeInterface/NativeInterfaceSystem.h"
 
 #include "System/Misc/TracyDefs.h"
 
@@ -1025,7 +1026,8 @@ void CGame::ClientReadNet()
 					unpack >> mode;
 					unpack >> data;
 
-					NativeInterfaceSystem::s_instance->HandleLuaMsg(playerNum, script, mode, data);
+					if (NativeInterfaceSystem::s_instance)
+						NativeInterfaceSystem::s_instance->HandleLuaMsg(playerNum, script, mode, data);
 					CLuaHandle::HandleLuaMsg(playerNum, script, mode, data);
 					AddTraffic(playerNum, packetCode, dataLength);
 				} catch (const netcode::UnpackPacketException& ex) {

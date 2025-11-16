@@ -41,15 +41,6 @@ impl Error {
         }
     }
 
-    pub(crate) fn unavailable(name: &str) -> Self {
-        // Mirrors CommonErrorCode::ERROR_OPERATION_FAILED
-        const ERROR_OPERATION_FAILED: i32 = 8;
-        Self::new(
-            ERROR_OPERATION_FAILED,
-            format!("Native function `{}` is unavailable", name),
-        )
-    }
-
     pub(crate) fn invalid_argument(name: &str) -> Self {
         // Mirrors CommonErrorCode::ERROR_INVALID_ARGUMENT
         const ERROR_INVALID_ARGUMENT: i32 = 2;

@@ -7,7 +7,7 @@
 namespace {
 
 // Scratch buffer
-static thread_local uint8_t scratchBuffer[8192];
+static thread_local uint8_t scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 
 // Static errors

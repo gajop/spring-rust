@@ -14,6 +14,39 @@ use crate::{
 #[derive(Clone, Copy)]
 pub struct NativeInterfaceRef {
     raw: NonNull<sys::NativeInterface>,
+    // Cache unwrapped API pointers - guaranteed to be initialized by the engine
+    units_query_api: &'static sys::UnitsQueryApi,
+    units_info_api: &'static sys::UnitsInfoApi,
+    teams_api: &'static sys::TeamsApi,
+    units_weapons_api: &'static sys::UnitsWeaponsApi,
+    units_commands_api: &'static sys::UnitsCommandsApi,
+    units_pieces_api: &'static sys::UnitsPiecesApi,
+    features_api: &'static sys::FeaturesApi,
+    projectiles_api: &'static sys::ProjectilesApi,
+    los_api: &'static sys::LOSApi,
+    unit_defs_api: &'static sys::UnitDefsApi,
+    feature_defs_api: &'static sys::FeatureDefsApi,
+    weapon_defs_api: &'static sys::WeaponDefsApi,
+    game_api: &'static sys::GameApi,
+    terrain_api: &'static sys::TerrainApi,
+    player_api: &'static sys::PlayerApi,
+    math_extra_api: &'static sys::MathExtraApi,
+    metal_map_api: &'static sys::MetalMapApi,
+    path_finder_api: &'static sys::PathFinderApi,
+    rules_params_api: &'static sys::RulesParamsApi,
+    move_ctrl_api: &'static sys::MoveCtrlApi,
+    synced_ctrl_api: &'static sys::SyncedCtrlApi,
+    camera_api: &'static sys::CameraApi,
+    input_api: &'static sys::InputApi,
+    display_api: &'static sys::DisplayApi,
+    selection_api: &'static sys::SelectionApi,
+    vfs_api: &'static sys::VFSApi,
+    sound_api: &'static sys::SoundApi,
+    messages_api: &'static sys::MessagesApi,
+    config_api: &'static sys::ConfigApi,
+    tracing_api: &'static sys::TracingApi,
+    utils_api: &'static sys::UtilsApi,
+    memory_api: &'static sys::MemoryApi,
 }
 
 // Safety: The NativeInterface is managed by the Spring engine, which handles
@@ -25,234 +58,176 @@ impl NativeInterfaceRef {
     /// # Safety
     /// Caller must ensure the pointer is valid for the lifetime of the wrapper.
     pub unsafe fn from_ptr(ptr: *const sys::NativeInterface) -> Option<Self> {
-        NonNull::new(ptr as *mut sys::NativeInterface).map(|raw| Self { raw })
+        let raw = NonNull::new(ptr as *mut sys::NativeInterface)?;
+        let iface = raw.as_ref();
+
+        // Unwrap all API pointers at initialization - they are guaranteed to be set by the engine
+        Some(Self {
+            raw,
+            units_query_api: iface.unitsQuery.as_ref().expect("unitsQuery API must be initialized"),
+            units_info_api: iface.unitsInfo.as_ref().expect("unitsInfo API must be initialized"),
+            teams_api: iface.teams.as_ref().expect("teams API must be initialized"),
+            units_weapons_api: iface.unitsWeapons.as_ref().expect("unitsWeapons API must be initialized"),
+            units_commands_api: iface.unitsCommands.as_ref().expect("unitsCommands API must be initialized"),
+            units_pieces_api: iface.unitsPieces.as_ref().expect("unitsPieces API must be initialized"),
+            features_api: iface.features.as_ref().expect("features API must be initialized"),
+            projectiles_api: iface.projectiles.as_ref().expect("projectiles API must be initialized"),
+            los_api: iface.los.as_ref().expect("los API must be initialized"),
+            unit_defs_api: iface.unitDefs.as_ref().expect("unitDefs API must be initialized"),
+            feature_defs_api: iface.featureDefs.as_ref().expect("featureDefs API must be initialized"),
+            weapon_defs_api: iface.weaponDefs.as_ref().expect("weaponDefs API must be initialized"),
+            game_api: iface.game.as_ref().expect("game API must be initialized"),
+            terrain_api: iface.terrain.as_ref().expect("terrain API must be initialized"),
+            player_api: iface.player.as_ref().expect("player API must be initialized"),
+            math_extra_api: iface.mathExtra.as_ref().expect("mathExtra API must be initialized"),
+            metal_map_api: iface.metalMap.as_ref().expect("metalMap API must be initialized"),
+            path_finder_api: iface.pathFinder.as_ref().expect("pathFinder API must be initialized"),
+            rules_params_api: iface.rulesParams.as_ref().expect("rulesParams API must be initialized"),
+            move_ctrl_api: iface.moveCtrl.as_ref().expect("moveCtrl API must be initialized"),
+            synced_ctrl_api: iface.syncedCtrl.as_ref().expect("syncedCtrl API must be initialized"),
+            camera_api: iface.cameraApi.as_ref().expect("cameraApi must be initialized"),
+            input_api: iface.input.as_ref().expect("input API must be initialized"),
+            display_api: iface.display.as_ref().expect("display API must be initialized"),
+            selection_api: iface.selection.as_ref().expect("selection API must be initialized"),
+            vfs_api: iface.vfs.as_ref().expect("vfs API must be initialized"),
+            sound_api: iface.soundApi.as_ref().expect("soundApi must be initialized"),
+            messages_api: iface.messages.as_ref().expect("messages API must be initialized"),
+            config_api: iface.config.as_ref().expect("config API must be initialized"),
+            tracing_api: iface.tracing.as_ref().expect("tracing API must be initialized"),
+            utils_api: iface.utils.as_ref().expect("utils API must be initialized"),
+            memory_api: iface.memory.as_ref().expect("memory API must be initialized"),
+        })
     }
 
     pub fn as_ptr(&self) -> *const sys::NativeInterface {
         self.raw.as_ptr()
     }
 
-    pub fn units_query(&self) -> Option<UnitsQuery<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.unitsQuery.as_ref().map(UnitsQuery::new)
-        }
+    pub fn units_query(&self) -> UnitsQuery<'_> {
+        UnitsQuery::new(self.units_query_api)
     }
 
-    pub fn units_info(&self) -> Option<UnitsInfo<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.unitsInfo.as_ref().map(UnitsInfo::new)
-        }
+    pub fn units_info(&self) -> UnitsInfo<'_> {
+        UnitsInfo::new(self.units_info_api)
     }
 
-    pub fn teams(&self) -> Option<Teams<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.teams.as_ref().map(Teams::new)
-        }
+    pub fn teams(&self) -> Teams<'_> {
+        Teams::new(self.teams_api)
     }
 
-    pub fn units_weapons(&self) -> Option<UnitsWeapons<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.unitsWeapons.as_ref().map(UnitsWeapons::new)
-        }
+    pub fn units_weapons(&self) -> UnitsWeapons<'_> {
+        UnitsWeapons::new(self.units_weapons_api)
     }
 
-    pub fn units_commands(&self) -> Option<UnitsCommands<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.unitsCommands.as_ref().map(UnitsCommands::new)
-        }
+    pub fn units_commands(&self) -> UnitsCommands<'_> {
+        UnitsCommands::new(self.units_commands_api)
     }
 
-    pub fn units_pieces(&self) -> Option<UnitsPieces<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.unitsPieces.as_ref().map(UnitsPieces::new)
-        }
+    pub fn units_pieces(&self) -> UnitsPieces<'_> {
+        UnitsPieces::new(self.units_pieces_api)
     }
 
-    pub fn features(&self) -> Option<Features<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.features.as_ref().map(Features::new)
-        }
+    pub fn features(&self) -> Features<'_> {
+        Features::new(self.features_api)
     }
 
-    pub fn projectiles(&self) -> Option<Projectiles<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.projectiles.as_ref().map(Projectiles::new)
-        }
+    pub fn projectiles(&self) -> Projectiles<'_> {
+        Projectiles::new(self.projectiles_api)
     }
 
-    pub fn los(&self) -> Option<Los<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.los.as_ref().map(Los::new)
-        }
+    pub fn los(&self) -> Los<'_> {
+        Los::new(self.los_api)
     }
 
-    pub fn unit_defs(&self) -> Option<UnitDefs<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.unitDefs.as_ref().map(UnitDefs::new)
-        }
+    pub fn unit_defs(&self) -> UnitDefs<'_> {
+        UnitDefs::new(self.unit_defs_api)
     }
 
-    pub fn feature_defs(&self) -> Option<FeatureDefs<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.featureDefs.as_ref().map(FeatureDefs::new)
-        }
+    pub fn feature_defs(&self) -> FeatureDefs<'_> {
+        FeatureDefs::new(self.feature_defs_api)
     }
 
-    pub fn weapon_defs(&self) -> Option<WeaponDefs<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.weaponDefs.as_ref().map(WeaponDefs::new)
-        }
+    pub fn weapon_defs(&self) -> WeaponDefs<'_> {
+        WeaponDefs::new(self.weapon_defs_api)
     }
 
-    pub fn game(&self) -> Option<Game<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.game.as_ref().map(Game::new)
-        }
+    pub fn game(&self) -> Game<'_> {
+        Game::new(self.game_api)
     }
 
-    pub fn terrain(&self) -> Option<Terrain<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.terrain.as_ref().map(Terrain::new)
-        }
+    pub fn terrain(&self) -> Terrain<'_> {
+        Terrain::new(self.terrain_api)
     }
 
-    pub fn player(&self) -> Option<Player<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.player.as_ref().map(Player::new)
-        }
+    pub fn player(&self) -> Player<'_> {
+        Player::new(self.player_api)
     }
 
-    pub fn math_extra(&self) -> Option<MathExtra<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.mathExtra.as_ref().map(MathExtra::new)
-        }
+    pub fn math_extra(&self) -> MathExtra<'_> {
+        MathExtra::new(self.math_extra_api)
     }
 
-    pub fn metal_map(&self) -> Option<MetalMap<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.metalMap.as_ref().map(MetalMap::new)
-        }
+    pub fn metal_map(&self) -> MetalMap<'_> {
+        MetalMap::new(self.metal_map_api)
     }
 
-    pub fn path_finder(&self) -> Option<PathFinder<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.pathFinder.as_ref().map(PathFinder::new)
-        }
+    pub fn path_finder(&self) -> PathFinder<'_> {
+        PathFinder::new(self.path_finder_api)
     }
 
-    pub fn rules_params(&self) -> Option<RulesParams<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.rulesParams.as_ref().map(RulesParams::new)
-        }
+    pub fn rules_params(&self) -> RulesParams<'_> {
+        RulesParams::new(self.rules_params_api)
     }
 
-    pub fn move_ctrl(&self) -> Option<MoveCtrl<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.moveCtrl.as_ref().map(MoveCtrl::new)
-        }
+    pub fn move_ctrl(&self) -> MoveCtrl<'_> {
+        MoveCtrl::new(self.move_ctrl_api)
     }
 
-    pub fn synced_ctrl(&self) -> Option<SyncedCtrl<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.syncedCtrl.as_ref().map(SyncedCtrl::new)
-        }
+    pub fn synced_ctrl(&self) -> SyncedCtrl<'_> {
+        SyncedCtrl::new(self.synced_ctrl_api)
     }
 
-    pub fn camera(&self) -> Option<Camera<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.cameraApi.as_ref().map(Camera::new)
-        }
+    pub fn camera(&self) -> Camera<'_> {
+        Camera::new(self.camera_api)
     }
 
-    pub fn input(&self) -> Option<Input<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.input.as_ref().map(Input::new)
-        }
+    pub fn input(&self) -> Input<'_> {
+        Input::new(self.input_api)
     }
 
-    pub fn display(&self) -> Option<Display<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.display.as_ref().map(Display::new)
-        }
+    pub fn display(&self) -> Display<'_> {
+        Display::new(self.display_api)
     }
 
-    pub fn selection(&self) -> Option<Selection<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.selection.as_ref().map(Selection::new)
-        }
+    pub fn selection(&self) -> Selection<'_> {
+        Selection::new(self.selection_api)
     }
 
-    pub fn vfs(&self) -> Option<Vfs<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.vfs.as_ref().map(Vfs::new)
-        }
+    pub fn vfs(&self) -> Vfs<'_> {
+        Vfs::new(self.vfs_api)
     }
 
-    pub fn sound(&self) -> Option<Sound<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.soundApi.as_ref().map(Sound::new)
-        }
+    pub fn sound(&self) -> Sound<'_> {
+        Sound::new(self.sound_api)
     }
 
-    pub fn messages(&self) -> Option<Messages<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.messages.as_ref().map(Messages::new)
-        }
+    pub fn messages(&self) -> Messages<'_> {
+        Messages::new(self.messages_api)
     }
 
-    pub fn config(&self) -> Option<Config<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.config.as_ref().map(Config::new)
-        }
+    pub fn config(&self) -> Config<'_> {
+        Config::new(self.config_api)
     }
 
-    pub fn tracing(&self) -> Option<Tracing<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.tracing.as_ref().map(Tracing::new)
-        }
+    pub fn tracing(&self) -> Tracing<'_> {
+        Tracing::new(self.tracing_api)
     }
 
-    pub fn utils(&self) -> Option<Utils<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.utils.as_ref().map(Utils::new)
-        }
+    pub fn utils(&self) -> Utils<'_> {
+        Utils::new(self.utils_api)
     }
 
-    pub fn memory(&self) -> Option<Memory<'_>> {
-        unsafe {
-            let iface = self.raw.as_ref();
-            iface.memory.as_ref().map(Memory::new)
-        }
+    pub fn memory(&self) -> Memory<'_> {
+        Memory::new(self.memory_api)
     }
 }

@@ -5,12 +5,13 @@
 #include "Sim/Units/BuildInfo.h"
 #include "Sim/Features/Feature.h"
 #include "Game/GameHelper.h"
+#include "Rendering/Models/3DModel.hpp"
 #include "System/float3.h"
 
 namespace {
 
 // Scratch buffer for dynamic data
-static thread_local char scratchBuffer[8192];
+static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 

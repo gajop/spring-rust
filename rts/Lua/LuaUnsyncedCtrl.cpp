@@ -28,6 +28,7 @@
 #include "Game/Players/PlayerHandler.h"
 #include "Game/InMapDraw.h"
 #include "Game/InMapDrawModel.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 #include "Game/UI/CommandColors.h"
 #include "Game/UI/CursorIcons.h"
 #include "Game/UI/GuiHandler.h"
@@ -90,7 +91,7 @@
 #include "System/Platform/WindowManagerHelper.h"
 #include "System/SpringHash.h"
 #include "System/LoadLock.h"
-#include "NativeInterface/NativeInterfaceSystem.h"
+// #include "NativeInterface/NativeInterfaceSystem.h"
 
 
 #if !defined(HEADLESS) && !defined(NO_SOUND)
@@ -5450,7 +5451,8 @@ int LuaUnsyncedCtrl::InvokeNativeModule(lua_State* L)
 {
 	const char* msg = luaL_checkstring(L, 1);
 
-	NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
+	if (NativeInterfaceSystem::s_instance)
+		NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
 
 	return 0;
 }

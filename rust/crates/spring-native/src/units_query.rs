@@ -10,11 +10,6 @@ impl<'a> UnitsQuery<'a> {
     pub(crate) fn new(api: &'a sys::UnitsQueryApi) -> Self {
         Self { api }
     }
-
-    #[inline(always)]
-    fn get_fn<T>(option: Option<T>, name: &str) -> Result<T, Error> {
-        option.ok_or_else(|| Error::unavailable(name))
-    }
 }
 
 /// Helper trait for ergonomic rectangle construction.
