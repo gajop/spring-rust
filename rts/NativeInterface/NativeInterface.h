@@ -37,6 +37,7 @@
 #include "NativeInterface/api/UnitsPieces.h"
 #include "NativeInterface/api/UnitsQuery.h"
 #include "NativeInterface/api/UnitsWeapons.h"
+#include "NativeInterface/api/UnsyncedRead.h"
 #include "NativeInterface/api/Utils.h"
 #include "NativeInterface/api/VFS.h"
 #include "NativeInterface/api/WeaponDefs.h"
@@ -88,6 +89,7 @@ struct NativeInterface {
 	const TracingApi* tracing;
 	const UtilsApi* utils;
 	const PlayerApi* player;
+	// const UnsyncedReadApi* unsyncedRead;
 };
 
 #ifdef __cplusplus

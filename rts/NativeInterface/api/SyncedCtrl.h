@@ -129,6 +129,170 @@ struct AddUnitDamageResult { const Error* error; bool success; };
 struct AddUnitImpulseQuery { int32_t unitID; Float3 impulse; };
 struct AddUnitImpulseResult { const Error* error; bool success; };
 
+struct SetUnitCloakQuery { int32_t unitID; bool wantCloak; float decloakDistance; bool useDefaultDecloakDistance; };
+struct SetUnitCloakResult { const Error* error; bool success; };
+
+struct SetUnitStealthQuery { int32_t unitID; bool stealth; };
+struct SetUnitStealthResult { const Error* error; bool success; };
+
+struct SetUnitSonarStealthQuery { int32_t unitID; bool sonarStealth; };
+struct SetUnitSonarStealthResult { const Error* error; bool success; };
+
+struct SetUnitSeismicSignatureQuery { int32_t unitID; float seismicSignature; };
+struct SetUnitSeismicSignatureResult { const Error* error; bool success; };
+
+struct SetUnitArmoredQuery { int32_t unitID; bool armoredState; float armoredMultiple; };
+struct SetUnitArmoredResult { const Error* error; bool success; };
+
+struct SetUnitBlockingQuery { int32_t unitID; bool blocking; bool solidObjects; bool projectiles; bool quadMapRays; bool crushable; bool blockEnemyPushing; bool blockHeightChanges; };
+struct SetUnitBlockingResult { const Error* error; bool success; };
+
+struct SetUnitMassQuery { int32_t unitID; float mass; };
+struct SetUnitMassResult { const Error* error; bool success; };
+
+struct SetUnitLeavesGhostQuery { int32_t unitID; bool leavesGhost; bool leaveDeadGhost; };
+struct SetUnitLeavesGhostResult { const Error* error; bool success; };
+
+struct SetUnitAlwaysVisibleQuery { int32_t unitID; bool alwaysVisible; };
+struct SetUnitAlwaysVisibleResult { const Error* error; bool success; };
+
+struct SetUnitUseAirLosQuery { int32_t unitID; bool useAirLos; };
+struct SetUnitUseAirLosResult { const Error* error; bool success; };
+
+// Unit read queries (synced)
+struct GetUnitLeavesGhostQuery { int32_t unitID; };
+struct GetUnitLeavesGhostResult { const Error* error; bool leavesGhost; };
+
+struct GetUnitPhysicalStateQuery { int32_t unitID; };
+struct GetUnitPhysicalStateResult { const Error* error; uint8_t physicalState; };
+
+struct GetUnitFeatureSeparationQuery { int32_t unitID; int32_t featureID; bool ignoreY; };
+struct GetUnitFeatureSeparationResult { const Error* error; float distance; };
+
+// Command Description structure for native API
+struct NativeCommandDescription {
+	int32_t id;
+	int32_t type;
+	bool queueing;
+	bool hidden;
+	bool disabled;
+	bool showUnique;
+	bool onlyTexture;
+	const char* name;
+	const char* action;
+	const char* iconname;
+	const char* mouseicon;
+	const char* tooltip;
+	const char** params;
+	uint32_t paramCount;
+};
+
+// Command Description queries
+struct EditUnitCmdDescQuery { int32_t unitID; uint32_t cmdDescIndex; const NativeCommandDescription* cmdDesc; };
+struct EditUnitCmdDescResult { const Error* error; bool success; };
+
+struct InsertUnitCmdDescQuery { int32_t unitID; int32_t cmdDescIndex; const NativeCommandDescription* cmdDesc; };  // -1 for append
+struct InsertUnitCmdDescResult { const Error* error; bool success; };
+
+struct RemoveUnitCmdDescQuery { int32_t unitID; int32_t cmdDescIndex; };  // -1 for last
+struct RemoveUnitCmdDescResult { const Error* error; bool success; };
+
+// Unit costs queries
+struct SetUnitCostsQuery { int32_t unitID; float buildTime; float metalCost; float energyCost; };
+struct SetUnitCostsResult { const Error* error; bool success; };
+
+// Unit build speed queries (for builders/factories)
+struct SetUnitBuildSpeedQuery { int32_t unitID; float buildSpeed; float repairSpeed; float reclaimSpeed; float resurrectSpeed; float captureSpeed; float terraformSpeed; };
+struct SetUnitBuildSpeedResult { const Error* error; bool success; };
+
+// Unit collision volume queries
+struct SetUnitCollisionVolumeDataQuery {
+	int32_t unitID;
+	Float3 scales;
+	Float3 offsets;
+	int32_t volumeType;      // COLVOL_TYPE_*
+	int32_t primaryAxis;     // COLVOL_AXIS_*
+};
+struct SetUnitCollisionVolumeDataResult { const Error* error; bool success; };
+
+// Unit selection volume queries
+struct SetUnitSelectionVolumeDataQuery {
+	int32_t unitID;
+	Float3 scales;
+	Float3 offsets;
+	int32_t volumeType;
+	int32_t primaryAxis;
+	bool useContHitTest;
+};
+struct SetUnitSelectionVolumeDataResult { const Error* error; bool success; };
+
+// Unit piece collision volume queries
+struct SetUnitPieceCollisionVolumeDataQuery {
+	int32_t unitID;
+	int32_t pieceIndex;
+	bool enable;
+	Float3 scales;
+	Float3 offsets;
+	int32_t volumeType;
+	int32_t primaryAxis;
+};
+struct SetUnitPieceCollisionVolumeDataResult { const Error* error; bool success; };
+
+// Unit target queries
+struct SetUnitTargetQuery {
+	int32_t unitID;
+	int32_t targetID;           // target unit ID, -1 for ground target or clear
+	Float3 targetPos;           // ground target position (if targetID == -1)
+	bool manualFire;
+	bool userTarget;
+	int32_t weaponNum;          // -1 for all weapons
+};
+struct SetUnitTargetResult { const Error* error; bool success; };
+
+// Unit shield queries
+struct SetUnitShieldStateQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // -1 for default shield
+	bool enabled;
+	float power;
+};
+struct SetUnitShieldStateResult { const Error* error; bool success; };
+
+struct SetUnitShieldRechargeDelayQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // -1 for default shield
+	float rechargeDelay;        // seconds, -1 to use default
+};
+struct SetUnitShieldRechargeDelayResult { const Error* error; bool success; };
+
+// Unit flanking queries
+struct SetUnitFlankingQuery {
+	int32_t unitID;
+	int32_t mode;               // flanking bonus mode
+	Float3 dir;                 // flanking direction
+	float moveFactor;           // mobility add factor
+	float minDamage;            // min damage multiplier
+	float maxDamage;            // max damage multiplier
+};
+struct SetUnitFlankingResult { const Error* error; bool success; };
+
+// Unit mid/aim position queries
+struct SetUnitMidAndAimPosQuery {
+	int32_t unitID;
+	Float3 midPos;
+	Float3 aimPos;
+	bool setRelative;
+};
+struct SetUnitMidAndAimPosResult { const Error* error; bool success; };
+
+// Unit radius/height queries
+struct SetUnitRadiusAndHeightQuery {
+	int32_t unitID;
+	float radius;
+	float height;
+};
+struct SetUnitRadiusAndHeightResult { const Error* error; bool success; };
+
 struct UnitControlApi {
 	void (*CreateUnit)(const CreateUnitQuery* query, CreateUnitResult* result);
 	void (*DestroyUnit)(const DestroyUnitQuery* query, DestroyUnitResult* result);
@@ -149,6 +313,33 @@ struct UnitControlApi {
 	void (*SetUnitPhysics)(const SetUnitPhysicsQuery* query, SetUnitPhysicsResult* result);
 	void (*AddUnitDamage)(const AddUnitDamageQuery* query, AddUnitDamageResult* result);
 	void (*AddUnitImpulse)(const AddUnitImpulseQuery* query, AddUnitImpulseResult* result);
+	void (*SetUnitCloak)(const SetUnitCloakQuery* query, SetUnitCloakResult* result);
+	void (*SetUnitStealth)(const SetUnitStealthQuery* query, SetUnitStealthResult* result);
+	void (*SetUnitSonarStealth)(const SetUnitSonarStealthQuery* query, SetUnitSonarStealthResult* result);
+	void (*SetUnitSeismicSignature)(const SetUnitSeismicSignatureQuery* query, SetUnitSeismicSignatureResult* result);
+	void (*SetUnitArmored)(const SetUnitArmoredQuery* query, SetUnitArmoredResult* result);
+	void (*SetUnitBlocking)(const SetUnitBlockingQuery* query, SetUnitBlockingResult* result);
+	void (*SetUnitMass)(const SetUnitMassQuery* query, SetUnitMassResult* result);
+	void (*SetUnitLeavesGhost)(const SetUnitLeavesGhostQuery* query, SetUnitLeavesGhostResult* result);
+	void (*SetUnitAlwaysVisible)(const SetUnitAlwaysVisibleQuery* query, SetUnitAlwaysVisibleResult* result);
+	void (*SetUnitUseAirLos)(const SetUnitUseAirLosQuery* query, SetUnitUseAirLosResult* result);
+	void (*GetUnitLeavesGhost)(const GetUnitLeavesGhostQuery* query, GetUnitLeavesGhostResult* result);
+	void (*GetUnitPhysicalState)(const GetUnitPhysicalStateQuery* query, GetUnitPhysicalStateResult* result);
+	void (*GetUnitFeatureSeparation)(const GetUnitFeatureSeparationQuery* query, GetUnitFeatureSeparationResult* result);
+	void (*EditUnitCmdDesc)(const EditUnitCmdDescQuery* query, EditUnitCmdDescResult* result);
+	void (*InsertUnitCmdDesc)(const InsertUnitCmdDescQuery* query, InsertUnitCmdDescResult* result);
+	void (*RemoveUnitCmdDesc)(const RemoveUnitCmdDescQuery* query, RemoveUnitCmdDescResult* result);
+	void (*SetUnitCosts)(const SetUnitCostsQuery* query, SetUnitCostsResult* result);
+	void (*SetUnitBuildSpeed)(const SetUnitBuildSpeedQuery* query, SetUnitBuildSpeedResult* result);
+	void (*SetUnitCollisionVolumeData)(const SetUnitCollisionVolumeDataQuery* query, SetUnitCollisionVolumeDataResult* result);
+	void (*SetUnitSelectionVolumeData)(const SetUnitSelectionVolumeDataQuery* query, SetUnitSelectionVolumeDataResult* result);
+	void (*SetUnitPieceCollisionVolumeData)(const SetUnitPieceCollisionVolumeDataQuery* query, SetUnitPieceCollisionVolumeDataResult* result);
+	void (*SetUnitTarget)(const SetUnitTargetQuery* query, SetUnitTargetResult* result);
+	void (*SetUnitShieldState)(const SetUnitShieldStateQuery* query, SetUnitShieldStateResult* result);
+	void (*SetUnitShieldRechargeDelay)(const SetUnitShieldRechargeDelayQuery* query, SetUnitShieldRechargeDelayResult* result);
+	void (*SetUnitFlanking)(const SetUnitFlankingQuery* query, SetUnitFlankingResult* result);
+	void (*SetUnitMidAndAimPos)(const SetUnitMidAndAimPosQuery* query, SetUnitMidAndAimPosResult* result);
+	void (*SetUnitRadiusAndHeight)(const SetUnitRadiusAndHeightQuery* query, SetUnitRadiusAndHeightResult* result);
 };
 
 // ============================================================================
@@ -180,6 +371,70 @@ struct SetFeatureVelocityResult { const Error* error; bool success; };
 struct SetFeatureResourcesQuery { int32_t featureID; float metal; float energy; float reclaimTime; };
 struct SetFeatureResourcesResult { const Error* error; bool success; };
 
+struct AddFeatureDamageQuery { int32_t featureID; float damage; int32_t weaponDefID; int32_t attackerID; Float3 impulse; };
+struct AddFeatureDamageResult { const Error* error; bool success; };
+
+struct SetFeatureBlockingQuery { int32_t featureID; bool blocking; bool solidObjects; bool projectiles; bool quadMapRays; bool crushable; bool blockEnemyPushing; bool blockHeightChanges; };
+struct SetFeatureBlockingResult { const Error* error; bool success; };
+
+struct SetFeatureMassQuery { int32_t featureID; float mass; };
+struct SetFeatureMassResult { const Error* error; bool success; };
+
+struct SetFeatureMaxHealthQuery { int32_t featureID; float maxHealth; };
+struct SetFeatureMaxHealthResult { const Error* error; bool success; };
+
+struct SetFeatureReclaimQuery { int32_t featureID; float reclaimLeft; };
+struct SetFeatureReclaimResult { const Error* error; bool success; };
+
+struct SetFeatureResurrectQuery { int32_t featureID; int32_t unitDefID; int32_t facing; };
+struct SetFeatureResurrectResult { const Error* error; bool success; };
+
+struct SetFeaturePhysicsQuery { int32_t featureID; Float3 pos; Float3 velocity; Float3 rotation; bool setPos; bool setVel; bool setRot; };
+struct SetFeaturePhysicsResult { const Error* error; bool success; };
+
+struct SetFeatureMoveCtrlQuery { int32_t featureID; bool enable; };
+struct SetFeatureMoveCtrlResult { const Error* error; bool success; };
+
+struct SetFeatureHeadingAndUpDirQuery { int32_t featureID; int32_t heading; Float3 upDir; };
+struct SetFeatureHeadingAndUpDirResult { const Error* error; bool success; };
+
+struct SetFeatureRotationQuery { int32_t featureID; Float3 rotation; };
+struct SetFeatureRotationResult { const Error* error; bool success; };
+
+struct SetFeatureAlwaysVisibleQuery { int32_t featureID; bool alwaysVisible; };
+struct SetFeatureAlwaysVisibleResult { const Error* error; bool success; };
+
+struct SetFeatureUseAirLosQuery { int32_t featureID; bool useAirLos; };
+struct SetFeatureUseAirLosResult { const Error* error; bool success; };
+
+struct SetFeatureNoSelectQuery { int32_t featureID; bool noSelect; };
+struct SetFeatureNoSelectResult { const Error* error; bool success; };
+
+struct SetFeatureMidAndAimPosQuery { int32_t featureID; Float3 midPos; Float3 aimPos; bool setRelative; };
+struct SetFeatureMidAndAimPosResult { const Error* error; bool success; };
+
+struct SetFeatureRadiusAndHeightQuery { int32_t featureID; float radius; float height; };
+struct SetFeatureRadiusAndHeightResult { const Error* error; bool success; };
+
+struct SetFeatureCollisionVolumeDataQuery {
+	int32_t featureID;
+	Float3 scales;
+	Float3 offsets;
+	int32_t volumeType;
+	int32_t primaryAxis;
+};
+struct SetFeatureCollisionVolumeDataResult { const Error* error; bool success; };
+
+struct SetFeatureSelectionVolumeDataQuery {
+	int32_t featureID;
+	Float3 scales;
+	Float3 offsets;
+	int32_t volumeType;
+	int32_t primaryAxis;
+	bool useContHitTest;
+};
+struct SetFeatureSelectionVolumeDataResult { const Error* error; bool success; };
+
 struct FeatureControlApi {
 	void (*CreateFeature)(const CreateFeatureQuery* query, CreateFeatureResult* result);
 	void (*DestroyFeature)(const DestroyFeatureQuery* query, DestroyFeatureResult* result);
@@ -189,6 +444,23 @@ struct FeatureControlApi {
 	void (*SetFeatureDirection)(const SetFeatureDirectionQuery* query, SetFeatureDirectionResult* result);
 	void (*SetFeatureVelocity)(const SetFeatureVelocityQuery* query, SetFeatureVelocityResult* result);
 	void (*SetFeatureResources)(const SetFeatureResourcesQuery* query, SetFeatureResourcesResult* result);
+	void (*AddFeatureDamage)(const AddFeatureDamageQuery* query, AddFeatureDamageResult* result);
+	void (*SetFeatureBlocking)(const SetFeatureBlockingQuery* query, SetFeatureBlockingResult* result);
+	void (*SetFeatureMass)(const SetFeatureMassQuery* query, SetFeatureMassResult* result);
+	void (*SetFeatureMaxHealth)(const SetFeatureMaxHealthQuery* query, SetFeatureMaxHealthResult* result);
+	void (*SetFeatureReclaim)(const SetFeatureReclaimQuery* query, SetFeatureReclaimResult* result);
+	void (*SetFeatureResurrect)(const SetFeatureResurrectQuery* query, SetFeatureResurrectResult* result);
+	void (*SetFeaturePhysics)(const SetFeaturePhysicsQuery* query, SetFeaturePhysicsResult* result);
+	void (*SetFeatureMoveCtrl)(const SetFeatureMoveCtrlQuery* query, SetFeatureMoveCtrlResult* result);
+	void (*SetFeatureHeadingAndUpDir)(const SetFeatureHeadingAndUpDirQuery* query, SetFeatureHeadingAndUpDirResult* result);
+	void (*SetFeatureRotation)(const SetFeatureRotationQuery* query, SetFeatureRotationResult* result);
+	void (*SetFeatureAlwaysVisible)(const SetFeatureAlwaysVisibleQuery* query, SetFeatureAlwaysVisibleResult* result);
+	void (*SetFeatureUseAirLos)(const SetFeatureUseAirLosQuery* query, SetFeatureUseAirLosResult* result);
+	void (*SetFeatureNoSelect)(const SetFeatureNoSelectQuery* query, SetFeatureNoSelectResult* result);
+	void (*SetFeatureMidAndAimPos)(const SetFeatureMidAndAimPosQuery* query, SetFeatureMidAndAimPosResult* result);
+	void (*SetFeatureRadiusAndHeight)(const SetFeatureRadiusAndHeightQuery* query, SetFeatureRadiusAndHeightResult* result);
+	void (*SetFeatureCollisionVolumeData)(const SetFeatureCollisionVolumeDataQuery* query, SetFeatureCollisionVolumeDataResult* result);
+	void (*SetFeatureSelectionVolumeData)(const SetFeatureSelectionVolumeDataQuery* query, SetFeatureSelectionVolumeDataResult* result);
 };
 
 // ============================================================================
@@ -226,6 +498,46 @@ struct SetTidalResult { const Error* error; bool success; };
 struct SetWindQuery { float minWind; float maxWind; };
 struct SetWindResult { const Error* error; bool success; };
 
+// Grass queries
+struct AddGrassQuery { float x; float z; uint8_t grassValue; };
+struct AddGrassResult { const Error* error; bool success; };
+
+struct RemoveGrassQuery { float x; float z; };
+struct RemoveGrassResult { const Error* error; bool success; };
+
+// Advanced height map queries
+struct AdjustHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct AdjustHeightMapResult { const Error* error; bool success; };
+
+struct LevelHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct LevelHeightMapResult { const Error* error; bool success; };
+
+// Original height map queries
+struct AddOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct AddOriginalHeightMapResult { const Error* error; bool success; };
+
+struct SetOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct SetOriginalHeightMapResult { const Error* error; bool success; };
+
+struct RevertOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float origFactor; };
+struct RevertOriginalHeightMapResult { const Error* error; bool success; };
+
+struct AdjustOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct AdjustOriginalHeightMapResult { const Error* error; bool success; };
+
+struct LevelOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct LevelOriginalHeightMapResult { const Error* error; bool success; };
+
+// Smooth mesh advanced queries
+struct AdjustSmoothMeshQuery { float x1; float z1; float x2; float z2; float height; };
+struct AdjustSmoothMeshResult { const Error* error; bool success; };
+
+struct LevelSmoothMeshQuery { float x1; float z1; float x2; float z2; float height; };
+struct LevelSmoothMeshResult { const Error* error; bool success; };
+
+struct RebuildSmoothMeshQuery { float x1; float z1; float x2; float z2; };
+struct RebuildSmoothMeshResult { const Error* error; bool success; };
+
 struct TerrainControlApi {
 	void (*AddHeightMap)(const AddHeightMapQuery* query, AddHeightMapResult* result);
 	void (*SetHeightMap)(const SetHeightMapQuery* query, SetHeightMapResult* result);
@@ -237,6 +549,18 @@ struct TerrainControlApi {
 	void (*SetTerrainTypeData)(const SetTerrainTypeDataQuery* query, SetTerrainTypeDataResult* result);
 	void (*SetTidal)(const SetTidalQuery* query, SetTidalResult* result);
 	void (*SetWind)(const SetWindQuery* query, SetWindResult* result);
+	void (*AddGrass)(const AddGrassQuery* query, AddGrassResult* result);
+	void (*RemoveGrass)(const RemoveGrassQuery* query, RemoveGrassResult* result);
+	void (*AdjustHeightMap)(const AdjustHeightMapQuery* query, AdjustHeightMapResult* result);
+	void (*LevelHeightMap)(const LevelHeightMapQuery* query, LevelHeightMapResult* result);
+	void (*AddOriginalHeightMap)(const AddOriginalHeightMapQuery* query, AddOriginalHeightMapResult* result);
+	void (*SetOriginalHeightMap)(const SetOriginalHeightMapQuery* query, SetOriginalHeightMapResult* result);
+	void (*RevertOriginalHeightMap)(const RevertOriginalHeightMapQuery* query, RevertOriginalHeightMapResult* result);
+	void (*AdjustOriginalHeightMap)(const AdjustOriginalHeightMapQuery* query, AdjustOriginalHeightMapResult* result);
+	void (*LevelOriginalHeightMap)(const LevelOriginalHeightMapQuery* query, LevelOriginalHeightMapResult* result);
+	void (*AdjustSmoothMesh)(const AdjustSmoothMeshQuery* query, AdjustSmoothMeshResult* result);
+	void (*LevelSmoothMesh)(const LevelSmoothMeshQuery* query, LevelSmoothMeshResult* result);
+	void (*RebuildSmoothMesh)(const RebuildSmoothMeshQuery* query, RebuildSmoothMeshResult* result);
 };
 
 // ============================================================================
@@ -262,6 +586,42 @@ struct SetProjectileGravityResult { const Error* error; bool success; };
 struct SetProjectileTargetQuery { int32_t projectileID; int32_t targetID; Float3 targetPos; bool isGroundTarget; };
 struct SetProjectileTargetResult { const Error* error; bool success; };
 
+struct SetProjectileDamagesQuery { int32_t projectileID; const char* damageKey; float damageValue; };
+struct SetProjectileDamagesResult { const Error* error; bool success; };
+
+struct SetProjectileTimeToLiveQuery { int32_t projectileID; int32_t timeToLive; };
+struct SetProjectileTimeToLiveResult { const Error* error; bool success; };
+
+struct SetProjectileIsInterceptedQuery { int32_t projectileID; bool intercepted; };
+struct SetProjectileIsInterceptedResult { const Error* error; bool success; };
+
+struct SetProjectileCollisionQuery { int32_t projectileID; bool collide; };
+struct SetProjectileCollisionResult { const Error* error; bool success; };
+
+struct SetProjectileCEGQuery { int32_t projectileID; const char* cegName; };
+struct SetProjectileCEGResult { const Error* error; bool success; };
+
+struct SetProjectileAlwaysVisibleQuery { int32_t projectileID; bool alwaysVisible; };
+struct SetProjectileAlwaysVisibleResult { const Error* error; bool success; };
+
+struct SetProjectileUseAirLosQuery { int32_t projectileID; bool useAirLos; };
+struct SetProjectileUseAirLosResult { const Error* error; bool success; };
+
+struct SetProjectileMoveControlQuery { int32_t projectileID; bool enable; };
+struct SetProjectileMoveControlResult { const Error* error; bool success; };
+
+struct SetProjectileIgnoreTrackingErrorQuery { int32_t projectileID; bool ignore; };
+struct SetProjectileIgnoreTrackingErrorResult { const Error* error; bool success; };
+
+struct SetProjectileSpinAngleQuery { int32_t projectileID; float angle; };
+struct SetProjectileSpinAngleResult { const Error* error; bool success; };
+
+struct SetProjectileSpinSpeedQuery { int32_t projectileID; float speed; };
+struct SetProjectileSpinSpeedResult { const Error* error; bool success; };
+
+struct SetProjectileSpinVecQuery { int32_t projectileID; Float3 spinVec; };
+struct SetProjectileSpinVecResult { const Error* error; bool success; };
+
 struct ProjectileControlApi {
 	void (*SpawnProjectile)(const SpawnProjectileQuery* query, SpawnProjectileResult* result);
 	void (*DeleteProjectile)(const DeleteProjectileQuery* query, DeleteProjectileResult* result);
@@ -269,6 +629,71 @@ struct ProjectileControlApi {
 	void (*SetProjectileVelocity)(const SetProjectileVelocityQuery* query, SetProjectileVelocityResult* result);
 	void (*SetProjectileGravity)(const SetProjectileGravityQuery* query, SetProjectileGravityResult* result);
 	void (*SetProjectileTarget)(const SetProjectileTargetQuery* query, SetProjectileTargetResult* result);
+	void (*SetProjectileDamages)(const SetProjectileDamagesQuery* query, SetProjectileDamagesResult* result);
+	void (*SetProjectileTimeToLive)(const SetProjectileTimeToLiveQuery* query, SetProjectileTimeToLiveResult* result);
+	void (*SetProjectileIsIntercepted)(const SetProjectileIsInterceptedQuery* query, SetProjectileIsInterceptedResult* result);
+	void (*SetProjectileCollision)(const SetProjectileCollisionQuery* query, SetProjectileCollisionResult* result);
+	void (*SetProjectileCEG)(const SetProjectileCEGQuery* query, SetProjectileCEGResult* result);
+	void (*SetProjectileAlwaysVisible)(const SetProjectileAlwaysVisibleQuery* query, SetProjectileAlwaysVisibleResult* result);
+	void (*SetProjectileUseAirLos)(const SetProjectileUseAirLosQuery* query, SetProjectileUseAirLosResult* result);
+	void (*SetProjectileMoveControl)(const SetProjectileMoveControlQuery* query, SetProjectileMoveControlResult* result);
+	void (*SetProjectileIgnoreTrackingError)(const SetProjectileIgnoreTrackingErrorQuery* query, SetProjectileIgnoreTrackingErrorResult* result);
+	void (*SetProjectileSpinAngle)(const SetProjectileSpinAngleQuery* query, SetProjectileSpinAngleResult* result);
+	void (*SetProjectileSpinSpeed)(const SetProjectileSpinSpeedQuery* query, SetProjectileSpinSpeedResult* result);
+	void (*SetProjectileSpinVec)(const SetProjectileSpinVecQuery* query, SetProjectileSpinVecResult* result);
+};
+
+// ============================================================================
+// Effects Control
+// ============================================================================
+
+// Spawn explosion query
+struct SpawnExplosionQuery {
+	Float3 pos;
+	Float3 dir;
+	float damages;              // base damage
+	float craterAreaOfEffect;
+	float damageAreaOfEffect;
+	float edgeEffectiveness;
+	float explosionSpeed;
+	float gfxMod;
+	bool impactOnly;
+	bool ignoreOwner;
+	bool damageGround;
+	int32_t weaponDefID;        // -1 for none
+	int32_t ownerID;            // -1 for none
+	int32_t projectileID;       // -1 for none
+};
+struct SpawnExplosionResult { const Error* error; bool success; };
+
+// Spawn CEG (Custom Explosion Generator) query
+struct SpawnCEGQuery {
+	const char* cegName;        // CEG name or NULL to use cegID
+	int32_t cegID;              // CEG ID, used if cegName is NULL
+	Float3 pos;
+	Float3 dir;
+	float radius;
+	float damage;
+	float dmgMod;
+};
+struct SpawnCEGResult { const Error* error; bool success; int32_t cegID; };
+
+// Spawn SFX query
+struct SpawnSFXQuery {
+	int32_t unitID;
+	int32_t sfxID;
+	Float3 pos;
+	Float3 dir;
+	float radius;
+	float damage;
+	bool absolute;              // absolute or unit-relative coordinates
+};
+struct SpawnSFXResult { const Error* error; bool success; };
+
+struct EffectsControlApi {
+	void (*SpawnExplosion)(const SpawnExplosionQuery* query, SpawnExplosionResult* result);
+	void (*SpawnCEG)(const SpawnCEGQuery* query, SpawnCEGResult* result);
+	void (*SpawnSFX)(const SpawnSFXQuery* query, SpawnSFXResult* result);
 };
 
 // ============================================================================
@@ -281,6 +706,7 @@ struct SyncedCtrlApi {
 	const FeatureControlApi* feature;
 	const TerrainControlApi* terrain;
 	const ProjectileControlApi* projectile;
+	const EffectsControlApi* effects;
 };
 
 extern const SyncedCtrlApi SYNCED_CTRL_API;

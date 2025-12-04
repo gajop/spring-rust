@@ -127,15 +127,18 @@ def extract_callins(content: str) -> List[Dict]:
     return callins
 
 def main():
+    rust_dir = Path(__file__).parent
+    cache_file = rust_dir / '.cache' / 'lua_api.html'
+
     print("Fetching Lua API documentation...")
     url = 'https://recoilengine.org/docs/lua-api/'
-    content = fetch_page(url)
+    content = fetch_page(url, cache_file, cache_days=1)
 
     if not content:
         print("Failed to fetch documentation")
         return
 
-    print(f"Fetched {len(content)} bytes")
+    print(f"Processing {len(content)} bytes")
 
     # Extract callouts (Spring.*, gl.*, etc.)
     print("Extracting callout functions...")
@@ -157,7 +160,6 @@ def main():
         by_namespace[ns].append(func)
 
     # Write to markdown
-    rust_dir = Path(__file__).parent
     output_file = rust_dir / 'lua_functions.md'
 
     with open(output_file, 'w') as f:

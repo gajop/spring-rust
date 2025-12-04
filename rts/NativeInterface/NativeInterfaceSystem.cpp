@@ -98,6 +98,7 @@ public:
 		nativeInterface.display = &DISPLAY_API;
 		nativeInterface.selection = &SELECTION_API;
 		nativeInterface.vfs = &VFS_API;
+		// nativeInterface.unsyncedRead = &UNSYNCED_READ_API;
 		nativeInterface.soundApi = &SOUND_API;
 		nativeInterface.messages = &MESSAGES_API;
 		nativeInterface.config = &CONFIG_API;
