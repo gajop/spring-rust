@@ -1,5 +1,7 @@
 #include "Sound.h"
 
+#include <vector>
+
 #include "System/Sound/ISound.h"
 #include "System/Sound/ISoundChannels.h"
 #include "System/Sound/IAudioChannel.h"
@@ -15,6 +17,7 @@ static thread_local Error dynamicError;
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Sound system not ready" };
 static const Error INVALID_SOUND_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid sound file or ID" };
+static const Error NOT_AVAILABLE_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Sound effect parameters are not available" };
 
 static bool IsReady() { return (sound != nullptr) && ISound::IsInitialized(); }
 
@@ -110,6 +113,51 @@ static void NativeGetSoundStreamTime(const GetSoundStreamTimeQuery* query, GetSo
 	result->time = Channels::BGMusic->StreamGetTime();
 }
 
+static void NativeGetSoundDevices(const GetSoundDevicesQuery* /*query*/, GetSoundDevicesResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	static thread_local std::vector<std::string> deviceStrings;
+	static thread_local std::vector<const char*> devicePtrs;
+
+	deviceStrings = sound->GetSoundDevices();
+	devicePtrs.clear();
+	devicePtrs.reserve(deviceStrings.size());
+
+	for (const auto& name : deviceStrings) {
+		devicePtrs.push_back(name.c_str());
+	}
+
+	result->error = nullptr;
+	result->devices = devicePtrs.data();
+	result->count = static_cast<uint32_t>(devicePtrs.size());
+}
+
+static void NativeGetSoundEffectParams(const GetSoundEffectParamsQuery* /*query*/, GetSoundEffectParamsResult* result) {
+	bufferPos = 0;
+	result->error = &NOT_AVAILABLE_ERROR;
+	result->success = false;
+}
+
+static void NativeSetSoundEffectParams(const SetSoundEffectParamsQuery* /*query*/, SetSoundEffectParamsResult* result) {
+	bufferPos = 0;
+	result->error = &NOT_AVAILABLE_ERROR;
+	result->success = false;
+}
+
+static void NativePreloadSoundItem(const PreloadSoundItemQuery* query, PreloadSoundItemResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (query->soundName == nullptr || query->soundName[0] == '\0') {
+		result->error = &INVALID_SOUND_ERROR;
+		return;
+	}
+
+	result->error = nullptr;
+	result->success = sound->PreloadSoundItem(query->soundName);
+}
+
 } // namespace
 
 const SoundApi SOUND_API = {
@@ -120,4 +168,8 @@ const SoundApi SOUND_API = {
 	.PauseSoundStream = NativePauseSoundStream,
 	.SetSoundStreamVolume = NativeSetSoundStreamVolume,
 	.GetSoundStreamTime = NativeGetSoundStreamTime,
+	.GetSoundDevices = NativeGetSoundDevices,
+	.GetSoundEffectParams = NativeGetSoundEffectParams,
+	.SetSoundEffectParams = NativeSetSoundEffectParams,
+	.PreloadSoundItem = NativePreloadSoundItem,
 };

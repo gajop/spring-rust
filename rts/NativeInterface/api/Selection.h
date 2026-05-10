@@ -61,6 +61,15 @@ struct GetUnitGroupResult { const Error* error; int32_t groupID; };
 struct SetUnitGroupQuery { int32_t unitID; int32_t groupID; };
 struct SetUnitGroupResult { const Error* error; bool success; };
 
+struct GetGroupUnitsCountQuery { int32_t groupID; };
+struct GetGroupUnitsCountResult { const Error* error; uint32_t count; };
+
+struct GetGroupUnitsCountsQuery { uint8_t _unused; };
+struct GetGroupUnitsCountsResult { const Error* error; uint32_t counts[10]; };
+
+struct GetGroupUnitsSortedQuery { int32_t groupID; };
+struct GetGroupUnitsSortedResult { const Error* error; int32_t* units; uint32_t count; };
+
 // API structure
 struct SelectionApi {
 	void (*GetSelectedUnits)(const GetSelectedUnitsQuery* query, GetSelectedUnitsResult* result);
@@ -74,6 +83,9 @@ struct SelectionApi {
 	void (*GetGroupList)(const GetGroupListQuery* query, GetGroupListResult* result);
 	void (*GetSelectedGroup)(const GetSelectedGroupQuery* query, GetSelectedGroupResult* result);
 	void (*GetGroupUnits)(const GetGroupUnitsQuery* query, GetGroupUnitsResult* result);
+	void (*GetGroupUnitsSorted)(const GetGroupUnitsSortedQuery* query, GetGroupUnitsSortedResult* result);
+	void (*GetGroupUnitsCount)(const GetGroupUnitsCountQuery* query, GetGroupUnitsCountResult* result);
+	void (*GetGroupUnitsCounts)(const GetGroupUnitsCountsQuery* query, GetGroupUnitsCountsResult* result);
 	void (*GetUnitGroup)(const GetUnitGroupQuery* query, GetUnitGroupResult* result);
 	void (*SetUnitGroup)(const SetUnitGroupQuery* query, SetUnitGroupResult* result);
 };

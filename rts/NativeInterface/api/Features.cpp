@@ -7,6 +7,7 @@
 #include "Sim/Misc/QuadField.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "System/float3.h"
+#include "Rendering/Features/FeatureDrawer.h"
 
 namespace {
 
@@ -154,7 +155,7 @@ static void NativeGetFeaturesInCylinder(const GetFeaturesInCylinderQuery* query,
 		return;
 	}
 
-	const float3 pos(query->center.x, query->center.y, query->center.z);
+	const float3 pos(query->x, 0.0f, query->z);
 	const float radiusSq = query->radius * query->radius;
 	const float halfHeight = query->height * 0.5f;
 
@@ -649,6 +650,273 @@ static void NativeGetFeaturePieceCollisionVolumeData(const GetFeaturePieceCollis
 	result->volume.disabled = cv.IgnoreHits();
 }
 
+static void NativeClearFeaturesPreviousDrawFlag(const ClearFeaturesPreviousDrawFlagQuery* query, ClearFeaturesPreviousDrawFlagResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady() || featureDrawer == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	featureDrawer->ClearPreviousDrawFlags();
+	result->success = true;
+}
+
+static void NativeGetFeatureNoDraw(const GetFeatureNoDrawQuery* query, GetFeatureNoDrawResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->noDraw = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	result->noDraw = feature->noDraw;
+}
+
+static void NativeGetFeatureLuaDraw(const GetFeatureLuaDrawQuery* query, GetFeatureLuaDrawResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->luaDraw = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	result->luaDraw = feature->luaDraw;
+}
+
+static void NativeGetFeatureEngineDrawMask(const GetFeatureEngineDrawMaskQuery* query, GetFeatureEngineDrawMaskResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->mask = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	result->mask = feature->engineDrawMask;
+}
+
+static void NativeGetFeatureDrawFlag(const GetFeatureDrawFlagQuery* query, GetFeatureDrawFlagResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->flag = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	result->flag = (feature->GetDrawFlag() != DrawFlags::SO_NODRAW_FLAG);
+}
+
+static void NativeGetFeatureAlwaysUpdateMatrix(const GetFeatureAlwaysUpdateMatrixQuery* query, GetFeatureAlwaysUpdateMatrixResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->update = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	result->update = feature->alwaysUpdateMat;
+}
+
+static void NativeGetFeatureTransformMatrix(const GetFeatureTransformMatrixQuery* query, GetFeatureTransformMatrixResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	const CMatrix44f m = feature->GetTransformMatrix(false, true);
+	for (size_t i = 0; i < 16; ++i) {
+		result->matrix.values[i] = m[i];
+	}
+}
+
+static void NativeGetFeatureSelectionVolumeData(const GetFeatureSelectionVolumeDataQuery* query, GetFeatureSelectionVolumeDataResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->data.scales = {0.0f, 0.0f, 0.0f};
+	result->data.offsets = {0.0f, 0.0f, 0.0f};
+	result->data.primaryAxis = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	const CollisionVolume& vol = feature->selectionVolume;
+	result->data.scales = {vol.GetScales().x, vol.GetScales().y, vol.GetScales().z};
+	result->data.offsets = {vol.GetOffsets().x, vol.GetOffsets().y, vol.GetOffsets().z};
+	result->data.primaryAxis = vol.GetPrimaryAxis();
+}
+
+static void NativeGetFeatureFireTime(const GetFeatureFireTimeQuery* query, GetFeatureFireTimeResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->fireTime = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	result->fireTime = feature->fireTime;
+}
+
+static void NativeGetFeatureSmokeTime(const GetFeatureSmokeTimeQuery* query, GetFeatureSmokeTimeResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->smokeTime = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	result->smokeTime = feature->smokeTime;
+}
+
+static void NativeGetRenderFeatures(const GetRenderFeaturesQuery* query, GetRenderFeaturesResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->features = nullptr;
+	result->count = 0;
+
+	if (!IsReady() || featureDrawer == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const auto& features = featureDrawer->GetUnsortedFeatures();
+	if (features.empty())
+		return;
+
+	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	const size_t count = std::min(features.size(), maxCount);
+
+	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	for (size_t i = 0; i < count; ++i) {
+		out[i] = features[i]->id;
+	}
+
+	result->features = out;
+	result->count = static_cast<uint32_t>(count);
+	bufferPos += count * sizeof(int32_t);
+}
+
+static void NativeGetRenderFeaturesDrawFlagChanged(const GetRenderFeaturesDrawFlagChangedQuery* query, GetRenderFeaturesDrawFlagChangedResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->features = nullptr;
+	result->count = 0;
+
+	if (!IsReady() || featureDrawer == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const auto& features = featureDrawer->GetUnsortedFeatures();
+
+	if (features.empty())
+		return;
+
+	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+
+	for (const CFeature* f : features) {
+		if (count >= maxCount)
+			break;
+
+		if (f->previousDrawFlag == f->drawFlag)
+			continue;
+
+		out[count++] = f->id;
+	}
+
+	result->features = out;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
+}
+
 } // namespace
 
 const FeaturesApi FEATURES_API = {
@@ -687,4 +955,16 @@ const FeaturesApi FEATURES_API = {
 
 	.GetFeatureCollisionVolumeData = NativeGetFeatureCollisionVolumeData,
 	.GetFeaturePieceCollisionVolumeData = NativeGetFeaturePieceCollisionVolumeData,
+	.ClearFeaturesPreviousDrawFlag = NativeClearFeaturesPreviousDrawFlag,
+	.GetFeatureNoDraw = NativeGetFeatureNoDraw,
+	.GetFeatureLuaDraw = NativeGetFeatureLuaDraw,
+	.GetFeatureEngineDrawMask = NativeGetFeatureEngineDrawMask,
+	.GetFeatureDrawFlag = NativeGetFeatureDrawFlag,
+	.GetFeatureAlwaysUpdateMatrix = NativeGetFeatureAlwaysUpdateMatrix,
+	.GetFeatureTransformMatrix = NativeGetFeatureTransformMatrix,
+	.GetFeatureSelectionVolumeData = NativeGetFeatureSelectionVolumeData,
+	.GetFeatureFireTime = NativeGetFeatureFireTime,
+	.GetFeatureSmokeTime = NativeGetFeatureSmokeTime,
+	.GetRenderFeatures = NativeGetRenderFeatures,
+	.GetRenderFeaturesDrawFlagChanged = NativeGetRenderFeaturesDrawFlagChanged,
 };

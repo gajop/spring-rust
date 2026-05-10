@@ -1353,13 +1353,6 @@ void CUnitDrawerGLSL::DrawIndividualDefAlpha(const SolidObjectDef* objectDef, in
 bool CUnitDrawerGLSL::ShowUnitBuildSquare(const BuildInfo& buildInfo, const std::vector<Command>& commands) const
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	//TODO: make this a lua callin!
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_TEXTURE_2D);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
 	CFeature* feature = nullptr;
 
 	std::vector<float3> buildableSquares; // buildable squares
@@ -1432,6 +1425,16 @@ bool CUnitDrawerGLSL::ShowUnitBuildSquare(const BuildInfo& buildInfo, const std:
 		buildCacheItem.featureSquares.assign(featureSquares.begin(), featureSquares.end());
 		buildCacheItem.illegalSquares.assign(illegalSquares.begin(), illegalSquares.end());
 	}
+
+	if (!CUnitDrawer::EngineBuildSquareRendering()) {
+		return canBuild;
+	}
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_TEXTURE_2D);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	static constexpr std::array<float, 4> buildColorT  = { 0.0f, 0.9f, 0.0f, 0.7f };
 	static constexpr std::array<float, 4> buildColorF  = { 0.9f, 0.8f, 0.0f, 0.7f };
@@ -2071,4 +2074,3 @@ void CUnitDrawerGL4::DrawUnitModelBeingBuiltOpaque(const CUnit* unit, bool noLua
 
 	glPopAttrib();
 }
-

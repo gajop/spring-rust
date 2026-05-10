@@ -48,6 +48,16 @@ struct PathWaypoint {
 	float eta;  // Estimated time of arrival
 };
 
+struct MoveCtrlQuery {
+	int32_t unitID;
+	bool enable;
+};
+
+struct MoveCtrlResult {
+	const Error* error;
+	bool success;
+};
+
 // Queries
 struct GetUnitMoveTypeDataQuery {
 	int32_t unitID;
@@ -78,6 +88,11 @@ struct MoveCtrlApi {
 	void (*GetUnitEstimatedPath)(
 		const GetUnitEstimatedPathQuery* query,
 		GetUnitEstimatedPathResult* result
+	);
+
+	void (*MoveCtrl)(
+		const MoveCtrlQuery* query,
+		MoveCtrlResult* result
 	);
 };
 

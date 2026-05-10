@@ -164,6 +164,7 @@ void CFeature::Initialize(const FeatureLoadParams& params)
 
 	team = params.teamID;
 	allyteam = params.allyTeamID;
+	paletteIndex = static_cast<uint16_t>(team);
 
 	heading = params.heading;
 	buildFacing = params.facing;
@@ -747,4 +748,3 @@ int CFeature::ChunkNumber(float f) { return int(math::ceil(f * modInfo.reclaimMe
 // to distinguish unit and feature ID's (values >= MaxUnits() correspond to
 // features in object commands)
 int CFeature::GetBlockingMapID() const { return (id + unitHandler.MaxUnits()); }
-

@@ -54,6 +54,17 @@ struct GetMouseCursorResult {
 	const char* cursor;
 };
 
+struct GetMouseButtonsPressedQuery {
+	const int32_t* buttons;
+	uint32_t count;
+};
+
+struct GetMouseButtonsPressedResult {
+	const Error* error;
+	bool* pressed;
+	uint32_t count;
+};
+
 struct GetMouseStartPositionQuery {
 	int32_t button;
 };
@@ -110,6 +121,9 @@ struct GetSelectionBoxResult {
 	SelectionBox box;
 };
 
+struct GetInvertQueueKeyQuery { uint8_t _unused; };
+struct GetInvertQueueKeyResult { const Error* error; bool invert; };
+
 struct IsAboveMiniMapQuery {
 	float screenX;
 	float screenY;
@@ -121,13 +135,36 @@ struct IsAboveMiniMapResult {
 };
 
 struct GetActiveCommandQuery {
-	uint8_t _unused;
+	float mouseX;
+	float mouseY;
+	bool useDefault;
 };
 
 struct GetActiveCommandResult {
 	const Error* error;
 	int32_t commandIndex;
 };
+
+struct GetActionHotKeysQuery { const char* action; };
+struct GetActionHotKeysResult { const Error* error; const char** hotkeys; uint32_t count; };
+
+struct GetKeyBindingsQuery { const char* keySet1; const char* keySet2; };
+struct GetKeyBindingsResult { const Error* error; const char** bindings; uint32_t count; };
+
+struct GetKeyCodeQuery { const char* keySym; };
+struct GetKeyCodeResult { const Error* error; int32_t keyCode; };
+
+struct GetKeySymbolQuery { int32_t keyCode; };
+struct GetKeySymbolResult { const Error* error; const char* keyCodeName; const char* keyCodeDefaultName; };
+
+struct GetScanSymbolQuery { int32_t scanCode; };
+struct GetScanSymbolResult { const Error* error; const char* scanCodeName; const char* scanCodeDefaultName; };
+
+struct GetKeyFromScanSymbolQuery { const char* scanSymbol; };
+struct GetKeyFromScanSymbolResult { const Error* error; int32_t keyCode; };
+
+struct GetActivePageQuery { uint8_t _unused; };
+struct GetActivePageResult { const Error* error; int32_t activePage; int32_t maxPage; };
 
 struct GetDefaultCommandQuery {
 	uint8_t _unused;
@@ -136,6 +173,9 @@ struct GetDefaultCommandQuery {
 struct GetDefaultCommandResult {
 	const Error* error;
 	int32_t commandIndex;
+	int32_t commandID;
+	int32_t commandType;
+	const char* commandName;
 };
 
 // API structure
@@ -148,6 +188,11 @@ struct InputApi {
 	void (*GetMouseCursor)(
 		const GetMouseCursorQuery* query,
 		GetMouseCursorResult* result
+	);
+
+	void (*GetMouseButtonsPressed)(
+		const GetMouseButtonsPressedQuery* query,
+		GetMouseButtonsPressedResult* result
 	);
 
 	void (*GetMouseStartPosition)(
@@ -180,6 +225,11 @@ struct InputApi {
 		GetSelectionBoxResult* result
 	);
 
+	void (*GetInvertQueueKey)(
+		const GetInvertQueueKeyQuery* query,
+		GetInvertQueueKeyResult* result
+	);
+
 	void (*IsAboveMiniMap)(
 		const IsAboveMiniMapQuery* query,
 		IsAboveMiniMapResult* result
@@ -188,6 +238,41 @@ struct InputApi {
 	void (*GetActiveCommand)(
 		const GetActiveCommandQuery* query,
 		GetActiveCommandResult* result
+	);
+
+	void (*GetActionHotKeys)(
+		const GetActionHotKeysQuery* query,
+		GetActionHotKeysResult* result
+	);
+
+	void (*GetKeyBindings)(
+		const GetKeyBindingsQuery* query,
+		GetKeyBindingsResult* result
+	);
+
+	void (*GetKeyCode)(
+		const GetKeyCodeQuery* query,
+		GetKeyCodeResult* result
+	);
+
+	void (*GetKeySymbol)(
+		const GetKeySymbolQuery* query,
+		GetKeySymbolResult* result
+	);
+
+	void (*GetScanSymbol)(
+		const GetScanSymbolQuery* query,
+		GetScanSymbolResult* result
+	);
+
+	void (*GetKeyFromScanSymbol)(
+		const GetKeyFromScanSymbolQuery* query,
+		GetKeyFromScanSymbolResult* result
+	);
+
+	void (*GetActivePage)(
+		const GetActivePageQuery* query,
+		GetActivePageResult* result
 	);
 
 	void (*GetDefaultCommand)(

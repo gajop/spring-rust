@@ -18,6 +18,7 @@ public:
 	virtual ~CDemo() {};
 
 	const DemoFileHeader& GetFileHeader() const { return fileHeader; }
+	const std::string& GetName() const { return demoName; }
 
 protected:
 	DemoFileHeader fileHeader;
@@ -25,4 +26,3 @@ protected:
 };
 
 #endif // _DEMO_H
-

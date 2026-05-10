@@ -1,4 +1,4 @@
-use std::mem::MaybeUninit;
+use std::{ffi::CStr, mem::MaybeUninit, slice};
 
 use crate::{error::Error, sys};
 

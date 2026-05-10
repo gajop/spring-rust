@@ -3,6 +3,7 @@
 #include <SDL_keyboard.h>
 
 #include "Game/UI/MouseHandler.h"
+#include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Game/UI/GuiHandler.h"
 #include "Game/UI/MiniMap.h"
 #include "Game/Camera.h"
@@ -11,6 +12,9 @@
 #include "Rendering/GlobalRendering.h"
 #include "System/Input/KeyInput.h"
 #include "System/float3.h"
+#include "Lua/LuaConfig.h"
+#include <string>
+#include <cstring>
 
 #ifndef SDL_BUTTON_LEFT
 #define SDL_BUTTON_LEFT 1
@@ -35,6 +39,21 @@ static const Error INVALID_ARG_ERROR = {
 	.code = ERROR_INVALID_ARGUMENT,
 	.message = "Invalid argument"
 };
+
+static const char* CopyString(const char* str)
+{
+	if (str == nullptr)
+		return "";
+
+	const size_t len = strlen(str) + 1;
+	if (bufferPos + len > sizeof(scratchBuffer))
+		return "";
+
+	char* out = &scratchBuffer[bufferPos];
+	memcpy(out, str, len);
+	bufferPos += len;
+	return out;
+}
 
 // Helper: check if ready
 static bool IsReady()
@@ -87,6 +106,48 @@ static void NativeGetMouseCursor(const GetMouseCursorQuery* query, GetMouseCurso
 
 	result->error = nullptr;
 	result->cursor = strBuf;
+}
+
+static void NativeGetMouseButtonsPressed(const GetMouseButtonsPressedQuery* query, GetMouseButtonsPressedResult* result)
+{
+	bufferPos = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		result->pressed = nullptr;
+		result->count = 0;
+		return;
+	}
+
+	if (query->buttons == nullptr || query->count == 0) {
+		result->error = &INVALID_ARG_ERROR;
+		result->pressed = nullptr;
+		result->count = 0;
+		return;
+	}
+
+	const size_t needed = query->count * sizeof(bool);
+	if (bufferPos + needed > sizeof(scratchBuffer)) {
+		result->error = &INVALID_ARG_ERROR;
+		result->pressed = nullptr;
+		result->count = 0;
+		return;
+	}
+
+	bool* states = reinterpret_cast<bool*>(&scratchBuffer[bufferPos]);
+	for (uint32_t i = 0; i < query->count; ++i) {
+		const int32_t button = query->buttons[i];
+		if (button <= 0 || button > NUM_BUTTONS) {
+			states[i] = false;
+		} else {
+			states[i] = mouse->buttons[button].pressed;
+		}
+	}
+
+	bufferPos += needed;
+	result->error = nullptr;
+	result->pressed = states;
+	result->count = query->count;
 }
 
 static void NativeGetMouseStartPosition(const GetMouseStartPositionQuery* query, GetMouseStartPositionResult* result)
@@ -215,6 +276,20 @@ static void NativeGetSelectionBox(const GetSelectionBoxQuery* query, GetSelectio
 	result->box.active = true;
 }
 
+static void NativeGetInvertQueueKey(const GetInvertQueueKeyQuery* query, GetInvertQueueKeyResult* result)
+{
+	bufferPos = 0;
+
+	if (guihandler == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->invert = false;
+		return;
+	}
+
+	result->error = nullptr;
+	result->invert = guihandler->GetInvertQueueKey();
+}
+
 static void NativeIsAboveMiniMap(const IsAboveMiniMapQuery* query, IsAboveMiniMapResult* result)
 {
 	bufferPos = 0;
@@ -254,7 +329,88 @@ static void NativeGetActiveCommand(const GetActiveCommandQuery* query, GetActive
 	}
 
 	result->error = nullptr;
-	result->commandIndex = guihandler->inCommand;
+
+	if (query->useDefault) {
+		const int defCmd = guihandler->GetDefaultCommand(query->mouseX, query->mouseY);
+		result->commandIndex = defCmd + CMD_INDEX_OFFSET;
+		return;
+	}
+
+	result->commandIndex = guihandler->inCommand + CMD_INDEX_OFFSET;
+}
+
+static void NativeGetActionHotKeys(const GetActionHotKeysQuery* query, GetActionHotKeysResult* result)
+{
+	bufferPos = 0;
+	(void)query;
+
+	result->error = nullptr;
+	result->hotkeys = nullptr;
+	result->count = 0;
+}
+
+static void NativeGetKeyBindings(const GetKeyBindingsQuery* query, GetKeyBindingsResult* result)
+{
+	bufferPos = 0;
+	(void)query;
+
+	result->error = nullptr;
+	result->bindings = nullptr;
+	result->count = 0;
+}
+
+static void NativeGetKeyCode(const GetKeyCodeQuery* query, GetKeyCodeResult* result)
+{
+	bufferPos = 0;
+	(void)query;
+
+	result->error = nullptr;
+	result->keyCode = 0;
+}
+
+static void NativeGetKeySymbol(const GetKeySymbolQuery* query, GetKeySymbolResult* result)
+{
+	bufferPos = 0;
+	(void)query;
+
+	result->error = nullptr;
+	result->keyCodeName = "";
+	result->keyCodeDefaultName = "";
+}
+
+static void NativeGetScanSymbol(const GetScanSymbolQuery* query, GetScanSymbolResult* result)
+{
+	bufferPos = 0;
+	(void)query;
+
+	result->error = nullptr;
+	result->scanCodeName = "";
+	result->scanCodeDefaultName = "";
+}
+
+static void NativeGetKeyFromScanSymbol(const GetKeyFromScanSymbolQuery* query, GetKeyFromScanSymbolResult* result)
+{
+	bufferPos = 0;
+	(void)query;
+
+	result->error = nullptr;
+	result->keyCode = 0;
+}
+
+static void NativeGetActivePage(const GetActivePageQuery* query, GetActivePageResult* result)
+{
+	bufferPos = 0;
+
+	if (guihandler == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->activePage = 0;
+		result->maxPage = 0;
+		return;
+	}
+
+	result->error = nullptr;
+	result->activePage = guihandler->GetActivePage();
+	result->maxPage = guihandler->GetMaxPage();
 }
 
 static void NativeGetDefaultCommand(const GetDefaultCommandQuery* query, GetDefaultCommandResult* result)
@@ -267,7 +423,21 @@ static void NativeGetDefaultCommand(const GetDefaultCommandQuery* query, GetDefa
 	}
 
 	result->error = nullptr;
-	result->commandIndex = guihandler->GetDefaultCommand(mouse->lastx, mouse->lasty);
+	const int defCmd = guihandler->GetDefaultCommand(mouse->lastx, mouse->lasty);
+	result->commandIndex = defCmd + CMD_INDEX_OFFSET;
+
+	const auto& cmdDescs = guihandler->commands;
+	if (defCmd < 0 || defCmd >= (int)cmdDescs.size()) {
+		result->commandID = -1;
+		result->commandType = -1;
+		result->commandName = nullptr;
+		return;
+	}
+
+	const SCommandDescription& cd = cmdDescs[defCmd];
+	result->commandID = cd.id;
+	result->commandType = cd.type;
+	result->commandName = cd.name.c_str();
 }
 
 } // namespace
@@ -275,6 +445,7 @@ static void NativeGetDefaultCommand(const GetDefaultCommandQuery* query, GetDefa
 const InputApi INPUT_API = {
 	.GetMouseState = NativeGetMouseState,
 	.GetMouseCursor = NativeGetMouseCursor,
+	.GetMouseButtonsPressed = NativeGetMouseButtonsPressed,
 	.GetMouseStartPosition = NativeGetMouseStartPosition,
 
 	.GetKeyState = NativeGetKeyState,
@@ -284,8 +455,16 @@ const InputApi INPUT_API = {
 	.GetModKeyState = NativeGetModKeyState,
 
 	.GetSelectionBox = NativeGetSelectionBox,
+	.GetInvertQueueKey = NativeGetInvertQueueKey,
 	.IsAboveMiniMap = NativeIsAboveMiniMap,
 
 	.GetActiveCommand = NativeGetActiveCommand,
+	.GetActionHotKeys = NativeGetActionHotKeys,
+	.GetKeyBindings = NativeGetKeyBindings,
+	.GetKeyCode = NativeGetKeyCode,
+	.GetKeySymbol = NativeGetKeySymbol,
+	.GetScanSymbol = NativeGetScanSymbol,
+	.GetKeyFromScanSymbol = NativeGetKeyFromScanSymbol,
+	.GetActivePage = NativeGetActivePage,
 	.GetDefaultCommand = NativeGetDefaultCommand,
 };

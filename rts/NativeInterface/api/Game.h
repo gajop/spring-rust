@@ -71,7 +71,7 @@ struct IsGameOverQuery { uint8_t _unused; };
 struct IsGameOverResult { const Error* error; bool gameOver; };
 
 struct GetGameFrameQuery { uint8_t _unused; };
-struct GetGameFrameResult { const Error* error; uint32_t frame; };
+struct GetGameFrameResult { const Error* error; uint32_t low16; uint32_t high16; };
 
 struct GetGameSecondsQuery { uint8_t _unused; };
 struct GetGameSecondsResult { const Error* error; float seconds; };

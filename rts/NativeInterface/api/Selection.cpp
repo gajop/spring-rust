@@ -221,6 +221,31 @@ static void NativeGetGroupUnits(const GetGroupUnitsQuery* query, GetGroupUnitsRe
 	result->count = count;
 }
 
+static void NativeGetGroupUnitsSorted(const GetGroupUnitsSortedQuery* query, GetGroupUnitsSortedResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
+
+	const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(query->groupID);
+	if (group == nullptr) { result->error = &INVALID_GROUP_ERROR; return; }
+
+	int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	uint32_t count = 0;
+
+	for (int unitID : group->units) {
+		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
+		units[count++] = unitID;
+		bufferPos += sizeof(int32_t);
+	}
+
+	std::sort(units, units + count);
+
+	result->error = nullptr;
+	result->units = units;
+	result->count = count;
+}
+
 static void NativeGetUnitGroup(const GetUnitGroupQuery* query, GetUnitGroupResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
@@ -278,6 +303,31 @@ static void NativeSetUnitGroup(const SetUnitGroupQuery* query, SetUnitGroupResul
 	}
 }
 
+static void NativeGetGroupUnitsCount(const GetGroupUnitsCountQuery* query, GetGroupUnitsCountResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
+
+	const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(query->groupID);
+	if (group == nullptr) { result->error = &INVALID_GROUP_ERROR; return; }
+
+	result->error = nullptr;
+	result->count = static_cast<uint32_t>(group->units.size());
+}
+
+static void NativeGetGroupUnitsCounts(const GetGroupUnitsCountsQuery* query, GetGroupUnitsCountsResult* result) {
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+
+	for (int g = 0; g < 10; g++) {
+		const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(g);
+		result->counts[g] = (group != nullptr) ? static_cast<uint32_t>(group->units.size()) : 0;
+	}
+
+	result->error = nullptr;
+}
+
 } // namespace
 
 const SelectionApi SELECTION_API = {
@@ -292,6 +342,9 @@ const SelectionApi SELECTION_API = {
 	.GetGroupList = NativeGetGroupList,
 	.GetSelectedGroup = NativeGetSelectedGroup,
 	.GetGroupUnits = NativeGetGroupUnits,
+	.GetGroupUnitsSorted = NativeGetGroupUnitsSorted,
+	.GetGroupUnitsCount = NativeGetGroupUnitsCount,
+	.GetGroupUnitsCounts = NativeGetGroupUnitsCounts,
 	.GetUnitGroup = NativeGetUnitGroup,
 	.SetUnitGroup = NativeSetUnitGroup,
 };

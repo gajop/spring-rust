@@ -59,6 +59,15 @@ struct GetViewGeometryResult {
 	ViewGeometry geom;
 };
 
+struct GetDualViewGeometryQuery {
+	uint8_t _unused;
+};
+
+struct GetDualViewGeometryResult {
+	const Error* error;
+	ViewGeometry geom;
+};
+
 struct GetWindowGeometryQuery {
 	uint8_t _unused;
 };
@@ -86,13 +95,20 @@ struct GetMiniMapGeometryResult {
 	MinimapGeometry geom;
 };
 
+struct GetMiniMapDualScreenQuery { uint8_t _unused; };
+struct GetMiniMapDualScreenResult { const Error* error; const char* position; bool dualScreen; };
+
+struct GetMiniMapRotationQuery { uint8_t _unused; };
+struct GetMiniMapRotationResult { const Error* error; float rotation; };
+
 struct GetDrawFrameQuery {
 	uint8_t _unused;
 };
 
 struct GetDrawFrameResult {
 	const Error* error;
-	uint32_t frame;
+	uint32_t low16;
+	uint32_t high16;
 };
 
 struct GetFrameTimeOffsetQuery {
@@ -122,13 +138,31 @@ struct GetFPSResult {
 	uint32_t fps;
 };
 
+struct GetMapDrawModeQuery { uint8_t _unused; };
+struct GetMapDrawModeResult { const Error* error; const char* mode; };
+
+struct GetWaterModeQuery { uint8_t _unused; };
+struct GetWaterModeResult { const Error* error; int32_t mode; const char* name; };
+
+struct GetLosViewColorsQuery { uint8_t _unused; };
+struct GetLosViewColorsResult {
+	const Error* error;
+	Float3 alwaysColor;
+	Float3 losColor;
+	Float3 radarColor;
+	Float3 jamColor;
+	Float3 radarColor2;
+};
+
 struct GetGameSpeedQuery {
 	uint8_t _unused;
 };
 
 struct GetGameSpeedResult {
 	const Error* error;
+	float wantedSpeed;
 	float speed;
+	bool paused;
 };
 
 struct GetTeamColorQuery {
@@ -218,6 +252,11 @@ struct DisplayApi {
 		GetViewGeometryResult* result
 	);
 
+	void (*GetDualViewGeometry)(
+		const GetDualViewGeometryQuery* query,
+		GetDualViewGeometryResult* result
+	);
+
 	void (*GetWindowGeometry)(
 		const GetWindowGeometryQuery* query,
 		GetWindowGeometryResult* result
@@ -231,6 +270,16 @@ struct DisplayApi {
 	void (*GetMiniMapGeometry)(
 		const GetMiniMapGeometryQuery* query,
 		GetMiniMapGeometryResult* result
+	);
+
+	void (*GetMiniMapDualScreen)(
+		const GetMiniMapDualScreenQuery* query,
+		GetMiniMapDualScreenResult* result
+	);
+
+	void (*GetMiniMapRotation)(
+		const GetMiniMapRotationQuery* query,
+		GetMiniMapRotationResult* result
 	);
 
 	void (*GetDrawFrame)(
@@ -251,6 +300,21 @@ struct DisplayApi {
 	void (*GetFPS)(
 		const GetFPSQuery* query,
 		GetFPSResult* result
+	);
+
+	void (*GetMapDrawMode)(
+		const GetMapDrawModeQuery* query,
+		GetMapDrawModeResult* result
+	);
+
+	void (*GetWaterMode)(
+		const GetWaterModeQuery* query,
+		GetWaterModeResult* result
+	);
+
+	void (*GetLosViewColors)(
+		const GetLosViewColorsQuery* query,
+		GetLosViewColorsResult* result
 	);
 
 	void (*GetGameSpeed)(

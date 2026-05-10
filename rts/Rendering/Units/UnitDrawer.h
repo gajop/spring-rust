@@ -77,6 +77,7 @@ public:
 	// Build Squares
 	        bool ShowUnitBuildSquare(const BuildInfo& buildInfo) const { return ShowUnitBuildSquare(buildInfo, std::vector<Command>()); }
 	virtual bool ShowUnitBuildSquare(const BuildInfo& buildInfo, const std::vector<Command>& commands) const = 0;
+	static bool& EngineBuildSquareRendering() { return engineBuildSquareRendering; }
 
 	virtual void DrawBuildIcons(const std::vector<CCursorIcons::BuildIcon>& buildIcons) const = 0;
 protected:
@@ -90,6 +91,7 @@ protected:
 	inline static Shader::IProgramObject* icons3DShader = nullptr;
 private:
 	inline static std::array<CUnitDrawer*, ModelDrawerTypes::MODEL_DRAWER_CNT> unitDrawers = {};
+	inline static bool engineBuildSquareRendering = true;
 public:
 	enum BuildStages {
 		BUILDSTAGE_WIRE = 0,

@@ -6,9 +6,15 @@
 #include "Game/UI/MiniMap.h"
 #include "Game/Camera.h"
 #include "Rendering/GlobalRendering.h"
+#include "Rendering/Env/IWater.h"
+#include "Rendering/Map/InfoTexture/IInfoTextureHandler.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Rendering/ShadowHandler.h"
 #include "System/TimeProfiler.h"
+#include "Map/ReadMap.h"
+#include "Map/BaseGroundDrawer.h"
+#include <string>
+#include <cstring>
 
 namespace {
 
@@ -22,6 +28,18 @@ static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Display system not ready"
 };
+
+static const char* CopyToScratch(const std::string& str)
+{
+	const size_t len = str.size() + 1;
+	if (bufferPos + len > sizeof(scratchBuffer))
+		return "";
+
+	char* ptr = &scratchBuffer[bufferPos];
+	memcpy(ptr, str.c_str(), len);
+	bufferPos += len;
+	return ptr;
+}
 
 // Helper: check if ready
 static bool IsReady()
@@ -52,6 +70,22 @@ static void NativeGetViewGeometry(const GetViewGeometryQuery* query, GetViewGeom
 	result->geom.viewSizeY = globalRendering->viewSizeY;
 	result->geom.viewPosX = globalRendering->viewPosX;
 	result->geom.viewPosY = globalRendering->viewPosY;
+}
+
+static void NativeGetDualViewGeometry(const GetDualViewGeometryQuery* query, GetDualViewGeometryResult* result)
+{
+	bufferPos = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	result->error = nullptr;
+	result->geom.viewSizeX = globalRendering->dualViewSizeX;
+	result->geom.viewSizeY = globalRendering->dualViewSizeY;
+	result->geom.viewPosX = globalRendering->dualViewPosX;
+	result->geom.viewPosY = globalRendering->dualViewPosY;
 }
 
 static void NativeGetWindowGeometry(const GetWindowGeometryQuery* query, GetWindowGeometryResult* result)
@@ -105,6 +139,41 @@ static void NativeGetMiniMapGeometry(const GetMiniMapGeometryQuery* query, GetMi
 	result->geom.maximized = minimap->GetMaximized();
 }
 
+static void NativeGetMiniMapDualScreen(const GetMiniMapDualScreenQuery* query, GetMiniMapDualScreenResult* result)
+{
+	bufferPos = 0;
+
+	if (!IsReady() || minimap == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->dualScreen = false;
+		result->position = "";
+		return;
+	}
+
+	result->error = nullptr;
+	result->dualScreen = globalRendering->dualScreenMode;
+	if (!result->dualScreen) {
+		result->position = "";
+		return;
+	}
+
+	result->position = (globalRendering->dualScreenMiniMapOnLeft ? "left" : "right");
+}
+
+static void NativeGetMiniMapRotation(const GetMiniMapRotationQuery* query, GetMiniMapRotationResult* result)
+{
+	bufferPos = 0;
+
+	if (minimap == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->rotation = 0.0f;
+		return;
+	}
+
+	result->error = nullptr;
+	result->rotation = minimap->GetRotation();
+}
+
 // Frame info
 static void NativeGetDrawFrame(const GetDrawFrameQuery* query, GetDrawFrameResult* result)
 {
@@ -116,7 +185,9 @@ static void NativeGetDrawFrame(const GetDrawFrameQuery* query, GetDrawFrameResul
 	}
 
 	result->error = nullptr;
-	result->frame = globalRendering->drawFrame;
+	const uint32_t frame = globalRendering->drawFrame;
+	result->low16 = frame & 0xFFFFu;
+	result->high16 = frame >> 16;
 }
 
 static void NativeGetFrameTimeOffset(const GetFrameTimeOffsetQuery* query, GetFrameTimeOffsetResult* result)
@@ -159,6 +230,85 @@ static void NativeGetFPS(const GetFPSQuery* query, GetFPSResult* result)
 	result->fps = static_cast<uint32_t>(globalRendering->FPS);
 }
 
+static void NativeGetMapDrawMode(const GetMapDrawModeQuery* query, GetMapDrawModeResult* result)
+{
+	bufferPos = 0;
+
+	if (infoTextureHandler == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->mode = "";
+		return;
+	}
+
+	const std::string& mode = infoTextureHandler->GetMode();
+	const char* mapped = "";
+
+	if (mode.empty()) {
+		mapped = "normal";
+	} else if (mode == "path") {
+		mapped = "pathTraversability";
+	} else if (mode == "heat") {
+		mapped = "pathHeat";
+	} else if (mode == "flow") {
+		mapped = "pathFlow";
+	} else if (mode == "pathcost") {
+		mapped = "pathCost";
+	} else {
+		mapped = CopyToScratch(mode);
+	}
+
+	result->error = nullptr;
+	result->mode = mapped;
+}
+
+static void NativeGetWaterMode(const GetWaterModeQuery* query, GetWaterModeResult* result)
+{
+	bufferPos = 0;
+
+	const auto& water = IWater::GetWater();
+	if (water == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->mode = 0;
+		result->name = "";
+		return;
+	}
+
+	const int id = water->GetID();
+	result->error = nullptr;
+	result->mode = id;
+	result->name = IWater::GetWaterName(static_cast<IWater::WATER_RENDERER>(id));
+}
+
+static void NativeGetLosViewColors(const GetLosViewColorsQuery* query, GetLosViewColorsResult* result)
+{
+	bufferPos = 0;
+
+	if (readMap == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CBaseGroundDrawer* gd = readMap->GetGroundDrawer();
+	if (gd == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const float scale = (float)CBaseGroundDrawer::losColorScale;
+	const auto fillColor = [scale](const int* color, Float3& out) {
+		out.x = color[0] / scale;
+		out.y = color[1] / scale;
+		out.z = color[2] / scale;
+	};
+
+	fillColor(gd->alwaysColor, result->alwaysColor);
+	fillColor(gd->losColor, result->losColor);
+	fillColor(gd->radarColor, result->radarColor);
+	fillColor(gd->jamColor, result->jamColor);
+	fillColor(gd->radarColor2, result->radarColor2);
+	result->error = nullptr;
+}
+
 static void NativeGetGameSpeed(const GetGameSpeedQuery* query, GetGameSpeedResult* result)
 {
 	bufferPos = 0;
@@ -169,7 +319,9 @@ static void NativeGetGameSpeed(const GetGameSpeedQuery* query, GetGameSpeedResul
 	}
 
 	result->error = nullptr;
-	result->speed = gs->wantedSpeedFactor;
+	result->wantedSpeed = gs->wantedSpeedFactor;
+	result->speed = gs->speedFactor;
+	result->paused = gs->paused;
 }
 
 // Team colors
@@ -301,15 +453,21 @@ static void NativeSetTeamColor(const SetTeamColorQuery* query, SetTeamColorResul
 const DisplayApi DISPLAY_API = {
 	.GetNumDisplays = NativeGetNumDisplays,
 	.GetViewGeometry = NativeGetViewGeometry,
+	.GetDualViewGeometry = NativeGetDualViewGeometry,
 	.GetWindowGeometry = NativeGetWindowGeometry,
 	.GetScreenGeometry = NativeGetScreenGeometry,
 	.GetMiniMapGeometry = NativeGetMiniMapGeometry,
+	.GetMiniMapDualScreen = NativeGetMiniMapDualScreen,
+	.GetMiniMapRotation = NativeGetMiniMapRotation,
 
 	.GetDrawFrame = NativeGetDrawFrame,
 	.GetFrameTimeOffset = NativeGetFrameTimeOffset,
 	.GetLastUpdateSeconds = NativeGetLastUpdateSeconds,
 
 	.GetFPS = NativeGetFPS,
+	.GetMapDrawMode = NativeGetMapDrawMode,
+	.GetWaterMode = NativeGetWaterMode,
+	.GetLosViewColors = NativeGetLosViewColors,
 	.GetGameSpeed = NativeGetGameSpeed,
 
 	.GetTeamColor = NativeGetTeamColor,

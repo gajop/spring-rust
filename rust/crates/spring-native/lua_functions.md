@@ -2,2966 +2,1246 @@
 
 Total Namespaces: 6
 
-Total Functions: 2934
+Total Functions: 1214
 
-Callouts (Plugin → Engine): 1053
-Callins (Engine → Plugin): 1881
+Callouts (Plugin → Engine): 1027
+Callins (Engine → Plugin): 187
 
 ---
 
 ## Callouts (Plugin → Engine)
 
-### RmlUi (43 functions)
+### RmlUi (11 functions)
 
-- `RmlUi.AddTranslationString`
-- `RmlUi.ClearTranslations`
-- `RmlUi.Context`
-- `RmlUi.CreateContext`
-- `RmlUi.Document`
-- `RmlUi.Element`
-- `RmlUi.ElementAttributesProxy`
-- `RmlUi.ElementChildNodesProxy`
-- `RmlUi.ElementForm`
-- `RmlUi.ElementFormControl`
-- `RmlUi.ElementFormControlInput`
-- `RmlUi.ElementFormControlSelect`
-- `RmlUi.ElementFormControlTextArea`
-- `RmlUi.ElementProgress`
-- `RmlUi.ElementPtr`
-- `RmlUi.ElementStyleProxy`
-- `RmlUi.ElementTabSet`
-- `RmlUi.ElementText`
-- `RmlUi.Event`
-- `RmlUi.EventID`
-- `RmlUi.EventListener`
-- `RmlUi.EventParametersProxy`
-- `RmlUi.GetContext`
-- `RmlUi.LoadFontFace`
-- `RmlUi.MouseButton`
-- `RmlUi.RegiserEventType`
-- `RmlUi.RemoveContext`
-- `RmlUi.RmlEventPhase`
-- `RmlUi.RmlFocusFlag`
-- `RmlUi.RmlModalFlag`
-- `RmlUi.SelectOptionsProxy`
-- `RmlUi.SelectOptionsProxyNode`
-- `RmlUi.SetDebugContext`
-- `RmlUi.SetMouseCursorAlias`
-- `RmlUi.SolLuaDataModel`
-- `RmlUi.StyleProxy`
-- `RmlUi.Vector2f`
-- `RmlUi.Vector2i`
-- `RmlUi.contexts`
-- `RmlUi.default`
-- `RmlUi.font`
-- `RmlUi.key`
-- `RmlUi.version`
+- `RmlUi.AddTranslationString` (params: key:string, translation:string)
+- `RmlUi.ClearDocumentPathRequests` (params: document_path:string)
+- `RmlUi.ClearTranslations` (params: )
+- `RmlUi.CreateContext` (params: name:string)
+- `RmlUi.GetContext` (params: name:string)
+- `RmlUi.GetDocumentPathRequests` (params: document_path:string)
+- `RmlUi.LoadFontFace` (params: file_path:string, fallback:boolean?, weight:RmlUi.font_weight?, face_index:number?)
+- `RmlUi.RegiserEventType` (params: event_type:string, interruptible:boolean?, bubbles:boolean?, default_phase:RmlUi.default_action_phase?)
+- `RmlUi.RemoveContext` (params: context:(string|RmlUi.Context))
+- `RmlUi.SetDebugContext` (params: context:(string|RmlUi.Context))
+- `RmlUi.SetMouseCursorAlias` (params: rml_name:string, recoil_name:string)
 
-### Script (28 functions)
+### Script (26 functions)
 
-- `Script.ALL`
-- `Script.DelayByFrames`
-- `Script.GetCtrlTeam`
-- `Script.GetFullCtrl`
-- `Script.GetFullRead`
-- `Script.GetGlobal`
-- `Script.GetName`
-- `Script.GetReadAllyTeam`
-- `Script.GetReadTeam`
-- `Script.GetRegistry`
-- `Script.GetSelectTeam`
-- `Script.GetSynced`
-- `Script.GetWatchAllowTarget`
-- `Script.GetWatchExplosion`
-- `Script.GetWatchFeature`
-- `Script.GetWatchProjectile`
-- `Script.GetWatchUnit`
-- `Script.GetWatchWeapon`
-- `Script.IsEngineMinVersion`
-- `Script.Kill`
-- `Script.NO`
-- `Script.SetWatchAllowTarget`
-- `Script.SetWatchExplosion`
-- `Script.SetWatchFeature`
-- `Script.SetWatchProjectile`
-- `Script.SetWatchUnit`
-- `Script.SetWatchWeapon`
-- `Script.UpdateCallin`
+- `Script.DelayByFrames` (params: frameDelay:integer, fun:unknown)
+- `Script.GetCtrlTeam` (params: )
+- `Script.GetFullCtrl` (params: )
+- `Script.GetFullRead` (params: )
+- `Script.GetGlobal` (params: )
+- `Script.GetName` (params: )
+- `Script.GetReadAllyTeam` (params: )
+- `Script.GetReadTeam` (params: )
+- `Script.GetRegistry` (params: )
+- `Script.GetSelectTeam` (params: )
+- `Script.GetSynced` (params: )
+- `Script.GetWatchAllowTarget` (params: weaponDefID:integer)
+- `Script.GetWatchExplosion` (params: weaponDefID:integer)
+- `Script.GetWatchFeature` (params: featureDefID:integer)
+- `Script.GetWatchProjectile` (params: weaponDefID:integer)
+- `Script.GetWatchUnit` (params: unitDefID:integer)
+- `Script.GetWatchWeapon` (params: weaponDefID:integer)
+- `Script.IsEngineMinVersion` (params: minMajorVer:integer, minMinorVer:integer?, minCommits:integer?)
+- `Script.Kill` (params: killMessage:string?)
+- `Script.SetWatchAllowTarget` (params: weaponDefID:integer, watch:boolean)
+- `Script.SetWatchExplosion` (params: weaponDefID:integer, watch:boolean)
+- `Script.SetWatchFeature` (params: featureDefID:integer, watch:boolean)
+- `Script.SetWatchProjectile` (params: weaponDefID:integer, watch:boolean)
+- `Script.SetWatchUnit` (params: unitDefID:integer, watch:boolean)
+- `Script.SetWatchWeapon` (params: weaponDefID:integer, watch:boolean)
+- `Script.UpdateCallin` (params: name:string)
 
-### Spring (761 functions)
+### Spring (776 functions)
 
-- `Spring.AddFeatureDamage`
-- `Spring.AddGrass`
-- `Spring.AddHeightMap`
-- `Spring.AddLightTrackingTarget`
-- `Spring.AddMapLight`
-- `Spring.AddModelLight`
-- `Spring.AddObjectDecal`
-- `Spring.AddOriginalHeightMap`
-- `Spring.AddSmoothMesh`
-- `Spring.AddTeamResource`
-- `Spring.AddUnitDamage`
-- `Spring.AddUnitExperience`
-- `Spring.AddUnitIcon`
-- `Spring.AddUnitImpulse`
-- `Spring.AddUnitResource`
-- `Spring.AddUnitSeismicPing`
-- `Spring.AddWorldIcon`
-- `Spring.AddWorldText`
-- `Spring.AddWorldUnit`
-- `Spring.AdjustHeightMap`
-- `Spring.AdjustOriginalHeightMap`
-- `Spring.AdjustSmoothMesh`
-- `Spring.AreHelperAIsEnabled`
-- `Spring.ArePlayersAllied`
-- `Spring.AreTeamsAllied`
-- `Spring.AssignMouseCursor`
-- `Spring.AssignPlayerToTeam`
-- `Spring.BuggerOff`
-- `Spring.CallAsTeam`
-- `Spring.CallCOBScript`
-- `Spring.ClearFeaturesPreviousDrawFlag`
-- `Spring.ClearUnitGoal`
-- `Spring.ClearUnitsPreviousDrawFlag`
-- `Spring.ClearWatchDogTimer`
-- `Spring.ClosestBuildPos`
-- `Spring.CreateDir`
-- `Spring.CreateFeature`
-- `Spring.CreateFeatureWreck`
-- `Spring.CreateGroundDecal`
-- `Spring.CreateUnit`
-- `Spring.CreateUnitWreck`
-- `Spring.DeleteProjectile`
-- `Spring.DeselectUnit`
-- `Spring.DeselectUnitArray`
-- `Spring.DeselectUnitMap`
-- `Spring.DestroyFeature`
-- `Spring.DestroyGroundDecal`
-- `Spring.DestroyUnit`
-- `Spring.DiffTimers`
-- `Spring.DrawUnitCommands`
-- `Spring.Echo`
-- `Spring.EditUnitCmdDesc`
-- `Spring.ExtractModArchiveFile`
-- `Spring.FindUnitCmdDesc`
-- `Spring.FixedAllies`
-- `Spring.ForceLayoutUpdate`
-- `Spring.ForceTesselationUpdate`
-- `Spring.ForceUnitCollisionUpdate`
-- `Spring.FreeUnitIcon`
-- `Spring.GameOver`
-- `Spring.GarbageCollectCtrl`
-- `Spring.GetAIInfo`
-- `Spring.GetActionHotKeys`
-- `Spring.GetActiveCmdDesc`
-- `Spring.GetActiveCmdDescs`
-- `Spring.GetActiveCommand`
-- `Spring.GetActivePage`
-- `Spring.GetAllFeatures`
-- `Spring.GetAllGroundDecals`
-- `Spring.GetAllIconDataArray`
-- `Spring.GetAllProjectiles`
-- `Spring.GetAllUnits`
-- `Spring.GetAllyTeamInfo`
-- `Spring.GetAllyTeamList`
-- `Spring.GetAllyTeamStartBox`
-- `Spring.GetBoxSelectionByEngine`
-- `Spring.GetBuildFacing`
-- `Spring.GetBuildSpacing`
-- `Spring.GetCEGID`
-- `Spring.GetCOBScriptID`
-- `Spring.GetCameraDirection`
-- `Spring.GetCameraFOV`
-- `Spring.GetCameraNames`
-- `Spring.GetCameraPosition`
-- `Spring.GetCameraRotation`
-- `Spring.GetCameraState`
-- `Spring.GetCameraVectors`
-- `Spring.GetClipboard`
-- `Spring.GetCmdDescIndex`
-- `Spring.GetCommandQueue`
-- `Spring.GetConfigFloat`
-- `Spring.GetConfigInt`
-- `Spring.GetConfigParams`
-- `Spring.GetConfigString`
-- `Spring.GetConsoleBuffer`
-- `Spring.GetCurrentTooltip`
-- `Spring.GetDefaultCommand`
-- `Spring.GetDrawFrame`
-- `Spring.GetDrawSeconds`
-- `Spring.GetDrawSelectionInfo`
-- `Spring.GetDualViewGeometry`
-- `Spring.GetFPS`
-- `Spring.GetFacingFromHeading`
-- `Spring.GetFactoryBuggerOff`
-- `Spring.GetFactoryCommandCount`
-- `Spring.GetFactoryCommands`
-- `Spring.GetFactoryCounts`
-- `Spring.GetFeatureAllyTeam`
-- `Spring.GetFeatureAlwaysUpdateMatrix`
-- `Spring.GetFeatureBlocking`
-- `Spring.GetFeatureCollisionVolumeData`
-- `Spring.GetFeatureDefID`
-- `Spring.GetFeatureDirection`
-- `Spring.GetFeatureDrawFlag`
-- `Spring.GetFeatureEngineDrawMask`
-- `Spring.GetFeatureFireTime`
-- `Spring.GetFeatureHeading`
-- `Spring.GetFeatureHealth`
-- `Spring.GetFeatureHeight`
-- `Spring.GetFeatureLastAttackedPiece`
-- `Spring.GetFeatureLuaDraw`
-- `Spring.GetFeatureMass`
-- `Spring.GetFeatureNoDraw`
-- `Spring.GetFeatureNoSelect`
-- `Spring.GetFeaturePieceCollisionVolumeData`
-- `Spring.GetFeaturePieceDirection`
-- `Spring.GetFeaturePieceInfo`
-- `Spring.GetFeaturePieceList`
-- `Spring.GetFeaturePieceMap`
-- `Spring.GetFeaturePieceMatrix`
-- `Spring.GetFeaturePiecePosDir`
-- `Spring.GetFeaturePiecePosition`
-- `Spring.GetFeaturePosition`
-- `Spring.GetFeatureRadius`
-- `Spring.GetFeatureResources`
-- `Spring.GetFeatureResurrect`
-- `Spring.GetFeatureRootPiece`
-- `Spring.GetFeatureRotation`
-- `Spring.GetFeatureRulesParam`
-- `Spring.GetFeatureRulesParams`
-- `Spring.GetFeatureSelectionVolumeData`
-- `Spring.GetFeatureSeparation`
-- `Spring.GetFeatureSmokeTime`
-- `Spring.GetFeatureTeam`
-- `Spring.GetFeatureTransformMatrix`
-- `Spring.GetFeatureVelocity`
-- `Spring.GetFeaturesInCylinder`
-- `Spring.GetFeaturesInRectangle`
-- `Spring.GetFeaturesInScreenRectangle`
-- `Spring.GetFeaturesInSphere`
-- `Spring.GetFrameTimeOffset`
-- `Spring.GetFrameTimer`
-- `Spring.GetFullBuildQueue`
-- `Spring.GetGaiaTeamID`
-- `Spring.GetGameFrame`
-- `Spring.GetGameName`
-- `Spring.GetGameRulesParam`
-- `Spring.GetGameRulesParams`
-- `Spring.GetGameSeconds`
-- `Spring.GetGameSpeed`
-- `Spring.GetGameState`
-- `Spring.GetGatherMode`
-- `Spring.GetGlobalLos`
-- `Spring.GetGrass`
-- `Spring.GetGroundBlocked`
-- `Spring.GetGroundDecalAlpha`
-- `Spring.GetGroundDecalCreationFrame`
-- `Spring.GetGroundDecalGlowParams`
-- `Spring.GetGroundDecalMiddlePos`
-- `Spring.GetGroundDecalMisc`
-- `Spring.GetGroundDecalNormal`
-- `Spring.GetGroundDecalOwner`
-- `Spring.GetGroundDecalQuadPos`
-- `Spring.GetGroundDecalRotation`
-- `Spring.GetGroundDecalSizeAndHeight`
-- `Spring.GetGroundDecalTexture`
-- `Spring.GetGroundDecalTextures`
-- `Spring.GetGroundDecalTint`
-- `Spring.GetGroundDecalType`
-- `Spring.GetGroundDecalUserData`
-- `Spring.GetGroundExtremes`
-- `Spring.GetGroundHeight`
-- `Spring.GetGroundInfo`
-- `Spring.GetGroundNormal`
-- `Spring.GetGroundOrigHeight`
-- `Spring.GetGroupList`
-- `Spring.GetGroupUnits`
-- `Spring.GetGroupUnitsCount`
-- `Spring.GetGroupUnitsCounts`
-- `Spring.GetGroupUnitsSorted`
-- `Spring.GetHeadingFromFacing`
-- `Spring.GetHeadingFromVector`
-- `Spring.GetIconData`
-- `Spring.GetInvertQueueKey`
-- `Spring.GetKeyBindings`
-- `Spring.GetKeyCode`
-- `Spring.GetKeyFromScanSymbol`
-- `Spring.GetKeyState`
-- `Spring.GetKeySymbol`
-- `Spring.GetLastMessagePositions`
-- `Spring.GetLastUpdateSeconds`
-- `Spring.GetLocalAllyTeamID`
-- `Spring.GetLocalPlayerID`
-- `Spring.GetLocalTeamID`
-- `Spring.GetLogSections`
-- `Spring.GetLosViewColors`
-- `Spring.GetLuaMemUsage`
-- `Spring.GetMapDrawMode`
-- `Spring.GetMapOption`
-- `Spring.GetMapOptions`
-- `Spring.GetMapSquareTexture`
-- `Spring.GetMapStartPositions`
-- `Spring.GetMenuName`
-- `Spring.GetMetalAmount`
-- `Spring.GetMetalExtraction`
-- `Spring.GetMetalMapSize`
-- `Spring.GetMiniMapDualScreen`
-- `Spring.GetMiniMapGeometry`
-- `Spring.GetMiniMapRotation`
-- `Spring.GetModKeyState`
-- `Spring.GetModOption`
-- `Spring.GetModOptions`
-- `Spring.GetModelPieceList`
-- `Spring.GetModelPieceMap`
-- `Spring.GetModelRootPiece`
-- `Spring.GetMouseButtonsPressed`
-- `Spring.GetMouseCursor`
-- `Spring.GetMouseStartPosition`
-- `Spring.GetMouseState`
-- `Spring.GetNanoProjectileParams`
-- `Spring.GetNumDisplays`
-- `Spring.GetPieceProjectileName`
-- `Spring.GetPieceProjectileParams`
-- `Spring.GetPixelDir`
-- `Spring.GetPlayerControlledUnit`
-- `Spring.GetPlayerInfo`
-- `Spring.GetPlayerList`
-- `Spring.GetPlayerRoster`
-- `Spring.GetPlayerRulesParam`
-- `Spring.GetPlayerRulesParams`
-- `Spring.GetPlayerStatistics`
-- `Spring.GetPlayerTraffic`
-- `Spring.GetPositionLosState`
-- `Spring.GetPressedKeys`
-- `Spring.GetPressedScans`
-- `Spring.GetProfilerRecordNames`
-- `Spring.GetProfilerTimeRecord`
-- `Spring.GetProjectileAllyTeamID`
-- `Spring.GetProjectileDamages`
-- `Spring.GetProjectileDefID`
-- `Spring.GetProjectileDirection`
-- `Spring.GetProjectileGravity`
-- `Spring.GetProjectileIsIntercepted`
-- `Spring.GetProjectileOwnerID`
-- `Spring.GetProjectilePosition`
-- `Spring.GetProjectileTarget`
-- `Spring.GetProjectileTeamID`
-- `Spring.GetProjectileTimeToLive`
-- `Spring.GetProjectileType`
-- `Spring.GetProjectileVelocity`
-- `Spring.GetProjectilesInRectangle`
-- `Spring.GetProjectilesInSphere`
-- `Spring.GetRadarErrorParams`
-- `Spring.GetRealBuildQueue`
-- `Spring.GetRenderFeatures`
-- `Spring.GetRenderFeaturesDrawFlagChanged`
-- `Spring.GetRenderUnits`
-- `Spring.GetRenderUnitsDrawFlagChanged`
-- `Spring.GetReplayLength`
-- `Spring.GetScanSymbol`
-- `Spring.GetScreenGeometry`
-- `Spring.GetSelectedGroup`
-- `Spring.GetSelectedUnits`
-- `Spring.GetSelectedUnitsCount`
-- `Spring.GetSelectedUnitsCounts`
-- `Spring.GetSelectedUnitsSorted`
-- `Spring.GetSelectionBox`
-- `Spring.GetSideData`
-- `Spring.GetSmoothMeshHeight`
-- `Spring.GetSoundDevices`
-- `Spring.GetSoundEffectParams`
-- `Spring.GetSoundStreamTime`
-- `Spring.GetSpectatingState`
-- `Spring.GetSyncedGCInfo`
-- `Spring.GetTeamAllyTeamID`
-- `Spring.GetTeamColor`
-- `Spring.GetTeamDamageStats`
-- `Spring.GetTeamInfo`
-- `Spring.GetTeamList`
-- `Spring.GetTeamLuaAI`
-- `Spring.GetTeamMaxUnits`
-- `Spring.GetTeamOrigColor`
-- `Spring.GetTeamResourceStats`
-- `Spring.GetTeamResources`
-- `Spring.GetTeamRulesParam`
-- `Spring.GetTeamRulesParams`
-- `Spring.GetTeamStartPosition`
-- `Spring.GetTeamStatsHistory`
-- `Spring.GetTeamUnitCount`
-- `Spring.GetTeamUnitDefCount`
-- `Spring.GetTeamUnitStats`
-- `Spring.GetTeamUnits`
-- `Spring.GetTeamUnitsByDefs`
-- `Spring.GetTeamUnitsCounts`
-- `Spring.GetTeamUnitsSorted`
-- `Spring.GetTerrainTypeData`
-- `Spring.GetTidal`
-- `Spring.GetTimer`
-- `Spring.GetTimerMicros`
-- `Spring.GetUnitAllyTeam`
-- `Spring.GetUnitAlwaysUpdateMatrix`
-- `Spring.GetUnitArmored`
-- `Spring.GetUnitArrayCentroid`
-- `Spring.GetUnitBasePosition`
-- `Spring.GetUnitBlocking`
-- `Spring.GetUnitBuildFacing`
-- `Spring.GetUnitBuildParams`
-- `Spring.GetUnitBuildeeRadius`
-- `Spring.GetUnitCmdDescs`
-- `Spring.GetUnitCollisionVolumeData`
-- `Spring.GetUnitCommandCount`
-- `Spring.GetUnitCommands`
-- `Spring.GetUnitCostTable`
-- `Spring.GetUnitCosts`
-- `Spring.GetUnitCurrentBuildPower`
-- `Spring.GetUnitCurrentCommand`
-- `Spring.GetUnitDefDimensions`
-- `Spring.GetUnitDefID`
-- `Spring.GetUnitDirection`
-- `Spring.GetUnitDrawFlag`
-- `Spring.GetUnitEffectiveBuildRange`
-- `Spring.GetUnitEngineDrawMask`
-- `Spring.GetUnitEstimatedPath`
-- `Spring.GetUnitExperience`
-- `Spring.GetUnitFeatureSeparation`
-- `Spring.GetUnitFlanking`
-- `Spring.GetUnitGroup`
-- `Spring.GetUnitHarvestStorage`
-- `Spring.GetUnitHeading`
-- `Spring.GetUnitHealth`
-- `Spring.GetUnitHeight`
-- `Spring.GetUnitIconData`
-- `Spring.GetUnitInBuildStance`
-- `Spring.GetUnitIsActive`
-- `Spring.GetUnitIsBeingBuilt`
-- `Spring.GetUnitIsBuilding`
-- `Spring.GetUnitIsCloaked`
-- `Spring.GetUnitIsDead`
-- `Spring.GetUnitIsStunned`
-- `Spring.GetUnitIsTransporting`
-- `Spring.GetUnitLastAttackedPiece`
-- `Spring.GetUnitLastAttacker`
-- `Spring.GetUnitLeavesGhost`
-- `Spring.GetUnitLosState`
-- `Spring.GetUnitLuaDraw`
-- `Spring.GetUnitMapCentroid`
-- `Spring.GetUnitMass`
-- `Spring.GetUnitMaxRange`
-- `Spring.GetUnitMetalExtraction`
-- `Spring.GetUnitMoveTypeData`
-- `Spring.GetUnitNanoPieces`
-- `Spring.GetUnitNearestAlly`
-- `Spring.GetUnitNearestEnemy`
-- `Spring.GetUnitNeutral`
-- `Spring.GetUnitNoDraw`
-- `Spring.GetUnitNoGroup`
-- `Spring.GetUnitNoMinimap`
-- `Spring.GetUnitNoSelect`
-- `Spring.GetUnitPhysicalState`
-- `Spring.GetUnitPieceDirection`
-- `Spring.GetUnitPieceInfo`
-- `Spring.GetUnitPieceList`
-- `Spring.GetUnitPieceMap`
-- `Spring.GetUnitPieceMatrix`
-- `Spring.GetUnitPiecePosDir`
-- `Spring.GetUnitPiecePosition`
-- `Spring.GetUnitPosErrorParams`
-- `Spring.GetUnitPosition`
-- `Spring.GetUnitRadius`
-- `Spring.GetUnitResources`
-- `Spring.GetUnitRootPiece`
-- `Spring.GetUnitRotation`
-- `Spring.GetUnitRulesParam`
-- `Spring.GetUnitRulesParams`
-- `Spring.GetUnitScriptNames`
-- `Spring.GetUnitScriptPiece`
-- `Spring.GetUnitSeismicSignature`
-- `Spring.GetUnitSelectionVolumeData`
-- `Spring.GetUnitSelfDTime`
-- `Spring.GetUnitSensorRadius`
-- `Spring.GetUnitSeparation`
-- `Spring.GetUnitShieldState`
-- `Spring.GetUnitStates`
-- `Spring.GetUnitStockpile`
-- `Spring.GetUnitStorage`
-- `Spring.GetUnitTeam`
-- `Spring.GetUnitTooltip`
-- `Spring.GetUnitTransformMatrix`
-- `Spring.GetUnitTransporter`
-- `Spring.GetUnitVectors`
-- `Spring.GetUnitVelocity`
-- `Spring.GetUnitViewPosition`
-- `Spring.GetUnitWeaponCanFire`
-- `Spring.GetUnitWeaponDamages`
-- `Spring.GetUnitWeaponHaveFreeLineOfFire`
-- `Spring.GetUnitWeaponState`
-- `Spring.GetUnitWeaponTarget`
-- `Spring.GetUnitWeaponTestRange`
-- `Spring.GetUnitWeaponTestTarget`
-- `Spring.GetUnitWeaponTryTarget`
-- `Spring.GetUnitWeaponVectors`
-- `Spring.GetUnitWorkerTask`
-- `Spring.GetUnitsInBox`
-- `Spring.GetUnitsInCylinder`
-- `Spring.GetUnitsInPlanes`
-- `Spring.GetUnitsInRectangle`
-- `Spring.GetUnitsInScreenRectangle`
-- `Spring.GetUnitsInSphere`
-- `Spring.GetVectorFromHeading`
-- `Spring.GetVidMemUsage`
-- `Spring.GetVideoCapturingMode`
-- `Spring.GetViewGeometry`
-- `Spring.GetVisibleFeatures`
-- `Spring.GetVisibleProjectiles`
-- `Spring.GetVisibleUnits`
-- `Spring.GetWaterLevel`
-- `Spring.GetWaterMode`
-- `Spring.GetWaterPlaneLevel`
-- `Spring.GetWind`
-- `Spring.GetWindowDisplayMode`
-- `Spring.GetWindowGeometry`
-- `Spring.GiveOrder`
-- `Spring.GiveOrderArrayToUnit`
-- `Spring.GiveOrderArrayToUnitArray`
-- `Spring.GiveOrderArrayToUnitMap`
-- `Spring.GiveOrderToUnit`
-- `Spring.GiveOrderToUnitArray`
-- `Spring.GiveOrderToUnitMap`
-- `Spring.HaveAdvShading`
-- `Spring.HaveShadows`
-- `Spring.InsertUnitCmdDesc`
-- `Spring.IsAABBInView`
-- `Spring.IsAboveMiniMap`
-- `Spring.IsCheatingEnabled`
-- `Spring.IsDevLuaEnabled`
-- `Spring.IsEditDefsEnabled`
-- `Spring.IsGUIHidden`
-- `Spring.IsGameOver`
-- `Spring.IsGodModeEnabled`
-- `Spring.IsNoCostEnabled`
-- `Spring.IsPosInAirLos`
-- `Spring.IsPosInLos`
-- `Spring.IsPosInMap`
-- `Spring.IsPosInRadar`
-- `Spring.IsReplay`
-- `Spring.IsSphereInView`
-- `Spring.IsUnitAllied`
-- `Spring.IsUnitIcon`
-- `Spring.IsUnitInAirLos`
-- `Spring.IsUnitInJammer`
-- `Spring.IsUnitInLos`
-- `Spring.IsUnitInRadar`
-- `Spring.IsUnitInView`
-- `Spring.IsUnitSelected`
-- `Spring.IsUnitVisible`
-- `Spring.IsUserWriting`
-- `Spring.KillTeam`
-- `Spring.LevelHeightMap`
-- `Spring.LevelOriginalHeightMap`
-- `Spring.LevelSmoothMesh`
-- `Spring.LoadCmdColorsConfig`
-- `Spring.LoadCtrlPanelConfig`
-- `Spring.LoadModelTextures`
-- `Spring.LoadSoundDef`
-- `Spring.Log`
-- `Spring.MarkerAddLine`
-- `Spring.MarkerAddPoint`
-- `Spring.MarkerErasePosition`
-- `Spring.MoveCtrl`
-- `Spring.PauseDollyCamera`
-- `Spring.PauseSoundStream`
-- `Spring.Ping`
-- `Spring.PlaySoundFile`
-- `Spring.PlaySoundStream`
-- `Spring.Pos2BuildPos`
-- `Spring.PreloadFeatureDefModel`
-- `Spring.PreloadSoundItem`
-- `Spring.PreloadUnitDefModel`
-- `Spring.Quit`
-- `Spring.RebuildSmoothMesh`
-- `Spring.Reload`
-- `Spring.RemoveGrass`
-- `Spring.RemoveObjectDecal`
-- `Spring.RemoveUnitCmdDesc`
-- `Spring.ReplaceMouseCursor`
-- `Spring.RequestStartPosition`
-- `Spring.Restart`
-- `Spring.ResumeDollyCamera`
-- `Spring.RevertHeightMap`
-- `Spring.RevertOriginalHeightMap`
-- `Spring.RevertSmoothMesh`
-- `Spring.RunDollyCamera`
-- `Spring.SDLSetTextInputRect`
-- `Spring.SDLStartTextInput`
-- `Spring.SDLStopTextInput`
-- `Spring.SelectUnit`
-- `Spring.SelectUnitArray`
-- `Spring.SelectUnitMap`
-- `Spring.SendAllyChat`
-- `Spring.SendCommands`
-- `Spring.SendLuaGaiaMsg`
-- `Spring.SendLuaMenuMsg`
-- `Spring.SendLuaRulesMsg`
-- `Spring.SendLuaUIMsg`
-- `Spring.SendMessage`
-- `Spring.SendMessageToAllyTeam`
-- `Spring.SendMessageToPlayer`
-- `Spring.SendMessageToSpectators`
-- `Spring.SendMessageToTeam`
-- `Spring.SendPrivateChat`
-- `Spring.SendPublicChat`
-- `Spring.SendSkirmishAIMessage`
-- `Spring.SendSpectatorChat`
-- `Spring.SetActiveCommand`
-- `Spring.SetAlly`
-- `Spring.SetAllyTeamStartBox`
-- `Spring.SetAtmosphere`
-- `Spring.SetAutoShowMetal`
-- `Spring.SetBoxSelectionByEngine`
-- `Spring.SetBuildFacing`
-- `Spring.SetBuildSpacing`
-- `Spring.SetCameraOffset`
-- `Spring.SetCameraState`
-- `Spring.SetCameraTarget`
-- `Spring.SetClipboard`
-- `Spring.SetConfigFloat`
-- `Spring.SetConfigInt`
-- `Spring.SetConfigString`
-- `Spring.SetCustomCommandDrawData`
-- `Spring.SetDollyCameraCurve`
-- `Spring.SetDollyCameraLookCurve`
-- `Spring.SetDollyCameraLookPosition`
-- `Spring.SetDollyCameraLookUnit`
-- `Spring.SetDollyCameraMode`
-- `Spring.SetDollyCameraPosition`
-- `Spring.SetDollyCameraRelativeMode`
-- `Spring.SetDrawGround`
-- `Spring.SetDrawGroundDeferred`
-- `Spring.SetDrawModelsDeferred`
-- `Spring.SetDrawSelectionInfo`
-- `Spring.SetDrawSky`
-- `Spring.SetDrawWater`
-- `Spring.SetExperienceGrade`
-- `Spring.SetFactoryBuggerOff`
-- `Spring.SetFeatureAlwaysUpdateMatrix`
-- `Spring.SetFeatureAlwaysVisible`
-- `Spring.SetFeatureBlocking`
-- `Spring.SetFeatureCollisionVolumeData`
-- `Spring.SetFeatureDirection`
-- `Spring.SetFeatureEngineDrawMask`
-- `Spring.SetFeatureFade`
-- `Spring.SetFeatureFireTime`
-- `Spring.SetFeatureHeadingAndUpDir`
-- `Spring.SetFeatureHealth`
-- `Spring.SetFeatureMass`
-- `Spring.SetFeatureMaxHealth`
-- `Spring.SetFeatureMidAndAimPos`
-- `Spring.SetFeatureMoveCtrl`
-- `Spring.SetFeatureNoDraw`
-- `Spring.SetFeatureNoSelect`
-- `Spring.SetFeaturePhysics`
-- `Spring.SetFeaturePieceCollisionVolumeData`
-- `Spring.SetFeaturePieceVisible`
-- `Spring.SetFeaturePosition`
-- `Spring.SetFeatureRadiusAndHeight`
-- `Spring.SetFeatureReclaim`
-- `Spring.SetFeatureResources`
-- `Spring.SetFeatureResurrect`
-- `Spring.SetFeatureRotation`
-- `Spring.SetFeatureRulesParam`
-- `Spring.SetFeatureSelectionVolumeData`
-- `Spring.SetFeatureSmokeTime`
-- `Spring.SetFeatureUseAirLos`
-- `Spring.SetFeatureVelocity`
-- `Spring.SetGameRulesParam`
-- `Spring.SetGlobalLos`
-- `Spring.SetGroundDecalAlpha`
-- `Spring.SetGroundDecalCreationFrame`
-- `Spring.SetGroundDecalGlowParams`
-- `Spring.SetGroundDecalMisc`
-- `Spring.SetGroundDecalNormal`
-- `Spring.SetGroundDecalPosAndDims`
-- `Spring.SetGroundDecalQuadPosAndHeight`
-- `Spring.SetGroundDecalRotation`
-- `Spring.SetGroundDecalTexture`
-- `Spring.SetGroundDecalTextureParams`
-- `Spring.SetGroundDecalTint`
-- `Spring.SetGroundDecalUserData`
-- `Spring.SetHeightMap`
-- `Spring.SetHeightMapFunc`
-- `Spring.SetLastMessagePosition`
-- `Spring.SetLogSectionFilterLevel`
-- `Spring.SetLosViewColors`
-- `Spring.SetMapLightTrackingState`
-- `Spring.SetMapRenderingParams`
-- `Spring.SetMapShader`
-- `Spring.SetMapShadingTexture`
-- `Spring.SetMapSquareTerrainType`
-- `Spring.SetMapSquareTexture`
-- `Spring.SetMetalAmount`
-- `Spring.SetMiniMapRotation`
-- `Spring.SetModelLightTrackingState`
-- `Spring.SetMouseCursor`
-- `Spring.SetNanoProjectileParams`
-- `Spring.SetNoPause`
-- `Spring.SetOriginalHeightMap`
-- `Spring.SetOriginalHeightMapFunc`
-- `Spring.SetPieceProjectileParams`
-- `Spring.SetPlayerReadyState`
-- `Spring.SetPlayerRulesParam`
-- `Spring.SetProjectileAlwaysVisible`
-- `Spring.SetProjectileCEG`
-- `Spring.SetProjectileCollision`
-- `Spring.SetProjectileDamages`
-- `Spring.SetProjectileGravity`
-- `Spring.SetProjectileIgnoreTrackingError`
-- `Spring.SetProjectileIsIntercepted`
-- `Spring.SetProjectileMoveControl`
-- `Spring.SetProjectilePosition`
-- `Spring.SetProjectileTarget`
-- `Spring.SetProjectileTimeToLive`
-- `Spring.SetProjectileUseAirLos`
-- `Spring.SetProjectileVelocity`
-- `Spring.SetRadarErrorParams`
-- `Spring.SetShareLevel`
-- `Spring.SetSkyBoxTexture`
-- `Spring.SetSmoothMesh`
-- `Spring.SetSmoothMeshFunc`
-- `Spring.SetSoundEffectParams`
-- `Spring.SetSoundStreamVolume`
-- `Spring.SetSquareBuildingMask`
-- `Spring.SetSunDirection`
-- `Spring.SetSunLighting`
-- `Spring.SetTeamColor`
-- `Spring.SetTeamResource`
-- `Spring.SetTeamRulesParam`
-- `Spring.SetTeamShareLevel`
-- `Spring.SetTeamStartPosition`
-- `Spring.SetTerrainTypeData`
-- `Spring.SetTidal`
-- `Spring.SetUnitAlwaysUpdateMatrix`
-- `Spring.SetUnitAlwaysVisible`
-- `Spring.SetUnitArmored`
-- `Spring.SetUnitBlocking`
-- `Spring.SetUnitBuildParams`
-- `Spring.SetUnitBuildSpeed`
-- `Spring.SetUnitBuildeeRadius`
-- `Spring.SetUnitCloak`
-- `Spring.SetUnitCollisionVolumeData`
-- `Spring.SetUnitCosts`
-- `Spring.SetUnitCrashing`
-- `Spring.SetUnitDefIcon`
-- `Spring.SetUnitDefImage`
-- `Spring.SetUnitDirection`
-- `Spring.SetUnitEngineDrawMask`
-- `Spring.SetUnitExperience`
-- `Spring.SetUnitFlanking`
-- `Spring.SetUnitGroup`
-- `Spring.SetUnitHarvestStorage`
-- `Spring.SetUnitHeadingAndUpDir`
-- `Spring.SetUnitHealth`
-- `Spring.SetUnitIconDraw`
-- `Spring.SetUnitLandGoal`
-- `Spring.SetUnitLeaveTracks`
-- `Spring.SetUnitLeavesGhost`
-- `Spring.SetUnitLoadingTransport`
-- `Spring.SetUnitLosMask`
-- `Spring.SetUnitLosState`
-- `Spring.SetUnitMass`
-- `Spring.SetUnitMaxHealth`
-- `Spring.SetUnitMaxRange`
-- `Spring.SetUnitMetalExtraction`
-- `Spring.SetUnitMidAndAimPos`
-- `Spring.SetUnitMoveGoal`
-- `Spring.SetUnitNanoPieces`
-- `Spring.SetUnitNeutral`
-- `Spring.SetUnitNoDraw`
-- `Spring.SetUnitNoGroup`
-- `Spring.SetUnitNoMinimap`
-- `Spring.SetUnitNoSelect`
-- `Spring.SetUnitPhysicalStateBit`
-- `Spring.SetUnitPhysics`
-- `Spring.SetUnitPieceCollisionVolumeData`
-- `Spring.SetUnitPieceMatrix`
-- `Spring.SetUnitPieceParent`
-- `Spring.SetUnitPieceVisible`
-- `Spring.SetUnitPosErrorParams`
-- `Spring.SetUnitPosition`
-- `Spring.SetUnitRadiusAndHeight`
-- `Spring.SetUnitResourcing`
-- `Spring.SetUnitRotation`
-- `Spring.SetUnitRulesParam`
-- `Spring.SetUnitSeismicSignature`
-- `Spring.SetUnitSelectionVolumeData`
-- `Spring.SetUnitSensorRadius`
-- `Spring.SetUnitShieldRechargeDelay`
-- `Spring.SetUnitShieldState`
-- `Spring.SetUnitSonarStealth`
-- `Spring.SetUnitStealth`
-- `Spring.SetUnitStockpile`
-- `Spring.SetUnitStorage`
-- `Spring.SetUnitTarget`
-- `Spring.SetUnitTooltip`
-- `Spring.SetUnitUseAirLos`
-- `Spring.SetUnitUseWeapons`
-- `Spring.SetUnitVelocity`
-- `Spring.SetUnitWeaponDamages`
-- `Spring.SetUnitWeaponState`
-- `Spring.SetVideoCapturingMode`
-- `Spring.SetVideoCapturingTimeOffset`
-- `Spring.SetWMCaption`
-- `Spring.SetWMIcon`
-- `Spring.SetWaterParams`
-- `Spring.SetWind`
-- `Spring.SetWindowGeometry`
-- `Spring.SetWindowMaximized`
-- `Spring.SetWindowMinimized`
-- `Spring.ShareResources`
-- `Spring.ShareTeamResource`
-- `Spring.SolveNURBSCurve`
-- `Spring.SpawnCEG`
-- `Spring.SpawnExplosion`
-- `Spring.SpawnProjectile`
-- `Spring.SpawnSFX`
-- `Spring.Start`
-- `Spring.StopSoundStream`
-- `Spring.TestBuildOrder`
-- `Spring.TestMoveOrder`
-- `Spring.TraceRayGroundBetweenPositions`
-- `Spring.TraceRayGroundInDirection`
-- `Spring.TraceScreenRay`
-- `Spring.TransferFeature`
-- `Spring.TransferTeamMaxUnits`
-- `Spring.TransferUnit`
-- `Spring.UnitAttach`
-- `Spring.UnitDetach`
-- `Spring.UnitDetachFromAir`
-- `Spring.UnitFinishCommand`
-- `Spring.UnitIconGetDraw`
-- `Spring.UnitIconSetDraw`
-- `Spring.UnitWeaponFire`
-- `Spring.UnitWeaponHoldFire`
-- `Spring.UpdateMapLight`
-- `Spring.UpdateModelLight`
-- `Spring.UseTeamResource`
-- `Spring.UseUnitResource`
-- `Spring.ValidFeatureID`
-- `Spring.ValidUnitID`
-- `Spring.WarpMouse`
-- `Spring.WorldToScreenCoords`
-- `Spring.Yield`
+- `Spring.AddFeatureDamage` (params: featureID:integer, damage:number, paralyze:number?, attackerID:integer?, weaponID:integer?, impulseX:number?, impulseY:number?, impulseZ:number?)
+- `Spring.AddGrass` (params: x:number, z:number)
+- `Spring.AddHeightMap` (params: x:number, z:number, height:number)
+- `Spring.AddLightTrackingTarget` (params: )
+- `Spring.AddMapLight` (params: lightParams:LightParams)
+- `Spring.AddModelLight` (params: lightParams:LightParams)
+- `Spring.AddObjectDecal` (params: unitID:integer)
+- `Spring.AddOriginalHeightMap` (params: x:number, y:number, height:number)
+- `Spring.AddSmoothMesh` (params: x:number, z:number, height:number)
+- `Spring.AddTeamResource` (params: teamID:integer, type:ResourceName, amount:number)
+- `Spring.AddUnitDamage` (params: unitID:integer, damage:number, paralyze:number?, attackerID:integer?, weaponID:integer?, impulseX:number?, impulseY:number?, impulseZ:number?)
+- `Spring.AddUnitExperience` (params: unitID:integer, deltaExperience:number)
+- `Spring.AddUnitIcon` (params: iconName:string, texFile:string, size:number?, dist:number?, radAdjust:number?, u0:number?, v0:number?, u1:number?, v1:number?)
+- `Spring.AddUnitImpulse` (params: unitID:integer, x:number, y:number, z:number, decayRate:number?)
+- `Spring.AddUnitResource` (params: unitID:integer, resource:string, amount:number)
+- `Spring.AddUnitSeismicPing` (params: unitID:integer, pindSize:number)
+- `Spring.AddWorldIcon` (params: cmdID:integer, posX:number, posY:number, posZ:number)
+- `Spring.AddWorldText` (params: text:string, posX:number, posY:number, posZ:number)
+- `Spring.AddWorldUnit` (params: unitDefID:integer, posX:number, posY:number, posZ:number, teamID:integer, facing:FacingInteger)
+- `Spring.AdjustHeightMap` (params: x:number, z:number, height:number)
+- `Spring.AdjustOriginalHeightMap` (params: x:number, z:number, height:number)
+- `Spring.AdjustSmoothMesh` (params: x:number, z:number, height:number)
+- `Spring.AreHelperAIsEnabled` (params: )
+- `Spring.ArePlayersAllied` (params: playerID1:number, playerID2:number)
+- `Spring.AreTeamsAllied` (params: teamID1:number, teamID2:number)
+- `Spring.AssignMouseCursor` (params: cmdName:string, iconFileName:string, overwrite:boolean?, hotSpotTopLeft:boolean?)
+- `Spring.AssignPlayerToTeam` (params: playerID:integer, teamID:integer)
+- `Spring.BuggerOff` (params: x:number, y:number, z:number?, radius:number, teamID:integer, spherical:boolean?, forced:boolean?, excludeUnitID:integer?, excludeUnitDefIDs:number[]?)
+- `Spring.CallAsTeam` (params: teamID:integer, func:fun(...), ...:any)
+- `Spring.CallCOBScript` (params: unitID:integer, funcName:(integer|string)?, retArgs:integer, ...:any)
+- `Spring.ClearFeaturesPreviousDrawFlag` (params: )
+- `Spring.ClearUnitGoal` (params: unitID:integer)
+- `Spring.ClearUnitsPreviousDrawFlag` (params: )
+- `Spring.ClearWatchDogTimer` (params: threadName:string?)
+- `Spring.ClosestBuildPos` (params: teamID:integer, unitDefID:integer, posX:number, posY:number, posZ:number, searchRadius:number, minDistance:number, buildFacing:number)
+- `Spring.CreateDir` (params: path:string)
+- `Spring.CreateFeature` (params: featureDef:(string|integer), x:number, y:number, z:number, heading:Heading?, teamID:integer?, featureID:integer?)
+- `Spring.CreateFeatureWreck` (params: featureID:integer, wreckLevel:integer?, doSmoke:boolean?)
+- `Spring.CreateGroundDecal` (params: )
+- `Spring.CreateUnit` (params: unitDef:(string|integer), posX:number, posY:number, posZ:number, facing:Facing, teamID:integer, build:boolean?, flattenGround:boolean?, unitID:integer?, builderID:integer?)
+- `Spring.CreateUnitWreck` (params: unitID:integer, wreckLevel:integer?, doSmoke:boolean?)
+- `Spring.DeleteProjectile` (params: projectileID:integer)
+- `Spring.DeselectUnit` (params: unitID:integer)
+- `Spring.DeselectUnitArray` (params: unitIDs:integer[])
+- `Spring.DeselectUnitMap` (params: unitMap:table<integer,any>)
+- `Spring.DestroyFeature` (params: featureID:integer)
+- `Spring.DestroyGroundDecal` (params: decalID:integer)
+- `Spring.DestroyUnit` (params: unitID:integer, selfd:boolean?, reclaimed:boolean?, attackerID:integer?, cleanupImmediately:boolean?)
+- `Spring.DiffTimers` (params: endTimer:integer, startTimer:integer, returnMs:boolean?, fromMicroSecs:boolean?)
+- `Spring.DrawUnitCommands` (params: unitID:integer)
+- `Spring.Echo` (params: arg:any, ...:any)
+- `Spring.EditUnitCmdDesc` (params: unitID:integer, cmdDescID:integer, cmdArray:CommandDescription)
+- `Spring.ExtractModArchiveFile` (params: modfile:string)
+- `Spring.FindUnitCmdDesc` (params: unitID:integer, cmdID:integer)
+- `Spring.FixedAllies` (params: )
+- `Spring.ForceLayoutUpdate` (params: )
+- `Spring.ForceTesselationUpdate` (params: normal:boolean?, shadow:boolean?)
+- `Spring.ForceUnitCollisionUpdate` (params: unitID:integer)
+- `Spring.FreeUnitIcon` (params: iconName:string)
+- `Spring.GameOver` (params: winningAllyTeamIDs:integer[])
+- `Spring.GarbageCollectCtrl` (params: itersPerBatch:integer?, numStepsPerIter:integer?, minStepsPerIter:integer?, maxStepsPerIter:integer?, minLoopRunTime:number?, maxLoopRunTime:number?, baseRunTimeMult:number?, baseMemLoadMult:number?)
+- `Spring.GetAIInfo` (params: teamID:integer)
+- `Spring.GetActionHotKeys` (params: actionName:string)
+- `Spring.GetActiveCmdDesc` (params: arg1:integer)
+- `Spring.GetActiveCmdDescs` (params: )
+- `Spring.GetActiveCommand` (params: )
+- `Spring.GetActivePage` (params: )
+- `Spring.GetAllFeatures` (params: )
+- `Spring.GetAllGroundDecals` (params: )
+- `Spring.GetAllIconDataArray` (params: fullData:boolean?)
+- `Spring.GetAllProjectiles` (params: excludeWeaponProjectiles:boolean?, excludePieceProjectiles:boolean?)
+- `Spring.GetAllUnits` (params: )
+- `Spring.GetAllyTeamInfo` (params: allyTeamID:integer)
+- `Spring.GetAllyTeamList` (params: )
+- `Spring.GetAllyTeamStartBox` (params: allyID:integer)
+- `Spring.GetBoxSelectionByEngine` (params: )
+- `Spring.GetBuildFacing` (params: )
+- `Spring.GetBuildSpacing` (params: )
+- `Spring.GetCEGID` (params: )
+- `Spring.GetCOBScriptID` (params: unitID:integer, funcName:string)
+- `Spring.GetCameraDirection` (params: )
+- `Spring.GetCameraFOV` (params: )
+- `Spring.GetCameraNames` (params: )
+- `Spring.GetCameraPosition` (params: )
+- `Spring.GetCameraRotation` (params: )
+- `Spring.GetCameraState` (params: useTable:false)
+- `Spring.GetCameraVectors` (params: )
+- `Spring.GetClipboard` (params: )
+- `Spring.GetClosestEnemyUnit` (params: x:number, y:number, z:number, range:number?, allyTeamID:number?, useLOS:boolean?, sphereDistTest:boolean?, checkSightDist:boolean?)
+- `Spring.GetCmdDescIndex` (params: cmdID:integer)
+- `Spring.GetCommandQueue` (params: unitID:integer, count:integer)
+- `Spring.GetConfigFloat` (params: name:string, default:number?)
+- `Spring.GetConfigInt` (params: name:string, default:number?)
+- `Spring.GetConfigParams` (params: )
+- `Spring.GetConfigString` (params: name:string, default:string?)
+- `Spring.GetConsoleBuffer` (params: maxLines:number)
+- `Spring.GetCurrentTooltip` (params: )
+- `Spring.GetCustomPaletteColor` (params: index:integer)
+- `Spring.GetDefaultCommand` (params: )
+- `Spring.GetDrawFrame` (params: )
+- `Spring.GetDrawSeconds` (params: )
+- `Spring.GetDrawSelectionInfo` (params: )
+- `Spring.GetDualViewGeometry` (params: )
+- `Spring.GetFPS` (params: )
+- `Spring.GetFacingFromHeading` (params: heading:number)
+- `Spring.GetFactoryBuggerOff` (params: unitID:integer)
+- `Spring.GetFactoryCommandCount` (params: unitID:integer)
+- `Spring.GetFactoryCommands` (params: unitID:integer, count:integer)
+- `Spring.GetFactoryCounts` (params: unitID:integer, count:integer?, addCmds:boolean?)
+- `Spring.GetFeatureAllyTeam` (params: featureID:integer)
+- `Spring.GetFeatureAlwaysUpdateMatrix` (params: featureID:integer)
+- `Spring.GetFeatureBlocking` (params: featureID:integer)
+- `Spring.GetFeatureCollisionVolumeData` (params: featureID:integer)
+- `Spring.GetFeatureDefID` (params: featureID:integer)
+- `Spring.GetFeatureDirection` (params: featureID:integer)
+- `Spring.GetFeatureDrawFlag` (params: featureID:integer)
+- `Spring.GetFeatureEngineDrawMask` (params: featureID:integer)
+- `Spring.GetFeatureFireTime` (params: featureID:integer)
+- `Spring.GetFeatureHeading` (params: featureID:integer)
+- `Spring.GetFeatureHealth` (params: featureID:integer)
+- `Spring.GetFeatureHeight` (params: featureID:integer)
+- `Spring.GetFeatureLastAttackedPiece` (params: featureID:integer)
+- `Spring.GetFeatureLuaDraw` (params: featureID:integer)
+- `Spring.GetFeatureMass` (params: featureID:integer)
+- `Spring.GetFeatureNoDraw` (params: featureID:integer)
+- `Spring.GetFeatureNoSelect` (params: featureID:integer)
+- `Spring.GetFeaturePaletteIndex` (params: featureID:integer)
+- `Spring.GetFeaturePieceCollisionVolumeData` (params: featureID:integer)
+- `Spring.GetFeaturePieceDirection` (params: featureID:integer, pieceIndex:integer)
+- `Spring.GetFeaturePieceInfo` (params: featureID:integer, pieceIndex:integer)
+- `Spring.GetFeaturePieceList` (params: featureID:integer)
+- `Spring.GetFeaturePieceMap` (params: featureID:integer)
+- `Spring.GetFeaturePieceMatrix` (params: featureID:integer, pieceIndex:integer)
+- `Spring.GetFeaturePiecePosDir` (params: featureID:integer, pieceIndex:integer)
+- `Spring.GetFeaturePiecePosition` (params: featureID:integer, pieceIndex:integer)
+- `Spring.GetFeaturePosition` (params: featureID:integer)
+- `Spring.GetFeatureRadius` (params: featureID:integer)
+- `Spring.GetFeatureResources` (params: featureID:integer)
+- `Spring.GetFeatureResurrect` (params: featureID:integer)
+- `Spring.GetFeatureRootPiece` (params: featureID:integer)
+- `Spring.GetFeatureRotation` (params: featureID:integer)
+- `Spring.GetFeatureRulesParam` (params: featureID:integer)
+- `Spring.GetFeatureRulesParams` (params: featureID:integer)
+- `Spring.GetFeatureSelectionVolumeData` (params: featureID:integer)
+- `Spring.GetFeatureSeparation` (params: featureID1:number, featureID2:number, direction:boolean?)
+- `Spring.GetFeatureSmokeTime` (params: featureID:integer)
+- `Spring.GetFeatureTeam` (params: featureID:integer)
+- `Spring.GetFeatureTransformMatrix` (params: featureID:integer)
+- `Spring.GetFeatureVelocity` (params: featureID:integer)
+- `Spring.GetFeaturesInCylinder` (params: x:number, z:number, radius:number, allegiance:number?)
+- `Spring.GetFeaturesInRectangle` (params: xmin:number, zmin:number, xmax:number, zmax:number)
+- `Spring.GetFeaturesInScreenRectangle` (params: left:number, top:number, right:number, bottom:number)
+- `Spring.GetFeaturesInSphere` (params: x:number, y:number, z:number, radius:number)
+- `Spring.GetFrameTimeOffset` (params: )
+- `Spring.GetFrameTimer` (params: lastFrameTime:boolean?)
+- `Spring.GetFullBuildQueue` (params: unitID:integer)
+- `Spring.GetGaiaTeamID` (params: )
+- `Spring.GetGameFrame` (params: )
+- `Spring.GetGameName` (params: )
+- `Spring.GetGameRulesParam` (params: arg1:(number|string)
+- `Spring.GetGameRulesParams` (params: )
+- `Spring.GetGameSeconds` (params: )
+- `Spring.GetGameSpeed` (params: )
+- `Spring.GetGameState` (params: maxLatency:number?)
+- `Spring.GetGatherMode` (params: )
+- `Spring.GetGlobalLos` (params: teamID:integer?)
+- `Spring.GetGrass` (params: x:number, z:number)
+- `Spring.GetGroundBlocked` (params: )
+- `Spring.GetGroundDecalAlpha` (params: decalID:integer)
+- `Spring.GetGroundDecalCreationFrame` (params: decalID:integer)
+- `Spring.GetGroundDecalGlowParams` (params: decalID:integer)
+- `Spring.GetGroundDecalMiddlePos` (params: decalID:integer)
+- `Spring.GetGroundDecalMisc` (params: decalID:integer)
+- `Spring.GetGroundDecalNormal` (params: decalID:integer)
+- `Spring.GetGroundDecalOwner` (params: decalID:integer)
+- `Spring.GetGroundDecalQuadPos` (params: decalID:integer)
+- `Spring.GetGroundDecalRotation` (params: decalID:integer)
+- `Spring.GetGroundDecalSizeAndHeight` (params: decalID:integer)
+- `Spring.GetGroundDecalTexture` (params: decalID:integer, isMainTex:boolean?)
+- `Spring.GetGroundDecalTextures` (params: isMainTex:boolean?, addFilenames:boolean?)
+- `Spring.GetGroundDecalTint` (params: decalID:integer)
+- `Spring.GetGroundDecalType` (params: decalID:integer)
+- `Spring.GetGroundDecalUserData` (params: decalID:integer, udQuad:integer)
+- `Spring.GetGroundExtremes` (params: )
+- `Spring.GetGroundHeight` (params: x:number, z:number)
+- `Spring.GetGroundInfo` (params: x:number, z:number)
+- `Spring.GetGroundNormal` (params: x:number, z:number, smoothed:boolean?)
+- `Spring.GetGroundOrigHeight` (params: x:number, z:number)
+- `Spring.GetGroupList` (params: )
+- `Spring.GetGroupUnits` (params: groupID:integer)
+- `Spring.GetGroupUnitsCount` (params: groupID:integer)
+- `Spring.GetGroupUnitsCounts` (params: groupID:integer)
+- `Spring.GetGroupUnitsSorted` (params: groupID:integer)
+- `Spring.GetHeadingFromFacing` (params: facing:FacingInteger)
+- `Spring.GetHeadingFromVector` (params: x:number, z:number)
+- `Spring.GetIconData` (params: iconName:string, fullData:boolean?)
+- `Spring.GetInvertQueueKey` (params: )
+- `Spring.GetKeyBindings` (params: keySet1:string?, keySet2:string?)
+- `Spring.GetKeyCode` (params: keySym:string)
+- `Spring.GetKeyFromScanSymbol` (params: scanSymbol:string)
+- `Spring.GetKeyState` (params: keyCode:number)
+- `Spring.GetKeySymbol` (params: keyCode:number)
+- `Spring.GetLastMessagePositions` (params: )
+- `Spring.GetLastUpdateSeconds` (params: )
+- `Spring.GetLocalAllyTeamID` (params: )
+- `Spring.GetLocalPlayerID` (params: )
+- `Spring.GetLocalTeamID` (params: )
+- `Spring.GetLogSections` (params: )
+- `Spring.GetLosViewColors` (params: )
+- `Spring.GetLuaMemUsage` (params: )
+- `Spring.GetMapDrawMode` (params: )
+- `Spring.GetMapOption` (params: mapOption:string)
+- `Spring.GetMapOptions` (params: )
+- `Spring.GetMapSquareTexture` (params: texSquareX:number, texSquareY:number, lodMin:number, luaTexName:string, lodMax:number?)
+- `Spring.GetMapStartPositions` (params: )
+- `Spring.GetMenuName` (params: )
+- `Spring.GetMetalAmount` (params: x:integer, z:integer)
+- `Spring.GetMetalExtraction` (params: x:integer, z:integer)
+- `Spring.GetMetalMapSize` (params: )
+- `Spring.GetMiniMapDualScreen` (params: )
+- `Spring.GetMiniMapGeometry` (params: )
+- `Spring.GetMiniMapRotation` (params: )
+- `Spring.GetModKeyState` (params: )
+- `Spring.GetModOption` (params: modOption:string)
+- `Spring.GetModOptions` (params: )
+- `Spring.GetModelPieceList` (params: modelName:string)
+- `Spring.GetModelPieceMap` (params: modelName:string)
+- `Spring.GetModelRootPiece` (params: modelName:string)
+- `Spring.GetMouseButtonsPressed` (params: button1:integer, ...:integer)
+- `Spring.GetMouseCursor` (params: )
+- `Spring.GetMouseStartPosition` (params: button:number)
+- `Spring.GetMouseState` (params: )
+- `Spring.GetNanoProjectileParams` (params: )
+- `Spring.GetNumDisplays` (params: )
+- `Spring.GetPieceProjectileName` (params: projectileID:integer)
+- `Spring.GetPieceProjectileParams` (params: projectileID:integer)
+- `Spring.GetPixelDir` (params: x:number, y:number)
+- `Spring.GetPlayerControlledUnit` (params: playerID:integer)
+- `Spring.GetPlayerInfo` (params: playerID:integer, getPlayerOpts:boolean?)
+- `Spring.GetPlayerList` (params: teamID:integer?, active:boolean?)
+- `Spring.GetPlayerRoster` (params: sortType:number?, showPathingPlayers:boolean?)
+- `Spring.GetPlayerRulesParam` (params: playerID:integer)
+- `Spring.GetPlayerRulesParams` (params: playerID:integer)
+- `Spring.GetPlayerStatistics` (params: playerID:integer)
+- `Spring.GetPlayerTraffic` (params: playerID:integer, packetID:integer?)
+- `Spring.GetPositionLosState` (params: posX:number, posY:number, posZ:number, allyTeamID:integer?)
+- `Spring.GetPressedKeys` (params: )
+- `Spring.GetPressedScans` (params: )
+- `Spring.GetProfilerRecordNames` (params: )
+- `Spring.GetProfilerTimeRecord` (params: profilerName:string, frameData:boolean?)
+- `Spring.GetProjectileAllyTeamID` (params: projectileID:integer)
+- `Spring.GetProjectileDamages` (params: projectileID:integer, tag:string)
+- `Spring.GetProjectileDefID` (params: projectileID:integer)
+- `Spring.GetProjectileDirection` (params: projectileID:integer)
+- `Spring.GetProjectileGravity` (params: projectileID:integer)
+- `Spring.GetProjectileIsIntercepted` (params: projectileID:integer)
+- `Spring.GetProjectileOwnerID` (params: projectileID:integer)
+- `Spring.GetProjectilePosition` (params: projectileID:integer)
+- `Spring.GetProjectileTarget` (params: projectileID:integer)
+- `Spring.GetProjectileTeamID` (params: projectileID:integer)
+- `Spring.GetProjectileTimeToLive` (params: projectileID:integer)
+- `Spring.GetProjectileType` (params: projectileID:integer)
+- `Spring.GetProjectileVelocity` (params: projectileID:integer)
+- `Spring.GetProjectilesInRectangle` (params: xmin:number, zmin:number, xmax:number, zmax:number, excludeWeaponProjectiles:boolean?, excludePieceProjectiles:boolean?)
+- `Spring.GetProjectilesInSphere` (params: x:number, y:number, z:number, radius:number, excludeWeaponProjectiles:boolean?, excludePieceProjectiles:boolean?)
+- `Spring.GetRadarErrorParams` (params: allyTeamID:integer)
+- `Spring.GetRealBuildQueue` (params: unitID:integer)
+- `Spring.GetRenderFeatures` (params: drawMask:DrawMask, sendMask:true)
+- `Spring.GetRenderFeaturesDrawFlagChanged` (params: sendMask:true)
+- `Spring.GetRenderUnits` (params: drawMask:DrawMask, sendMask:true)
+- `Spring.GetRenderUnitsDrawFlagChanged` (params: sendMask:true)
+- `Spring.GetReplayFilePath` (params: )
+- `Spring.GetReplayLength` (params: )
+- `Spring.GetReplayRecordingFilePath` (params: )
+- `Spring.GetScanSymbol` (params: scanCode:number)
+- `Spring.GetScreenGeometry` (params: displayIndex:number?, queryUsable:boolean?)
+- `Spring.GetSelectedGroup` (params: )
+- `Spring.GetSelectedUnits` (params: )
+- `Spring.GetSelectedUnitsCount` (params: )
+- `Spring.GetSelectedUnitsCounts` (params: )
+- `Spring.GetSelectedUnitsSorted` (params: )
+- `Spring.GetSelectionBox` (params: )
+- `Spring.GetSideData` (params: sideName:string)
+- `Spring.GetSmoothMeshHeight` (params: x:number, z:number)
+- `Spring.GetSoundDevices` (params: )
+- `Spring.GetSoundEffectParams` (params: )
+- `Spring.GetSoundStreamTime` (params: )
+- `Spring.GetSpectatingState` (params: )
+- `Spring.GetSyncedGCInfo` (params: collectGC:boolean?)
+- `Spring.GetTeamAllyTeamID` (params: teamID:integer)
+- `Spring.GetTeamColor` (params: teamID:integer)
+- `Spring.GetTeamDamageStats` (params: teamID:integer)
+- `Spring.GetTeamInfo` (params: teamID:integer, getTeamKeys:boolean?)
+- `Spring.GetTeamList` (params: allyTeamID:unknown)
+- `Spring.GetTeamLuaAI` (params: teamID:integer)
+- `Spring.GetTeamMaxUnits` (params: teamID:integer)
+- `Spring.GetTeamOrigColor` (params: teamID:integer)
+- `Spring.GetTeamResourceStats` (params: teamID:integer, resource:ResourceName)
+- `Spring.GetTeamResources` (params: teamID:integer, resource:ResourceName)
+- `Spring.GetTeamRulesParam` (params: teamID:integer)
+- `Spring.GetTeamRulesParams` (params: teamID:integer)
+- `Spring.GetTeamStartPosition` (params: teamID:integer)
+- `Spring.GetTeamStatsHistory` (params: teamID:integer)
+- `Spring.GetTeamUnitCount` (params: teamID:integer)
+- `Spring.GetTeamUnitDefCount` (params: teamID:integer, unitDefID:integer)
+- `Spring.GetTeamUnitStats` (params: teamID:integer)
+- `Spring.GetTeamUnits` (params: teamID:integer)
+- `Spring.GetTeamUnitsByDefs` (params: teamID:integer, unitDefIDs:(number|number[]))
+- `Spring.GetTeamUnitsCounts` (params: teamID:integer)
+- `Spring.GetTeamUnitsSorted` (params: teamID:integer)
+- `Spring.GetTerrainTypeData` (params: terrainTypeInfo:number)
+- `Spring.GetTidal` (params: )
+- `Spring.GetTimer` (params: )
+- `Spring.GetTimerMicros` (params: )
+- `Spring.GetUnitAllyTeam` (params: unitID:integer)
+- `Spring.GetUnitAlwaysUpdateMatrix` (params: unitID:integer)
+- `Spring.GetUnitArmored` (params: unitID:integer)
+- `Spring.GetUnitArrayCentroid` (params: units:table)
+- `Spring.GetUnitBasePosition` (params: unitID:integer)
+- `Spring.GetUnitBlocking` (params: unitID:integer)
+- `Spring.GetUnitBuildFacing` (params: unitID:integer)
+- `Spring.GetUnitBuildParams` (params: unitID:integer)
+- `Spring.GetUnitBuildeeRadius` (params: unitID:integer)
+- `Spring.GetUnitCmdDescs` (params: unitID:integer)
+- `Spring.GetUnitCollisionVolumeData` (params: unitID:integer)
+- `Spring.GetUnitCommandCount` (params: unitID:integer)
+- `Spring.GetUnitCommands` (params: unitID:integer, count:integer)
+- `Spring.GetUnitCostTable` (params: unitID:integer)
+- `Spring.GetUnitCosts` (params: unitID:integer)
+- `Spring.GetUnitCurrentBuildPower` (params: unitID:integer)
+- `Spring.GetUnitCurrentCommand` (params: unitID:integer, cmdIndex:integer?)
+- `Spring.GetUnitDefDimensions` (params: unitDefID:integer)
+- `Spring.GetUnitDefID` (params: unitID:integer)
+- `Spring.GetUnitDirection` (params: unitID:integer)
+- `Spring.GetUnitDrawFlag` (params: unitID:integer)
+- `Spring.GetUnitEffectiveBuildRange` (params: unitID:integer, buildeeDefID:integer)
+- `Spring.GetUnitEngineDrawMask` (params: unitID:integer)
+- `Spring.GetUnitEstimatedPath` (params: unitID:integer)
+- `Spring.GetUnitExperience` (params: unitID:integer)
+- `Spring.GetUnitFeatureSeparation` (params: unitID:integer)
+- `Spring.GetUnitFlanking` (params: unitID:integer)
+- `Spring.GetUnitGroup` (params: unitID:integer)
+- `Spring.GetUnitHarvestStorage` (params: unitID:integer)
+- `Spring.GetUnitHeading` (params: unitID:integer, convertToRadians:boolean?)
+- `Spring.GetUnitHealth` (params: unitID:integer)
+- `Spring.GetUnitHeight` (params: unitID:integer)
+- `Spring.GetUnitIcon` (params: unitID:number, fullData:boolean?)
+- `Spring.GetUnitIconData` (params: unitID:number, fullData:boolean?)
+- `Spring.GetUnitInBuildStance` (params: unitID:integer)
+- `Spring.GetUnitIsActive` (params: unitID:integer)
+- `Spring.GetUnitIsBeingBuilt` (params: unitID:integer)
+- `Spring.GetUnitIsBuilding` (params: unitID:integer)
+- `Spring.GetUnitIsCloaked` (params: unitID:integer)
+- `Spring.GetUnitIsDead` (params: unitID:integer)
+- `Spring.GetUnitIsStunned` (params: unitID:integer)
+- `Spring.GetUnitIsTransporting` (params: unitID:integer)
+- `Spring.GetUnitLastAttackedPiece` (params: unitID:integer)
+- `Spring.GetUnitLastAttacker` (params: unitID:integer)
+- `Spring.GetUnitLeavesGhost` (params: )
+- `Spring.GetUnitLosState` (params: unitID:integer, allyTeamID:integer?, raw:true)
+- `Spring.GetUnitLuaDraw` (params: unitID:integer)
+- `Spring.GetUnitMapCentroid` (params: units:table)
+- `Spring.GetUnitMass` (params: unitID:integer)
+- `Spring.GetUnitMaxRange` (params: unitID:integer)
+- `Spring.GetUnitMetalExtraction` (params: unitID:integer)
+- `Spring.GetUnitMoveDefID` (params: unitID:integer)
+- `Spring.GetUnitMoveTypeData` (params: unitID:integer)
+- `Spring.GetUnitNanoPieces` (params: unitID:integer)
+- `Spring.GetUnitNearestAlly` (params: unitID:integer, range:number?)
+- `Spring.GetUnitNearestEnemy` (params: unitID:integer, range:number?, useLOS:boolean?, sphereDistTest:boolean?, checkSightDist:boolean?)
+- `Spring.GetUnitNeutral` (params: unitID:integer)
+- `Spring.GetUnitNoDraw` (params: unitID:integer)
+- `Spring.GetUnitNoGroup` (params: unitID:integer)
+- `Spring.GetUnitNoMinimap` (params: unitID:integer)
+- `Spring.GetUnitNoSelect` (params: unitID:integer)
+- `Spring.GetUnitPaletteIndex` (params: unitID:integer)
+- `Spring.GetUnitPhysicalState` (params: unitID:integer)
+- `Spring.GetUnitPieceDirection` (params: unitID:integer, pieceIndex:integer)
+- `Spring.GetUnitPieceInfo` (params: unitID:integer, pieceIndex:integer)
+- `Spring.GetUnitPieceList` (params: unitID:integer)
+- `Spring.GetUnitPieceMap` (params: unitID:integer)
+- `Spring.GetUnitPieceMatrix` (params: unitID:integer, pieceIndex:integer)
+- `Spring.GetUnitPiecePosDir` (params: unitID:integer, pieceIndex:integer)
+- `Spring.GetUnitPiecePosition` (params: unitID:integer, pieceIndex:integer)
+- `Spring.GetUnitPosErrorParams` (params: unitID:integer, allyTeamID:integer?)
+- `Spring.GetUnitPosition` (params: unitID:integer, midPos:boolean?, aimPos:boolean?)
+- `Spring.GetUnitRadius` (params: unitID:integer)
+- `Spring.GetUnitResources` (params: unitID:integer)
+- `Spring.GetUnitRootPiece` (params: unitID:integer)
+- `Spring.GetUnitRotation` (params: unitID:integer)
+- `Spring.GetUnitRulesParam` (params: unitID:integer)
+- `Spring.GetUnitRulesParams` (params: unitID:integer)
+- `Spring.GetUnitScriptNames` (params: unitID:integer)
+- `Spring.GetUnitScriptPiece` (params: unitID:integer)
+- `Spring.GetUnitSeismicSignature` (params: unitID:integer)
+- `Spring.GetUnitSelectionVolumeData` (params: unitID:integer)
+- `Spring.GetUnitSelfDTime` (params: unitID:integer)
+- `Spring.GetUnitSensorRadius` (params: unitID:integer, type:string)
+- `Spring.GetUnitSeparation` (params: unitID1:number, unitID2:number, direction:boolean?, subtractRadii:boolean?)
+- `Spring.GetUnitShieldState` (params: unitID:integer, weaponNum:number?)
+- `Spring.GetUnitStates` (params: unitID:integer)
+- `Spring.GetUnitStockpile` (params: unitID:integer)
+- `Spring.GetUnitStorage` (params: unitID:integer)
+- `Spring.GetUnitTeam` (params: unitID:integer)
+- `Spring.GetUnitTooltip` (params: unitID:integer)
+- `Spring.GetUnitTransformMatrix` (params: unitID:integer)
+- `Spring.GetUnitTransporter` (params: unitID:integer)
+- `Spring.GetUnitVectors` (params: unitID:integer)
+- `Spring.GetUnitVelocity` (params: unitID:integer)
+- `Spring.GetUnitViewPosition` (params: unitID:integer, midPos:boolean?)
+- `Spring.GetUnitWeaponCanFire` (params: unitID:integer)
+- `Spring.GetUnitWeaponDamages` (params: unitID:integer)
+- `Spring.GetUnitWeaponHaveFreeLineOfFire` (params: unitID:integer)
+- `Spring.GetUnitWeaponState` (params: unitID:integer, weaponNum:number, stateName:string)
+- `Spring.GetUnitWeaponTarget` (params: unitID:integer, weaponNum:integer)
+- `Spring.GetUnitWeaponTestRange` (params: unitID:integer)
+- `Spring.GetUnitWeaponTestTarget` (params: unitID:integer)
+- `Spring.GetUnitWeaponTryTarget` (params: unitID:integer)
+- `Spring.GetUnitWeaponVectors` (params: unitID:integer)
+- `Spring.GetUnitWorkerTask` (params: unitID:integer)
+- `Spring.GetUnitsInBox` (params: xmin:number, ymin:number, zmin:number, xmax:number, ymax:number, zmax:number, allegiance:number?)
+- `Spring.GetUnitsInCylinder` (params: x:number, z:number, radius:number)
+- `Spring.GetUnitsInPlanes` (params: planes:Plane[], allegiance:integer?)
+- `Spring.GetUnitsInRectangle` (params: xmin:number, zmin:number, xmax:number, zmax:number, allegiance:number?)
+- `Spring.GetUnitsInScreenRectangle` (params: left:number, top:number, right:number, bottom:number, allegiance:number?)
+- `Spring.GetUnitsInSphere` (params: x:number, y:number, z:number, radius:number)
+- `Spring.GetVectorFromHeading` (params: heading:number)
+- `Spring.GetVidMemUsage` (params: )
+- `Spring.GetVideoCapturingMode` (params: )
+- `Spring.GetViewGeometry` (params: )
+- `Spring.GetVisibleFeatures` (params: teamID:integer?, radius:number?, icons:boolean?, geos:boolean?)
+- `Spring.GetVisibleProjectiles` (params: allyTeamID:integer?, addSyncedProjectiles:boolean?, addWeaponProjectiles:boolean?, addPieceProjectiles:boolean?)
+- `Spring.GetVisibleUnits` (params: teamID:integer?, radius:number?, icons:boolean?)
+- `Spring.GetWaterLevel` (params: x:number, z:number)
+- `Spring.GetWaterMode` (params: )
+- `Spring.GetWaterPlaneLevel` (params: )
+- `Spring.GetWind` (params: )
+- `Spring.GetWindowDisplayMode` (params: )
+- `Spring.GetWindowGeometry` (params: )
+- `Spring.GiveOrder` (params: cmdID:(CMD|integer), params:CreateCommandParams, options:CreateCommandOptions?, timeout:integer?)
+- `Spring.GiveOrderArrayToUnit` (params: unitID:integer, commands:CreateCommand[])
+- `Spring.GiveOrderArrayToUnitArray` (params: unitIDs:integer[], commands:CreateCommand[], pairwise:boolean?)
+- `Spring.GiveOrderArrayToUnitMap` (params: unitMap:table<integer,any>, commands:CreateCommand[])
+- `Spring.GiveOrderToUnit` (params: unitID:integer, cmdID:(CMD|integer), params:CreateCommandParams?, options:CreateCommandOptions?, timeout:integer?)
+- `Spring.GiveOrderToUnitArray` (params: unitIDs:integer[], cmdID:(CMD|integer), params:CreateCommandParams?, options:CreateCommandOptions?, timeout:integer?)
+- `Spring.GiveOrderToUnitMap` (params: unitMap:table<integer,any>, cmdID:(CMD|integer), params:CreateCommandParams?, options:CreateCommandOptions?, timeout:integer?)
+- `Spring.HaveAdvShading` (params: )
+- `Spring.HaveShadows` (params: )
+- `Spring.InsertUnitCmdDesc` (params: unitID:integer, index:integer, cmdDesc:CommandDescription)
+- `Spring.IsAABBInView` (params: minX:number, minY:number, minZ:number, maxX:number, maxY:number, maxZ:number)
+- `Spring.IsAboveMiniMap` (params: x:number, y:number)
+- `Spring.IsCheatingEnabled` (params: )
+- `Spring.IsDevLuaEnabled` (params: )
+- `Spring.IsEditDefsEnabled` (params: )
+- `Spring.IsGUIHidden` (params: )
+- `Spring.IsGameOver` (params: )
+- `Spring.IsGodModeEnabled` (params: )
+- `Spring.IsNoCostEnabled` (params: )
+- `Spring.IsPosInAirLos` (params: posX:number, posY:number, posZ:number, allyTeamID:integer?)
+- `Spring.IsPosInLos` (params: posX:number, posY:number, posZ:number, allyTeamID:integer?)
+- `Spring.IsPosInMap` (params: x:number, z:number)
+- `Spring.IsPosInRadar` (params: posX:number, posY:number, posZ:number, allyTeamID:integer?)
+- `Spring.IsReplay` (params: )
+- `Spring.IsSphereInView` (params: posX:number, posY:number, posZ:number, radius:number?)
+- `Spring.IsUnitAllied` (params: unitID:integer)
+- `Spring.IsUnitIcon` (params: unitID:integer)
+- `Spring.IsUnitInAirLos` (params: unitID:integer, allyTeamID:integer)
+- `Spring.IsUnitInJammer` (params: unitID:integer, allyTeamID:integer)
+- `Spring.IsUnitInLos` (params: unitID:integer, allyTeamID:integer)
+- `Spring.IsUnitInRadar` (params: unitID:integer, allyTeamID:integer)
+- `Spring.IsUnitInView` (params: unitID:integer)
+- `Spring.IsUnitSelected` (params: unitID:integer)
+- `Spring.IsUnitVisible` (params: unitID:integer, radius:number?, checkIcon:boolean)
+- `Spring.IsUserWriting` (params: )
+- `Spring.KillTeam` (params: teamID:integer)
+- `Spring.LevelHeightMap` (params: x:number, z:number, height:number)
+- `Spring.LevelOriginalHeightMap` (params: x:number, z:number, height:number)
+- `Spring.LevelSmoothMesh` (params: x:number, z:number, height:number)
+- `Spring.LoadCmdColorsConfig` (params: config:string)
+- `Spring.LoadCtrlPanelConfig` (params: config:string)
+- `Spring.LoadModelTextures` (params: modelName:string)
+- `Spring.LoadSoundDef` (params: soundfile:string)
+- `Spring.Log` (params: section:string, logLevel:(LogLevel|LOG)?, ...:string)
+- `Spring.MarkerAddLine` (params: x1:number, y1:number, z1:number, x2:number, y2:number, z2:number, localOnly:boolean?, playerId:number?)
+- `Spring.MarkerAddPoint` (params: x:number, y:number, z:number, text:string?, localOnly:boolean?, playerID:number?)
+- `Spring.MarkerErasePosition` (params: x:number, y:number, z:number, unused:nil, localOnly:boolean?, playerId:number?, alwaysErase:boolean?)
+- `Spring.PauseDollyCamera` (params: fraction:number)
+- `Spring.PauseSoundStream` (params: )
+- `Spring.Ping` (params: pingTag:number)
+- `Spring.PlaySoundFile` (params: soundfile:string, volume:number?, posx:number?, posy:number?, posz:number?, speedx:number?, speedy:number?, speedz:number?, channel:SoundChannel?)
+- `Spring.PlaySoundStream` (params: oggfile:string, volume:number?, enqueue:boolean?)
+- `Spring.Pos2BuildPos` (params: unitDefID:integer, posX:number, posY:number, posZ:number, buildFacing:number?)
+- `Spring.PreloadFeatureDefModel` (params: featureDefID:integer)
+- `Spring.PreloadSoundItem` (params: name:string)
+- `Spring.PreloadUnitDefModel` (params: unitDefID:integer)
+- `Spring.Quit` (params: )
+- `Spring.RebuildSmoothMesh` (params: )
+- `Spring.Reload` (params: startScript:string)
+- `Spring.RemoveGrass` (params: x:number, z:number)
+- `Spring.RemoveObjectDecal` (params: unitID:integer)
+- `Spring.RemoveUnitCmdDesc` (params: unitID:integer, cmdDescID:integer?)
+- `Spring.ReplaceMouseCursor` (params: oldFileName:string, newFileName:string, hotSpotTopLeft:boolean?)
+- `Spring.RequestStartPosition` (params: x:number, y:number, z:number, ready:boolean?)
+- `Spring.Restart` (params: commandline_args:string, startScript:string)
+- `Spring.ResumeDollyCamera` (params: )
+- `Spring.RevertHeightMap` (params: x:number, z:number, height:number)
+- `Spring.RevertOriginalHeightMap` (params: x:number, z:number, height:number)
+- `Spring.RevertSmoothMesh` (params: x:number, z:number, origFactor:number)
+- `Spring.RunDollyCamera` (params: runtime:number)
+- `Spring.SDLSetTextInputRect` (params: x:number, y:number, width:number, height:number)
+- `Spring.SDLStartTextInput` (params: )
+- `Spring.SDLStopTextInput` (params: )
+- `Spring.SelectUnit` (params: unitID:integer?, append:boolean?)
+- `Spring.SelectUnitArray` (params: unitIDs:integer[], append:boolean?)
+- `Spring.SelectUnitMap` (params: unitMap:table<integer,any>, append:boolean?)
+- `Spring.SendAllyChat` (params: message:string)
+- `Spring.SendCommands` (params: commands:string[])
+- `Spring.SendLuaGaiaMsg` (params: message:string)
+- `Spring.SendLuaMenuMsg` (params: msg:string)
+- `Spring.SendLuaRulesMsg` (params: message:string)
+- `Spring.SendLuaUIMsg` (params: message:string, mode:string)
+- `Spring.SendMessage` (params: message:string)
+- `Spring.SendMessageToAllyTeam` (params: allyID:integer, message:string)
+- `Spring.SendMessageToPlayer` (params: playerID:integer, message:string)
+- `Spring.SendMessageToSpectators` (params: message:string)
+- `Spring.SendMessageToTeam` (params: teamID:integer, message:string)
+- `Spring.SendPrivateChat` (params: message:string, playerID:integer)
+- `Spring.SendPublicChat` (params: message:string)
+- `Spring.SendSkirmishAIMessage` (params: aiTeam:number, message:string)
+- `Spring.SendSpectatorChat` (params: message:string)
+- `Spring.SetActiveCommand` (params: action:string, actionExtra:string?)
+- `Spring.SetAlly` (params: firstAllyTeamID:integer, secondAllyTeamID:integer, ally:boolean)
+- `Spring.SetAllyTeamStartBox` (params: allyTeamID:integer, xMin:number, zMin:number, xMax:number, zMax:number)
+- `Spring.SetAtmosphere` (params: params:AtmosphereParams)
+- `Spring.SetAutoShowMetal` (params: autoShow:boolean)
+- `Spring.SetBoxSelectionByEngine` (params: state:boolean)
+- `Spring.SetBuildFacing` (params: facing:FacingInteger)
+- `Spring.SetBuildSpacing` (params: spacing:number)
+- `Spring.SetCameraOffset` (params: posX:number?, posY:number?, posZ:number?, tiltX:number?, tiltY:number?, tiltZ:number?)
+- `Spring.SetCameraState` (params: cameraState:CameraState, transitionTime:number?, transitionTimeFactor:number?, transitionTimeExponent:number?)
+- `Spring.SetCameraTarget` (params: x:number, y:number, z:number, transTime:number?)
+- `Spring.SetCheatingEnabled` (params: cheatsEnabled:boolean)
+- `Spring.SetClipboard` (params: text:string)
+- `Spring.SetConfigFloat` (params: name:string, value:number, useOverlay:boolean?)
+- `Spring.SetConfigInt` (params: name:string, value:integer, useOverlay:boolean?)
+- `Spring.SetConfigString` (params: name:string, value:string, useOverlay:boolean?)
+- `Spring.SetCustomCommandDrawData` (params: cmdID:integer, cmdReference:(string|integer)?, color:rgba?, showArea:boolean?)
+- `Spring.SetCustomPaletteColor` (params: index:integer, r:number, g:number, b:number)
+- `Spring.SetDollyCameraCurve` (params: degree:number, cpoints:ControlPoint[], knots:table)
+- `Spring.SetDollyCameraLookCurve` (params: degree:number, cpoints:ControlPoint[], knots:table)
+- `Spring.SetDollyCameraLookPosition` (params: x:number, y:number, z:number)
+- `Spring.SetDollyCameraLookUnit` (params: unitID:integer)
+- `Spring.SetDollyCameraMode` (params: mode:(1|2))
+- `Spring.SetDollyCameraPosition` (params: x:number, y:number, z:number)
+- `Spring.SetDollyCameraRelativeMode` (params: relativeMode:number)
+- `Spring.SetDrawGround` (params: drawGround:boolean)
+- `Spring.SetDrawGroundDeferred` (params: drawGroundDeferred:boolean, drawGroundForward:boolean?)
+- `Spring.SetDrawModelsDeferred` (params: drawUnitsDeferred:boolean, drawFeaturesDeferred:boolean, drawUnitsForward:boolean?, drawFeaturesForward:boolean?)
+- `Spring.SetDrawSelectionInfo` (params: enable:boolean)
+- `Spring.SetDrawSky` (params: drawSky:boolean)
+- `Spring.SetDrawWater` (params: drawWater:boolean)
+- `Spring.SetEngineBuildSquareRendering` (params: enabled:boolean)
+- `Spring.SetExperienceGrade` (params: expGrade:number, ExpPowerScale:number?, ExpHealthScale:number?, ExpReloadScale:number?)
+- `Spring.SetFactoryBuggerOff` (params: unitID:integer, buggerOff:boolean?, offset:number?, radius:number?, relHeading:Heading?, spherical:boolean?, forced:boolean?)
+- `Spring.SetFeatureAlwaysUpdateMatrix` (params: featureID:integer, alwaysUpdateMat:number)
+- `Spring.SetFeatureAlwaysVisible` (params: featureID:integer, enable:boolean)
+- `Spring.SetFeatureBlocking` (params: featureID:integer, isBlocking:boolean?, isSolidObjectCollidable:boolean?, isProjectileCollidable:boolean?, isRaySegmentCollidable:boolean?, crushable:boolean?, blockEnemyPushing:boolean?, blockHeightChanges:boolean?)
+- `Spring.SetFeatureCollisionVolumeData` (params: featureID:integer, scaleX:number, scaleY:number, scaleZ:number, offsetX:number, offsetY:number, offsetZ:number, vType:number, tType:number, Axis:number)
+- `Spring.SetFeatureDirection` (params: featureID:integer, frontx:number, fronty:number, frontz:number)
+- `Spring.SetFeatureEngineDrawMask` (params: featureID:integer, engineDrawMask:number)
+- `Spring.SetFeatureFade` (params: featureID:integer, allow:boolean)
+- `Spring.SetFeatureFireTime` (params: featureID:integer, fireTime:number)
+- `Spring.SetFeatureHeadingAndUpDir` (params: featureID:integer, heading:Heading, upx:number, upy:number, upz:number)
+- `Spring.SetFeatureHealth` (params: featureID:integer, health:number, checkDestruction:boolean?)
+- `Spring.SetFeatureMass` (params: featureID:integer, mass:number)
+- `Spring.SetFeatureMaxHealth` (params: featureID:integer, maxHealth:number)
+- `Spring.SetFeatureMidAndAimPos` (params: featureID:integer, mpX:number, mpY:number, mpZ:number, apX:number, apY:number, apZ:number, relative:boolean?)
+- `Spring.SetFeatureMoveCtrl` (params: featureID:integer, enabled:true, initialVelocityX:number?, initialVelocityY:number?, initialVelocityZ:number?, accelerationX:number?, accelerationY:number?, accelerationZ:number?)
+- `Spring.SetFeatureNoDraw` (params: featureID:integer, noDraw:boolean)
+- `Spring.SetFeatureNoSelect` (params: featureID:integer, noSelect:boolean)
+- `Spring.SetFeaturePaletteIndex` (params: featureID:integer, customIndex:integer?)
+- `Spring.SetFeaturePhysics` (params: featureID:integer, posX:number, posY:number, posZ:number, velX:number, velY:number, velZ:number, rotX:number, rotY:number, rotZ:number, dragX:number, dragY:number, dragZ:number)
+- `Spring.SetFeaturePieceCollisionVolumeData` (params: featureID:integer, pieceIndex:number, enable:boolean, scaleX:number, scaleY:number, scaleZ:number, offsetX:number, offsetY:number, offsetZ:number, Axis:number, volumeType:number, primaryAxis:number?)
+- `Spring.SetFeaturePieceMatrix` (params: featureID:integer, pieceIndex:number, matrix:number[])
+- `Spring.SetFeaturePieceVisible` (params: featureID:integer, pieceIndex:number, visible:boolean)
+- `Spring.SetFeaturePosition` (params: featureID:integer, x:number, y:number, z:number, snapToGround:boolean?)
+- `Spring.SetFeatureRadiusAndHeight` (params: featureID:integer, radius:number, height:number)
+- `Spring.SetFeatureReclaim` (params: featureID:integer, reclaimLeft:number)
+- `Spring.SetFeatureResources` (params: featureID:integer, metal:number, energy:number, reclaimTime:number?, reclaimLeft:number?, featureDefMetal:number?, featureDefEnergy:number?)
+- `Spring.SetFeatureResurrect` (params: featureID:integer, unitDef:(string|integer), facing:Facing?, progress:number?)
+- `Spring.SetFeatureRotation` (params: featureID:integer, pitch:number, yaw:number, roll:number)
+- `Spring.SetFeatureRulesParam` (params: featureID:integer, paramName:string, paramValue:(number|string)?, losAccess:losAccess?)
+- `Spring.SetFeatureSelectionVolumeData` (params: featureID:integer, scaleX:number, scaleY:number, scaleZ:number, offsetX:number, offsetY:number, offsetZ:number, vType:number, tType:number, Axis:number)
+- `Spring.SetFeatureSmokeTime` (params: featureID:integer, smokeTime:number)
+- `Spring.SetFeatureUseAirLos` (params: featureID:integer, useAirLos:boolean)
+- `Spring.SetFeatureVelocity` (params: featureID:integer, velX:number, velY:number, velZ:number)
+- `Spring.SetGameRulesParam` (params: paramName:string, paramValue:(number|string)?, losAccess:losAccess?)
+- `Spring.SetGlobalLos` (params: allyTeamID:integer, globallos:boolean)
+- `Spring.SetGodMode` (params: controlAllies:boolean?, controlEnemies:boolean?)
+- `Spring.SetGroundDecalAlpha` (params: decalID:integer, alpha:number?, alphaFalloff:number?)
+- `Spring.SetGroundDecalCreationFrame` (params: decalID:integer, creationFrameMin:number?, creationFrameMax:number?)
+- `Spring.SetGroundDecalGlowParams` (params: decalID:integer, glow:number?, glowFalloff:number?)
+- `Spring.SetGroundDecalMisc` (params: decalID:integer, dotElimExp:number?, refHeight:number?, minHeight:number?, maxHeight:number?, forceHeightMode:number?)
+- `Spring.SetGroundDecalNormal` (params: decalID:integer, normalX:number?, normalY:number?, normalZ:number?)
+- `Spring.SetGroundDecalPosAndDims` (params: decalID:integer, midPosX:number?, midPosZ:number?, sizeX:number?, sizeZ:number?, projCubeHeight:number?)
+- `Spring.SetGroundDecalQuadPosAndHeight` (params: decalID:integer, posTL:xz?, posTR:xz?, posBR:xz?, posBL:xz?, projCubeHeight:number?)
+- `Spring.SetGroundDecalRotation` (params: decalID:integer, rot:number?)
+- `Spring.SetGroundDecalTexture` (params: decalID:integer, textureName:string, isMainTex:boolean?)
+- `Spring.SetGroundDecalTextureParams` (params: decalID:integer, texWrapDistance:number?, texTraveledDistance:number?)
+- `Spring.SetGroundDecalTint` (params: decalID:integer, tintColR:number?, tintColG:number?, tintColB:number?, tintColA:number?)
+- `Spring.SetGroundDecalUserData` (params: decalID:integer, udQuad:integer, x:number?, y:number?, z:number?, w:number?)
+- `Spring.SetHeightMap` (params: x:number, z:number, height:number, terraform:number?)
+- `Spring.SetHeightMapFunc` (params: luaFunction:function, arg:number, ...:number)
+- `Spring.SetLastMessagePosition` (params: x:number, y:number, z:number)
+- `Spring.SetLogSectionFilterLevel` (params: sectionName:string, logLevel:(string|number)?)
+- `Spring.SetLosViewColors` (params: always:rgb, LOS:rgb, radar:rgb, jam:rgb, radar2:rgb)
+- `Spring.SetMapLightTrackingState` (params: lightHandle:number, unitOrProjectileID:integer, enableTracking:boolean, unitOrProjectile:boolean)
+- `Spring.SetMapRenderingParams` (params: params:MapRenderingParams)
+- `Spring.SetMapShader` (params: standardShaderID:integer, deferredShaderID:integer)
+- `Spring.SetMapShadingTexture` (params: texType:string, texName:string)
+- `Spring.SetMapSquareTerrainType` (params: x:number, z:number, newType:number)
+- `Spring.SetMapSquareTexture` (params: texSqrX:number, texSqrY:number, luaTexName:string)
+- `Spring.SetMetalAmount` (params: x:integer, z:integer, metalAmount:number)
+- `Spring.SetMiniMapRotation` (params: rotation:number)
+- `Spring.SetModelLightTrackingState` (params: lightHandle:number, unitOrProjectileID:integer, enableTracking:boolean, unitOrProjectile:boolean)
+- `Spring.SetMouseCursor` (params: cursorName:string, cursorScale:number?)
+- `Spring.SetNanoProjectileParams` (params: rotVal:number?, rotVel:number?, rotAcc:number?, rotValRng:number?, rotVelRng:number?, rotAccRng:number?)
+- `Spring.SetNoPause` (params: noPause:boolean)
+- `Spring.SetOriginalHeightMap` (params: x:number, y:number, height:number, factor:number?)
+- `Spring.SetOriginalHeightMapFunc` (params: heightMapFunc:function)
+- `Spring.SetPieceProjectileParams` (params: projectileID:integer, explosionFlags:number?, spinAngle:number?, spinSpeed:number?, spinVectorX:number?, spinVectorY:number?, spinVectorZ:number?)
+- `Spring.SetPlayerReadyState` (params: playerID:integer, ready:boolean)
+- `Spring.SetPlayerRulesParam` (params: playerID:integer, paramName:string, paramValue:(number|string)?, losAccess:losAccess?)
+- `Spring.SetProjectileAlwaysVisible` (params: projectileID:integer, alwaysVisible:boolean)
+- `Spring.SetProjectileCEG` (params: projectileID:integer, ceg_name:string)
+- `Spring.SetProjectileCollision` (params: projectileID:integer)
+- `Spring.SetProjectileDamages` (params: unitID:integer, weaponNum:integer, key:string, value:number)
+- `Spring.SetProjectileGravity` (params: projectileID:integer, grav:number?)
+- `Spring.SetProjectileIgnoreTrackingError` (params: projectileID:integer, ignore:boolean)
+- `Spring.SetProjectileIsIntercepted` (params: projectileID:integer)
+- `Spring.SetProjectileMoveControl` (params: projectileID:integer, enable:boolean)
+- `Spring.SetProjectilePosition` (params: projectileID:integer, posX:number?, posY:number?, posZ:number?)
+- `Spring.SetProjectileTarget` (params: projectileID:integer, targetID:number, targetType:ProjectileTargetType)
+- `Spring.SetProjectileTimeToLive` (params: projectileID:integer, ttl:number)
+- `Spring.SetProjectileUseAirLos` (params: projectileID:integer, useAirLos:boolean)
+- `Spring.SetProjectileVelocity` (params: projectileID:integer, velX:number, velY:number, velZ:number)
+- `Spring.SetRadarErrorParams` (params: allyTeamID:integer, allyteamErrorSize:number, baseErrorSize:number?, baseErrorMult:number?)
+- `Spring.SetShareLevel` (params: resource:string, shareLevel:number)
+- `Spring.SetSkyBoxTexture` (params: texName:string)
+- `Spring.SetSmoothMesh` (params: x:number, z:number, height:number, terraform:number?)
+- `Spring.SetSmoothMeshFunc` (params: luaFunction:function, arg:any, ...:any)
+- `Spring.SetSoundEffectParams` (params: )
+- `Spring.SetSoundStreamVolume` (params: volume:number)
+- `Spring.SetSquareBuildingMask` (params: x:number, z:number, mask:number)
+- `Spring.SetSunDirection` (params: dirX:number, dirY:number, dirZ:number, intensity:number?)
+- `Spring.SetSunLighting` (params: params:{ groundAmbientColor: rgb, groundDiffuseColor: rgb })
+- `Spring.SetTeamColor` (params: teamID:integer, r:number, g:number, b:number)
+- `Spring.SetTeamResource` (params: teamID:integer, resource:(ResourceName|StorageName), amount:number)
+- `Spring.SetTeamRulesParam` (params: teamID:integer, paramName:string, paramValue:(number|string)?, losAccess:losAccess?)
+- `Spring.SetTeamShareLevel` (params: teamID:integer, type:ResourceName, amount:number)
+- `Spring.SetTeamStartPosition` (params: teamID:integer, x:number, y:number, z:number)
+- `Spring.SetTerrainTypeData` (params: typeIndex:number, speedTanks:number?, speedKBOts:number?, speedHovers:number?, speedShips:number?)
+- `Spring.SetTidal` (params: strength:number)
+- `Spring.SetUnitAlwaysUpdateMatrix` (params: unitID:integer, alwaysUpdateMatrix:boolean)
+- `Spring.SetUnitAlwaysVisible` (params: unitID:integer, alwaysVisible:boolean)
+- `Spring.SetUnitArmored` (params: unitID:integer, armored:boolean?, armorMultiple:number?)
+- `Spring.SetUnitBlocking` (params: unitID:integer, isBlocking:boolean?, isSolidObjectCollidable:boolean?, isProjectileCollidable:boolean?, isRaySegmentCollidable:boolean?, crushable:boolean?, blockEnemyPushing:boolean?, blockHeightChanges:boolean?)
+- `Spring.SetUnitBuildParams` (params: unitID:integer, paramName:string, value:(number|boolean))
+- `Spring.SetUnitBuildSpeed` (params: builderID:integer, buildSpeed:number, repairSpeed:number?, reclaimSpeed:number?, captureSpeed:number?, terraformSpeed:number?)
+- `Spring.SetUnitBuildeeRadius` (params: unitID:integer, build:number)
+- `Spring.SetUnitCloak` (params: unitID:integer, cloak:(boolean|number), cloakArg:(boolean|number))
+- `Spring.SetUnitCollisionVolumeData` (params: unitID:integer, scaleX:number, scaleY:number, scaleZ:number, offsetX:number, offsetY:number, offsetZ:number, vType:number, tType:number, Axis:number)
+- `Spring.SetUnitCosts` (params: unitID:integer, where:table<number,number>)
+- `Spring.SetUnitCrashing` (params: unitID:integer, crashing:boolean)
+- `Spring.SetUnitDefIcon` (params: unitDefID:integer, iconName:string)
+- `Spring.SetUnitDefImage` (params: unitDefID:integer, image:string)
+- `Spring.SetUnitDirection` (params: unitID:integer, frontx:number, fronty:number, frontz:number)
+- `Spring.SetUnitEngineDrawMask` (params: unitID:integer, drawMask:number)
+- `Spring.SetUnitExperience` (params: unitID:integer, experience:number)
+- `Spring.SetUnitFlanking` (params: unitID:integer, type:string, arg1:number, y:number?, z:number?)
+- `Spring.SetUnitGroup` (params: unitID:integer, groupID:integer)
+- `Spring.SetUnitHarvestStorage` (params: unitID:integer, metal:number)
+- `Spring.SetUnitHeadingAndUpDir` (params: unitID:integer, heading:Heading, upx:number, upy:number, upz:number)
+- `Spring.SetUnitHealth` (params: unitID:integer, health:(number|SetUnitHealthAmounts))
+- `Spring.SetUnitIcon` (params: unitID:integer, drawIcon:boolean)
+- `Spring.SetUnitIconDraw` (params: unitID:integer, drawIcon:boolean)
+- `Spring.SetUnitLandGoal` (params: unitID:integer, goalX:number, goalY:number, goalZ:number, goalRadius:number?)
+- `Spring.SetUnitLeaveTracks` (params: unitID:integer, unitLeaveTracks:boolean)
+- `Spring.SetUnitLeavesGhost` (params: leavesGhost:boolean, leaveDeadGhost:boolean?)
+- `Spring.SetUnitLoadingTransport` (params: passengerID:integer, transportID:integer)
+- `Spring.SetUnitLosMask` (params: unitID:integer, allyTeam:number, losTypes:(LosTable|LosMask|integer))
+- `Spring.SetUnitLosState` (params: unitID:integer, allyTeam:number, losTypes:(LosTable|LosMask|integer))
+- `Spring.SetUnitMass` (params: unitID:integer, mass:number)
+- `Spring.SetUnitMaxHealth` (params: unitID:integer, maxHealth:number)
+- `Spring.SetUnitMaxRange` (params: unitID:integer, maxRange:number)
+- `Spring.SetUnitMetalExtraction` (params: unitID:integer, depth:number, range:number?)
+- `Spring.SetUnitMidAndAimPos` (params: unitID:integer, mpX:number, mpY:number, mpZ:number, apX:number, apY:number, apZ:number, relative:boolean?)
+- `Spring.SetUnitMoveGoal` (params: unitID:integer, goalX:number, goalY:number, goalZ:number, goalRadius:number?, moveSpeed:number?, moveRaw:boolean?)
+- `Spring.SetUnitNanoPieces` (params: builderID:integer, pieces:table)
+- `Spring.SetUnitNeutral` (params: unitID:integer, neutral:boolean)
+- `Spring.SetUnitNoDraw` (params: unitID:integer, noDraw:boolean)
+- `Spring.SetUnitNoGroup` (params: unitID:integer, unitNoGroup:boolean)
+- `Spring.SetUnitNoMinimap` (params: unitID:integer, unitNoMinimap:boolean)
+- `Spring.SetUnitNoSelect` (params: unitID:integer, unitNoSelect:boolean)
+- `Spring.SetUnitPaletteIndex` (params: unitID:integer, customIndex:integer?)
+- `Spring.SetUnitPhysicalStateBit` (params: unitID:integer, Physical:)
+- `Spring.SetUnitPhysics` (params: unitID:integer, posX:number, posY:number, posZ:number, velX:number, velY:number, velZ:number, rotX:number, rotY:number, rotZ:number, dragX:number, dragY:number, dragZ:number)
+- `Spring.SetUnitPieceCollisionVolumeData` (params: unitID:integer, pieceIndex:number, enable:boolean, scaleX:number, scaleY:number, scaleZ:number, offsetX:number, offsetY:number, offsetZ:number, volumeType:number?, primaryAxis:number?)
+- `Spring.SetUnitPieceMatrix` (params: unitID:integer, pieceNum:number, matrix:number[])
+- `Spring.SetUnitPieceParent` (params: unitID:integer, AlteredPiece:number, ParentPiece:number)
+- `Spring.SetUnitPieceVisible` (params: unitID:integer, pieceIndex:number, visible:boolean)
+- `Spring.SetUnitPosErrorParams` (params: unitID:integer, posErrorVectorX:number, posErrorVectorY:number, posErrorVectorZ:number, posErrorDeltaX:number, posErrorDeltaY:number, posErrorDeltaZ:number, nextPosErrorUpdate:number?)
+- `Spring.SetUnitPosition` (params: unitID:integer, x:number, z:number, floating:boolean?)
+- `Spring.SetUnitRadiusAndHeight` (params: unitID:integer, radius:number, height:number)
+- `Spring.SetUnitResourcing` (params: unitID:integer, res:string, amount:number)
+- `Spring.SetUnitRotation` (params: unitID:integer, pitch:number, yaw:number, roll:number)
+- `Spring.SetUnitRulesParam` (params: unitID:integer, paramName:string, paramValue:(number|string)?, losAccess:losAccess?)
+- `Spring.SetUnitSeismicSignature` (params: unitID:integer, seismicSignature:number)
+- `Spring.SetUnitSelectionVolumeData` (params: unitID:integer, featureID:integer, scaleX:number, scaleY:number, scaleZ:number, offsetX:number, offsetY:number, offsetZ:number, vType:number, tType:number, Axis:number)
+- `Spring.SetUnitSensorRadius` (params: unitID:integer, type:("los"|"airLos"|"radar"|"sonar"|"seismic"|"radarJammer"...), radius:number)
+- `Spring.SetUnitShieldRechargeDelay` (params: unitID:integer, weaponID:integer?, rechargeTime:number?)
+- `Spring.SetUnitShieldState` (params: unitID:integer, weaponID:integer?, enabled:boolean?, power:number?)
+- `Spring.SetUnitSonarStealth` (params: unitID:integer, sonarStealth:boolean)
+- `Spring.SetUnitStealth` (params: unitID:integer, stealth:boolean)
+- `Spring.SetUnitStockpile` (params: unitID:integer, stockpile:number?, buildPercent:number?)
+- `Spring.SetUnitStorage` (params: unitID:integer, res:string, amount:number)
+- `Spring.SetUnitTarget` (params: unitID:integer, enemyUnitID:integer?, dgun:boolean?, userTarget:boolean?, weaponNum:number?)
+- `Spring.SetUnitTooltip` (params: unitID:integer, tooltip:string)
+- `Spring.SetUnitUseAirLos` (params: unitID:integer, useAirLos:boolean)
+- `Spring.SetUnitUseWeapons` (params: unitID:integer, forceUseWeapons:number?, allowUseWeapons:number?)
+- `Spring.SetUnitVelocity` (params: unitID:integer, velX:number, velY:number, velZ:number)
+- `Spring.SetUnitWeaponDamages` (params: unitID:integer, weaponNum:(number|"selfDestruct"|"explode"), damages:WeaponDamages)
+- `Spring.SetUnitWeaponState` (params: unitID:integer, weaponNum:number, states:WeaponState)
+- `Spring.SetVideoCapturingMode` (params: allowCaptureMode:boolean)
+- `Spring.SetVideoCapturingTimeOffset` (params: timeOffset:boolean)
+- `Spring.SetWMCaption` (params: title:string, titleShort:string?)
+- `Spring.SetWMIcon` (params: iconFileName:string)
+- `Spring.SetWaterParams` (params: waterParams:WaterParams)
+- `Spring.SetWind` (params: displayIndex:number, winRelPosX:number, winRelPosY:number, winSizeX:number, winSizeY:number, fullScreen:boolean, borderless:boolean)
+- `Spring.SetWindowGeometry` (params: displayIndex:number, winRelPosX:number, winRelPosY:number, winSizeX:number, winSizeY:number, fullScreen:boolean, borderless:boolean)
+- `Spring.SetWindowMaximized` (params: )
+- `Spring.SetWindowMinimized` (params: )
+- `Spring.ShareResources` (params: teamID:integer, units:string)
+- `Spring.ShareTeamResource` (params: teamID_src:integer, teamID_recv:integer, type:ResourceName, amount:number)
+- `Spring.SolveNURBSCurve` (params: groupID:integer)
+- `Spring.SpawnCEG` (params: cegname:string, posX:number?, posY:number?, posZ:number?, dirX:number?, dirY:number?, dirZ:number?, radius:number?, damage:number?)
+- `Spring.SpawnExplosion` (params: posX:number?, posY:number?, posZ:number?, dirX:number?, dirY:number?, dirZ:number?, explosionParams:ExplosionParams)
+- `Spring.SpawnProjectile` (params: weaponDefID:integer, projectileParams:ProjectileParams)
+- `Spring.SpawnSFX` (params: unitID:integer?, sfxID:integer?, posX:number?, posY:number?, posZ:number?, dirX:number?, dirY:number?, dirZ:number?, radius:number?, damage:number?, absolute:boolean?)
+- `Spring.Start` (params: commandline_args:string, startScript:string)
+- `Spring.StopSoundStream` (params: )
+- `Spring.TestBuildOrder` (params: unitDefID:integer, x:number, y:number, z:number, facing:Facing)
+- `Spring.TestMoveOrder` (params: unitDefID:integer, posX:number, posY:number, posZ:number, dirX:number?, dirY:number?, dirZ:number?, testTerrain:boolean?, testObjects:boolean?, centerOnly:boolean?)
+- `Spring.TraceRayGroundBetweenPositions` (params: startX:number, startY:number, startZ:number, endX:number, endY:number, endZ:number, testWater:boolean?)
+- `Spring.TraceRayGroundInDirection` (params: posX:number, posY:number, posZ:number, dirX:number, dirY:number, dirZ:number, testWater:boolean?)
+- `Spring.TraceScreenRay` (params: screenX:number, screenY:number, onlyCoords:boolean?, useMinimap:boolean?, includeSky:boolean?, ignoreWater:boolean?, heightOffset:number?)
+- `Spring.TransferFeature` (params: featureID:integer, teamID:integer)
+- `Spring.TransferTeamMaxUnits` (params: fromTeamID:number, newTeamID:number, transferAmnt:number)
+- `Spring.TransferUnit` (params: unitID:integer, newTeamID:integer, given:boolean?, adjustUnitLimit:boolean?)
+- `Spring.UnitAttach` (params: transporterID:integer, passengerID:integer, pieceNum:number, force:boolean)
+- `Spring.UnitDetach` (params: passengerID:integer)
+- `Spring.UnitDetachFromAir` (params: passengerID:integer)
+- `Spring.UnitFinishCommand` (params: unitID:integer)
+- `Spring.UnitIconGetDraw` (params: unitID:integer)
+- `Spring.UnitIconSetDraw` (params: unitID:integer, drawIcon:boolean)
+- `Spring.UnitWeaponFire` (params: unitID:integer, weaponID:integer)
+- `Spring.UnitWeaponHoldFire` (params: unitID:integer, weaponID:integer)
+- `Spring.UpdateMapLight` (params: lightHandle:number, lightParams:LightParams)
+- `Spring.UpdateModelLight` (params: lightHandle:number, lightParams:LightParams)
+- `Spring.UseTeamResource` (params: teamID:integer, type:ResourceName, amount:number)
+- `Spring.UseUnitResource` (params: unitID:integer, resource:ResourceName, amount:number)
+- `Spring.ValidFeatureID` (params: featureID:integer)
+- `Spring.ValidUnitID` (params: unitID:integer)
+- `Spring.WarpMouse` (params: x:number, y:number)
+- `Spring.WorldToScreenCoords` (params: x:number, y:number, z:number)
+- `Spring.Yield` (params: )
 
-### VFS (44 functions)
+### VFS (37 functions)
 
-- `VFS.BASE`
-- `VFS.CalculateHash`
-- `VFS.CompressFolder`
-- `VFS.DirList`
-- `VFS.FileExists`
-- `VFS.GAME`
-- `VFS.GetAllArchives`
-- `VFS.GetArchiveChecksum`
-- `VFS.GetArchiveContainingFile`
-- `VFS.GetArchiveDependencies`
-- `VFS.GetArchiveInfo`
-- `VFS.GetArchivePath`
-- `VFS.GetArchiveReplaces`
-- `VFS.GetAvailableAIs`
-- `VFS.GetFileAbsolutePath`
-- `VFS.GetGames`
-- `VFS.GetLoadedArchives`
-- `VFS.GetMaps`
-- `VFS.GetNameFromRapidTag`
-- `VFS.HasArchive`
-- `VFS.Include`
-- `VFS.LoadFile`
-- `VFS.MAP`
-- `VFS.MENU`
-- `VFS.MOD`
-- `VFS.PackS16`
-- `VFS.PackS32`
-- `VFS.PackS8`
-- `VFS.PackU16`
-- `VFS.PackU32`
-- `VFS.PackU8`
-- `VFS.RAW`
-- `VFS.SubDirs`
-- `VFS.UnpackF32`
-- `VFS.UnpackS16`
-- `VFS.UnpackS32`
-- `VFS.UnpackS8`
-- `VFS.UnpackU16`
-- `VFS.UnpackU32`
-- `VFS.UnpackU8`
-- `VFS.UseArchive`
-- `VFS.ZIP`
-- `VFS.ZlibCompress`
-- `VFS.ZlibDecompress`
+- `VFS.CalculateHash` (params: input:string, hashType:HashType)
+- `VFS.CompressFolder` (params: folderPath:string, archiveType:string?, compressedFilePath:string?, includeFolder:boolean?, mode:string?)
+- `VFS.DirList` (params: directory:string, pattern:string?, mode:string?, recursive:boolean?)
+- `VFS.FileExists` (params: filename:string, mode:string?)
+- `VFS.GetAllArchives` (params: )
+- `VFS.GetArchiveChecksum` (params: archiveName:string)
+- `VFS.GetArchiveContainingFile` (params: filename:string, mode:string?)
+- `VFS.GetArchiveDependencies` (params: archiveName:string)
+- `VFS.GetArchiveInfo` (params: archiveName:string)
+- `VFS.GetArchivePath` (params: archiveName:string)
+- `VFS.GetArchiveReplaces` (params: archiveName:string)
+- `VFS.GetAvailableAIs` (params: gameArchiveName:string?, mapArichiveName:string?)
+- `VFS.GetFileAbsolutePath` (params: filename:string, mode:string?)
+- `VFS.GetGames` (params: )
+- `VFS.GetLoadedArchives` (params: )
+- `VFS.GetMaps` (params: )
+- `VFS.GetNameFromRapidTag` (params: rapidTag:string)
+- `VFS.HasArchive` (params: )
+- `VFS.Include` (params: filename:string, environment:table?, mode:string?)
+- `VFS.LoadFile` (params: filename:string, mode:string?)
+- `VFS.PackS16` (params: ...:integer)
+- `VFS.PackS32` (params: ...:integer)
+- `VFS.PackS8` (params: ...:integer)
+- `VFS.PackU16` (params: ...:integer)
+- `VFS.PackU32` (params: ...:integer)
+- `VFS.PackU8` (params: ...:integer)
+- `VFS.SubDirs` (params: directory:string, pattern:string?, mode:string?, recursive:boolean?)
+- `VFS.UnpackF32` (params: str:string, pos:integer?)
+- `VFS.UnpackS16` (params: str:string, pos:integer?)
+- `VFS.UnpackS32` (params: str:string, pos:integer?)
+- `VFS.UnpackS8` (params: str:string, pos:integer?)
+- `VFS.UnpackU16` (params: str:string, pos:integer?)
+- `VFS.UnpackU32` (params: str:string, pos:integer?)
+- `VFS.UnpackU8` (params: str:string, pos:integer?)
+- `VFS.UseArchive` (params: archiveName:string, fun:unknown)
+- `VFS.ZlibCompress` (params: uncompressed:string)
+- `VFS.ZlibDecompress` (params: compressed:string)
 
 ### gl (177 functions)
 
-- `gl.ActiveFBO`
-- `gl.ActiveShader`
-- `gl.ActiveTexture`
-- `gl.AddAtlasTexture`
-- `gl.AddFallbackFont`
-- `gl.AlphaTest`
-- `gl.AlphaToCoverage`
-- `gl.BeginEnd`
-- `gl.BeginText`
-- `gl.Billboard`
-- `gl.BindImageTexture`
-- `gl.BlendEquation`
-- `gl.BlendEquationSeparate`
-- `gl.BlendFunc`
-- `gl.BlendFuncSeparate`
-- `gl.Blending`
-- `gl.BlitFBO`
-- `gl.CallList`
-- `gl.ChangeTextureParams`
-- `gl.Clear`
-- `gl.ClearAttachmentFBO`
-- `gl.ClearFallbackFonts`
-- `gl.ClipDistance`
-- `gl.ClipPlane`
-- `gl.Color`
-- `gl.ColorMask`
-- `gl.ConfigMiniMap`
-- `gl.CopyToTexture`
-- `gl.CreateFBO`
-- `gl.CreateList`
-- `gl.CreateQuery`
-- `gl.CreateRBO`
-- `gl.CreateShader`
-- `gl.CreateTexture`
-- `gl.CreateTextureAtlas`
-- `gl.Culling`
-- `gl.DeleteFBO`
-- `gl.DeleteList`
-- `gl.DeleteQuery`
-- `gl.DeleteRBO`
-- `gl.DeleteShader`
-- `gl.DeleteTexture`
-- `gl.DeleteTextureAtlas`
-- `gl.DeleteTextureFBO`
-- `gl.DepthClamp`
-- `gl.DepthMask`
-- `gl.DepthTest`
-- `gl.DispatchCompute`
-- `gl.DrawFuncAtUnit`
-- `gl.DrawGroundCircle`
-- `gl.DrawListAtUnit`
-- `gl.DrawMiniMap`
-- `gl.EdgeFlag`
-- `gl.EndText`
-- `gl.Feature`
-- `gl.FeatureMultMatrix`
-- `gl.FeaturePiece`
-- `gl.FeaturePieceMatrix`
-- `gl.FeaturePieceMultMatrix`
-- `gl.FeatureRaw`
-- `gl.FeatureShape`
-- `gl.FeatureShapeTextures`
-- `gl.FeatureTextures`
-- `gl.FinalizeTextureAtlas`
-- `gl.Finish`
-- `gl.Flush`
-- `gl.Fog`
-- `gl.FogCoord`
-- `gl.Frustum`
-- `gl.GenerateMipmap`
-- `gl.GetActiveUniforms`
-- `gl.GetAtlasTexture`
-- `gl.GetAtmosphere`
-- `gl.GetEngineAtlasTextures`
-- `gl.GetEngineModelUniformDataDef`
-- `gl.GetEngineModelUniformDataSize`
-- `gl.GetEngineUniformBufferDef`
-- `gl.GetFixedState`
-- `gl.GetGlobalTexCoords`
-- `gl.GetGlobalTexNames`
-- `gl.GetMapRendering`
-- `gl.GetMatrixData`
-- `gl.GetNumber`
-- `gl.GetQuery`
-- `gl.GetScreenViewTrans`
-- `gl.GetShaderLog`
-- `gl.GetShadowMapParams`
-- `gl.GetString`
-- `gl.GetSun`
-- `gl.GetTextHeight`
-- `gl.GetTextWidth`
-- `gl.GetUniformLocation`
-- `gl.GetVAO`
-- `gl.GetVBO`
-- `gl.GetViewRange`
-- `gl.GetViewSizes`
-- `gl.GetWaterRendering`
-- `gl.HasExtension`
-- `gl.IsValidFBO`
-- `gl.Light`
-- `gl.Lighting`
-- `gl.LineStipple`
-- `gl.LineWidth`
-- `gl.LoadIdentity`
-- `gl.LoadMatrix`
-- `gl.LogicOp`
-- `gl.Material`
-- `gl.MatrixMode`
-- `gl.MemoryBarrier`
-- `gl.MultMatrix`
-- `gl.MultiTexCoord`
-- `gl.MultiTexEnv`
-- `gl.MultiTexGen`
-- `gl.Normal`
-- `gl.ObjectLabel`
-- `gl.Ortho`
-- `gl.PointParameter`
-- `gl.PointSize`
-- `gl.PointSprite`
-- `gl.PolygonMode`
-- `gl.PolygonOffset`
-- `gl.PopAttrib`
-- `gl.PopDebugGroup`
-- `gl.PopMatrix`
-- `gl.PushAttrib`
-- `gl.PushDebugGroup`
-- `gl.PushMatrix`
-- `gl.PushPopMatrix`
-- `gl.RawBindFBO`
-- `gl.ReadPixels`
-- `gl.Rect`
-- `gl.RenderToTexture`
-- `gl.ResetMatrices`
-- `gl.ResetState`
-- `gl.Rotate`
-- `gl.RunQuery`
-- `gl.SaveImage`
-- `gl.Scale`
-- `gl.Scissor`
-- `gl.SecondaryColor`
-- `gl.SetGeometryShaderParameter`
-- `gl.SetTesselationShaderParameter`
-- `gl.ShadeModel`
-- `gl.Shape`
-- `gl.SlaveMiniMap`
-- `gl.StencilFunc`
-- `gl.StencilFuncSeparate`
-- `gl.StencilMask`
-- `gl.StencilMaskSeparate`
-- `gl.StencilOp`
-- `gl.StencilOpSeparate`
-- `gl.StencilTest`
-- `gl.SwapBuffers`
-- `gl.TexCoord`
-- `gl.TexGen`
-- `gl.Text`
-- `gl.TextEnv`
-- `gl.Texture`
-- `gl.TextureInfo`
-- `gl.Translate`
-- `gl.Uniform`
-- `gl.UniformArray`
-- `gl.UniformInt`
-- `gl.UniformMatrix`
-- `gl.Unit`
-- `gl.UnitMultMatrix`
-- `gl.UnitPiece`
-- `gl.UnitPieceMatrix`
-- `gl.UnitPieceMultMatrix`
-- `gl.UnitRaw`
-- `gl.UnitShape`
-- `gl.UnitShapeTextures`
-- `gl.UnitTextures`
-- `gl.UnsafeState`
-- `gl.UseShader`
-- `gl.Vertex`
-- `gl.Viewport`
+- `gl.ActiveFBO` (params: fbo:FBO, func:fun(...), ...:any)
+- `gl.ActiveShader` (params: shaderID:integer, func:function, ...:any)
+- `gl.ActiveTexture` (params: texNum:integer, func:function, ...:any)
+- `gl.AddAtlasTexture` (params: texName:string, subAtlasTexName:string)
+- `gl.AddFallbackFont` (params: filePath:string)
+- `gl.AlphaTest` (params: enable:boolean)
+- `gl.AlphaToCoverage` (params: enable:boolean)
+- `gl.BeginEnd` (params: primMode:GL, fun:unknown, ...:any)
+- `gl.BeginText` (params: userDefinedBlending:boolean?)
+- `gl.Billboard` (params: )
+- `gl.BindImageTexture` (params: unit:integer, texID:string?, level:integer?, layer:integer?, access:GL?, format:integer)
+- `gl.BlendEquation` (params: mode:GL)
+- `gl.BlendEquationSeparate` (params: modeRGB:GL, modeAlpha:GL)
+- `gl.BlendFunc` (params: src:GL, dst:GL)
+- `gl.BlendFuncSeparate` (params: srcRGB:GL, dstRGB:GL, srcAlpha:GL, dstAlpha:GL)
+- `gl.Blending` (params: enable:boolean)
+- `gl.BlitFBO` (params: x0Src:number, y0Src:number, x1Src:number, y1Src:number, x0Dst:number, y0Dst:number, x1Dst:number, y1Dst:number, mask:number?, filter:number?)
+- `gl.CallList` (params: listIndex:integer)
+- `gl.ChangeTextureParams` (params: texName:string, params:Texture)
+- `gl.Clear` (params: target:number?, attachment:(GL|Attachment), clearValue0:number?, clearValue1:number?, clearValue2:number?, clearValue3:number?)
+- `gl.ClearAttachmentFBO` (params: target:number?, attachment:(GL|Attachment), clearValue0:number?, clearValue1:number?, clearValue2:number?, clearValue3:number?)
+- `gl.ClearFallbackFonts` (params: )
+- `gl.ClipDistance` (params: clipId:integer, enable:boolean)
+- `gl.ClipPlane` (params: plane:integer, enable:boolean)
+- `gl.Color` (params: r:number, g:number, b:number, a:number?)
+- `gl.ColorMask` (params: rgba:boolean)
+- `gl.ConfigMiniMap` (params: px:integer, py:integer, sx:integer, sy:integer)
+- `gl.CopyToTexture` (params: texName:string, xoff:integer, yoff:integer, x:integer, y:integer, w:integer, h:integer, target:GL?, level:GL?)
+- `gl.CreateFBO` (params: fboDesc:FBODescription)
+- `gl.CreateList` (params: func:fun(), ...:any)
+- `gl.CreateQuery` (params: )
+- `gl.CreateRBO` (params: xsize:integer, ysize:integer, data:CreateRBOData)
+- `gl.CreateShader` (params: shaderParams:ShaderParams)
+- `gl.CreateTexture` (params: xsize:integer, ysize:integer, texture:Texture)
+- `gl.CreateTextureAtlas` (params: xsize:integer, ysize:integer, allocType:integer?)
+- `gl.Culling` (params: enable:boolean)
+- `gl.DeleteFBO` (params: fbo:FBO)
+- `gl.DeleteList` (params: listIndex:integer)
+- `gl.DeleteQuery` (params: query:any)
+- `gl.DeleteRBO` (params: rbo:RBO)
+- `gl.DeleteShader` (params: shaderID:integer)
+- `gl.DeleteTexture` (params: texName:string)
+- `gl.DeleteTextureAtlas` (params: texName:string)
+- `gl.DeleteTextureFBO` (params: texName:string)
+- `gl.DepthClamp` (params: enable:boolean)
+- `gl.DepthMask` (params: enable:boolean)
+- `gl.DepthTest` (params: enable:boolean)
+- `gl.DispatchCompute` (params: numGroupX:integer, numGroupY:integer, numGroupZ:integer, barriers:integer?)
+- `gl.DrawFuncAtUnit` (params: unitID:integer, useMidPos:boolean?, fun:unknown, ...:any)
+- `gl.DrawGroundCircle` (params: posX:number, posY:number, posZ:number, radius:number, resolution:integer)
+- `gl.DrawListAtUnit` (params: unitID:integer, listIndex:integer, useMidPos:boolean?, scaleX:number?, scaleY:number?, scaleZ:number?, degrees:number?, rotX:number?, rotY:number?, rotZ:number?)
+- `gl.DrawMiniMap` (params: defaultTransform:boolean?)
+- `gl.EdgeFlag` (params: flag:boolean)
+- `gl.EndText` (params: )
+- `gl.Feature` (params: featureID:integer, doRawDraw:boolean?, useLuaMat:integer?, noLuaCall:boolean?)
+- `gl.FeatureMultMatrix` (params: featureID:integer)
+- `gl.FeaturePiece` (params: featureID:integer, pieceID:integer)
+- `gl.FeaturePieceMatrix` (params: featureID:integer, pieceID:integer)
+- `gl.FeaturePieceMultMatrix` (params: featureID:integer, pieceID:integer)
+- `gl.FeatureRaw` (params: featureID:integer, doRawDraw:boolean?, useLuaMat:integer?, noLuaCall:boolean?)
+- `gl.FeatureShape` (params: featureDefID:integer, teamID:integer, rawState:boolean?, toScreen:boolean?, opaque:boolean?)
+- `gl.FeatureShapeTextures` (params: featureDefID:integer, push:boolean)
+- `gl.FeatureTextures` (params: featureID:integer, push:boolean)
+- `gl.FinalizeTextureAtlas` (params: texName:string)
+- `gl.Finish` (params: )
+- `gl.Flush` (params: )
+- `gl.Fog` (params: coord:number)
+- `gl.FogCoord` (params: coord:number)
+- `gl.Frustum` (params: left:number, right:number, bottom:number, top:number, near:number, far:number)
+- `gl.GenerateMipmap` (params: texName:string)
+- `gl.GetActiveUniforms` (params: shaderID:integer)
+- `gl.GetAtlasTexture` (params: texName:string, subAtlasTexName:string)
+- `gl.GetAtmosphere` (params: )
+- `gl.GetEngineAtlasTextures` (params: atlasName:("$explosions"|"$groundfx"))
+- `gl.GetEngineModelUniformDataDef` (params: index:number)
+- `gl.GetEngineModelUniformDataSize` (params: index:number)
+- `gl.GetEngineUniformBufferDef` (params: index:number)
+- `gl.GetFixedState` (params: param:string, toStr:boolean?)
+- `gl.GetGlobalTexCoords` (params: )
+- `gl.GetGlobalTexNames` (params: )
+- `gl.GetMapRendering` (params: key:string)
+- `gl.GetMatrixData` (params: type:GL, index:integer)
+- `gl.GetNumber` (params: pname:GL, count:integer?)
+- `gl.GetQuery` (params: query:any)
+- `gl.GetScreenViewTrans` (params: )
+- `gl.GetShaderLog` (params: )
+- `gl.GetShadowMapParams` (params: )
+- `gl.GetString` (params: pname:GL)
+- `gl.GetSun` (params: )
+- `gl.GetTextHeight` (params: text:string)
+- `gl.GetTextWidth` (params: text:string)
+- `gl.GetUniformLocation` (params: shaderID:integer, name:string)
+- `gl.GetVAO` (params: )
+- `gl.GetVBO` (params: bufferType:GL?, freqUpdated:boolean?)
+- `gl.GetViewRange` (params: )
+- `gl.GetViewSizes` (params: )
+- `gl.GetWaterRendering` (params: key:string)
+- `gl.HasExtension` (params: ext:string)
+- `gl.IsValidFBO` (params: fbo:FBO, target:GL?)
+- `gl.Light` (params: enable:boolean)
+- `gl.Lighting` (params: enable:boolean)
+- `gl.LineStipple` (params: enable:boolean)
+- `gl.LineWidth` (params: width:number)
+- `gl.LoadIdentity` (params: )
+- `gl.LoadMatrix` (params: matrix:string)
+- `gl.LogicOp` (params: enable:boolean)
+- `gl.Material` (params: material:Material)
+- `gl.MatrixMode` (params: mode:GL)
+- `gl.MemoryBarrier` (params: barriers:integer?)
+- `gl.MultMatrix` (params: matrixName:string)
+- `gl.MultiTexCoord` (params: texNum:integer, coord:(number))
+- `gl.MultiTexEnv` (params: texNum:integer, target:GL, pname:GL, value:number)
+- `gl.MultiTexGen` (params: texNum:integer, target:GL, state:boolean)
+- `gl.Normal` (params: v:xyz)
+- `gl.ObjectLabel` (params: objectTypeIdentifier:GL, objectID:integer, label:string)
+- `gl.Ortho` (params: left:number, right:number, bottom:number, top:number, near:number, far:number)
+- `gl.PointParameter` (params: atten0:number, atten1:number, atten2:number, sizeMin:number?, sizeMax:number?, sizeFade:number?)
+- `gl.PointSize` (params: size:number)
+- `gl.PointSprite` (params: enable:boolean, enableCoordReplace:boolean?, coordOrigin:boolean?)
+- `gl.PolygonMode` (params: face:GL, mode:GL)
+- `gl.PolygonOffset` (params: enable:boolean)
+- `gl.PopAttrib` (params: )
+- `gl.PopDebugGroup` (params: )
+- `gl.PopMatrix` (params: )
+- `gl.PushAttrib` (params: mask:GL?)
+- `gl.PushDebugGroup` (params: id:integer, message:string, sourceIsThirdParty:boolean)
+- `gl.PushMatrix` (params: )
+- `gl.PushPopMatrix` (params: matMode1:GL, func:fun(), ...:any)
+- `gl.RawBindFBO` (params: fbo:nil, target:GL?, rawFboId:integer?)
+- `gl.ReadPixels` (params: x:integer, y:integer, w:1, h:1, format:GL?)
+- `gl.Rect` (params: x1:number, y1:number, x2:number, y2:number)
+- `gl.RenderToTexture` (params: texName:string, fun:unknown, ...:any)
+- `gl.ResetMatrices` (params: )
+- `gl.ResetState` (params: )
+- `gl.Rotate` (params: r:number, x:number, y:number, z:number)
+- `gl.RunQuery` (params: query:any)
+- `gl.SaveImage` (params: x:integer, y:integer, width:integer, height:integer, filename:string, options:SaveImageOptions?)
+- `gl.Scale` (params: x:number, y:number, z:number)
+- `gl.Scissor` (params: enable:boolean)
+- `gl.SecondaryColor` (params: color:rgb)
+- `gl.SetGeometryShaderParameter` (params: shaderID:integer, key:number, value:number)
+- `gl.SetTesselationShaderParameter` (params: param:integer, value:integer)
+- `gl.ShadeModel` (params: model:GL)
+- `gl.Shape` (params: type:GL, vertices:VertexData[])
+- `gl.SlaveMiniMap` (params: newMode:boolean)
+- `gl.StencilFunc` (params: func:GL, ref:integer, mask:integer)
+- `gl.StencilFuncSeparate` (params: face:GL, func:GL, ref:integer, mask:integer)
+- `gl.StencilMask` (params: mask:integer)
+- `gl.StencilMaskSeparate` (params: face:GL, mask:integer)
+- `gl.StencilOp` (params: fail:GL, zfail:GL, zpass:GL)
+- `gl.StencilOpSeparate` (params: face:GL, fail:GL, zfail:GL, zpass:GL)
+- `gl.StencilTest` (params: enable:boolean)
+- `gl.SwapBuffers` (params: )
+- `gl.TexCoord` (params: coord:(number))
+- `gl.TexGen` (params: target:GL, state:boolean)
+- `gl.Text` (params: text:string, x:number, y:number, size:number, options:string?)
+- `gl.TextEnv` (params: target:GL, pname:GL, value:number)
+- `gl.Texture` (params: texNum:integer, enable:boolean?)
+- `gl.TextureInfo` (params: texName:string)
+- `gl.Translate` (params: x:number, y:number, z:number)
+- `gl.Uniform` (params: locationID:(GL|string), f1:number, f2:number?, f3:number?, f4:number?)
+- `gl.UniformArray` (params: locationID:(integer|string), type:UniformArrayType, uniforms:number[])
+- `gl.UniformInt` (params: locationID:(integer|string), int1:integer, int2:integer?, int3:integer?, int4:integer?)
+- `gl.UniformMatrix` (params: locationID:(integer|string), matrix:MatrixName)
+- `gl.Unit` (params: unitID:integer, doRawDraw:boolean?, useLuaMat:integer?, noLuaCall:boolean?, fullModel:boolean?)
+- `gl.UnitMultMatrix` (params: unitID:integer)
+- `gl.UnitPiece` (params: unitID:integer, pieceID:integer)
+- `gl.UnitPieceMatrix` (params: unitID:integer, pieceID:integer)
+- `gl.UnitPieceMultMatrix` (params: unitID:integer, pieceID:integer)
+- `gl.UnitRaw` (params: unitID:integer, doRawDraw:boolean?, useLuaMat:integer?, noLuaCall:boolean?, fullModel:boolean?)
+- `gl.UnitShape` (params: unitDefID:integer, teamID:integer, rawState:boolean?, toScreen:boolean?, opaque:boolean?)
+- `gl.UnitShapeTextures` (params: unitDefID:integer, push:boolean)
+- `gl.UnitTextures` (params: unitID:integer, push:boolean)
+- `gl.UnsafeState` (params: state:GL, func:fun(), ...:any)
+- `gl.UseShader` (params: shaderID:integer)
+- `gl.Vertex` (params: v:xy)
+- `gl.Viewport` (params: x:integer, y:integer, w:integer, h:integer)
 
 ## Callins (Engine → Plugin)
 
-Total: 1881 functions
+Total: 187 functions
 
-- `AIInfo`
-- `ActiveUniform`
-- `ArchiveInfo`
-- `AtmosphereParams`
-- `Attachment`
-- `BuildOrderBlockedStatus`
-- `CMD`
-- `CMDTYPE`
-- `COB`
-- `COBSCALE`
-- `CallAsTeamOptions`
-- `Callins`
-- `CameraMode`
-- `CameraName`
-- `CameraState`
-- `CameraVectors`
-- `CollisionVolumeData`
-- `Command`
-- `CommandDescription`
-- `CommandOptionBit`
-- `CommandOptionName`
-- `CommandOptions`
-- `Configuration`
-- `ControlPoint`
-- `CreateCommand`
-- `CreateCommandOptions`
-- `CreateCommandParams`
-- `CreateRBOData`
-- `DrawFlag`
-- `DrawMask`
-- `Encoding`
-- `Engine`
-- `ExplosionParams`
-- `FBO`
-- `FBODescription`
-- `Facing`
-- `FacingInteger`
-- `FeatureSupport`
-- `GL`
-- `Game`
-- `GenericMoveType`
-- `GenericMoveTypeBooleanKey`
-- `GenericMoveTypeNumberKey`
-- `GroundMoveType`
-- `HashType`
-- `Heading`
-- `HoverAirMoveType`
-- `IconData`
-- `Intro`
-- `KeyBinding`
-- `KeyModifiers`
-- `L100`
-- `L1000`
-- `L1001`
-- `L1007`
-- `L1009`
-- `L101`
-- `L1015`
-- `L102`
-- `L1021`
-- `L1026`
-- `L1029`
-- `L103`
-- `L1033`
-- `L1035`
-- `L104`
-- `L1043`
-- `L1049`
-- `L105`
-- `L1053`
-- `L1057`
-- `L1059`
-- `L106`
-- `L1063`
-- `L1064`
-- `L107`
-- `L1071`
-- `L1073`
-- `L1075`
-- `L1077`
-- `L108`
-- `L1085`
-- `L109`
-- `L1090`
-- `L1091`
-- `L1093`
-- `L1095`
-- `L11`
-- `L110`
-- `L1104`
-- `L1107`
-- `L111`
-- `L1110`
-- `L1113`
-- `L112`
-- `L1122`
-- `L1123`
-- `L1126`
-- `L113`
-- `L1130`
-- `L1135`
-- `L1136`
-- `L1138`
-- `L114`
-- `L1144`
-- `L1149`
-- `L115`
-- `L1152`
-- `L1153`
-- `L1155`
-- `L116`
-- `L1160`
-- `L1161`
-- `L1162`
-- `L1164`
-- `L1165`
-- `L117`
-- `L1171`
-- `L1173`
-- `L1175`
-- `L118`
-- `L1180`
-- `L1184`
-- `L1186`
-- `L1188`
-- `L1189`
-- `L119`
-- `L1192`
-- `L1194`
-- `L1198`
-- `L12`
-- `L120`
-- `L1200`
-- `L1206`
-- `L1208`
-- `L1209`
-- `L121`
-- `L122`
-- `L1221`
-- `L1222`
-- `L1223`
-- `L1224`
-- `L1226`
-- `L123`
-- `L1233`
-- `L1234`
-- `L1237`
-- `L1238`
-- `L124`
-- `L1242`
-- `L1248`
-- `L125`
-- `L1253`
-- `L1256`
-- `L1258`
-- `L1259`
-- `L126`
-- `L1263`
-- `L127`
-- `L1271`
-- `L1272`
-- `L1276`
-- `L128`
-- `L1282`
-- `L129`
-- `L1293`
-- `L1296`
-- `L130`
-- `L1301`
-- `L1307`
-- `L131`
-- `L1310`
-- `L1318`
-- `L132`
-- `L1321`
-- `L1322`
-- `L1328`
-- `L133`
-- `L1330`
-- `L1332`
-- `L1333`
-- `L1337`
-- `L1338`
-- `L134`
-- `L1342`
-- `L1346`
-- `L1349`
-- `L135`
-- `L1350`
-- `L1356`
-- `L1357`
-- `L1358`
-- `L1359`
-- `L136`
-- `L1360`
-- `L1363`
-- `L1367`
-- `L1368`
-- `L137`
-- `L1373`
-- `L1375`
-- `L1379`
-- `L138`
-- `L1382`
-- `L1385`
-- `L1387`
-- `L1389`
-- `L139`
-- `L1391`
-- `L1394`
-- `L1397`
-- `L140`
-- `L1401`
-- `L1402`
-- `L1408`
-- `L1409`
-- `L141`
-- `L1412`
-- `L1417`
-- `L142`
-- `L1420`
-- `L1423`
-- `L143`
-- `L1433`
-- `L1437`
-- `L1439`
-- `L144`
-- `L1441`
-- `L1442`
-- `L1448`
-- `L145`
-- `L1455`
-- `L1456`
-- `L1457`
-- `L1459`
-- `L146`
-- `L1463`
-- `L1464`
-- `L147`
-- `L1471`
-- `L1472`
-- `L1475`
-- `L1477`
-- `L148`
-- `L1480`
-- `L149`
-- `L1491`
-- `L15`
-- `L150`
-- `L1500`
-- `L1505`
-- `L1508`
-- `L151`
-- `L1517`
-- `L1522`
-- `L1524`
-- `L153`
-- `L1531`
-- `L1535`
-- `L1538`
-- `L154`
-- `L1546`
-- `L1549`
-- `L155`
-- `L1551`
-- `L1557`
-- `L1558`
-- `L156`
-- `L1566`
-- `L1568`
-- `L157`
-- `L1570`
-- `L1572`
-- `L1573`
-- `L1577`
-- `L158`
-- `L1585`
-- `L1588`
-- `L159`
-- `L1593`
-- `L1595`
-- `L1598`
-- `L16`
-- `L1600`
-- `L1602`
-- `L161`
-- `L1616`
-- `L1619`
-- `L1624`
-- `L163`
-- `L1634`
-- `L164`
-- `L1640`
-- `L1644`
-- `L165`
-- `L1651`
-- `L1652`
-- `L1657`
-- `L1664`
-- `L167`
-- `L1672`
-- `L1675`
-- `L1676`
-- `L168`
-- `L169`
-- `L1691`
-- `L17`
-- `L170`
-- `L1703`
-- `L1705`
-- `L171`
-- `L1710`
-- `L1714`
-- `L1718`
-- `L1723`
-- `L1724`
-- `L173`
-- `L1731`
-- `L1738`
-- `L1745`
-- `L1749`
-- `L175`
-- `L1753`
-- `L1757`
-- `L1758`
-- `L1760`
-- `L1761`
-- `L1765`
-- `L1767`
-- `L177`
-- `L178`
-- `L1782`
-- `L1783`
-- `L1784`
-- `L179`
-- `L1796`
-- `L1797`
-- `L181`
-- `L1810`
-- `L1812`
-- `L1817`
-- `L182`
-- `L1827`
-- `L183`
-- `L1831`
-- `L1832`
-- `L1833`
-- `L1843`
-- `L185`
-- `L1854`
-- `L1856`
-- `L1859`
-- `L1868`
-- `L187`
-- `L1876`
-- `L1878`
-- `L1883`
-- `L189`
-- `L1896`
-- `L19`
-- `L1904`
-- `L191`
-- `L1911`
-- `L1914`
-- `L1926`
-- `L1928`
-- `L193`
-- `L1931`
-- `L1934`
-- `L1947`
-- `L195`
-- `L1951`
-- `L1953`
-- `L1960`
-- `L1964`
-- `L197`
-- `L1970`
-- `L198`
-- `L1989`
-- `L199`
-- `L1991`
-- `L20`
-- `L2001`
-- `L2008`
-- `L2010`
-- `L2016`
-- `L2018`
-- `L2022`
-- `L2026`
-- `L203`
-- `L2035`
-- `L204`
-- `L205`
-- `L2051`
-- `L2059`
-- `L206`
-- `L2062`
-- `L207`
-- `L208`
-- `L209`
-- `L21`
-- `L2107`
-- `L2110`
-- `L2115`
-- `L2117`
-- `L2119`
-- `L2136`
-- `L2139`
-- `L214`
-- `L2147`
-- `L2148`
-- `L215`
-- `L2158`
-- `L216`
-- `L2169`
-- `L217`
-- `L2173`
-- `L2177`
-- `L218`
-- `L2185`
-- `L2186`
-- `L219`
-- `L2192`
-- `L2196`
-- `L2199`
-- `L22`
-- `L220`
-- `L221`
-- `L2214`
-- `L2215`
-- `L222`
-- `L2224`
-- `L2228`
-- `L223`
-- `L2233`
-- `L2234`
-- `L2235`
-- `L2238`
-- `L2241`
-- `L2247`
-- `L225`
-- `L2254`
-- `L2256`
-- `L2263`
-- `L227`
-- `L2270`
-- `L2274`
-- `L228`
-- `L2281`
-- `L2284`
-- `L2285`
-- `L2290`
-- `L230`
-- `L2301`
-- `L2302`
-- `L2307`
-- `L231`
-- `L2310`
-- `L2313`
-- `L2320`
-- `L2321`
-- `L2322`
-- `L233`
-- `L2330`
-- `L2332`
-- `L2333`
-- `L2336`
-- `L2337`
-- `L234`
-- `L2340`
-- `L2342`
-- `L235`
-- `L2350`
-- `L2359`
-- `L236`
-- `L2361`
-- `L2365`
-- `L2366`
-- `L237`
-- `L2371`
-- `L2379`
-- `L2381`
-- `L2386`
-- `L239`
-- `L24`
-- `L240`
-- `L2403`
-- `L2405`
-- `L2407`
-- `L241`
-- `L2411`
-- `L2415`
-- `L242`
-- `L2424`
-- `L243`
-- `L2445`
-- `L2453`
-- `L247`
-- `L2472`
-- `L2479`
-- `L2480`
-- `L2481`
-- `L2485`
-- `L2489`
-- `L2498`
-- `L2501`
-- `L2509`
-- `L251`
-- `L2517`
-- `L2519`
-- `L2525`
-- `L253`
-- `L2533`
-- `L2536`
-- `L2537`
-- `L254`
-- `L2541`
-- `L2544`
-- `L2545`
-- `L2548`
-- `L2549`
-- `L255`
-- `L2553`
-- `L2560`
-- `L257`
-- `L2572`
-- `L2583`
-- `L259`
-- `L2591`
-- `L26`
-- `L2602`
-- `L2604`
-- `L261`
-- `L2617`
-- `L262`
-- `L2620`
-- `L2624`
-- `L2629`
-- `L263`
-- `L2633`
-- `L2634`
-- `L2637`
-- `L2639`
-- `L2644`
-- `L2649`
-- `L265`
-- `L266`
-- `L2663`
-- `L267`
-- `L2672`
-- `L2675`
-- `L268`
-- `L2687`
-- `L2697`
-- `L27`
-- `L2701`
-- `L2712`
-- `L2715`
-- `L2717`
-- `L272`
-- `L2721`
-- `L2726`
-- `L2727`
-- `L2730`
-- `L2732`
-- `L2733`
-- `L2734`
-- `L2736`
-- `L2739`
-- `L2744`
-- `L2746`
-- `L2751`
-- `L2755`
-- `L2756`
-- `L276`
-- `L2761`
-- `L2766`
-- `L277`
-- `L2772`
-- `L2774`
-- `L2777`
-- `L278`
-- `L2783`
-- `L2788`
-- `L2789`
-- `L2796`
-- `L28`
-- `L280`
-- `L2803`
-- `L2804`
-- `L2807`
-- `L2808`
-- `L281`
-- `L2810`
-- `L2814`
-- `L2815`
-- `L282`
-- `L2820`
-- `L2821`
-- `L2826`
-- `L283`
-- `L2831`
-- `L2832`
-- `L2835`
-- `L284`
-- `L2841`
-- `L285`
-- `L2853`
-- `L2855`
-- `L286`
-- `L2864`
-- `L2868`
-- `L2869`
-- `L2876`
-- `L2878`
-- `L288`
-- `L2882`
-- `L2885`
-- `L2891`
-- `L29`
-- `L290`
-- `L2901`
-- `L2906`
-- `L291`
-- `L292`
-- `L2920`
-- `L2921`
-- `L2922`
-- `L293`
-- `L294`
-- `L2940`
-- `L2947`
-- `L2949`
-- `L295`
-- `L2952`
-- `L296`
-- `L2961`
-- `L2966`
-- `L2968`
-- `L297`
-- `L2971`
-- `L2972`
-- `L2974`
-- `L298`
-- `L2980`
-- `L2982`
-- `L2989`
-- `L299`
-- `L2995`
-- `L2999`
-- `L30`
-- `L300`
-- `L3006`
-- `L3007`
-- `L301`
-- `L3013`
-- `L3019`
-- `L3022`
-- `L3024`
-- `L303`
-- `L3044`
-- `L3046`
-- `L3048`
-- `L305`
-- `L3056`
-- `L306`
-- `L3060`
-- `L3068`
-- `L3069`
-- `L307`
-- `L308`
-- `L3081`
-- `L309`
-- `L3096`
-- `L3097`
-- `L3098`
-- `L31`
-- `L310`
-- `L3108`
-- `L311`
-- `L3110`
-- `L3117`
-- `L3118`
-- `L312`
-- `L3126`
-- `L3129`
-- `L313`
-- `L314`
-- `L3143`
-- `L315`
-- `L3151`
-- `L3155`
-- `L3159`
-- `L316`
-- `L3165`
-- `L317`
-- `L3178`
-- `L318`
-- `L3180`
-- `L319`
-- `L3194`
-- `L3195`
-- `L3196`
-- `L32`
-- `L320`
-- `L3202`
-- `L321`
-- `L3218`
-- `L3219`
-- `L322`
-- `L3224`
-- `L323`
-- `L3239`
-- `L324`
-- `L325`
-- `L3250`
-- `L3255`
-- `L326`
-- `L3262`
-- `L3263`
-- `L3267`
-- `L327`
-- `L3272`
-- `L3277`
-- `L328`
-- `L3280`
-- `L329`
-- `L3297`
-- `L33`
-- `L330`
-- `L3304`
-- `L331`
-- `L3313`
-- `L3314`
-- `L3315`
-- `L332`
-- `L3321`
-- `L3329`
-- `L333`
-- `L3330`
-- `L3331`
-- `L3335`
-- `L334`
-- `L3349`
-- `L335`
-- `L3353`
-- `L3359`
-- `L336`
-- `L3363`
-- `L337`
-- `L3372`
-- `L3376`
-- `L338`
-- `L339`
-- `L3390`
-- `L3394`
-- `L34`
-- `L340`
-- `L3406`
-- `L3409`
-- `L341`
-- `L3416`
-- `L342`
-- `L3421`
-- `L343`
-- `L3433`
-- `L3434`
-- `L3437`
-- `L3438`
-- `L344`
-- `L3442`
-- `L345`
-- `L3452`
-- `L3453`
-- `L3456`
-- `L346`
-- `L3462`
-- `L3467`
-- `L347`
-- `L3479`
-- `L348`
-- `L3480`
-- `L3482`
-- `L3499`
-- `L35`
-- `L350`
-- `L3501`
-- `L3506`
-- `L3509`
-- `L351`
-- `L3510`
-- `L352`
-- `L3522`
-- `L3529`
-- `L3533`
-- `L3534`
-- `L3537`
-- `L3538`
-- `L354`
-- `L355`
-- `L3552`
-- `L3553`
-- `L3559`
-- `L356`
-- `L3567`
-- `L3568`
-- `L357`
-- `L3571`
-- `L3575`
-- `L3579`
-- `L358`
-- `L3584`
-- `L3589`
-- `L3596`
-- `L36`
-- `L360`
-- `L3602`
-- `L3612`
-- `L362`
-- `L3620`
-- `L3627`
-- `L3632`
-- `L3633`
-- `L3638`
-- `L364`
-- `L3644`
-- `L365`
-- `L3652`
-- `L3659`
-- `L366`
-- `L3660`
-- `L3663`
-- `L3664`
-- `L3668`
-- `L367`
-- `L3674`
-- `L368`
-- `L3681`
-- `L3683`
-- `L3689`
-- `L369`
-- `L3698`
-- `L37`
-- `L370`
-- `L3700`
-- `L3706`
-- `L3707`
-- `L3709`
-- `L372`
-- `L3720`
-- `L3724`
-- `L3725`
-- `L3729`
-- `L373`
-- `L3730`
-- `L3738`
-- `L374`
-- `L3743`
-- `L3745`
-- `L3756`
-- `L3757`
-- `L376`
-- `L3760`
-- `L3764`
-- `L377`
-- `L3773`
-- `L3774`
-- `L378`
-- `L3788`
-- `L379`
-- `L3790`
-- `L3795`
-- `L3796`
-- `L38`
-- `L380`
-- `L3800`
-- `L3803`
-- `L3804`
-- `L3808`
-- `L381`
-- `L3810`
-- `L382`
-- `L3821`
-- `L383`
-- `L3832`
-- `L3835`
-- `L3836`
-- `L384`
-- `L3840`
-- `L3847`
-- `L385`
-- `L3853`
-- `L3857`
-- `L386`
-- `L3860`
-- `L3863`
-- `L387`
-- `L3872`
-- `L388`
-- `L3881`
-- `L3883`
-- `L3884`
-- `L3889`
-- `L389`
-- `L3895`
-- `L39`
-- `L390`
-- `L3902`
-- `L3904`
-- `L3906`
-- `L3909`
-- `L391`
-- `L3912`
-- `L392`
-- `L3922`
-- `L3923`
-- `L3925`
-- `L393`
-- `L3930`
-- `L3938`
-- `L394`
-- `L3940`
-- `L3946`
-- `L395`
-- `L3953`
-- `L3955`
-- `L3957`
-- `L396`
-- `L3962`
-- `L397`
-- `L3976`
-- `L3979`
-- `L398`
-- `L3989`
-- `L3992`
-- `L3993`
-- `L3999`
-- `L40`
-- `L400`
-- `L4000`
-- `L4001`
-- `L4004`
-- `L4006`
-- `L4009`
-- `L401`
-- `L4010`
-- `L402`
-- `L4022`
-- `L4024`
-- `L403`
-- `L4031`
-- `L404`
-- `L4043`
-- `L405`
-- `L4055`
-- `L4056`
-- `L4059`
-- `L406`
-- `L4068`
-- `L407`
-- `L408`
-- `L4086`
-- `L409`
-- `L4090`
-- `L4098`
-- `L4099`
-- `L41`
-- `L410`
-- `L4101`
-- `L411`
-- `L4113`
-- `L4114`
-- `L412`
-- `L4124`
-- `L4125`
-- `L4127`
-- `L4128`
-- `L4130`
-- `L4133`
-- `L414`
-- `L4141`
-- `L4144`
-- `L4145`
-- `L4146`
-- `L4148`
-- `L4151`
-- `L4156`
-- `L4158`
-- `L4159`
-- `L416`
-- `L4168`
-- `L4170`
-- `L4179`
-- `L418`
-- `L4181`
-- `L4186`
-- `L419`
-- `L4192`
-- `L42`
-- `L420`
-- `L4201`
-- `L4203`
-- `L4209`
-- `L421`
-- `L4211`
-- `L4214`
-- `L4218`
-- `L422`
-- `L4225`
-- `L4226`
-- `L423`
-- `L4235`
-- `L4236`
-- `L424`
-- `L4249`
-- `L4250`
-- `L4257`
-- `L426`
-- `L4262`
-- `L4263`
-- `L427`
-- `L4270`
-- `L4275`
-- `L4278`
-- `L428`
-- `L4280`
-- `L4283`
-- `L4294`
-- `L4298`
-- `L43`
-- `L430`
-- `L4302`
-- `L4304`
-- `L431`
-- `L4310`
-- `L432`
-- `L4320`
-- `L4327`
-- `L433`
-- `L4330`
-- `L4339`
-- `L434`
-- `L4341`
-- `L4344`
-- `L4346`
-- `L435`
-- `L4351`
-- `L4352`
-- `L436`
-- `L4361`
-- `L4363`
-- `L4369`
-- `L4374`
-- `L4378`
-- `L438`
-- `L4384`
-- `L4388`
-- `L4389`
-- `L4391`
-- `L4398`
-- `L44`
-- `L440`
-- `L4408`
-- `L4413`
-- `L4415`
-- `L442`
-- `L4425`
-- `L4428`
-- `L443`
-- `L4432`
-- `L4433`
-- `L4434`
-- `L4439`
-- `L444`
-- `L4441`
-- `L445`
-- `L4457`
-- `L4458`
-- `L446`
-- `L4463`
-- `L4469`
-- `L447`
-- `L4471`
-- `L448`
-- `L4484`
-- `L4486`
-- `L449`
-- `L4490`
-- `L4491`
-- `L4497`
-- `L45`
-- `L450`
-- `L4506`
-- `L451`
-- `L452`
-- `L4524`
-- `L453`
-- `L4534`
-- `L4535`
-- `L454`
-- `L4541`
-- `L4542`
-- `L4549`
-- `L455`
-- `L4559`
-- `L456`
-- `L457`
-- `L458`
-- `L4582`
-- `L4586`
-- `L459`
-- `L4597`
-- `L46`
-- `L460`
-- `L4602`
-- `L4607`
-- `L4609`
-- `L461`
-- `L4613`
-- `L4615`
-- `L4618`
-- `L462`
-- `L4620`
-- `L463`
-- `L4636`
-- `L464`
-- `L4657`
-- `L466`
-- `L4660`
-- `L4666`
-- `L467`
-- `L4673`
-- `L4678`
-- `L468`
-- `L47`
-- `L470`
-- `L4705`
-- `L4706`
-- `L471`
-- `L4718`
-- `L472`
-- `L4724`
-- `L473`
-- `L4731`
-- `L4736`
-- `L474`
-- `L4740`
-- `L475`
-- `L4756`
-- `L4758`
-- `L4759`
-- `L476`
-- `L4761`
-- `L477`
-- `L4770`
-- `L478`
-- `L4783`
-- `L479`
-- `L4792`
-- `L4794`
-- `L48`
-- `L480`
-- `L4806`
-- `L4808`
-- `L481`
-- `L4814`
-- `L4818`
-- `L482`
-- `L4821`
-- `L4826`
-- `L483`
-- `L4837`
-- `L484`
-- `L4843`
-- `L4847`
-- `L485`
-- `L4852`
-- `L486`
-- `L4865`
-- `L4869`
-- `L487`
-- `L4871`
-- `L4872`
-- `L488`
-- `L4880`
-- `L489`
-- `L49`
-- `L490`
-- `L4900`
-- `L4901`
-- `L4905`
-- `L4907`
-- `L4908`
-- `L491`
-- `L492`
-- `L4920`
-- `L4921`
-- `L4922`
-- `L4929`
-- `L493`
-- `L4931`
-- `L4936`
-- `L494`
-- `L4945`
-- `L4946`
-- `L495`
-- `L496`
-- `L4969`
-- `L497`
-- `L4973`
-- `L498`
-- `L4983`
-- `L4986`
-- `L4987`
-- `L499`
-- `L4992`
-- `L4999`
-- `L50`
-- `L500`
-- `L5006`
-- `L501`
-- `L5010`
-- `L5018`
-- `L502`
-- `L5021`
-- `L5023`
-- `L5024`
-- `L503`
-- `L5039`
-- `L504`
-- `L5043`
-- `L5044`
-- `L505`
-- `L5056`
-- `L5059`
-- `L506`
-- `L5067`
-- `L507`
-- `L5071`
-- `L5074`
-- `L5075`
-- `L508`
-- `L5080`
-- `L5086`
-- `L509`
-- `L5094`
-- `L5098`
-- `L510`
-- `L511`
-- `L5112`
-- `L512`
-- `L5126`
-- `L5127`
-- `L513`
-- `L5130`
-- `L5138`
-- `L514`
-- `L5140`
-- `L5143`
-- `L5145`
-- `L515`
-- `L5159`
-- `L516`
-- `L5161`
-- `L5163`
-- `L5167`
-- `L517`
-- `L5179`
-- `L518`
-- `L5180`
-- `L519`
-- `L5199`
-- `L52`
-- `L520`
-- `L5200`
-- `L521`
-- `L5211`
-- `L5214`
-- `L522`
-- `L5223`
-- `L5228`
-- `L523`
-- `L524`
-- `L5247`
-- `L5249`
-- `L525`
-- `L5258`
-- `L526`
-- `L5261`
-- `L5266`
-- `L5269`
-- `L527`
-- `L5272`
-- `L528`
-- `L5287`
-- `L529`
-- `L5293`
-- `L5297`
-- `L530`
-- `L5307`
-- `L531`
-- `L5312`
-- `L532`
-- `L533`
-- `L5331`
-- `L5333`
-- `L5336`
-- `L5339`
-- `L534`
-- `L535`
-- `L536`
-- `L5362`
-- `L5369`
-- `L537`
-- `L5373`
-- `L538`
-- `L5380`
-- `L5382`
-- `L539`
-- `L54`
-- `L540`
-- `L5403`
-- `L5406`
-- `L5408`
-- `L541`
-- `L5411`
-- `L5414`
-- `L542`
-- `L5422`
-- `L543`
-- `L5439`
-- `L544`
-- `L5447`
-- `L5448`
-- `L545`
-- `L5459`
-- `L546`
-- `L5460`
-- `L5464`
-- `L5468`
-- `L547`
-- `L5472`
-- `L548`
-- `L549`
-- `L5493`
-- `L5497`
-- `L550`
-- `L551`
-- `L5519`
-- `L552`
-- `L5523`
-- `L5527`
-- `L553`
-- `L5531`
-- `L5538`
-- `L554`
-- `L555`
-- `L5553`
-- `L556`
-- `L5561`
-- `L5569`
-- `L557`
-- `L5570`
-- `L5578`
-- `L558`
-- `L559`
-- `L5599`
-- `L56`
-- `L560`
-- `L561`
-- `L5619`
-- `L562`
-- `L5625`
-- `L563`
-- `L5635`
-- `L564`
-- `L565`
-- `L5654`
-- `L566`
-- `L5668`
-- `L567`
-- `L5676`
-- `L5677`
-- `L568`
-- `L5680`
-- `L5685`
-- `L569`
-- `L5690`
-- `L5693`
-- `L5695`
-- `L57`
-- `L570`
-- `L5706`
-- `L571`
-- `L572`
-- `L573`
-- `L5731`
-- `L574`
-- `L575`
-- `L576`
-- `L5760`
-- `L5762`
-- `L577`
-- `L5775`
-- `L5779`
-- `L578`
-- `L5783`
-- `L579`
-- `L5790`
-- `L5795`
-- `L5796`
-- `L58`
-- `L580`
-- `L581`
-- `L5815`
-- `L5817`
-- `L582`
-- `L5825`
-- `L5829`
-- `L584`
-- `L5846`
-- `L585`
-- `L5856`
-- `L586`
-- `L5875`
-- `L588`
-- `L5888`
-- `L590`
-- `L5912`
-- `L592`
-- `L5922`
-- `L593`
-- `L5938`
-- `L594`
-- `L595`
-- `L5957`
-- `L596`
-- `L597`
-- `L5973`
-- `L598`
-- `L5984`
-- `L599`
-- `L60`
-- `L600`
-- `L6002`
-- `L6003`
-- `L601`
-- `L602`
-- `L603`
-- `L604`
-- `L6044`
-- `L605`
-- `L606`
-- `L607`
-- `L608`
-- `L6086`
-- `L609`
-- `L61`
-- `L610`
-- `L611`
-- `L6117`
-- `L612`
-- `L613`
-- `L614`
-- `L615`
-- `L616`
-- `L6169`
-- `L617`
-- `L618`
-- `L619`
-- `L6191`
-- `L6193`
-- `L62`
-- `L620`
-- `L6216`
-- `L622`
-- `L6224`
-- `L6227`
-- `L6235`
-- `L624`
-- `L625`
-- `L6255`
-- `L626`
-- `L6264`
-- `L628`
-- `L6285`
-- `L6287`
-- `L6295`
-- `L6296`
-- `L6298`
-- `L63`
-- `L630`
-- `L6304`
-- `L6305`
-- `L6315`
-- `L632`
-- `L6335`
-- `L634`
-- `L6346`
-- `L635`
-- `L6353`
-- `L636`
-- `L638`
-- `L6387`
-- `L6396`
-- `L6398`
-- `L64`
-- `L640`
-- `L6405`
-- `L641`
-- `L6410`
-- `L642`
-- `L644`
-- `L6440`
-- `L6457`
-- `L646`
-- `L647`
-- `L648`
-- `L6488`
-- `L65`
-- `L650`
-- `L6512`
-- `L652`
-- `L6520`
-- `L6522`
-- `L6530`
-- `L6539`
-- `L654`
-- `L655`
-- `L6556`
-- `L6558`
-- `L656`
-- `L6566`
-- `L6568`
-- `L6579`
-- `L658`
-- `L6597`
-- `L66`
-- `L660`
-- `L6605`
-- `L6606`
-- `L662`
-- `L6625`
-- `L664`
-- `L6648`
-- `L6653`
-- `L666`
-- `L6661`
-- `L6664`
-- `L6670`
-- `L6673`
-- `L668`
-- `L6688`
-- `L669`
-- `L6695`
-- `L67`
-- `L670`
-- `L672`
-- `L6727`
-- `L6733`
-- `L674`
-- `L6747`
-- `L6754`
-- `L676`
-- `L6767`
-- `L678`
-- `L6795`
-- `L6799`
-- `L68`
-- `L680`
-- `L6806`
-- `L6812`
-- `L6814`
-- `L682`
-- `L6820`
-- `L683`
-- `L6833`
-- `L684`
-- `L6846`
-- `L685`
-- `L6850`
-- `L6852`
-- `L686`
-- `L687`
-- `L6871`
-- `L6876`
-- `L688`
-- `L6882`
-- `L6888`
-- `L69`
-- `L690`
-- `L6904`
-- `L6915`
-- `L692`
-- `L6923`
-- `L6929`
-- `L694`
-- `L696`
-- `L6961`
-- `L6979`
-- `L6988`
-- `L699`
-- `L70`
-- `L7009`
-- `L701`
-- `L702`
-- `L7020`
-- `L7032`
-- `L7036`
-- `L7050`
-- `L7052`
-- `L7069`
-- `L7079`
-- `L7080`
-- `L709`
-- `L7097`
-- `L71`
-- `L7107`
-- `L711`
-- `L7115`
-- `L7127`
-- `L713`
-- `L7141`
-- `L715`
-- `L7153`
-- `L7159`
-- `L716`
-- `L717`
-- `L7171`
-- `L7182`
-- `L7187`
-- `L719`
-- `L7199`
-- `L72`
-- `L720`
-- `L7203`
-- `L721`
-- `L7218`
-- `L723`
-- `L7230`
-- `L7244`
-- `L725`
-- `L726`
-- `L7265`
-- `L7269`
-- `L7286`
-- `L7291`
-- `L73`
-- `L7301`
-- `L7320`
-- `L7323`
-- `L734`
-- `L7350`
-- `L7352`
-- `L7372`
-- `L7394`
-- `L74`
-- `L7402`
-- `L7422`
-- `L7442`
-- `L745`
-- `L7464`
-- `L748`
-- `L7485`
-- `L75`
-- `L7506`
-- `L7523`
-- `L7526`
-- `L753`
-- `L7545`
-- `L7552`
-- `L7577`
-- `L759`
-- `L76`
-- `L7617`
-- `L7625`
-- `L765`
-- `L7658`
-- `L7666`
-- `L7683`
-- `L7698`
-- `L77`
-- `L7716`
-- `L7717`
-- `L7735`
-- `L7747`
-- `L775`
-- `L7765`
-- `L778`
-- `L779`
-- `L78`
-- `L7836`
-- `L7881`
-- `L7882`
-- `L7899`
-- `L79`
-- `L790`
-- `L791`
-- `L7914`
-- `L792`
-- `L7922`
-- `L7923`
-- `L793`
-- `L7939`
-- `L7963`
-- `L797`
-- `L80`
-- `L8028`
-- `L803`
-- `L806`
-- `L8078`
-- `L809`
-- `L81`
-- `L8107`
-- `L816`
-- `L8175`
-- `L819`
-- `L82`
-- `L8215`
-- `L8241`
-- `L825`
-- `L8267`
-- `L827`
-- `L8292`
-- `L83`
-- `L8301`
-- `L832`
-- `L835`
-- `L8351`
-- `L837`
-- `L8375`
-- `L8399`
-- `L84`
-- `L842`
-- `L8423`
-- `L85`
-- `L851`
-- `L854`
-- `L8571`
-- `L859`
-- `L86`
-- `L862`
-- `L864`
-- `L865`
-- `L869`
-- `L87`
-- `L8723`
-- `L8733`
-- `L8744`
-- `L8755`
-- `L876`
-- `L8765`
-- `L877`
-- `L8776`
-- `L8787`
-- `L8799`
-- `L88`
-- `L8816`
-- `L882`
-- `L883`
-- `L8830`
-- `L884`
-- `L8844`
-- `L8869`
-- `L8879`
-- `L8890`
-- `L89`
-- `L8901`
-- `L8913`
-- `L892`
-- `L8930`
-- `L8944`
-- `L8958`
-- `L897`
-- `L8983`
-- `L899`
-- `L8990`
-- `L90`
-- `L9029`
-- `L906`
-- `L907`
-- `L9072`
-- `L909`
-- `L910`
-- `L9101`
-- `L9139`
-- `L914`
-- `L915`
-- `L917`
-- `L918`
-- `L92`
-- `L924`
-- `L925`
-- `L928`
-- `L930`
-- `L932`
-- `L934`
-- `L935`
-- `L936`
-- `L938`
-- `L94`
-- `L943`
-- `L945`
-- `L949`
-- `L95`
-- `L951`
-- `L96`
-- `L961`
-- `L962`
-- `L963`
-- `L964`
-- `L97`
-- `L970`
-- `L98`
-- `L980`
-- `L983`
-- `L984`
-- `L985`
-- `L987`
-- `L99`
-- `L991`
-- `L999`
-- `LOG`
-- `LightParams`
-- `LogLevel`
-- `LosMask`
-- `LosTable`
-- `LuaFont`
-- `MapRenderingParams`
-- `Material`
-- `Matrix4x4`
-- `MatrixName`
-- `Menu`
-- `ModType`
-- `MoveCtrl`
-- `PieceInfo`
-- `Plane`
-- `Platform`
-- `PlatformVideoMode`
-- `ProjectileParams`
-- `ProjectileTargetType`
-- `RBO`
-- `ResourceCost`
-- `ResourceName`
-- `ResourceUsage`
-- `Roster`
-- `RulesParams`
-- `RulesSyncedCallins`
-- `RulesUnsyncedCallins`
-- `SEC1`
-- `SFX`
-- `SYNCED`
-- `SaveImageOptions`
-- `SetUnitHealthAmounts`
-- `ShaderParams`
-- `SideSpec`
-- `SoundChannel`
-- `SoundDeviceSpec`
-- `StorageName`
-- `StrafeAirMoveType`
-- `SyncedCallins`
-- `TargetType`
-- `TeamStats`
-- `TexCoords`
-- `TextColorCode`
-- `Texture`
-- `TextureInfo`
-- `UI`
-- `UniformArrayType`
-- `UniformParam`
-- `UnitDefDimensions`
-- `UnitState`
-- `UnsyncedCallins`
-- `VAO`
-- `VBO`
-- `VBOAttributeDef`
-- `VertexData`
-- `WaterParams`
-- `WeaponDamages`
-- `WeaponState`
-- `ZgotmplZ`
+- `Callins.ActiveCommandChanged`
+- `Callins.AddConsoleLine`
+- `Callins.AllowBuilderHoldFire`
+- `Callins.AllowCommand`
+- `Callins.AllowDirectUnitControl`
+- `Callins.AllowFeatureBuildStep`
+- `Callins.AllowFeatureCreation`
+- `Callins.AllowResourceLevel`
+- `Callins.AllowResourceTransfer`
+- `Callins.AllowStartPosition`
+- `Callins.AllowUnitBuildStep`
+- `Callins.AllowUnitCaptureStep`
+- `Callins.AllowUnitCloak`
+- `Callins.AllowUnitCreation`
+- `Callins.AllowUnitKamikaze`
+- `Callins.AllowUnitTransfer`
+- `Callins.AllowUnitTransport`
+- `Callins.AllowUnitTransportLoad`
+- `Callins.AllowUnitTransportUnload`
+- `Callins.AllowWeaponInterceptTarget`
+- `Callins.AllowWeaponTarget`
+- `Callins.AllowWeaponTargetCheck`
+- `Callins.CameraPositionChanged`
+- `Callins.CameraRotationChanged`
+- `Callins.CommandFallback`
+- `Callins.CommandNotify`
+- `Callins.DefaultCommand`
+- `Callins.DownloadFailed`
+- `Callins.DownloadFinished`
+- `Callins.DownloadProgress`
+- `Callins.DownloadQueued`
+- `Callins.DownloadStarted`
+- `Callins.DrawBuildSquare`
+- `Callins.DrawFeature`
+- `Callins.DrawFeaturesPostDeferred`
+- `Callins.DrawGenesis`
+- `Callins.DrawGroundDeferred`
+- `Callins.DrawGroundPostDeferred`
+- `Callins.DrawGroundPostForward`
+- `Callins.DrawGroundPreDeferred`
+- `Callins.DrawGroundPreForward`
+- `Callins.DrawInMiniMap`
+- `Callins.DrawInMiniMapBackground`
+- `Callins.DrawMaterial`
+- `Callins.DrawPreDecals`
+- `Callins.DrawProjectile`
+- `Callins.DrawScreen`
+- `Callins.DrawScreenEffects`
+- `Callins.DrawScreenPost`
+- `Callins.DrawShadowFeaturesLua`
+- `Callins.DrawShadowPassTransparent`
+- `Callins.DrawShadowUnitsLua`
+- `Callins.DrawShield`
+- `Callins.DrawUnit`
+- `Callins.DrawUnitsPostDeferred`
+- `Callins.DrawWaterPost`
+- `Callins.DrawWorld`
+- `Callins.DrawWorldPreParticles`
+- `Callins.DrawWorldPreUnit`
+- `Callins.DrawWorldReflection`
+- `Callins.DrawWorldRefraction`
+- `Callins.DrawWorldShadow`
+- `Callins.Explosion`
+- `Callins.FeatureCreated`
+- `Callins.FeatureDamaged`
+- `Callins.FeatureDestroyed`
+- `Callins.FeaturePreDamaged`
+- `Callins.FontsChanged`
+- `Callins.GameFrame`
+- `Callins.GameFramePost`
+- `Callins.GameID`
+- `Callins.GameOver`
+- `Callins.GamePaused`
+- `Callins.GamePreload`
+- `Callins.GameProgress`
+- `Callins.GameSetup`
+- `Callins.GameStart`
+- `Callins.GetTooltip`
+- `Callins.GotChatMsg`
+- `Callins.GroupChanged`
+- `Callins.Initialize`
+- `Callins.IsAbove`
+- `Callins.KeyMapChanged`
+- `Callins.KeyPress`
+- `Callins.KeyRelease`
+- `Callins.Load`
+- `Callins.LoadCode`
+- `Callins.MapDrawCmd`
+- `Callins.MiniMapGeometryChanged`
+- `Callins.MiniMapRotationChanged`
+- `Callins.MiniMapStateChanged`
+- `Callins.MouseMove`
+- `Callins.MousePress`
+- `Callins.MouseRelease`
+- `Callins.MouseWheel`
+- `Callins.MoveCtrlNotify`
+- `Callins.PlayerAdded`
+- `Callins.PlayerChanged`
+- `Callins.PlayerRemoved`
+- `Callins.ProjectileCreated`
+- `Callins.ProjectileDestroyed`
+- `Callins.RecvFromSynced`
+- `Callins.RecvLuaMsg`
+- `Callins.RecvSkirmishAIMessage`
+- `Callins.RenderUnitDestroyed`
+- `Callins.Save`
+- `Callins.ShieldPreDamaged`
+- `Callins.Shutdown`
+- `Callins.StockpileChanged`
+- `Callins.SunChanged`
+- `Callins.TeamChanged`
+- `Callins.TeamDied`
+- `Callins.TerraformComplete`
+- `Callins.TextEditing`
+- `Callins.TextInput`
+- `Callins.UnitArrivedAtGoal`
+- `Callins.UnitCloaked`
+- `Callins.UnitCmdDone`
+- `Callins.UnitCommand`
+- `Callins.UnitConstructionDecayed`
+- `Callins.UnitCreated`
+- `Callins.UnitDamaged`
+- `Callins.UnitDecloaked`
+- `Callins.UnitDestroyed`
+- `Callins.UnitEnteredAir`
+- `Callins.UnitEnteredLos`
+- `Callins.UnitEnteredRadar`
+- `Callins.UnitEnteredUnderwater`
+- `Callins.UnitEnteredWater`
+- `Callins.UnitExperience`
+- `Callins.UnitFeatureCollision`
+- `Callins.UnitFinished`
+- `Callins.UnitFromFactory`
+- `Callins.UnitGiven`
+- `Callins.UnitHarvestStorageFull`
+- `Callins.UnitIdle`
+- `Callins.UnitLeftAir`
+- `Callins.UnitLeftLos`
+- `Callins.UnitLeftRadar`
+- `Callins.UnitLeftUnderwater`
+- `Callins.UnitLeftWater`
+- `Callins.UnitLoaded`
+- `Callins.UnitMoveFailed`
+- `Callins.UnitPreDamaged`
+- `Callins.UnitReverseBuilt`
+- `Callins.UnitSeismicPing`
+- `Callins.UnitStunned`
+- `Callins.UnitTaken`
+- `Callins.UnitUnitCollision`
+- `Callins.UnitUnloaded`
+- `Callins.UnsyncedHeightMapUpdate`
+- `Callins.Update`
+- `Callins.ViewResize`
+- `Callins.WorldTooltip`
+- `SyncedCallins.AllowBuilderHoldFire`
+- `SyncedCallins.AllowCommand`
+- `SyncedCallins.AllowDirectUnitControl`
+- `SyncedCallins.AllowFeatureBuildStep`
+- `SyncedCallins.AllowFeatureCreation`
+- `SyncedCallins.AllowResourceLevel`
+- `SyncedCallins.AllowResourceTransfer`
+- `SyncedCallins.AllowStartPosition`
+- `SyncedCallins.AllowUnitBuildStep`
+- `SyncedCallins.AllowUnitCaptureStep`
+- `SyncedCallins.AllowUnitCloak`
+- `SyncedCallins.AllowUnitCreation`
+- `SyncedCallins.AllowUnitKamikaze`
+- `SyncedCallins.AllowUnitTransfer`
+- `SyncedCallins.AllowUnitTransport`
+- `SyncedCallins.AllowUnitTransportLoad`
+- `SyncedCallins.AllowUnitTransportUnload`
+- `SyncedCallins.AllowWeaponInterceptTarget`
+- `SyncedCallins.AllowWeaponTarget`
+- `SyncedCallins.AllowWeaponTargetCheck`
+- `SyncedCallins.CommandFallback`
+- `SyncedCallins.FeatureDamaged`
+- `SyncedCallins.FeaturePreDamaged`
+- `SyncedCallins.MoveCtrlNotify`
+- `SyncedCallins.ShieldPreDamaged`
+- `SyncedCallins.TerraformComplete`
+- `SyncedCallins.UnitPreDamaged`
+- `UnsyncedCallins.DrawFeature`
+- `UnsyncedCallins.DrawMaterial`
+- `UnsyncedCallins.DrawProjectile`
+- `UnsyncedCallins.DrawShield`
+- `UnsyncedCallins.DrawUnit`
+- `UnsyncedCallins.RecvFromSynced`
 

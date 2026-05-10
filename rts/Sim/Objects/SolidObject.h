@@ -385,6 +385,8 @@ public:
 	int team = 0;
 	///< allyteam that this->team is part of
 	int allyteam = 0;
+	///< team palette index or encoded custom color palette index
+	uint16_t paletteIndex = 0;
 
 	// the object could be spawned before the frame start (via cheats) or during the normal sim frame
 	bool prevFrameNeedsUpdate = true;

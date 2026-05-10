@@ -51,6 +51,8 @@ static bool CheckDemoHeader(const DemoFileHeader& fileHeader)
 
 CDemoReader::CDemoReader(const std::string& filename, float curTime): playbackDemo(new CGZFileHandler(filename, SPRING_VFS_PWD_ALL))
 {
+	demoName = filename;
+
 	if (FileSystem::GetExtension(filename) != "sdfz")
 		throw content_error("Unknown demo extension: " + FileSystem::GetExtension(filename));
 

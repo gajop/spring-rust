@@ -484,9 +484,48 @@ static void NativeGetProjectileDamages(const GetProjectileDamagesQuery* query, G
 	bufferPos += count * sizeof(float);
 }
 
+static void NativeGetAllProjectiles(const GetAllProjectilesQuery* query, GetAllProjectilesResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->projectiles = nullptr;
+	result->count = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const auto& projectiles = projectileHandler.GetActiveProjectiles(query->synced).GetData();
+
+	if (projectiles.empty())
+		return;
+
+	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+
+	for (const CProjectile* proj : projectiles) {
+		if (proj == nullptr)
+			continue;
+		if (query->weapon && !proj->weapon)
+			continue;
+
+		if (count >= maxCount)
+			break;
+
+		out[count++] = proj->id;
+	}
+
+	result->projectiles = out;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
+}
+
 } // namespace
 
 const ProjectilesApi PROJECTILES_API = {
+	.GetAllProjectiles = NativeGetAllProjectiles,
 	.GetProjectilesInRectangle = NativeGetProjectilesInRectangle,
 	.GetProjectilesInSphere = NativeGetProjectilesInSphere,
 

@@ -88,7 +88,7 @@ struct GetFeaturePiecePosDirResult { const Error* error; PiecePosDir posDir; };
 struct GetUnitPieceMatrixQuery { int32_t unitID; int32_t pieceNum; };
 struct GetUnitPieceMatrixResult { const Error* error; PieceMatrix matrix; };
 
-struct GetFeaturePieceMatrixQuery { int32_t featureID; int32_t pieceNum; };
+struct GetFeaturePieceMatrixQuery { int32_t featureID; };
 struct GetFeaturePieceMatrixResult { const Error* error; PieceMatrix matrix; };
 
 struct GetUnitScriptPieceQuery { int32_t unitID; int32_t scriptNum; };

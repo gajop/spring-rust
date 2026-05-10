@@ -6,7 +6,9 @@
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Misc/QuadField.h"
+#include "Game/GameHelper.h"
 #include "System/float3.h"
+#include "Rendering/Units/UnitDrawer.h"
 
 namespace {
 
@@ -19,6 +21,7 @@ static thread_local Error dynamicError;
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit system not ready" };
 static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
 static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
+static const Error INVALID_ALLYTEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
 
 // Helper: check if ready
 static bool IsReady()
@@ -532,6 +535,32 @@ static void NativeGetUnitNearestEnemy(const GetUnitNearestEnemyQuery* query, Get
 	result->unitID = r.unitID;
 }
 
+static void NativeGetClosestEnemyUnit(const GetClosestEnemyUnitQuery* query, GetClosestEnemyUnitResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->unitID = -1;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLYTEAM_ERROR;
+		return;
+	}
+
+	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
+	const CUnit* unit =
+		query->useLOS
+			? CGameHelper::GetClosestEnemyUnit(nullptr, pos, query->range, query->allyTeamID)
+			: CGameHelper::GetClosestEnemyUnitNoLosTest(nullptr, pos, query->range, query->allyTeamID, query->sphereDistTest, query->checkSightDist);
+
+	if (unit != nullptr)
+		result->unitID = unit->id;
+}
+
 // Separation
 static void NativeGetUnitSeparation(const GetUnitSeparationQuery* query, GetUnitSeparationResult* result)
 {
@@ -562,6 +591,70 @@ static void NativeGetUnitSeparation(const GetUnitSeparationQuery* query, GetUnit
 	}
 }
 
+static void NativeGetRenderUnits(const GetRenderUnitsQuery* query, GetRenderUnitsResult* result)
+{
+	bufferPos = 0;
+	(void)query;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
+	if (!IsReady() || unitDrawer == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const auto& renderUnits = unitDrawer->GetUnsortedUnits();
+	if (renderUnits.empty())
+		return;
+
+	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+	const size_t count = std::min(renderUnits.size(), maxCount);
+
+	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	for (size_t i = 0; i < count; ++i) {
+		out[i] = renderUnits[i]->id;
+	}
+
+	result->units = out;
+	result->count = static_cast<uint32_t>(count);
+	bufferPos += count * sizeof(int32_t);
+}
+
+static void NativeGetRenderUnitsDrawFlagChanged(const GetRenderUnitsDrawFlagChangedQuery* query, GetRenderUnitsDrawFlagChangedResult* result)
+{
+	bufferPos = 0;
+	(void)query;
+	result->error = nullptr;
+	result->units = nullptr;
+	result->count = 0;
+
+	if (!IsReady() || unitDrawer == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const auto& renderUnits = unitDrawer->GetUnsortedUnits();
+	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+
+	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+
+	for (const CUnit* u : renderUnits) {
+		if (count >= maxCount)
+			break;
+
+		if (u->previousDrawFlag == u->drawFlag)
+			continue;
+
+		out[count++] = u->id;
+	}
+
+	result->units = out;
+	result->count = count;
+	bufferPos += count * sizeof(int32_t);
+}
+
 } // namespace
 
 const UnitsQueryApi UNITS_QUERY_API = {
@@ -587,6 +680,9 @@ const UnitsQueryApi UNITS_QUERY_API = {
 
 	.GetUnitNearestAlly = NativeGetUnitNearestAlly,
 	.GetUnitNearestEnemy = NativeGetUnitNearestEnemy,
+	.GetClosestEnemyUnit = NativeGetClosestEnemyUnit,
 
 	.GetUnitSeparation = NativeGetUnitSeparation,
+	.GetRenderUnits = NativeGetRenderUnits,
+	.GetRenderUnitsDrawFlagChanged = NativeGetRenderUnitsDrawFlagChanged,
 };

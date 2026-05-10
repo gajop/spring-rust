@@ -72,7 +72,7 @@ struct GetUnitCommandsResult { const Error* error; CommandFFI* commands; uint32_
 struct GetUnitCurrentCommandQuery { int32_t unitID; };
 struct GetUnitCurrentCommandResult { const Error* error; CommandFFI command; bool hasCommand; };
 
-struct GetFactoryCountsQuery { int32_t unitID; };
+struct GetFactoryCountsQuery { int32_t unitID; int32_t count; bool addCmds; };
 struct GetFactoryCountsResult { const Error* error; FactoryQueueInfo info; };
 
 struct GetFactoryCommandCountQuery { int32_t unitID; };
@@ -96,8 +96,32 @@ struct GetRealBuildQueueResult { const Error* error; int32_t* unitDefIDs; uint32
 struct GetUnitCmdDescsQuery { int32_t unitID; };
 struct GetUnitCmdDescsResult { const Error* error; CommandDescription* cmdDescs; uint32_t count; };
 
-struct FindUnitCmdDescQuery { int32_t unitID; int32_t cmdID; };
+struct FindUnitCmdDescQuery { int32_t unitID; int32_t cmdID; int32_t cmdIndex; };
 struct FindUnitCmdDescResult { const Error* error; CommandDescription cmdDesc; bool found; };
+
+struct GiveOrderQuery { int32_t cmdID; float* params; uint32_t paramCount; uint32_t options; };
+struct GiveOrderResult { const Error* error; bool success; };
+
+struct GiveOrderToUnitMapQuery {
+	const int32_t* unitIDs;
+	uint32_t count;
+	int32_t cmdID;
+	float* params;
+	uint32_t paramCount;
+	uint32_t options;
+};
+
+struct GiveOrderToUnitMapResult { const Error* error; int32_t unitsOrdered; };
+
+struct GiveOrderArrayToUnitMapQuery {
+	const int32_t* unitIDs;
+	uint32_t unitCount;
+	const CommandFFI* commands;
+	uint32_t commandCount;
+	bool pairwise;
+};
+
+struct GiveOrderArrayToUnitMapResult { const Error* error; int32_t unitsOrdered; };
 
 // API structure
 struct UnitsCommandsApi {
@@ -113,6 +137,9 @@ struct UnitsCommandsApi {
 	void (*GetRealBuildQueue)(const GetRealBuildQueueQuery* query, GetRealBuildQueueResult* result);
 	void (*GetUnitCmdDescs)(const GetUnitCmdDescsQuery* query, GetUnitCmdDescsResult* result);
 	void (*FindUnitCmdDesc)(const FindUnitCmdDescQuery* query, FindUnitCmdDescResult* result);
+	void (*GiveOrder)(const GiveOrderQuery* query, GiveOrderResult* result);
+	void (*GiveOrderToUnitMap)(const GiveOrderToUnitMapQuery* query, GiveOrderToUnitMapResult* result);
+	void (*GiveOrderArrayToUnitMap)(const GiveOrderArrayToUnitMapQuery* query, GiveOrderArrayToUnitMapResult* result);
 };
 
 extern const UnitsCommandsApi UNITS_COMMANDS_API;

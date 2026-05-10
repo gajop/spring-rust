@@ -40,13 +40,21 @@ fn main() {
         ("input", "Input.h"),
         ("display", "Display.h"),
         ("selection", "Selection.h"),
-        ("vfs", "VFS.h"),
         ("sound", "Sound.h"),
         ("messages", "Messages.h"),
         ("config", "Config.h"),
         ("tracing", "Tracing.h"),
         ("utils", "Utils.h"),
         ("memory", "Memory.h"),
+        ("unsynced_ctrl", "UnsyncedCtrl.h"),
+        ("lights", "Lights.h"),
+        ("icons", "Icons.h"),
+        ("markers", "Markers.h"),
+        ("ground_decals", "GroundDecals.h"),
+        ("system_control", "SystemControl.h"),
+        ("profiling", "Profiling.h"),
+        ("vfs", "VFS.h"),
+        ("unsynced_read", "UnsyncedRead.h"),
     ];
 
     let mut headers = Vec::new();
@@ -89,13 +97,21 @@ fn main() {
             "input" => spring_native_codegen::generate_input,
             "display" => spring_native_codegen::generate_display,
             "selection" => spring_native_codegen::generate_selection,
-            "vfs" => spring_native_codegen::generate_vfs,
             "sound" => spring_native_codegen::generate_sound,
             "messages" => spring_native_codegen::generate_messages,
             "config" => spring_native_codegen::generate_config,
             "tracing" => spring_native_codegen::generate_tracing,
             "utils" => spring_native_codegen::generate_utils,
             "memory" => spring_native_codegen::generate_memory,
+            "unsynced_ctrl" => spring_native_codegen::generate_unsynced_ctrl,
+            "lights" => spring_native_codegen::generate_lights,
+            "icons" => spring_native_codegen::generate_icons,
+            "markers" => spring_native_codegen::generate_markers,
+            "ground_decals" => spring_native_codegen::generate_ground_decals,
+            "system_control" => spring_native_codegen::generate_system_control,
+            "profiling" => spring_native_codegen::generate_profiling,
+            "vfs" => spring_native_codegen::generate_vfs,
+            "unsynced_read" => spring_native_codegen::generate_unsynced_read,
             _ => panic!("Unknown module: {}", module_name),
         };
 
@@ -113,6 +129,9 @@ fn main() {
         ("feature_control", spring_native_codegen::generate_feature_control),
         ("terrain_control", spring_native_codegen::generate_terrain_control),
         ("projectile_control", spring_native_codegen::generate_projectile_control),
+        ("effects_control", spring_native_codegen::generate_effects_control),
+        ("game_config", spring_native_codegen::generate_game_config),
+        ("cob_script", spring_native_codegen::generate_cob_script),
     ];
 
     for (name, generator) in &sub_apis {
@@ -121,6 +140,15 @@ fn main() {
         fs::write(out_dir.join(format!("{}_generated.rs", name)), code)
             .unwrap_or_else(|e| panic!("write {}: {}", name, e));
     }
+
+    // Generate UnitRendering sub-API (embedded within UnsyncedRead)
+    let unsynced_read_header = project_root.join("rts/NativeInterface/api/UnsyncedRead.h");
+    println!("cargo:rerun-if-changed={}", unsynced_read_header.display());
+    let unit_rendering_code =
+        spring_native_codegen::generate_unit_rendering(&unsynced_read_header, &includes)
+            .unwrap_or_else(|e| panic!("unit_rendering codegen: {}", e));
+    fs::write(out_dir.join("unit_rendering_generated.rs"), unit_rendering_code)
+        .unwrap_or_else(|e| panic!("write unit_rendering: {}", e));
 
     // Extract and generate API version constants
     let common_header = project_root.join("rts/NativeInterface/api/Common.h");

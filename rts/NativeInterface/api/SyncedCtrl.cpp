@@ -1,6 +1,9 @@
 #include "SyncedCtrl.h"
+#include <algorithm>
 #include <cstring>
 #include <cmath>
+#include <cstdlib>
+#include <vector>
 
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
@@ -13,15 +16,23 @@
 #include "Sim/Units/UnitTypes/ExtractorBuilding.h"
 #include "Sim/Units/UnitTypes/Factory.h"
 #include "Sim/Units/UnitTypes/Builder.h"
-#include "Rendering/Models/3DModel.h"
+#include "Sim/Units/UnitToolTipMap.hpp"
+#include "Rendering/Models/3DModel.hpp"
+#include "Rendering/Env/IGroundDecalDrawer.h"
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureDef.h"
 #include "Sim/Features/FeatureDefHandler.h"
 #include "Sim/Features/FeatureHandler.h"
+#include "Rendering/Env/GrassDrawer.h"
 #include "Sim/Projectiles/Projectile.h"
 #include "Sim/Projectiles/ProjectileHandler.h"
 #include "Sim/Projectiles/WeaponProjectiles/WeaponProjectile.h"
 #include "Sim/Projectiles/WeaponProjectiles/WeaponProjectileFactory.h"
+#include "Sim/Projectiles/WeaponProjectiles/WeaponProjectileTypes.h"
+#include "Sim/Projectiles/WeaponProjectiles/MissileProjectile.h"
+#include "Sim/Projectiles/WeaponProjectiles/StarburstProjectile.h"
+#include "Sim/Misc/GlobalConstants.h"
+#include "Sim/Projectiles/WeaponProjectiles/TorpedoProjectile.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Misc/Team.h"
 #include "Sim/Misc/AllyTeam.h"
@@ -34,11 +45,17 @@
 #include "Sim/Weapons/WeaponDef.h"
 #include "Sim/Weapons/Weapon.h"
 #include "Sim/Weapons/PlasmaRepulser.h"
+#include "Sim/MoveTypes/MoveType.h"
+#include "Sim/MoveTypes/AAirMoveType.h"
 #include "Sim/Projectiles/ExplosionGenerator.h"
+#include "Sim/Projectiles/PieceProjectile.h"
+#include "Sim/Misc/BuildingMaskMap.h"
+#include "Net/GameServer.h"
 #include "Game/GameHelper.h"
 #include "Game/GameSetup.h"
 #include "Game/Players/PlayerHandler.h"
 #include "Game/Players/Player.h"
+#include "Lua/LuaUI.h"
 #include "Map/ReadMap.h"
 #include "Map/MapDamage.h"
 #include "Map/MapInfo.h"
@@ -46,10 +63,14 @@
 #include "Map/Ground.h"
 #include "Sim/Misc/GroundBlockingObjectMap.h"
 #include "Sim/Misc/CollisionVolume.h"
+#include "Sim/Misc/GlobalConstants.h"
 #include "System/EventHandler.h"
+#include "System/StringHash.h"
 #include "System/float3.h"
 #include "System/Matrix44f.h"
 #include "System/creg/STL_Map.h"
+#include "Sim/Units/Scripts/CobInstance.h"
+#include "Sim/Units/Scripts/NullUnitScript.h"
 
 namespace {
 
@@ -61,6 +82,11 @@ thread_local size_t bufferPos = 0;
 static const Error NOT_READY_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Game not ready"
+};
+
+static const Error NOT_AVAILABLE_ERROR = {
+	.code = ERROR_NOT_AVAILABLE,
+	.message = "Not available in Native API"
 };
 
 static const Error INVALID_TEAM_ERROR = {
@@ -101,6 +127,11 @@ static const Error INVALID_WEAPONDEF_ERROR = {
 static const Error INVALID_PROJECTILE_ERROR = {
 	.code = ERROR_INVALID_ARGUMENT,
 	.message = "Invalid projectile ID"
+};
+
+static const Error INVALID_PLAYER_ERROR = {
+	.code = ERROR_INVALID_ARGUMENT,
+	.message = "Invalid player ID"
 };
 
 static const Error INVALID_RESOURCE_ERROR = {
@@ -520,6 +551,82 @@ static void NativeShareTeamResource(const ShareTeamResourceQuery* query, ShareTe
 	}
 }
 
+static void NativeSetTeamStartPosition(const SetTeamStartPositionQuery* query, SetTeamStartPositionResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
+
+	CTeam* team = teamHandler.Team(query->teamID);
+	float3 pickPos(query->pos.x, query->pos.y, query->pos.z);
+	team->ClampStartPosInStartBox(&pickPos);
+	team->SetStartPos(pickPos);
+
+	result->success = true;
+}
+
+static void NativeSetPlayerReadyState(const SetPlayerReadyStateQuery* query, SetPlayerReadyStateResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!playerHandler.IsValidPlayer(query->playerID)) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid player ID");
+		return;
+	}
+
+	playerHandler.Player(query->playerID)->SetReadyToStart(query->ready);
+	result->success = true;
+}
+
+static void NativeTransferTeamMaxUnits(const TransferTeamMaxUnitsQuery* query, TransferTeamMaxUnitsResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidTeam(query->fromTeamID)) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid from team ID");
+		return;
+	}
+
+	if (!teamHandler.IsValidTeam(query->toTeamID)) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid to team ID");
+		return;
+	}
+
+	CTeam* fromTeam = teamHandler.Team(query->fromTeamID);
+	CTeam* toTeam = teamHandler.Team(query->toTeamID);
+
+	if (fromTeam == nullptr || toTeam == nullptr) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
+
+	result->success = teamHandler.TransferTeamMaxUnits(fromTeam, toTeam, query->amount);
+}
+
 static const TeamControlApi TEAM_CONTROL_API = {
 	.SetAlly = NativeSetAlly,
 	.SetAllyTeamStartBox = NativeSetAllyTeamStartBox,
@@ -531,7 +638,10 @@ static const TeamControlApi TEAM_CONTROL_API = {
 	.UseTeamResource = NativeUseTeamResource,
 	.SetTeamResource = NativeSetTeamResource,
 	.SetTeamShareLevel = NativeSetTeamShareLevel,
-	.ShareTeamResource = NativeShareTeamResource
+	.ShareTeamResource = NativeShareTeamResource,
+	.SetTeamStartPosition = NativeSetTeamStartPosition,
+	.SetPlayerReadyState = NativeSetPlayerReadyState,
+	.TransferTeamMaxUnits = NativeTransferTeamMaxUnits
 };
 
 // ============================================================================
@@ -572,7 +682,7 @@ static void NativeCreateUnit(const CreateUnitQuery* query, CreateUnitResult* res
 	params.builder = builder;
 	params.pos = pos;
 	params.speed = ZeroVector;
-	params.unitID = -1;
+	params.unitID = (query->unitID >= 0) ? query->unitID : -1;
 	params.teamID = query->teamID;
 	params.facing = query->facing;
 	params.beingBuilt = query->build;
@@ -605,10 +715,19 @@ static void NativeDestroyUnit(const DestroyUnitQuery* query, DestroyUnitResult* 
 		return;
 	}
 
+	CUnit* attacker = nullptr;
+	if (query->attackerID >= 0) {
+		attacker = unitHandler.GetUnit(query->attackerID);
+	}
+
 	if (query->selfd) {
-		unit->KillUnit(nullptr, true, query->reclaimed);
+		unit->KillUnit(attacker, true, query->reclaimed);
 	} else {
-		unit->KillUnit(nullptr, false, query->reclaimed);
+		unit->KillUnit(attacker, false, query->reclaimed);
+	}
+
+	if (query->recycleID) {
+		unitHandler.GarbageCollectUnit(unit->id);
 	}
 
 	result->success = true;
@@ -692,6 +811,100 @@ static void NativeGiveOrderToUnitArray(const GiveOrderToUnitArrayQuery* query, G
 	}
 
 	result->success = true;
+}
+
+static void NativeGiveOrderArrayToUnit(const GiveOrderArrayToUnitQuery* query, GiveOrderArrayToUnitResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr || unit->commandAI == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (query->commands == nullptr || query->commandCount == 0) {
+		result->success = false;
+		return;
+	}
+
+	// Give each command to the unit
+	for (uint32_t i = 0; i < query->commandCount; ++i) {
+		const NativeCommand& nativeCmd = query->commands[i];
+		Command cmd(nativeCmd.cmdID, nativeCmd.options);
+
+		for (uint32_t j = 0; j < nativeCmd.paramCount; ++j) {
+			cmd.PushParam(nativeCmd.params[j]);
+		}
+
+		unit->commandAI->GiveCommand(cmd);
+	}
+
+	result->success = true;
+}
+
+static void NativeGiveOrderArrayToUnitArray(const GiveOrderArrayToUnitArrayQuery* query, GiveOrderArrayToUnitArrayResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->unitsOrdered = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (query->unitIDs == nullptr || query->unitCount == 0) {
+		return;
+	}
+
+	if (query->commands == nullptr || query->commandCount == 0) {
+		return;
+	}
+
+	if (query->pairwise) {
+		// Pairwise mode: unit[i] gets command[i]
+		const uint32_t count = std::min(query->unitCount, query->commandCount);
+		for (uint32_t i = 0; i < count; ++i) {
+			CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
+			if (unit != nullptr && unit->commandAI != nullptr) {
+				const NativeCommand& nativeCmd = query->commands[i];
+				Command cmd(nativeCmd.cmdID, nativeCmd.options);
+
+				for (uint32_t j = 0; j < nativeCmd.paramCount; ++j) {
+					cmd.PushParam(nativeCmd.params[j]);
+				}
+
+				unit->commandAI->GiveCommand(cmd);
+				result->unitsOrdered++;
+			}
+		}
+	} else {
+		// Broadcast mode: each unit gets all commands
+		for (uint32_t i = 0; i < query->unitCount; ++i) {
+			CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
+			if (unit != nullptr && unit->commandAI != nullptr) {
+				for (uint32_t c = 0; c < query->commandCount; ++c) {
+					const NativeCommand& nativeCmd = query->commands[c];
+					Command cmd(nativeCmd.cmdID, nativeCmd.options);
+
+					for (uint32_t j = 0; j < nativeCmd.paramCount; ++j) {
+						cmd.PushParam(nativeCmd.params[j]);
+					}
+
+					unit->commandAI->GiveCommand(cmd);
+				}
+				result->unitsOrdered++;
+			}
+		}
+	}
 }
 
 static void NativeUnitFinishCommand(const UnitFinishCommandQuery* query, UnitFinishCommandResult* result)
@@ -1056,7 +1269,12 @@ static void NativeAddUnitDamage(const AddUnitDamageQuery* query, AddUnitDamageRe
 		damages.SetDefaultDamage(query->damage);
 	}
 
-	unit->DoDamage(damages, query->damage, attacker, weaponDef != nullptr ? weaponDef->id : -1, -1);
+	if (query->paralyzeTime > 0.0f) {
+		damages.paralyzeDamageTime = query->paralyzeTime;
+	}
+
+	const float3 impulse(query->impulse.x, query->impulse.y, query->impulse.z);
+	unit->DoDamage(damages, impulse, attacker, weaponDef != nullptr ? weaponDef->id : -1, -1);
 
 	result->success = true;
 }
@@ -1078,7 +1296,11 @@ static void NativeAddUnitImpulse(const AddUnitImpulseQuery* query, AddUnitImpuls
 		return;
 	}
 
-	const float3 impulse(query->impulse.x, query->impulse.y, query->impulse.z);
+	const float3 impulse(
+		std::clamp(query->impulse.x, -MAX_EXPLOSION_IMPULSE, MAX_EXPLOSION_IMPULSE),
+		std::clamp(query->impulse.y, -MAX_EXPLOSION_IMPULSE, MAX_EXPLOSION_IMPULSE),
+		std::clamp(query->impulse.z, -MAX_EXPLOSION_IMPULSE, MAX_EXPLOSION_IMPULSE)
+	);
 	unit->ApplyImpulse(impulse);
 
 	result->success = true;
@@ -1640,7 +1862,7 @@ static void NativeSetUnitCollisionVolumeData(const SetUnitCollisionVolumeDataQue
 		scales,
 		offsets,
 		query->volumeType,
-		COLVOL_HITTEST_CONT,
+		CollisionVolume::COLVOL_HITTEST_CONT,
 		query->primaryAxis
 	);
 
@@ -1671,7 +1893,7 @@ static void NativeSetUnitSelectionVolumeData(const SetUnitSelectionVolumeDataQue
 		scales,
 		offsets,
 		query->volumeType,
-		query->useContHitTest ? COLVOL_HITTEST_CONT : COLVOL_HITTEST_DISC,
+		query->useContHitTest ? CollisionVolume::COLVOL_HITTEST_CONT : CollisionVolume::COLVOL_HITTEST_DISC,
 		query->primaryAxis
 	);
 
@@ -1695,13 +1917,13 @@ static void NativeSetUnitPieceCollisionVolumeData(const SetUnitPieceCollisionVol
 		return;
 	}
 
-	LocalModel* localModel = unit->localModel;
-	if (localModel == nullptr || query->pieceIndex < 0 || static_cast<size_t>(query->pieceIndex) >= localModel->pieces.size()) {
+	LocalModel& localModel = unit->localModel;
+	if (query->pieceIndex < 0 || static_cast<size_t>(query->pieceIndex) >= localModel.pieces.size()) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
 		return;
 	}
 
-	LocalModelPiece* lmp = &localModel->pieces[query->pieceIndex];
+	LocalModelPiece* lmp = &localModel.pieces[query->pieceIndex];
 
 	if (query->enable) {
 		const float3 scales(query->scales.x, query->scales.y, query->scales.z);
@@ -1712,7 +1934,7 @@ static void NativeSetUnitPieceCollisionVolumeData(const SetUnitPieceCollisionVol
 			scales,
 			offsets,
 			query->volumeType,
-			COLVOL_HITTEST_CONT,
+			CollisionVolume::COLVOL_HITTEST_CONT,
 			query->primaryAxis
 		);
 		lmp->SetScriptVisible(!lmp->GetScriptVisible());
@@ -1946,12 +2168,1424 @@ static void NativeSetUnitRadiusAndHeight(const SetUnitRadiusAndHeightQuery* quer
 	result->success = true;
 }
 
+static void NativeSetUnitMoveGoal(const SetUnitMoveGoalQuery* query, SetUnitMoveGoalResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (unit->moveType == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no move type");
+		return;
+	}
+
+	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
+	const float speed = (query->speed > 0.0f) ? query->speed : unit->moveType->GetMaxSpeed();
+
+	if (query->raw) {
+		unit->moveType->StartMovingRaw(pos, query->radius);
+	} else {
+		unit->moveType->StartMoving(pos, query->radius, speed);
+	}
+
+	result->success = true;
+}
+
+static void NativeSetUnitLandGoal(const SetUnitLandGoalQuery* query, SetUnitLandGoalResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	AAirMoveType* amt = dynamic_cast<AAirMoveType*>(unit->moveType);
+	if (amt == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a flying unit");
+		return;
+	}
+
+	const float3 landPos(query->pos.x, query->pos.y, query->pos.z);
+	amt->LandAt(landPos, query->radiusSq);
+
+	result->success = true;
+}
+
+static void NativeClearUnitGoal(const ClearUnitGoalQuery* query, ClearUnitGoalResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (unit->moveType == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no move type");
+		return;
+	}
+
+	unit->moveType->StopMoving(false, false, query->cancelRaw);
+	result->success = true;
+}
+
+static void NativeSetUnitStockpile(const SetUnitStockpileQuery* query, SetUnitStockpileResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CWeapon* w = unit->stockpileWeapon;
+	if (w == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no stockpile weapon");
+		return;
+	}
+
+	if (query->stockpile >= 0) {
+		w->numStockpiled = query->stockpile;
+		unit->commandAI->UpdateStockpileIcon();
+	}
+
+	if (query->buildPercent >= 0.0f) {
+		w->buildPercent = std::clamp(query->buildPercent, 0.0f, 1.0f);
+	}
+
+	result->success = true;
+}
+
+static void NativeSetUnitDirection(const SetUnitDirectionQuery* query, SetUnitDirectionResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	float3 dir(query->dir.x, query->dir.y, query->dir.z);
+	dir.SafeNormalize();
+
+	if (math::fabsf(dir.SqLength() - 1.0f) > float3::cmp_eps()) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid direction vector");
+		return;
+	}
+
+	unit->ForcedSpin(dir);
+	result->success = true;
+}
+
+static void NativeUnitAttach(const UnitAttachQuery* query, UnitAttachResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* transporter = unitHandler.GetUnit(query->transporterID);
+	if (transporter == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid transporter unit ID");
+		return;
+	}
+
+	CUnit* transportee = unitHandler.GetUnit(query->transporteeID);
+	if (transportee == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid transportee unit ID");
+		return;
+	}
+
+	if (transporter == transportee) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Cannot attach unit to itself");
+		return;
+	}
+
+	int piece = query->pieceNum;
+	const auto& pieces = transporter->localModel.pieces;
+
+	if (piece >= static_cast<int>(pieces.size())) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece number");
+		return;
+	}
+
+	if (piece >= 0) {
+		piece = pieces[piece].scriptPieceIndex;
+	}
+
+	transporter->AttachUnit(transportee, piece, !transporter->unitDef->IsTransportUnit());
+	result->success = true;
+}
+
+static void NativeUnitDetach(const UnitDetachQuery* query, UnitDetachResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* transportee = unitHandler.GetUnit(query->transporteeID);
+	if (transportee == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CUnit* transporter = transportee->GetTransporter();
+	if (transporter == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not being transported");
+		return;
+	}
+
+	transporter->DetachUnit(transportee);
+	result->success = true;
+}
+
+static void NativeUnitDetachFromAir(const UnitDetachFromAirQuery* query, UnitDetachFromAirResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* transportee = unitHandler.GetUnit(query->transporteeID);
+	if (transportee == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CUnit* transporter = transportee->GetTransporter();
+	if (transporter == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not being transported");
+		return;
+	}
+
+	float3 pos;
+	if (query->usePos) {
+		pos = float3(query->pos.x, query->pos.y, query->pos.z);
+	} else {
+		pos = transportee->pos;
+		pos.y = CGround::GetHeightAboveWater(pos.x, pos.z);
+	}
+
+	transporter->DetachUnitFromAir(transportee, pos);
+	result->success = true;
+}
+
+static void NativeSetUnitLoadingTransport(const SetUnitLoadingTransportQuery* query, SetUnitLoadingTransportResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (query->transportID < 0) {
+		unit->loadingTransportId = -1;
+		result->success = true;
+		return;
+	}
+
+	CUnit* transport = unitHandler.GetUnit(query->transportID);
+	if (transport == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid transport unit ID");
+		return;
+	}
+
+	unit->loadingTransportId = transport->id;
+	result->success = true;
+}
+
+static void NativeSetUnitCrashing(const SetUnitCrashingQuery* query, SetUnitCrashingResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->stateChanged = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	AAirMoveType* amt = dynamic_cast<AAirMoveType*>(unit->moveType);
+	if (amt == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not an aircraft");
+		return;
+	}
+
+	const AAirMoveType::AircraftState aircraftState = amt->aircraftState;
+
+	// For simplicity, can only set a non-landed aircraft to start crashing,
+	// or a crashing aircraft to start flying
+	if (query->wantCrash && (aircraftState != AAirMoveType::AIRCRAFT_LANDED)) {
+		amt->SetState(AAirMoveType::AIRCRAFT_CRASHING);
+	}
+
+	if (!query->wantCrash && (aircraftState == AAirMoveType::AIRCRAFT_CRASHING)) {
+		amt->SetState(AAirMoveType::AIRCRAFT_FLYING);
+	}
+
+	result->stateChanged = (amt->aircraftState != aircraftState);
+}
+
+// Helper function to set a single weapon state property
+static bool SetSingleWeaponState(CWeapon* weapon, const char* key, float value)
+{
+	switch (hashString(key)) {
+		case hashString("reloadState"):
+		case hashString("reloadFrame"):
+			weapon->reloadStatus = static_cast<int>(value);
+			break;
+		case hashString("reloadTime"):
+			weapon->reloadTime = std::max(1, static_cast<int>(value * GAME_SPEED));
+			break;
+		case hashString("reaimTime"):
+			weapon->reaimTime = std::max(1, static_cast<int>(value));
+			break;
+		case hashString("accuracy"):
+			weapon->accuracyError = value;
+			break;
+		case hashString("sprayAngle"):
+			weapon->sprayAngle = value;
+			break;
+		case hashString("range"):
+			weapon->UpdateRange(value);
+			break;
+		case hashString("projectileSpeed"):
+			weapon->UpdateProjectileSpeed(value);
+			break;
+		case hashString("autoTargetRangeBoost"):
+			weapon->autoTargetRangeBoost = std::max(0.0f, value);
+			break;
+		case hashString("burst"):
+			weapon->salvoSize = static_cast<int>(value);
+			break;
+		case hashString("burstRate"):
+			weapon->salvoDelay = static_cast<int>(value * GAME_SPEED);
+			break;
+		case hashString("windup"):
+			weapon->salvoWindup = static_cast<int>(value * GAME_SPEED);
+			break;
+		case hashString("projectiles"):
+			weapon->projectilesPerShot = static_cast<int>(value);
+			break;
+		case hashString("salvoLeft"):
+			weapon->salvoLeft = static_cast<int>(value);
+			break;
+		case hashString("nextSalvo"):
+			weapon->nextSalvo = static_cast<int>(value);
+			break;
+		case hashString("aimReady"):
+			weapon->angleGood = (value != 0.0f);
+			break;
+		case hashString("forceAim"):
+			weapon->lastAimedFrame -= static_cast<int>(value > 0.0f ? value : weapon->reaimTime);
+			break;
+		case hashString("avoidFlags"):
+			weapon->avoidFlags = static_cast<int>(value);
+			break;
+		case hashString("collisionFlags"):
+			weapon->collisionFlags = static_cast<int>(value);
+			break;
+		case hashString("ttl"):
+			weapon->ttl = static_cast<int>(value * GAME_SPEED);
+			break;
+		default:
+			return false;
+	}
+	return true;
+}
+
+static void NativeSetUnitWeaponState(const SetUnitWeaponStateQuery* query, SetUnitWeaponStateResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const size_t weaponNum = static_cast<size_t>(query->weaponNum);
+	if (weaponNum >= unit->weapons.size()) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
+		return;
+	}
+
+	CWeapon* weapon = unit->weapons[weaponNum];
+	if (query->key == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Key is null");
+		return;
+	}
+
+	result->success = SetSingleWeaponState(weapon, query->key, query->value);
+	if (!result->success) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown weapon state key");
+	}
+}
+
+static void NativeUnitWeaponFire(const UnitWeaponFireQuery* query, UnitWeaponFireResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const size_t weaponNum = static_cast<size_t>(query->weaponNum);
+	if (weaponNum >= unit->weapons.size()) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
+		return;
+	}
+
+	unit->weapons[weaponNum]->Fire(false);
+	result->success = true;
+}
+
+static void NativeUnitWeaponHoldFire(const UnitWeaponHoldFireQuery* query, UnitWeaponHoldFireResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const size_t weaponNum = static_cast<size_t>(query->weaponNum);
+	if (weaponNum >= unit->weapons.size()) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
+		return;
+	}
+
+	unit->weapons[weaponNum]->DropCurrentTarget();
+	result->success = true;
+}
+
+static void NativeSetUnitUseWeapons(const SetUnitUseWeaponsQuery* query, SetUnitUseWeaponsResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (query->setForce) {
+		unit->forceUseWeapons = query->forceUseWeapons;
+	}
+	if (query->setAllow) {
+		unit->allowUseWeapons = query->allowUseWeapons;
+	}
+
+	result->success = true;
+}
+
+static void NativeSetUnitMaxRange(const SetUnitMaxRangeQuery* query, SetUnitMaxRangeResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->maxRange = std::max(0.0f, query->maxRange);
+	result->success = true;
+}
+
+static void NativeSetUnitPhysicalStateBit(const SetUnitPhysicalStateBitQuery* query, SetUnitPhysicalStateBitResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->SetPhysicalStateBit(query->stateBit);
+	result->success = true;
+}
+
+static void NativeSetUnitPosErrorParams(const SetUnitPosErrorParamsQuery* query, SetUnitPosErrorParamsResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->posErrorVector.x = query->posErrorVector.x;
+	unit->posErrorVector.y = query->posErrorVector.y;
+	unit->posErrorVector.z = query->posErrorVector.z;
+	unit->posErrorDelta.x = query->posErrorDelta.x;
+	unit->posErrorDelta.y = query->posErrorDelta.y;
+	unit->posErrorDelta.z = query->posErrorDelta.z;
+	unit->nextPosErrorUpdate = query->nextPosErrorUpdate;
+
+	if (query->allyTeamID >= 0 && query->allyTeamID < teamHandler.ActiveAllyTeams()) {
+		unit->SetPosErrorBit(query->allyTeamID, query->setPosErrorBit);
+	}
+
+	result->success = true;
+}
+
+// Helper function to set a single damage property
+static bool SetSingleDynDamagesKey(DynDamageArray* damages, const char* key, float value)
+{
+	switch (hashString(key)) {
+		case hashString("paralyzeDamageTime"):
+			damages->paralyzeDamageTime = std::max(static_cast<int>(value), 0);
+			break;
+		case hashString("impulseFactor"):
+			damages->impulseFactor = value;
+			break;
+		case hashString("impulseBoost"):
+			damages->impulseBoost = value;
+			break;
+		case hashString("craterMult"):
+			damages->craterMult = value;
+			break;
+		case hashString("craterBoost"):
+			damages->craterBoost = value;
+			break;
+		case hashString("dynDamageExp"):
+			damages->dynDamageExp = value;
+			break;
+		case hashString("dynDamageMin"):
+			damages->dynDamageMin = value;
+			break;
+		case hashString("dynDamageRange"):
+			damages->dynDamageRange = value;
+			break;
+		case hashString("dynDamageInverted"):
+			damages->dynDamageInverted = (value != 0.0f);
+			break;
+		case hashString("craterAreaOfEffect"):
+			damages->craterAreaOfEffect = value;
+			break;
+		case hashString("damageAreaOfEffect"):
+			damages->damageAreaOfEffect = value;
+			break;
+		case hashString("edgeEffectiveness"):
+			damages->edgeEffectiveness = std::min(value, 1.0f);
+			break;
+		case hashString("explosionSpeed"):
+			damages->explosionSpeed = value;
+			break;
+		default:
+			return false;
+	}
+	return true;
+}
+
+static void NativeSetUnitWeaponDamages(const SetUnitWeaponDamagesQuery* query, SetUnitWeaponDamagesResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	DynDamageArray* damages = nullptr;
+
+	if (query->weaponNum == -1) {
+		// "explode"
+		damages = DynDamageArray::GetMutable(unit->deathExpDamages);
+	} else if (query->weaponNum == -2) {
+		// "selfDestruct"
+		damages = DynDamageArray::GetMutable(unit->selfdExpDamages);
+	} else {
+		const size_t weaponNum = static_cast<size_t>(query->weaponNum);
+		if (weaponNum >= unit->weapons.size()) {
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
+			return;
+		}
+		damages = DynDamageArray::GetMutable(unit->weapons[weaponNum]->damages);
+	}
+
+	if (damages == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Could not get damage array");
+		return;
+	}
+
+	if (query->damageKey == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Damage key is null");
+		return;
+	}
+
+	// Check if it's an armor type index (numeric string)
+	char* endptr;
+	long armType = strtol(query->damageKey, &endptr, 10);
+	if (*endptr == '\0' && armType >= 0) {
+		// It's a numeric armor type
+		if (static_cast<unsigned>(armType) < damages->GetNumTypes()) {
+			damages->Set(static_cast<unsigned>(armType), query->damageValue);
+			result->success = true;
+		} else {
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid armor type index");
+		}
+		return;
+	}
+
+	// It's a named property
+	result->success = SetSingleDynDamagesKey(damages, query->damageKey, query->damageValue);
+	if (!result->success) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown damage key");
+	}
+}
+
+static void NativeForceUnitCollisionUpdate(const ForceUnitCollisionUpdateQuery* query, ForceUnitCollisionUpdateResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (unit->moveType == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no move type");
+		return;
+	}
+
+	unit->moveType->UpdateCollisionMap(true);
+	result->success = true;
+}
+
+static void NativeSetUnitHeading(const SetUnitHeadingQuery* query, SetUnitHeadingResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->heading = static_cast<short>(query->heading);
+	unit->SetFacingFromHeading();
+	unit->UpdateMidAndAimPos();
+
+	result->success = true;
+}
+
+static void NativeSetUnitHeadingAndUpDir(const SetUnitHeadingAndUpDirQuery* query, SetUnitHeadingAndUpDirResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const float3 upDir = float3(query->upDir.x, query->upDir.y, query->upDir.z).SafeNormalize();
+	if (std::fabs(upDir.SqLength() - 1.0f) > float3::cmp_eps()) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid up direction (must be non-zero)");
+		return;
+	}
+
+	unit->heading = static_cast<short>(query->heading);
+	unit->UpdateDirVectors(upDir);
+	unit->SetFacingFromHeading();
+	unit->UpdateMidAndAimPos();
+
+	result->success = true;
+}
+
+static void NativeAddObjectDecal(const AddObjectDecalQuery* query, AddObjectDecalResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	groundDecals->AddSolidObject(unit);
+	result->success = true;
+}
+
+static void NativeRemoveObjectDecal(const RemoveObjectDecalQuery* query, RemoveObjectDecalResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	groundDecals->ForceRemoveSolidObject(unit);
+	result->success = true;
+}
+
+static void NativeSetUnitBuildeeRadius(const SetUnitBuildeeRadiusQuery* query, SetUnitBuildeeRadiusResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->buildeeRadius = std::max(0.0f, query->radius);
+	result->success = true;
+}
+
+static void NativeSetUnitSensorRadius(const SetUnitSensorRadiusQuery* query, SetUnitSensorRadiusResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->newRadius = -1;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (query->sensorType == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Sensor type is null");
+		return;
+	}
+
+	const int radius = std::clamp(query->radius, 0, MAX_UNIT_SENSOR_RADIUS);
+
+	switch (hashString(query->sensorType)) {
+		case hashString("los"):
+			unit->ChangeLos(unit->realLosRadius = radius, unit->realAirLosRadius);
+			result->newRadius = unit->losRadius;
+			break;
+		case hashString("airLos"):
+			unit->ChangeLos(unit->realLosRadius, unit->realAirLosRadius = radius);
+			result->newRadius = unit->airLosRadius;
+			break;
+		case hashString("radar"):
+			result->newRadius = unit->radarRadius = radius;
+			break;
+		case hashString("sonar"):
+			result->newRadius = unit->sonarRadius = radius;
+			break;
+		case hashString("seismic"):
+			result->newRadius = unit->seismicRadius = radius;
+			break;
+		case hashString("radarJammer"):
+			result->newRadius = unit->jammerRadius = radius;
+			break;
+		case hashString("sonarJammer"):
+			result->newRadius = unit->sonarJamRadius = radius;
+			break;
+		default:
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown sensor type");
+			return;
+	}
+}
+
+static void NativeSetUnitHarvestStorage(const SetUnitHarvestStorageQuery* query, SetUnitHarvestStorageResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->harvested[0] = query->harvestedMetal;
+	unit->harvestStorage[0] = query->harvestStorageMetal;
+	unit->harvested[1] = query->harvestedEnergy;
+	unit->harvestStorage[1] = query->harvestStorageEnergy;
+
+	result->success = true;
+}
+
+static void NativeSetUnitBuildParams(const SetUnitBuildParamsQuery* query, SetUnitBuildParamsResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CBuilder* builder = dynamic_cast<CBuilder*>(unit);
+	if (builder == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a builder");
+		return;
+	}
+
+	if (query->paramName == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Param name is null");
+		return;
+	}
+
+	switch (hashString(query->paramName)) {
+		case hashString("buildRange"):
+		case hashString("buildDistance"):
+			builder->buildDistance = query->floatValue;
+			break;
+		case hashString("buildRange3D"):
+			builder->range3D = query->boolValue;
+			break;
+		default:
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown build param");
+			return;
+	}
+
+	result->success = true;
+}
+
+static void NativeSetUnitLosMask(const SetUnitLosMaskQuery* query, SetUnitLosMaskResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLYTEAM_ERROR;
+		return;
+	}
+
+	const unsigned char losStatus = unit->losStatus[query->allyTeamID];
+	const unsigned char newMask = query->losMask & 0x0F;
+	const unsigned char state = (newMask << LOS_MASK_SHIFT) | (losStatus & 0x0F);
+
+	unit->losStatus[query->allyTeamID] = state;
+	unit->SetLosStatus(query->allyTeamID, unit->CalcLosStatus(query->allyTeamID));
+
+	result->success = true;
+}
+
+static void NativeSetUnitLosState(const SetUnitLosStateQuery* query, SetUnitLosStateResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLYTEAM_ERROR;
+		return;
+	}
+
+	const unsigned char losStatus = unit->losStatus[query->allyTeamID];
+	const unsigned char newState = query->losState & 0x0F;
+
+	unit->SetLosStatus(query->allyTeamID, (losStatus & 0xF0) | newState);
+
+	result->success = true;
+}
+
+static void NativeSetUnitStorage(const SetUnitStorageQuery* query, SetUnitStorageResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	SResourcePack newStorage = unit->storage;
+	newStorage.metal = query->metalStorage;
+	newStorage.energy = query->energyStorage;
+	unit->SetStorage(newStorage);
+
+	result->success = true;
+}
+
+static void NativeSetUnitTooltip(const SetUnitTooltipQuery* query, SetUnitTooltipResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (query->tooltip != nullptr) {
+		unitToolTipMap.Set(unit->id, std::string(query->tooltip));
+	} else {
+		unitToolTipMap.Set(unit->id, "");
+	}
+
+	result->success = true;
+}
+
+static void NativeSetFactoryBuggerOff(const SetFactoryBuggerOffQuery* query, SetFactoryBuggerOffResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->perform = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CFactory* factory = dynamic_cast<CFactory*>(unit);
+	if (factory == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a factory");
+		return;
+	}
+
+	factory->boPerform = query->perform;
+	factory->boOffset = query->offset;
+	factory->boRadius = query->radius;
+	factory->boRelHeading = query->relHeading;
+	factory->boSherical = query->spherical;
+	factory->boForced = query->forced;
+
+	result->perform = factory->boPerform;
+}
+
+static void NativeBuggerOff(const BuggerOffQuery* query, BuggerOffResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
+
+	float3 pos(query->pos.x, query->pos.y, query->pos.z);
+
+	CUnit* excludeUnit = nullptr;
+	if (query->excludeUnitID >= 0) {
+		excludeUnit = unitHandler.GetUnit(query->excludeUnitID);
+	}
+
+	if (query->excludeUnitDefIDs != nullptr && query->excludeUnitDefCount > 0) {
+		std::vector<const UnitDef*> exclDefs;
+		exclDefs.reserve(query->excludeUnitDefCount);
+		for (uint32_t i = 0; i < query->excludeUnitDefCount; ++i) {
+			const int defID = query->excludeUnitDefIDs[i];
+			if (unitDefHandler->IsValidUnitDefID(defID)) {
+				exclDefs.push_back(unitDefHandler->GetUnitDefByID(defID));
+			}
+		}
+		CGameHelper::BuggerOff(pos, query->radius, query->spherical, query->forced, query->teamID, excludeUnit, exclDefs);
+	} else {
+		CGameHelper::BuggerOff(pos, query->radius, query->spherical, query->forced, query->teamID, excludeUnit);
+	}
+	result->success = true;
+}
+
+static void NativeAddUnitSeismicPing(const AddUnitSeismicPingQuery* query, AddUnitSeismicPingResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->DoSeismicPing(query->pingSize);
+	result->success = true;
+}
+
+static void NativeAddUnitResource(const AddUnitResourceQuery* query, AddUnitResourceResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (query->resourceType == nullptr || query->resourceType[0] == '\0') {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Resource type is null or empty");
+		return;
+	}
+
+	const float amount = std::max(0.0f, query->amount);
+	switch (query->resourceType[0]) {
+		case 'm':
+			unit->AddMetal(amount);
+			result->success = true;
+			break;
+		case 'e':
+			unit->AddEnergy(amount);
+			result->success = true;
+			break;
+		default:
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown resource type");
+			break;
+	}
+}
+
+static void NativeUseUnitResource(const UseUnitResourceQuery* query, UseUnitResourceResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (query->resourceType == nullptr || query->resourceType[0] == '\0') {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Resource type is null or empty");
+		return;
+	}
+
+	const float amount = std::max(0.0f, query->amount);
+	switch (query->resourceType[0]) {
+		case 'm':
+			result->success = unit->UseMetal(amount);
+			break;
+		case 'e':
+			result->success = unit->UseEnergy(amount);
+			break;
+		default:
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown resource type");
+			break;
+	}
+}
+
+static void NativeSetUnitPieceVisible(const SetUnitPieceVisibleQuery* query, SetUnitPieceVisibleResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	LocalModel& localModel = unit->localModel;
+	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		return;
+	}
+
+	localModel.pieces[query->pieceIndex].SetScriptVisible(query->visible);
+	result->success = true;
+}
+
+static void NativeSetUnitPieceParent(const SetUnitPieceParentQuery* query, SetUnitPieceParentResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	LocalModel& localModel = unit->localModel;
+	if (query->childPieceIndex < 0 || query->childPieceIndex >= static_cast<int>(localModel.pieces.size())) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid child piece index");
+		return;
+	}
+	if (query->parentPieceIndex < 0 || query->parentPieceIndex >= static_cast<int>(localModel.pieces.size())) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid parent piece index");
+		return;
+	}
+
+	LocalModelPiece* childPiece = &localModel.pieces[query->childPieceIndex];
+	LocalModelPiece* parentPiece = &localModel.pieces[query->parentPieceIndex];
+
+	// Cannot change the root piece's parent
+	if (childPiece == localModel.GetRoot()) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Cannot change root piece's parent");
+		return;
+	}
+
+	childPiece->parent->RemoveChild(childPiece);
+	childPiece->SetParent(parentPiece);
+	parentPiece->AddChild(childPiece);
+	result->success = true;
+}
+
+static void NativeSetUnitPieceMatrix(const SetUnitPieceMatrixQuery* query, SetUnitPieceMatrixResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->blockScriptAnims = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	LocalModel& localModel = unit->localModel;
+	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		return;
+	}
+
+	LocalModelPiece* lmp = &localModel.pieces[query->pieceIndex];
+
+	CMatrix44f mat;
+	for (int i = 0; i < 16; ++i) {
+		mat.m[i] = query->matrix[i];
+	}
+
+	if (lmp->SetPieceSpaceMatrix(mat))
+		lmp->SetDirty();
+
+	result->blockScriptAnims = lmp->blockScriptAnims;
+}
+
+static void NativeSetUnitNanoPieces(const SetUnitNanoPiecesQuery* query, SetUnitNanoPiecesResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	NanoPieceCache* pieceCache = nullptr;
+	std::vector<int>* nanoPieces = nullptr;
+
+	// Check if Builder
+	CBuilder* builder = dynamic_cast<CBuilder*>(unit);
+	if (builder != nullptr) {
+		pieceCache = &builder->GetNanoPieceCache();
+		nanoPieces = &pieceCache->GetNanoPieces();
+	}
+
+	// Check if Factory
+	CFactory* factory = dynamic_cast<CFactory*>(unit);
+	if (factory != nullptr) {
+		pieceCache = &factory->GetNanoPieceCache();
+		nanoPieces = &pieceCache->GetNanoPieces();
+	}
+
+	if (nanoPieces == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a builder or factory");
+		return;
+	}
+
+	nanoPieces->clear();
+	pieceCache->StopPolling();
+
+	for (uint32_t i = 0; i < query->pieceCount; ++i) {
+		const int modelPieceNum = query->pieceIndices[i];  // Already 0-indexed
+
+		if (unit->localModel.HasPiece(modelPieceNum)) {
+			nanoPieces->push_back(modelPieceNum);
+		} else {
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+			return;
+		}
+	}
+
+	result->success = true;
+}
+
 static const UnitControlApi UNIT_CONTROL_API = {
 	.CreateUnit = NativeCreateUnit,
 	.DestroyUnit = NativeDestroyUnit,
 	.TransferUnit = NativeTransferUnit,
 	.GiveOrderToUnit = NativeGiveOrderToUnit,
 	.GiveOrderToUnitArray = NativeGiveOrderToUnitArray,
+	.GiveOrderArrayToUnit = NativeGiveOrderArrayToUnit,
+	.GiveOrderArrayToUnitArray = NativeGiveOrderArrayToUnitArray,
 	.UnitFinishCommand = NativeUnitFinishCommand,
 	.SetUnitHealth = NativeSetUnitHealth,
 	.SetUnitMaxHealth = NativeSetUnitMaxHealth,
@@ -1992,7 +3626,47 @@ static const UnitControlApi UNIT_CONTROL_API = {
 	.SetUnitShieldRechargeDelay = NativeSetUnitShieldRechargeDelay,
 	.SetUnitFlanking = NativeSetUnitFlanking,
 	.SetUnitMidAndAimPos = NativeSetUnitMidAndAimPos,
-	.SetUnitRadiusAndHeight = NativeSetUnitRadiusAndHeight
+	.SetUnitRadiusAndHeight = NativeSetUnitRadiusAndHeight,
+	.SetUnitMoveGoal = NativeSetUnitMoveGoal,
+	.SetUnitLandGoal = NativeSetUnitLandGoal,
+	.ClearUnitGoal = NativeClearUnitGoal,
+	.SetUnitStockpile = NativeSetUnitStockpile,
+	.SetUnitDirection = NativeSetUnitDirection,
+	.UnitAttach = NativeUnitAttach,
+	.UnitDetach = NativeUnitDetach,
+	.UnitDetachFromAir = NativeUnitDetachFromAir,
+	.SetUnitLoadingTransport = NativeSetUnitLoadingTransport,
+	.SetUnitCrashing = NativeSetUnitCrashing,
+	.SetUnitWeaponState = NativeSetUnitWeaponState,
+	.UnitWeaponFire = NativeUnitWeaponFire,
+	.UnitWeaponHoldFire = NativeUnitWeaponHoldFire,
+	.SetUnitUseWeapons = NativeSetUnitUseWeapons,
+	.SetUnitMaxRange = NativeSetUnitMaxRange,
+	.SetUnitPhysicalStateBit = NativeSetUnitPhysicalStateBit,
+	.SetUnitPosErrorParams = NativeSetUnitPosErrorParams,
+	.SetUnitWeaponDamages = NativeSetUnitWeaponDamages,
+	.ForceUnitCollisionUpdate = NativeForceUnitCollisionUpdate,
+	.SetUnitHeading = NativeSetUnitHeading,
+	.SetUnitHeadingAndUpDir = NativeSetUnitHeadingAndUpDir,
+	.AddObjectDecal = NativeAddObjectDecal,
+	.RemoveObjectDecal = NativeRemoveObjectDecal,
+	.SetUnitBuildeeRadius = NativeSetUnitBuildeeRadius,
+	.SetUnitSensorRadius = NativeSetUnitSensorRadius,
+	.SetUnitHarvestStorage = NativeSetUnitHarvestStorage,
+	.SetUnitBuildParams = NativeSetUnitBuildParams,
+	.SetUnitLosMask = NativeSetUnitLosMask,
+	.SetUnitLosState = NativeSetUnitLosState,
+	.SetUnitStorage = NativeSetUnitStorage,
+	.SetUnitTooltip = NativeSetUnitTooltip,
+	.SetFactoryBuggerOff = NativeSetFactoryBuggerOff,
+	.BuggerOff = NativeBuggerOff,
+	.AddUnitSeismicPing = NativeAddUnitSeismicPing,
+	.AddUnitResource = NativeAddUnitResource,
+	.UseUnitResource = NativeUseUnitResource,
+	.SetUnitPieceVisible = NativeSetUnitPieceVisible,
+	.SetUnitPieceParent = NativeSetUnitPieceParent,
+	.SetUnitPieceMatrix = NativeSetUnitPieceMatrix,
+	.SetUnitNanoPieces = NativeSetUnitNanoPieces
 };
 
 // ============================================================================
@@ -2239,6 +3913,10 @@ static void NativeAddFeatureDamage(const AddFeatureDamageQuery* query, AddFeatur
 		damages = damages * (query->damage / damages.GetDefault());
 	} else {
 		damages.SetDefaultDamage(query->damage);
+	}
+
+	if (query->paralyzeTime > 0.0f) {
+		damages.paralyzeDamageTime = query->paralyzeTime;
 	}
 
 	const float3 impulse(query->impulse.x, query->impulse.y, query->impulse.z);
@@ -2650,7 +4328,7 @@ static void NativeSetFeatureCollisionVolumeData(const SetFeatureCollisionVolumeD
 		scales,
 		offsets,
 		query->volumeType,
-		COLVOL_HITTEST_CONT,
+		CollisionVolume::COLVOL_HITTEST_CONT,
 		query->primaryAxis
 	);
 
@@ -2681,10 +4359,199 @@ static void NativeSetFeatureSelectionVolumeData(const SetFeatureSelectionVolumeD
 		scales,
 		offsets,
 		query->volumeType,
-		query->useContHitTest ? COLVOL_HITTEST_CONT : COLVOL_HITTEST_DISC,
+		query->useContHitTest ? CollisionVolume::COLVOL_HITTEST_CONT : CollisionVolume::COLVOL_HITTEST_DISC,
 		query->primaryAxis
 	);
 
+	result->success = true;
+}
+
+static void NativeSetFeatureFireTime(const SetFeatureFireTimeQuery* query, SetFeatureFireTimeResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	feature->fireTime = static_cast<int>(query->fireTime * GAME_SPEED);
+	result->success = true;
+}
+
+static void NativeSetFeatureSmokeTime(const SetFeatureSmokeTimeQuery* query, SetFeatureSmokeTimeResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	feature->smokeTime = static_cast<int>(query->smokeTime * GAME_SPEED);
+	result->success = true;
+}
+
+static void NativeCreateUnitWreck(const CreateUnitWreckQuery* query, CreateUnitWreckResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->featureID = -1;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const int wreckLevel = std::max(1, query->wreckLevel);
+	CFeature* wreck = unit->CreateWreck(wreckLevel, query->doSmoke);
+
+	if (wreck != nullptr) {
+		result->featureID = wreck->id;
+	}
+}
+
+static void NativeCreateFeatureWreck(const CreateFeatureWreckQuery* query, CreateFeatureWreckResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->featureID = -1;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	const int wreckLevel = std::max(1, query->wreckLevel);
+	CFeature* wreck = feature->CreateWreck(wreckLevel, query->doSmoke);
+
+	if (wreck != nullptr) {
+		result->featureID = wreck->id;
+	}
+}
+
+static void NativeSetFeaturePieceVisible(const SetFeaturePieceVisibleQuery* query, SetFeaturePieceVisibleResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	LocalModel& localModel = feature->localModel;
+	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		return;
+	}
+
+	localModel.pieces[query->pieceIndex].SetScriptVisible(query->visible);
+	result->success = true;
+}
+
+static void NativeSetFeaturePieceMatrix(const SetFeaturePieceMatrixQuery* query, SetFeaturePieceMatrixResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->blockScriptAnims = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	LocalModel& localModel = feature->localModel;
+	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		return;
+	}
+
+	LocalModelPiece* lmp = &localModel.pieces[query->pieceIndex];
+
+	CMatrix44f mat;
+	for (int i = 0; i < 16; ++i) {
+		mat.m[i] = query->matrix[i];
+	}
+
+	if (lmp->SetPieceSpaceMatrix(mat))
+		lmp->SetDirty();
+
+	result->blockScriptAnims = lmp->blockScriptAnims;
+}
+
+static void NativeSetFeaturePieceCollisionVolumeData(const SetFeaturePieceCollisionVolumeDataQuery* query, SetFeaturePieceCollisionVolumeDataResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	LocalModel& localModel = feature->localModel;
+	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		return;
+	}
+
+	LocalModelPiece* lmp = &localModel.pieces[query->pieceIndex];
+
+	const float3 scales(query->scales.x, query->scales.y, query->scales.z);
+	const float3 offsets(query->offsets.x, query->offsets.y, query->offsets.z);
+
+	CollisionVolume* vol = lmp->GetCollisionVolume();
+	vol->InitShape(scales, offsets, query->volumeType, CollisionVolume::COLVOL_HITTEST_CONT, query->primaryAxis);
+	vol->SetIgnoreHits(!query->enable);
 	result->success = true;
 }
 
@@ -2713,7 +4580,14 @@ static const FeatureControlApi FEATURE_CONTROL_API = {
 	.SetFeatureMidAndAimPos = NativeSetFeatureMidAndAimPos,
 	.SetFeatureRadiusAndHeight = NativeSetFeatureRadiusAndHeight,
 	.SetFeatureCollisionVolumeData = NativeSetFeatureCollisionVolumeData,
-	.SetFeatureSelectionVolumeData = NativeSetFeatureSelectionVolumeData
+	.SetFeatureSelectionVolumeData = NativeSetFeatureSelectionVolumeData,
+	.SetFeatureFireTime = NativeSetFeatureFireTime,
+	.SetFeatureSmokeTime = NativeSetFeatureSmokeTime,
+	.CreateUnitWreck = NativeCreateUnitWreck,
+	.CreateFeatureWreck = NativeCreateFeatureWreck,
+	.SetFeaturePieceVisible = NativeSetFeaturePieceVisible,
+	.SetFeaturePieceMatrix = NativeSetFeaturePieceMatrix,
+	.SetFeaturePieceCollisionVolumeData = NativeSetFeaturePieceCollisionVolumeData
 };
 
 // ============================================================================
@@ -2732,8 +4606,8 @@ static void NativeAddHeightMap(const AddHeightMapQuery* query, AddHeightMapResul
 	}
 
 	// Convert world coordinates to heightmap coordinates
-	const int x = query->pos.x / SQUARE_SIZE;
-	const int z = query->pos.z / SQUARE_SIZE;
+	const int x = query->x / SQUARE_SIZE;
+	const int z = query->z / SQUARE_SIZE;
 
 	if (x >= 0 && x <= mapDims.mapx && z >= 0 && z <= mapDims.mapy) {
 		const int idx = z * mapDims.mapxp1 + x;
@@ -2800,22 +4674,16 @@ static void NativeAddSmoothMesh(const AddSmoothMeshQuery* query, AddSmoothMeshRe
 		return;
 	}
 
-	const float3 pos1(query->pos1.x, query->pos1.y, query->pos1.z);
-	const float3 pos2(query->pos2.x, query->pos2.y, query->pos2.z);
+	const int x = static_cast<int>(query->x / (SQUARE_SIZE * 2));
+	const int z = static_cast<int>(query->z / (SQUARE_SIZE * 2));
 
-	const int minx = static_cast<int>(std::min(pos1.x, pos2.x) / (SQUARE_SIZE * 2));
-	const int maxx = static_cast<int>(std::max(pos1.x, pos2.x) / (SQUARE_SIZE * 2));
-	const int minz = static_cast<int>(std::min(pos1.z, pos2.z) / (SQUARE_SIZE * 2));
-	const int maxz = static_cast<int>(std::max(pos1.z, pos2.z) / (SQUARE_SIZE * 2));
-
-	for (int z = minz; z <= maxz; ++z) {
-		for (int x = minx; x <= maxx; ++x) {
-			const int idx = z * smoothGround.GetMaxX() + x;
-			if (idx >= 0 && idx < smoothGround.GetMaxX() * smoothGround.GetMaxY()) {
-				smoothGround.AddHeight(idx, query->height);
-			}
-		}
+	if (x < 0 || x >= smoothGround.GetMaxX() || z < 0 || z >= smoothGround.GetMaxY()) {
+		result->success = false;
+		return;
 	}
+
+	const int idx = z * smoothGround.GetMaxX() + x;
+	smoothGround.AddHeight(idx, query->height);
 	result->success = true;
 }
 
@@ -2973,8 +4841,13 @@ static void NativeAddGrass(const AddGrassQuery* query, AddGrassResult* result)
 		return;
 	}
 
-	// Note: GrassDrawer access would be needed but it's not exposed
-	// For now, just return success
+	if (grassDrawer == nullptr) {
+		result->error = &NOT_AVAILABLE_ERROR;
+		return;
+	}
+
+	grassDrawer->AddGrass(float3(query->x, 0.0f, query->z), /*grassValue*/ 1);
+
 	result->success = true;
 }
 
@@ -2989,8 +4862,13 @@ static void NativeRemoveGrass(const RemoveGrassQuery* query, RemoveGrassResult* 
 		return;
 	}
 
-	// Note: GrassDrawer access would be needed but it's not exposed
-	// For now, just return success
+	if (grassDrawer == nullptr) {
+		result->error = &NOT_AVAILABLE_ERROR;
+		return;
+	}
+
+	grassDrawer->RemoveGrass(float3(query->x, 0.0f, query->z));
+
 	result->success = true;
 }
 
@@ -3010,18 +4888,12 @@ static void NativeAdjustHeightMap(const AdjustHeightMapQuery* query, AdjustHeigh
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / SQUARE_SIZE));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / SQUARE_SIZE));
-	const int x2 = std::min(mapDims.mapx, static_cast<int>(query->x2 / SQUARE_SIZE));
-	const int z2 = std::min(mapDims.mapy, static_cast<int>(query->z2 / SQUARE_SIZE));
+	const int x = std::clamp(static_cast<int>(query->x / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z = std::clamp(static_cast<int>(query->z / SQUARE_SIZE), 0, mapDims.mapy);
+	const int idx = (z * mapDims.mapxp1) + x;
 
-	for (int z = z1; z <= z2; z++) {
-		for (int x = x1; x <= x2; x++) {
-			readMap->AddHeight((z * mapDims.mapxp1) + x, query->height);
-		}
-	}
-
-	mapDamage->RecalcArea(x1, x2, z1, z2);
+	readMap->AddHeight(idx, query->height);
+	mapDamage->RecalcArea(x, x, z, z);
 	result->success = true;
 }
 
@@ -3072,17 +4944,12 @@ static void NativeAddOriginalHeightMap(const AddOriginalHeightMapQuery* query, A
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / SQUARE_SIZE));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / SQUARE_SIZE));
-	const int x2 = std::min(mapDims.mapx, static_cast<int>(query->x2 / SQUARE_SIZE));
-	const int z2 = std::min(mapDims.mapy, static_cast<int>(query->z2 / SQUARE_SIZE));
+	const int x = std::clamp(static_cast<int>(query->x / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z = std::clamp(static_cast<int>(query->z / SQUARE_SIZE), 0, mapDims.mapy);
+	const int idx = (z * mapDims.mapxp1) + x;
 
-	for (int z = z1; z <= z2; z++) {
-		for (int x = x1; x <= x2; x++) {
-			readMap->AddOriginalHeight((z * mapDims.mapxp1) + x, query->height);
-		}
-	}
-
+	readMap->AddOriginalHeight(idx, query->height);
+	mapDamage->RecalcArea(x, x, z, z);
 	result->success = true;
 }
 
@@ -3167,17 +5034,12 @@ static void NativeAdjustOriginalHeightMap(const AdjustOriginalHeightMapQuery* qu
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / SQUARE_SIZE));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / SQUARE_SIZE));
-	const int x2 = std::min(mapDims.mapx, static_cast<int>(query->x2 / SQUARE_SIZE));
-	const int z2 = std::min(mapDims.mapy, static_cast<int>(query->z2 / SQUARE_SIZE));
+	const int x = std::clamp(static_cast<int>(query->x / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z = std::clamp(static_cast<int>(query->z / SQUARE_SIZE), 0, mapDims.mapy);
+	const int idx = (z * mapDims.mapxp1) + x;
 
-	for (int z = z1; z <= z2; z++) {
-		for (int x = x1; x <= x2; x++) {
-			readMap->AddOriginalHeight((z * mapDims.mapxp1) + x, query->height);
-		}
-	}
-
+	readMap->AddOriginalHeight(idx, query->height);
+	mapDamage->RecalcArea(x, x, z, z);
 	result->success = true;
 }
 
@@ -3227,17 +5089,10 @@ static void NativeAdjustSmoothMesh(const AdjustSmoothMeshQuery* query, AdjustSmo
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / (SQUARE_SIZE * 2)));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / (SQUARE_SIZE * 2)));
-	const int x2 = std::min(smoothGround.GetMaxX(), static_cast<int>(query->x2 / (SQUARE_SIZE * 2)));
-	const int z2 = std::min(smoothGround.GetMaxY(), static_cast<int>(query->z2 / (SQUARE_SIZE * 2)));
-
-	for (int z = z1; z <= z2; z++) {
-		for (int x = x1; x <= x2; x++) {
-			const float orgHeight = smoothGround.GetHeight(x, z);
-			smoothGround.SetHeight(x, z, orgHeight + query->height);
-		}
-	}
+	const int x = std::clamp(static_cast<int>(query->x / (SQUARE_SIZE * 2)), 0, smoothGround.GetMaxX() - 1);
+	const int z = std::clamp(static_cast<int>(query->z / (SQUARE_SIZE * 2)), 0, smoothGround.GetMaxY() - 1);
+	const int index = (z * smoothGround.GetMaxX()) + x;
+	smoothGround.AddHeight(index, query->height);
 
 	result->success = true;
 }
@@ -3265,11 +5120,33 @@ static void NativeLevelSmoothMesh(const LevelSmoothMeshQuery* query, LevelSmooth
 
 	for (int z = z1; z <= z2; z++) {
 		for (int x = x1; x <= x2; x++) {
-			smoothGround.SetHeight(x, z, query->height);
+			const int index = (z * smoothGround.GetMaxX()) + x;
+			smoothGround.SetHeight(index, query->height);
 		}
 	}
 
 	result->success = true;
+}
+
+static void NativeSetHeightMapFunc(const SetHeightMapFuncQuery* /*query*/, SetHeightMapFuncResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_AVAILABLE_ERROR;
+	result->success = false;
+}
+
+static void NativeSetOriginalHeightMapFunc(const SetOriginalHeightMapFuncQuery* /*query*/, SetOriginalHeightMapFuncResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_AVAILABLE_ERROR;
+	result->success = false;
+}
+
+static void NativeSetSmoothMeshFunc(const SetSmoothMeshFuncQuery* /*query*/, SetSmoothMeshFuncResult* result)
+{
+	bufferPos = 0;
+	result->error = &NOT_AVAILABLE_ERROR;
+	result->success = false;
 }
 
 static void NativeRebuildSmoothMesh(const RebuildSmoothMeshQuery* query, RebuildSmoothMeshResult* result)
@@ -3283,16 +5160,9 @@ static void NativeRebuildSmoothMesh(const RebuildSmoothMeshQuery* query, Rebuild
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / (SQUARE_SIZE * 2)));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / (SQUARE_SIZE * 2)));
-	const int x2 = std::min(smoothGround.GetMaxX(), static_cast<int>(query->x2 / (SQUARE_SIZE * 2)));
-	const int z2 = std::min(smoothGround.GetMaxY(), static_cast<int>(query->z2 / (SQUARE_SIZE * 2)));
-
-	for (int z = z1; z <= z2; z++) {
-		for (int x = x1; x <= x2; x++) {
-			smoothGround.SetHeightFromHeightMap(x, z);
-		}
-	}
+	// Rebuild the entire smooth mesh from the height map
+	// The query parameters are ignored as MakeSmoothMesh rebuilds everything
+	smoothGround.MakeSmoothMesh();
 
 	result->success = true;
 }
@@ -3319,7 +5189,10 @@ static const TerrainControlApi TERRAIN_CONTROL_API = {
 	.LevelOriginalHeightMap = NativeLevelOriginalHeightMap,
 	.AdjustSmoothMesh = NativeAdjustSmoothMesh,
 	.LevelSmoothMesh = NativeLevelSmoothMesh,
-	.RebuildSmoothMesh = NativeRebuildSmoothMesh
+	.RebuildSmoothMesh = NativeRebuildSmoothMesh,
+	.SetHeightMapFunc = NativeSetHeightMapFunc,
+	.SetOriginalHeightMapFunc = NativeSetOriginalHeightMapFunc,
+	.SetSmoothMeshFunc = NativeSetSmoothMeshFunc
 };
 
 // ============================================================================
@@ -3697,8 +5570,18 @@ static void NativeSetProjectileIgnoreTrackingError(const SetProjectileIgnoreTrac
 		return;
 	}
 
-	if (CWeaponProjectile* wproj = dynamic_cast<CWeaponProjectile*>(proj)) {
-		wproj->SetIgnoreError(query->ignore);
+	switch (proj->GetProjectileType()) {
+		case WEAPON_MISSILE_PROJECTILE: {
+			static_cast<CMissileProjectile*>(proj)->SetIgnoreError(query->ignore);
+		} break;
+		case WEAPON_STARBURST_PROJECTILE: {
+			static_cast<CStarburstProjectile*>(proj)->SetIgnoreError(query->ignore);
+		} break;
+		case WEAPON_TORPEDO_PROJECTILE: {
+			static_cast<CTorpedoProjectile*>(proj)->SetIgnoreError(query->ignore);
+		} break;
+		default:
+			break;
 	}
 	result->success = true;
 }
@@ -3748,6 +5631,37 @@ static void NativeSetProjectileSpinVec(const SetProjectileSpinVecQuery* query, S
 	result->success = true;
 }
 
+static void NativeSetPieceProjectileParams(const SetPieceProjectileParamsQuery* query, SetPieceProjectileParamsResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	if (proj == nullptr) {
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
+	}
+
+	if (!proj->piece) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Projectile is not a piece projectile");
+		return;
+	}
+
+	CPieceProjectile* pproj = static_cast<CPieceProjectile*>(proj);
+	pproj->explFlags = query->explFlags;
+	pproj->spinAngle = query->spinAngle;
+	pproj->spinSpeed = query->spinSpeed;
+	pproj->spinVec = float3(query->spinVec.x, query->spinVec.y, query->spinVec.z);
+
+	result->success = true;
+}
+
 static const ProjectileControlApi PROJECTILE_CONTROL_API = {
 	.SpawnProjectile = NativeSpawnProjectile,
 	.DeleteProjectile = NativeDeleteProjectile,
@@ -3766,7 +5680,8 @@ static const ProjectileControlApi PROJECTILE_CONTROL_API = {
 	.SetProjectileIgnoreTrackingError = NativeSetProjectileIgnoreTrackingError,
 	.SetProjectileSpinAngle = NativeSetProjectileSpinAngle,
 	.SetProjectileSpinSpeed = NativeSetProjectileSpinSpeed,
-	.SetProjectileSpinVec = NativeSetProjectileSpinVec
+	.SetProjectileSpinVec = NativeSetProjectileSpinVec,
+	.SetPieceProjectileParams = NativeSetPieceProjectileParams
 };
 
 // ============================================================================
@@ -3878,6 +5793,247 @@ static const EffectsControlApi EFFECTS_CONTROL_API = {
 	.SpawnSFX = NativeSpawnSFX
 };
 
+// ============================================================================
+// Game Config Control Implementation
+// ============================================================================
+
+static void NativeSetNoPause(const SetNoPauseQuery* query, SetNoPauseResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	// Only works in server mode
+	if (gameServer != nullptr) {
+		gameServer->SetGamePausable(!query->noPause);
+		result->success = true;
+	} else {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Not in server mode");
+	}
+}
+
+static void NativeSetCheatingEnabled(const SetCheatingEnabledQuery* query, SetCheatingEnabledResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	gs->cheatEnabled = query->enabled;
+	result->success = true;
+}
+
+static void NativeSetGodMode(const SetGodModeQuery* query, SetGodModeResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	gs->godMode = 0;
+	if (query->controlAllies)
+		gs->godMode |= GODMODE_ATC_BIT;
+	if (query->controlEnemies)
+		gs->godMode |= GODMODE_ETC_BIT;
+
+	CLuaUI::UpdateTeams();
+	CPlayer::UpdateControlledTeams();
+	result->success = true;
+}
+
+static void NativeSetExperienceGrade(const SetExperienceGradeQuery* query, SetExperienceGradeResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	globalUnitParams.expGrade = query->expGrade;
+
+	// Additional params only apply if cheats are enabled
+	if (gs->cheatEnabled) {
+		if (query->expPowerScale >= 0.0f)
+			globalUnitParams.expPowerScale = query->expPowerScale;
+		if (query->expHealthScale >= 0.0f)
+			globalUnitParams.expHealthScale = query->expHealthScale;
+		if (query->expReloadScale >= 0.0f)
+			globalUnitParams.expReloadScale = query->expReloadScale;
+	}
+
+	result->success = true;
+}
+
+static void NativeSetRadarErrorParams(const SetRadarErrorParamsQuery* query, SetRadarErrorParamsResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLYTEAM_ERROR;
+		return;
+	}
+
+	losHandler->SetAllyTeamRadarErrorSize(query->allyTeamID, query->allyTeamErrorSize);
+
+	if (query->baseErrorSize >= 0.0f)
+		losHandler->SetBaseRadarErrorSize(query->baseErrorSize);
+	if (query->baseErrorMult >= 0.0f)
+		losHandler->SetBaseRadarErrorMult(query->baseErrorMult);
+
+	result->success = true;
+}
+
+static void NativeSetSquareBuildingMask(const SetSquareBuildingMaskQuery* query, SetSquareBuildingMaskResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!buildingMaskMap.SetTileMask(query->x, query->z, query->mask)) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid tile coordinates");
+		return;
+	}
+
+	result->success = true;
+}
+
+static const GameConfigApi GAME_CONFIG_API = {
+	.SetNoPause = NativeSetNoPause,
+	.SetCheatingEnabled = NativeSetCheatingEnabled,
+	.SetGodMode = NativeSetGodMode,
+	.SetExperienceGrade = NativeSetExperienceGrade,
+	.SetRadarErrorParams = NativeSetRadarErrorParams,
+	.SetSquareBuildingMask = NativeSetSquareBuildingMask
+};
+
+// ============================================================================
+// COB Script Control Implementation
+// ============================================================================
+
+// Thread-local storage for COB return values
+thread_local int32_t cobReturnValues[MAX_COB_ARGS];
+
+static void NativeCallCOBScript(const CallCOBScriptQuery* query, CallCOBScriptResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->retCode = 0;
+	result->retValues = nullptr;
+	result->retCount = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CCobInstance* cob = dynamic_cast<CCobInstance*>(unit->script);
+	if (cob == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not running a COB script");
+		return;
+	}
+
+	// Prepare arguments - cobArgs[0] holds the count
+	std::array<int, 1 + MAX_COB_ARGS> cobArgs;
+	cobArgs[0] = static_cast<int>(std::min(static_cast<uint32_t>(MAX_COB_ARGS), query->argCount));
+	for (int i = 0; i < cobArgs[0]; ++i) {
+		cobArgs[1 + i] = query->args[i];
+	}
+
+	int retCode = 0;
+	if (query->funcID >= 0) {
+		retCode = cob->RawCall(query->funcID, cobArgs);
+	} else if (query->funcName != nullptr) {
+		retCode = cob->Call(query->funcName, cobArgs);
+	} else {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "No function ID or name provided");
+		return;
+	}
+
+	result->retCode = retCode;
+
+	if (query->returnValues) {
+		const int numRetVals = std::min(static_cast<int>(query->retCount), std::min(static_cast<int>(MAX_COB_ARGS), cobArgs[0]));
+		for (int i = 0; i < numRetVals; ++i) {
+			cobReturnValues[i] = cobArgs[i];
+		}
+		result->retValues = cobReturnValues;
+		result->retCount = numRetVals;
+	} else {
+		result->retValues = nullptr;
+		result->retCount = 0;
+	}
+}
+
+static void NativeGetCOBScriptID(const GetCOBScriptIDQuery* query, GetCOBScriptIDResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->funcID = -1;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CCobInstance* cob = dynamic_cast<CCobInstance*>(unit->script);
+	if (cob == nullptr) {
+		// Not an error - allows checking if unit runs COB or LUS
+		return;
+	}
+
+	if (query->funcName == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Function name is null");
+		return;
+	}
+
+	result->funcID = cob->GetFunctionId(query->funcName);
+}
+
+static const COBScriptApi COB_SCRIPT_API = {
+	.CallCOBScript = NativeCallCOBScript,
+	.GetCOBScriptID = NativeGetCOBScriptID
+};
+
 } // namespace
 
 // ============================================================================
@@ -3889,5 +6045,8 @@ const SyncedCtrlApi SYNCED_CTRL_API = {
 	.unit = &UNIT_CONTROL_API,
 	.feature = &FEATURE_CONTROL_API,
 	.terrain = &TERRAIN_CONTROL_API,
-	.projectile = &PROJECTILE_CONTROL_API
+	.projectile = &PROJECTILE_CONTROL_API,
+	.effects = &EFFECTS_CONTROL_API,
+	.gameConfig = &GAME_CONFIG_API,
+	.cobScript = &COB_SCRIPT_API
 };

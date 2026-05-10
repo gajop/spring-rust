@@ -59,6 +59,18 @@ struct GetMapsResult { const Error* error; const char** maps; uint32_t count; };
 struct GetGamesQuery { uint8_t _unused; };
 struct GetGamesResult { const Error* error; const char** games; uint32_t count; };
 
+struct CreateDirQuery { const char* path; };
+struct CreateDirResult { const Error* error; bool success; };
+
+struct ExtractModArchiveFileQuery { const char* path; };
+struct ExtractModArchiveFileResult { const Error* error; bool success; };
+
+struct GetMapSquareTextureQuery { int32_t texSquareX; int32_t texSquareY; int32_t lodMin; int32_t lodMax; const char* textureName; };
+struct GetMapSquareTextureResult { const Error* error; bool success; };
+
+struct SetMapSquareTextureQuery { int32_t texSquareX; int32_t texSquareY; const char* textureName; };
+struct SetMapSquareTextureResult { const Error* error; bool success; };
+
 // API structure
 struct VFSApi {
 	void (*FileExists)(const FileExistsQuery* query, FileExistsResult* result);
@@ -71,6 +83,10 @@ struct VFSApi {
 	void (*GetArchives)(const GetArchivesQuery* query, GetArchivesResult* result);
 	void (*GetMaps)(const GetMapsQuery* query, GetMapsResult* result);
 	void (*GetGames)(const GetGamesQuery* query, GetGamesResult* result);
+	void (*CreateDir)(const CreateDirQuery* query, CreateDirResult* result);
+	void (*ExtractModArchiveFile)(const ExtractModArchiveFileQuery* query, ExtractModArchiveFileResult* result);
+	void (*GetMapSquareTexture)(const GetMapSquareTextureQuery* query, GetMapSquareTextureResult* result);
+	void (*SetMapSquareTexture)(const SetMapSquareTextureQuery* query, SetMapSquareTextureResult* result);
 };
 
 extern const VFSApi VFS_API;

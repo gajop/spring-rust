@@ -1,5 +1,5 @@
 
-use std::mem::MaybeUninit;
+use std::{mem::MaybeUninit, slice};
 
 use crate::{error::Error, sys};
 
@@ -17,6 +17,9 @@ pub struct SyncedCtrl<'a> {
     feature_api: &'a sys::FeatureControlApi,
     terrain_api: &'a sys::TerrainControlApi,
     projectile_api: &'a sys::ProjectileControlApi,
+    effects_api: &'a sys::EffectsControlApi,
+    game_config_api: &'a sys::GameConfigApi,
+    cob_script_api: &'a sys::COBScriptApi,
 }
 
 impl<'a> SyncedCtrl<'a> {
@@ -29,6 +32,9 @@ impl<'a> SyncedCtrl<'a> {
                 feature_api: api.feature.as_ref().expect("feature API must be initialized"),
                 terrain_api: api.terrain.as_ref().expect("terrain API must be initialized"),
                 projectile_api: api.projectile.as_ref().expect("projectile API must be initialized"),
+                effects_api: api.effects.as_ref().expect("effects API must be initialized"),
+                game_config_api: api.gameConfig.as_ref().expect("gameConfig API must be initialized"),
+                cob_script_api: api.cobScript.as_ref().expect("cobScript API must be initialized"),
             }
         }
     }
@@ -56,6 +62,21 @@ impl<'a> SyncedCtrl<'a> {
     /// Projectile spawning and modification
     pub fn projectile(&self) -> ProjectileControl<'_> {
         ProjectileControl::new(self.projectile_api)
+    }
+
+    /// Spawn explosions, CEGs, and SFX
+    pub fn effects(&self) -> EffectsControl<'_> {
+        EffectsControl::new(self.effects_api)
+    }
+
+    /// Toggle game configuration flags and radar error settings
+    pub fn game_config(&self) -> GameConfig<'_> {
+        GameConfig::new(self.game_config_api)
+    }
+
+    /// Call COB scripts and resolve script IDs
+    pub fn cob_script(&self) -> CobScript<'_> {
+        CobScript::new(self.cob_script_api)
     }
 }
 
@@ -119,3 +140,39 @@ impl<'a> ProjectileControl<'a> {
 }
 
 include!(concat!(env!("OUT_DIR"), "/projectile_control_generated.rs"));
+
+pub struct EffectsControl<'a> {
+    api: &'a sys::EffectsControlApi,
+}
+
+impl<'a> EffectsControl<'a> {
+    pub(crate) fn new(api: &'a sys::EffectsControlApi) -> Self {
+        Self { api }
+    }
+}
+
+include!(concat!(env!("OUT_DIR"), "/effects_control_generated.rs"));
+
+pub struct GameConfig<'a> {
+    api: &'a sys::GameConfigApi,
+}
+
+impl<'a> GameConfig<'a> {
+    pub(crate) fn new(api: &'a sys::GameConfigApi) -> Self {
+        Self { api }
+    }
+}
+
+include!(concat!(env!("OUT_DIR"), "/game_config_generated.rs"));
+
+pub struct CobScript<'a> {
+    api: &'a sys::COBScriptApi,
+}
+
+impl<'a> CobScript<'a> {
+    pub(crate) fn new(api: &'a sys::COBScriptApi) -> Self {
+        Self { api }
+    }
+}
+
+include!(concat!(env!("OUT_DIR"), "/cob_script_generated.rs"));

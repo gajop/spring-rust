@@ -3,15 +3,15 @@
 ## Summary Statistics
 
 **Lua API (Spring.* callouts only):**
-- Total: 761 functions
-- Matched (perfect 1.0): 390 (51.2%)
-- Uncertain matches (<1.0): 3 (0.4%)
-- Unmatched: 368 (48.4%)
+- Total: 776 functions
+- Matched (perfect 1.0): 776 (100.0%)
+- Uncertain matches (<1.0): 0 (0.0%)
+- Unmatched: 0 (0.0%)
 
 **Rust API:**
-- Total: 480 functions across 37 modules
-- Matched to Lua: 390 (81.2%)
-- Rust-only: 90 (18.8%)
+- Total: 876 functions across 49 modules
+- Matched to Lua: 776 (88.6%)
+- Rust-only: 100 (11.4%)
 
 ---
 
@@ -19,398 +19,784 @@
 
 Functions with perfect 1.0 confidence match:
 
-- `Spring.AddHeightMap` → `TerrainControl.add_height_map`
-- `Spring.AddSmoothMesh` → `TerrainControl.add_smooth_mesh`
-- `Spring.AddTeamResource` → `TeamControl.add_team_resource`
-- `Spring.AddUnitDamage` → `UnitControl.add_unit_damage`
-- `Spring.AddUnitExperience` → `UnitControl.add_unit_experience`
-- `Spring.AddUnitImpulse` → `UnitControl.add_unit_impulse`
-- `Spring.AreHelperAIsEnabled` → `Game.are_helper_ais_enabled`
-- `Spring.ArePlayersAllied` → `Teams.are_players_allied`
-- `Spring.AreTeamsAllied` → `Teams.are_teams_allied`
-- `Spring.AssignPlayerToTeam` → `TeamControl.assign_player_to_team`
-- `Spring.ClosestBuildPos` → `Utils.closest_build_pos`
-- `Spring.CreateFeature` → `FeatureControl.create_feature`
-- `Spring.CreateUnit` → `UnitControl.create_unit`
-- `Spring.DeleteProjectile` → `ProjectileControl.delete_projectile`
-- `Spring.DeselectUnit` → `Selection.deselect_unit`
-- `Spring.DeselectUnitArray` → `Selection.deselect_unit_array`
-- `Spring.DestroyFeature` → `FeatureControl.destroy_feature`
-- `Spring.DestroyUnit` → `UnitControl.destroy_unit`
-- `Spring.Echo` → `Messages.echo`
-- `Spring.FindUnitCmdDesc` → `UnitsCommands.find_unit_cmd_desc`
-- `Spring.FixedAllies` → `Game.fixed_allies`
-- `Spring.GameOver` → `TeamControl.game_over`
-- `Spring.GetAIInfo` → `Teams.get_aiinfo`
-- `Spring.GetActiveCommand` → `Input.get_active_command`
-- `Spring.GetAllFeatures` → `Features.get_all_features`
-- `Spring.GetAllUnits` → `UnitsQuery.get_all_units`
-- `Spring.GetAllyTeamInfo` → `Teams.get_ally_team_info`
-- `Spring.GetAllyTeamList` → `Teams.get_ally_team_list`
-- `Spring.GetAllyTeamStartBox` → `Game.get_ally_team_start_box`
-- `Spring.GetCEGID` → `Utils.get_cegid`
-- `Spring.GetCameraDirection` → `Camera.get_camera_direction`
-- `Spring.GetCameraFOV` → `Camera.get_camera_fov`
-- `Spring.GetCameraNames` → `Camera.get_camera_names`
-- `Spring.GetCameraPosition` → `Camera.get_camera_position`
-- `Spring.GetCameraState` → `Camera.get_camera_state`
-- `Spring.GetCommandQueue` → `UnitsCommands.get_command_queue`
-- `Spring.GetConfigFloat` → `Config.get_config_float`
-- `Spring.GetConfigInt` → `Config.get_config_int`
-- `Spring.GetConfigParams` → `Config.get_config_params`
-- `Spring.GetConfigString` → `Config.get_config_string`
-- `Spring.GetConsoleBuffer` → `Messages.get_console_buffer`
-- `Spring.GetCurrentTooltip` → `Messages.get_current_tooltip`
-- `Spring.GetDefaultCommand` → `Input.get_default_command`
-- `Spring.GetDrawFrame` → `Display.get_draw_frame`
-- `Spring.GetFPS` → `Display.get_fps`
-- `Spring.GetFacingFromHeading` → `Game.get_facing_from_heading`
-- `Spring.GetFactoryBuggerOff` → `UnitsCommands.get_factory_bugger_off`
-- `Spring.GetFactoryCommandCount` → `UnitsCommands.get_factory_command_count`
-- `Spring.GetFactoryCommands` → `UnitsCommands.get_factory_commands`
-- `Spring.GetFactoryCounts` → `UnitsCommands.get_factory_counts`
-- `Spring.GetFeatureAllyTeam` → `Features.get_feature_ally_team`
-- `Spring.GetFeatureBlocking` → `Features.get_feature_blocking`
-- `Spring.GetFeatureCollisionVolumeData` → `Features.get_feature_collision_volume_data`
-- `Spring.GetFeatureDefID` → `Features.get_feature_def_id`
-- `Spring.GetFeatureDirection` → `Features.get_feature_direction`
-- `Spring.GetFeatureHeading` → `Features.get_feature_heading`
-- `Spring.GetFeatureHealth` → `Features.get_feature_health`
-- `Spring.GetFeatureHeight` → `Features.get_feature_height`
-- `Spring.GetFeatureLastAttackedPiece` → `Features.get_feature_last_attacked_piece`
-- `Spring.GetFeatureMass` → `Features.get_feature_mass`
-- `Spring.GetFeatureNoSelect` → `Features.get_feature_no_select`
-- `Spring.GetFeaturePieceCollisionVolumeData` → `Features.get_feature_piece_collision_volume_data`
-- `Spring.GetFeaturePieceDirection` → `UnitsPieces.get_feature_piece_direction`
-- `Spring.GetFeaturePieceInfo` → `UnitsPieces.get_feature_piece_info`
-- `Spring.GetFeaturePieceList` → `UnitsPieces.get_feature_piece_list`
-- `Spring.GetFeaturePieceMap` → `UnitsPieces.get_feature_piece_map`
-- `Spring.GetFeaturePieceMatrix` → `UnitsPieces.get_feature_piece_matrix`
-- `Spring.GetFeaturePiecePosDir` → `UnitsPieces.get_feature_piece_pos_dir`
-- `Spring.GetFeaturePiecePosition` → `UnitsPieces.get_feature_piece_position`
-- `Spring.GetFeaturePosition` → `Features.get_feature_position`
-- `Spring.GetFeatureRadius` → `Features.get_feature_radius`
-- `Spring.GetFeatureResources` → `Features.get_feature_resources`
-- `Spring.GetFeatureResurrect` → `Features.get_feature_resurrect`
-- `Spring.GetFeatureRootPiece` → `UnitsPieces.get_feature_root_piece`
-- `Spring.GetFeatureRotation` → `Features.get_feature_rotation`
-- `Spring.GetFeatureRulesParam` → `RulesParams.get_feature_rules_param`
-- `Spring.GetFeatureRulesParams` → `RulesParams.get_feature_rules_params`
-- `Spring.GetFeatureSeparation` → `Features.get_feature_separation`
-- `Spring.GetFeatureTeam` → `Features.get_feature_team`
-- `Spring.GetFeatureVelocity` → `Features.get_feature_velocity`
-- `Spring.GetFeaturesInCylinder` → `Features.get_features_in_cylinder`
-- `Spring.GetFeaturesInRectangle` → `Features.get_features_in_rectangle`
-- `Spring.GetFeaturesInSphere` → `Features.get_features_in_sphere`
-- `Spring.GetFrameTimeOffset` → `Display.get_frame_time_offset`
-- `Spring.GetFullBuildQueue` → `UnitsCommands.get_full_build_queue`
-- `Spring.GetGaiaTeamID` → `Game.get_gaia_team_id`
-- `Spring.GetGameFrame` → `Game.get_game_frame`
-- `Spring.GetGameRulesParam` → `RulesParams.get_game_rules_param`
-- `Spring.GetGameRulesParams` → `RulesParams.get_game_rules_params`
-- `Spring.GetGameSeconds` → `Game.get_game_seconds`
-- `Spring.GetGameSpeed` → `Display.get_game_speed`
-- `Spring.GetGlobalLos` → `Game.get_global_los`
-- `Spring.GetGrass` → `Terrain.get_grass`
-- `Spring.GetGroundBlocked` → `Terrain.get_ground_blocked`
-- `Spring.GetGroundExtremes` → `Terrain.get_ground_extremes`
-- `Spring.GetGroundHeight` → `Terrain.get_ground_height`
-- `Spring.GetGroundInfo` → `Terrain.get_ground_info`
-- `Spring.GetGroundNormal` → `Terrain.get_ground_normal`
-- `Spring.GetGroundOrigHeight` → `Terrain.get_ground_orig_height`
-- `Spring.GetGroupList` → `Selection.get_group_list`
-- `Spring.GetGroupUnits` → `Selection.get_group_units`
-- `Spring.GetHeadingFromFacing` → `Game.get_heading_from_facing`
-- `Spring.GetHeadingFromVector` → `Game.get_heading_from_vector`
-- `Spring.GetKeyState` → `Input.get_key_state`
-- `Spring.GetLastUpdateSeconds` → `Display.get_last_update_seconds`
-- `Spring.GetLocalAllyTeamID` → `Player.get_local_ally_team_id`
-- `Spring.GetLocalPlayerID` → `Player.get_local_player_id`
-- `Spring.GetLocalTeamID` → `Player.get_local_team_id`
-- `Spring.GetLogSections` → `Config.get_log_sections`
-- `Spring.GetMapOption` → `Game.get_map_option`
-- `Spring.GetMapOptions` → `Game.get_map_options`
-- `Spring.GetMapStartPositions` → `Game.get_map_start_positions`
-- `Spring.GetMetalAmount` → `MetalMap.get_metal_amount`
-- `Spring.GetMetalExtraction` → `MetalMap.get_metal_extraction`
-- `Spring.GetMetalMapSize` → `MetalMap.get_metal_map_size`
-- `Spring.GetMiniMapGeometry` → `Display.get_mini_map_geometry`
-- `Spring.GetModKeyState` → `Input.get_mod_key_state`
-- `Spring.GetModOption` → `Game.get_mod_option`
-- `Spring.GetModOptions` → `Game.get_mod_options`
-- `Spring.GetModelPieceList` → `UnitsPieces.get_model_piece_list`
-- `Spring.GetModelPieceMap` → `UnitsPieces.get_model_piece_map`
-- `Spring.GetModelRootPiece` → `UnitsPieces.get_model_root_piece`
-- `Spring.GetMouseCursor` → `Input.get_mouse_cursor`
-- `Spring.GetMouseStartPosition` → `Input.get_mouse_start_position`
-- `Spring.GetMouseState` → `Input.get_mouse_state`
-- `Spring.GetNumDisplays` → `Display.get_num_displays`
-- `Spring.GetPieceProjectileParams` → `Projectiles.get_piece_projectile_params`
-- `Spring.GetPixelDir` → `Camera.get_pixel_dir`
-- `Spring.GetPlayerControlledUnit` → `Teams.get_player_controlled_unit`
-- `Spring.GetPlayerInfo` → `Teams.get_player_info`
-- `Spring.GetPlayerList` → `Teams.get_player_list`
-- `Spring.GetPlayerRoster` → `Player.get_player_roster`
-- `Spring.GetPlayerRulesParam` → `RulesParams.get_player_rules_param`
-- `Spring.GetPlayerRulesParams` → `RulesParams.get_player_rules_params`
-- `Spring.GetPlayerStatistics` → `Player.get_player_statistics`
-- `Spring.GetPlayerTraffic` → `Player.get_player_traffic`
-- `Spring.GetPositionLosState` → `Los.get_position_los_state`
-- `Spring.GetPressedKeys` → `Input.get_pressed_keys`
-- `Spring.GetPressedScans` → `Input.get_pressed_scans`
-- `Spring.GetProjectileAllyTeamID` → `Projectiles.get_projectile_ally_team_id`
-- `Spring.GetProjectileDamages` → `Projectiles.get_projectile_damages`
-- `Spring.GetProjectileDefID` → `Projectiles.get_projectile_def_id`
-- `Spring.GetProjectileDirection` → `Projectiles.get_projectile_direction`
-- `Spring.GetProjectileGravity` → `Projectiles.get_projectile_gravity`
-- `Spring.GetProjectileIsIntercepted` → `Projectiles.get_projectile_is_intercepted`
-- `Spring.GetProjectileOwnerID` → `Projectiles.get_projectile_owner_id`
-- `Spring.GetProjectilePosition` → `Projectiles.get_projectile_position`
-- `Spring.GetProjectileTarget` → `Projectiles.get_projectile_target`
-- `Spring.GetProjectileTeamID` → `Projectiles.get_projectile_team_id`
-- `Spring.GetProjectileTimeToLive` → `Projectiles.get_projectile_time_to_live`
-- `Spring.GetProjectileType` → `Projectiles.get_projectile_type`
-- `Spring.GetProjectileVelocity` → `Projectiles.get_projectile_velocity`
-- `Spring.GetProjectilesInRectangle` → `Projectiles.get_projectiles_in_rectangle`
-- `Spring.GetProjectilesInSphere` → `Projectiles.get_projectiles_in_sphere`
-- `Spring.GetRadarErrorParams` → `Los.get_radar_error_params`
-- `Spring.GetRealBuildQueue` → `UnitsCommands.get_real_build_queue`
-- `Spring.GetScreenGeometry` → `Display.get_screen_geometry`
-- `Spring.GetSelectedGroup` → `Selection.get_selected_group`
-- `Spring.GetSelectedUnits` → `Selection.get_selected_units`
-- `Spring.GetSelectedUnitsCount` → `Selection.get_selected_units_count`
-- `Spring.GetSelectedUnitsCounts` → `Selection.get_selected_units_counts`
-- `Spring.GetSelectedUnitsSorted` → `Selection.get_selected_units_sorted`
-- `Spring.GetSelectionBox` → `Input.get_selection_box`
-- `Spring.GetSideData` → `Game.get_side_data`
-- `Spring.GetSmoothMeshHeight` → `Terrain.get_smooth_mesh_height`
-- `Spring.GetSoundStreamTime` → `Sound.get_sound_stream_time`
-- `Spring.GetSpectatingState` → `Player.get_spectating_state`
-- `Spring.GetTeamAllyTeamID` → `Teams.get_team_ally_team_id`
-- `Spring.GetTeamColor` → `Display.get_team_color`
-- `Spring.GetTeamInfo` → `Teams.get_team_info`
-- `Spring.GetTeamList` → `Teams.get_team_list`
-- `Spring.GetTeamLuaAI` → `Teams.get_team_lua_ai`
-- `Spring.GetTeamMaxUnits` → `Teams.get_team_max_units`
-- `Spring.GetTeamOrigColor` → `Display.get_team_orig_color`
-- `Spring.GetTeamResourceStats` → `Teams.get_team_resource_stats`
-- `Spring.GetTeamResources` → `Teams.get_team_resources`
-- `Spring.GetTeamRulesParam` → `RulesParams.get_team_rules_param`
-- `Spring.GetTeamRulesParams` → `RulesParams.get_team_rules_params`
-- `Spring.GetTeamStartPosition` → `Game.get_team_start_position`
-- `Spring.GetTeamStatsHistory` → `Teams.get_team_stats_history`
-- `Spring.GetTeamUnitCount` → `UnitsQuery.get_team_unit_count`
-- `Spring.GetTeamUnitDefCount` → `UnitsQuery.get_team_unit_def_count`
-- `Spring.GetTeamUnitStats` → `Teams.get_team_unit_stats`
-- `Spring.GetTeamUnits` → `UnitsQuery.get_team_units`
-- `Spring.GetTeamUnitsByDefs` → `UnitsQuery.get_team_units_by_defs`
-- `Spring.GetTeamUnitsCounts` → `UnitsQuery.get_team_units_counts`
-- `Spring.GetTeamUnitsSorted` → `UnitsQuery.get_team_units_sorted`
-- `Spring.GetTerrainTypeData` → `Terrain.get_terrain_type_data`
-- `Spring.GetTidal` → `Game.get_tidal`
-- `Spring.GetUnitAllyTeam` → `UnitsInfo.get_unit_ally_team`
-- `Spring.GetUnitArmored` → `UnitsInfo.get_unit_armored`
-- `Spring.GetUnitArrayCentroid` → `UnitsQuery.get_unit_array_centroid`
-- `Spring.GetUnitBasePosition` → `UnitsInfo.get_unit_base_position`
-- `Spring.GetUnitBlocking` → `UnitsInfo.get_unit_blocking`
-- `Spring.GetUnitBuildFacing` → `UnitsInfo.get_unit_build_facing`
-- `Spring.GetUnitBuildParams` → `UnitsInfo.get_unit_build_params`
-- `Spring.GetUnitBuildeeRadius` → `UnitsInfo.get_unit_buildee_radius`
-- `Spring.GetUnitCmdDescs` → `UnitsCommands.get_unit_cmd_descs`
-- `Spring.GetUnitCollisionVolumeData` → `UnitsInfo.get_unit_collision_volume_data`
-- `Spring.GetUnitCommandCount` → `UnitsCommands.get_unit_command_count`
-- `Spring.GetUnitCommands` → `UnitsCommands.get_unit_commands`
-- `Spring.GetUnitCostTable` → `UnitsInfo.get_unit_cost_table`
-- `Spring.GetUnitCosts` → `UnitsInfo.get_unit_costs`
-- `Spring.GetUnitCurrentBuildPower` → `UnitsInfo.get_unit_current_build_power`
-- `Spring.GetUnitCurrentCommand` → `UnitsCommands.get_unit_current_command`
-- `Spring.GetUnitDefDimensions` → `Utils.get_unit_def_dimensions`
-- `Spring.GetUnitDefID` → `UnitsInfo.get_unit_def_id`
-- `Spring.GetUnitDirection` → `UnitsInfo.get_unit_direction`
-- `Spring.GetUnitEffectiveBuildRange` → `UnitsInfo.get_unit_effective_build_range`
-- `Spring.GetUnitEstimatedPath` → `MoveCtrl.get_unit_estimated_path`
-- `Spring.GetUnitExperience` → `UnitsInfo.get_unit_experience`
-- `Spring.GetUnitFlanking` → `UnitsInfo.get_unit_flanking`
-- `Spring.GetUnitGroup` → `Selection.get_unit_group`
-- `Spring.GetUnitHarvestStorage` → `UnitsInfo.get_unit_harvest_storage`
-- `Spring.GetUnitHeading` → `UnitsInfo.get_unit_heading`
-- `Spring.GetUnitHealth` → `UnitsInfo.get_unit_health`
-- `Spring.GetUnitHeight` → `UnitsInfo.get_unit_height`
-- `Spring.GetUnitInBuildStance` → `UnitsInfo.get_unit_in_build_stance`
-- `Spring.GetUnitIsActive` → `UnitsInfo.get_unit_is_active`
-- `Spring.GetUnitIsBeingBuilt` → `UnitsInfo.get_unit_is_being_built`
-- `Spring.GetUnitIsBuilding` → `UnitsInfo.get_unit_is_building`
-- `Spring.GetUnitIsCloaked` → `UnitsInfo.get_unit_is_cloaked`
-- `Spring.GetUnitIsDead` → `UnitsInfo.get_unit_is_dead`
-- `Spring.GetUnitIsStunned` → `UnitsInfo.get_unit_is_stunned`
-- `Spring.GetUnitIsTransporting` → `UnitsInfo.get_unit_is_transporting`
-- `Spring.GetUnitLastAttackedPiece` → `UnitsInfo.get_unit_last_attacked_piece`
-- `Spring.GetUnitLastAttacker` → `UnitsInfo.get_unit_last_attacker`
-- `Spring.GetUnitLosState` → `UnitsInfo.get_unit_los_state`
-- `Spring.GetUnitMapCentroid` → `UnitsQuery.get_unit_map_centroid`
-- `Spring.GetUnitMass` → `UnitsInfo.get_unit_mass`
-- `Spring.GetUnitMaxRange` → `UnitsWeapons.get_unit_max_range`
-- `Spring.GetUnitMetalExtraction` → `UnitsInfo.get_unit_metal_extraction`
-- `Spring.GetUnitMoveTypeData` → `MoveCtrl.get_unit_move_type_data`
-- `Spring.GetUnitNanoPieces` → `UnitsInfo.get_unit_nano_pieces`
-- `Spring.GetUnitNearestAlly` → `UnitsQuery.get_unit_nearest_ally`
-- `Spring.GetUnitNearestEnemy` → `UnitsQuery.get_unit_nearest_enemy`
-- `Spring.GetUnitNeutral` → `UnitsInfo.get_unit_neutral`
-- `Spring.GetUnitPieceDirection` → `UnitsPieces.get_unit_piece_direction`
-- `Spring.GetUnitPieceInfo` → `UnitsPieces.get_unit_piece_info`
-- `Spring.GetUnitPieceList` → `UnitsPieces.get_unit_piece_list`
-- `Spring.GetUnitPieceMap` → `UnitsPieces.get_unit_piece_map`
-- `Spring.GetUnitPieceMatrix` → `UnitsPieces.get_unit_piece_matrix`
-- `Spring.GetUnitPiecePosDir` → `UnitsPieces.get_unit_piece_pos_dir`
-- `Spring.GetUnitPiecePosition` → `UnitsPieces.get_unit_piece_position`
-- `Spring.GetUnitPosErrorParams` → `UnitsInfo.get_unit_pos_error_params`
-- `Spring.GetUnitPosition` → `UnitsInfo.get_unit_position`
-- `Spring.GetUnitRadius` → `UnitsInfo.get_unit_radius`
-- `Spring.GetUnitResources` → `UnitsInfo.get_unit_resources`
-- `Spring.GetUnitRootPiece` → `UnitsPieces.get_unit_root_piece`
-- `Spring.GetUnitRotation` → `UnitsInfo.get_unit_rotation`
-- `Spring.GetUnitRulesParam` → `RulesParams.get_unit_rules_param`
-- `Spring.GetUnitRulesParams` → `RulesParams.get_unit_rules_params`
-- `Spring.GetUnitScriptNames` → `UnitsPieces.get_unit_script_names`
-- `Spring.GetUnitScriptPiece` → `UnitsPieces.get_unit_script_piece`
-- `Spring.GetUnitSeismicSignature` → `UnitsInfo.get_unit_seismic_signature`
-- `Spring.GetUnitSelfDTime` → `UnitsInfo.get_unit_self_dtime`
-- `Spring.GetUnitSensorRadius` → `UnitsInfo.get_unit_sensor_radius`
-- `Spring.GetUnitSeparation` → `UnitsQuery.get_unit_separation`
-- `Spring.GetUnitShieldState` → `UnitsInfo.get_unit_shield_state`
-- `Spring.GetUnitStates` → `UnitsInfo.get_unit_states`
-- `Spring.GetUnitStockpile` → `UnitsInfo.get_unit_stockpile`
-- `Spring.GetUnitStorage` → `UnitsInfo.get_unit_storage`
-- `Spring.GetUnitTeam` → `UnitsInfo.get_unit_team`
-- `Spring.GetUnitTooltip` → `UnitsInfo.get_unit_tooltip`
-- `Spring.GetUnitTransporter` → `UnitsInfo.get_unit_transporter`
-- `Spring.GetUnitVectors` → `UnitsInfo.get_unit_vectors`
-- `Spring.GetUnitVelocity` → `UnitsInfo.get_unit_velocity`
-- `Spring.GetUnitWeaponCanFire` → `UnitsWeapons.get_unit_weapon_can_fire`
-- `Spring.GetUnitWeaponDamages` → `UnitsWeapons.get_unit_weapon_damages`
-- `Spring.GetUnitWeaponHaveFreeLineOfFire` → `UnitsWeapons.get_unit_weapon_have_free_line_of_fire`
-- `Spring.GetUnitWeaponState` → `UnitsWeapons.get_unit_weapon_state`
-- `Spring.GetUnitWeaponTarget` → `UnitsWeapons.get_unit_weapon_target`
-- `Spring.GetUnitWeaponTestRange` → `UnitsWeapons.get_unit_weapon_test_range`
-- `Spring.GetUnitWeaponTestTarget` → `UnitsWeapons.get_unit_weapon_test_target`
-- `Spring.GetUnitWeaponTryTarget` → `UnitsWeapons.get_unit_weapon_try_target`
-- `Spring.GetUnitWeaponVectors` → `UnitsWeapons.get_unit_weapon_vectors`
-- `Spring.GetUnitWorkerTask` → `UnitsInfo.get_unit_worker_task`
-- `Spring.GetUnitsInBox` → `UnitsQuery.get_units_in_box`
-- `Spring.GetUnitsInCylinder` → `UnitsQuery.get_units_in_cylinder`
-- `Spring.GetUnitsInPlanes` → `UnitsQuery.get_units_in_planes`
-- `Spring.GetUnitsInRectangle` → `UnitsQuery.get_units_in_rectangle`
-- `Spring.GetUnitsInSphere` → `UnitsQuery.get_units_in_sphere`
-- `Spring.GetVectorFromHeading` → `Game.get_vector_from_heading`
-- `Spring.GetViewGeometry` → `Display.get_view_geometry`
-- `Spring.GetWaterLevel` → `Terrain.get_water_level`
-- `Spring.GetWaterPlaneLevel` → `Terrain.get_water_plane_level`
-- `Spring.GetWind` → `Game.get_wind`
-- `Spring.GetWindowGeometry` → `Display.get_window_geometry`
-- `Spring.GiveOrderToUnit` → `UnitControl.give_order_to_unit`
-- `Spring.GiveOrderToUnitArray` → `UnitControl.give_order_to_unit_array`
-- `Spring.HaveAdvShading` → `Display.have_adv_shading`
-- `Spring.HaveShadows` → `Display.have_shadows`
-- `Spring.IsAABBInView` → `Display.is_aabbin_view`
-- `Spring.IsAboveMiniMap` → `Input.is_above_mini_map`
-- `Spring.IsCheatingEnabled` → `Game.is_cheating_enabled`
-- `Spring.IsDevLuaEnabled` → `Game.is_dev_lua_enabled`
-- `Spring.IsEditDefsEnabled` → `Game.is_edit_defs_enabled`
-- `Spring.IsGUIHidden` → `Display.is_guihidden`
-- `Spring.IsGameOver` → `Game.is_game_over`
-- `Spring.IsGodModeEnabled` → `Game.is_god_mode_enabled`
-- `Spring.IsNoCostEnabled` → `Game.is_no_cost_enabled`
-- `Spring.IsPosInAirLos` → `Los.is_pos_in_air_los`
-- `Spring.IsPosInLos` → `Los.is_pos_in_los`
-- `Spring.IsPosInMap` → `Terrain.is_pos_in_map`
-- `Spring.IsPosInRadar` → `Los.is_pos_in_radar`
-- `Spring.IsSphereInView` → `Display.is_sphere_in_view`
-- `Spring.IsUnitInAirLos` → `Los.is_unit_in_air_los`
-- `Spring.IsUnitInJammer` → `Los.is_unit_in_jammer`
-- `Spring.IsUnitInLos` → `Los.is_unit_in_los`
-- `Spring.IsUnitInRadar` → `Los.is_unit_in_radar`
-- `Spring.IsUserWriting` → `Messages.is_user_writing`
-- `Spring.KillTeam` → `TeamControl.kill_team`
-- `Spring.LoadSoundDef` → `Sound.load_sound_def`
-- `Spring.Log` → `Messages.log`
-- `Spring.PauseSoundStream` → `Sound.pause_sound_stream`
-- `Spring.PlaySoundFile` → `Sound.play_sound_file`
-- `Spring.PlaySoundStream` → `Sound.play_sound_stream`
-- `Spring.Pos2BuildPos` → `Utils.pos2_build_pos`
-- `Spring.RevertHeightMap` → `TerrainControl.revert_height_map`
-- `Spring.RevertSmoothMesh` → `TerrainControl.revert_smooth_mesh`
-- `Spring.SelectUnit` → `Selection.select_unit`
-- `Spring.SelectUnitArray` → `Selection.select_unit_array`
-- `Spring.SendLuaGaiaMsg` → `Messages.send_lua_gaia_msg`
-- `Spring.SendLuaRulesMsg` → `Messages.send_lua_rules_msg`
-- `Spring.SendLuaUIMsg` → `Messages.send_lua_uimsg`
-- `Spring.SendMessage` → `Messages.send_message`
-- `Spring.SendMessageToAllyTeam` → `Messages.send_message_to_ally_team`
-- `Spring.SendMessageToPlayer` → `Messages.send_message_to_player`
-- `Spring.SendMessageToSpectators` → `Messages.send_message_to_spectators`
-- `Spring.SendMessageToTeam` → `Messages.send_message_to_team`
-- `Spring.SetAlly` → `TeamControl.set_ally`
-- `Spring.SetAllyTeamStartBox` → `TeamControl.set_ally_team_start_box`
-- `Spring.SetCameraState` → `Camera.set_camera_state`
-- `Spring.SetCameraTarget` → `Camera.set_camera_target`
-- `Spring.SetConfigFloat` → `Config.set_config_float`
-- `Spring.SetConfigInt` → `Config.set_config_int`
-- `Spring.SetConfigString` → `Config.set_config_string`
-- `Spring.SetFeatureDirection` → `FeatureControl.set_feature_direction`
-- `Spring.SetFeatureHealth` → `FeatureControl.set_feature_health`
-- `Spring.SetFeaturePosition` → `FeatureControl.set_feature_position`
-- `Spring.SetFeatureResources` → `FeatureControl.set_feature_resources`
-- `Spring.SetFeatureRulesParam` → `RulesParams.set_feature_rules_param`
-- `Spring.SetFeatureVelocity` → `FeatureControl.set_feature_velocity`
-- `Spring.SetGameRulesParam` → `RulesParams.set_game_rules_param`
-- `Spring.SetGlobalLos` → `TeamControl.set_global_los`
-- `Spring.SetHeightMap` → `TerrainControl.set_height_map`
-- `Spring.SetLogSectionFilterLevel` → `Config.set_log_section_filter_level`
-- `Spring.SetMapSquareTerrainType` → `TerrainControl.set_map_square_terrain_type`
-- `Spring.SetMetalAmount` → `MetalMap.set_metal_amount`
-- `Spring.SetPlayerRulesParam` → `RulesParams.set_player_rules_param`
-- `Spring.SetProjectileGravity` → `ProjectileControl.set_projectile_gravity`
-- `Spring.SetProjectilePosition` → `ProjectileControl.set_projectile_position`
-- `Spring.SetProjectileTarget` → `ProjectileControl.set_projectile_target`
-- `Spring.SetProjectileVelocity` → `ProjectileControl.set_projectile_velocity`
-- `Spring.SetSmoothMesh` → `TerrainControl.set_smooth_mesh`
-- `Spring.SetSoundStreamVolume` → `Sound.set_sound_stream_volume`
-- `Spring.SetTeamColor` → `Display.set_team_color`
-- `Spring.SetTeamResource` → `TeamControl.set_team_resource`
-- `Spring.SetTeamRulesParam` → `RulesParams.set_team_rules_param`
-- `Spring.SetTeamShareLevel` → `TeamControl.set_team_share_level`
-- `Spring.SetTerrainTypeData` → `TerrainControl.set_terrain_type_data`
-- `Spring.SetTidal` → `TerrainControl.set_tidal`
-- `Spring.SetUnitExperience` → `UnitControl.set_unit_experience`
-- `Spring.SetUnitGroup` → `Selection.set_unit_group`
-- `Spring.SetUnitHealth` → `UnitControl.set_unit_health`
-- `Spring.SetUnitMaxHealth` → `UnitControl.set_unit_max_health`
-- `Spring.SetUnitMetalExtraction` → `UnitControl.set_unit_metal_extraction`
-- `Spring.SetUnitNeutral` → `UnitControl.set_unit_neutral`
-- `Spring.SetUnitPhysics` → `UnitControl.set_unit_physics`
-- `Spring.SetUnitPosition` → `UnitControl.set_unit_position`
-- `Spring.SetUnitResourcing` → `UnitControl.set_unit_resourcing`
-- `Spring.SetUnitRotation` → `UnitControl.set_unit_rotation`
-- `Spring.SetUnitRulesParam` → `RulesParams.set_unit_rules_param`
-- `Spring.SetUnitVelocity` → `UnitControl.set_unit_velocity`
-- `Spring.SetWind` → `TerrainControl.set_wind`
-- `Spring.ShareTeamResource` → `TeamControl.share_team_resource`
-- `Spring.SpawnProjectile` → `ProjectileControl.spawn_projectile`
-- `Spring.StopSoundStream` → `Sound.stop_sound_stream`
-- `Spring.TestBuildOrder` → `Utils.test_build_order`
-- `Spring.TestMoveOrder` → `Utils.test_move_order`
-- `Spring.TraceRayGroundBetweenPositions` → `Tracing.trace_ray_ground_between_positions`
-- `Spring.TraceRayGroundInDirection` → `Tracing.trace_ray_ground_in_direction`
-- `Spring.TraceScreenRay` → `Camera.trace_screen_ray`
-- `Spring.TransferFeature` → `FeatureControl.transfer_feature`
-- `Spring.TransferUnit` → `UnitControl.transfer_unit`
-- `Spring.UnitFinishCommand` → `UnitControl.unit_finish_command`
-- `Spring.UseTeamResource` → `TeamControl.use_team_resource`
-- `Spring.ValidFeatureID` → `Features.valid_feature_id`
-- `Spring.ValidUnitID` → `UnitsQuery.valid_unit_id`
-- `Spring.WorldToScreenCoords` → `Camera.world_to_screen_coords`
+- `Spring.AddFeatureDamage` → `FeatureControl.FeatureControl.add_feature_damage` (param mismatch: p1 type integer!=i32; p2 type number!=f32; p3 type number?!=f32; p4 type integer?!=i32; p5 type integer?!=i32)
+- `Spring.AddGrass` → `TerrainControl.TerrainControl.add_grass` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.AddHeightMap` → `TerrainControl.TerrainControl.add_height_map` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32)
+- `Spring.AddLightTrackingTarget` → `Lights.Lights.add_light_tracking_target` (param mismatch: count mismatch (lua=0, rust=4))
+- `Spring.AddMapLight` → `Lights.Lights.add_map_light` (param mismatch: p1 type LightParams!=sys::LightParams)
+- `Spring.AddModelLight` → `Lights.Lights.add_model_light` (param mismatch: p1 type LightParams!=sys::LightParams)
+- `Spring.AddObjectDecal` → `UnitControl.UnitControl.add_object_decal` (param mismatch: p1 type integer!=i32)
+- `Spring.AddOriginalHeightMap` → `TerrainControl.TerrainControl.add_original_height_map` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32)
+- `Spring.AddSmoothMesh` → `TerrainControl.TerrainControl.add_smooth_mesh` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32)
+- `Spring.AddTeamResource` → `TeamControl.TeamControl.add_team_resource` (param mismatch: p1 type integer!=i32; p2 type ResourceName!=&str; p3 type number!=f32)
+- `Spring.AddUnitDamage` → `UnitControl.UnitControl.add_unit_damage` (param mismatch: p1 type integer!=i32; p2 type number!=f32; p3 type number?!=f32; p4 type integer?!=i32; p5 type integer?!=i32)
+- `Spring.AddUnitExperience` → `UnitControl.UnitControl.add_unit_experience` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.AddUnitIcon` → `Icons.Icons.add_unit_icon` (param mismatch: p1 type string!=&str; p2 type string!=&str; p3 type number?!=f32; p4 type number?!=f32; p5 type number?!=bool; p6 type number?!=f32; p7 type number?!=f32; p8 type number?!=f32; p9 type number?!=f32)
+- `Spring.AddUnitImpulse` → `UnitControl.UnitControl.add_unit_impulse` (param mismatch: p1 type integer!=i32; p5 type number?!=f32)
+- `Spring.AddUnitResource` → `UnitControl.UnitControl.add_unit_resource` (param mismatch: p1 type integer!=i32; p2 type string!=&str; p3 type number!=f32)
+- `Spring.AddUnitSeismicPing` → `UnitControl.UnitControl.add_unit_seismic_ping` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.AddWorldIcon` → `Markers.Markers.add_world_icon` (param mismatch: p1 type integer!=i32)
+- `Spring.AddWorldText` → `Markers.Markers.add_world_text` (param mismatch: p1 type string!=&str)
+- `Spring.AddWorldUnit` → `Markers.Markers.add_world_unit` (param mismatch: p1 type integer!=i32; p5 type integer!=i32; p6 type FacingInteger!=i32)
+- `Spring.AdjustHeightMap` → `TerrainControl.TerrainControl.adjust_height_map` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32)
+- `Spring.AdjustOriginalHeightMap` → `TerrainControl.TerrainControl.adjust_original_height_map` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32)
+- `Spring.AdjustSmoothMesh` → `TerrainControl.TerrainControl.adjust_smooth_mesh` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32)
+- `Spring.AreHelperAIsEnabled` → `Game.Game.are_helper_ais_enabled`
+- `Spring.ArePlayersAllied` → `Teams.Teams.are_players_allied` (param mismatch: p1 type number!=i32; p2 type number!=i32)
+- `Spring.AreTeamsAllied` → `Teams.Teams.are_teams_allied` (param mismatch: p1 type number!=i32; p2 type number!=i32)
+- `Spring.AssignMouseCursor` → `UnsyncedCtrl.UnsyncedCtrl.assign_mouse_cursor` (param mismatch: p1 type string!=&str; p2 type string!=&str)
+- `Spring.AssignPlayerToTeam` → `TeamControl.TeamControl.assign_player_to_team` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.BuggerOff` → `UnitControl.UnitControl.bugger_off` (param mismatch: p4 type number!=f32; p5 type integer!=i32; p8 type integer?!=i32; p9 type number[]?!=&[i32])
+- `Spring.CallAsTeam` → `SystemControl.SystemControl.call_as_team` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.CallCOBScript` → `CobScript.CobScript.call_cobscript` (param mismatch: count mismatch (lua=4, rust=6))
+- `Spring.ClearFeaturesPreviousDrawFlag` → `Features.Features.clear_features_previous_draw_flag`
+- `Spring.ClearUnitGoal` → `UnitControl.UnitControl.clear_unit_goal` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.ClearUnitsPreviousDrawFlag` → `UnitsInfo.UnitsInfo.clear_units_previous_draw_flag`
+- `Spring.ClearWatchDogTimer` → `SystemControl.SystemControl.clear_watch_dog_timer` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.ClosestBuildPos` → `Utils.Utils.closest_build_pos` (param mismatch: p1 type integer!=i32; p2 type integer!=i32; p6 type number!=f32; p7 type number!=i32; p8 type number!=i32)
+- `Spring.CreateDir` → `Vfs.Vfs.create_dir` (param mismatch: p1 type string!=&str)
+- `Spring.CreateFeature` → `FeatureControl.FeatureControl.create_feature` (param mismatch: count mismatch (lua=7, rust=8))
+- `Spring.CreateFeatureWreck` → `FeatureControl.FeatureControl.create_feature_wreck` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32)
+- `Spring.CreateGroundDecal` → `GroundDecals.GroundDecals.create_ground_decal` (param mismatch: count mismatch (lua=0, rust=2))
+- `Spring.CreateUnit` → `UnitControl.UnitControl.create_unit` (param mismatch: count mismatch (lua=10, rust=9))
+- `Spring.CreateUnitWreck` → `FeatureControl.FeatureControl.create_unit_wreck` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32)
+- `Spring.DeleteProjectile` → `ProjectileControl.ProjectileControl.delete_projectile` (param mismatch: p1 type integer!=i32)
+- `Spring.DeselectUnit` → `Selection.Selection.deselect_unit` (param mismatch: p1 type integer!=i32)
+- `Spring.DeselectUnitArray` → `Selection.Selection.deselect_unit_array` (param mismatch: p1 type integer[]!=&[i32])
+- `Spring.DeselectUnitMap` → `UnsyncedCtrl.UnsyncedCtrl.deselect_unit_map` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.DestroyFeature` → `FeatureControl.FeatureControl.destroy_feature` (param mismatch: p1 type integer!=i32)
+- `Spring.DestroyGroundDecal` → `GroundDecals.GroundDecals.destroy_ground_decal` (param mismatch: p1 type integer!=u32)
+- `Spring.DestroyUnit` → `UnitControl.UnitControl.destroy_unit` (param mismatch: p1 type integer!=i32; p4 type integer?!=i32)
+- `Spring.DiffTimers` → `Profiling.Profiling.diff_timers` (param mismatch: p1 type integer!=u64; p2 type integer!=u64)
+- `Spring.DrawUnitCommands` → `UnsyncedCtrl.UnsyncedCtrl.draw_unit_commands` (param mismatch: p1 type integer!=bool)
+- `Spring.Echo` → `Messages.Messages.echo` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.EditUnitCmdDesc` → `UnitControl.UnitControl.edit_unit_cmd_desc` (param mismatch: p1 type integer!=i32; p2 type integer!=u32; p3 type CommandDescription!=&sys::NativeCommandDescription)
+- `Spring.ExtractModArchiveFile` → `Vfs.Vfs.extract_mod_archive_file` (param mismatch: p1 type string!=&str)
+- `Spring.FindUnitCmdDesc` → `UnitsCommands.UnitsCommands.find_unit_cmd_desc` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.FixedAllies` → `Game.Game.fixed_allies`
+- `Spring.ForceLayoutUpdate` → `UnsyncedCtrl.UnsyncedCtrl.force_layout_update`
+- `Spring.ForceTesselationUpdate` → `UnsyncedCtrl.UnsyncedCtrl.force_tesselation_update`
+- `Spring.ForceUnitCollisionUpdate` → `UnitControl.UnitControl.force_unit_collision_update` (param mismatch: p1 type integer!=i32)
+- `Spring.FreeUnitIcon` → `Icons.Icons.free_unit_icon` (param mismatch: p1 type string!=&str)
+- `Spring.GameOver` → `TeamControl.TeamControl.game_over` (param mismatch: p1 type integer[]!=&[i32])
+- `Spring.GarbageCollectCtrl` → `SystemControl.SystemControl.garbage_collect_ctrl` (param mismatch: p1 type integer?!=i32; p2 type integer?!=i32; p3 type integer?!=i32; p4 type integer?!=i32; p5 type number?!=f32; p6 type number?!=f32; p7 type number?!=f32; p8 type number?!=f32)
+- `Spring.GetAIInfo` → `Teams.Teams.get_aiinfo` (param mismatch: p1 type integer!=i32)
+- `Spring.GetActionHotKeys` → `Input.Input.get_action_hot_keys` (param mismatch: p1 type string!=&str)
+- `Spring.GetActiveCmdDesc` → `UnsyncedRead.UnsyncedRead.get_active_cmd_desc` (param mismatch: p1 type integer!=i32)
+- `Spring.GetActiveCmdDescs` → `UnsyncedRead.UnsyncedRead.get_active_cmd_descs` (param mismatch: count mismatch (lua=0, rust=1))
+- `Spring.GetActiveCommand` → `Input.Input.get_active_command` (param mismatch: count mismatch (lua=0, rust=3))
+- `Spring.GetActivePage` → `Input.Input.get_active_page`
+- `Spring.GetAllFeatures` → `Features.Features.get_all_features`
+- `Spring.GetAllGroundDecals` → `GroundDecals.GroundDecals.get_all_ground_decals`
+- `Spring.GetAllIconDataArray` → `Icons.Icons.get_all_icon_data_array`
+- `Spring.GetAllProjectiles` → `Projectiles.Projectiles.get_all_projectiles`
+- `Spring.GetAllUnits` → `UnitsQuery.UnitsQuery.get_all_units`
+- `Spring.GetAllyTeamInfo` → `Teams.Teams.get_ally_team_info` (param mismatch: p1 type integer!=i32)
+- `Spring.GetAllyTeamList` → `Teams.Teams.get_ally_team_list`
+- `Spring.GetAllyTeamStartBox` → `Game.Game.get_ally_team_start_box` (param mismatch: p1 type integer!=i32)
+- `Spring.GetBoxSelectionByEngine` → `UnsyncedRead.UnsyncedRead.get_box_selection_by_engine`
+- `Spring.GetBuildFacing` → `UnsyncedRead.UnsyncedRead.get_build_facing`
+- `Spring.GetBuildSpacing` → `UnsyncedRead.UnsyncedRead.get_build_spacing`
+- `Spring.GetCEGID` → `Utils.Utils.get_cegid` (param mismatch: count mismatch (lua=0, rust=1))
+- `Spring.GetCOBScriptID` → `CobScript.CobScript.get_cobscript_id` (param mismatch: p1 type integer!=i32; p2 type string!=&str)
+- `Spring.GetCameraDirection` → `Camera.Camera.get_camera_direction`
+- `Spring.GetCameraFOV` → `Camera.Camera.get_camera_fov`
+- `Spring.GetCameraNames` → `Camera.Camera.get_camera_names`
+- `Spring.GetCameraPosition` → `Camera.Camera.get_camera_position`
+- `Spring.GetCameraRotation` → `UnitRendering.UnitRendering.get_camera_rotation`
+- `Spring.GetCameraState` → `Camera.Camera.get_camera_state` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.GetCameraVectors` → `UnitRendering.UnitRendering.get_camera_vectors`
+- `Spring.GetClipboard` → `UnsyncedRead.UnsyncedRead.get_clipboard`
+- `Spring.GetClosestEnemyUnit` → `UnitsQuery.UnitsQuery.get_closest_enemy_unit` (param mismatch: p4 type number?!=f32; p5 type number?!=i32)
+- `Spring.GetCmdDescIndex` → `UnsyncedRead.UnsyncedRead.get_cmd_desc_index` (param mismatch: p1 type integer!=i32)
+- `Spring.GetCommandQueue` → `UnitsCommands.UnitsCommands.get_command_queue` (param mismatch: p1 type integer!=i32; p2 type integer!=u32)
+- `Spring.GetConfigFloat` → `Config.Config.get_config_float` (param mismatch: p1 type string!=&str; p2 type number?!=f32)
+- `Spring.GetConfigInt` → `Config.Config.get_config_int` (param mismatch: p1 type string!=&str; p2 type number?!=i32)
+- `Spring.GetConfigParams` → `Config.Config.get_config_params`
+- `Spring.GetConfigString` → `Config.Config.get_config_string` (param mismatch: p1 type string!=&str; p2 type string?!=&str)
+- `Spring.GetConsoleBuffer` → `Messages.Messages.get_console_buffer` (param mismatch: p1 type number!=u32)
+- `Spring.GetCurrentTooltip` → `Messages.Messages.get_current_tooltip`
+- `Spring.GetCustomPaletteColor` → `UnsyncedRead.UnsyncedRead.get_custom_palette_color` (param mismatch: p1 type integer!=i32)
+- `Spring.GetDefaultCommand` → `Input.Input.get_default_command`
+- `Spring.GetDrawFrame` → `Display.Display.get_draw_frame`
+- `Spring.GetDrawSeconds` → `Profiling.Profiling.get_draw_seconds`
+- `Spring.GetDrawSelectionInfo` → `UnsyncedRead.UnsyncedRead.get_draw_selection_info`
+- `Spring.GetDualViewGeometry` → `Display.Display.get_dual_view_geometry`
+- `Spring.GetFPS` → `Display.Display.get_fps`
+- `Spring.GetFacingFromHeading` → `Game.Game.get_facing_from_heading` (param mismatch: p1 type number!=i32)
+- `Spring.GetFactoryBuggerOff` → `UnitsCommands.UnitsCommands.get_factory_bugger_off` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFactoryCommandCount` → `UnitsCommands.UnitsCommands.get_factory_command_count` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFactoryCommands` → `UnitsCommands.UnitsCommands.get_factory_commands` (param mismatch: p1 type integer!=i32; p2 type integer!=u32)
+- `Spring.GetFactoryCounts` → `UnitsCommands.UnitsCommands.get_factory_counts` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32)
+- `Spring.GetFeatureAllyTeam` → `Features.Features.get_feature_ally_team` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureAlwaysUpdateMatrix` → `Features.Features.get_feature_always_update_matrix` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureBlocking` → `Features.Features.get_feature_blocking` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureCollisionVolumeData` → `Features.Features.get_feature_collision_volume_data` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureDefID` → `Features.Features.get_feature_def_id` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureDirection` → `Features.Features.get_feature_direction` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureDrawFlag` → `Features.Features.get_feature_draw_flag` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureEngineDrawMask` → `Features.Features.get_feature_engine_draw_mask` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureFireTime` → `Features.Features.get_feature_fire_time` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureHeading` → `Features.Features.get_feature_heading` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureHealth` → `Features.Features.get_feature_health` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureHeight` → `Features.Features.get_feature_height` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureLastAttackedPiece` → `Features.Features.get_feature_last_attacked_piece` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureLuaDraw` → `Features.Features.get_feature_lua_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureMass` → `Features.Features.get_feature_mass` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureNoDraw` → `Features.Features.get_feature_no_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureNoSelect` → `Features.Features.get_feature_no_select` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeaturePaletteIndex` → `UnsyncedRead.UnsyncedRead.get_feature_palette_index` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeaturePieceCollisionVolumeData` → `Features.Features.get_feature_piece_collision_volume_data` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeaturePieceDirection` → `UnitsPieces.UnitsPieces.get_feature_piece_direction` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetFeaturePieceInfo` → `UnitsPieces.UnitsPieces.get_feature_piece_info` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetFeaturePieceList` → `UnitsPieces.UnitsPieces.get_feature_piece_list` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeaturePieceMap` → `UnitsPieces.UnitsPieces.get_feature_piece_map` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeaturePieceMatrix` → `UnitsPieces.UnitsPieces.get_feature_piece_matrix` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetFeaturePiecePosDir` → `UnitsPieces.UnitsPieces.get_feature_piece_pos_dir` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetFeaturePiecePosition` → `UnitsPieces.UnitsPieces.get_feature_piece_position` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetFeaturePosition` → `Features.Features.get_feature_position` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureRadius` → `Features.Features.get_feature_radius` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureResources` → `Features.Features.get_feature_resources` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureResurrect` → `Features.Features.get_feature_resurrect` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureRootPiece` → `UnitsPieces.UnitsPieces.get_feature_root_piece` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureRotation` → `Features.Features.get_feature_rotation` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureRulesParam` → `RulesParams.RulesParams.get_feature_rules_param` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetFeatureRulesParams` → `RulesParams.RulesParams.get_feature_rules_params` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureSelectionVolumeData` → `Features.Features.get_feature_selection_volume_data` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureSeparation` → `Features.Features.get_feature_separation` (param mismatch: p1 type number!=i32; p2 type number!=i32)
+- `Spring.GetFeatureSmokeTime` → `Features.Features.get_feature_smoke_time` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureTeam` → `Features.Features.get_feature_team` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureTransformMatrix` → `Features.Features.get_feature_transform_matrix` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeatureVelocity` → `Features.Features.get_feature_velocity` (param mismatch: p1 type integer!=i32)
+- `Spring.GetFeaturesInCylinder` → `Features.Features.get_features_in_cylinder` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32; p4 type number?!=f32)
+- `Spring.GetFeaturesInRectangle` → `Features.Features.get_features_in_rectangle` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32; p4 type number!=f32)
+- `Spring.GetFeaturesInScreenRectangle` → `UnitRendering.UnitRendering.get_features_in_screen_rectangle` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32; p4 type number!=f32)
+- `Spring.GetFeaturesInSphere` → `Features.Features.get_features_in_sphere` (param mismatch: p4 type number!=f32)
+- `Spring.GetFrameTimeOffset` → `Display.Display.get_frame_time_offset`
+- `Spring.GetFrameTimer` → `Profiling.Profiling.get_frame_timer`
+- `Spring.GetFullBuildQueue` → `UnitsCommands.UnitsCommands.get_full_build_queue` (param mismatch: p1 type integer!=i32)
+- `Spring.GetGaiaTeamID` → `Game.Game.get_gaia_team_id`
+- `Spring.GetGameFrame` → `Game.Game.get_game_frame`
+- `Spring.GetGameName` → `SystemControl.SystemControl.get_game_name`
+- `Spring.GetGameRulesParam` → `RulesParams.RulesParams.get_game_rules_param` (param mismatch: p1 type (number|string!=&str)
+- `Spring.GetGameRulesParams` → `RulesParams.RulesParams.get_game_rules_params`
+- `Spring.GetGameSeconds` → `Game.Game.get_game_seconds`
+- `Spring.GetGameSpeed` → `Display.Display.get_game_speed`
+- `Spring.GetGameState` → `SystemControl.SystemControl.get_game_state` (param mismatch: p1 type number?!=f32)
+- `Spring.GetGatherMode` → `SystemControl.SystemControl.get_gather_mode`
+- `Spring.GetGlobalLos` → `Game.Game.get_global_los` (param mismatch: p1 type integer?!=i32)
+- `Spring.GetGrass` → `Terrain.Terrain.get_grass` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.GetGroundBlocked` → `Terrain.Terrain.get_ground_blocked` (param mismatch: count mismatch (lua=0, rust=4))
+- `Spring.GetGroundDecalAlpha` → `GroundDecals.GroundDecals.get_ground_decal_alpha` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalCreationFrame` → `GroundDecals.GroundDecals.get_ground_decal_creation_frame` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalGlowParams` → `GroundDecals.GroundDecals.get_ground_decal_glow_params` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalMiddlePos` → `GroundDecals.GroundDecals.get_ground_decal_middle_pos` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalMisc` → `GroundDecals.GroundDecals.get_ground_decal_misc` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalNormal` → `GroundDecals.GroundDecals.get_ground_decal_normal` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalOwner` → `GroundDecals.GroundDecals.get_ground_decal_owner` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalQuadPos` → `GroundDecals.GroundDecals.get_ground_decal_quad_pos` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalRotation` → `GroundDecals.GroundDecals.get_ground_decal_rotation` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalSizeAndHeight` → `GroundDecals.GroundDecals.get_ground_decal_size_and_height` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalTexture` → `GroundDecals.GroundDecals.get_ground_decal_texture` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalTextures` → `GroundDecals.GroundDecals.get_ground_decal_textures`
+- `Spring.GetGroundDecalTint` → `GroundDecals.GroundDecals.get_ground_decal_tint` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalType` → `GroundDecals.GroundDecals.get_ground_decal_type` (param mismatch: p1 type integer!=u32)
+- `Spring.GetGroundDecalUserData` → `GroundDecals.GroundDecals.get_ground_decal_user_data` (param mismatch: p1 type integer!=u32; p2 type integer!=u32)
+- `Spring.GetGroundExtremes` → `Terrain.Terrain.get_ground_extremes`
+- `Spring.GetGroundHeight` → `Terrain.Terrain.get_ground_height` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.GetGroundInfo` → `Terrain.Terrain.get_ground_info` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.GetGroundNormal` → `Terrain.Terrain.get_ground_normal` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.GetGroundOrigHeight` → `Terrain.Terrain.get_ground_orig_height` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.GetGroupList` → `Selection.Selection.get_group_list`
+- `Spring.GetGroupUnits` → `Selection.Selection.get_group_units` (param mismatch: p1 type integer!=i32)
+- `Spring.GetGroupUnitsCount` → `Selection.Selection.get_group_units_count` (param mismatch: p1 type integer!=i32)
+- `Spring.GetGroupUnitsCounts` → `Selection.Selection.get_group_units_counts` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.GetGroupUnitsSorted` → `Selection.Selection.get_group_units_sorted` (param mismatch: p1 type integer!=i32)
+- `Spring.GetHeadingFromFacing` → `Game.Game.get_heading_from_facing` (param mismatch: p1 type FacingInteger!=i32)
+- `Spring.GetHeadingFromVector` → `Game.Game.get_heading_from_vector` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.GetIconData` → `Icons.Icons.get_icon_data` (param mismatch: p1 type string!=&str)
+- `Spring.GetInvertQueueKey` → `Input.Input.get_invert_queue_key`
+- `Spring.GetKeyBindings` → `Input.Input.get_key_bindings` (param mismatch: p1 type string?!=&str; p2 type string?!=&str)
+- `Spring.GetKeyCode` → `Input.Input.get_key_code` (param mismatch: p1 type string!=&str)
+- `Spring.GetKeyFromScanSymbol` → `Input.Input.get_key_from_scan_symbol` (param mismatch: p1 type string!=&str)
+- `Spring.GetKeyState` → `Input.Input.get_key_state` (param mismatch: p1 type number!=i32)
+- `Spring.GetKeySymbol` → `Input.Input.get_key_symbol` (param mismatch: p1 type number!=i32)
+- `Spring.GetLastMessagePositions` → `UnsyncedRead.UnsyncedRead.get_last_message_positions`
+- `Spring.GetLastUpdateSeconds` → `Display.Display.get_last_update_seconds`
+- `Spring.GetLocalAllyTeamID` → `Player.Player.get_local_ally_team_id`
+- `Spring.GetLocalPlayerID` → `Player.Player.get_local_player_id`
+- `Spring.GetLocalTeamID` → `Player.Player.get_local_team_id`
+- `Spring.GetLogSections` → `Config.Config.get_log_sections`
+- `Spring.GetLosViewColors` → `Display.Display.get_los_view_colors`
+- `Spring.GetLuaMemUsage` → `Profiling.Profiling.get_lua_mem_usage`
+- `Spring.GetMapDrawMode` → `Display.Display.get_map_draw_mode`
+- `Spring.GetMapOption` → `Game.Game.get_map_option` (param mismatch: p1 type string!=&str)
+- `Spring.GetMapOptions` → `Game.Game.get_map_options`
+- `Spring.GetMapSquareTexture` → `Vfs.Vfs.get_map_square_texture` (param mismatch: p1 type number!=i32; p2 type number!=i32; p3 type number!=i32; p4 type string!=i32; p5 type number?!=&str)
+- `Spring.GetMapStartPositions` → `Game.Game.get_map_start_positions`
+- `Spring.GetMenuName` → `SystemControl.SystemControl.get_menu_name`
+- `Spring.GetMetalAmount` → `MetalMap.MetalMap.get_metal_amount` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetMetalExtraction` → `MetalMap.MetalMap.get_metal_extraction` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetMetalMapSize` → `MetalMap.MetalMap.get_metal_map_size`
+- `Spring.GetMiniMapDualScreen` → `Display.Display.get_mini_map_dual_screen`
+- `Spring.GetMiniMapGeometry` → `Display.Display.get_mini_map_geometry`
+- `Spring.GetMiniMapRotation` → `Display.Display.get_mini_map_rotation`
+- `Spring.GetModKeyState` → `Input.Input.get_mod_key_state`
+- `Spring.GetModOption` → `Game.Game.get_mod_option` (param mismatch: p1 type string!=&str)
+- `Spring.GetModOptions` → `Game.Game.get_mod_options`
+- `Spring.GetModelPieceList` → `UnitsPieces.UnitsPieces.get_model_piece_list` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetModelPieceMap` → `UnitsPieces.UnitsPieces.get_model_piece_map` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetModelRootPiece` → `UnitsPieces.UnitsPieces.get_model_root_piece` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetMouseButtonsPressed` → `Input.Input.get_mouse_buttons_pressed` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetMouseCursor` → `Input.Input.get_mouse_cursor`
+- `Spring.GetMouseStartPosition` → `Input.Input.get_mouse_start_position` (param mismatch: p1 type number!=i32)
+- `Spring.GetMouseState` → `Input.Input.get_mouse_state`
+- `Spring.GetNanoProjectileParams` → `UnsyncedRead.UnsyncedRead.get_nano_projectile_params`
+- `Spring.GetNumDisplays` → `Display.Display.get_num_displays`
+- `Spring.GetPieceProjectileName` → `UnsyncedRead.UnsyncedRead.get_piece_projectile_name` (param mismatch: p1 type integer!=i32)
+- `Spring.GetPieceProjectileParams` → `Projectiles.Projectiles.get_piece_projectile_params` (param mismatch: p1 type integer!=i32)
+- `Spring.GetPixelDir` → `Camera.Camera.get_pixel_dir` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.GetPlayerControlledUnit` → `Teams.Teams.get_player_controlled_unit` (param mismatch: p1 type integer!=i32)
+- `Spring.GetPlayerInfo` → `Teams.Teams.get_player_info` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetPlayerList` → `Teams.Teams.get_player_list` (param mismatch: count mismatch (lua=2, rust=0))
+- `Spring.GetPlayerRoster` → `Player.Player.get_player_roster` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetPlayerRulesParam` → `RulesParams.RulesParams.get_player_rules_param` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetPlayerRulesParams` → `RulesParams.RulesParams.get_player_rules_params` (param mismatch: p1 type integer!=i32)
+- `Spring.GetPlayerStatistics` → `Player.Player.get_player_statistics` (param mismatch: p1 type integer!=i32)
+- `Spring.GetPlayerTraffic` → `Player.Player.get_player_traffic` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetPositionLosState` → `Los.Los.get_position_los_state` (param mismatch: p4 type integer?!=i32)
+- `Spring.GetPressedKeys` → `Input.Input.get_pressed_keys`
+- `Spring.GetPressedScans` → `Input.Input.get_pressed_scans`
+- `Spring.GetProfilerRecordNames` → `Profiling.Profiling.get_profiler_record_names`
+- `Spring.GetProfilerTimeRecord` → `Profiling.Profiling.get_profiler_time_record` (param mismatch: p1 type string!=&str)
+- `Spring.GetProjectileAllyTeamID` → `Projectiles.Projectiles.get_projectile_ally_team_id` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileDamages` → `Projectiles.Projectiles.get_projectile_damages` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetProjectileDefID` → `Projectiles.Projectiles.get_projectile_def_id` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileDirection` → `Projectiles.Projectiles.get_projectile_direction` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileGravity` → `Projectiles.Projectiles.get_projectile_gravity` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileIsIntercepted` → `Projectiles.Projectiles.get_projectile_is_intercepted` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileOwnerID` → `Projectiles.Projectiles.get_projectile_owner_id` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectilePosition` → `Projectiles.Projectiles.get_projectile_position` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileTarget` → `Projectiles.Projectiles.get_projectile_target` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileTeamID` → `Projectiles.Projectiles.get_projectile_team_id` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileTimeToLive` → `Projectiles.Projectiles.get_projectile_time_to_live` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileType` → `Projectiles.Projectiles.get_projectile_type` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectileVelocity` → `Projectiles.Projectiles.get_projectile_velocity` (param mismatch: p1 type integer!=i32)
+- `Spring.GetProjectilesInRectangle` → `Projectiles.Projectiles.get_projectiles_in_rectangle` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32; p4 type number!=f32)
+- `Spring.GetProjectilesInSphere` → `Projectiles.Projectiles.get_projectiles_in_sphere` (param mismatch: p4 type number!=f32)
+- `Spring.GetRadarErrorParams` → `Los.Los.get_radar_error_params` (param mismatch: p1 type integer!=i32)
+- `Spring.GetRealBuildQueue` → `UnitsCommands.UnitsCommands.get_real_build_queue` (param mismatch: p1 type integer!=i32)
+- `Spring.GetRenderFeatures` → `Features.Features.get_render_features` (param mismatch: count mismatch (lua=2, rust=0))
+- `Spring.GetRenderFeaturesDrawFlagChanged` → `Features.Features.get_render_features_draw_flag_changed` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.GetRenderUnits` → `UnitsQuery.UnitsQuery.get_render_units` (param mismatch: count mismatch (lua=2, rust=0))
+- `Spring.GetRenderUnitsDrawFlagChanged` → `UnitsQuery.UnitsQuery.get_render_units_draw_flag_changed` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.GetReplayFilePath` → `SystemControl.SystemControl.get_replay_file_path`
+- `Spring.GetReplayLength` → `SystemControl.SystemControl.get_replay_length`
+- `Spring.GetReplayRecordingFilePath` → `SystemControl.SystemControl.get_replay_recording_file_path`
+- `Spring.GetScanSymbol` → `Input.Input.get_scan_symbol` (param mismatch: p1 type number!=i32)
+- `Spring.GetScreenGeometry` → `Display.Display.get_screen_geometry` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetSelectedGroup` → `Selection.Selection.get_selected_group`
+- `Spring.GetSelectedUnits` → `Selection.Selection.get_selected_units`
+- `Spring.GetSelectedUnitsCount` → `Selection.Selection.get_selected_units_count`
+- `Spring.GetSelectedUnitsCounts` → `Selection.Selection.get_selected_units_counts`
+- `Spring.GetSelectedUnitsSorted` → `Selection.Selection.get_selected_units_sorted`
+- `Spring.GetSelectionBox` → `Input.Input.get_selection_box`
+- `Spring.GetSideData` → `Game.Game.get_side_data` (param mismatch: p1 type string!=&str)
+- `Spring.GetSmoothMeshHeight` → `Terrain.Terrain.get_smooth_mesh_height` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.GetSoundDevices` → `Sound.Sound.get_sound_devices`
+- `Spring.GetSoundEffectParams` → `Sound.Sound.get_sound_effect_params`
+- `Spring.GetSoundStreamTime` → `Sound.Sound.get_sound_stream_time`
+- `Spring.GetSpectatingState` → `Player.Player.get_spectating_state`
+- `Spring.GetSyncedGCInfo` → `Profiling.Profiling.get_synced_gcinfo`
+- `Spring.GetTeamAllyTeamID` → `Teams.Teams.get_team_ally_team_id` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamColor` → `Display.Display.get_team_color` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamDamageStats` → `UnsyncedRead.UnsyncedRead.get_team_damage_stats` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetTeamInfo` → `Teams.Teams.get_team_info` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetTeamList` → `Teams.Teams.get_team_list` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.GetTeamLuaAI` → `Teams.Teams.get_team_lua_ai` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamMaxUnits` → `Teams.Teams.get_team_max_units` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamOrigColor` → `Display.Display.get_team_orig_color` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamResourceStats` → `Teams.Teams.get_team_resource_stats` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetTeamResources` → `Teams.Teams.get_team_resources` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetTeamRulesParam` → `RulesParams.RulesParams.get_team_rules_param` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetTeamRulesParams` → `RulesParams.RulesParams.get_team_rules_params` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamStartPosition` → `Game.Game.get_team_start_position` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamStatsHistory` → `Teams.Teams.get_team_stats_history` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamUnitCount` → `UnitsQuery.UnitsQuery.get_team_unit_count` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamUnitDefCount` → `UnitsQuery.UnitsQuery.get_team_unit_def_count` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetTeamUnitStats` → `Teams.Teams.get_team_unit_stats` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamUnits` → `UnitsQuery.UnitsQuery.get_team_units` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamUnitsByDefs` → `UnitsQuery.UnitsQuery.get_team_units_by_defs` (param mismatch: p1 type integer!=i32; p2 type (number|number[])!=&[i32])
+- `Spring.GetTeamUnitsCounts` → `UnitsQuery.UnitsQuery.get_team_units_counts` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTeamUnitsSorted` → `UnitsQuery.UnitsQuery.get_team_units_sorted` (param mismatch: p1 type integer!=i32)
+- `Spring.GetTerrainTypeData` → `Terrain.Terrain.get_terrain_type_data` (param mismatch: p1 type number!=i32)
+- `Spring.GetTidal` → `Game.Game.get_tidal`
+- `Spring.GetTimer` → `Profiling.Profiling.get_timer`
+- `Spring.GetTimerMicros` → `Profiling.Profiling.get_timer_micros`
+- `Spring.GetUnitAllyTeam` → `UnitsInfo.UnitsInfo.get_unit_ally_team` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitAlwaysUpdateMatrix` → `UnitRendering.UnitRendering.get_unit_always_update_matrix` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitArmored` → `UnitsInfo.UnitsInfo.get_unit_armored` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitArrayCentroid` → `UnitsQuery.UnitsQuery.get_unit_array_centroid` (param mismatch: p1 type table!=&[i32])
+- `Spring.GetUnitBasePosition` → `UnitsInfo.UnitsInfo.get_unit_base_position` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitBlocking` → `UnitsInfo.UnitsInfo.get_unit_blocking` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitBuildFacing` → `UnitsInfo.UnitsInfo.get_unit_build_facing` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitBuildParams` → `UnitsInfo.UnitsInfo.get_unit_build_params` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitBuildeeRadius` → `UnitsInfo.UnitsInfo.get_unit_buildee_radius` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitCmdDescs` → `UnitsCommands.UnitsCommands.get_unit_cmd_descs` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitCollisionVolumeData` → `UnitsInfo.UnitsInfo.get_unit_collision_volume_data` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitCommandCount` → `UnitsCommands.UnitsCommands.get_unit_command_count` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitCommands` → `UnitsCommands.UnitsCommands.get_unit_commands` (param mismatch: p1 type integer!=i32; p2 type integer!=u32)
+- `Spring.GetUnitCostTable` → `UnitsInfo.UnitsInfo.get_unit_cost_table` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitCosts` → `UnitsInfo.UnitsInfo.get_unit_costs` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitCurrentBuildPower` → `UnitsInfo.UnitsInfo.get_unit_current_build_power` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitCurrentCommand` → `UnitsCommands.UnitsCommands.get_unit_current_command` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetUnitDefDimensions` → `Utils.Utils.get_unit_def_dimensions` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitDefID` → `UnitsInfo.UnitsInfo.get_unit_def_id` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitDirection` → `UnitsInfo.UnitsInfo.get_unit_direction` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitDrawFlag` → `UnitRendering.UnitRendering.get_unit_draw_flag` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitEffectiveBuildRange` → `UnitsInfo.UnitsInfo.get_unit_effective_build_range` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetUnitEngineDrawMask` → `UnitRendering.UnitRendering.get_unit_engine_draw_mask` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitEstimatedPath` → `MoveCtrl.MoveCtrl.get_unit_estimated_path` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitExperience` → `UnitsInfo.UnitsInfo.get_unit_experience` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitFeatureSeparation` → `UnitControl.UnitControl.get_unit_feature_separation` (param mismatch: count mismatch (lua=1, rust=3))
+- `Spring.GetUnitFlanking` → `UnitsInfo.UnitsInfo.get_unit_flanking` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitGroup` → `Selection.Selection.get_unit_group` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitHarvestStorage` → `UnitsInfo.UnitsInfo.get_unit_harvest_storage` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitHeading` → `UnitsInfo.UnitsInfo.get_unit_heading` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetUnitHealth` → `UnitsInfo.UnitsInfo.get_unit_health` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitHeight` → `UnitsInfo.UnitsInfo.get_unit_height` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitIcon` → `UnitRendering.UnitRendering.get_unit_icon` (param mismatch: p1 type number!=i32)
+- `Spring.GetUnitIconData` → `UnitRendering.UnitRendering.get_unit_icon_data` (param mismatch: p1 type number!=i32)
+- `Spring.GetUnitInBuildStance` → `UnitsInfo.UnitsInfo.get_unit_in_build_stance` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitIsActive` → `UnitsInfo.UnitsInfo.get_unit_is_active` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitIsBeingBuilt` → `UnitsInfo.UnitsInfo.get_unit_is_being_built` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitIsBuilding` → `UnitsInfo.UnitsInfo.get_unit_is_building` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitIsCloaked` → `UnitsInfo.UnitsInfo.get_unit_is_cloaked` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitIsDead` → `UnitsInfo.UnitsInfo.get_unit_is_dead` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitIsStunned` → `UnitsInfo.UnitsInfo.get_unit_is_stunned` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitIsTransporting` → `UnitsInfo.UnitsInfo.get_unit_is_transporting` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitLastAttackedPiece` → `UnitsInfo.UnitsInfo.get_unit_last_attacked_piece` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitLastAttacker` → `UnitsInfo.UnitsInfo.get_unit_last_attacker` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitLeavesGhost` → `UnitControl.UnitControl.get_unit_leaves_ghost` (param mismatch: count mismatch (lua=0, rust=1))
+- `Spring.GetUnitLosState` → `UnitsInfo.UnitsInfo.get_unit_los_state` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.GetUnitLuaDraw` → `UnitRendering.UnitRendering.get_unit_lua_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitMapCentroid` → `UnitsQuery.UnitsQuery.get_unit_map_centroid` (param mismatch: p1 type table!=&[i32])
+- `Spring.GetUnitMass` → `UnitsInfo.UnitsInfo.get_unit_mass` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitMaxRange` → `UnitsWeapons.UnitsWeapons.get_unit_max_range` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitMetalExtraction` → `UnitsInfo.UnitsInfo.get_unit_metal_extraction` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitMoveDefID` → `UnitsInfo.UnitsInfo.get_unit_move_def_id` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitMoveTypeData` → `MoveCtrl.MoveCtrl.get_unit_move_type_data` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitNanoPieces` → `UnitsInfo.UnitsInfo.get_unit_nano_pieces` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitNearestAlly` → `UnitsQuery.UnitsQuery.get_unit_nearest_ally` (param mismatch: count mismatch (lua=2, rust=4))
+- `Spring.GetUnitNearestEnemy` → `UnitsQuery.UnitsQuery.get_unit_nearest_enemy` (param mismatch: count mismatch (lua=5, rust=4))
+- `Spring.GetUnitNeutral` → `UnitsInfo.UnitsInfo.get_unit_neutral` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitNoDraw` → `UnitRendering.UnitRendering.get_unit_no_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitNoGroup` → `UnitRendering.UnitRendering.get_unit_no_group` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitNoMinimap` → `UnitRendering.UnitRendering.get_unit_no_minimap` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitNoSelect` → `UnitRendering.UnitRendering.get_unit_no_select` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitPaletteIndex` → `UnsyncedRead.UnsyncedRead.get_unit_palette_index` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitPhysicalState` → `UnitControl.UnitControl.get_unit_physical_state` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitPieceDirection` → `UnitsPieces.UnitsPieces.get_unit_piece_direction` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetUnitPieceInfo` → `UnitsPieces.UnitsPieces.get_unit_piece_info` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetUnitPieceList` → `UnitsPieces.UnitsPieces.get_unit_piece_list` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitPieceMap` → `UnitsPieces.UnitsPieces.get_unit_piece_map` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitPieceMatrix` → `UnitsPieces.UnitsPieces.get_unit_piece_matrix` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetUnitPiecePosDir` → `UnitsPieces.UnitsPieces.get_unit_piece_pos_dir` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetUnitPiecePosition` → `UnitsPieces.UnitsPieces.get_unit_piece_position` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetUnitPosErrorParams` → `UnitsInfo.UnitsInfo.get_unit_pos_error_params` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32)
+- `Spring.GetUnitPosition` → `UnitsInfo.UnitsInfo.get_unit_position` (param mismatch: count mismatch (lua=3, rust=1))
+- `Spring.GetUnitRadius` → `UnitsInfo.UnitsInfo.get_unit_radius` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitResources` → `UnitsInfo.UnitsInfo.get_unit_resources` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitRootPiece` → `UnitsPieces.UnitsPieces.get_unit_root_piece` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitRotation` → `UnitsInfo.UnitsInfo.get_unit_rotation` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitRulesParam` → `RulesParams.RulesParams.get_unit_rules_param` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetUnitRulesParams` → `RulesParams.RulesParams.get_unit_rules_params` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitScriptNames` → `UnitsPieces.UnitsPieces.get_unit_script_names` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitScriptPiece` → `UnitsPieces.UnitsPieces.get_unit_script_piece` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetUnitSeismicSignature` → `UnitsInfo.UnitsInfo.get_unit_seismic_signature` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitSelectionVolumeData` → `UnitRendering.UnitRendering.get_unit_selection_volume_data` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitSelfDTime` → `UnitsInfo.UnitsInfo.get_unit_self_dtime` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitSensorRadius` → `UnitsInfo.UnitsInfo.get_unit_sensor_radius` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.GetUnitSeparation` → `UnitsQuery.UnitsQuery.get_unit_separation` (param mismatch: p1 type number!=i32; p2 type number!=i32)
+- `Spring.GetUnitShieldState` → `UnitsInfo.UnitsInfo.get_unit_shield_state` (param mismatch: p1 type integer!=i32; p2 type number?!=i32)
+- `Spring.GetUnitStates` → `UnitsInfo.UnitsInfo.get_unit_states` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitStockpile` → `UnitsInfo.UnitsInfo.get_unit_stockpile` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitStorage` → `UnitsInfo.UnitsInfo.get_unit_storage` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitTeam` → `UnitsInfo.UnitsInfo.get_unit_team` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitTooltip` → `UnitsInfo.UnitsInfo.get_unit_tooltip` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitTransformMatrix` → `UnitRendering.UnitRendering.get_unit_transform_matrix` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitTransporter` → `UnitsInfo.UnitsInfo.get_unit_transporter` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitVectors` → `UnitsInfo.UnitsInfo.get_unit_vectors` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitVelocity` → `UnitsInfo.UnitsInfo.get_unit_velocity` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitViewPosition` → `UnitRendering.UnitRendering.get_unit_view_position` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitWeaponCanFire` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_can_fire` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetUnitWeaponDamages` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_damages` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetUnitWeaponHaveFreeLineOfFire` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_have_free_line_of_fire` (param mismatch: count mismatch (lua=1, rust=7))
+- `Spring.GetUnitWeaponState` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_state` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.GetUnitWeaponTarget` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_target` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.GetUnitWeaponTestRange` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_test_range` (param mismatch: count mismatch (lua=1, rust=5))
+- `Spring.GetUnitWeaponTestTarget` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_test_target` (param mismatch: count mismatch (lua=1, rust=7))
+- `Spring.GetUnitWeaponTryTarget` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_try_target` (param mismatch: count mismatch (lua=1, rust=8))
+- `Spring.GetUnitWeaponVectors` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_vectors` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.GetUnitWorkerTask` → `UnitsInfo.UnitsInfo.get_unit_worker_task` (param mismatch: p1 type integer!=i32)
+- `Spring.GetUnitsInBox` → `UnitsQuery.UnitsQuery.get_units_in_box` (param mismatch: count mismatch (lua=7, rust=2))
+- `Spring.GetUnitsInCylinder` → `UnitsQuery.UnitsQuery.get_units_in_cylinder` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.GetUnitsInPlanes` → `UnitsQuery.UnitsQuery.get_units_in_planes` (param mismatch: p1 type Plane[]!=sys::PlanesQuery; p2 type integer?!=sys::UnitFilterParams)
+- `Spring.GetUnitsInRectangle` → `UnitsQuery.UnitsQuery.get_units_in_rectangle` (param mismatch: count mismatch (lua=5, rust=2))
+- `Spring.GetUnitsInScreenRectangle` → `UnitRendering.UnitRendering.get_units_in_screen_rectangle` (param mismatch: p1 type number!=f32; p2 type number!=f32; p3 type number!=f32; p4 type number!=f32; p5 type number?!=i32)
+- `Spring.GetUnitsInSphere` → `UnitsQuery.UnitsQuery.get_units_in_sphere` (param mismatch: count mismatch (lua=4, rust=2))
+- `Spring.GetVectorFromHeading` → `Game.Game.get_vector_from_heading` (param mismatch: p1 type number!=i32)
+- `Spring.GetVidMemUsage` → `Profiling.Profiling.get_vid_mem_usage`
+- `Spring.GetVideoCapturingMode` → `SystemControl.SystemControl.get_video_capturing_mode`
+- `Spring.GetViewGeometry` → `Display.Display.get_view_geometry`
+- `Spring.GetVisibleFeatures` → `UnitRendering.UnitRendering.get_visible_features` (param mismatch: p1 type integer?!=i32; p2 type number?!=f32)
+- `Spring.GetVisibleProjectiles` → `UnitRendering.UnitRendering.get_visible_projectiles` (param mismatch: count mismatch (lua=4, rust=3))
+- `Spring.GetVisibleUnits` → `UnitRendering.UnitRendering.get_visible_units` (param mismatch: p1 type integer?!=i32; p2 type number?!=f32)
+- `Spring.GetWaterLevel` → `Terrain.Terrain.get_water_level` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.GetWaterMode` → `Display.Display.get_water_mode`
+- `Spring.GetWaterPlaneLevel` → `Terrain.Terrain.get_water_plane_level`
+- `Spring.GetWind` → `Game.Game.get_wind`
+- `Spring.GetWindowDisplayMode` → `SystemControl.SystemControl.get_window_display_mode`
+- `Spring.GetWindowGeometry` → `Display.Display.get_window_geometry`
+- `Spring.GiveOrder` → `UnitsCommands.UnitsCommands.give_order` (param mismatch: count mismatch (lua=4, rust=3))
+- `Spring.GiveOrderArrayToUnit` → `UnitControl.UnitControl.give_order_array_to_unit` (param mismatch: p1 type integer!=i32; p2 type CreateCommand[]!=&[sys::NativeCommand])
+- `Spring.GiveOrderArrayToUnitArray` → `UnitControl.UnitControl.give_order_array_to_unit_array` (param mismatch: p1 type integer[]!=&[i32]; p2 type CreateCommand[]!=&[sys::NativeCommand])
+- `Spring.GiveOrderArrayToUnitMap` → `UnitsCommands.UnitsCommands.give_order_array_to_unit_map` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.GiveOrderToUnit` → `UnitControl.UnitControl.give_order_to_unit` (param mismatch: count mismatch (lua=5, rust=4))
+- `Spring.GiveOrderToUnitArray` → `UnitControl.UnitControl.give_order_to_unit_array` (param mismatch: count mismatch (lua=5, rust=4))
+- `Spring.GiveOrderToUnitMap` → `UnitsCommands.UnitsCommands.give_order_to_unit_map` (param mismatch: count mismatch (lua=5, rust=4))
+- `Spring.HaveAdvShading` → `Display.Display.have_adv_shading`
+- `Spring.HaveShadows` → `Display.Display.have_shadows`
+- `Spring.InsertUnitCmdDesc` → `UnitControl.UnitControl.insert_unit_cmd_desc` (param mismatch: p1 type integer!=i32; p2 type integer!=i32; p3 type CommandDescription!=&sys::NativeCommandDescription)
+- `Spring.IsAABBInView` → `Display.Display.is_aabbin_view`
+- `Spring.IsAboveMiniMap` → `Input.Input.is_above_mini_map` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.IsCheatingEnabled` → `Game.Game.is_cheating_enabled`
+- `Spring.IsDevLuaEnabled` → `Game.Game.is_dev_lua_enabled`
+- `Spring.IsEditDefsEnabled` → `Game.Game.is_edit_defs_enabled`
+- `Spring.IsGUIHidden` → `Display.Display.is_guihidden`
+- `Spring.IsGameOver` → `Game.Game.is_game_over`
+- `Spring.IsGodModeEnabled` → `Game.Game.is_god_mode_enabled`
+- `Spring.IsNoCostEnabled` → `Game.Game.is_no_cost_enabled`
+- `Spring.IsPosInAirLos` → `Los.Los.is_pos_in_air_los` (param mismatch: p4 type integer?!=i32)
+- `Spring.IsPosInLos` → `Los.Los.is_pos_in_los` (param mismatch: p4 type integer?!=i32)
+- `Spring.IsPosInMap` → `Terrain.Terrain.is_pos_in_map` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.IsPosInRadar` → `Los.Los.is_pos_in_radar` (param mismatch: p4 type integer?!=i32)
+- `Spring.IsReplay` → `SystemControl.SystemControl.is_replay`
+- `Spring.IsSphereInView` → `Display.Display.is_sphere_in_view` (param mismatch: p4 type number?!=f32)
+- `Spring.IsUnitAllied` → `UnsyncedRead.UnsyncedRead.is_unit_allied` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.IsUnitIcon` → `UnitRendering.UnitRendering.is_unit_icon` (param mismatch: p1 type integer!=i32)
+- `Spring.IsUnitInAirLos` → `Los.Los.is_unit_in_air_los` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.IsUnitInJammer` → `Los.Los.is_unit_in_jammer` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.IsUnitInLos` → `Los.Los.is_unit_in_los` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.IsUnitInRadar` → `Los.Los.is_unit_in_radar` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.IsUnitInView` → `UnitRendering.UnitRendering.is_unit_in_view` (param mismatch: p1 type integer!=i32)
+- `Spring.IsUnitSelected` → `UnsyncedRead.UnsyncedRead.is_unit_selected` (param mismatch: p1 type integer!=i32)
+- `Spring.IsUnitVisible` → `UnitRendering.UnitRendering.is_unit_visible` (param mismatch: p1 type integer!=i32; p2 type number?!=f32)
+- `Spring.IsUserWriting` → `Messages.Messages.is_user_writing`
+- `Spring.KillTeam` → `TeamControl.TeamControl.kill_team` (param mismatch: p1 type integer!=i32)
+- `Spring.LevelHeightMap` → `TerrainControl.TerrainControl.level_height_map` (param mismatch: count mismatch (lua=3, rust=5))
+- `Spring.LevelOriginalHeightMap` → `TerrainControl.TerrainControl.level_original_height_map` (param mismatch: count mismatch (lua=3, rust=5))
+- `Spring.LevelSmoothMesh` → `TerrainControl.TerrainControl.level_smooth_mesh` (param mismatch: count mismatch (lua=3, rust=5))
+- `Spring.LoadCmdColorsConfig` → `UnsyncedCtrl.UnsyncedCtrl.load_cmd_colors_config` (param mismatch: p1 type string!=&str)
+- `Spring.LoadCtrlPanelConfig` → `UnsyncedCtrl.UnsyncedCtrl.load_ctrl_panel_config` (param mismatch: p1 type string!=&str)
+- `Spring.LoadModelTextures` → `UnsyncedCtrl.UnsyncedCtrl.load_model_textures` (param mismatch: p1 type string!=&str)
+- `Spring.LoadSoundDef` → `Sound.Sound.load_sound_def` (param mismatch: p1 type string!=&str)
+- `Spring.Log` → `Messages.Messages.log` (param mismatch: p1 type string!=&str; p2 type (LogLevel|LOG)?!=i32; p3 type string!=&str)
+- `Spring.MarkerAddLine` → `Markers.Markers.marker_add_line` (param mismatch: p8 type number?!=i32)
+- `Spring.MarkerAddPoint` → `Markers.Markers.marker_add_point` (param mismatch: count mismatch (lua=6, rust=7))
+- `Spring.MarkerErasePosition` → `Markers.Markers.marker_erase_position` (param mismatch: count mismatch (lua=7, rust=6))
+- `Spring.PauseDollyCamera` → `UnsyncedCtrl.UnsyncedCtrl.pause_dolly_camera` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.PauseSoundStream` → `Sound.Sound.pause_sound_stream`
+- `Spring.Ping` → `SystemControl.SystemControl.ping` (param mismatch: p1 type number!=u32)
+- `Spring.PlaySoundFile` → `Sound.Sound.play_sound_file` (param mismatch: count mismatch (lua=9, rust=16))
+- `Spring.PlaySoundStream` → `Sound.Sound.play_sound_stream` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.Pos2BuildPos` → `Utils.Utils.pos2_build_pos` (param mismatch: p1 type integer!=i32; p5 type number?!=i32)
+- `Spring.PreloadFeatureDefModel` → `UnsyncedCtrl.UnsyncedCtrl.preload_feature_def_model` (param mismatch: p1 type integer!=i32)
+- `Spring.PreloadSoundItem` → `Sound.Sound.preload_sound_item` (param mismatch: p1 type string!=&str)
+- `Spring.PreloadUnitDefModel` → `UnsyncedCtrl.UnsyncedCtrl.preload_unit_def_model` (param mismatch: p1 type integer!=i32)
+- `Spring.Quit` → `SystemControl.SystemControl.quit`
+- `Spring.RebuildSmoothMesh` → `TerrainControl.TerrainControl.rebuild_smooth_mesh` (param mismatch: count mismatch (lua=0, rust=4))
+- `Spring.Reload` → `SystemControl.SystemControl.reload` (param mismatch: p1 type string!=&str)
+- `Spring.RemoveGrass` → `TerrainControl.TerrainControl.remove_grass` (param mismatch: p1 type number!=f32; p2 type number!=f32)
+- `Spring.RemoveObjectDecal` → `UnitControl.UnitControl.remove_object_decal` (param mismatch: p1 type integer!=i32)
+- `Spring.RemoveUnitCmdDesc` → `UnitControl.UnitControl.remove_unit_cmd_desc` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32)
+- `Spring.ReplaceMouseCursor` → `UnsyncedCtrl.UnsyncedCtrl.replace_mouse_cursor` (param mismatch: p1 type string!=&str; p2 type string!=&str)
+- `Spring.RequestStartPosition` → `SystemControl.SystemControl.request_start_position` (param mismatch: count mismatch (lua=4, rust=3))
+- `Spring.Restart` → `SystemControl.SystemControl.restart` (param mismatch: p1 type string!=&str; p2 type string!=&str)
+- `Spring.ResumeDollyCamera` → `UnsyncedCtrl.UnsyncedCtrl.resume_dolly_camera`
+- `Spring.RevertHeightMap` → `TerrainControl.TerrainControl.revert_height_map` (param mismatch: count mismatch (lua=3, rust=7))
+- `Spring.RevertOriginalHeightMap` → `TerrainControl.TerrainControl.revert_original_height_map` (param mismatch: count mismatch (lua=3, rust=5))
+- `Spring.RevertSmoothMesh` → `TerrainControl.TerrainControl.revert_smooth_mesh` (param mismatch: count mismatch (lua=3, rust=7))
+- `Spring.RunDollyCamera` → `UnsyncedCtrl.UnsyncedCtrl.run_dolly_camera` (param mismatch: p1 type number!=f32)
+- `Spring.SDLSetTextInputRect` → `UnsyncedCtrl.UnsyncedCtrl.sdlset_text_input_rect` (param mismatch: p1 type number!=i32; p2 type number!=i32; p3 type number!=i32; p4 type number!=i32)
+- `Spring.SDLStartTextInput` → `UnsyncedCtrl.UnsyncedCtrl.sdlstart_text_input`
+- `Spring.SDLStopTextInput` → `UnsyncedCtrl.UnsyncedCtrl.sdlstop_text_input`
+- `Spring.SelectUnit` → `Selection.Selection.select_unit` (param mismatch: p1 type integer?!=i32)
+- `Spring.SelectUnitArray` → `Selection.Selection.select_unit_array` (param mismatch: p1 type integer[]!=&[i32])
+- `Spring.SelectUnitMap` → `UnsyncedCtrl.UnsyncedCtrl.select_unit_map` (param mismatch: p1 type table<integer,any>!=&[i32])
+- `Spring.SendAllyChat` → `Messages.Messages.send_ally_chat` (param mismatch: p1 type string!=&str)
+- `Spring.SendCommands` → `Messages.Messages.send_commands` (param mismatch: p1 type string[]!=&str)
+- `Spring.SendLuaGaiaMsg` → `Messages.Messages.send_lua_gaia_msg` (param mismatch: p1 type string!=&str)
+- `Spring.SendLuaMenuMsg` → `Messages.Messages.send_lua_menu_msg` (param mismatch: p1 type string!=&str)
+- `Spring.SendLuaRulesMsg` → `Messages.Messages.send_lua_rules_msg` (param mismatch: p1 type string!=&str)
+- `Spring.SendLuaUIMsg` → `Messages.Messages.send_lua_uimsg` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.SendMessage` → `Messages.Messages.send_message` (param mismatch: p1 type string!=&str)
+- `Spring.SendMessageToAllyTeam` → `Messages.Messages.send_message_to_ally_team` (param mismatch: p1 type integer!=i32; p2 type string!=&str)
+- `Spring.SendMessageToPlayer` → `Messages.Messages.send_message_to_player` (param mismatch: p1 type integer!=i32; p2 type string!=&str)
+- `Spring.SendMessageToSpectators` → `Messages.Messages.send_message_to_spectators` (param mismatch: p1 type string!=&str)
+- `Spring.SendMessageToTeam` → `Messages.Messages.send_message_to_team` (param mismatch: p1 type integer!=i32; p2 type string!=&str)
+- `Spring.SendPrivateChat` → `Messages.Messages.send_private_chat` (param mismatch: p1 type string!=i32; p2 type integer!=&str)
+- `Spring.SendPublicChat` → `Messages.Messages.send_public_chat` (param mismatch: p1 type string!=&str)
+- `Spring.SendSkirmishAIMessage` → `Messages.Messages.send_skirmish_aimessage` (param mismatch: p1 type number!=i32; p2 type string!=&str)
+- `Spring.SendSpectatorChat` → `Messages.Messages.send_spectator_chat` (param mismatch: p1 type string!=&str)
+- `Spring.SetActiveCommand` → `UnsyncedCtrl.UnsyncedCtrl.set_active_command` (param mismatch: count mismatch (lua=2, rust=10))
+- `Spring.SetAlly` → `TeamControl.TeamControl.set_ally` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.SetAllyTeamStartBox` → `TeamControl.TeamControl.set_ally_team_start_box` (param mismatch: p1 type integer!=i32; p2 type number!=f32; p3 type number!=f32; p4 type number!=f32; p5 type number!=f32)
+- `Spring.SetAtmosphere` → `UnsyncedCtrl.UnsyncedCtrl.set_atmosphere` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.SetAutoShowMetal` → `UnsyncedCtrl.UnsyncedCtrl.set_auto_show_metal`
+- `Spring.SetBoxSelectionByEngine` → `UnsyncedCtrl.UnsyncedCtrl.set_box_selection_by_engine`
+- `Spring.SetBuildFacing` → `UnsyncedCtrl.UnsyncedCtrl.set_build_facing` (param mismatch: p1 type FacingInteger!=i32)
+- `Spring.SetBuildSpacing` → `UnsyncedCtrl.UnsyncedCtrl.set_build_spacing` (param mismatch: p1 type number!=i32)
+- `Spring.SetCameraOffset` → `UnsyncedCtrl.UnsyncedCtrl.set_camera_offset`
+- `Spring.SetCameraState` → `Camera.Camera.set_camera_state` (param mismatch: count mismatch (lua=4, rust=2))
+- `Spring.SetCameraTarget` → `Camera.Camera.set_camera_target` (param mismatch: p4 type number?!=f32)
+- `Spring.SetCheatingEnabled` → `GameConfig.GameConfig.set_cheating_enabled`
+- `Spring.SetClipboard` → `UnsyncedCtrl.UnsyncedCtrl.set_clipboard` (param mismatch: p1 type string!=&str)
+- `Spring.SetConfigFloat` → `Config.Config.set_config_float` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.SetConfigInt` → `Config.Config.set_config_int` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.SetConfigString` → `Config.Config.set_config_string` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.SetCustomCommandDrawData` → `UnsyncedCtrl.UnsyncedCtrl.set_custom_command_draw_data` (param mismatch: count mismatch (lua=4, rust=0))
+- `Spring.SetCustomPaletteColor` → `UnsyncedCtrl.UnsyncedCtrl.set_custom_palette_color` (param mismatch: p1 type integer!=i32; p2 type number!=f32; p3 type number!=f32; p4 type number!=f32)
+- `Spring.SetDollyCameraCurve` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_curve` (param mismatch: count mismatch (lua=3, rust=6))
+- `Spring.SetDollyCameraLookCurve` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_look_curve` (param mismatch: count mismatch (lua=3, rust=6))
+- `Spring.SetDollyCameraLookPosition` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_look_position`
+- `Spring.SetDollyCameraLookUnit` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_look_unit` (param mismatch: p1 type integer!=i32)
+- `Spring.SetDollyCameraMode` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_mode` (param mismatch: p1 type (1|2)!=i32)
+- `Spring.SetDollyCameraPosition` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_position`
+- `Spring.SetDollyCameraRelativeMode` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_relative_mode` (param mismatch: p1 type number!=i32)
+- `Spring.SetDrawGround` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_ground`
+- `Spring.SetDrawGroundDeferred` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_ground_deferred`
+- `Spring.SetDrawModelsDeferred` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_models_deferred`
+- `Spring.SetDrawSelectionInfo` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_selection_info`
+- `Spring.SetDrawSky` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_sky`
+- `Spring.SetDrawWater` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_water`
+- `Spring.SetEngineBuildSquareRendering` → `UnsyncedCtrl.UnsyncedCtrl.set_engine_build_square_rendering`
+- `Spring.SetExperienceGrade` → `GameConfig.GameConfig.set_experience_grade` (param mismatch: p1 type number!=f32; p2 type number?!=f32; p3 type number?!=f32; p4 type number?!=f32)
+- `Spring.SetFactoryBuggerOff` → `UnitControl.UnitControl.set_factory_bugger_off` (param mismatch: p1 type integer!=i32; p3 type number?!=f32; p4 type number?!=f32; p5 type Heading?!=i32)
+- `Spring.SetFeatureAlwaysUpdateMatrix` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_always_update_matrix` (param mismatch: p1 type integer!=i32; p2 type number!=bool)
+- `Spring.SetFeatureAlwaysVisible` → `FeatureControl.FeatureControl.set_feature_always_visible` (param mismatch: p1 type integer!=i32)
+- `Spring.SetFeatureBlocking` → `FeatureControl.FeatureControl.set_feature_blocking` (param mismatch: p1 type integer!=i32)
+- `Spring.SetFeatureCollisionVolumeData` → `FeatureControl.FeatureControl.set_feature_collision_volume_data` (param mismatch: count mismatch (lua=10, rust=9))
+- `Spring.SetFeatureDirection` → `FeatureControl.FeatureControl.set_feature_direction` (param mismatch: p1 type integer!=i32)
+- `Spring.SetFeatureEngineDrawMask` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_engine_draw_mask` (param mismatch: p1 type integer!=i32; p2 type number!=u32)
+- `Spring.SetFeatureFade` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_fade` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.SetFeatureFireTime` → `FeatureControl.FeatureControl.set_feature_fire_time` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetFeatureHeadingAndUpDir` → `FeatureControl.FeatureControl.set_feature_heading_and_up_dir` (param mismatch: p1 type integer!=i32; p2 type Heading!=i32)
+- `Spring.SetFeatureHealth` → `FeatureControl.FeatureControl.set_feature_health` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.SetFeatureMass` → `FeatureControl.FeatureControl.set_feature_mass` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetFeatureMaxHealth` → `FeatureControl.FeatureControl.set_feature_max_health` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetFeatureMidAndAimPos` → `FeatureControl.FeatureControl.set_feature_mid_and_aim_pos` (param mismatch: p1 type integer!=i32)
+- `Spring.SetFeatureMoveCtrl` → `FeatureControl.FeatureControl.set_feature_move_ctrl` (param mismatch: count mismatch (lua=8, rust=2))
+- `Spring.SetFeatureNoDraw` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_no_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.SetFeatureNoSelect` → `FeatureControl.FeatureControl.set_feature_no_select` (param mismatch: p1 type integer!=i32)
+- `Spring.SetFeaturePaletteIndex` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_palette_index` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32)
+- `Spring.SetFeaturePhysics` → `FeatureControl.FeatureControl.set_feature_physics` (param mismatch: p1 type integer!=i32; p11 type number!=bool; p12 type number!=bool; p13 type number!=bool)
+- `Spring.SetFeaturePieceCollisionVolumeData` → `FeatureControl.FeatureControl.set_feature_piece_collision_volume_data` (param mismatch: count mismatch (lua=12, rust=11))
+- `Spring.SetFeaturePieceMatrix` → `FeatureControl.FeatureControl.set_feature_piece_matrix` (param mismatch: p1 type integer!=i32; p2 type number!=i32; p3 type number[]!=[f32; 16])
+- `Spring.SetFeaturePieceVisible` → `FeatureControl.FeatureControl.set_feature_piece_visible` (param mismatch: p1 type integer!=i32; p2 type number!=i32)
+- `Spring.SetFeaturePosition` → `FeatureControl.FeatureControl.set_feature_position` (param mismatch: count mismatch (lua=5, rust=4))
+- `Spring.SetFeatureRadiusAndHeight` → `FeatureControl.FeatureControl.set_feature_radius_and_height` (param mismatch: p1 type integer!=i32; p2 type number!=f32; p3 type number!=f32)
+- `Spring.SetFeatureReclaim` → `FeatureControl.FeatureControl.set_feature_reclaim` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetFeatureResources` → `FeatureControl.FeatureControl.set_feature_resources` (param mismatch: count mismatch (lua=7, rust=4))
+- `Spring.SetFeatureResurrect` → `FeatureControl.FeatureControl.set_feature_resurrect` (param mismatch: count mismatch (lua=4, rust=3))
+- `Spring.SetFeatureRotation` → `FeatureControl.FeatureControl.set_feature_rotation` (param mismatch: p1 type integer!=i32)
+- `Spring.SetFeatureRulesParam` → `RulesParams.RulesParams.set_feature_rules_param` (param mismatch: p1 type integer!=i32; p2 type string!=&str; p3 type (number|string)?!=sys::RulesParamValue; p4 type losAccess?!=i32)
+- `Spring.SetFeatureSelectionVolumeData` → `FeatureControl.FeatureControl.set_feature_selection_volume_data` (param mismatch: p1 type integer!=i32; p8 type number!=i32; p9 type number!=i32; p10 type number!=bool)
+- `Spring.SetFeatureSmokeTime` → `FeatureControl.FeatureControl.set_feature_smoke_time` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetFeatureUseAirLos` → `FeatureControl.FeatureControl.set_feature_use_air_los` (param mismatch: p1 type integer!=i32)
+- `Spring.SetFeatureVelocity` → `FeatureControl.FeatureControl.set_feature_velocity` (param mismatch: p1 type integer!=i32)
+- `Spring.SetGameRulesParam` → `RulesParams.RulesParams.set_game_rules_param` (param mismatch: p1 type string!=&str; p2 type (number|string)?!=sys::RulesParamValue; p3 type losAccess?!=i32)
+- `Spring.SetGlobalLos` → `TeamControl.TeamControl.set_global_los` (param mismatch: p1 type integer!=i32)
+- `Spring.SetGodMode` → `GameConfig.GameConfig.set_god_mode`
+- `Spring.SetGroundDecalAlpha` → `GroundDecals.GroundDecals.set_ground_decal_alpha` (param mismatch: p1 type integer!=u32; p2 type number?!=f32; p3 type number?!=f32)
+- `Spring.SetGroundDecalCreationFrame` → `GroundDecals.GroundDecals.set_ground_decal_creation_frame` (param mismatch: p1 type integer!=u32; p2 type number?!=f32; p3 type number?!=f32)
+- `Spring.SetGroundDecalGlowParams` → `GroundDecals.GroundDecals.set_ground_decal_glow_params` (param mismatch: p1 type integer!=u32; p2 type number?!=f32; p3 type number?!=f32)
+- `Spring.SetGroundDecalMisc` → `GroundDecals.GroundDecals.set_ground_decal_misc` (param mismatch: p1 type integer!=u32; p2 type number?!=f32; p3 type number?!=f32; p4 type number?!=f32; p5 type number?!=f32; p6 type number?!=f32)
+- `Spring.SetGroundDecalNormal` → `GroundDecals.GroundDecals.set_ground_decal_normal` (param mismatch: p1 type integer!=u32; p2 type number?!=f32; p3 type number?!=f32; p4 type number?!=f32)
+- `Spring.SetGroundDecalPosAndDims` → `GroundDecals.GroundDecals.set_ground_decal_pos_and_dims` (param mismatch: p1 type integer!=u32; p2 type number?!=f32; p3 type number?!=f32; p4 type number?!=f32; p5 type number?!=f32; p6 type number?!=f32)
+- `Spring.SetGroundDecalQuadPosAndHeight` → `GroundDecals.GroundDecals.set_ground_decal_quad_pos_and_height` (param mismatch: count mismatch (lua=6, rust=10))
+- `Spring.SetGroundDecalRotation` → `GroundDecals.GroundDecals.set_ground_decal_rotation` (param mismatch: p1 type integer!=u32; p2 type number?!=f32)
+- `Spring.SetGroundDecalTexture` → `GroundDecals.GroundDecals.set_ground_decal_texture` (param mismatch: p1 type integer!=u32; p2 type string!=&str)
+- `Spring.SetGroundDecalTextureParams` → `GroundDecals.GroundDecals.set_ground_decal_texture_params` (param mismatch: p1 type integer!=u32; p2 type number?!=f32; p3 type number?!=f32)
+- `Spring.SetGroundDecalTint` → `GroundDecals.GroundDecals.set_ground_decal_tint` (param mismatch: p1 type integer!=u32; p2 type number?!=f32; p3 type number?!=f32; p4 type number?!=f32; p5 type number?!=f32)
+- `Spring.SetGroundDecalUserData` → `GroundDecals.GroundDecals.set_ground_decal_user_data` (param mismatch: p1 type integer!=u32; p2 type integer!=u32; p3 type number?!=f32; p4 type number?!=f32; p5 type number?!=f32; p6 type number?!=f32)
+- `Spring.SetHeightMap` → `TerrainControl.TerrainControl.set_height_map` (param mismatch: p4 type number?!=f32)
+- `Spring.SetHeightMapFunc` → `TerrainControl.TerrainControl.set_height_map_func` (param mismatch: count mismatch (lua=3, rust=0))
+- `Spring.SetLastMessagePosition` → `UnsyncedCtrl.UnsyncedCtrl.set_last_message_position`
+- `Spring.SetLogSectionFilterLevel` → `Config.Config.set_log_section_filter_level` (param mismatch: p1 type string!=&str; p2 type (string|number)?!=i32)
+- `Spring.SetLosViewColors` → `UnsyncedCtrl.UnsyncedCtrl.set_los_view_colors` (param mismatch: count mismatch (lua=5, rust=0))
+- `Spring.SetMapLightTrackingState` → `Lights.Lights.set_map_light_tracking_state` (param mismatch: p1 type number!=u32; p2 type integer!=i32)
+- `Spring.SetMapRenderingParams` → `UnsyncedCtrl.UnsyncedCtrl.set_map_rendering_params` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.SetMapShader` → `UnsyncedCtrl.UnsyncedCtrl.set_map_shader` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.SetMapShadingTexture` → `UnsyncedCtrl.UnsyncedCtrl.set_map_shading_texture` (param mismatch: p1 type string!=&str; p2 type string!=&str)
+- `Spring.SetMapSquareTerrainType` → `TerrainControl.TerrainControl.set_map_square_terrain_type` (param mismatch: p1 type number!=i32; p2 type number!=i32; p3 type number!=i32)
+- `Spring.SetMapSquareTexture` → `Vfs.Vfs.set_map_square_texture` (param mismatch: p1 type number!=i32; p2 type number!=i32; p3 type string!=&str)
+- `Spring.SetMetalAmount` → `MetalMap.MetalMap.set_metal_amount` (param mismatch: p1 type integer!=i32; p2 type integer!=i32; p3 type number!=f32)
+- `Spring.SetMiniMapRotation` → `UnsyncedCtrl.UnsyncedCtrl.set_mini_map_rotation` (param mismatch: p1 type number!=f32)
+- `Spring.SetModelLightTrackingState` → `Lights.Lights.set_model_light_tracking_state` (param mismatch: p1 type number!=u32; p2 type integer!=i32)
+- `Spring.SetMouseCursor` → `UnsyncedCtrl.UnsyncedCtrl.set_mouse_cursor` (param mismatch: p1 type string!=&str; p2 type number?!=f32)
+- `Spring.SetNanoProjectileParams` → `UnsyncedCtrl.UnsyncedCtrl.set_nano_projectile_params` (param mismatch: p1 type number?!=f32; p2 type number?!=f32; p3 type number?!=f32; p4 type number?!=f32; p5 type number?!=f32; p6 type number?!=f32)
+- `Spring.SetNoPause` → `GameConfig.GameConfig.set_no_pause`
+- `Spring.SetOriginalHeightMap` → `TerrainControl.TerrainControl.set_original_height_map` (param mismatch: count mismatch (lua=4, rust=5))
+- `Spring.SetOriginalHeightMapFunc` → `TerrainControl.TerrainControl.set_original_height_map_func` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.SetPieceProjectileParams` → `ProjectileControl.ProjectileControl.set_piece_projectile_params` (param mismatch: p1 type integer!=i32; p2 type number?!=i32; p3 type number?!=f32; p4 type number?!=f32)
+- `Spring.SetPlayerReadyState` → `TeamControl.TeamControl.set_player_ready_state` (param mismatch: p1 type integer!=i32)
+- `Spring.SetPlayerRulesParam` → `RulesParams.RulesParams.set_player_rules_param` (param mismatch: p1 type integer!=i32; p2 type string!=&str; p3 type (number|string)?!=sys::RulesParamValue; p4 type losAccess?!=i32)
+- `Spring.SetProjectileAlwaysVisible` → `ProjectileControl.ProjectileControl.set_projectile_always_visible` (param mismatch: p1 type integer!=i32)
+- `Spring.SetProjectileCEG` → `ProjectileControl.ProjectileControl.set_projectile_ceg` (param mismatch: p1 type integer!=i32; p2 type string!=&str)
+- `Spring.SetProjectileCollision` → `ProjectileControl.ProjectileControl.set_projectile_collision` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.SetProjectileDamages` → `ProjectileControl.ProjectileControl.set_projectile_damages` (param mismatch: count mismatch (lua=4, rust=3))
+- `Spring.SetProjectileGravity` → `ProjectileControl.ProjectileControl.set_projectile_gravity` (param mismatch: p1 type integer!=i32; p2 type number?!=f32)
+- `Spring.SetProjectileIgnoreTrackingError` → `ProjectileControl.ProjectileControl.set_projectile_ignore_tracking_error` (param mismatch: p1 type integer!=i32)
+- `Spring.SetProjectileIsIntercepted` → `ProjectileControl.ProjectileControl.set_projectile_is_intercepted` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.SetProjectileMoveControl` → `ProjectileControl.ProjectileControl.set_projectile_move_control` (param mismatch: p1 type integer!=i32)
+- `Spring.SetProjectilePosition` → `ProjectileControl.ProjectileControl.set_projectile_position` (param mismatch: p1 type integer!=i32)
+- `Spring.SetProjectileTarget` → `ProjectileControl.ProjectileControl.set_projectile_target` (param mismatch: count mismatch (lua=3, rust=6))
+- `Spring.SetProjectileTimeToLive` → `ProjectileControl.ProjectileControl.set_projectile_time_to_live` (param mismatch: p1 type integer!=i32; p2 type number!=i32)
+- `Spring.SetProjectileUseAirLos` → `ProjectileControl.ProjectileControl.set_projectile_use_air_los` (param mismatch: p1 type integer!=i32)
+- `Spring.SetProjectileVelocity` → `ProjectileControl.ProjectileControl.set_projectile_velocity` (param mismatch: p1 type integer!=i32)
+- `Spring.SetRadarErrorParams` → `GameConfig.GameConfig.set_radar_error_params` (param mismatch: p1 type integer!=i32; p2 type number!=f32; p3 type number?!=f32; p4 type number?!=f32)
+- `Spring.SetShareLevel` → `SystemControl.SystemControl.set_share_level` (param mismatch: p1 type string!=&str; p2 type number!=f32)
+- `Spring.SetSkyBoxTexture` → `UnsyncedCtrl.UnsyncedCtrl.set_sky_box_texture` (param mismatch: p1 type string!=&str)
+- `Spring.SetSmoothMesh` → `TerrainControl.TerrainControl.set_smooth_mesh` (param mismatch: count mismatch (lua=4, rust=7))
+- `Spring.SetSmoothMeshFunc` → `TerrainControl.TerrainControl.set_smooth_mesh_func` (param mismatch: count mismatch (lua=3, rust=0))
+- `Spring.SetSoundEffectParams` → `Sound.Sound.set_sound_effect_params` (param mismatch: count mismatch (lua=0, rust=1))
+- `Spring.SetSoundStreamVolume` → `Sound.Sound.set_sound_stream_volume` (param mismatch: p1 type number!=f32)
+- `Spring.SetSquareBuildingMask` → `GameConfig.GameConfig.set_square_building_mask` (param mismatch: p1 type number!=i32; p2 type number!=i32; p3 type number!=u16)
+- `Spring.SetSunDirection` → `UnsyncedCtrl.UnsyncedCtrl.set_sun_direction` (param mismatch: p4 type number?!=f32)
+- `Spring.SetSunLighting` → `UnsyncedCtrl.UnsyncedCtrl.set_sun_lighting` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.SetTeamColor` → `Display.Display.set_team_color` (param mismatch: count mismatch (lua=4, rust=2))
+- `Spring.SetTeamResource` → `TeamControl.TeamControl.set_team_resource` (param mismatch: p1 type integer!=i32; p2 type (ResourceName|StorageName)!=&str; p3 type number!=f32)
+- `Spring.SetTeamRulesParam` → `RulesParams.RulesParams.set_team_rules_param` (param mismatch: p1 type integer!=i32; p2 type string!=&str; p3 type (number|string)?!=sys::RulesParamValue; p4 type losAccess?!=i32)
+- `Spring.SetTeamShareLevel` → `TeamControl.TeamControl.set_team_share_level` (param mismatch: p1 type integer!=i32; p2 type ResourceName!=&str; p3 type number!=f32)
+- `Spring.SetTeamStartPosition` → `TeamControl.TeamControl.set_team_start_position` (param mismatch: p1 type integer!=i32)
+- `Spring.SetTerrainTypeData` → `TerrainControl.TerrainControl.set_terrain_type_data` (param mismatch: p1 type number!=i32; p2 type number?!=&str; p3 type number?!=f32; p4 type number?!=f32; p5 type number?!=f32)
+- `Spring.SetTidal` → `TerrainControl.TerrainControl.set_tidal` (param mismatch: p1 type number!=f32)
+- `Spring.SetUnitAlwaysUpdateMatrix` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_always_update_matrix` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitAlwaysVisible` → `UnitControl.UnitControl.set_unit_always_visible` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitArmored` → `UnitControl.UnitControl.set_unit_armored` (param mismatch: p1 type integer!=i32; p3 type number?!=f32)
+- `Spring.SetUnitBlocking` → `UnitControl.UnitControl.set_unit_blocking` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitBuildParams` → `UnitControl.UnitControl.set_unit_build_params` (param mismatch: count mismatch (lua=3, rust=4))
+- `Spring.SetUnitBuildSpeed` → `UnitControl.UnitControl.set_unit_build_speed` (param mismatch: count mismatch (lua=6, rust=7))
+- `Spring.SetUnitBuildeeRadius` → `UnitControl.UnitControl.set_unit_buildee_radius` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetUnitCloak` → `UnitControl.UnitControl.set_unit_cloak` (param mismatch: count mismatch (lua=3, rust=4))
+- `Spring.SetUnitCollisionVolumeData` → `UnitControl.UnitControl.set_unit_collision_volume_data` (param mismatch: count mismatch (lua=10, rust=9))
+- `Spring.SetUnitCosts` → `UnitControl.UnitControl.set_unit_costs` (param mismatch: count mismatch (lua=2, rust=4))
+- `Spring.SetUnitCrashing` → `UnitControl.UnitControl.set_unit_crashing` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitDefIcon` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_def_icon` (param mismatch: p1 type integer!=i32; p2 type string!=&str)
+- `Spring.SetUnitDefImage` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_def_image` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.SetUnitDirection` → `UnitControl.UnitControl.set_unit_direction` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitEngineDrawMask` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_engine_draw_mask` (param mismatch: p1 type integer!=i32; p2 type number!=u32)
+- `Spring.SetUnitExperience` → `UnitControl.UnitControl.set_unit_experience` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.SetUnitFlanking` → `UnitControl.UnitControl.set_unit_flanking` (param mismatch: count mismatch (lua=5, rust=8))
+- `Spring.SetUnitGroup` → `Selection.Selection.set_unit_group` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.SetUnitHarvestStorage` → `UnitControl.UnitControl.set_unit_harvest_storage` (param mismatch: count mismatch (lua=2, rust=5))
+- `Spring.SetUnitHeadingAndUpDir` → `UnitControl.UnitControl.set_unit_heading_and_up_dir` (param mismatch: p1 type integer!=i32; p2 type Heading!=i32)
+- `Spring.SetUnitHealth` → `UnitControl.UnitControl.set_unit_health` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.SetUnitIcon` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_icon` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitIconDraw` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_icon_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitLandGoal` → `UnitControl.UnitControl.set_unit_land_goal` (param mismatch: p1 type integer!=i32; p5 type number?!=f32)
+- `Spring.SetUnitLeaveTracks` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_leave_tracks` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitLeavesGhost` → `UnitControl.UnitControl.set_unit_leaves_ghost` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.SetUnitLoadingTransport` → `UnitControl.UnitControl.set_unit_loading_transport` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.SetUnitLosMask` → `UnitControl.UnitControl.set_unit_los_mask` (param mismatch: p1 type integer!=i32; p2 type number!=i32; p3 type (LosTable|LosMask|integer)!=u8)
+- `Spring.SetUnitLosState` → `UnitControl.UnitControl.set_unit_los_state` (param mismatch: p1 type integer!=i32; p2 type number!=i32; p3 type (LosTable|LosMask|integer)!=u8)
+- `Spring.SetUnitMass` → `UnitControl.UnitControl.set_unit_mass` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetUnitMaxHealth` → `UnitControl.UnitControl.set_unit_max_health` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetUnitMaxRange` → `UnitControl.UnitControl.set_unit_max_range` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetUnitMetalExtraction` → `UnitControl.UnitControl.set_unit_metal_extraction` (param mismatch: count mismatch (lua=3, rust=2))
+- `Spring.SetUnitMidAndAimPos` → `UnitControl.UnitControl.set_unit_mid_and_aim_pos` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitMoveGoal` → `UnitControl.UnitControl.set_unit_move_goal` (param mismatch: p1 type integer!=i32; p5 type number?!=f32; p6 type number?!=f32)
+- `Spring.SetUnitNanoPieces` → `UnitControl.UnitControl.set_unit_nano_pieces` (param mismatch: p1 type integer!=i32; p2 type table!=&[i32])
+- `Spring.SetUnitNeutral` → `UnitControl.UnitControl.set_unit_neutral` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitNoDraw` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitNoGroup` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_group` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitNoMinimap` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_minimap` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitNoSelect` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_select` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitPaletteIndex` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_palette_index` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32)
+- `Spring.SetUnitPhysicalStateBit` → `UnitControl.UnitControl.set_unit_physical_state_bit` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitPhysics` → `UnitControl.UnitControl.set_unit_physics` (param mismatch: p1 type integer!=i32; p11 type number!=bool; p12 type number!=bool; p13 type number!=bool)
+- `Spring.SetUnitPieceCollisionVolumeData` → `UnitControl.UnitControl.set_unit_piece_collision_volume_data` (param mismatch: p1 type integer!=i32; p2 type number!=i32; p10 type number?!=i32; p11 type number?!=i32)
+- `Spring.SetUnitPieceMatrix` → `UnitControl.UnitControl.set_unit_piece_matrix` (param mismatch: p1 type integer!=i32; p2 type number!=i32; p3 type number[]!=[f32; 16])
+- `Spring.SetUnitPieceParent` → `UnitControl.UnitControl.set_unit_piece_parent` (param mismatch: p1 type integer!=i32; p2 type number!=i32; p3 type number!=i32)
+- `Spring.SetUnitPieceVisible` → `UnitControl.UnitControl.set_unit_piece_visible` (param mismatch: p1 type integer!=i32; p2 type number!=i32)
+- `Spring.SetUnitPosErrorParams` → `UnitControl.UnitControl.set_unit_pos_error_params` (param mismatch: count mismatch (lua=8, rust=10))
+- `Spring.SetUnitPosition` → `UnitControl.UnitControl.set_unit_position` (param mismatch: count mismatch (lua=4, rust=5))
+- `Spring.SetUnitRadiusAndHeight` → `UnitControl.UnitControl.set_unit_radius_and_height` (param mismatch: p1 type integer!=i32; p2 type number!=f32; p3 type number!=f32)
+- `Spring.SetUnitResourcing` → `UnitControl.UnitControl.set_unit_resourcing` (param mismatch: p1 type integer!=i32; p2 type string!=&str; p3 type number!=f32)
+- `Spring.SetUnitRotation` → `UnitControl.UnitControl.set_unit_rotation` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitRulesParam` → `RulesParams.RulesParams.set_unit_rules_param` (param mismatch: p1 type integer!=i32; p2 type string!=&str; p3 type (number|string)?!=sys::RulesParamValue; p4 type losAccess?!=i32)
+- `Spring.SetUnitSeismicSignature` → `UnitControl.UnitControl.set_unit_seismic_signature` (param mismatch: p1 type integer!=i32; p2 type number!=f32)
+- `Spring.SetUnitSelectionVolumeData` → `UnitControl.UnitControl.set_unit_selection_volume_data` (param mismatch: count mismatch (lua=11, rust=10))
+- `Spring.SetUnitSensorRadius` → `UnitControl.UnitControl.set_unit_sensor_radius` (param mismatch: p1 type integer!=i32; p2 type ("los"|"airLos"|"radar"|"sonar"|"seismic"|"radarJammer"...)!=&str; p3 type number!=i32)
+- `Spring.SetUnitShieldRechargeDelay` → `UnitControl.UnitControl.set_unit_shield_recharge_delay` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32; p3 type number?!=f32)
+- `Spring.SetUnitShieldState` → `UnitControl.UnitControl.set_unit_shield_state` (param mismatch: p1 type integer!=i32; p2 type integer?!=i32; p4 type number?!=f32)
+- `Spring.SetUnitSonarStealth` → `UnitControl.UnitControl.set_unit_sonar_stealth` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitStealth` → `UnitControl.UnitControl.set_unit_stealth` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitStockpile` → `UnitControl.UnitControl.set_unit_stockpile` (param mismatch: p1 type integer!=i32; p2 type number?!=i32; p3 type number?!=f32)
+- `Spring.SetUnitStorage` → `UnitControl.UnitControl.set_unit_storage` (param mismatch: p1 type integer!=i32; p2 type string!=f32; p3 type number!=f32)
+- `Spring.SetUnitTarget` → `UnitControl.UnitControl.set_unit_target` (param mismatch: count mismatch (lua=5, rust=8))
+- `Spring.SetUnitTooltip` → `UnitControl.UnitControl.set_unit_tooltip` (param mismatch: p1 type integer!=i32; p2 type string!=&str)
+- `Spring.SetUnitUseAirLos` → `UnitControl.UnitControl.set_unit_use_air_los` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitUseWeapons` → `UnitControl.UnitControl.set_unit_use_weapons` (param mismatch: count mismatch (lua=3, rust=5))
+- `Spring.SetUnitVelocity` → `UnitControl.UnitControl.set_unit_velocity` (param mismatch: p1 type integer!=i32)
+- `Spring.SetUnitWeaponDamages` → `UnitControl.UnitControl.set_unit_weapon_damages` (param mismatch: count mismatch (lua=3, rust=4))
+- `Spring.SetUnitWeaponState` → `UnitControl.UnitControl.set_unit_weapon_state` (param mismatch: count mismatch (lua=3, rust=4))
+- `Spring.SetVideoCapturingMode` → `UnsyncedCtrl.UnsyncedCtrl.set_video_capturing_mode`
+- `Spring.SetVideoCapturingTimeOffset` → `UnsyncedCtrl.UnsyncedCtrl.set_video_capturing_time_offset` (param mismatch: p1 type boolean!=f32)
+- `Spring.SetWMCaption` → `UnsyncedCtrl.UnsyncedCtrl.set_wmcaption` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.SetWMIcon` → `UnsyncedCtrl.UnsyncedCtrl.set_wmicon` (param mismatch: count mismatch (lua=1, rust=2))
+- `Spring.SetWaterParams` → `UnsyncedCtrl.UnsyncedCtrl.set_water_params` (param mismatch: count mismatch (lua=1, rust=0))
+- `Spring.SetWind` → `TerrainControl.TerrainControl.set_wind` (param mismatch: count mismatch (lua=7, rust=2))
+- `Spring.SetWindowGeometry` → `UnsyncedCtrl.UnsyncedCtrl.set_window_geometry` (param mismatch: p1 type number!=i32; p2 type number!=i32; p3 type number!=i32; p4 type number!=i32; p5 type number!=i32)
+- `Spring.SetWindowMaximized` → `UnsyncedCtrl.UnsyncedCtrl.set_window_maximized`
+- `Spring.SetWindowMinimized` → `UnsyncedCtrl.UnsyncedCtrl.set_window_minimized`
+- `Spring.ShareResources` → `SystemControl.SystemControl.share_resources` (param mismatch: count mismatch (lua=2, rust=3))
+- `Spring.ShareTeamResource` → `TeamControl.TeamControl.share_team_resource` (param mismatch: p1 type integer!=i32; p2 type integer!=i32; p3 type ResourceName!=&str; p4 type number!=f32)
+- `Spring.SolveNURBSCurve` → `UnsyncedRead.UnsyncedRead.solve_nurbscurve` (param mismatch: count mismatch (lua=1, rust=7))
+- `Spring.SpawnCEG` → `EffectsControl.EffectsControl.spawn_ceg` (param mismatch: count mismatch (lua=9, rust=11))
+- `Spring.SpawnExplosion` → `EffectsControl.EffectsControl.spawn_explosion` (param mismatch: count mismatch (lua=7, rust=18))
+- `Spring.SpawnProjectile` → `ProjectileControl.ProjectileControl.spawn_projectile` (param mismatch: count mismatch (lua=2, rust=14))
+- `Spring.SpawnSFX` → `EffectsControl.EffectsControl.spawn_sfx` (param mismatch: p1 type integer?!=i32; p2 type integer?!=i32; p9 type number?!=f32; p10 type number?!=f32)
+- `Spring.Start` → `SystemControl.SystemControl.start` (param mismatch: p1 type string!=&str; p2 type string!=&str)
+- `Spring.StopSoundStream` → `Sound.Sound.stop_sound_stream`
+- `Spring.TestBuildOrder` → `Utils.Utils.test_build_order` (param mismatch: p1 type integer!=i32; p5 type Facing!=i32)
+- `Spring.TestMoveOrder` → `Utils.Utils.test_move_order` (param mismatch: count mismatch (lua=10, rust=4))
+- `Spring.TraceRayGroundBetweenPositions` → `Tracing.Tracing.trace_ray_ground_between_positions` (param mismatch: count mismatch (lua=7, rust=6))
+- `Spring.TraceRayGroundInDirection` → `Tracing.Tracing.trace_ray_ground_in_direction` (param mismatch: p7 type boolean?!=f32)
+- `Spring.TraceScreenRay` → `Camera.Camera.trace_screen_ray` (param mismatch: count mismatch (lua=7, rust=3))
+- `Spring.TransferFeature` → `FeatureControl.FeatureControl.transfer_feature` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.TransferTeamMaxUnits` → `TeamControl.TeamControl.transfer_team_max_units` (param mismatch: p1 type number!=i32; p2 type number!=i32; p3 type number!=i32)
+- `Spring.TransferUnit` → `UnitControl.UnitControl.transfer_unit` (param mismatch: count mismatch (lua=4, rust=3))
+- `Spring.UnitAttach` → `UnitControl.UnitControl.unit_attach` (param mismatch: count mismatch (lua=4, rust=3))
+- `Spring.UnitDetach` → `UnitControl.UnitControl.unit_detach` (param mismatch: p1 type integer!=i32)
+- `Spring.UnitDetachFromAir` → `UnitControl.UnitControl.unit_detach_from_air` (param mismatch: count mismatch (lua=1, rust=5))
+- `Spring.UnitFinishCommand` → `UnitControl.UnitControl.unit_finish_command` (param mismatch: p1 type integer!=i32)
+- `Spring.UnitIconGetDraw` → `Icons.Icons.unit_icon_get_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.UnitIconSetDraw` → `Icons.Icons.unit_icon_set_draw` (param mismatch: p1 type integer!=i32)
+- `Spring.UnitWeaponFire` → `UnitControl.UnitControl.unit_weapon_fire` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.UnitWeaponHoldFire` → `UnitControl.UnitControl.unit_weapon_hold_fire` (param mismatch: p1 type integer!=i32; p2 type integer!=i32)
+- `Spring.UpdateMapLight` → `Lights.Lights.update_map_light` (param mismatch: p1 type number!=u32; p2 type LightParams!=sys::LightParams)
+- `Spring.UpdateModelLight` → `Lights.Lights.update_model_light` (param mismatch: p1 type number!=u32; p2 type LightParams!=sys::LightParams)
+- `Spring.UseTeamResource` → `TeamControl.TeamControl.use_team_resource` (param mismatch: p1 type integer!=i32; p2 type ResourceName!=&str; p3 type number!=f32)
+- `Spring.UseUnitResource` → `UnitControl.UnitControl.use_unit_resource` (param mismatch: p1 type integer!=i32; p2 type ResourceName!=&str; p3 type number!=f32)
+- `Spring.ValidFeatureID` → `Features.Features.valid_feature_id` (param mismatch: p1 type integer!=i32)
+- `Spring.ValidUnitID` → `UnitsQuery.UnitsQuery.valid_unit_id` (param mismatch: p1 type integer!=i32)
+- `Spring.WarpMouse` → `UnsyncedCtrl.UnsyncedCtrl.warp_mouse` (param mismatch: p1 type number!=i32; p2 type number!=i32)
+- `Spring.WorldToScreenCoords` → `Camera.Camera.world_to_screen_coords`
+- `Spring.Yield` → `SystemControl.SystemControl.yield`
 
-**Total: 390**
+**Total: 776**
 
 ---
 
@@ -418,11 +804,8 @@ Functions with perfect 1.0 confidence match:
 
 Imperfect matches with <1.0 confidence (likely incorrect):
 
-- `Spring.SetUnitPieceCollisionVolumeData` → `UnitsInfo.get_unit_piece_collision_volume_data` (confidence: 0.97)
-- `Spring.SetUnitDefIcon` → `UnitDefs.get_unit_def_count` (confidence: 0.86)
-- `Spring.SetUnitDefImage` → `UnitDefs.get_unit_def_name` (confidence: 0.80)
 
-**Total: 3**
+**Total: 0**
 
 ---
 
@@ -430,376 +813,8 @@ Imperfect matches with <1.0 confidence (likely incorrect):
 
 Functions in Lua API with no Rust equivalent:
 
-- `Spring.AddFeatureDamage`
-- `Spring.AddGrass`
-- `Spring.AddLightTrackingTarget`
-- `Spring.AddMapLight`
-- `Spring.AddModelLight`
-- `Spring.AddObjectDecal`
-- `Spring.AddOriginalHeightMap`
-- `Spring.AddUnitIcon`
-- `Spring.AddUnitResource`
-- `Spring.AddUnitSeismicPing`
-- `Spring.AddWorldIcon`
-- `Spring.AddWorldText`
-- `Spring.AddWorldUnit`
-- `Spring.AdjustHeightMap`
-- `Spring.AdjustOriginalHeightMap`
-- `Spring.AdjustSmoothMesh`
-- `Spring.AssignMouseCursor`
-- `Spring.BuggerOff`
-- `Spring.CallAsTeam`
-- `Spring.CallCOBScript`
-- `Spring.ClearFeaturesPreviousDrawFlag`
-- `Spring.ClearUnitGoal`
-- `Spring.ClearUnitsPreviousDrawFlag`
-- `Spring.ClearWatchDogTimer`
-- `Spring.CreateDir`
-- `Spring.CreateFeatureWreck`
-- `Spring.CreateGroundDecal`
-- `Spring.CreateUnitWreck`
-- `Spring.DeselectUnitMap`
-- `Spring.DestroyGroundDecal`
-- `Spring.DiffTimers`
-- `Spring.DrawUnitCommands`
-- `Spring.EditUnitCmdDesc`
-- `Spring.ExtractModArchiveFile`
-- `Spring.ForceLayoutUpdate`
-- `Spring.ForceTesselationUpdate`
-- `Spring.ForceUnitCollisionUpdate`
-- `Spring.FreeUnitIcon`
-- `Spring.GarbageCollectCtrl`
-- `Spring.GetActionHotKeys`
-- `Spring.GetActiveCmdDesc`
-- `Spring.GetActiveCmdDescs`
-- `Spring.GetActivePage`
-- `Spring.GetAllGroundDecals`
-- `Spring.GetAllIconDataArray`
-- `Spring.GetAllProjectiles`
-- `Spring.GetBoxSelectionByEngine`
-- `Spring.GetBuildFacing`
-- `Spring.GetBuildSpacing`
-- `Spring.GetCOBScriptID`
-- `Spring.GetCameraRotation`
-- `Spring.GetCameraVectors`
-- `Spring.GetClipboard`
-- `Spring.GetCmdDescIndex`
-- `Spring.GetDrawSeconds`
-- `Spring.GetDrawSelectionInfo`
-- `Spring.GetDualViewGeometry`
-- `Spring.GetFeatureAlwaysUpdateMatrix`
-- `Spring.GetFeatureDrawFlag`
-- `Spring.GetFeatureEngineDrawMask`
-- `Spring.GetFeatureFireTime`
-- `Spring.GetFeatureLuaDraw`
-- `Spring.GetFeatureNoDraw`
-- `Spring.GetFeatureSelectionVolumeData`
-- `Spring.GetFeatureSmokeTime`
-- `Spring.GetFeatureTransformMatrix`
-- `Spring.GetFeaturesInScreenRectangle`
-- `Spring.GetFrameTimer`
-- `Spring.GetGameName`
-- `Spring.GetGameState`
-- `Spring.GetGatherMode`
-- `Spring.GetGroundDecalAlpha`
-- `Spring.GetGroundDecalCreationFrame`
-- `Spring.GetGroundDecalGlowParams`
-- `Spring.GetGroundDecalMiddlePos`
-- `Spring.GetGroundDecalMisc`
-- `Spring.GetGroundDecalNormal`
-- `Spring.GetGroundDecalOwner`
-- `Spring.GetGroundDecalQuadPos`
-- `Spring.GetGroundDecalRotation`
-- `Spring.GetGroundDecalSizeAndHeight`
-- `Spring.GetGroundDecalTexture`
-- `Spring.GetGroundDecalTextures`
-- `Spring.GetGroundDecalTint`
-- `Spring.GetGroundDecalType`
-- `Spring.GetGroundDecalUserData`
-- `Spring.GetGroupUnitsCount`
-- `Spring.GetGroupUnitsCounts`
-- `Spring.GetGroupUnitsSorted`
-- `Spring.GetIconData`
-- `Spring.GetInvertQueueKey`
-- `Spring.GetKeyBindings`
-- `Spring.GetKeyCode`
-- `Spring.GetKeyFromScanSymbol`
-- `Spring.GetKeySymbol`
-- `Spring.GetLastMessagePositions`
-- `Spring.GetLosViewColors`
-- `Spring.GetLuaMemUsage`
-- `Spring.GetMapDrawMode`
-- `Spring.GetMapSquareTexture`
-- `Spring.GetMenuName`
-- `Spring.GetMiniMapDualScreen`
-- `Spring.GetMiniMapRotation`
-- `Spring.GetMouseButtonsPressed`
-- `Spring.GetNanoProjectileParams`
-- `Spring.GetPieceProjectileName`
-- `Spring.GetProfilerRecordNames`
-- `Spring.GetProfilerTimeRecord`
-- `Spring.GetRenderFeatures`
-- `Spring.GetRenderFeaturesDrawFlagChanged`
-- `Spring.GetRenderUnits`
-- `Spring.GetRenderUnitsDrawFlagChanged`
-- `Spring.GetReplayLength`
-- `Spring.GetScanSymbol`
-- `Spring.GetSoundDevices`
-- `Spring.GetSoundEffectParams`
-- `Spring.GetSyncedGCInfo`
-- `Spring.GetTeamDamageStats`
-- `Spring.GetTimer`
-- `Spring.GetTimerMicros`
-- `Spring.GetUnitAlwaysUpdateMatrix`
-- `Spring.GetUnitDrawFlag`
-- `Spring.GetUnitEngineDrawMask`
-- `Spring.GetUnitFeatureSeparation`
-- `Spring.GetUnitIconData`
-- `Spring.GetUnitLeavesGhost`
-- `Spring.GetUnitLuaDraw`
-- `Spring.GetUnitNoDraw`
-- `Spring.GetUnitNoGroup`
-- `Spring.GetUnitNoMinimap`
-- `Spring.GetUnitNoSelect`
-- `Spring.GetUnitPhysicalState`
-- `Spring.GetUnitSelectionVolumeData`
-- `Spring.GetUnitTransformMatrix`
-- `Spring.GetUnitViewPosition`
-- `Spring.GetUnitsInScreenRectangle`
-- `Spring.GetVidMemUsage`
-- `Spring.GetVideoCapturingMode`
-- `Spring.GetVisibleFeatures`
-- `Spring.GetVisibleProjectiles`
-- `Spring.GetVisibleUnits`
-- `Spring.GetWaterMode`
-- `Spring.GetWindowDisplayMode`
-- `Spring.GiveOrder`
-- `Spring.GiveOrderArrayToUnit`
-- `Spring.GiveOrderArrayToUnitArray`
-- `Spring.GiveOrderArrayToUnitMap`
-- `Spring.GiveOrderToUnitMap`
-- `Spring.InsertUnitCmdDesc`
-- `Spring.IsReplay`
-- `Spring.IsUnitAllied`
-- `Spring.IsUnitIcon`
-- `Spring.IsUnitInView`
-- `Spring.IsUnitSelected`
-- `Spring.IsUnitVisible`
-- `Spring.LevelHeightMap`
-- `Spring.LevelOriginalHeightMap`
-- `Spring.LevelSmoothMesh`
-- `Spring.LoadCmdColorsConfig`
-- `Spring.LoadCtrlPanelConfig`
-- `Spring.LoadModelTextures`
-- `Spring.MarkerAddLine`
-- `Spring.MarkerAddPoint`
-- `Spring.MarkerErasePosition`
-- `Spring.MoveCtrl`
-- `Spring.PauseDollyCamera`
-- `Spring.Ping`
-- `Spring.PreloadFeatureDefModel`
-- `Spring.PreloadSoundItem`
-- `Spring.PreloadUnitDefModel`
-- `Spring.Quit`
-- `Spring.RebuildSmoothMesh`
-- `Spring.Reload`
-- `Spring.RemoveGrass`
-- `Spring.RemoveObjectDecal`
-- `Spring.RemoveUnitCmdDesc`
-- `Spring.ReplaceMouseCursor`
-- `Spring.RequestStartPosition`
-- `Spring.Restart`
-- `Spring.ResumeDollyCamera`
-- `Spring.RevertOriginalHeightMap`
-- `Spring.RunDollyCamera`
-- `Spring.SDLSetTextInputRect`
-- `Spring.SDLStartTextInput`
-- `Spring.SDLStopTextInput`
-- `Spring.SelectUnitMap`
-- `Spring.SendAllyChat`
-- `Spring.SendCommands`
-- `Spring.SendLuaMenuMsg`
-- `Spring.SendPrivateChat`
-- `Spring.SendPublicChat`
-- `Spring.SendSkirmishAIMessage`
-- `Spring.SendSpectatorChat`
-- `Spring.SetActiveCommand`
-- `Spring.SetAtmosphere`
-- `Spring.SetAutoShowMetal`
-- `Spring.SetBoxSelectionByEngine`
-- `Spring.SetBuildFacing`
-- `Spring.SetBuildSpacing`
-- `Spring.SetCameraOffset`
-- `Spring.SetClipboard`
-- `Spring.SetCustomCommandDrawData`
-- `Spring.SetDollyCameraCurve`
-- `Spring.SetDollyCameraLookCurve`
-- `Spring.SetDollyCameraLookPosition`
-- `Spring.SetDollyCameraLookUnit`
-- `Spring.SetDollyCameraMode`
-- `Spring.SetDollyCameraPosition`
-- `Spring.SetDollyCameraRelativeMode`
-- `Spring.SetDrawGround`
-- `Spring.SetDrawGroundDeferred`
-- `Spring.SetDrawModelsDeferred`
-- `Spring.SetDrawSelectionInfo`
-- `Spring.SetDrawSky`
-- `Spring.SetDrawWater`
-- `Spring.SetExperienceGrade`
-- `Spring.SetFactoryBuggerOff`
-- `Spring.SetFeatureAlwaysUpdateMatrix`
-- `Spring.SetFeatureAlwaysVisible`
-- `Spring.SetFeatureBlocking`
-- `Spring.SetFeatureCollisionVolumeData`
-- `Spring.SetFeatureEngineDrawMask`
-- `Spring.SetFeatureFade`
-- `Spring.SetFeatureFireTime`
-- `Spring.SetFeatureHeadingAndUpDir`
-- `Spring.SetFeatureMass`
-- `Spring.SetFeatureMaxHealth`
-- `Spring.SetFeatureMidAndAimPos`
-- `Spring.SetFeatureMoveCtrl`
-- `Spring.SetFeatureNoDraw`
-- `Spring.SetFeatureNoSelect`
-- `Spring.SetFeaturePhysics`
-- `Spring.SetFeaturePieceCollisionVolumeData`
-- `Spring.SetFeaturePieceVisible`
-- `Spring.SetFeatureRadiusAndHeight`
-- `Spring.SetFeatureReclaim`
-- `Spring.SetFeatureResurrect`
-- `Spring.SetFeatureRotation`
-- `Spring.SetFeatureSelectionVolumeData`
-- `Spring.SetFeatureSmokeTime`
-- `Spring.SetFeatureUseAirLos`
-- `Spring.SetGroundDecalAlpha`
-- `Spring.SetGroundDecalCreationFrame`
-- `Spring.SetGroundDecalGlowParams`
-- `Spring.SetGroundDecalMisc`
-- `Spring.SetGroundDecalNormal`
-- `Spring.SetGroundDecalPosAndDims`
-- `Spring.SetGroundDecalQuadPosAndHeight`
-- `Spring.SetGroundDecalRotation`
-- `Spring.SetGroundDecalTexture`
-- `Spring.SetGroundDecalTextureParams`
-- `Spring.SetGroundDecalTint`
-- `Spring.SetGroundDecalUserData`
-- `Spring.SetHeightMapFunc`
-- `Spring.SetLastMessagePosition`
-- `Spring.SetLosViewColors`
-- `Spring.SetMapLightTrackingState`
-- `Spring.SetMapRenderingParams`
-- `Spring.SetMapShader`
-- `Spring.SetMapShadingTexture`
-- `Spring.SetMapSquareTexture`
-- `Spring.SetMiniMapRotation`
-- `Spring.SetModelLightTrackingState`
-- `Spring.SetMouseCursor`
-- `Spring.SetNanoProjectileParams`
-- `Spring.SetNoPause`
-- `Spring.SetOriginalHeightMap`
-- `Spring.SetOriginalHeightMapFunc`
-- `Spring.SetPieceProjectileParams`
-- `Spring.SetPlayerReadyState`
-- `Spring.SetProjectileAlwaysVisible`
-- `Spring.SetProjectileCEG`
-- `Spring.SetProjectileCollision`
-- `Spring.SetProjectileDamages`
-- `Spring.SetProjectileIgnoreTrackingError`
-- `Spring.SetProjectileIsIntercepted`
-- `Spring.SetProjectileMoveControl`
-- `Spring.SetProjectileTimeToLive`
-- `Spring.SetProjectileUseAirLos`
-- `Spring.SetRadarErrorParams`
-- `Spring.SetShareLevel`
-- `Spring.SetSkyBoxTexture`
-- `Spring.SetSmoothMeshFunc`
-- `Spring.SetSoundEffectParams`
-- `Spring.SetSquareBuildingMask`
-- `Spring.SetSunDirection`
-- `Spring.SetSunLighting`
-- `Spring.SetTeamStartPosition`
-- `Spring.SetUnitAlwaysUpdateMatrix`
-- `Spring.SetUnitAlwaysVisible`
-- `Spring.SetUnitArmored`
-- `Spring.SetUnitBlocking`
-- `Spring.SetUnitBuildParams`
-- `Spring.SetUnitBuildSpeed`
-- `Spring.SetUnitBuildeeRadius`
-- `Spring.SetUnitCloak`
-- `Spring.SetUnitCollisionVolumeData`
-- `Spring.SetUnitCosts`
-- `Spring.SetUnitCrashing`
-- `Spring.SetUnitDirection`
-- `Spring.SetUnitEngineDrawMask`
-- `Spring.SetUnitFlanking`
-- `Spring.SetUnitHarvestStorage`
-- `Spring.SetUnitHeadingAndUpDir`
-- `Spring.SetUnitIconDraw`
-- `Spring.SetUnitLandGoal`
-- `Spring.SetUnitLeaveTracks`
-- `Spring.SetUnitLeavesGhost`
-- `Spring.SetUnitLoadingTransport`
-- `Spring.SetUnitLosMask`
-- `Spring.SetUnitLosState`
-- `Spring.SetUnitMass`
-- `Spring.SetUnitMaxRange`
-- `Spring.SetUnitMidAndAimPos`
-- `Spring.SetUnitMoveGoal`
-- `Spring.SetUnitNanoPieces`
-- `Spring.SetUnitNoDraw`
-- `Spring.SetUnitNoGroup`
-- `Spring.SetUnitNoMinimap`
-- `Spring.SetUnitNoSelect`
-- `Spring.SetUnitPhysicalStateBit`
-- `Spring.SetUnitPieceMatrix`
-- `Spring.SetUnitPieceParent`
-- `Spring.SetUnitPieceVisible`
-- `Spring.SetUnitPosErrorParams`
-- `Spring.SetUnitRadiusAndHeight`
-- `Spring.SetUnitSeismicSignature`
-- `Spring.SetUnitSelectionVolumeData`
-- `Spring.SetUnitSensorRadius`
-- `Spring.SetUnitShieldRechargeDelay`
-- `Spring.SetUnitShieldState`
-- `Spring.SetUnitSonarStealth`
-- `Spring.SetUnitStealth`
-- `Spring.SetUnitStockpile`
-- `Spring.SetUnitStorage`
-- `Spring.SetUnitTarget`
-- `Spring.SetUnitTooltip`
-- `Spring.SetUnitUseAirLos`
-- `Spring.SetUnitUseWeapons`
-- `Spring.SetUnitWeaponDamages`
-- `Spring.SetUnitWeaponState`
-- `Spring.SetVideoCapturingMode`
-- `Spring.SetVideoCapturingTimeOffset`
-- `Spring.SetWMCaption`
-- `Spring.SetWMIcon`
-- `Spring.SetWaterParams`
-- `Spring.SetWindowGeometry`
-- `Spring.SetWindowMaximized`
-- `Spring.SetWindowMinimized`
-- `Spring.ShareResources`
-- `Spring.SolveNURBSCurve`
-- `Spring.SpawnCEG`
-- `Spring.SpawnExplosion`
-- `Spring.SpawnSFX`
-- `Spring.Start`
-- `Spring.TransferTeamMaxUnits`
-- `Spring.UnitAttach`
-- `Spring.UnitDetach`
-- `Spring.UnitDetachFromAir`
-- `Spring.UnitIconGetDraw`
-- `Spring.UnitIconSetDraw`
-- `Spring.UnitWeaponFire`
-- `Spring.UnitWeaponHoldFire`
-- `Spring.UpdateMapLight`
-- `Spring.UpdateModelLight`
-- `Spring.UseUnitResource`
-- `Spring.WarpMouse`
-- `Spring.Yield`
 
-**Total unmatched: 368**
+**Total unmatched: 0**
 
 ---
 
@@ -807,96 +822,106 @@ Functions in Lua API with no Rust equivalent:
 
 Functions in Rust API with no Lua equivalent:
 
-- `FeatureDefs.get_feature_def_by_id`
-- `FeatureDefs.get_feature_def_count`
-- `FeatureDefs.get_feature_def_custom_param`
-- `FeatureDefs.get_feature_def_custom_param_keys`
-- `FeatureDefs.get_feature_def_energy`
-- `FeatureDefs.get_feature_def_idby_name`
-- `FeatureDefs.get_feature_def_ids`
-- `FeatureDefs.get_feature_def_metal`
-- `FeatureDefs.get_feature_def_name`
-- `FeatureDefs.valid_feature_def_id`
-- `Los.get_closest_valid_position`
-- `MathExtra.bit_and`
-- `MathExtra.bit_bits`
-- `MathExtra.bit_inv`
-- `MathExtra.bit_or`
-- `MathExtra.bit_xor`
-- `MathExtra.clamp`
-- `MathExtra.diag`
-- `MathExtra.erf`
-- `MathExtra.hypot`
-- `MathExtra.mix`
-- `MathExtra.normalize`
-- `MathExtra.round`
-- `MathExtra.sgn`
-- `MathExtra.smooth_step`
-- `Memory.free`
-- `Memory.free_float2_array`
-- `Memory.free_float3_array`
-- `Memory.free_float4_array`
-- `Memory.free_float_array`
-- `Memory.free_int32_array`
-- `Memory.free_int3_array`
-- `Memory.free_string_array`
-- `Memory.free_uint32_array`
-- `PathFinder.delete_path`
-- `PathFinder.free_path_node_costs_array`
-- `PathFinder.get_next_way_point`
-- `PathFinder.get_path_node_cost`
-- `PathFinder.get_path_node_costs`
-- `PathFinder.get_path_way_points`
-- `PathFinder.init_path_node_costs_array`
-- `PathFinder.request_path`
-- `PathFinder.set_path_node_cost`
-- `PathFinder.set_path_node_costs`
-- `SyncedCtrl.feature`
-- `SyncedCtrl.projectile`
-- `SyncedCtrl.team`
-- `SyncedCtrl.terrain`
-- `SyncedCtrl.unit`
-- `Teams.get_player_list_in_ally_team`
-- `Teams.get_player_list_in_team`
-- `Tracing.trace_ray`
-- `Tracing.trace_ray_features`
-- `Tracing.trace_ray_units`
-- `UnitDefs.get_unit_def_by_id`
-- `UnitDefs.get_unit_def_costs`
-- `UnitDefs.get_unit_def_count`
-- `UnitDefs.get_unit_def_custom_param`
-- `UnitDefs.get_unit_def_custom_param_keys`
-- `UnitDefs.get_unit_def_health`
-- `UnitDefs.get_unit_def_human_name`
-- `UnitDefs.get_unit_def_idby_name`
-- `UnitDefs.get_unit_def_ids`
-- `UnitDefs.get_unit_def_name`
-- `UnitDefs.get_unit_def_speed`
-- `UnitDefs.valid_unit_def_id`
-- `UnitsInfo.get_unit_fuel`
-- `UnitsInfo.get_unit_piece_collision_volume_data`
-- `UnitsInfo.get_unit_travel`
-- `UnitsWeapons.get_unit_weapon_count`
-- `Vfs.file_exists`
-- `Vfs.get_archives`
-- `Vfs.get_file_info`
-- `Vfs.get_file_size`
-- `Vfs.get_games`
-- `Vfs.get_maps`
-- `Vfs.is_directory`
-- `Vfs.list_dir`
-- `Vfs.read_file`
-- `Vfs.read_file_as_string`
-- `WeaponDefs.get_weapon_def_by_id`
-- `WeaponDefs.get_weapon_def_count`
-- `WeaponDefs.get_weapon_def_custom_param`
-- `WeaponDefs.get_weapon_def_custom_param_keys`
-- `WeaponDefs.get_weapon_def_damage`
-- `WeaponDefs.get_weapon_def_id`
-- `WeaponDefs.get_weapon_def_ids`
-- `WeaponDefs.get_weapon_def_name`
-- `WeaponDefs.get_weapon_def_range`
-- `WeaponDefs.valid_weapon_def_id`
+- `FeatureDefs.FeatureDefs.get_feature_def_by_id`
+- `FeatureDefs.FeatureDefs.get_feature_def_count`
+- `FeatureDefs.FeatureDefs.get_feature_def_custom_param`
+- `FeatureDefs.FeatureDefs.get_feature_def_custom_param_keys`
+- `FeatureDefs.FeatureDefs.get_feature_def_energy`
+- `FeatureDefs.FeatureDefs.get_feature_def_idby_name`
+- `FeatureDefs.FeatureDefs.get_feature_def_ids`
+- `FeatureDefs.FeatureDefs.get_feature_def_metal`
+- `FeatureDefs.FeatureDefs.get_feature_def_name`
+- `FeatureDefs.FeatureDefs.valid_feature_def_id`
+- `GroundDecals.GroundDecals.get_ground_decal_texture_params`
+- `Los.Los.get_closest_valid_position`
+- `MathExtra.MathExtra.bit_and`
+- `MathExtra.MathExtra.bit_bits`
+- `MathExtra.MathExtra.bit_inv`
+- `MathExtra.MathExtra.bit_or`
+- `MathExtra.MathExtra.bit_xor`
+- `MathExtra.MathExtra.clamp`
+- `MathExtra.MathExtra.diag`
+- `MathExtra.MathExtra.erf`
+- `MathExtra.MathExtra.hypot`
+- `MathExtra.MathExtra.mix`
+- `MathExtra.MathExtra.normalize`
+- `MathExtra.MathExtra.round`
+- `MathExtra.MathExtra.sgn`
+- `MathExtra.MathExtra.smooth_step`
+- `Memory.Memory.free`
+- `Memory.Memory.free_float2_array`
+- `Memory.Memory.free_float3_array`
+- `Memory.Memory.free_float4_array`
+- `Memory.Memory.free_float_array`
+- `Memory.Memory.free_int32_array`
+- `Memory.Memory.free_int3_array`
+- `Memory.Memory.free_string_array`
+- `Memory.Memory.free_uint32_array`
+- `MoveCtrl.MoveCtrl.move_ctrl`
+- `PathFinder.PathFinder.delete_path`
+- `PathFinder.PathFinder.free_path_node_costs_array`
+- `PathFinder.PathFinder.get_next_way_point`
+- `PathFinder.PathFinder.get_path_node_cost`
+- `PathFinder.PathFinder.get_path_node_costs`
+- `PathFinder.PathFinder.get_path_way_points`
+- `PathFinder.PathFinder.init_path_node_costs_array`
+- `PathFinder.PathFinder.request_path`
+- `PathFinder.PathFinder.set_path_node_cost`
+- `PathFinder.PathFinder.set_path_node_costs`
+- `ProjectileControl.ProjectileControl.set_projectile_spin_angle`
+- `ProjectileControl.ProjectileControl.set_projectile_spin_speed`
+- `ProjectileControl.ProjectileControl.set_projectile_spin_vec`
+- `SyncedCtrl.SyncedCtrl.cob_script`
+- `SyncedCtrl.SyncedCtrl.effects`
+- `SyncedCtrl.SyncedCtrl.feature`
+- `SyncedCtrl.SyncedCtrl.game_config`
+- `SyncedCtrl.SyncedCtrl.projectile`
+- `SyncedCtrl.SyncedCtrl.team`
+- `SyncedCtrl.SyncedCtrl.terrain`
+- `SyncedCtrl.SyncedCtrl.unit`
+- `Teams.Teams.get_player_list_in_ally_team`
+- `Teams.Teams.get_player_list_in_team`
+- `Tracing.Tracing.trace_ray`
+- `Tracing.Tracing.trace_ray_features`
+- `Tracing.Tracing.trace_ray_units`
+- `UnitControl.UnitControl.set_unit_heading`
+- `UnitDefs.UnitDefs.get_unit_def_by_id`
+- `UnitDefs.UnitDefs.get_unit_def_costs`
+- `UnitDefs.UnitDefs.get_unit_def_count`
+- `UnitDefs.UnitDefs.get_unit_def_custom_param`
+- `UnitDefs.UnitDefs.get_unit_def_custom_param_keys`
+- `UnitDefs.UnitDefs.get_unit_def_health`
+- `UnitDefs.UnitDefs.get_unit_def_human_name`
+- `UnitDefs.UnitDefs.get_unit_def_idby_name`
+- `UnitDefs.UnitDefs.get_unit_def_ids`
+- `UnitDefs.UnitDefs.get_unit_def_name`
+- `UnitDefs.UnitDefs.get_unit_def_speed`
+- `UnitDefs.UnitDefs.valid_unit_def_id`
+- `UnitRendering.UnitRendering.get_frustum_planes`
+- `UnitsInfo.UnitsInfo.get_unit_fuel`
+- `UnitsInfo.UnitsInfo.get_unit_piece_collision_volume_data`
+- `UnitsInfo.UnitsInfo.get_unit_travel`
+- `UnitsWeapons.UnitsWeapons.get_unit_weapon_count`
+- `Vfs.Vfs.file_exists`
+- `Vfs.Vfs.get_archives`
+- `Vfs.Vfs.get_file_info`
+- `Vfs.Vfs.get_file_size`
+- `Vfs.Vfs.get_games`
+- `Vfs.Vfs.get_maps`
+- `Vfs.Vfs.is_directory`
+- `Vfs.Vfs.list_dir`
+- `Vfs.Vfs.read_file`
+- `Vfs.Vfs.read_file_as_string`
+- `WeaponDefs.WeaponDefs.get_weapon_def_by_id`
+- `WeaponDefs.WeaponDefs.get_weapon_def_count`
+- `WeaponDefs.WeaponDefs.get_weapon_def_custom_param`
+- `WeaponDefs.WeaponDefs.get_weapon_def_custom_param_keys`
+- `WeaponDefs.WeaponDefs.get_weapon_def_damage`
+- `WeaponDefs.WeaponDefs.get_weapon_def_id`
+- `WeaponDefs.WeaponDefs.get_weapon_def_ids`
+- `WeaponDefs.WeaponDefs.get_weapon_def_name`
+- `WeaponDefs.WeaponDefs.get_weapon_def_range`
+- `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 90**
+**Total Rust-only: 100**
 

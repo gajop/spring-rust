@@ -5,8 +5,198 @@ Match Lua API functions to Rust API functions and generate comparison report.
 
 import re
 from pathlib import Path
-from typing import List, Dict, Set, Tuple, Optional
+from typing import List, Dict, Tuple, Optional
 from difflib import SequenceMatcher
+
+
+def expand_params(params: List[Dict]) -> List[str]:
+    """Expand vector-like params (float2/3/4) into scalar slots for count comparison."""
+    expanded = []
+    for p in params:
+        ptype = p.get('type', '').strip()
+        lower = ptype.lower()
+        mult = 1
+        for dim, key in [(4, 'float4'), (3, 'float3'), (2, 'float2')]:
+            if key in lower:
+                mult = dim
+                break
+        expanded.extend([ptype] * mult)
+    return expanded
+
+
+def bucket_type(ptype: str) -> str:
+    """Group types: treat Lua 'number' as floating-point, keep ints separate."""
+    lt = ptype.lower()
+    if not lt:
+        return ""
+    if "number" in lt or "float" in lt or "double" in lt:
+        return "float"
+    if "int" in lt or "uint" in lt or "size" in lt:
+        return "int"
+    if "bool" in lt:
+        return "bool"
+    if "string" in lt:
+        return "string"
+    return lt
+
+
+def compare_params(lua_params: List[Dict], rust_params: List[Dict]) -> Tuple[bool, str]:
+    lua_expanded = expand_params(lua_params)
+    rust_expanded = expand_params(rust_params)
+
+    if len(lua_expanded) != len(rust_expanded):
+        return False, f"count mismatch (lua={len(lua_expanded)}, rust={len(rust_expanded)})"
+
+    diffs = []
+    for idx, (ltype, rtype) in enumerate(zip(lua_expanded, rust_expanded)):
+        ltype = ltype.strip()
+        rtype = rtype.strip()
+        lb = bucket_type(ltype)
+        rb = bucket_type(rtype)
+
+        if lb and rb:
+            if lb != rb:
+                diffs.append(f"p{idx+1} type {ltype}!={rtype}")
+        elif ltype and rtype and ltype != rtype:
+            diffs.append(f"p{idx+1} type {ltype}!={rtype}")
+
+    if diffs:
+        return False, "; ".join(diffs)
+
+    return True, "match"
+
+
+def split_top_level_commas(param_str: str) -> List[str]:
+    parts = []
+    start = 0
+    depth = 0
+    pairs = {'(': ')', '<': '>', '{': '}', '[': ']'}
+    closers = set(pairs.values())
+
+    for idx, ch in enumerate(param_str):
+        if ch in pairs:
+            depth += 1
+        elif ch in closers and depth > 0:
+            depth -= 1
+        elif ch == ',' and depth == 0:
+            part = param_str[start:idx].strip()
+            if part:
+                parts.append(part)
+            start = idx + 1
+
+    tail = param_str[start:].strip()
+    if tail:
+        parts.append(tail)
+    return parts
+
+
+def parse_params(param_str: str) -> List[Dict]:
+    if not param_str:
+        return []
+    parts = split_top_level_commas(param_str)
+    params = []
+    for part in parts:
+        if ':' in part:
+            name, ty = part.split(':', 1)
+            params.append({'name': name.strip(), 'type': ty.strip()})
+        else:
+            params.append({'name': part.strip(), 'type': ''})
+    return params
+
+
+def parse_lua_functions(filepath: Path) -> Dict[str, List[Dict]]:
+    """Parse lua_functions.md and extract functions by namespace."""
+    functions = {}
+    current_namespace: Optional[str] = None
+
+    with open(filepath, 'r') as f:
+        for line in f:
+            line = line.strip()
+
+            if line.startswith('## '):
+                current_namespace = None
+                continue
+
+            ns_match = re.match(r'###\s+(\w+)\s+\((\d+)\s+functions\)', line)
+            if ns_match:
+                current_namespace = ns_match.group(1)
+                functions[current_namespace] = []
+                continue
+
+            func_match = re.match(r'-\s+`([^`]+)`\s+\(params:\s*(.*)\)', line)
+            if func_match and current_namespace:
+                func_name = func_match.group(1)
+                params = parse_params(func_match.group(2))
+                functions[current_namespace].append({'name': func_name, 'params': params})
+
+    return functions
+
+
+def parse_rust_functions(filepath: Path) -> Dict[str, List[Dict]]:
+    """Parse rust_functions.md and extract functions by module."""
+    functions = {}
+    current_module: Optional[str] = None
+
+    with open(filepath, 'r') as f:
+        for line in f:
+            line = line.strip()
+
+            mod_match = re.match(r'##\s+(\w+)\s+\((\d+)\s+functions\)', line)
+            if mod_match:
+                current_module = mod_match.group(1)
+                functions[current_module] = []
+                continue
+
+            func_match = re.match(r'-\s+`([^`]+)`\s+\(params:\s*(.*)\)\s+→\s+`([^`]+)`', line)
+            if func_match and current_module:
+                func_name = func_match.group(1)
+                params = parse_params(func_match.group(2))
+                return_type = func_match.group(3)
+                functions[current_module].append({'name': func_name, 'params': params, 'return': return_type})
+
+    return functions
+
+
+def find_best_match(lua_func: Dict, rust_funcs: Dict[str, List[Dict]]) -> Optional[Tuple[Dict, float, str]]:
+    """
+    Find the best matching Rust function for a Lua function.
+    Returns (rust_func_dict, confidence, module) or None.
+    """
+    lua_normalized = normalize_name(lua_func['name'])
+
+    best_match: Optional[Tuple[Dict, float, str]] = None
+    best_score = 0.0
+
+    for module, funcs in rust_funcs.items():
+        for rust_func in funcs:
+            rust_normalized = normalize_name(rust_func['name'])
+            similarity = SequenceMatcher(None, lua_normalized, rust_normalized).ratio()
+
+            if similarity > best_score:
+                best_score = similarity
+                best_match = (rust_func, similarity, module)
+
+    if best_score >= 0.8:
+        return best_match
+
+    return None
+
+
+def normalize_name(name: str) -> str:
+    """
+    Normalize a function name for comparison.
+    - Convert camelCase to snake_case
+    - Remove namespace prefixes
+    - Lowercase
+    """
+    if '.' in name:
+        name = name.split('.')[-1]
+
+    result = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name)
+    result = result.lower()
+
+    return result
+
 
 def main():
     rust_dir = Path(__file__).parent
@@ -24,60 +214,55 @@ def main():
     print("Parsing Rust functions...")
     rust_funcs = parse_rust_functions(rust_file)
 
-    # Focus on Spring.* callouts (the main API)
     spring_funcs = lua_funcs.get('Spring', [])
     print(f"\nFound {len(spring_funcs)} Spring.* functions in Lua")
 
     total_rust = sum(len(funcs) for funcs in rust_funcs.values())
     print(f"Found {total_rust} functions in Rust across {len(rust_funcs)} modules")
 
-    # Match Spring functions to Rust functions (1-to-1 mapping)
     print("\nMatching functions...")
 
-    # First, find all potential matches
     potential_matches = []
     for lua_func in spring_funcs:
         match = find_best_match(lua_func, rust_funcs)
         if match:
-            rust_full, return_type, confidence = match
-            potential_matches.append((lua_func, rust_full, return_type, confidence))
+            rust_func, confidence, module = match
+            rust_full = f"{module}.{rust_func['name']}"
+            potential_matches.append((lua_func, rust_func, rust_full, confidence, module))
 
-    # Sort by confidence (highest first) to resolve conflicts
     potential_matches.sort(key=lambda x: -x[3])
 
-    # Enforce 1-to-1 mapping
     matched = []
     uncertain = []
     unmatched_lua = []
     used_rust = set()
 
-    for lua_func, rust_full, return_type, confidence in potential_matches:
-        if rust_full not in used_rust:
-            used_rust.add(rust_full)
-            if confidence == 1.0:  # Only perfect matches
-                matched.append((lua_func, rust_full, return_type, confidence))
-            else:  # Imperfect matches (likely wrong)
-                uncertain.append((lua_func, rust_full, return_type, confidence))
+    for lua_func, rust_func, rust_full, confidence, module in potential_matches:
+        if rust_full in used_rust:
+            unmatched_lua.append(lua_func)
+            continue
+
+        used_rust.add(rust_full)
+        if confidence == 1.0:
+            matched.append((lua_func, rust_full, rust_func['return'], confidence, rust_func))
         else:
-            # This Rust function already matched to another Lua function
-            unmatched_lua.append(lua_func)
+            uncertain.append((lua_func, rust_full, rust_func['return'], confidence, rust_func))
 
-    # Add Lua functions that didn't match anything
-    matched_lua = set(lua for lua, _, _, _ in matched) | set(lua for lua, _, _, _ in uncertain)
+    matched_lua = set(lua['name'] for lua, _, _, _, _ in matched) | set(lua['name'] for lua, _, _, _, _ in uncertain)
+    unmatched_lua_names = set(lua['name'] if isinstance(lua, dict) else lua for lua in unmatched_lua)
     for lua_func in spring_funcs:
-        if lua_func not in matched_lua and lua_func not in unmatched_lua:
-            unmatched_lua.append(lua_func)
+        if lua_func['name'] not in matched_lua and lua_func['name'] not in unmatched_lua_names:
+            unmatched_lua.append(lua_func['name'])
+            unmatched_lua_names.add(lua_func['name'])
 
-    # Find Rust functions with no Lua equivalent
-    matched_rust = set(rust_full for _, rust_full, _, _ in matched)
+    matched_rust = set(rust_full for _, rust_full, _, _, _ in matched)
     all_rust = set()
-    for funcs in rust_funcs.values():
-        for rust_full, _ in funcs:
-            all_rust.add(rust_full)
+    for module, funcs in rust_funcs.items():
+        for func in funcs:
+            all_rust.add(f"{module}.{func['name']}")
 
     unmatched_rust = all_rust - matched_rust
 
-    # Generate report
     output_file = rust_dir / 'api_comparison.md'
 
     with open(output_file, 'w') as f:
@@ -100,8 +285,10 @@ def main():
         f.write('## Matched Functions (Perfect Match)\n\n')
         f.write('Functions with perfect 1.0 confidence match:\n\n')
 
-        for lua_func, rust_func, return_type, confidence in sorted(matched, key=lambda x: x[0]):
-            f.write(f'- `{lua_func}` → `{rust_func}`\n')
+        for lua_func, rust_func, return_type, confidence, rust_meta in sorted(matched, key=lambda x: x[0]['name']):
+            ok, msg = compare_params(lua_func.get('params', []), rust_meta.get('params', []))
+            suffix = "" if ok else f" (param mismatch: {msg})"
+            f.write(f'- `{lua_func["name"]}` → `{rust_func}`{suffix}\n')
 
         f.write(f'\n**Total: {len(matched)}**\n\n')
 
@@ -110,8 +297,10 @@ def main():
         f.write('## Uncertain Matches\n\n')
         f.write('Imperfect matches with <1.0 confidence (likely incorrect):\n\n')
 
-        for lua_func, rust_func, return_type, confidence in sorted(uncertain, key=lambda x: -x[3]):
-            f.write(f'- `{lua_func}` → `{rust_func}` (confidence: {confidence:.2f})\n')
+        for lua_func, rust_func, return_type, confidence, rust_meta in sorted(uncertain, key=lambda x: -x[3]):
+            ok, msg = compare_params(lua_func.get('params', []), rust_meta.get('params', []))
+            suffix = "" if ok else f"; params: {msg}"
+            f.write(f'- `{lua_func["name"]}` → `{rust_func}` (confidence: {confidence:.2f}{suffix})\n')
 
         f.write(f'\n**Total: {len(uncertain)}**\n\n')
 
@@ -120,7 +309,7 @@ def main():
         f.write('## Unmatched Lua Functions\n\n')
         f.write('Functions in Lua API with no Rust equivalent:\n\n')
 
-        for lua_func in sorted(unmatched_lua):
+        for lua_func in sorted(unmatched_lua_names):
             f.write(f'- `{lua_func}`\n')
 
         f.write(f'\n**Total unmatched: {len(unmatched_lua)}**\n\n')
@@ -142,98 +331,6 @@ def main():
     print(f"  Lua-only: {len(unmatched_lua)}")
     print(f"  Rust-only: {len(unmatched_rust)}")
 
-def parse_lua_functions(filepath: Path) -> Dict[str, List[str]]:
-    """Parse lua_functions.md and extract functions by namespace."""
-    functions = {}
-    current_namespace = None
-
-    with open(filepath, 'r') as f:
-        for line in f:
-            line = line.strip()
-
-            # Match namespace headers: ### Spring (761 functions)
-            ns_match = re.match(r'###\s+(\w+)\s+\((\d+)\s+functions\)', line)
-            if ns_match:
-                current_namespace = ns_match.group(1)
-                functions[current_namespace] = []
-                continue
-
-            # Match function: - `Spring.FunctionName`
-            func_match = re.match(r'-\s+`([^`]+)`', line)
-            if func_match and current_namespace:
-                functions[current_namespace].append(func_match.group(1))
-
-    return functions
-
-def parse_rust_functions(filepath: Path) -> Dict[str, List[Tuple[str, str]]]:
-    """Parse rust_functions.md and extract functions by module."""
-    functions = {}
-    current_module = None
-
-    with open(filepath, 'r') as f:
-        for line in f:
-            line = line.strip()
-
-            # Match module headers: ## Camera (10 functions)
-            mod_match = re.match(r'##\s+(\w+)\s+\((\d+)\s+functions\)', line)
-            if mod_match:
-                current_module = mod_match.group(1)
-                functions[current_module] = []
-                continue
-
-            # Match function: - `Camera.get_camera_direction` → `Result<sys::Float3, Error>`
-            func_match = re.match(r'-\s+`([^`]+)`\s+→\s+`([^`]+)`', line)
-            if func_match and current_module:
-                full_name = func_match.group(1)
-                return_type = func_match.group(2)
-                functions[current_module].append((full_name, return_type))
-
-    return functions
-
-def find_best_match(lua_func: str, rust_funcs: Dict[str, List[Tuple[str, str]]]) -> Optional[Tuple[str, str, float]]:
-    """
-    Find the best matching Rust function for a Lua function.
-    Returns (rust_full_name, return_type, confidence) or None.
-    """
-    lua_normalized = normalize_name(lua_func)
-
-    best_match = None
-    best_score = 0.0
-
-    for module, funcs in rust_funcs.items():
-        for rust_full, return_type in funcs:
-            rust_normalized = normalize_name(rust_full)
-
-            # Calculate similarity
-            similarity = SequenceMatcher(None, lua_normalized, rust_normalized).ratio()
-
-            if similarity > best_score:
-                best_score = similarity
-                best_match = (rust_full, return_type, similarity)
-
-    # Return matches above 0.8 threshold (will be categorized as certain/uncertain later)
-    if best_score >= 0.8:
-        return best_match
-
-    return None
-
-def normalize_name(name: str) -> str:
-    """
-    Normalize a function name for comparison.
-    - Convert camelCase to snake_case
-    - Remove namespace prefixes
-    - Lowercase
-    """
-    # Strip namespace
-    if '.' in name:
-        name = name.split('.')[-1]
-
-    # Convert camelCase to snake_case
-    # Insert underscore before uppercase letters
-    result = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name)
-    result = result.lower()
-
-    return result
 
 if __name__ == '__main__':
     main()

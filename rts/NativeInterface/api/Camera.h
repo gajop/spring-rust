@@ -50,27 +50,21 @@ struct GetCameraStateResult {
 	CameraState state;
 };
 
-struct GetCameraPositionQuery {
-	uint8_t _unused;
-};
+struct GetCameraPositionQuery { uint8_t _unused; };
 
 struct GetCameraPositionResult {
 	const Error* error;
 	Float3 position;
 };
 
-struct GetCameraDirectionQuery {
-	uint8_t _unused;
-};
+struct GetCameraDirectionQuery { uint8_t _unused; };
 
 struct GetCameraDirectionResult {
 	const Error* error;
 	Float3 direction;
 };
 
-struct GetCameraFOVQuery {
-	uint8_t _unused;
-};
+struct GetCameraFOVQuery { uint8_t _unused; };
 
 struct GetCameraFOVResult {
 	const Error* error;

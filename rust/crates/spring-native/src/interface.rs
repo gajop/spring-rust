@@ -2,13 +2,16 @@ use std::ptr::NonNull;
 
 use crate::{
     camera::Camera, config::Config, display::Display, feature_defs::FeatureDefs,
-    features::Features, game::Game, input::Input, los::Los, math_extra::MathExtra,
-    memory::Memory, messages::Messages, metal_map::MetalMap, move_ctrl::MoveCtrl,
-    path_finder::PathFinder, player::Player, projectiles::Projectiles, rules_params::RulesParams,
-    selection::Selection, sound::Sound, synced_ctrl::SyncedCtrl, sys, teams::Teams,
-    terrain::Terrain, tracing::Tracing, unit_defs::UnitDefs, units_commands::UnitsCommands,
-    units_info::UnitsInfo, units_pieces::UnitsPieces, units_query::UnitsQuery,
-    units_weapons::UnitsWeapons, utils::Utils, vfs::Vfs, weapon_defs::WeaponDefs,
+    features::Features, game::Game, ground_decals::GroundDecals, input::Input, los::Los,
+    math_extra::MathExtra, memory::Memory, messages::Messages, metal_map::MetalMap,
+    move_ctrl::MoveCtrl, path_finder::PathFinder, player::Player, profiling::Profiling,
+    projectiles::Projectiles, rules_params::RulesParams, selection::Selection,
+    sound::Sound, synced_ctrl::SyncedCtrl, sys, system_control::SystemControl, teams::Teams,
+    lights::Lights, terrain::Terrain, tracing::Tracing, unit_defs::UnitDefs,
+    units_commands::UnitsCommands, units_info::UnitsInfo, units_pieces::UnitsPieces,
+    units_query::UnitsQuery, units_weapons::UnitsWeapons, unsynced_ctrl::UnsyncedCtrl,
+    unsynced_read::UnsyncedRead, utils::Utils, vfs::Vfs, weapon_defs::WeaponDefs, icons::Icons,
+    markers::Markers,
 };
 
 #[derive(Clone, Copy)]
@@ -47,6 +50,14 @@ pub struct NativeInterfaceRef {
     tracing_api: &'static sys::TracingApi,
     utils_api: &'static sys::UtilsApi,
     memory_api: &'static sys::MemoryApi,
+    unsynced_ctrl_api: &'static sys::UnsyncedCtrlApi,
+    unsynced_read_api: &'static sys::UnsyncedReadApi,
+    lights_api: &'static sys::LightsApi,
+    icons_api: &'static sys::IconsApi,
+    markers_api: &'static sys::MarkersApi,
+    ground_decals_api: &'static sys::GroundDecalsApi,
+    system_control_api: &'static sys::SystemControlApi,
+    profiling_api: &'static sys::ProfilingApi,
 }
 
 // Safety: The NativeInterface is managed by the Spring engine, which handles
@@ -96,6 +107,26 @@ impl NativeInterfaceRef {
             tracing_api: iface.tracing.as_ref().expect("tracing API must be initialized"),
             utils_api: iface.utils.as_ref().expect("utils API must be initialized"),
             memory_api: iface.memory.as_ref().expect("memory API must be initialized"),
+            unsynced_ctrl_api: iface
+                .unsyncedCtrl
+                .as_ref()
+                .expect("unsyncedCtrl API must be initialized"),
+            unsynced_read_api: iface
+                .unsyncedRead
+                .as_ref()
+                .expect("unsyncedRead API must be initialized"),
+            lights_api: iface.lights.as_ref().expect("lights API must be initialized"),
+            icons_api: iface.icons.as_ref().expect("icons API must be initialized"),
+            markers_api: iface.markers.as_ref().expect("markers API must be initialized"),
+            ground_decals_api: iface
+                .groundDecals
+                .as_ref()
+                .expect("groundDecals API must be initialized"),
+            system_control_api: iface
+                .systemControl
+                .as_ref()
+                .expect("systemControl API must be initialized"),
+            profiling_api: iface.profiling.as_ref().expect("profiling API must be initialized"),
         })
     }
 
@@ -229,5 +260,37 @@ impl NativeInterfaceRef {
 
     pub fn memory(&self) -> Memory<'_> {
         Memory::new(self.memory_api)
+    }
+
+    pub fn unsynced_ctrl(&self) -> UnsyncedCtrl<'_> {
+        UnsyncedCtrl::new(self.unsynced_ctrl_api)
+    }
+
+    pub fn unsynced_read(&self) -> UnsyncedRead<'_> {
+        UnsyncedRead::new(self.unsynced_read_api)
+    }
+
+    pub fn lights(&self) -> Lights<'_> {
+        Lights::new(self.lights_api)
+    }
+
+    pub fn icons(&self) -> Icons<'_> {
+        Icons::new(self.icons_api)
+    }
+
+    pub fn markers(&self) -> Markers<'_> {
+        Markers::new(self.markers_api)
+    }
+
+    pub fn ground_decals(&self) -> GroundDecals<'_> {
+        GroundDecals::new(self.ground_decals_api)
+    }
+
+    pub fn system_control(&self) -> SystemControl<'_> {
+        SystemControl::new(self.system_control_api)
+    }
+
+    pub fn profiling(&self) -> Profiling<'_> {
+        Profiling::new(self.profiling_api)
     }
 }

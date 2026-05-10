@@ -9,6 +9,7 @@ import urllib.parse
 import re
 import time
 import json
+import html
 from pathlib import Path
 from typing import List, Dict, Set
 from datetime import datetime, timedelta
@@ -41,6 +42,10 @@ def fetch_page(url: str, cache_file: Path, cache_days: int = 1) -> str:
         return content
     except Exception as e:
         print(f"Error fetching {url}: {e}")
+        if cache_file.exists():
+            print("Falling back to cached content despite expiry")
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                return f.read()
         return ""
 
 def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
@@ -54,74 +59,167 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
     functions = []
     seen = set()
 
-    # Pattern 1: Function headings/anchors
-    # Matches: #Spring.GetGameFrame, #Spring.GetUnitPosition, etc.
-    anchor_pattern = r'#(Spring|gl|RmlUi|VFS|Script)\.([A-Za-z][A-Za-z0-9]*)'
-    for match in re.finditer(anchor_pattern, content):
+    # First, collect parameter info from @function blocks
+    func_blocks = []
+    func_pattern = re.compile(r'@function\s+(Spring|gl|RmlUi|VFS|Script)\.([A-Za-z][A-Za-z0-9_]*)', re.MULTILINE)
+    matches = list(func_pattern.finditer(content))
+    for idx, match in enumerate(matches):
+        start = match.start()
+        end = matches[idx + 1].start() if idx + 1 < len(matches) else len(content)
+        func_blocks.append((match.group(1), match.group(2), content[start:end]))
+
+    params_by_name = {}
+    param_regex = re.compile(r'@param\s+([^\s]+)\s+([^\n]+)')
+    html_param_regex = re.compile(r'<dt><code>([^<]+)</code><a [^>]+href=#([^>]+)>([^<]+)</a>')
+    sig_regex = re.compile(r'Spring\.[A-Za-z0-9_]+\(([^)]*)\)')
+
+    def clean_type(t: str) -> str:
+        t = re.sub(r'<[^>]+>', '', t)
+        return html.unescape(t).strip()
+
+    def parse_param_doc_text(text: str) -> str:
+        text = text.strip()
+        if not text:
+            return ''
+        # Most source docs use "@param name type description". Keep the type
+        # token, but preserve braced table types that contain spaces.
+        if text.startswith('{'):
+            depth = 0
+            for idx, ch in enumerate(text):
+                if ch == '{':
+                    depth += 1
+                elif ch == '}':
+                    depth -= 1
+                    if depth == 0:
+                        return text[:idx + 1].strip()
+        return text.split()[0]
+
+    def extract_html_params(block: str) -> List[Dict]:
+        params = []
+        for dt in re.findall(r'<dt>(.*?)</dt>', block, flags=re.DOTALL):
+            code_match = re.search(r'<code>(.*?)</code>', dt, flags=re.DOTALL)
+            if not code_match:
+                continue
+
+            name_part = dt[code_match.end():]
+            name_match = re.search(r'href=#([^>\s]+)>([^<]*)</a>', name_part, flags=re.DOTALL)
+            if not name_match:
+                continue
+            anchor = name_match.group(1)
+            if '-returns' in anchor or '-params.' not in anchor:
+                continue
+
+            params.append({
+                'name': html.unescape(name_match.group(2)).strip(),
+                'type': clean_type(code_match.group(1)),
+            })
+        return params
+    for namespace, func_name, block in func_blocks:
+        params = []
+        for p in param_regex.finditer(block):
+            params.append({'name': p.group(1), 'type': clean_type(parse_param_doc_text(p.group(2)))})
+
+        if not params:
+            params = extract_html_params(block)
+
+        if not params:
+            sig_match = sig_regex.search(block)
+            if sig_match:
+                raw = sig_match.group(1).strip()
+                if raw:
+                    for idx, token in enumerate([t.strip() for t in raw.split(',') if t.strip()]):
+                        params.append({'name': f'arg{idx+1}', 'type': clean_type(token)})
+
+        params_by_name[f"{namespace}.{func_name}"] = params
+
+    def extract_params_from_section(full_name: str) -> List[Dict]:
+        start = content.find(f"id={full_name}")
+        if start == -1:
+            start = content.find(full_name)
+            if start == -1:
+                return []
+        next_h4 = content.find("<h4", start + 1)
+        block = content[start: next_h4 if next_h4 != -1 else len(content)]
+
+        params = []
+        params = extract_html_params(block)
+
+        if not params:
+            sig_match = re.search(rf'{re.escape(full_name.split(".")[1])}\(([^)]*)\)', block)
+            if sig_match:
+                raw = sig_match.group(1).strip()
+                if raw:
+                    for idx, token in enumerate([t.strip() for t in raw.split(',') if t.strip()]):
+                        params.append({'name': f'arg{idx+1}', 'type': token})
+        return params
+
+    # Scan signatures from code blocks / text
+    sig_scan_pattern = re.compile(r'\b(Spring|gl|RmlUi|VFS|Script)\.([A-Za-z0-9_]+)\(([^)]*)\)')
+    for match in sig_scan_pattern.finditer(content):
         namespace = match.group(1)
         func_name = match.group(2)
+        if func_name.endswith(('_arguments', '_returns')):
+            continue
         full_name = f"{namespace}.{func_name}"
 
-        if full_name not in seen:
-            seen.add(full_name)
-            functions.append({
-                'namespace': namespace,
-                'name': func_name,
-                'full_name': full_name
-            })
+        if full_name in seen:
+            continue
 
-    # Pattern 2: Function definitions with parentheses
-    # Matches: Spring.FunctionName(...), gl.DrawGroundCircle(...), etc.
-    func_pattern = r'\b(Spring|gl|RmlUi|VFS|Script)\.([A-Za-z][A-Za-z0-9]*)\s*\('
-    for match in re.finditer(func_pattern, content):
-        namespace = match.group(1)
-        func_name = match.group(2)
-        full_name = f"{namespace}.{func_name}"
+        seen.add(full_name)
 
-        if full_name not in seen:
-            seen.add(full_name)
-            functions.append({
-                'namespace': namespace,
-                'name': func_name,
-                'full_name': full_name
-            })
+        params = extract_params_from_section(full_name)
+        if not params:
+            params = params_by_name.get(full_name, [])
+        if not params:
+            raw = match.group(3).strip()
+            if raw:
+                for idx, token in enumerate([t.strip() for t in raw.split(',') if t.strip()]):
+                    params.append({'name': f'arg{idx+1}', 'type': clean_type(token)})
+
+        functions.append({
+            'namespace': namespace,
+            'name': func_name,
+            'full_name': full_name,
+            'params': params
+        })
 
     return functions
 
 def extract_callins(content: str) -> List[Dict]:
     """
-    Extract call-in functions (callbacks from engine to plugin).
-    These don't have a namespace prefix.
+    Extract call-in functions (callbacks from engine to plugin) from the documented
+    Callins/SyncedCallins/UnsyncedCallins sections. Avoids picking up anchor noise
+    like L50/L500 and table headings.
     """
     callins = []
     seen = set()
 
-    # Pattern for callins - typically camelCase without namespace
-    # Look for function definitions in callin sections
-    callin_pattern = r'function\s+([A-Z][A-Za-z0-9]*)\s*\('
-    for match in re.finditer(callin_pattern, content):
-        func_name = match.group(1)
+    prefixes = [
+        'Callins',
+        'SyncedCallins',
+        'UnsyncedCallins',
+        'RulesSyncedCallins',
+        'RulesUnsyncedCallins',
+    ]
 
-        if func_name not in seen:
-            seen.add(func_name)
+    for prefix in prefixes:
+        pattern = rf'{prefix}:([A-Za-z0-9_]+)'
+        for name in re.findall(pattern, content):
+            # Skip anchors for params/returns and numeric noise
+            if name.endswith(('_arguments', '_returns')):
+                continue
+            if re.match(r'^L\d+$', name):
+                continue
+
+            full = f"{prefix}.{name}"
+            if full in seen:
+                continue
+
+            seen.add(full)
             callins.append({
                 'namespace': 'Callins',
-                'name': func_name,
-                'full_name': func_name
-            })
-
-    # Also look for anchor-style definitions
-    callin_anchor_pattern = r'#([A-Z][A-Za-z0-9]*)\b'
-    for match in re.finditer(callin_anchor_pattern, content):
-        func_name = match.group(1)
-
-        # Filter out common non-function words
-        if func_name not in seen and func_name not in ['Spring', 'RmlUi', 'Script', 'VFS', 'The', 'This', 'For']:
-            seen.add(func_name)
-            callins.append({
-                'namespace': 'Callins',
-                'name': func_name,
-                'full_name': func_name
+                'name': full,
+                'full_name': full,
             })
 
     return callins
@@ -184,7 +282,10 @@ def main():
                 f.write(f'### {namespace} ({len(functions)} functions)\n\n')
 
                 for func in sorted(functions, key=lambda x: x['name']):
-                    f.write(f'- `{func["full_name"]}`\n')
+                    params = func.get("params", [])
+                    param_str = ", ".join(f'{p["name"]}:{p["type"]}' for p in params) if params else ""
+                    suffix = f" (params: {param_str})" if param_str else " (params: )"
+                    f.write(f'- `{func["full_name"]}`{suffix}\n')
 
                 f.write('\n')
 

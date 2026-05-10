@@ -15,14 +15,8 @@ extern "C" {
 // ============================================================================
 
 // Queries
-struct GetCEGIDQuery {
-	const char* cegName;
-};
-
-struct GetCEGIDResult {
-	const Error* error;
-	int32_t cegID;
-};
+struct GetCEGIDQuery { const char* cegName; };
+struct GetCEGIDResult { const Error* error; int32_t cegID; };
 
 struct TestBuildOrderQuery {
 	int32_t unitDefID;

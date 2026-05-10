@@ -2,10 +2,16 @@
 
 #include "System/Log/ILog.h"
 #include "Game/GlobalUnsynced.h"
+#include "Game/Game.h"
+#include "Game/ChatMessage.h"
+#include "Game/Players/PlayerHandler.h"
+#include "Game/UI/GuiHandler.h"
 #include "Game/UI/TooltipConsole.h"
 #include "Game/UI/MouseHandler.h"
+#include "ExternalAI/EngineOutHandler.h"
 #include "System/EventClient.h"
 #include "Lua/LuaHandle.h"
+#include "Lua/LuaMenu.h"
 #include <string>
 #include <vector>
 
@@ -18,6 +24,8 @@ static thread_local Error dynamicError;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Message system not ready" };
+static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid player" };
+static const Error GUI_NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "GUI handler not ready" };
 
 static void NativeEcho(const EchoQuery* query, EchoResult* result) {
 	bufferPos = 0;
@@ -27,7 +35,17 @@ static void NativeEcho(const EchoQuery* query, EchoResult* result) {
 		return;
 	}
 
-	LOG("%s", query->message);
+	std::string composed = query->message;
+	if (query->message2 != nullptr) {
+		composed += " ";
+		composed += query->message2;
+	}
+	if (query->message3 != nullptr) {
+		composed += " ";
+		composed += query->message3;
+	}
+
+	LOG("%s", composed.c_str());
 	result->error = nullptr;
 	result->success = true;
 }
@@ -127,6 +145,148 @@ static void NativeSendMessageToSpectators(const SendMessageToSpectatorsQuery* qu
 	result->success = true;
 }
 
+static void NativeSendPublicChat(const SendPublicChatQuery* query, SendPublicChatResult* result) {
+	bufferPos = 0;
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (game == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+
+	game->SendNetChat(query->message, ChatMessage::TO_EVERYONE);
+	result->error = nullptr;
+	result->success = true;
+}
+
+static void NativeSendAllyChat(const SendAllyChatQuery* query, SendAllyChatResult* result) {
+	bufferPos = 0;
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (game == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+
+	game->SendNetChat(query->message, ChatMessage::TO_ALLIES);
+	result->error = nullptr;
+	result->success = true;
+}
+
+static void NativeSendSpectatorChat(const SendSpectatorChatQuery* query, SendSpectatorChatResult* result) {
+	bufferPos = 0;
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (game == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+
+	game->SendNetChat(query->message, ChatMessage::TO_SPECTATORS);
+	result->error = nullptr;
+	result->success = true;
+}
+
+static void NativeSendPrivateChat(const SendPrivateChatQuery* query, SendPrivateChatResult* result) {
+	bufferPos = 0;
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (game == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+	if (!playerHandler.IsValidPlayer(query->playerID)) {
+		result->error = &INVALID_PLAYER_ERROR;
+		result->success = false;
+		return;
+	}
+
+	game->SendNetChat(query->message, query->playerID);
+	result->error = nullptr;
+	result->success = true;
+}
+
+static void NativeSendCommands(const SendCommandsQuery* query, SendCommandsResult* result) {
+	bufferPos = 0;
+
+	if (query->commands == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (guihandler == nullptr) {
+		result->error = &GUI_NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+
+	std::string command = query->commands;
+	if (!command.empty() && command[0] != '@')
+		command = "@@" + command;
+
+	guihandler->RunCustomCommands({command}, false);
+	result->error = nullptr;
+	result->success = true;
+}
+
+static void NativeSendLuaMenuMsg(const SendLuaMenuMsgQuery* query, SendLuaMenuMsgResult* result) {
+	bufferPos = 0;
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (luaMenu == nullptr || gu == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+
+	luaMenu->RecvLuaMsg(query->message, gu->myPlayerNum);
+	result->error = nullptr;
+	result->success = true;
+}
+
+static void NativeSendSkirmishAIMessage(const SendSkirmishAIMessageQuery* query, SendSkirmishAIMessageResult* result) {
+	bufferPos = 0;
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (eoh == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+
+	std::vector<const char*> outData;
+	result->success = eoh->SendLuaMessages(query->aiID, query->message, outData);
+	result->error = nullptr;
+}
+
 static void NativeSendLuaUIMsg(const SendLuaUIQuery* query, SendLuaUIResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
@@ -197,6 +357,13 @@ const MessagesApi MESSAGES_API = {
 	.SendMessageToTeam = NativeSendMessageToTeam,
 	.SendMessageToAllyTeam = NativeSendMessageToAllyTeam,
 	.SendMessageToSpectators = NativeSendMessageToSpectators,
+	.SendPublicChat = NativeSendPublicChat,
+	.SendAllyChat = NativeSendAllyChat,
+	.SendSpectatorChat = NativeSendSpectatorChat,
+	.SendPrivateChat = NativeSendPrivateChat,
+	.SendCommands = NativeSendCommands,
+	.SendLuaMenuMsg = NativeSendLuaMenuMsg,
+	.SendSkirmishAIMessage = NativeSendSkirmishAIMessage,
 	.SendLuaUIMsg = NativeSendLuaUIMsg,
 	.SendLuaGaiaMsg = NativeSendLuaGaiaMsg,
 	.SendLuaRulesMsg = NativeSendLuaRulesMsg,

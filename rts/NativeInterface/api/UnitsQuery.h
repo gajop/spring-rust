@@ -118,8 +118,24 @@ struct GetUnitNearestAllyResult { const Error* error; int32_t unitID; };
 struct GetUnitNearestEnemyQuery { Float3 pos; float radius; };
 struct GetUnitNearestEnemyResult { const Error* error; int32_t unitID; };
 
+struct GetClosestEnemyUnitQuery {
+	Float3 pos;
+	float range;
+	int32_t allyTeamID;
+	bool useLOS;
+	bool sphereDistTest;
+	bool checkSightDist;
+};
+struct GetClosestEnemyUnitResult { const Error* error; int32_t unitID; };
+
 struct GetUnitSeparationQuery { int32_t unitID1; int32_t unitID2; bool positional; bool checkMap; };
 struct GetUnitSeparationResult { const Error* error; float separation; };
+
+struct GetRenderUnitsQuery { uint8_t _unused; };
+struct GetRenderUnitsResult { const Error* error; int32_t* units; uint32_t count; };
+
+struct GetRenderUnitsDrawFlagChangedQuery { uint8_t _unused; };
+struct GetRenderUnitsDrawFlagChangedResult { const Error* error; int32_t* units; uint32_t count; };
 
 // API structure
 struct UnitsQueryApi {
@@ -140,7 +156,10 @@ struct UnitsQueryApi {
 	void (*GetUnitMapCentroid)(const GetUnitMapCentroidQuery* query, GetUnitMapCentroidResult* result);
 	void (*GetUnitNearestAlly)(const GetUnitNearestAllyQuery* query, GetUnitNearestAllyResult* result);
 	void (*GetUnitNearestEnemy)(const GetUnitNearestEnemyQuery* query, GetUnitNearestEnemyResult* result);
+	void (*GetClosestEnemyUnit)(const GetClosestEnemyUnitQuery* query, GetClosestEnemyUnitResult* result);
 	void (*GetUnitSeparation)(const GetUnitSeparationQuery* query, GetUnitSeparationResult* result);
+	void (*GetRenderUnits)(const GetRenderUnitsQuery* query, GetRenderUnitsResult* result);
+	void (*GetRenderUnitsDrawFlagChanged)(const GetRenderUnitsDrawFlagChangedQuery* query, GetRenderUnitsDrawFlagChangedResult* result);
 };
 
 extern const UnitsQueryApi UNITS_QUERY_API;

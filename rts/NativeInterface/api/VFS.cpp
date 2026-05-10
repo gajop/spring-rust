@@ -4,6 +4,11 @@
 #include "System/FileSystem/FileHandler.h"
 #include "System/FileSystem/ArchiveScanner.h"
 #include "System/FileSystem/FileSystem.h"
+#include "Map/ReadMap.h"
+#include "Map/BaseGroundDrawer.h"
+#include "Map/BaseGroundTextures.h"
+#include "Rendering/Textures/NamedTextures.h"
+#include "System/Log/ILog.h"
 #include <vector>
 #include <string>
 
@@ -18,6 +23,8 @@ static thread_local Error dynamicError;
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "VFS system not ready" };
 static const Error FILE_NOT_FOUND_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "File not found" };
 static const Error READ_ERROR = { .code = ERROR_INTERNAL, .message = "Failed to read file" };
+static const Error INVALID_ARGUMENT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid argument" };
+static const Error MAP_TEX_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Map texture system not available" };
 
 static bool IsReady() { return (vfsHandler != nullptr); }
 static bool IsArchiveScannerReady() { return (archiveScanner != nullptr); }
@@ -269,6 +276,170 @@ static void NativeGetGames(const GetGamesQuery* query, GetGamesResult* result) {
 	result->count = static_cast<uint32_t>(gameNames.size());
 }
 
+static void NativeCreateDir(const CreateDirQuery* query, CreateDirResult* result) {
+	bufferPos = 0;
+	if (query->path == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		result->success = false;
+		return;
+	}
+
+	const std::string dir = query->path;
+	if (dir.empty() || dir[0] == '/' || dir[0] == '\\' || dir[0] == '~' || dir[0] == ' ' || dir[0] == '\t' || (dir.size() > 1 && dir[1] == ':') || dir.find("..") != std::string::npos) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		result->success = false;
+		return;
+	}
+
+	result->success = FileSystem::CreateDirectory(dir);
+	result->error = nullptr;
+}
+
+static void NativeExtractModArchiveFile(const ExtractModArchiveFileQuery* query, ExtractModArchiveFileResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (query->path == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const std::string path = query->path;
+
+	CFileHandler vfsFile(path, SPRING_VFS_ZIP);
+	CFileHandler rawFile(path, SPRING_VFS_RAW);
+
+	if (!vfsFile.FileExists()) {
+		result->error = &FILE_NOT_FOUND_ERROR;
+		return;
+	}
+
+	if (rawFile.FileExists()) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::string dname = FileSystem::GetDirectory(path);
+	std::string fname = FileSystem::GetFilename(path);
+
+#ifdef _WIN32
+	const size_t s = dname.size();
+	if ((s > 0) && ((dname[s - 1] == '/') || (dname[s - 1] == '\\')))
+		dname = dname.substr(0, s - 1);
+#endif
+
+	if (!dname.empty() && !FileSystem::CreateDirectory(dname)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<uint8_t> buffer;
+	std::fstream fstr(path.c_str(), std::ios::out | std::ios::binary);
+
+	if (!vfsFile.IsBuffered()) {
+		buffer.resize(vfsFile.FileSize(), 0);
+		vfsFile.Read(buffer.data(), buffer.size());
+	} else {
+		buffer = vfsFile.GetBuffer();
+	}
+
+	fstr.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+	fstr.close();
+
+	result->success = true;
+	if (!dname.empty()) {
+		LOG("[%s] extracted file \"%s\" to directory \"%s\"", __func__, fname.c_str(), dname.c_str());
+	} else {
+		LOG("[%s] extracted file \"%s\"", __func__, fname.c_str());
+	}
+}
+
+static void NativeGetMapSquareTexture(const GetMapSquareTextureQuery* query, GetMapSquareTextureResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (readMap == nullptr || readMap->GetGroundDrawer() == nullptr) {
+		result->error = &MAP_TEX_ERROR;
+		return;
+	}
+
+	if (query->textureName == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	CBaseGroundTextures* groundTextures = readMap->GetGroundDrawer()->GetGroundTextures();
+	if (groundTextures == nullptr) {
+		result->error = &MAP_TEX_ERROR;
+		return;
+	}
+
+	const CNamedTextures::TexInfo* namedTexture = CNamedTextures::GetInfo(query->textureName);
+	if (namedTexture == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const int tid = namedTexture->id;
+	const int txs = namedTexture->xsize;
+	const int tys = namedTexture->ysize;
+
+	if (txs != tys) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const int lodMax = (query->lodMax > 0) ? query->lodMax : query->lodMin;
+
+	result->success = groundTextures->GetSquareLuaTexture(
+		query->texSquareX,
+		query->texSquareY,
+		tid,
+		txs,
+		tys,
+		query->lodMin,
+		lodMax
+	);
+}
+
+static void NativeSetMapSquareTexture(const SetMapSquareTextureQuery* query, SetMapSquareTextureResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (readMap == nullptr || readMap->GetGroundDrawer() == nullptr) {
+		result->error = &MAP_TEX_ERROR;
+		return;
+	}
+
+	CBaseGroundTextures* groundTextures = readMap->GetGroundDrawer()->GetGroundTextures();
+	if (groundTextures == nullptr) {
+		result->error = &MAP_TEX_ERROR;
+		return;
+	}
+
+	if (query->textureName == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const std::string texName = query->textureName;
+	if (texName.empty()) {
+		result->success = groundTextures->SetSquareLuaTexture(query->texSquareX, query->texSquareY, 0);
+		return;
+	}
+
+	const CNamedTextures::TexInfo* namedTexture = CNamedTextures::GetInfo(texName);
+	if (namedTexture == nullptr || namedTexture->xsize != namedTexture->ysize) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	result->success = groundTextures->SetSquareLuaTexture(query->texSquareX, query->texSquareY, namedTexture->id);
+}
+
 } // namespace
 
 const VFSApi VFS_API = {
@@ -282,4 +453,8 @@ const VFSApi VFS_API = {
 	.GetArchives = NativeGetArchives,
 	.GetMaps = NativeGetMaps,
 	.GetGames = NativeGetGames,
+	.CreateDir = NativeCreateDir,
+	.ExtractModArchiveFile = NativeExtractModArchiveFile,
+	.GetMapSquareTexture = NativeGetMapSquareTexture,
+	.SetMapSquareTexture = NativeSetMapSquareTexture,
 };

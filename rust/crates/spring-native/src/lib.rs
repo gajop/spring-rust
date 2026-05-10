@@ -12,7 +12,7 @@
 //! - **Type safety** - Query structs are flattened into strongly-typed function parameters
 //! - **Idiomatic Rust** - Uses `Result<T, Error>`, `&[T]` slices, and `&str` strings
 //! - **Zero unsafe in user code** - All FFI unsafe code is encapsulated in the generated wrappers
-//! - **37 API modules** - Complete coverage of all Spring Native Interface APIs (32 main + 5 sub-APIs)
+//! - **46 API modules** - Complete coverage of all Spring Native Interface APIs (38 main + 8 sub-APIs)
 //!
 //! ## Quick Start
 //!
@@ -74,12 +74,15 @@
 //! - [`Los`] - Line of sight and radar queries
 //!
 //! ### Control (Synced)
-//! - [`SyncedCtrl`] - Composite API with 5 sub-APIs:
+//! - [`SyncedCtrl`] - Composite API with 8 sub-APIs:
 //!   - [`TeamControl`] - Alliances, resources (11 functions)
 //!   - [`UnitControl`] - Create/destroy units, orders (19 functions)
 //!   - [`FeatureControl`] - Feature modification (8 functions)
 //!   - [`TerrainControl`] - Height maps, terrain types (10 functions)
 //!   - [`ProjectileControl`] - Spawn/modify projectiles (6 functions)
+//!   - [`EffectsControl`] - Spawn explosions/CEGs/SFX (3 functions)
+//!   - [`GameConfig`] - Game rule toggles and radar error settings (4 functions)
+//!   - [`CobScript`] - Call COB scripts and resolve IDs (2 functions)
 //!
 //! ### Utilities
 //! - [`MathExtra`] - Extended math functions
@@ -93,6 +96,11 @@
 //! - [`Input`] - Mouse and keyboard input
 //! - [`Display`] - Display and rendering state
 //! - [`Selection`] - Unit selection queries
+//! - [`Icons`] - Unit icon definitions and draw toggles
+//! - [`Markers`] - Map/world marker helpers
+//! - [`GroundDecals`] - Dynamic ground decals (create, query, modify)
+//! - [`UnsyncedRead`] - Client-only rendering and UI state (UnitRendering sub-API)
+//! - [`UnsyncedCtrl`] - Client-only rendering and UI control (unit flags, minimap)
 //!
 //! ### I/O & System
 //! - [`Vfs`] - Virtual file system access
@@ -101,6 +109,9 @@
 //! - [`Config`] - Engine configuration
 //! - [`Memory`] - FFI memory management
 //! - [`Tracing`] - Ray tracing and collision
+//! - [`Lights`] - Dynamic map/model lights
+//! - [`SystemControl`] - Game lifecycle, team sharing, watchdog/yield
+//! - [`Profiling`] - Timers, profiler records, Lua/VRAM usage
 //! - [`Utils`] - Miscellaneous utilities
 //!
 //! ## Error Handling
@@ -137,16 +148,22 @@ mod error;
 mod feature_defs;
 mod features;
 mod game;
+mod ground_decals;
 mod input;
+mod icons;
 mod interface;
 mod los;
+mod lights;
 mod math_extra;
+mod profiling;
+mod markers;
 mod memory;
 mod messages;
 mod metal_map;
 mod move_ctrl;
 mod path_finder;
 mod player;
+mod system_control;
 pub mod prelude;
 mod projectiles;
 mod rules_params;
@@ -156,6 +173,8 @@ mod synced_ctrl;
 mod teams;
 mod terrain;
 mod tracing;
+mod unsynced_ctrl;
+mod unsynced_read;
 mod unit_defs;
 mod units_commands;
 mod units_info;
@@ -174,26 +193,35 @@ pub use error::Error;
 pub use feature_defs::FeatureDefs;
 pub use features::Features;
 pub use game::Game;
+pub use ground_decals::GroundDecals;
+pub use profiling::Profiling;
 pub use input::Input;
+pub use icons::Icons;
 pub use interface::NativeInterfaceRef;
 pub use los::Los;
 pub use math_extra::MathExtra;
+pub use markers::Markers;
 pub use memory::Memory;
 pub use messages::Messages;
 pub use metal_map::MetalMap;
 pub use move_ctrl::MoveCtrl;
 pub use path_finder::PathFinder;
 pub use player::Player;
+pub use system_control::SystemControl;
 pub use projectiles::Projectiles;
 pub use rules_params::RulesParams;
 pub use selection::Selection;
 pub use sound::Sound;
+pub use lights::Lights;
 pub use synced_ctrl::{
-    FeatureControl, ProjectileControl, SyncedCtrl, TeamControl, TerrainControl, UnitControl,
+    CobScript, EffectsControl, FeatureControl, GameConfig, ProjectileControl, SyncedCtrl,
+    TeamControl, TerrainControl, UnitControl,
 };
 pub use teams::Teams;
 pub use terrain::Terrain;
 pub use tracing::Tracing;
+pub use unsynced_ctrl::UnsyncedCtrl;
+pub use unsynced_read::{UnitRendering, UnsyncedRead};
 pub use unit_defs::UnitDefs;
 pub use units_commands::UnitsCommands;
 pub use units_info::UnitsInfo;

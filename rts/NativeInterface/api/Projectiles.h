@@ -94,8 +94,12 @@ struct GetProjectileDefIDResult { const Error* error; int32_t defID; };
 struct GetProjectileDamagesQuery { int32_t projectileID; };
 struct GetProjectileDamagesResult { const Error* error; ProjectileDamages damages; };
 
+struct GetAllProjectilesQuery { bool synced; bool weapon; };
+struct GetAllProjectilesResult { const Error* error; int32_t* projectiles; uint32_t count; };
+
 // API structure
 struct ProjectilesApi {
+	void (*GetAllProjectiles)(const GetAllProjectilesQuery* query, GetAllProjectilesResult* result);
 	void (*GetProjectilesInRectangle)(const GetProjectilesInRectangleQuery* query, GetProjectilesInRectangleResult* result);
 	void (*GetProjectilesInSphere)(const GetProjectilesInSphereQuery* query, GetProjectilesInSphereResult* result);
 	void (*GetProjectilePosition)(const GetProjectilePositionQuery* query, GetProjectilePositionResult* result);

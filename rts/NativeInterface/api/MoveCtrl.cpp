@@ -6,6 +6,7 @@
 #include "Sim/MoveTypes/GroundMoveType.h"
 #include "Sim/MoveTypes/AAirMoveType.h"
 #include "Sim/MoveTypes/StrafeAirMoveType.h"
+#include "Sim/Misc/GlobalSynced.h"
 #include "System/StringUtil.h"
 
 namespace {
@@ -108,9 +109,36 @@ static void NativeGetUnitEstimatedPath(const GetUnitEstimatedPathQuery* query, G
 	result->count = 1;
 }
 
+static void NativeMoveCtrl(const MoveCtrlQuery* query, MoveCtrlResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (query->enable) {
+		unit->EnableScriptMoveType();
+	} else {
+		unit->DisableScriptMoveType();
+	}
+
+	result->success = true;
+}
+
 } // namespace
 
 const MoveCtrlApi MOVE_CTRL_API = {
 	.GetUnitMoveTypeData = NativeGetUnitMoveTypeData,
 	.GetUnitEstimatedPath = NativeGetUnitEstimatedPath,
+	.MoveCtrl = NativeMoveCtrl,
 };

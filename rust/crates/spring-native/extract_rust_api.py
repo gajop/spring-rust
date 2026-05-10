@@ -18,16 +18,32 @@ def extract_functions_from_file(filepath: Path) -> List[Dict]:
 
     # Pattern to match public functions
     # pub fn function_name(&self, param: Type, ...) -> Result<ReturnType, Error>
-    pattern = r'pub\s+fn\s+([a-z_][a-z0-9_]*)\s*\([^)]*\)\s*(?:->\s*([^{;]+))?'
+    pattern = r'pub\s+fn\s+(?:r#)?([a-z_][a-z0-9_]*)\s*\(([^)]*)\)\s*(?:->\s*([^{;]+))?'
 
     for match in re.finditer(pattern, content):
         func_name = match.group(1)
-        return_type = match.group(2).strip() if match.group(2) else '()'
+        param_str = match.group(2)
+        return_type = match.group(3).strip() if match.group(3) else '()'
+
+        params = []
+        if param_str.strip():
+            # Split top-level commas (simplistic but fine for our generated signatures)
+            raw_params = [p.strip() for p in param_str.split(',') if p.strip()]
+            for p in raw_params:
+                # skip self receivers
+                if p in ('&self', 'self', '&mut self'):
+                    continue
+                if ':' in p:
+                    name, ty = p.split(':', 1)
+                    params.append({'name': name.strip(), 'type': ty.strip()})
+                else:
+                    params.append({'name': p.strip(), 'type': ''})
 
         functions.append({
             'name': func_name,
             'return_type': return_type,
-            'file': filepath.name
+            'file': filepath.name,
+            'params': params
         })
 
     return functions
@@ -58,7 +74,9 @@ def extract_from_source(src_dir: Path) -> Dict[str, List[Dict]]:
         'projectiles.rs', 'rules_params.rs', 'selection.rs', 'sound.rs',
         'synced_ctrl.rs', 'teams.rs', 'terrain.rs', 'tracing.rs', 'unit_defs.rs',
         'units_commands.rs', 'units_info.rs', 'units_pieces.rs', 'units_query.rs',
-        'units_weapons.rs', 'utils.rs', 'vfs.rs', 'weapon_defs.rs', 'memory.rs'
+        'units_weapons.rs', 'utils.rs', 'vfs.rs', 'weapon_defs.rs', 'memory.rs',
+        'unsynced_read.rs', 'unsynced_ctrl.rs', 'lights.rs', 'icons.rs',
+        'markers.rs', 'ground_decals.rs', 'system_control.rs', 'profiling.rs',
     ]
 
     for filename in api_files:
@@ -91,7 +109,14 @@ def main():
         print("Could not find build output directory")
         return
 
-    out_dir = out_dirs[0]
+    # Pick the directory with the most recently modified .rs file
+    def get_newest_file_time(d):
+        rs_files = list(d.glob('*.rs'))
+        if not rs_files:
+            return 0
+        return max(f.stat().st_mtime for f in rs_files)
+
+    out_dir = max(out_dirs, key=get_newest_file_time)
     print(f"Reading generated code from: {out_dir}")
     print(f"Found {len(list(out_dir.glob('*.rs')))} generated files")
 
@@ -121,7 +146,8 @@ def main():
             f.write(f'## {struct_name} ({len(functions)} functions)\n\n')
 
             for func in sorted(functions, key=lambda x: x['name']):
-                f.write(f'- `{struct_name}.{func["name"]}` → `{func["return_type"]}`\n')
+                param_str = ", ".join(f'{p["name"]}:{p["type"]}' for p in func.get("params", []))
+                f.write(f'- `{struct_name}.{func["name"]}` (params: {param_str}) → `{func["return_type"]}`\n')
 
             f.write('\n')
 

@@ -70,7 +70,12 @@ if [[ -z "$(docker images -q $image 2> /dev/null)" ]]; then
   docker pull $image
 fi
 
-docker run -it --rm \
+TTY_FLAGS="-it"
+if [[ ! -t 0 ]]; then
+  TTY_FLAGS="-i"
+fi
+
+docker run $TTY_FLAGS --rm \
     -v /etc/passwd:/etc/passwd:ro \
     -v /etc/group:/etc/group:ro \
     --user=$(id -u):$(id -g) \

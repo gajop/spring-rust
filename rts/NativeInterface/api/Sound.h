@@ -64,6 +64,18 @@ struct SetSoundStreamVolumeResult { const Error* error; bool success; };
 struct GetSoundStreamTimeQuery { uint8_t _unused; };
 struct GetSoundStreamTimeResult { const Error* error; float time; };
 
+struct GetSoundDevicesQuery { uint8_t _unused; };
+struct GetSoundDevicesResult { const Error* error; const char** devices; uint32_t count; };
+
+struct GetSoundEffectParamsQuery { uint8_t _unused; };
+struct GetSoundEffectParamsResult { const Error* error; bool success; };
+
+struct SetSoundEffectParamsQuery { const char* preset; };
+struct SetSoundEffectParamsResult { const Error* error; bool success; };
+
+struct PreloadSoundItemQuery { const char* soundName; };
+struct PreloadSoundItemResult { const Error* error; bool success; };
+
 // API structure
 struct SoundApi {
 	void (*PlaySoundFile)(const PlaySoundFileQuery* query, PlaySoundFileResult* result);
@@ -73,6 +85,10 @@ struct SoundApi {
 	void (*PauseSoundStream)(const PauseSoundStreamQuery* query, PauseSoundStreamResult* result);
 	void (*SetSoundStreamVolume)(const SetSoundStreamVolumeQuery* query, SetSoundStreamVolumeResult* result);
 	void (*GetSoundStreamTime)(const GetSoundStreamTimeQuery* query, GetSoundStreamTimeResult* result);
+	void (*GetSoundDevices)(const GetSoundDevicesQuery* query, GetSoundDevicesResult* result);
+	void (*GetSoundEffectParams)(const GetSoundEffectParamsQuery* query, GetSoundEffectParamsResult* result);
+	void (*SetSoundEffectParams)(const SetSoundEffectParamsQuery* query, SetSoundEffectParamsResult* result);
+	void (*PreloadSoundItem)(const PreloadSoundItemQuery* query, PreloadSoundItemResult* result);
 };
 
 extern const SoundApi SOUND_API;

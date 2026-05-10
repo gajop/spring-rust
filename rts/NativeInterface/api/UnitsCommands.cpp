@@ -7,8 +7,11 @@
 #include "Sim/Units/CommandAI/Command.h"
 #include "Sim/Units/CommandAI/CommandQueue.h"
 #include "Sim/Misc/GlobalSynced.h"
+#include "Game/SelectedUnitsHandler.h"
+#include "Game/GlobalUnsynced.h"
 #include <cstring>
 #include <algorithm>
+#include <vector>
 
 namespace {
 
@@ -22,9 +25,29 @@ static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "
 static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
 static const Error NO_COMMAND_AI_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit has no command AI" };
 static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
+static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Command issuing not implemented" };
+static const Error ORDERS_BLOCKED_ERROR = { .code = ERROR_PERMISSION_DENIED, .message = "Command issuing not allowed" };
 
 static bool IsReady() {
 	return (gs != nullptr);
+}
+
+static bool CanIssueOrders()
+{
+	if (!IsReady())
+		return false;
+
+	if (gs->PreSimFrame())
+		return false;
+
+	if (gs->noHelperAIs)
+		return false;
+
+	// Mirrors CSelectedUnitsHandler::SendCommandsToUnits guard
+	if (gu->spectating && gs->godMode == 0)
+		return false;
+
+	return true;
 }
 
 // Helper to allocate from scratch buffer
@@ -96,6 +119,41 @@ static bool ConvertCommand(const ::Command& cmd, CommandFFI& outCmd) {
 	outCmd.paramCount = paramCount;
 
 	return true;
+}
+
+static bool BuildCommand(const CommandFFI& ffi, Command& outCmd)
+{
+	if (ffi.paramCount > MAX_COMMAND_PARAMS) {
+		return false;
+	}
+
+	outCmd = Command(ffi.cmdID);
+	outCmd.SetOpts(ffi.options);
+	outCmd.SetTag(ffi.tag);
+	outCmd.SetAICmdID(ffi.aiCommandID);
+
+	if (ffi.timeOut > 0.0f && ffi.timeOut < static_cast<float>(INT_MAX)) {
+		outCmd.SetTimeOut(static_cast<int>(ffi.timeOut));
+	}
+
+	for (uint32_t i = 0; i < ffi.paramCount; ++i) {
+		outCmd.PushParam(ffi.params[i]);
+	}
+
+	return true;
+}
+
+static bool BuildCommandSimple(int32_t cmdID, uint32_t options, const float* params, uint32_t paramCount, Command& outCmd)
+{
+	CommandFFI ffi{};
+	ffi.cmdID = cmdID;
+	ffi.options = static_cast<uint8_t>(options);
+	ffi.tag = 0;
+	ffi.aiCommandID = 0;
+	ffi.timeOut = 0.0f;
+	ffi.params = const_cast<float*>(params);
+	ffi.paramCount = paramCount;
+	return BuildCommand(ffi, outCmd);
 }
 
 static void NativeGetUnitCommandCount(const GetUnitCommandCountQuery* query, GetUnitCommandCountResult* result)
@@ -226,14 +284,32 @@ static void NativeGetFactoryCounts(const GetFactoryCountsQuery* query, GetFactor
 		return; // Not a factory, return zero counts
 	}
 
-	const auto& buildOptions = factoryCAI->buildOptions;
-	if (buildOptions.empty()) {
+	const CCommandQueue& commandQue = factoryCAI->commandQue;
+	int count = query->count;
+	if (count < 0) {
+		count = static_cast<int>(commandQue.size());
+	}
+
+	// Use command queue to count commands
+	std::map<int, uint32_t> cmdCounts;
+	int processed = 0;
+	for (const auto& cmd : commandQue) {
+		if (processed >= count) break;
+		const int id = cmd.GetID(false);
+		if (!query->addCmds && id >= 0) {
+			continue; // skip non-build commands when addCmds=false
+		}
+		cmdCounts[id] += 1;
+		processed++;
+	}
+
+	if (cmdCounts.empty()) {
 		return;
 	}
 
 	// Allocate arrays
-	result->info.unitDefIDs = AllocateArray<int32_t>(buildOptions.size());
-	result->info.counts = AllocateArray<uint32_t>(buildOptions.size());
+	result->info.unitDefIDs = AllocateArray<int32_t>(cmdCounts.size());
+	result->info.counts = AllocateArray<uint32_t>(cmdCounts.size());
 	if (result->info.unitDefIDs == nullptr || result->info.counts == nullptr) {
 		result->error = &BUFFER_OVERFLOW_ERROR;
 		return;
@@ -242,8 +318,8 @@ static void NativeGetFactoryCounts(const GetFactoryCountsQuery* query, GetFactor
 	// Fill arrays
 	uint32_t idx = 0;
 	uint32_t totalCount = 0;
-	for (const auto& pair : buildOptions) {
-		result->info.unitDefIDs[idx] = -pair.first; // Build commands use negative IDs
+	for (const auto& pair : cmdCounts) {
+		result->info.unitDefIDs[idx] = pair.first;
 		result->info.counts[idx] = pair.second;
 		totalCount += pair.second;
 		idx++;
@@ -597,6 +673,46 @@ static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmd
 	}
 
 	const auto& possibleCmds = unit->commandAI->GetPossibleCommands();
+
+	// Prefer cmdIndex if supplied (1-based in Lua)
+	if (query->cmdIndex > 0 && static_cast<size_t>(query->cmdIndex) <= possibleCmds.size()) {
+		const SCommandDescription* desc = possibleCmds[query->cmdIndex - 1];
+
+		CommandDescription& outDesc = result->cmdDesc;
+
+		outDesc.cmdID = desc->id;
+		outDesc.action = 0; // action string not mapped to int currently
+		outDesc.type = CmdTypeToString(desc->type);
+		outDesc.name = CopyString(desc->name);
+		outDesc.tooltip = CopyString(desc->tooltip);
+		outDesc.texture = CopyString(desc->iconname);
+		outDesc.cursor = CopyString(desc->mouseicon);
+		outDesc.queueing = desc->queueing;
+		outDesc.hidden = desc->hidden;
+		outDesc.disabled = desc->disabled;
+		outDesc.showUnique = desc->showUnique;
+		outDesc.onlyTexture = desc->onlyTexture;
+
+		if (!desc->params.empty()) {
+			outDesc.params = AllocateArray<const char*>(desc->params.size());
+			if (outDesc.params == nullptr) {
+				result->error = &BUFFER_OVERFLOW_ERROR;
+				return;
+			}
+			for (size_t j = 0; j < desc->params.size(); ++j) {
+				outDesc.params[j] = CopyString(desc->params[j]);
+				if (outDesc.params[j] == nullptr) {
+					result->error = &BUFFER_OVERFLOW_ERROR;
+					return;
+				}
+			}
+			outDesc.paramCount = static_cast<uint32_t>(desc->params.size());
+		}
+
+		result->found = true;
+		return;
+	}
+
 	for (const SCommandDescription* desc : possibleCmds) {
 		if (desc->id == query->cmdID) {
 			CommandDescription& outDesc = result->cmdDesc;
@@ -645,6 +761,99 @@ static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmd
 	}
 }
 
+static void NativeGiveOrder(const GiveOrderQuery* query, GiveOrderResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!CanIssueOrders()) {
+		result->error = &ORDERS_BLOCKED_ERROR;
+		return;
+	}
+
+	Command cmd;
+	if (!BuildCommandSimple(query->cmdID, query->options, query->params, query->paramCount, cmd)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	selectedUnitsHandler.GiveCommand(cmd);
+	result->success = true;
+}
+
+static void NativeGiveOrderToUnitMap(const GiveOrderToUnitMapQuery* query, GiveOrderToUnitMapResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->unitsOrdered = 0;
+
+	if (!CanIssueOrders()) {
+		result->error = &ORDERS_BLOCKED_ERROR;
+		return;
+	}
+
+	Command cmd;
+	if (!BuildCommandSimple(query->cmdID, query->options, query->params, query->paramCount, cmd)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	std::vector<int> unitIDs;
+	unitIDs.reserve(query->count);
+
+	for (uint32_t i = 0; i < query->count; ++i) {
+		CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
+		if (unit != nullptr && !unit->noSelect) {
+			unitIDs.push_back(unit->id);
+		}
+	}
+
+	if (!unitIDs.empty()) {
+		selectedUnitsHandler.SendCommandsToUnits(unitIDs, {cmd});
+		result->unitsOrdered = static_cast<int32_t>(unitIDs.size());
+	}
+}
+
+static void NativeGiveOrderArrayToUnitMap(const GiveOrderArrayToUnitMapQuery* query, GiveOrderArrayToUnitMapResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->unitsOrdered = 0;
+
+	if (!CanIssueOrders()) {
+		result->error = &ORDERS_BLOCKED_ERROR;
+		return;
+	}
+
+	std::vector<int> unitIDs;
+	unitIDs.reserve(query->unitCount);
+
+	for (uint32_t i = 0; i < query->unitCount; ++i) {
+		CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
+		if (unit != nullptr && !unit->noSelect) {
+			unitIDs.push_back(unit->id);
+		}
+	}
+
+	std::vector<Command> commands;
+	commands.reserve(query->commandCount);
+
+	for (uint32_t i = 0; i < query->commandCount; ++i) {
+		Command cmd;
+		if (!BuildCommand(query->commands[i], cmd)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+		commands.push_back(cmd);
+	}
+
+	if (!unitIDs.empty() && !commands.empty()) {
+		selectedUnitsHandler.SendCommandsToUnits(unitIDs, commands, query->pairwise);
+		result->unitsOrdered = static_cast<int32_t>(unitIDs.size());
+	}
+}
+
 } // namespace
 
 const UnitsCommandsApi UNITS_COMMANDS_API = {
@@ -660,4 +869,7 @@ const UnitsCommandsApi UNITS_COMMANDS_API = {
 	.GetRealBuildQueue = NativeGetRealBuildQueue,
 	.GetUnitCmdDescs = NativeGetUnitCmdDescs,
 	.FindUnitCmdDesc = NativeFindUnitCmdDesc,
+	.GiveOrder = NativeGiveOrder,
+	.GiveOrderToUnitMap = NativeGiveOrderToUnitMap,
+	.GiveOrderArrayToUnitMap = NativeGiveOrderArrayToUnitMap,
 };

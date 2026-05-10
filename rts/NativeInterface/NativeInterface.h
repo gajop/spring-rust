@@ -37,10 +37,17 @@
 #include "NativeInterface/api/UnitsPieces.h"
 #include "NativeInterface/api/UnitsQuery.h"
 #include "NativeInterface/api/UnitsWeapons.h"
+#include "NativeInterface/api/UnsyncedCtrl.h"
 #include "NativeInterface/api/UnsyncedRead.h"
 #include "NativeInterface/api/Utils.h"
 #include "NativeInterface/api/VFS.h"
 #include "NativeInterface/api/WeaponDefs.h"
+#include "NativeInterface/api/Lights.h"
+#include "NativeInterface/api/Icons.h"
+#include "NativeInterface/api/Markers.h"
+#include "NativeInterface/api/GroundDecals.h"
+#include "NativeInterface/api/SystemControl.h"
+#include "NativeInterface/api/Profiling.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -89,7 +96,14 @@ struct NativeInterface {
 	const TracingApi* tracing;
 	const UtilsApi* utils;
 	const PlayerApi* player;
-	// const UnsyncedReadApi* unsyncedRead;
+	const UnsyncedCtrlApi* unsyncedCtrl;
+	const UnsyncedReadApi* unsyncedRead;
+	const LightsApi* lights;
+	const IconsApi* icons;
+	const MarkersApi* markers;
+	const GroundDecalsApi* groundDecals;
+	const SystemControlApi* systemControl;
+	const ProfilingApi* profiling;
 };
 
 #ifdef __cplusplus

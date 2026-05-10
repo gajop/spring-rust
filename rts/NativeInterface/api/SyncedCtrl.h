@@ -53,6 +53,22 @@ struct SetTeamShareLevelResult { const Error* error; bool success; };
 struct ShareTeamResourceQuery { int32_t teamID; int32_t targetTeamID; const char* resourceType; float amount; };
 struct ShareTeamResourceResult { const Error* error; bool success; };
 
+// Set team start position query
+struct SetTeamStartPositionQuery { int32_t teamID; Float3 pos; };
+struct SetTeamStartPositionResult { const Error* error; bool success; };
+
+// Set player ready state query
+struct SetPlayerReadyStateQuery { int32_t playerID; bool ready; };
+struct SetPlayerReadyStateResult { const Error* error; bool success; };
+
+// Transfer team max units query
+struct TransferTeamMaxUnitsQuery {
+	int32_t fromTeamID;
+	int32_t toTeamID;
+	int32_t amount;
+};
+struct TransferTeamMaxUnitsResult { const Error* error; bool success; };
+
 struct TeamControlApi {
 	void (*SetAlly)(const SetAllyQuery* query, SetAllyResult* result);
 	void (*SetAllyTeamStartBox)(const SetAllyTeamStartBoxQuery* query, SetAllyTeamStartBoxResult* result);
@@ -65,6 +81,42 @@ struct TeamControlApi {
 	void (*SetTeamResource)(const SetTeamResourceQuery* query, SetTeamResourceResult* result);
 	void (*SetTeamShareLevel)(const SetTeamShareLevelQuery* query, SetTeamShareLevelResult* result);
 	void (*ShareTeamResource)(const ShareTeamResourceQuery* query, ShareTeamResourceResult* result);
+	void (*SetTeamStartPosition)(const SetTeamStartPositionQuery* query, SetTeamStartPositionResult* result);
+	void (*SetPlayerReadyState)(const SetPlayerReadyStateQuery* query, SetPlayerReadyStateResult* result);
+	void (*TransferTeamMaxUnits)(const TransferTeamMaxUnitsQuery* query, TransferTeamMaxUnitsResult* result);
+};
+
+// ============================================================================
+// COB Script Control
+// ============================================================================
+
+// Call COB script query
+struct CallCOBScriptQuery {
+	int32_t unitID;
+	const char* funcName;        // Function name (if funcID < 0)
+	int32_t funcID;              // Function ID (use -1 to use funcName instead)
+	const int32_t* args;         // Arguments array
+	uint32_t argCount;           // Number of arguments
+	uint32_t retCount;           // Number of return values requested
+	bool returnValues;           // whether to copy return values
+};
+struct CallCOBScriptResult {
+	const Error* error;
+	int32_t retCode;             // Return code from COB
+	int32_t* retValues;          // Return values (up to retCount)
+	uint32_t retCount;           // Actual number of return values
+};
+
+// Get COB script ID query
+struct GetCOBScriptIDQuery {
+	int32_t unitID;
+	const char* funcName;
+};
+struct GetCOBScriptIDResult { const Error* error; int32_t funcID; };
+
+struct COBScriptApi {
+	void (*CallCOBScript)(const CallCOBScriptQuery* query, CallCOBScriptResult* result);
+	void (*GetCOBScriptID)(const GetCOBScriptIDQuery* query, GetCOBScriptIDResult* result);
 };
 
 // ============================================================================
@@ -72,10 +124,10 @@ struct TeamControlApi {
 // ============================================================================
 
 // Queries - Unit Control
-struct CreateUnitQuery { int32_t unitDefID; Float3 pos; int32_t facing; int32_t teamID; bool build; int32_t builderID; };
+struct CreateUnitQuery { int32_t unitDefID; Float3 pos; int32_t facing; int32_t teamID; bool build; int32_t builderID; int32_t unitID; };
 struct CreateUnitResult { const Error* error; int32_t unitID; };
 
-struct DestroyUnitQuery { int32_t unitID; bool selfd; bool reclaimed; };
+struct DestroyUnitQuery { int32_t unitID; bool selfd; bool reclaimed; int32_t attackerID; bool recycleID; };
 struct DestroyUnitResult { const Error* error; bool success; };
 
 struct TransferUnitQuery { int32_t unitID; int32_t newTeamID; bool given; };
@@ -86,6 +138,32 @@ struct GiveOrderToUnitResult { const Error* error; bool success; };
 
 struct GiveOrderToUnitArrayQuery { const int32_t* unitIDs; uint32_t count; int32_t cmdID; float* params; uint32_t paramCount; uint32_t options; };
 struct GiveOrderToUnitArrayResult { const Error* error; bool success; };
+
+// Single command for order arrays
+struct NativeCommand {
+	int32_t cmdID;
+	float* params;
+	uint32_t paramCount;
+	uint32_t options;
+};
+
+// Give multiple orders to a single unit
+struct GiveOrderArrayToUnitQuery {
+	int32_t unitID;
+	const NativeCommand* commands;
+	uint32_t commandCount;
+};
+struct GiveOrderArrayToUnitResult { const Error* error; bool success; };
+
+// Give multiple orders to multiple units
+struct GiveOrderArrayToUnitArrayQuery {
+	const int32_t* unitIDs;
+	uint32_t unitCount;
+	const NativeCommand* commands;
+	uint32_t commandCount;
+	bool pairwise;        // When true, assign commands by index (unit[i] gets command[i])
+};
+struct GiveOrderArrayToUnitArrayResult { const Error* error; int32_t unitsOrdered; };
 
 struct UnitFinishCommandQuery { int32_t unitID; };
 struct UnitFinishCommandResult { const Error* error; bool success; };
@@ -123,10 +201,10 @@ struct SetUnitRotationResult { const Error* error; bool success; };
 struct SetUnitPhysicsQuery { int32_t unitID; Float3 pos; Float3 velocity; Float3 rotation; bool setPos; bool setVel; bool setRot; };
 struct SetUnitPhysicsResult { const Error* error; bool success; };
 
-struct AddUnitDamageQuery { int32_t unitID; float damage; int32_t weaponDefID; int32_t attackerID; };
+struct AddUnitDamageQuery { int32_t unitID; float damage; float paralyzeTime; int32_t weaponDefID; int32_t attackerID; Float3 impulse; };
 struct AddUnitDamageResult { const Error* error; bool success; };
 
-struct AddUnitImpulseQuery { int32_t unitID; Float3 impulse; };
+struct AddUnitImpulseQuery { int32_t unitID; Float3 impulse; float decayRate; };
 struct AddUnitImpulseResult { const Error* error; bool success; };
 
 struct SetUnitCloakQuery { int32_t unitID; bool wantCloak; float decloakDistance; bool useDefaultDecloakDistance; };
@@ -293,12 +371,296 @@ struct SetUnitRadiusAndHeightQuery {
 };
 struct SetUnitRadiusAndHeightResult { const Error* error; bool success; };
 
+// Unit movement queries
+struct SetUnitMoveGoalQuery {
+	int32_t unitID;
+	Float3 pos;
+	float radius;
+	float speed;           // 0 for default
+	bool raw;              // use raw movement (no pathfinding)
+};
+struct SetUnitMoveGoalResult { const Error* error; bool success; };
+
+struct SetUnitLandGoalQuery {
+	int32_t unitID;
+	Float3 pos;
+	float radiusSq;        // squared radius, -1 for default
+};
+struct SetUnitLandGoalResult { const Error* error; bool success; };
+
+struct ClearUnitGoalQuery { int32_t unitID; bool cancelRaw; };
+struct ClearUnitGoalResult { const Error* error; bool success; };
+
+// Unit stockpile queries
+struct SetUnitStockpileQuery {
+	int32_t unitID;
+	int32_t stockpile;     // -1 to not change
+	float buildPercent;    // -1 to not change
+};
+struct SetUnitStockpileResult { const Error* error; bool success; };
+
+// Unit direction queries
+struct SetUnitDirectionQuery { int32_t unitID; Float3 dir; };
+struct SetUnitDirectionResult { const Error* error; bool success; };
+
+// Unit attachment/transport queries
+struct UnitAttachQuery {
+	int32_t transporterID;
+	int32_t transporteeID;
+	int32_t pieceNum;           // 0-indexed, -1 for default
+};
+struct UnitAttachResult { const Error* error; bool success; };
+
+struct UnitDetachQuery { int32_t transporteeID; };
+struct UnitDetachResult { const Error* error; bool success; };
+
+struct UnitDetachFromAirQuery {
+	int32_t transporteeID;
+	Float3 pos;                 // drop position, use zero for unit's current position
+	bool usePos;                // whether to use pos parameter
+};
+struct UnitDetachFromAirResult { const Error* error; bool success; };
+
+struct SetUnitLoadingTransportQuery {
+	int32_t unitID;
+	int32_t transportID;        // -1 to clear
+};
+struct SetUnitLoadingTransportResult { const Error* error; bool success; };
+
+struct SetUnitCrashingQuery {
+	int32_t unitID;
+	bool wantCrash;
+};
+struct SetUnitCrashingResult { const Error* error; bool stateChanged; };
+
+// Unit weapon control queries
+struct SetUnitWeaponStateQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // 0-indexed
+	const char* key;
+	float value;
+};
+struct SetUnitWeaponStateResult { const Error* error; bool success; };
+
+struct UnitWeaponFireQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // 0-indexed
+};
+struct UnitWeaponFireResult { const Error* error; bool success; };
+
+struct UnitWeaponHoldFireQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // 0-indexed
+};
+struct UnitWeaponHoldFireResult { const Error* error; bool success; };
+
+struct SetUnitUseWeaponsQuery {
+	int32_t unitID;
+	bool forceUseWeapons;
+	bool allowUseWeapons;
+	bool setForce;              // whether to set forceUseWeapons
+	bool setAllow;              // whether to set allowUseWeapons
+};
+struct SetUnitUseWeaponsResult { const Error* error; bool success; };
+
+// Unit max range query
+struct SetUnitMaxRangeQuery { int32_t unitID; float maxRange; };
+struct SetUnitMaxRangeResult { const Error* error; bool success; };
+
+// Unit physical state bit query
+struct SetUnitPhysicalStateBitQuery { int32_t unitID; int32_t stateBit; };
+struct SetUnitPhysicalStateBitResult { const Error* error; bool success; };
+
+// Unit position error params query
+struct SetUnitPosErrorParamsQuery {
+	int32_t unitID;
+	Float3 posErrorVector;
+	Float3 posErrorDelta;
+	int32_t nextPosErrorUpdate;
+	int32_t allyTeamID;         // -1 to not set
+	bool setPosErrorBit;        // whether to set the bit for allyTeamID
+};
+struct SetUnitPosErrorParamsResult { const Error* error; bool success; };
+
+// Unit weapon damages query
+struct SetUnitWeaponDamagesQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // 0-indexed, -1 for "explode", -2 for "selfDestruct"
+	const char* damageKey;      // damage type key (e.g., "paralyzeDamageTime", armor type index)
+	float damageValue;
+};
+struct SetUnitWeaponDamagesResult { const Error* error; bool success; };
+
+// Force unit collision update query
+struct ForceUnitCollisionUpdateQuery { int32_t unitID; };
+struct ForceUnitCollisionUpdateResult { const Error* error; bool success; };
+
+// Set unit heading query
+struct SetUnitHeadingQuery { int32_t unitID; int32_t heading; bool useSmoothing; };
+struct SetUnitHeadingResult { const Error* error; bool success; };
+
+// Set unit heading and up direction query
+struct SetUnitHeadingAndUpDirQuery {
+	int32_t unitID;
+	int32_t heading;
+	Float3 upDir;
+};
+struct SetUnitHeadingAndUpDirResult { const Error* error; bool success; };
+
+// Add/remove object decal queries
+struct AddObjectDecalQuery { int32_t unitID; };
+struct AddObjectDecalResult { const Error* error; bool success; };
+
+struct RemoveObjectDecalQuery { int32_t unitID; };
+struct RemoveObjectDecalResult { const Error* error; bool success; };
+
+// Set unit buildee radius query
+struct SetUnitBuildeeRadiusQuery { int32_t unitID; float radius; };
+struct SetUnitBuildeeRadiusResult { const Error* error; bool success; };
+
+// Set unit sensor radius query
+struct SetUnitSensorRadiusQuery {
+	int32_t unitID;
+	const char* sensorType;      // "los", "airLos", "radar", "sonar", "seismic", "radarJammer", "sonarJammer"
+	int32_t radius;
+};
+struct SetUnitSensorRadiusResult { const Error* error; int32_t newRadius; };
+
+// Set unit harvest storage query
+struct SetUnitHarvestStorageQuery {
+	int32_t unitID;
+	float harvestedMetal;
+	float harvestStorageMetal;
+	float harvestedEnergy;
+	float harvestStorageEnergy;
+};
+struct SetUnitHarvestStorageResult { const Error* error; bool success; };
+
+// Set unit build params query
+struct SetUnitBuildParamsQuery {
+	int32_t unitID;
+	const char* paramName;       // "buildRange", "buildDistance", "buildRange3D"
+	float floatValue;            // for buildRange/buildDistance
+	bool boolValue;              // for buildRange3D
+};
+struct SetUnitBuildParamsResult { const Error* error; bool success; };
+
+// Set unit LOS mask query (mask disables engine updates for specific visibility bits)
+struct SetUnitLosMaskQuery {
+	int32_t unitID;
+	int32_t allyTeamID;
+	uint8_t losMask;             // bitmask: LOS_INLOS=1, LOS_INRADAR=2, LOS_PREVLOS=4, LOS_CONTRADAR=8
+};
+struct SetUnitLosMaskResult { const Error* error; bool success; };
+
+// Set unit LOS state query (set current visibility state)
+struct SetUnitLosStateQuery {
+	int32_t unitID;
+	int32_t allyTeamID;
+	uint8_t losState;            // bitmask: LOS_INLOS=1, LOS_INRADAR=2, LOS_PREVLOS=4, LOS_CONTRADAR=8
+};
+struct SetUnitLosStateResult { const Error* error; bool success; };
+
+// Set unit storage query
+struct SetUnitStorageQuery {
+	int32_t unitID;
+	float metalStorage;
+	float energyStorage;
+};
+struct SetUnitStorageResult { const Error* error; bool success; };
+
+// Set unit tooltip query
+struct SetUnitTooltipQuery {
+	int32_t unitID;
+	const char* tooltip;
+};
+struct SetUnitTooltipResult { const Error* error; bool success; };
+
+// Set factory bugger off query
+struct SetFactoryBuggerOffQuery {
+	int32_t unitID;
+	bool perform;
+	float offset;
+	float radius;
+	int32_t relHeading;
+	bool spherical;
+	bool forced;
+};
+struct SetFactoryBuggerOffResult { const Error* error; bool perform; };
+
+// Bugger off query (tells units to move away from position)
+struct BuggerOffQuery {
+	Float3 pos;
+	float radius;
+	int32_t teamID;
+	bool spherical;
+	bool forced;
+	int32_t excludeUnitID;         // -1 for none
+	const int32_t* excludeUnitDefIDs; // optional array of unit def IDs
+	uint32_t excludeUnitDefCount;
+};
+struct BuggerOffResult { const Error* error; bool success; };
+
+// Add unit seismic ping query
+struct AddUnitSeismicPingQuery { int32_t unitID; float pingSize; };
+struct AddUnitSeismicPingResult { const Error* error; bool success; };
+
+// Add unit resource query
+struct AddUnitResourceQuery {
+	int32_t unitID;
+	const char* resourceType;      // "m" or "e"
+	float amount;
+};
+struct AddUnitResourceResult { const Error* error; bool success; };
+
+// Use unit resource query
+struct UseUnitResourceQuery {
+	int32_t unitID;
+	const char* resourceType;      // "m" or "e"
+	float amount;
+};
+struct UseUnitResourceResult { const Error* error; bool success; };
+
+// Set unit piece visible query
+struct SetUnitPieceVisibleQuery {
+	int32_t unitID;
+	int32_t pieceIndex;      // 0-indexed
+	bool visible;
+};
+struct SetUnitPieceVisibleResult { const Error* error; bool success; };
+
+// Set unit piece parent query
+struct SetUnitPieceParentQuery {
+	int32_t unitID;
+	int32_t childPieceIndex;    // 0-indexed
+	int32_t parentPieceIndex;   // 0-indexed
+};
+struct SetUnitPieceParentResult { const Error* error; bool success; };
+
+// Set unit piece matrix query
+struct SetUnitPieceMatrixQuery {
+	int32_t unitID;
+	int32_t pieceIndex;      // 0-indexed
+	float matrix[16];        // 4x4 transformation matrix (column-major)
+};
+struct SetUnitPieceMatrixResult { const Error* error; bool blockScriptAnims; };
+
+// Set unit nano pieces query
+struct SetUnitNanoPiecesQuery {
+	int32_t unitID;
+	const int32_t* pieceIndices;   // 0-indexed piece indices
+	uint32_t pieceCount;
+};
+struct SetUnitNanoPiecesResult { const Error* error; bool success; };
+
 struct UnitControlApi {
 	void (*CreateUnit)(const CreateUnitQuery* query, CreateUnitResult* result);
 	void (*DestroyUnit)(const DestroyUnitQuery* query, DestroyUnitResult* result);
 	void (*TransferUnit)(const TransferUnitQuery* query, TransferUnitResult* result);
 	void (*GiveOrderToUnit)(const GiveOrderToUnitQuery* query, GiveOrderToUnitResult* result);
 	void (*GiveOrderToUnitArray)(const GiveOrderToUnitArrayQuery* query, GiveOrderToUnitArrayResult* result);
+	void (*GiveOrderArrayToUnit)(const GiveOrderArrayToUnitQuery* query, GiveOrderArrayToUnitResult* result);
+	void (*GiveOrderArrayToUnitArray)(const GiveOrderArrayToUnitArrayQuery* query, GiveOrderArrayToUnitArrayResult* result);
 	void (*UnitFinishCommand)(const UnitFinishCommandQuery* query, UnitFinishCommandResult* result);
 	void (*SetUnitHealth)(const SetUnitHealthQuery* query, SetUnitHealthResult* result);
 	void (*SetUnitMaxHealth)(const SetUnitMaxHealthQuery* query, SetUnitMaxHealthResult* result);
@@ -340,6 +702,46 @@ struct UnitControlApi {
 	void (*SetUnitFlanking)(const SetUnitFlankingQuery* query, SetUnitFlankingResult* result);
 	void (*SetUnitMidAndAimPos)(const SetUnitMidAndAimPosQuery* query, SetUnitMidAndAimPosResult* result);
 	void (*SetUnitRadiusAndHeight)(const SetUnitRadiusAndHeightQuery* query, SetUnitRadiusAndHeightResult* result);
+	void (*SetUnitMoveGoal)(const SetUnitMoveGoalQuery* query, SetUnitMoveGoalResult* result);
+	void (*SetUnitLandGoal)(const SetUnitLandGoalQuery* query, SetUnitLandGoalResult* result);
+	void (*ClearUnitGoal)(const ClearUnitGoalQuery* query, ClearUnitGoalResult* result);
+	void (*SetUnitStockpile)(const SetUnitStockpileQuery* query, SetUnitStockpileResult* result);
+	void (*SetUnitDirection)(const SetUnitDirectionQuery* query, SetUnitDirectionResult* result);
+	void (*UnitAttach)(const UnitAttachQuery* query, UnitAttachResult* result);
+	void (*UnitDetach)(const UnitDetachQuery* query, UnitDetachResult* result);
+	void (*UnitDetachFromAir)(const UnitDetachFromAirQuery* query, UnitDetachFromAirResult* result);
+	void (*SetUnitLoadingTransport)(const SetUnitLoadingTransportQuery* query, SetUnitLoadingTransportResult* result);
+	void (*SetUnitCrashing)(const SetUnitCrashingQuery* query, SetUnitCrashingResult* result);
+	void (*SetUnitWeaponState)(const SetUnitWeaponStateQuery* query, SetUnitWeaponStateResult* result);
+	void (*UnitWeaponFire)(const UnitWeaponFireQuery* query, UnitWeaponFireResult* result);
+	void (*UnitWeaponHoldFire)(const UnitWeaponHoldFireQuery* query, UnitWeaponHoldFireResult* result);
+	void (*SetUnitUseWeapons)(const SetUnitUseWeaponsQuery* query, SetUnitUseWeaponsResult* result);
+	void (*SetUnitMaxRange)(const SetUnitMaxRangeQuery* query, SetUnitMaxRangeResult* result);
+	void (*SetUnitPhysicalStateBit)(const SetUnitPhysicalStateBitQuery* query, SetUnitPhysicalStateBitResult* result);
+	void (*SetUnitPosErrorParams)(const SetUnitPosErrorParamsQuery* query, SetUnitPosErrorParamsResult* result);
+	void (*SetUnitWeaponDamages)(const SetUnitWeaponDamagesQuery* query, SetUnitWeaponDamagesResult* result);
+	void (*ForceUnitCollisionUpdate)(const ForceUnitCollisionUpdateQuery* query, ForceUnitCollisionUpdateResult* result);
+	void (*SetUnitHeading)(const SetUnitHeadingQuery* query, SetUnitHeadingResult* result);
+	void (*SetUnitHeadingAndUpDir)(const SetUnitHeadingAndUpDirQuery* query, SetUnitHeadingAndUpDirResult* result);
+	void (*AddObjectDecal)(const AddObjectDecalQuery* query, AddObjectDecalResult* result);
+	void (*RemoveObjectDecal)(const RemoveObjectDecalQuery* query, RemoveObjectDecalResult* result);
+	void (*SetUnitBuildeeRadius)(const SetUnitBuildeeRadiusQuery* query, SetUnitBuildeeRadiusResult* result);
+	void (*SetUnitSensorRadius)(const SetUnitSensorRadiusQuery* query, SetUnitSensorRadiusResult* result);
+	void (*SetUnitHarvestStorage)(const SetUnitHarvestStorageQuery* query, SetUnitHarvestStorageResult* result);
+	void (*SetUnitBuildParams)(const SetUnitBuildParamsQuery* query, SetUnitBuildParamsResult* result);
+	void (*SetUnitLosMask)(const SetUnitLosMaskQuery* query, SetUnitLosMaskResult* result);
+	void (*SetUnitLosState)(const SetUnitLosStateQuery* query, SetUnitLosStateResult* result);
+	void (*SetUnitStorage)(const SetUnitStorageQuery* query, SetUnitStorageResult* result);
+	void (*SetUnitTooltip)(const SetUnitTooltipQuery* query, SetUnitTooltipResult* result);
+	void (*SetFactoryBuggerOff)(const SetFactoryBuggerOffQuery* query, SetFactoryBuggerOffResult* result);
+	void (*BuggerOff)(const BuggerOffQuery* query, BuggerOffResult* result);
+	void (*AddUnitSeismicPing)(const AddUnitSeismicPingQuery* query, AddUnitSeismicPingResult* result);
+	void (*AddUnitResource)(const AddUnitResourceQuery* query, AddUnitResourceResult* result);
+	void (*UseUnitResource)(const UseUnitResourceQuery* query, UseUnitResourceResult* result);
+	void (*SetUnitPieceVisible)(const SetUnitPieceVisibleQuery* query, SetUnitPieceVisibleResult* result);
+	void (*SetUnitPieceParent)(const SetUnitPieceParentQuery* query, SetUnitPieceParentResult* result);
+	void (*SetUnitPieceMatrix)(const SetUnitPieceMatrixQuery* query, SetUnitPieceMatrixResult* result);
+	void (*SetUnitNanoPieces)(const SetUnitNanoPiecesQuery* query, SetUnitNanoPiecesResult* result);
 };
 
 // ============================================================================
@@ -347,7 +749,7 @@ struct UnitControlApi {
 // ============================================================================
 
 // Queries - Feature Control
-struct CreateFeatureQuery { int32_t featureDefID; Float3 pos; int32_t facing; int32_t teamID; int32_t allyTeamID; };
+struct CreateFeatureQuery { int32_t featureDefID; Float3 pos; int32_t facing; int32_t teamID; int32_t allyTeamID; int32_t featureID; };
 struct CreateFeatureResult { const Error* error; int32_t featureID; };
 
 struct DestroyFeatureQuery { int32_t featureID; };
@@ -371,7 +773,7 @@ struct SetFeatureVelocityResult { const Error* error; bool success; };
 struct SetFeatureResourcesQuery { int32_t featureID; float metal; float energy; float reclaimTime; };
 struct SetFeatureResourcesResult { const Error* error; bool success; };
 
-struct AddFeatureDamageQuery { int32_t featureID; float damage; int32_t weaponDefID; int32_t attackerID; Float3 impulse; };
+struct AddFeatureDamageQuery { int32_t featureID; float damage; float paralyzeTime; int32_t weaponDefID; int32_t attackerID; Float3 impulse; };
 struct AddFeatureDamageResult { const Error* error; bool success; };
 
 struct SetFeatureBlockingQuery { int32_t featureID; bool blocking; bool solidObjects; bool projectiles; bool quadMapRays; bool crushable; bool blockEnemyPushing; bool blockHeightChanges; };
@@ -435,6 +837,57 @@ struct SetFeatureSelectionVolumeDataQuery {
 };
 struct SetFeatureSelectionVolumeDataResult { const Error* error; bool success; };
 
+// Set feature fire time query
+struct SetFeatureFireTimeQuery { int32_t featureID; float fireTime; };  // fireTime in seconds
+struct SetFeatureFireTimeResult { const Error* error; bool success; };
+
+// Set feature smoke time query
+struct SetFeatureSmokeTimeQuery { int32_t featureID; float smokeTime; };  // smokeTime in seconds
+struct SetFeatureSmokeTimeResult { const Error* error; bool success; };
+
+// Create unit wreck query
+struct CreateUnitWreckQuery {
+	int32_t unitID;
+	int32_t wreckLevel;       // 1-indexed wreck level (default 1)
+	bool doSmoke;             // emit smoke (default true)
+};
+struct CreateUnitWreckResult { const Error* error; int32_t featureID; };
+
+// Create feature wreck query
+struct CreateFeatureWreckQuery {
+	int32_t featureID;
+	int32_t wreckLevel;       // 1-indexed wreck level (default 1)
+	bool doSmoke;             // emit smoke (default false)
+};
+struct CreateFeatureWreckResult { const Error* error; int32_t featureID; };
+
+// Set feature piece visible query
+struct SetFeaturePieceVisibleQuery {
+	int32_t featureID;
+	int32_t pieceIndex;      // 0-indexed
+	bool visible;
+};
+struct SetFeaturePieceVisibleResult { const Error* error; bool success; };
+
+struct SetFeaturePieceMatrixQuery {
+	int32_t featureID;
+	int32_t pieceIndex;      // 0-indexed
+	float matrix[16];        // 4x4 transformation matrix (column-major)
+};
+struct SetFeaturePieceMatrixResult { const Error* error; bool blockScriptAnims; };
+
+// Set feature piece collision volume data query
+struct SetFeaturePieceCollisionVolumeDataQuery {
+	int32_t featureID;
+	int32_t pieceIndex;      // 0-indexed
+	bool enable;
+	Float3 scales;
+	Float3 offsets;
+	int32_t volumeType;
+	int32_t primaryAxis;
+};
+struct SetFeaturePieceCollisionVolumeDataResult { const Error* error; bool success; };
+
 struct FeatureControlApi {
 	void (*CreateFeature)(const CreateFeatureQuery* query, CreateFeatureResult* result);
 	void (*DestroyFeature)(const DestroyFeatureQuery* query, DestroyFeatureResult* result);
@@ -461,6 +914,13 @@ struct FeatureControlApi {
 	void (*SetFeatureRadiusAndHeight)(const SetFeatureRadiusAndHeightQuery* query, SetFeatureRadiusAndHeightResult* result);
 	void (*SetFeatureCollisionVolumeData)(const SetFeatureCollisionVolumeDataQuery* query, SetFeatureCollisionVolumeDataResult* result);
 	void (*SetFeatureSelectionVolumeData)(const SetFeatureSelectionVolumeDataQuery* query, SetFeatureSelectionVolumeDataResult* result);
+	void (*SetFeatureFireTime)(const SetFeatureFireTimeQuery* query, SetFeatureFireTimeResult* result);
+	void (*SetFeatureSmokeTime)(const SetFeatureSmokeTimeQuery* query, SetFeatureSmokeTimeResult* result);
+	void (*CreateUnitWreck)(const CreateUnitWreckQuery* query, CreateUnitWreckResult* result);
+	void (*CreateFeatureWreck)(const CreateFeatureWreckQuery* query, CreateFeatureWreckResult* result);
+	void (*SetFeaturePieceVisible)(const SetFeaturePieceVisibleQuery* query, SetFeaturePieceVisibleResult* result);
+	void (*SetFeaturePieceMatrix)(const SetFeaturePieceMatrixQuery* query, SetFeaturePieceMatrixResult* result);
+	void (*SetFeaturePieceCollisionVolumeData)(const SetFeaturePieceCollisionVolumeDataQuery* query, SetFeaturePieceCollisionVolumeDataResult* result);
 };
 
 // ============================================================================
@@ -468,7 +928,7 @@ struct FeatureControlApi {
 // ============================================================================
 
 // Queries - Terrain Control
-struct AddHeightMapQuery { Float3 pos; float height; };
+struct AddHeightMapQuery { float x; float z; float height; };
 struct AddHeightMapResult { const Error* error; bool success; };
 
 struct SetHeightMapQuery { Float3 pos; float height; };
@@ -477,7 +937,7 @@ struct SetHeightMapResult { const Error* error; bool success; };
 struct RevertHeightMapQuery { Float3 pos1; Float3 pos2; float origFactor; };
 struct RevertHeightMapResult { const Error* error; bool success; };
 
-struct AddSmoothMeshQuery { Float3 pos1; Float3 pos2; float height; };
+struct AddSmoothMeshQuery { float x; float z; float height; };
 struct AddSmoothMeshResult { const Error* error; bool success; };
 
 struct SetSmoothMeshQuery { Float3 pos1; Float3 pos2; float height; };
@@ -499,21 +959,21 @@ struct SetWindQuery { float minWind; float maxWind; };
 struct SetWindResult { const Error* error; bool success; };
 
 // Grass queries
-struct AddGrassQuery { float x; float z; uint8_t grassValue; };
+struct AddGrassQuery { float x; float z; };
 struct AddGrassResult { const Error* error; bool success; };
 
 struct RemoveGrassQuery { float x; float z; };
 struct RemoveGrassResult { const Error* error; bool success; };
 
 // Advanced height map queries
-struct AdjustHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct AdjustHeightMapQuery { float x; float z; float height; };
 struct AdjustHeightMapResult { const Error* error; bool success; };
 
 struct LevelHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
 struct LevelHeightMapResult { const Error* error; bool success; };
 
 // Original height map queries
-struct AddOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct AddOriginalHeightMapQuery { float x; float z; float height; };
 struct AddOriginalHeightMapResult { const Error* error; bool success; };
 
 struct SetOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
@@ -522,14 +982,14 @@ struct SetOriginalHeightMapResult { const Error* error; bool success; };
 struct RevertOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float origFactor; };
 struct RevertOriginalHeightMapResult { const Error* error; bool success; };
 
-struct AdjustOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
+struct AdjustOriginalHeightMapQuery { float x; float z; float height; };
 struct AdjustOriginalHeightMapResult { const Error* error; bool success; };
 
 struct LevelOriginalHeightMapQuery { float x1; float z1; float x2; float z2; float height; };
 struct LevelOriginalHeightMapResult { const Error* error; bool success; };
 
 // Smooth mesh advanced queries
-struct AdjustSmoothMeshQuery { float x1; float z1; float x2; float z2; float height; };
+struct AdjustSmoothMeshQuery { float x; float z; float height; };
 struct AdjustSmoothMeshResult { const Error* error; bool success; };
 
 struct LevelSmoothMeshQuery { float x1; float z1; float x2; float z2; float height; };
@@ -537,6 +997,15 @@ struct LevelSmoothMeshResult { const Error* error; bool success; };
 
 struct RebuildSmoothMeshQuery { float x1; float z1; float x2; float z2; };
 struct RebuildSmoothMeshResult { const Error* error; bool success; };
+
+struct SetHeightMapFuncQuery { uint8_t _unused; };
+struct SetHeightMapFuncResult { const Error* error; bool success; };
+
+struct SetOriginalHeightMapFuncQuery { uint8_t _unused; };
+struct SetOriginalHeightMapFuncResult { const Error* error; bool success; };
+
+struct SetSmoothMeshFuncQuery { uint8_t _unused; };
+struct SetSmoothMeshFuncResult { const Error* error; bool success; };
 
 struct TerrainControlApi {
 	void (*AddHeightMap)(const AddHeightMapQuery* query, AddHeightMapResult* result);
@@ -561,6 +1030,9 @@ struct TerrainControlApi {
 	void (*AdjustSmoothMesh)(const AdjustSmoothMeshQuery* query, AdjustSmoothMeshResult* result);
 	void (*LevelSmoothMesh)(const LevelSmoothMeshQuery* query, LevelSmoothMeshResult* result);
 	void (*RebuildSmoothMesh)(const RebuildSmoothMeshQuery* query, RebuildSmoothMeshResult* result);
+	void (*SetHeightMapFunc)(const SetHeightMapFuncQuery* query, SetHeightMapFuncResult* result);
+	void (*SetOriginalHeightMapFunc)(const SetOriginalHeightMapFuncQuery* query, SetOriginalHeightMapFuncResult* result);
+	void (*SetSmoothMeshFunc)(const SetSmoothMeshFuncQuery* query, SetSmoothMeshFuncResult* result);
 };
 
 // ============================================================================
@@ -622,6 +1094,16 @@ struct SetProjectileSpinSpeedResult { const Error* error; bool success; };
 struct SetProjectileSpinVecQuery { int32_t projectileID; Float3 spinVec; };
 struct SetProjectileSpinVecResult { const Error* error; bool success; };
 
+// Set piece projectile params query
+struct SetPieceProjectileParamsQuery {
+	int32_t projectileID;
+	int32_t explFlags;
+	float spinAngle;
+	float spinSpeed;
+	Float3 spinVec;
+};
+struct SetPieceProjectileParamsResult { const Error* error; bool success; };
+
 struct ProjectileControlApi {
 	void (*SpawnProjectile)(const SpawnProjectileQuery* query, SpawnProjectileResult* result);
 	void (*DeleteProjectile)(const DeleteProjectileQuery* query, DeleteProjectileResult* result);
@@ -641,6 +1123,7 @@ struct ProjectileControlApi {
 	void (*SetProjectileSpinAngle)(const SetProjectileSpinAngleQuery* query, SetProjectileSpinAngleResult* result);
 	void (*SetProjectileSpinSpeed)(const SetProjectileSpinSpeedQuery* query, SetProjectileSpinSpeedResult* result);
 	void (*SetProjectileSpinVec)(const SetProjectileSpinVecQuery* query, SetProjectileSpinVecResult* result);
+	void (*SetPieceProjectileParams)(const SetPieceProjectileParamsQuery* query, SetPieceProjectileParamsResult* result);
 };
 
 // ============================================================================
@@ -697,6 +1180,55 @@ struct EffectsControlApi {
 };
 
 // ============================================================================
+// Game Config Control
+// ============================================================================
+
+// Set no pause query (disables game pausing)
+struct SetNoPauseQuery { bool noPause; };
+struct SetNoPauseResult { const Error* error; bool success; };
+
+struct SetCheatingEnabledQuery { bool enabled; };
+struct SetCheatingEnabledResult { const Error* error; bool success; };
+
+struct SetGodModeQuery { bool controlAllies; bool controlEnemies; };
+struct SetGodModeResult { const Error* error; bool success; };
+
+// Set experience grade query (controls UnitExperience callin frequency)
+struct SetExperienceGradeQuery {
+	float expGrade;
+	float expPowerScale;      // only applies if cheats enabled, use -1 to not set
+	float expHealthScale;     // only applies if cheats enabled, use -1 to not set
+	float expReloadScale;     // only applies if cheats enabled, use -1 to not set
+};
+struct SetExperienceGradeResult { const Error* error; bool success; };
+
+// Set radar error params query
+struct SetRadarErrorParamsQuery {
+	int32_t allyTeamID;
+	float allyTeamErrorSize;
+	float baseErrorSize;      // use -1 to not set
+	float baseErrorMult;      // use -1 to not set
+};
+struct SetRadarErrorParamsResult { const Error* error; bool success; };
+
+// Set square building mask query
+struct SetSquareBuildingMaskQuery {
+	int32_t x;
+	int32_t z;
+	uint16_t mask;
+};
+struct SetSquareBuildingMaskResult { const Error* error; bool success; };
+
+struct GameConfigApi {
+	void (*SetNoPause)(const SetNoPauseQuery* query, SetNoPauseResult* result);
+	void (*SetCheatingEnabled)(const SetCheatingEnabledQuery* query, SetCheatingEnabledResult* result);
+	void (*SetGodMode)(const SetGodModeQuery* query, SetGodModeResult* result);
+	void (*SetExperienceGrade)(const SetExperienceGradeQuery* query, SetExperienceGradeResult* result);
+	void (*SetRadarErrorParams)(const SetRadarErrorParamsQuery* query, SetRadarErrorParamsResult* result);
+	void (*SetSquareBuildingMask)(const SetSquareBuildingMaskQuery* query, SetSquareBuildingMaskResult* result);
+};
+
+// ============================================================================
 // Combined API
 // ============================================================================
 
@@ -707,6 +1239,8 @@ struct SyncedCtrlApi {
 	const TerrainControlApi* terrain;
 	const ProjectileControlApi* projectile;
 	const EffectsControlApi* effects;
+	const GameConfigApi* gameConfig;
+	const COBScriptApi* cobScript;
 };
 
 extern const SyncedCtrlApi SYNCED_CTRL_API;

@@ -6,10 +6,12 @@
 #include "Sim/Units/BuildInfo.h"
 #include "Sim/Units/UnitTypes/Builder.h"
 #include "Sim/Units/UnitTypes/Factory.h"
+#include "Sim/MoveTypes/MoveDefHandler.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Weapons/PlasmaRepulser.h"
 #include "System/float3.h"
+#include "Rendering/Units/UnitDrawer.h"
 
 namespace {
 
@@ -62,6 +64,26 @@ static void NativeGetUnitDefID(const GetUnitDefIDQuery* query, GetUnitDefIDResul
 	}
 
 	result->unitDefID = unit->unitDef->id;
+}
+
+static void NativeGetUnitMoveDefID(const GetUnitMoveDefIDQuery* query, GetUnitMoveDefIDResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->moveDefID = -1;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	if (unit->moveDef != nullptr)
+		result->moveDefID = static_cast<int32_t>(unit->moveDef->pathType);
 }
 
 static void NativeGetUnitTeam(const GetUnitTeamQuery* query, GetUnitTeamResult* result) {
@@ -1252,11 +1274,28 @@ static void NativeGetUnitHarvestStorage(const GetUnitHarvestStorageQuery* query,
 	result->harvestStorage = unit->harvested.metal;
 }
 
+static void NativeClearUnitsPreviousDrawFlag(const ClearUnitsPreviousDrawFlagQuery* query, ClearUnitsPreviousDrawFlagResult* result) {
+	bufferPos = 0;
+	(void)query;
+
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady() || unitDrawer == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	unitDrawer->ClearPreviousDrawFlags();
+	result->success = true;
+}
+
 } // namespace
 
 const UnitsInfoApi UNITS_INFO_API = {
 	.GetUnitTooltip = NativeGetUnitTooltip,
 	.GetUnitDefID = NativeGetUnitDefID,
+	.GetUnitMoveDefID = NativeGetUnitMoveDefID,
 	.GetUnitTeam = NativeGetUnitTeam,
 	.GetUnitAllyTeam = NativeGetUnitAllyTeam,
 	.GetUnitNeutral = NativeGetUnitNeutral,
@@ -1311,4 +1350,5 @@ const UnitsInfoApi UNITS_INFO_API = {
 	.GetUnitPieceCollisionVolumeData = NativeGetUnitPieceCollisionVolumeData,
 	.GetUnitBlocking = NativeGetUnitBlocking,
 	.GetUnitHarvestStorage = NativeGetUnitHarvestStorage,
+	.ClearUnitsPreviousDrawFlag = NativeClearUnitsPreviousDrawFlag,
 };

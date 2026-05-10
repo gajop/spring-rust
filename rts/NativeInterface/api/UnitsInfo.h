@@ -184,6 +184,9 @@ struct GetUnitTooltipResult { const Error* error; const char* tooltip; };
 struct GetUnitDefIDQuery { int32_t unitID; };
 struct GetUnitDefIDResult { const Error* error; int32_t unitDefID; };
 
+struct GetUnitMoveDefIDQuery { int32_t unitID; };
+struct GetUnitMoveDefIDResult { const Error* error; int32_t moveDefID; };
+
 struct GetUnitTeamQuery { int32_t unitID; };
 struct GetUnitTeamResult { const Error* error; int32_t teamID; };
 
@@ -346,10 +349,14 @@ struct GetUnitBlockingResult { const Error* error; UnitBlockingState blockingSta
 struct GetUnitHarvestStorageQuery { int32_t unitID; };
 struct GetUnitHarvestStorageResult { const Error* error; float harvestStorage; };
 
+struct ClearUnitsPreviousDrawFlagQuery { uint8_t _unused; };
+struct ClearUnitsPreviousDrawFlagResult { const Error* error; bool success; };
+
 // API structure
 struct UnitsInfoApi {
 	void (*GetUnitTooltip)(const GetUnitTooltipQuery* query, GetUnitTooltipResult* result);
 	void (*GetUnitDefID)(const GetUnitDefIDQuery* query, GetUnitDefIDResult* result);
+	void (*GetUnitMoveDefID)(const GetUnitMoveDefIDQuery* query, GetUnitMoveDefIDResult* result);
 	void (*GetUnitTeam)(const GetUnitTeamQuery* query, GetUnitTeamResult* result);
 	void (*GetUnitAllyTeam)(const GetUnitAllyTeamQuery* query, GetUnitAllyTeamResult* result);
 	void (*GetUnitNeutral)(const GetUnitNeutralQuery* query, GetUnitNeutralResult* result);
@@ -404,6 +411,7 @@ struct UnitsInfoApi {
 	void (*GetUnitPieceCollisionVolumeData)(const GetUnitPieceCollisionVolumeDataQuery* query, GetUnitPieceCollisionVolumeDataResult* result);
 	void (*GetUnitBlocking)(const GetUnitBlockingQuery* query, GetUnitBlockingResult* result);
 	void (*GetUnitHarvestStorage)(const GetUnitHarvestStorageQuery* query, GetUnitHarvestStorageResult* result);
+	void (*ClearUnitsPreviousDrawFlag)(const ClearUnitsPreviousDrawFlagQuery* query, ClearUnitsPreviousDrawFlagResult* result);
 };
 
 extern const UnitsInfoApi UNITS_INFO_API;

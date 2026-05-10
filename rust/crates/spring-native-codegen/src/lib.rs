@@ -341,6 +341,17 @@ pub fn generate_tracing(header: &Path, include_dirs: &[PathBuf]) -> Result<Strin
     )
 }
 
+pub fn generate_lights(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "LightsApi",
+            wrapper_struct: "Lights",
+        },
+    )
+}
+
 pub fn generate_utils(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
     generate_api(
         header,
@@ -352,6 +363,61 @@ pub fn generate_utils(header: &Path, include_dirs: &[PathBuf]) -> Result<String>
     )
 }
 
+pub fn generate_icons(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "IconsApi",
+            wrapper_struct: "Icons",
+        },
+    )
+}
+
+pub fn generate_markers(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "MarkersApi",
+            wrapper_struct: "Markers",
+        },
+    )
+}
+
+pub fn generate_ground_decals(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "GroundDecalsApi",
+            wrapper_struct: "GroundDecals",
+        },
+    )
+}
+
+pub fn generate_system_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "SystemControlApi",
+            wrapper_struct: "SystemControl",
+        },
+    )
+}
+
+pub fn generate_profiling(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "ProfilingApi",
+            wrapper_struct: "Profiling",
+        },
+    )
+}
+
 pub fn generate_memory(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
     generate_api(
         header,
@@ -359,6 +425,17 @@ pub fn generate_memory(header: &Path, include_dirs: &[PathBuf]) -> Result<String
         ApiConfig {
             api_struct: "MemoryApi",
             wrapper_struct: "Memory",
+        },
+    )
+}
+
+pub fn generate_unsynced_ctrl(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "UnsyncedCtrlApi",
+            wrapper_struct: "UnsyncedCtrl",
         },
     )
 }
@@ -419,6 +496,61 @@ pub fn generate_projectile_control(header: &Path, include_dirs: &[PathBuf]) -> R
     )
 }
 
+pub fn generate_effects_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "EffectsControlApi",
+            wrapper_struct: "EffectsControl",
+        },
+    )
+}
+
+pub fn generate_game_config(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "GameConfigApi",
+            wrapper_struct: "GameConfig",
+        },
+    )
+}
+
+pub fn generate_cob_script(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "COBScriptApi",
+            wrapper_struct: "CobScript",
+        },
+    )
+}
+
+pub fn generate_unsynced_read(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+	generate_api(
+		header,
+		include_dirs,
+		ApiConfig {
+			api_struct: "UnsyncedReadApi",
+			wrapper_struct: "UnsyncedRead",
+		},
+	)
+}
+
+pub fn generate_unit_rendering(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+	generate_api(
+		header,
+		include_dirs,
+		ApiConfig {
+			api_struct: "UnitRenderingApi",
+			wrapper_struct: "UnitRendering",
+		},
+	)
+}
+
 fn generate_api(header: &Path, include_dirs: &[PathBuf], config: ApiConfig<'_>) -> Result<String> {
     let spec = parse_api(header, include_dirs, config.api_struct)?;
     render_api(&spec, &config)
@@ -457,7 +589,9 @@ enum CType {
 enum Primitive {
     I32,
     U32,
+    U16,
     U8,
+    U64,
     Bool,
     F32,
     Char,
@@ -469,7 +603,9 @@ impl Primitive {
         match self {
             Primitive::I32 => "i32",
             Primitive::U32 => "u32",
+            Primitive::U16 => "u16",
             Primitive::U8 => "u8",
+            Primitive::U64 => "u64",
             Primitive::Bool => "bool",
             Primitive::F32 => "f32",
             Primitive::Char => "i8",
@@ -621,7 +757,10 @@ fn classify_type(ty: Type) -> CType {
         }
         TypeKind::Int => CType::Primitive(Primitive::I32),
         TypeKind::UInt => CType::Primitive(Primitive::U32),
+        TypeKind::UShort => CType::Primitive(Primitive::U16),
         TypeKind::UChar => CType::Primitive(Primitive::U8),
+        TypeKind::ULongLong => CType::Primitive(Primitive::U64),
+        TypeKind::ULong => CType::Primitive(Primitive::U64),
         TypeKind::Bool => CType::Primitive(Primitive::Bool),
         TypeKind::Float => CType::Primitive(Primitive::F32),
         TypeKind::CharS => CType::Primitive(Primitive::Char),
@@ -635,14 +774,18 @@ fn classify_type(ty: Type) -> CType {
             CType::Unknown(ty.get_display_name())
         }
         TypeKind::ConstantArray => {
-            let element = ty
-                .get_element_type()
-                .map(classify_type)
+            let element_ty = ty.get_element_type();
+            let element = element_ty
+                .as_ref()
+                .map(|t| classify_type(t.clone()))
                 .unwrap_or(CType::Unknown("unknown".into()));
-            let len = ty.get_sizeof().unwrap_or(0) as u64;
+            // Calculate array length: total_size / element_size
+            let total_size = ty.get_sizeof().unwrap_or(0);
+            let elem_size = element_ty.and_then(|t| t.get_sizeof().ok()).unwrap_or(1);
+            let len = if elem_size > 0 { total_size / elem_size } else { 0 };
             CType::Array {
                 element: Box::new(element),
-                length: len,
+                length: len as u64,
             }
         }
         _ => CType::Unknown(ty.get_display_name()),
@@ -653,6 +796,7 @@ fn primitive_from_name(name: &str) -> Option<Primitive> {
     match name {
         "int32_t" | "int" => Some(Primitive::I32),
         "uint32_t" | "unsigned int" => Some(Primitive::U32),
+        "uint16_t" | "unsigned short" => Some(Primitive::U16),
         "uint8_t" | "unsigned char" => Some(Primitive::U8),
         "bool" => Some(Primitive::Bool),
         "float" => Some(Primitive::F32),
@@ -690,7 +834,9 @@ enum ParamType {
     Primitive(&'static str),
     Struct(String),
     Slice { element: TypeRef },
+    Ref { element: TypeRef },
     MutRef { element: TypeRef },
+    Array { element: &'static str, length: u64 },
     CStr,
 }
 
@@ -711,6 +857,7 @@ enum QueryExpr {
     Param(String),
     SlicePtr { param: String, mutable_ptr: bool },
     SliceLen { param: String, cast: &'static str },
+    RefPtr { param: String },
     MutRefPtr { param: String },
     CStrPtr { param: String },
     Zero,
@@ -726,20 +873,7 @@ struct ReturnField {
 enum ReturnFieldType {
     Plain(TypeRef),
     CString,
-}
-
-impl ReturnFieldType {
-    fn ty_string(&self) -> String {
-        match self {
-            ReturnFieldType::Plain(ty) => type_ref_to_string(ty),
-            ReturnFieldType::CString => "Option<String>".into(),
-        }
-    }
-}
-
-#[derive(Debug)]
-enum ReturnKind {
-    Scalar(ReturnField),
+    Array { element: String, length: u64 },
     Vec {
         ptr_field: String,
         len_field: String,
@@ -750,12 +884,28 @@ enum ReturnKind {
         ptr_field: String,
         len_field: String,
     },
-    Tuple(Vec<ReturnField>),
+}
+
+impl ReturnFieldType {
+    fn ty_string(&self) -> String {
+        match self {
+            ReturnFieldType::Plain(ty) => type_ref_to_string(ty),
+            ReturnFieldType::CString => "Option<String>".into(),
+            ReturnFieldType::Array { element, length } => format!("[{}; {}]", element, length),
+            ReturnFieldType::Vec { elem, .. } => format!("Vec<{}>", type_ref_to_string(elem)),
+            ReturnFieldType::StringVec { .. } => "Vec<String>".into(),
+        }
+    }
+}
+
+#[derive(Debug)]
+enum ReturnKind {
+    Fields(Vec<ReturnField>),
     Unit,
 }
 
 fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> Result<String> {
-    let method_name = normalize_acronyms(&func.name).to_snake_case();
+    let method_name = make_param_name(&func.name);
     let (params, inits) = build_params(query)?;
     let ret_kind = build_return(result)?;
 
@@ -765,25 +915,26 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
             ParamType::Primitive(name) => name.to_string(),
             ParamType::Struct(struct_name) => format!("sys::{}", struct_name),
             ParamType::Slice { element } => format!("&[{}]", type_ref_to_string(element)),
+            ParamType::Ref { element } => format!("&{}", type_ref_to_string(element)),
             ParamType::MutRef { element } => format!("&mut {}", type_ref_to_string(element)),
+            ParamType::Array { element, length } => format!("[{}; {}]", element, length),
             ParamType::CStr => "&str".to_string(),
         };
         sig.push_str(&format!(", {}: {}", param.name, ty));
     }
     sig.push_str(") -> Result<");
-    sig.push_str(
-        match &ret_kind {
-            ReturnKind::Scalar(field) => field.ty.ty_string(),
-            ReturnKind::Vec { elem, .. } => format!("Vec<{}>", type_ref_to_string(elem)),
-            ReturnKind::StringVec { .. } => "Vec<String>".to_string(),
-            ReturnKind::Tuple(fields) => {
+    let return_ty = match &ret_kind {
+        ReturnKind::Unit => "()".to_string(),
+        ReturnKind::Fields(fields) => {
+            if fields.len() == 1 {
+                fields[0].ty.ty_string()
+            } else {
                 let parts: Vec<_> = fields.iter().map(|f| f.ty.ty_string()).collect();
                 format!("({})", parts.join(", "))
             }
-            ReturnKind::Unit => "()".to_string(),
         }
-        .as_str(),
-    );
+    };
+    sig.push_str(&return_ty);
     sig.push_str(", Error> {\n");
 
     let mut body = String::new();
@@ -818,6 +969,7 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
                 }
             }
             QueryExpr::SliceLen { param, cast } => format!("{}.len() as {}", param, cast),
+            QueryExpr::RefPtr { param } => format!("{} as *const _", param),
             QueryExpr::MutRefPtr { param } => format!("{} as *mut _", param),
             QueryExpr::CStrPtr { param } => format!("{}_cstr.as_ptr()", param),
             QueryExpr::Zero => "0".into(),
@@ -844,14 +996,39 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
 
 fn render_return(kind: &ReturnKind) -> String {
     match kind {
-        ReturnKind::Scalar(field) => {
-            let expr = field_expr(field, "                ");
-            format!(
-                "            Error::result_or(result.error, {{\n{expr}\n            }})\n",
-                expr = expr
-            )
+        ReturnKind::Unit => "            Error::result_or(result.error, ())\n".into(),
+        ReturnKind::Fields(fields) => {
+            if fields.len() == 1 {
+                let expr = field_expr(&fields[0], "                ");
+                format!(
+                    "            Error::result_or(result.error, {{\n{expr}\n            }})\n",
+                    expr = expr
+                )
+            } else {
+                let mut out = String::from("            let value = (\n");
+                for field in fields {
+                    let expr = field_expr(field, "                ");
+                    out.push_str(&expr);
+                    out.push_str(",\n");
+                }
+                out.push_str("            );\n");
+                out.push_str("            Error::result_or(result.error, value)\n");
+                out
+            }
         }
-        ReturnKind::Vec {
+    }
+}
+
+fn field_expr(field: &ReturnField, indent: &str) -> String {
+    match &field.ty {
+        ReturnFieldType::Plain(_) => format!("{indent}result.{}", field.name),
+        ReturnFieldType::CString => format!(
+            "{indent}{{\n{indent}    if result.{name}.is_null() {{\n{indent}        None\n{indent}    }} else {{\n{indent}        Some(CStr::from_ptr(result.{name}).to_string_lossy().into_owned())\n{indent}    }}\n{indent}}}",
+            indent = indent,
+            name = field.name
+        ),
+        ReturnFieldType::Array { .. } => format!("{indent}result.{}", field.name),
+        ReturnFieldType::Vec {
             ptr_field,
             len_field,
             elem,
@@ -867,41 +1044,21 @@ fn render_return(kind: &ReturnKind) -> String {
                 format!("result.{}", ptr_field)
             };
             format!(
-                "            let slice = if result.{len_field} == 0 || result.{ptr_field}.is_null() {{\n                &[]\n            }} else {{\n                slice::from_raw_parts({ptr_expr}, result.{len_field} as usize)\n            }};\n            Error::result_or(result.error, slice.to_vec())\n",
+                "{indent}{{\n{indent}    let slice = if result.{len_field} == 0 || result.{ptr_field}.is_null() {{\n{indent}        &[]\n{indent}    }} else {{\n{indent}        slice::from_raw_parts({ptr_expr}, result.{len_field} as usize)\n{indent}    }};\n{indent}    slice.to_vec()\n{indent}}}",
+                indent = indent,
                 len_field = len_field,
                 ptr_field = ptr_field,
                 ptr_expr = ptr_expr,
             )
         }
-        ReturnKind::StringVec { ptr_field, len_field } => {
-            format!(
-                "            let vec = if result.{len_field} == 0 || result.{ptr_field}.is_null() {{\n                Vec::new()\n            }} else {{\n                let slice = slice::from_raw_parts(result.{ptr_field}, result.{len_field} as usize);\n                slice.iter().map(|&ptr| {{\n                    if ptr.is_null() {{\n                        String::new()\n                    }} else {{\n                        CStr::from_ptr(ptr).to_string_lossy().into_owned()\n                    }}\n                }}).collect()\n            }};\n            Error::result_or(result.error, vec)\n",
-                ptr_field = ptr_field,
-                len_field = len_field,
-            )
-        }
-        ReturnKind::Tuple(fields) => {
-            let mut out = String::from("            let value = (\n");
-            for field in fields {
-                let expr = field_expr(field, "                ");
-                out.push_str(&expr);
-                out.push_str(",\n");
-            }
-            out.push_str("            );\n");
-            out.push_str("            Error::result_or(result.error, value)\n");
-            out
-        }
-        ReturnKind::Unit => "            Error::result_or(result.error, ())\n".into(),
-    }
-}
-
-fn field_expr(field: &ReturnField, indent: &str) -> String {
-    match &field.ty {
-        ReturnFieldType::Plain(_) => format!("{indent}result.{}", field.name),
-        ReturnFieldType::CString => format!(
-            "{indent}{{\n{indent}    if result.{name}.is_null() {{\n{indent}        None\n{indent}    }} else {{\n{indent}        Some(CStr::from_ptr(result.{name}).to_string_lossy().into_owned())\n{indent}    }}\n{indent}}}",
+        ReturnFieldType::StringVec {
+            ptr_field,
+            len_field,
+        } => format!(
+            "{indent}{{\n{indent}    if result.{len_field} == 0 || result.{ptr_field}.is_null() {{\n{indent}        Vec::new()\n{indent}    }} else {{\n{indent}        let slice = slice::from_raw_parts(result.{ptr_field}, result.{len_field} as usize);\n{indent}        slice.iter().map(|&ptr| {{\n{indent}            if ptr.is_null() {{\n{indent}                String::new()\n{indent}            }} else {{\n{indent}                CStr::from_ptr(ptr).to_string_lossy().into_owned()\n{indent}            }}\n{indent}        }}).collect()\n{indent}    }}\n{indent}}}",
             indent = indent,
-            name = field.name
+            ptr_field = ptr_field,
+            len_field = len_field,
         ),
     }
 }
@@ -1037,7 +1194,48 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                     }
                 }
 
+                // Single const pointer without count - treat as &T
+                if *is_const {
+                    if let Some(elem) = rust_type_from_pointer(pointee) {
+                        let param_name = make_param_name(&field.name);
+                        params.push(ParamSpec {
+                            name: param_name.clone(),
+                            ty: ParamType::Ref {
+                                element: elem.clone(),
+                            },
+                        });
+                        inits.push(QueryInitField {
+                            field: make_field_name(&field.name),
+                            expr: QueryExpr::RefPtr {
+                                param: param_name,
+                            },
+                        });
+                        i += 1;
+                        continue;
+                    }
+                }
+
                 return Err(anyhow!("pointer field {} missing length pair", field.name));
+            }
+            CType::Array { element, length } => {
+                // Fixed-size arrays like float matrix[16]
+                if let CType::Primitive(prim) = element.as_ref() {
+                    let param_name = make_param_name(&field.name);
+                    params.push(ParamSpec {
+                        name: param_name.clone(),
+                        ty: ParamType::Array {
+                            element: prim.rust_type(),
+                            length: *length,
+                        },
+                    });
+                    inits.push(QueryInitField {
+                        field: make_field_name(&field.name),
+                        expr: QueryExpr::Param(param_name),
+                    });
+                    i += 1;
+                    continue;
+                }
+                return Err(anyhow!("unsupported array element type in field {}", field.name));
             }
             _ => {
                 if let Some(ty) = rust_type_from_c(&field.ty) {
@@ -1066,45 +1264,55 @@ fn build_return(result: &StructDef) -> Result<ReturnKind> {
     if data_fields.is_empty() {
         return Ok(ReturnKind::Unit);
     }
-    let first = data_fields[0];
-    if let CType::Pointer { pointee, is_const: outer_const } = &first.ty {
-        if data_fields.len() >= 2 && matches!(data_fields[1].ty, CType::Primitive(Primitive::U32)) {
-            // Check for const char** (array of strings)
-            // Note: In C, "const char**" means the outer pointer is NOT const, but points to const char*
-            if let CType::Pointer { pointee: inner_pointee, is_const: inner_const } = &**pointee {
-                if *inner_const && matches!(**inner_pointee, CType::Primitive(Primitive::Char)) {
-                    return Ok(ReturnKind::StringVec {
-                        ptr_field: make_field_name(&first.name),
-                        len_field: make_field_name(&data_fields[1].name),
-                    });
-                }
-            }
-
-            let elem = rust_type_from_pointer(pointee)
-                .ok_or_else(|| anyhow!("unsupported result pointer {}", first.name))?;
-            return Ok(ReturnKind::Vec {
-                ptr_field: make_field_name(&first.name),
-                len_field: make_field_name(&data_fields[1].name),
-                elem,
-                mutable_ptr: !outer_const,
-            });
-        }
-    }
     let mut fields = Vec::new();
-    for field in data_fields {
+    let mut i = 0;
+    while i < data_fields.len() {
+        let field = data_fields[i];
+        if let CType::Pointer { pointee, is_const: outer_const } = &field.ty {
+            if i + 1 < data_fields.len() && matches!(data_fields[i + 1].ty, CType::Primitive(Primitive::U32)) {
+                // Special case: const char** + length (array of strings)
+                if let CType::Pointer { pointee: inner_pointee, is_const: inner_const } = &**pointee {
+                    if *inner_const && matches!(**inner_pointee, CType::Primitive(Primitive::Char)) {
+                        fields.push(ReturnField {
+                            name: make_field_name(&field.name),
+                            ty: ReturnFieldType::StringVec {
+                                ptr_field: make_field_name(&field.name),
+                                len_field: make_field_name(&data_fields[i + 1].name),
+                            },
+                        });
+                        i += 2;
+                        continue;
+                    }
+                }
+
+                let elem = rust_type_from_pointer(pointee)
+                    .ok_or_else(|| anyhow!("unsupported result pointer {}", field.name))?;
+                fields.push(ReturnField {
+                    name: make_field_name(&field.name),
+                    ty: ReturnFieldType::Vec {
+                        ptr_field: make_field_name(&field.name),
+                        len_field: make_field_name(&data_fields[i + 1].name),
+                        elem,
+                        mutable_ptr: !outer_const,
+                    },
+                });
+                i += 2;
+                continue;
+            }
+        }
+
+        let ty = match return_field_type(&field.ty) {
+            Some(ty) => ty,
+            None => return Err(anyhow!("unsupported result field {}", field.name)),
+        };
         fields.push(ReturnField {
             name: make_field_name(&field.name),
-            ty: match return_field_type(&field.ty) {
-                Some(ty) => ty,
-                None => return Err(anyhow!("unsupported result field {}", field.name)),
-            },
+            ty,
         });
+        i += 1;
     }
-    if fields.len() == 1 {
-        Ok(ReturnKind::Scalar(fields.remove(0)))
-    } else {
-        Ok(ReturnKind::Tuple(fields))
-    }
+
+    Ok(ReturnKind::Fields(fields))
 }
 
 fn return_field_type(ty: &CType) -> Option<ReturnFieldType> {
@@ -1118,6 +1326,14 @@ fn return_field_type(ty: &CType) -> Option<ReturnFieldType> {
                 }
             }
             None
+        }
+        CType::Array { element, length } => {
+            let elem_type = match &**element {
+                CType::Primitive(p) => p.rust_type().to_string(),
+                CType::Record(name) => name.clone(),
+                _ => return None,
+            };
+            Some(ReturnFieldType::Array { element: elem_type, length: *length })
         }
         _ => None,
     }

@@ -66,7 +66,7 @@ struct GetFeaturesInRectangleResult { const Error* error; int32_t* features; uin
 struct GetFeaturesInSphereQuery { Float3 center; float radius; };
 struct GetFeaturesInSphereResult { const Error* error; int32_t* features; uint32_t count; };
 
-struct GetFeaturesInCylinderQuery { Float3 center; float radius; float height; };
+struct GetFeaturesInCylinderQuery { float x; float z; float radius; float height; };
 struct GetFeaturesInCylinderResult { const Error* error; int32_t* features; uint32_t count; };
 
 struct GetFeatureDefIDQuery { int32_t featureID; };
@@ -126,8 +126,51 @@ struct GetFeatureLastAttackedPieceResult { const Error* error; int32_t pieceNum;
 struct GetFeatureCollisionVolumeDataQuery { int32_t featureID; };
 struct GetFeatureCollisionVolumeDataResult { const Error* error; CollisionVolumeData volume; };
 
-struct GetFeaturePieceCollisionVolumeDataQuery { int32_t featureID; int32_t pieceNum; };
+struct GetFeaturePieceCollisionVolumeDataQuery { int32_t featureID; };
 struct GetFeaturePieceCollisionVolumeDataResult { const Error* error; CollisionVolumeData volume; };
+
+struct ClearFeaturesPreviousDrawFlagQuery { uint8_t _unused; };
+struct ClearFeaturesPreviousDrawFlagResult { const Error* error; bool success; };
+
+struct GetFeatureNoDrawQuery { int32_t featureID; };
+struct GetFeatureNoDrawResult { const Error* error; bool noDraw; };
+
+struct GetFeatureLuaDrawQuery { int32_t featureID; };
+struct GetFeatureLuaDrawResult { const Error* error; bool luaDraw; };
+
+struct GetFeatureEngineDrawMaskQuery { int32_t featureID; };
+struct GetFeatureEngineDrawMaskResult { const Error* error; uint32_t mask; };
+
+struct GetFeatureDrawFlagQuery { int32_t featureID; };
+struct GetFeatureDrawFlagResult { const Error* error; bool flag; };
+
+struct GetFeatureAlwaysUpdateMatrixQuery { int32_t featureID; };
+struct GetFeatureAlwaysUpdateMatrixResult { const Error* error; bool update; };
+
+struct FeatureTransformMatrix { float values[16]; };
+struct GetFeatureTransformMatrixQuery { int32_t featureID; };
+struct GetFeatureTransformMatrixResult { const Error* error; FeatureTransformMatrix matrix; };
+
+struct FeatureSelectionVolumeData {
+	Float3 scales;
+	Float3 offsets;
+	int32_t primaryAxis;
+};
+
+struct GetFeatureSelectionVolumeDataQuery { int32_t featureID; };
+struct GetFeatureSelectionVolumeDataResult { const Error* error; FeatureSelectionVolumeData data; };
+
+struct GetFeatureFireTimeQuery { int32_t featureID; };
+struct GetFeatureFireTimeResult { const Error* error; int32_t fireTime; };
+
+struct GetFeatureSmokeTimeQuery { int32_t featureID; };
+struct GetFeatureSmokeTimeResult { const Error* error; int32_t smokeTime; };
+
+struct GetRenderFeaturesQuery { uint8_t _unused; };
+struct GetRenderFeaturesResult { const Error* error; int32_t* features; uint32_t count; };
+
+struct GetRenderFeaturesDrawFlagChangedQuery { uint8_t _unused; };
+struct GetRenderFeaturesDrawFlagChangedResult { const Error* error; int32_t* features; uint32_t count; };
 
 // API structure
 struct FeaturesApi {
@@ -156,6 +199,18 @@ struct FeaturesApi {
 	void (*GetFeatureLastAttackedPiece)(const GetFeatureLastAttackedPieceQuery* query, GetFeatureLastAttackedPieceResult* result);
 	void (*GetFeatureCollisionVolumeData)(const GetFeatureCollisionVolumeDataQuery* query, GetFeatureCollisionVolumeDataResult* result);
 	void (*GetFeaturePieceCollisionVolumeData)(const GetFeaturePieceCollisionVolumeDataQuery* query, GetFeaturePieceCollisionVolumeDataResult* result);
+	void (*ClearFeaturesPreviousDrawFlag)(const ClearFeaturesPreviousDrawFlagQuery* query, ClearFeaturesPreviousDrawFlagResult* result);
+	void (*GetFeatureNoDraw)(const GetFeatureNoDrawQuery* query, GetFeatureNoDrawResult* result);
+	void (*GetFeatureLuaDraw)(const GetFeatureLuaDrawQuery* query, GetFeatureLuaDrawResult* result);
+	void (*GetFeatureEngineDrawMask)(const GetFeatureEngineDrawMaskQuery* query, GetFeatureEngineDrawMaskResult* result);
+	void (*GetFeatureDrawFlag)(const GetFeatureDrawFlagQuery* query, GetFeatureDrawFlagResult* result);
+	void (*GetFeatureAlwaysUpdateMatrix)(const GetFeatureAlwaysUpdateMatrixQuery* query, GetFeatureAlwaysUpdateMatrixResult* result);
+	void (*GetFeatureTransformMatrix)(const GetFeatureTransformMatrixQuery* query, GetFeatureTransformMatrixResult* result);
+	void (*GetFeatureSelectionVolumeData)(const GetFeatureSelectionVolumeDataQuery* query, GetFeatureSelectionVolumeDataResult* result);
+	void (*GetFeatureFireTime)(const GetFeatureFireTimeQuery* query, GetFeatureFireTimeResult* result);
+	void (*GetFeatureSmokeTime)(const GetFeatureSmokeTimeQuery* query, GetFeatureSmokeTimeResult* result);
+	void (*GetRenderFeatures)(const GetRenderFeaturesQuery* query, GetRenderFeaturesResult* result);
+	void (*GetRenderFeaturesDrawFlagChanged)(const GetRenderFeaturesDrawFlagChangedQuery* query, GetRenderFeaturesDrawFlagChangedResult* result);
 };
 
 extern const FeaturesApi FEATURES_API;
