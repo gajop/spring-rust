@@ -117,8 +117,8 @@ static void NativeGetScreenGeometry(const GetScreenGeometryQuery* query, GetScre
 	result->error = nullptr;
 	result->geom.viewSizeX = globalRendering->screenSizeX;
 	result->geom.viewSizeY = globalRendering->screenSizeY;
-	result->geom.viewPosX = 0;
-	result->geom.viewPosY = 0;
+	result->geom.viewPosX = globalRendering->screenPosX;
+	result->geom.viewPosY = globalRendering->screenPosY;
 }
 
 static void NativeGetMiniMapGeometry(const GetMiniMapGeometryQuery* query, GetMiniMapGeometryResult* result)

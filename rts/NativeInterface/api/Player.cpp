@@ -99,7 +99,7 @@ static void NativeGetPlayerRoster(const GetPlayerRosterQuery* query, GetPlayerRo
 	const PlayerRoster::SortType oldSortType = playerRoster.GetSortType();
 	playerRoster.SetSortTypeByCode(static_cast<PlayerRoster::SortType>(query->sortMode));
 
-	const std::vector<int>& playerIndices = playerRoster.GetIndices(false);
+	const std::vector<int>& playerIndices = playerRoster.GetIndices(query->showPathingPlayers);
 	playerRoster.SetSortTypeByCode(oldSortType);
 
 	// Write roster entries to scratch buffer
@@ -173,6 +173,10 @@ static void NativeGetPlayerTraffic(const GetPlayerTrafficQuery* query, GetPlayer
 	trafficData->packetsSent = 0;
 	trafficData->packetsReceived = 0;
 	trafficData->bytesSent = pti.total;
+	if (query->packetID != -1) {
+		const auto pit = pti.packets.find(query->packetID);
+		trafficData->bytesSent = (pit != pti.packets.end()) ? pit->second : static_cast<uint32_t>(-1);
+	}
 	trafficData->bytesReceived = 0;
 
 	bufferPos += sizeof(PlayerTraffic);

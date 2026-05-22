@@ -588,7 +588,7 @@ static void NativeGetUnitPieceMatrix(const GetUnitPieceMatrixQuery* query, GetUn
 		return;
 	}
 
-	const LocalModelPiece* piece = localModel.GetPiece(0);
+	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum);
 	const CMatrix44f& mat = piece->GetModelSpaceMatrix();
 
 	// Copy matrix in column-major order
@@ -613,12 +613,12 @@ static void NativeGetFeaturePieceMatrix(const GetFeaturePieceMatrixQuery* query,
 	}
 
 	const LocalModel& localModel = feature->localModel;
-	if (localModel.pieces.empty()) {
+	if (!localModel.HasPiece(query->pieceNum)) {
 		result->error = &INVALID_PIECE_ERROR;
 		return;
 	}
 
-	const LocalModelPiece* piece = localModel.GetPiece(0);
+	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum);
 	const CMatrix44f& mat = piece->GetModelSpaceMatrix();
 
 	// Copy matrix in column-major order

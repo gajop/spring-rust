@@ -1,0 +1,257 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_unit_weapon_state",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitWeaponState"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsWeapons.get_unit_weapon_state"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitWeaponState`",
+        "native_getter": "`UnitsWeapons.get_unit_weapon_state`",
+        "fields": "`value`"
+      },
+      "rust": {
+        "check": "check_unit_weapon_state_f32",
+        "set": "set_noop"
+      },
+      "params": {
+        "weaponNum": {
+          "type": "i32",
+          "fixed": 1
+        },
+        "key": {
+          "type": "enum",
+          "values": [
+            "range",
+            "projectileSpeed",
+            "reloadFrame",
+            "reloadTime"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitWeaponState",
+        "args": [
+          "fixture.unitID",
+          "value.weaponNum",
+          "value.key"
+        ],
+        "returns": [
+          "value"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_weapon_can_fire",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitWeaponCanFire"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsWeapons.get_unit_weapon_can_fire"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitWeaponCanFire`",
+        "native_getter": "`UnitsWeapons.get_unit_weapon_can_fire`",
+        "fields": "`value`"
+      },
+      "rust": {
+        "check": "check_unit_weapon_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "weaponNum": {
+          "type": "i32",
+          "fixed": 1
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitWeaponCanFire",
+        "args": [
+          "fixture.unitID",
+          "value.weaponNum",
+          false,
+          false,
+          false
+        ],
+        "returns": [
+          "value"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_weapon_test_range",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitWeaponTestRange"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsWeapons.get_unit_weapon_test_range"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitWeaponTestRange`",
+        "native_getter": "`UnitsWeapons.get_unit_weapon_test_range`",
+        "fields": "`value`"
+      },
+      "rust": {
+        "check": "check_unit_weapon_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "weaponNum": {
+          "type": "i32",
+          "fixed": 1
+        },
+        "target": {
+          "type": "float3",
+          "generator": "map_position",
+          "expands_to": [
+            "x",
+            "y",
+            "z"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitWeaponTestRange",
+        "args": [
+          "fixture.unitID",
+          "value.weaponNum",
+          "value.x",
+          "value.y",
+          "value.z"
+        ],
+        "returns": [
+          "value"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_weapon_damages",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitWeaponDamages"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsWeapons.get_unit_weapon_damages"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitWeaponDamages`",
+        "native_getter": "`UnitsWeapons.get_unit_weapon_damages`",
+        "fields": "`value`"
+      },
+      "rust": {
+        "check": "check_unit_weapon_damages_f32",
+        "set": "set_noop"
+      },
+      "params": {
+        "weaponNum": {
+          "type": "i32",
+          "fixed": 1
+        },
+        "key": {
+          "type": "enum",
+          "values": [
+            "paralyzeDamageTime",
+            "impulseFactor",
+            "impulseBoost",
+            "craterMult",
+            "craterBoost"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitWeaponDamages",
+        "args": [
+          "fixture.unitID",
+          "value.weaponNum",
+          "value.key"
+        ],
+        "returns": [
+          "value"
+        ]
+      }
+    }
+  ]
+}

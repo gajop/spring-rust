@@ -26,6 +26,7 @@ struct TestBuildOrderQuery {
 
 struct TestBuildOrderResult {
 	const Error* error;
+	int32_t status;   // 0=blocked, 1=occupied, 2=reclaimable/open
 	bool canBuild;
 	int32_t feature;  // Blocking feature ID or -1
 };
@@ -58,6 +59,10 @@ struct ClosestBuildPosResult {
 struct TestMoveOrderQuery {
 	int32_t unitDefID;
 	Float3 pos;
+	Float3 dir;
+	bool testTerrain;
+	bool testObjects;
+	bool centerOnly;
 };
 
 struct TestMoveOrderResult {
@@ -69,9 +74,23 @@ struct GetUnitDefDimensionsQuery {
 	int32_t unitDefID;
 };
 
+struct UnitDefDimensions {
+	float height;
+	float radius;
+	float midx;
+	float minx;
+	float maxx;
+	float midy;
+	float miny;
+	float maxy;
+	float midz;
+	float minz;
+	float maxz;
+};
+
 struct GetUnitDefDimensionsResult {
 	const Error* error;
-	Float3 dimensions;
+	UnitDefDimensions dimensions;
 };
 
 // API structure

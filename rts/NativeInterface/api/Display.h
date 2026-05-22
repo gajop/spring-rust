@@ -79,6 +79,7 @@ struct GetWindowGeometryResult {
 
 struct GetScreenGeometryQuery {
 	int32_t screenNum;
+	bool queryUsable;
 };
 
 struct GetScreenGeometryResult {

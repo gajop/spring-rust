@@ -66,11 +66,7 @@ static void NativeMarkerAddPoint(const MarkerAddPointQuery* query, MarkerAddPoin
 	const int playerID = (query->playerID >= 0) ? query->playerID : gu->myPlayerNum;
 
 	if (query->localOnly) {
-		const bool alwaysErase = query->alwaysErase && gu->spectating;
 		inMapDrawerModel->AddPoint(pos, text, playerID);
-		if (alwaysErase) {
-			inMapDrawerModel->EraseNear(pos, playerID, true);
-		}
 	} else {
 		inMapDrawer->SendPoint(pos, text, true);
 	}
@@ -112,6 +108,7 @@ static void NativeMarkerErasePosition(const MarkerErasePositionQuery* query, Mar
 	}
 
 	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
+	(void)query->unused;
 	const int playerID = (query->playerID >= 0) ? query->playerID : gu->myPlayerNum;
 
 	if (query->localOnly) {

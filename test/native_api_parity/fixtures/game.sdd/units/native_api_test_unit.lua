@@ -1,0 +1,56 @@
+return {
+	native_api_test_unit = {
+		name = "Native API Test Unit",
+		description = "Native API parity fixture unit",
+		objectName = "fir_tree_small.s3o",
+		script = "native_api_test_unit.lua",
+		buildPic = "",
+		maxDamage = 1000,
+		buildCostMetal = 1,
+		buildCostEnergy = 1,
+		buildTime = 1,
+		canAttack = true,
+		canMove = true,
+		canPatrol = false,
+		canStop = true,
+		builder = true,
+		workerTime = 10,
+		buildDistance = 128,
+		canAssist = true,
+		canReclaim = true,
+		canRepair = true,
+		buildoptions = {
+			"native_api_test_unit",
+		},
+		category = "LAND",
+		collisionVolumeType = "box",
+		collisionVolumeScales = "16 16 16",
+		footprintX = 1,
+		footprintZ = 1,
+		movementClass = "KBOT1",
+		sightDistance = 256,
+		customParams = {
+			native_api_parity_unit = "unit_custom_value",
+		},
+		weapondefs = {
+			parity_weapon = {
+				name = "Native API Parity Weapon",
+				weaponType = "Cannon",
+				range = 300,
+				reloadtime = 1,
+				weaponVelocity = 500,
+				damage = {
+					default = 25,
+				},
+				customParams = {
+					native_api_parity_weapon = "weapon_custom_value",
+				},
+			},
+		},
+		weapons = {
+			{
+				def = "parity_weapon",
+			},
+		},
+	},
+}

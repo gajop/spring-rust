@@ -19,6 +19,7 @@ static thread_local Error dynamicError;
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "LOS system not ready" };
 static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
 static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
+static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "GetClosestValidPosition is not implemented by the Lua API" };
 
 static bool IsReady() { return (gs != nullptr) && (losHandler != nullptr); }
 
@@ -33,9 +34,10 @@ static void NativeGetPositionLosState(const GetPositionLosStateQuery* query, Get
 
 	const float3 position(query->pos.x, query->pos.y, query->pos.z);
 	result->error = nullptr;
-	result->state.los = losHandler->InLos(position, query->allyTeamID);
-	result->state.radar = losHandler->InRadar(position, query->allyTeamID);
-	result->state.prevLos = false; // Not directly available
+	result->state.inLos = losHandler->InLos(position, query->allyTeamID);
+	result->state.inRadar = losHandler->InRadar(position, query->allyTeamID);
+	result->state.inJammer = losHandler->InJammer(position, query->allyTeamID);
+	result->state.inLosOrRadar = result->state.inLos || result->state.inRadar;
 }
 
 static void NativeIsPosInLos(const IsPosInLosQuery* query, IsPosInLosResult* result) {
@@ -153,26 +155,17 @@ static void NativeGetRadarErrorParams(const GetRadarErrorParamsQuery* query, Get
 		return;
 	}
 
-	// Default radar error params (actual values would come from modRules)
 	result->error = nullptr;
-	result->params.baseErrMult = 1.0f;
-	result->params.baseErrSize = 0.0f;
-	result->params.errorMult = 0.1f;
-	result->params.errorSize = 10.0f;
-	result->params.baseSpeed = 0.0f;
-	result->params.speedMult = 0.0f;
+	result->params.radarErrorSize = losHandler->GetAllyTeamRadarErrorSize(query->allyTeamID);
+	result->params.baseRadarErrorSize = losHandler->GetBaseRadarErrorSize();
+	result->params.baseRadarErrorMult = losHandler->GetBaseRadarErrorMult();
 }
 
 static void NativeGetClosestValidPosition(const GetClosestValidPositionQuery* query, GetClosestValidPositionResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	// Simplified - just return the input position
-	// Full implementation would check terrain, blocking, etc.
-	result->error = nullptr;
-	result->position.x = query->pos.x;
-	result->position.y = query->pos.y;
-	result->position.z = query->pos.z;
+	result->error = &NOT_IMPLEMENTED_ERROR;
 }
 
 } // namespace

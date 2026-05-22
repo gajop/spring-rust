@@ -16,6 +16,7 @@
 #include "Game/Camera/DollyController.h"
 #include "Game/UI/MouseHandler.h"
 #include "Game/UI/GuiHandler.h"
+#include "Game/UI/CursorIcons.h"
 #include "Game/UI/MiniMap.h"
 #include "Game/UI/KeySet.h"
 #include "Game/UI/CommandColors.h"
@@ -442,18 +443,6 @@ static void NativeSetActiveCommand(const SetActiveCommandQuery* query, SetActive
 		return;
 	}
 
-	// Action path
-	if (query->actionName != nullptr) {
-		const Action action(query->actionName);
-		CKeySet keyset;
-		if (query->actionExtra != nullptr) {
-			keyset.Parse(query->actionExtra);
-		}
-
-		result->success = guihandler->SetActiveCommand(action, keyset, 0);
-		return;
-	}
-
 	// Index path
 	const int cmdIndex = query->cmdIndex;
 	const int button = (query->button == 0) ? SDL_BUTTON_LEFT : query->button;
@@ -673,8 +662,7 @@ static void NativePauseDollyCamera(const PauseDollyCameraQuery* query, PauseDoll
 		return;
 	}
 
-	const float percent = query->hasPercent ? query->percent : -1.0f;
-	camHandler->GetDollyController().Pause(percent);
+	camHandler->GetDollyController().Pause(query->percent);
 	result->success = true;
 }
 
@@ -952,8 +940,9 @@ static void NativeStubNotAvailable(const Error** error, bool* success)
 	}
 }
 
-static void NativeSetAtmosphere(const SetAtmosphereQuery* /*query*/, SetAtmosphereResult* result)
+static void NativeSetAtmosphere(const SetAtmosphereQuery* query, SetAtmosphereResult* result)
 {
+	(void)query->params;
 	result->error = nullptr;
 	result->success = (ISky::GetSky() != nullptr);
 }
@@ -976,14 +965,16 @@ static void NativeSetSunDirection(const SetSunDirectionQuery* query, SetSunDirec
 	result->success = true;
 }
 
-static void NativeSetSunLighting(const SetSunLightingQuery* /*query*/, SetSunLightingResult* result)
+static void NativeSetSunLighting(const SetSunLightingQuery* query, SetSunLightingResult* result)
 {
+	(void)query->params;
 	result->error = nullptr;
 	result->success = (ISky::GetSky() != nullptr);
 }
 
-static void NativeSetWaterParams(const SetWaterParamsQuery* /*query*/, SetWaterParamsResult* result)
+static void NativeSetWaterParams(const SetWaterParamsQuery* query, SetWaterParamsResult* result)
 {
+	(void)query->params;
 	result->error = nullptr;
 	result->success = true;
 }
@@ -1024,15 +1015,37 @@ static void NativeSetSkyBoxTexture(const SetSkyBoxTextureQuery* /*query*/, SetSk
 	result->success = true;
 }
 
-static void NativeSetMapRenderingParams(const SetMapRenderingParamsQuery* /*query*/, SetMapRenderingParamsResult* result)
+static void NativeSetMapRenderingParams(const SetMapRenderingParamsQuery* query, SetMapRenderingParamsResult* result)
 {
+	(void)query->params;
 	result->error = nullptr;
 	result->success = true;
 }
 
-static void NativeSetLosViewColors(const SetLosViewColorsQuery* /*query*/, SetLosViewColorsResult* result)
+static void NativeSetLosViewColors(const SetLosViewColorsQuery* query, SetLosViewColorsResult* result)
 {
 	result->error = nullptr;
+	result->success = false;
+	if (readMap == nullptr || readMap->GetGroundDrawer() == nullptr)
+		return;
+
+	const int scale = CBaseGroundDrawer::losColorScale;
+	CBaseGroundDrawer* gd = readMap->GetGroundDrawer();
+	gd->alwaysColor[0] = static_cast<int>(scale * query->always.r);
+	gd->alwaysColor[1] = static_cast<int>(scale * query->always.g);
+	gd->alwaysColor[2] = static_cast<int>(scale * query->always.b);
+	gd->losColor[0] = static_cast<int>(scale * query->los.r);
+	gd->losColor[1] = static_cast<int>(scale * query->los.g);
+	gd->losColor[2] = static_cast<int>(scale * query->los.b);
+	gd->radarColor[0] = static_cast<int>(scale * query->radar.r);
+	gd->radarColor[1] = static_cast<int>(scale * query->radar.g);
+	gd->radarColor[2] = static_cast<int>(scale * query->radar.b);
+	gd->jamColor[0] = static_cast<int>(scale * query->jam.r);
+	gd->jamColor[1] = static_cast<int>(scale * query->jam.g);
+	gd->jamColor[2] = static_cast<int>(scale * query->jam.b);
+	gd->radarColor2[0] = static_cast<int>(scale * query->radar2.r);
+	gd->radarColor2[1] = static_cast<int>(scale * query->radar2.g);
+	gd->radarColor2[2] = static_cast<int>(scale * query->radar2.b);
 	result->success = true;
 }
 
@@ -1050,9 +1063,26 @@ static void NativeSetDrawSelectionInfo(const SetDrawSelectionInfoQuery* query, S
 	result->success = true;
 }
 
-static void NativeSetCustomCommandDrawData(const SetCustomCommandDrawDataQuery* /*query*/, SetCustomCommandDrawDataResult* result)
+static void NativeSetCustomCommandDrawData(const SetCustomCommandDrawDataQuery* query, SetCustomCommandDrawDataResult* result)
 {
 	result->error = nullptr;
+	result->success = false;
+
+	int iconID = 0;
+	if (query->cmdReference.id >= 0) {
+		iconID = query->cmdReference.id;
+	} else if (query->cmdReference.name != nullptr && query->cmdReference.name[0] != '\0') {
+		iconID = query->cmdID;
+		cursorIcons.SetCustomType(query->cmdID, query->cmdReference.name);
+	} else {
+		cursorIcons.SetCustomType(query->cmdID, "");
+		cmdColors.ClearCustomCmdData(query->cmdID);
+		result->success = true;
+		return;
+	}
+
+	const float color[4] = { query->color.x, query->color.y, query->color.z, query->color.w };
+	cmdColors.SetCustomCmdData(query->cmdID, iconID, color, query->showArea);
 	result->success = true;
 }
 
@@ -1196,15 +1226,19 @@ static void NativeSetUnitIconDraw(const SetUnitIconDrawQuery* query, SetUnitIcon
 
 static void NativeSetUnitIcon(const SetUnitIconQuery* query, SetUnitIconResult* result)
 {
-	SetUnitIconDrawQuery drawQuery = {
-		.unitID = query->unitID,
-		.drawIcon = query->drawIcon,
-	};
-	SetUnitIconDrawResult drawResult = {};
-	NativeSetUnitIconDraw(&drawQuery, &drawResult);
+	result->error = nullptr;
+	result->success = false;
 
-	result->error = drawResult.error;
-	result->success = drawResult.success;
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	unit->currentIconIndex = (query->iconName != nullptr)
+		? icon::iconHandler.GetIconIdxOrDefault(query->iconName)
+		: icon::iconHandler.GetDefaultIconIdx();
+	result->success = true;
 }
 
 static void NativeSetUnitDefIcon(const SetUnitDefIconQuery* query, SetUnitDefIconResult* result)
@@ -1260,7 +1294,7 @@ static void NativeSetUnitDefImage(const SetUnitDefImageQuery* query, SetUnitDefI
 		return;
 	}
 
-	if (!query->hasImage || query->image == nullptr || query->image[0] == '\0') {
+	if (query->image == nullptr || query->image[0] == '\0') {
 		CUnitDrawer::SetUnitDefImage(ud, ud->buildPicName);
 		result->success = true;
 		return;
@@ -1412,9 +1446,7 @@ static void NativeSetFeatureFade(const SetFeatureFadeQuery* query, SetFeatureFad
 		return;
 	}
 
-	feature->alphaFade = true;
-	feature->smokeTime = query->time;
-	feature->drawAlpha = query->alpha;
+	feature->alphaFade = query->allow;
 	result->success = true;
 }
 
@@ -1486,10 +1518,6 @@ static void NativeDeselectUnitMap(const DeselectUnitMapQuery* query, DeselectUni
 	result->error = nullptr;
 	result->success = false;
 
-	if (query->clearFirst) {
-		selectedUnitsHandler.ClearSelected();
-	}
-
 	for (uint32_t i = 0; i < query->count; ++i) {
 		CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
 		if (unit == nullptr)
@@ -1501,9 +1529,23 @@ static void NativeDeselectUnitMap(const DeselectUnitMapQuery* query, DeselectUni
 	result->success = true;
 }
 
-static void NativeDrawUnitCommands(const DrawUnitCommandsQuery* /*query*/, DrawUnitCommandsResult* result)
+static void NativeDrawUnitCommands(const DrawUnitCommandsQuery* query, DrawUnitCommandsResult* result)
 {
 	result->error = nullptr;
+	result->success = false;
+	(void)query->tableOrArray;
+
+	if (query->unitIDs == nullptr && query->count > 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	for (uint32_t i = 0; i < query->count; ++i) {
+		const CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
+		if (unit != nullptr && unit->allyteam == gu->myAllyTeam)
+			commandDrawer->AddLuaQueuedUnit(unit, query->queueDrawDepth);
+	}
+
 	result->success = true;
 }
 

@@ -123,7 +123,9 @@ static void NativeGetGroundNormal(const GetGroundNormalQuery* query, GetGroundNo
 		return;
 	}
 
-	const float3 normal = CGround::GetNormal(query->x, query->z);
+	const float3 normal = query->smoothed
+		? CGround::GetNormal(query->x, query->z, true)
+		: CGround::GetSmoothNormal(query->x, query->z, true);
 	result->error = nullptr;
 	result->normal.x = normal.x;
 	result->normal.y = normal.y;
@@ -142,7 +144,9 @@ static void NativeGetGroundInfo(const GetGroundInfoQuery* query, GetGroundInfoRe
 
 	const int hmx = std::clamp(int(query->x / SQUARE_SIZE), 0, mapDims.mapxm1);
 	const int hmz = std::clamp(int(query->z / SQUARE_SIZE), 0, mapDims.mapym1);
-	const int typeIndex = readMap->GetTypeMapSynced()[hmz * mapDims.mapx + hmx];
+	const int tmx = hmx >> 1;
+	const int tmz = hmz >> 1;
+	const int typeIndex = readMap->GetTypeMapSynced()[tmz * mapDims.hmapx + tmx];
 
 	const CMapInfo::TerrainType& tt = mapInfo->terrainTypes[typeIndex];
 

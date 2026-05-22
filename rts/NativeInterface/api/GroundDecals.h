@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-struct CreateGroundDecalQuery { const float* pos; const float* size; };
+struct CreateGroundDecalQuery { uint8_t _unused; };
 struct CreateGroundDecalResult { const Error* error; uint32_t decalID; bool success; };
 
 struct DestroyGroundDecalQuery { uint32_t decalID; };

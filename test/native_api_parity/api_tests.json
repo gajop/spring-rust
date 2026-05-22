@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "includes": [
+    "api_tests/game_system_01.json",
+    "api_tests/game_system_02.json",
+    "api_tests/game_system_03.json",
+    "api_tests/units_01.json",
+    "api_tests/units_02.json",
+    "api_tests/units_03.json",
+    "api_tests/units_04.json",
+    "api_tests/units_05.json",
+    "api_tests/units_06.json",
+    "api_tests/units_07.json",
+    "api_tests/units_commands_01.json",
+    "api_tests/units_weapons_01.json",
+    "api_tests/known_issue_regressions_01.json",
+    "api_tests/features_01.json",
+    "api_tests/features_02.json",
+    "api_tests/features_03.json",
+    "api_tests/features_04.json",
+    "api_tests/terrain_metal_01.json",
+    "api_tests/terrain_metal_02.json",
+    "api_tests/terrain_metal_03.json",
+    "api_tests/los_01.json",
+    "api_tests/defs_unit_01.json",
+    "api_tests/defs_feature_01.json",
+    "api_tests/defs_weapon_01.json",
+    "api_tests/utils_01.json",
+    "api_tests/teams_rules_01.json",
+    "api_tests/teams_rules_02.json",
+    "api_tests/teams_rules_03.json"
+  ]
+}

@@ -84,6 +84,7 @@ static const GroundDecal* GetDecalConst(uint32_t id, const Error** error)
 static void NativeCreateGroundDecal(const CreateGroundDecalQuery* query, CreateGroundDecalResult* result)
 {
 	ResetBuffer();
+	(void)query;
 	result->error = nullptr;
 	result->success = false;
 	result->decalID = 0;
@@ -94,24 +95,6 @@ static void NativeCreateGroundDecal(const CreateGroundDecalQuery* query, CreateG
 	}
 
 	const uint32_t id = groundDecals->CreateLuaDecal();
-
-	if (query != nullptr && query->pos != nullptr && query->size != nullptr) {
-		GroundDecal* decal = groundDecals->GetDecalById(id);
-		if (decal != nullptr) {
-			// Map center/size inputs onto the existing corner layout
-			const float centerX = query->pos[0];
-			const float centerY = query->pos[1];
-			const float centerZ = query->pos[2];
-			const float halfSizeX = query->size[0] * 0.5f;
-			const float halfSizeZ = query->size[1] * 0.5f;
-
-			decal->refHeight = centerY;
-			decal->posTL = float2(centerX - halfSizeX, centerZ - halfSizeZ);
-			decal->posTR = float2(centerX + halfSizeX, centerZ - halfSizeZ);
-			decal->posBR = float2(centerX + halfSizeX, centerZ + halfSizeZ);
-			decal->posBL = float2(centerX - halfSizeX, centerZ + halfSizeZ);
-		}
-	}
 
 	result->decalID = id;
 	result->success = (id > 0);

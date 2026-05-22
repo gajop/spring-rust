@@ -16,19 +16,17 @@ extern "C" {
 
 // Position LOS state
 struct PositionLosState {
-	bool los;        // In line of sight
-	bool radar;      // In radar
-	bool prevLos;    // Was in LOS last check
+	bool inLosOrRadar;
+	bool inLos;
+	bool inRadar;
+	bool inJammer;
 };
 
 // Radar error params (position error in fog of war)
 struct RadarErrorParams {
-	float baseErrMult;
-	float baseErrSize;
-	float errorMult;
-	float errorSize;
-	float baseSpeed;
-	float speedMult;
+	float radarErrorSize;
+	float baseRadarErrorSize;
+	float baseRadarErrorMult;
 };
 
 // Queries

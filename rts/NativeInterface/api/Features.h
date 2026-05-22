@@ -25,7 +25,10 @@ struct FeatureHealth {
 // Feature resources
 struct FeatureResources {
 	float metal;
+	float defMetal;
 	float energy;
+	float defEnergy;
+	float reclaimLeft;
 	float reclaimTime;
 };
 
@@ -36,11 +39,11 @@ struct FeatureResurrect {
 	int32_t facingDir;
 };
 
-// Feature rotation (matrix)
+// Feature rotation (pitch, yaw, roll)
 struct FeatureRotation {
-	Float3 col1;
-	Float3 col2;
-	Float3 col3;
+	float pitch;
+	float yaw;
+	float roll;
 };
 
 // Feature blocking state
@@ -50,6 +53,7 @@ struct FeatureBlockingState {
 	bool isProjectileCollidable;
 	bool isRaySegmentCollidable;
 	bool crushable;
+	bool blockEnemyPushing;
 	bool blockHeightChanges;
 };
 
@@ -161,15 +165,15 @@ struct GetFeatureSelectionVolumeDataQuery { int32_t featureID; };
 struct GetFeatureSelectionVolumeDataResult { const Error* error; FeatureSelectionVolumeData data; };
 
 struct GetFeatureFireTimeQuery { int32_t featureID; };
-struct GetFeatureFireTimeResult { const Error* error; int32_t fireTime; };
+struct GetFeatureFireTimeResult { const Error* error; float fireTime; };
 
 struct GetFeatureSmokeTimeQuery { int32_t featureID; };
-struct GetFeatureSmokeTimeResult { const Error* error; int32_t smokeTime; };
+struct GetFeatureSmokeTimeResult { const Error* error; float smokeTime; };
 
-struct GetRenderFeaturesQuery { uint8_t _unused; };
+struct GetRenderFeaturesQuery { int32_t drawMask; bool sendMask; };
 struct GetRenderFeaturesResult { const Error* error; int32_t* features; uint32_t count; };
 
-struct GetRenderFeaturesDrawFlagChangedQuery { uint8_t _unused; };
+struct GetRenderFeaturesDrawFlagChangedQuery { bool sendMask; };
 struct GetRenderFeaturesDrawFlagChangedResult { const Error* error; int32_t* features; uint32_t count; };
 
 // API structure

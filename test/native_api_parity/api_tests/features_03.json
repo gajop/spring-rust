@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "feature_rules_param",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeatureRulesParam"
+        ],
+        "get": [
+          "Spring.GetFeatureRulesParam",
+          "Spring.GetFeatureRulesParams"
+        ]
+      },
+      "native": {
+        "set": [
+          "RulesParams.set_feature_rules_param"
+        ],
+        "get": [
+          "RulesParams.get_feature_rules_param",
+          "RulesParams.get_feature_rules_params"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value",
+          "listed"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeatureRulesParam`",
+        "native_setter": "`RulesParams.set_feature_rules_param`",
+        "lua_getter": "`Spring.GetFeatureRulesParam`, `Spring.GetFeatureRulesParams`",
+        "native_getter": "`RulesParams.get_feature_rules_param`, `RulesParams.get_feature_rules_params`",
+        "fields": "`value`, `listed`"
+      },
+      "rust": {
+        "check": "check_rules_param",
+        "set": "set_rules_param"
+      },
+      "params": {
+        "scope": {
+          "type": "string",
+          "fixed": "feature"
+        },
+        "featureID": {
+          "type": "i32",
+          "fixture": "featureID"
+        },
+        "paramName": {
+          "type": "string",
+          "fixed": "native_api_parity_feature_rules_param"
+        },
+        "value": {
+          "type": "f32",
+          "range": [
+            10,
+            900
+          ]
+        }
+      }
+    },
+    {
+      "id": "get_feature_collision_volume_data",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFeatureCollisionVolumeData"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Features.get_feature_collision_volume_data"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "scaleX",
+          "scaleY",
+          "scaleZ",
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "volumeType",
+          "testType",
+          "primaryAxis",
+          "disabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFeatureCollisionVolumeData`",
+        "native_getter": "`Features.get_feature_collision_volume_data`",
+        "fields": "`scaleX`, `scaleY`, `scaleZ`, `offsetX`, `offsetY`, `offsetZ`, `volumeType`, `testType`, `primaryAxis`, `disabled`"
+      },
+      "rust": {
+        "check": "check_feature_collision_volume_data",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetFeatureCollisionVolumeData",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "scaleX",
+          "scaleY",
+          "scaleZ",
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "volumeType",
+          "testType",
+          "primaryAxis",
+          "disabled"
+        ]
+      }
+    }
+  ]
+}

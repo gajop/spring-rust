@@ -34,7 +34,7 @@ struct PieceMatrix {
 };
 
 // Queries
-struct GetModelRootPieceQuery { const char* modelName; int32_t modelType; };
+struct GetModelRootPieceQuery { const char* modelName; };
 struct GetModelRootPieceResult { const Error* error; int32_t rootPiece; };
 
 struct GetUnitRootPieceQuery { int32_t unitID; };
@@ -43,10 +43,10 @@ struct GetUnitRootPieceResult { const Error* error; int32_t rootPiece; };
 struct GetFeatureRootPieceQuery { int32_t featureID; };
 struct GetFeatureRootPieceResult { const Error* error; int32_t rootPiece; };
 
-struct GetModelPieceListQuery { const char* modelName; int32_t modelType; };
+struct GetModelPieceListQuery { const char* modelName; };
 struct GetModelPieceListResult { const Error* error; int32_t* pieces; uint32_t count; };
 
-struct GetModelPieceMapQuery { const char* modelName; int32_t modelType; };
+struct GetModelPieceMapQuery { const char* modelName; };
 struct GetModelPieceMapResult { const Error* error; const char** names; uint32_t count; };
 
 struct GetUnitPieceListQuery { int32_t unitID; };
@@ -88,7 +88,7 @@ struct GetFeaturePiecePosDirResult { const Error* error; PiecePosDir posDir; };
 struct GetUnitPieceMatrixQuery { int32_t unitID; int32_t pieceNum; };
 struct GetUnitPieceMatrixResult { const Error* error; PieceMatrix matrix; };
 
-struct GetFeaturePieceMatrixQuery { int32_t featureID; };
+struct GetFeaturePieceMatrixQuery { int32_t featureID; int32_t pieceNum; };
 struct GetFeaturePieceMatrixResult { const Error* error; PieceMatrix matrix; };
 
 struct GetUnitScriptPieceQuery { int32_t unitID; int32_t scriptNum; };

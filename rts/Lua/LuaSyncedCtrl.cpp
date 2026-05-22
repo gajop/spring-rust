@@ -3100,7 +3100,10 @@ int LuaSyncedCtrl::SetUnitMetalExtraction(lua_State* L)
  *
  * @function Spring.SetUnitHarvestStorage
  * @param unitID integer
- * @param metal number
+ * @param storedMetal number?
+ * @param maxStoredMetal number?
+ * @param storedEnergy number?
+ * @param maxStoredEnergy number?
  * @return nil
  */
 int LuaSyncedCtrl::SetUnitHarvestStorage(lua_State* L)

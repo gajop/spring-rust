@@ -2,6 +2,7 @@
 
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitDef.h"
+#include "Sim/Units/UnitDefHandler.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
@@ -9,6 +10,8 @@
 #include "Game/GameHelper.h"
 #include "System/float3.h"
 #include "Rendering/Units/UnitDrawer.h"
+
+#include <algorithm>
 
 namespace {
 
@@ -22,6 +25,7 @@ static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "
 static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
 static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
 static const Error INVALID_ALLYTEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
+static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
 
 // Helper: check if ready
 static bool IsReady()
@@ -44,6 +48,15 @@ static bool UnitMatchesFilter(const CUnit* unit, const UnitFilterParams& filter)
 		default:
 			return true;
 	}
+}
+
+static bool UnitMatchesAllegiance(const CUnit* unit, int32_t allegiance)
+{
+	if (unit == nullptr)
+		return false;
+	if (allegiance >= 0)
+		return unit->team == allegiance;
+	return true;
 }
 
 // Validation
@@ -125,14 +138,71 @@ static void NativeGetTeamUnits(const GetTeamUnitsQuery* query, GetTeamUnitsResul
 
 static void NativeGetTeamUnitsSorted(const GetTeamUnitsSortedQuery* query, GetTeamUnitsSortedResult* result)
 {
-	// For now, return same as GetTeamUnits
-	// Full sorting by def would require more complex structure
-	GetTeamUnitsQuery q = { .teamID = query->teamID };
-	GetTeamUnitsResult r;
-	NativeGetTeamUnits(&q, &r);
-	result->error = r.error;
-	result->units = r.units;
-	result->count = r.count;
+	bufferPos = 0;
+	result->error = nullptr;
+	result->groups = nullptr;
+	result->count = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
+
+	size_t groupCapacity = 0;
+	for (unsigned int i = 0, n = unitDefHandler->NumUnitDefs(); i < n; ++i) {
+		const auto& unitsByDef = unitHandler.GetUnitsByTeamAndDef(query->teamID, i + 1);
+		if (!unitsByDef.empty())
+			groupCapacity++;
+	}
+
+	if (groupCapacity == 0)
+		return;
+
+	const size_t groupBytes = groupCapacity * sizeof(TeamUnitsByDef);
+	if (groupBytes > sizeof(scratchBuffer)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	TeamUnitsByDef* groups = reinterpret_cast<TeamUnitsByDef*>(scratchBuffer);
+	bufferPos = groupBytes;
+
+	for (unsigned int i = 0, n = unitDefHandler->NumUnitDefs(); i < n; ++i) {
+		const int unitDefID = i + 1;
+		const auto& unitsByDef = unitHandler.GetUnitsByTeamAndDef(query->teamID, unitDefID);
+		if (unitsByDef.empty())
+			continue;
+
+		if (result->count >= groupCapacity) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+
+		const size_t bytes = unitsByDef.size() * sizeof(int32_t);
+		if (bufferPos + bytes > sizeof(scratchBuffer)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+
+		int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
+		uint32_t unitCount = 0;
+		for (const CUnit* unit: unitsByDef) {
+			units[unitCount++] = unit->id;
+		}
+		bufferPos += bytes;
+
+		TeamUnitsByDef& group = groups[result->count++];
+		group.unitDefID = unitDefID;
+		group.units = units;
+		group.count = unitCount;
+	}
+
+	result->groups = groups;
 }
 
 static void NativeGetTeamUnitsCounts(const GetTeamUnitsCountsQuery* query, GetTeamUnitsCountsResult* result)
@@ -195,17 +265,20 @@ static void NativeGetTeamUnitsByDefs(const GetTeamUnitsByDefsQuery* query, GetTe
 		return;
 	}
 
-	// Build set of requested defs
-	std::unordered_set<int32_t> requestedDefs(query->unitDefIDs, query->unitDefIDs + query->defCount);
+	std::vector<int32_t> requestedDefs(query->unitDefIDs, query->unitDefIDs + query->defCount);
+	std::sort(requestedDefs.begin(), requestedDefs.end());
+	requestedDefs.erase(std::unique(requestedDefs.begin(), requestedDefs.end()), requestedDefs.end());
 
 	// Use scratch buffer for array
 	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
 	uint32_t count = 0;
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
-		if (unit != nullptr && requestedDefs.count(unit->unitDef->id) > 0 && count < maxUnits) {
-			units[count++] = unit->id;
+	for (const int32_t unitDefID: requestedDefs) {
+		for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
+			if (unit != nullptr && unit->unitDef->id == unitDefID && count < maxUnits) {
+				units[count++] = unit->id;
+			}
 		}
 	}
 
@@ -272,8 +345,8 @@ static void NativeGetUnitsInRectangle(const GetUnitsInRectangleQuery* query, Get
 		return;
 	}
 
-	const float3 mins(query->rect.minX, 0.0f, query->rect.minZ);
-	const float3 maxs(query->rect.maxX, 0.0f, query->rect.maxZ);
+	const float3 mins(query->xmin, 0.0f, query->zmin);
+	const float3 maxs(query->xmax, 0.0f, query->zmax);
 
 	// Use scratch buffer for array
 	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
@@ -284,7 +357,7 @@ static void NativeGetUnitsInRectangle(const GetUnitsInRectangleQuery* query, Get
 	quadField.GetUnitsExact(qfq, mins, maxs);
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
-			if (UnitMatchesFilter(unit, query->filter) && count < maxUnits) {
+			if (UnitMatchesAllegiance(unit, query->allegiance) && count < maxUnits) {
 				units[count++] = unit->id;
 			}
 		}
@@ -307,8 +380,8 @@ static void NativeGetUnitsInBox(const GetUnitsInBoxQuery* query, GetUnitsInBoxRe
 		return;
 	}
 
-	const float3 mins(query->box.min.x, query->box.min.y, query->box.min.z);
-	const float3 maxs(query->box.max.x, query->box.max.y, query->box.max.z);
+	const float3 mins(query->xmin, query->ymin, query->zmin);
+	const float3 maxs(query->xmax, query->ymax, query->zmax);
 
 	// Use scratch buffer for array
 	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
@@ -319,7 +392,7 @@ static void NativeGetUnitsInBox(const GetUnitsInBoxQuery* query, GetUnitsInBoxRe
 	quadField.GetUnitsExact(qfq, mins, maxs);
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
-			if (UnitMatchesFilter(unit, query->filter)) {
+			if (UnitMatchesAllegiance(unit, query->allegiance)) {
 				const float3& pos = unit->pos;
 				if (pos.x >= mins.x && pos.x <= maxs.x &&
 					pos.y >= mins.y && pos.y <= maxs.y &&
@@ -355,7 +428,7 @@ static void NativeGetUnitsInPlanes(const GetUnitsInPlanesQuery* query, GetUnitsI
 
 	// Simplified - would need proper frustum culling
 	for (const CUnit* unit : unitHandler.GetActiveUnits()) {
-		if (UnitMatchesFilter(unit, query->filter) && count < maxUnits) {
+		if (UnitMatchesAllegiance(unit, query->allegiance) && count < maxUnits) {
 			units[count++] = unit->id;
 		}
 	}
@@ -377,8 +450,8 @@ static void NativeGetUnitsInSphere(const GetUnitsInSphereQuery* query, GetUnitsI
 		return;
 	}
 
-	const float3 center(query->sphere.center.x, query->sphere.center.y, query->sphere.center.z);
-	const float radiusSq = query->sphere.radius * query->sphere.radius;
+	const float3 center(query->x, query->y, query->z);
+	const float radiusSq = query->radius * query->radius;
 
 	// Use scratch buffer for array
 	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
@@ -386,10 +459,10 @@ static void NativeGetUnitsInSphere(const GetUnitsInSphereQuery* query, GetUnitsI
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	QuadFieldQuery qfq;
-	quadField.GetUnitsExact(qfq, center, query->sphere.radius);
+	quadField.GetUnitsExact(qfq, center, query->radius);
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
-			if (UnitMatchesFilter(unit, query->filter)) {
+			if (UnitMatchesAllegiance(unit, query->allegiance)) {
 				const float distSq = unit->pos.SqDistance(center);
 				if (distSq <= radiusSq && count < maxUnits) {
 					units[count++] = unit->id;
@@ -415,9 +488,8 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 		return;
 	}
 
-	const float3 center(query->cylinder.center.x, query->cylinder.center.y, query->cylinder.center.z);
-	const float radiusSq = query->cylinder.radius * query->cylinder.radius;
-	const float halfHeight = query->cylinder.height * 0.5f;
+	const float3 center(query->x, 0.0f, query->z);
+	const float radiusSq = query->radius * query->radius;
 
 	// Use scratch buffer for array
 	int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
@@ -425,17 +497,16 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	QuadFieldQuery qfq;
-	quadField.GetUnitsExact(qfq, center, query->cylinder.radius);
+	quadField.GetUnitsExact(qfq, center, query->radius);
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
-			if (UnitMatchesFilter(unit, query->filter)) {
+			if (UnitMatchesAllegiance(unit, query->allegiance)) {
 				const float3& pos = unit->pos;
 				const float dx = pos.x - center.x;
 				const float dz = pos.z - center.z;
 				const float distXZSq = dx * dx + dz * dz;
-				const float dy = std::abs(pos.y - center.y);
 
-				if (distXZSq <= radiusSq && dy <= halfHeight && count < maxUnits) {
+				if (distXZSq <= radiusSq && count < maxUnits) {
 					units[count++] = unit->id;
 				}
 			}
@@ -471,7 +542,7 @@ static void NativeGetUnitArrayCentroid(const GetUnitArrayCentroidQuery* query, G
 	for (uint32_t i = 0; i < query->count; i++) {
 		const CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
 		if (unit != nullptr) {
-			centroid += unit->pos;
+			centroid += unit->midPos;
 			validCount++;
 		}
 	}
@@ -500,39 +571,48 @@ static void NativeGetUnitNearestAlly(const GetUnitNearestAllyQuery* query, GetUn
 {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->unitID = -1; // No unit found
+	result->unitID = -1;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
-	const float3 position(query->pos.x, query->pos.y, query->pos.z);
-	float minDistSq = query->radius * query->radius;
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
 
-	QuadFieldQuery qfq;
-	quadField.GetUnitsExact(qfq, position, query->radius);
-	if (qfq.units != nullptr) {
-		for (const CUnit* unit : *(qfq.units)) {
-			if (unit != nullptr) {
-				const float distSq = unit->pos.SqDistance(position);
-				if (distSq < minDistSq) {
-					minDistSq = distSq;
-					result->unitID = unit->id;
-				}
-			}
-		}
+	const CUnit* target = CGameHelper::GetClosestFriendlyUnit(unit, unit->pos, query->range, unit->allyteam);
+	if (target != nullptr) {
+		result->unitID = target->id;
 	}
 }
 
 static void NativeGetUnitNearestEnemy(const GetUnitNearestEnemyQuery* query, GetUnitNearestEnemyResult* result)
 {
-	// Same as ally for now - would need ally/enemy filtering
-	GetUnitNearestAllyQuery q = { .pos = query->pos, .radius = query->radius };
-	GetUnitNearestAllyResult r;
-	NativeGetUnitNearestAlly(&q, &r);
-	result->error = r.error;
-	result->unitID = r.unitID;
+	bufferPos = 0;
+	result->error = nullptr;
+	result->unitID = -1;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const CUnit* target = query->useLOS
+		? CGameHelper::GetClosestEnemyUnit(unit, unit->pos, query->range, unit->allyteam)
+		: CGameHelper::GetClosestEnemyUnitNoLosTest(unit, unit->pos, query->range, unit->allyteam, query->sphereDistTest, query->checkSightDist);
+	if (target != nullptr) {
+		result->unitID = target->id;
+	}
 }
 
 static void NativeGetClosestEnemyUnit(const GetClosestEnemyUnitQuery* query, GetClosestEnemyUnitResult* result)
@@ -594,7 +674,6 @@ static void NativeGetUnitSeparation(const GetUnitSeparationQuery* query, GetUnit
 static void NativeGetRenderUnits(const GetRenderUnitsQuery* query, GetRenderUnitsResult* result)
 {
 	bufferPos = 0;
-	(void)query;
 	result->error = nullptr;
 	result->units = nullptr;
 	result->count = 0;
@@ -608,23 +687,28 @@ static void NativeGetRenderUnits(const GetRenderUnitsQuery* query, GetRenderUnit
 	if (renderUnits.empty())
 		return;
 
-	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-	const size_t count = std::min(renderUnits.size(), maxCount);
-
 	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	for (size_t i = 0; i < count; ++i) {
-		out[i] = renderUnits[i]->id;
+	uint32_t count = 0;
+	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+
+	for (const CUnit* unit : renderUnits) {
+		if (count >= maxCount)
+			break;
+		if ((unit->drawFlag & query->drawMask) == 0)
+			continue;
+
+		out[count++] = unit->id;
 	}
 
 	result->units = out;
-	result->count = static_cast<uint32_t>(count);
 	bufferPos += count * sizeof(int32_t);
+	(void)query->sendMask;
+	result->count = count;
 }
 
 static void NativeGetRenderUnitsDrawFlagChanged(const GetRenderUnitsDrawFlagChangedQuery* query, GetRenderUnitsDrawFlagChangedResult* result)
 {
 	bufferPos = 0;
-	(void)query;
 	result->error = nullptr;
 	result->units = nullptr;
 	result->count = 0;
@@ -635,10 +719,9 @@ static void NativeGetRenderUnitsDrawFlagChanged(const GetRenderUnitsDrawFlagChan
 	}
 
 	const auto& renderUnits = unitDrawer->GetUnsortedUnits();
-	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-
 	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
 	uint32_t count = 0;
+	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	for (const CUnit* u : renderUnits) {
 		if (count >= maxCount)
@@ -651,8 +734,9 @@ static void NativeGetRenderUnitsDrawFlagChanged(const GetRenderUnitsDrawFlagChan
 	}
 
 	result->units = out;
-	result->count = count;
 	bufferPos += count * sizeof(int32_t);
+	(void)query->sendMask;
+	result->count = count;
 }
 
 } // namespace

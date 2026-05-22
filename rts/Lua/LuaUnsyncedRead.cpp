@@ -4879,7 +4879,7 @@ int LuaUnsyncedRead::GetGroundDecalTextures(lua_State* L)
 
 /***
  *
- * @function Spring.SetGroundDecalTextureParams
+ * @function Spring.GetGroundDecalTextureParams
  * @param decalID integer
  * @return number? texWrapDistance If non-zero, sets the mode to repeat the texture along the left-right direction of the decal every texWrapFactor elmos.
  * @return number texTraveledDistance Shifts the texture repetition defined by texWrapFactor so the texture of a next line in the continuous multiline can start where the previous finished. For that it should collect all elmo lengths of the previously set multiline segments.

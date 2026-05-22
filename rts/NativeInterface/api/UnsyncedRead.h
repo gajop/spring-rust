@@ -72,7 +72,7 @@ struct GetUnitIconDataResult {
 	bool radiusAdjust;
 };
 
-struct GetUnitIconQuery { int32_t unitID; bool fullData; };
+struct GetUnitIconQuery { int32_t unitID; };
 struct GetUnitIconResult {
 	const Error* error;
 	const char* iconName;
@@ -99,7 +99,7 @@ struct GetVisibleUnitsResult { const Error* error; int32_t* unitIDs; uint32_t co
 struct GetVisibleFeaturesQuery { int32_t allyTeamID; float radius; bool includeIcons; bool includeGeos; };
 struct GetVisibleFeaturesResult { const Error* error; int32_t* featureIDs; uint32_t count; };
 
-struct GetVisibleProjectilesQuery { int32_t allyTeamID; bool includeWeaponProjectiles; bool includePieceProjectiles; };
+struct GetVisibleProjectilesQuery { int32_t allyTeamID; bool includeSyncedProjectiles; bool includeWeaponProjectiles; bool includePieceProjectiles; };
 struct GetVisibleProjectilesResult { const Error* error; int32_t* projectileIDs; uint32_t count; };
 
 struct GetUnitsInScreenRectangleQuery { float left; float top; float right; float bottom; int32_t allegiance; };
@@ -125,7 +125,7 @@ struct GetClipboardResult { const Error* error; const char* text; };
 struct GetActiveCmdDescQuery { int32_t unitID; };
 struct GetActiveCmdDescResult { const Error* error; bool success; };
 
-struct GetActiveCmdDescsQuery { int32_t unitID; };
+struct GetActiveCmdDescsQuery { uint8_t _unused; };
 struct GetActiveCmdDescsResult { const Error* error; bool success; };
 
 struct GetCmdDescIndexQuery { int32_t cmdID; };
@@ -150,7 +150,7 @@ struct GetNanoProjectileParamsResult { const Error* error; float r; float v; flo
 struct GetPieceProjectileNameQuery { int32_t projectileID; };
 struct GetPieceProjectileNameResult { const Error* error; const char* name; };
 
-struct GetTeamDamageStatsQuery { int32_t teamID; int32_t allyTeamID; };
+struct GetTeamDamageStatsQuery { int32_t teamID; };
 struct GetTeamDamageStatsResult { const Error* error; float damageDealt; float damageReceived; bool success; };
 
 // Messages / misc
@@ -170,7 +170,7 @@ struct SolveNURBSCurveResult { const Error* error; Float3* points; uint32_t coun
 struct IsUnitSelectedQuery { int32_t unitID; };
 struct IsUnitSelectedResult { const Error* error; bool selected; };
 
-struct IsUnitAlliedQuery { int32_t unitID; int32_t allyTeamID; };
+struct IsUnitAlliedQuery { int32_t unitID; };
 struct IsUnitAlliedResult { const Error* error; bool allied; };
 
 struct GetCustomPaletteColorQuery { int32_t index; };

@@ -1,0 +1,617 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "unit_health",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitHealth"
+        ],
+        "get": [
+          "Spring.GetUnitHealth"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_health"
+        ],
+        "get": [
+          "units_info().get_unit_health"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "health",
+          "maxHealth",
+          "paralyzeDamage",
+          "captureProgress",
+          "buildProgress"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitHealth`",
+        "native_setter": "`UnitControl.set_unit_health`",
+        "lua_getter": "`Spring.GetUnitHealth`",
+        "native_getter": "`units_info().get_unit_health`",
+        "fields": "`health`, `maxHealth`, `paralyzeDamage`, `captureProgress`, `buildProgress`"
+      },
+      "rust": {
+        "check": "check_unit_health",
+        "set": "set_unit_health"
+      },
+      "params": {
+        "health": {
+          "type": "f32",
+          "range": [
+            100,
+            900
+          ]
+        },
+        "paralyzeDamage": {
+          "type": "f32",
+          "range": [
+            0,
+            30
+          ]
+        },
+        "captureProgress": {
+          "type": "f32",
+          "range": [
+            0,
+            0.3
+          ]
+        },
+        "buildProgress": {
+          "type": "f32",
+          "range": [
+            0.4,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_max_health",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitMaxHealth"
+        ],
+        "get": [
+          "Spring.GetUnitHealth"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_max_health"
+        ],
+        "get": [
+          "units_info().get_unit_health"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "maxHealth"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitMaxHealth`",
+        "native_setter": "`UnitControl.set_unit_max_health`",
+        "lua_getter": "`Spring.GetUnitHealth`",
+        "native_getter": "`units_info().get_unit_health`",
+        "fields": "`maxHealth`"
+      },
+      "rust": {
+        "check": "check_unit_health",
+        "set": "set_unit_max_health"
+      },
+      "params": {
+        "maxHealth": {
+          "type": "f32",
+          "range": [
+            700,
+            1400
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_experience",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitExperience"
+        ],
+        "get": [
+          "Spring.GetUnitExperience"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_experience"
+        ],
+        "get": [
+          "units_info().get_unit_experience"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "experience"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitExperience`",
+        "native_setter": "`UnitControl.set_unit_experience`",
+        "lua_getter": "`Spring.GetUnitExperience`",
+        "native_getter": "`units_info().get_unit_experience`",
+        "fields": "`experience`"
+      },
+      "rust": {
+        "check": "check_unit_experience",
+        "set": "set_unit_experience"
+      },
+      "params": {
+        "experience": {
+          "type": "f32",
+          "range": [
+            0,
+            3
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_neutral",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitNeutral"
+        ],
+        "get": [
+          "Spring.GetUnitNeutral"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_neutral"
+        ],
+        "get": [
+          "units_info().get_unit_neutral"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "neutral"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitNeutral`",
+        "native_setter": "`UnitControl.set_unit_neutral`",
+        "lua_getter": "`Spring.GetUnitNeutral`",
+        "native_getter": "`units_info().get_unit_neutral`",
+        "fields": "`neutral`"
+      },
+      "rust": {
+        "check": "check_unit_neutral",
+        "set": "set_unit_neutral"
+      },
+      "params": {
+        "neutral": {
+          "type": "bool"
+        }
+      }
+    },
+    {
+      "id": "unit_seismic_signature",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitSeismicSignature"
+        ],
+        "get": [
+          "Spring.GetUnitSeismicSignature"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_seismic_signature"
+        ],
+        "get": [
+          "units_info().get_unit_seismic_signature"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "seismicSignature"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitSeismicSignature`",
+        "native_setter": "`UnitControl.set_unit_seismic_signature`",
+        "lua_getter": "`Spring.GetUnitSeismicSignature`",
+        "native_getter": "`units_info().get_unit_seismic_signature`",
+        "fields": "`seismicSignature`"
+      },
+      "rust": {
+        "check": "check_unit_seismic_signature",
+        "set": "set_unit_seismic_signature"
+      },
+      "params": {
+        "seismicSignature": {
+          "type": "f32",
+          "range": [
+            0,
+            32
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_mass",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitMass"
+        ],
+        "get": [
+          "Spring.GetUnitMass"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_mass"
+        ],
+        "get": [
+          "units_info().get_unit_mass"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "mass"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitMass`",
+        "native_setter": "`UnitControl.set_unit_mass`",
+        "lua_getter": "`Spring.GetUnitMass`",
+        "native_getter": "`units_info().get_unit_mass`",
+        "fields": "`mass`"
+      },
+      "rust": {
+        "check": "check_unit_mass",
+        "set": "set_unit_mass"
+      },
+      "params": {
+        "mass": {
+          "type": "f32",
+          "range": [
+            20,
+            300
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_armored",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitArmored"
+        ],
+        "get": [
+          "Spring.GetUnitArmored"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_armored"
+        ],
+        "get": [
+          "units_info().get_unit_armored"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "armored",
+          "armorMultiple"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitArmored`",
+        "native_setter": "`UnitControl.set_unit_armored`",
+        "lua_getter": "`Spring.GetUnitArmored`",
+        "native_getter": "`units_info().get_unit_armored`",
+        "fields": "`armored`, `armorMultiple`"
+      },
+      "rust": {
+        "check": "check_unit_armored",
+        "set": "set_unit_armored"
+      },
+      "params": {
+        "armored": {
+          "type": "bool"
+        },
+        "armorMultiple": {
+          "type": "f32",
+          "range": [
+            0.2,
+            3
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_costs",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitCosts"
+        ],
+        "get": [
+          "Spring.GetUnitCosts"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_costs"
+        ],
+        "get": [
+          "units_info().get_unit_costs"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "buildTime",
+          "metalCost",
+          "energyCost"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitCosts`",
+        "native_setter": "`UnitControl.set_unit_costs`",
+        "lua_getter": "`Spring.GetUnitCosts`",
+        "native_getter": "`units_info().get_unit_costs`",
+        "fields": "`buildTime`, `metalCost`, `energyCost`"
+      },
+      "rust": {
+        "check": "check_unit_costs",
+        "set": "set_unit_costs"
+      },
+      "params": {
+        "buildTime": {
+          "type": "f32",
+          "range": [
+            10,
+            500
+          ]
+        },
+        "metalCost": {
+          "type": "f32",
+          "range": [
+            10,
+            500
+          ]
+        },
+        "energyCost": {
+          "type": "f32",
+          "range": [
+            10,
+            500
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_storage",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitStorage"
+        ],
+        "get": [
+          "Spring.GetUnitStorage"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_storage"
+        ],
+        "get": []
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "metalStorage",
+          "energyStorage"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitStorage`",
+        "native_setter": "`UnitControl.set_unit_storage`",
+        "lua_getter": "`Spring.GetUnitStorage`",
+        "native_getter": "n/a (`GetUnitStorage` reads unit-def storage)",
+        "fields": "`metalStorage`, `energyStorage` through Lua readback"
+      },
+      "rust": {
+        "check": "check_unit_storage",
+        "set": "set_unit_storage"
+      },
+      "params": {
+        "resource": {
+          "type": "enum",
+          "values": [
+            "metal",
+            "energy"
+          ]
+        },
+        "amount": {
+          "type": "f32",
+          "range": [
+            50,
+            1000
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_max_range",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitMaxRange"
+        ],
+        "get": [
+          "Spring.GetUnitMaxRange"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_max_range"
+        ],
+        "get": [
+          "units_weapons().get_unit_max_range"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "maxRange"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitMaxRange`",
+        "native_setter": "`UnitControl.set_unit_max_range`",
+        "lua_getter": "`Spring.GetUnitMaxRange`",
+        "native_getter": "`units_weapons().get_unit_max_range`",
+        "fields": "`maxRange`"
+      },
+      "rust": {
+        "check": "check_unit_max_range",
+        "set": "set_unit_max_range"
+      },
+      "params": {
+        "maxRange": {
+          "type": "f32",
+          "range": [
+            100,
+            1200
+          ]
+        }
+      }
+    },
+    {
+      "id": "unit_position",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitPosition"
+        ],
+        "get": [
+          "Spring.GetUnitPosition"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_position"
+        ],
+        "get": [
+          "units_info().get_unit_position"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitPosition`",
+        "native_setter": "`UnitControl.set_unit_position`",
+        "lua_getter": "`Spring.GetUnitPosition`",
+        "native_getter": "`units_info().get_unit_position`",
+        "fields": "`x`, `y`, `z`"
+      },
+      "rust": {
+        "check": "check_unit_position",
+        "set": "set_unit_position"
+      },
+      "params": {
+        "position": {
+          "type": "float3",
+          "generator": "map_position",
+          "expands_to": [
+            "x",
+            "y",
+            "z"
+          ]
+        }
+      }
+    }
+  ]
+}

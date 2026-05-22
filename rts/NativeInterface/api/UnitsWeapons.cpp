@@ -23,6 +23,15 @@ static bool IsReady() {
 	return (gs != nullptr);
 }
 
+static const CWeapon* GetLuaWeapon(const CUnit* unit, int32_t luaWeaponNum)
+{
+	const int weaponNum = luaWeaponNum - 1;
+	if (weaponNum < 0 || weaponNum >= static_cast<int>(unit->weapons.size()))
+		return nullptr;
+
+	return unit->weapons[weaponNum];
+}
+
 static void NativeGetUnitWeaponCount(const GetUnitWeaponCountQuery* query, GetUnitWeaponCountResult* result)
 {
 	bufferPos = 0;
@@ -79,12 +88,9 @@ static void NativeGetUnitWeaponState(const GetUnitWeaponStateQuery* query, GetUn
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
+	(void)query->key;
 
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr || weapon->weaponDef == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -123,12 +129,7 @@ static void NativeGetUnitWeaponDamages(const GetUnitWeaponDamagesQuery* query, G
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
-
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr || weapon->weaponDef == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -172,12 +173,7 @@ static void NativeGetUnitWeaponVectors(const GetUnitWeaponVectorsQuery* query, G
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
-
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -213,12 +209,7 @@ static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* quer
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
-
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -255,12 +246,7 @@ static void NativeGetUnitWeaponTestTarget(const GetUnitWeaponTestTargetQuery* qu
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
-
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -302,12 +288,7 @@ static void NativeGetUnitWeaponTestRange(const GetUnitWeaponTestRangeQuery* quer
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
-
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -338,12 +319,7 @@ static void NativeGetUnitWeaponHaveFreeLineOfFire(const GetUnitWeaponHaveFreeLin
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
-
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -385,12 +361,7 @@ static void NativeGetUnitWeaponCanFire(const GetUnitWeaponCanFireQuery* query, G
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
-
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;
@@ -416,12 +387,7 @@ static void NativeGetUnitWeaponTarget(const GetUnitWeaponTargetQuery* query, Get
 		return;
 	}
 
-	if (query->weaponNum < 0 || query->weaponNum >= static_cast<int>(unit->weapons.size())) {
-		result->error = &INVALID_WEAPON_ERROR;
-		return;
-	}
-
-	const CWeapon* weapon = unit->weapons[query->weaponNum];
+	const CWeapon* weapon = GetLuaWeapon(unit, query->weaponNum);
 	if (weapon == nullptr) {
 		result->error = &INVALID_WEAPON_ERROR;
 		return;

@@ -20,12 +20,7 @@ struct PlaySoundFileQuery {
 	float volume;
 	Float3 pos;
 	Float3 velocity;
-	bool positional;  // false for ambient sound
-	bool inCone;
-	float coneAngle;
-	float coneInnerAngle;
-	float coneOuterAngle;
-	Float3 coneDir;
+	int32_t channel;
 };
 
 struct PlaySoundFileResult {
@@ -45,6 +40,7 @@ struct LoadSoundDefResult {
 struct PlaySoundStreamQuery {
 	const char* oggFile;
 	float volume;
+	bool enqueue;
 };
 
 struct PlaySoundStreamResult {
@@ -70,7 +66,7 @@ struct GetSoundDevicesResult { const Error* error; const char** devices; uint32_
 struct GetSoundEffectParamsQuery { uint8_t _unused; };
 struct GetSoundEffectParamsResult { const Error* error; bool success; };
 
-struct SetSoundEffectParamsQuery { const char* preset; };
+struct SetSoundEffectParamsQuery { SoundEffectParams params; };
 struct SetSoundEffectParamsResult { const Error* error; bool success; };
 
 struct PreloadSoundItemQuery { const char* soundName; };

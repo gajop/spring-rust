@@ -134,15 +134,14 @@ struct IsAboveMiniMapResult {
 	bool above;
 };
 
-struct GetActiveCommandQuery {
-	float mouseX;
-	float mouseY;
-	bool useDefault;
-};
+struct GetActiveCommandQuery { uint8_t _unused; };
 
 struct GetActiveCommandResult {
 	const Error* error;
 	int32_t commandIndex;
+	int32_t commandID;
+	int32_t commandType;
+	const char* commandName;
 };
 
 struct GetActionHotKeysQuery { const char* action; };

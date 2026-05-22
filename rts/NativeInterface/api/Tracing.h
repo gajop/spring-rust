@@ -76,6 +76,7 @@ struct TraceRayFeaturesResult {
 struct TraceRayGroundBetweenPositionsQuery {
 	Float3 start;
 	Float3 end;
+	bool testWater;
 };
 
 struct TraceRayGroundBetweenPositionsResult {

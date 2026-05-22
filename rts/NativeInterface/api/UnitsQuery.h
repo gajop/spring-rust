@@ -66,6 +66,12 @@ struct UnitDefCount {
 	uint32_t count;
 };
 
+struct TeamUnitsByDef {
+	int32_t unitDefID;
+	int32_t* units;
+	uint32_t count;
+};
+
 // Queries
 struct ValidUnitIDQuery { int32_t unitID; };
 struct ValidUnitIDResult { const Error* error; bool valid; };
@@ -77,7 +83,7 @@ struct GetTeamUnitsQuery { int32_t teamID; };
 struct GetTeamUnitsResult { const Error* error; int32_t* units; uint32_t count; };
 
 struct GetTeamUnitsSortedQuery { int32_t teamID; };
-struct GetTeamUnitsSortedResult { const Error* error; int32_t* units; uint32_t count; };
+struct GetTeamUnitsSortedResult { const Error* error; TeamUnitsByDef* groups; uint32_t count; };
 
 struct GetTeamUnitsCountsQuery { int32_t teamID; };
 struct GetTeamUnitsCountsResult { const Error* error; UnitDefCount* counts; uint32_t count; };
@@ -91,19 +97,19 @@ struct GetTeamUnitDefCountResult { const Error* error; uint32_t count; };
 struct GetTeamUnitCountQuery { int32_t teamID; };
 struct GetTeamUnitCountResult { const Error* error; uint32_t count; };
 
-struct GetUnitsInRectangleQuery { RectangleQuery rect; UnitFilterParams filter; };
+struct GetUnitsInRectangleQuery { float xmin; float zmin; float xmax; float zmax; int32_t allegiance; };
 struct GetUnitsInRectangleResult { const Error* error; int32_t* units; uint32_t count; };
 
-struct GetUnitsInBoxQuery { BoxQuery box; UnitFilterParams filter; };
+struct GetUnitsInBoxQuery { float xmin; float ymin; float zmin; float xmax; float ymax; float zmax; int32_t allegiance; };
 struct GetUnitsInBoxResult { const Error* error; int32_t* units; uint32_t count; };
 
-struct GetUnitsInPlanesQuery { PlanesQuery planes; UnitFilterParams filter; };
+struct GetUnitsInPlanesQuery { PlanesQuery planes; int32_t allegiance; };
 struct GetUnitsInPlanesResult { const Error* error; int32_t* units; uint32_t count; };
 
-struct GetUnitsInSphereQuery { SphereQuery sphere; UnitFilterParams filter; };
+struct GetUnitsInSphereQuery { float x; float y; float z; float radius; int32_t allegiance; };
 struct GetUnitsInSphereResult { const Error* error; int32_t* units; uint32_t count; };
 
-struct GetUnitsInCylinderQuery { CylinderQuery cylinder; UnitFilterParams filter; };
+struct GetUnitsInCylinderQuery { float x; float z; float radius; int32_t allegiance; };
 struct GetUnitsInCylinderResult { const Error* error; int32_t* units; uint32_t count; };
 
 struct GetUnitArrayCentroidQuery { const int32_t* unitIDs; uint32_t count; };
@@ -112,10 +118,10 @@ struct GetUnitArrayCentroidResult { const Error* error; Float3 centroid; };
 struct GetUnitMapCentroidQuery { const int32_t* unitIDs; uint32_t count; };
 struct GetUnitMapCentroidResult { const Error* error; Float3 centroid; };
 
-struct GetUnitNearestAllyQuery { Float3 pos; float radius; };
+struct GetUnitNearestAllyQuery { int32_t unitID; float range; };
 struct GetUnitNearestAllyResult { const Error* error; int32_t unitID; };
 
-struct GetUnitNearestEnemyQuery { Float3 pos; float radius; };
+struct GetUnitNearestEnemyQuery { int32_t unitID; float range; bool useLOS; bool sphereDistTest; bool checkSightDist; };
 struct GetUnitNearestEnemyResult { const Error* error; int32_t unitID; };
 
 struct GetClosestEnemyUnitQuery {
@@ -131,10 +137,10 @@ struct GetClosestEnemyUnitResult { const Error* error; int32_t unitID; };
 struct GetUnitSeparationQuery { int32_t unitID1; int32_t unitID2; bool positional; bool checkMap; };
 struct GetUnitSeparationResult { const Error* error; float separation; };
 
-struct GetRenderUnitsQuery { uint8_t _unused; };
+struct GetRenderUnitsQuery { int32_t drawMask; bool sendMask; };
 struct GetRenderUnitsResult { const Error* error; int32_t* units; uint32_t count; };
 
-struct GetRenderUnitsDrawFlagChangedQuery { uint8_t _unused; };
+struct GetRenderUnitsDrawFlagChangedQuery { bool sendMask; };
 struct GetRenderUnitsDrawFlagChangedResult { const Error* error; int32_t* units; uint32_t count; };
 
 // API structure

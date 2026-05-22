@@ -70,12 +70,32 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
 
     params_by_name = {}
     param_regex = re.compile(r'@param\s+([^\s]+)\s+([^\n]+)')
-    html_param_regex = re.compile(r'<dt><code>([^<]+)</code><a [^>]+href=#([^>]+)>([^<]+)</a>')
     sig_regex = re.compile(r'Spring\.[A-Za-z0-9_]+\(([^)]*)\)')
 
     def clean_type(t: str) -> str:
         t = re.sub(r'<[^>]+>', '', t)
         return html.unescape(t).strip()
+
+    def split_top_level_commas(text: str) -> List[str]:
+        parts = []
+        start = 0
+        depth = 0
+        openers = {'(': ')', '<': '>', '{': '}', '[': ']'}
+        closers = set(openers.values())
+        for idx, ch in enumerate(text):
+            if ch in openers:
+                depth += 1
+            elif ch in closers and depth > 0:
+                depth -= 1
+            elif ch == ',' and depth == 0:
+                part = text[start:idx].strip()
+                if part:
+                    parts.append(part)
+                start = idx + 1
+        tail = text[start:].strip()
+        if tail:
+            parts.append(tail)
+        return parts
 
     def parse_param_doc_text(text: str) -> str:
         text = text.strip()
@@ -92,17 +112,26 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
                     depth -= 1
                     if depth == 0:
                         return text[:idx + 1].strip()
+        if '<' in text:
+            depth = 0
+            for idx, ch in enumerate(text):
+                if ch == '<':
+                    depth += 1
+                elif ch == '>':
+                    depth -= 1
+                    if depth == 0:
+                        return text[:idx + 1].strip()
         return text.split()[0]
 
     def extract_html_params(block: str) -> List[Dict]:
         params = []
-        for dt in re.findall(r'<dt>(.*?)</dt>', block, flags=re.DOTALL):
-            code_match = re.search(r'<code>(.*?)</code>', dt, flags=re.DOTALL)
+        for dt in re.findall(r'<dt[^>]*>(.*?)</dt>', block, flags=re.DOTALL):
+            code_match = re.search(r'<code[^>]*>(.*?)</code>', dt, flags=re.DOTALL)
             if not code_match:
                 continue
 
             name_part = dt[code_match.end():]
-            name_match = re.search(r'href=#([^>\s]+)>([^<]*)</a>', name_part, flags=re.DOTALL)
+            name_match = re.search(r'href=["\']?#([^"\'\s>]+)["\']?[^>]*>(.*?)</a>', name_part, flags=re.DOTALL)
             if not name_match:
                 continue
             anchor = name_match.group(1)
@@ -110,7 +139,7 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
                 continue
 
             params.append({
-                'name': html.unescape(name_match.group(2)).strip(),
+                'name': clean_type(name_match.group(2)),
                 'type': clean_type(code_match.group(1)),
             })
         return params
@@ -127,19 +156,24 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
             if sig_match:
                 raw = sig_match.group(1).strip()
                 if raw:
-                    for idx, token in enumerate([t.strip() for t in raw.split(',') if t.strip()]):
+                    for idx, token in enumerate(split_top_level_commas(raw)):
                         params.append({'name': f'arg{idx+1}', 'type': clean_type(token)})
 
         params_by_name[f"{namespace}.{func_name}"] = params
 
     def extract_params_from_section(full_name: str) -> List[Dict]:
-        start = content.find(f"id={full_name}")
-        if start == -1:
+        span_match = re.search(rf'\bid=["\']?{re.escape(full_name)}(?=["\'\s>])', content)
+        if span_match:
+            heading_start = content.rfind("<h4", 0, span_match.start())
+            start = heading_start if heading_start != -1 else span_match.start()
+        else:
             start = content.find(full_name)
             if start == -1:
                 return []
-        next_h4 = content.find("<h4", start + 1)
-        block = content[start: next_h4 if next_h4 != -1 else len(content)]
+
+        next_heading = re.search(r'<h4[^>]*>', content[start + 1:], flags=re.DOTALL)
+        end = start + 1 + next_heading.start() if next_heading else len(content)
+        block = content[start:end]
 
         params = []
         params = extract_html_params(block)
@@ -149,12 +183,13 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
             if sig_match:
                 raw = sig_match.group(1).strip()
                 if raw:
-                    for idx, token in enumerate([t.strip() for t in raw.split(',') if t.strip()]):
-                        params.append({'name': f'arg{idx+1}', 'type': token})
+                    for idx, token in enumerate(split_top_level_commas(raw)):
+                        params.append({'name': f'arg{idx+1}', 'type': clean_type(token)})
         return params
 
     # Scan signatures from code blocks / text
     sig_scan_pattern = re.compile(r'\b(Spring|gl|RmlUi|VFS|Script)\.([A-Za-z0-9_]+)\(([^)]*)\)')
+    function_index = {}
     for match in sig_scan_pattern.finditer(content):
         namespace = match.group(1)
         func_name = match.group(2)
@@ -163,25 +198,54 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
         full_name = f"{namespace}.{func_name}"
 
         if full_name in seen:
+            raw = html.unescape(re.sub(r'<[^>]+>', '', match.group(3))).strip()
+            if raw and full_name in function_index:
+                current = function_index[full_name].get('params', [])
+                candidate = [
+                    {'name': f'arg{idx+1}', 'type': clean_type(token)}
+                    for idx, token in enumerate(split_top_level_commas(raw))
+                ] if raw else []
+                if candidate and raw != 'unknown':
+                    if any(p.get('type') == 'unknown' for p in current) or len(candidate) > len(current):
+                        function_index[full_name]['params'] = candidate
             continue
 
         seen.add(full_name)
 
-        params = extract_params_from_section(full_name)
+        params = params_by_name.get(full_name, [])
         if not params:
-            params = params_by_name.get(full_name, [])
+            params = extract_params_from_section(full_name)
         if not params:
             raw = match.group(3).strip()
             if raw:
-                for idx, token in enumerate([t.strip() for t in raw.split(',') if t.strip()]):
+                for idx, token in enumerate(split_top_level_commas(raw)):
                     params.append({'name': f'arg{idx+1}', 'type': clean_type(token)})
 
-        functions.append({
+        func = {
             'namespace': namespace,
             'name': func_name,
             'full_name': full_name,
             'params': params
-        })
+        }
+        functions.append(func)
+        function_index[full_name] = func
+
+    for namespace, func_name, _block in func_blocks:
+        full_name = f"{namespace}.{func_name}"
+        if full_name in seen:
+            continue
+        if func_name.endswith(('_arguments', '_returns')):
+            continue
+
+        seen.add(full_name)
+        func = {
+            'namespace': namespace,
+            'name': func_name,
+            'full_name': full_name,
+            'params': params_by_name.get(full_name, []),
+        }
+        functions.append(func)
+        function_index[full_name] = func
 
     return functions
 
@@ -224,8 +288,41 @@ def extract_callins(content: str) -> List[Dict]:
 
     return callins
 
+def collect_registered_spring_functions(project_root: Path) -> Set[str]:
+    """Collect Spring.* functions actually registered by the local Lua bindings."""
+    registered = set()
+    lua_dir = project_root / 'rts' / 'Lua'
+    if not lua_dir.exists():
+        return registered
+
+    register_regex = re.compile(r'REGISTER_(?:SCOPED_)?LUA_CFUNC\s*\((?:\s*[A-Za-z0-9_:]+\s*,)?\s*([A-Za-z][A-Za-z0-9_]*)\s*\)')
+    for path in lua_dir.glob('Lua*.cpp'):
+        try:
+            text = path.read_text(encoding='utf-8', errors='ignore')
+        except OSError:
+            continue
+        for match in register_regex.finditer(text):
+            registered.add(f"Spring.{match.group(1)}")
+    return registered
+
+def extract_source_doc_functions(project_root: Path) -> List[Dict]:
+    """Extract local @function docs from rts/Lua so newly fixed docs are visible before publishing."""
+    lua_dir = project_root / 'rts' / 'Lua'
+    if not lua_dir.exists():
+        return []
+
+    functions = []
+    for path in lua_dir.glob('Lua*.cpp'):
+        try:
+            content = path.read_text(encoding='utf-8', errors='ignore')
+        except OSError:
+            continue
+        functions.extend(extract_lua_functions_from_markdown(content))
+    return functions
+
 def main():
     rust_dir = Path(__file__).parent
+    project_root = rust_dir.parents[2]
     cache_file = rust_dir / '.cache' / 'lua_api.html'
 
     print("Fetching Lua API documentation...")
@@ -248,6 +345,185 @@ def main():
 
     # Combine all functions
     all_functions = callouts + callins
+
+    registered_spring = collect_registered_spring_functions(project_root)
+    if registered_spring:
+        before = len(callouts)
+        callouts = [
+            func for func in callouts
+            if func.get('namespace') != 'Spring' or func.get('full_name') in registered_spring
+        ]
+        removed = before - len(callouts)
+        if removed:
+            print(f"Filtered {removed} stale Spring docs not present in local registrations")
+
+    source_functions = extract_source_doc_functions(project_root)
+    if source_functions:
+        by_full_name = {func['full_name']: func for func in callouts}
+        added = 0
+        updated = 0
+        for func in source_functions:
+            if func.get('namespace') != 'Spring':
+                continue
+            if registered_spring and func.get('full_name') not in registered_spring:
+                continue
+            existing = by_full_name.get(func['full_name'])
+            if existing is None:
+                callouts.append(func)
+                by_full_name[func['full_name']] = func
+                added += 1
+            elif func.get('params'):
+                existing['params'] = func['params']
+                updated += 1
+        if added or updated:
+            print(f"Merged local source docs: added {added}, updated {updated}")
+
+    all_functions = callouts + callins
+
+    source_overrides = {
+        "Spring.AddUnitIcon": [("iconName", "string"), ("texFile", "string"), ("size", "number?"), ("dist", "number?"), ("radAdjust", "boolean?"), ("u0", "number?"), ("v0", "number?"), ("u1", "number?"), ("v1", "number?")],
+        "Spring.AddLightTrackingTarget": [("lightHandle", "integer"), ("objectID", "integer"), ("trackUnit", "boolean"), ("enableTracking", "boolean")],
+        "Spring.BuggerOff": [("x", "number"), ("y", "number"), ("z", "number?"), ("radius", "number"), ("teamID", "integer"), ("spherical", "boolean?"), ("forced", "boolean?"), ("excludeUnitID", "integer?"), ("excludeUnitDefIDs", "integer[]?")],
+        "Spring.CallCOBScript": [("unitID", "integer"), ("func", "CobFunctionRef"), ("retArgs", "integer"), ("args", "integer[]")],
+        "Spring.ClearUnitGoal": [("unitID", "integer"), ("cancelRaw", "boolean?")],
+        "Spring.ClearWatchDogTimer": [("threadName", "string?"), ("keepStopped", "boolean?")],
+        "Spring.ClosestBuildPos": [("teamID", "integer"), ("unitDefID", "integer"), ("posX", "number"), ("posY", "number"), ("posZ", "number"), ("searchRadius", "number"), ("minDistance", "integer"), ("buildFacing", "integer")],
+        "Spring.DeselectUnitMap": [("unitMap", "integer[]")],
+        "Spring.DrawUnitCommands": [("unitIDs", "integer[]"), ("tableOrArray", "boolean?"), ("queueDrawDepth", "integer?")],
+        "Spring.GetConfigInt": [("name", "string"), ("default", "integer?")],
+        "Spring.GetCEGID": [("cegName", "string")],
+        "Spring.GetGroundBlocked": [("x1", "number"), ("z1", "number"), ("x2", "number"), ("z2", "number")],
+        "Spring.GetMapSquareTexture": [("texSquareX", "integer"), ("texSquareY", "integer"), ("lodMin", "integer"), ("luaTexName", "string"), ("lodMax", "integer?")],
+        "Spring.GetMouseButtonsPressed": [("buttons", "integer[]")],
+        "Spring.GetTeamStatsHistory": [("teamID", "integer"), ("startIndex", "integer"), ("endIndex", "integer?")],
+        "Spring.GetTeamUnitsByDefs": [("teamID", "integer"), ("unitDefIDs", "integer[]")],
+        "Spring.GetTerrainTypeData": [("terrainTypeIndex", "integer")],
+        "Spring.GetGameRulesParam": [("paramName", "string")],
+        "Spring.GetFeatureRulesParam": [("featureID", "integer"), ("paramName", "string")],
+        "Spring.GetPlayerRulesParam": [("playerID", "integer"), ("paramName", "string")],
+        "Spring.GetTeamRulesParam": [("teamID", "integer"), ("paramName", "string")],
+        "Spring.GetUnitRulesParam": [("unitID", "integer"), ("paramName", "string")],
+        "Spring.GetUnitsInBox": [("xmin", "number"), ("ymin", "number"), ("zmin", "number"), ("xmax", "number"), ("ymax", "number"), ("zmax", "number"), ("allegiance", "integer?")],
+        "Spring.GetUnitsInCylinder": [("x", "number"), ("z", "number"), ("radius", "number"), ("allegiance", "integer?")],
+        "Spring.GetUnitsInRectangle": [("xmin", "number"), ("zmin", "number"), ("xmax", "number"), ("zmax", "number"), ("allegiance", "integer?")],
+        "Spring.GetUnitsInSphere": [("x", "number"), ("y", "number"), ("z", "number"), ("radius", "number"), ("allegiance", "integer?")],
+        "Spring.GetUnitsInScreenRectangle": [("left", "number"), ("top", "number"), ("right", "number"), ("bottom", "number"), ("allegiance", "integer?")],
+        "Spring.GetVisibleProjectiles": [("allyTeamID", "integer?"), ("addSyncedProjectiles", "boolean?"), ("addWeaponProjectiles", "boolean?"), ("addPieceProjectiles", "boolean?")],
+        "Spring.GiveOrderArrayToUnitMap": [("unitMap", "integer[]"), ("commands", "CreateCommand[]")],
+        "Spring.GiveOrderToUnitMap": [("unitMap", "integer[]"), ("cmdID", "CMD|integer"), ("params", "CreateCommandParams?"), ("options", "CreateCommandOptions?"), ("timeout", "integer?")],
+        "Spring.InsertUnitCmdDesc": [("unitID", "integer"), ("index", "integer"), ("cmdDesc", "CommandDescription")],
+        "Spring.SelectUnitMap": [("unitMap", "integer[]"), ("append", "boolean?")],
+        "Spring.SetGroundDecalQuadPosAndHeight": [("decalID", "integer"), ("posTLX", "number?"), ("posTLY", "number?"), ("posTRX", "number?"), ("posTRY", "number?"), ("posBRX", "number?"), ("posBRY", "number?"), ("posBLX", "number?"), ("posBLY", "number?"), ("projCubeHeight", "number?")],
+        "Spring.SetGroundDecalTextureParams": [("decalID", "integer"), ("texWrapDistance", "number?"), ("texTraveledDistance", "number?")],
+        "Spring.GetUnitFeatureSeparation": [("unitID", "integer"), ("featureID", "integer"), ("surfaceDist", "boolean?")],
+        "Spring.GetUnitArrayCentroid": [("units", "integer[]")],
+        "Spring.GetUnitMapCentroid": [("units", "integer[]")],
+        "Spring.GetUnitNearestAlly": [("unitID", "integer"), ("range", "number?")],
+        "Spring.GetUnitNearestEnemy": [("unitID", "integer"), ("range", "number?"), ("useLOS", "boolean?"), ("sphereDistTest", "boolean?"), ("checkSightDist", "boolean?")],
+        "Spring.GetUnitWeaponCanFire": [("unitID", "integer"), ("weaponNum", "integer")],
+        "Spring.GetUnitWeaponDamages": [("unitID", "integer"), ("weaponNum", "integer")],
+        "Spring.GetUnitWeaponState": [("unitID", "integer"), ("weaponNum", "integer"), ("key", "string?")],
+        "Spring.GetUnitWeaponTestRange": [("unitID", "integer"), ("weaponNum", "integer"), ("x", "number"), ("y", "number"), ("z", "number")],
+        "Spring.GetUnitWeaponHaveFreeLineOfFire": [("unitID", "integer"), ("weaponNum", "integer"), ("targetID", "integer"), ("x", "number"), ("y", "number"), ("z", "number"), ("isGroundTarget", "boolean")],
+        "Spring.GetUnitWeaponTestTarget": [("unitID", "integer"), ("weaponNum", "integer"), ("targetID", "integer"), ("x", "number"), ("y", "number"), ("z", "number"), ("isGroundTarget", "boolean")],
+        "Spring.GetUnitWeaponTryTarget": [("unitID", "integer"), ("weaponNum", "integer"), ("targetID", "integer"), ("x", "number"), ("y", "number"), ("z", "number"), ("userTarget", "boolean"), ("isGroundTarget", "boolean")],
+        "Spring.GetUnitWeaponVectors": [("unitID", "integer"), ("weaponNum", "integer")],
+        "Spring.GetUnitLeavesGhost": [("unitID", "integer")],
+        "Spring.SetUnitLeavesGhost": [("unitID", "integer"), ("leavesGhost", "boolean"), ("leaveDeadGhost", "boolean?")],
+        "Spring.SetUnitMetalExtraction": [("unitID", "integer"), ("depth", "number"), ("range", "number?")],
+        "Spring.MarkerAddPoint": [("x", "number"), ("y", "number"), ("z", "number"), ("text", "string?"), ("localOnly", "boolean?"), ("playerID", "integer?")],
+        "Spring.SDLSetTextInputRect": [("x", "integer"), ("y", "integer"), ("width", "integer"), ("height", "integer")],
+        "Spring.Pos2BuildPos": [("unitDefID", "integer"), ("posX", "number"), ("posY", "number"), ("posZ", "number"), ("buildFacing", "integer?")],
+        "Spring.SendSkirmishAIMessage": [("aiTeam", "integer"), ("message", "string")],
+        "Spring.SetBuildSpacing": [("spacing", "integer")],
+        "Spring.SetFeatureEngineDrawMask": [("featureID", "integer"), ("engineDrawMask", "integer")],
+        "Spring.SetFeatureAlwaysUpdateMatrix": [("featureID", "integer"), ("alwaysUpdateMat", "boolean")],
+        "Spring.SetFeatureSelectionVolumeData": [("featureID", "integer"), ("scaleX", "number"), ("scaleY", "number"), ("scaleZ", "number"), ("offsetX", "number"), ("offsetY", "number"), ("offsetZ", "number"), ("vType", "integer"), ("tType", "integer"), ("Axis", "boolean")],
+        "Spring.SetFeatureCollisionVolumeData": [("featureID", "integer"), ("scaleX", "number"), ("scaleY", "number"), ("scaleZ", "number"), ("offsetX", "number"), ("offsetY", "number"), ("offsetZ", "number"), ("vType", "integer"), ("tType", "integer"), ("Axis", "integer")],
+        "Spring.SetFeaturePieceCollisionVolumeData": [("featureID", "integer"), ("pieceIndex", "integer"), ("enable", "boolean"), ("scaleX", "number"), ("scaleY", "number"), ("scaleZ", "number"), ("offsetX", "number"), ("offsetY", "number"), ("offsetZ", "number"), ("volumeType", "integer"), ("primaryAxis", "integer")],
+        "Spring.SetCustomCommandDrawData": [("cmdID", "integer"), ("cmdReference", "DefRef"), ("colorR", "number?"), ("colorG", "number?"), ("colorB", "number?"), ("colorA", "number?"), ("showArea", "boolean?")],
+        "Spring.SetUnitCollisionVolumeData": [("unitID", "integer"), ("scaleX", "number"), ("scaleY", "number"), ("scaleZ", "number"), ("offsetX", "number"), ("offsetY", "number"), ("offsetZ", "number"), ("vType", "integer"), ("tType", "integer"), ("Axis", "integer")],
+        "Spring.SetDollyCameraCurve": [("curveType", "integer"), ("controlPoints", "ControlPoint[]"), ("knots", "number[]")],
+        "Spring.SetDollyCameraLookCurve": [("curveType", "integer"), ("controlPoints", "ControlPoint[]"), ("knots", "number[]")],
+        "Spring.SetFeatureRulesParam": [("featureID", "integer"), ("paramName", "string"), ("paramValue", "RulesParamValue"), ("losAccess", "integer?")],
+        "Spring.SetGameRulesParam": [("paramName", "string"), ("paramValue", "RulesParamValue"), ("losAccess", "integer?")],
+        "Spring.SetMapLightTrackingState": [("lightHandle", "integer"), ("unitOrProjectileID", "integer"), ("enableTracking", "boolean"), ("unitOrProjectile", "boolean")],
+        "Spring.SetMapSquareTerrainType": [("x", "integer"), ("z", "integer"), ("newType", "integer")],
+        "Spring.SetMapSquareTexture": [("texSqrX", "integer"), ("texSqrY", "integer"), ("luaTexName", "string")],
+        "Spring.SetModelLightTrackingState": [("lightHandle", "integer"), ("unitOrProjectileID", "integer"), ("enableTracking", "boolean"), ("unitOrProjectile", "boolean")],
+        "Spring.SetPlayerRulesParam": [("playerID", "integer"), ("paramName", "string"), ("paramValue", "RulesParamValue"), ("losAccess", "integer?")],
+        "Spring.SetDollyCameraRelativeMode": [("relativeMode", "integer")],
+        "Spring.SetSoundEffectParams": [("params", "table")],
+        "Spring.SetSquareBuildingMask": [("x", "integer"), ("z", "integer"), ("mask", "integer")],
+        "Spring.SetTerrainTypeData": [("typeIndex", "integer"), ("speedTanks", "number?"), ("speedKBOts", "number?"), ("speedHovers", "number?"), ("speedShips", "number?"), ("hardness", "number?"), ("receiveTracks", "boolean?"), ("name", "string?")],
+        "Spring.SetTeamRulesParam": [("teamID", "integer"), ("paramName", "string"), ("paramValue", "RulesParamValue"), ("losAccess", "integer?")],
+        "Spring.SetUnitRulesParam": [("unitID", "integer"), ("paramName", "string"), ("paramValue", "RulesParamValue"), ("losAccess", "integer?")],
+        "Spring.SetUnitBuildSpeed": [("builderID", "integer"), ("buildSpeed", "number"), ("repairSpeed", "number?"), ("reclaimSpeed", "number?"), ("resurrectSpeed", "number?"), ("captureSpeed", "number?"), ("terraformSpeed", "number?")],
+        "Spring.SetUnitCloak": [("unitID", "integer"), ("cloak", "NumberOrBool"), ("cloakArg", "NumberOrBool")],
+        "Spring.SetUnitCosts": [("unitID", "integer"), ("costs", "UnitCostOverrides")],
+        "Spring.SetUnitFlanking": [("unitID", "integer"), ("type", "string"), ("arg1", "number"), ("y", "number?"), ("z", "number?")],
+        "Spring.SetUnitHarvestStorage": [("unitID", "integer"), ("storedMetal", "number?"), ("maxStoredMetal", "number?"), ("storedEnergy", "number?"), ("maxStoredEnergy", "number?")],
+        "Spring.SetUnitHealth": [("unitID", "integer"), ("health", "UnitHealthValue")],
+        "Spring.SetUnitPosErrorParams": [("unitID", "integer"), ("posErrorVectorX", "number"), ("posErrorVectorY", "number"), ("posErrorVectorZ", "number"), ("posErrorDeltaX", "number"), ("posErrorDeltaY", "number"), ("posErrorDeltaZ", "number"), ("nextPosErrorUpdate", "integer?"), ("allyTeamID", "integer?"), ("setPosErrorBit", "boolean?")],
+        "Spring.SetUnitResourcing": [("unitID", "integer"), ("resourceType", "string"), ("amount", "number")],
+        "Spring.SetUnitSelectionVolumeData": [("unitID", "integer"), ("scaleX", "number"), ("scaleY", "number"), ("scaleZ", "number"), ("offsetX", "number"), ("offsetY", "number"), ("offsetZ", "number"), ("vType", "integer"), ("tType", "integer"), ("Axis", "integer")],
+        "Spring.SetUnitStorage": [("unitID", "integer"), ("resource", "string"), ("amount", "number")],
+        "Spring.SetUnitWeaponDamages": [("unitID", "integer"), ("weaponNum", "integer"), ("key", "string"), ("value", "number")],
+        "Spring.SetUnitUseWeapons": [("unitID", "integer"), ("forceUseWeapons", "boolean?"), ("allowUseWeapons", "boolean?")],
+        "Spring.SetAtmosphere": [("params", "AtmosphereParams")],
+        "Spring.SetLosViewColors": [("always", "RgbColor"), ("los", "RgbColor"), ("radar", "RgbColor"), ("jam", "RgbColor"), ("radar2", "RgbColor")],
+        "Spring.SetMapRenderingParams": [("params", "MapRenderingParams")],
+        "Spring.SetSoundEffectParams": [("params", "SoundEffectParams")],
+        "Spring.SetSunLighting": [("params", "SunLightingParams")],
+        "Spring.SetWaterParams": [("waterParams", "WaterParams")],
+        "Spring.SetUnitNanoPieces": [("unitID", "integer"), ("pieceNums", "integer[]")],
+        "Spring.SetUnitSensorRadius": [("unitID", "integer"), ("type", "string"), ("radius", "integer")],
+        "Spring.SetUnitStockpile": [("unitID", "integer"), ("stockpile", "integer?"), ("buildPercent", "number?")],
+        "Spring.SetUnitPieceCollisionVolumeData": [("unitID", "integer"), ("pieceIndex", "integer"), ("enable", "boolean"), ("scaleX", "number"), ("scaleY", "number"), ("scaleZ", "number"), ("offsetX", "number"), ("offsetY", "number"), ("offsetZ", "number"), ("volumeType", "integer?"), ("primaryAxis", "integer?")],
+        "Spring.SetUnitPieceParent": [("unitID", "integer"), ("AlteredPiece", "integer"), ("ParentPiece", "integer")],
+        "Spring.SetUnitPosition": [("unitID", "integer"), ("x", "number"), ("y", "number"), ("z", "number")],
+        "Spring.SetUnitWeaponState": [("unitID", "integer"), ("weaponNum", "integer"), ("key", "string"), ("value", "number")],
+        "Spring.CallAsTeam": [("teamID", "integer"), ("func", "LuaFunctionRef"), ("args", "NativeLuaArgs")],
+        "Spring.Echo": [("arg", "string"), ("rest", "string")],
+        "Spring.MarkerErasePosition": [("x", "number"), ("y", "number"), ("z", "number"), ("unused", "number"), ("localOnly", "boolean?"), ("playerID", "integer?"), ("alwaysErase", "boolean?")],
+        "Spring.SendCommands": [("command", "string"), ("rest", "string")],
+        "Spring.SendMessageToSpectators": [("message", "string")],
+        "Spring.SetActiveCommand": [("cmdIndex", "integer"), ("button", "integer"), ("leftClick", "boolean?"), ("rightClick", "boolean?"), ("alt", "boolean?"), ("ctrl", "boolean?"), ("meta", "boolean?"), ("shift", "boolean?")],
+        "Spring.SetHeightMapFunc": [("luaFunction", "LuaFunctionRef"), ("arg", "number"), ("args", "NativeLuaArgs")],
+        "Spring.SetOriginalHeightMapFunc": [("heightMapFunc", "LuaFunctionRef")],
+        "Spring.SetProjectileTarget": [("projectileID", "integer"), ("target", "ProjectileTargetRef")],
+        "Spring.SetSmoothMeshFunc": [("luaFunction", "LuaFunctionRef"), ("arg", "NativeLuaValue"), ("args", "NativeLuaArgs")],
+        "Spring.SetUnitTarget": [("unitID", "integer"), ("target", "UnitTargetRef"), ("dgun", "boolean?"), ("userTarget", "boolean?"), ("weaponNum", "number?")],
+        "Spring.SpawnCEG": [("ceg", "DefRef"), ("posX", "number?"), ("posY", "number?"), ("posZ", "number?"), ("dirX", "number?"), ("dirY", "number?"), ("dirZ", "number?"), ("radius", "number?"), ("damage", "number?"), ("dmgMod", "number?")],
+        "Spring.SpawnExplosion": [("posX", "number?"), ("posY", "number?"), ("posZ", "number?"), ("dirX", "number?"), ("dirY", "number?"), ("dirZ", "number?"), ("explosionParams", "NativeExplosionParams")],
+        "Spring.SpawnProjectile": [("weaponDefID", "integer"), ("projectileParams", "NativeProjectileParams")],
+        "Spring.SetProjectileTimeToLive": [("projectileID", "integer"), ("ttl", "integer")],
+        "Spring.SetPieceProjectileParams": [("projectileID", "integer"), ("explosionFlags", "integer?"), ("spinAngle", "number?"), ("spinSpeed", "number?"), ("spinVectorX", "number?"), ("spinVectorY", "number?"), ("spinVectorZ", "number?")],
+        "Spring.SetProjectileCollision": [("projectileID", "integer")],
+        "Spring.SetProjectileDamages": [("projectileID", "integer"), ("unused", "integer"), ("key", "string"), ("value", "number")],
+        "Spring.SetProjectileIsIntercepted": [("projectileID", "integer"), ("intercepted", "boolean")],
+        "Spring.SetVideoCapturingTimeOffset": [("timeOffset", "number")],
+        "Spring.SetWMCaption": [("title", "string"), ("titleShort", "string?")],
+        "Spring.SetWindowGeometry": [("displayIndex", "integer"), ("winRelPosX", "integer"), ("winRelPosY", "integer"), ("winSizeX", "integer"), ("winSizeY", "integer"), ("fullScreen", "boolean"), ("borderless", "boolean")],
+        "Spring.SetTeamColor": [("teamID", "integer"), ("r", "number"), ("g", "number"), ("b", "number"), ("a", "number?")],
+        "Spring.SetWMIcon": [("iconFileName", "string"), ("forceResolution", "boolean?")],
+        "Spring.TraceScreenRay": [("screenX", "number"), ("screenY", "number"), ("onlyCoords", "boolean?"), ("useMinimap", "boolean?"), ("includeSky", "boolean?"), ("ignoreWater", "boolean?"), ("heightOffset", "number?")],
+        "Spring.TransferTeamMaxUnits": [("fromTeamID", "integer"), ("newTeamID", "integer"), ("transferAmnt", "integer")],
+        "Spring.UnitAttach": [("transporterID", "integer"), ("passengerID", "integer"), ("pieceNum", "integer")],
+        "Spring.UnitDetachFromAir": [("passengerID", "integer"), ("x", "number?"), ("y", "number?"), ("z", "number?")],
+        "Spring.UpdateMapLight": [("lightHandle", "integer"), ("lightParams", "LightParams")],
+        "Spring.UpdateModelLight": [("lightHandle", "integer"), ("lightParams", "LightParams")],
+        "Spring.UseTeamResource": [("teamID", "integer"), ("resourceType", "string"), ("amount", "number")],
+        "Spring.UseUnitResource": [("unitID", "integer"), ("resourceType", "string"), ("amount", "number")],
+        "Spring.WarpMouse": [("x", "integer"), ("y", "integer")],
+        "Spring.TraceRayGroundInDirection": [("posX", "number"), ("posY", "number"), ("posZ", "number"), ("dirX", "number"), ("dirY", "number"), ("dirZ", "number"), ("testWater", "number?")],
+        "Spring.SolveNURBSCurve": [("degree", "integer"), ("controlPoints", "ControlPoint[]"), ("knots", "number[]"), ("segments", "integer")],
+    }
+
+    for func in all_functions:
+        override = source_overrides.get(func.get("full_name", ""))
+        if override is not None:
+            func["params"] = [{"name": name, "type": ptype} for name, ptype in override]
 
     # Group by namespace
     by_namespace = {}

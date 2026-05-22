@@ -149,6 +149,7 @@ static void NativeTraceRayGroundBetweenPositions(const TraceRayGroundBetweenPosi
 	const float3 start(query->start.x, query->start.y, query->start.z);
 	const float3 end(query->end.x, query->end.y, query->end.z);
 	const float3 dir = (end - start).SafeNormalize();
+	(void)query->testWater;
 
 	// Simple ground intersection at mid-point
 	const float3 hitPos = (start + end) * 0.5f;

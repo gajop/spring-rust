@@ -78,6 +78,7 @@ struct GetWaterLevelResult {
 struct GetGroundNormalQuery {
 	float x;
 	float z;
+	bool smoothed;
 };
 
 struct GetGroundNormalResult {

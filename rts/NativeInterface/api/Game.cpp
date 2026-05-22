@@ -57,7 +57,7 @@ IMPL_SIMPLE_QUERY(IsGameOver, GameReady(), result->gameOver = game->IsGameOver()
 IMPL_SIMPLE_QUERY(GetGameFrame, GameReady(), result->low16 = (gs->frameNum & 0xFFFFu); result->high16 = (gs->frameNum >> 16))
 IMPL_SIMPLE_QUERY(GetGameSeconds, GameReady(), result->seconds = gs->frameNum / static_cast<float>(GAME_SPEED))
 IMPL_SIMPLE_QUERY(GetGaiaTeamID, GameReady(), result->teamID = teamHandler.GaiaTeamID())
-IMPL_SIMPLE_QUERY(GetTidal, GameReady(), result->strength = mapInfo->map.tidalStrength)
+IMPL_SIMPLE_QUERY(GetTidal, GameReady(), result->strength = envResHandler.GetCurrentTidalStrength())
 
 static void NativeGetGlobalLos(const GetGlobalLosQuery* query, GetGlobalLosResult* result) {
 	bufferPos = 0;
@@ -176,18 +176,51 @@ static void NativeGetSideData(const GetSideDataQuery* query, GetSideDataResult* 
 	const std::string& startUnit = sideParser.GetStartUnit(query->sideName);
 	if (startUnit.empty()) { result->error = &NOT_FOUND; return; }
 
-	// Copy strings to scratch buffer
-	std::string lowerName = StringToLower(query->sideName);
+	const std::string lowerName = StringToLower(query->sideName);
+	unsigned int sideIndex = 0;
+	const unsigned int sideCount = sideParser.GetCount();
+	for (; sideIndex < sideCount; ++sideIndex) {
+		if (sideParser.GetSideName(sideIndex) == lowerName)
+			break;
+	}
+
+	const std::string& fallbackSideName = lowerName;
+	const std::string& sideName = sideIndex < sideCount
+		? sideParser.GetSideName(sideIndex)
+		: fallbackSideName;
+	const std::string& caseName = sideParser.GetCaseName(query->sideName);
+
 	char* nameBuf = &scratchBuffer[bufferPos];
-	size_t len = lowerName.length();
+	size_t len = sideName.length();
 	if (bufferPos + len + 1 > sizeof(scratchBuffer)) { result->error = &INTERNAL; return; }
-	memcpy(nameBuf, lowerName.c_str(), len + 1);
+	memcpy(nameBuf, sideName.c_str(), len + 1);
 	bufferPos += len + 1;
 
 	result->error = nullptr;
 	result->data.sideName = nameBuf;
-	result->data.caseName = sideParser.GetCaseName(query->sideName).c_str();
-	result->data.sideIndex = 0;
+	result->data.caseName = caseName.c_str();
+	result->data.startUnit = startUnit.c_str();
+	result->data.sideIndex = sideIndex < sideCount ? sideIndex : 0;
+}
+
+static void NativeGetSideDataByIndex(const GetSideDataByIndexQuery* query, GetSideDataByIndexResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+	if (!sideParser.ValidSide(query->sideIndex)) { result->error = &NOT_FOUND; return; }
+
+	result->error = nullptr;
+	result->data.sideName = sideParser.GetSideName(query->sideIndex).c_str();
+	result->data.caseName = sideParser.GetCaseName(query->sideIndex).c_str();
+	result->data.startUnit = sideParser.GetStartUnit(query->sideIndex).c_str();
+	result->data.sideIndex = query->sideIndex;
+}
+
+static void NativeGetSideDataCount(const GetSideDataCountQuery* query, GetSideDataCountResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->count = sideParser.GetCount();
 }
 
 static void NativeGetAllyTeamStartBox(const GetAllyTeamStartBoxQuery* query, GetAllyTeamStartBoxResult* result) {
@@ -272,6 +305,8 @@ const GameApi GAME_API = {
 	.GetFacingFromHeading = NativeGetFacingFromHeading,
 	.GetHeadingFromFacing = NativeGetHeadingFromFacing,
 	.GetSideData = NativeGetSideData,
+	.GetSideDataByIndex = NativeGetSideDataByIndex,
+	.GetSideDataCount = NativeGetSideDataCount,
 	.GetAllyTeamStartBox = NativeGetAllyTeamStartBox,
 	.GetTeamStartPosition = NativeGetTeamStartPosition,
 	.GetMapStartPositions = NativeGetMapStartPositions,

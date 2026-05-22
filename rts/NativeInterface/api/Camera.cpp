@@ -210,6 +210,10 @@ static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRa
 	// Get pixel direction
 	const float3 dir = camera->CalcPixelDir(static_cast<int>(query->screenX), static_cast<int>(query->screenY));
 	const float3& pos = camera->GetPos();
+	(void)query->useMinimap;
+	(void)query->includeSky;
+	(void)query->ignoreWater;
+	(void)query->heightOffset;
 
 	// Simplified: trace against units, features, and ground
 	const CUnit* hitUnit = nullptr;
@@ -272,6 +276,10 @@ static void NativeSetCameraState(const SetCameraStateQuery* query, SetCameraStat
 
 	// Simplified: just return false as camera state setting requires
 	// complex controller-specific logic
+	(void)query->state;
+	(void)query->transitionTime;
+	(void)query->transitionTimeFactor;
+	(void)query->transitionTimeExponent;
 	result->error = nullptr;
 	result->success = false;
 }

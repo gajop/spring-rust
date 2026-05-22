@@ -86,6 +86,7 @@ struct GetSpectatingStateResult {
 
 struct GetPlayerRosterQuery {
 	int32_t sortMode;
+	bool showPathingPlayers;
 };
 
 struct GetPlayerRosterResult {
@@ -96,6 +97,7 @@ struct GetPlayerRosterResult {
 
 struct GetPlayerTrafficQuery {
 	int32_t playerID;
+	int32_t packetID;
 };
 
 struct GetPlayerTrafficResult {

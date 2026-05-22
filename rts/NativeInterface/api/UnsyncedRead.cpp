@@ -506,7 +506,7 @@ static void NativeGetUnitIcon(const GetUnitIconQuery* query, GetUnitIconResult* 
 {
 	GetUnitIconDataQuery dataQuery = {
 		.unitID = query->unitID,
-		.fullData = query->fullData,
+		.fullData = false,
 	};
 	GetUnitIconDataResult dataResult = {};
 	NativeGetUnitIconData(&dataQuery, &dataResult);
@@ -754,6 +754,7 @@ static void NativeGetVisibleProjectiles(const GetVisibleProjectilesQuery* query,
 
 	const bool includeWeapon = query->includeWeaponProjectiles;
 	const bool includePiece = query->includePieceProjectiles;
+	(void)query->includeSyncedProjectiles;
 	const bool fullView = (gu != nullptr) && gu->spectatingFullView;
 	const int readAllyTeam = (gu != nullptr) ? gu->myAllyTeam : query->allyTeamID;
 	const int allyTeamID = (query->allyTeamID >= 0) ? query->allyTeamID : readAllyTeam;
@@ -1115,8 +1116,9 @@ static void NativeGetTeamDamageStats(const GetTeamDamageStatsQuery* query, GetTe
 
 	const CTeam* team = teamHandler.Team(query->teamID);
 	const int myAlly = (gu != nullptr) ? gu->myAllyTeam : -1;
+	const int teamAlly = teamHandler.AllyTeam(query->teamID);
 
-	if (myAlly >= 0 && !teamHandler.Ally(query->allyTeamID, myAlly) && !game->IsGameOver())
+	if (myAlly >= 0 && !teamHandler.Ally(teamAlly, myAlly) && !game->IsGameOver())
 		return;
 
 	const TeamStatistics& stats = team->GetCurrentStats();

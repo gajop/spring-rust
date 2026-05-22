@@ -17,7 +17,8 @@ extern "C" {
 // Side data (faction)
 struct SideData {
 	const char* sideName;
-	const char* caseName;  // Lowercase version
+	const char* caseName;
+	const char* startUnit;
 	uint32_t sideIndex;
 };
 
@@ -112,6 +113,12 @@ struct GetHeadingFromFacingResult { const Error* error; int32_t heading; };
 struct GetSideDataQuery { const char* sideName; };
 struct GetSideDataResult { const Error* error; SideData data; };
 
+struct GetSideDataByIndexQuery { uint32_t sideIndex; };
+struct GetSideDataByIndexResult { const Error* error; SideData data; };
+
+struct GetSideDataCountQuery { uint8_t _unused; };
+struct GetSideDataCountResult { const Error* error; uint32_t count; };
+
 struct GetAllyTeamStartBoxQuery { int32_t allyTeamID; };
 struct GetAllyTeamStartBoxResult { const Error* error; StartBox box; bool exists; };
 
@@ -146,6 +153,8 @@ struct GameApi {
 	void (*GetFacingFromHeading)(const GetFacingFromHeadingQuery* query, GetFacingFromHeadingResult* result);
 	void (*GetHeadingFromFacing)(const GetHeadingFromFacingQuery* query, GetHeadingFromFacingResult* result);
 	void (*GetSideData)(const GetSideDataQuery* query, GetSideDataResult* result);
+	void (*GetSideDataByIndex)(const GetSideDataByIndexQuery* query, GetSideDataByIndexResult* result);
+	void (*GetSideDataCount)(const GetSideDataCountQuery* query, GetSideDataCountResult* result);
 	void (*GetAllyTeamStartBox)(const GetAllyTeamStartBoxQuery* query, GetAllyTeamStartBoxResult* result);
 	void (*GetTeamStartPosition)(const GetTeamStartPositionQuery* query, GetTeamStartPositionResult* result);
 	void (*GetMapStartPositions)(const GetMapStartPositionsQuery* query, GetMapStartPositionsResult* result);

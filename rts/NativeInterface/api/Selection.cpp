@@ -320,12 +320,41 @@ static void NativeGetGroupUnitsCounts(const GetGroupUnitsCountsQuery* query, Get
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
-	for (int g = 0; g < 10; g++) {
-		const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(g);
-		result->counts[g] = (group != nullptr) ? static_cast<uint32_t>(group->units.size()) : 0;
+	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
+
+	const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(query->groupID);
+	if (group == nullptr) { result->error = &INVALID_GROUP_ERROR; return; }
+
+	std::unordered_map<int32_t, uint32_t> countMap;
+
+	for (int unitID : group->units) {
+		const CUnit* unit = unitHandler.GetUnit(unitID);
+		if (unit != nullptr) {
+			countMap[unit->unitDef->id]++;
+		}
+	}
+
+	int32_t* defIDs = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+	size_t arraySize = countMap.size() * sizeof(int32_t);
+	if (bufferPos + arraySize > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
+	bufferPos += arraySize;
+
+	uint32_t* counts = reinterpret_cast<uint32_t*>(&scratchBuffer[bufferPos]);
+	arraySize = countMap.size() * sizeof(uint32_t);
+	if (bufferPos + arraySize > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
+	bufferPos += arraySize;
+
+	uint32_t idx = 0;
+	for (const auto& [defID, count] : countMap) {
+		defIDs[idx] = defID;
+		counts[idx] = count;
+		idx++;
 	}
 
 	result->error = nullptr;
+	result->counts.unitDefIDs = defIDs;
+	result->counts.counts = counts;
+	result->counts.uniqueCount = idx;
 }
 
 } // namespace

@@ -99,11 +99,11 @@ struct UnitVectors {
 	Float3 rightDir;
 };
 
-// Unit rotation (matrix representation)
+// Unit rotation (pitch, yaw, roll)
 struct UnitRotation {
-	Float3 col1;  // Right vector
-	Float3 col2;  // Up vector
-	Float3 col3;  // Front vector
+	float pitch;
+	float yaw;
+	float roll;
 };
 
 // Build params
@@ -115,6 +115,20 @@ struct UnitBuildParams {
 	float resurrectSpeed;
 	float captureSpeed;
 	float terraformSpeed;
+};
+
+struct UnitHarvestStorage {
+	float storedMetal;
+	float maxStoredMetal;
+	float storedEnergy;
+	float maxStoredEnergy;
+};
+
+struct UnitWorkerTask {
+	int32_t cmdID;
+	int32_t targetID;
+	bool hasTask;
+	bool hasTarget;
 };
 
 // Shield state
@@ -151,12 +165,9 @@ struct UnitLastAttacker {
 
 // LOS state
 struct UnitLosState {
+	uint8_t rawMask;
 	bool los;
-	bool prevLos;
 	bool radar;
-	bool sonar;
-	bool seismic;
-	bool jammer;
 	bool typed;
 };
 
@@ -241,7 +252,7 @@ struct GetUnitIsCloakedResult { const Error* error; bool isCloaked; };
 struct GetUnitSeismicSignatureQuery { int32_t unitID; };
 struct GetUnitSeismicSignatureResult { const Error* error; float seismicSignature; };
 
-struct GetUnitSensorRadiusQuery { int32_t unitID; };
+struct GetUnitSensorRadiusQuery { int32_t unitID; const char* type; };
 struct GetUnitSensorRadiusResult { const Error* error; UnitSensorRadius radius; };
 
 struct GetUnitPosErrorParamsQuery { int32_t unitID; int32_t allyTeamID; };
@@ -259,7 +270,7 @@ struct GetUnitBuildeeRadiusResult { const Error* error; float radius; };
 struct GetUnitMassQuery { int32_t unitID; };
 struct GetUnitMassResult { const Error* error; float mass; };
 
-struct GetUnitPositionQuery { int32_t unitID; };
+struct GetUnitPositionQuery { int32_t unitID; bool midPos; bool aimPos; };
 struct GetUnitPositionResult { const Error* error; Float3 position; };
 
 struct GetUnitBasePositionQuery { int32_t unitID; };
@@ -274,8 +285,8 @@ struct GetUnitRotationResult { const Error* error; UnitRotation rotation; };
 struct GetUnitDirectionQuery { int32_t unitID; };
 struct GetUnitDirectionResult { const Error* error; Float3 direction; };
 
-struct GetUnitHeadingQuery { int32_t unitID; };
-struct GetUnitHeadingResult { const Error* error; int32_t heading; };
+struct GetUnitHeadingQuery { int32_t unitID; bool convertToRadians; };
+struct GetUnitHeadingResult { const Error* error; float heading; };
 
 struct GetUnitVelocityQuery { int32_t unitID; };
 struct GetUnitVelocityResult { const Error* error; Float3 velocity; };
@@ -287,16 +298,16 @@ struct GetUnitIsBuildingQuery { int32_t unitID; };
 struct GetUnitIsBuildingResult { const Error* error; int32_t buildeeID; };
 
 struct GetUnitWorkerTaskQuery { int32_t unitID; };
-struct GetUnitWorkerTaskResult { const Error* error; const char* task; };
+struct GetUnitWorkerTaskResult { const Error* error; UnitWorkerTask task; };
 
-struct GetUnitEffectiveBuildRangeQuery { int32_t unitID; };
+struct GetUnitEffectiveBuildRangeQuery { int32_t unitID; int32_t buildeeDefID; };
 struct GetUnitEffectiveBuildRangeResult { const Error* error; float range; };
 
 struct GetUnitCurrentBuildPowerQuery { int32_t unitID; };
 struct GetUnitCurrentBuildPowerResult { const Error* error; float buildPower; };
 
-struct GetUnitBuildParamsQuery { int32_t unitID; };
-struct GetUnitBuildParamsResult { const Error* error; UnitBuildParams params; };
+struct GetUnitBuildParamsQuery { int32_t unitID; const char* paramName; };
+struct GetUnitBuildParamsResult { const Error* error; NumberOrBool value; bool hasValue; };
 
 struct GetUnitInBuildStanceQuery { int32_t unitID; };
 struct GetUnitInBuildStanceResult { const Error* error; bool inBuildStance; };
@@ -334,7 +345,7 @@ struct GetUnitLastAttackerResult { const Error* error; UnitLastAttacker attacker
 struct GetUnitLastAttackedPieceQuery { int32_t unitID; };
 struct GetUnitLastAttackedPieceResult { const Error* error; int32_t pieceNum; };
 
-struct GetUnitLosStateQuery { int32_t unitID; int32_t allyTeamID; };
+struct GetUnitLosStateQuery { int32_t unitID; int32_t allyTeamID; bool raw; };
 struct GetUnitLosStateResult { const Error* error; UnitLosState losState; };
 
 struct GetUnitCollisionVolumeDataQuery { int32_t unitID; };
@@ -347,7 +358,7 @@ struct GetUnitBlockingQuery { int32_t unitID; };
 struct GetUnitBlockingResult { const Error* error; UnitBlockingState blockingState; };
 
 struct GetUnitHarvestStorageQuery { int32_t unitID; };
-struct GetUnitHarvestStorageResult { const Error* error; float harvestStorage; };
+struct GetUnitHarvestStorageResult { const Error* error; UnitHarvestStorage storage; };
 
 struct ClearUnitsPreviousDrawFlagQuery { uint8_t _unused; };
 struct ClearUnitsPreviousDrawFlagResult { const Error* error; bool success; };

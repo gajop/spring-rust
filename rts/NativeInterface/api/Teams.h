@@ -49,8 +49,12 @@ struct TeamResources {
 
 // Team unit stats
 struct TeamUnitStats {
-	uint32_t unitCount;
-	uint32_t unitLimit;
+	uint32_t killed;
+	uint32_t died;
+	uint32_t capturedBy;
+	uint32_t capturedFrom;
+	uint32_t received;
+	uint32_t sent;
 };
 
 // Player info
@@ -69,9 +73,9 @@ struct PlayerInfo {
 
 // AllyTeam info
 struct AllyTeamInfo {
-	int32_t allyTeamID;
-	uint32_t teamCount;
-	const char* customKeys;
+	const char** keys;
+	const char** values;
+	uint32_t count;
 };
 
 // AI info
@@ -107,13 +111,13 @@ struct TeamStatsHistoryPoint {
 };
 
 // Queries
-struct GetTeamListQuery { uint8_t _unused; };
+struct GetTeamListQuery { int32_t allyTeamID; };
 struct GetTeamListResult { const Error* error; int32_t* teams; uint32_t count; };
 
 struct GetAllyTeamListQuery { uint8_t _unused; };
 struct GetAllyTeamListResult { const Error* error; int32_t* allyTeams; uint32_t count; };
 
-struct GetTeamInfoQuery { int32_t teamID; };
+struct GetTeamInfoQuery { int32_t teamID; bool getTeamKeys; };
 struct GetTeamInfoResult { const Error* error; TeamInfo info; };
 
 struct GetTeamAllyTeamIDQuery { int32_t teamID; };
@@ -125,16 +129,16 @@ struct GetTeamMaxUnitsResult { const Error* error; int32_t maxUnits; };
 struct GetTeamLuaAIQuery { int32_t teamID; };
 struct GetTeamLuaAIResult { const Error* error; const char* luaAI; };
 
-struct GetTeamResourcesQuery { int32_t teamID; };
+struct GetTeamResourcesQuery { int32_t teamID; const char* resource; };
 struct GetTeamResourcesResult { const Error* error; TeamResources resources; };
 
 struct GetTeamUnitStatsQuery { int32_t teamID; };
 struct GetTeamUnitStatsResult { const Error* error; TeamUnitStats stats; };
 
-struct GetTeamResourceStatsQuery { int32_t teamID; };
+struct GetTeamResourceStatsQuery { int32_t teamID; const char* resource; };
 struct GetTeamResourceStatsResult { const Error* error; TeamResources resources; };
 
-struct GetTeamStatsHistoryQuery { int32_t teamID; };
+struct GetTeamStatsHistoryQuery { int32_t teamID; int32_t startIndex; int32_t endIndex; };
 struct GetTeamStatsHistoryResult { const Error* error; TeamStatsHistoryPoint* history; uint32_t count; };
 
 struct GetAllyTeamInfoQuery { int32_t allyTeamID; };
@@ -146,7 +150,7 @@ struct AreTeamsAlliedResult { const Error* error; bool allied; };
 struct ArePlayersAlliedQuery { int32_t playerID1; int32_t playerID2; };
 struct ArePlayersAlliedResult { const Error* error; bool allied; };
 
-struct GetPlayerListQuery { uint8_t _unused; };
+struct GetPlayerListQuery { int32_t teamID; bool active; };
 struct GetPlayerListResult { const Error* error; int32_t* players; uint32_t count; };
 
 struct GetPlayerListInTeamQuery { int32_t teamID; };
@@ -155,11 +159,11 @@ struct GetPlayerListInTeamResult { const Error* error; int32_t* players; uint32_
 struct GetPlayerListInAllyTeamQuery { int32_t allyTeamID; };
 struct GetPlayerListInAllyTeamResult { const Error* error; int32_t* players; uint32_t count; };
 
-struct GetPlayerInfoQuery { int32_t playerID; };
+struct GetPlayerInfoQuery { int32_t playerID; bool getPlayerOpts; };
 struct GetPlayerInfoResult { const Error* error; PlayerInfo info; };
 
 struct GetPlayerControlledUnitQuery { int32_t playerID; };
-struct GetPlayerControlledUnitResult { const Error* error; int32_t unitID; };
+struct GetPlayerControlledUnitResult { const Error* error; int32_t unitID; bool hasUnit; };
 
 struct GetAIInfoQuery { int32_t teamID; };
 struct GetAIInfoResult { const Error* error; AIInfo info; bool isAI; };

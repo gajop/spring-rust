@@ -64,7 +64,7 @@ struct GetUnitWeaponCountResult { const Error* error; uint32_t count; };
 struct GetUnitMaxRangeQuery { int32_t unitID; };
 struct GetUnitMaxRangeResult { const Error* error; float maxRange; };
 
-struct GetUnitWeaponStateQuery { int32_t unitID; int32_t weaponNum; };
+struct GetUnitWeaponStateQuery { int32_t unitID; int32_t weaponNum; const char* key; };
 struct GetUnitWeaponStateResult { const Error* error; UnitWeaponState state; };
 
 struct GetUnitWeaponDamagesQuery { int32_t unitID; int32_t weaponNum; };

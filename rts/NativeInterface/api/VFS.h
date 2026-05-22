@@ -65,7 +65,7 @@ struct CreateDirResult { const Error* error; bool success; };
 struct ExtractModArchiveFileQuery { const char* path; };
 struct ExtractModArchiveFileResult { const Error* error; bool success; };
 
-struct GetMapSquareTextureQuery { int32_t texSquareX; int32_t texSquareY; int32_t lodMin; int32_t lodMax; const char* textureName; };
+struct GetMapSquareTextureQuery { int32_t texSquareX; int32_t texSquareY; int32_t lodMin; const char* textureName; int32_t lodMax; };
 struct GetMapSquareTextureResult { const Error* error; bool success; };
 
 struct SetMapSquareTextureQuery { int32_t texSquareX; int32_t texSquareY; const char* textureName; };

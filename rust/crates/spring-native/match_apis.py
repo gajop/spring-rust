@@ -9,35 +9,169 @@ from typing import List, Dict, Tuple, Optional
 from difflib import SequenceMatcher
 
 
+FLATTENED_TYPES = {
+    'float2': ['float', 'float'],
+    'float3': ['float', 'float', 'float'],
+    'float4': ['float', 'float', 'float', 'float'],
+    'sys::float2': ['float', 'float'],
+    'sys::float3': ['float', 'float', 'float'],
+    'sys::float4': ['float', 'float', 'float', 'float'],
+    'sys::rectanglequery': ['float', 'float', 'float', 'float'],
+    'sys::boxquery': ['float', 'float', 'float', 'float', 'float', 'float'],
+    'sys::spherequery': ['float', 'float', 'float', 'float'],
+    'sys::cylinderquery': ['float', 'float', 'float', 'float', 'float'],
+    'sys::teamcolor': ['float', 'float', 'float', 'float'],
+}
+
+
 def expand_params(params: List[Dict]) -> List[str]:
-    """Expand vector-like params (float2/3/4) into scalar slots for count comparison."""
+    """Expand only explicit native aggregate types into normalized scalar slots."""
     expanded = []
     for p in params:
         ptype = p.get('type', '').strip()
         lower = ptype.lower()
-        mult = 1
-        for dim, key in [(4, 'float4'), (3, 'float3'), (2, 'float2')]:
-            if key in lower:
-                mult = dim
-                break
-        expanded.extend([ptype] * mult)
+        if lower in FLATTENED_TYPES:
+            expanded.extend(FLATTENED_TYPES[lower])
+        else:
+            expanded.append(normalize_param_type(p))
     return expanded
 
 
-def bucket_type(ptype: str) -> str:
-    """Group types: treat Lua 'number' as floating-point, keep ints separate."""
+def normalize_param_type(param: Dict) -> str:
+    ptype = param.get('type', '').strip()
+    normalized = normalize_type(ptype)
+    name = param.get('name', '').lower()
+    compact_name = re.sub(r'[^a-z0-9]', '', name)
+    raw = ptype.lower().rstrip('?')
+
+    integral_name = (
+        name.endswith('id') or name.endswith('ids') or re.search(r'id\d*$', compact_name) is not None or
+        name.endswith('index') or name.endswith('num') or name.endswith('count') or
+        compact_name.endswith('index') or compact_name.endswith('num') or compact_name.endswith('count') or
+        name in {
+            'button', 'button1', 'key', 'keycode', 'scancode', 'drawmask',
+            'facing', 'heading', 'degree', 'level', 'rank', 'sorttype',
+            'sortmode', 'packetid', 'piece', 'piecenum', 'weaponnum',
+            'cmdid', 'cmdindex', 'team', 'allyteam',
+        } or
+        compact_name in {
+            'button', 'button1', 'key', 'keycode', 'scancode', 'drawmask',
+            'facing', 'heading', 'degree', 'level', 'rank', 'sorttype',
+            'sortmode', 'packetid', 'piece', 'piecenum', 'weaponnum',
+            'cmdid', 'cmdindex', 'team', 'allyteam', 'maxlines',
+            'pingtag',
+        }
+    )
+    if raw == 'number' and integral_name:
+        return 'int'
+
+    return normalized
+
+
+def normalize_type(ptype: str) -> str:
+    """Normalize unambiguous primitive aliases only; leave unknowns as mismatches."""
     lt = ptype.lower()
     if not lt:
         return ""
-    if "number" in lt or "float" in lt or "double" in lt:
+    lt = lt.strip()
+    if lt.endswith("?"):
+        lt = lt[:-1]
+    if lt.startswith("&sys::"):
+        lt = lt[6:]
+    if lt.startswith("&[sys::") and lt.endswith("]"):
+        inner = lt[2:-1]
+        if inner == "sys::nativecommand":
+            return "array<createcommand>"
+        if inner == "sys::commandffi":
+            return "array<createcommand>"
+        if inner == "sys::float4":
+            return "array<float4>"
+        return f"array<{inner[5:] if inner.startswith('sys::') else inner}>"
+    if lt in ("number", "float", "double", "f32", "f64"):
         return "float"
-    if "int" in lt or "uint" in lt or "size" in lt:
+    if re.fullmatch(r'-?\d+', lt):
         return "int"
-    if "bool" in lt:
-        return "bool"
-    if "string" in lt:
+    if re.fullmatch(r'-?\d+\.\d+', lt):
+        return "float"
+    if re.fullmatch(r'".*"', lt):
         return "string"
-    return lt
+    if lt in ("integer", "int", "i32", "u32", "i16", "u16", "i8", "u8", "i64", "u64", "usize", "cmd|integer", "(cmd|integer)"):
+        return "int"
+    if lt in ("boolean", "bool", "true", "false"):
+        return "bool"
+    if lt in ("string", "&str", "str"):
+        return "string"
+    if lt in ("integer[]", "&[i32]", "&[u32]", "table<integer,any>", "table<integer, any>"):
+        return "array<int>"
+    if lt.startswith("table<integer,"):
+        return "array<int>"
+    if lt in ("number[]", "&[f32]"):
+        return "array<float>"
+    if lt == "createcommand[]":
+        return "array<createcommand>"
+    if lt == "controlpoint[]":
+        return "array<float4>"
+    if lt in ("rgba", "rgba?"):
+        return "float4"
+    if lt == "plane[]":
+        return "planesquery"
+    if re.fullmatch(r'\[\s*f32\s*;\s*\d+\s*\]', lt):
+        return "array<float>"
+    if lt in ("resourcename", "storagename"):
+        return "string"
+    if lt in ("resourcename|storagename", "(resourcename|storagename)"):
+        return "string"
+    if lt in ("(loglevel|log)", "1|2", "(1|2)", "losaccess", "losmask", "lostable|losmask|integer", "(lostable|losmask|integer)", "number[bit]", "?string|number", "string|number", "(string|number)"):
+        return "int"
+    if lt in ("boolean|nil", "nil|boolean"):
+        return "bool"
+    if lt == '("los"|"airlos"|"radar"|"sonar"|"seismic"|"radarjammer"...)':
+        return "string"
+    if lt in ("rulesparamvalue",):
+        return "rulesparamvalue"
+    if lt in ("luafunctionref", "fun(...)", "function"):
+        return "luafunctionref"
+    if lt in ("nativeluaargs", "any", "...", "...any", "...:any", "...number", "...:number"):
+        return "nativeluaargs"
+    if lt in ("nativeluavalue",):
+        return "nativeluavalue"
+    if lt in ("unittargetref",):
+        return "unittargetref"
+    if lt in ("projectiletargetref",):
+        return "projectiletargetref"
+    if lt in ("nativeprojectileparams", "projectileparams"):
+        return "projectileparams"
+    if lt in ("nativeexplosionparams", "explosionparams"):
+        return "explosionparams"
+    if lt in ("string|integer", "(string|integer)", "defref"):
+        return "defref"
+    if lt in ("number|boolean", "(number|boolean)", "numberorbool"):
+        return "numberorbool"
+    if lt in ("unithealthvalue", "(number|setunithealthamounts)", "number|setunithealthamounts"):
+        return "unithealthvalue"
+    if lt in ("unitcosts", "unitcostoverrides"):
+        return "unitcosts"
+    if lt in ("atmosphereparams", "sunlightingparams", "waterparams", "maprenderingparams", "soundeffectparams", "rgbcolor"):
+        return lt
+    if lt in ("facinginteger", "facing", "heading", "cmd", "loglevel", "drawmask", "soundchannel", "createcommandoptions"):
+        return "int"
+    if lt == "createcommandparams":
+        return "array<float>"
+    if lt.startswith("sys::"):
+        lt = lt[5:]
+    named_aliases = {
+        "nativecommanddescription": "commanddescription",
+        "nativecommand": "createcommand",
+        "commandffi": "createcommand",
+        "nativecommanddescription": "commanddescription",
+        "nativecommanddescriptionffi": "commanddescription",
+        "nativecommandffi": "createcommand",
+        "float4": "float4",
+        "unitcostoverrides": "unitcosts",
+        "nativeprojectileparams": "projectileparams",
+        "nativeexplosionparams": "explosionparams",
+    }
+    return named_aliases.get(lt, lt)
 
 
 def compare_params(lua_params: List[Dict], rust_params: List[Dict]) -> Tuple[bool, str]:
@@ -49,21 +183,20 @@ def compare_params(lua_params: List[Dict], rust_params: List[Dict]) -> Tuple[boo
 
     diffs = []
     for idx, (ltype, rtype) in enumerate(zip(lua_expanded, rust_expanded)):
-        ltype = ltype.strip()
-        rtype = rtype.strip()
-        lb = bucket_type(ltype)
-        rb = bucket_type(rtype)
-
-        if lb and rb:
-            if lb != rb:
-                diffs.append(f"p{idx+1} type {ltype}!={rtype}")
-        elif ltype and rtype and ltype != rtype:
+        if ltype and rtype and ltype != rtype:
             diffs.append(f"p{idx+1} type {ltype}!={rtype}")
 
     if diffs:
         return False, "; ".join(diffs)
 
     return True, "match"
+
+
+def param_mismatch_msg(lua_func: Dict, rust_func: Dict) -> Optional[str]:
+    ok, msg = compare_params(lua_func.get('params', []), rust_func.get('params', []))
+    if ok:
+        return None
+    return f'{lua_func["name"]} param mismatch {msg}'
 
 
 def split_top_level_commas(param_str: str) -> List[str]:
@@ -262,8 +395,16 @@ def main():
             all_rust.add(f"{module}.{func['name']}")
 
     unmatched_rust = all_rust - matched_rust
+    param_results = []
+    for lua_func, rust_full, _, _, rust_meta in matched + uncertain:
+        ok, msg = compare_params(lua_func.get('params', []), rust_meta.get('params', []))
+        param_results.append((ok, msg))
+    param_ok = sum(1 for ok, _ in param_results if ok)
+    count_mismatches = sum(1 for ok, msg in param_results if not ok and msg.startswith('count mismatch'))
+    type_mismatches = sum(1 for ok, msg in param_results if not ok and not msg.startswith(('shape mismatch', 'count mismatch')))
 
     output_file = rust_dir / 'api_comparison.md'
+    todo_file = rust_dir / 'PORTING_TODO.txt'
 
     with open(output_file, 'w') as f:
         f.write('# Lua ↔ Rust API Comparison Report\n\n')
@@ -279,6 +420,11 @@ def main():
         f.write(f'- Total: {total_rust} functions across {len(rust_funcs)} modules\n')
         f.write(f'- Matched to Lua: {len(matched)} ({100*len(matched)/total_rust:.1f}%)\n')
         f.write(f'- Rust-only: {len(unmatched_rust)} ({100*len(unmatched_rust)/total_rust:.1f}%)\n\n')
+
+        f.write(f'**Parameter comparison (matched functions):**\n')
+        f.write(f'- Parameter matches: {param_ok}\n')
+        f.write(f'- Count mismatches: {count_mismatches}\n')
+        f.write(f'- Type mismatches: {type_mismatches}\n\n')
 
         f.write('---\n\n')
 
@@ -324,7 +470,19 @@ def main():
 
         f.write(f'\n**Total Rust-only: {len(unmatched_rust)}**\n\n')
 
+    todo_lines = ['Current API port TODO (one function per line; generated from api_comparison.md)']
+    for lua_func, _, _, _, rust_meta in sorted(matched, key=lambda x: x[0]['name']):
+        line = param_mismatch_msg(lua_func, rust_meta)
+        if line:
+            todo_lines.append(line)
+    for lua_func, _, _, _, rust_meta in sorted(uncertain, key=lambda x: x[0]['name']):
+        line = param_mismatch_msg(lua_func, rust_meta)
+        if line:
+            todo_lines.append(line)
+    todo_file.write_text('\n'.join(todo_lines) + '\n')
+
     print(f"\n✓ Wrote comparison report to {output_file}")
+    print(f"✓ Wrote parameter TODO to {todo_file}")
     print(f"\nSummary:")
     print(f"  Perfect matches (1.0): {len(matched)}/{len(spring_funcs)} ({100*len(matched)/len(spring_funcs):.1f}%)")
     print(f"  Uncertain matches (<1.0): {len(uncertain)} ({100*len(uncertain)/len(spring_funcs):.1f}%)")

@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_mod_options",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetModOptions"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_mod_options"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "keys"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetModOptions`",
+        "native_getter": "`Game.get_mod_options`",
+        "fields": "`keys`"
+      },
+      "rust": {
+        "check": "check_game_options",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetModOptions",
+        "args": [],
+        "returns": [
+          {
+            "field": "keys",
+            "index": 1,
+            "transform": "table_keys"
+          }
+        ]
+      }
+    },
+    {
+      "id": "get_map_options",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetMapOptions"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_map_options"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "keys"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetMapOptions`",
+        "native_getter": "`Game.get_map_options`",
+        "fields": "`keys`"
+      },
+      "rust": {
+        "check": "check_game_options",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetMapOptions",
+        "args": [],
+        "returns": [
+          {
+            "field": "keys",
+            "index": 1,
+            "transform": "table_keys"
+          }
+        ]
+      }
+    },
+    {
+      "id": "get_map_start_positions",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetMapStartPositions"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_map_start_positions"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "positions"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetMapStartPositions`",
+        "native_getter": "`Game.get_map_start_positions`",
+        "fields": "`positions`"
+      },
+      "rust": {
+        "check": "check_map_start_positions",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetMapStartPositions",
+        "args": [],
+        "returns": [
+          {
+            "field": "positions",
+            "transform": "start_positions"
+          }
+        ]
+      }
+    },
+    {
+      "id": "global_los",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetGlobalLos"
+        ],
+        "get": [
+          "Spring.GetGlobalLos"
+        ]
+      },
+      "native": {
+        "set": [
+          "TeamControl.set_global_los"
+        ],
+        "get": [
+          "Game.get_global_los"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetGlobalLos`",
+        "native_setter": "`TeamControl.set_global_los`",
+        "lua_getter": "`Spring.GetGlobalLos`",
+        "native_getter": "`Game.get_global_los`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_global_los",
+        "set": "set_global_los"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        },
+        "enabled": {
+          "type": "bool"
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetGlobalLos",
+          "args": [
+            "fixture.allyTeamID",
+            "value.enabled"
+          ]
+        },
+        "call": "Spring.GetGlobalLos",
+        "args": [
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "enabled"
+        ]
+      }
+    }
+  ]
+}

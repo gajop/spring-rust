@@ -42,7 +42,7 @@ struct GetCameraNamesResult {
 };
 
 struct GetCameraStateQuery {
-	uint8_t _unused;
+	bool useTable;
 };
 
 struct GetCameraStateResult {
@@ -85,6 +85,10 @@ struct TraceScreenRayQuery {
 	float screenX;
 	float screenY;
 	bool onlyCoords;
+	bool useMinimap;
+	bool includeSky;
+	bool ignoreWater;
+	float heightOffset;
 };
 
 struct TraceScreenRayResult {
@@ -107,6 +111,8 @@ struct GetPixelDirResult {
 struct SetCameraStateQuery {
 	CameraState state;
 	float transitionTime;
+	float transitionTimeFactor;
+	float transitionTimeExponent;
 };
 
 struct SetCameraStateResult {

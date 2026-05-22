@@ -40,6 +40,104 @@ struct Int3 {
 	int32_t z;
 };
 
+struct DefRef {
+	const char* name;
+	int32_t id;              // Use id >= 0 for numeric lookups, otherwise use name.
+};
+
+struct NumberOrBool {
+	float number;
+	bool boolean;
+	bool useBoolean;
+};
+
+struct UnitHealthValue {
+	float health;
+	float capture;
+	float paralyze;
+	float build;
+	bool useAmounts;
+};
+
+struct UnitCostOverrides {
+	float buildTime;
+	float metalCost;
+	float energyCost;
+};
+
+struct LuaFunctionRef {
+	void* handle;
+};
+
+struct NativeLuaValue {
+	const void* value;
+};
+
+struct NativeLuaArgs {
+	const void* values;
+	uint32_t count;
+};
+
+struct UnitTargetRef {
+	int32_t targetID;
+	Float3 pos;
+	bool isGroundTarget;
+};
+
+struct ProjectileTargetRef {
+	int32_t targetID;
+	int32_t targetType;
+	Float3 pos;
+	bool isGroundTarget;
+};
+
+struct NativeProjectileParams {
+	Float3 pos;
+	Float3 speed;
+	Float3 spread;
+	Float3 error;
+	Float3 end;
+	int32_t owner;
+	int32_t team;
+	float ttl;
+	float gravity;
+	float tracking;
+	float maxRange;
+	float startAlpha;
+	float endAlpha;
+	const char* model;
+	const char* cegTag;
+};
+
+struct NativeExplosionParams {
+	float damages;
+	int32_t weaponDefID;
+	int32_t ownerID;
+	int32_t hitUnitID;
+	int32_t hitFeatureID;
+	float craterAreaOfEffect;
+	float damageAreaOfEffect;
+	float edgeEffectiveness;
+	float explosionSpeed;
+	float gfxMod;
+	bool impactOnly;
+	bool ignoreOwner;
+	bool damageGround;
+	int32_t projectileID;
+};
+
+struct RgbColor {
+	float r;
+	float g;
+	float b;
+};
+
+struct AtmosphereParams { uint8_t _unused; };
+struct SunLightingParams { uint8_t _unused; };
+struct WaterParams { uint8_t _unused; };
+struct MapRenderingParams { uint8_t _unused; };
+struct SoundEffectParams { const char* preset; };
+
 // Collision volume data (used by units and features)
 struct CollisionVolumeData {
 	float scaleX;

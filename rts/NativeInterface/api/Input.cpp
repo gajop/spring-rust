@@ -15,6 +15,7 @@
 #include "Lua/LuaConfig.h"
 #include <string>
 #include <cstring>
+#include <vector>
 
 #ifndef SDL_BUTTON_LEFT
 #define SDL_BUTTON_LEFT 1
@@ -40,6 +41,11 @@ static const Error INVALID_ARG_ERROR = {
 	.message = "Invalid argument"
 };
 
+static const Error BUFFER_OVERFLOW_ERROR = {
+	.code = ERROR_BUFFER_OVERFLOW,
+	.message = "Buffer overflow"
+};
+
 static const char* CopyString(const char* str)
 {
 	if (str == nullptr)
@@ -53,6 +59,11 @@ static const char* CopyString(const char* str)
 	memcpy(out, str, len);
 	bufferPos += len;
 	return out;
+}
+
+static const char* CopyString(const std::string& str)
+{
+	return CopyString(str.c_str());
 }
 
 // Helper: check if ready
@@ -322,6 +333,7 @@ static void NativeIsAboveMiniMap(const IsAboveMiniMapQuery* query, IsAboveMiniMa
 static void NativeGetActiveCommand(const GetActiveCommandQuery* query, GetActiveCommandResult* result)
 {
 	bufferPos = 0;
+	(void)query;
 
 	if (guihandler == nullptr) {
 		result->error = &NOT_READY_ERROR;
@@ -329,14 +341,23 @@ static void NativeGetActiveCommand(const GetActiveCommandQuery* query, GetActive
 	}
 
 	result->error = nullptr;
+	result->commandID = 0;
+	result->commandType = 0;
+	result->commandName = nullptr;
 
-	if (query->useDefault) {
-		const int defCmd = guihandler->GetDefaultCommand(query->mouseX, query->mouseY);
-		result->commandIndex = defCmd + CMD_INDEX_OFFSET;
+	const int inCommand = guihandler->inCommand;
+	result->commandIndex = inCommand + CMD_INDEX_OFFSET;
+
+	const std::vector<SCommandDescription>& cmdDescs = guihandler->commands;
+	if (inCommand < 0 || inCommand >= static_cast<int>(cmdDescs.size()))
 		return;
-	}
 
-	result->commandIndex = guihandler->inCommand + CMD_INDEX_OFFSET;
+	const SCommandDescription& desc = cmdDescs[inCommand];
+	result->commandID = desc.id;
+	result->commandType = desc.type;
+	result->commandName = CopyString(desc.name);
+	if (result->commandName == nullptr)
+		result->error = &BUFFER_OVERFLOW_ERROR;
 }
 
 static void NativeGetActionHotKeys(const GetActionHotKeysQuery* query, GetActionHotKeysResult* result)

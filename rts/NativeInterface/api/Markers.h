@@ -18,13 +18,13 @@ struct AddWorldTextResult { const Error* error; bool success; };
 struct AddWorldUnitQuery { int32_t unitDefID; Float3 pos; int32_t teamID; int32_t facing; };
 struct AddWorldUnitResult { const Error* error; bool success; };
 
-struct MarkerAddPointQuery { Float3 pos; const char* text; bool localOnly; int32_t playerID; bool alwaysErase; };
+struct MarkerAddPointQuery { Float3 pos; const char* text; bool localOnly; int32_t playerID; };
 struct MarkerAddPointResult { const Error* error; bool success; };
 
 struct MarkerAddLineQuery { Float3 from; Float3 to; bool localOnly; int32_t playerID; };
 struct MarkerAddLineResult { const Error* error; bool success; };
 
-struct MarkerErasePositionQuery { Float3 pos; bool localOnly; int32_t playerID; bool alwaysErase; };
+struct MarkerErasePositionQuery { Float3 pos; float unused; bool localOnly; int32_t playerID; bool alwaysErase; };
 struct MarkerErasePositionResult { const Error* error; bool success; };
 
 struct MarkersApi {

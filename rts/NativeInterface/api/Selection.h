@@ -64,8 +64,8 @@ struct SetUnitGroupResult { const Error* error; bool success; };
 struct GetGroupUnitsCountQuery { int32_t groupID; };
 struct GetGroupUnitsCountResult { const Error* error; uint32_t count; };
 
-struct GetGroupUnitsCountsQuery { uint8_t _unused; };
-struct GetGroupUnitsCountsResult { const Error* error; uint32_t counts[10]; };
+struct GetGroupUnitsCountsQuery { int32_t groupID; };
+struct GetGroupUnitsCountsResult { const Error* error; SelectionCounts counts; };
 
 struct GetGroupUnitsSortedQuery { int32_t groupID; };
 struct GetGroupUnitsSortedResult { const Error* error; int32_t* units; uint32_t count; };

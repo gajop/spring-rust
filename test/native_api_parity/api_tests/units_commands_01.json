@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_unit_command_count",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitCommandCount"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsCommands.get_unit_command_count"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "count"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitCommandCount`",
+        "native_getter": "`UnitsCommands.get_unit_command_count`",
+        "fields": "`count`"
+      },
+      "rust": {
+        "check": "check_unit_commands_count",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitCommandCount",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "count"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_commands",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitCommands"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsCommands.get_unit_commands"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "count"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitCommands`",
+        "native_getter": "`UnitsCommands.get_unit_commands`",
+        "fields": "`count`"
+      },
+      "rust": {
+        "check": "check_unit_commands_table_count",
+        "set": "set_noop"
+      },
+      "params": {
+        "maxCommands": {
+          "type": "i32",
+          "fixed": 999
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitCommands",
+        "args": [
+          "fixture.unitID",
+          "value.maxCommands"
+        ],
+        "returns": [
+          {
+            "field": "count",
+            "transform": "table_count"
+          }
+        ]
+      }
+    },
+    {
+      "id": "get_command_queue",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetCommandQueue"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsCommands.get_command_queue"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "count"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetCommandQueue`",
+        "native_getter": "`UnitsCommands.get_command_queue`",
+        "fields": "`count`"
+      },
+      "rust": {
+        "check": "check_unit_commands_table_count",
+        "set": "set_noop"
+      },
+      "params": {
+        "maxCommands": {
+          "type": "i32",
+          "fixed": 999
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetCommandQueue",
+        "args": [
+          "fixture.unitID",
+          "value.maxCommands"
+        ],
+        "returns": [
+          {
+            "field": "count",
+            "transform": "table_count"
+          }
+        ]
+      }
+    },
+    {
+      "id": "get_unit_current_command",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitCurrentCommand"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsCommands.get_unit_current_command"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "hasCommand"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitCurrentCommand`",
+        "native_getter": "`UnitsCommands.get_unit_current_command`",
+        "fields": "`hasCommand`"
+      },
+      "rust": {
+        "check": "check_unit_current_command_presence",
+        "set": "set_noop"
+      },
+      "params": {
+        "cmdIndex": {
+          "type": "i32",
+          "fixed": 1
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitCurrentCommand",
+        "args": [
+          "fixture.unitID",
+          "value.cmdIndex"
+        ],
+        "returns": [
+          {
+            "field": "hasCommand",
+            "transform": "truthy"
+          }
+        ]
+      }
+    }
+  ]
+}

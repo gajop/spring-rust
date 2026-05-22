@@ -1,0 +1,425 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "is_unit_in_los",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsUnitInLos"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Los.is_unit_in_los"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "inLos"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsUnitInLos`",
+        "native_getter": "`Los.is_unit_in_los`",
+        "fields": "`inLos`"
+      },
+      "rust": {
+        "check": "check_los_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.IsUnitInLos",
+        "args": [
+          "fixture.unitID",
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "inLos"
+        ]
+      }
+    },
+    {
+      "id": "is_unit_in_radar",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsUnitInRadar"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Los.is_unit_in_radar"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "inRadar"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsUnitInRadar`",
+        "native_getter": "`Los.is_unit_in_radar`",
+        "fields": "`inRadar`"
+      },
+      "rust": {
+        "check": "check_los_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.IsUnitInRadar",
+        "args": [
+          "fixture.unitID",
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "inRadar"
+        ]
+      }
+    },
+    {
+      "id": "is_unit_in_air_los",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsUnitInAirLos"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Los.is_unit_in_air_los"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "inAirLos"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsUnitInAirLos`",
+        "native_getter": "`Los.is_unit_in_air_los`",
+        "fields": "`inAirLos`"
+      },
+      "rust": {
+        "check": "check_los_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.IsUnitInAirLos",
+        "args": [
+          "fixture.unitID",
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "inAirLos"
+        ]
+      }
+    },
+    {
+      "id": "is_unit_in_jammer",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsUnitInJammer"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Los.is_unit_in_jammer"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "inJammer"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsUnitInJammer`",
+        "native_getter": "`Los.is_unit_in_jammer`",
+        "fields": "`inJammer`"
+      },
+      "rust": {
+        "check": "check_los_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.IsUnitInJammer",
+        "args": [
+          "fixture.unitID",
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "inJammer"
+        ]
+      }
+    },
+    {
+      "id": "is_pos_in_los",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsPosInLos"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Los.is_pos_in_los"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "inLos"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsPosInLos`",
+        "native_getter": "`Los.is_pos_in_los`",
+        "fields": "`inLos`"
+      },
+      "rust": {
+        "check": "check_pos_los_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "x": {
+          "type": "f32",
+          "fixture": "groundX"
+        },
+        "y": {
+          "type": "f32",
+          "fixed": 96
+        },
+        "z": {
+          "type": "f32",
+          "fixture": "groundZ"
+        },
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.IsPosInLos",
+        "args": [
+          "value.x",
+          "value.y",
+          "value.z",
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "inLos"
+        ]
+      }
+    },
+    {
+      "id": "is_pos_in_radar",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsPosInRadar"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Los.is_pos_in_radar"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "inRadar"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsPosInRadar`",
+        "native_getter": "`Los.is_pos_in_radar`",
+        "fields": "`inRadar`"
+      },
+      "rust": {
+        "check": "check_pos_los_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "x": {
+          "type": "f32",
+          "fixture": "groundX"
+        },
+        "y": {
+          "type": "f32",
+          "fixed": 96
+        },
+        "z": {
+          "type": "f32",
+          "fixture": "groundZ"
+        },
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.IsPosInRadar",
+        "args": [
+          "value.x",
+          "value.y",
+          "value.z",
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "inRadar"
+        ]
+      }
+    },
+    {
+      "id": "is_pos_in_air_los",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsPosInAirLos"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Los.is_pos_in_air_los"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "inAirLos"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsPosInAirLos`",
+        "native_getter": "`Los.is_pos_in_air_los`",
+        "fields": "`inAirLos`"
+      },
+      "rust": {
+        "check": "check_pos_los_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "x": {
+          "type": "f32",
+          "fixture": "groundX"
+        },
+        "y": {
+          "type": "f32",
+          "fixed": 96
+        },
+        "z": {
+          "type": "f32",
+          "fixture": "groundZ"
+        },
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.IsPosInAirLos",
+        "args": [
+          "value.x",
+          "value.y",
+          "value.z",
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "inAirLos"
+        ]
+      }
+    }
+  ]
+}

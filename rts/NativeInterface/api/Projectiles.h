@@ -91,7 +91,7 @@ struct GetProjectileTypeResult { const Error* error; uint32_t type; };
 struct GetProjectileDefIDQuery { int32_t projectileID; };
 struct GetProjectileDefIDResult { const Error* error; int32_t defID; };
 
-struct GetProjectileDamagesQuery { int32_t projectileID; };
+struct GetProjectileDamagesQuery { int32_t projectileID; const char* tag; };
 struct GetProjectileDamagesResult { const Error* error; ProjectileDamages damages; };
 
 struct GetAllProjectilesQuery { bool synced; bool weapon; };

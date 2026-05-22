@@ -3,15 +3,23 @@
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Units/UnitDef.h"
+#include "Sim/Units/UnitDefHandler.h"
 #include "Sim/Units/BuildInfo.h"
+#include "Sim/Features/Feature.h"
 #include "Sim/Units/UnitTypes/Builder.h"
 #include "Sim/Units/UnitTypes/Factory.h"
+#include "Sim/Units/CommandAI/BuilderCAI.h"
+#include "Sim/Units/CommandAI/Command.h"
 #include "Sim/MoveTypes/MoveDefHandler.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Weapons/PlasmaRepulser.h"
 #include "System/float3.h"
+#include "System/SpringMath.h"
 #include "Rendering/Units/UnitDrawer.h"
+#include "Rendering/Models/3DModel.hpp"
+#include "Sim/Units/UnitToolTipMap.hpp"
+#include <cstring>
 
 namespace {
 
@@ -23,6 +31,7 @@ static thread_local Error dynamicError;
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit system not ready" };
 static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
+static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
 
 static bool IsReady() {
 	return (gs != nullptr);
@@ -44,7 +53,7 @@ static void NativeGetUnitTooltip(const GetUnitTooltipQuery* query, GetUnitToolti
 		return;
 	}
 
-	result->tooltip = unit->unitDef->humanName.c_str();
+	result->tooltip = unitToolTipMap.Get(unit->id).c_str();
 }
 
 static void NativeGetUnitDefID(const GetUnitDefIDQuery* query, GetUnitDefIDResult* result) {
@@ -430,6 +439,7 @@ static void NativeGetUnitSeismicSignature(const GetUnitSeismicSignatureQuery* qu
 static void NativeGetUnitSensorRadius(const GetUnitSensorRadiusQuery* query, GetUnitSensorRadiusResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	result->radius = {};
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -442,13 +452,14 @@ static void NativeGetUnitSensorRadius(const GetUnitSensorRadiusQuery* query, Get
 		return;
 	}
 
-	result->radius.los = unit->losRadius;
-	result->radius.airLos = unit->airLosRadius;
-	result->radius.radar = unit->radarRadius;
-	result->radius.sonar = unit->sonarRadius;
-	result->radius.seismic = unit->seismicRadius;
-	result->radius.radarJammer = unit->jammerRadius;
-	result->radius.sonarJammer = unit->sonarJamRadius;
+	const char* type = (query->type != nullptr) ? query->type : "";
+	if (strcmp(type, "los") == 0) result->radius.los = unit->losRadius;
+	else if (strcmp(type, "airLos") == 0) result->radius.airLos = unit->airLosRadius;
+	else if (strcmp(type, "radar") == 0) result->radius.radar = unit->radarRadius;
+	else if (strcmp(type, "sonar") == 0) result->radius.sonar = unit->sonarRadius;
+	else if (strcmp(type, "seismic") == 0) result->radius.seismic = unit->seismicRadius;
+	else if (strcmp(type, "radarJammer") == 0) result->radius.radarJammer = unit->jammerRadius;
+	else if (strcmp(type, "sonarJammer") == 0) result->radius.sonarJammer = unit->sonarJamRadius;
 }
 
 static void NativeGetUnitPosErrorParams(const GetUnitPosErrorParamsQuery* query, GetUnitPosErrorParamsResult* result) {
@@ -531,13 +542,7 @@ static void NativeGetUnitBuildeeRadius(const GetUnitBuildeeRadiusQuery* query, G
 		return;
 	}
 
-	// Return buildee's radius if it exists, otherwise unit's radius
-	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
-	if (builder != nullptr && builder->curBuild != nullptr) {
-		result->radius = builder->curBuild->radius;
-	} else {
-		result->radius = unit->radius;
-	}
+	result->radius = unit->buildeeRadius;
 }
 
 static void NativeGetUnitMass(const GetUnitMassQuery* query, GetUnitMassResult* result) {
@@ -574,9 +579,10 @@ static void NativeGetUnitPosition(const GetUnitPositionQuery* query, GetUnitPosi
 		return;
 	}
 
-	result->position.x = unit->pos.x;
-	result->position.y = unit->pos.y;
-	result->position.z = unit->pos.z;
+	const float3 pos = query->midPos ? float3(unit->midPos) : (query->aimPos ? float3(unit->aimPos) : unit->pos);
+	result->position.x = pos.x;
+	result->position.y = pos.y;
+	result->position.z = pos.z;
 }
 
 static void NativeGetUnitBasePosition(const GetUnitBasePositionQuery* query, GetUnitBasePositionResult* result) {
@@ -643,17 +649,11 @@ static void NativeGetUnitRotation(const GetUnitRotationQuery* query, GetUnitRota
 		return;
 	}
 
-	result->rotation.col1.x = unit->rightdir.x;
-	result->rotation.col1.y = unit->rightdir.y;
-	result->rotation.col1.z = unit->rightdir.z;
-
-	result->rotation.col2.x = unit->updir.x;
-	result->rotation.col2.y = unit->updir.y;
-	result->rotation.col2.z = unit->updir.z;
-
-	result->rotation.col3.x = unit->frontdir.x;
-	result->rotation.col3.y = unit->frontdir.y;
-	result->rotation.col3.z = unit->frontdir.z;
+	const CMatrix44f& matrix = unit->GetTransformMatrix(true);
+	const float3 angles = matrix.GetEulerAnglesLftHand();
+	result->rotation.pitch = angles[CMatrix44f::ANGLE_P];
+	result->rotation.yaw = angles[CMatrix44f::ANGLE_Y];
+	result->rotation.roll = angles[CMatrix44f::ANGLE_R];
 }
 
 static void NativeGetUnitDirection(const GetUnitDirectionQuery* query, GetUnitDirectionResult* result) {
@@ -692,7 +692,8 @@ static void NativeGetUnitHeading(const GetUnitHeadingQuery* query, GetUnitHeadin
 		return;
 	}
 
-	result->heading = unit->heading;
+	const float heading = unit->heading;
+	result->heading = query->convertToRadians ? ClampRad(math::PI / 32768.0f * heading) : heading;
 }
 
 static void NativeGetUnitVelocity(const GetUnitVelocityQuery* query, GetUnitVelocityResult* result) {
@@ -759,7 +760,10 @@ static void NativeGetUnitIsBuilding(const GetUnitIsBuildingQuery* query, GetUnit
 static void NativeGetUnitWorkerTask(const GetUnitWorkerTaskQuery* query, GetUnitWorkerTaskResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->task = "";
+	result->task.cmdID = 0;
+	result->task.targetID = 0;
+	result->task.hasTask = false;
+	result->task.hasTarget = false;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -772,18 +776,48 @@ static void NativeGetUnitWorkerTask(const GetUnitWorkerTaskQuery* query, GetUnit
 		return;
 	}
 
-	// Determine task based on current state
 	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
-	if (builder != nullptr && builder->curBuild != nullptr) {
-		result->task = "building";
-	} else if (builder != nullptr && builder->curReclaim != nullptr) {
-		result->task = "reclaiming";
-	} else if (builder != nullptr && builder->curResurrect != nullptr) {
-		result->task = "resurrecting";
-	} else if (builder != nullptr && builder->curCapture != nullptr) {
-		result->task = "capturing";
-	} else {
-		result->task = "idle";
+	if (builder != nullptr) {
+		if (builder->curBuild != nullptr) {
+			result->task.cmdID = builder->curBuild->beingBuilt ? -builder->curBuild->unitDef->id : CMD_REPAIR;
+			result->task.targetID = builder->curBuild->id;
+			result->task.hasTask = true;
+			result->task.hasTarget = true;
+		} else if (builder->curCapture != nullptr) {
+			result->task.cmdID = CMD_CAPTURE;
+			result->task.targetID = builder->curCapture->id;
+			result->task.hasTask = true;
+			result->task.hasTarget = true;
+		} else if (builder->curResurrect != nullptr) {
+			result->task.cmdID = CMD_RESURRECT;
+			result->task.targetID = builder->curResurrect->id + unitHandler.MaxUnits();
+			result->task.hasTask = true;
+			result->task.hasTarget = true;
+		} else if (builder->curReclaim != nullptr) {
+			result->task.cmdID = CMD_RECLAIM;
+			if (builder->reclaimingUnit) {
+				const CUnit* reclaimee = dynamic_cast<const CUnit*>(builder->curReclaim);
+				result->task.targetID = (reclaimee != nullptr) ? reclaimee->id : 0;
+			} else {
+				const CFeature* reclaimee = dynamic_cast<const CFeature*>(builder->curReclaim);
+				result->task.targetID = (reclaimee != nullptr) ? reclaimee->id + unitHandler.MaxUnits() : 0;
+			}
+			result->task.hasTask = true;
+			result->task.hasTarget = true;
+		} else if (builder->helpTerraform || builder->terraforming) {
+			result->task.cmdID = CMD_RESTORE;
+			result->task.hasTask = true;
+			result->task.hasTarget = false;
+		}
+		return;
+	}
+
+	const CFactory* factory = dynamic_cast<const CFactory*>(unit);
+	if (factory != nullptr && factory->curBuild != nullptr) {
+		result->task.cmdID = factory->curBuild->beingBuilt ? -factory->curBuild->unitDef->id : CMD_REPAIR;
+		result->task.targetID = factory->curBuild->id;
+		result->task.hasTask = true;
+		result->task.hasTarget = true;
 	}
 }
 
@@ -803,7 +837,26 @@ static void NativeGetUnitEffectiveBuildRange(const GetUnitEffectiveBuildRangeQue
 		return;
 	}
 
-	result->range = unit->unitDef->buildDistance;
+	const CBuilderCAI* builderCAI = dynamic_cast<const CBuilderCAI*>(unit->commandAI);
+	if (builderCAI == nullptr) {
+		result->range = unit->unitDef->buildDistance;
+		return;
+	}
+
+	if (query->buildeeDefID <= 0) {
+		result->range = builderCAI->GetBuildRange(0.0f);
+		return;
+	}
+
+	const UnitDef* unitDef = unitDefHandler->GetUnitDefByID(query->buildeeDefID);
+	if (unitDef == nullptr) {
+		result->range = builderCAI->GetBuildRange(0.0f);
+		return;
+	}
+
+	const S3DModel* model = unitDef->LoadModel();
+	const float radius = (model != nullptr) ? std::max(0.0f, model->radius) : 0.0f;
+	result->range = builderCAI->GetBuildRange(radius);
 }
 
 static void NativeGetUnitCurrentBuildPower(const GetUnitCurrentBuildPowerQuery* query, GetUnitCurrentBuildPowerResult* result) {
@@ -828,6 +881,8 @@ static void NativeGetUnitCurrentBuildPower(const GetUnitCurrentBuildPowerQuery* 
 static void NativeGetUnitBuildParams(const GetUnitBuildParamsQuery* query, GetUnitBuildParamsResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	result->value = {};
+	result->hasValue = false;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -835,19 +890,31 @@ static void NativeGetUnitBuildParams(const GetUnitBuildParamsQuery* query, GetUn
 	}
 
 	const CUnit* unit = unitHandler.GetUnit(query->unitID);
-	if (unit == nullptr || unit->unitDef == nullptr) {
+	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
 	}
 
-	const UnitDef* ud = unit->unitDef;
-	result->params.buildDistance = ud->buildDistance;
-	result->params.buildSpeed = ud->buildSpeed;
-	result->params.repairSpeed = ud->repairSpeed;
-	result->params.reclaimSpeed = ud->reclaimSpeed;
-	result->params.resurrectSpeed = ud->resurrectSpeed;
-	result->params.captureSpeed = ud->captureSpeed;
-	result->params.terraformSpeed = ud->terraformSpeed;
+	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
+	if (builder == nullptr || query->paramName == nullptr) {
+		return;
+	}
+
+	switch (hashString(query->paramName)) {
+		case hashString("buildRange"):
+		case hashString("buildDistance"):
+			result->value.number = builder->buildDistance;
+			result->value.useBoolean = false;
+			result->hasValue = true;
+			break;
+		case hashString("buildRange3D"):
+			result->value.boolean = builder->range3D;
+			result->value.useBoolean = true;
+			result->hasValue = true;
+			break;
+		default:
+			break;
+	}
 }
 
 static void NativeGetUnitInBuildStance(const GetUnitInBuildStanceQuery* query, GetUnitInBuildStanceResult* result) {
@@ -1147,6 +1214,10 @@ static void NativeGetUnitLastAttackedPiece(const GetUnitLastAttackedPieceQuery* 
 static void NativeGetUnitLosState(const GetUnitLosStateQuery* query, GetUnitLosStateResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	result->losState.rawMask = 0;
+	result->losState.los = false;
+	result->losState.radar = false;
+	result->losState.typed = false;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -1159,18 +1230,19 @@ static void NativeGetUnitLosState(const GetUnitLosStateQuery* query, GetUnitLosS
 		return;
 	}
 
-	// Get LOS state for allyteam 0 as default
-	int allyTeam = 0;
-	if (allyTeam < static_cast<int>(unit->losStatus.size())) {
-		const uint8_t losStatus = unit->losStatus[allyTeam];
-		result->losState.los = (losStatus & LOS_INLOS) != 0;
-		result->losState.prevLos = (losStatus & LOS_PREVLOS) != 0;
-		result->losState.radar = (losStatus & LOS_INRADAR) != 0;
-		result->losState.sonar = false;
-		result->losState.seismic = false;
-		result->losState.jammer = false;
-		result->losState.typed = false;
+	const int allyTeam = query->allyTeamID;
+	if (!teamHandler.IsValidAllyTeam(allyTeam) || allyTeam >= static_cast<int>(unit->losStatus.size())) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
 	}
+
+	const uint8_t losStatus = unit->losStatus[allyTeam] & LOS_ALL_BITS;
+	constexpr uint8_t prevMask = LOS_PREVLOS | LOS_CONTRADAR;
+
+	result->losState.rawMask = losStatus;
+	result->losState.los = (losStatus & LOS_INLOS) != 0;
+	result->losState.radar = (losStatus & LOS_INRADAR) != 0;
+	result->losState.typed = result->losState.los || ((losStatus & prevMask) == prevMask);
 }
 
 static void NativeGetUnitCollisionVolumeData(const GetUnitCollisionVolumeDataQuery* query, GetUnitCollisionVolumeDataResult* result) {
@@ -1246,19 +1318,19 @@ static void NativeGetUnitBlocking(const GetUnitBlockingQuery* query, GetUnitBloc
 		return;
 	}
 
-	result->blockingState.isBlocking = unit->immobile;  // blocking field removed, use immobile
-	result->blockingState.isSolidObjectCollidable = !unit->collisionVolume.IgnoreHits();
-	result->blockingState.isProjectileCollidable = !unit->collisionVolume.IgnoreHits();
-	result->blockingState.isRaySegmentCollidable = !unit->collisionVolume.IgnoreHits();
-	result->blockingState.crushable = unit->crushResistance > 0.0f;
+	result->blockingState.isBlocking = unit->HasPhysicalStateBit(CSolidObject::PSTATE_BIT_BLOCKING);
+	result->blockingState.isSolidObjectCollidable = unit->HasCollidableStateBit(CSolidObject::CSTATE_BIT_SOLIDOBJECTS);
+	result->blockingState.isProjectileCollidable = unit->HasCollidableStateBit(CSolidObject::CSTATE_BIT_PROJECTILES);
+	result->blockingState.isRaySegmentCollidable = unit->HasCollidableStateBit(CSolidObject::CSTATE_BIT_QUADMAPRAYS);
+	result->blockingState.crushable = unit->crushable;
 	result->blockingState.blockEnemyPushing = unit->blockEnemyPushing;
-	result->blockingState.blockHeightChanges = false;  // levelGround no longer available
+	result->blockingState.blockHeightChanges = unit->blockHeightChanges;
 }
 
 static void NativeGetUnitHarvestStorage(const GetUnitHarvestStorageQuery* query, GetUnitHarvestStorageResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->harvestStorage = 0.0f;
+	std::memset(&result->storage, 0, sizeof(result->storage));
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -1271,7 +1343,10 @@ static void NativeGetUnitHarvestStorage(const GetUnitHarvestStorageQuery* query,
 		return;
 	}
 
-	result->harvestStorage = unit->harvested.metal;
+	result->storage.storedMetal = unit->harvested.metal;
+	result->storage.maxStoredMetal = unit->harvestStorage.metal;
+	result->storage.storedEnergy = unit->harvested.energy;
+	result->storage.maxStoredEnergy = unit->harvestStorage.energy;
 }
 
 static void NativeClearUnitsPreviousDrawFlag(const ClearUnitsPreviousDrawFlagQuery* query, ClearUnitsPreviousDrawFlagResult* result) {

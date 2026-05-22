@@ -77,8 +77,6 @@ struct SetActiveCommandQuery {
 	bool ctrl;
 	bool meta;
 	bool shift;
-	const char* actionName;     // optional: if set, uses action instead of cmdIndex
-	const char* actionExtra;    // optional: keyset string
 };
 struct SetActiveCommandResult { const Error* error; bool success; };
 
@@ -117,7 +115,7 @@ struct SetWindowMinimizedResult { const Error* error; bool minimized; };
 struct SetWindowMaximizedQuery { uint8_t _unused; };
 struct SetWindowMaximizedResult { const Error* error; bool maximized; };
 
-struct SetWMCaptionQuery { const char* title; };
+struct SetWMCaptionQuery { const char* title; const char* titleShort; };
 struct SetWMCaptionResult { const Error* error; bool success; };
 
 struct SetWMIconQuery { const char* iconFileName; bool forceResolution; };
@@ -129,7 +127,7 @@ struct SetVideoCapturingModeResult { const Error* error; bool success; };
 struct RunDollyCameraQuery { float runtimeMs; };
 struct RunDollyCameraResult { const Error* error; bool success; };
 
-struct PauseDollyCameraQuery { float percent; bool hasPercent; };
+struct PauseDollyCameraQuery { float percent; };
 struct PauseDollyCameraResult { const Error* error; bool success; };
 
 struct ResumeDollyCameraQuery { uint8_t _unused; };
@@ -194,16 +192,16 @@ struct SetDrawModelsDeferredQuery {
 };
 struct SetDrawModelsDeferredResult { const Error* error; bool success; bool unitsDeferred; bool featuresDeferred; bool unitsForward; bool featuresForward; };
 
-struct SetAtmosphereQuery { uint8_t _unused; };
+struct SetAtmosphereQuery { AtmosphereParams params; };
 struct SetAtmosphereResult { const Error* error; bool success; };
 
 struct SetSunDirectionQuery { Float3 dir; float intensity; };
 struct SetSunDirectionResult { const Error* error; bool success; };
 
-struct SetSunLightingQuery { uint8_t _unused; };
+struct SetSunLightingQuery { SunLightingParams params; };
 struct SetSunLightingResult { const Error* error; bool success; };
 
-struct SetWaterParamsQuery { uint8_t _unused; };
+struct SetWaterParamsQuery { WaterParams params; };
 struct SetWaterParamsResult { const Error* error; bool success; };
 
 struct SetMapShaderQuery { int32_t standardShaderID; int32_t deferredShaderID; };
@@ -215,16 +213,16 @@ struct SetMapShadingTextureResult { const Error* error; bool success; };
 struct SetSkyBoxTextureQuery { const char* texName; };
 struct SetSkyBoxTextureResult { const Error* error; bool success; };
 
-struct SetMapRenderingParamsQuery { uint8_t _unused; };
+struct SetMapRenderingParamsQuery { MapRenderingParams params; };
 struct SetMapRenderingParamsResult { const Error* error; bool success; };
 
-struct SetLosViewColorsQuery { uint8_t _unused; };
+struct SetLosViewColorsQuery { RgbColor always; RgbColor los; RgbColor radar; RgbColor jam; RgbColor radar2; };
 struct SetLosViewColorsResult { const Error* error; bool success; };
 
 struct SetDrawSelectionInfoQuery { bool draw; };
 struct SetDrawSelectionInfoResult { const Error* error; bool success; };
 
-struct SetCustomCommandDrawDataQuery { uint8_t _unused; };
+struct SetCustomCommandDrawDataQuery { int32_t cmdID; DefRef cmdReference; Float4 color; bool showArea; };
 struct SetCustomCommandDrawDataResult { const Error* error; bool success; };
 
 struct SetLastMessagePositionQuery { Float3 pos; };
@@ -251,13 +249,13 @@ struct SetAutoShowMetalResult { const Error* error; bool success; };
 struct SetUnitIconDrawQuery { int32_t unitID; bool drawIcon; };
 struct SetUnitIconDrawResult { const Error* error; bool success; };
 
-struct SetUnitIconQuery { int32_t unitID; bool drawIcon; };
+struct SetUnitIconQuery { int32_t unitID; const char* iconName; };
 struct SetUnitIconResult { const Error* error; bool success; };
 
 struct SetUnitDefIconQuery { int32_t unitDefID; const char* iconName; };
 struct SetUnitDefIconResult { const Error* error; bool success; };
 
-struct SetUnitDefImageQuery { int32_t unitDefID; const char* image; bool hasImage; };
+struct SetUnitDefImageQuery { int32_t unitDefID; const char* image; };
 struct SetUnitDefImageResult { const Error* error; bool success; };
 
 struct SetCustomPaletteColorQuery { int32_t index; float r; float g; float b; };
@@ -281,7 +279,7 @@ struct SetFeatureEngineDrawMaskResult { const Error* error; bool success; };
 struct SetFeatureAlwaysUpdateMatrixQuery { int32_t featureID; bool enable; };
 struct SetFeatureAlwaysUpdateMatrixResult { const Error* error; bool success; };
 
-struct SetFeatureFadeQuery { int32_t featureID; int32_t time; float alpha; };
+struct SetFeatureFadeQuery { int32_t featureID; bool allow; };
 struct SetFeatureFadeResult { const Error* error; bool success; };
 
 struct SetNanoProjectileParamsQuery { float r; float v; float a; float randR; float randV; float randA; };
@@ -296,10 +294,10 @@ struct PreloadUnitDefModelResult { const Error* error; bool success; };
 struct SelectUnitMapQuery { const int32_t* unitIDs; uint32_t count; bool append; };
 struct SelectUnitMapResult { const Error* error; bool success; };
 
-struct DeselectUnitMapQuery { const int32_t* unitIDs; uint32_t count; bool clearFirst; };
+struct DeselectUnitMapQuery { const int32_t* unitIDs; uint32_t count; };
 struct DeselectUnitMapResult { const Error* error; bool success; };
 
-struct DrawUnitCommandsQuery { bool enable; };
+struct DrawUnitCommandsQuery { const int32_t* unitIDs; uint32_t count; bool tableOrArray; int32_t queueDrawDepth; };
 struct DrawUnitCommandsResult { const Error* error; bool success; };
 
 struct UnsyncedCtrlApi {

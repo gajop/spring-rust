@@ -9,6 +9,7 @@
 #include "Sim/Misc/GlobalSynced.h"
 #include "Game/SelectedUnitsHandler.h"
 #include "Game/GlobalUnsynced.h"
+#include "Lua/LuaConfig.h"
 #include <cstring>
 #include <algorithm>
 #include <vector>
@@ -16,7 +17,7 @@
 namespace {
 
 // Scratch buffer
-static thread_local char scratchBuffer[1024];
+static thread_local char scratchBuffer[64 * 1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 
@@ -143,14 +144,14 @@ static bool BuildCommand(const CommandFFI& ffi, Command& outCmd)
 	return true;
 }
 
-static bool BuildCommandSimple(int32_t cmdID, uint32_t options, const float* params, uint32_t paramCount, Command& outCmd)
+static bool BuildCommandSimple(int32_t cmdID, uint32_t options, const float* params, uint32_t paramCount, int32_t timeout, Command& outCmd)
 {
 	CommandFFI ffi{};
 	ffi.cmdID = cmdID;
 	ffi.options = static_cast<uint8_t>(options);
 	ffi.tag = 0;
 	ffi.aiCommandID = 0;
-	ffi.timeOut = 0.0f;
+	ffi.timeOut = static_cast<float>(timeout);
 	ffi.params = const_cast<float*>(params);
 	ffi.paramCount = paramCount;
 	return BuildCommand(ffi, outCmd);
@@ -248,9 +249,17 @@ static void NativeGetUnitCurrentCommand(const GetUnitCurrentCommandQuery* query,
 		return;
 	}
 
-	const CCommandQueue& queue = unit->commandAI->commandQue;
-	if (!queue.empty()) {
-		if (!ConvertCommand(queue.front(), result->command)) {
+	const CFactoryCAI* factoryCAI = dynamic_cast<const CFactoryCAI*>(unit->commandAI);
+	const CCommandQueue& queue = (factoryCAI == nullptr) ? unit->commandAI->commandQue : factoryCAI->newUnitCommands;
+	int cmdIndex = query->cmdIndex;
+	if (cmdIndex > 0) {
+		cmdIndex -= 1;
+	} else {
+		cmdIndex = static_cast<int>(queue.size()) + cmdIndex;
+	}
+
+	if (cmdIndex >= 0 && cmdIndex < static_cast<int>(queue.size())) {
+		if (!ConvertCommand(queue[cmdIndex], result->command)) {
 			result->error = &BUFFER_OVERFLOW_ERROR;
 			return;
 		}
@@ -654,6 +663,7 @@ static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmd
 {
 	bufferPos = 0;
 	result->error = nullptr;
+	result->cmdIndex = 0;
 	result->found = false;
 
 	if (!IsReady()) {
@@ -674,87 +684,10 @@ static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmd
 
 	const auto& possibleCmds = unit->commandAI->GetPossibleCommands();
 
-	// Prefer cmdIndex if supplied (1-based in Lua)
-	if (query->cmdIndex > 0 && static_cast<size_t>(query->cmdIndex) <= possibleCmds.size()) {
-		const SCommandDescription* desc = possibleCmds[query->cmdIndex - 1];
-
-		CommandDescription& outDesc = result->cmdDesc;
-
-		outDesc.cmdID = desc->id;
-		outDesc.action = 0; // action string not mapped to int currently
-		outDesc.type = CmdTypeToString(desc->type);
-		outDesc.name = CopyString(desc->name);
-		outDesc.tooltip = CopyString(desc->tooltip);
-		outDesc.texture = CopyString(desc->iconname);
-		outDesc.cursor = CopyString(desc->mouseicon);
-		outDesc.queueing = desc->queueing;
-		outDesc.hidden = desc->hidden;
-		outDesc.disabled = desc->disabled;
-		outDesc.showUnique = desc->showUnique;
-		outDesc.onlyTexture = desc->onlyTexture;
-
-		if (!desc->params.empty()) {
-			outDesc.params = AllocateArray<const char*>(desc->params.size());
-			if (outDesc.params == nullptr) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				return;
-			}
-			for (size_t j = 0; j < desc->params.size(); ++j) {
-				outDesc.params[j] = CopyString(desc->params[j]);
-				if (outDesc.params[j] == nullptr) {
-					result->error = &BUFFER_OVERFLOW_ERROR;
-					return;
-				}
-			}
-			outDesc.paramCount = static_cast<uint32_t>(desc->params.size());
-		}
-
-		result->found = true;
-		return;
-	}
-
-	for (const SCommandDescription* desc : possibleCmds) {
+	for (int i = 0; i < static_cast<int>(possibleCmds.size()); ++i) {
+		const SCommandDescription* desc = possibleCmds[i];
 		if (desc->id == query->cmdID) {
-			CommandDescription& outDesc = result->cmdDesc;
-
-			outDesc.cmdID = desc->id;
-			outDesc.action = 0; // action string not mapped to int currently
-			outDesc.type = CmdTypeToString(desc->type);
-			outDesc.name = CopyString(desc->name);
-			outDesc.tooltip = CopyString(desc->tooltip);
-			outDesc.texture = CopyString(desc->iconname);
-			outDesc.cursor = CopyString(desc->mouseicon);
-			outDesc.queueing = desc->queueing;
-			outDesc.hidden = desc->hidden;
-			outDesc.disabled = desc->disabled;
-			outDesc.showUnique = desc->showUnique;
-			outDesc.onlyTexture = desc->onlyTexture;
-
-			if (!desc->params.empty()) {
-				outDesc.params = AllocateArray<const char*>(desc->params.size());
-				if (outDesc.params == nullptr) {
-					result->error = &BUFFER_OVERFLOW_ERROR;
-					return;
-				}
-				for (size_t j = 0; j < desc->params.size(); ++j) {
-					outDesc.params[j] = CopyString(desc->params[j]);
-					if (outDesc.params[j] == nullptr) {
-						result->error = &BUFFER_OVERFLOW_ERROR;
-						return;
-					}
-				}
-				outDesc.paramCount = desc->params.size();
-			} else {
-				outDesc.params = nullptr;
-				outDesc.paramCount = 0;
-			}
-
-			if (outDesc.type == nullptr || outDesc.name == nullptr || outDesc.tooltip == nullptr ||
-			    outDesc.texture == nullptr || outDesc.cursor == nullptr) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				return;
-			}
-
+			result->cmdIndex = i + CMD_INDEX_OFFSET;
 			result->found = true;
 			return;
 		}
@@ -773,7 +706,7 @@ static void NativeGiveOrder(const GiveOrderQuery* query, GiveOrderResult* result
 	}
 
 	Command cmd;
-	if (!BuildCommandSimple(query->cmdID, query->options, query->params, query->paramCount, cmd)) {
+	if (!BuildCommandSimple(query->cmdID, query->options, query->params, query->paramCount, query->timeout, cmd)) {
 		result->error = &BUFFER_OVERFLOW_ERROR;
 		return;
 	}
@@ -794,7 +727,7 @@ static void NativeGiveOrderToUnitMap(const GiveOrderToUnitMapQuery* query, GiveO
 	}
 
 	Command cmd;
-	if (!BuildCommandSimple(query->cmdID, query->options, query->params, query->paramCount, cmd)) {
+	if (!BuildCommandSimple(query->cmdID, query->options, query->params, query->paramCount, query->timeout, cmd)) {
 		result->error = &BUFFER_OVERFLOW_ERROR;
 		return;
 	}
@@ -849,7 +782,7 @@ static void NativeGiveOrderArrayToUnitMap(const GiveOrderArrayToUnitMapQuery* qu
 	}
 
 	if (!unitIDs.empty() && !commands.empty()) {
-		selectedUnitsHandler.SendCommandsToUnits(unitIDs, commands, query->pairwise);
+		selectedUnitsHandler.SendCommandsToUnits(unitIDs, commands, false);
 		result->unitsOrdered = static_cast<int32_t>(unitIDs.size());
 	}
 }

@@ -77,6 +77,7 @@ struct GetConfigParamsResult {
 struct SetConfigIntQuery {
 	const char* key;
 	int32_t value;
+	bool useOverlay;
 };
 
 struct SetConfigIntResult {
@@ -87,6 +88,7 @@ struct SetConfigIntResult {
 struct SetConfigFloatQuery {
 	const char* key;
 	float value;
+	bool useOverlay;
 };
 
 struct SetConfigFloatResult {
@@ -97,6 +99,7 @@ struct SetConfigFloatResult {
 struct SetConfigStringQuery {
 	const char* key;
 	const char* value;
+	bool useOverlay;
 };
 
 struct SetConfigStringResult {

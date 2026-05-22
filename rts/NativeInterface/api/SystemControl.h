@@ -11,7 +11,8 @@ extern "C" {
 
 struct CallAsTeamQuery {
 	int32_t teamID;
-	int32_t readTeam; // optional read team, -1 to ignore
+	LuaFunctionRef func;
+	NativeLuaArgs args;
 };
 struct CallAsTeamResult { const Error* error; bool success; };
 
@@ -45,7 +46,7 @@ struct StartResult { const Error* error; bool success; };
 struct YieldQuery { uint8_t _unused; };
 struct YieldResult { const Error* error; bool keepYielding; };
 
-struct RequestStartPositionQuery { float pos[3]; bool ready; bool hasReady; };
+struct RequestStartPositionQuery { Float3 pos; bool ready; };
 struct RequestStartPositionResult { const Error* error; bool success; };
 
 struct PingQuery { uint32_t tag; };

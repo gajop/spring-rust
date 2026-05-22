@@ -78,8 +78,11 @@ static bool CopyString(const std::string& src, const char** outPtr)
 	return true;
 }
 
-static void NativeCallAsTeam(const CallAsTeamQuery*, CallAsTeamResult* result)
+static void NativeCallAsTeam(const CallAsTeamQuery* query, CallAsTeamResult* result)
 {
+	(void)query->teamID;
+	(void)query->func;
+	(void)query->args;
 	result->error = nullptr;
 	result->success = true;
 }
@@ -221,8 +224,8 @@ static void NativeRequestStartPosition(const RequestStartPositionQuery* query, R
 	result->error = nullptr;
 	result->success = false;
 
-	const float3 pickPos(query->pos[0], query->pos[1], query->pos[2]);
-	const bool isReady = query->hasReady ? query->ready : playerHandler.Player(gu->myPlayerNum)->IsReadyToStart();
+	const float3 pickPos(query->pos.x, query->pos.y, query->pos.z);
+	const bool isReady = query->ready;
 
 	clientNet->Send(CBaseNetProtocol::Get().SendStartPos(
 		gu->myPlayerNum,

@@ -36,13 +36,9 @@ static void NativeEcho(const EchoQuery* query, EchoResult* result) {
 	}
 
 	std::string composed = query->message;
-	if (query->message2 != nullptr) {
+	if (query->rest != nullptr) {
 		composed += " ";
-		composed += query->message2;
-	}
-	if (query->message3 != nullptr) {
-		composed += " ";
-		composed += query->message3;
+		composed += query->rest;
 	}
 
 	LOG("%s", composed.c_str());
@@ -229,7 +225,7 @@ static void NativeSendPrivateChat(const SendPrivateChatQuery* query, SendPrivate
 static void NativeSendCommands(const SendCommandsQuery* query, SendCommandsResult* result) {
 	bufferPos = 0;
 
-	if (query->commands == nullptr) {
+	if (query->command == nullptr) {
 		result->error = nullptr;
 		result->success = false;
 		return;
@@ -240,7 +236,11 @@ static void NativeSendCommands(const SendCommandsQuery* query, SendCommandsResul
 		return;
 	}
 
-	std::string command = query->commands;
+	std::string command = query->command;
+	if (query->rest != nullptr && query->rest[0] != '\0') {
+		command += "\n";
+		command += query->rest;
+	}
 	if (!command.empty() && command[0] != '@')
 		command = "@@" + command;
 

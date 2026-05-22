@@ -37,11 +37,19 @@ static void NativePlaySoundFile(const PlaySoundFileQuery* query, PlaySoundFileRe
 	}
 
 	IAudioChannel* channel = Channels::General;
+	switch (query->channel) {
+		case 1: channel = Channels::Battle; break;
+		case 2: channel = Channels::UnitReply; break;
+		case 3: channel = Channels::UserInterface; break;
+		default: break;
+	}
 
-	if (query->positional) {
-		const float3 pos(query->pos.x, query->pos.y, query->pos.z);
-		const float3 velocity(query->velocity.x, query->velocity.y, query->velocity.z);
-		channel->PlaySample(soundID, pos, velocity, query->volume);
+	const bool hasPos = (query->pos.x != 0.0f) || (query->pos.y != 0.0f) || (query->pos.z != 0.0f);
+	const bool hasVelocity = (query->velocity.x != 0.0f) || (query->velocity.y != 0.0f) || (query->velocity.z != 0.0f);
+	if (hasPos && hasVelocity) {
+		channel->PlaySample(soundID, float3(query->pos.x, query->pos.y, query->pos.z), float3(query->velocity.x, query->velocity.y, query->velocity.z), query->volume);
+	} else if (hasPos) {
+		channel->PlaySample(soundID, float3(query->pos.x, query->pos.y, query->pos.z), query->volume);
 	} else {
 		channel->PlaySample(soundID, query->volume);
 	}
@@ -72,7 +80,7 @@ static void NativePlaySoundStream(const PlaySoundStreamQuery* query, PlaySoundSt
 		return;
 	}
 
-	Channels::BGMusic->StreamPlay(query->oggFile, query->volume, false);
+	Channels::BGMusic->StreamPlay(query->oggFile, query->volume, query->enqueue);
 
 	result->error = nullptr;
 	result->success = true;
@@ -139,8 +147,9 @@ static void NativeGetSoundEffectParams(const GetSoundEffectParamsQuery* /*query*
 	result->success = false;
 }
 
-static void NativeSetSoundEffectParams(const SetSoundEffectParamsQuery* /*query*/, SetSoundEffectParamsResult* result) {
+static void NativeSetSoundEffectParams(const SetSoundEffectParamsQuery* query, SetSoundEffectParamsResult* result) {
 	bufferPos = 0;
+	(void)query->params;
 	result->error = &NOT_AVAILABLE_ERROR;
 	result->success = false;
 }

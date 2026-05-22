@@ -8,6 +8,7 @@
 #include "Sim/Misc/GlobalSynced.h"
 #include "System/float3.h"
 #include "Rendering/Features/FeatureDrawer.h"
+#include "Game/Game.h"
 
 namespace {
 
@@ -456,9 +457,9 @@ static void NativeGetFeatureRotation(const GetFeatureRotationQuery* query, GetFe
 {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->rotation.col1 = {1.0f, 0.0f, 0.0f};
-	result->rotation.col2 = {0.0f, 1.0f, 0.0f};
-	result->rotation.col3 = {0.0f, 0.0f, 1.0f};
+	result->rotation.pitch = 0.0f;
+	result->rotation.yaw = 0.0f;
+	result->rotation.roll = 0.0f;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -471,7 +472,11 @@ static void NativeGetFeatureRotation(const GetFeatureRotationQuery* query, GetFe
 		return;
 	}
 
-	// Return identity for now
+	const CMatrix44f& matrix = feature->GetTransformMatrix(true);
+	const float3 angles = matrix.GetEulerAnglesLftHand();
+	result->rotation.pitch = angles[CMatrix44f::ANGLE_P];
+	result->rotation.yaw = angles[CMatrix44f::ANGLE_Y];
+	result->rotation.roll = angles[CMatrix44f::ANGLE_R];
 }
 
 // Resources
@@ -491,9 +496,12 @@ static void NativeGetFeatureResources(const GetFeatureResourcesQuery* query, Get
 		return;
 	}
 
-	result->resources.metal = feature->def->cost.metal * feature->reclaimLeft;
-	result->resources.energy = feature->def->cost.energy * feature->reclaimLeft;
-	result->resources.reclaimTime = feature->def->reclaimTime;
+	result->resources.metal = feature->resources.metal;
+	result->resources.defMetal = feature->defResources.metal;
+	result->resources.energy = feature->resources.energy;
+	result->resources.defEnergy = feature->defResources.energy;
+	result->resources.reclaimLeft = feature->reclaimLeft;
+	result->resources.reclaimTime = feature->reclaimTime;
 }
 
 // Blocking
@@ -513,12 +521,13 @@ static void NativeGetFeatureBlocking(const GetFeatureBlockingQuery* query, GetFe
 		return;
 	}
 
-	result->blockingState.isBlocking = feature->IsBlocking();
-	result->blockingState.isSolidObjectCollidable = !feature->collisionVolume.IgnoreHits();
-	result->blockingState.isProjectileCollidable = !feature->collisionVolume.IgnoreHits();
-	result->blockingState.isRaySegmentCollidable = !feature->collisionVolume.IgnoreHits();
-	result->blockingState.crushable = false;
-	result->blockingState.blockHeightChanges = feature->def->floating;
+	result->blockingState.isBlocking = feature->HasPhysicalStateBit(CSolidObject::PSTATE_BIT_BLOCKING);
+	result->blockingState.isSolidObjectCollidable = feature->HasCollidableStateBit(CSolidObject::CSTATE_BIT_SOLIDOBJECTS);
+	result->blockingState.isProjectileCollidable = feature->HasCollidableStateBit(CSolidObject::CSTATE_BIT_PROJECTILES);
+	result->blockingState.isRaySegmentCollidable = feature->HasCollidableStateBit(CSolidObject::CSTATE_BIT_QUADMAPRAYS);
+	result->blockingState.crushable = feature->crushable;
+	result->blockingState.blockEnemyPushing = feature->blockEnemyPushing;
+	result->blockingState.blockHeightChanges = feature->blockHeightChanges;
 }
 
 // No select
@@ -829,7 +838,7 @@ static void NativeGetFeatureFireTime(const GetFeatureFireTimeQuery* query, GetFe
 		return;
 	}
 
-	result->fireTime = feature->fireTime;
+	result->fireTime = feature->fireTime * (1.0f / GAME_SPEED);
 }
 
 static void NativeGetFeatureSmokeTime(const GetFeatureSmokeTimeQuery* query, GetFeatureSmokeTimeResult* result)
@@ -849,7 +858,7 @@ static void NativeGetFeatureSmokeTime(const GetFeatureSmokeTimeQuery* query, Get
 		return;
 	}
 
-	result->smokeTime = feature->smokeTime;
+	result->smokeTime = feature->smokeTime * (1.0f / GAME_SPEED);
 }
 
 static void NativeGetRenderFeatures(const GetRenderFeaturesQuery* query, GetRenderFeaturesResult* result)
@@ -868,17 +877,23 @@ static void NativeGetRenderFeatures(const GetRenderFeaturesQuery* query, GetRend
 	if (features.empty())
 		return;
 
-	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
-	const size_t count = std::min(features.size(), maxCount);
-
 	int32_t* out = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
-	for (size_t i = 0; i < count; ++i) {
-		out[i] = features[i]->id;
+	uint32_t count = 0;
+	const size_t maxCount = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
+
+	for (const CFeature* feature : features) {
+		if (count >= maxCount)
+			break;
+		if ((feature->drawFlag & query->drawMask) == 0)
+			continue;
+
+		out[count++] = feature->id;
 	}
 
 	result->features = out;
-	result->count = static_cast<uint32_t>(count);
 	bufferPos += count * sizeof(int32_t);
+	(void)query->sendMask;
+	result->count = count;
 }
 
 static void NativeGetRenderFeaturesDrawFlagChanged(const GetRenderFeaturesDrawFlagChangedQuery* query, GetRenderFeaturesDrawFlagChangedResult* result)
@@ -913,8 +928,9 @@ static void NativeGetRenderFeaturesDrawFlagChanged(const GetRenderFeaturesDrawFl
 	}
 
 	result->features = out;
-	result->count = count;
 	bufferPos += count * sizeof(int32_t);
+	(void)query->sendMask;
+	result->count = count;
 }
 
 } // namespace

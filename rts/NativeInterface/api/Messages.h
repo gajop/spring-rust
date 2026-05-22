@@ -21,7 +21,7 @@ struct ConsoleEntry {
 };
 
 // Queries
-struct EchoQuery { const char* message; const char* message2; const char* message3; };
+struct EchoQuery { const char* message; const char* rest; };
 struct EchoResult { const Error* error; bool success; };
 
 struct LogQuery { const char* section; int32_t level; const char* message; };
@@ -51,10 +51,10 @@ struct SendAllyChatResult { const Error* error; bool success; };
 struct SendSpectatorChatQuery { const char* message; };
 struct SendSpectatorChatResult { const Error* error; bool success; };
 
-struct SendPrivateChatQuery { int32_t playerID; const char* message; };
+struct SendPrivateChatQuery { const char* message; int32_t playerID; };
 struct SendPrivateChatResult { const Error* error; bool success; };
 
-struct SendCommandsQuery { const char* commands; };
+struct SendCommandsQuery { const char* command; const char* rest; };
 struct SendCommandsResult { const Error* error; bool success; };
 
 struct SendLuaMenuMsgQuery { const char* message; };
@@ -63,7 +63,7 @@ struct SendLuaMenuMsgResult { const Error* error; bool success; };
 struct SendSkirmishAIMessageQuery { int32_t aiID; const char* message; };
 struct SendSkirmishAIMessageResult { const Error* error; bool success; };
 
-struct SendLuaUIQuery { const char* message; };
+struct SendLuaUIQuery { const char* message; const char* mode; };
 struct SendLuaUIResult { const Error* error; bool success; };
 
 struct SendLuaGaiaQuery { const char* message; };

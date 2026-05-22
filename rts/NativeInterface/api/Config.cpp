@@ -1,6 +1,7 @@
 #include "Config.h"
 
 #include "System/Config/ConfigHandler.h"
+#include "System/GlobalConfig.h"
 #include "System/Log/Level.h"
 #include "System/Log/ILog.h"
 
@@ -128,7 +129,9 @@ static void NativeSetConfigInt(const SetConfigIntQuery* query, SetConfigIntResul
 		return;
 	}
 
-	configHandler->Set(query->key, query->value);
+	configHandler->EnableWriting(globalConfig.luaWritableConfigFile);
+	configHandler->Set(query->key, query->value, query->useOverlay);
+	configHandler->EnableWriting(true);
 	result->error = nullptr;
 	result->success = true;
 }
@@ -147,7 +150,9 @@ static void NativeSetConfigFloat(const SetConfigFloatQuery* query, SetConfigFloa
 		return;
 	}
 
-	configHandler->Set(query->key, query->value);
+	configHandler->EnableWriting(globalConfig.luaWritableConfigFile);
+	configHandler->Set(query->key, query->value, query->useOverlay);
+	configHandler->EnableWriting(true);
 	result->error = nullptr;
 	result->success = true;
 }
@@ -166,7 +171,9 @@ static void NativeSetConfigString(const SetConfigStringQuery* query, SetConfigSt
 		return;
 	}
 
-	configHandler->SetString(query->key, query->value);
+	configHandler->EnableWriting(globalConfig.luaWritableConfigFile);
+	configHandler->SetString(query->key, query->value, query->useOverlay);
+	configHandler->EnableWriting(true);
 	result->error = nullptr;
 	result->success = true;
 }

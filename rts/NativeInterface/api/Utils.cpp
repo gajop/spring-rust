@@ -71,15 +71,15 @@ static void NativeTestBuildOrder(const TestBuildOrderQuery* query, TestBuildOrde
 
 	CFeature* feature = nullptr;
 
-	// Negative allyTeam = full visibility
 	// Return values: 0=blocked, 1=occupied, 2=reclaimable, 3=open
-	const int status = CGameHelper::TestUnitBuildSquare(bi, feature, -1, true);
+	const int status = CGameHelper::TestUnitBuildSquare(bi, feature, 0, true);
 
 	// Keep backward compatibility: map OPEN to RECLAIMABLE
 	const int mappedStatus = (status == CGameHelper::BUILDSQUARE_OPEN) ?
 		CGameHelper::BUILDSQUARE_RECLAIMABLE : status;
 
 	result->error = nullptr;
+	result->status = mappedStatus;
 	result->canBuild = (mappedStatus >= CGameHelper::BUILDSQUARE_RECLAIMABLE);
 	result->feature = (feature != nullptr) ? feature->id : -1;
 }
@@ -175,18 +175,23 @@ static void NativeGetUnitDefDimensions(const GetUnitDefDimensionsQuery* query, G
 		return;
 	}
 
-	// Return model dimensions
-	const S3DModel* model = unitDef->model;
+	const S3DModel* model = unitDef->LoadModel();
 	result->error = nullptr;
 	if (model != nullptr) {
-		const float3 mid = (model->maxs + model->mins) * 0.5f;
-		result->dimensions.x = mid.x;
-		result->dimensions.y = mid.y;
-		result->dimensions.z = mid.z;
+		const float3& mid = model->relMidPos;
+		result->dimensions.height = model->height;
+		result->dimensions.radius = model->radius;
+		result->dimensions.midx = mid.x;
+		result->dimensions.minx = model->mins.x;
+		result->dimensions.maxx = model->maxs.x;
+		result->dimensions.midy = mid.y;
+		result->dimensions.miny = model->mins.y;
+		result->dimensions.maxy = model->maxs.y;
+		result->dimensions.midz = mid.z;
+		result->dimensions.minz = model->mins.z;
+		result->dimensions.maxz = model->maxs.z;
 	} else {
-		result->dimensions.x = 0.0f;
-		result->dimensions.y = 0.0f;
-		result->dimensions.z = 0.0f;
+		result->dimensions = {};
 	}
 }
 

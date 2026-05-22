@@ -4873,6 +4873,7 @@ int LuaSyncedRead::GetUnitHarvestStorage(lua_State* L)
  *
  * @function Spring.GetUnitBuildParams
  * @param unitID integer
+ * @param paramName string one of `buildRange`|`buildDistance`|`buildRange3D`
  */
 int LuaSyncedRead::GetUnitBuildParams(lua_State* L)
 {
@@ -5768,7 +5769,21 @@ int LuaSyncedRead::GetUnitWeaponTarget(lua_State* L)
 ******************************************************************************/
 
 
+/***
+ *
+ * @function Spring.GetUnitTravel
+ * @param unitID integer
+ * @return number travelPeriod
+ * @return number travelTime
+ */
 int LuaSyncedRead::GetUnitTravel(lua_State* L) { lua_pushnumber(L, 0.0f); lua_pushnumber(L, 0.0f); return 2; } // FIXME: DELETE ME
+
+/***
+ *
+ * @function Spring.GetUnitFuel
+ * @param unitID integer
+ * @return number fuel
+ */
 int LuaSyncedRead::GetUnitFuel(lua_State* L) { lua_pushnumber(L, 0.0f); return 1; } // FIXME: DELETE ME
 
 
@@ -6728,6 +6743,7 @@ int LuaSyncedRead::GetUnitCmdDescs(lua_State* L)
  *
  * @function Spring.FindUnitCmdDesc
  * @param unitID integer
+ * @param cmdID integer
  */
 int LuaSyncedRead::FindUnitCmdDesc(lua_State* L)
 {
@@ -8845,6 +8861,7 @@ int LuaSyncedRead::GetUnitPieceDirection(lua_State* L) {
  *
  * @function Spring.GetUnitPieceMatrix
  * @param unitID integer
+ * @param pieceNum integer
  * @return number? m11
  * @return number m12
  * @return number m13
@@ -8959,6 +8976,7 @@ int LuaSyncedRead::GetFeaturePieceDirection(lua_State* L) {
  *
  * @function Spring.GetFeaturePieceMatrix
  * @param featureID integer
+ * @param pieceNum integer
  * @return number? m11
  * @return number m12
  * @return number m13

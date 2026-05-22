@@ -1,5 +1,6 @@
 #include "Teams.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -23,12 +24,14 @@ static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .messa
 static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
 static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid player ID" };
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Team system not ready" };
+static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
 
 static bool IsReady() { return (gs != nullptr); }
 
 static void NativeGetTeamList(const GetTeamListQuery* query, GetTeamListResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (query->allyTeamID >= 0 && !teamHandler.IsValidAllyTeam(query->allyTeamID)) { result->error = &INVALID_ALLY_TEAM_ERROR; return; }
 
 	int32_t* teams = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
 	uint32_t count = 0;
@@ -36,6 +39,9 @@ static void NativeGetTeamList(const GetTeamListQuery* query, GetTeamListResult* 
 	for (int t = 0; t < teamHandler.ActiveTeams(); t++) {
 		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
 		if (teamHandler.Team(t) != nullptr) {
+			if (query->allyTeamID >= 0 && query->allyTeamID != teamHandler.AllyTeam(t)) {
+				continue;
+			}
 			teams[count++] = t;
 			bufferPos += sizeof(int32_t);
 		}
@@ -81,7 +87,7 @@ static void NativeGetTeamInfo(const GetTeamInfoQuery* query, GetTeamInfoResult* 
 
 	const unsigned char* c = team->color;
 	result->info.color = (c[0] << 24) | (c[1] << 16) | (c[2] << 8) | c[3];
-	result->info.customKeys = "";
+	result->info.customKeys = query->getTeamKeys ? "" : nullptr;
 }
 
 static void NativeGetTeamAllyTeamID(const GetTeamAllyTeamIDQuery* query, GetTeamAllyTeamIDResult* result) {
@@ -111,7 +117,7 @@ static void NativeGetTeamLuaAI(const GetTeamLuaAIQuery* query, GetTeamLuaAIResul
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	result->error = nullptr;
-	result->luaAI = "";
+	result->luaAI = nullptr;
 }
 
 static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamResourcesResult* result) {
@@ -123,25 +129,34 @@ static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamRe
 	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	result->error = nullptr;
-	result->resources.metalCurrent = team->res.metal;
-	result->resources.metalStorage = team->resStorage.metal;
-	result->resources.metalPull = team->resPull.metal;
-	result->resources.metalIncome = team->resIncome.metal;
-	result->resources.metalExpense = team->resExpense.metal;
-	result->resources.metalShared = team->resShare.metal;
-	result->resources.metalSent = team->resSent.metal;
-	result->resources.metalReceived = team->resReceived.metal;
-	result->resources.metalExcess = team->resPrevExcess.metal;
+	std::memset(&result->resources, 0, sizeof(result->resources));
+	const char res = (query->resource != nullptr) ? query->resource[0] : '\0';
+	if (res == 'm') {
+		result->resources.metalCurrent = team->res.metal;
+		result->resources.metalStorage = team->resStorage.metal;
+		result->resources.metalPull = team->resPrevPull.metal;
+		result->resources.metalIncome = team->resPrevIncome.metal;
+		result->resources.metalExpense = team->resPrevExpense.metal;
+		result->resources.metalShared = team->resShare.metal;
+		result->resources.metalSent = team->resPrevSent.metal;
+		result->resources.metalReceived = team->resPrevReceived.metal;
+		result->resources.metalExcess = team->resPrevExcess.metal;
+		return;
+	}
+	if (res == 'e') {
+		result->resources.energyCurrent = team->res.energy;
+		result->resources.energyStorage = team->resStorage.energy;
+		result->resources.energyPull = team->resPrevPull.energy;
+		result->resources.energyIncome = team->resPrevIncome.energy;
+		result->resources.energyExpense = team->resPrevExpense.energy;
+		result->resources.energyShared = team->resShare.energy;
+		result->resources.energySent = team->resPrevSent.energy;
+		result->resources.energyReceived = team->resPrevReceived.energy;
+		result->resources.energyExcess = team->resPrevExcess.energy;
+		return;
+	}
 
-	result->resources.energyCurrent = team->res.energy;
-	result->resources.energyStorage = team->resStorage.energy;
-	result->resources.energyPull = team->resPull.energy;
-	result->resources.energyIncome = team->resIncome.energy;
-	result->resources.energyExpense = team->resExpense.energy;
-	result->resources.energyShared = team->resShare.energy;
-	result->resources.energySent = team->resSent.energy;
-	result->resources.energyReceived = team->resReceived.energy;
-	result->resources.energyExcess = team->resPrevExcess.energy;
+	result->error = &INVALID_TEAM_ERROR;
 }
 
 static void NativeGetTeamUnitStats(const GetTeamUnitStatsQuery* query, GetTeamUnitStatsResult* result) {
@@ -153,12 +168,46 @@ static void NativeGetTeamUnitStats(const GetTeamUnitStatsQuery* query, GetTeamUn
 	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	result->error = nullptr;
-	result->stats.unitCount = team->GetNumUnits();
-	result->stats.unitLimit = team->GetMaxUnits();
+	const TeamStatistics& stats = team->GetCurrentStats();
+	result->stats.killed = static_cast<uint32_t>(stats.unitsKilled);
+	result->stats.died = static_cast<uint32_t>(stats.unitsDied);
+	result->stats.capturedBy = static_cast<uint32_t>(stats.unitsCaptured);
+	result->stats.capturedFrom = static_cast<uint32_t>(stats.unitsOutCaptured);
+	result->stats.received = static_cast<uint32_t>(stats.unitsReceived);
+	result->stats.sent = static_cast<uint32_t>(stats.unitsSent);
 }
 
 static void NativeGetTeamResourceStats(const GetTeamResourceStatsQuery* query, GetTeamResourceStatsResult* result) {
-	NativeGetTeamResources(reinterpret_cast<const GetTeamResourcesQuery*>(query), reinterpret_cast<GetTeamResourcesResult*>(result));
+	bufferPos = 0;
+	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
+
+	const CTeam* team = teamHandler.Team(query->teamID);
+	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
+
+	const TeamStatistics& stats = team->GetCurrentStats();
+	result->error = nullptr;
+	std::memset(&result->resources, 0, sizeof(result->resources));
+
+	const char res = (query->resource != nullptr) ? query->resource[0] : '\0';
+	if (res == 'm') {
+		result->resources.metalCurrent = stats.metalUsed;
+		result->resources.metalStorage = stats.metalProduced;
+		result->resources.metalPull = stats.metalExcess;
+		result->resources.metalIncome = stats.metalReceived;
+		result->resources.metalExpense = stats.metalSent;
+		return;
+	}
+	if (res == 'e') {
+		result->resources.energyCurrent = stats.energyUsed;
+		result->resources.energyStorage = stats.energyProduced;
+		result->resources.energyPull = stats.energyExcess;
+		result->resources.energyIncome = stats.energyReceived;
+		result->resources.energyExpense = stats.energySent;
+		return;
+	}
+
+	result->error = &INVALID_TEAM_ERROR;
 }
 
 static void NativeGetTeamStatsHistory(const GetTeamStatsHistoryQuery* query, GetTeamStatsHistoryResult* result) {
@@ -170,10 +219,16 @@ static void NativeGetTeamStatsHistory(const GetTeamStatsHistoryQuery* query, Get
 	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	const auto& history = team->statHistory;
+	const int statCount = static_cast<int>(history.size());
+	int start = std::clamp(query->startIndex - 1, 0, std::max(0, statCount - 1));
+	int end = std::clamp(query->endIndex - 1, 0, std::max(0, statCount - 1));
+	if (query->endIndex <= 0)
+		end = start;
+
 	TeamStatsHistoryPoint* points = reinterpret_cast<TeamStatsHistoryPoint*>(&scratchBuffer[bufferPos]);
 
 	uint32_t count = 0;
-	for (size_t i = 0; i < history.size(); i++) {
+	for (int i = start; i <= end && i < statCount; i++) {
 		if (bufferPos + sizeof(TeamStatsHistoryPoint) > sizeof(scratchBuffer)) break;
 
 		const TeamStatistics& stats = history[i];
@@ -208,16 +263,36 @@ static void NativeGetTeamStatsHistory(const GetTeamStatsHistoryQuery* query, Get
 
 static void NativeGetAllyTeamInfo(const GetAllyTeamInfoQuery* query, GetAllyTeamInfoResult* result) {
 	bufferPos = 0;
+	result->info.keys = nullptr;
+	result->info.values = nullptr;
+	result->info.count = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) { result->error = &INVALID_ALLY_TEAM_ERROR; return; }
 
-	result->error = nullptr;
-	result->info.allyTeamID = query->allyTeamID;
-	result->info.teamCount = 0;
-	for (int t = 0; t < teamHandler.ActiveTeams(); t++) {
-		if (teamHandler.AllyTeam(t) == query->allyTeamID) result->info.teamCount++;
+	const AllyTeam& allyTeam = teamHandler.GetAllyTeam(query->allyTeamID);
+	const AllyTeam::customOpts& customOpts = allyTeam.GetAllValues();
+	const size_t pointerBytes = customOpts.size() * sizeof(const char*) * 2;
+	if (bufferPos + pointerBytes > sizeof(scratchBuffer)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
 	}
-	result->info.customKeys = "";
+
+	const char** keys = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
+	bufferPos += customOpts.size() * sizeof(const char*);
+	const char** values = reinterpret_cast<const char**>(scratchBuffer + bufferPos);
+	bufferPos += customOpts.size() * sizeof(const char*);
+
+	uint32_t count = 0;
+	for (const auto& [key, value] : customOpts) {
+		keys[count] = key.c_str();
+		values[count] = value.c_str();
+		count++;
+	}
+
+	result->error = nullptr;
+	result->info.keys = keys;
+	result->info.values = values;
+	result->info.count = count;
 }
 
 static void NativeAreTeamsAllied(const AreTeamsAlliedQuery* query, AreTeamsAlliedResult* result) {
@@ -247,16 +322,20 @@ static void NativeArePlayersAllied(const ArePlayersAlliedQuery* query, ArePlayer
 static void NativeGetPlayerList(const GetPlayerListQuery* query, GetPlayerListResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (query->teamID >= teamHandler.ActiveTeams()) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	int32_t* players = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
 	uint32_t count = 0;
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
-		if (playerHandler.Player(p) != nullptr && playerHandler.Player(p)->active) {
-			players[count++] = p;
-			bufferPos += sizeof(int32_t);
-		}
+		const CPlayer* player = playerHandler.Player(p);
+		if (player == nullptr) continue;
+		if (query->active && !player->active) continue;
+		if (query->teamID >= 0 && (player->spectator || player->team != query->teamID)) continue;
+
+		players[count++] = p;
+		bufferPos += sizeof(int32_t);
 	}
 
 	result->error = nullptr;
@@ -324,7 +403,7 @@ static void NativeGetPlayerInfo(const GetPlayerInfoQuery* query, GetPlayerInfoRe
 	result->info.allyTeamID = teamHandler.AllyTeam(player->team);
 	result->info.pingTime = player->ping;
 	result->info.cpuUsage = player->cpuUsage;
-	result->info.customKeys = "";
+	result->info.customKeys = query->getPlayerOpts ? "" : nullptr;
 }
 
 static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* query, GetPlayerControlledUnitResult* result) {
@@ -339,6 +418,7 @@ static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* qu
 
 	result->error = nullptr;
 	result->unitID = (controllee != nullptr) ? controllee->id : -1;
+	result->hasUnit = (controllee != nullptr);
 }
 
 static void NativeGetAIInfo(const GetAIInfoQuery* query, GetAIInfoResult* result) {

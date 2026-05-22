@@ -4,6 +4,7 @@
 
 #include <dlfcn.h>
 #include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -216,7 +217,13 @@ NativeInterfaceSystem::~NativeInterfaceSystem() {
 }
 
 void NativeInterfaceSystem::Reload() {
-	std::string path = "/home/gajop/projects/spring-projects/SBC.sdd/native//target/release/librust_plugin.so";
+	const char* envPath = std::getenv("SPRING_NATIVE_MODULE");
+	if (envPath != nullptr && envPath[0] == '\0')
+		return;
+
+	std::string path = (envPath != nullptr && envPath[0] != '\0')
+		? envPath
+		: "/home/gajop/projects/spring-projects/SBC.sdd/native//target/release/librust_plugin.so";
 	pImpl->LoadDLL(path);
 }
 

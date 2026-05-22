@@ -1,0 +1,256 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_metal_map_size",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetMetalMapSize"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "MetalMap.get_metal_map_size"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "width",
+          "height"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetMetalMapSize`",
+        "native_getter": "`MetalMap.get_metal_map_size`",
+        "fields": "`width`, `height`"
+      },
+      "rust": {
+        "check": "check_metal_map",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetMetalMapSize",
+        "args": [],
+        "returns": [
+          "width",
+          "height"
+        ]
+      }
+    },
+    {
+      "id": "get_metal_amount",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetMetalAmount"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "MetalMap.get_metal_amount"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "amount"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetMetalAmount`",
+        "native_getter": "`MetalMap.get_metal_amount`",
+        "fields": "`amount`"
+      },
+      "rust": {
+        "check": "check_metal_map",
+        "set": "set_noop"
+      },
+      "params": {
+        "x": {
+          "type": "i32",
+          "range": [
+            0,
+            15
+          ]
+        },
+        "z": {
+          "type": "i32",
+          "range": [
+            0,
+            15
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetMetalAmount",
+        "args": [
+          "x",
+          "z"
+        ],
+        "returns": [
+          "amount"
+        ]
+      }
+    },
+    {
+      "id": "get_metal_extraction",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetMetalExtraction"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "MetalMap.get_metal_extraction"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "extraction"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetMetalExtraction`",
+        "native_getter": "`MetalMap.get_metal_extraction`",
+        "fields": "`extraction`"
+      },
+      "rust": {
+        "check": "check_metal_map",
+        "set": "set_noop"
+      },
+      "params": {
+        "x": {
+          "type": "i32",
+          "range": [
+            0,
+            15
+          ]
+        },
+        "z": {
+          "type": "i32",
+          "range": [
+            0,
+            15
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetMetalExtraction",
+        "args": [
+          "x",
+          "z"
+        ],
+        "returns": [
+          "extraction"
+        ]
+      }
+    },
+    {
+      "id": "metal_amount",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetMetalAmount"
+        ],
+        "get": [
+          "Spring.GetMetalAmount"
+        ]
+      },
+      "native": {
+        "set": [
+          "MetalMap.set_metal_amount"
+        ],
+        "get": [
+          "MetalMap.get_metal_amount"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "amount"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetMetalAmount`",
+        "native_setter": "`MetalMap.set_metal_amount`",
+        "lua_getter": "`Spring.GetMetalAmount`",
+        "native_getter": "`MetalMap.get_metal_amount`",
+        "fields": "`amount`"
+      },
+      "rust": {
+        "check": "check_metal_map",
+        "set": "set_metal_amount"
+      },
+      "params": {
+        "x": {
+          "type": "i32",
+          "range": [
+            0,
+            15
+          ]
+        },
+        "z": {
+          "type": "i32",
+          "range": [
+            0,
+            15
+          ]
+        },
+        "amount": {
+          "type": "f32",
+          "range": [
+            0,
+            5
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetMetalAmount",
+          "args": [
+            "value.x",
+            "value.z",
+            "value.amount"
+          ]
+        },
+        "call": "Spring.GetMetalAmount",
+        "args": [
+          "value.x",
+          "value.z"
+        ],
+        "returns": [
+          "amount"
+        ]
+      }
+    }
+  ]
+}

@@ -69,7 +69,7 @@ struct GetUnitCommandCountResult { const Error* error; uint32_t count; };
 struct GetUnitCommandsQuery { int32_t unitID; uint32_t maxCommands; };
 struct GetUnitCommandsResult { const Error* error; CommandFFI* commands; uint32_t count; };
 
-struct GetUnitCurrentCommandQuery { int32_t unitID; };
+struct GetUnitCurrentCommandQuery { int32_t unitID; int32_t cmdIndex; };
 struct GetUnitCurrentCommandResult { const Error* error; CommandFFI command; bool hasCommand; };
 
 struct GetFactoryCountsQuery { int32_t unitID; int32_t count; bool addCmds; };
@@ -96,10 +96,10 @@ struct GetRealBuildQueueResult { const Error* error; int32_t* unitDefIDs; uint32
 struct GetUnitCmdDescsQuery { int32_t unitID; };
 struct GetUnitCmdDescsResult { const Error* error; CommandDescription* cmdDescs; uint32_t count; };
 
-struct FindUnitCmdDescQuery { int32_t unitID; int32_t cmdID; int32_t cmdIndex; };
-struct FindUnitCmdDescResult { const Error* error; CommandDescription cmdDesc; bool found; };
+struct FindUnitCmdDescQuery { int32_t unitID; int32_t cmdID; };
+struct FindUnitCmdDescResult { const Error* error; int32_t cmdIndex; bool found; };
 
-struct GiveOrderQuery { int32_t cmdID; float* params; uint32_t paramCount; uint32_t options; };
+struct GiveOrderQuery { int32_t cmdID; float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };
 struct GiveOrderResult { const Error* error; bool success; };
 
 struct GiveOrderToUnitMapQuery {
@@ -109,6 +109,7 @@ struct GiveOrderToUnitMapQuery {
 	float* params;
 	uint32_t paramCount;
 	uint32_t options;
+	int32_t timeout;
 };
 
 struct GiveOrderToUnitMapResult { const Error* error; int32_t unitsOrdered; };
@@ -118,7 +119,6 @@ struct GiveOrderArrayToUnitMapQuery {
 	uint32_t unitCount;
 	const CommandFFI* commands;
 	uint32_t commandCount;
-	bool pairwise;
 };
 
 struct GiveOrderArrayToUnitMapResult { const Error* error; int32_t unitsOrdered; };

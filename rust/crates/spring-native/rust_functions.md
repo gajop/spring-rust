@@ -2,7 +2,7 @@
 
 Total APIs: 49
 
-Total Functions: 876
+Total Functions: 878
 
 ---
 
@@ -12,16 +12,16 @@ Total Functions: 876
 - `Camera.get_camera_fov` (params: ) → `Result<f32, Error>`
 - `Camera.get_camera_names` (params: ) → `Result<Vec<String>, Error>`
 - `Camera.get_camera_position` (params: ) → `Result<sys::Float3, Error>`
-- `Camera.get_camera_state` (params: ) → `Result<sys::CameraState, Error>`
+- `Camera.get_camera_state` (params: use_table:bool) → `Result<sys::CameraState, Error>`
 - `Camera.get_pixel_dir` (params: screen_x:f32, screen_y:f32) → `Result<sys::Float3, Error>`
-- `Camera.set_camera_state` (params: state:sys::CameraState, transition_time:f32) → `Result<bool, Error>`
+- `Camera.set_camera_state` (params: state:sys::CameraState, transition_time:f32, transition_time_factor:f32, transition_time_exponent:f32) → `Result<bool, Error>`
 - `Camera.set_camera_target` (params: target:sys::Float3, transition_time:f32) → `Result<bool, Error>`
-- `Camera.trace_screen_ray` (params: screen_x:f32, screen_y:f32, only_coords:bool) → `Result<(i32, i32, sys::Float3), Error>`
+- `Camera.trace_screen_ray` (params: screen_x:f32, screen_y:f32, only_coords:bool, use_minimap:bool, include_sky:bool, ignore_water:bool, height_offset:f32) → `Result<(i32, i32, sys::Float3), Error>`
 - `Camera.world_to_screen_coords` (params: world_pos:sys::Float3) → `Result<(sys::Float3, bool), Error>`
 
 ## CobScript (2 functions)
 
-- `CobScript.call_cobscript` (params: unit_id:i32, func_name:&str, func_id:i32, args:&[i32], ret_count:u32, return_values:bool) → `Result<(i32, Vec<i32>), Error>`
+- `CobScript.call_cobscript` (params: unit_id:i32, func:sys::CobFunctionRef, ret_args:u32, args:&[i32]) → `Result<(i32, Vec<i32>), Error>`
 - `CobScript.get_cobscript_id` (params: unit_id:i32, func_name:&str) → `Result<i32, Error>`
 
 ## Config (9 functions)
@@ -31,9 +31,9 @@ Total Functions: 876
 - `Config.get_config_params` (params: ) → `Result<Vec<sys::ConfigParam>, Error>`
 - `Config.get_config_string` (params: key:&str, default_value:&str) → `Result<Option<String>, Error>`
 - `Config.get_log_sections` (params: ) → `Result<Vec<String>, Error>`
-- `Config.set_config_float` (params: key:&str, value:f32) → `Result<bool, Error>`
-- `Config.set_config_int` (params: key:&str, value:i32) → `Result<bool, Error>`
-- `Config.set_config_string` (params: key:&str, value:&str) → `Result<bool, Error>`
+- `Config.set_config_float` (params: key:&str, value:f32, use_overlay:bool) → `Result<bool, Error>`
+- `Config.set_config_int` (params: key:&str, value:i32, use_overlay:bool) → `Result<bool, Error>`
+- `Config.set_config_string` (params: key:&str, value:&str, use_overlay:bool) → `Result<bool, Error>`
 - `Config.set_log_section_filter_level` (params: section:&str, level:i32) → `Result<bool, Error>`
 
 ## Display (24 functions)
@@ -50,7 +50,7 @@ Total Functions: 876
 - `Display.get_mini_map_geometry` (params: ) → `Result<sys::MinimapGeometry, Error>`
 - `Display.get_mini_map_rotation` (params: ) → `Result<f32, Error>`
 - `Display.get_num_displays` (params: ) → `Result<u32, Error>`
-- `Display.get_screen_geometry` (params: screen_num:i32) → `Result<sys::ViewGeometry, Error>`
+- `Display.get_screen_geometry` (params: screen_num:i32, query_usable:bool) → `Result<sys::ViewGeometry, Error>`
 - `Display.get_team_color` (params: team_id:i32) → `Result<sys::TeamColor, Error>`
 - `Display.get_team_orig_color` (params: team_id:i32) → `Result<sys::TeamColor, Error>`
 - `Display.get_view_geometry` (params: ) → `Result<sys::ViewGeometry, Error>`
@@ -65,38 +65,38 @@ Total Functions: 876
 
 ## EffectsControl (3 functions)
 
-- `EffectsControl.spawn_ceg` (params: ceg_name:&str, ceg_id:i32, pos:sys::Float3, dir:sys::Float3, radius:f32, damage:f32, dmg_mod:f32) → `Result<(bool, i32), Error>`
-- `EffectsControl.spawn_explosion` (params: pos:sys::Float3, dir:sys::Float3, damages:f32, crater_area_of_effect:f32, damage_area_of_effect:f32, edge_effectiveness:f32, explosion_speed:f32, gfx_mod:f32, impact_only:bool, ignore_owner:bool, damage_ground:bool, weapon_def_id:i32, owner_id:i32, projectile_id:i32) → `Result<bool, Error>`
+- `EffectsControl.spawn_ceg` (params: ceg:sys::DefRef, pos:sys::Float3, dir:sys::Float3, radius:f32, damage:f32, dmg_mod:f32) → `Result<(bool, i32), Error>`
+- `EffectsControl.spawn_explosion` (params: pos:sys::Float3, dir:sys::Float3, explosion_params:sys::NativeExplosionParams) → `Result<bool, Error>`
 - `EffectsControl.spawn_sfx` (params: unit_id:i32, sfx_id:i32, pos:sys::Float3, dir:sys::Float3, radius:f32, damage:f32, absolute:bool) → `Result<bool, Error>`
 
 ## FeatureControl (32 functions)
 
 - `FeatureControl.add_feature_damage` (params: feature_id:i32, damage:f32, paralyze_time:f32, weapon_def_id:i32, attacker_id:i32, impulse:sys::Float3) → `Result<bool, Error>`
-- `FeatureControl.create_feature` (params: feature_def_id:i32, pos:sys::Float3, facing:i32, team_id:i32, ally_team_id:i32, feature_id:i32) → `Result<i32, Error>`
+- `FeatureControl.create_feature` (params: feature_def:sys::DefRef, pos:sys::Float3, facing:i32, team_id:i32, feature_id:i32) → `Result<i32, Error>`
 - `FeatureControl.create_feature_wreck` (params: feature_id:i32, wreck_level:i32, do_smoke:bool) → `Result<i32, Error>`
 - `FeatureControl.create_unit_wreck` (params: unit_id:i32, wreck_level:i32, do_smoke:bool) → `Result<i32, Error>`
 - `FeatureControl.destroy_feature` (params: feature_id:i32) → `Result<bool, Error>`
 - `FeatureControl.set_feature_always_visible` (params: feature_id:i32, always_visible:bool) → `Result<bool, Error>`
 - `FeatureControl.set_feature_blocking` (params: feature_id:i32, blocking:bool, solid_objects:bool, projectiles:bool, quad_map_rays:bool, crushable:bool, block_enemy_pushing:bool, block_height_changes:bool) → `Result<bool, Error>`
-- `FeatureControl.set_feature_collision_volume_data` (params: feature_id:i32, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, primary_axis:i32) → `Result<bool, Error>`
-- `FeatureControl.set_feature_direction` (params: feature_id:i32, dir:sys::Float3) → `Result<bool, Error>`
+- `FeatureControl.set_feature_collision_volume_data` (params: feature_id:i32, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, test_type:i32, primary_axis:i32) → `Result<bool, Error>`
+- `FeatureControl.set_feature_direction` (params: feature_id:i32, front_dir:sys::Float3, right_dir:sys::Float3) → `Result<bool, Error>`
 - `FeatureControl.set_feature_fire_time` (params: feature_id:i32, fire_time:f32) → `Result<bool, Error>`
 - `FeatureControl.set_feature_heading_and_up_dir` (params: feature_id:i32, heading:i32, up_dir:sys::Float3) → `Result<bool, Error>`
-- `FeatureControl.set_feature_health` (params: feature_id:i32, health:f32) → `Result<bool, Error>`
+- `FeatureControl.set_feature_health` (params: feature_id:i32, health:f32, check_destruction:bool) → `Result<bool, Error>`
 - `FeatureControl.set_feature_mass` (params: feature_id:i32, mass:f32) → `Result<bool, Error>`
 - `FeatureControl.set_feature_max_health` (params: feature_id:i32, max_health:f32) → `Result<bool, Error>`
 - `FeatureControl.set_feature_mid_and_aim_pos` (params: feature_id:i32, mid_pos:sys::Float3, aim_pos:sys::Float3, set_relative:bool) → `Result<bool, Error>`
-- `FeatureControl.set_feature_move_ctrl` (params: feature_id:i32, enable:bool) → `Result<bool, Error>`
+- `FeatureControl.set_feature_move_ctrl` (params: feature_id:i32, enable:bool, velocity_or_mask:sys::Float3, acceleration_or_impulse_mask:sys::Float3, movement_mask:sys::Float3) → `Result<bool, Error>`
 - `FeatureControl.set_feature_no_select` (params: feature_id:i32, no_select:bool) → `Result<bool, Error>`
-- `FeatureControl.set_feature_physics` (params: feature_id:i32, pos:sys::Float3, velocity:sys::Float3, rotation:sys::Float3, set_pos:bool, set_vel:bool, set_rot:bool) → `Result<bool, Error>`
+- `FeatureControl.set_feature_physics` (params: feature_id:i32, pos:sys::Float3, velocity:sys::Float3, rotation:sys::Float3, drag:sys::Float3) → `Result<bool, Error>`
 - `FeatureControl.set_feature_piece_collision_volume_data` (params: feature_id:i32, piece_index:i32, enable:bool, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, primary_axis:i32) → `Result<bool, Error>`
 - `FeatureControl.set_feature_piece_matrix` (params: feature_id:i32, piece_index:i32, matrix:[f32; 16]) → `Result<bool, Error>`
 - `FeatureControl.set_feature_piece_visible` (params: feature_id:i32, piece_index:i32, visible:bool) → `Result<bool, Error>`
-- `FeatureControl.set_feature_position` (params: feature_id:i32, pos:sys::Float3) → `Result<bool, Error>`
+- `FeatureControl.set_feature_position` (params: feature_id:i32, pos:sys::Float3, snap_to_ground:bool) → `Result<bool, Error>`
 - `FeatureControl.set_feature_radius_and_height` (params: feature_id:i32, radius:f32, height:f32) → `Result<bool, Error>`
 - `FeatureControl.set_feature_reclaim` (params: feature_id:i32, reclaim_left:f32) → `Result<bool, Error>`
-- `FeatureControl.set_feature_resources` (params: feature_id:i32, metal:f32, energy:f32, reclaim_time:f32) → `Result<bool, Error>`
-- `FeatureControl.set_feature_resurrect` (params: feature_id:i32, unit_def_id:i32, facing:i32) → `Result<bool, Error>`
+- `FeatureControl.set_feature_resources` (params: feature_id:i32, metal:f32, energy:f32, reclaim_time:f32, reclaim_left:f32, feature_def_metal:f32, feature_def_energy:f32) → `Result<bool, Error>`
+- `FeatureControl.set_feature_resurrect` (params: feature_id:i32, unit_def:sys::DefRef, facing:i32, progress:f32) → `Result<bool, Error>`
 - `FeatureControl.set_feature_rotation` (params: feature_id:i32, rotation:sys::Float3) → `Result<bool, Error>`
 - `FeatureControl.set_feature_selection_volume_data` (params: feature_id:i32, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, primary_axis:i32, use_cont_hit_test:bool) → `Result<bool, Error>`
 - `FeatureControl.set_feature_smoke_time` (params: feature_id:i32, smoke_time:f32) → `Result<bool, Error>`
@@ -129,7 +129,7 @@ Total Functions: 876
 - `Features.get_feature_direction` (params: feature_id:i32) → `Result<sys::Float3, Error>`
 - `Features.get_feature_draw_flag` (params: feature_id:i32) → `Result<bool, Error>`
 - `Features.get_feature_engine_draw_mask` (params: feature_id:i32) → `Result<u32, Error>`
-- `Features.get_feature_fire_time` (params: feature_id:i32) → `Result<i32, Error>`
+- `Features.get_feature_fire_time` (params: feature_id:i32) → `Result<f32, Error>`
 - `Features.get_feature_heading` (params: feature_id:i32) → `Result<i32, Error>`
 - `Features.get_feature_health` (params: feature_id:i32) → `Result<sys::FeatureHealth, Error>`
 - `Features.get_feature_height` (params: feature_id:i32) → `Result<f32, Error>`
@@ -146,18 +146,18 @@ Total Functions: 876
 - `Features.get_feature_rotation` (params: feature_id:i32) → `Result<sys::FeatureRotation, Error>`
 - `Features.get_feature_selection_volume_data` (params: feature_id:i32) → `Result<sys::FeatureSelectionVolumeData, Error>`
 - `Features.get_feature_separation` (params: feature_id1:i32, feature_id2:i32, positional:bool) → `Result<f32, Error>`
-- `Features.get_feature_smoke_time` (params: feature_id:i32) → `Result<i32, Error>`
+- `Features.get_feature_smoke_time` (params: feature_id:i32) → `Result<f32, Error>`
 - `Features.get_feature_team` (params: feature_id:i32) → `Result<i32, Error>`
 - `Features.get_feature_transform_matrix` (params: feature_id:i32) → `Result<sys::FeatureTransformMatrix, Error>`
 - `Features.get_feature_velocity` (params: feature_id:i32) → `Result<sys::Float3, Error>`
 - `Features.get_features_in_cylinder` (params: x:f32, z:f32, radius:f32, height:f32) → `Result<Vec<i32>, Error>`
 - `Features.get_features_in_rectangle` (params: min_x:f32, min_z:f32, max_x:f32, max_z:f32) → `Result<Vec<i32>, Error>`
 - `Features.get_features_in_sphere` (params: center:sys::Float3, radius:f32) → `Result<Vec<i32>, Error>`
-- `Features.get_render_features` (params: ) → `Result<Vec<i32>, Error>`
-- `Features.get_render_features_draw_flag_changed` (params: ) → `Result<Vec<i32>, Error>`
+- `Features.get_render_features` (params: draw_mask:i32, send_mask:bool) → `Result<Vec<i32>, Error>`
+- `Features.get_render_features_draw_flag_changed` (params: send_mask:bool) → `Result<Vec<i32>, Error>`
 - `Features.valid_feature_id` (params: feature_id:i32) → `Result<bool, Error>`
 
-## Game (26 functions)
+## Game (28 functions)
 
 - `Game.are_helper_ais_enabled` (params: ) → `Result<bool, Error>`
 - `Game.fixed_allies` (params: ) → `Result<bool, Error>`
@@ -175,6 +175,8 @@ Total Functions: 876
 - `Game.get_mod_option` (params: key:&str) → `Result<(Option<String>, bool), Error>`
 - `Game.get_mod_options` (params: ) → `Result<Vec<String>, Error>`
 - `Game.get_side_data` (params: side_name:&str) → `Result<sys::SideData, Error>`
+- `Game.get_side_data_by_index` (params: side_index:u32) → `Result<sys::SideData, Error>`
+- `Game.get_side_data_count` (params: ) → `Result<u32, Error>`
 - `Game.get_team_start_position` (params: team_id:i32) → `Result<sys::Float3, Error>`
 - `Game.get_tidal` (params: ) → `Result<f32, Error>`
 - `Game.get_vector_from_heading` (params: heading:i32) → `Result<sys::Float2, Error>`
@@ -197,7 +199,7 @@ Total Functions: 876
 
 ## GroundDecals (31 functions)
 
-- `GroundDecals.create_ground_decal` (params: pos:&f32, size:&f32) → `Result<(u32, bool), Error>`
+- `GroundDecals.create_ground_decal` (params: ) → `Result<(u32, bool), Error>`
 - `GroundDecals.destroy_ground_decal` (params: decal_id:u32) → `Result<bool, Error>`
 - `GroundDecals.get_all_ground_decals` (params: ) → `Result<Vec<u32>, Error>`
 - `GroundDecals.get_ground_decal_alpha` (params: decal_id:u32) → `Result<(f32, f32), Error>`
@@ -241,7 +243,7 @@ Total Functions: 876
 ## Input (20 functions)
 
 - `Input.get_action_hot_keys` (params: action:&str) → `Result<Vec<String>, Error>`
-- `Input.get_active_command` (params: mouse_x:f32, mouse_y:f32, use_default:bool) → `Result<i32, Error>`
+- `Input.get_active_command` (params: ) → `Result<(i32, i32, i32, Option<String>), Error>`
 - `Input.get_active_page` (params: ) → `Result<(i32, i32), Error>`
 - `Input.get_default_command` (params: ) → `Result<(i32, i32, i32, Option<String>), Error>`
 - `Input.get_invert_queue_key` (params: ) → `Result<bool, Error>`
@@ -290,8 +292,8 @@ Total Functions: 876
 - `Markers.add_world_text` (params: text:&str, pos:sys::Float3) → `Result<bool, Error>`
 - `Markers.add_world_unit` (params: unit_def_id:i32, pos:sys::Float3, team_id:i32, facing:i32) → `Result<bool, Error>`
 - `Markers.marker_add_line` (params: from:sys::Float3, to:sys::Float3, local_only:bool, player_id:i32) → `Result<bool, Error>`
-- `Markers.marker_add_point` (params: pos:sys::Float3, text:&str, local_only:bool, player_id:i32, always_erase:bool) → `Result<bool, Error>`
-- `Markers.marker_erase_position` (params: pos:sys::Float3, local_only:bool, player_id:i32, always_erase:bool) → `Result<bool, Error>`
+- `Markers.marker_add_point` (params: pos:sys::Float3, text:&str, local_only:bool, player_id:i32) → `Result<bool, Error>`
+- `Markers.marker_erase_position` (params: pos:sys::Float3, unused:f32, local_only:bool, player_id:i32, always_erase:bool) → `Result<bool, Error>`
 
 ## MathExtra (14 functions)
 
@@ -324,23 +326,23 @@ Total Functions: 876
 
 ## Messages (20 functions)
 
-- `Messages.echo` (params: message:&str, message2:&str, message3:&str) → `Result<bool, Error>`
+- `Messages.echo` (params: message:&str, rest:&str) → `Result<bool, Error>`
 - `Messages.get_console_buffer` (params: max_lines:u32) → `Result<Vec<sys::ConsoleEntry>, Error>`
 - `Messages.get_current_tooltip` (params: ) → `Result<Option<String>, Error>`
 - `Messages.is_user_writing` (params: ) → `Result<bool, Error>`
 - `Messages.log` (params: section:&str, level:i32, message:&str) → `Result<bool, Error>`
 - `Messages.send_ally_chat` (params: message:&str) → `Result<bool, Error>`
-- `Messages.send_commands` (params: commands:&str) → `Result<bool, Error>`
+- `Messages.send_commands` (params: command:&str, rest:&str) → `Result<bool, Error>`
 - `Messages.send_lua_gaia_msg` (params: message:&str) → `Result<bool, Error>`
 - `Messages.send_lua_menu_msg` (params: message:&str) → `Result<bool, Error>`
 - `Messages.send_lua_rules_msg` (params: message:&str) → `Result<bool, Error>`
-- `Messages.send_lua_uimsg` (params: message:&str) → `Result<bool, Error>`
+- `Messages.send_lua_uimsg` (params: message:&str, mode:&str) → `Result<bool, Error>`
 - `Messages.send_message` (params: message:&str) → `Result<bool, Error>`
 - `Messages.send_message_to_ally_team` (params: ally_team_id:i32, message:&str) → `Result<bool, Error>`
 - `Messages.send_message_to_player` (params: player_id:i32, message:&str) → `Result<bool, Error>`
 - `Messages.send_message_to_spectators` (params: message:&str) → `Result<bool, Error>`
 - `Messages.send_message_to_team` (params: team_id:i32, message:&str) → `Result<bool, Error>`
-- `Messages.send_private_chat` (params: player_id:i32, message:&str) → `Result<bool, Error>`
+- `Messages.send_private_chat` (params: message:&str, player_id:i32) → `Result<bool, Error>`
 - `Messages.send_public_chat` (params: message:&str) → `Result<bool, Error>`
 - `Messages.send_skirmish_aimessage` (params: ai_id:i32, message:&str) → `Result<bool, Error>`
 - `Messages.send_spectator_chat` (params: message:&str) → `Result<bool, Error>`
@@ -376,9 +378,9 @@ Total Functions: 876
 - `Player.get_local_ally_team_id` (params: ) → `Result<i32, Error>`
 - `Player.get_local_player_id` (params: ) → `Result<i32, Error>`
 - `Player.get_local_team_id` (params: ) → `Result<i32, Error>`
-- `Player.get_player_roster` (params: sort_mode:i32) → `Result<Vec<sys::RosterEntry>, Error>`
+- `Player.get_player_roster` (params: sort_mode:i32, show_pathing_players:bool) → `Result<Vec<sys::RosterEntry>, Error>`
 - `Player.get_player_statistics` (params: player_id:i32) → `Result<sys::PlayerStats, Error>`
-- `Player.get_player_traffic` (params: player_id:i32) → `Result<Vec<sys::PlayerTraffic>, Error>`
+- `Player.get_player_traffic` (params: player_id:i32, packet_id:i32) → `Result<Vec<sys::PlayerTraffic>, Error>`
 - `Player.get_spectating_state` (params: ) → `Result<bool, Error>`
 
 ## Profiling (10 functions)
@@ -400,8 +402,8 @@ Total Functions: 876
 - `ProjectileControl.set_piece_projectile_params` (params: projectile_id:i32, expl_flags:i32, spin_angle:f32, spin_speed:f32, spin_vec:sys::Float3) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_always_visible` (params: projectile_id:i32, always_visible:bool) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_ceg` (params: projectile_id:i32, ceg_name:&str) → `Result<bool, Error>`
-- `ProjectileControl.set_projectile_collision` (params: projectile_id:i32, collide:bool) → `Result<bool, Error>`
-- `ProjectileControl.set_projectile_damages` (params: projectile_id:i32, damage_key:&str, damage_value:f32) → `Result<bool, Error>`
+- `ProjectileControl.set_projectile_collision` (params: projectile_id:i32) → `Result<bool, Error>`
+- `ProjectileControl.set_projectile_damages` (params: projectile_id:i32, unused:i32, damage_key:&str, damage_value:f32) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_gravity` (params: projectile_id:i32, gravity:f32) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_ignore_tracking_error` (params: projectile_id:i32, ignore:bool) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_is_intercepted` (params: projectile_id:i32, intercepted:bool) → `Result<bool, Error>`
@@ -410,18 +412,18 @@ Total Functions: 876
 - `ProjectileControl.set_projectile_spin_angle` (params: projectile_id:i32, angle:f32) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_spin_speed` (params: projectile_id:i32, speed:f32) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_spin_vec` (params: projectile_id:i32, spin_vec:sys::Float3) → `Result<bool, Error>`
-- `ProjectileControl.set_projectile_target` (params: projectile_id:i32, target_id:i32, target_pos:sys::Float3, is_ground_target:bool) → `Result<bool, Error>`
+- `ProjectileControl.set_projectile_target` (params: projectile_id:i32, target:sys::ProjectileTargetRef) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_time_to_live` (params: projectile_id:i32, time_to_live:i32) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_use_air_los` (params: projectile_id:i32, use_air_los:bool) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_velocity` (params: projectile_id:i32, velocity:sys::Float3) → `Result<bool, Error>`
-- `ProjectileControl.spawn_projectile` (params: weapon_def_id:i32, pos:sys::Float3, velocity:sys::Float3, target:sys::Float3, owner_id:i32, team_id:i32, ttl:f32, gravity:f32) → `Result<i32, Error>`
+- `ProjectileControl.spawn_projectile` (params: weapon_def_id:i32, projectile_params:sys::NativeProjectileParams) → `Result<i32, Error>`
 
 ## Projectiles (17 functions)
 
 - `Projectiles.get_all_projectiles` (params: synced:bool, weapon:bool) → `Result<Vec<i32>, Error>`
 - `Projectiles.get_piece_projectile_params` (params: projectile_id:i32) → `Result<(sys::PieceProjectileParams, bool), Error>`
 - `Projectiles.get_projectile_ally_team_id` (params: projectile_id:i32) → `Result<i32, Error>`
-- `Projectiles.get_projectile_damages` (params: projectile_id:i32) → `Result<sys::ProjectileDamages, Error>`
+- `Projectiles.get_projectile_damages` (params: projectile_id:i32, tag:&str) → `Result<sys::ProjectileDamages, Error>`
 - `Projectiles.get_projectile_def_id` (params: projectile_id:i32) → `Result<i32, Error>`
 - `Projectiles.get_projectile_direction` (params: projectile_id:i32) → `Result<sys::Float3, Error>`
 - `Projectiles.get_projectile_gravity` (params: projectile_id:i32) → `Result<sys::Float3, Error>`
@@ -461,7 +463,7 @@ Total Functions: 876
 - `Selection.get_group_list` (params: ) → `Result<Vec<i32>, Error>`
 - `Selection.get_group_units` (params: group_id:i32) → `Result<Vec<i32>, Error>`
 - `Selection.get_group_units_count` (params: group_id:i32) → `Result<u32, Error>`
-- `Selection.get_group_units_counts` (params: ) → `Result<[u32`
+- `Selection.get_group_units_counts` (params: group_id:i32) → `Result<sys::SelectionCounts, Error>`
 - `Selection.get_group_units_sorted` (params: group_id:i32) → `Result<Vec<i32>, Error>`
 - `Selection.get_selected_group` (params: ) → `Result<i32, Error>`
 - `Selection.get_selected_units` (params: ) → `Result<Vec<i32>, Error>`
@@ -480,10 +482,10 @@ Total Functions: 876
 - `Sound.get_sound_stream_time` (params: ) → `Result<f32, Error>`
 - `Sound.load_sound_def` (params: sound_name:&str) → `Result<bool, Error>`
 - `Sound.pause_sound_stream` (params: ) → `Result<bool, Error>`
-- `Sound.play_sound_file` (params: sound_file:&str, volume:f32, pos:sys::Float3, velocity:sys::Float3, positional:bool, in_cone:bool, cone_angle:f32, cone_inner_angle:f32, cone_outer_angle:f32, cone_dir:sys::Float3) → `Result<bool, Error>`
-- `Sound.play_sound_stream` (params: ogg_file:&str, volume:f32) → `Result<bool, Error>`
+- `Sound.play_sound_file` (params: sound_file:&str, volume:f32, pos:sys::Float3, velocity:sys::Float3, channel:i32) → `Result<bool, Error>`
+- `Sound.play_sound_stream` (params: ogg_file:&str, volume:f32, enqueue:bool) → `Result<bool, Error>`
 - `Sound.preload_sound_item` (params: sound_name:&str) → `Result<bool, Error>`
-- `Sound.set_sound_effect_params` (params: preset:&str) → `Result<bool, Error>`
+- `Sound.set_sound_effect_params` (params: params:sys::SoundEffectParams) → `Result<bool, Error>`
 - `Sound.set_sound_stream_volume` (params: volume:f32) → `Result<bool, Error>`
 - `Sound.stop_sound_stream` (params: ) → `Result<bool, Error>`
 
@@ -500,7 +502,7 @@ Total Functions: 876
 
 ## SystemControl (22 functions)
 
-- `SystemControl.call_as_team` (params: team_id:i32, read_team:i32) → `Result<bool, Error>`
+- `SystemControl.call_as_team` (params: team_id:i32, func:sys::LuaFunctionRef, args:sys::NativeLuaArgs) → `Result<bool, Error>`
 - `SystemControl.clear_watch_dog_timer` (params: thread_name:&str, keep_stopped:bool) → `Result<bool, Error>`
 - `SystemControl.garbage_collect_ctrl` (params: iters_per_batch:i32, num_steps_per_iter:i32, min_steps_per_iter:i32, max_steps_per_iter:i32, min_loop_run_time:f32, max_loop_run_time:f32, base_run_time_mult:f32, base_mem_load_mult:f32) → `Result<bool, Error>`
 - `SystemControl.get_game_name` (params: ) → `Result<Option<String>, Error>`
@@ -516,7 +518,7 @@ Total Functions: 876
 - `SystemControl.ping` (params: tag:u32) → `Result<bool, Error>`
 - `SystemControl.quit` (params: ) → `Result<bool, Error>`
 - `SystemControl.reload` (params: start_script:&str) → `Result<bool, Error>`
-- `SystemControl.request_start_position` (params: pos:[f32; 3], ready:bool, has_ready:bool) → `Result<bool, Error>`
+- `SystemControl.request_start_position` (params: pos:sys::Float3, ready:bool) → `Result<bool, Error>`
 - `SystemControl.restart` (params: cmd_args:&str, start_script:&str) → `Result<bool, Error>`
 - `SystemControl.set_share_level` (params: resource:&str, level:f32) → `Result<bool, Error>`
 - `SystemControl.share_resources` (params: team_id:i32, resource:&str, amount:f32) → `Result<bool, Error>`
@@ -547,19 +549,19 @@ Total Functions: 876
 - `Teams.get_aiinfo` (params: team_id:i32) → `Result<(sys::AIInfo, bool), Error>`
 - `Teams.get_ally_team_info` (params: ally_team_id:i32) → `Result<sys::AllyTeamInfo, Error>`
 - `Teams.get_ally_team_list` (params: ) → `Result<Vec<i32>, Error>`
-- `Teams.get_player_controlled_unit` (params: player_id:i32) → `Result<i32, Error>`
-- `Teams.get_player_info` (params: player_id:i32) → `Result<sys::PlayerInfo, Error>`
-- `Teams.get_player_list` (params: ) → `Result<Vec<i32>, Error>`
+- `Teams.get_player_controlled_unit` (params: player_id:i32) → `Result<(i32, bool), Error>`
+- `Teams.get_player_info` (params: player_id:i32, get_player_opts:bool) → `Result<sys::PlayerInfo, Error>`
+- `Teams.get_player_list` (params: team_id:i32, active:bool) → `Result<Vec<i32>, Error>`
 - `Teams.get_player_list_in_ally_team` (params: ally_team_id:i32) → `Result<Vec<i32>, Error>`
 - `Teams.get_player_list_in_team` (params: team_id:i32) → `Result<Vec<i32>, Error>`
 - `Teams.get_team_ally_team_id` (params: team_id:i32) → `Result<i32, Error>`
-- `Teams.get_team_info` (params: team_id:i32) → `Result<sys::TeamInfo, Error>`
-- `Teams.get_team_list` (params: ) → `Result<Vec<i32>, Error>`
+- `Teams.get_team_info` (params: team_id:i32, get_team_keys:bool) → `Result<sys::TeamInfo, Error>`
+- `Teams.get_team_list` (params: ally_team_id:i32) → `Result<Vec<i32>, Error>`
 - `Teams.get_team_lua_ai` (params: team_id:i32) → `Result<Option<String>, Error>`
 - `Teams.get_team_max_units` (params: team_id:i32) → `Result<i32, Error>`
-- `Teams.get_team_resource_stats` (params: team_id:i32) → `Result<sys::TeamResources, Error>`
-- `Teams.get_team_resources` (params: team_id:i32) → `Result<sys::TeamResources, Error>`
-- `Teams.get_team_stats_history` (params: team_id:i32) → `Result<Vec<sys::TeamStatsHistoryPoint>, Error>`
+- `Teams.get_team_resource_stats` (params: team_id:i32, resource:&str) → `Result<sys::TeamResources, Error>`
+- `Teams.get_team_resources` (params: team_id:i32, resource:&str) → `Result<sys::TeamResources, Error>`
+- `Teams.get_team_stats_history` (params: team_id:i32, start_index:i32, end_index:i32) → `Result<Vec<sys::TeamStatsHistoryPoint>, Error>`
 - `Teams.get_team_unit_stats` (params: team_id:i32) → `Result<sys::TeamUnitStats, Error>`
 
 ## Terrain (12 functions)
@@ -569,7 +571,7 @@ Total Functions: 876
 - `Terrain.get_ground_extremes` (params: ) → `Result<(f32, f32, f32, f32), Error>`
 - `Terrain.get_ground_height` (params: x:f32, z:f32) → `Result<f32, Error>`
 - `Terrain.get_ground_info` (params: x:f32, z:f32) → `Result<(i32, Option<String>, f32, f32, f32, f32, f32, f32, bool), Error>`
-- `Terrain.get_ground_normal` (params: x:f32, z:f32) → `Result<(sys::Float3, f32), Error>`
+- `Terrain.get_ground_normal` (params: x:f32, z:f32, smoothed:bool) → `Result<(sys::Float3, f32), Error>`
 - `Terrain.get_ground_orig_height` (params: x:f32, z:f32) → `Result<f32, Error>`
 - `Terrain.get_smooth_mesh_height` (params: x:f32, z:f32) → `Result<f32, Error>`
 - `Terrain.get_terrain_type_data` (params: terrain_type_index:i32) → `Result<(i32, Option<String>, f32, f32, f32, f32, f32, bool), Error>`
@@ -583,25 +585,25 @@ Total Functions: 876
 - `TerrainControl.add_height_map` (params: x:f32, z:f32, height:f32) → `Result<bool, Error>`
 - `TerrainControl.add_original_height_map` (params: x:f32, z:f32, height:f32) → `Result<bool, Error>`
 - `TerrainControl.add_smooth_mesh` (params: x:f32, z:f32, height:f32) → `Result<bool, Error>`
-- `TerrainControl.adjust_height_map` (params: x:f32, z:f32, height:f32) → `Result<bool, Error>`
-- `TerrainControl.adjust_original_height_map` (params: x:f32, z:f32, height:f32) → `Result<bool, Error>`
-- `TerrainControl.adjust_smooth_mesh` (params: x:f32, z:f32, height:f32) → `Result<bool, Error>`
+- `TerrainControl.adjust_height_map` (params: x1:f32, z1:f32, x2:f32, z2:f32, height:f32) → `Result<bool, Error>`
+- `TerrainControl.adjust_original_height_map` (params: x1:f32, z1:f32, x2:f32, z2:f32, height:f32) → `Result<bool, Error>`
+- `TerrainControl.adjust_smooth_mesh` (params: x1:f32, z1:f32, x2:f32, z2:f32, height:f32) → `Result<bool, Error>`
 - `TerrainControl.level_height_map` (params: x1:f32, z1:f32, x2:f32, z2:f32, height:f32) → `Result<bool, Error>`
 - `TerrainControl.level_original_height_map` (params: x1:f32, z1:f32, x2:f32, z2:f32, height:f32) → `Result<bool, Error>`
 - `TerrainControl.level_smooth_mesh` (params: x1:f32, z1:f32, x2:f32, z2:f32, height:f32) → `Result<bool, Error>`
-- `TerrainControl.rebuild_smooth_mesh` (params: x1:f32, z1:f32, x2:f32, z2:f32) → `Result<bool, Error>`
+- `TerrainControl.rebuild_smooth_mesh` (params: ) → `Result<bool, Error>`
 - `TerrainControl.remove_grass` (params: x:f32, z:f32) → `Result<bool, Error>`
-- `TerrainControl.revert_height_map` (params: pos1:sys::Float3, pos2:sys::Float3, orig_factor:f32) → `Result<bool, Error>`
+- `TerrainControl.revert_height_map` (params: x1:f32, z1:f32, x2:f32, z2:f32, orig_factor:f32) → `Result<bool, Error>`
 - `TerrainControl.revert_original_height_map` (params: x1:f32, z1:f32, x2:f32, z2:f32, orig_factor:f32) → `Result<bool, Error>`
-- `TerrainControl.revert_smooth_mesh` (params: pos1:sys::Float3, pos2:sys::Float3, orig_factor:f32) → `Result<bool, Error>`
-- `TerrainControl.set_height_map` (params: pos:sys::Float3, height:f32) → `Result<bool, Error>`
-- `TerrainControl.set_height_map_func` (params: ) → `Result<bool, Error>`
+- `TerrainControl.revert_smooth_mesh` (params: x1:f32, z1:f32, x2:f32, z2:f32, orig_factor:f32) → `Result<bool, Error>`
+- `TerrainControl.set_height_map` (params: x:f32, z:f32, height:f32, terraform:f32) → `Result<bool, Error>`
+- `TerrainControl.set_height_map_func` (params: lua_function:sys::LuaFunctionRef, arg:f32, args:sys::NativeLuaArgs) → `Result<bool, Error>`
 - `TerrainControl.set_map_square_terrain_type` (params: x:i32, z:i32, terrain_type:i32) → `Result<bool, Error>`
-- `TerrainControl.set_original_height_map` (params: x1:f32, z1:f32, x2:f32, z2:f32, height:f32) → `Result<bool, Error>`
-- `TerrainControl.set_original_height_map_func` (params: ) → `Result<bool, Error>`
-- `TerrainControl.set_smooth_mesh` (params: pos1:sys::Float3, pos2:sys::Float3, height:f32) → `Result<bool, Error>`
-- `TerrainControl.set_smooth_mesh_func` (params: ) → `Result<bool, Error>`
-- `TerrainControl.set_terrain_type_data` (params: type_index:i32, name:&str, hardness:f32, tank_speed:f32, kbot_speed:f32) → `Result<bool, Error>`
+- `TerrainControl.set_original_height_map` (params: x:f32, z:f32, height:f32, factor:f32) → `Result<bool, Error>`
+- `TerrainControl.set_original_height_map_func` (params: height_map_func:sys::LuaFunctionRef) → `Result<bool, Error>`
+- `TerrainControl.set_smooth_mesh` (params: x:f32, z:f32, height:f32, terraform:f32) → `Result<bool, Error>`
+- `TerrainControl.set_smooth_mesh_func` (params: lua_function:sys::LuaFunctionRef, arg:sys::NativeLuaValue, args:sys::NativeLuaArgs) → `Result<bool, Error>`
+- `TerrainControl.set_terrain_type_data` (params: type_index:i32, tank_speed:f32, kbot_speed:f32, hover_speed:f32, ship_speed:f32, hardness:f32, receive_tracks:bool, name:&str) → `Result<bool, Error>`
 - `TerrainControl.set_tidal` (params: tidal:f32) → `Result<bool, Error>`
 - `TerrainControl.set_wind` (params: min_wind:f32, max_wind:f32) → `Result<bool, Error>`
 
@@ -609,7 +611,7 @@ Total Functions: 876
 
 - `Tracing.trace_ray` (params: ray:sys::Ray) → `Result<(bool, i32, i32, sys::Float3, sys::Float3), Error>`
 - `Tracing.trace_ray_features` (params: ray:sys::Ray) → `Result<(bool, i32, i32, sys::Float3, sys::Float3), Error>`
-- `Tracing.trace_ray_ground_between_positions` (params: start:sys::Float3, end:sys::Float3) → `Result<(bool, sys::Float3, sys::Float3), Error>`
+- `Tracing.trace_ray_ground_between_positions` (params: start:sys::Float3, end:sys::Float3, test_water:bool) → `Result<(bool, sys::Float3, sys::Float3), Error>`
 - `Tracing.trace_ray_ground_in_direction` (params: start:sys::Float3, dir:sys::Float3, length:f32) → `Result<(bool, sys::Float3, sys::Float3), Error>`
 - `Tracing.trace_ray_units` (params: ray:sys::Ray) → `Result<(bool, i32, i32, sys::Float3, sys::Float3), Error>`
 
@@ -623,17 +625,17 @@ Total Functions: 876
 - `UnitControl.add_unit_seismic_ping` (params: unit_id:i32, ping_size:f32) → `Result<bool, Error>`
 - `UnitControl.bugger_off` (params: pos:sys::Float3, radius:f32, team_id:i32, spherical:bool, forced:bool, exclude_unit_id:i32, exclude_unit_def_ids:&[i32]) → `Result<bool, Error>`
 - `UnitControl.clear_unit_goal` (params: unit_id:i32, cancel_raw:bool) → `Result<bool, Error>`
-- `UnitControl.create_unit` (params: unit_def_id:i32, pos:sys::Float3, facing:i32, team_id:i32, build:bool, builder_id:i32, unit_id:i32) → `Result<i32, Error>`
+- `UnitControl.create_unit` (params: unit_def:sys::DefRef, pos:sys::Float3, facing:i32, team_id:i32, build:bool, flatten_ground:bool, unit_id:i32, builder_id:i32) → `Result<i32, Error>`
 - `UnitControl.destroy_unit` (params: unit_id:i32, selfd:bool, reclaimed:bool, attacker_id:i32, recycle_id:bool) → `Result<bool, Error>`
 - `UnitControl.edit_unit_cmd_desc` (params: unit_id:i32, cmd_desc_index:u32, cmd_desc:&sys::NativeCommandDescription) → `Result<bool, Error>`
 - `UnitControl.force_unit_collision_update` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitControl.get_unit_feature_separation` (params: unit_id:i32, feature_id:i32, ignore_y:bool) → `Result<f32, Error>`
 - `UnitControl.get_unit_leaves_ghost` (params: unit_id:i32) → `Result<bool, Error>`
-- `UnitControl.get_unit_physical_state` (params: unit_id:i32) → `Result<u8, Error>`
+- `UnitControl.get_unit_physical_state` (params: unit_id:i32) → `Result<u32, Error>`
 - `UnitControl.give_order_array_to_unit` (params: unit_id:i32, commands:&[sys::NativeCommand]) → `Result<bool, Error>`
 - `UnitControl.give_order_array_to_unit_array` (params: unit_ids:&[i32], commands:&[sys::NativeCommand], pairwise:bool) → `Result<i32, Error>`
-- `UnitControl.give_order_to_unit` (params: unit_id:i32, cmd_id:i32, params:&[f32], options:u32) → `Result<bool, Error>`
-- `UnitControl.give_order_to_unit_array` (params: unit_ids:&[i32], cmd_id:i32, params:&[f32], options:u32) → `Result<bool, Error>`
+- `UnitControl.give_order_to_unit` (params: unit_id:i32, cmd_id:i32, params:&[f32], options:u32, timeout:i32) → `Result<bool, Error>`
+- `UnitControl.give_order_to_unit_array` (params: unit_ids:&[i32], cmd_id:i32, params:&[f32], options:u32, timeout:i32) → `Result<bool, Error>`
 - `UnitControl.insert_unit_cmd_desc` (params: unit_id:i32, cmd_desc_index:i32, cmd_desc:&sys::NativeCommandDescription) → `Result<bool, Error>`
 - `UnitControl.remove_object_decal` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitControl.remove_unit_cmd_desc` (params: unit_id:i32, cmd_desc_index:i32) → `Result<bool, Error>`
@@ -641,20 +643,20 @@ Total Functions: 876
 - `UnitControl.set_unit_always_visible` (params: unit_id:i32, always_visible:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_armored` (params: unit_id:i32, armored_state:bool, armored_multiple:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_blocking` (params: unit_id:i32, blocking:bool, solid_objects:bool, projectiles:bool, quad_map_rays:bool, crushable:bool, block_enemy_pushing:bool, block_height_changes:bool) → `Result<bool, Error>`
-- `UnitControl.set_unit_build_params` (params: unit_id:i32, param_name:&str, float_value:f32, bool_value:bool) → `Result<bool, Error>`
+- `UnitControl.set_unit_build_params` (params: unit_id:i32, param_name:&str, value:sys::NumberOrBool) → `Result<bool, Error>`
 - `UnitControl.set_unit_build_speed` (params: unit_id:i32, build_speed:f32, repair_speed:f32, reclaim_speed:f32, resurrect_speed:f32, capture_speed:f32, terraform_speed:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_buildee_radius` (params: unit_id:i32, radius:f32) → `Result<bool, Error>`
-- `UnitControl.set_unit_cloak` (params: unit_id:i32, want_cloak:bool, decloak_distance:f32, use_default_decloak_distance:bool) → `Result<bool, Error>`
-- `UnitControl.set_unit_collision_volume_data` (params: unit_id:i32, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, primary_axis:i32) → `Result<bool, Error>`
-- `UnitControl.set_unit_costs` (params: unit_id:i32, build_time:f32, metal_cost:f32, energy_cost:f32) → `Result<bool, Error>`
+- `UnitControl.set_unit_cloak` (params: unit_id:i32, cloak:sys::NumberOrBool, cloak_arg:sys::NumberOrBool) → `Result<bool, Error>`
+- `UnitControl.set_unit_collision_volume_data` (params: unit_id:i32, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, test_type:i32, primary_axis:i32) → `Result<bool, Error>`
+- `UnitControl.set_unit_costs` (params: unit_id:i32, costs:sys::UnitCostOverrides) → `Result<bool, Error>`
 - `UnitControl.set_unit_crashing` (params: unit_id:i32, want_crash:bool) → `Result<bool, Error>`
-- `UnitControl.set_unit_direction` (params: unit_id:i32, dir:sys::Float3) → `Result<bool, Error>`
-- `UnitControl.set_unit_experience` (params: unit_id:i32, experience:f32, add:bool) → `Result<bool, Error>`
-- `UnitControl.set_unit_flanking` (params: unit_id:i32, mode:i32, dir:sys::Float3, move_factor:f32, min_damage:f32, max_damage:f32) → `Result<bool, Error>`
-- `UnitControl.set_unit_harvest_storage` (params: unit_id:i32, harvested_metal:f32, harvest_storage_metal:f32, harvested_energy:f32, harvest_storage_energy:f32) → `Result<bool, Error>`
+- `UnitControl.set_unit_direction` (params: unit_id:i32, front_dir:sys::Float3, right_dir:sys::Float3) → `Result<bool, Error>`
+- `UnitControl.set_unit_experience` (params: unit_id:i32, experience:f32) → `Result<bool, Error>`
+- `UnitControl.set_unit_flanking` (params: unit_id:i32, r#type:&str, args:sys::Float3) → `Result<bool, Error>`
+- `UnitControl.set_unit_harvest_storage` (params: unit_id:i32, stored_metal:f32, max_stored_metal:f32, stored_energy:f32, max_stored_energy:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_heading` (params: unit_id:i32, heading:i32, use_smoothing:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_heading_and_up_dir` (params: unit_id:i32, heading:i32, up_dir:sys::Float3) → `Result<bool, Error>`
-- `UnitControl.set_unit_health` (params: unit_id:i32, health:f32, relative:bool) → `Result<bool, Error>`
+- `UnitControl.set_unit_health` (params: unit_id:i32, value:sys::UnitHealthValue) → `Result<bool, Error>`
 - `UnitControl.set_unit_land_goal` (params: unit_id:i32, pos:sys::Float3, radius_sq:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_leaves_ghost` (params: unit_id:i32, leaves_ghost:bool, leave_dead_ghost:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_loading_transport` (params: unit_id:i32, transport_id:i32) → `Result<bool, Error>`
@@ -663,42 +665,42 @@ Total Functions: 876
 - `UnitControl.set_unit_mass` (params: unit_id:i32, mass:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_max_health` (params: unit_id:i32, max_health:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_max_range` (params: unit_id:i32, max_range:f32) → `Result<bool, Error>`
-- `UnitControl.set_unit_metal_extraction` (params: unit_id:i32, amount:f32) → `Result<bool, Error>`
+- `UnitControl.set_unit_metal_extraction` (params: unit_id:i32, depth:f32, range:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_mid_and_aim_pos` (params: unit_id:i32, mid_pos:sys::Float3, aim_pos:sys::Float3, set_relative:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_move_goal` (params: unit_id:i32, pos:sys::Float3, radius:f32, speed:f32, raw:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_nano_pieces` (params: unit_id:i32, piece_indices:&[i32]) → `Result<bool, Error>`
 - `UnitControl.set_unit_neutral` (params: unit_id:i32, neutral:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_physical_state_bit` (params: unit_id:i32, state_bit:i32) → `Result<bool, Error>`
-- `UnitControl.set_unit_physics` (params: unit_id:i32, pos:sys::Float3, velocity:sys::Float3, rotation:sys::Float3, set_pos:bool, set_vel:bool, set_rot:bool) → `Result<bool, Error>`
+- `UnitControl.set_unit_physics` (params: unit_id:i32, pos:sys::Float3, velocity:sys::Float3, rotation:sys::Float3, drag:sys::Float3) → `Result<bool, Error>`
 - `UnitControl.set_unit_piece_collision_volume_data` (params: unit_id:i32, piece_index:i32, enable:bool, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, primary_axis:i32) → `Result<bool, Error>`
 - `UnitControl.set_unit_piece_matrix` (params: unit_id:i32, piece_index:i32, matrix:[f32; 16]) → `Result<bool, Error>`
 - `UnitControl.set_unit_piece_parent` (params: unit_id:i32, child_piece_index:i32, parent_piece_index:i32) → `Result<bool, Error>`
 - `UnitControl.set_unit_piece_visible` (params: unit_id:i32, piece_index:i32, visible:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_pos_error_params` (params: unit_id:i32, pos_error_vector:sys::Float3, pos_error_delta:sys::Float3, next_pos_error_update:i32, ally_team_id:i32, set_pos_error_bit:bool) → `Result<bool, Error>`
-- `UnitControl.set_unit_position` (params: unit_id:i32, pos:sys::Float3, relative:bool) → `Result<bool, Error>`
+- `UnitControl.set_unit_position` (params: unit_id:i32, pos:sys::Float3) → `Result<bool, Error>`
 - `UnitControl.set_unit_radius_and_height` (params: unit_id:i32, radius:f32, height:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_resourcing` (params: unit_id:i32, r#type:&str, amount:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_rotation` (params: unit_id:i32, rotation:sys::Float3) → `Result<bool, Error>`
 - `UnitControl.set_unit_seismic_signature` (params: unit_id:i32, seismic_signature:f32) → `Result<bool, Error>`
-- `UnitControl.set_unit_selection_volume_data` (params: unit_id:i32, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, primary_axis:i32, use_cont_hit_test:bool) → `Result<bool, Error>`
+- `UnitControl.set_unit_selection_volume_data` (params: unit_id:i32, scales:sys::Float3, offsets:sys::Float3, volume_type:i32, test_type:i32, primary_axis:i32) → `Result<bool, Error>`
 - `UnitControl.set_unit_sensor_radius` (params: unit_id:i32, sensor_type:&str, radius:i32) → `Result<i32, Error>`
 - `UnitControl.set_unit_shield_recharge_delay` (params: unit_id:i32, weapon_num:i32, recharge_delay:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_shield_state` (params: unit_id:i32, weapon_num:i32, enabled:bool, power:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_sonar_stealth` (params: unit_id:i32, sonar_stealth:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_stealth` (params: unit_id:i32, stealth:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_stockpile` (params: unit_id:i32, stockpile:i32, build_percent:f32) → `Result<bool, Error>`
-- `UnitControl.set_unit_storage` (params: unit_id:i32, metal_storage:f32, energy_storage:f32) → `Result<bool, Error>`
-- `UnitControl.set_unit_target` (params: unit_id:i32, target_id:i32, target_pos:sys::Float3, manual_fire:bool, user_target:bool, weapon_num:i32) → `Result<bool, Error>`
+- `UnitControl.set_unit_storage` (params: unit_id:i32, resource:&str, amount:f32) → `Result<bool, Error>`
+- `UnitControl.set_unit_target` (params: unit_id:i32, target:sys::UnitTargetRef, manual_fire:bool, user_target:bool, weapon_num:i32) → `Result<bool, Error>`
 - `UnitControl.set_unit_tooltip` (params: unit_id:i32, tooltip:&str) → `Result<bool, Error>`
 - `UnitControl.set_unit_use_air_los` (params: unit_id:i32, use_air_los:bool) → `Result<bool, Error>`
-- `UnitControl.set_unit_use_weapons` (params: unit_id:i32, force_use_weapons:bool, allow_use_weapons:bool, set_force:bool, set_allow:bool) → `Result<bool, Error>`
+- `UnitControl.set_unit_use_weapons` (params: unit_id:i32, force_use_weapons:bool, allow_use_weapons:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_velocity` (params: unit_id:i32, velocity:sys::Float3) → `Result<bool, Error>`
 - `UnitControl.set_unit_weapon_damages` (params: unit_id:i32, weapon_num:i32, damage_key:&str, damage_value:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_weapon_state` (params: unit_id:i32, weapon_num:i32, key:&str, value:f32) → `Result<bool, Error>`
-- `UnitControl.transfer_unit` (params: unit_id:i32, new_team_id:i32, given:bool) → `Result<bool, Error>`
+- `UnitControl.transfer_unit` (params: unit_id:i32, new_team_id:i32, given:bool, adjust_unit_limit:bool) → `Result<bool, Error>`
 - `UnitControl.unit_attach` (params: transporter_id:i32, transportee_id:i32, piece_num:i32) → `Result<bool, Error>`
 - `UnitControl.unit_detach` (params: transportee_id:i32) → `Result<bool, Error>`
-- `UnitControl.unit_detach_from_air` (params: transportee_id:i32, pos:sys::Float3, use_pos:bool) → `Result<bool, Error>`
+- `UnitControl.unit_detach_from_air` (params: transportee_id:i32, pos:sys::Float3) → `Result<bool, Error>`
 - `UnitControl.unit_finish_command` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitControl.unit_weapon_fire` (params: unit_id:i32, weapon_num:i32) → `Result<bool, Error>`
 - `UnitControl.unit_weapon_hold_fire` (params: unit_id:i32, weapon_num:i32) → `Result<bool, Error>`
@@ -728,7 +730,7 @@ Total Functions: 876
 - `UnitRendering.get_unit_always_update_matrix` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitRendering.get_unit_draw_flag` (params: unit_id:i32) → `Result<u8, Error>`
 - `UnitRendering.get_unit_engine_draw_mask` (params: unit_id:i32) → `Result<u32, Error>`
-- `UnitRendering.get_unit_icon` (params: unit_id:i32, full_data:bool) → `Result<(Option<String>, [f32`
+- `UnitRendering.get_unit_icon` (params: unit_id:i32) → `Result<(Option<String>, [f32`
 - `UnitRendering.get_unit_icon_data` (params: unit_id:i32, full_data:bool) → `Result<(Option<String>, [f32`
 - `UnitRendering.get_unit_lua_draw` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitRendering.get_unit_no_draw` (params: unit_id:i32) → `Result<bool, Error>`
@@ -740,7 +742,7 @@ Total Functions: 876
 - `UnitRendering.get_unit_view_position` (params: unit_id:i32, use_mid_pos:bool) → `Result<sys::Float3, Error>`
 - `UnitRendering.get_units_in_screen_rectangle` (params: left:f32, top:f32, right:f32, bottom:f32, allegiance:i32) → `Result<Vec<i32>, Error>`
 - `UnitRendering.get_visible_features` (params: ally_team_id:i32, radius:f32, include_icons:bool, include_geos:bool) → `Result<Vec<i32>, Error>`
-- `UnitRendering.get_visible_projectiles` (params: ally_team_id:i32, include_weapon_projectiles:bool, include_piece_projectiles:bool) → `Result<Vec<i32>, Error>`
+- `UnitRendering.get_visible_projectiles` (params: ally_team_id:i32, include_synced_projectiles:bool, include_weapon_projectiles:bool, include_piece_projectiles:bool) → `Result<Vec<i32>, Error>`
 - `UnitRendering.get_visible_units` (params: team_id:i32, radius:f32, include_icons:bool) → `Result<Vec<i32>, Error>`
 - `UnitRendering.is_unit_icon` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitRendering.is_unit_in_view` (params: unit_id:i32) → `Result<bool, Error>`
@@ -748,7 +750,7 @@ Total Functions: 876
 
 ## UnitsCommands (15 functions)
 
-- `UnitsCommands.find_unit_cmd_desc` (params: unit_id:i32, cmd_id:i32, cmd_index:i32) → `Result<(sys::CommandDescription, bool), Error>`
+- `UnitsCommands.find_unit_cmd_desc` (params: unit_id:i32, cmd_id:i32) → `Result<(i32, bool), Error>`
 - `UnitsCommands.get_command_queue` (params: unit_id:i32, max_commands:u32) → `Result<Vec<sys::CommandFFI>, Error>`
 - `UnitsCommands.get_factory_bugger_off` (params: unit_id:i32) → `Result<(bool, sys::Float3, f32), Error>`
 - `UnitsCommands.get_factory_command_count` (params: unit_id:i32) → `Result<u32, Error>`
@@ -759,10 +761,10 @@ Total Functions: 876
 - `UnitsCommands.get_unit_cmd_descs` (params: unit_id:i32) → `Result<Vec<sys::CommandDescription>, Error>`
 - `UnitsCommands.get_unit_command_count` (params: unit_id:i32) → `Result<u32, Error>`
 - `UnitsCommands.get_unit_commands` (params: unit_id:i32, max_commands:u32) → `Result<Vec<sys::CommandFFI>, Error>`
-- `UnitsCommands.get_unit_current_command` (params: unit_id:i32) → `Result<(sys::CommandFFI, bool), Error>`
-- `UnitsCommands.give_order` (params: cmd_id:i32, params:&[f32], options:u32) → `Result<bool, Error>`
-- `UnitsCommands.give_order_array_to_unit_map` (params: unit_ids:&[i32], commands:&[sys::CommandFFI], pairwise:bool) → `Result<i32, Error>`
-- `UnitsCommands.give_order_to_unit_map` (params: unit_ids:&[i32], cmd_id:i32, params:&[f32], options:u32) → `Result<i32, Error>`
+- `UnitsCommands.get_unit_current_command` (params: unit_id:i32, cmd_index:i32) → `Result<(sys::CommandFFI, bool), Error>`
+- `UnitsCommands.give_order` (params: cmd_id:i32, params:&[f32], options:u32, timeout:i32) → `Result<bool, Error>`
+- `UnitsCommands.give_order_array_to_unit_map` (params: unit_ids:&[i32], commands:&[sys::CommandFFI]) → `Result<i32, Error>`
+- `UnitsCommands.give_order_to_unit_map` (params: unit_ids:&[i32], cmd_id:i32, params:&[f32], options:u32, timeout:i32) → `Result<i32, Error>`
 
 ## UnitsInfo (58 functions)
 
@@ -772,7 +774,7 @@ Total Functions: 876
 - `UnitsInfo.get_unit_base_position` (params: unit_id:i32) → `Result<sys::Float3, Error>`
 - `UnitsInfo.get_unit_blocking` (params: unit_id:i32) → `Result<sys::UnitBlockingState, Error>`
 - `UnitsInfo.get_unit_build_facing` (params: unit_id:i32) → `Result<i32, Error>`
-- `UnitsInfo.get_unit_build_params` (params: unit_id:i32) → `Result<sys::UnitBuildParams, Error>`
+- `UnitsInfo.get_unit_build_params` (params: unit_id:i32, param_name:&str) → `Result<(sys::NumberOrBool, bool), Error>`
 - `UnitsInfo.get_unit_buildee_radius` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_collision_volume_data` (params: unit_id:i32) → `Result<sys::CollisionVolumeData, Error>`
 - `UnitsInfo.get_unit_cost_table` (params: unit_id:i32) → `Result<sys::UnitCosts, Error>`
@@ -780,12 +782,12 @@ Total Functions: 876
 - `UnitsInfo.get_unit_current_build_power` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_def_id` (params: unit_id:i32) → `Result<i32, Error>`
 - `UnitsInfo.get_unit_direction` (params: unit_id:i32) → `Result<sys::Float3, Error>`
-- `UnitsInfo.get_unit_effective_build_range` (params: unit_id:i32) → `Result<f32, Error>`
+- `UnitsInfo.get_unit_effective_build_range` (params: unit_id:i32, buildee_def_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_experience` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_flanking` (params: unit_id:i32) → `Result<sys::UnitFlanking, Error>`
 - `UnitsInfo.get_unit_fuel` (params: unit_id:i32) → `Result<sys::UnitFuel, Error>`
-- `UnitsInfo.get_unit_harvest_storage` (params: unit_id:i32) → `Result<f32, Error>`
-- `UnitsInfo.get_unit_heading` (params: unit_id:i32) → `Result<i32, Error>`
+- `UnitsInfo.get_unit_harvest_storage` (params: unit_id:i32) → `Result<sys::UnitHarvestStorage, Error>`
+- `UnitsInfo.get_unit_heading` (params: unit_id:i32, convert_to_radians:bool) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_health` (params: unit_id:i32) → `Result<sys::UnitHealth, Error>`
 - `UnitsInfo.get_unit_height` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_in_build_stance` (params: unit_id:i32) → `Result<bool, Error>`
@@ -798,7 +800,7 @@ Total Functions: 876
 - `UnitsInfo.get_unit_is_transporting` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitsInfo.get_unit_last_attacked_piece` (params: unit_id:i32) → `Result<i32, Error>`
 - `UnitsInfo.get_unit_last_attacker` (params: unit_id:i32) → `Result<(sys::UnitLastAttacker, bool), Error>`
-- `UnitsInfo.get_unit_los_state` (params: unit_id:i32, ally_team_id:i32) → `Result<sys::UnitLosState, Error>`
+- `UnitsInfo.get_unit_los_state` (params: unit_id:i32, ally_team_id:i32, raw:bool) → `Result<sys::UnitLosState, Error>`
 - `UnitsInfo.get_unit_mass` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_metal_extraction` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_move_def_id` (params: unit_id:i32) → `Result<i32, Error>`
@@ -806,13 +808,13 @@ Total Functions: 876
 - `UnitsInfo.get_unit_neutral` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitsInfo.get_unit_piece_collision_volume_data` (params: unit_id:i32, piece_num:i32) → `Result<sys::CollisionVolumeData, Error>`
 - `UnitsInfo.get_unit_pos_error_params` (params: unit_id:i32, ally_team_id:i32) → `Result<sys::UnitPosErrorParams, Error>`
-- `UnitsInfo.get_unit_position` (params: unit_id:i32) → `Result<sys::Float3, Error>`
+- `UnitsInfo.get_unit_position` (params: unit_id:i32, mid_pos:bool, aim_pos:bool) → `Result<sys::Float3, Error>`
 - `UnitsInfo.get_unit_radius` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_resources` (params: unit_id:i32) → `Result<sys::UnitResources, Error>`
 - `UnitsInfo.get_unit_rotation` (params: unit_id:i32) → `Result<sys::UnitRotation, Error>`
 - `UnitsInfo.get_unit_seismic_signature` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_self_dtime` (params: unit_id:i32) → `Result<f32, Error>`
-- `UnitsInfo.get_unit_sensor_radius` (params: unit_id:i32) → `Result<sys::UnitSensorRadius, Error>`
+- `UnitsInfo.get_unit_sensor_radius` (params: unit_id:i32, r#type:&str) → `Result<sys::UnitSensorRadius, Error>`
 - `UnitsInfo.get_unit_shield_state` (params: unit_id:i32, weapon_num:i32) → `Result<(sys::UnitShieldState, bool), Error>`
 - `UnitsInfo.get_unit_states` (params: unit_id:i32) → `Result<sys::UnitStates, Error>`
 - `UnitsInfo.get_unit_stockpile` (params: unit_id:i32) → `Result<sys::UnitStockpile, Error>`
@@ -823,7 +825,7 @@ Total Functions: 876
 - `UnitsInfo.get_unit_travel` (params: unit_id:i32) → `Result<sys::UnitTravel, Error>`
 - `UnitsInfo.get_unit_vectors` (params: unit_id:i32) → `Result<sys::UnitVectors, Error>`
 - `UnitsInfo.get_unit_velocity` (params: unit_id:i32) → `Result<sys::Float3, Error>`
-- `UnitsInfo.get_unit_worker_task` (params: unit_id:i32) → `Result<Option<String>, Error>`
+- `UnitsInfo.get_unit_worker_task` (params: unit_id:i32) → `Result<sys::UnitWorkerTask, Error>`
 
 ## UnitsPieces (21 functions)
 
@@ -831,13 +833,13 @@ Total Functions: 876
 - `UnitsPieces.get_feature_piece_info` (params: feature_id:i32, piece_num:i32) → `Result<(sys::PieceInfo, bool), Error>`
 - `UnitsPieces.get_feature_piece_list` (params: feature_id:i32) → `Result<Vec<i32>, Error>`
 - `UnitsPieces.get_feature_piece_map` (params: feature_id:i32) → `Result<Vec<String>, Error>`
-- `UnitsPieces.get_feature_piece_matrix` (params: feature_id:i32) → `Result<sys::PieceMatrix, Error>`
+- `UnitsPieces.get_feature_piece_matrix` (params: feature_id:i32, piece_num:i32) → `Result<sys::PieceMatrix, Error>`
 - `UnitsPieces.get_feature_piece_pos_dir` (params: feature_id:i32, piece_num:i32) → `Result<sys::PiecePosDir, Error>`
 - `UnitsPieces.get_feature_piece_position` (params: feature_id:i32, piece_num:i32) → `Result<sys::Float3, Error>`
 - `UnitsPieces.get_feature_root_piece` (params: feature_id:i32) → `Result<i32, Error>`
-- `UnitsPieces.get_model_piece_list` (params: model_name:&str, model_type:i32) → `Result<Vec<i32>, Error>`
-- `UnitsPieces.get_model_piece_map` (params: model_name:&str, model_type:i32) → `Result<Vec<String>, Error>`
-- `UnitsPieces.get_model_root_piece` (params: model_name:&str, model_type:i32) → `Result<i32, Error>`
+- `UnitsPieces.get_model_piece_list` (params: model_name:&str) → `Result<Vec<i32>, Error>`
+- `UnitsPieces.get_model_piece_map` (params: model_name:&str) → `Result<Vec<String>, Error>`
+- `UnitsPieces.get_model_root_piece` (params: model_name:&str) → `Result<i32, Error>`
 - `UnitsPieces.get_unit_piece_direction` (params: unit_id:i32, piece_num:i32) → `Result<sys::Float3, Error>`
 - `UnitsPieces.get_unit_piece_info` (params: unit_id:i32, piece_num:i32) → `Result<(sys::PieceInfo, bool), Error>`
 - `UnitsPieces.get_unit_piece_list` (params: unit_id:i32) → `Result<Vec<i32>, Error>`
@@ -853,24 +855,24 @@ Total Functions: 876
 
 - `UnitsQuery.get_all_units` (params: ) → `Result<Vec<i32>, Error>`
 - `UnitsQuery.get_closest_enemy_unit` (params: pos:sys::Float3, range:f32, ally_team_id:i32, use_los:bool, sphere_dist_test:bool, check_sight_dist:bool) → `Result<i32, Error>`
-- `UnitsQuery.get_render_units` (params: ) → `Result<Vec<i32>, Error>`
-- `UnitsQuery.get_render_units_draw_flag_changed` (params: ) → `Result<Vec<i32>, Error>`
+- `UnitsQuery.get_render_units` (params: draw_mask:i32, send_mask:bool) → `Result<Vec<i32>, Error>`
+- `UnitsQuery.get_render_units_draw_flag_changed` (params: send_mask:bool) → `Result<Vec<i32>, Error>`
 - `UnitsQuery.get_team_unit_count` (params: team_id:i32) → `Result<u32, Error>`
 - `UnitsQuery.get_team_unit_def_count` (params: team_id:i32, unit_def_id:i32) → `Result<u32, Error>`
 - `UnitsQuery.get_team_units` (params: team_id:i32) → `Result<Vec<i32>, Error>`
 - `UnitsQuery.get_team_units_by_defs` (params: team_id:i32, unit_def_ids:&[i32]) → `Result<Vec<i32>, Error>`
 - `UnitsQuery.get_team_units_counts` (params: team_id:i32) → `Result<Vec<sys::UnitDefCount>, Error>`
-- `UnitsQuery.get_team_units_sorted` (params: team_id:i32) → `Result<Vec<i32>, Error>`
+- `UnitsQuery.get_team_units_sorted` (params: team_id:i32) → `Result<Vec<sys::TeamUnitsByDef>, Error>`
 - `UnitsQuery.get_unit_array_centroid` (params: unit_ids:&[i32]) → `Result<sys::Float3, Error>`
 - `UnitsQuery.get_unit_map_centroid` (params: unit_ids:&[i32]) → `Result<sys::Float3, Error>`
-- `UnitsQuery.get_unit_nearest_ally` (params: pos:sys::Float3, radius:f32) → `Result<i32, Error>`
-- `UnitsQuery.get_unit_nearest_enemy` (params: pos:sys::Float3, radius:f32) → `Result<i32, Error>`
+- `UnitsQuery.get_unit_nearest_ally` (params: unit_id:i32, range:f32) → `Result<i32, Error>`
+- `UnitsQuery.get_unit_nearest_enemy` (params: unit_id:i32, range:f32, use_los:bool, sphere_dist_test:bool, check_sight_dist:bool) → `Result<i32, Error>`
 - `UnitsQuery.get_unit_separation` (params: unit_id1:i32, unit_id2:i32, positional:bool, check_map:bool) → `Result<f32, Error>`
-- `UnitsQuery.get_units_in_box` (params: r#box:sys::BoxQuery, filter:sys::UnitFilterParams) → `Result<Vec<i32>, Error>`
-- `UnitsQuery.get_units_in_cylinder` (params: cylinder:sys::CylinderQuery, filter:sys::UnitFilterParams) → `Result<Vec<i32>, Error>`
-- `UnitsQuery.get_units_in_planes` (params: planes:sys::PlanesQuery, filter:sys::UnitFilterParams) → `Result<Vec<i32>, Error>`
-- `UnitsQuery.get_units_in_rectangle` (params: rect:sys::RectangleQuery, filter:sys::UnitFilterParams) → `Result<Vec<i32>, Error>`
-- `UnitsQuery.get_units_in_sphere` (params: sphere:sys::SphereQuery, filter:sys::UnitFilterParams) → `Result<Vec<i32>, Error>`
+- `UnitsQuery.get_units_in_box` (params: xmin:f32, ymin:f32, zmin:f32, xmax:f32, ymax:f32, zmax:f32, allegiance:i32) → `Result<Vec<i32>, Error>`
+- `UnitsQuery.get_units_in_cylinder` (params: x:f32, z:f32, radius:f32, allegiance:i32) → `Result<Vec<i32>, Error>`
+- `UnitsQuery.get_units_in_planes` (params: planes:sys::PlanesQuery, allegiance:i32) → `Result<Vec<i32>, Error>`
+- `UnitsQuery.get_units_in_rectangle` (params: xmin:f32, zmin:f32, xmax:f32, zmax:f32, allegiance:i32) → `Result<Vec<i32>, Error>`
+- `UnitsQuery.get_units_in_sphere` (params: x:f32, y:f32, z:f32, radius:f32, allegiance:i32) → `Result<Vec<i32>, Error>`
 - `UnitsQuery.valid_unit_id` (params: unit_id:i32) → `Result<bool, Error>`
 
 ## UnitsWeapons (11 functions)
@@ -880,7 +882,7 @@ Total Functions: 876
 - `UnitsWeapons.get_unit_weapon_count` (params: unit_id:i32) → `Result<u32, Error>`
 - `UnitsWeapons.get_unit_weapon_damages` (params: unit_id:i32, weapon_num:i32) → `Result<sys::UnitWeaponDamages, Error>`
 - `UnitsWeapons.get_unit_weapon_have_free_line_of_fire` (params: unit_id:i32, weapon_num:i32, target_id:i32, target_pos:sys::Float3, is_ground_target:bool) → `Result<bool, Error>`
-- `UnitsWeapons.get_unit_weapon_state` (params: unit_id:i32, weapon_num:i32) → `Result<sys::UnitWeaponState, Error>`
+- `UnitsWeapons.get_unit_weapon_state` (params: unit_id:i32, weapon_num:i32, key:&str) → `Result<sys::UnitWeaponState, Error>`
 - `UnitsWeapons.get_unit_weapon_target` (params: unit_id:i32, weapon_num:i32) → `Result<sys::UnitWeaponTarget, Error>`
 - `UnitsWeapons.get_unit_weapon_test_range` (params: unit_id:i32, weapon_num:i32, target_pos:sys::Float3) → `Result<bool, Error>`
 - `UnitsWeapons.get_unit_weapon_test_target` (params: unit_id:i32, weapon_num:i32, target_id:i32, target_pos:sys::Float3, is_ground_target:bool) → `Result<bool, Error>`
@@ -890,14 +892,14 @@ Total Functions: 876
 ## UnsyncedCtrl (79 functions)
 
 - `UnsyncedCtrl.assign_mouse_cursor` (params: command_name:&str, cursor_file_name:&str, overwrite:bool, hot_spot_top_left:bool) → `Result<bool, Error>`
-- `UnsyncedCtrl.deselect_unit_map` (params: unit_ids:&[i32], clear_first:bool) → `Result<bool, Error>`
-- `UnsyncedCtrl.draw_unit_commands` (params: enable:bool) → `Result<bool, Error>`
+- `UnsyncedCtrl.deselect_unit_map` (params: unit_ids:&[i32]) → `Result<bool, Error>`
+- `UnsyncedCtrl.draw_unit_commands` (params: unit_ids:&[i32], table_or_array:bool, queue_draw_depth:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.force_layout_update` (params: ) → `Result<bool, Error>`
 - `UnsyncedCtrl.force_tesselation_update` (params: normal:bool, shadow:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.load_cmd_colors_config` (params: filename:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.load_ctrl_panel_config` (params: filename:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.load_model_textures` (params: model_name:&str) → `Result<bool, Error>`
-- `UnsyncedCtrl.pause_dolly_camera` (params: percent:f32, has_percent:bool) → `Result<bool, Error>`
+- `UnsyncedCtrl.pause_dolly_camera` (params: percent:f32) → `Result<bool, Error>`
 - `UnsyncedCtrl.preload_feature_def_model` (params: def_id:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.preload_unit_def_model` (params: def_id:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.replace_mouse_cursor` (params: old_cursor_file_name:&str, new_cursor_file_name:&str, hot_spot_top_left:bool) → `Result<bool, Error>`
@@ -907,15 +909,15 @@ Total Functions: 876
 - `UnsyncedCtrl.sdlstart_text_input` (params: ) → `Result<bool, Error>`
 - `UnsyncedCtrl.sdlstop_text_input` (params: ) → `Result<bool, Error>`
 - `UnsyncedCtrl.select_unit_map` (params: unit_ids:&[i32], append:bool) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_active_command` (params: cmd_index:i32, button:i32, left_click:bool, right_click:bool, alt:bool, ctrl:bool, meta:bool, shift:bool, action_name:&str, action_extra:&str) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_atmosphere` (params: ) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_active_command` (params: cmd_index:i32, button:i32, left_click:bool, right_click:bool, alt:bool, ctrl:bool, meta:bool, shift:bool) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_atmosphere` (params: params:sys::AtmosphereParams) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_auto_show_metal` (params: enable:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_box_selection_by_engine` (params: state:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_build_facing` (params: facing:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_build_spacing` (params: spacing:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_camera_offset` (params: pos_offset:sys::Float3, tilt_offset:sys::Float3) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_clipboard` (params: text:&str) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_custom_command_draw_data` (params: ) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_custom_command_draw_data` (params: cmd_id:i32, cmd_reference:sys::DefRef, color:sys::Float4, show_area:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_custom_palette_color` (params: index:i32, r:f32, g:f32, b:f32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_dolly_camera_curve` (params: degree:i32, control_points:&[sys::Float4], knots:&[f32]) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_dolly_camera_look_curve` (params: degree:i32, control_points:&[sys::Float4], knots:&[f32]) → `Result<bool, Error>`
@@ -933,12 +935,12 @@ Total Functions: 876
 - `UnsyncedCtrl.set_engine_build_square_rendering` (params: enabled:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_feature_always_update_matrix` (params: feature_id:i32, enable:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_feature_engine_draw_mask` (params: feature_id:i32, mask:u32) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_feature_fade` (params: feature_id:i32, time:i32, alpha:f32) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_feature_fade` (params: feature_id:i32, allow:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_feature_no_draw` (params: feature_id:i32, no_draw:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_feature_palette_index` (params: feature_id:i32, custom_index:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_last_message_position` (params: pos:sys::Float3) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_los_view_colors` (params: ) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_map_rendering_params` (params: ) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_los_view_colors` (params: always:sys::RgbColor, los:sys::RgbColor, radar:sys::RgbColor, jam:sys::RgbColor, radar2:sys::RgbColor) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_map_rendering_params` (params: params:sys::MapRenderingParams) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_map_shader` (params: standard_shader_id:i32, deferred_shader_id:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_map_shading_texture` (params: tex_type:&str, tex_name:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_mini_map_rotation` (params: radians:f32) → `Result<(bool, i32), Error>`
@@ -946,12 +948,12 @@ Total Functions: 876
 - `UnsyncedCtrl.set_nano_projectile_params` (params: r:f32, v:f32, a:f32, rand_r:f32, rand_v:f32, rand_a:f32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_sky_box_texture` (params: tex_name:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_sun_direction` (params: dir:sys::Float3, intensity:f32) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_sun_lighting` (params: ) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_sun_lighting` (params: params:sys::SunLightingParams) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_unit_always_update_matrix` (params: unit_id:i32, always_update_matrix:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_unit_def_icon` (params: unit_def_id:i32, icon_name:&str) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_unit_def_image` (params: unit_def_id:i32, image:&str, has_image:bool) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_unit_def_image` (params: unit_def_id:i32, image:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_unit_engine_draw_mask` (params: unit_id:i32, draw_mask:u32) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_unit_icon` (params: unit_id:i32, draw_icon:bool) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_unit_icon` (params: unit_id:i32, icon_name:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_unit_icon_draw` (params: unit_id:i32, draw_icon:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_unit_leave_tracks` (params: unit_id:i32, leave_tracks:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_unit_no_draw` (params: unit_id:i32, no_draw:bool) → `Result<bool, Error>`
@@ -961,18 +963,18 @@ Total Functions: 876
 - `UnsyncedCtrl.set_unit_palette_index` (params: unit_id:i32, custom_index:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_video_capturing_mode` (params: allow_capture_mode:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_video_capturing_time_offset` (params: time_offset:f32) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_water_params` (params: ) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_water_params` (params: params:sys::WaterParams) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_window_geometry` (params: display_index:i32, window_pos_x:i32, window_pos_y:i32, window_size_x:i32, window_size_y:i32, full_screen:bool, borderless:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_window_maximized` (params: ) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_window_minimized` (params: ) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_wmcaption` (params: title:&str) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_wmcaption` (params: title:&str, title_short:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_wmicon` (params: icon_file_name:&str, force_resolution:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.warp_mouse` (params: x:i32, y:i32) → `Result<bool, Error>`
 
 ## UnsyncedRead (18 functions)
 
 - `UnsyncedRead.get_active_cmd_desc` (params: unit_id:i32) → `Result<bool, Error>`
-- `UnsyncedRead.get_active_cmd_descs` (params: unit_id:i32) → `Result<bool, Error>`
+- `UnsyncedRead.get_active_cmd_descs` (params: ) → `Result<bool, Error>`
 - `UnsyncedRead.get_box_selection_by_engine` (params: ) → `Result<bool, Error>`
 - `UnsyncedRead.get_build_facing` (params: ) → `Result<i32, Error>`
 - `UnsyncedRead.get_build_spacing` (params: ) → `Result<i32, Error>`
@@ -984,9 +986,9 @@ Total Functions: 876
 - `UnsyncedRead.get_last_message_positions` (params: ) → `Result<Vec<sys::Float3>, Error>`
 - `UnsyncedRead.get_nano_projectile_params` (params: ) → `Result<(f32, f32, f32, f32, f32, f32), Error>`
 - `UnsyncedRead.get_piece_projectile_name` (params: projectile_id:i32) → `Result<Option<String>, Error>`
-- `UnsyncedRead.get_team_damage_stats` (params: team_id:i32, ally_team_id:i32) → `Result<(f32, f32, bool), Error>`
+- `UnsyncedRead.get_team_damage_stats` (params: team_id:i32) → `Result<(f32, f32, bool), Error>`
 - `UnsyncedRead.get_unit_palette_index` (params: unit_id:i32) → `Result<(i32, bool), Error>`
-- `UnsyncedRead.is_unit_allied` (params: unit_id:i32, ally_team_id:i32) → `Result<bool, Error>`
+- `UnsyncedRead.is_unit_allied` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnsyncedRead.is_unit_selected` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnsyncedRead.solve_nurbscurve` (params: degree:i32, points:&[sys::Float4], knots:&[f32], segments:i32) → `Result<(Vec<sys::Float3>, bool), Error>`
 
@@ -994,10 +996,10 @@ Total Functions: 876
 
 - `Utils.closest_build_pos` (params: team_id:i32, unit_def_id:i32, pos:sys::Float3, search_radius:f32, min_dist:i32, facing:i32) → `Result<sys::Float3, Error>`
 - `Utils.get_cegid` (params: ceg_name:&str) → `Result<i32, Error>`
-- `Utils.get_unit_def_dimensions` (params: unit_def_id:i32) → `Result<sys::Float3, Error>`
+- `Utils.get_unit_def_dimensions` (params: unit_def_id:i32) → `Result<sys::UnitDefDimensions, Error>`
 - `Utils.pos2_build_pos` (params: unit_def_id:i32, pos:sys::Float3, facing:i32) → `Result<sys::Float3, Error>`
-- `Utils.test_build_order` (params: unit_def_id:i32, pos:sys::Float3, facing:i32) → `Result<(bool, i32), Error>`
-- `Utils.test_move_order` (params: unit_def_id:i32, pos:sys::Float3) → `Result<bool, Error>`
+- `Utils.test_build_order` (params: unit_def_id:i32, pos:sys::Float3, facing:i32) → `Result<(i32, bool, i32), Error>`
+- `Utils.test_move_order` (params: unit_def_id:i32, pos:sys::Float3, dir:sys::Float3, test_terrain:bool, test_objects:bool, center_only:bool) → `Result<bool, Error>`
 
 ## Vfs (14 functions)
 
@@ -1008,7 +1010,7 @@ Total Functions: 876
 - `Vfs.get_file_info` (params: path:&str) → `Result<(sys::FileInfo, bool), Error>`
 - `Vfs.get_file_size` (params: path:&str) → `Result<u32, Error>`
 - `Vfs.get_games` (params: ) → `Result<Vec<String>, Error>`
-- `Vfs.get_map_square_texture` (params: tex_square_x:i32, tex_square_y:i32, lod_min:i32, lod_max:i32, texture_name:&str) → `Result<bool, Error>`
+- `Vfs.get_map_square_texture` (params: tex_square_x:i32, tex_square_y:i32, lod_min:i32, texture_name:&str, lod_max:i32) → `Result<bool, Error>`
 - `Vfs.get_maps` (params: ) → `Result<Vec<String>, Error>`
 - `Vfs.is_directory` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.list_dir` (params: path:&str, pattern:&str) → `Result<Vec<sys::DirEntry>, Error>`
