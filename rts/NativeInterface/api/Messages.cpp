@@ -12,6 +12,8 @@
 #include "System/EventClient.h"
 #include "Lua/LuaHandle.h"
 #include "Lua/LuaMenu.h"
+#include "Lua/LuaUI.h"
+#include "Sim/Misc/TeamHandler.h"
 #include <string>
 #include <vector>
 
@@ -25,6 +27,7 @@ static thread_local Error dynamicError;
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Message system not ready" };
 static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid player" };
+static const Error INVALID_LUA_UI_MODE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid LuaUI message mode" };
 static const Error GUI_NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "GUI handler not ready" };
 
 static void NativeEcho(const EchoQuery* query, EchoResult* result) {
@@ -289,8 +292,47 @@ static void NativeSendSkirmishAIMessage(const SendSkirmishAIMessageQuery* query,
 
 static void NativeSendLuaUIMsg(const SendLuaUIQuery* query, SendLuaUIResult* result) {
 	bufferPos = 0;
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (luaUI == nullptr || gu == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+
+	const char mode = (query->mode != nullptr) ? query->mode[0] : 0;
+	if (mode != 0 && mode != 'a' && mode != 's') {
+		result->error = &INVALID_LUA_UI_MODE_ERROR;
+		result->success = false;
+		return;
+	}
+
+	bool sendMsg = false;
+	switch (mode) {
+		case 0: {
+			sendMsg = true;
+		} break;
+		case 's': {
+			sendMsg = gu->spectating;
+		} break;
+		case 'a': {
+			if (gu->spectatingFullView) {
+				sendMsg = true;
+			} else {
+				sendMsg = teamHandler.Ally(gu->myAllyTeam, gu->myAllyTeam);
+			}
+		} break;
+	}
+
+	if (sendMsg)
+		luaUI->RecvLuaMsg(query->message, gu->myPlayerNum);
+
 	result->error = nullptr;
-	result->success = (query->message != nullptr);
+	result->success = true;
 }
 
 static void NativeSendLuaGaiaMsg(const SendLuaGaiaQuery* query, SendLuaGaiaResult* result) {
