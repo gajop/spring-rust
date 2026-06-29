@@ -48,4 +48,20 @@ impl NativeApiParity {
         self.same_bool_if_present(label, message, "hasCommand", has_command)
     }
 
+    pub(crate) fn check_find_unit_cmd_desc_missing(&mut self, message: &Value, label: &str) -> Result<(), String> {
+        let unit_id = i32_field(message, "unitID")?;
+        let cmd_id = i32_field(message, "cmdID")?;
+        let (cmd_index, found) = self
+            .interface
+            .units_commands()
+            .find_unit_cmd_desc(unit_id, cmd_id)
+            .map_err(|err| format!("find_unit_cmd_desc({unit_id}, {cmd_id}) failed: {err:?}"))?;
+        self.same_bool_if_present(label, message, "found", found)?;
+        if !found {
+            self.same_i32_if_present(label, message, "cmdDescIndex", cmd_index)
+        } else {
+            Ok(())
+        }
+    }
+
 }

@@ -2,23 +2,22 @@
 
 Goal: reach 100% API parity coverage.
 
-Current baseline from `out/20260522-222638/report.md`:
+Current rendering baseline from `out/20260527-083927/report.md`:
 
-- Lua: 213 / 778 functions tested (27.4%)
-- Native Rust: 245 / 876 functions tested (28.0%)
-- Full generated gap list: `out/20260522-222638/coverage_details.md`
+- Lua: 418 / 762 functions tested (54.9%)
+- Native Rust: 475 / 878 functions tested (54.1%)
+- Full generated gap list: `out/20260527-083927/coverage_details.md`
 
 Context baseline:
 
-- Synced gadget: 213 / 612 runtime Spring APIs tested; 399 untested; 23 known mismatch issues affecting 29 APIs.
-- Unsynced gadget: 42 / 596 runtime Spring APIs tested; 554 untested; 23 known mismatch issues affecting 23 APIs.
-- Widget: 42 / 597 runtime Spring APIs tested; 555 untested; 23 known mismatch issues affecting 23 APIs.
+- Synced gadget: 253 / 612 runtime Spring APIs tested; 359 untested; 14 known mismatch issues; 307 native APIs recorded.
+- Unsynced gadget: 120 / 596 runtime Spring APIs tested; 476 untested; 25 known mismatch issues; 120 native APIs recorded.
+- Widget: 47 / 597 runtime Spring APIs tested; 550 untested; 25 known mismatch issues; 50 native APIs recorded.
 
 Known problem baseline:
 
-- known_mismatch: 23 issues; 29 Lua APIs; 29 native APIs.
-- inventory_mismatch: 2 issues; 2 Lua APIs; 2 native APIs.
-- inventory_missing_docstring: 1 issue; 2 Lua APIs; 2 native APIs.
+- known_mismatch: 26 issues; 32 Spring Lua APIs plus `math.bit_bits`; 33 native APIs.
+- known_test_limitation: 1 issue; 1 Spring Lua API; 1 native API.
 
 Process:
 
@@ -47,11 +46,11 @@ Process:
 - [x] Harness defaults use installed `spring`/`spring-headless` binaries so renderer assets are available.
 - [ ] Replace remaining custom setter/getter Lua value generators with generic spec param generation.
 - [ ] Generate common Rust field extractors/comparators from spec.
-- [ ] Add unsynced gadget/widget-specific generated test contexts.
+- [x] Add unsynced gadget/widget-specific generated test contexts.
 
 ## Next Batches
 
-- [ ] Read-only game/system/display getters.
+- [ ] Read-only game/system/display getters. In progress: display/window/color/camera/input basics covered.
 - [ ] Read-only teams/player getters.
 - [ ] Read-only unit query/list/count getters.
 - [ ] Read-only feature query/list/count getters.
@@ -69,7 +68,7 @@ Process:
 - [ ] Unit state setters/getters.
 - [ ] Feature state setters/getters.
 - [ ] Projectiles/effects/spawn APIs.
-- [ ] UI/input/camera/display unsynced APIs.
+- [ ] UI/input/camera/display unsynced APIs. In progress: camera basics and input state/key-symbol basics covered.
 - [ ] VFS/config/sound/messages/misc APIs.
 - [ ] Destructive APIs with isolated fixture objects.
 - [ ] APIs requiring multi-team/player fixture setup.

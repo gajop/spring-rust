@@ -207,11 +207,19 @@ struct SetWaterParamsResult { const Error* error; bool success; };
 struct SetMapShaderQuery { int32_t standardShaderID; int32_t deferredShaderID; };
 struct SetMapShaderResult { const Error* error; bool success; };
 
-struct SetMapShadingTextureQuery { const char* texType; const char* texName; };
+struct SetMapShadingTextureQuery { const char* texType; const char* texName; int32_t num; };
 struct SetMapShadingTextureResult { const Error* error; bool success; };
 
 struct SetSkyBoxTextureQuery { const char* texName; };
 struct SetSkyBoxTextureResult { const Error* error; bool success; };
+
+// texType is "texture", "foamTexture" or "normalTexture" (mirrors the string keys
+// of Lua Spring.SetWaterParams, which the value-typed WaterParams cannot carry).
+struct SetWaterTextureQuery { const char* texType; const char* texName; };
+struct SetWaterTextureResult { const Error* error; bool success; };
+// Reads the current path back (for undo); texType as in SetWaterTexture.
+struct GetWaterTextureQuery { const char* texType; };
+struct GetWaterTextureResult { const Error* error; const char* texName; };
 
 struct SetMapRenderingParamsQuery { MapRenderingParams params; };
 struct SetMapRenderingParamsResult { const Error* error; bool success; };
@@ -221,6 +229,16 @@ struct SetLosViewColorsResult { const Error* error; bool success; };
 
 struct SetDrawSelectionInfoQuery { bool draw; };
 struct SetDrawSelectionInfoResult { const Error* error; bool success; };
+
+struct SetShockFrontFactorsQuery {
+	float minArea;
+	float minPower;
+	float distAdj;
+	bool hasMinArea;
+	bool hasMinPower;
+	bool hasDistAdj;
+};
+struct SetShockFrontFactorsResult { const Error* error; bool success; };
 
 struct SetCustomCommandDrawDataQuery { int32_t cmdID; DefRef cmdReference; Float4 color; bool showArea; };
 struct SetCustomCommandDrawDataResult { const Error* error; bool success; };
@@ -354,6 +372,7 @@ struct UnsyncedCtrlApi {
 	void (*SetMapRenderingParams)(const SetMapRenderingParamsQuery* query, SetMapRenderingParamsResult* result);
 	void (*SetLosViewColors)(const SetLosViewColorsQuery* query, SetLosViewColorsResult* result);
 	void (*SetDrawSelectionInfo)(const SetDrawSelectionInfoQuery* query, SetDrawSelectionInfoResult* result);
+	void (*SetShockFrontFactors)(const SetShockFrontFactorsQuery* query, SetShockFrontFactorsResult* result);
 	void (*SetCustomCommandDrawData)(const SetCustomCommandDrawDataQuery* query, SetCustomCommandDrawDataResult* result);
 	void (*SetLastMessagePosition)(const SetLastMessagePositionQuery* query, SetLastMessagePositionResult* result);
 	void (*LoadCmdColorsConfig)(const LoadCmdColorsConfigQuery* query, LoadCmdColorsConfigResult* result);
@@ -380,6 +399,8 @@ struct UnsyncedCtrlApi {
 	void (*SelectUnitMap)(const SelectUnitMapQuery* query, SelectUnitMapResult* result);
 	void (*DeselectUnitMap)(const DeselectUnitMapQuery* query, DeselectUnitMapResult* result);
 	void (*DrawUnitCommands)(const DrawUnitCommandsQuery* query, DrawUnitCommandsResult* result);
+	void (*SetWaterTexture)(const SetWaterTextureQuery* query, SetWaterTextureResult* result);
+	void (*GetWaterTexture)(const GetWaterTextureQuery* query, GetWaterTextureResult* result);
 };
 
 extern const UnsyncedCtrlApi UNSYNCED_CTRL_API;

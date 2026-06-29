@@ -28,6 +28,28 @@ static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .mes
 
 static bool IsReady() { return (gs != nullptr); }
 
+template<typename T>
+static T* AllocateArray(size_t count) {
+	const size_t needed = count * sizeof(T);
+	if (bufferPos + needed > sizeof(scratchBuffer))
+		return nullptr;
+
+	T* out = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
+	bufferPos += needed;
+	return out;
+}
+
+static const char* CopyString(const std::string& str) {
+	const size_t len = str.size() + 1;
+	if (bufferPos + len > sizeof(scratchBuffer))
+		return nullptr;
+
+	char* out = &scratchBuffer[bufferPos];
+	memcpy(out, str.c_str(), len);
+	bufferPos += len;
+	return out;
+}
+
 static void NativeGetTeamList(const GetTeamListQuery* query, GetTeamListResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
@@ -428,11 +450,58 @@ static void NativeGetAIInfo(const GetAIInfoQuery* query, GetAIInfoResult* result
 
 	result->error = nullptr;
 	result->isAI = false;
+	result->info = {};
+	result->info.skirmishAIID = -1;
+	result->info.hostingPlayerID = -1;
+	result->info.name = "";
 	result->info.shortName = "";
 	result->info.version = "";
-	result->info.name = "";
-	result->info.description = "";
-	result->info.hostPlayer = "";
+	result->info.options = nullptr;
+	result->info.optionCount = 0;
+
+	const std::vector<uint8_t>& teamAIs = skirmishAIHandler.GetSkirmishAIsInTeam(query->teamID);
+	if (teamAIs.empty())
+		return;
+
+	const size_t skirmishAIID = teamAIs[0];
+	const SkirmishAIData* aiData = skirmishAIHandler.GetSkirmishAI(skirmishAIID);
+	if (aiData == nullptr)
+		return;
+
+	result->info.skirmishAIID = static_cast<int32_t>(skirmishAIID);
+	result->info.name = CopyString(aiData->name);
+	result->info.hostingPlayerID = aiData->hostPlayer;
+	result->info.shortName = CopyString(aiData->shortName);
+	result->info.version = CopyString(aiData->version);
+
+	if (result->info.name == nullptr || result->info.shortName == nullptr || result->info.version == nullptr) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	if (!aiData->options.empty()) {
+		result->info.options = AllocateArray<AIOption>(aiData->options.size());
+		if (result->info.options == nullptr) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+
+		uint32_t optionCount = 0;
+		for (const auto& option: aiData->options) {
+			AIOption& outOption = result->info.options[optionCount];
+			outOption.key = CopyString(option.first);
+			outOption.value = CopyString(option.second);
+			if (outOption.key == nullptr || outOption.value == nullptr) {
+				result->error = &BUFFER_OVERFLOW_ERROR;
+				result->info.optionCount = optionCount;
+				return;
+			}
+			optionCount++;
+		}
+		result->info.optionCount = optionCount;
+	}
+
+	result->isAI = true;
 }
 
 } // namespace

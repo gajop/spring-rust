@@ -424,6 +424,67 @@
       }
     },
     {
+      "id": "get_team_units_by_defs",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamUnitsByDefs"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_team_units_by_defs"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "unitIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamUnitsByDefs`",
+        "native_getter": "`UnitsQuery.get_team_units_by_defs`",
+        "fields": "`unitIDs`"
+      },
+      "rust": {
+        "check": "check_units_query_list",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "unitDefID": {
+          "type": "i32",
+          "fixture": "unitDefID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamUnitsByDefs",
+        "args": [
+          "fixture.teamID",
+          "fixture.unitDefID"
+        ],
+        "returns": [
+          "unitIDs"
+        ]
+      },
+      "order_insensitive_fields": [
+        "unitIDs"
+      ]
+    },
+    {
       "id": "get_units_in_rectangle",
       "context": "synced_gadget",
       "kind": "readonly",

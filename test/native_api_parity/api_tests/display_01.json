@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_num_displays",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetNumDisplays"]},
+      "native": {"set": [], "get": ["Display.get_num_displays"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetNumDisplays`", "native_getter": "`Display.get_num_displays`", "fields": "`count`"},
+      "rust": {"check": "check_display_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetNumDisplays", "args": [], "returns": ["count"]}
+    },
+    {
+      "id": "get_draw_frame",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetDrawFrame"]},
+      "native": {"set": [], "get": ["Display.get_draw_frame"]},
+      "compare": {"mode": "fields", "stream": "shape", "epsilon": 0.05, "fields": ["low16", "high16"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetDrawFrame`", "native_getter": "`Display.get_draw_frame`", "fields": "`low16`, `high16`"},
+      "rust": {"check": "check_display_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetDrawFrame", "args": [], "returns": ["low16", "high16"]}
+    },
+    {
+      "id": "get_frame_time_offset",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetFrameTimeOffset"]},
+      "native": {"set": [], "get": ["Display.get_frame_time_offset"]},
+      "compare": {"mode": "fields", "stream": "shape", "epsilon": 0.05, "fields": ["offset"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFrameTimeOffset`", "native_getter": "`Display.get_frame_time_offset`", "fields": "`offset`"},
+      "rust": {"check": "check_display_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFrameTimeOffset", "args": [], "returns": ["offset"]}
+    },
+    {
+      "id": "get_last_update_seconds",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetLastUpdateSeconds"]},
+      "native": {"set": [], "get": ["Display.get_last_update_seconds"]},
+      "compare": {"mode": "fields", "stream": "shape", "epsilon": 0.05, "fields": ["seconds"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetLastUpdateSeconds`", "native_getter": "`Display.get_last_update_seconds`", "fields": "`seconds`"},
+      "rust": {"check": "check_display_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetLastUpdateSeconds", "args": [], "returns": ["seconds"]}
+    },
+    {
+      "id": "get_fps",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetFPS"]},
+      "native": {"set": [], "get": ["Display.get_fps"]},
+      "compare": {"mode": "fields", "stream": "shape", "epsilon": 0.05, "fields": ["fps"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFPS`", "native_getter": "`Display.get_fps`", "fields": "`fps`"},
+      "rust": {"check": "check_display_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFPS", "args": [], "returns": ["fps"]}
+    },
+    {
+      "id": "get_game_speed",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetGameSpeed"]},
+      "native": {"set": [], "get": ["Display.get_game_speed"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["wantedSpeedFactor", "speedFactor", "paused"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetGameSpeed`", "native_getter": "`Display.get_game_speed`", "fields": "`wantedSpeedFactor`, `speedFactor`, `paused`"},
+      "rust": {"check": "check_display_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetGameSpeed", "args": [], "returns": ["wantedSpeedFactor", "speedFactor", "paused"]}
+    }
+  ]
+}

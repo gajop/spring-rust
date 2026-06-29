@@ -10,7 +10,11 @@
 #include "Sim/Units/UnitTypes/Factory.h"
 #include "Sim/Units/CommandAI/BuilderCAI.h"
 #include "Sim/Units/CommandAI/Command.h"
+#include "Sim/Units/CommandAI/MobileCAI.h"
 #include "Sim/MoveTypes/MoveDefHandler.h"
+#include "Sim/MoveTypes/AAirMoveType.h"
+#include "Sim/MoveTypes/HoverAirMoveType.h"
+#include "Sim/MoveTypes/StrafeAirMoveType.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Weapons/PlasmaRepulser.h"
@@ -18,7 +22,10 @@
 #include "System/SpringMath.h"
 #include "Rendering/Units/UnitDrawer.h"
 #include "Rendering/Models/3DModel.hpp"
+#include "Rendering/Models/3DModelPiece.hpp"
 #include "Sim/Units/UnitToolTipMap.hpp"
+#include <algorithm>
+#include <cstddef>
 #include <cstring>
 
 namespace {
@@ -35,6 +42,28 @@ static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .
 
 static bool IsReady() {
 	return (gs != nullptr);
+}
+
+static char* AllocScratch(size_t size, size_t alignment = alignof(std::max_align_t)) {
+	const size_t alignedPos = (bufferPos + alignment - 1) & ~(alignment - 1);
+	if (alignedPos + size > sizeof(scratchBuffer)) {
+		return nullptr;
+	}
+
+	char* ptr = &scratchBuffer[alignedPos];
+	bufferPos = alignedPos + size;
+	return ptr;
+}
+
+static const char* CopyString(const std::string& str) {
+	const size_t len = str.size() + 1;
+	char* ptr = AllocScratch(len, alignof(char));
+	if (ptr == nullptr) {
+		return "";
+	}
+
+	memcpy(ptr, str.c_str(), len);
+	return ptr;
 }
 
 static void NativeGetUnitTooltip(const GetUnitTooltipQuery* query, GetUnitTooltipResult* result) {
@@ -150,6 +179,33 @@ static void NativeGetUnitNeutral(const GetUnitNeutralQuery* query, GetUnitNeutra
 	}
 
 	result->neutral = unit->IsNeutral();
+}
+
+static void NativeGetUnitCrashing(const GetUnitCrashingQuery* query, GetUnitCrashingResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->isAircraft = false;
+	result->crashing = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const AAirMoveType* amt = dynamic_cast<AAirMoveType*>(unit->moveType);
+	if (amt == nullptr) {
+		// Not an aircraft: crashing does not apply (isAircraft stays false).
+		return;
+	}
+
+	result->isAircraft = true;
+	result->crashing = (amt->aircraftState == AAirMoveType::AIRCRAFT_CRASHING);
 }
 
 static void NativeGetUnitHealth(const GetUnitHealthQuery* query, GetUnitHealthResult* result) {
@@ -294,8 +350,8 @@ static void NativeGetUnitStorage(const GetUnitStorageQuery* query, GetUnitStorag
 		return;
 	}
 
-	result->storage.metalStorage = unit->unitDef->storage.metal;
-	result->storage.energyStorage = unit->unitDef->storage.energy;
+	result->storage.metalStorage = unit->storage.metal;
+	result->storage.energyStorage = unit->storage.energy;
 }
 
 static void NativeGetUnitMetalExtraction(const GetUnitMetalExtractionQuery* query, GetUnitMetalExtractionResult* result) {
@@ -353,11 +409,24 @@ static void NativeGetUnitStates(const GetUnitStatesQuery* query, GetUnitStatesRe
 
 	result->states.fireState = unit->fireState;
 	result->states.moveState = unit->moveState;
-	result->states.repeat = false; // Would need command queue
+	result->states.autoRepairLevel = -1.0f;
+	result->states.repeat = unit->commandAI->repeatOrders;
 	result->states.cloak = unit->wantCloak;
 	result->states.active = unit->activated;
 	result->states.trajectory = unit->useHighTrajectory;
-	result->states.autoLand = !unit->unitDef->DontLand();
+	result->states.autoLand = false;
+	result->states.loopbackAttack = false;
+
+	if (const CMobileCAI* mCAI = dynamic_cast<const CMobileCAI*>(unit->commandAI)) {
+		result->states.autoRepairLevel = mCAI->repairBelowHealth;
+	}
+	if (const CHoverAirMoveType* hAMT = dynamic_cast<const CHoverAirMoveType*>(unit->moveType)) {
+		result->states.autoLand = hAMT->autoLand;
+		result->states.loopbackAttack = false;
+	} else if (const CStrafeAirMoveType* sAMT = dynamic_cast<const CStrafeAirMoveType*>(unit->moveType)) {
+		result->states.autoLand = sAMT->autoLand;
+		result->states.loopbackAttack = sAMT->loopbackAttack;
+	}
 }
 
 static void NativeGetUnitArmored(const GetUnitArmoredQuery* query, GetUnitArmoredResult* result) {
@@ -477,15 +546,15 @@ static void NativeGetUnitPosErrorParams(const GetUnitPosErrorParamsQuery* query,
 		return;
 	}
 
-	const float3 errVec = unit->GetErrorVector(query->allyTeamID);
-	result->params.posError.x = errVec.x;
-	result->params.posError.y = errVec.y;
-	result->params.posError.z = errVec.z;
-	result->params.nextPosError.x = 0.0f;
-	result->params.nextPosError.y = 0.0f;
-	result->params.nextPosError.z = 0.0f;
-	result->params.errorScale = 1.0f;
-	result->params.errorMult = 1.0f;
+	const int allyTeam = std::clamp(query->allyTeamID, 0, teamHandler.ActiveAllyTeams());
+	result->params.posErrorVector.x = unit->posErrorVector.x;
+	result->params.posErrorVector.y = unit->posErrorVector.y;
+	result->params.posErrorVector.z = unit->posErrorVector.z;
+	result->params.posErrorDelta.x = unit->posErrorDelta.x;
+	result->params.posErrorDelta.y = unit->posErrorDelta.y;
+	result->params.posErrorDelta.z = unit->posErrorDelta.z;
+	result->params.nextPosErrorUpdate = unit->nextPosErrorUpdate;
+	result->params.posErrorBit = unit->GetPosErrorBit(allyTeam);
 }
 
 static void NativeGetUnitHeight(const GetUnitHeightQuery* query, GetUnitHeightResult* result) {
@@ -754,6 +823,12 @@ static void NativeGetUnitIsBuilding(const GetUnitIsBuildingQuery* query, GetUnit
 	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
 	if (builder != nullptr && builder->curBuild != nullptr) {
 		result->buildeeID = builder->curBuild->id;
+		return;
+	}
+
+	const CFactory* factory = dynamic_cast<const CFactory*>(unit);
+	if (factory != nullptr && factory->curBuild != nullptr) {
+		result->buildeeID = factory->curBuild->id;
 	}
 }
 
@@ -875,7 +950,18 @@ static void NativeGetUnitCurrentBuildPower(const GetUnitCurrentBuildPowerQuery* 
 		return;
 	}
 
-	result->buildPower = unit->unitDef->buildSpeed;
+	const NanoPieceCache* pieceCache = nullptr;
+
+	const CBuilder* builder = dynamic_cast<const CBuilder*>(unit);
+	if (builder != nullptr)
+		pieceCache = &builder->GetNanoPieceCache();
+
+	const CFactory* factory = dynamic_cast<const CFactory*>(unit);
+	if (factory != nullptr)
+		pieceCache = &factory->GetNanoPieceCache();
+
+	if (pieceCache != nullptr)
+		result->buildPower = pieceCache->GetBuildPower();
 }
 
 static void NativeGetUnitBuildParams(const GetUnitBuildParamsQuery* query, GetUnitBuildParamsResult* result) {
@@ -1020,6 +1106,8 @@ static void NativeGetUnitIsTransporting(const GetUnitIsTransportingQuery* query,
 	bufferPos = 0;
 	result->error = nullptr;
 	result->isTransporting = false;
+	result->unitIDs = nullptr;
+	result->count = 0;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -1032,12 +1120,36 @@ static void NativeGetUnitIsTransporting(const GetUnitIsTransportingQuery* query,
 		return;
 	}
 
-	result->isTransporting = !unit->transportedUnits.empty();
+	if (!unit->unitDef->IsTransportUnit()) {
+		return;
+	}
+
+	result->isTransporting = true;
+	result->count = unit->transportedUnits.size();
+	if (result->count == 0) {
+		return;
+	}
+
+	const size_t bytesNeeded = result->count * sizeof(int32_t);
+	result->unitIDs = reinterpret_cast<int32_t*>(AllocScratch(bytesNeeded, alignof(int32_t)));
+	if (result->unitIDs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->count = 0;
+		return;
+	}
+
+	for (uint32_t i = 0; i < result->count; ++i) {
+		result->unitIDs[i] = unit->transportedUnits[i].unit->id;
+	}
 }
 
 static void NativeGetUnitStockpile(const GetUnitStockpileQuery* query, GetUnitStockpileResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	result->hasStockpile = false;
+	result->stockpile.stockpile = 0;
+	result->stockpile.stockpileQueueSize = 0;
+	result->stockpile.buildPercent = 0.0f;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -1045,20 +1157,20 @@ static void NativeGetUnitStockpile(const GetUnitStockpileQuery* query, GetUnitSt
 	}
 
 	const CUnit* unit = unitHandler.GetUnit(query->unitID);
-	if (unit == nullptr || unit->weapons.empty()) {
+	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
 	}
 
-	// Check first weapon for stockpile
-	const CWeapon* weapon = unit->weapons[0];
-	if (weapon != nullptr) {
-		result->stockpile.stockpile = weapon->numStockpiled;
-		result->stockpile.stockpileQueueSize = weapon->numStockpileQued;
-	} else {
-		result->stockpile.stockpile = 0;
-		result->stockpile.stockpileQueueSize = 0;
+	const CWeapon* weapon = unit->stockpileWeapon;
+	if (weapon == nullptr) {
+		return;
 	}
+
+	result->hasStockpile = true;
+	result->stockpile.stockpile = weapon->numStockpiled;
+	result->stockpile.stockpileQueueSize = weapon->numStockpileQued;
+	result->stockpile.buildPercent = weapon->buildPercent;
 }
 
 static void NativeGetUnitSelfDTime(const GetUnitSelfDTimeQuery* query, GetUnitSelfDTimeResult* result) {
@@ -1125,8 +1237,13 @@ static void NativeGetUnitFlanking(const GetUnitFlankingQuery* query, GetUnitFlan
 	}
 
 	result->flanking.flankingMode = unit->flankingBonusMode;
+	result->flanking.moveFactor = unit->flankingBonusMobilityAdd;
 	result->flanking.minDamage = unit->flankingBonusAvgDamage - unit->flankingBonusDifDamage;
 	result->flanking.maxDamage = unit->flankingBonusAvgDamage + unit->flankingBonusDifDamage;
+	result->flanking.direction.x = unit->flankingBonusDir.x;
+	result->flanking.direction.y = unit->flankingBonusDir.y;
+	result->flanking.direction.z = unit->flankingBonusDir.z;
+	result->flanking.mobility = unit->flankingBonusMobility;
 }
 
 static void NativeGetUnitTravel(const GetUnitTravelQuery* query, GetUnitTravelResult* result) {
@@ -1195,7 +1312,10 @@ static void NativeGetUnitLastAttacker(const GetUnitLastAttackerQuery* query, Get
 static void NativeGetUnitLastAttackedPiece(const GetUnitLastAttackedPieceQuery* query, GetUnitLastAttackedPieceResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->pieceNum = -1;
+	result->piece.name = "";
+	result->piece.pieceNum = -1;
+	result->piece.frame = -1;
+	result->piece.wasHit = false;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -1208,7 +1328,15 @@ static void NativeGetUnitLastAttackedPiece(const GetUnitLastAttackedPieceQuery* 
 		return;
 	}
 
-	result->pieceNum = -1;  // lastAttackedPiece no longer available
+	const LocalModelPiece* piece = unit->hitModelPieces[true];
+	if (piece == nullptr || piece->original == nullptr) {
+		return;
+	}
+
+	result->piece.name = CopyString(piece->original->name);
+	result->piece.pieceNum = piece->GetLModelPieceIndex() + 1;
+	result->piece.frame = unit->pieceHitFrames[true];
+	result->piece.wasHit = true;
 }
 
 static void NativeGetUnitLosState(const GetUnitLosStateQuery* query, GetUnitLosStateResult* result) {
@@ -1426,4 +1554,5 @@ const UnitsInfoApi UNITS_INFO_API = {
 	.GetUnitBlocking = NativeGetUnitBlocking,
 	.GetUnitHarvestStorage = NativeGetUnitHarvestStorage,
 	.ClearUnitsPreviousDrawFlag = NativeClearUnitsPreviousDrawFlag,
+	.GetUnitCrashing = NativeGetUnitCrashing,
 };

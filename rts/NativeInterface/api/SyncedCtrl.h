@@ -400,6 +400,12 @@ struct SetUnitStockpileQuery {
 };
 struct SetUnitStockpileResult { const Error* error; bool success; };
 
+struct SetUnitTravelQuery { uint8_t _unused; };
+struct SetUnitTravelResult { const Error* error; bool success; };
+
+struct SetUnitFuelQuery { uint8_t _unused; };
+struct SetUnitFuelResult { const Error* error; bool success; };
+
 // Unit direction queries
 struct SetUnitDirectionQuery { int32_t unitID; Float3 frontDir; Float3 rightDir; };
 struct SetUnitDirectionResult { const Error* error; bool success; };
@@ -703,6 +709,8 @@ struct UnitControlApi {
 	void (*SetUnitLandGoal)(const SetUnitLandGoalQuery* query, SetUnitLandGoalResult* result);
 	void (*ClearUnitGoal)(const ClearUnitGoalQuery* query, ClearUnitGoalResult* result);
 	void (*SetUnitStockpile)(const SetUnitStockpileQuery* query, SetUnitStockpileResult* result);
+	void (*SetUnitTravel)(const SetUnitTravelQuery* query, SetUnitTravelResult* result);
+	void (*SetUnitFuel)(const SetUnitFuelQuery* query, SetUnitFuelResult* result);
 	void (*SetUnitDirection)(const SetUnitDirectionQuery* query, SetUnitDirectionResult* result);
 	void (*UnitAttach)(const UnitAttachQuery* query, UnitAttachResult* result);
 	void (*UnitDetach)(const UnitDetachQuery* query, UnitDetachResult* result);
@@ -996,13 +1004,16 @@ struct LevelSmoothMeshResult { const Error* error; bool success; };
 struct RebuildSmoothMeshQuery { uint8_t _unused; };
 struct RebuildSmoothMeshResult { const Error* error; bool success; };
 
-struct SetHeightMapFuncQuery { LuaFunctionRef luaFunction; float arg; NativeLuaArgs args; };
+// Native counterparts of Lua's terrain edit callback wrappers. The engine sets
+// callback-local edit state, invokes callback(userData), then finalizes the
+// edited data before returning.
+struct SetHeightMapFuncQuery { NativeCallback callback; void* userData; };
 struct SetHeightMapFuncResult { const Error* error; bool success; };
 
-struct SetOriginalHeightMapFuncQuery { LuaFunctionRef heightMapFunc; };
+struct SetOriginalHeightMapFuncQuery { NativeCallback callback; void* userData; };
 struct SetOriginalHeightMapFuncResult { const Error* error; bool success; };
 
-struct SetSmoothMeshFuncQuery { LuaFunctionRef luaFunction; NativeLuaValue arg; NativeLuaArgs args; };
+struct SetSmoothMeshFuncQuery { NativeCallback callback; void* userData; };
 struct SetSmoothMeshFuncResult { const Error* error; bool success; };
 
 struct TerrainControlApi {

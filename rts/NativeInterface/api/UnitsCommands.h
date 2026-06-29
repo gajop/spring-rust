@@ -30,8 +30,8 @@ struct CommandFFI {
 // Command description
 struct CommandDescription {
 	int32_t cmdID;
-	int32_t action;          // Command action type
-	const char* type;        // "icon", "iconMap", etc.
+	const char* action;      // Command action binding name
+	int32_t type;            // CMDTYPE_* from Command.h
 	const char* name;
 	const char* tooltip;
 	const char* texture;
@@ -99,6 +99,9 @@ struct GetUnitCmdDescsResult { const Error* error; CommandDescription* cmdDescs;
 struct FindUnitCmdDescQuery { int32_t unitID; int32_t cmdID; };
 struct FindUnitCmdDescResult { const Error* error; int32_t cmdIndex; bool found; };
 
+struct GetCommandParamsQuery { const CommandFFI* command; };
+struct GetCommandParamsResult { const Error* error; float* params; uint32_t count; };
+
 struct GiveOrderQuery { int32_t cmdID; float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };
 struct GiveOrderResult { const Error* error; bool success; };
 
@@ -137,6 +140,7 @@ struct UnitsCommandsApi {
 	void (*GetRealBuildQueue)(const GetRealBuildQueueQuery* query, GetRealBuildQueueResult* result);
 	void (*GetUnitCmdDescs)(const GetUnitCmdDescsQuery* query, GetUnitCmdDescsResult* result);
 	void (*FindUnitCmdDesc)(const FindUnitCmdDescQuery* query, FindUnitCmdDescResult* result);
+	void (*GetCommandParams)(const GetCommandParamsQuery* query, GetCommandParamsResult* result);
 	void (*GiveOrder)(const GiveOrderQuery* query, GiveOrderResult* result);
 	void (*GiveOrderToUnitMap)(const GiveOrderToUnitMapQuery* query, GiveOrderToUnitMapResult* result);
 	void (*GiveOrderArrayToUnitMap)(const GiveOrderArrayToUnitMapQuery* query, GiveOrderArrayToUnitMapResult* result);

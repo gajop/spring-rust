@@ -3646,8 +3646,8 @@ int LuaSyncedCtrl::SetUnitRadiusAndHeight(lua_State* L)
 		return 1;
 	}
 
-	const float newRadius = std::max(1.0f, luaL_optfloat(L, 2, unit->radius));
-	const float newHeight = std::max(1.0f, luaL_optfloat(L, 3, unit->height));
+	const float newRadius = std::max(0.0f, luaL_optfloat(L, 2, unit->radius));
+	const float newHeight = std::max(0.0f, luaL_optfloat(L, 3, unit->height));
 	const bool updateQuads = (newRadius != unit->radius);
 
 	if (updateQuads) {
@@ -4870,7 +4870,7 @@ int LuaSyncedCtrl::SetFeatureResources(lua_State* L)
 	feature->resources.metal  = std::clamp(luaL_checknumber(L, 2), 0.0f, feature->defResources.metal );
 	feature->resources.energy = std::clamp(luaL_checknumber(L, 3), 0.0f, feature->defResources.energy);
 
-	feature->reclaimTime = std::clamp(luaL_optnumber(L, 4, feature->reclaimTime), 1.0f, 1000000.0f);
+	feature->reclaimTime = std::clamp(luaL_optnumber(L, 4, feature->reclaimTime), 0.0f, 1000000.0f);
 	feature->reclaimLeft = std::clamp(luaL_optnumber(L, 5, feature->reclaimLeft), 0.0f,       1.0f);
 	return 0;
 }
@@ -5233,8 +5233,8 @@ int LuaSyncedCtrl::SetFeatureRadiusAndHeight(lua_State* L)
 		return 1;
 	}
 
-	const float newRadius = std::max(1.0f, luaL_optfloat(L, 2, feature->radius));
-	const float newHeight = std::max(1.0f, luaL_optfloat(L, 3, feature->height));
+	const float newRadius = std::max(0.0f, luaL_optfloat(L, 2, feature->radius));
+	const float newHeight = std::max(0.0f, luaL_optfloat(L, 3, feature->height));
 	const bool updateQuads = (newRadius != feature->radius);
 
 	if (updateQuads) {
@@ -7994,10 +7994,11 @@ int LuaSyncedCtrl::RemoveUnitCmdDesc(lua_State* L)
 
 int LuaSyncedCtrl::InvokeNativeModule(lua_State* L)
 {
-	const char* msg = luaL_checkstring(L, 1);
+	size_t msgLen = 0;
+	const char* msg = luaL_checklstring(L, 1, &msgLen);
 
 	if (NativeInterfaceSystem::s_instance)
-		NativeInterfaceSystem::s_instance->HandleLuaCall(msg);
+		NativeInterfaceSystem::s_instance->HandleLuaCall(msg, msgLen);
 
 	return 0;
 }

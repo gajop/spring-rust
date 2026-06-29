@@ -11,8 +11,8 @@ extern "C" {
 
 struct CallAsTeamQuery {
 	int32_t teamID;
-	LuaFunctionRef func;
-	NativeLuaArgs args;
+	NativeCallback callback;
+	void* userData;
 };
 struct CallAsTeamResult { const Error* error; bool success; };
 

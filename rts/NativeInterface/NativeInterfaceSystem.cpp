@@ -91,6 +91,7 @@ public:
 		nativeInterface.metalMap = &METAL_MAP_API;
 		nativeInterface.pathFinder = &PATH_FINDER_API;
 		nativeInterface.rulesParams = &RULES_PARAMS_API;
+		nativeInterface.rmlUi = &RMLUI_API;
 		nativeInterface.mathExtra = &MATH_EXTRA_API;
 		nativeInterface.moveCtrl = &MOVE_CTRL_API;
 		nativeInterface.syncedCtrl = &SYNCED_CTRL_API;
@@ -107,6 +108,7 @@ public:
 		nativeInterface.groundDecals = &GROUND_DECALS_API;
 		nativeInterface.systemControl = &SYSTEM_CONTROL_API;
 		nativeInterface.profiling = &PROFILING_API;
+		nativeInterface.gfx = &GFX_API;
 		nativeInterface.soundApi = &SOUND_API;
 		nativeInterface.messages = &MESSAGES_API;
 		nativeInterface.config = &CONFIG_API;
@@ -232,7 +234,7 @@ void NativeInterfaceSystem::HandleLuaMsg(int playerID, int script, int mode, con
 		pImpl->eventClient->HandleLuaMsg(playerID, script, mode, data);
 }
 
-void NativeInterfaceSystem::HandleLuaCall(const char* msg) {
+void NativeInterfaceSystem::HandleLuaCall(const char* msg, size_t msgLength) {
 	if (pImpl->eventClient)
-		pImpl->eventClient->HandleLuaCall(msg);
+		pImpl->eventClient->HandleLuaCall(msg, msgLength);
 }

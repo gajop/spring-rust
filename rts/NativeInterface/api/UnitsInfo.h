@@ -60,17 +60,20 @@ struct UnitStorage {
 struct UnitStates {
 	int32_t fireState;     // 0=hold, 1=return fire, 2=fire at will
 	int32_t moveState;     // 0=hold, 1=maneuver, 2=roam
+	float autoRepairLevel;
 	bool repeat;
 	bool cloak;
 	bool active;
 	bool trajectory;
 	bool autoLand;
+	bool loopbackAttack;
 };
 
 // Unit stockpile
 struct UnitStockpile {
 	uint32_t stockpile;
 	uint32_t stockpileQueueSize;
+	float buildPercent;
 };
 
 // Unit sensor radius
@@ -86,10 +89,10 @@ struct UnitSensorRadius {
 
 // Unit position error params (fog of war error)
 struct UnitPosErrorParams {
-	Float3 posError;
-	Float3 nextPosError;
-	float errorScale;
-	float errorMult;
+	Float3 posErrorVector;
+	Float3 posErrorDelta;
+	int32_t nextPosErrorUpdate;
+	bool posErrorBit;
 };
 
 // Unit vectors (directional)
@@ -141,8 +144,11 @@ struct UnitShieldState {
 // Flanking bonus
 struct UnitFlanking {
 	uint32_t flankingMode;
+	float moveFactor;
 	float minDamage;
 	float maxDamage;
+	Float3 direction;
+	float mobility;
 };
 
 // Travel and fuel
@@ -154,6 +160,13 @@ struct UnitTravel {
 struct UnitFuel {
 	float fuel;
 	float maxFuel;
+};
+
+struct LastHitPiece {
+	const char* name;
+	int32_t pieceNum;
+	int32_t frame;
+	bool wasHit;
 };
 
 // Last attacker
@@ -206,6 +219,11 @@ struct GetUnitAllyTeamResult { const Error* error; int32_t allyTeamID; };
 
 struct GetUnitNeutralQuery { int32_t unitID; };
 struct GetUnitNeutralResult { const Error* error; bool neutral; };
+
+struct GetUnitCrashingQuery { int32_t unitID; };
+// isAircraft is false for non-aircraft units (crashing is meaningless there),
+// mirroring Lua's GetUnitMoveTypeData().aircraftState being aircraft-only.
+struct GetUnitCrashingResult { const Error* error; bool isAircraft; bool crashing; };
 
 struct GetUnitHealthQuery { int32_t unitID; };
 struct GetUnitHealthResult { const Error* error; UnitHealth health; };
@@ -319,10 +337,10 @@ struct GetUnitTransporterQuery { int32_t unitID; };
 struct GetUnitTransporterResult { const Error* error; int32_t transporterID; };
 
 struct GetUnitIsTransportingQuery { int32_t unitID; };
-struct GetUnitIsTransportingResult { const Error* error; bool isTransporting; };
+struct GetUnitIsTransportingResult { const Error* error; int32_t* unitIDs; uint32_t count; bool isTransporting; };
 
 struct GetUnitStockpileQuery { int32_t unitID; };
-struct GetUnitStockpileResult { const Error* error; UnitStockpile stockpile; };
+struct GetUnitStockpileResult { const Error* error; UnitStockpile stockpile; bool hasStockpile; };
 
 struct GetUnitSelfDTimeQuery { int32_t unitID; };
 struct GetUnitSelfDTimeResult { const Error* error; float selfDTime; };
@@ -343,7 +361,7 @@ struct GetUnitLastAttackerQuery { int32_t unitID; };
 struct GetUnitLastAttackerResult { const Error* error; UnitLastAttacker attacker; bool hasAttacker; };
 
 struct GetUnitLastAttackedPieceQuery { int32_t unitID; };
-struct GetUnitLastAttackedPieceResult { const Error* error; int32_t pieceNum; };
+struct GetUnitLastAttackedPieceResult { const Error* error; LastHitPiece piece; };
 
 struct GetUnitLosStateQuery { int32_t unitID; int32_t allyTeamID; bool raw; };
 struct GetUnitLosStateResult { const Error* error; UnitLosState losState; };
@@ -423,6 +441,8 @@ struct UnitsInfoApi {
 	void (*GetUnitBlocking)(const GetUnitBlockingQuery* query, GetUnitBlockingResult* result);
 	void (*GetUnitHarvestStorage)(const GetUnitHarvestStorageQuery* query, GetUnitHarvestStorageResult* result);
 	void (*ClearUnitsPreviousDrawFlag)(const ClearUnitsPreviousDrawFlagQuery* query, ClearUnitsPreviousDrawFlagResult* result);
+	// Appended last to keep the vtable ABI stable (offsets only grow).
+	void (*GetUnitCrashing)(const GetUnitCrashingQuery* query, GetUnitCrashingResult* result);
 };
 
 extern const UnitsInfoApi UNITS_INFO_API;

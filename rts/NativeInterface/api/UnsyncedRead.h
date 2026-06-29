@@ -122,11 +122,28 @@ struct GetClipboardQuery { uint8_t _unused; };
 struct GetClipboardResult { const Error* error; const char* text; };
 
 // Command/GUI queries
-struct GetActiveCmdDescQuery { int32_t unitID; };
-struct GetActiveCmdDescResult { const Error* error; bool success; };
+struct ActiveCommandDescription {
+	int32_t id;
+	int32_t type;
+	const char* name;
+	const char* action;
+	const char* tooltip;
+	const char* texture;
+	const char* cursor;
+	bool queueing;
+	bool hidden;
+	bool disabled;
+	bool showUnique;
+	bool onlyTexture;
+	const char** params;
+	uint32_t paramCount;
+};
+
+struct GetActiveCmdDescQuery { int32_t cmdIndex; };
+struct GetActiveCmdDescResult { const Error* error; ActiveCommandDescription cmdDesc; bool hasCommand; };
 
 struct GetActiveCmdDescsQuery { uint8_t _unused; };
-struct GetActiveCmdDescsResult { const Error* error; bool success; };
+struct GetActiveCmdDescsResult { const Error* error; ActiveCommandDescription* cmdDescs; uint32_t count; };
 
 struct GetCmdDescIndexQuery { int32_t cmdID; };
 struct GetCmdDescIndexResult { const Error* error; int32_t index; };
@@ -182,6 +199,9 @@ struct GetUnitPaletteIndexResult { const Error* error; int32_t customIndex; bool
 struct GetFeaturePaletteIndexQuery { int32_t featureID; };
 struct GetFeaturePaletteIndexResult { const Error* error; int32_t customIndex; bool usingCustomColor; };
 
+struct GetGameSecondsInterpolatedQuery { uint8_t _unused; };
+struct GetGameSecondsInterpolatedResult { const Error* error; float seconds; };
+
 struct UnitRenderingApi {
 	void (*GetUnitNoDraw)(const GetUnitNoDrawQuery* query, GetUnitNoDrawResult* result);
 	void (*GetUnitLuaDraw)(const GetUnitLuaDrawQuery* query, GetUnitLuaDrawResult* result);
@@ -229,6 +249,7 @@ struct UnsyncedReadApi {
 	void (*GetCustomPaletteColor)(const GetCustomPaletteColorQuery* query, GetCustomPaletteColorResult* result);
 	void (*GetUnitPaletteIndex)(const GetUnitPaletteIndexQuery* query, GetUnitPaletteIndexResult* result);
 	void (*GetFeaturePaletteIndex)(const GetFeaturePaletteIndexQuery* query, GetFeaturePaletteIndexResult* result);
+	void (*GetGameSecondsInterpolated)(const GetGameSecondsInterpolatedQuery* query, GetGameSecondsInterpolatedResult* result);
 };
 
 extern const UnsyncedReadApi UNSYNCED_READ_API;

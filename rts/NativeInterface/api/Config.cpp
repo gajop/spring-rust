@@ -1,9 +1,13 @@
 #include "Config.h"
 
 #include "System/Config/ConfigHandler.h"
+#include "System/Config/ConfigVariable.h"
 #include "System/GlobalConfig.h"
+#include "System/Log/DefaultFilter.h"
 #include "System/Log/Level.h"
 #include "System/Log/ILog.h"
+
+#include <vector>
 
 namespace {
 
@@ -12,6 +16,9 @@ namespace {
 static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local std::vector<ConfigParam> configParamBuffer;
+static thread_local std::vector<std::string> configStringBuffer;
+static thread_local std::vector<const char*> logSectionBuffer;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
@@ -27,6 +34,35 @@ static const Error INVALID_ARG_ERROR = {
 static bool ConfigReady()
 {
 	return (configHandler != nullptr);
+}
+
+static ConfigValueType ConfigTypeFromString(const std::string& type)
+{
+	if (type == "int")
+		return CONFIG_TYPE_INT;
+	if (type == "float")
+		return CONFIG_TYPE_FLOAT;
+	if (type == "bool")
+		return CONFIG_TYPE_BOOL;
+	return CONFIG_TYPE_STRING;
+}
+
+static const char* StoreConfigString(const StringConvertibleOptionalValue& value)
+{
+	if (!value.IsSet())
+		return nullptr;
+
+	configStringBuffer.emplace_back(value.ToString());
+	return configStringBuffer.back().c_str();
+}
+
+static const char* StoreConfigString(const ConfigVariableMetaData::OptionalString& value)
+{
+	if (!value.IsSet())
+		return nullptr;
+
+	configStringBuffer.emplace_back(value.ToString());
+	return configStringBuffer.back().c_str();
 }
 
 // Query config
@@ -45,7 +81,10 @@ static void NativeGetConfigInt(const GetConfigIntQuery* query, GetConfigIntResul
 	}
 
 	result->error = nullptr;
-	result->value = configHandler->GetIntSafe(query->key, query->defaultValue);
+	result->exists = query->hasDefault || configHandler->IsSet(query->key);
+	result->value = result->exists
+		? (query->hasDefault ? configHandler->GetIntSafe(query->key, query->defaultValue) : configHandler->GetInt(query->key))
+		: 0;
 }
 
 static void NativeGetConfigFloat(const GetConfigFloatQuery* query, GetConfigFloatResult* result)
@@ -63,7 +102,10 @@ static void NativeGetConfigFloat(const GetConfigFloatQuery* query, GetConfigFloa
 	}
 
 	result->error = nullptr;
-	result->value = configHandler->GetFloatSafe(query->key, query->defaultValue);
+	result->exists = query->hasDefault || configHandler->IsSet(query->key);
+	result->value = result->exists
+		? (query->hasDefault ? configHandler->GetFloatSafe(query->key, query->defaultValue) : configHandler->GetFloat(query->key))
+		: 0.0f;
 }
 
 static void NativeGetConfigString(const GetConfigStringQuery* query, GetConfigStringResult* result)
@@ -80,9 +122,17 @@ static void NativeGetConfigString(const GetConfigStringQuery* query, GetConfigSt
 		return;
 	}
 
-	// Get config string into scratch buffer
+	result->exists = query->hasDefault || configHandler->IsSet(query->key);
+	if (!result->exists) {
+		result->error = nullptr;
+		result->value = nullptr;
+		return;
+	}
+
 	const std::string defaultStr = (query->defaultValue != nullptr) ? query->defaultValue : "";
-	std::string value = configHandler->GetStringSafe(query->key, defaultStr);
+	std::string value = query->hasDefault
+		? configHandler->GetStringSafe(query->key, defaultStr)
+		: configHandler->GetString(query->key);
 
 	// Copy string to scratch buffer
 	char* strBuf = &scratchBuffer[bufferPos];
@@ -102,16 +152,36 @@ static void NativeGetConfigString(const GetConfigStringQuery* query, GetConfigSt
 static void NativeGetConfigParams(const GetConfigParamsQuery* query, GetConfigParamsResult* result)
 {
 	bufferPos = 0;
+	configParamBuffer.clear();
+	configStringBuffer.clear();
 
 	if (!ConfigReady()) {
 		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
-	// Config params enumeration not implemented - would require accessing internal config map
+	const ConfigVariable::MetaDataMap& cfgMap = ConfigVariable::GetMetaDataMap();
+	configParamBuffer.reserve(cfgMap.size());
+	configStringBuffer.reserve(cfgMap.size() * 6);
+
+	for (const auto& [_, meta]: cfgMap) {
+		configStringBuffer.emplace_back(meta->GetKey());
+		const char* name = configStringBuffer.back().c_str();
+
+		ConfigParam param = {};
+		param.name = name;
+		param.type = ConfigTypeFromString(meta->GetType());
+		param.description = StoreConfigString(meta->GetDescription());
+		param.defaultValue = StoreConfigString(meta->GetDefaultValue());
+		param.minimumValue = StoreConfigString(meta->GetMinimumValue());
+		param.maximumValue = StoreConfigString(meta->GetMaximumValue());
+		param.readOnly = meta->GetReadOnly().IsSet() && meta->GetReadOnly().Get();
+		configParamBuffer.push_back(param);
+	}
+
 	result->error = nullptr;
-	result->params = nullptr;
-	result->count = 0;
+	result->params = configParamBuffer.data();
+	result->count = configParamBuffer.size();
 }
 
 // Set config
@@ -182,11 +252,17 @@ static void NativeSetConfigString(const SetConfigStringQuery* query, SetConfigSt
 static void NativeGetLogSections(const GetLogSectionsQuery* query, GetLogSectionsResult* result)
 {
 	bufferPos = 0;
+	logSectionBuffer.clear();
 
-	// Log sections enumeration not implemented - would require accessing log internals
+	const int count = log_filter_section_getNumRegisteredSections();
+	logSectionBuffer.reserve(count);
+	for (int i = 0; i < count; ++i) {
+		logSectionBuffer.push_back(log_filter_section_getRegisteredIndex(i));
+	}
+
 	result->error = nullptr;
-	result->sections = nullptr;
-	result->count = 0;
+	result->sections = logSectionBuffer.data();
+	result->count = logSectionBuffer.size();
 }
 
 static void NativeSetLogSectionFilterLevel(const SetLogSectionFilterLevelQuery* query, SetLogSectionFilterLevelResult* result)

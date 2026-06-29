@@ -8,7 +8,11 @@
 #include "Sim/Misc/GlobalSynced.h"
 #include "System/float3.h"
 #include "Rendering/Features/FeatureDrawer.h"
+#include "Rendering/Models/3DModel.hpp"
+#include "Rendering/Models/3DModelPiece.hpp"
 #include "Game/Game.h"
+#include <cstddef>
+#include <cstring>
 
 namespace {
 
@@ -25,6 +29,30 @@ static const Error INVALID_FEATURE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .me
 static bool IsReady()
 {
 	return (gs != nullptr);
+}
+
+static char* AllocScratch(size_t size, size_t alignment = alignof(std::max_align_t))
+{
+	const size_t alignedPos = (bufferPos + alignment - 1) & ~(alignment - 1);
+	if (alignedPos + size > sizeof(scratchBuffer)) {
+		return nullptr;
+	}
+
+	char* ptr = &scratchBuffer[alignedPos];
+	bufferPos = alignedPos + size;
+	return ptr;
+}
+
+static const char* CopyString(const std::string& str)
+{
+	const size_t len = str.size() + 1;
+	char* ptr = AllocScratch(len, alignof(char));
+	if (ptr == nullptr) {
+		return "";
+	}
+
+	memcpy(ptr, str.c_str(), len);
+	return ptr;
 }
 
 // Validation
@@ -358,6 +386,34 @@ static void NativeGetFeaturePosition(const GetFeaturePositionQuery* query, GetFe
 	result->position.z = feature->pos.z;
 }
 
+static void NativeGetFeaturePositionExt(const GetFeaturePositionExtQuery* query, GetFeaturePositionExtResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->position = {};
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	result->position.position.x = feature->pos.x;
+	result->position.position.y = feature->pos.y;
+	result->position.position.z = feature->pos.z;
+	result->position.midPosition.x = feature->midPos.x;
+	result->position.midPosition.y = feature->midPos.y;
+	result->position.midPosition.z = feature->midPos.z;
+	result->position.aimPosition.x = feature->aimPos.x;
+	result->position.aimPosition.y = feature->aimPos.y;
+	result->position.aimPosition.z = feature->aimPos.z;
+}
+
 static void NativeGetFeatureSeparation(const GetFeatureSeparationQuery* query, GetFeatureSeparationResult* result)
 {
 	bufferPos = 0;
@@ -430,7 +486,9 @@ static void NativeGetFeatureVelocity(const GetFeatureVelocityQuery* query, GetFe
 		return;
 	}
 
-	// Features typically don't move
+	result->velocity.x = feature->speed.x;
+	result->velocity.y = feature->speed.y;
+	result->velocity.z = feature->speed.z;
 }
 
 static void NativeGetFeatureHeading(const GetFeatureHeadingQuery* query, GetFeatureHeadingResult* result)
@@ -582,7 +640,10 @@ static void NativeGetFeatureLastAttackedPiece(const GetFeatureLastAttackedPieceQ
 {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->pieceNum = -1;
+	result->piece.name = "";
+	result->piece.pieceNum = -1;
+	result->piece.frame = -1;
+	result->piece.wasHit = false;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -595,7 +656,15 @@ static void NativeGetFeatureLastAttackedPiece(const GetFeatureLastAttackedPieceQ
 		return;
 	}
 
-	result->pieceNum = -1; // lastAttackedPiece not available
+	const LocalModelPiece* piece = feature->hitModelPieces[true];
+	if (piece == nullptr || piece->original == nullptr) {
+		return;
+	}
+
+	result->piece.name = CopyString(piece->original->name);
+	result->piece.pieceNum = piece->GetLModelPieceIndex() + 1;
+	result->piece.frame = feature->pieceHitFrames[true];
+	result->piece.wasHit = true;
 }
 
 // Collision volumes
@@ -751,7 +820,7 @@ static void NativeGetFeatureDrawFlag(const GetFeatureDrawFlagQuery* query, GetFe
 		return;
 	}
 
-	result->flag = (feature->GetDrawFlag() != DrawFlags::SO_NODRAW_FLAG);
+	result->flag = feature->drawFlag;
 }
 
 static void NativeGetFeatureAlwaysUpdateMatrix(const GetFeatureAlwaysUpdateMatrixQuery* query, GetFeatureAlwaysUpdateMatrixResult* result)
@@ -953,8 +1022,9 @@ const FeaturesApi FEATURES_API = {
 	.GetFeatureRadius = NativeGetFeatureRadius,
 	.GetFeatureMass = NativeGetFeatureMass,
 
-	.GetFeaturePosition = NativeGetFeaturePosition,
-	.GetFeatureSeparation = NativeGetFeatureSeparation,
+		.GetFeaturePosition = NativeGetFeaturePosition,
+		.GetFeaturePositionExt = NativeGetFeaturePositionExt,
+		.GetFeatureSeparation = NativeGetFeatureSeparation,
 	.GetFeatureDirection = NativeGetFeatureDirection,
 	.GetFeatureVelocity = NativeGetFeatureVelocity,
 	.GetFeatureHeading = NativeGetFeatureHeading,

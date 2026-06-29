@@ -444,6 +444,64 @@
       }
     },
     {
+      "id": "get_grass",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGrass"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_grass"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "grassLevel"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGrass`",
+        "native_getter": "`Terrain.get_grass`",
+        "fields": "`grassLevel`"
+      },
+      "rust": {
+        "check": "check_terrain_f32",
+        "set": "set_noop"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetGrass",
+        "args": [
+          "value.x",
+          "value.z"
+        ],
+        "returns": [
+          "grassLevel"
+        ]
+      }
+    },
+    {
       "id": "is_pos_in_map",
       "context": "synced_gadget",
       "kind": "readonly",

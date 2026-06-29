@@ -106,6 +106,36 @@ impl NativeApiParity {
         }
         Ok(())
     }
+    pub(crate) fn same_string_i32_pairs_if_present(&self, label: &str, message: &Value, field: &str, native: &[(String, i32)]) -> Result<(), String> {
+        let Some(value) = message.get(field) else {
+            return Ok(());
+        };
+        let mut lua_values = value
+            .as_array()
+            .ok_or_else(|| format!("{label}.{field}: expected array"))?
+            .iter()
+            .map(|value| {
+                let name = value
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned)
+                    .ok_or_else(|| format!("{label}.{field}: expected name"))?;
+                let piece_num = value
+                    .get("pieceNum")
+                    .and_then(Value::as_i64)
+                    .and_then(|value| i32::try_from(value).ok())
+                    .ok_or_else(|| format!("{label}.{field}: expected pieceNum"))?;
+                Ok((name, piece_num))
+            })
+            .collect::<Result<Vec<_>, String>>()?;
+        let mut native_values = native.to_vec();
+        lua_values.sort();
+        native_values.sort();
+        if native_values != lua_values {
+            return Err(format!("{label}.{field}: native={native_values:?}, lua={lua_values:?}"));
+        }
+        Ok(())
+    }
     pub(crate) fn same_unit_def_counts_if_present(&self, label: &str, message: &Value, field: &str, native: &[spring_native::sys::UnitDefCount]) -> Result<(), String> {
         let Some(value) = message.get(field) else {
             return Ok(());
@@ -258,12 +288,13 @@ impl NativeApiParity {
             .append(true)
             .open(&self.output_path)
         {
-            let escaped = message.replace('\\', "\\\\").replace('"', "\\\"");
-            let _ = writeln!(
-                file,
-                "{{\"context\":\"native\",\"name\":\"{}\",\"status\":\"{}\",\"message\":\"{}\"}}",
-                name, status, escaped
-            );
+            let row = serde_json::json!({
+                "context": "native",
+                "name": name,
+                "status": status,
+                "message": message,
+            });
+            let _ = writeln!(file, "{row}");
         }
 
         let _ = self.interface.messages().echo("[native-api-parity]", message);

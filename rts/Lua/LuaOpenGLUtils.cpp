@@ -400,6 +400,9 @@ bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, con
 		} break;
 
 		case LuaAtlasTextures::prefix: {
+			if (L == nullptr)
+				return false; // per-handle atlas textures need a Lua state
+
 			// dynamic texture
 			const LuaAtlasTextures& atlasTextures = CLuaHandle::GetActiveAtlasTextures(L);
 			const size_t idx = atlasTextures.GetAtlasIndexById(image);
@@ -469,8 +472,12 @@ bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, con
 		} break;
 
 		default: {
-			const CLuaHandle* luaHandle = CLuaHandle::GetHandle(L);
-			const CNamedTextures::TexInfo* texInfo = CNamedTextures::GetInfo(image, true, luaHandle->PersistOnReload(), luaHandle->SecondaryGLContext());
+			// L may be null when called from the native (non-Lua) interface; the
+			// PersistOnReload/SecondaryGLContext hints are then simply unavailable
+			const CLuaHandle* luaHandle = (L != nullptr) ? CLuaHandle::GetHandle(L) : nullptr;
+			const bool persistOnReload = (luaHandle != nullptr) && luaHandle->PersistOnReload();
+			const bool secondaryGLContext = (luaHandle != nullptr) && luaHandle->SecondaryGLContext();
+			const CNamedTextures::TexInfo* texInfo = CNamedTextures::GetInfo(image, true, persistOnReload, secondaryGLContext);
 
 			if (texInfo != nullptr) {
 				texUnit.type = LuaMatTexture::LUATEX_NAMED;

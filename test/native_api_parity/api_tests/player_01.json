@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_local_player_id",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetLocalPlayerID"]},
+      "native": {"set": [], "get": ["Player.get_local_player_id"]},
+      "compare": {"mode": "fields", "fields": ["playerID"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetLocalPlayerID`", "native_getter": "`Player.get_local_player_id`", "fields": "`playerID`"},
+      "rust": {"check": "check_player_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetLocalPlayerID", "args": [], "returns": ["playerID"]}
+    },
+    {
+      "id": "get_local_team_id",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetLocalTeamID"]},
+      "native": {"set": [], "get": ["Player.get_local_team_id"]},
+      "compare": {"mode": "fields", "fields": ["teamID"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetLocalTeamID`", "native_getter": "`Player.get_local_team_id`", "fields": "`teamID`"},
+      "rust": {"check": "check_player_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetLocalTeamID", "args": [], "returns": ["teamID"]}
+    },
+    {
+      "id": "get_local_ally_team_id",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetLocalAllyTeamID"]},
+      "native": {"set": [], "get": ["Player.get_local_ally_team_id"]},
+      "compare": {"mode": "fields", "fields": ["allyTeamID"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetLocalAllyTeamID`", "native_getter": "`Player.get_local_ally_team_id`", "fields": "`allyTeamID`"},
+      "rust": {"check": "check_player_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetLocalAllyTeamID", "args": [], "returns": ["allyTeamID"]}
+    },
+    {
+      "id": "get_spectating_state",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetSpectatingState"]},
+      "native": {"set": [], "get": ["Player.get_spectating_state"]},
+      "compare": {"mode": "fields", "fields": ["spectating"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSpectatingState`", "native_getter": "`Player.get_spectating_state`", "fields": "`spectating`"},
+      "rust": {"check": "check_player_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetSpectatingState", "args": [], "returns": ["spectating", "spectatingFullView", "spectatingFullSelect"]}
+    },
+    {
+      "id": "get_player_roster_count",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetPlayerRoster"]},
+      "native": {"set": [], "get": ["Player.get_player_roster"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPlayerRoster`", "native_getter": "`Player.get_player_roster`", "fields": "`count`"},
+      "rust": {"check": "check_player_value", "set": "set_noop"},
+      "params": {"sortMode": {"type": "i32", "fixed": 0}, "showPathingPlayers": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetPlayerRoster", "args": ["value.sortMode", "value.showPathingPlayers"], "returns": [{"field": "count", "transform": "table_count"}]}
+    },
+    {
+      "id": "get_player_statistics",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetPlayerStatistics"]},
+      "native": {"set": [], "get": ["Player.get_player_statistics"]},
+      "compare": {"mode": "fields", "fields": ["mousePixels", "mouseClicks", "keyPresses", "unitCommands"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPlayerStatistics`", "native_getter": "`Player.get_player_statistics`", "fields": "`mousePixels`, `mouseClicks`, `keyPresses`, `unitCommands`"},
+      "rust": {"check": "check_player_value", "set": "set_noop"},
+      "params": {"playerID": {"type": "i32", "fixed": 0}},
+      "lua_runtime": {"call": "Spring.GetPlayerStatistics", "args": ["value.playerID"], "returns": ["mousePixels", "mouseClicks", "keyPresses", "numCommands", "unitCommands"]}
+    },
+    {
+      "id": "get_player_traffic_missing_packet",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetPlayerTraffic"]},
+      "native": {"set": [], "get": ["Player.get_player_traffic"]},
+      "compare": {"mode": "fields", "fields": ["traffic"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPlayerTraffic`", "native_getter": "`Player.get_player_traffic`", "fields": "`traffic`"},
+      "rust": {"check": "check_player_value", "set": "set_noop"},
+      "params": {"playerID": {"type": "i32", "fixture": "playerID"}, "packetID": {"type": "i32", "fixed": 4095}},
+      "lua_runtime": {"call": "Spring.GetPlayerTraffic", "args": ["value.playerID", "value.packetID"], "returns": ["traffic"]}
+    }
+  ]
+}

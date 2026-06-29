@@ -48,7 +48,7 @@ def fetch_page(url: str, cache_file: Path, cache_days: int = 1) -> str:
                 return f.read()
         return ""
 
-def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
+def extract_lua_functions_from_markdown(content: str, infer_signatures: bool = True) -> List[Dict]:
     """
     Extract function signatures from markdown-like content.
     Looking for patterns like:
@@ -61,16 +61,21 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
 
     # First, collect parameter info from @function blocks
     func_blocks = []
-    func_pattern = re.compile(r'@function\s+(Spring|gl|RmlUi|VFS|Script)\.([A-Za-z][A-Za-z0-9_]*)', re.MULTILINE)
+    func_pattern = re.compile(
+        r'@function\s+((?:Spring|gl|RmlUi|VFS|Script)(?:[.:][A-Za-z_][A-Za-z0-9_]*)+)',
+        re.MULTILINE,
+    )
     matches = list(func_pattern.finditer(content))
     for idx, match in enumerate(matches):
         start = match.start()
         end = matches[idx + 1].start() if idx + 1 < len(matches) else len(content)
-        func_blocks.append((match.group(1), match.group(2), content[start:end]))
+        full_name = match.group(1).replace(':', '.')
+        namespace, func_name = full_name.split('.', 1)
+        func_blocks.append((namespace, func_name, content[start:end]))
 
     params_by_name = {}
     param_regex = re.compile(r'@param\s+([^\s]+)\s+([^\n]+)')
-    sig_regex = re.compile(r'Spring\.[A-Za-z0-9_]+\(([^)]*)\)')
+    sig_regex = re.compile(r'(?:Spring|gl|RmlUi|VFS|Script)(?:[.:][A-Za-z0-9_]+)+\(([^)]*)\)')
 
     def clean_type(t: str) -> str:
         t = re.sub(r'<[^>]+>', '', t)
@@ -151,7 +156,7 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
         if not params:
             params = extract_html_params(block)
 
-        if not params:
+        if infer_signatures and not params:
             sig_match = sig_regex.search(block)
             if sig_match:
                 raw = sig_match.group(1).strip()
@@ -178,8 +183,8 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
         params = []
         params = extract_html_params(block)
 
-        if not params:
-            sig_match = re.search(rf'{re.escape(full_name.split(".")[1])}\(([^)]*)\)', block)
+        if infer_signatures and not params:
+            sig_match = re.search(rf'{re.escape(full_name.split(".")[-1])}\(([^)]*)\)', block)
             if sig_match:
                 raw = sig_match.group(1).strip()
                 if raw:
@@ -188,17 +193,22 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
         return params
 
     # Scan signatures from code blocks / text
-    sig_scan_pattern = re.compile(r'\b(Spring|gl|RmlUi|VFS|Script)\.([A-Za-z0-9_]+)\(([^)]*)\)')
+    sig_scan_pattern = re.compile(
+        r'\b((?:Spring|gl|RmlUi|VFS|Script)(?:[.:][A-Za-z0-9_]+)+)\(([^)]*)\)'
+    )
     function_index = {}
-    for match in sig_scan_pattern.finditer(content):
-        namespace = match.group(1)
-        func_name = match.group(2)
+    if infer_signatures:
+        scan_iter = sig_scan_pattern.finditer(content)
+    else:
+        scan_iter = []
+    for match in scan_iter:
+        full_name = match.group(1).replace(':', '.')
+        namespace, func_name = full_name.split('.', 1)
         if func_name.endswith(('_arguments', '_returns')):
             continue
-        full_name = f"{namespace}.{func_name}"
 
         if full_name in seen:
-            raw = html.unescape(re.sub(r'<[^>]+>', '', match.group(3))).strip()
+            raw = html.unescape(re.sub(r'<[^>]+>', '', match.group(2))).strip()
             if raw and full_name in function_index:
                 current = function_index[full_name].get('params', [])
                 candidate = [
@@ -216,7 +226,7 @@ def extract_lua_functions_from_markdown(content: str) -> List[Dict]:
         if not params:
             params = extract_params_from_section(full_name)
         if not params:
-            raw = match.group(3).strip()
+            raw = match.group(2).strip()
             if raw:
                 for idx, token in enumerate(split_top_level_commas(raw)):
                     params.append({'name': f'arg{idx+1}', 'type': clean_type(token)})
@@ -306,18 +316,24 @@ def collect_registered_spring_functions(project_root: Path) -> Set[str]:
     return registered
 
 def extract_source_doc_functions(project_root: Path) -> List[Dict]:
-    """Extract local @function docs from rts/Lua so newly fixed docs are visible before publishing."""
-    lua_dir = project_root / 'rts' / 'Lua'
-    if not lua_dir.exists():
-        return []
-
+    """Extract local @function docs so newly fixed docs are visible before publishing."""
     functions = []
-    for path in lua_dir.glob('Lua*.cpp'):
+    source_paths = []
+
+    lua_dir = project_root / 'rts' / 'Lua'
+    if lua_dir.exists():
+        source_paths.extend(lua_dir.glob('Lua*.cpp'))
+
+    rml_bind_dir = project_root / 'rts' / 'Rml' / 'SolLua' / 'bind'
+    if rml_bind_dir.exists():
+        source_paths.extend(rml_bind_dir.glob('*.cpp'))
+
+    for path in source_paths:
         try:
             content = path.read_text(encoding='utf-8', errors='ignore')
         except OSError:
             continue
-        functions.extend(extract_lua_functions_from_markdown(content))
+        functions.extend(extract_lua_functions_from_markdown(content, infer_signatures=False))
     return functions
 
 def main():
@@ -359,20 +375,34 @@ def main():
 
     source_functions = extract_source_doc_functions(project_root)
     if source_functions:
+        source_rml_names = {
+            func.get('full_name') for func in source_functions
+            if func.get('namespace') == 'RmlUi'
+        }
+        if source_rml_names:
+            before = len(callouts)
+            callouts = [
+                func for func in callouts
+                if func.get('namespace') != 'RmlUi' or func.get('full_name') in source_rml_names
+            ]
+            removed = before - len(callouts)
+            if removed:
+                print(f"Filtered {removed} stale RmlUi docs not present in local SolLua bindings")
+
         by_full_name = {func['full_name']: func for func in callouts}
         added = 0
         updated = 0
         for func in source_functions:
-            if func.get('namespace') != 'Spring':
+            if func.get('namespace') not in ('Spring', 'RmlUi'):
                 continue
-            if registered_spring and func.get('full_name') not in registered_spring:
+            if func.get('namespace') == 'Spring' and registered_spring and func.get('full_name') not in registered_spring:
                 continue
             existing = by_full_name.get(func['full_name'])
             if existing is None:
                 callouts.append(func)
                 by_full_name[func['full_name']] = func
                 added += 1
-            elif func.get('params'):
+            elif func.get('namespace') == 'RmlUi' or func.get('params'):
                 existing['params'] = func['params']
                 updated += 1
         if added or updated:
@@ -448,6 +478,7 @@ def main():
         "Spring.SetFeatureRulesParam": [("featureID", "integer"), ("paramName", "string"), ("paramValue", "RulesParamValue"), ("losAccess", "integer?")],
         "Spring.SetGameRulesParam": [("paramName", "string"), ("paramValue", "RulesParamValue"), ("losAccess", "integer?")],
         "Spring.SetMapLightTrackingState": [("lightHandle", "integer"), ("unitOrProjectileID", "integer"), ("enableTracking", "boolean"), ("unitOrProjectile", "boolean")],
+        "Spring.SetMapShadingTexture": [("texType", "string"), ("texName", "string"), ("num", "integer?")],
         "Spring.SetMapSquareTerrainType": [("x", "integer"), ("z", "integer"), ("newType", "integer")],
         "Spring.SetMapSquareTexture": [("texSqrX", "integer"), ("texSqrY", "integer"), ("luaTexName", "string")],
         "Spring.SetModelLightTrackingState": [("lightHandle", "integer"), ("unitOrProjectileID", "integer"), ("enableTracking", "boolean"), ("unitOrProjectile", "boolean")],
@@ -483,16 +514,16 @@ def main():
         "Spring.SetUnitPieceParent": [("unitID", "integer"), ("AlteredPiece", "integer"), ("ParentPiece", "integer")],
         "Spring.SetUnitPosition": [("unitID", "integer"), ("x", "number"), ("y", "number"), ("z", "number")],
         "Spring.SetUnitWeaponState": [("unitID", "integer"), ("weaponNum", "integer"), ("key", "string"), ("value", "number")],
-        "Spring.CallAsTeam": [("teamID", "integer"), ("func", "LuaFunctionRef"), ("args", "NativeLuaArgs")],
+        "Spring.CallAsTeam": [("teamID", "integer"), ("func", "function"), ("args", "any[]")],
         "Spring.Echo": [("arg", "string"), ("rest", "string")],
         "Spring.MarkerErasePosition": [("x", "number"), ("y", "number"), ("z", "number"), ("unused", "number"), ("localOnly", "boolean?"), ("playerID", "integer?"), ("alwaysErase", "boolean?")],
         "Spring.SendCommands": [("command", "string"), ("rest", "string")],
         "Spring.SendMessageToSpectators": [("message", "string")],
         "Spring.SetActiveCommand": [("cmdIndex", "integer"), ("button", "integer"), ("leftClick", "boolean?"), ("rightClick", "boolean?"), ("alt", "boolean?"), ("ctrl", "boolean?"), ("meta", "boolean?"), ("shift", "boolean?")],
-        "Spring.SetHeightMapFunc": [("luaFunction", "LuaFunctionRef"), ("arg", "number"), ("args", "NativeLuaArgs")],
-        "Spring.SetOriginalHeightMapFunc": [("heightMapFunc", "LuaFunctionRef")],
+        "Spring.SetHeightMapFunc": [("luaFunction", "function"), ("args", "number[]")],
+        "Spring.SetOriginalHeightMapFunc": [("heightMapFunc", "function"), ("args", "any[]")],
         "Spring.SetProjectileTarget": [("projectileID", "integer"), ("target", "ProjectileTargetRef")],
-        "Spring.SetSmoothMeshFunc": [("luaFunction", "LuaFunctionRef"), ("arg", "NativeLuaValue"), ("args", "NativeLuaArgs")],
+        "Spring.SetSmoothMeshFunc": [("luaFunction", "function"), ("args", "any[]")],
         "Spring.SetUnitTarget": [("unitID", "integer"), ("target", "UnitTargetRef"), ("dgun", "boolean?"), ("userTarget", "boolean?"), ("weaponNum", "number?")],
         "Spring.SpawnCEG": [("ceg", "DefRef"), ("posX", "number?"), ("posY", "number?"), ("posZ", "number?"), ("dirX", "number?"), ("dirY", "number?"), ("dirZ", "number?"), ("radius", "number?"), ("damage", "number?"), ("dmgMod", "number?")],
         "Spring.SpawnExplosion": [("posX", "number?"), ("posY", "number?"), ("posZ", "number?"), ("dirX", "number?"), ("dirY", "number?"), ("dirZ", "number?"), ("explosionParams", "NativeExplosionParams")],

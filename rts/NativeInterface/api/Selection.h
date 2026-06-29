@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "CommonTypes.h"
+#include "UnitsQuery.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,7 +69,7 @@ struct GetGroupUnitsCountsQuery { int32_t groupID; };
 struct GetGroupUnitsCountsResult { const Error* error; SelectionCounts counts; };
 
 struct GetGroupUnitsSortedQuery { int32_t groupID; };
-struct GetGroupUnitsSortedResult { const Error* error; int32_t* units; uint32_t count; };
+struct GetGroupUnitsSortedResult { const Error* error; TeamUnitsByDef* groups; uint32_t count; };
 
 // API structure
 struct SelectionApi {

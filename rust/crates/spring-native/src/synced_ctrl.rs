@@ -1,4 +1,3 @@
-
 use std::{mem::MaybeUninit, slice};
 
 use crate::{error::Error, sys};
@@ -29,12 +28,30 @@ impl<'a> SyncedCtrl<'a> {
             Self {
                 team_api: api.team.as_ref().expect("team API must be initialized"),
                 unit_api: api.unit.as_ref().expect("unit API must be initialized"),
-                feature_api: api.feature.as_ref().expect("feature API must be initialized"),
-                terrain_api: api.terrain.as_ref().expect("terrain API must be initialized"),
-                projectile_api: api.projectile.as_ref().expect("projectile API must be initialized"),
-                effects_api: api.effects.as_ref().expect("effects API must be initialized"),
-                game_config_api: api.gameConfig.as_ref().expect("gameConfig API must be initialized"),
-                cob_script_api: api.cobScript.as_ref().expect("cobScript API must be initialized"),
+                feature_api: api
+                    .feature
+                    .as_ref()
+                    .expect("feature API must be initialized"),
+                terrain_api: api
+                    .terrain
+                    .as_ref()
+                    .expect("terrain API must be initialized"),
+                projectile_api: api
+                    .projectile
+                    .as_ref()
+                    .expect("projectile API must be initialized"),
+                effects_api: api
+                    .effects
+                    .as_ref()
+                    .expect("effects API must be initialized"),
+                game_config_api: api
+                    .gameConfig
+                    .as_ref()
+                    .expect("gameConfig API must be initialized"),
+                cob_script_api: api
+                    .cobScript
+                    .as_ref()
+                    .expect("cobScript API must be initialized"),
             }
         }
     }

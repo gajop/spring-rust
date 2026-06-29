@@ -224,26 +224,63 @@ static void NativeGetGroupUnits(const GetGroupUnitsQuery* query, GetGroupUnitsRe
 static void NativeGetGroupUnitsSorted(const GetGroupUnitsSortedQuery* query, GetGroupUnitsSortedResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	result->groups = nullptr;
+	result->count = 0;
 
 	if (query->groupID < 0 || query->groupID >= 10) { result->error = &INVALID_GROUP_ERROR; return; }
 
 	const CGroup* group = uiGroupHandlers[gu->myTeam].GetGroup(query->groupID);
 	if (group == nullptr) { result->error = &INVALID_GROUP_ERROR; return; }
 
-	int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
-	uint32_t count = 0;
+	std::unordered_map<int32_t, std::vector<int32_t>> unitsByDef;
 
 	for (int unitID : group->units) {
-		if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
-		units[count++] = unitID;
-		bufferPos += sizeof(int32_t);
+		const CUnit* unit = unitHandler.GetUnit(unitID);
+		if (unit != nullptr && unit->unitDef != nullptr) {
+			unitsByDef[unit->unitDef->id].push_back(unitID);
+		}
 	}
 
-	std::sort(units, units + count);
+	if (unitsByDef.empty()) {
+		result->error = nullptr;
+		return;
+	}
+
+	const size_t groupBytes = unitsByDef.size() * sizeof(TeamUnitsByDef);
+	if (bufferPos + groupBytes > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
+	TeamUnitsByDef* groups = reinterpret_cast<TeamUnitsByDef*>(&scratchBuffer[bufferPos]);
+	bufferPos += groupBytes;
+
+	std::vector<int32_t> unitDefIDs;
+	unitDefIDs.reserve(unitsByDef.size());
+	for (const auto& [unitDefID, _] : unitsByDef) {
+		unitDefIDs.push_back(unitDefID);
+	}
+	std::sort(unitDefIDs.begin(), unitDefIDs.end());
+
+	uint32_t groupCount = 0;
+	for (int32_t unitDefID : unitDefIDs) {
+		auto& unitIDs = unitsByDef[unitDefID];
+		std::sort(unitIDs.begin(), unitIDs.end());
+
+		const size_t bytes = unitIDs.size() * sizeof(int32_t);
+		if (bufferPos + bytes > sizeof(scratchBuffer)) { result->error = &NOT_READY_ERROR; return; }
+
+		int32_t* units = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+		for (uint32_t i = 0; i < unitIDs.size(); ++i) {
+			units[i] = unitIDs[i];
+		}
+		bufferPos += bytes;
+
+		TeamUnitsByDef& groupEntry = groups[groupCount++];
+		groupEntry.unitDefID = unitDefID;
+		groupEntry.units = units;
+		groupEntry.count = unitIDs.size();
+	}
 
 	result->error = nullptr;
-	result->units = units;
-	result->count = count;
+	result->groups = groups;
+	result->count = groupCount;
 }
 
 static void NativeGetUnitGroup(const GetUnitGroupQuery* query, GetUnitGroupResult* result) {

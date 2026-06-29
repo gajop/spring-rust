@@ -9,7 +9,6 @@
 ///
 /// Notice: The user only writes safe Rust. All FFI boilerplate is handled by the
 /// `export_module!` macro.
-
 use spring_native::prelude::*;
 
 /// Our module implementation - just a normal Rust struct!
@@ -44,10 +43,9 @@ impl NativeModule for EchoModule {
         println!("[EchoModule] Game has started! Let's play!");
 
         // Example: Query game information using the Spring API
-        if let Some(game) = self.interface.game() {
-            let frame = game.get_game_frame()?;
-            println!("[EchoModule] Starting at game frame: {}", frame);
-        }
+        let (frame_low, frame_high) = self.interface.game().get_game_frame()?;
+        let frame = frame_low | (frame_high << 16);
+        println!("[EchoModule] Starting at game frame: {}", frame);
 
         Ok(())
     }
@@ -69,20 +67,19 @@ impl NativeModule for EchoModule {
         }
 
         // Example: Query unit information using the Spring API
-        if let Some(units_info) = self.interface.units_info() {
-            if let Ok(pos) = units_info.get_unit_position(unit_id) {
-                println!(
-                    "[EchoModule] Unit #{} position: ({:.1}, {:.1}, {:.1})",
-                    unit_id, pos.x, pos.y, pos.z
-                );
-            }
+        let units_info = self.interface.units_info();
+        if let Ok(pos) = units_info.get_unit_position(unit_id, false, false) {
+            println!(
+                "[EchoModule] Unit #{} position: ({:.1}, {:.1}, {:.1})",
+                unit_id, pos.x, pos.y, pos.z
+            );
+        }
 
-            if let Ok(health) = units_info.get_unit_health(unit_id) {
-                println!(
-                    "[EchoModule] Unit #{} health: {:.0}/{:.0}",
-                    unit_id, health.health, health.maxHealth
-                );
-            }
+        if let Ok(health) = units_info.get_unit_health(unit_id) {
+            println!(
+                "[EchoModule] Unit #{} health: {:.0}/{:.0}",
+                unit_id, health.health, health.maxHealth
+            );
         }
 
         Ok(())
@@ -136,7 +133,10 @@ impl NativeModule for EchoModule {
 
     /// Called when the module is shutting down
     fn shutdown(&mut self) -> Result<(), Error> {
-        println!("[EchoModule] Shutting down. Final unit count: {}", self.unit_count);
+        println!(
+            "[EchoModule] Shutting down. Final unit count: {}",
+            self.unit_count
+        );
         println!("[EchoModule] Goodbye!");
         Ok(())
     }

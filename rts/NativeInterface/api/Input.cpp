@@ -3,16 +3,22 @@
 #include <SDL_keyboard.h>
 
 #include "Game/UI/MouseHandler.h"
+#include "Game/UI/KeyCodes.h"
+#include "Game/UI/ScanCodes.h"
 #include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Game/UI/GuiHandler.h"
+#include "Game/UI/KeyBindings.h"
 #include "Game/UI/MiniMap.h"
 #include "Game/Camera.h"
 #include "Game/Game.h"
 #include "Game/GlobalUnsynced.h"
 #include "Rendering/GlobalRendering.h"
 #include "System/Input/KeyInput.h"
+#include "System/Platform/SDL1_keysym.h"
+#include "System/StringUtil.h"
 #include "System/float3.h"
 #include "Lua/LuaConfig.h"
+#include "Game/Action.h"
 #include <string>
 #include <cstring>
 #include <vector>
@@ -180,6 +186,12 @@ static void NativeGetMouseStartPosition(const GetMouseStartPositionQuery* query,
 	result->error = nullptr;
 	result->position.x = static_cast<float>(bp.x);
 	result->position.y = static_cast<float>(bp.y);
+	result->camPos.x = bp.camPos.x;
+	result->camPos.y = bp.camPos.y;
+	result->camPos.z = bp.camPos.z;
+	result->dir.x = bp.dir.x;
+	result->dir.y = bp.dir.y;
+	result->dir.z = bp.dir.z;
 }
 
 // Keyboard
@@ -373,49 +385,119 @@ static void NativeGetActionHotKeys(const GetActionHotKeysQuery* query, GetAction
 static void NativeGetKeyBindings(const GetKeyBindingsQuery* query, GetKeyBindingsResult* result)
 {
 	bufferPos = 0;
-	(void)query;
-
 	result->error = nullptr;
 	result->bindings = nullptr;
 	result->count = 0;
+
+	ActionList actions;
+	const std::string keySet1 = query->keySet1 != nullptr ? query->keySet1 : "";
+	if (keySet1.empty()) {
+		actions = keyBindings.GetActionList();
+	} else {
+		CKeySet ks;
+		if (!ks.Parse(keySet1)) {
+			return;
+		}
+
+		CKeyChain keyChain;
+		keyChain.emplace_back(ks);
+
+		const std::string keySet2 = query->keySet2 != nullptr ? query->keySet2 : "";
+		if (keySet2.empty()) {
+			actions = keyBindings.GetActionList(keyChain);
+		} else {
+			if (!ks.Parse(keySet2)) {
+				return;
+			}
+
+			CKeyChain keyChain2;
+			keyChain2.emplace_back(ks);
+			actions = keyBindings.GetActionList(keyChain, keyChain2);
+		}
+	}
+
+	if (actions.empty()) {
+		return;
+	}
+
+	const size_t entryBytes = actions.size() * sizeof(KeyBindingEntry);
+	if (bufferPos + entryBytes > sizeof(scratchBuffer)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	KeyBindingEntry* bindings = reinterpret_cast<KeyBindingEntry*>(&scratchBuffer[bufferPos]);
+	bufferPos += entryBytes;
+
+	for (const Action& action: actions) {
+		KeyBindingEntry& binding = bindings[result->count];
+		binding.command = CopyString(action.command);
+		binding.extra = CopyString(action.extra);
+		binding.boundWith = CopyString(action.boundWith);
+		if (bufferPos > sizeof(scratchBuffer)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			result->count = 0;
+			return;
+		}
+		result->count++;
+	}
+
+	result->bindings = bindings;
 }
 
 static void NativeGetKeyCode(const GetKeyCodeQuery* query, GetKeyCodeResult* result)
 {
 	bufferPos = 0;
-	(void)query;
 
 	result->error = nullptr;
-	result->keyCode = 0;
+	result->keyCode = SDL21_keysyms(keyCodes.GetCode(query->keySym != nullptr ? query->keySym : ""));
 }
 
 static void NativeGetKeySymbol(const GetKeySymbolQuery* query, GetKeySymbolResult* result)
 {
 	bufferPos = 0;
-	(void)query;
 
+	const int keyCode = SDL12_keysyms(query->keyCode);
 	result->error = nullptr;
-	result->keyCodeName = "";
-	result->keyCodeDefaultName = "";
+	result->keyCodeName = CopyString(keyCodes.GetName(keyCode));
+	result->keyCodeDefaultName = CopyString(keyCodes.GetDefaultName(keyCode));
 }
 
 static void NativeGetScanSymbol(const GetScanSymbolQuery* query, GetScanSymbolResult* result)
 {
 	bufferPos = 0;
-	(void)query;
 
 	result->error = nullptr;
-	result->scanCodeName = "";
-	result->scanCodeDefaultName = "";
+	result->scanCodeName = CopyString(scanCodes.GetName(query->scanCode));
+	result->scanCodeDefaultName = CopyString(scanCodes.GetDefaultName(query->scanCode));
 }
 
 static void NativeGetKeyFromScanSymbol(const GetKeyFromScanSymbolQuery* query, GetKeyFromScanSymbolResult* result)
 {
 	bufferPos = 0;
-	(void)query;
 
 	result->error = nullptr;
-	result->keyCode = 0;
+	result->keyName = "";
+	const std::string symbol = StringToLower(query->scanSymbol != nullptr ? query->scanSymbol : "");
+	if (symbol.empty()) {
+		return;
+	}
+
+	const SDL_Scancode scanCode = static_cast<SDL_Scancode>(scanCodes.GetCode(symbol));
+	if (scanCode <= 0) {
+		return;
+	}
+
+	const SDL_Keycode keyCode = SDL_GetKeyFromScancode(scanCode);
+	if (keyCode <= 0 || keyCode == 0x40000000) {
+		return;
+	}
+
+	result->keyName = CopyString(keyCodes.GetDefaultName(keyCode));
+	if (result->keyName == nullptr) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		result->keyName = "";
+	}
 }
 
 static void NativeGetActivePage(const GetActivePageQuery* query, GetActivePageResult* result)

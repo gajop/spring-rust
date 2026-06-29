@@ -14,6 +14,7 @@
 #include "NativeInterface/api/FeatureDefs.h"
 #include "NativeInterface/api/Features.h"
 #include "NativeInterface/api/Game.h"
+#include "NativeInterface/api/Gfx.h"
 #include "NativeInterface/api/Input.h"
 #include "NativeInterface/api/LOS.h"
 #include "NativeInterface/api/MathExtra.h"
@@ -25,6 +26,7 @@
 #include "NativeInterface/api/Player.h"
 #include "NativeInterface/api/Projectiles.h"
 #include "NativeInterface/api/RulesParams.h"
+#include "NativeInterface/api/RmlUi.h"
 #include "NativeInterface/api/Selection.h"
 #include "NativeInterface/api/Sound.h"
 #include "NativeInterface/api/SyncedCtrl.h"
@@ -82,6 +84,7 @@ struct NativeInterface {
 	const MetalMapApi* metalMap;
 	const PathFinderApi* pathFinder;
 	const RulesParamsApi* rulesParams;
+	const RmlUiApi* rmlUi;
 	const MathExtraApi* mathExtra;
 	const MoveCtrlApi* moveCtrl;
 	const SyncedCtrlApi* syncedCtrl;
@@ -104,6 +107,7 @@ struct NativeInterface {
 	const GroundDecalsApi* groundDecals;
 	const SystemControlApi* systemControl;
 	const ProfilingApi* profiling;
+	const GfxApi* gfx;
 };
 
 #ifdef __cplusplus

@@ -1,8 +1,10 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "UnsyncedCtrl.h"
+#include "Gfx.h"
 
 #include <cmath>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <SDL_clipboard.h>
@@ -21,8 +23,13 @@
 #include "Game/UI/KeySet.h"
 #include "Game/UI/CommandColors.h"
 #include "Rendering/Env/IGroundDecalDrawer.h"
+#include "Rendering/GL/myGL.h"
 #include "Rendering/GlobalRendering.h"
 #include "Rendering/Env/ISky.h"
+#include "Rendering/Env/SunLighting.h"
+#include "Rendering/Env/WaterRendering.h"
+#include "Rendering/Env/MapRendering.h"
+#include "Rendering/Env/IWater.h"
 #include "Rendering/Textures/Bitmap.h"
 #include "Rendering/Textures/NamedTextures.h"
 #include "Rendering/Textures/S3OTextureHandler.h"
@@ -50,6 +57,7 @@
 #include "Game/IVideoCapturing.h"
 #include "System/type2.h"
 #include "System/EventHandler.h"
+#include "Lua/LuaUI.h"
 
 #ifndef SDL_BUTTON_LEFT
 #define SDL_BUTTON_LEFT 1
@@ -99,9 +107,19 @@ static const Error MAP_UNAVAILABLE_ERROR = {
 	.message = "Map rendering not available"
 };
 
+static const Error INVALID_TEXTURE_ERROR = {
+	.code = ERROR_INVALID_ARGUMENT,
+	.message = "Invalid texture"
+};
+
 static const Error MOUSE_UNAVAILABLE_ERROR = {
 	.code = ERROR_NOT_AVAILABLE,
 	.message = "Mouse handler not available"
+};
+
+static const Error LUAUI_UNAVAILABLE_ERROR = {
+	.code = ERROR_NOT_AVAILABLE,
+	.message = "LuaUI not available"
 };
 
 static const Error INVALID_CURSOR_ERROR = {
@@ -942,9 +960,26 @@ static void NativeStubNotAvailable(const Error** error, bool* success)
 
 static void NativeSetAtmosphere(const SetAtmosphereQuery* query, SetAtmosphereResult* result)
 {
-	(void)query->params;
 	result->error = nullptr;
-	result->success = (ISky::GetSky() != nullptr);
+	result->success = false;
+
+	const auto& sky = ISky::GetSky();
+	if (sky == nullptr) {
+		result->error = &RENDERING_UNAVAILABLE_ERROR;
+		return;
+	}
+
+	const AtmosphereParams& p = query->params;
+	if (p.hasFogColor)   sky->fogColor   = float4(p.fogColor[0], p.fogColor[1], p.fogColor[2], p.fogColor[3]);
+	if (p.hasSkyColor)   sky->skyColor   = float4(p.skyColor[0], p.skyColor[1], p.skyColor[2], p.skyColor[3]);
+	if (p.hasSunColor)   sky->sunColor   = float4(p.sunColor[0], p.sunColor[1], p.sunColor[2], p.sunColor[3]);
+	if (p.hasCloudColor) sky->cloudColor = float4(p.cloudColor[0], p.cloudColor[1], p.cloudColor[2], p.cloudColor[3]);
+	if (p.hasSkyAxisAngle) sky->SetSkyAxisAngle(float4(p.skyAxisAngle[0], p.skyAxisAngle[1], p.skyAxisAngle[2], p.skyAxisAngle[3]));
+	if (p.hasFogStart)   sky->fogStart = p.fogStart;
+	if (p.hasFogEnd)     sky->fogEnd   = p.fogEnd;
+
+	sky->SetUpdated();
+	result->success = true;
 }
 
 static void NativeSetSunDirection(const SetSunDirectionQuery* query, SetSunDirectionResult* result)
@@ -962,20 +997,158 @@ static void NativeSetSunDirection(const SetSunDirectionQuery* query, SetSunDirec
 	float3 dir(query->dir.x, query->dir.y, query->dir.z);
 	dir.SafeNormalize();
 	sky->GetLight()->SetLightDir(float4(dir, query->intensity));
+	sunLighting->SetUpdated();
+	// Notify listeners the sun changed so the ground/model shaders re-upload the
+	// new light direction (SMFRenderState::UpdateShaderSkyUniforms reads it from
+	// the sky light). Without this only the shading texture refreshes, leaving the
+	// lit terrain stale until an unrelated SetSunLighting fires the same event.
+	eventHandler.SunChanged();
 	result->success = true;
 }
 
 static void NativeSetSunLighting(const SetSunLightingQuery* query, SetSunLightingResult* result)
 {
-	(void)query->params;
 	result->error = nullptr;
-	result->success = (ISky::GetSky() != nullptr);
+	result->success = false;
+
+	if (sunLighting == nullptr) {
+		result->error = &RENDERING_UNAVAILABLE_ERROR;
+		return;
+	}
+
+	CSunLighting sl = *sunLighting;
+	const SunLightingParams& p = query->params;
+	if (p.hasGroundAmbientColor)  sl.groundAmbientColor  = float4(p.groundAmbientColor[0], p.groundAmbientColor[1], p.groundAmbientColor[2], p.groundAmbientColor[3]);
+	if (p.hasGroundDiffuseColor)  sl.groundDiffuseColor  = float4(p.groundDiffuseColor[0], p.groundDiffuseColor[1], p.groundDiffuseColor[2], p.groundDiffuseColor[3]);
+	if (p.hasGroundSpecularColor) sl.groundSpecularColor = float4(p.groundSpecularColor[0], p.groundSpecularColor[1], p.groundSpecularColor[2], p.groundSpecularColor[3]);
+	if (p.hasModelAmbientColor)   sl.modelAmbientColor   = float4(p.modelAmbientColor[0], p.modelAmbientColor[1], p.modelAmbientColor[2], p.modelAmbientColor[3]);
+	if (p.hasModelDiffuseColor)   sl.modelDiffuseColor   = float4(p.modelDiffuseColor[0], p.modelDiffuseColor[1], p.modelDiffuseColor[2], p.modelDiffuseColor[3]);
+	if (p.hasModelSpecularColor)  sl.modelSpecularColor  = float4(p.modelSpecularColor[0], p.modelSpecularColor[1], p.modelSpecularColor[2], p.modelSpecularColor[3]);
+	if (p.hasSpecularExponent)    sl.specularExponent    = p.specularExponent;
+	if (p.hasGroundShadowDensity) sl.groundShadowDensity = p.groundShadowDensity;
+	if (p.hasModelShadowDensity)  sl.modelShadowDensity  = p.modelShadowDensity;
+
+	*sunLighting = sl;
+	sunLighting->SetUpdated();
+	result->success = true;
+}
+
+static void NativeSetWaterTexture(const SetWaterTextureQuery* query, SetWaterTextureResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (waterRendering == nullptr) {
+		result->error = &RENDERING_UNAVAILABLE_ERROR;
+		return;
+	}
+	if (query->texType == nullptr || query->texName == nullptr) {
+		result->error = &INVALID_TEXTURE_ERROR;
+		return;
+	}
+
+	// Mirror the LUA_TSTRING keys of Spring.SetWaterParams: just store the path.
+	// The renderer picks it up on the next water-mode (re)select, which SBC
+	// triggers via SendCommands("water <mode>") right after applying params.
+	const std::string texType = query->texType;
+	const std::string texName = query->texName;
+	if (texType == "texture") {
+		waterRendering->texture = texName;
+	} else if (texType == "foamTexture") {
+		waterRendering->foamTexture = texName;
+	} else if (texType == "normalTexture") {
+		waterRendering->normalTexture = texName;
+	} else {
+		result->error = &INVALID_TEXTURE_ERROR;
+		return;
+	}
+	result->success = true;
+}
+
+static void NativeGetWaterTexture(const GetWaterTextureQuery* query, GetWaterTextureResult* result)
+{
+	result->error = nullptr;
+	result->texName = "";
+
+	if (waterRendering == nullptr) {
+		result->error = &RENDERING_UNAVAILABLE_ERROR;
+		return;
+	}
+	if (query->texType == nullptr) {
+		result->error = &INVALID_TEXTURE_ERROR;
+		return;
+	}
+
+	// Returns a pointer into the persistent waterRendering string; the caller
+	// copies it before any further mutation.
+	const std::string texType = query->texType;
+	if (texType == "texture") {
+		result->texName = waterRendering->texture.c_str();
+	} else if (texType == "foamTexture") {
+		result->texName = waterRendering->foamTexture.c_str();
+	} else if (texType == "normalTexture") {
+		result->texName = waterRendering->normalTexture.c_str();
+	} else {
+		result->error = &INVALID_TEXTURE_ERROR;
+	}
 }
 
 static void NativeSetWaterParams(const SetWaterParamsQuery* query, SetWaterParamsResult* result)
 {
-	(void)query->params;
 	result->error = nullptr;
+	result->success = false;
+
+	if (waterRendering == nullptr) {
+		result->error = &RENDERING_UNAVAILABLE_ERROR;
+		return;
+	}
+
+	const WaterParams& p = query->params;
+	if (p.hasAbsorb)        waterRendering->absorb        = float3(p.absorb[0], p.absorb[1], p.absorb[2]);
+	if (p.hasBaseColor)     waterRendering->baseColor     = float3(p.baseColor[0], p.baseColor[1], p.baseColor[2]);
+	if (p.hasMinColor)      waterRendering->minColor      = float3(p.minColor[0], p.minColor[1], p.minColor[2]);
+	if (p.hasSurfaceColor)  waterRendering->surfaceColor  = float3(p.surfaceColor[0], p.surfaceColor[1], p.surfaceColor[2]);
+	if (p.hasDiffuseColor)  waterRendering->diffuseColor  = float3(p.diffuseColor[0], p.diffuseColor[1], p.diffuseColor[2]);
+	if (p.hasSpecularColor) waterRendering->specularColor = float3(p.specularColor[0], p.specularColor[1], p.specularColor[2]);
+	if (p.hasPlaneColor) {
+		waterRendering->planeColor.x = p.planeColor[0];
+		waterRendering->planeColor.y = p.planeColor[1];
+		waterRendering->planeColor.z = p.planeColor[2];
+	}
+
+	if (p.hasRepeatX)        waterRendering->repeatX        = p.repeatX;
+	if (p.hasRepeatY)        waterRendering->repeatY        = p.repeatY;
+	if (p.hasSurfaceAlpha)   waterRendering->surfaceAlpha   = p.surfaceAlpha;
+	if (p.hasAmbientFactor)  waterRendering->ambientFactor  = p.ambientFactor;
+	if (p.hasDiffuseFactor)  waterRendering->diffuseFactor  = p.diffuseFactor;
+	if (p.hasSpecularFactor) waterRendering->specularFactor = p.specularFactor;
+	if (p.hasSpecularPower)  waterRendering->specularPower  = p.specularPower;
+	if (p.hasFresnelMin)     waterRendering->fresnelMin     = p.fresnelMin;
+	if (p.hasFresnelMax)     waterRendering->fresnelMax     = p.fresnelMax;
+	if (p.hasFresnelPower)   waterRendering->fresnelPower   = p.fresnelPower;
+	if (p.hasReflectionDistortion) waterRendering->reflDistortion = p.reflectionDistortion;
+	if (p.hasBlurBase)       waterRendering->blurBase       = p.blurBase;
+	if (p.hasBlurExponent)   waterRendering->blurExponent   = p.blurExponent;
+	if (p.hasPerlinStartFreq)  waterRendering->perlinStartFreq  = p.perlinStartFreq;
+	if (p.hasPerlinLacunarity) waterRendering->perlinLacunarity = p.perlinLacunarity;
+	if (p.hasPerlinAmplitude)  waterRendering->perlinAmplitude  = p.perlinAmplitude;
+	if (p.hasWindSpeed)        waterRendering->windSpeed        = p.windSpeed;
+	if (p.hasWaveOffsetFactor) waterRendering->waveOffsetFactor = p.waveOffsetFactor;
+	if (p.hasWaveLength)       waterRendering->waveLength       = p.waveLength;
+	if (p.hasWaveFoamDistortion) waterRendering->waveFoamDistortion = p.waveFoamDistortion;
+	if (p.hasWaveFoamIntensity)  waterRendering->waveFoamIntensity  = p.waveFoamIntensity;
+	if (p.hasCausticsResolution) waterRendering->causticsResolution = p.causticsResolution;
+	if (p.hasCausticsStrength)   waterRendering->causticsStrength   = p.causticsStrength;
+	if (p.hasNumTiles)           waterRendering->numTiles           = (unsigned char)p.numTiles;
+
+	if (p.hasShoreWaves)     waterRendering->shoreWaves     = p.shoreWaves;
+	if (p.hasForceRendering) waterRendering->forceRendering = p.forceRendering;
+	if (p.hasHasWaterPlane)  waterRendering->hasWaterPlane  = p.hasWaterPlane;
+
+	const int waterID = static_cast<int>(IWater::GetWater()->GetID());
+	IWater::KillWater();
+	IWater::SetWater(waterID);
+	waterRendering->SetUpdated();
 	result->success = true;
 }
 
@@ -1003,10 +1176,74 @@ static void NativeSetMapShader(const SetMapShaderQuery* query, SetMapShaderResul
 	result->success = true;
 }
 
-static void NativeSetMapShadingTexture(const SetMapShadingTextureQuery* /*query*/, SetMapShadingTextureResult* result)
+static bool NativeMapTextureTypeFromName(const char* texType, unsigned int* type)
+{
+	if (texType == nullptr || type == nullptr)
+		return false;
+
+	switch (hashString(texType)) {
+		case hashString("$grass"):              *type = MAP_BASE_GRASS_TEX; break;
+		case hashString("$detail"):             *type = MAP_BASE_DETAIL_TEX; break;
+		case hashString("$minimap"):            *type = MAP_BASE_MINIMAP_TEX; break;
+		case hashString("$shading"):            *type = MAP_BASE_SHADING_TEX; break;
+		case hashString("$normals"):            *type = MAP_BASE_NORMALS_TEX; break;
+		case hashString("$ssmf_normals"):       *type = MAP_SSMF_NORMALS_TEX; break;
+		case hashString("$ssmf_specular"):      *type = MAP_SSMF_SPECULAR_TEX; break;
+		case hashString("$ssmf_splat_distr"):   *type = MAP_SSMF_SPLAT_DISTRIB_TEX; break;
+		case hashString("$ssmf_splat_detail"):  *type = MAP_SSMF_SPLAT_DETAIL_TEX; break;
+		case hashString("$ssmf_splat_normals"): *type = MAP_SSMF_SPLAT_NORMAL_TEX; break;
+		case hashString("$ssmf_sky_refl"):      *type = MAP_SSMF_SKY_REFLECTION_TEX; break;
+		case hashString("$ssmf_emission"):      *type = MAP_SSMF_LIGHT_EMISSION_TEX; break;
+		case hashString("$ssmf_parallax"):      *type = MAP_SSMF_PARALLAX_HEIGHT_TEX; break;
+		default: return false;
+	}
+
+	return true;
+}
+
+static void NativeSetMapShadingTexture(const SetMapShadingTextureQuery* query, SetMapShadingTextureResult* result)
 {
 	result->error = nullptr;
-	result->success = true;
+	result->success = false;
+
+	if (readMap == nullptr) {
+		result->error = &MAP_UNAVAILABLE_ERROR;
+		return;
+	}
+
+	MapTextureData texData;
+	if (!NativeMapTextureTypeFromName(query->texType, &texData.type)) {
+		result->error = &INVALID_TEXTURE_ERROR;
+		return;
+	}
+	texData.num = std::max(query->num, 0);
+
+	const char* texName = query->texName;
+	if (texName != nullptr && texName[0] != '\0') {
+		uint32_t nativeID = 0;
+		int32_t nativeXSize = 0;
+		int32_t nativeYSize = 0;
+		uint32_t nativeTarget = 0;
+
+		if (GetNativeGfxTextureInfo(texName, &nativeID, &nativeXSize, &nativeYSize, &nativeTarget)) {
+			if (nativeTarget != GL_TEXTURE_2D) {
+				result->error = &INVALID_TEXTURE_ERROR;
+				return;
+			}
+			texData.id = nativeID;
+			texData.size = int2(nativeXSize, nativeYSize);
+		} else {
+			const CNamedTextures::TexInfo* namedTexture = CNamedTextures::GetInfo(texName);
+			if (namedTexture == nullptr) {
+				result->error = &INVALID_TEXTURE_ERROR;
+				return;
+			}
+			texData.id = namedTexture->id;
+			texData.size = int2(namedTexture->xsize, namedTexture->ysize);
+		}
+	}
+
+	result->success = readMap->SetLuaTexture(texData);
 }
 
 static void NativeSetSkyBoxTexture(const SetSkyBoxTextureQuery* /*query*/, SetSkyBoxTextureResult* result)
@@ -1017,8 +1254,24 @@ static void NativeSetSkyBoxTexture(const SetSkyBoxTextureQuery* /*query*/, SetSk
 
 static void NativeSetMapRenderingParams(const SetMapRenderingParamsQuery* query, SetMapRenderingParamsResult* result)
 {
-	(void)query->params;
 	result->error = nullptr;
+	result->success = false;
+
+	if (readMap == nullptr || mapRendering == nullptr) {
+		result->error = &MAP_UNAVAILABLE_ERROR;
+		return;
+	}
+
+	const MapRenderingParams& p = query->params;
+	if (p.hasSplatTexScales) mapRendering->splatTexScales = float4(p.splatTexScales[0], p.splatTexScales[1], p.splatTexScales[2], p.splatTexScales[3]);
+	if (p.hasSplatTexMults)  mapRendering->splatTexMults  = float4(p.splatTexMults[0], p.splatTexMults[1], p.splatTexMults[2], p.splatTexMults[3]);
+	if (p.hasVoidWater)      mapRendering->voidWater      = p.voidWater;
+	if (p.hasVoidGround)     mapRendering->voidGround     = p.voidGround;
+	if (p.hasSplatDetailNormalDiffuseAlpha) mapRendering->splatDetailNormalDiffuseAlpha = p.splatDetailNormalDiffuseAlpha;
+
+	CBaseGroundDrawer* groundDrawer = readMap->GetGroundDrawer();
+	if (groundDrawer != nullptr)
+		groundDrawer->UpdateRenderState();
 	result->success = true;
 }
 
@@ -1060,6 +1313,24 @@ static void NativeSetDrawSelectionInfo(const SetDrawSelectionInfoQuery* query, S
 	}
 
 	guihandler->SetDrawSelectionInfo(query->draw);
+	result->success = true;
+}
+
+static void NativeSetShockFrontFactors(const SetShockFrontFactorsQuery* query, SetShockFrontFactorsResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (luaUI == nullptr) {
+		result->error = &LUAUI_UNAVAILABLE_ERROR;
+		return;
+	}
+
+	luaUI->SetShockFrontFactors(
+		query->hasMinArea, query->minArea,
+		query->hasMinPower, query->minPower,
+		query->hasDistAdj, query->distAdj
+	);
 	result->success = true;
 }
 
@@ -1605,6 +1876,7 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetMapRenderingParams = NativeSetMapRenderingParams,
 	.SetLosViewColors = NativeSetLosViewColors,
 	.SetDrawSelectionInfo = NativeSetDrawSelectionInfo,
+	.SetShockFrontFactors = NativeSetShockFrontFactors,
 	.SetCustomCommandDrawData = NativeSetCustomCommandDrawData,
 	.SetLastMessagePosition = NativeSetLastMessagePosition,
 	.LoadCmdColorsConfig = NativeLoadCmdColorsConfig,
@@ -1631,4 +1903,6 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SelectUnitMap = NativeSelectUnitMap,
 	.DeselectUnitMap = NativeDeselectUnitMap,
 	.DrawUnitCommands = NativeDrawUnitCommands,
+	.SetWaterTexture = NativeSetWaterTexture,
+	.GetWaterTexture = NativeGetWaterTexture,
 };

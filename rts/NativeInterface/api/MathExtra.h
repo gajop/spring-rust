@@ -54,7 +54,7 @@ struct BitXorResult { const Error* error; uint32_t value; };
 struct BitInvQuery { uint32_t a; };
 struct BitInvResult { const Error* error; uint32_t value; };
 
-struct BitBitsQuery { uint32_t value; uint32_t startBit; uint32_t endBit; };
+struct BitBitsQuery { const uint32_t* bits; uint32_t count; };
 struct BitBitsResult { const Error* error; uint32_t bits; };
 
 // API structure

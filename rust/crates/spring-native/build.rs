@@ -47,12 +47,14 @@ fn main() {
         ("utils", "Utils.h"),
         ("memory", "Memory.h"),
         ("unsynced_ctrl", "UnsyncedCtrl.h"),
+        ("gfx", "Gfx.h"),
         ("lights", "Lights.h"),
         ("icons", "Icons.h"),
         ("markers", "Markers.h"),
         ("ground_decals", "GroundDecals.h"),
         ("system_control", "SystemControl.h"),
         ("profiling", "Profiling.h"),
+        ("rml_ui", "RmlUi.h"),
         ("vfs", "VFS.h"),
         ("unsynced_read", "UnsyncedRead.h"),
     ];
@@ -104,12 +106,14 @@ fn main() {
             "utils" => spring_native_codegen::generate_utils,
             "memory" => spring_native_codegen::generate_memory,
             "unsynced_ctrl" => spring_native_codegen::generate_unsynced_ctrl,
+            "gfx" => spring_native_codegen::generate_gfx,
             "lights" => spring_native_codegen::generate_lights,
             "icons" => spring_native_codegen::generate_icons,
             "markers" => spring_native_codegen::generate_markers,
             "ground_decals" => spring_native_codegen::generate_ground_decals,
             "system_control" => spring_native_codegen::generate_system_control,
             "profiling" => spring_native_codegen::generate_profiling,
+            "rml_ui" => spring_native_codegen::generate_rml_ui,
             "vfs" => spring_native_codegen::generate_vfs,
             "unsynced_read" => spring_native_codegen::generate_unsynced_read,
             _ => panic!("Unknown module: {}", module_name),
@@ -124,12 +128,27 @@ fn main() {
     // Generate SyncedCtrl sub-APIs (all use SyncedCtrl.h)
     let synced_ctrl_header = project_root.join("rts/NativeInterface/api/SyncedCtrl.h");
     let sub_apis = [
-        ("team_control", spring_native_codegen::generate_team_control as fn(&_, &_) -> _),
+        (
+            "team_control",
+            spring_native_codegen::generate_team_control as fn(&_, &_) -> _,
+        ),
         ("unit_control", spring_native_codegen::generate_unit_control),
-        ("feature_control", spring_native_codegen::generate_feature_control),
-        ("terrain_control", spring_native_codegen::generate_terrain_control),
-        ("projectile_control", spring_native_codegen::generate_projectile_control),
-        ("effects_control", spring_native_codegen::generate_effects_control),
+        (
+            "feature_control",
+            spring_native_codegen::generate_feature_control,
+        ),
+        (
+            "terrain_control",
+            spring_native_codegen::generate_terrain_control,
+        ),
+        (
+            "projectile_control",
+            spring_native_codegen::generate_projectile_control,
+        ),
+        (
+            "effects_control",
+            spring_native_codegen::generate_effects_control,
+        ),
         ("game_config", spring_native_codegen::generate_game_config),
         ("cob_script", spring_native_codegen::generate_cob_script),
     ];
@@ -147,8 +166,11 @@ fn main() {
     let unit_rendering_code =
         spring_native_codegen::generate_unit_rendering(&unsynced_read_header, &includes)
             .unwrap_or_else(|e| panic!("unit_rendering codegen: {}", e));
-    fs::write(out_dir.join("unit_rendering_generated.rs"), unit_rendering_code)
-        .unwrap_or_else(|e| panic!("write unit_rendering: {}", e));
+    fs::write(
+        out_dir.join("unit_rendering_generated.rs"),
+        unit_rendering_code,
+    )
+    .unwrap_or_else(|e| panic!("write unit_rendering: {}", e));
 
     // Extract and generate API version constants
     let common_header = project_root.join("rts/NativeInterface/api/Common.h");

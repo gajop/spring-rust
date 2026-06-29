@@ -9,13 +9,22 @@
 #include "Game/Game.h"
 #include "Game/GlobalUnsynced.h"
 #include "Game/IVideoCapturing.h"
+#include "lib/lua/include/LuaInclude.h"
+#include "Lua/LuaContextData.h"
+#include "Lua/LuaRules.h"
+#include "System/UnorderedSet.hpp"
 #include "Rendering/GlobalRendering.h"
 #include "Rendering/GlobalRenderingInfo.h"
 #include "Rendering/GL/myGL.h"
 #include "System/Log/ILog.h"
 #include "System/TimeProfiler.h"
 #include "System/Platform/Watchdog.h"
+#include "System/ScopedResource.h"
 #include "System/SpringMath.h"
+#include "lib/lua/include/LuaUser.h"
+
+// [0] := unsynced, [1] := synced. Defined in LuaHandle.cpp.
+extern const spring::unsynced_set<const luaContextData*>* LUAHANDLE_CONTEXTS[2];
 
 namespace {
 
@@ -176,7 +185,7 @@ static void NativeGetProfilerRecordNames(const GetProfilerRecordNamesQuery*, Get
 
 static void NativeGetLuaMemUsage(const GetLuaMemUsageQuery*, GetLuaMemUsageResult* result)
 {
-	result->error = &NOT_READY_ERROR;
+	result->error = nullptr;
 	result->handleAllocedKB = 0.0f;
 	result->handleAllocsK = 0.0f;
 	result->globalAllocedKB = 0.0f;
@@ -185,6 +194,33 @@ static void NativeGetLuaMemUsage(const GetLuaMemUsageQuery*, GetLuaMemUsageResul
 	result->unsyncedAllocsK = 0.0f;
 	result->syncedAllocedKB = 0.0f;
 	result->syncedAllocsK = 0.0f;
+
+	SLuaAllocState globalState;
+	spring_lua_alloc_get_stats(&globalState);
+
+	result->globalAllocedKB = globalState.allocedBytes / 1024.0f;
+	result->globalAllocsK = globalState.numLuaAllocs / 1000.0f;
+
+	for (bool synced: {false, true}) {
+		SLuaAllocState state;
+		state.allocedBytes = {0};
+		state.numLuaAllocs = {0};
+		state.luaAllocTime = {0};
+		state.numLuaStates = {0};
+
+		for (const luaContextData* lcd: *LUAHANDLE_CONTEXTS[synced]) {
+			state.allocedBytes += lcd->allocState.allocedBytes;
+			state.numLuaAllocs += lcd->allocState.numLuaAllocs;
+		}
+
+		if (synced) {
+			result->syncedAllocedKB = state.allocedBytes / 1024.0f;
+			result->syncedAllocsK = state.numLuaAllocs / 1000.0f;
+		} else {
+			result->unsyncedAllocedKB = state.allocedBytes / 1024.0f;
+			result->unsyncedAllocsK = state.numLuaAllocs / 1000.0f;
+		}
+	}
 }
 
 static void NativeGetVidMemUsage(const GetVidMemUsageQuery*, GetVidMemUsageResult* result)
@@ -199,9 +235,29 @@ static void NativeGetVidMemUsage(const GetVidMemUsageQuery*, GetVidMemUsageResul
 
 static void NativeGetSyncedGCInfo(const GetSyncedGCInfoQuery* query, GetSyncedGCInfoResult* result)
 {
-	(void)query;
-	result->error = &NOT_READY_ERROR;
 	result->gcKB = 0.0f;
+	result->error = nullptr;
+
+	if (luaRules == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	lua_State* syncedL = luaRules->syncedLuaHandle.GetLuaGCState();
+	if (syncedL == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	auto luaLock = spring::ScopedNullResource([syncedL]() { lua_lock(syncedL); }, [syncedL]() { lua_unlock(syncedL); });
+
+	if (query->collect) {
+		lua_gc(syncedL, LUA_GCCOLLECT, 0);
+		lua_gc(syncedL, LUA_GCCOLLECT, 0);
+		lua_gc(syncedL, LUA_GCSTOP, 0);
+	}
+
+	result->gcKB = lua_gc(syncedL, LUA_GCCOUNT, 0);
 }
 
 } // namespace

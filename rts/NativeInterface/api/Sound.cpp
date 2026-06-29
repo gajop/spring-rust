@@ -2,9 +2,14 @@
 
 #include <vector>
 
+#include "Lua/LuaParser.h"
 #include "System/Sound/ISound.h"
 #include "System/Sound/ISoundChannels.h"
 #include "System/Sound/IAudioChannel.h"
+#if !defined(HEADLESS) && !defined(NO_SOUND)
+#include "System/Sound/OpenAL/EFX.h"
+#endif
+#include "System/FileSystem/VFSModes.h"
 #include "System/float3.h"
 
 namespace {
@@ -17,7 +22,7 @@ static thread_local Error dynamicError;
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Sound system not ready" };
 static const Error INVALID_SOUND_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid sound file or ID" };
-static const Error NOT_AVAILABLE_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Sound effect parameters are not available" };
+static const Error SOUND_EFFECTS_UNSUPPORTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Sound effects are not supported" };
 
 static bool IsReady() { return (sound != nullptr) && ISound::IsInitialized(); }
 
@@ -26,13 +31,15 @@ static void NativePlaySoundFile(const PlaySoundFileQuery* query, PlaySoundFileRe
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (query->soundFile == nullptr || query->soundFile[0] == '\0') {
-		result->error = &INVALID_SOUND_ERROR;
+		result->error = nullptr;
+		result->success = false;
 		return;
 	}
 
 	const unsigned int soundID = sound->GetSoundId(query->soundFile);
 	if (soundID == 0) {
-		result->error = &INVALID_SOUND_ERROR;
+		result->error = nullptr;
+		result->success = false;
 		return;
 	}
 
@@ -63,12 +70,15 @@ static void NativeLoadSoundDef(const LoadSoundDefQuery* query, LoadSoundDefResul
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (query->soundName == nullptr || query->soundName[0] == '\0') {
-		result->error = &INVALID_SOUND_ERROR;
+		result->error = nullptr;
+		result->success = false;
 		return;
 	}
 
+	LuaParser soundDefsParser(query->soundName, SPRING_VFS_ZIP_FIRST, SPRING_VFS_ZIP_FIRST);
+
 	result->error = nullptr;
-	result->success = sound->PreloadSoundItem(query->soundName);
+	result->success = sound->LoadSoundDefs(&soundDefsParser);
 }
 
 static void NativePlaySoundStream(const PlaySoundStreamQuery* query, PlaySoundStreamResult* result) {
@@ -143,15 +153,36 @@ static void NativeGetSoundDevices(const GetSoundDevicesQuery* /*query*/, GetSoun
 
 static void NativeGetSoundEffectParams(const GetSoundEffectParamsQuery* /*query*/, GetSoundEffectParamsResult* result) {
 	bufferPos = 0;
-	result->error = &NOT_AVAILABLE_ERROR;
+#if defined(HEADLESS) || defined(NO_SOUND)
+	result->error = &SOUND_EFFECTS_UNSUPPORTED_ERROR;
 	result->success = false;
+#else
+	result->success = efx.Supported();
+	result->error = result->success ? nullptr : &SOUND_EFFECTS_UNSUPPORTED_ERROR;
+#endif
 }
 
 static void NativeSetSoundEffectParams(const SetSoundEffectParamsQuery* query, SetSoundEffectParamsResult* result) {
 	bufferPos = 0;
-	(void)query->params;
-	result->error = &NOT_AVAILABLE_ERROR;
+#if defined(HEADLESS) || defined(NO_SOUND)
+	(void)query;
+	result->error = &SOUND_EFFECTS_UNSUPPORTED_ERROR;
 	result->success = false;
+#else
+	result->success = false;
+
+	if (!efx.Supported()) {
+		result->error = &SOUND_EFFECTS_UNSUPPORTED_ERROR;
+		return;
+	}
+
+	if (query->params.preset != nullptr && query->params.preset[0] != '\0') {
+		efx.SetPreset(query->params.preset, false);
+		result->success = true;
+	}
+
+	result->error = nullptr;
+#endif
 }
 
 static void NativePreloadSoundItem(const PreloadSoundItemQuery* query, PreloadSoundItemResult* result) {
@@ -159,7 +190,8 @@ static void NativePreloadSoundItem(const PreloadSoundItemQuery* query, PreloadSo
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (query->soundName == nullptr || query->soundName[0] == '\0') {
-		result->error = &INVALID_SOUND_ERROR;
+		result->error = nullptr;
+		result->success = false;
 		return;
 	}
 

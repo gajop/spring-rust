@@ -9,8 +9,11 @@ function widget:GetInfo()
 end
 
 local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
+local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
 local outputPath
 local sentInventory = false
+local ranGeneratedTests = false
+local fixtureIDs = {}
 
 local function record(name, payload)
 	if outputPath == nil then
@@ -29,6 +32,29 @@ local function recordInventory()
 	record("context_inventory", { functions = Common.springFunctionInventory() })
 end
 
+local function runGeneratedTests()
+	if ranGeneratedTests then
+		return
+	end
+	ranGeneratedTests = true
+	Common.runPortableReadOnlyTests("widget", GeneratedTests, record, function(encoded)
+		Spring.InvokeNativeModule(encoded)
+	end, fixtureIDs)
+end
+
+function widget:NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, teamID, allyTeamID)
+	fixtureIDs = {
+		unitID = unitID,
+		featureID = featureID,
+		unitDefID = unitDefID,
+		featureDefID = featureDefID,
+		weaponDefID = weaponDefID,
+		teamID = teamID,
+		allyTeamID = allyTeamID,
+	}
+	ranGeneratedTests = false
+end
+
 function widget:Initialize()
 	outputPath = Common.outputDir() .. "/widget.jsonl"
 	recordInventory()
@@ -40,9 +66,11 @@ end
 function widget:GameFrame(frame)
 	if frame == 4 then
 		recordInventory()
+		runGeneratedTests()
 		record("game_frame", { value = Spring.GetGameFrame() })
 		record("visible_units", { count = #(Spring.GetVisibleUnits() or {}) })
 	elseif frame == 20 then
+		runGeneratedTests()
 		Spring.SendCommands("quitforce")
 	end
 end

@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_all_projectiles",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetAllProjectiles"]},
+      "native": {"set": [], "get": ["Projectiles.get_all_projectiles"]},
+      "compare": {"mode": "fields", "fields": ["projectileIDs"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetAllProjectiles`", "native_getter": "`Projectiles.get_all_projectiles`", "fields": "`projectileIDs`"},
+      "rust": {"check": "check_projectiles_list", "set": "set_noop"},
+      "params": {"synced": {"type": "bool", "fixed": true}, "weapon": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.GetAllProjectiles", "args": ["value.synced", "value.weapon"], "returns": [{"field": "projectileIDs"}]},
+      "order_insensitive_fields": ["projectileIDs"]
+    },
+    {
+      "id": "get_projectiles_in_rectangle",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetProjectilesInRectangle"]},
+      "native": {"set": [], "get": ["Projectiles.get_projectiles_in_rectangle"]},
+      "compare": {"mode": "fields", "fields": ["projectileIDs"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetProjectilesInRectangle`", "native_getter": "`Projectiles.get_projectiles_in_rectangle`", "fields": "`projectileIDs`"},
+      "rust": {"check": "check_projectiles_list", "set": "set_noop"},
+      "params": {"minX": {"type": "f32", "fixed": 0}, "minZ": {"type": "f32", "fixed": 0}, "maxX": {"type": "f32", "fixed": 99999}, "maxZ": {"type": "f32", "fixed": 99999}, "synced": {"type": "bool", "fixed": true}, "weapon": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.GetProjectilesInRectangle", "args": ["value.minX", "value.minZ", "value.maxX", "value.maxZ", "value.synced", "value.weapon"], "returns": [{"field": "projectileIDs"}]},
+      "order_insensitive_fields": ["projectileIDs"]
+    },
+    {
+      "id": "get_projectiles_in_sphere",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetProjectilesInSphere"]},
+      "native": {"set": [], "get": ["Projectiles.get_projectiles_in_sphere"]},
+      "compare": {"mode": "fields", "fields": ["projectileIDs"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetProjectilesInSphere`", "native_getter": "`Projectiles.get_projectiles_in_sphere`", "fields": "`projectileIDs`"},
+      "rust": {"check": "check_projectiles_list", "set": "set_noop"},
+      "params": {"center": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]}, "radius": {"type": "f32", "fixed": 2048}, "synced": {"type": "bool", "fixed": true}, "weapon": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.GetProjectilesInSphere", "args": ["value.x", "value.y", "value.z", "value.radius", "value.synced", "value.weapon"], "returns": [{"field": "projectileIDs"}]},
+      "order_insensitive_fields": ["projectileIDs"]
+    }
+  ]
+}

@@ -24,6 +24,7 @@
 #include "Game/UI/GuiHandler.h"
 #include "Game/UI/InfoConsole.h"
 #include "Game/SelectedUnitsHandler.h"
+#include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Map/ReadMap.h"
 #include "System/Matrix44f.h"
 #include "System/float3.h"
@@ -91,6 +92,61 @@ static const char* CopyToScratch(const std::string& str) {
 	memcpy(out, str.c_str(), len);
 	bufferPos += len;
 	return out;
+}
+
+template<typename T>
+static T* AllocateArray(size_t count) {
+	const size_t needed = count * sizeof(T);
+	if (bufferPos + needed > sizeof(scratchBuffer))
+		return nullptr;
+
+	T* out = reinterpret_cast<T*>(&scratchBuffer[bufferPos]);
+	bufferPos += needed;
+	return out;
+}
+
+static bool FillActiveCommandDescription(const SCommandDescription& in, ActiveCommandDescription& out)
+{
+	out.id = in.id;
+	out.type = in.type;
+	out.name = CopyToScratch(in.name);
+	out.action = CopyToScratch(in.action);
+	out.tooltip = CopyToScratch(in.tooltip);
+	out.texture = CopyToScratch(in.iconname);
+	out.cursor = CopyToScratch(in.mouseicon);
+	out.queueing = in.queueing;
+	out.hidden = in.hidden;
+	out.disabled = in.disabled;
+	out.showUnique = in.showUnique;
+	out.onlyTexture = in.onlyTexture;
+	out.params = nullptr;
+	out.paramCount = 0;
+
+	if (out.name[0] == '\0' && !in.name.empty())
+		return false;
+	if (out.action[0] == '\0' && !in.action.empty())
+		return false;
+	if (out.tooltip[0] == '\0' && !in.tooltip.empty())
+		return false;
+	if (out.texture[0] == '\0' && !in.iconname.empty())
+		return false;
+	if (out.cursor[0] == '\0' && !in.mouseicon.empty())
+		return false;
+
+	if (!in.params.empty()) {
+		out.params = AllocateArray<const char*>(in.params.size());
+		if (out.params == nullptr)
+			return false;
+
+		for (size_t i = 0; i < in.params.size(); ++i) {
+			out.params[i] = CopyToScratch(in.params[i]);
+			if (out.params[i][0] == '\0' && !in.params[i].empty())
+				return false;
+		}
+		out.paramCount = static_cast<uint32_t>(in.params.size());
+	}
+
+	return true;
 }
 
 static bool IsReady() {
@@ -179,6 +235,29 @@ static bool UnitVisibleToClient(const CUnit* unit, int readAllyTeam, bool fullVi
 		return false;
 
 	return true;
+}
+
+static bool UnitVisibleForScreenRectangle(const CUnit* unit, int allegiance, int readTeam, int readAllyTeam, bool fullView)
+{
+	if (unit == nullptr || unit->noDraw)
+		return false;
+
+	switch (allegiance) {
+		case MY_UNITS:
+			return (readTeam >= 0 && unit->team == readTeam);
+		case ALLY_UNITS:
+			return (readAllyTeam >= 0 && unit->allyteam == readAllyTeam);
+		case ENEMY_UNITS:
+			return (readAllyTeam >= 0 && unit->allyteam != readAllyTeam);
+		case ALL_UNITS:
+			return UnitVisibleToClient(unit, readAllyTeam, fullView, false);
+		default:
+			if (allegiance < 0 || unit->team != allegiance)
+				return false;
+			if (readTeam >= 0 && teamHandler.AlliedTeams(readTeam, allegiance))
+				return true;
+			return UnitVisibleToClient(unit, readAllyTeam, fullView, false);
+	}
 }
 
 static void SetNotAvailable(const Error** error) {
@@ -548,6 +627,20 @@ static void NativeGetClipboard(const GetClipboardQuery* query, GetClipboardResul
 	result->text = buf;
 }
 
+static void NativeGetGameSecondsInterpolated(const GetGameSecondsInterpolatedQuery* query, GetGameSecondsInterpolatedResult* result)
+{
+	(void)query;
+	result->error = nullptr;
+	result->seconds = 0.0f;
+
+	if (gs == nullptr || globalRendering == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	result->seconds = (gs->GetLuaSimFrame() + globalRendering->timeOffset) / GAME_SPEED;
+}
+
 // ============================================================================
 // Camera queries
 // ============================================================================
@@ -839,10 +932,7 @@ static void NativeGetUnitsInScreenRectangle(const GetUnitsInScreenRectangleQuery
 				continue;
 			unit->tempNum = tempNum;
 
-			if (!UnitMatchesAllegiance(unit, query->allegiance, readTeam, readAllyTeam))
-				continue;
-
-			if (!UnitVisibleToClient(unit, readAllyTeam, fullView, false))
+			if (!UnitVisibleForScreenRectangle(unit, query->allegiance, readTeam, readAllyTeam, fullView))
 				continue;
 
 			const float3 vpPos = camera->CalcViewPortCoordinates(unit->drawPos);
@@ -901,6 +991,9 @@ static void NativeGetFeaturesInScreenRectangle(const GetFeaturesInScreenRectangl
 			if (feature->tempNum == tempNum)
 				continue;
 			feature->tempNum = tempNum;
+
+			if (featureHandler.GetFeature(feature->id) != feature)
+				continue;
 
 			const float3 vpPos = camera->CalcViewPortCoordinates(feature->drawPos);
 
@@ -996,26 +1089,60 @@ static void NativeIsUnitIcon(const IsUnitIconQuery* query, IsUnitIconResult* res
 // Additional stubs
 // ====================================================================
 
-static void NativeGetActiveCmdDesc(const GetActiveCmdDescQuery* /*query*/, GetActiveCmdDescResult* result) {
+static void NativeGetActiveCmdDesc(const GetActiveCmdDescQuery* query, GetActiveCmdDescResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
+	result->cmdDesc = {};
+	result->hasCommand = false;
+
 	if (guihandler == nullptr) {
 		result->error = &NOT_READY_ERROR;
-		result->success = false;
 		return;
 	}
-	result->error = nullptr;
-	result->success = !guihandler->commands.empty();
+
+	const int cmdIndex = query->cmdIndex - CMD_INDEX_OFFSET;
+	const auto& cmdDescs = guihandler->commands;
+	if (cmdIndex < 0 || cmdIndex >= static_cast<int>(cmdDescs.size()))
+		return;
+
+	if (!FillActiveCommandDescription(cmdDescs[cmdIndex], result->cmdDesc)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	result->hasCommand = true;
 }
 
 static void NativeGetActiveCmdDescs(const GetActiveCmdDescsQuery* /*query*/, GetActiveCmdDescsResult* result) {
 	bufferPos = 0;
+	result->error = nullptr;
+	result->cmdDescs = nullptr;
+	result->count = 0;
+
 	if (guihandler == nullptr) {
 		result->error = &NOT_READY_ERROR;
-		result->success = false;
 		return;
 	}
-	result->error = nullptr;
-	result->success = true;
+
+	const auto& cmdDescs = guihandler->commands;
+	if (cmdDescs.empty())
+		return;
+
+	result->cmdDescs = AllocateArray<ActiveCommandDescription>(cmdDescs.size());
+	if (result->cmdDescs == nullptr) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	for (size_t i = 0; i < cmdDescs.size(); ++i) {
+		if (!FillActiveCommandDescription(cmdDescs[i], result->cmdDescs[i])) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			result->count = static_cast<uint32_t>(i);
+			return;
+		}
+	}
+
+	result->count = static_cast<uint32_t>(cmdDescs.size());
 }
 
 static void NativeGetCmdDescIndex(const GetCmdDescIndexQuery* query, GetCmdDescIndexResult* result) {
@@ -1346,4 +1473,5 @@ const UnsyncedReadApi UNSYNCED_READ_API = {
 	.GetCustomPaletteColor = NativeGetCustomPaletteColor,
 	.GetUnitPaletteIndex = NativeGetUnitPaletteIndex,
 	.GetFeaturePaletteIndex = NativeGetFeaturePaletteIndex,
+	.GetGameSecondsInterpolated = NativeGetGameSecondsInterpolated,
 };

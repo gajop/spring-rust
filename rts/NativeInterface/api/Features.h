@@ -39,6 +39,13 @@ struct FeatureResurrect {
 	int32_t facingDir;
 };
 
+struct FeatureLastHitPiece {
+	const char* name;
+	int32_t pieceNum;
+	int32_t frame;
+	bool wasHit;
+};
+
 // Feature rotation (pitch, yaw, roll)
 struct FeatureRotation {
 	float pitch;
@@ -97,6 +104,15 @@ struct GetFeatureMassResult { const Error* error; float mass; };
 struct GetFeaturePositionQuery { int32_t featureID; };
 struct GetFeaturePositionResult { const Error* error; Float3 position; };
 
+struct FeaturePositionExt {
+	Float3 position;
+	Float3 midPosition;
+	Float3 aimPosition;
+};
+
+struct GetFeaturePositionExtQuery { int32_t featureID; };
+struct GetFeaturePositionExtResult { const Error* error; FeaturePositionExt position; };
+
 struct GetFeatureSeparationQuery { int32_t featureID1; int32_t featureID2; bool positional; };
 struct GetFeatureSeparationResult { const Error* error; float separation; };
 
@@ -125,7 +141,7 @@ struct GetFeatureResurrectQuery { int32_t featureID; };
 struct GetFeatureResurrectResult { const Error* error; FeatureResurrect resurrect; bool canResurrect; };
 
 struct GetFeatureLastAttackedPieceQuery { int32_t featureID; };
-struct GetFeatureLastAttackedPieceResult { const Error* error; int32_t pieceNum; };
+struct GetFeatureLastAttackedPieceResult { const Error* error; FeatureLastHitPiece piece; };
 
 struct GetFeatureCollisionVolumeDataQuery { int32_t featureID; };
 struct GetFeatureCollisionVolumeDataResult { const Error* error; CollisionVolumeData volume; };
@@ -146,7 +162,7 @@ struct GetFeatureEngineDrawMaskQuery { int32_t featureID; };
 struct GetFeatureEngineDrawMaskResult { const Error* error; uint32_t mask; };
 
 struct GetFeatureDrawFlagQuery { int32_t featureID; };
-struct GetFeatureDrawFlagResult { const Error* error; bool flag; };
+struct GetFeatureDrawFlagResult { const Error* error; uint8_t flag; };
 
 struct GetFeatureAlwaysUpdateMatrixQuery { int32_t featureID; };
 struct GetFeatureAlwaysUpdateMatrixResult { const Error* error; bool update; };
@@ -191,6 +207,7 @@ struct FeaturesApi {
 	void (*GetFeatureRadius)(const GetFeatureRadiusQuery* query, GetFeatureRadiusResult* result);
 	void (*GetFeatureMass)(const GetFeatureMassQuery* query, GetFeatureMassResult* result);
 	void (*GetFeaturePosition)(const GetFeaturePositionQuery* query, GetFeaturePositionResult* result);
+	void (*GetFeaturePositionExt)(const GetFeaturePositionExtQuery* query, GetFeaturePositionExtResult* result);
 	void (*GetFeatureSeparation)(const GetFeatureSeparationQuery* query, GetFeatureSeparationResult* result);
 	void (*GetFeatureDirection)(const GetFeatureDirectionQuery* query, GetFeatureDirectionResult* result);
 	void (*GetFeatureVelocity)(const GetFeatureVelocityQuery* query, GetFeatureVelocityResult* result);

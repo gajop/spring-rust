@@ -33,6 +33,11 @@ struct PieceMatrix {
 	float m[16];  // 4x4 matrix in column-major order
 };
 
+struct PieceMapEntry {
+	const char* name;
+	int32_t pieceNum;
+};
+
 // Queries
 struct GetModelRootPieceQuery { const char* modelName; };
 struct GetModelRootPieceResult { const Error* error; int32_t rootPiece; };
@@ -50,16 +55,16 @@ struct GetModelPieceMapQuery { const char* modelName; };
 struct GetModelPieceMapResult { const Error* error; const char** names; uint32_t count; };
 
 struct GetUnitPieceListQuery { int32_t unitID; };
-struct GetUnitPieceListResult { const Error* error; int32_t* pieces; uint32_t count; };
+struct GetUnitPieceListResult { const Error* error; const char** names; uint32_t count; };
 
 struct GetUnitPieceMapQuery { int32_t unitID; };
-struct GetUnitPieceMapResult { const Error* error; const char** names; uint32_t count; };
+struct GetUnitPieceMapResult { const Error* error; PieceMapEntry* entries; uint32_t count; };
 
 struct GetFeaturePieceListQuery { int32_t featureID; };
-struct GetFeaturePieceListResult { const Error* error; int32_t* pieces; uint32_t count; };
+struct GetFeaturePieceListResult { const Error* error; const char** names; uint32_t count; };
 
 struct GetFeaturePieceMapQuery { int32_t featureID; };
-struct GetFeaturePieceMapResult { const Error* error; const char** names; uint32_t count; };
+struct GetFeaturePieceMapResult { const Error* error; PieceMapEntry* entries; uint32_t count; };
 
 struct GetUnitPieceInfoQuery { int32_t unitID; int32_t pieceNum; };
 struct GetUnitPieceInfoResult { const Error* error; PieceInfo info; bool exists; };

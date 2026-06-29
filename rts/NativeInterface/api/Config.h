@@ -37,31 +37,37 @@ struct ConfigParam {
 struct GetConfigIntQuery {
 	const char* key;
 	int32_t defaultValue;
+	bool hasDefault;
 };
 
 struct GetConfigIntResult {
 	const Error* error;
 	int32_t value;
+	bool exists;
 };
 
 struct GetConfigFloatQuery {
 	const char* key;
 	float defaultValue;
+	bool hasDefault;
 };
 
 struct GetConfigFloatResult {
 	const Error* error;
 	float value;
+	bool exists;
 };
 
 struct GetConfigStringQuery {
 	const char* key;
 	const char* defaultValue;
+	bool hasDefault;
 };
 
 struct GetConfigStringResult {
 	const Error* error;
 	const char* value;
+	bool exists;
 };
 
 struct GetConfigParamsQuery {

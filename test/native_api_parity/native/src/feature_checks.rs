@@ -68,6 +68,17 @@ impl NativeApiParity {
                 f32_field(message, "height")?,
             )
                 .map_err(|err| format!("get_features_in_cylinder() failed: {err:?}"))?,
+            "get_render_features" => {
+                let draw_mask = i32_field(message, "drawMask")?;
+                let send_mask = bool_field(message, "sendMask")?;
+                self.interface.features().get_render_features(draw_mask, send_mask)
+                    .map_err(|err| format!("get_render_features({draw_mask}, {send_mask}) failed: {err:?}"))?
+            }
+            "get_render_features_draw_flag_changed" => {
+                let send_mask = bool_field(message, "sendMask")?;
+                self.interface.features().get_render_features_draw_flag_changed(send_mask)
+                    .map_err(|err| format!("get_render_features_draw_flag_changed({send_mask}) failed: {err:?}"))?
+            }
             _ => return Err(format!("unsupported feature spatial list check `{label}`")),
         };
         self.same_i32_set_if_present(label, message, "featureIDs", &native)
@@ -217,6 +228,52 @@ impl NativeApiParity {
         self.same_bool_if_present(label, message, "crushable", native.crushable)?;
         self.same_bool_if_present(label, message, "blockEnemyPushing", native.blockEnemyPushing)?;
         self.same_bool_if_present(label, message, "blockHeightChanges", native.blockHeightChanges)
+    }
+    pub(crate) fn check_feature_render_flag(&mut self, message: &Value, label: &str) -> Result<(), String> {
+        let feature_id = i32_field(message, "featureID")?;
+        match base_test_name(label) {
+            "get_feature_no_draw" => {
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_no_draw(feature_id)
+                    .map_err(|err| format!("get_feature_no_draw({feature_id}) failed: {err:?}"))?;
+                self.same_bool_if_present(label, message, "noDraw", native)
+            }
+            "get_feature_lua_draw" => {
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_lua_draw(feature_id)
+                    .map_err(|err| format!("get_feature_lua_draw({feature_id}) failed: {err:?}"))?;
+                self.same_bool_if_present(label, message, "luaDraw", native)
+            }
+            "get_feature_engine_draw_mask" => {
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_engine_draw_mask(feature_id)
+                    .map_err(|err| format!("get_feature_engine_draw_mask({feature_id}) failed: {err:?}"))?;
+                self.same_i32_if_present(label, message, "mask", native as i32)
+            }
+            "get_feature_draw_flag" => {
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_draw_flag(feature_id)
+                    .map_err(|err| format!("get_feature_draw_flag({feature_id}) failed: {err:?}"))?;
+                self.same_i32_if_present(label, message, "flag", native as i32)
+            }
+            "get_feature_always_update_matrix" => {
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_always_update_matrix(feature_id)
+                    .map_err(|err| format!("get_feature_always_update_matrix({feature_id}) failed: {err:?}"))?;
+                self.same_bool_if_present(label, message, "update", native)
+            }
+            _ => Err(format!("unsupported feature render flag check `{label}`")),
+        }
     }
     pub(crate) fn set_feature_collision_volume_data(&mut self, message: &Value) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;

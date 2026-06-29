@@ -6,14 +6,17 @@
 #include "Game/ChatMessage.h"
 #include "Game/Players/PlayerHandler.h"
 #include "Game/UI/GuiHandler.h"
+#include "Game/UI/InfoConsole.h"
 #include "Game/UI/TooltipConsole.h"
 #include "Game/UI/MouseHandler.h"
 #include "ExternalAI/EngineOutHandler.h"
 #include "System/EventClient.h"
 #include "Lua/LuaHandle.h"
 #include "Lua/LuaMenu.h"
+#include "Lua/LuaRules.h"
 #include "Lua/LuaUI.h"
 #include "Sim/Misc/TeamHandler.h"
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -23,6 +26,8 @@ namespace {
 static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local std::vector<std::string> consoleTextBuffer;
+static thread_local std::vector<ConsoleEntry> consoleEntryBuffer;
 
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Message system not ready" };
@@ -343,23 +348,65 @@ static void NativeSendLuaGaiaMsg(const SendLuaGaiaQuery* query, SendLuaGaiaResul
 
 static void NativeSendLuaRulesMsg(const SendLuaRulesQuery* query, SendLuaRulesResult* result) {
 	bufferPos = 0;
+
+	if (query->message == nullptr) {
+		result->error = nullptr;
+		result->success = false;
+		return;
+	}
+	if (luaRules == nullptr || gu == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->success = false;
+		return;
+	}
+
+	luaRules->RecvLuaMsg(query->message, gu->myPlayerNum);
 	result->error = nullptr;
-	result->success = (query->message != nullptr);
+	result->success = true;
 }
 
 static void NativeGetConsoleBuffer(const GetConsoleBufferQuery* query, GetConsoleBufferResult* result) {
 	bufferPos = 0;
-	// Console buffer access would require interfacing with the logging system
-	// which stores messages internally - simplified implementation
+
+	if (infoConsole == nullptr) {
+		result->error = nullptr;
+		result->entries = nullptr;
+		result->count = 0;
+		return;
+	}
+
+	std::vector<CInfoConsole::RawLine> lines;
+	infoConsole->GetRawLines(lines);
+
+	const size_t lineCount = lines.size();
+	size_t startLine = 0;
+
+	if (query != nullptr && query->maxLines > 0) {
+		startLine = lineCount - std::min(lineCount, size_t(query->maxLines));
+	}
+
+	consoleTextBuffer.clear();
+	consoleEntryBuffer.clear();
+	consoleTextBuffer.reserve(lineCount - startLine);
+	consoleEntryBuffer.reserve(lineCount - startLine);
+
+	for (size_t i = startLine; i < lineCount; ++i) {
+		consoleTextBuffer.push_back(lines[i].text);
+		consoleEntryBuffer.push_back({
+			.text = consoleTextBuffer.back().c_str(),
+			.priority = uint32_t(lines[i].level),
+		});
+	}
+
 	result->error = nullptr;
-	result->entries = nullptr;
-	result->count = 0;
+	result->entries = consoleEntryBuffer.empty() ? nullptr : consoleEntryBuffer.data();
+	result->count = uint32_t(consoleEntryBuffer.size());
 }
 
 static void NativeGetCurrentTooltip(const GetCurrentTooltipQuery* query, GetCurrentTooltipResult* result) {
 	bufferPos = 0;
 
-	if (tooltip == nullptr) {
+	if (mouse == nullptr) {
 		result->error = nullptr;
 		result->tooltip = "";
 		return;
@@ -367,7 +414,7 @@ static void NativeGetCurrentTooltip(const GetCurrentTooltipQuery* query, GetCurr
 
 	// Use scratch buffer for tooltip text
 	static thread_local std::string tooltipText;
-	tooltipText = tooltip->GetTooltip(0, 0);
+	tooltipText = mouse->GetCurrentTooltip();
 
 	// Copy to scratch buffer if needed
 	const size_t len = tooltipText.length() + 1;

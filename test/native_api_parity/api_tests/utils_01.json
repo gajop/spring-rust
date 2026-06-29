@@ -21,15 +21,15 @@
       "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.Pos2BuildPos"]},
       "native": {"set": [], "get": ["Utils.pos2_build_pos"]},
-      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["x", "y", "z"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.Pos2BuildPos`", "native_getter": "`Utils.pos2_build_pos`", "fields": "`x`, `y`, `z`"},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["buildX", "buildY", "buildZ"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.Pos2BuildPos`", "native_getter": "`Utils.pos2_build_pos`", "fields": "`buildX`, `buildY`, `buildZ`"},
       "rust": {"check": "check_utils_vec3", "set": "set_noop"},
       "params": {
         "unitDefID": {"type": "i32", "fixture": "unitDefID"},
         "position": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
         "facing": {"type": "enum", "values": [0, 1, 2, 3]}
       },
-      "lua_runtime": {"call": "Spring.Pos2BuildPos", "args": ["fixture.unitDefID", "value.x", "value.y", "value.z", "value.facing"], "returns": ["x", "y", "z"]}
+      "lua_runtime": {"call": "Spring.Pos2BuildPos", "args": ["fixture.unitDefID", "value.x", "value.y", "value.z", "value.facing"], "returns": ["buildX", "buildY", "buildZ"]}
     },
     {
       "id": "test_move_order",

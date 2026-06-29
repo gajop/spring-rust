@@ -25,25 +25,22 @@
 //!     .ok_or_else(|| Error::new(1, "Invalid interface pointer".to_string()))?;
 //!
 //! // Query units
-//! if let Some(units_query) = interface.units_query() {
-//!     let team_units = units_query.get_team_units(0)?;
-//!     println!("Team 0 has {} units", team_units.len());
-//! }
+//! let units_query = interface.units_query();
+//! let team_units = units_query.get_team_units(0)?;
+//! println!("Team 0 has {} units", team_units.len());
 //!
 //! // Get unit information
-//! if let Some(units_info) = interface.units_info() {
-//!     if let Some(tooltip) = units_info.get_unit_tooltip(42)? {
-//!         println!("Unit tooltip: {}", tooltip);
-//!     }
+//! let units_info = interface.units_info();
+//! if let Some(tooltip) = units_info.get_unit_tooltip(42)? {
+//!     println!("Unit tooltip: {}", tooltip);
 //! }
 //!
 //! // Modify game state (synced)
-//! if let Some(synced) = interface.synced_ctrl() {
-//!     if let Some(unit_ctrl) = synced.unit() {
-//!         let pos = spring_native::sys::Float3 { x: 100.0, y: 0.0, z: 200.0 };
-//!         let unit_id = unit_ctrl.create_unit(42, pos, 0, 0, false, -1)?;
-//!     }
-//! }
+//! let synced = interface.synced_ctrl();
+//! let unit_ctrl = synced.unit();
+//! let unit_def = spring_native::sys::DefRef { name: std::ptr::null(), id: 42 };
+//! let pos = spring_native::sys::Float3 { x: 100.0, y: 0.0, z: 200.0 };
+//! let unit_id = unit_ctrl.create_unit(unit_def, pos, 0, 0, false, false, -1, -1)?;
 //! # Ok(())
 //! # }
 //! ```
@@ -133,8 +130,9 @@
 
 mod callbacks;
 mod camera;
-pub mod module_entry;
 mod config;
+pub mod constants;
+pub mod module_entry;
 
 // Include build-time generated version constants
 mod version {
@@ -148,39 +146,41 @@ mod error;
 mod feature_defs;
 mod features;
 mod game;
+mod gfx;
 mod ground_decals;
-mod input;
 mod icons;
+mod input;
 mod interface;
-mod los;
 mod lights;
-mod math_extra;
-mod profiling;
+mod los;
 mod markers;
+mod math_extra;
 mod memory;
 mod messages;
 mod metal_map;
 mod move_ctrl;
 mod path_finder;
 mod player;
-mod system_control;
 pub mod prelude;
+mod profiling;
 mod projectiles;
+mod rml_ui;
 mod rules_params;
 mod selection;
 mod sound;
 mod synced_ctrl;
+mod system_control;
 mod teams;
 mod terrain;
 mod tracing;
-mod unsynced_ctrl;
-mod unsynced_read;
 mod unit_defs;
 mod units_commands;
 mod units_info;
 mod units_pieces;
 mod units_query;
 mod units_weapons;
+mod unsynced_ctrl;
+mod unsynced_read;
 mod utils;
 mod vfs;
 mod weapon_defs;
@@ -193,41 +193,43 @@ pub use error::Error;
 pub use feature_defs::FeatureDefs;
 pub use features::Features;
 pub use game::Game;
+pub use gfx::Gfx;
 pub use ground_decals::GroundDecals;
-pub use profiling::Profiling;
-pub use input::Input;
 pub use icons::Icons;
+pub use input::Input;
 pub use interface::NativeInterfaceRef;
+pub use lights::Lights;
 pub use los::Los;
-pub use math_extra::MathExtra;
 pub use markers::Markers;
+pub use math_extra::MathExtra;
 pub use memory::Memory;
 pub use messages::Messages;
 pub use metal_map::MetalMap;
 pub use move_ctrl::MoveCtrl;
 pub use path_finder::PathFinder;
 pub use player::Player;
-pub use system_control::SystemControl;
+pub use profiling::Profiling;
 pub use projectiles::Projectiles;
-pub use rules_params::RulesParams;
+pub use rml_ui::RmlUi;
+pub use rules_params::{RulesParamValue, RulesParams};
 pub use selection::Selection;
 pub use sound::Sound;
-pub use lights::Lights;
 pub use synced_ctrl::{
     CobScript, EffectsControl, FeatureControl, GameConfig, ProjectileControl, SyncedCtrl,
     TeamControl, TerrainControl, UnitControl,
 };
+pub use system_control::SystemControl;
 pub use teams::Teams;
 pub use terrain::Terrain;
 pub use tracing::Tracing;
-pub use unsynced_ctrl::UnsyncedCtrl;
-pub use unsynced_read::{UnitRendering, UnsyncedRead};
 pub use unit_defs::UnitDefs;
-pub use units_commands::UnitsCommands;
+pub use units_commands::{CommandDescription, CommandType, UnitsCommands};
 pub use units_info::UnitsInfo;
 pub use units_pieces::UnitsPieces;
 pub use units_query::{RectangleQueryExt, UnitsQuery};
 pub use units_weapons::UnitsWeapons;
+pub use unsynced_ctrl::UnsyncedCtrl;
+pub use unsynced_read::{UnitRendering, UnsyncedRead};
 pub use utils::Utils;
 pub use vfs::Vfs;
 pub use weapon_defs::WeaponDefs;

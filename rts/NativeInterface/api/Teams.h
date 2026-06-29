@@ -79,12 +79,19 @@ struct AllyTeamInfo {
 };
 
 // AI info
+struct AIOption {
+	const char* key;
+	const char* value;
+};
+
 struct AIInfo {
+	int32_t skirmishAIID;
+	const char* name;
+	int32_t hostingPlayerID;
 	const char* shortName;
 	const char* version;
-	const char* name;
-	const char* description;
-	const char* hostPlayer;
+	AIOption* options;
+	uint32_t optionCount;
 };
 
 // Team stats history point

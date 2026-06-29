@@ -3,6 +3,7 @@ local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
 local outputPath = Common.outputDir() .. "/widget.jsonl"
 local sentInventory = false
 local ranGeneratedTests = false
+local fixtureIDs = {}
 
 local function record(name, payload)
 	payload.context = "widget"
@@ -25,7 +26,7 @@ local function runGeneratedTests()
 	ranGeneratedTests = true
 	Common.runPortableReadOnlyTests("widget", GeneratedTests, record, function(encoded)
 		Spring.InvokeNativeModule(encoded)
-	end)
+	end, fixtureIDs)
 end
 
 function NativeApiParityResult(stream, encodedPayload)
@@ -38,6 +39,19 @@ function NativeApiParityResult(stream, encodedPayload)
 	file:write(encodedPayload)
 	file:write("\n")
 	file:close()
+end
+
+function NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, teamID, allyTeamID)
+	fixtureIDs = {
+		unitID = unitID,
+		featureID = featureID,
+		unitDefID = unitDefID,
+		featureDefID = featureDefID,
+		weaponDefID = weaponDefID,
+		teamID = teamID,
+		allyTeamID = allyTeamID,
+	}
+	ranGeneratedTests = false
 end
 
 function GameSetup()
@@ -58,6 +72,7 @@ function GameFrame(frame)
 		record("game_frame", { value = Spring.GetGameFrame() })
 		record("visible_units", { count = #(Spring.GetVisibleUnits() or {}) })
 	elseif frame == 20 then
+		runGeneratedTests()
 		Spring.SendCommands("quitforce")
 	end
 end

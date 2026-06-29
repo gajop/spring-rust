@@ -13,6 +13,7 @@ if not gadgetHandler:IsSyncedCode() then
 	local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
 	local sentInventory = false
 	local ranGeneratedTests = false
+	local fixtureIDs = {}
 
 	local function forward(stream, payload)
 		if Script.LuaUI.NativeApiParityResult then
@@ -45,7 +46,7 @@ if not gadgetHandler:IsSyncedCode() then
 		ranGeneratedTests = true
 		Common.runPortableReadOnlyTests("unsynced_gadget", GeneratedTests, record, function(encoded)
 			Spring.InvokeNativeModule(encoded)
-		end)
+		end, fixtureIDs)
 	end
 
 	function gadget:Initialize()
@@ -56,11 +57,26 @@ if not gadgetHandler:IsSyncedCode() then
 		}))
 	end
 
-	function gadget:RecvFromSynced(name, stream, encodedPayload)
-		if name ~= "native_api_parity_result" then
+	function gadget:RecvFromSynced(name, ...)
+		if name == "native_api_parity_fixture" then
+			local unitID, featureID, unitDefID, featureDefID, weaponDefID, teamID, allyTeamID = ...
+			fixtureIDs = {
+				unitID = unitID,
+				featureID = featureID,
+				unitDefID = unitDefID,
+				featureDefID = featureDefID,
+				weaponDefID = weaponDefID,
+				teamID = teamID,
+				allyTeamID = allyTeamID,
+			}
+			if Script.LuaUI.NativeApiParityFixture then
+				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, teamID, allyTeamID)
+			end
 			return
+		elseif name == "native_api_parity_result" then
+			local stream, encodedPayload = ...
+			forward(stream, encodedPayload)
 		end
-		forward(stream, encodedPayload)
 	end
 
 	function gadget:GameFrame(frame)
@@ -325,6 +341,17 @@ local function generatedReturnValue(returnSpec, returns)
 			table.sort(keys)
 		end
 		value = keys
+	elseif returnSpec.transform == "table_string_int_pairs" then
+		local pairsList = {}
+		if type(value) == "table" then
+			for key, item in pairs(value) do
+				if type(key) == "string" and type(item) == "number" then
+					pairsList[#pairsList + 1] = { name = key, pieceNum = item }
+				end
+			end
+			table.sort(pairsList, function(a, b) return a.name < b.name end)
+		end
+		value = pairsList
 	elseif returnSpec.transform == "table_int_keys" then
 		local keys = {}
 		if type(value) == "table" then
@@ -346,8 +373,19 @@ local function generatedReturnValue(returnSpec, returns)
 			end
 		end
 		value = count
+	elseif returnSpec.transform == "table_nonempty" then
+		local nonempty = false
+		if type(value) == "table" then
+			for _ in pairs(value) do
+				nonempty = true
+				break
+			end
+		end
+		value = nonempty
 	elseif returnSpec.transform == "truthy" then
 		value = value ~= nil and value ~= false
+	elseif returnSpec.transform == "string_len" then
+		value = type(value) == "string" and #value or 0
 	elseif returnSpec.transform == "nil_to_minus_one" then
 		if value == nil then
 			value = -1
@@ -367,6 +405,27 @@ local function generatedReturnValue(returnSpec, returns)
 			table.sort(unitIDs)
 		end
 		value = unitIDs
+	elseif returnSpec.transform == "unit_def_unit_groups" then
+		local groups = {}
+		if type(value) == "table" then
+			for unitDefID, units in pairs(value) do
+				if unitDefID ~= "n" and type(units) == "table" then
+					local unitIDs = {}
+					for _, unitID in ipairs(units) do
+						unitIDs[#unitIDs + 1] = unitID
+					end
+					table.sort(unitIDs)
+					groups[#groups + 1] = {
+						unitDefID = tonumber(unitDefID),
+						unitIDs = unitIDs,
+					}
+				end
+			end
+			table.sort(groups, function(a, b)
+				return a.unitDefID < b.unitDefID
+			end)
+		end
+		value = groups
 	elseif returnSpec.transform == "unit_def_counts" then
 		local counts = {}
 		if type(value) == "table" then
@@ -520,13 +579,26 @@ local TEST_HOOKS = CustomHooks({
 local function buildGeneratedTests(hooks)
 	local hookByID = {}
 	local seen = {}
+	local function hasUnsupportedRequirement(metadata)
+		for _, requirement in ipairs(metadata.requires or {}) do
+			if requirement ~= "unit" and requirement ~= "feature" and requirement ~= "ground_point" then
+				return true
+			end
+		end
+		return false
+	end
 	for _, hook in ipairs(hooks) do
 		hookByID[hook.name] = hook
 	end
 
 	local tests = {}
 	for _, metadata in ipairs(GeneratedTests) do
-		if metadata.requires_rendering and not Common.enableRenderingTests() then
+		local context = metadata.context or "synced_gadget"
+		if context ~= "synced_gadget" then
+			seen[metadata.id] = true
+		elseif metadata.requires_rendering and not Common.enableRenderingTests() then
+			seen[metadata.id] = true
+		elseif hasUnsupportedRequirement(metadata) then
 			seen[metadata.id] = true
 		else
 			local hook = hookByID[metadata.id]
@@ -570,6 +642,7 @@ local function buildGeneratedTests(hooks)
 end
 
 local TESTS = buildGeneratedTests(TEST_HOOKS)
+local persistentFixture
 
 local function mergePayload(caseIndex, ids, test, value, readback)
 	local payload = test.payload(caseIndex, ids, readback)
@@ -615,7 +688,24 @@ local function runSyncedChecks()
 end
 
 function gadget:GameFrame(frame)
+	if frame == 1 then
+		persistentFixture = Fixture.create()
+		SendToUnsynced(
+			"native_api_parity_fixture",
+			persistentFixture.unitID,
+			persistentFixture.featureID,
+			persistentFixture.unitDefID,
+			persistentFixture.featureDefID,
+			persistentFixture.weaponDefID,
+			persistentFixture.teamID,
+			persistentFixture.allyTeamID
+		)
+	end
 	if frame == 2 then
 		runSyncedChecks()
+	end
+	if frame == 20 and persistentFixture ~= nil then
+		Fixture.destroy(persistentFixture)
+		persistentFixture = nil
 	end
 end

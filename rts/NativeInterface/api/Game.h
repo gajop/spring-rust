@@ -43,6 +43,72 @@ struct WindData {
 	float current;
 };
 
+struct GameSetupInfo {
+	int32_t startPosType;
+	bool ghostedBuildings;
+	const char* demoPlayName;
+};
+
+struct GameMapInfo {
+	const char* mapName;
+	const char* mapDescription;
+	const char* mapChecksum;
+	float mapHardness;
+	float extractorRadius;
+	float tidal;
+	float waterDamage;
+	float gravity;
+	int32_t mapX;
+	int32_t mapY;
+	int32_t mapSizeX;
+	int32_t mapSizeZ;
+	bool mapDamage;
+};
+
+struct GameModInfo {
+	const char* gameName;
+	const char* gameShortName;
+	const char* gameVersion;
+	const char* gameMutator;
+	const char* gameDesc;
+	const char* modName;
+	const char* modShortName;
+	const char* modVersion;
+	const char* modMutator;
+	const char* modDesc;
+	const char* modChecksum;
+};
+
+struct GameRulesInfo {
+	int32_t maxUnits;
+	bool constructionDecay;
+	int32_t constructionDecayTime;
+	float constructionDecaySpeed;
+	int32_t multiReclaim;
+	int32_t reclaimMethod;
+	int32_t reclaimUnitMethod;
+	float reclaimUnitEnergyCostFactor;
+	float reclaimUnitEfficiency;
+	float reclaimFeatureEnergyCostFactor;
+	bool reclaimUnitDrainHealth;
+	bool reclaimAllowEnemies;
+	bool reclaimAllowAllies;
+	float repairEnergyCostFactor;
+	float resurrectEnergyCostFactor;
+	float captureEnergyCostFactor;
+	int32_t transportAir;
+	int32_t transportShip;
+	int32_t transportHover;
+	int32_t transportGround;
+	int32_t fireAtKilled;
+	int32_t fireAtCrashing;
+	int32_t requireSonarUnderWater;
+	bool paralyzeOnMaxHealth;
+	float paralyzeDeclineRate;
+	bool allowEnginePlayerlist;
+	bool nativeExcessSharing;
+};
+
 // Queries
 struct IsCheatingEnabledQuery { uint8_t _unused; };
 struct IsCheatingEnabledResult { const Error* error; bool enabled; };
@@ -79,6 +145,18 @@ struct GetGameSecondsResult { const Error* error; float seconds; };
 
 struct GetGaiaTeamIDQuery { uint8_t _unused; };
 struct GetGaiaTeamIDResult { const Error* error; int32_t teamID; };
+
+struct GetGameSetupInfoQuery { uint8_t _unused; };
+struct GetGameSetupInfoResult { const Error* error; GameSetupInfo info; };
+
+struct GetGameMapInfoQuery { uint8_t _unused; };
+struct GetGameMapInfoResult { const Error* error; GameMapInfo info; };
+
+struct GetGameModInfoQuery { uint8_t _unused; };
+struct GetGameModInfoResult { const Error* error; GameModInfo info; };
+
+struct GetGameRulesInfoQuery { uint8_t _unused; };
+struct GetGameRulesInfoResult { const Error* error; GameRulesInfo info; };
 
 struct GetMapOptionQuery { const char* key; };
 struct GetMapOptionResult { const Error* error; const char* value; bool exists; };
@@ -142,6 +220,10 @@ struct GameApi {
 	void (*GetGameFrame)(const GetGameFrameQuery* query, GetGameFrameResult* result);
 	void (*GetGameSeconds)(const GetGameSecondsQuery* query, GetGameSecondsResult* result);
 	void (*GetGaiaTeamID)(const GetGaiaTeamIDQuery* query, GetGaiaTeamIDResult* result);
+	void (*GetGameSetupInfo)(const GetGameSetupInfoQuery* query, GetGameSetupInfoResult* result);
+	void (*GetGameMapInfo)(const GetGameMapInfoQuery* query, GetGameMapInfoResult* result);
+	void (*GetGameModInfo)(const GetGameModInfoQuery* query, GetGameModInfoResult* result);
+	void (*GetGameRulesInfo)(const GetGameRulesInfoQuery* query, GetGameRulesInfoResult* result);
 	void (*GetMapOption)(const GetMapOptionQuery* query, GetMapOptionResult* result);
 	void (*GetMapOptions)(const GetMapOptionsQuery* query, GetMapOptionsResult* result);
 	void (*GetModOption)(const GetModOptionQuery* query, GetModOptionResult* result);

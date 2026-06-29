@@ -1,8 +1,8 @@
 # Rust API Functions
 
-Total APIs: 49
+Total APIs: 51
 
-Total Functions: 878
+Total Functions: 1266
 
 ---
 
@@ -26,10 +26,10 @@ Total Functions: 878
 
 ## Config (9 functions)
 
-- `Config.get_config_float` (params: key:&str, default_value:f32) → `Result<f32, Error>`
-- `Config.get_config_int` (params: key:&str, default_value:i32) → `Result<i32, Error>`
+- `Config.get_config_float` (params: key:&str, default_value:Option<f32>) → `Result<(f32, bool), Error>`
+- `Config.get_config_int` (params: key:&str, default_value:Option<i32>) → `Result<(i32, bool), Error>`
 - `Config.get_config_params` (params: ) → `Result<Vec<sys::ConfigParam>, Error>`
-- `Config.get_config_string` (params: key:&str, default_value:&str) → `Result<Option<String>, Error>`
+- `Config.get_config_string` (params: key:&str, default_value:Option<&str>) → `Result<(Option<String>, bool), Error>`
 - `Config.get_log_sections` (params: ) → `Result<Vec<String>, Error>`
 - `Config.set_config_float` (params: key:&str, value:f32, use_overlay:bool) → `Result<bool, Error>`
 - `Config.set_config_int` (params: key:&str, value:i32, use_overlay:bool) → `Result<bool, Error>`
@@ -127,13 +127,13 @@ Total Functions: 878
 - `Features.get_feature_collision_volume_data` (params: feature_id:i32) → `Result<sys::CollisionVolumeData, Error>`
 - `Features.get_feature_def_id` (params: feature_id:i32) → `Result<i32, Error>`
 - `Features.get_feature_direction` (params: feature_id:i32) → `Result<sys::Float3, Error>`
-- `Features.get_feature_draw_flag` (params: feature_id:i32) → `Result<bool, Error>`
+- `Features.get_feature_draw_flag` (params: feature_id:i32) → `Result<u8, Error>`
 - `Features.get_feature_engine_draw_mask` (params: feature_id:i32) → `Result<u32, Error>`
 - `Features.get_feature_fire_time` (params: feature_id:i32) → `Result<f32, Error>`
 - `Features.get_feature_heading` (params: feature_id:i32) → `Result<i32, Error>`
 - `Features.get_feature_health` (params: feature_id:i32) → `Result<sys::FeatureHealth, Error>`
 - `Features.get_feature_height` (params: feature_id:i32) → `Result<f32, Error>`
-- `Features.get_feature_last_attacked_piece` (params: feature_id:i32) → `Result<i32, Error>`
+- `Features.get_feature_last_attacked_piece` (params: feature_id:i32) → `Result<sys::FeatureLastHitPiece, Error>`
 - `Features.get_feature_lua_draw` (params: feature_id:i32) → `Result<bool, Error>`
 - `Features.get_feature_mass` (params: feature_id:i32) → `Result<f32, Error>`
 - `Features.get_feature_no_draw` (params: feature_id:i32) → `Result<bool, Error>`
@@ -197,6 +197,211 @@ Total Functions: 878
 - `GameConfig.set_radar_error_params` (params: ally_team_id:i32, ally_team_error_size:f32, base_error_size:f32, base_error_mult:f32) → `Result<bool, Error>`
 - `GameConfig.set_square_building_mask` (params: x:i32, z:i32, mask:u16) → `Result<bool, Error>`
 
+## Gfx (202 functions)
+
+- `Gfx.active_fbo` (params: fbo_id:u32, target:u32, identities:bool, callback:F) → `Result<(), Error>`
+- `Gfx.active_shader` (params: shader_id:u32, callback:F) → `Result<(), Error>`
+- `Gfx.active_texture` (params: tex_num:i32) → `Result<(), Error>`
+- `Gfx.add_atlas_texture` (params: atlas_name:&str, texture_name:&str) → `Result<(), Error>`
+- `Gfx.add_fallback_font` (params: value:&str) → `Result<bool, Error>`
+- `Gfx.alpha_test` (params: enable:bool, func:u32, r#ref:f32) → `Result<(), Error>`
+- `Gfx.alpha_to_coverage` (params: value:bool) → `Result<(), Error>`
+- `Gfx.begin_end` (params: primitive:u32, callback:F) → `Result<(), Error>`
+- `Gfx.begin_text` (params: value:bool) → `Result<(), Error>`
+- `Gfx.billboard` (params: ) → `Result<(), Error>`
+- `Gfx.bind_image_texture` (params: unit:u32, name:&str, level:i32, layer:i32, layered:bool, access:u32, format:u32) → `Result<(), Error>`
+- `Gfx.bind_texture` (params: name:&str, tex_num:i32, enable:bool) → `Result<bool, Error>`
+- `Gfx.blend_equation` (params: mode:u32) → `Result<(), Error>`
+- `Gfx.blend_equation_separate` (params: mode_rgb:u32, mode_alpha:u32) → `Result<(), Error>`
+- `Gfx.blend_func` (params: src:u32, dst:u32) → `Result<(), Error>`
+- `Gfx.blend_func_separate` (params: src_rgb:u32, dst_rgb:u32, src_alpha:u32, dst_alpha:u32) → `Result<(), Error>`
+- `Gfx.blending` (params: value:bool) → `Result<(), Error>`
+- `Gfx.blit_fbo` (params: src_fboid:u32, dst_fboid:u32, x0_src:i32, y0_src:i32, x1_src:i32, y1_src:i32, x0_dst:i32, y0_dst:i32, x1_dst:i32, y1_dst:i32, mask:u32, filter:u32) → `Result<(), Error>`
+- `Gfx.call_list` (params: value:u32) → `Result<(), Error>`
+- `Gfx.change_texture_params` (params: name:&str, params:sys::GfxTextureParams) → `Result<(), Error>`
+- `Gfx.clear` (params: bits:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.clear_attachment_fbo` (params: target:u32, attachment:u32, values:[f32; 4], count:u32) → `Result<bool, Error>`
+- `Gfx.clear_fallback_fonts` (params: ) → `Result<(), Error>`
+- `Gfx.clip_distance` (params: index:u32, enable:bool) → `Result<(), Error>`
+- `Gfx.clip_plane` (params: plane:u32, equation:[f32; 4]) → `Result<(), Error>`
+- `Gfx.color` (params: r:f32, g:f32, b:f32, a:f32) → `Result<(), Error>`
+- `Gfx.color_mask` (params: red:bool, green:bool, blue:bool, alpha:bool) → `Result<(), Error>`
+- `Gfx.config_mini_map` (params: px:i32, py:i32, sx:i32, sy:i32) → `Result<(), Error>`
+- `Gfx.copy_to_texture` (params: name:&str, xoff:i32, yoff:i32, x:i32, y:i32, width:i32, height:i32, target:u32, level:u32) → `Result<(), Error>`
+- `Gfx.create_fbo` (params: target:u32, attachments:&[sys::GfxFBOAttachment], draw_buffers:&[u32], read_buffer:u32) → `Result<(u32, u32), Error>`
+- `Gfx.create_list` (params: callback:F) → `Result<u32, Error>`
+- `Gfx.create_query` (params: ) → `Result<u32, Error>`
+- `Gfx.create_rbo` (params: xsize:i32, ysize:i32, target:u32, format:u32, samples:i32) → `Result<u32, Error>`
+- `Gfx.create_shader` (params: definitions:&str, vertex:&str, tcs:&str, tes:&str, geometry:&str, fragment:&str, compute:&str, has_geo_input_type:bool, geo_input_type:u32, has_geo_output_type:bool, geo_output_type:u32, has_geo_output_verts:bool, geo_output_verts:i32) → `Result<(u32, u32), Error>`
+- `Gfx.create_texture` (params: xsize:i32, ysize:i32, zsize:i32, params:sys::GfxTextureParams) → `Result<Option<String>, Error>`
+- `Gfx.create_texture_atlas` (params: xsize:i32, ysize:i32, alloc_type:i32) → `Result<Option<String>, Error>`
+- `Gfx.culling` (params: value:bool) → `Result<(), Error>`
+- `Gfx.delete_fbo` (params: value:u32) → `Result<(), Error>`
+- `Gfx.delete_font` (params: font_id:u32) → `Result<(), Error>`
+- `Gfx.delete_list` (params: value:u32) → `Result<(), Error>`
+- `Gfx.delete_query` (params: value:u32) → `Result<(), Error>`
+- `Gfx.delete_rbo` (params: value:u32) → `Result<(), Error>`
+- `Gfx.delete_shader` (params: shader_id:u32) → `Result<bool, Error>`
+- `Gfx.delete_texture` (params: name:&str) → `Result<bool, Error>`
+- `Gfx.delete_texture_atlas` (params: name:&str) → `Result<bool, Error>`
+- `Gfx.delete_texture_fbo` (params: name:&str) → `Result<bool, Error>`
+- `Gfx.delete_vao` (params: value:u32) → `Result<(), Error>`
+- `Gfx.delete_vbo` (params: value:u32) → `Result<(), Error>`
+- `Gfx.depth_clamp` (params: value:bool) → `Result<(), Error>`
+- `Gfx.depth_mask` (params: value:bool) → `Result<(), Error>`
+- `Gfx.depth_test` (params: enable:bool, set_func:bool, func:u32) → `Result<(), Error>`
+- `Gfx.dispatch_compute` (params: num_group_x:u32, num_group_y:u32, num_group_z:u32, barriers:u32) → `Result<(), Error>`
+- `Gfx.draw_func_at_unit` (params: unit_id:i32, use_mid_pos:bool, callback:F) → `Result<(), Error>`
+- `Gfx.draw_ground_circle` (params: pos:sys::Float3, radius:f32, resolution:i32, ballistic:bool, slope:f32, gravity:f32, weapon_def_id:i32) → `Result<(), Error>`
+- `Gfx.draw_ground_quad` (params: x0:f32, z0:f32, x1:f32, z1:f32, use_tex_coords:bool, tu0:f32, tv0:f32, tu1:f32, tv1:f32) → `Result<(), Error>`
+- `Gfx.draw_list_at_unit` (params: unit_id:i32, list_id:u32, use_mid_pos:bool, scale:sys::Float3, degrees:f32, rot:sys::Float3) → `Result<(), Error>`
+- `Gfx.draw_mini_map` (params: value:bool) → `Result<(), Error>`
+- `Gfx.edge_flag` (params: value:bool) → `Result<(), Error>`
+- `Gfx.end_text` (params: ) → `Result<(), Error>`
+- `Gfx.feature` (params: feature_id:i32, apply_transform:bool, do_raw_draw:bool, no_lua_call:bool) → `Result<(), Error>`
+- `Gfx.feature_mult_matrix` (params: value:i32) → `Result<(), Error>`
+- `Gfx.feature_piece` (params: object_id:i32, piece_id:i32) → `Result<(), Error>`
+- `Gfx.feature_piece_matrix` (params: object_id:i32, piece_id:i32) → `Result<(), Error>`
+- `Gfx.feature_piece_mult_matrix` (params: object_id:i32, piece_id:i32) → `Result<(), Error>`
+- `Gfx.feature_raw` (params: feature_id:i32, apply_transform:bool, do_raw_draw:bool, no_lua_call:bool) → `Result<(), Error>`
+- `Gfx.feature_shape` (params: def_id:i32, team_id:i32, raw_state:bool, to_screen:bool, opaque:bool) → `Result<(), Error>`
+- `Gfx.feature_shape_textures` (params: object_id:i32, push:bool) → `Result<(), Error>`
+- `Gfx.feature_textures` (params: object_id:i32, push:bool) → `Result<(), Error>`
+- `Gfx.finalize_texture_atlas` (params: name:&str) → `Result<bool, Error>`
+- `Gfx.finish` (params: ) → `Result<(), Error>`
+- `Gfx.flush` (params: ) → `Result<(), Error>`
+- `Gfx.fog` (params: value:bool) → `Result<(), Error>`
+- `Gfx.fog_coord` (params: value:f32) → `Result<(), Error>`
+- `Gfx.font_begin` (params: font_id:u32, user_defined_blending:bool) → `Result<(), Error>`
+- `Gfx.font_bind_texture` (params: font_id:u32) → `Result<(), Error>`
+- `Gfx.font_end` (params: font_id:u32) → `Result<(), Error>`
+- `Gfx.font_get_text_height` (params: font_id:u32, text:&str, x:f32, y:f32, size:f32, options:&str) → `Result<(f32, f32, i32), Error>`
+- `Gfx.font_get_text_width` (params: font_id:u32, text:&str, x:f32, y:f32, size:f32, options:&str) → `Result<f32, Error>`
+- `Gfx.font_print` (params: font_id:u32, text:&str, x:f32, y:f32, size:f32, options:&str) → `Result<(), Error>`
+- `Gfx.font_print_world` (params: font_id:u32, text:&str, pos:sys::Float3, size:f32, options:&str) → `Result<(), Error>`
+- `Gfx.font_set_auto_outline_color` (params: font_id:u32, enable:bool) → `Result<(), Error>`
+- `Gfx.font_set_outline_color` (params: font_id:u32, r:f32, g:f32, b:f32, a:f32) → `Result<(), Error>`
+- `Gfx.font_set_text_color` (params: font_id:u32, r:f32, g:f32, b:f32, a:f32) → `Result<(), Error>`
+- `Gfx.font_submit_buffered` (params: font_id:u32, no_billboarding:bool, user_defined_blending:bool) → `Result<(), Error>`
+- `Gfx.font_wrap_text` (params: font_id:u32, text:&str, max_width:f32, max_height:f32, size:f32) → `Result<(Option<String>, i32), Error>`
+- `Gfx.frustum` (params: left:f32, right:f32, bottom:f32, top:f32, near_val:f32, far_val:f32) → `Result<(), Error>`
+- `Gfx.generate_mipmap` (params: name:&str) → `Result<(), Error>`
+- `Gfx.get_active_uniforms` (params: shader_id:u32) → `Result<Vec<sys::GfxActiveUniformEntry>, Error>`
+- `Gfx.get_atlas_texture` (params: atlas_name:&str, texture_name:&str) → `Result<(f32, f32, f32, f32, i32), Error>`
+- `Gfx.get_atmosphere` (params: key:&str, mode:&str) → `Result<([f32`
+- `Gfx.get_engine_atlas_textures` (params: name:&str) → `Result<Vec<sys::GfxAtlasTextureEntry>, Error>`
+- `Gfx.get_engine_model_uniform_data_def` (params: ) → `Result<Option<String>, Error>`
+- `Gfx.get_engine_model_uniform_data_size` (params: ) → `Result<(u32, u32), Error>`
+- `Gfx.get_engine_uniform_buffer_def` (params: index:i32) → `Result<Option<String>, Error>`
+- `Gfx.get_fixed_state` (params: param:&str) → `Result<([bool`
+- `Gfx.get_font_info` (params: font_id:u32) → `Result<(Option<String>, Option<String>, Option<String>, f32, f32, f32, f32, f32, i32, i32), Error>`
+- `Gfx.get_global_tex_coords` (params: value:&str) → `Result<(f32, f32, f32, f32, i32), Error>`
+- `Gfx.get_global_tex_names` (params: ) → `Result<Vec<sys::GfxAtlasTextureEntry>, Error>`
+- `Gfx.get_map_rendering` (params: key:&str, mode:&str) → `Result<([f32`
+- `Gfx.get_matrix_data` (params: mode:u32) → `Result<[f32`
+- `Gfx.get_number` (params: pname:u32, max_values:u32) → `Result<([f32`
+- `Gfx.get_query` (params: value:u32) → `Result<u32, Error>`
+- `Gfx.get_screen_view_trans` (params: ) → `Result<(f32, f32, f32), Error>`
+- `Gfx.get_shader_log` (params: ) → `Result<Option<String>, Error>`
+- `Gfx.get_shadow_map_params` (params: ) → `Result<sys::Float4, Error>`
+- `Gfx.get_string` (params: pname:u32) → `Result<Option<String>, Error>`
+- `Gfx.get_subroutine_index` (params: shader_id:u32, shader_type:u32, name:&str) → `Result<(u32, bool), Error>`
+- `Gfx.get_sun` (params: key:&str, mode:&str) → `Result<([f32`
+- `Gfx.get_text_height` (params: value:&str) → `Result<(f32, f32, i32), Error>`
+- `Gfx.get_text_width` (params: value:&str) → `Result<f32, Error>`
+- `Gfx.get_uniform_location` (params: shader_id:u32, name:&str) → `Result<i32, Error>`
+- `Gfx.get_vao` (params: ) → `Result<(u32, u32), Error>`
+- `Gfx.get_vbo` (params: target:u32, freq_updated:bool) → `Result<(u32, u32, u32), Error>`
+- `Gfx.get_view_range` (params: camera_type:i32) → `Result<(f32, f32, f32, f32), Error>`
+- `Gfx.get_view_sizes` (params: ) → `Result<(i32, i32), Error>`
+- `Gfx.get_water_rendering` (params: key:&str, mode:&str) → `Result<([f32`
+- `Gfx.has_extension` (params: value:&str) → `Result<bool, Error>`
+- `Gfx.is_valid_fbo` (params: fbo_id:u32, target:u32) → `Result<(bool, u32), Error>`
+- `Gfx.light` (params: light:i32, set_state:bool, state:bool, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.lighting` (params: value:bool) → `Result<(), Error>`
+- `Gfx.line_stipple` (params: factor:i32, pattern:u16) → `Result<(), Error>`
+- `Gfx.line_width` (params: value:f32) → `Result<(), Error>`
+- `Gfx.load_font` (params: path:&str, size:i32, outline_width:i32, outline_weight:f32) → `Result<u32, Error>`
+- `Gfx.load_identity` (params: ) → `Result<(), Error>`
+- `Gfx.load_matrix` (params: values:[f32; 16]) → `Result<(), Error>`
+- `Gfx.logic_op` (params: enable:bool, opcode:u32) → `Result<(), Error>`
+- `Gfx.material` (params: pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.matrix_mode` (params: mode:u32) → `Result<(), Error>`
+- `Gfx.memory_barrier` (params: barriers:u32) → `Result<(), Error>`
+- `Gfx.mult_matrix` (params: values:[f32; 16]) → `Result<(), Error>`
+- `Gfx.multi_tex_coord` (params: tex_num:i32, s:f32, t:f32, r:f32, q:f32, count:u32) → `Result<(), Error>`
+- `Gfx.multi_tex_env` (params: tex_num:i32, target:u32, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.multi_tex_gen` (params: tex_num:i32, target:u32, set_state:bool, state:bool, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.normal` (params: x:f32, y:f32, z:f32) → `Result<(), Error>`
+- `Gfx.object_label` (params: identifier:u32, object_id:u32, label:&str) → `Result<(), Error>`
+- `Gfx.ortho` (params: left:f32, right:f32, bottom:f32, top:f32, near_val:f32, far_val:f32) → `Result<(), Error>`
+- `Gfx.point_parameter` (params: pname:u32, value:f32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.point_size` (params: value:f32) → `Result<(), Error>`
+- `Gfx.point_sprite` (params: value:bool) → `Result<(), Error>`
+- `Gfx.polygon_mode` (params: face:u32, mode:u32) → `Result<(), Error>`
+- `Gfx.polygon_offset` (params: factor:f32, units:f32) → `Result<(), Error>`
+- `Gfx.pop_attrib` (params: ) → `Result<(), Error>`
+- `Gfx.pop_debug_group` (params: ) → `Result<(), Error>`
+- `Gfx.pop_matrix` (params: ) → `Result<(), Error>`
+- `Gfx.push_attrib` (params: value:u32) → `Result<(), Error>`
+- `Gfx.push_debug_group` (params: id:u32, message:&str, source_is_third_party:bool) → `Result<(), Error>`
+- `Gfx.push_matrix` (params: ) → `Result<(), Error>`
+- `Gfx.push_pop_matrix` (params: callback:F) → `Result<(), Error>`
+- `Gfx.raw_bind_fbo` (params: bind_default:bool, fbo_id:u32, target:u32, raw_fbo_id:u32) → `Result<(u32, bool), Error>`
+- `Gfx.read_pixels` (params: x:i32, y:i32, width:i32, height:i32, format:u32) → `Result<(Vec<f32>, u32), Error>`
+- `Gfx.rect` (params: x1:f32, y1:f32, x2:f32, y2:f32) → `Result<(), Error>`
+- `Gfx.render_to_texture` (params: name:&str, callback:F) → `Result<(), Error>`
+- `Gfx.reset_matrices` (params: ) → `Result<(), Error>`
+- `Gfx.reset_state` (params: ) → `Result<(), Error>`
+- `Gfx.rotate` (params: degrees:f32, x:f32, y:f32, z:f32) → `Result<(), Error>`
+- `Gfx.run_query` (params: id:u32, callback:F) → `Result<(), Error>`
+- `Gfx.save_image` (params: x:i32, y:i32, width:i32, height:i32, filename:&str, alpha:bool, yflip:bool, grayscale16bit:bool, read_buffer:u32) → `Result<bool, Error>`
+- `Gfx.scale` (params: x:f32, y:f32, z:f32) → `Result<(), Error>`
+- `Gfx.scissor` (params: x:i32, y:i32, width:i32, height:i32) → `Result<(), Error>`
+- `Gfx.secondary_color` (params: x:f32, y:f32, z:f32) → `Result<(), Error>`
+- `Gfx.set_feature_buffer_uniforms` (params: object_id:i32, values:&[f32], offset:u32) → `Result<u32, Error>`
+- `Gfx.set_geometry_shader_parameter` (params: shader_id:u32, param:u32, value:i32) → `Result<(), Error>`
+- `Gfx.set_tesselation_shader_parameter` (params: param:u32, value:i32, values:[f32; 4], value_count:u32, use_float_array:bool) → `Result<(), Error>`
+- `Gfx.set_unit_buffer_uniforms` (params: object_id:i32, values:&[f32], offset:u32) → `Result<u32, Error>`
+- `Gfx.shade_model` (params: mode:u32) → `Result<(), Error>`
+- `Gfx.shape` (params: primitive:u32, vertices:&[sys::GfxVertexData]) → `Result<(), Error>`
+- `Gfx.slave_mini_map` (params: value:bool) → `Result<(), Error>`
+- `Gfx.stencil_func` (params: func:u32, r#ref:i32, mask:u32) → `Result<(), Error>`
+- `Gfx.stencil_func_separate` (params: face:u32, func:u32, r#ref:i32, mask:u32) → `Result<(), Error>`
+- `Gfx.stencil_mask` (params: mask:u32) → `Result<(), Error>`
+- `Gfx.stencil_mask_separate` (params: face:u32, mask:u32) → `Result<(), Error>`
+- `Gfx.stencil_op` (params: fail:u32, zfail:u32, zpass:u32) → `Result<(), Error>`
+- `Gfx.stencil_op_separate` (params: face:u32, fail:u32, zfail:u32, zpass:u32) → `Result<(), Error>`
+- `Gfx.stencil_test` (params: enable:bool) → `Result<(), Error>`
+- `Gfx.swap_buffers` (params: ) → `Result<(), Error>`
+- `Gfx.tex_coord` (params: x:f32, y:f32, z:f32, w:f32, count:u32) → `Result<(), Error>`
+- `Gfx.tex_env` (params: target:u32, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.tex_gen` (params: target:u32, set_state:bool, state:bool, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.tex_rect` (params: x1:f32, y1:f32, x2:f32, y2:f32, s1:f32, t1:f32, s2:f32, t2:f32) → `Result<(), Error>`
+- `Gfx.text` (params: text:&str, x:f32, y:f32, size:f32, options:&str) → `Result<(), Error>`
+- `Gfx.text_env` (params: target:u32, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.texture_info` (params: name:&str) → `Result<(i32, i32, i32, u32, u32, u32), Error>`
+- `Gfx.translate` (params: x:f32, y:f32, z:f32) → `Result<(), Error>`
+- `Gfx.uniform` (params: location:i32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.uniform_array_float` (params: location:i32, values:&[f32]) → `Result<(), Error>`
+- `Gfx.uniform_array_int` (params: location:i32, values:&[i32]) → `Result<(), Error>`
+- `Gfx.uniform_int` (params: location:i32, values:[i32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.uniform_matrix` (params: location:i32, values:&[f32], transpose:bool) → `Result<(), Error>`
+- `Gfx.uniform_subroutine` (params: shader_type:u32, index:u32) → `Result<(), Error>`
+- `Gfx.unit` (params: unit_id:i32, apply_transform:bool, do_raw_draw:bool, no_lua_call:bool, full_model:bool) → `Result<(), Error>`
+- `Gfx.unit_mult_matrix` (params: value:i32) → `Result<(), Error>`
+- `Gfx.unit_piece` (params: object_id:i32, piece_id:i32) → `Result<(), Error>`
+- `Gfx.unit_piece_matrix` (params: object_id:i32, piece_id:i32) → `Result<(), Error>`
+- `Gfx.unit_piece_mult_matrix` (params: object_id:i32, piece_id:i32) → `Result<(), Error>`
+- `Gfx.unit_raw` (params: unit_id:i32, apply_transform:bool, do_raw_draw:bool, no_lua_call:bool, full_model:bool) → `Result<(), Error>`
+- `Gfx.unit_shape` (params: def_id:i32, team_id:i32, raw_state:bool, to_screen:bool, opaque:bool) → `Result<(), Error>`
+- `Gfx.unit_shape_textures` (params: object_id:i32, push:bool) → `Result<(), Error>`
+- `Gfx.unit_textures` (params: object_id:i32, push:bool) → `Result<(), Error>`
+- `Gfx.unsafe_state` (params: state:u32, reverse:bool, callback:F) → `Result<(), Error>`
+- `Gfx.use_shader` (params: shader_id:u32) → `Result<bool, Error>`
+- `Gfx.vertex` (params: x:f32, y:f32, z:f32, w:f32, count:u32) → `Result<(), Error>`
+- `Gfx.viewport` (params: x:i32, y:i32, width:i32, height:i32) → `Result<(), Error>`
+
 ## GroundDecals (31 functions)
 
 - `GroundDecals.create_ground_decal` (params: ) → `Result<(u32, bool), Error>`
@@ -247,15 +452,15 @@ Total Functions: 878
 - `Input.get_active_page` (params: ) → `Result<(i32, i32), Error>`
 - `Input.get_default_command` (params: ) → `Result<(i32, i32, i32, Option<String>), Error>`
 - `Input.get_invert_queue_key` (params: ) → `Result<bool, Error>`
-- `Input.get_key_bindings` (params: key_set1:&str, key_set2:&str) → `Result<Vec<String>, Error>`
+- `Input.get_key_bindings` (params: key_set1:&str, key_set2:&str) → `Result<Vec<sys::KeyBindingEntry>, Error>`
 - `Input.get_key_code` (params: key_sym:&str) → `Result<i32, Error>`
-- `Input.get_key_from_scan_symbol` (params: scan_symbol:&str) → `Result<i32, Error>`
+- `Input.get_key_from_scan_symbol` (params: scan_symbol:&str) → `Result<Option<String>, Error>`
 - `Input.get_key_state` (params: key_code:i32) → `Result<bool, Error>`
 - `Input.get_key_symbol` (params: key_code:i32) → `Result<(Option<String>, Option<String>), Error>`
 - `Input.get_mod_key_state` (params: ) → `Result<u32, Error>`
 - `Input.get_mouse_buttons_pressed` (params: buttons:&[i32]) → `Result<Vec<bool>, Error>`
 - `Input.get_mouse_cursor` (params: ) → `Result<Option<String>, Error>`
-- `Input.get_mouse_start_position` (params: button:i32) → `Result<sys::Float2, Error>`
+- `Input.get_mouse_start_position` (params: button:i32) → `Result<(sys::Float2, sys::Float3, sys::Float3), Error>`
 - `Input.get_mouse_state` (params: ) → `Result<sys::MouseState, Error>`
 - `Input.get_pressed_keys` (params: ) → `Result<Vec<i32>, Error>`
 - `Input.get_pressed_scans` (params: ) → `Result<Vec<i32>, Error>`
@@ -275,7 +480,7 @@ Total Functions: 878
 
 ## Los (10 functions)
 
-- `Los.get_closest_valid_position` (params: pos:sys::Float3, radius:f32, unit_def_id:i32, team_id:i32) → `Result<sys::Float3, Error>`
+- `Los.get_closest_valid_position` (params: unit_def_id:i32, x:f32, z:f32, radius:f32) → `Result<sys::Float3, Error>`
 - `Los.get_position_los_state` (params: pos:sys::Float3, ally_team_id:i32) → `Result<sys::PositionLosState, Error>`
 - `Los.get_radar_error_params` (params: ally_team_id:i32) → `Result<sys::RadarErrorParams, Error>`
 - `Los.is_pos_in_air_los` (params: pos:sys::Float3, ally_team_id:i32) → `Result<bool, Error>`
@@ -298,7 +503,7 @@ Total Functions: 878
 ## MathExtra (14 functions)
 
 - `MathExtra.bit_and` (params: a:u32, b:u32) → `Result<u32, Error>`
-- `MathExtra.bit_bits` (params: value:u32, start_bit:u32, end_bit:u32) → `Result<u32, Error>`
+- `MathExtra.bit_bits` (params: bits:&[u32]) → `Result<u32, Error>`
 - `MathExtra.bit_inv` (params: a:u32) → `Result<u32, Error>`
 - `MathExtra.bit_or` (params: a:u32, b:u32) → `Result<u32, Error>`
 - `MathExtra.bit_xor` (params: a:u32, b:u32) → `Result<u32, Error>`
@@ -438,6 +643,156 @@ Total Functions: 878
 - `Projectiles.get_projectiles_in_rectangle` (params: min_x:f32, min_z:f32, max_x:f32, max_z:f32, synced:bool, weapon:bool) → `Result<Vec<i32>, Error>`
 - `Projectiles.get_projectiles_in_sphere` (params: center:sys::Float3, radius:f32, synced:bool, weapon:bool) → `Result<Vec<i32>, Error>`
 
+## RmlUi (147 functions)
+
+- `RmlUi.add_translation_string` (params: key:&str, translation:&str) → `Result<bool, Error>`
+- `RmlUi.clear_translations` (params: ) → `Result<bool, Error>`
+- `RmlUi.context_activate_theme` (params: context_handle:u64, name:&str, value:bool) → `Result<bool, Error>`
+- `RmlUi.context_add_event_listener` (params: context_handle:u64, event:&str, in_capture_phase:bool, callback:F) → `Result<(u64, bool), Error>`
+- `RmlUi.context_create_document` (params: context_handle:u64, tag:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.context_enable_mouse_cursor` (params: context_handle:u64, value:bool) → `Result<bool, Error>`
+- `RmlUi.context_get_density_independent_pixel_ratio` (params: context_handle:u64) → `Result<f32, Error>`
+- `RmlUi.context_get_dimensions` (params: context_handle:u64) → `Result<(i32, i32), Error>`
+- `RmlUi.context_get_document` (params: context_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.context_get_element_at_point` (params: context_handle:u64, x:f32, y:f32, ignore_element_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.context_get_focus_element` (params: context_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.context_get_hover_element` (params: context_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.context_get_name` (params: context_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.context_get_root_element` (params: context_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.context_is_mouse_interacting` (params: context_handle:u64) → `Result<bool, Error>`
+- `RmlUi.context_is_theme_active` (params: context_handle:u64, name:&str) → `Result<bool, Error>`
+- `RmlUi.context_load_document` (params: context_handle:u64, document_path:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.context_open_data_model` (params: context_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.context_process_key_down` (params: context_handle:u64, key:i32, key_modifier_state:i32) → `Result<bool, Error>`
+- `RmlUi.context_process_key_up` (params: context_handle:u64, key:i32, key_modifier_state:i32) → `Result<bool, Error>`
+- `RmlUi.context_process_mouse_button_down` (params: context_handle:u64, button:i32, key_modifier_state:i32) → `Result<bool, Error>`
+- `RmlUi.context_process_mouse_button_up` (params: context_handle:u64, button:i32, key_modifier_state:i32) → `Result<bool, Error>`
+- `RmlUi.context_process_mouse_leave` (params: context_handle:u64) → `Result<bool, Error>`
+- `RmlUi.context_process_mouse_move` (params: context_handle:u64, x:f32, y:f32, key_modifier_state:i32) → `Result<bool, Error>`
+- `RmlUi.context_process_mouse_wheel` (params: context_handle:u64, x:f32, y:f32, key_modifier_state:i32) → `Result<bool, Error>`
+- `RmlUi.context_process_text_input` (params: context_handle:u64, text:&str) → `Result<bool, Error>`
+- `RmlUi.context_pull_document_to_front` (params: context_handle:u64, document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.context_push_document_to_back` (params: context_handle:u64, document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.context_remove_data_model` (params: context_handle:u64, name:&str) → `Result<bool, Error>`
+- `RmlUi.context_render` (params: context_handle:u64) → `Result<bool, Error>`
+- `RmlUi.context_set_density_independent_pixel_ratio` (params: context_handle:u64, value:f32) → `Result<bool, Error>`
+- `RmlUi.context_set_dimensions` (params: context_handle:u64, x:i32, y:i32) → `Result<bool, Error>`
+- `RmlUi.context_unload_all_documents` (params: context_handle:u64) → `Result<bool, Error>`
+- `RmlUi.context_unload_document` (params: context_handle:u64, document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.context_update` (params: context_handle:u64) → `Result<bool, Error>`
+- `RmlUi.create_context` (params: name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.document_append_to_style_sheet` (params: document_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.document_close` (params: document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.document_create_element` (params: document_handle:u64, tag_name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.document_create_text_node` (params: document_handle:u64, value:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.document_get_context` (params: document_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.document_get_title` (params: document_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.document_get_url` (params: document_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.document_hide` (params: document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.document_is_modal` (params: document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.document_load_external_script` (params: document_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.document_load_inline_script` (params: document_handle:u64, content:&str, source_path:&str, source_line:i32) → `Result<bool, Error>`
+- `RmlUi.document_pull_to_front` (params: document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.document_push_to_back` (params: document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.document_reload_style_sheet` (params: document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.document_set_title` (params: document_handle:u64, title:&str) → `Result<bool, Error>`
+- `RmlUi.document_show` (params: document_handle:u64, modal:Option<i32>, focus:Option<i32>) → `Result<bool, Error>`
+- `RmlUi.document_update_document` (params: document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_add_event_listener` (params: element_handle:u64, event:&str, in_capture_phase:bool, callback:F) → `Result<(u64, bool), Error>`
+- `RmlUi.element_append_child` (params: element_handle:u64, element_ptr_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.element_are_pseudo_classes_set` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_blur` (params: element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_click` (params: element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_clone` (params: element_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.element_closest` (params: element_handle:u64, value:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.element_dispatch_event` (params: element_handle:u64, event:&str) → `Result<bool, Error>`
+- `RmlUi.element_focus` (params: element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_form_control_input_get_selection` (params: element_handle:u64) → `Result<(i32, i32, bool), Error>`
+- `RmlUi.element_form_control_input_select` (params: element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_form_control_input_set_selection` (params: element_handle:u64, start:i32, end:i32) → `Result<bool, Error>`
+- `RmlUi.element_form_control_select_add` (params: element_handle:u64, element_ptr_handle:u64, before:i32) → `Result<bool, Error>`
+- `RmlUi.element_form_control_select_remove` (params: element_handle:u64, index:i32) → `Result<bool, Error>`
+- `RmlUi.element_form_control_select_remove_all` (params: element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_form_control_text_area_get_selection` (params: element_handle:u64) → `Result<(i32, i32, bool), Error>`
+- `RmlUi.element_form_control_text_area_select` (params: element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_form_control_text_area_set_selection` (params: element_handle:u64, start:i32, end:i32) → `Result<bool, Error>`
+- `RmlUi.element_form_submit` (params: element_handle:u64, name:&str, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_get_active_pseudo_classes` (params: element_handle:u64) → `Result<Vec<String>, Error>`
+- `RmlUi.element_get_attribute` (params: element_handle:u64, name:&str) → `Result<(Option<String>, bool), Error>`
+- `RmlUi.element_get_child` (params: element_handle:u64, index:i32) → `Result<(u64, bool), Error>`
+- `RmlUi.element_get_class_name` (params: element_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.element_get_element_by_id` (params: element_handle:u64, value:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.element_get_elements_by_class_name` (params: element_handle:u64, value:&str) → `Result<Vec<u64>, Error>`
+- `RmlUi.element_get_elements_by_class_name_count` (params: element_handle:u64, value:&str) → `Result<i32, Error>`
+- `RmlUi.element_get_elements_by_tag_name` (params: element_handle:u64, value:&str) → `Result<Vec<u64>, Error>`
+- `RmlUi.element_get_elements_by_tag_name_count` (params: element_handle:u64, value:&str) → `Result<i32, Error>`
+- `RmlUi.element_get_id` (params: element_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.element_get_inner_rml` (params: element_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.element_get_scroll_left` (params: element_handle:u64) → `Result<i32, Error>`
+- `RmlUi.element_get_scroll_top` (params: element_handle:u64) → `Result<i32, Error>`
+- `RmlUi.element_get_tag_name` (params: element_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.element_get_value` (params: element_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.element_has_attribute` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_has_child_nodes` (params: element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_insert_before` (params: element_handle:u64, element_ptr_handle:u64, adjacent_element_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.element_is_class_set` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_is_point_within_element` (params: element_handle:u64, x:f32, y:f32) → `Result<bool, Error>`
+- `RmlUi.element_is_pseudo_class_set` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_is_visible` (params: element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_matches` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_process_default_action` (params: element_handle:u64, event_handle:u64) → `Result<bool, Error>`
+- `RmlUi.element_query_selector` (params: element_handle:u64, value:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.element_query_selector_all` (params: element_handle:u64, value:&str) → `Result<Vec<u64>, Error>`
+- `RmlUi.element_query_selector_all_count` (params: element_handle:u64, value:&str) → `Result<i32, Error>`
+- `RmlUi.element_remove_attribute` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_remove_child` (params: element_handle:u64, child_element_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.element_replace_child` (params: element_handle:u64, element_ptr_handle:u64, replaced_element_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.element_scroll_into_view` (params: element_handle:u64, align_with_top:bool) → `Result<bool, Error>`
+- `RmlUi.element_set_attribute` (params: element_handle:u64, name:&str, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_set_class` (params: element_handle:u64, name:&str, value:bool) → `Result<bool, Error>`
+- `RmlUi.element_set_class_name` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_set_id` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_set_inner_rml` (params: element_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.element_set_pseudo_class` (params: element_handle:u64, name:&str, value:bool) → `Result<bool, Error>`
+- `RmlUi.element_set_scroll_left` (params: element_handle:u64, value:i32) → `Result<bool, Error>`
+- `RmlUi.element_set_scroll_top` (params: element_handle:u64, value:i32) → `Result<bool, Error>`
+- `RmlUi.element_tab_set_remove_tab` (params: element_handle:u64, index:i32) → `Result<bool, Error>`
+- `RmlUi.element_tab_set_set_panel` (params: element_handle:u64, index:i32, rml:&str) → `Result<bool, Error>`
+- `RmlUi.element_tab_set_set_tab` (params: element_handle:u64, index:i32, rml:&str) → `Result<bool, Error>`
+- `RmlUi.event_get_current` (params: ) → `Result<(u64, u64, u64, bool), Error>`
+- `RmlUi.event_get_current_element` (params: event_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.event_get_parameter_bool` (params: event_handle:u64, name:&str) → `Result<(bool, bool), Error>`
+- `RmlUi.event_get_parameter_float` (params: event_handle:u64, name:&str) → `Result<(f32, bool), Error>`
+- `RmlUi.event_get_parameter_int` (params: event_handle:u64, name:&str) → `Result<(i32, bool), Error>`
+- `RmlUi.event_get_parameter_string` (params: event_handle:u64, name:&str) → `Result<(Option<String>, bool), Error>`
+- `RmlUi.event_get_parameter_type` (params: event_handle:u64, name:&str) → `Result<(i32, bool), Error>`
+- `RmlUi.event_get_phase` (params: event_handle:u64) → `Result<(i32, bool), Error>`
+- `RmlUi.event_get_target_element` (params: event_handle:u64) → `Result<(u64, bool), Error>`
+- `RmlUi.event_get_type` (params: event_handle:u64) → `Result<(Option<String>, bool), Error>`
+- `RmlUi.event_is_immediate_propagating` (params: event_handle:u64) → `Result<(bool, bool), Error>`
+- `RmlUi.event_is_interruptible` (params: event_handle:u64) → `Result<(bool, bool), Error>`
+- `RmlUi.event_is_propagating` (params: event_handle:u64) → `Result<(bool, bool), Error>`
+- `RmlUi.event_listener_on_attach` (params: event_listener_handle:u64, element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.event_listener_on_detach` (params: event_listener_handle:u64, element_handle:u64) → `Result<bool, Error>`
+- `RmlUi.event_listener_process_event` (params: event_listener_handle:u64, event_handle:u64) → `Result<bool, Error>`
+- `RmlUi.event_stop_immediate_propagation` (params: event_handle:u64) → `Result<bool, Error>`
+- `RmlUi.event_stop_propagation` (params: event_handle:u64) → `Result<bool, Error>`
+- `RmlUi.get_context` (params: name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.get_version` (params: ) → `Result<Option<String>, Error>`
+- `RmlUi.is_ready` (params: ) → `Result<bool, Error>`
+- `RmlUi.load_font_face` (params: file_path:&str, fallback:bool, weight:Option<i32>) → `Result<bool, Error>`
+- `RmlUi.regiser_event_type` (params: event_type:&str, interruptible:bool, bubbles:bool, default_phase:Option<i32>) → `Result<i32, Error>`
+- `RmlUi.register_event_type` (params: event_type:&str, interruptible:bool, bubbles:bool, default_phase:Option<i32>) → `Result<i32, Error>`
+- `RmlUi.remove_context` (params: context_handle:u64) → `Result<bool, Error>`
+- `RmlUi.remove_context_by_name` (params: name:&str) → `Result<bool, Error>`
+- `RmlUi.set_debug_context` (params: context_handle:u64) → `Result<bool, Error>`
+- `RmlUi.set_debug_context_by_name` (params: name:&str) → `Result<bool, Error>`
+- `RmlUi.set_mouse_cursor_alias` (params: rml_name:&str, recoil_name:&str) → `Result<bool, Error>`
+- `RmlUi.sol_lua_data_model___set_dirty` (params: data_model_handle:u64, property:&str) → `Result<bool, Error>`
+- `RmlUi.sol_lua_data_model_set_dirty` (params: data_model_handle:u64, property:&str) → `Result<bool, Error>`
+- `RmlUi.vector2f_new` (params: x:f32, y:f32) → `Result<(f32, f32), Error>`
+- `RmlUi.vector2i_new` (params: x:i32, y:i32) → `Result<(i32, i32), Error>`
+
 ## RulesParams (15 functions)
 
 - `RulesParams.get_feature_rules_param` (params: feature_id:i32, param_name:&str) → `Result<(sys::RulesParamValue, i32, bool), Error>`
@@ -464,7 +819,7 @@ Total Functions: 878
 - `Selection.get_group_units` (params: group_id:i32) → `Result<Vec<i32>, Error>`
 - `Selection.get_group_units_count` (params: group_id:i32) → `Result<u32, Error>`
 - `Selection.get_group_units_counts` (params: group_id:i32) → `Result<sys::SelectionCounts, Error>`
-- `Selection.get_group_units_sorted` (params: group_id:i32) → `Result<Vec<i32>, Error>`
+- `Selection.get_group_units_sorted` (params: group_id:i32) → `Result<Vec<sys::TeamUnitsByDef>, Error>`
 - `Selection.get_selected_group` (params: ) → `Result<i32, Error>`
 - `Selection.get_selected_units` (params: ) → `Result<Vec<i32>, Error>`
 - `Selection.get_selected_units_count` (params: ) → `Result<u32, Error>`
@@ -502,7 +857,7 @@ Total Functions: 878
 
 ## SystemControl (22 functions)
 
-- `SystemControl.call_as_team` (params: team_id:i32, func:sys::LuaFunctionRef, args:sys::NativeLuaArgs) → `Result<bool, Error>`
+- `SystemControl.call_as_team` (params: team_id:i32, callback:F) → `Result<bool, Error>`
 - `SystemControl.clear_watch_dog_timer` (params: thread_name:&str, keep_stopped:bool) → `Result<bool, Error>`
 - `SystemControl.garbage_collect_ctrl` (params: iters_per_batch:i32, num_steps_per_iter:i32, min_steps_per_iter:i32, max_steps_per_iter:i32, min_loop_run_time:f32, max_loop_run_time:f32, base_run_time_mult:f32, base_mem_load_mult:f32) → `Result<bool, Error>`
 - `SystemControl.get_game_name` (params: ) → `Result<Option<String>, Error>`
@@ -597,12 +952,12 @@ Total Functions: 878
 - `TerrainControl.revert_original_height_map` (params: x1:f32, z1:f32, x2:f32, z2:f32, orig_factor:f32) → `Result<bool, Error>`
 - `TerrainControl.revert_smooth_mesh` (params: x1:f32, z1:f32, x2:f32, z2:f32, orig_factor:f32) → `Result<bool, Error>`
 - `TerrainControl.set_height_map` (params: x:f32, z:f32, height:f32, terraform:f32) → `Result<bool, Error>`
-- `TerrainControl.set_height_map_func` (params: lua_function:sys::LuaFunctionRef, arg:f32, args:sys::NativeLuaArgs) → `Result<bool, Error>`
+- `TerrainControl.set_height_map_func` (params: callback:F) → `Result<bool, Error>`
 - `TerrainControl.set_map_square_terrain_type` (params: x:i32, z:i32, terrain_type:i32) → `Result<bool, Error>`
 - `TerrainControl.set_original_height_map` (params: x:f32, z:f32, height:f32, factor:f32) → `Result<bool, Error>`
-- `TerrainControl.set_original_height_map_func` (params: height_map_func:sys::LuaFunctionRef) → `Result<bool, Error>`
+- `TerrainControl.set_original_height_map_func` (params: callback:F) → `Result<bool, Error>`
 - `TerrainControl.set_smooth_mesh` (params: x:f32, z:f32, height:f32, terraform:f32) → `Result<bool, Error>`
-- `TerrainControl.set_smooth_mesh_func` (params: lua_function:sys::LuaFunctionRef, arg:sys::NativeLuaValue, args:sys::NativeLuaArgs) → `Result<bool, Error>`
+- `TerrainControl.set_smooth_mesh_func` (params: callback:F) → `Result<bool, Error>`
 - `TerrainControl.set_terrain_type_data` (params: type_index:i32, tank_speed:f32, kbot_speed:f32, hover_speed:f32, ship_speed:f32, hardness:f32, receive_tracks:bool, name:&str) → `Result<bool, Error>`
 - `TerrainControl.set_tidal` (params: tidal:f32) → `Result<bool, Error>`
 - `TerrainControl.set_wind` (params: min_wind:f32, max_wind:f32) → `Result<bool, Error>`
@@ -615,7 +970,7 @@ Total Functions: 878
 - `Tracing.trace_ray_ground_in_direction` (params: start:sys::Float3, dir:sys::Float3, length:f32) → `Result<(bool, sys::Float3, sys::Float3), Error>`
 - `Tracing.trace_ray_units` (params: ray:sys::Ray) → `Result<(bool, i32, i32, sys::Float3, sys::Float3), Error>`
 
-## UnitControl (88 functions)
+## UnitControl (90 functions)
 
 - `UnitControl.add_object_decal` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitControl.add_unit_damage` (params: unit_id:i32, damage:f32, paralyze_time:f32, weapon_def_id:i32, attacker_id:i32, impulse:sys::Float3) → `Result<bool, Error>`
@@ -653,6 +1008,7 @@ Total Functions: 878
 - `UnitControl.set_unit_direction` (params: unit_id:i32, front_dir:sys::Float3, right_dir:sys::Float3) → `Result<bool, Error>`
 - `UnitControl.set_unit_experience` (params: unit_id:i32, experience:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_flanking` (params: unit_id:i32, r#type:&str, args:sys::Float3) → `Result<bool, Error>`
+- `UnitControl.set_unit_fuel` (params: ) → `Result<bool, Error>`
 - `UnitControl.set_unit_harvest_storage` (params: unit_id:i32, stored_metal:f32, max_stored_metal:f32, stored_energy:f32, max_stored_energy:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_heading` (params: unit_id:i32, heading:i32, use_smoothing:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_heading_and_up_dir` (params: unit_id:i32, heading:i32, up_dir:sys::Float3) → `Result<bool, Error>`
@@ -692,6 +1048,7 @@ Total Functions: 878
 - `UnitControl.set_unit_storage` (params: unit_id:i32, resource:&str, amount:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_target` (params: unit_id:i32, target:sys::UnitTargetRef, manual_fire:bool, user_target:bool, weapon_num:i32) → `Result<bool, Error>`
 - `UnitControl.set_unit_tooltip` (params: unit_id:i32, tooltip:&str) → `Result<bool, Error>`
+- `UnitControl.set_unit_travel` (params: ) → `Result<bool, Error>`
 - `UnitControl.set_unit_use_air_los` (params: unit_id:i32, use_air_los:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_use_weapons` (params: unit_id:i32, force_use_weapons:bool, allow_use_weapons:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_velocity` (params: unit_id:i32, velocity:sys::Float3) → `Result<bool, Error>`
@@ -797,8 +1154,8 @@ Total Functions: 878
 - `UnitsInfo.get_unit_is_cloaked` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitsInfo.get_unit_is_dead` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitsInfo.get_unit_is_stunned` (params: unit_id:i32) → `Result<bool, Error>`
-- `UnitsInfo.get_unit_is_transporting` (params: unit_id:i32) → `Result<bool, Error>`
-- `UnitsInfo.get_unit_last_attacked_piece` (params: unit_id:i32) → `Result<i32, Error>`
+- `UnitsInfo.get_unit_is_transporting` (params: unit_id:i32) → `Result<(Vec<i32>, bool), Error>`
+- `UnitsInfo.get_unit_last_attacked_piece` (params: unit_id:i32) → `Result<sys::LastHitPiece, Error>`
 - `UnitsInfo.get_unit_last_attacker` (params: unit_id:i32) → `Result<(sys::UnitLastAttacker, bool), Error>`
 - `UnitsInfo.get_unit_los_state` (params: unit_id:i32, ally_team_id:i32, raw:bool) → `Result<sys::UnitLosState, Error>`
 - `UnitsInfo.get_unit_mass` (params: unit_id:i32) → `Result<f32, Error>`
@@ -817,7 +1174,7 @@ Total Functions: 878
 - `UnitsInfo.get_unit_sensor_radius` (params: unit_id:i32, r#type:&str) → `Result<sys::UnitSensorRadius, Error>`
 - `UnitsInfo.get_unit_shield_state` (params: unit_id:i32, weapon_num:i32) → `Result<(sys::UnitShieldState, bool), Error>`
 - `UnitsInfo.get_unit_states` (params: unit_id:i32) → `Result<sys::UnitStates, Error>`
-- `UnitsInfo.get_unit_stockpile` (params: unit_id:i32) → `Result<sys::UnitStockpile, Error>`
+- `UnitsInfo.get_unit_stockpile` (params: unit_id:i32) → `Result<(sys::UnitStockpile, bool), Error>`
 - `UnitsInfo.get_unit_storage` (params: unit_id:i32) → `Result<sys::UnitStorage, Error>`
 - `UnitsInfo.get_unit_team` (params: unit_id:i32) → `Result<i32, Error>`
 - `UnitsInfo.get_unit_tooltip` (params: unit_id:i32) → `Result<Option<String>, Error>`
@@ -831,8 +1188,8 @@ Total Functions: 878
 
 - `UnitsPieces.get_feature_piece_direction` (params: feature_id:i32, piece_num:i32) → `Result<sys::Float3, Error>`
 - `UnitsPieces.get_feature_piece_info` (params: feature_id:i32, piece_num:i32) → `Result<(sys::PieceInfo, bool), Error>`
-- `UnitsPieces.get_feature_piece_list` (params: feature_id:i32) → `Result<Vec<i32>, Error>`
-- `UnitsPieces.get_feature_piece_map` (params: feature_id:i32) → `Result<Vec<String>, Error>`
+- `UnitsPieces.get_feature_piece_list` (params: feature_id:i32) → `Result<Vec<String>, Error>`
+- `UnitsPieces.get_feature_piece_map` (params: feature_id:i32) → `Result<Vec<sys::PieceMapEntry>, Error>`
 - `UnitsPieces.get_feature_piece_matrix` (params: feature_id:i32, piece_num:i32) → `Result<sys::PieceMatrix, Error>`
 - `UnitsPieces.get_feature_piece_pos_dir` (params: feature_id:i32, piece_num:i32) → `Result<sys::PiecePosDir, Error>`
 - `UnitsPieces.get_feature_piece_position` (params: feature_id:i32, piece_num:i32) → `Result<sys::Float3, Error>`
@@ -842,8 +1199,8 @@ Total Functions: 878
 - `UnitsPieces.get_model_root_piece` (params: model_name:&str) → `Result<i32, Error>`
 - `UnitsPieces.get_unit_piece_direction` (params: unit_id:i32, piece_num:i32) → `Result<sys::Float3, Error>`
 - `UnitsPieces.get_unit_piece_info` (params: unit_id:i32, piece_num:i32) → `Result<(sys::PieceInfo, bool), Error>`
-- `UnitsPieces.get_unit_piece_list` (params: unit_id:i32) → `Result<Vec<i32>, Error>`
-- `UnitsPieces.get_unit_piece_map` (params: unit_id:i32) → `Result<Vec<String>, Error>`
+- `UnitsPieces.get_unit_piece_list` (params: unit_id:i32) → `Result<Vec<String>, Error>`
+- `UnitsPieces.get_unit_piece_map` (params: unit_id:i32) → `Result<Vec<sys::PieceMapEntry>, Error>`
 - `UnitsPieces.get_unit_piece_matrix` (params: unit_id:i32, piece_num:i32) → `Result<sys::PieceMatrix, Error>`
 - `UnitsPieces.get_unit_piece_pos_dir` (params: unit_id:i32, piece_num:i32) → `Result<sys::PiecePosDir, Error>`
 - `UnitsPieces.get_unit_piece_position` (params: unit_id:i32, piece_num:i32) → `Result<sys::Float3, Error>`
@@ -889,7 +1246,7 @@ Total Functions: 878
 - `UnitsWeapons.get_unit_weapon_try_target` (params: unit_id:i32, weapon_num:i32, target_id:i32, target_pos:sys::Float3, user_target:bool, is_ground_target:bool) → `Result<bool, Error>`
 - `UnitsWeapons.get_unit_weapon_vectors` (params: unit_id:i32, weapon_num:i32) → `Result<sys::UnitWeaponVectors, Error>`
 
-## UnsyncedCtrl (79 functions)
+## UnsyncedCtrl (80 functions)
 
 - `UnsyncedCtrl.assign_mouse_cursor` (params: command_name:&str, cursor_file_name:&str, overwrite:bool, hot_spot_top_left:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.deselect_unit_map` (params: unit_ids:&[i32]) → `Result<bool, Error>`
@@ -942,10 +1299,11 @@ Total Functions: 878
 - `UnsyncedCtrl.set_los_view_colors` (params: always:sys::RgbColor, los:sys::RgbColor, radar:sys::RgbColor, jam:sys::RgbColor, radar2:sys::RgbColor) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_map_rendering_params` (params: params:sys::MapRenderingParams) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_map_shader` (params: standard_shader_id:i32, deferred_shader_id:i32) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_map_shading_texture` (params: tex_type:&str, tex_name:&str) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_map_shading_texture` (params: tex_type:&str, tex_name:&str, num:i32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_mini_map_rotation` (params: radians:f32) → `Result<(bool, i32), Error>`
 - `UnsyncedCtrl.set_mouse_cursor` (params: cursor_name:&str, scale:f32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_nano_projectile_params` (params: r:f32, v:f32, a:f32, rand_r:f32, rand_v:f32, rand_a:f32) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_shock_front_factors` (params: min_area:f32, min_power:f32, dist_adj:f32, has_min_area:bool, has_min_power:bool, has_dist_adj:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_sky_box_texture` (params: tex_name:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_sun_direction` (params: dir:sys::Float3, intensity:f32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_sun_lighting` (params: params:sys::SunLightingParams) → `Result<bool, Error>`
@@ -971,10 +1329,10 @@ Total Functions: 878
 - `UnsyncedCtrl.set_wmicon` (params: icon_file_name:&str, force_resolution:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.warp_mouse` (params: x:i32, y:i32) → `Result<bool, Error>`
 
-## UnsyncedRead (18 functions)
+## UnsyncedRead (20 functions)
 
-- `UnsyncedRead.get_active_cmd_desc` (params: unit_id:i32) → `Result<bool, Error>`
-- `UnsyncedRead.get_active_cmd_descs` (params: ) → `Result<bool, Error>`
+- `UnsyncedRead.get_active_cmd_desc` (params: cmd_index:i32) → `Result<(sys::ActiveCommandDescription, bool), Error>`
+- `UnsyncedRead.get_active_cmd_descs` (params: ) → `Result<Vec<sys::ActiveCommandDescription>, Error>`
 - `UnsyncedRead.get_box_selection_by_engine` (params: ) → `Result<bool, Error>`
 - `UnsyncedRead.get_build_facing` (params: ) → `Result<i32, Error>`
 - `UnsyncedRead.get_build_spacing` (params: ) → `Result<i32, Error>`
@@ -983,6 +1341,7 @@ Total Functions: 878
 - `UnsyncedRead.get_custom_palette_color` (params: index:i32) → `Result<(f32, f32, f32, bool), Error>`
 - `UnsyncedRead.get_draw_selection_info` (params: ) → `Result<bool, Error>`
 - `UnsyncedRead.get_feature_palette_index` (params: feature_id:i32) → `Result<(i32, bool), Error>`
+- `UnsyncedRead.get_game_seconds_interpolated` (params: ) → `Result<f32, Error>`
 - `UnsyncedRead.get_last_message_positions` (params: ) → `Result<Vec<sys::Float3>, Error>`
 - `UnsyncedRead.get_nano_projectile_params` (params: ) → `Result<(f32, f32, f32, f32, f32, f32), Error>`
 - `UnsyncedRead.get_piece_projectile_name` (params: projectile_id:i32) → `Result<Option<String>, Error>`
@@ -991,6 +1350,7 @@ Total Functions: 878
 - `UnsyncedRead.is_unit_allied` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnsyncedRead.is_unit_selected` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnsyncedRead.solve_nurbscurve` (params: degree:i32, points:&[sys::Float4], knots:&[f32], segments:i32) → `Result<(Vec<sys::Float3>, bool), Error>`
+- `UnsyncedRead.unit_rendering` (params: ) → `UnitRendering<'_>`
 
 ## Utils (6 functions)
 
@@ -1001,22 +1361,56 @@ Total Functions: 878
 - `Utils.test_build_order` (params: unit_def_id:i32, pos:sys::Float3, facing:i32) → `Result<(i32, bool, i32), Error>`
 - `Utils.test_move_order` (params: unit_def_id:i32, pos:sys::Float3, dir:sys::Float3, test_terrain:bool, test_objects:bool, center_only:bool) → `Result<bool, Error>`
 
-## Vfs (14 functions)
+## Vfs (48 functions)
 
+- `Vfs.calculate_hash` (params: data:&[u8], hash_type:i32) → `Result<Option<String>, Error>`
+- `Vfs.compress_folder` (params: folder_path:&str, archive_type:&str, compressed_file_path:&str, include_folder:bool, mode:&str) → `Result<bool, Error>`
 - `Vfs.create_dir` (params: path:&str) → `Result<bool, Error>`
+- `Vfs.dir_list` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<sys::DirEntry>, Error>`
 - `Vfs.extract_mod_archive_file` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.file_exists` (params: path:&str) → `Result<bool, Error>`
+- `Vfs.get_all_archives` (params: ) → `Result<Vec<String>, Error>`
+- `Vfs.get_archive_checksum` (params: archive_name:&str) → `Result<(Option<String>, Option<String>), Error>`
+- `Vfs.get_archive_containing_file` (params: path:&str, mode:&str) → `Result<Option<String>, Error>`
+- `Vfs.get_archive_dependencies` (params: archive_name:&str) → `Result<Vec<String>, Error>`
+- `Vfs.get_archive_info` (params: archive_name:&str) → `Result<Vec<sys::ArchiveInfoEntry>, Error>`
+- `Vfs.get_archive_path` (params: archive_name:&str) → `Result<Option<String>, Error>`
+- `Vfs.get_archive_replaces` (params: archive_name:&str) → `Result<Vec<String>, Error>`
 - `Vfs.get_archives` (params: ) → `Result<Vec<String>, Error>`
+- `Vfs.get_available_ais` (params: game_archive_name:&str, map_archive_name:&str) → `Result<Vec<sys::AIInfoEntry>, Error>`
+- `Vfs.get_file_absolute_path` (params: path:&str, mode:&str) → `Result<Option<String>, Error>`
 - `Vfs.get_file_info` (params: path:&str) → `Result<(sys::FileInfo, bool), Error>`
 - `Vfs.get_file_size` (params: path:&str) → `Result<u32, Error>`
 - `Vfs.get_games` (params: ) → `Result<Vec<String>, Error>`
+- `Vfs.get_loaded_archives` (params: ) → `Result<Vec<String>, Error>`
 - `Vfs.get_map_square_texture` (params: tex_square_x:i32, tex_square_y:i32, lod_min:i32, texture_name:&str, lod_max:i32) → `Result<bool, Error>`
 - `Vfs.get_maps` (params: ) → `Result<Vec<String>, Error>`
+- `Vfs.get_name_from_rapid_tag` (params: rapid_tag:&str) → `Result<Option<String>, Error>`
+- `Vfs.has_archive` (params: archive_name:&str) → `Result<bool, Error>`
 - `Vfs.is_directory` (params: path:&str) → `Result<bool, Error>`
-- `Vfs.list_dir` (params: path:&str, pattern:&str) → `Result<Vec<sys::DirEntry>, Error>`
+- `Vfs.list_dir` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<sys::DirEntry>, Error>`
+- `Vfs.load_file` (params: path:&str, mode:&str) → `Result<Vec<u8>, Error>`
+- `Vfs.pack_f32` (params: values:&[f32]) → `Result<Vec<u8>, Error>`
+- `Vfs.pack_s16` (params: values:&[i16]) → `Result<Vec<u8>, Error>`
+- `Vfs.pack_s32` (params: values:&[i32]) → `Result<Vec<u8>, Error>`
+- `Vfs.pack_s8` (params: values:&[i8]) → `Result<Vec<u8>, Error>`
+- `Vfs.pack_u16` (params: values:&[u16]) → `Result<Vec<u8>, Error>`
+- `Vfs.pack_u32` (params: values:&[u32]) → `Result<Vec<u8>, Error>`
+- `Vfs.pack_u8` (params: values:&[u8]) → `Result<Vec<u8>, Error>`
 - `Vfs.read_file` (params: path:&str) → `Result<Vec<u8>, Error>`
 - `Vfs.read_file_as_string` (params: path:&str) → `Result<Option<String>, Error>`
 - `Vfs.set_map_square_texture` (params: tex_square_x:i32, tex_square_y:i32, texture_name:&str) → `Result<bool, Error>`
+- `Vfs.sub_dirs` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<String>, Error>`
+- `Vfs.unpack_f32` (params: data:&[u8], byte_offset:u32, count:u32) → `Result<Vec<f32>, Error>`
+- `Vfs.unpack_s16` (params: data:&[u8], byte_offset:u32, count:u32) → `Result<Vec<i16>, Error>`
+- `Vfs.unpack_s32` (params: data:&[u8], byte_offset:u32, count:u32) → `Result<Vec<i32>, Error>`
+- `Vfs.unpack_s8` (params: data:&[u8], byte_offset:u32, count:u32) → `Result<Vec<i8>, Error>`
+- `Vfs.unpack_u16` (params: data:&[u8], byte_offset:u32, count:u32) → `Result<Vec<u16>, Error>`
+- `Vfs.unpack_u32` (params: data:&[u8], byte_offset:u32, count:u32) → `Result<Vec<u32>, Error>`
+- `Vfs.unpack_u8` (params: data:&[u8], byte_offset:u32, count:u32) → `Result<Vec<u8>, Error>`
+- `Vfs.use_archive` (params: archive_name:&str, callback:F) → `Result<bool, Error>`
+- `Vfs.zlib_compress` (params: data:&[u8]) → `Result<Vec<u8>, Error>`
+- `Vfs.zlib_decompress` (params: data:&[u8]) → `Result<Vec<u8>, Error>`
 
 ## WeaponDefs (10 functions)
 

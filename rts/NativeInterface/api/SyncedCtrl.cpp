@@ -1102,14 +1102,29 @@ static void NativeSetUnitResourcing(const SetUnitResourcingQuery* query, SetUnit
 	}
 
 	const char* type = query->type;
-	if (strcmp(type, "umm") == 0) {
-		unit->resourcesMake.metal = query->amount;
+	const float amount = query->amount * 0.5f;
+	if (strcmp(type, "uum") == 0) {
+		unit->resourcesUncondUse.metal = amount;
+	} else if (strcmp(type, "uue") == 0) {
+		unit->resourcesUncondUse.energy = amount;
+	} else if (strcmp(type, "umu") == 0) {
+		unit->resourcesUncondUse.metal = amount;
+	} else if (strcmp(type, "ueu") == 0) {
+		unit->resourcesUncondUse.energy = amount;
+	} else if (strcmp(type, "umm") == 0) {
+		unit->resourcesUncondMake.metal = amount;
 	} else if (strcmp(type, "ume") == 0) {
-		unit->resourcesMake.energy = query->amount;
+		unit->resourcesUncondMake.energy = amount;
+	} else if (strcmp(type, "uem") == 0) {
+		unit->resourcesUncondMake.energy = amount;
 	} else if (strcmp(type, "cum") == 0) {
-		unit->resourcesUse.metal = query->amount;
+		unit->resourcesCondUse.metal = amount;
 	} else if (strcmp(type, "cue") == 0) {
-		unit->resourcesUse.energy = query->amount;
+		unit->resourcesCondUse.energy = amount;
+	} else if (strcmp(type, "cmm") == 0) {
+		unit->resourcesCondMake.metal = amount;
+	} else if (strcmp(type, "cme") == 0) {
+		unit->resourcesCondMake.energy = amount;
 	} else {
 		result->error = &INVALID_RESOURCE_ERROR;
 		return;
@@ -2155,15 +2170,7 @@ static void NativeSetUnitMidAndAimPos(const SetUnitMidAndAimPosQuery* query, Set
 	const float3 newMidPos(query->midPos.x, query->midPos.y, query->midPos.z);
 	const float3 newAimPos(query->aimPos.x, query->aimPos.y, query->aimPos.z);
 
-	if (query->setRelative) {
-		unit->SetMidAndAimPos(
-			unit->GetMdlDrawMidPos() + newMidPos,
-			unit->GetMdlDrawMidPos() + newAimPos,
-			true
-		);
-	} else {
-		unit->SetMidAndAimPos(newMidPos, newAimPos, true);
-	}
+	unit->SetMidAndAimPos(newMidPos, newAimPos, query->setRelative);
 
 	result->success = true;
 }
@@ -2185,8 +2192,8 @@ static void NativeSetUnitRadiusAndHeight(const SetUnitRadiusAndHeightQuery* quer
 		return;
 	}
 
-	const float newRadius = std::max(1.0f, query->radius);
-	const float newHeight = std::max(1.0f, query->height);
+	const float newRadius = std::max(0.0f, query->radius);
+	const float newHeight = std::max(0.0f, query->height);
 
 	unit->SetRadiusAndHeight(newRadius, newHeight);
 	result->success = true;
@@ -2313,6 +2320,20 @@ static void NativeSetUnitStockpile(const SetUnitStockpileQuery* query, SetUnitSt
 		w->buildPercent = std::clamp(query->buildPercent, 0.0f, 1.0f);
 	}
 
+	result->success = true;
+}
+
+static void NativeSetUnitTravel(const SetUnitTravelQuery* query, SetUnitTravelResult* result)
+{
+	(void)query;
+	result->error = nullptr;
+	result->success = true;
+}
+
+static void NativeSetUnitFuel(const SetUnitFuelQuery* query, SetUnitFuelResult* result)
+{
+	(void)query;
+	result->error = nullptr;
 	result->success = true;
 }
 
@@ -3656,6 +3677,8 @@ static const UnitControlApi UNIT_CONTROL_API = {
 	.SetUnitLandGoal = NativeSetUnitLandGoal,
 	.ClearUnitGoal = NativeClearUnitGoal,
 	.SetUnitStockpile = NativeSetUnitStockpile,
+	.SetUnitTravel = NativeSetUnitTravel,
+	.SetUnitFuel = NativeSetUnitFuel,
 	.SetUnitDirection = NativeSetUnitDirection,
 	.UnitAttach = NativeUnitAttach,
 	.UnitDetach = NativeUnitDetach,
@@ -3804,7 +3827,7 @@ static void NativeSetFeatureHealth(const SetFeatureHealthQuery* query, SetFeatur
 		return;
 	}
 
-	feature->health = std::max(0.0f, std::min(query->health, feature->maxHealth));
+	feature->health = std::min(query->health, feature->maxHealth);
 	if (feature->health <= 0.0f && query->checkDestruction) {
 		featureHandler.DeleteFeature(feature);
 	}
@@ -3858,9 +3881,11 @@ static void NativeSetFeatureDirection(const SetFeatureDirectionQuery* query, Set
 	dir.SafeNormalize();
 	rightDir.SafeNormalize();
 
-	feature->frontdir = dir;
-	feature->rightdir = rightDir;
-	feature->UpdateTransform(feature->pos, true);
+	// Use ForcedSpin (as NativeSetUnitDirection and Lua's SetFeatureDirection do)
+	// so updir and heading are recomputed from front/right. Assigning frontdir/
+	// rightdir directly leaves a stale updir — an inconsistent basis the feature
+	// fights every physical update, making it spin until something re-grounds it.
+	feature->ForcedSpin(dir, rightDir);
 
 	result->success = true;
 }
@@ -3882,8 +3907,12 @@ static void NativeSetFeatureVelocity(const SetFeatureVelocityQuery* query, SetFe
 		return;
 	}
 
-	// Features don't typically have velocity, but we can set it if physics allows
-	// Most features are static
+	float3 speed;
+	speed.x = std::clamp(query->velocity.x, -MAX_UNIT_SPEED, MAX_UNIT_SPEED);
+	speed.y = std::clamp(query->velocity.y, -MAX_UNIT_SPEED, MAX_UNIT_SPEED);
+	speed.z = std::clamp(query->velocity.z, -MAX_UNIT_SPEED, MAX_UNIT_SPEED);
+	feature->SetVelocityAndSpeed(speed);
+
 	result->success = true;
 }
 
@@ -3908,7 +3937,7 @@ static void NativeSetFeatureResources(const SetFeatureResourcesQuery* query, Set
 	feature->defResources.energy = std::max(0.0f, query->featureDefEnergy);
 	feature->resources.metal = std::clamp(query->metal, 0.0f, feature->defResources.metal);
 	feature->resources.energy = std::clamp(query->energy, 0.0f, feature->defResources.energy);
-	feature->reclaimTime = std::clamp(query->reclaimTime, 1.0f, 1000000.0f);
+	feature->reclaimTime = std::clamp(query->reclaimTime, 0.0f, 1000000.0f);
 	feature->reclaimLeft = std::clamp(query->reclaimLeft, 0.0f, 1.0f);
 
 	result->success = true;
@@ -4220,7 +4249,13 @@ static void NativeSetFeatureRotation(const SetFeatureRotationQuery* query, SetFe
 
 	const float3 rot(query->rotation.x, query->rotation.y, query->rotation.z);
 	feature->SetDirVectorsEuler(rot);
-	feature->UpdateTransform(feature->pos, true);
+	// Lua's SetFeatureRotation only updates the transform after SetDirVectorsEuler.
+	// Native-driven editor changes also need the CFeature ForcedSpin side effect
+	// (`prevFrameNeedsUpdate = true`), matching the stable SetFeatureDirection path
+	// used by ctrl-drag rotation and preventing the feature from fighting stale
+	// previous-frame transform state. Do not call UpdateTransform here: CFeature's
+	// ForcedSpin overload already updates the synced transform.
+	feature->ForcedSpin(feature->frontdir, feature->rightdir);
 
 	result->success = true;
 }
@@ -4308,15 +4343,7 @@ static void NativeSetFeatureMidAndAimPos(const SetFeatureMidAndAimPosQuery* quer
 	const float3 newMidPos(query->midPos.x, query->midPos.y, query->midPos.z);
 	const float3 newAimPos(query->aimPos.x, query->aimPos.y, query->aimPos.z);
 
-	if (query->setRelative) {
-		feature->SetMidAndAimPos(
-			feature->GetMdlDrawMidPos() + newMidPos,
-			feature->GetMdlDrawMidPos() + newAimPos,
-			true
-		);
-	} else {
-		feature->SetMidAndAimPos(newMidPos, newAimPos, true);
-	}
+	feature->SetMidAndAimPos(newMidPos, newAimPos, query->setRelative);
 
 	result->success = true;
 }
@@ -4338,8 +4365,8 @@ static void NativeSetFeatureRadiusAndHeight(const SetFeatureRadiusAndHeightQuery
 		return;
 	}
 
-	const float newRadius = std::max(1.0f, query->radius);
-	const float newHeight = std::max(1.0f, query->height);
+	const float newRadius = std::max(0.0f, query->radius);
+	const float newHeight = std::max(0.0f, query->height);
 
 	feature->SetRadiusAndHeight(newRadius, newHeight);
 	result->success = true;
@@ -4635,6 +4662,23 @@ static const FeatureControlApi FEATURE_CONTROL_API = {
 // Terrain Control Implementation
 // ============================================================================
 
+// Terrain edit batching, mirroring LuaSyncedCtrl's Set*Func wrappers.
+static bool inHeightMapEdit = false;
+static int heightMapEditX1 = 0, heightMapEditX2 = -1;
+static int heightMapEditZ1 = 0, heightMapEditZ2 = 0;
+static bool inOriginalHeightMapEdit = false;
+static bool inSmoothMeshEdit = false;
+
+static void TrackHeightMapEdit(int x, int z)
+{
+	if (!inHeightMapEdit)
+		return;
+	if (x < heightMapEditX1) heightMapEditX1 = x;
+	if (x > heightMapEditX2) heightMapEditX2 = x;
+	if (z < heightMapEditZ1) heightMapEditZ1 = z;
+	if (z > heightMapEditZ2) heightMapEditZ2 = z;
+}
+
 static void NativeAddHeightMap(const AddHeightMapQuery* query, AddHeightMapResult* result)
 {
 	bufferPos = 0;
@@ -4646,6 +4690,11 @@ static void NativeAddHeightMap(const AddHeightMapQuery* query, AddHeightMapResul
 		return;
 	}
 
+	if (!inHeightMapEdit) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
 	// Convert world coordinates to heightmap coordinates
 	const int x = query->x / SQUARE_SIZE;
 	const int z = query->z / SQUARE_SIZE;
@@ -4653,6 +4702,7 @@ static void NativeAddHeightMap(const AddHeightMapQuery* query, AddHeightMapResul
 	if (x >= 0 && x <= mapDims.mapx && z >= 0 && z <= mapDims.mapy) {
 		const int idx = z * mapDims.mapxp1 + x;
 		readMap->AddHeight(idx, query->height);
+		TrackHeightMapEdit(x, z);
 		result->success = true;
 	}
 }
@@ -4668,6 +4718,11 @@ static void NativeSetHeightMap(const SetHeightMapQuery* query, SetHeightMapResul
 		return;
 	}
 
+	if (!inHeightMapEdit) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
 	const int x = query->x / SQUARE_SIZE;
 	const int z = query->z / SQUARE_SIZE;
 
@@ -4676,6 +4731,7 @@ static void NativeSetHeightMap(const SetHeightMapQuery* query, SetHeightMapResul
 		const float oldHeight = readMap->GetCornerHeightMapSynced()[idx];
 		const float height = oldHeight + (query->height - oldHeight) * query->terraform;
 		readMap->SetHeight(idx, height);
+		TrackHeightMapEdit(x, z);
 		result->success = true;
 	}
 }
@@ -4729,6 +4785,11 @@ static void NativeAddSmoothMesh(const AddSmoothMeshQuery* query, AddSmoothMeshRe
 		return;
 	}
 
+	if (!inSmoothMeshEdit) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
 	const int x = static_cast<int>(query->x / (SQUARE_SIZE * 2));
 	const int z = static_cast<int>(query->z / (SQUARE_SIZE * 2));
 
@@ -4750,6 +4811,11 @@ static void NativeSetSmoothMesh(const SetSmoothMeshQuery* query, SetSmoothMeshRe
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!inSmoothMeshEdit) {
+		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
 
@@ -5024,12 +5090,17 @@ static void NativeAddOriginalHeightMap(const AddOriginalHeightMapQuery* query, A
 		return;
 	}
 
+	if (!inOriginalHeightMapEdit) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		result->success = false;
+		return;
+	}
+
 	const int x = std::clamp(static_cast<int>(query->x / SQUARE_SIZE), 0, mapDims.mapx);
 	const int z = std::clamp(static_cast<int>(query->z / SQUARE_SIZE), 0, mapDims.mapy);
 	const int idx = (z * mapDims.mapxp1) + x;
 
 	readMap->AddOriginalHeight(idx, query->height);
-	mapDamage->RecalcArea(x, x, z, z);
 	result->success = true;
 }
 
@@ -5046,6 +5117,12 @@ static void NativeSetOriginalHeightMap(const SetOriginalHeightMapQuery* query, S
 
 	if (mapDamage->Disabled()) {
 		result->success = true;
+		return;
+	}
+
+	if (!inOriginalHeightMapEdit) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		result->success = false;
 		return;
 	}
 
@@ -5236,29 +5313,105 @@ static void NativeLevelSmoothMesh(const LevelSmoothMeshQuery* query, LevelSmooth
 static void NativeSetHeightMapFunc(const SetHeightMapFuncQuery* query, SetHeightMapFuncResult* result)
 {
 	bufferPos = 0;
-	(void)query->luaFunction;
-	(void)query->arg;
-	(void)query->args;
-	result->error = &NOT_AVAILABLE_ERROR;
 	result->success = false;
+	result->error = nullptr;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (query->callback == nullptr || readMap == nullptr || mapDamage == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (mapDamage->Disabled()) {
+		result->success = true;
+		return;
+	}
+	if (inHeightMapEdit) {
+		// no recursion
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	heightMapEditX1 = mapDims.mapx;
+	heightMapEditX2 = -1;
+	heightMapEditZ1 = mapDims.mapy;
+	heightMapEditZ2 = 0;
+	inHeightMapEdit = true;
+
+	query->callback(query->userData);
+
+	inHeightMapEdit = false;
+
+	if (heightMapEditX2 > -1) {
+		readMap->MarkHeightMapUpdated();
+		mapDamage->RecalcArea(heightMapEditX1, heightMapEditX2, heightMapEditZ1, heightMapEditZ2);
+	}
+
+	result->success = true;
 }
 
 static void NativeSetOriginalHeightMapFunc(const SetOriginalHeightMapFuncQuery* query, SetOriginalHeightMapFuncResult* result)
 {
 	bufferPos = 0;
-	(void)query->heightMapFunc;
-	result->error = &NOT_AVAILABLE_ERROR;
 	result->success = false;
+	result->error = nullptr;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (mapDamage->Disabled()) {
+		result->success = true;
+		return;
+	}
+
+	if (query->callback == nullptr || readMap == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	if (inOriginalHeightMapEdit) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	inOriginalHeightMapEdit = true;
+	query->callback(query->userData);
+	inOriginalHeightMapEdit = false;
+
+	result->success = true;
 }
 
 static void NativeSetSmoothMeshFunc(const SetSmoothMeshFuncQuery* query, SetSmoothMeshFuncResult* result)
 {
 	bufferPos = 0;
-	(void)query->luaFunction;
-	(void)query->arg;
-	(void)query->args;
-	result->error = &NOT_AVAILABLE_ERROR;
 	result->success = false;
+	result->error = nullptr;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (query->callback == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	if (inSmoothMeshEdit) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	inSmoothMeshEdit = true;
+	query->callback(query->userData);
+	inSmoothMeshEdit = false;
+
+	result->success = true;
 }
 
 static void NativeRebuildSmoothMesh(const RebuildSmoothMeshQuery* query, RebuildSmoothMeshResult* result)

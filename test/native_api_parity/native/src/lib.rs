@@ -13,6 +13,7 @@ const EPSILON: f32 = 0.05;
 struct NativeApiParity {
     interface: NativeInterfaceRef,
     failures: u32,
+    gfx_smoke_ran: bool,
     output_path: PathBuf,
 }
 
@@ -40,6 +41,7 @@ impl NativeModule for NativeApiParity {
         Self {
             interface,
             failures: 0,
+            gfx_smoke_ran: false,
             output_path: env::var_os("SPRING_NATIVE_PARITY_OUTPUT_DIR")
                 .map(PathBuf::from)
                 .unwrap_or_else(|| PathBuf::from("native_api_parity"))
@@ -88,6 +90,22 @@ impl NativeModule for NativeApiParity {
 
         Ok(())
     }
+
+    fn draw_screen(&mut self) -> Result<(), Error> {
+        if self.gfx_smoke_ran {
+            return Ok(());
+        }
+        self.gfx_smoke_ran = true;
+
+        match self.check_gfx_compute_upload() {
+            Ok(()) => self.record("gfx_compute_upload", "pass", ""),
+            Err(err) => {
+                self.failures += 1;
+                self.record("gfx_compute_upload", "fail", &err);
+            }
+        }
+        Ok(())
+    }
 }
 
 mod core;
@@ -102,6 +120,24 @@ mod los_checks;
 mod defs_checks;
 mod utils_checks;
 mod commands_checks;
+mod config_checks;
+mod camera_checks;
+mod display_checks;
+mod input_checks;
+mod icons_checks;
+mod math_extra_checks;
+mod player_checks;
+mod pieces_checks;
+mod system_control_checks;
+mod messages_checks;
+mod selection_checks;
+mod sound_checks;
+mod profiling_checks;
+mod projectiles_checks;
+mod unsynced_read_checks;
+mod vfs_checks;
+mod known_mismatch_checks;
+mod gfx_checks;
 mod support;
 
 spring_native::export_module!(NativeApiParity);

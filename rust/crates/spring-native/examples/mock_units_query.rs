@@ -1,4 +1,4 @@
-use spring_native::{sys, NativeInterfaceRef, RectangleQueryExt};
+use spring_native::{sys, NativeInterfaceRef};
 use std::ptr;
 
 static MOCK_UNITS: [i32; 3] = [101, 202, 303];
@@ -52,80 +52,74 @@ unsafe extern "C" fn mock_get_unit_is_active(
 }
 
 fn main() {
-    let units_query_api = sys::UnitsQueryApi {
-        ValidUnitID: Some(mock_valid_unit_id),
-        GetAllUnits: None,
-        GetTeamUnits: None,
-        GetTeamUnitsSorted: None,
-        GetTeamUnitsCounts: None,
-        GetTeamUnitsByDefs: None,
-        GetTeamUnitDefCount: None,
-        GetTeamUnitCount: None,
-        GetUnitsInRectangle: Some(mock_get_units_in_rectangle),
-        GetUnitsInBox: None,
-        GetUnitsInPlanes: None,
-        GetUnitsInSphere: None,
-        GetUnitsInCylinder: None,
-        GetUnitArrayCentroid: None,
-        GetUnitMapCentroid: None,
-        GetUnitNearestAlly: None,
-        GetUnitNearestEnemy: None,
-        GetUnitSeparation: Some(mock_get_unit_separation),
-    };
+    let mut units_query_api = sys::UnitsQueryApi::default();
+    units_query_api.ValidUnitID = Some(mock_valid_unit_id);
+    units_query_api.GetUnitsInRectangle = Some(mock_get_units_in_rectangle);
+    units_query_api.GetUnitSeparation = Some(mock_get_unit_separation);
 
     let mut units_info_api = sys::UnitsInfoApi::default();
     units_info_api.GetUnitTooltip = Some(mock_get_unit_tooltip);
     units_info_api.GetUnitIsActive = Some(mock_get_unit_is_active);
 
+    macro_rules! empty_api {
+        ($ty:ty) => {
+            Box::leak(Box::<$ty>::default()) as *const $ty
+        };
+    }
+
     let native_interface = sys::NativeInterface {
-        memory: ptr::null(),
-        game: ptr::null(),
-        terrain: ptr::null(),
-        teams: ptr::null(),
+        memory: empty_api!(sys::MemoryApi),
+        game: empty_api!(sys::GameApi),
+        terrain: empty_api!(sys::TerrainApi),
+        teams: empty_api!(sys::TeamsApi),
         unitsQuery: &units_query_api,
         unitsInfo: &units_info_api,
-        unitsWeapons: ptr::null(),
-        unitsCommands: ptr::null(),
-        unitsPieces: ptr::null(),
-        features: ptr::null(),
-        projectiles: ptr::null(),
-        los: ptr::null(),
-        unitDefs: ptr::null(),
-        featureDefs: ptr::null(),
-        weaponDefs: ptr::null(),
-        metalMap: ptr::null(),
-        pathFinder: ptr::null(),
-        rulesParams: ptr::null(),
-        mathExtra: ptr::null(),
-        moveCtrl: ptr::null(),
-        syncedCtrl: ptr::null(),
-        cameraApi: ptr::null(),
-        input: ptr::null(),
-        display: ptr::null(),
-        selection: ptr::null(),
-        vfs: ptr::null(),
-        soundApi: ptr::null(),
-        messages: ptr::null(),
-        config: ptr::null(),
-        tracing: ptr::null(),
-        utils: ptr::null(),
-        player: ptr::null(),
+        unitsWeapons: empty_api!(sys::UnitsWeaponsApi),
+        unitsCommands: empty_api!(sys::UnitsCommandsApi),
+        unitsPieces: empty_api!(sys::UnitsPiecesApi),
+        features: empty_api!(sys::FeaturesApi),
+        projectiles: empty_api!(sys::ProjectilesApi),
+        los: empty_api!(sys::LOSApi),
+        unitDefs: empty_api!(sys::UnitDefsApi),
+        featureDefs: empty_api!(sys::FeatureDefsApi),
+        weaponDefs: empty_api!(sys::WeaponDefsApi),
+        metalMap: empty_api!(sys::MetalMapApi),
+        pathFinder: empty_api!(sys::PathFinderApi),
+        rulesParams: empty_api!(sys::RulesParamsApi),
+        rmlUi: empty_api!(sys::RmlUiApi),
+        mathExtra: empty_api!(sys::MathExtraApi),
+        moveCtrl: empty_api!(sys::MoveCtrlApi),
+        syncedCtrl: empty_api!(sys::SyncedCtrlApi),
+        cameraApi: empty_api!(sys::CameraApi),
+        input: empty_api!(sys::InputApi),
+        display: empty_api!(sys::DisplayApi),
+        selection: empty_api!(sys::SelectionApi),
+        vfs: empty_api!(sys::VFSApi),
+        soundApi: empty_api!(sys::SoundApi),
+        messages: empty_api!(sys::MessagesApi),
+        config: empty_api!(sys::ConfigApi),
+        tracing: empty_api!(sys::TracingApi),
+        utils: empty_api!(sys::UtilsApi),
+        player: empty_api!(sys::PlayerApi),
+        unsyncedCtrl: empty_api!(sys::UnsyncedCtrlApi),
+        unsyncedRead: empty_api!(sys::UnsyncedReadApi),
+        lights: empty_api!(sys::LightsApi),
+        icons: empty_api!(sys::IconsApi),
+        markers: empty_api!(sys::MarkersApi),
+        groundDecals: empty_api!(sys::GroundDecalsApi),
+        systemControl: empty_api!(sys::SystemControlApi),
+        profiling: empty_api!(sys::ProfilingApi),
+        gfx: empty_api!(sys::GfxApi),
     };
 
     let iface = unsafe { NativeInterfaceRef::from_ptr(&native_interface) }.expect("interface ptr");
-    let units = iface.units_query().expect("units api available");
+    let units = iface.units_query();
 
     let valid = units.valid_unit_id(5).expect("valid unit call");
     println!("unit 5 valid? {}", valid);
 
-    let rect = (0.0, 0.0, 512.0, 512.0).rect();
-    let filter = sys::UnitFilterParams {
-        filter: sys::UnitFilter_UNIT_FILTER_ALL,
-        teamID: -1,
-        allyTeamID: -1,
-    };
     let units_in_rect = units
-        .get_units_in_rectangle(rect, filter)
+        .get_units_in_rectangle(0.0, 0.0, 512.0, 512.0, -1)
         .expect("rectangle query");
     println!("units in rect: {:?}", units_in_rect);
 
@@ -134,7 +128,7 @@ fn main() {
         .expect("separation query");
     println!("unit separation = {}", separation);
 
-    let info = iface.units_info().expect("units info api available");
+    let info = iface.units_info();
     let tooltip = info
         .get_unit_tooltip(5)
         .expect("tooltip query")

@@ -18,7 +18,11 @@ impl NativeApiParity {
     pub(crate) fn check_utils_vec3(&mut self, message: &Value, label: &str) -> Result<(), String> {
         let test_name = base_test_name(label);
         let unit_def_id = i32_field(message, "unitDefID")?;
-        let pos = vec3_from_fields(message, "x", "y", "z")?;
+        let pos = if message.get("inputX").is_some() {
+            vec3_from_fields(message, "inputX", "inputY", "inputZ")?
+        } else {
+            vec3_from_fields(message, "x", "y", "z")?
+        };
         let facing = i32_field(message, "facing")?;
         let native = match test_name {
             "pos2_build_pos" => self.interface.utils().pos2_build_pos(unit_def_id, pos, facing)
@@ -32,6 +36,11 @@ impl NativeApiParity {
             }
             _ => return Err(format!("unsupported utils vec3 check `{label}`")),
         };
+        if test_name == "pos2_build_pos" {
+            self.same_if_present(label, message, "buildX", native.x)?;
+            self.same_if_present(label, message, "buildY", native.y)?;
+            return self.same_if_present(label, message, "buildZ", native.z);
+        }
         self.same_vec3(label, native, message)
     }
 

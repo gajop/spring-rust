@@ -18,7 +18,7 @@ def extract_functions_from_file(filepath: Path) -> List[Dict]:
 
     # Pattern to match public functions
     # pub fn function_name(&self, param: Type, ...) -> Result<ReturnType, Error>
-    pattern = r'pub\s+fn\s+(?:r#)?([a-z_][a-z0-9_]*)\s*\(([^)]*)\)\s*(?:->\s*([^{;]+))?'
+    pattern = r'pub\s+fn\s+(?:r#)?([a-z_][a-z0-9_]*)\s*(?:<[^>]+>)?\s*\(([^)]*)\)\s*(?:->\s*([^{;]+))?'
 
     for match in re.finditer(pattern, content):
         func_name = match.group(1)
@@ -35,7 +35,7 @@ def extract_functions_from_file(filepath: Path) -> List[Dict]:
                     continue
                 if ':' in p:
                     name, ty = p.split(':', 1)
-                    params.append({'name': name.strip(), 'type': ty.strip()})
+                    params.append({'name': name.strip().removeprefix('mut '), 'type': ty.strip()})
                 else:
                     params.append({'name': p.strip(), 'type': ''})
 
@@ -77,6 +77,7 @@ def extract_from_source(src_dir: Path) -> Dict[str, List[Dict]]:
         'units_weapons.rs', 'utils.rs', 'vfs.rs', 'weapon_defs.rs', 'memory.rs',
         'unsynced_read.rs', 'unsynced_ctrl.rs', 'lights.rs', 'icons.rs',
         'markers.rs', 'ground_decals.rs', 'system_control.rs', 'profiling.rs',
+        'rml_ui.rs',
     ]
 
     for filename in api_files:
@@ -127,8 +128,12 @@ def main():
     src_dir = rust_dir / 'src'
     source_methods = extract_from_source(src_dir)
 
-    # Combine both
-    all_methods = {**source_methods, **generated_methods}
+    # Combine both; generated files and hand-written wrappers can share the
+    # same API struct (for example RmlUi aliases around generated calls).
+    all_methods = {}
+    for methods_by_api in (source_methods, generated_methods):
+        for api, methods in methods_by_api.items():
+            all_methods.setdefault(api, []).extend(methods)
 
     # Write to markdown
     output_file = rust_dir / 'rust_functions.md'

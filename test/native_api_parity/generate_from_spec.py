@@ -65,6 +65,7 @@ def write_lua(tests: list[dict]) -> None:
             "context": test.get("context", "synced_gadget"),
             "kind": test.get("kind", "readonly"),
             "requires_rendering": bool(test.get("requires_rendering", False)),
+            "skip_when_rendering": bool(test.get("skip_when_rendering", False)),
             "requires": test.get("requires", []),
             "lua": test.get("lua", {}),
             "native": test.get("native", {}),

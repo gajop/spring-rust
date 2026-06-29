@@ -63,18 +63,14 @@ impl NativeApiParity {
         self.same_if_present(label, message, "baseRadarErrorMult", native.baseRadarErrorMult)
     }
     pub(crate) fn check_closest_valid_position(&mut self, message: &Value, label: &str) -> Result<(), String> {
-        let pos = sys::Float3 {
-            x: f32_field(message, "x")?,
-            y: message.get("y").and_then(Value::as_f64).unwrap_or(0.0) as f32,
-            z: f32_field(message, "z")?,
-        };
+        let x = f32_field(message, "x")?;
+        let z = f32_field(message, "z")?;
         let radius = f32_field(message, "radius")?;
         let unit_def_id = i32_field(message, "unitDefID")?;
-        let team_id = message.get("teamID").and_then(Value::as_i64).unwrap_or(0) as i32;
         let native_has_position = self
             .interface
             .los()
-            .get_closest_valid_position(pos, radius, unit_def_id, team_id)
+            .get_closest_valid_position(unit_def_id, x, z, radius)
             .is_ok();
         self.same_bool_if_present(label, message, "hasPosition", native_has_position)
     }

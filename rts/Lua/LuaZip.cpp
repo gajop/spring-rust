@@ -504,7 +504,7 @@ void RecurseZipFolder(const std::string& folderPath, zipFile& zip, const std::st
 	}
 }
 
-int LuaZipFolder::ZipFolder(lua_State* L, const std::string& folderPath, const std::string& zipFilePath, bool includeFolder, const std::string& modes)
+bool LuaZipFolder::ZipFolder(const std::string& folderPath, const std::string& zipFilePath, bool includeFolder, const std::string& modes, std::string* error)
 {
 	zipFile zipFolderFile = zipOpen(zipFilePath.c_str(), APPEND_STATUS_CREATE);
 
@@ -514,19 +514,32 @@ int LuaZipFolder::ZipFolder(lua_State* L, const std::string& folderPath, const s
 
 	if (zipFolderFile == nullptr) {
 		SNPRINTF(buf, sizeof(buf), "[%s] could not open zipfile \"%s\" for writing", __func__, zipFilePath.c_str());
-		lua_pushstring(L, buf);
-		return 1;
+		if (error != nullptr)
+			*error = buf;
+		return false;
 	}
 
 	if (!dataDirsAccess.InWriteDir(normFolderPath)) {
 		SNPRINTF(buf, sizeof(buf), "[%s] cannot zip \"%s\": outside writable data-directory", __func__, normFolderPath.c_str());
-		lua_pushstring(L, buf);
+		if (error != nullptr)
+			*error = buf;
 		zipClose(zipFolderFile, nullptr);
-		return 1;
+		return false;
 	}
 
 	RecurseZipFolder(folderPath, zipFolderFile, folderName, modes);
 
 	zipClose(zipFolderFile, nullptr);
+	return true;
+}
+
+int LuaZipFolder::ZipFolder(lua_State* L, const std::string& folderPath, const std::string& zipFilePath, bool includeFolder, const std::string& modes)
+{
+	std::string error;
+	if (!ZipFolder(folderPath, zipFilePath, includeFolder, modes, &error)) {
+		lua_pushstring(L, error.c_str());
+		return 1;
+	}
+
 	return 0;
 }

@@ -107,6 +107,32 @@
       "lua_runtime": {"table": "UnitDefs", "key": "fixture.unitDefID", "returns": [{"field": "value", "path": ["metalCost"]}]}
     },
     {
+      "id": "get_unit_def_energy_cost",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["UnitDefs"]},
+      "native": {"set": [], "get": ["UnitDefs.get_unit_def_costs"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`UnitDefs`", "native_getter": "`UnitDefs.get_unit_def_costs`", "fields": "`energyCost`"},
+      "rust": {"check": "check_unit_defs_f32", "set": "set_noop"},
+      "params": {"unitDefID": {"type": "i32", "fixture": "unitDefID"}},
+      "lua_runtime": {"table": "UnitDefs", "key": "fixture.unitDefID", "returns": [{"field": "value", "path": ["energyCost"]}]}
+    },
+    {
+      "id": "get_unit_def_build_time",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["UnitDefs"]},
+      "native": {"set": [], "get": ["UnitDefs.get_unit_def_costs"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`UnitDefs`", "native_getter": "`UnitDefs.get_unit_def_costs`", "fields": "`buildTime`"},
+      "rust": {"check": "check_unit_defs_f32", "set": "set_noop"},
+      "params": {"unitDefID": {"type": "i32", "fixture": "unitDefID"}},
+      "lua_runtime": {"table": "UnitDefs", "key": "fixture.unitDefID", "returns": [{"field": "value", "path": ["buildTime"]}]}
+    },
+    {
       "id": "get_unit_def_speed",
       "context": "synced_gadget",
       "kind": "readonly",

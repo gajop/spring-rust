@@ -75,28 +75,6 @@ static const char* CopyString(const std::string& str) {
 	return ptr;
 }
 
-// Helper to convert CMDTYPE_* int to string
-static const char* CmdTypeToString(int type) {
-	switch (type) {
-		case 0:  return "icon";
-		case 5:  return "iconMode";
-		case 10: return "iconMap";
-		case 11: return "iconArea";
-		case 12: return "iconUnit";
-		case 13: return "iconUnitOrMap";
-		case 14: return "iconFront";
-		case 16: return "iconUnitOrArea";
-		case 17: return "next";
-		case 18: return "prev";
-		case 19: return "iconUnitFeatureOrArea";
-		case 20: return "iconBuilding";
-		case 21: return "custom";
-		case 22: return "iconUnitOrRectangle";
-		case 23: return "number";
-		default: return "icon";
-	}
-}
-
 // Helper to convert engine Command to FFI CommandFFI
 static bool ConvertCommand(const ::Command& cmd, CommandFFI& outCmd) {
 	outCmd.cmdID = cmd.GetID(false);
@@ -615,8 +593,8 @@ static void NativeGetUnitCmdDescs(const GetUnitCmdDescsQuery* query, GetUnitCmdD
 		CommandDescription& outDesc = result->cmdDescs[i];
 
 		outDesc.cmdID = desc->id;
-		outDesc.action = 0; // action string not mapped to int currently
-		outDesc.type = CmdTypeToString(desc->type);
+		outDesc.action = CopyString(desc->action);
+		outDesc.type = desc->type;
 		outDesc.name = CopyString(desc->name);
 		outDesc.tooltip = CopyString(desc->tooltip);
 		outDesc.texture = CopyString(desc->iconname);
@@ -648,7 +626,7 @@ static void NativeGetUnitCmdDescs(const GetUnitCmdDescsQuery* query, GetUnitCmdD
 			outDesc.paramCount = 0;
 		}
 
-		if (outDesc.type == nullptr || outDesc.name == nullptr || outDesc.tooltip == nullptr ||
+		if (outDesc.action == nullptr || outDesc.name == nullptr || outDesc.tooltip == nullptr ||
 		    outDesc.texture == nullptr || outDesc.cursor == nullptr) {
 			result->error = &BUFFER_OVERFLOW_ERROR;
 			result->count = i;
@@ -663,7 +641,7 @@ static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmd
 {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->cmdIndex = 0;
+	result->cmdIndex = -1;
 	result->found = false;
 
 	if (!IsReady()) {
@@ -692,6 +670,33 @@ static void NativeFindUnitCmdDesc(const FindUnitCmdDescQuery* query, FindUnitCmd
 			return;
 		}
 	}
+}
+
+static void NativeGetCommandParams(const GetCommandParamsQuery* query, GetCommandParamsResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->params = nullptr;
+	result->count = 0;
+
+	if (query->command == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const CommandFFI& command = *query->command;
+	if (command.paramCount == 0 || command.params == nullptr) {
+		return;
+	}
+
+	result->params = AllocateArray<float>(command.paramCount);
+	if (result->params == nullptr) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	std::copy(command.params, command.params + command.paramCount, result->params);
+	result->count = command.paramCount;
 }
 
 static void NativeGiveOrder(const GiveOrderQuery* query, GiveOrderResult* result)
@@ -802,6 +807,7 @@ const UnitsCommandsApi UNITS_COMMANDS_API = {
 	.GetRealBuildQueue = NativeGetRealBuildQueue,
 	.GetUnitCmdDescs = NativeGetUnitCmdDescs,
 	.FindUnitCmdDesc = NativeFindUnitCmdDesc,
+	.GetCommandParams = NativeGetCommandParams,
 	.GiveOrder = NativeGiveOrder,
 	.GiveOrderToUnitMap = NativeGiveOrderToUnitMap,
 	.GiveOrderArrayToUnitMap = NativeGiveOrderArrayToUnitMap,

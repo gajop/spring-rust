@@ -2,6 +2,7 @@
 
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
+#include "Sim/Units/Scripts/UnitScript.h"
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureHandler.h"
 #include "Sim/Misc/GlobalSynced.h"
@@ -55,7 +56,7 @@ static const char* CopyString(const std::string& str) {
 static void NativeGetModelRootPiece(const GetModelRootPieceQuery* query, GetModelRootPieceResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->rootPiece = 0; // Root piece is always index 0
+	result->rootPiece = 1; // Lua piece indices are one-based.
 }
 
 static void NativeGetUnitRootPiece(const GetUnitRootPieceQuery* query, GetUnitRootPieceResult* result) {
@@ -74,7 +75,7 @@ static void NativeGetUnitRootPiece(const GetUnitRootPieceQuery* query, GetUnitRo
 		return;
 	}
 
-	result->rootPiece = 0; // Root piece is always index 0
+	result->rootPiece = 1; // Lua piece indices are one-based.
 }
 
 static void NativeGetFeatureRootPiece(const GetFeatureRootPieceQuery* query, GetFeatureRootPieceResult* result) {
@@ -93,7 +94,7 @@ static void NativeGetFeatureRootPiece(const GetFeatureRootPieceQuery* query, Get
 		return;
 	}
 
-	result->rootPiece = 0; // Root piece is always index 0
+	result->rootPiece = 1; // Lua piece indices are one-based.
 }
 
 static void NativeGetModelPieceList(const GetModelPieceListQuery* query, GetModelPieceListResult* result) {
@@ -118,46 +119,6 @@ static void NativeGetModelPieceMap(const GetModelPieceMapQuery* query, GetModelP
 static void NativeGetUnitPieceList(const GetUnitPieceListQuery* query, GetUnitPieceListResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->pieces = nullptr;
-	result->count = 0;
-
-	if (!IsReady()) {
-		result->error = &NOT_READY_ERROR;
-		return;
-	}
-
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
-	if (unit == nullptr) {
-		result->error = &INVALID_UNIT_ERROR;
-		return;
-	}
-
-	const LocalModel& localModel = unit->localModel;
-	if (!localModel.Initialized()) {
-		return;
-	}
-
-	uint32_t count = static_cast<uint32_t>(localModel.pieces.size());
-	if (count == 0) {
-		return;
-	}
-
-	result->pieces = AllocateArray<int32_t>(count);
-	if (result->pieces == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	for (uint32_t i = 0; i < count; ++i) {
-		result->pieces[i] = static_cast<int32_t>(i);
-	}
-
-	result->count = count;
-}
-
-static void NativeGetUnitPieceMap(const GetUnitPieceMapQuery* query, GetUnitPieceMapResult* result) {
-	bufferPos = 0;
-	result->error = nullptr;
 	result->names = nullptr;
 	result->count = 0;
 
@@ -173,9 +134,8 @@ static void NativeGetUnitPieceMap(const GetUnitPieceMapQuery* query, GetUnitPiec
 	}
 
 	const LocalModel& localModel = unit->localModel;
-	if (!localModel.Initialized()) {
+	if (!localModel.Initialized())
 		return;
-	}
 
 	uint32_t count = static_cast<uint32_t>(localModel.pieces.size());
 	if (count == 0) {
@@ -190,15 +150,60 @@ static void NativeGetUnitPieceMap(const GetUnitPieceMapQuery* query, GetUnitPiec
 
 	for (uint32_t i = 0; i < count; ++i) {
 		const LocalModelPiece& piece = localModel.pieces[i];
-		if (piece.original != nullptr) {
-			result->names[i] = CopyString(piece.original->name);
-			if (result->names[i] == nullptr) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				result->count = i;
-				return;
-			}
-		} else {
-			result->names[i] = CopyString("");
+		const std::string name = (piece.original != nullptr) ? piece.original->name : "";
+		result->names[i] = CopyString(name);
+		if (result->names[i] == nullptr) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			result->count = i;
+			return;
+		}
+	}
+
+	result->count = count;
+}
+
+static void NativeGetUnitPieceMap(const GetUnitPieceMapQuery* query, GetUnitPieceMapResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->entries = nullptr;
+	result->count = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const LocalModel& localModel = unit->localModel;
+	if (!localModel.Initialized()) {
+		return;
+	}
+
+	uint32_t count = static_cast<uint32_t>(localModel.pieces.size());
+	if (count == 0) {
+		return;
+	}
+
+	result->entries = AllocateArray<PieceMapEntry>(count);
+	if (result->entries == nullptr) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	for (uint32_t i = 0; i < count; ++i) {
+		const LocalModelPiece& piece = localModel.pieces[i];
+		const std::string name = (piece.original != nullptr) ? piece.original->name : "";
+		result->entries[i].name = CopyString(name);
+		result->entries[i].pieceNum = static_cast<int32_t>(i + 1);
+		if (result->entries[i].name == nullptr) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			result->count = i;
+			return;
 		}
 	}
 
@@ -208,46 +213,6 @@ static void NativeGetUnitPieceMap(const GetUnitPieceMapQuery* query, GetUnitPiec
 static void NativeGetFeaturePieceList(const GetFeaturePieceListQuery* query, GetFeaturePieceListResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->pieces = nullptr;
-	result->count = 0;
-
-	if (!IsReady()) {
-		result->error = &NOT_READY_ERROR;
-		return;
-	}
-
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
-	if (feature == nullptr) {
-		result->error = &INVALID_UNIT_ERROR;
-		return;
-	}
-
-	const LocalModel& localModel = feature->localModel;
-	if (!localModel.Initialized()) {
-		return;
-	}
-
-	uint32_t count = static_cast<uint32_t>(localModel.pieces.size());
-	if (count == 0) {
-		return;
-	}
-
-	result->pieces = AllocateArray<int32_t>(count);
-	if (result->pieces == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	for (uint32_t i = 0; i < count; ++i) {
-		result->pieces[i] = static_cast<int32_t>(i);
-	}
-
-	result->count = count;
-}
-
-static void NativeGetFeaturePieceMap(const GetFeaturePieceMapQuery* query, GetFeaturePieceMapResult* result) {
-	bufferPos = 0;
-	result->error = nullptr;
 	result->names = nullptr;
 	result->count = 0;
 
@@ -280,15 +245,60 @@ static void NativeGetFeaturePieceMap(const GetFeaturePieceMapQuery* query, GetFe
 
 	for (uint32_t i = 0; i < count; ++i) {
 		const LocalModelPiece& piece = localModel.pieces[i];
-		if (piece.original != nullptr) {
-			result->names[i] = CopyString(piece.original->name);
-			if (result->names[i] == nullptr) {
-				result->error = &BUFFER_OVERFLOW_ERROR;
-				result->count = i;
-				return;
-			}
-		} else {
-			result->names[i] = CopyString("");
+		const std::string name = (piece.original != nullptr) ? piece.original->name : "";
+		result->names[i] = CopyString(name);
+		if (result->names[i] == nullptr) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			result->count = i;
+			return;
+		}
+	}
+
+	result->count = count;
+}
+
+static void NativeGetFeaturePieceMap(const GetFeaturePieceMapQuery* query, GetFeaturePieceMapResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->entries = nullptr;
+	result->count = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	if (feature == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const LocalModel& localModel = feature->localModel;
+	if (!localModel.Initialized()) {
+		return;
+	}
+
+	uint32_t count = static_cast<uint32_t>(localModel.pieces.size());
+	if (count == 0) {
+		return;
+	}
+
+	result->entries = AllocateArray<PieceMapEntry>(count);
+	if (result->entries == nullptr) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	for (uint32_t i = 0; i < count; ++i) {
+		const LocalModelPiece& piece = localModel.pieces[i];
+		const std::string name = (piece.original != nullptr) ? piece.original->name : "";
+		result->entries[i].name = CopyString(name);
+		result->entries[i].pieceNum = static_cast<int32_t>(i + 1);
+		if (result->entries[i].name == nullptr) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			result->count = i;
+			return;
 		}
 	}
 

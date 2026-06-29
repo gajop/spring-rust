@@ -2,16 +2,16 @@ use std::ptr::NonNull;
 
 use crate::{
     camera::Camera, config::Config, display::Display, feature_defs::FeatureDefs,
-    features::Features, game::Game, ground_decals::GroundDecals, input::Input, los::Los,
-    math_extra::MathExtra, memory::Memory, messages::Messages, metal_map::MetalMap,
-    move_ctrl::MoveCtrl, path_finder::PathFinder, player::Player, profiling::Profiling,
-    projectiles::Projectiles, rules_params::RulesParams, selection::Selection,
-    sound::Sound, synced_ctrl::SyncedCtrl, sys, system_control::SystemControl, teams::Teams,
-    lights::Lights, terrain::Terrain, tracing::Tracing, unit_defs::UnitDefs,
-    units_commands::UnitsCommands, units_info::UnitsInfo, units_pieces::UnitsPieces,
-    units_query::UnitsQuery, units_weapons::UnitsWeapons, unsynced_ctrl::UnsyncedCtrl,
-    unsynced_read::UnsyncedRead, utils::Utils, vfs::Vfs, weapon_defs::WeaponDefs, icons::Icons,
-    markers::Markers,
+    features::Features, game::Game, gfx::Gfx, ground_decals::GroundDecals, icons::Icons,
+    input::Input, lights::Lights, los::Los, markers::Markers, math_extra::MathExtra,
+    memory::Memory, messages::Messages, metal_map::MetalMap, move_ctrl::MoveCtrl,
+    path_finder::PathFinder, player::Player, profiling::Profiling, projectiles::Projectiles,
+    rml_ui::RmlUi, rules_params::RulesParams, selection::Selection, sound::Sound,
+    synced_ctrl::SyncedCtrl, sys, system_control::SystemControl, teams::Teams, terrain::Terrain,
+    tracing::Tracing, unit_defs::UnitDefs, units_commands::UnitsCommands, units_info::UnitsInfo,
+    units_pieces::UnitsPieces, units_query::UnitsQuery, units_weapons::UnitsWeapons,
+    unsynced_ctrl::UnsyncedCtrl, unsynced_read::UnsyncedRead, utils::Utils, vfs::Vfs,
+    weapon_defs::WeaponDefs,
 };
 
 #[derive(Clone, Copy)]
@@ -37,6 +37,7 @@ pub struct NativeInterfaceRef {
     metal_map_api: &'static sys::MetalMapApi,
     path_finder_api: &'static sys::PathFinderApi,
     rules_params_api: &'static sys::RulesParamsApi,
+    rml_ui_api: &'static sys::RmlUiApi,
     move_ctrl_api: &'static sys::MoveCtrlApi,
     synced_ctrl_api: &'static sys::SyncedCtrlApi,
     camera_api: &'static sys::CameraApi,
@@ -58,6 +59,7 @@ pub struct NativeInterfaceRef {
     ground_decals_api: &'static sys::GroundDecalsApi,
     system_control_api: &'static sys::SystemControlApi,
     profiling_api: &'static sys::ProfilingApi,
+    gfx_api: &'static sys::GfxApi,
 }
 
 // Safety: The NativeInterface is managed by the Spring engine, which handles
@@ -75,38 +77,117 @@ impl NativeInterfaceRef {
         // Unwrap all API pointers at initialization - they are guaranteed to be set by the engine
         Some(Self {
             raw,
-            units_query_api: iface.unitsQuery.as_ref().expect("unitsQuery API must be initialized"),
-            units_info_api: iface.unitsInfo.as_ref().expect("unitsInfo API must be initialized"),
+            units_query_api: iface
+                .unitsQuery
+                .as_ref()
+                .expect("unitsQuery API must be initialized"),
+            units_info_api: iface
+                .unitsInfo
+                .as_ref()
+                .expect("unitsInfo API must be initialized"),
             teams_api: iface.teams.as_ref().expect("teams API must be initialized"),
-            units_weapons_api: iface.unitsWeapons.as_ref().expect("unitsWeapons API must be initialized"),
-            units_commands_api: iface.unitsCommands.as_ref().expect("unitsCommands API must be initialized"),
-            units_pieces_api: iface.unitsPieces.as_ref().expect("unitsPieces API must be initialized"),
-            features_api: iface.features.as_ref().expect("features API must be initialized"),
-            projectiles_api: iface.projectiles.as_ref().expect("projectiles API must be initialized"),
+            units_weapons_api: iface
+                .unitsWeapons
+                .as_ref()
+                .expect("unitsWeapons API must be initialized"),
+            units_commands_api: iface
+                .unitsCommands
+                .as_ref()
+                .expect("unitsCommands API must be initialized"),
+            units_pieces_api: iface
+                .unitsPieces
+                .as_ref()
+                .expect("unitsPieces API must be initialized"),
+            features_api: iface
+                .features
+                .as_ref()
+                .expect("features API must be initialized"),
+            projectiles_api: iface
+                .projectiles
+                .as_ref()
+                .expect("projectiles API must be initialized"),
             los_api: iface.los.as_ref().expect("los API must be initialized"),
-            unit_defs_api: iface.unitDefs.as_ref().expect("unitDefs API must be initialized"),
-            feature_defs_api: iface.featureDefs.as_ref().expect("featureDefs API must be initialized"),
-            weapon_defs_api: iface.weaponDefs.as_ref().expect("weaponDefs API must be initialized"),
+            unit_defs_api: iface
+                .unitDefs
+                .as_ref()
+                .expect("unitDefs API must be initialized"),
+            feature_defs_api: iface
+                .featureDefs
+                .as_ref()
+                .expect("featureDefs API must be initialized"),
+            weapon_defs_api: iface
+                .weaponDefs
+                .as_ref()
+                .expect("weaponDefs API must be initialized"),
             game_api: iface.game.as_ref().expect("game API must be initialized"),
-            terrain_api: iface.terrain.as_ref().expect("terrain API must be initialized"),
-            player_api: iface.player.as_ref().expect("player API must be initialized"),
-            math_extra_api: iface.mathExtra.as_ref().expect("mathExtra API must be initialized"),
-            metal_map_api: iface.metalMap.as_ref().expect("metalMap API must be initialized"),
-            path_finder_api: iface.pathFinder.as_ref().expect("pathFinder API must be initialized"),
-            rules_params_api: iface.rulesParams.as_ref().expect("rulesParams API must be initialized"),
-            move_ctrl_api: iface.moveCtrl.as_ref().expect("moveCtrl API must be initialized"),
-            synced_ctrl_api: iface.syncedCtrl.as_ref().expect("syncedCtrl API must be initialized"),
-            camera_api: iface.cameraApi.as_ref().expect("cameraApi must be initialized"),
+            terrain_api: iface
+                .terrain
+                .as_ref()
+                .expect("terrain API must be initialized"),
+            player_api: iface
+                .player
+                .as_ref()
+                .expect("player API must be initialized"),
+            math_extra_api: iface
+                .mathExtra
+                .as_ref()
+                .expect("mathExtra API must be initialized"),
+            metal_map_api: iface
+                .metalMap
+                .as_ref()
+                .expect("metalMap API must be initialized"),
+            path_finder_api: iface
+                .pathFinder
+                .as_ref()
+                .expect("pathFinder API must be initialized"),
+            rules_params_api: iface
+                .rulesParams
+                .as_ref()
+                .expect("rulesParams API must be initialized"),
+            rml_ui_api: iface.rmlUi.as_ref().expect("rmlUi API must be initialized"),
+            move_ctrl_api: iface
+                .moveCtrl
+                .as_ref()
+                .expect("moveCtrl API must be initialized"),
+            synced_ctrl_api: iface
+                .syncedCtrl
+                .as_ref()
+                .expect("syncedCtrl API must be initialized"),
+            camera_api: iface
+                .cameraApi
+                .as_ref()
+                .expect("cameraApi must be initialized"),
             input_api: iface.input.as_ref().expect("input API must be initialized"),
-            display_api: iface.display.as_ref().expect("display API must be initialized"),
-            selection_api: iface.selection.as_ref().expect("selection API must be initialized"),
+            display_api: iface
+                .display
+                .as_ref()
+                .expect("display API must be initialized"),
+            selection_api: iface
+                .selection
+                .as_ref()
+                .expect("selection API must be initialized"),
             vfs_api: iface.vfs.as_ref().expect("vfs API must be initialized"),
-            sound_api: iface.soundApi.as_ref().expect("soundApi must be initialized"),
-            messages_api: iface.messages.as_ref().expect("messages API must be initialized"),
-            config_api: iface.config.as_ref().expect("config API must be initialized"),
-            tracing_api: iface.tracing.as_ref().expect("tracing API must be initialized"),
+            sound_api: iface
+                .soundApi
+                .as_ref()
+                .expect("soundApi must be initialized"),
+            messages_api: iface
+                .messages
+                .as_ref()
+                .expect("messages API must be initialized"),
+            config_api: iface
+                .config
+                .as_ref()
+                .expect("config API must be initialized"),
+            tracing_api: iface
+                .tracing
+                .as_ref()
+                .expect("tracing API must be initialized"),
             utils_api: iface.utils.as_ref().expect("utils API must be initialized"),
-            memory_api: iface.memory.as_ref().expect("memory API must be initialized"),
+            memory_api: iface
+                .memory
+                .as_ref()
+                .expect("memory API must be initialized"),
             unsynced_ctrl_api: iface
                 .unsyncedCtrl
                 .as_ref()
@@ -115,9 +196,15 @@ impl NativeInterfaceRef {
                 .unsyncedRead
                 .as_ref()
                 .expect("unsyncedRead API must be initialized"),
-            lights_api: iface.lights.as_ref().expect("lights API must be initialized"),
+            lights_api: iface
+                .lights
+                .as_ref()
+                .expect("lights API must be initialized"),
             icons_api: iface.icons.as_ref().expect("icons API must be initialized"),
-            markers_api: iface.markers.as_ref().expect("markers API must be initialized"),
+            markers_api: iface
+                .markers
+                .as_ref()
+                .expect("markers API must be initialized"),
             ground_decals_api: iface
                 .groundDecals
                 .as_ref()
@@ -126,7 +213,11 @@ impl NativeInterfaceRef {
                 .systemControl
                 .as_ref()
                 .expect("systemControl API must be initialized"),
-            profiling_api: iface.profiling.as_ref().expect("profiling API must be initialized"),
+            profiling_api: iface
+                .profiling
+                .as_ref()
+                .expect("profiling API must be initialized"),
+            gfx_api: iface.gfx.as_ref().expect("gfx API must be initialized"),
         })
     }
 
@@ -208,6 +299,10 @@ impl NativeInterfaceRef {
 
     pub fn rules_params(&self) -> RulesParams<'_> {
         RulesParams::new(self.rules_params_api)
+    }
+
+    pub fn rml_ui(&self) -> RmlUi<'_> {
+        RmlUi::new(self.rml_ui_api)
     }
 
     pub fn move_ctrl(&self) -> MoveCtrl<'_> {
@@ -292,5 +387,9 @@ impl NativeInterfaceRef {
 
     pub fn profiling(&self) -> Profiling<'_> {
         Profiling::new(self.profiling_api)
+    }
+
+    pub fn gfx(&self) -> Gfx<'_> {
+        Gfx::new(self.gfx_api)
     }
 }

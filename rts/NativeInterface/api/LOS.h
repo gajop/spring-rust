@@ -58,10 +58,10 @@ struct GetRadarErrorParamsQuery { int32_t allyTeamID; };
 struct GetRadarErrorParamsResult { const Error* error; RadarErrorParams params; };
 
 struct GetClosestValidPositionQuery {
-	Float3 pos;
-	float radius;
 	int32_t unitDefID;
-	int32_t teamID;
+	float x;
+	float z;
+	float radius;
 };
 
 struct GetClosestValidPositionResult { const Error* error; Float3 position; };

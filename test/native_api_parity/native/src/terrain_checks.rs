@@ -48,12 +48,16 @@ impl NativeApiParity {
             "get_water_plane_level" => terrain
                 .get_water_plane_level()
                 .map_err(|err| format!("get_water_plane_level() failed: {err:?}"))?,
+            "get_grass" => terrain
+                .get_grass(f32_field(message, "x")?, f32_field(message, "z")?)
+                .map_err(|err| format!("get_grass() failed: {err:?}"))?,
             _ => return Err(format!("unsupported terrain f32 check `{label}`")),
         };
         let field = match test_name {
             "get_smooth_mesh_height" => "height",
             "get_water_level" => "waterLevel",
             "get_water_plane_level" => "waterPlaneLevel",
+            "get_grass" => "grassLevel",
             _ => unreachable!(),
         };
         self.same_if_present(label, message, field, native)

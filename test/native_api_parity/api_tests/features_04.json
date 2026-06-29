@@ -394,6 +394,86 @@
           "health"
         ]
       }
+    },
+    {
+      "id": "get_feature_no_draw",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureNoDraw"]},
+      "native": {"set": [], "get": ["Features.get_feature_no_draw"]},
+      "compare": {"mode": "fields", "fields": ["noDraw"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureNoDraw`", "native_getter": "`Features.get_feature_no_draw`", "fields": "`noDraw`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureNoDraw", "args": ["fixture.featureID"], "returns": ["noDraw"]}
+    },
+    {
+      "id": "get_feature_lua_draw",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureLuaDraw"]},
+      "native": {"set": [], "get": ["Features.get_feature_lua_draw"]},
+      "compare": {"mode": "fields", "fields": ["luaDraw"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureLuaDraw`", "native_getter": "`Features.get_feature_lua_draw`", "fields": "`luaDraw`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureLuaDraw", "args": ["fixture.featureID"], "returns": ["luaDraw"]}
+    },
+    {
+      "id": "get_feature_engine_draw_mask",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureEngineDrawMask"]},
+      "native": {"set": [], "get": ["Features.get_feature_engine_draw_mask"]},
+      "compare": {"mode": "fields", "fields": ["mask"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureEngineDrawMask`", "native_getter": "`Features.get_feature_engine_draw_mask`", "fields": "`mask`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureEngineDrawMask", "args": ["fixture.featureID"], "returns": ["mask"]}
+    },
+    {
+      "id": "get_feature_always_update_matrix",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureAlwaysUpdateMatrix"]},
+      "native": {"set": [], "get": ["Features.get_feature_always_update_matrix"]},
+      "compare": {"mode": "fields", "fields": ["update"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureAlwaysUpdateMatrix`", "native_getter": "`Features.get_feature_always_update_matrix`", "fields": "`update`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureAlwaysUpdateMatrix", "args": ["fixture.featureID"], "returns": ["update"]}
+    },
+    {
+      "id": "get_render_features",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetRenderFeatures"]},
+      "native": {"set": [], "get": ["Features.get_render_features"]},
+      "compare": {"mode": "fields", "fields": ["featureIDs"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetRenderFeatures`", "native_getter": "`Features.get_render_features`", "fields": "`featureIDs`"},
+      "rust": {"check": "check_features_spatial_list", "set": "set_noop"},
+      "params": {"drawMask": {"type": "i32", "fixed": 0}, "sendMask": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetRenderFeatures", "args": ["value.drawMask", "value.sendMask"], "returns": [{"field": "featureIDs"}]},
+      "order_insensitive_fields": ["featureIDs"]
+    },
+    {
+      "id": "get_render_features_draw_flag_changed",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetRenderFeaturesDrawFlagChanged"]},
+      "native": {"set": [], "get": ["Features.get_render_features_draw_flag_changed"]},
+      "compare": {"mode": "fields", "fields": ["featureIDs"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetRenderFeaturesDrawFlagChanged`", "native_getter": "`Features.get_render_features_draw_flag_changed`", "fields": "`featureIDs`"},
+      "rust": {"check": "check_features_spatial_list", "set": "set_noop"},
+      "params": {"sendMask": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetRenderFeaturesDrawFlagChanged", "args": ["value.sendMask"], "returns": [{"field": "featureIDs"}]},
+      "order_insensitive_fields": ["featureIDs"]
     }
   ]
 }

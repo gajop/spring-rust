@@ -2,10 +2,14 @@
 
 #include "Game/Camera.h"
 #include "Game/CameraHandler.h"
+#include "Game/UI/MouseHandler.h"
 #include "Game/TraceRay.h"
 #include "Sim/Units/Unit.h"
 #include "Sim/Features/Feature.h"
+#include "System/float4.h"
 #include "System/float3.h"
+
+#include <algorithm>
 
 namespace {
 
@@ -288,14 +292,26 @@ static void NativeSetCameraTarget(const SetCameraTargetQuery* query, SetCameraTa
 {
 	bufferPos = 0;
 
-	if (!IsReady()) {
+	if (!IsReady() || mouse == nullptr) {
 		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
-	// Simplified: not implemented
+	float4 targetPos = {
+		query->target.x,
+		query->target.y,
+		query->target.z,
+		std::max(0.0f, query->transitionTime),
+	};
+
+	const float3 targetDir = camera->GetDir();
+
+	camHandler->GetCurrentController().SetPos(targetPos);
+	camHandler->GetCurrentController().SetDir(targetDir);
+	camHandler->CameraTransition(targetPos.w);
+
 	result->error = nullptr;
-	result->success = false;
+	result->success = true;
 }
 
 } // namespace

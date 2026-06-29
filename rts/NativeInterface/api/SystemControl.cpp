@@ -41,6 +41,7 @@
 #include "System/Platform/Watchdog.h"
 #include "System/Platform/WindowManagerHelper.h"
 #include "System/SafeUtil.h"
+#include "System/EventClient.h"
 #include "System/FileSystem/DataDirLocater.h"
 
 #include <SDL.h>
@@ -80,10 +81,20 @@ static bool CopyString(const std::string& src, const char** outPtr)
 
 static void NativeCallAsTeam(const CallAsTeamQuery* query, CallAsTeamResult* result)
 {
-	(void)query->teamID;
-	(void)query->func;
-	(void)query->args;
 	result->error = nullptr;
+	result->success = false;
+
+	if (query->callback == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	if ((query->teamID < CEventClient::MinSpecialTeam) || (query->teamID >= teamHandler.ActiveTeams())) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	query->callback(query->userData);
 	result->success = true;
 }
 

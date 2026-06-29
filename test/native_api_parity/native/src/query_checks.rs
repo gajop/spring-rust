@@ -42,8 +42,22 @@ impl NativeApiParity {
                 self.interface.units_query().get_team_units_by_defs(team_id, &[unit_def_id])
                     .map_err(|err| format!("get_team_units_by_defs({team_id}, [{unit_def_id}]) failed: {err:?}"))?
             }
+            "get_render_units" => {
+                let draw_mask = i32_field(message, "drawMask")?;
+                let send_mask = bool_field(message, "sendMask")?;
+                self.interface.units_query().get_render_units(draw_mask, send_mask)
+                    .map_err(|err| format!("get_render_units({draw_mask}, {send_mask}) failed: {err:?}"))?
+            }
+            "get_render_units_draw_flag_changed" => {
+                let send_mask = bool_field(message, "sendMask")?;
+                self.interface.units_query().get_render_units_draw_flag_changed(send_mask)
+                    .map_err(|err| format!("get_render_units_draw_flag_changed({send_mask}) failed: {err:?}"))?
+            }
             _ => return Err(format!("unsupported units query list check `{label}`")),
         };
+        if test_name == "get_team_units_by_defs" {
+            return self.same_i32_set_if_present(label, message, "unitIDs", &native);
+        }
         self.same_i32_list_if_present(label, message, "unitIDs", &native)
     }
     pub(crate) fn check_units_query_counts(&mut self, message: &Value, label: &str) -> Result<(), String> {
@@ -276,6 +290,24 @@ impl NativeApiParity {
         self.same_bool_if_present(label, message, "hasLuaAI", native.is_some())?;
         if let Some(lua_ai) = native {
             self.same_string_if_present(label, message, "luaAI", &lua_ai)?;
+        }
+        Ok(())
+    }
+    pub(crate) fn check_ai_info_fixed(&mut self, message: &Value, label: &str) -> Result<(), String> {
+        let team_id = i32_field(message, "teamID")?;
+        let (info, has_ai) = self
+            .interface
+            .teams()
+            .get_aiinfo(team_id)
+            .map_err(|err| format!("get_aiinfo({team_id}) failed: {err:?}"))?;
+        self.same_bool_if_present(label, message, "hasAI", has_ai)?;
+        if has_ai {
+            self.same_i32_if_present(label, message, "skirmishAIID", info.skirmishAIID)?;
+            self.same_i32_if_present(label, message, "hostingPlayerID", info.hostingPlayerID)?;
+            self.same_string_if_present(label, message, "name", &cstr_or_empty(info.name)?)?;
+            self.same_string_if_present(label, message, "shortName", &cstr_or_empty(info.shortName)?)?;
+            self.same_string_if_present(label, message, "version", &cstr_or_empty(info.version)?)?;
+            self.same_i32_if_present(label, message, "optionCount", info.optionCount as i32)?;
         }
         Ok(())
     }

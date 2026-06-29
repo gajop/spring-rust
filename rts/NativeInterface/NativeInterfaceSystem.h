@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -25,7 +26,7 @@ public:
 
 	// Special events (called from Lua)
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
-	void HandleLuaCall(const char* msg);
+	void HandleLuaCall(const char* msg, size_t msgLength);
 
 public:
 	static NativeInterfaceSystem* s_instance;

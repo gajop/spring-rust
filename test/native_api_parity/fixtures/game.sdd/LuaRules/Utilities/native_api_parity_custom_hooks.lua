@@ -945,14 +945,16 @@ TEST_HOOKS[#TEST_HOOKS + 1] = {
 	readonly = true,
 	payload = groundPayload,
 	make = function()
-		local value = randomGroundPoint()
-		value.y = 96
-		value.teamID = 0
-		value.unitDefID = UnitDefNames.native_api_test_unit.id
-		value.searchRadius = rounded(randFloat(64, 256))
-		value.minDistance = randInt(0, 4)
-		value.facing = randInt(0, 3)
-		return value
+		return {
+			x = 1024,
+			y = 96,
+			z = 1024,
+			teamID = 0,
+			unitDefID = UnitDefNames.native_api_test_unit.id,
+			searchRadius = 0,
+			minDistance = 0,
+			facing = 0,
+		}
 	end,
 	get = function(_, value)
 		local x, y, z = Spring.ClosestBuildPos(
@@ -971,6 +973,9 @@ TEST_HOOKS[#TEST_HOOKS + 1] = {
 			searchRadius = value.searchRadius,
 			minDistance = value.minDistance,
 			facing = value.facing,
+			inputX = value.x,
+			inputY = value.y,
+			inputZ = value.z,
 			x = x,
 			y = y,
 			z = z,

@@ -465,11 +465,11 @@
           "Spring.GetUnitStorage"
         ]
       },
-      "native": {
-        "set": [
-          "UnitControl.set_unit_storage"
-        ],
-        "get": []
+        "native": {
+          "set": [
+            "UnitControl.set_unit_storage"
+          ],
+          "get": []
       },
       "compare": {
         "mode": "fields",
@@ -479,13 +479,13 @@
           "energyStorage"
         ]
       },
-      "report": {
-        "lua_setter": "`Spring.SetUnitStorage`",
-        "native_setter": "`UnitControl.set_unit_storage`",
-        "lua_getter": "`Spring.GetUnitStorage`",
-        "native_getter": "n/a (`GetUnitStorage` reads unit-def storage)",
-        "fields": "`metalStorage`, `energyStorage` through Lua readback"
-      },
+        "report": {
+          "lua_setter": "`Spring.SetUnitStorage`",
+          "native_setter": "`UnitControl.set_unit_storage`",
+          "lua_getter": "`Spring.GetUnitStorage`",
+          "native_getter": "n/a (`GetUnitStorage` reads unit-def storage in the installed ABI)",
+          "fields": "`metalStorage`, `energyStorage` through Lua readback"
+        },
       "rust": {
         "check": "check_unit_storage",
         "set": "set_unit_storage"

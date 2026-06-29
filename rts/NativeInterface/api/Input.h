@@ -72,6 +72,8 @@ struct GetMouseStartPositionQuery {
 struct GetMouseStartPositionResult {
 	const Error* error;
 	Float2 position;
+	Float3 camPos;
+	Float3 dir;
 };
 
 struct GetKeyStateQuery {
@@ -147,8 +149,14 @@ struct GetActiveCommandResult {
 struct GetActionHotKeysQuery { const char* action; };
 struct GetActionHotKeysResult { const Error* error; const char** hotkeys; uint32_t count; };
 
+struct KeyBindingEntry {
+	const char* command;
+	const char* extra;
+	const char* boundWith;
+};
+
 struct GetKeyBindingsQuery { const char* keySet1; const char* keySet2; };
-struct GetKeyBindingsResult { const Error* error; const char** bindings; uint32_t count; };
+struct GetKeyBindingsResult { const Error* error; KeyBindingEntry* bindings; uint32_t count; };
 
 struct GetKeyCodeQuery { const char* keySym; };
 struct GetKeyCodeResult { const Error* error; int32_t keyCode; };
@@ -160,7 +168,7 @@ struct GetScanSymbolQuery { int32_t scanCode; };
 struct GetScanSymbolResult { const Error* error; const char* scanCodeName; const char* scanCodeDefaultName; };
 
 struct GetKeyFromScanSymbolQuery { const char* scanSymbol; };
-struct GetKeyFromScanSymbolResult { const Error* error; int32_t keyCode; };
+struct GetKeyFromScanSymbolResult { const Error* error; const char* keyName; };
 
 struct GetActivePageQuery { uint8_t _unused; };
 struct GetActivePageResult { const Error* error; int32_t activePage; int32_t maxPage; };

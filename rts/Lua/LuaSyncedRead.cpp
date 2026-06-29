@@ -8462,6 +8462,14 @@ int LuaSyncedRead::IsUnitInJammer(lua_State* L)
 
 /******************************************************************************/
 
+/***
+ *
+ * @function Spring.GetClosestValidPosition
+ * @param unitDefID integer
+ * @param x number
+ * @param z number
+ * @param radius number
+ */
 int LuaSyncedRead::GetClosestValidPosition(lua_State* L)
 {
 	// FIXME -- finish this

@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "box_selection_by_engine",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetBoxSelectionByEngine"], "get": ["Spring.GetBoxSelectionByEngine"]},
+      "native": {"set": ["UnsyncedCtrl.set_box_selection_by_engine"], "get": ["UnsyncedRead.get_box_selection_by_engine"]},
+      "compare": {"mode": "fields", "fields": ["enabled"]},
+      "report": {"lua_setter": "`Spring.SetBoxSelectionByEngine`", "native_setter": "`UnsyncedCtrl.set_box_selection_by_engine`", "lua_getter": "`Spring.GetBoxSelectionByEngine`", "native_getter": "`UnsyncedRead.get_box_selection_by_engine`", "fields": "`enabled`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_unsynced_read_value"},
+      "params": {"enabled": {"type": "bool"}},
+      "lua_runtime": {"set": {"call": "Spring.SetBoxSelectionByEngine", "args": ["value.enabled"]}, "call": "Spring.GetBoxSelectionByEngine", "args": [], "returns": ["enabled"]}
+    },
+    {
+      "id": "build_facing",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetBuildFacing"], "get": ["Spring.GetBuildFacing"]},
+      "native": {"set": ["UnsyncedCtrl.set_build_facing"], "get": ["UnsyncedRead.get_build_facing"]},
+      "compare": {"mode": "fields", "fields": ["facing"]},
+      "report": {"lua_setter": "`Spring.SetBuildFacing`", "native_setter": "`UnsyncedCtrl.set_build_facing`", "lua_getter": "`Spring.GetBuildFacing`", "native_getter": "`UnsyncedRead.get_build_facing`", "fields": "`facing`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_unsynced_read_value"},
+      "params": {"facing": {"type": "enum", "values": [0, 1, 2, 3]}},
+      "lua_runtime": {"set": {"call": "Spring.SetBuildFacing", "args": ["value.facing"]}, "call": "Spring.GetBuildFacing", "args": [], "returns": ["facing"]}
+    },
+    {
+      "id": "build_spacing",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetBuildSpacing"], "get": ["Spring.GetBuildSpacing"]},
+      "native": {"set": ["UnsyncedCtrl.set_build_spacing"], "get": ["UnsyncedRead.get_build_spacing"]},
+      "compare": {"mode": "fields", "fields": ["spacing"]},
+      "report": {"lua_setter": "`Spring.SetBuildSpacing`", "native_setter": "`UnsyncedCtrl.set_build_spacing`", "lua_getter": "`Spring.GetBuildSpacing`", "native_getter": "`UnsyncedRead.get_build_spacing`", "fields": "`spacing`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_unsynced_read_value"},
+      "params": {"spacing": {"type": "i32", "range": [0, 8]}},
+      "lua_runtime": {"set": {"call": "Spring.SetBuildSpacing", "args": ["value.spacing"]}, "call": "Spring.GetBuildSpacing", "args": [], "returns": ["spacing"]}
+    },
+    {
+      "id": "draw_selection_info",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetDrawSelectionInfo"], "get": ["Spring.GetDrawSelectionInfo"]},
+      "native": {"set": ["UnsyncedCtrl.set_draw_selection_info"], "get": ["UnsyncedRead.get_draw_selection_info"]},
+      "compare": {"mode": "fields", "fields": ["draw"]},
+      "report": {"lua_setter": "`Spring.SetDrawSelectionInfo`", "native_setter": "`UnsyncedCtrl.set_draw_selection_info`", "lua_getter": "`Spring.GetDrawSelectionInfo`", "native_getter": "`UnsyncedRead.get_draw_selection_info`", "fields": "`draw`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_unsynced_read_value"},
+      "params": {"draw": {"type": "bool"}},
+      "lua_runtime": {"set": {"call": "Spring.SetDrawSelectionInfo", "args": ["value.draw"]}, "call": "Spring.GetDrawSelectionInfo", "args": [], "returns": ["draw"]}
+    },
+    {
+      "id": "last_message_position_count",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetLastMessagePosition"], "get": ["Spring.GetLastMessagePositions"]},
+      "native": {"set": ["UnsyncedCtrl.set_last_message_position"], "get": ["UnsyncedRead.get_last_message_positions"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "`Spring.SetLastMessagePosition`", "native_setter": "`UnsyncedCtrl.set_last_message_position`", "lua_getter": "`Spring.GetLastMessagePositions`", "native_getter": "`UnsyncedRead.get_last_message_positions`", "fields": "`count`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_unsynced_read_value"},
+      "params": {"pos": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]}},
+      "lua_runtime": {"set": {"call": "Spring.SetLastMessagePosition", "args": ["value.x", "value.y", "value.z"]}, "call": "Spring.GetLastMessagePositions", "args": [], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "los_view_colors",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetLosViewColors"], "get": ["Spring.GetLosViewColors"]},
+      "native": {"set": ["UnsyncedCtrl.set_los_view_colors"], "get": ["Display.get_los_view_colors"]},
+      "compare": {"mode": "fields", "fields": ["alwaysR", "alwaysG", "alwaysB", "losR", "losG", "losB"]},
+      "report": {"lua_setter": "`Spring.SetLosViewColors`", "native_setter": "`UnsyncedCtrl.set_los_view_colors`", "lua_getter": "`Spring.GetLosViewColors`", "native_getter": "`Display.get_los_view_colors`", "fields": "`always*`, `los*`"},
+      "rust": {"check": "check_display_value", "set": "set_display_value"},
+      "params": {
+        "alwaysR": {"type": "f32", "range": [0.05, 0.95]},
+        "alwaysG": {"type": "f32", "range": [0.05, 0.95]},
+        "alwaysB": {"type": "f32", "range": [0.05, 0.95]},
+        "losR": {"type": "f32", "range": [0.05, 0.95]},
+        "losG": {"type": "f32", "range": [0.05, 0.95]},
+        "losB": {"type": "f32", "range": [0.05, 0.95]},
+        "radarR": {"type": "f32", "range": [0.05, 0.95]},
+        "radarG": {"type": "f32", "range": [0.05, 0.95]},
+        "radarB": {"type": "f32", "range": [0.05, 0.95]},
+        "jamR": {"type": "f32", "range": [0.05, 0.95]},
+        "jamG": {"type": "f32", "range": [0.05, 0.95]},
+        "jamB": {"type": "f32", "range": [0.05, 0.95]},
+        "radar2R": {"type": "f32", "range": [0.05, 0.95]},
+        "radar2G": {"type": "f32", "range": [0.05, 0.95]},
+        "radar2B": {"type": "f32", "range": [0.05, 0.95]}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetLosViewColors",
+          "args": [
+            ["value.alwaysR", "value.alwaysG", "value.alwaysB"],
+            ["value.losR", "value.losG", "value.losB"],
+            ["value.radarR", "value.radarG", "value.radarB"],
+            ["value.jamR", "value.jamG", "value.jamB"],
+            ["value.radar2R", "value.radar2G", "value.radar2B"]
+          ]
+        },
+        "call": "Spring.GetLosViewColors",
+        "args": [],
+        "returns": [
+          {"field": "alwaysR", "index": 1, "path": [1]},
+          {"field": "alwaysG", "index": 1, "path": [2]},
+          {"field": "alwaysB", "index": 1, "path": [3]},
+          {"field": "losR", "index": 2, "path": [1]},
+          {"field": "losG", "index": 2, "path": [2]},
+          {"field": "losB", "index": 2, "path": [3]}
+        ]
+      }
+    }
+  ]
+}

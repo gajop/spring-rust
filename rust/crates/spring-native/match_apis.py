@@ -76,6 +76,8 @@ def normalize_type(ptype: str) -> str:
     lt = lt.strip()
     if lt.endswith("?"):
         lt = lt[:-1]
+    if lt.startswith("option<") and lt.endswith(">"):
+        lt = lt[7:-1].strip()
     if lt.startswith("&sys::"):
         lt = lt[6:]
     if lt.startswith("&[sys::") and lt.endswith("]"):

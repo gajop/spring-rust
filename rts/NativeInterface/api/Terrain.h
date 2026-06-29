@@ -133,6 +133,18 @@ struct GetGroundExtremesResult {
 	float currMaxHeight;
 };
 
+// NEW (no Lua equivalent): heightmap point-grid dimensions. These are
+// equivalent to Game.mapSize{X,Z} / SQUARE_SIZE + 1, i.e. mapDims.mapxp1/mapyp1.
+struct GetHeightMapSizeQuery {
+	uint8_t _unused;
+};
+
+struct GetHeightMapSizeResult {
+	const Error* error;
+	int32_t pointsX;
+	int32_t pointsZ;
+};
+
 struct GetGroundBlockedQuery {
 	float x1;
 	float z1;
@@ -205,6 +217,12 @@ struct TerrainApi {
 	void (*GetGroundExtremes)(
 		const GetGroundExtremesQuery* query,
 		GetGroundExtremesResult* result
+	);
+
+	// NEW (no Lua equivalent) — see GetHeightMapSizeResult above.
+	void (*GetHeightMapSize)(
+		const GetHeightMapSizeQuery* query,
+		GetHeightMapSizeResult* result
 	);
 
 	void (*GetGroundBlocked)(

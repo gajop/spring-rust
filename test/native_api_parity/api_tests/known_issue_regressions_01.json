@@ -258,9 +258,10 @@
       "lua": {"set": [], "get": ["Spring.GetSideData"]},
       "native": {"set": [], "get": ["Game.get_side_data"]},
       "compare": {"mode": "fields", "fields": ["normalizedSideName", "caseName", "startUnit"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSideData(name)`", "native_getter": "`Game.get_side_data`", "fields": "`normalizedSideName`, `caseName`, `startUnit`"},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSideData`", "native_getter": "`Game.get_side_data`", "fields": "`normalizedSideName`, `caseName`, `startUnit`"},
       "rust": {"check": "check_side_data", "set": "set_noop"},
-      "params": {}
+      "params": {"sideName": {"type": "string", "fixed": "arm"}},
+      "lua_runtime": {"call": "Spring.GetSideData", "args": ["value.sideName"], "returns": ["startUnit", "caseName"]}
     },
     {
       "id": "side_data_by_index",
@@ -270,9 +271,10 @@
       "lua": {"set": [], "get": ["Spring.GetSideData"]},
       "native": {"set": [], "get": ["Game.get_side_data_by_index"]},
       "compare": {"mode": "fields", "fields": ["normalizedSideName", "caseName", "startUnit"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSideData(index)`", "native_getter": "`Game.get_side_data_by_index`", "fields": "`normalizedSideName`, `caseName`, `startUnit`"},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSideData`", "native_getter": "`Game.get_side_data_by_index`", "fields": "`normalizedSideName`, `caseName`, `startUnit`"},
       "rust": {"check": "check_side_data_by_index", "set": "set_noop"},
-      "params": {}
+      "params": {"sideIndex": {"type": "i32", "fixed": 1}},
+      "lua_runtime": {"call": "Spring.GetSideData", "args": ["value.sideIndex"], "returns": ["normalizedSideName", "startUnit", "caseName"]}
     },
     {
       "id": "side_data_count",
@@ -282,9 +284,10 @@
       "lua": {"set": [], "get": ["Spring.GetSideData"]},
       "native": {"set": [], "get": ["Game.get_side_data_count"]},
       "compare": {"mode": "fields", "fields": ["sideCount"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSideData()`", "native_getter": "`Game.get_side_data_count`", "fields": "`sideCount`"},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSideData`", "native_getter": "`Game.get_side_data_count`", "fields": "`sideCount`"},
       "rust": {"check": "check_side_data_count", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetSideData", "args": [], "returns": [{"field": "sideCount", "index": 1, "transform": "table_count"}]}
     },
     {
       "id": "closest_valid_position",
@@ -410,6 +413,269 @@
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureBlocking`", "native_getter": "`Features.get_feature_blocking`", "fields": "`isBlocking`, `isSolidObjectCollidable`, `isProjectileCollidable`, `isRaySegmentCollidable`, `crushable`, `blockEnemyPushing`, `blockHeightChanges`"},
       "rust": {"check": "check_feature_blocking", "set": "set_noop"},
       "params": {}
+    },
+    {
+      "id": "unit_stockpile_fixed_shape",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetUnitStockpile"]},
+      "native": {"set": [], "get": ["UnitsInfo.get_unit_stockpile"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["hasStockpile", "stockpile", "stockpileQueueSize", "buildPercent"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitStockpile`", "native_getter": "`UnitsInfo.get_unit_stockpile`", "fields": "`hasStockpile`, `stockpile`, `stockpileQueueSize`, `buildPercent`"},
+      "rust": {"check": "check_unit_stockpile_fixed", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitStockpile",
+        "args": ["fixture.unitID"],
+        "returns": [
+          {"field": "hasStockpile", "index": 1, "transform": "truthy"},
+          {"field": "stockpile", "index": 1},
+          {"field": "stockpileQueueSize", "index": 2},
+          {"field": "buildPercent", "index": 3}
+        ]
+      }
+    },
+    {
+      "id": "unit_storage_fixed_getter",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": ["Spring.SetUnitStorage"], "get": ["Spring.GetUnitStorage"]},
+      "native": {"set": ["UnitControl.set_unit_storage"], "get": ["UnitsInfo.get_unit_storage"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["metalStorage", "energyStorage"]},
+      "report": {"lua_setter": "`Spring.SetUnitStorage`", "native_setter": "`UnitControl.set_unit_storage`", "lua_getter": "`Spring.GetUnitStorage`", "native_getter": "`UnitsInfo.get_unit_storage`", "fields": "`metalStorage`, `energyStorage`"},
+      "rust": {"check": "check_unit_storage_fixed", "set": "set_unit_storage"},
+      "params": {
+        "resource": {"type": "enum", "values": ["metal", "energy"]},
+        "amount": {"type": "f32", "range": [50, 1000]}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.SetUnitStorage", "args": ["fixture.unitID", "value.resource", "value.amount"]},
+        "call": "Spring.GetUnitStorage",
+        "args": ["fixture.unitID"],
+        "returns": ["metalStorage", "energyStorage"]
+      }
+    },
+    {
+      "id": "unit_is_transporting_fixed_shape",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetUnitIsTransporting"]},
+      "native": {"set": [], "get": ["UnitsInfo.get_unit_is_transporting"]},
+      "compare": {"mode": "fields", "fields": ["isTransporting", "unitIDs"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitIsTransporting`", "native_getter": "`UnitsInfo.get_unit_is_transporting`", "fields": "`isTransporting`, `unitIDs`"},
+      "rust": {"check": "check_unit_is_transporting_fixed", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitIsTransporting",
+        "args": ["fixture.unitID"],
+        "returns": [
+          {"field": "isTransporting", "index": 1, "transform": "truthy"},
+          {"field": "unitIDs", "index": 1}
+        ]
+      },
+      "order_insensitive_fields": ["unitIDs"]
+    },
+    {
+      "id": "unit_pos_error_params_fixed_shape",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetUnitPosErrorParams"]},
+      "native": {"set": [], "get": ["UnitsInfo.get_unit_pos_error_params"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["posErrorVectorX", "posErrorVectorY", "posErrorVectorZ", "posErrorDeltaX", "posErrorDeltaY", "posErrorDeltaZ", "nextPosErrorUpdate", "posErrorBit"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitPosErrorParams`", "native_getter": "`UnitsInfo.get_unit_pos_error_params`", "fields": "`posErrorVector*`, `posErrorDelta*`, `nextPosErrorUpdate`, `posErrorBit`"},
+      "rust": {"check": "check_unit_pos_error_params_fixed", "set": "set_noop"},
+      "params": {"allyTeamID": {"type": "i32", "fixture": "allyTeamID"}},
+      "lua_runtime": {
+        "call": "Spring.GetUnitPosErrorParams",
+        "args": ["fixture.unitID", "value.allyTeamID"],
+        "returns": ["posErrorVectorX", "posErrorVectorY", "posErrorVectorZ", "posErrorDeltaX", "posErrorDeltaY", "posErrorDeltaZ", "nextPosErrorUpdate", "posErrorBit"]
+      }
+    },
+    {
+      "id": "unit_flanking_fixed_shape",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetUnitFlanking"]},
+      "native": {"set": [], "get": ["UnitsInfo.get_unit_flanking"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["flankingMode", "moveFactor", "minDamage", "maxDamage", "directionX", "directionY", "directionZ", "mobility"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitFlanking`", "native_getter": "`UnitsInfo.get_unit_flanking`", "fields": "`flankingMode`, `moveFactor`, `minDamage`, `maxDamage`, `direction*`, `mobility`"},
+      "rust": {"check": "check_unit_flanking_fixed", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitFlanking",
+        "args": ["fixture.unitID"],
+        "returns": ["flankingMode", "moveFactor", "minDamage", "maxDamage", "directionX", "directionY", "directionZ", "mobility"]
+      }
+    },
+    {
+      "id": "unit_last_attacked_piece_fixed_shape",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetUnitLastAttackedPiece"]},
+      "native": {"set": [], "get": ["UnitsInfo.get_unit_last_attacked_piece"]},
+      "compare": {"mode": "fields", "fields": ["wasHit", "name", "pieceNum", "frame"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitLastAttackedPiece`", "native_getter": "`UnitsInfo.get_unit_last_attacked_piece`", "fields": "`wasHit`, `name`, `pieceNum`, `frame`"},
+      "rust": {"check": "check_unit_last_hit_piece_fixed", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitLastAttackedPiece",
+        "args": ["fixture.unitID"],
+        "returns": [
+          {"field": "wasHit", "index": 1, "transform": "truthy"},
+          {"field": "name", "index": 1},
+          {"field": "frame", "index": 2}
+        ]
+      }
+    },
+    {
+      "id": "feature_last_attacked_piece_fixed_shape",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureLastAttackedPiece"]},
+      "native": {"set": [], "get": ["Features.get_feature_last_attacked_piece"]},
+      "compare": {"mode": "fields", "fields": ["wasHit", "name", "pieceNum", "frame"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureLastAttackedPiece`", "native_getter": "`Features.get_feature_last_attacked_piece`", "fields": "`wasHit`, `name`, `pieceNum`, `frame`"},
+      "rust": {"check": "check_feature_last_hit_piece_fixed", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetFeatureLastAttackedPiece",
+        "args": ["fixture.featureID"],
+        "returns": [
+          {"field": "wasHit", "index": 1, "transform": "truthy"},
+          {"field": "name", "index": 1},
+          {"field": "frame", "index": 2}
+        ]
+      }
+    },
+    {
+      "id": "get_group_units_sorted_fixed",
+      "context": "widget",
+      "kind": "setter_getter",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": ["Spring.SetUnitGroup"], "get": ["Spring.GetGroupUnitsSorted"]},
+      "native": {"set": ["Selection.set_unit_group"], "get": ["Selection.get_group_units_sorted"]},
+      "compare": {"mode": "fields", "fields": ["groups"]},
+      "report": {"lua_setter": "`Spring.SetUnitGroup`", "native_setter": "`Selection.set_unit_group`", "lua_getter": "`Spring.GetGroupUnitsSorted`", "native_getter": "`Selection.get_group_units_sorted`", "fields": "`groups`"},
+      "rust": {"check": "check_selection_value", "set": "set_selection_value"},
+      "params": {"groupID": {"type": "i32", "fixed": 0}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetUnitGroup", "args": ["fixture.unitID", "value.groupID"]},
+        "call": "Spring.GetGroupUnitsSorted",
+        "args": ["value.groupID"],
+        "returns": [{"field": "groups", "transform": "unit_def_unit_groups"}]
+      }
+    },
+    {
+      "id": "get_key_bindings_count",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetKeyBindings"]},
+      "native": {"set": [], "get": ["Input.get_key_bindings"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetKeyBindings`", "native_getter": "`Input.get_key_bindings`", "fields": "`count`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {
+        "keySet1": {"type": "string", "fixed": ""},
+        "keySet2": {"type": "string", "fixed": ""}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetKeyBindings",
+        "args": [],
+        "returns": [{"field": "count", "transform": "table_count"}]
+      }
+    },
+    {
+      "id": "get_active_cmd_descs_fixed_count",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetActiveCmdDescs"]},
+      "native": {"set": [], "get": ["UnsyncedRead.get_active_cmd_descs"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetActiveCmdDescs`", "native_getter": "`UnsyncedRead.get_active_cmd_descs`", "fields": "`count`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetActiveCmdDescs",
+        "args": [],
+        "returns": [{"field": "count", "transform": "table_count"}]
+      }
+    },
+    {
+      "id": "get_active_cmd_desc_fixed_fields",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetActiveCmdDesc"]},
+      "native": {"set": [], "get": ["UnsyncedRead.get_active_cmd_desc"]},
+      "compare": {"mode": "fields", "fields": ["hasCommand", "id", "type", "name", "queueing", "hidden", "disabled", "paramCount"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetActiveCmdDesc`", "native_getter": "`UnsyncedRead.get_active_cmd_desc`", "fields": "`id`, `type`, `name`, flags, `paramCount`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {"cmdIndex": {"type": "i32", "fixed": 1}},
+      "lua_runtime": {
+        "call": "Spring.GetActiveCmdDesc",
+        "args": ["value.cmdIndex"],
+        "returns": [
+          {"field": "hasCommand", "transform": "truthy"},
+          {"field": "id", "path": ["id"]},
+          {"field": "type", "path": ["type"]},
+          {"field": "name", "path": ["name"]},
+          {"field": "queueing", "path": ["queueing"]},
+          {"field": "hidden", "path": ["hidden"]},
+          {"field": "disabled", "path": ["disabled"]},
+          {"field": "paramCount", "path": ["params"], "transform": "table_count"}
+        ]
+      }
+    },
+    {
+      "id": "get_ai_info_fixed_shape",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetAIInfo"]},
+      "native": {"set": [], "get": ["Teams.get_aiinfo"]},
+      "compare": {"mode": "fields", "fields": ["hasAI", "skirmishAIID", "name", "hostingPlayerID", "shortName", "version", "optionCount"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetAIInfo`", "native_getter": "`Teams.get_aiinfo`", "fields": "`hasAI`, id/name/host, shortName/version, option count"},
+      "rust": {"check": "check_ai_info_fixed", "set": "set_noop"},
+      "params": {"teamID": {"type": "i32", "fixture": "teamID"}},
+      "lua_runtime": {
+        "call": "Spring.GetAIInfo",
+        "args": ["value.teamID"],
+        "returns": [
+          {"field": "hasAI", "index": 1, "transform": "truthy"},
+          {"field": "skirmishAIID", "index": 1},
+          {"field": "name", "index": 2},
+          {"field": "hostingPlayerID", "index": 3},
+          {"field": "shortName", "index": 4},
+          {"field": "version", "index": 5},
+          {"field": "optionCount", "index": 6, "transform": "table_count"}
+        ]
+      }
+    },
+    {
+      "id": "get_synced_gc_info_fixed_available",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetSyncedGCInfo"]},
+      "native": {"set": [], "get": ["Profiling.get_synced_gcinfo"]},
+      "compare": {"mode": "fields", "fields": ["hasInfo"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSyncedGCInfo`", "native_getter": "`Profiling.get_synced_gcinfo`", "fields": "`hasInfo`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {"collect": {"type": "bool", "fixed": false}},
+      "lua_runtime": {
+        "call": "Spring.GetSyncedGCInfo",
+        "args": ["value.collect"],
+        "returns": [{"field": "hasInfo", "index": 1, "transform": "truthy"}]
+      }
     }
   ]
 }

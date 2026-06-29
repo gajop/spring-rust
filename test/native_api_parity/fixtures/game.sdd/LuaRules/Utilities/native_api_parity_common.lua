@@ -2,6 +2,22 @@ local M = {}
 
 local rngState = 1
 
+local jsonEscapes = {
+	["\\"] = "\\\\",
+	["\""] = "\\\"",
+	["\b"] = "\\b",
+	["\f"] = "\\f",
+	["\n"] = "\\n",
+	["\r"] = "\\r",
+	["\t"] = "\\t",
+}
+
+local function encodeString(value)
+	return "\"" .. value:gsub("[%z\1-\31\\\"]", function(char)
+		return jsonEscapes[char] or string.format("\\u%04x", char:byte())
+	end) .. "\""
+end
+
 function M.encode(value)
 	local t = type(value)
 	if t == "nil" then
@@ -9,7 +25,7 @@ function M.encode(value)
 	elseif t == "boolean" or t == "number" then
 		return tostring(value)
 	elseif t == "string" then
-		return string.format("%q", value)
+		return encodeString(value)
 	end
 
 	local parts = {}
@@ -83,6 +99,49 @@ local function rounded(value)
 	return math.floor(value * 1000 + 0.5) / 1000
 end
 
+local function randomPosition()
+	return {
+		x = rounded(randFloat(880, 1180)),
+		y = 96,
+		z = rounded(randFloat(880, 1180)),
+	}
+end
+
+local function randomGroundPoint()
+	return {
+		x = rounded(randFloat(880, 1180)),
+		z = rounded(randFloat(880, 1180)),
+	}
+end
+
+local function randomVelocity()
+	return {
+		x = rounded(randFloat(-2, 2)),
+		y = rounded(randFloat(-0.25, 1)),
+		z = rounded(randFloat(-2, 2)),
+	}
+end
+
+local function randomFlatVelocity()
+	return {
+		x = rounded(randFloat(-2, 2)),
+		y = 0,
+		z = rounded(randFloat(-2, 2)),
+	}
+end
+
+local function randomDirection()
+	local angle = randFloat(0, math.pi * 2)
+	return {
+		frontX = rounded(math.sin(angle)),
+		frontY = 0,
+		frontZ = rounded(math.cos(angle)),
+		rightX = rounded(math.cos(angle)),
+		rightY = 0,
+		rightZ = rounded(-math.sin(angle)),
+	}
+end
+
 local function options()
 	return Spring.GetModOptions() or {}
 end
@@ -95,12 +154,18 @@ function M.seed()
 	return tonumber(options().native_api_parity_seed) or 1
 end
 
-function M.fixtureIDs()
-	return {
+function M.fixtureIDs(extra)
+	local ids = {
 		teamID = Spring.GetMyTeamID and Spring.GetMyTeamID() or 0,
 		allyTeamID = Spring.GetMyAllyTeamID and Spring.GetMyAllyTeamID() or 0,
 		playerID = Spring.GetMyPlayerID and Spring.GetMyPlayerID() or 0,
 	}
+	for key, value in pairs(extra or {}) do
+		if value ~= nil then
+			ids[key] = value
+		end
+	end
+	return ids
 end
 
 local function resolveLuaFunction(name)
@@ -121,6 +186,28 @@ local function generatedParamValue(param, ids)
 	end
 	if param.fixture then
 		return ids[param.fixture]
+	end
+	if param.generator == "unit_circle" then
+		local angle = randFloat(0, math.pi * 2)
+		return { x = rounded(math.sin(angle)), z = rounded(math.cos(angle)) }
+	end
+	if param.generator == "map_position" then
+		return randomPosition()
+	end
+	if param.generator == "map_point" then
+		return randomGroundPoint()
+	end
+	if param.generator == "unit_velocity" then
+		return randomVelocity()
+	end
+	if param.generator == "flat_velocity" then
+		return randomFlatVelocity()
+	end
+	if param.generator == "unit_orientation" then
+		return randomDirection()
+	end
+	if param.generator == "raised_ground_height" then
+		return rounded(randFloat(128, 192))
 	end
 	if param.type == "bool" then
 		return randInt(0, 1) == 1
@@ -155,16 +242,24 @@ local function generatedMake(test, ids)
 	return values
 end
 
-local function generatedArg(spec, ids, value)
+local function generatedArg(spec, ids, value, locals)
 	if type(spec) == "table" then
 		local resolved = {}
 		for key, item in pairs(spec) do
-			resolved[key] = generatedArg(item, ids, value)
+			local resolvedKey = key
+			if type(key) == "string" and (key:match("^local%.") or key:match("^fixture%.") or key:match("^value%.")) then
+				resolvedKey = generatedArg(key, ids, value, locals)
+			end
+			resolved[resolvedKey] = generatedArg(item, ids, value, locals)
 		end
 		return resolved
 	end
 	if type(spec) ~= "string" then
 		return spec
+	end
+	local localKey = spec:match("^local%.(.+)$")
+	if localKey then
+		return locals and locals[localKey]
 	end
 	local fixtureKey = spec:match("^fixture%.(.+)$")
 	if fixtureKey then
@@ -199,6 +294,17 @@ local function generatedReturnValue(returnSpec, returns)
 			table.sort(keys)
 		end
 		value = keys
+	elseif returnSpec.transform == "table_string_int_pairs" then
+		local pairsList = {}
+		if type(value) == "table" then
+			for key, item in pairs(value) do
+				if type(key) == "string" and type(item) == "number" then
+					pairsList[#pairsList + 1] = { name = key, pieceNum = item }
+				end
+			end
+			table.sort(pairsList, function(a, b) return a.name < b.name end)
+		end
+		value = pairsList
 	elseif returnSpec.transform == "table_int_keys" then
 		local keys = {}
 		if type(value) == "table" then
@@ -220,8 +326,19 @@ local function generatedReturnValue(returnSpec, returns)
 			end
 		end
 		value = count
+	elseif returnSpec.transform == "table_nonempty" then
+		local nonempty = false
+		if type(value) == "table" then
+			for _ in pairs(value) do
+				nonempty = true
+				break
+			end
+		end
+		value = nonempty
 	elseif returnSpec.transform == "truthy" then
 		value = value ~= nil and value ~= false
+	elseif returnSpec.transform == "string_len" then
+		value = type(value) == "string" and #value or 0
 	elseif returnSpec.transform == "nil_to_minus_one" then
 		if value == nil then
 			value = -1
@@ -241,6 +358,27 @@ local function generatedReturnValue(returnSpec, returns)
 			table.sort(unitIDs)
 		end
 		value = unitIDs
+	elseif returnSpec.transform == "unit_def_unit_groups" then
+		local groups = {}
+		if type(value) == "table" then
+			for unitDefID, units in pairs(value) do
+				if unitDefID ~= "n" and type(units) == "table" then
+					local unitIDs = {}
+					for _, unitID in ipairs(units) do
+						unitIDs[#unitIDs + 1] = unitID
+					end
+					table.sort(unitIDs)
+					groups[#groups + 1] = {
+						unitDefID = tonumber(unitDefID),
+						unitIDs = unitIDs,
+					}
+				end
+			end
+			table.sort(groups, function(a, b)
+				return a.unitDefID < b.unitDefID
+			end)
+		end
+		value = groups
 	elseif returnSpec.transform == "unit_def_counts" then
 		local counts = {}
 		if type(value) == "table" then
@@ -281,13 +419,22 @@ end
 
 local function generatedGet(test, ids, value)
 	local runtime = test.lua_runtime
+	local locals = {}
+	for name, localSpec in pairs(runtime.locals or {}) do
+		local func = resolveLuaFunction(localSpec.call)
+		local args = {}
+		for _, argSpec in ipairs(localSpec.args or {}) do
+			args[#args + 1] = generatedArg(argSpec, ids, value, locals)
+		end
+		locals[name] = func(unpack(args))
+	end
 	local returns
 	if runtime.table then
 		local tableValue = _G[runtime.table]
 		if type(tableValue) ~= "table" then
 			error("Lua API value is not a table: " .. tostring(runtime.table))
 		end
-		local key = generatedArg(runtime.key, ids, value)
+		local key = generatedArg(runtime.key, ids, value, locals)
 		if key ~= nil then
 			tableValue = tableValue[key]
 		end
@@ -296,7 +443,7 @@ local function generatedGet(test, ids, value)
 		local func = resolveLuaFunction(runtime.call)
 		local args = {}
 		for _, argSpec in ipairs(runtime.args or {}) do
-			args[#args + 1] = generatedArg(argSpec, ids, value)
+			args[#args + 1] = generatedArg(argSpec, ids, value, locals)
 		end
 		returns = { func(unpack(args)) }
 	end
@@ -316,12 +463,64 @@ local function generatedGet(test, ids, value)
 	return readback
 end
 
-local function canRunPortableReadOnly(test)
-	if test.kind ~= "readonly" or test.lua_runtime == nil or test.requires_rendering then
+local function generatedSet(test, ids, value)
+	local runtime = test.lua_runtime
+	local setters = runtime.set
+	if setters == nil then
+		return
+	end
+
+	if setters.call ~= nil then
+		setters = { setters }
+	end
+
+	for _, setter in ipairs(setters) do
+		local func = resolveLuaFunction(setter.call)
+		local args = {}
+		for _, argSpec in ipairs(setter.args or {}) do
+			args[#args + 1] = generatedArg(argSpec, ids, value)
+		end
+		func(unpack(args))
+	end
+end
+
+local function canRunPortableTest(test, ids)
+	if (test.context or "synced_gadget") ~= ids.context then
 		return false
 	end
-	if #(test.requires or {}) ~= 0 then
+	if (test.kind ~= "readonly" and test.kind ~= "setter_getter") or test.lua_runtime == nil then
 		return false
+	end
+	if test.requires_rendering and not M.enableRenderingTests() then
+		return false
+	end
+	if test.skip_when_rendering and M.enableRenderingTests() then
+		return false
+	end
+	for _, requirement in ipairs(test.requires or {}) do
+		if requirement == "unit" then
+			if ids.unitID == nil then
+				return false
+			end
+		elseif requirement == "feature" then
+			if ids.featureID == nil then
+				return false
+			end
+		else
+			return false
+		end
+	end
+	local setters = test.lua_runtime.set
+	if setters ~= nil then
+		if setters.call ~= nil then
+			setters = { setters }
+		end
+		for _, setter in ipairs(setters) do
+			local tableName, functionName = setter.call:match("^([^.]+)%.(.+)$")
+			if tableName == "Spring" and type(Spring[functionName]) ~= "function" then
+				return false
+			end
+		end
 	end
 	if test.lua_runtime.call then
 		local tableName, functionName = test.lua_runtime.call:match("^([^.]+)%.(.+)$")
@@ -335,19 +534,45 @@ local function canRunPortableReadOnly(test)
 	return true
 end
 
-function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNative)
+function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNative, fixtureIDs)
 	M.initRandom(M.seed(), context == "widget" and 20 or 10)
-	local ids = M.fixtureIDs()
+	local ids = M.fixtureIDs(fixtureIDs)
+	ids.context = context
+	local function addFixtureAndValues(payload, test, value)
+		for _, requirement in ipairs(test.requires or {}) do
+			if requirement == "unit" then
+				payload.unitID = ids.unitID
+			elseif requirement == "feature" then
+				payload.featureID = ids.featureID
+			end
+		end
+		for key, fieldValue in pairs(value) do
+			if type(fieldValue) ~= "userdata" and type(fieldValue) ~= "function" and type(fieldValue) ~= "thread" then
+				payload[key] = fieldValue
+			end
+		end
+	end
 	for caseIndex = 1, M.caseCount() do
 		for _, test in ipairs(generatedTests) do
-			if canRunPortableReadOnly(test) then
+			if canRunPortableTest(test, ids) then
 				local value = generatedMake(test, ids)
-				local ok, readback = pcall(generatedGet, test, ids, value)
+				local ok, readback = pcall(function()
+					if M.mode() == "native" and invokeNative and test.kind == "setter_getter" and test.lua_runtime.set ~= nil then
+						local setPayload = {
+							case = caseIndex,
+							context = context,
+							name = "set_native_" .. test.id,
+						}
+						addFixtureAndValues(setPayload, test, value)
+						invokeNative(M.encode(setPayload))
+					else
+						generatedSet(test, ids, value)
+					end
+					return generatedGet(test, ids, value)
+				end)
 				if ok then
 					local payload = { case = caseIndex }
-					for key, fieldValue in pairs(value) do
-						payload[key] = fieldValue
-					end
+					addFixtureAndValues(payload, test, value)
 					for key, fieldValue in pairs(readback) do
 						payload[key] = fieldValue
 					end

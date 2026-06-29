@@ -297,6 +297,17 @@ pub fn generate_vfs(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
     )
 }
 
+pub fn generate_rml_ui(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "RmlUiApi",
+            wrapper_struct: "RmlUi",
+        },
+    )
+}
+
 pub fn generate_sound(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
     generate_api(
         header,
@@ -348,6 +359,17 @@ pub fn generate_lights(header: &Path, include_dirs: &[PathBuf]) -> Result<String
         ApiConfig {
             api_struct: "LightsApi",
             wrapper_struct: "Lights",
+        },
+    )
+}
+
+pub fn generate_gfx(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "GfxApi",
+            wrapper_struct: "Gfx",
         },
     )
 }
@@ -530,25 +552,25 @@ pub fn generate_cob_script(header: &Path, include_dirs: &[PathBuf]) -> Result<St
 }
 
 pub fn generate_unsynced_read(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-	generate_api(
-		header,
-		include_dirs,
-		ApiConfig {
-			api_struct: "UnsyncedReadApi",
-			wrapper_struct: "UnsyncedRead",
-		},
-	)
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "UnsyncedReadApi",
+            wrapper_struct: "UnsyncedRead",
+        },
+    )
 }
 
 pub fn generate_unit_rendering(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-	generate_api(
-		header,
-		include_dirs,
-		ApiConfig {
-			api_struct: "UnitRenderingApi",
-			wrapper_struct: "UnitRendering",
-		},
-	)
+    generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "UnitRenderingApi",
+            wrapper_struct: "UnitRendering",
+        },
+    )
 }
 
 fn generate_api(header: &Path, include_dirs: &[PathBuf], config: ApiConfig<'_>) -> Result<String> {
@@ -578,15 +600,26 @@ struct FieldDef {
 enum CType {
     Primitive(Primitive),
     Record(String),
-    Pointer { pointee: Box<CType>, is_const: bool },
+    Pointer {
+        pointee: Box<CType>,
+        is_const: bool,
+    },
+    /// A C function pointer (e.g. the NativeEditCallback typedef). Recognized so
+    /// the generated wrapper can take a Rust closure instead of a raw pointer.
+    FnPtr,
     #[allow(dead_code)]
-    Array { element: Box<CType>, length: u64 },
+    Array {
+        element: Box<CType>,
+        length: u64,
+    },
     #[allow(dead_code)]
     Unknown(String),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Primitive {
+    I8,
+    I16,
     I32,
     U32,
     U16,
@@ -601,6 +634,8 @@ enum Primitive {
 impl Primitive {
     fn rust_type(self) -> &'static str {
         match self {
+            Primitive::I8 => "i8",
+            Primitive::I16 => "i16",
             Primitive::I32 => "i32",
             Primitive::U32 => "u32",
             Primitive::U16 => "u16",
@@ -740,6 +775,9 @@ fn classify_type(ty: Type) -> CType {
     match ty.get_kind() {
         TypeKind::Pointer => {
             let pointee = ty.get_pointee_type().unwrap();
+            if pointee.get_kind() == TypeKind::FunctionPrototype {
+                return CType::FnPtr;
+            }
             CType::Pointer {
                 pointee: Box::new(classify_type(pointee)),
                 is_const: pointee.is_const_qualified(),
@@ -756,6 +794,8 @@ fn classify_type(ty: Type) -> CType {
             classify_type(canonical)
         }
         TypeKind::Int => CType::Primitive(Primitive::I32),
+        TypeKind::Short => CType::Primitive(Primitive::I16),
+        TypeKind::SChar => CType::Primitive(Primitive::I8),
         TypeKind::UInt => CType::Primitive(Primitive::U32),
         TypeKind::UShort => CType::Primitive(Primitive::U16),
         TypeKind::UChar => CType::Primitive(Primitive::U8),
@@ -782,7 +822,11 @@ fn classify_type(ty: Type) -> CType {
             // Calculate array length: total_size / element_size
             let total_size = ty.get_sizeof().unwrap_or(0);
             let elem_size = element_ty.and_then(|t| t.get_sizeof().ok()).unwrap_or(1);
-            let len = if elem_size > 0 { total_size / elem_size } else { 0 };
+            let len = if elem_size > 0 {
+                total_size / elem_size
+            } else {
+                0
+            };
             CType::Array {
                 element: Box::new(element),
                 length: len as u64,
@@ -794,13 +838,15 @@ fn classify_type(ty: Type) -> CType {
 
 fn primitive_from_name(name: &str) -> Option<Primitive> {
     match name {
+        "int8_t" | "signed char" => Some(Primitive::I8),
+        "int16_t" | "short" => Some(Primitive::I16),
         "int32_t" | "int" => Some(Primitive::I32),
         "uint32_t" | "unsigned int" => Some(Primitive::U32),
         "uint16_t" | "unsigned short" => Some(Primitive::U16),
         "uint8_t" | "unsigned char" => Some(Primitive::U8),
         "bool" => Some(Primitive::Bool),
         "float" => Some(Primitive::F32),
-        "char" | "const char" | "signed char" => Some(Primitive::Char),
+        "char" | "const char" => Some(Primitive::Char),
         "void" => Some(Primitive::Void),
         _ => None,
     }
@@ -832,12 +878,27 @@ struct ParamSpec {
 #[derive(Debug)]
 enum ParamType {
     Primitive(&'static str),
+    OptionPrimitive(&'static str),
+    OptionCStr,
+    RulesParamValue,
     Struct(String),
-    Slice { element: TypeRef },
-    Ref { element: TypeRef },
-    MutRef { element: TypeRef },
-    Array { element: &'static str, length: u64 },
+    Slice {
+        element: TypeRef,
+    },
+    Ref {
+        element: TypeRef,
+    },
+    MutRef {
+        element: TypeRef,
+    },
+    Array {
+        element: &'static str,
+        length: u64,
+    },
     CStr,
+    /// A `{ NativeEditCallback callback; void* userData; }` pair surfaced as a
+    /// `FnMut()` closure; the wrapper builds an extern-C trampoline.
+    Callback,
 }
 
 #[derive(Debug, Clone)]
@@ -855,12 +916,43 @@ struct QueryInitField {
 #[derive(Debug)]
 enum QueryExpr {
     Param(String),
-    SlicePtr { param: String, mutable_ptr: bool },
-    SliceLen { param: String, cast: &'static str },
-    RefPtr { param: String },
-    MutRefPtr { param: String },
-    CStrPtr { param: String },
+    SlicePtr {
+        param: String,
+        mutable_ptr: bool,
+    },
+    SliceLen {
+        param: String,
+        cast: &'static str,
+    },
+    RefPtr {
+        param: String,
+    },
+    MutRefPtr {
+        param: String,
+    },
+    CStrPtr {
+        param: String,
+    },
+    OptionParam {
+        param: String,
+        default_expr: &'static str,
+    },
+    OptionIsSome {
+        param: String,
+    },
+    OptionCStrPtr {
+        param: String,
+    },
+    RulesParamValue {
+        param: String,
+    },
     Zero,
+    /// The callback function pointer field: emits `Some(trampoline::<F>)`.
+    CallbackFn,
+    /// The userData field paired with a callback: emits `&mut <param> as *mut _`.
+    CallbackUserData {
+        param: String,
+    },
 }
 
 #[derive(Debug)]
@@ -873,7 +965,14 @@ struct ReturnField {
 enum ReturnFieldType {
     Plain(TypeRef),
     CString,
-    Array { element: String, length: u64 },
+    StringWithLen {
+        ptr_field: String,
+        len_field: String,
+    },
+    Array {
+        element: String,
+        length: u64,
+    },
     Vec {
         ptr_field: String,
         len_field: String,
@@ -891,6 +990,7 @@ impl ReturnFieldType {
         match self {
             ReturnFieldType::Plain(ty) => type_ref_to_string(ty),
             ReturnFieldType::CString => "Option<String>".into(),
+            ReturnFieldType::StringWithLen { .. } => "Option<String>".into(),
             ReturnFieldType::Array { element, length } => format!("[{}; {}]", element, length),
             ReturnFieldType::Vec { elem, .. } => format!("Vec<{}>", type_ref_to_string(elem)),
             ReturnFieldType::StringVec { .. } => "Vec<String>".into(),
@@ -909,18 +1009,29 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
     let (params, inits) = build_params(query)?;
     let ret_kind = build_return(result)?;
 
-    let mut sig = format!("    pub fn {}(&self", method_name);
+    let has_callback = params.iter().any(|p| matches!(p.ty, ParamType::Callback));
+    let generics = if has_callback { "<F: FnMut()>" } else { "" };
+    let mut sig = format!("    pub fn {}{}(&self", method_name, generics);
     for param in &params {
         let ty = match &param.ty {
             ParamType::Primitive(name) => name.to_string(),
+            ParamType::OptionPrimitive(name) => format!("Option<{}>", name),
+            ParamType::OptionCStr => "Option<&str>".to_string(),
+            ParamType::RulesParamValue => "RulesParamValue".to_string(),
             ParamType::Struct(struct_name) => format!("sys::{}", struct_name),
             ParamType::Slice { element } => format!("&[{}]", type_ref_to_string(element)),
             ParamType::Ref { element } => format!("&{}", type_ref_to_string(element)),
             ParamType::MutRef { element } => format!("&mut {}", type_ref_to_string(element)),
             ParamType::Array { element, length } => format!("[{}; {}]", element, length),
             ParamType::CStr => "&str".to_string(),
+            ParamType::Callback => "F".to_string(),
         };
-        sig.push_str(&format!(", {}: {}", param.name, ty));
+        let prefix = if matches!(param.ty, ParamType::Callback) {
+            "mut "
+        } else {
+            ""
+        };
+        sig.push_str(&format!(", {}{}: {}", prefix, param.name, ty));
     }
     sig.push_str(") -> Result<");
     let return_ty = match &ret_kind {
@@ -941,20 +1052,30 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
     body.push_str("        unsafe {\n");
 
     // Generate CStr conversions for string parameters
-    let mut needs_cstr = false;
     for field in &inits {
-        if matches!(field.expr, QueryExpr::CStrPtr { .. }) {
-            needs_cstr = true;
-            break;
+        match &field.expr {
+            QueryExpr::CStrPtr { param } => {
+                body.push_str(&format!("            let {}_cstr = std::ffi::CString::new({}).map_err(|_| Error::invalid_argument(\"{}\"))?;\n", param, param, param));
+            }
+            QueryExpr::OptionCStrPtr { param } => {
+                body.push_str(&format!("            let {}_cstr = {}.as_ref().map(|value| std::ffi::CString::new(*value)).transpose().map_err(|_| Error::invalid_argument(\"{}\"))?;\n", param, param, param));
+            }
+            QueryExpr::RulesParamValue { param } => {
+                body.push_str(&format!(
+                    "            let {param}_sys = {param}.to_sys()?;\n"
+                ));
+            }
+            _ => {}
         }
     }
 
-    if needs_cstr {
-        for field in &inits {
-            if let QueryExpr::CStrPtr { param } = &field.expr {
-                body.push_str(&format!("            let {}_cstr = std::ffi::CString::new({}).map_err(|_| Error::invalid_argument(\"{}\"))?;\n", param, param, param));
-            }
-        }
+    // For a callback param, define an extern-C trampoline that recovers the
+    // closure from userData and calls it.
+    if has_callback {
+        body.push_str("            unsafe extern \"C\" fn trampoline<F: FnMut()>(user_data: *mut std::ffi::c_void) {\n");
+        body.push_str("                let f = &mut *(user_data as *mut F);\n");
+        body.push_str("                f();\n");
+        body.push_str("            }\n");
     }
 
     body.push_str(&format!("            let query = sys::{} {{\n", query.name));
@@ -972,7 +1093,25 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
             QueryExpr::RefPtr { param } => format!("{} as *const _", param),
             QueryExpr::MutRefPtr { param } => format!("{} as *mut _", param),
             QueryExpr::CStrPtr { param } => format!("{}_cstr.as_ptr()", param),
+            QueryExpr::OptionParam {
+                param,
+                default_expr,
+            } => {
+                format!("{}.unwrap_or({})", param, default_expr)
+            }
+            QueryExpr::OptionIsSome { param } => format!("{}.is_some()", param),
+            QueryExpr::OptionCStrPtr { param } => {
+                format!(
+                    "{}_cstr.as_ref().map_or(std::ptr::null(), |value| value.as_ptr())",
+                    param
+                )
+            }
+            QueryExpr::RulesParamValue { param } => format!("{param}_sys.value"),
             QueryExpr::Zero => "0".into(),
+            QueryExpr::CallbackFn => "Some(trampoline::<F>)".to_string(),
+            QueryExpr::CallbackUserData { param } => {
+                format!("&mut {} as *mut F as *mut std::ffi::c_void", param)
+            }
         };
         body.push_str(&format!("                {}: {},\n", field.field, expr));
     }
@@ -1021,11 +1160,23 @@ fn render_return(kind: &ReturnKind) -> String {
 
 fn field_expr(field: &ReturnField, indent: &str) -> String {
     match &field.ty {
+        ReturnFieldType::Plain(TypeRef::Struct(name)) if name == "RulesParamValue" => {
+            format!("{indent}RulesParamValue::from_sys(result.{})", field.name)
+        }
         ReturnFieldType::Plain(_) => format!("{indent}result.{}", field.name),
         ReturnFieldType::CString => format!(
             "{indent}{{\n{indent}    if result.{name}.is_null() {{\n{indent}        None\n{indent}    }} else {{\n{indent}        Some(CStr::from_ptr(result.{name}).to_string_lossy().into_owned())\n{indent}    }}\n{indent}}}",
             indent = indent,
             name = field.name
+        ),
+        ReturnFieldType::StringWithLen {
+            ptr_field,
+            len_field,
+        } => format!(
+            "{indent}{{\n{indent}    if result.{ptr_field}.is_null() {{\n{indent}        None\n{indent}    }} else {{\n{indent}        let slice = if result.{len_field} == 0 {{\n{indent}            &[]\n{indent}        }} else {{\n{indent}            slice::from_raw_parts(result.{ptr_field} as *const u8, result.{len_field} as usize)\n{indent}        }};\n{indent}        Some(String::from_utf8_lossy(slice).into_owned())\n{indent}    }}\n{indent}}}",
+            indent = indent,
+            ptr_field = ptr_field,
+            len_field = len_field,
         ),
         ReturnFieldType::Array { .. } => format!("{indent}result.{}", field.name),
         ReturnFieldType::Vec {
@@ -1069,7 +1220,80 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
     let mut i = 0;
     while i < query.fields.len() {
         let field = &query.fields[i];
+        if let Some(next) = query.fields.get(i + 1) {
+            if is_optional_presence_pair(field, next) {
+                let param_name = make_param_name(&field.name);
+                match &field.ty {
+                    CType::Primitive(prim) => {
+                        params.push(ParamSpec {
+                            name: param_name.clone(),
+                            ty: ParamType::OptionPrimitive(prim.rust_type()),
+                        });
+                        inits.push(QueryInitField {
+                            field: make_field_name(&field.name),
+                            expr: QueryExpr::OptionParam {
+                                param: param_name.clone(),
+                                default_expr: primitive_default_expr(*prim),
+                            },
+                        });
+                        inits.push(QueryInitField {
+                            field: make_field_name(&next.name),
+                            expr: QueryExpr::OptionIsSome { param: param_name },
+                        });
+                        i += 2;
+                        continue;
+                    }
+                    CType::Pointer { pointee, is_const }
+                        if *is_const && matches!(**pointee, CType::Primitive(Primitive::Char)) =>
+                    {
+                        params.push(ParamSpec {
+                            name: param_name.clone(),
+                            ty: ParamType::OptionCStr,
+                        });
+                        inits.push(QueryInitField {
+                            field: make_field_name(&field.name),
+                            expr: QueryExpr::OptionCStrPtr {
+                                param: param_name.clone(),
+                            },
+                        });
+                        inits.push(QueryInitField {
+                            field: make_field_name(&next.name),
+                            expr: QueryExpr::OptionIsSome { param: param_name },
+                        });
+                        i += 2;
+                        continue;
+                    }
+                    _ => {}
+                }
+            }
+        }
         match &field.ty {
+            // A function-pointer field followed by a void* userData field is a
+            // native edit callback; surface it as one FnMut closure param.
+            CType::FnPtr => {
+                let next_is_userdata = i + 1 < query.fields.len()
+                    && matches!(query.fields[i + 1].ty, CType::Pointer { .. });
+                if !next_is_userdata {
+                    return Err(anyhow!(
+                        "callback field {} must be followed by a void* userData field",
+                        field.name
+                    ));
+                }
+                let param_name = make_param_name(&field.name);
+                params.push(ParamSpec {
+                    name: param_name.clone(),
+                    ty: ParamType::Callback,
+                });
+                inits.push(QueryInitField {
+                    field: make_field_name(&field.name),
+                    expr: QueryExpr::CallbackFn,
+                });
+                inits.push(QueryInitField {
+                    field: make_field_name(&query.fields[i + 1].name),
+                    expr: QueryExpr::CallbackUserData { param: param_name },
+                });
+                i += 2;
+            }
             CType::Primitive(Primitive::U8) if field.name.starts_with('_') => {
                 inits.push(QueryInitField {
                     field: make_field_name(&field.name),
@@ -1087,9 +1311,7 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                     });
                     inits.push(QueryInitField {
                         field: make_field_name(&field.name),
-                        expr: QueryExpr::CStrPtr {
-                            param: param_name,
-                        },
+                        expr: QueryExpr::CStrPtr { param: param_name },
                     });
                     i += 1;
                     continue;
@@ -1099,8 +1321,14 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                 if i + 1 < query.fields.len() {
                     if matches!(query.fields[i + 1].ty, CType::Primitive(Primitive::U32)) {
                         // Special case: const char** + length should be a raw pointer (for Memory::Free* functions)
-                        if let CType::Pointer { pointee: inner_pointee, is_const: inner_const } = &**pointee {
-                            if *inner_const && matches!(**inner_pointee, CType::Primitive(Primitive::Char)) {
+                        if let CType::Pointer {
+                            pointee: inner_pointee,
+                            is_const: inner_const,
+                        } = &**pointee
+                        {
+                            if *inner_const
+                                && matches!(**inner_pointee, CType::Primitive(Primitive::Char))
+                            {
                                 let param_name = make_param_name(&field.name);
                                 params.push(ParamSpec {
                                     name: param_name.clone(),
@@ -1154,7 +1382,10 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                 }
 
                 // void* or unknown pointer types - use raw pointer
-                if matches!(**pointee, CType::Primitive(Primitive::Void) | CType::Unknown(_)) {
+                if matches!(
+                    **pointee,
+                    CType::Primitive(Primitive::Void) | CType::Unknown(_)
+                ) {
                     let param_name = make_param_name(&field.name);
                     let ptr_type = if *is_const {
                         "*const std::ffi::c_void"
@@ -1185,9 +1416,7 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                         });
                         inits.push(QueryInitField {
                             field: make_field_name(&field.name),
-                            expr: QueryExpr::MutRefPtr {
-                                param: param_name,
-                            },
+                            expr: QueryExpr::MutRefPtr { param: param_name },
                         });
                         i += 1;
                         continue;
@@ -1206,9 +1435,7 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                         });
                         inits.push(QueryInitField {
                             field: make_field_name(&field.name),
-                            expr: QueryExpr::RefPtr {
-                                param: param_name,
-                            },
+                            expr: QueryExpr::RefPtr { param: param_name },
                         });
                         i += 1;
                         continue;
@@ -1235,21 +1462,32 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                     i += 1;
                     continue;
                 }
-                return Err(anyhow!("unsupported array element type in field {}", field.name));
+                return Err(anyhow!(
+                    "unsupported array element type in field {}",
+                    field.name
+                ));
             }
             _ => {
                 if let Some(ty) = rust_type_from_c(&field.ty) {
                     let param_name = make_param_name(&field.name);
                     params.push(ParamSpec {
                         name: param_name.clone(),
-                        ty: match ty {
+                        ty: match &ty {
                             TypeRef::Primitive(name) => ParamType::Primitive(name),
-                            TypeRef::Struct(ref name) => ParamType::Struct(name.clone()),
+                            TypeRef::Struct(name) if name == "RulesParamValue" => {
+                                ParamType::RulesParamValue
+                            }
+                            TypeRef::Struct(name) => ParamType::Struct(name.clone()),
                         },
                     });
                     inits.push(QueryInitField {
                         field: make_field_name(&field.name),
-                        expr: QueryExpr::Param(param_name),
+                        expr: match &ty {
+                            TypeRef::Struct(name) if name == "RulesParamValue" => {
+                                QueryExpr::RulesParamValue { param: param_name }
+                            }
+                            _ => QueryExpr::Param(param_name),
+                        },
                     });
                 }
                 i += 1;
@@ -1257,6 +1495,30 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
         }
     }
     Ok((params, inits))
+}
+
+fn is_optional_presence_pair(value_field: &FieldDef, has_field: &FieldDef) -> bool {
+    if !matches!(has_field.ty, CType::Primitive(Primitive::Bool)) {
+        return false;
+    }
+
+    let Some(has_suffix) = has_field.name.strip_prefix("has") else {
+        return false;
+    };
+
+    has_suffix.eq_ignore_ascii_case(&value_field.name)
+        || value_field
+            .name
+            .strip_suffix("Value")
+            .is_some_and(|prefix| has_suffix.eq_ignore_ascii_case(prefix))
+}
+
+fn primitive_default_expr(prim: Primitive) -> &'static str {
+    match prim {
+        Primitive::F32 => "0.0",
+        Primitive::Bool => "false",
+        _ => "0",
+    }
 }
 
 fn build_return(result: &StructDef) -> Result<ReturnKind> {
@@ -1268,11 +1530,22 @@ fn build_return(result: &StructDef) -> Result<ReturnKind> {
     let mut i = 0;
     while i < data_fields.len() {
         let field = data_fields[i];
-        if let CType::Pointer { pointee, is_const: outer_const } = &field.ty {
-            if i + 1 < data_fields.len() && matches!(data_fields[i + 1].ty, CType::Primitive(Primitive::U32)) {
+        if let CType::Pointer {
+            pointee,
+            is_const: outer_const,
+        } = &field.ty
+        {
+            if i + 1 < data_fields.len()
+                && matches!(data_fields[i + 1].ty, CType::Primitive(Primitive::U32))
+            {
                 // Special case: const char** + length (array of strings)
-                if let CType::Pointer { pointee: inner_pointee, is_const: inner_const } = &**pointee {
-                    if *inner_const && matches!(**inner_pointee, CType::Primitive(Primitive::Char)) {
+                if let CType::Pointer {
+                    pointee: inner_pointee,
+                    is_const: inner_const,
+                } = &**pointee
+                {
+                    if *inner_const && matches!(**inner_pointee, CType::Primitive(Primitive::Char))
+                    {
                         fields.push(ReturnField {
                             name: make_field_name(&field.name),
                             ty: ReturnFieldType::StringVec {
@@ -1283,6 +1556,19 @@ fn build_return(result: &StructDef) -> Result<ReturnKind> {
                         i += 2;
                         continue;
                     }
+                }
+
+                // Special case: const char* + length (string that may contain embedded NUL bytes)
+                if *outer_const && matches!(**pointee, CType::Primitive(Primitive::Char)) {
+                    fields.push(ReturnField {
+                        name: make_field_name(&field.name),
+                        ty: ReturnFieldType::StringWithLen {
+                            ptr_field: make_field_name(&field.name),
+                            len_field: make_field_name(&data_fields[i + 1].name),
+                        },
+                    });
+                    i += 2;
+                    continue;
                 }
 
                 let elem = rust_type_from_pointer(pointee)
@@ -1333,7 +1619,10 @@ fn return_field_type(ty: &CType) -> Option<ReturnFieldType> {
                 CType::Record(name) => name.clone(),
                 _ => return None,
             };
-            Some(ReturnFieldType::Array { element: elem_type, length: *length })
+            Some(ReturnFieldType::Array {
+                element: elem_type,
+                length: *length,
+            })
         }
         _ => None,
     }
@@ -1358,6 +1647,7 @@ fn rust_type_from_pointer(ty: &CType) -> Option<TypeRef> {
 fn type_ref_to_string(ty: &TypeRef) -> String {
     match ty {
         TypeRef::Primitive(name) => name.to_string(),
+        TypeRef::Struct(name) if name == "RulesParamValue" => "RulesParamValue".to_string(),
         TypeRef::Struct(name) => format!("sys::{}", name),
     }
 }
@@ -1365,7 +1655,7 @@ fn type_ref_to_string(ty: &TypeRef) -> String {
 fn make_param_name(name: &str) -> String {
     let normalized = normalize_acronyms(name);
     let snake = normalized.to_snake_case();
-    let collapsed = collapse_acronyms(&snake);
+    let collapsed = collapse_acronyms(&snake).replace("_a_is", "_ais");
     let base = if collapsed.is_empty() {
         normalized
     } else {
@@ -1526,6 +1816,9 @@ pub fn extract_api_version(common_header: &Path) -> Result<(u32, u32, u32)> {
 
         Ok((major, minor, patch))
     } else {
-        Err(anyhow!("Could not find NATIVE_API_CURRENT_VERSION in {}", common_header.display()))
+        Err(anyhow!(
+            "Could not find NATIVE_API_CURRENT_VERSION in {}",
+            common_header.display()
+        ))
     }
 }

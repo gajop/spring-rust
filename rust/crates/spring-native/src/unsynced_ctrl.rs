@@ -1,3 +1,4 @@
+use std::ffi::CStr;
 use std::mem::MaybeUninit;
 
 use crate::{error::Error, sys};

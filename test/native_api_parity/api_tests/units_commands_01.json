@@ -54,7 +54,8 @@
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": [
-        "unit"
+        "unit",
+        "native_rebuild"
       ],
       "lua": {
         "set": [],
@@ -216,6 +217,70 @@
           {
             "field": "hasCommand",
             "transform": "truthy"
+          }
+        ]
+      }
+    },
+    {
+      "id": "find_unit_cmd_desc_missing",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit",
+        "native_rebuild"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.FindUnitCmdDesc"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsCommands.find_unit_cmd_desc"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "fields": [
+          "found",
+          "cmdDescIndex"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.FindUnitCmdDesc`",
+        "native_getter": "`UnitsCommands.find_unit_cmd_desc`",
+        "fields": "`found`, `cmdDescIndex`"
+      },
+      "rust": {
+        "check": "check_find_unit_cmd_desc_missing",
+        "set": "set_noop"
+      },
+      "params": {
+        "cmdID": {
+          "type": "i32",
+          "fixed": -999999
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.FindUnitCmdDesc",
+        "args": [
+          "fixture.unitID",
+          "value.cmdID"
+        ],
+        "returns": [
+          {
+            "field": "found",
+            "index": 1,
+            "transform": "truthy"
+          },
+          {
+            "field": "cmdDescIndex",
+            "index": 1,
+            "transform": "nil_to_minus_one"
           }
         ]
       }

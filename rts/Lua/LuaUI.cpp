@@ -721,18 +721,27 @@ bool CLuaUI::GetLuaCmdDescList(lua_State* L, int index, vector<SCommandDescripti
 // Lua Callbacks
 //
 
+void CLuaUI::SetShockFrontFactors(bool hasMinArea, float minArea, bool hasMinPower, float minPower, bool hasDistAdj, float distAdj)
+{
+	haveShockFront = true;
+
+	if (hasMinArea)
+		shockFrontMinArea = std::max(0.0f, minArea);
+
+	if (hasMinPower)
+		shockFrontMinPower = std::max(0.0f, minPower);
+
+	if (hasDistAdj)
+		shockFrontDistAdj = std::max(1.0f, distAdj);
+}
+
 int CLuaUI::SetShockFrontFactors(lua_State* L)
 {
-	luaUI->haveShockFront = true;
-
-	if (lua_isnumber(L, 1))
-		luaUI->shockFrontMinArea = std::max(0.0f, lua_tofloat(L, 1));
-
-	if (lua_isnumber(L, 2))
-		luaUI->shockFrontMinPower = std::max(0.0f, lua_tofloat(L, 2));
-
-	if (lua_isnumber(L, 3))
-		luaUI->shockFrontDistAdj = std::max(1.0f, lua_tofloat(L, 3));
+	luaUI->SetShockFrontFactors(
+		lua_isnumber(L, 1), lua_tofloat(L, 1),
+		lua_isnumber(L, 2), lua_tofloat(L, 2),
+		lua_isnumber(L, 3), lua_tofloat(L, 3)
+	);
 
 	return 0;
 }

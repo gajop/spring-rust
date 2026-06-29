@@ -58,6 +58,25 @@ struct MoveCtrlResult {
 	bool success;
 };
 
+struct IsMoveCtrlEnabledQuery {
+	int32_t unitID;
+};
+
+struct IsMoveCtrlEnabledResult {
+	const Error* error;
+	bool enabled;
+};
+
+struct SetMoveCtrlGravityQuery {
+	int32_t unitID;
+	float gravityFactor;
+};
+
+struct SetMoveCtrlGravityResult {
+	const Error* error;
+	bool success;
+};
+
 // Queries
 struct GetUnitMoveTypeDataQuery {
 	int32_t unitID;
@@ -93,6 +112,16 @@ struct MoveCtrlApi {
 	void (*MoveCtrl)(
 		const MoveCtrlQuery* query,
 		MoveCtrlResult* result
+	);
+
+	void (*IsMoveCtrlEnabled)(
+		const IsMoveCtrlEnabledQuery* query,
+		IsMoveCtrlEnabledResult* result
+	);
+
+	void (*SetMoveCtrlGravity)(
+		const SetMoveCtrlGravityQuery* query,
+		SetMoveCtrlGravityResult* result
 	);
 };
 

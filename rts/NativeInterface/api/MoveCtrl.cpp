@@ -3,6 +3,7 @@
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/MoveTypes/MoveType.h"
+#include "Sim/MoveTypes/ScriptMoveType.h"
 #include "Sim/MoveTypes/GroundMoveType.h"
 #include "Sim/MoveTypes/AAirMoveType.h"
 #include "Sim/MoveTypes/StrafeAirMoveType.h"
@@ -135,10 +136,59 @@ static void NativeMoveCtrl(const MoveCtrlQuery* query, MoveCtrlResult* result)
 	result->success = true;
 }
 
+static void NativeIsMoveCtrlEnabled(const IsMoveCtrlEnabledQuery* query, IsMoveCtrlEnabledResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->enabled = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	result->enabled = unit->UsingScriptMoveType();
+}
+
+static void NativeSetMoveCtrlGravity(const SetMoveCtrlGravityQuery* query, SetMoveCtrlGravityResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (gs == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CUnit* unit = unitHandler.GetUnit(query->unitID);
+	if (unit == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	CScriptMoveType* moveType = dynamic_cast<CScriptMoveType*>(unit->moveType);
+	if (moveType == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	moveType->gravityFactor = query->gravityFactor;
+	result->success = true;
+}
+
 } // namespace
 
 const MoveCtrlApi MOVE_CTRL_API = {
 	.GetUnitMoveTypeData = NativeGetUnitMoveTypeData,
 	.GetUnitEstimatedPath = NativeGetUnitEstimatedPath,
 	.MoveCtrl = NativeMoveCtrl,
+	.IsMoveCtrlEnabled = NativeIsMoveCtrlEnabled,
+	.SetMoveCtrlGravity = NativeSetMoveCtrlGravity,
 };

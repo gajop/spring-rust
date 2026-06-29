@@ -11,10 +11,13 @@
 #include "Sim/Misc/TeamHandler.h"
 #include "Rendering/ShadowHandler.h"
 #include "System/TimeProfiler.h"
+#include "System/Platform/SDL1_keysym.h"
 #include "Map/ReadMap.h"
 #include "Map/BaseGroundDrawer.h"
+#include <algorithm>
 #include <string>
 #include <cstring>
+#include <SDL_video.h>
 
 namespace {
 
@@ -53,7 +56,7 @@ static void NativeGetNumDisplays(const GetNumDisplaysQuery* query, GetNumDisplay
 	bufferPos = 0;
 
 	result->error = nullptr;
-	result->count = 1; // Simplified: single display
+	result->count = SDL_GetNumVideoDisplays();
 }
 
 static void NativeGetViewGeometry(const GetViewGeometryQuery* query, GetViewGeometryResult* result)
@@ -101,7 +104,7 @@ static void NativeGetWindowGeometry(const GetWindowGeometryQuery* query, GetWind
 	result->geom.viewSizeX = globalRendering->winSizeX;
 	result->geom.viewSizeY = globalRendering->winSizeY;
 	result->geom.viewPosX = globalRendering->winPosX;
-	result->geom.viewPosY = globalRendering->winPosY;
+	result->geom.viewPosY = globalRendering->screenSizeY - globalRendering->winSizeY - globalRendering->winPosY;
 }
 
 static void NativeGetScreenGeometry(const GetScreenGeometryQuery* query, GetScreenGeometryResult* result)
@@ -146,14 +149,14 @@ static void NativeGetMiniMapDualScreen(const GetMiniMapDualScreenQuery* query, G
 	if (!IsReady() || minimap == nullptr) {
 		result->error = &NOT_READY_ERROR;
 		result->dualScreen = false;
-		result->position = "";
+		result->position = nullptr;
 		return;
 	}
 
 	result->error = nullptr;
 	result->dualScreen = globalRendering->dualScreenMode;
 	if (!result->dualScreen) {
-		result->position = "";
+		result->position = nullptr;
 		return;
 	}
 
@@ -213,7 +216,7 @@ static void NativeGetLastUpdateSeconds(const GetLastUpdateSecondsQuery* query, G
 	}
 
 	result->error = nullptr;
-	result->seconds = game->lastFrameTime.toSecsf();
+	result->seconds = game->updateDeltaSeconds;
 }
 
 // FPS and performance
@@ -342,10 +345,10 @@ static void NativeGetTeamColor(const GetTeamColorQuery* query, GetTeamColorResul
 	const auto& color = team->color;
 
 	result->error = nullptr;
-	result->color.r = color[0];
-	result->color.g = color[1];
-	result->color.b = color[2];
-	result->color.a = color[3];
+	result->color.r = color[0] / 255.0f;
+	result->color.g = color[1] / 255.0f;
+	result->color.b = color[2] / 255.0f;
+	result->color.a = color[3] / 255.0f;
 }
 
 static void NativeGetTeamOrigColor(const GetTeamOrigColorQuery* query, GetTeamOrigColorResult* result)
@@ -365,10 +368,10 @@ static void NativeGetTeamOrigColor(const GetTeamOrigColorQuery* query, GetTeamOr
 	const auto& color = team->origColor;
 
 	result->error = nullptr;
-	result->color.r = color[0];
-	result->color.g = color[1];
-	result->color.b = color[2];
-	result->color.a = color[3];
+	result->color.r = color[0] / 255.0f;
+	result->color.g = color[1] / 255.0f;
+	result->color.b = color[2] / 255.0f;
+	result->color.a = color[3] / 255.0f;
 }
 
 // Visibility queries
@@ -439,10 +442,10 @@ static void NativeSetTeamColor(const SetTeamColorQuery* query, SetTeamColorResul
 	}
 
 	CTeam* team = teamHandler.Team(query->teamID);
-	team->color[0] = query->color.r;
-	team->color[1] = query->color.g;
-	team->color[2] = query->color.b;
-	team->color[3] = query->color.a;
+	team->color[0] = std::clamp(query->color.r, 0.0f, 1.0f) * 255;
+	team->color[1] = std::clamp(query->color.g, 0.0f, 1.0f) * 255;
+	team->color[2] = std::clamp(query->color.b, 0.0f, 1.0f) * 255;
+	team->color[3] = std::clamp(query->color.a, 0.0f, 1.0f) * 255;
 
 	result->error = nullptr;
 	result->success = true;

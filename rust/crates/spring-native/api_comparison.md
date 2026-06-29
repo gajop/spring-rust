@@ -3,19 +3,19 @@
 ## Summary Statistics
 
 **Lua API (Spring.* callouts only):**
-- Total: 761 functions
-- Matched (perfect 1.0): 761 (100.0%)
+- Total: 762 functions
+- Matched (perfect 1.0): 762 (100.0%)
 - Uncertain matches (<1.0): 0 (0.0%)
 - Unmatched: 0 (0.0%)
 
 **Rust API:**
-- Total: 878 functions across 49 modules
-- Matched to Lua: 761 (86.7%)
-- Rust-only: 117 (13.3%)
+- Total: 1266 functions across 51 modules
+- Matched to Lua: 762 (60.2%)
+- Rust-only: 504 (39.8%)
 
 **Parameter comparison (matched functions):**
-- Parameter matches: 761
-- Count mismatches: 0
+- Parameter matches: 759
+- Count mismatches: 3
 - Type mismatches: 0
 
 ---
@@ -110,6 +110,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetCameraState` → `Camera.Camera.get_camera_state`
 - `Spring.GetCameraVectors` → `UnitRendering.UnitRendering.get_camera_vectors`
 - `Spring.GetClipboard` → `UnsyncedRead.UnsyncedRead.get_clipboard`
+- `Spring.GetClosestValidPosition` → `Los.Los.get_closest_valid_position`
 - `Spring.GetCmdDescIndex` → `UnsyncedRead.UnsyncedRead.get_cmd_desc_index`
 - `Spring.GetCommandQueue` → `UnitsCommands.UnitsCommands.get_command_queue`
 - `Spring.GetConfigFloat` → `Config.Config.get_config_float`
@@ -623,7 +624,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetGroundDecalTint` → `GroundDecals.GroundDecals.set_ground_decal_tint`
 - `Spring.SetGroundDecalUserData` → `GroundDecals.GroundDecals.set_ground_decal_user_data`
 - `Spring.SetHeightMap` → `TerrainControl.TerrainControl.set_height_map`
-- `Spring.SetHeightMapFunc` → `TerrainControl.TerrainControl.set_height_map_func`
+- `Spring.SetHeightMapFunc` → `TerrainControl.TerrainControl.set_height_map_func` (param mismatch: count mismatch (lua=2, rust=1))
 - `Spring.SetLastMessagePosition` → `UnsyncedCtrl.UnsyncedCtrl.set_last_message_position`
 - `Spring.SetLogSectionFilterLevel` → `Config.Config.set_log_section_filter_level`
 - `Spring.SetLosViewColors` → `UnsyncedCtrl.UnsyncedCtrl.set_los_view_colors`
@@ -640,7 +641,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetNanoProjectileParams` → `UnsyncedCtrl.UnsyncedCtrl.set_nano_projectile_params`
 - `Spring.SetNoPause` → `GameConfig.GameConfig.set_no_pause`
 - `Spring.SetOriginalHeightMap` → `TerrainControl.TerrainControl.set_original_height_map`
-- `Spring.SetOriginalHeightMapFunc` → `TerrainControl.TerrainControl.set_original_height_map_func`
+- `Spring.SetOriginalHeightMapFunc` → `TerrainControl.TerrainControl.set_original_height_map_func` (param mismatch: count mismatch (lua=2, rust=1))
 - `Spring.SetPieceProjectileParams` → `ProjectileControl.ProjectileControl.set_piece_projectile_params`
 - `Spring.SetPlayerReadyState` → `TeamControl.TeamControl.set_player_ready_state`
 - `Spring.SetPlayerRulesParam` → `RulesParams.RulesParams.set_player_rules_param`
@@ -661,7 +662,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetShareLevel` → `SystemControl.SystemControl.set_share_level`
 - `Spring.SetSkyBoxTexture` → `UnsyncedCtrl.UnsyncedCtrl.set_sky_box_texture`
 - `Spring.SetSmoothMesh` → `TerrainControl.TerrainControl.set_smooth_mesh`
-- `Spring.SetSmoothMeshFunc` → `TerrainControl.TerrainControl.set_smooth_mesh_func`
+- `Spring.SetSmoothMeshFunc` → `TerrainControl.TerrainControl.set_smooth_mesh_func` (param mismatch: count mismatch (lua=2, rust=1))
 - `Spring.SetSoundEffectParams` → `Sound.Sound.set_sound_effect_params`
 - `Spring.SetSoundStreamVolume` → `Sound.Sound.set_sound_stream_volume`
 - `Spring.SetSquareBuildingMask` → `GameConfig.GameConfig.set_square_building_mask`
@@ -786,7 +787,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.WorldToScreenCoords` → `Camera.Camera.world_to_screen_coords`
 - `Spring.Yield` → `SystemControl.SystemControl.yield`
 
-**Total: 761**
+**Total: 762**
 
 ---
 
@@ -827,8 +828,209 @@ Functions in Rust API with no Lua equivalent:
 - `Game.Game.get_side_data_count`
 - `GameConfig.GameConfig.set_cheating_enabled`
 - `GameConfig.GameConfig.set_god_mode`
+- `Gfx.Gfx.active_fbo`
+- `Gfx.Gfx.active_shader`
+- `Gfx.Gfx.active_texture`
+- `Gfx.Gfx.add_atlas_texture`
+- `Gfx.Gfx.add_fallback_font`
+- `Gfx.Gfx.alpha_test`
+- `Gfx.Gfx.alpha_to_coverage`
+- `Gfx.Gfx.begin_end`
+- `Gfx.Gfx.begin_text`
+- `Gfx.Gfx.billboard`
+- `Gfx.Gfx.bind_image_texture`
+- `Gfx.Gfx.bind_texture`
+- `Gfx.Gfx.blend_equation`
+- `Gfx.Gfx.blend_equation_separate`
+- `Gfx.Gfx.blend_func`
+- `Gfx.Gfx.blend_func_separate`
+- `Gfx.Gfx.blending`
+- `Gfx.Gfx.blit_fbo`
+- `Gfx.Gfx.call_list`
+- `Gfx.Gfx.change_texture_params`
+- `Gfx.Gfx.clear`
+- `Gfx.Gfx.clear_attachment_fbo`
+- `Gfx.Gfx.clear_fallback_fonts`
+- `Gfx.Gfx.clip_distance`
+- `Gfx.Gfx.clip_plane`
+- `Gfx.Gfx.color`
+- `Gfx.Gfx.color_mask`
+- `Gfx.Gfx.config_mini_map`
+- `Gfx.Gfx.copy_to_texture`
+- `Gfx.Gfx.create_fbo`
+- `Gfx.Gfx.create_list`
+- `Gfx.Gfx.create_query`
+- `Gfx.Gfx.create_rbo`
+- `Gfx.Gfx.create_shader`
+- `Gfx.Gfx.create_texture`
+- `Gfx.Gfx.create_texture_atlas`
+- `Gfx.Gfx.culling`
+- `Gfx.Gfx.delete_fbo`
+- `Gfx.Gfx.delete_font`
+- `Gfx.Gfx.delete_list`
+- `Gfx.Gfx.delete_query`
+- `Gfx.Gfx.delete_rbo`
+- `Gfx.Gfx.delete_shader`
+- `Gfx.Gfx.delete_texture`
+- `Gfx.Gfx.delete_texture_atlas`
+- `Gfx.Gfx.delete_texture_fbo`
+- `Gfx.Gfx.delete_vao`
+- `Gfx.Gfx.delete_vbo`
+- `Gfx.Gfx.depth_clamp`
+- `Gfx.Gfx.depth_mask`
+- `Gfx.Gfx.depth_test`
+- `Gfx.Gfx.dispatch_compute`
+- `Gfx.Gfx.draw_func_at_unit`
+- `Gfx.Gfx.draw_ground_circle`
+- `Gfx.Gfx.draw_ground_quad`
+- `Gfx.Gfx.draw_list_at_unit`
+- `Gfx.Gfx.draw_mini_map`
+- `Gfx.Gfx.edge_flag`
+- `Gfx.Gfx.end_text`
+- `Gfx.Gfx.feature`
+- `Gfx.Gfx.feature_mult_matrix`
+- `Gfx.Gfx.feature_piece`
+- `Gfx.Gfx.feature_piece_matrix`
+- `Gfx.Gfx.feature_piece_mult_matrix`
+- `Gfx.Gfx.feature_raw`
+- `Gfx.Gfx.feature_shape`
+- `Gfx.Gfx.feature_shape_textures`
+- `Gfx.Gfx.feature_textures`
+- `Gfx.Gfx.finalize_texture_atlas`
+- `Gfx.Gfx.finish`
+- `Gfx.Gfx.flush`
+- `Gfx.Gfx.fog`
+- `Gfx.Gfx.fog_coord`
+- `Gfx.Gfx.font_begin`
+- `Gfx.Gfx.font_bind_texture`
+- `Gfx.Gfx.font_end`
+- `Gfx.Gfx.font_get_text_height`
+- `Gfx.Gfx.font_get_text_width`
+- `Gfx.Gfx.font_print`
+- `Gfx.Gfx.font_print_world`
+- `Gfx.Gfx.font_set_auto_outline_color`
+- `Gfx.Gfx.font_set_outline_color`
+- `Gfx.Gfx.font_set_text_color`
+- `Gfx.Gfx.font_submit_buffered`
+- `Gfx.Gfx.font_wrap_text`
+- `Gfx.Gfx.frustum`
+- `Gfx.Gfx.generate_mipmap`
+- `Gfx.Gfx.get_active_uniforms`
+- `Gfx.Gfx.get_atlas_texture`
+- `Gfx.Gfx.get_atmosphere`
+- `Gfx.Gfx.get_engine_atlas_textures`
+- `Gfx.Gfx.get_engine_model_uniform_data_def`
+- `Gfx.Gfx.get_engine_model_uniform_data_size`
+- `Gfx.Gfx.get_engine_uniform_buffer_def`
+- `Gfx.Gfx.get_fixed_state`
+- `Gfx.Gfx.get_font_info`
+- `Gfx.Gfx.get_global_tex_coords`
+- `Gfx.Gfx.get_global_tex_names`
+- `Gfx.Gfx.get_map_rendering`
+- `Gfx.Gfx.get_matrix_data`
+- `Gfx.Gfx.get_number`
+- `Gfx.Gfx.get_query`
+- `Gfx.Gfx.get_screen_view_trans`
+- `Gfx.Gfx.get_shader_log`
+- `Gfx.Gfx.get_shadow_map_params`
+- `Gfx.Gfx.get_string`
+- `Gfx.Gfx.get_subroutine_index`
+- `Gfx.Gfx.get_sun`
+- `Gfx.Gfx.get_text_height`
+- `Gfx.Gfx.get_text_width`
+- `Gfx.Gfx.get_uniform_location`
+- `Gfx.Gfx.get_vao`
+- `Gfx.Gfx.get_vbo`
+- `Gfx.Gfx.get_view_range`
+- `Gfx.Gfx.get_view_sizes`
+- `Gfx.Gfx.get_water_rendering`
+- `Gfx.Gfx.has_extension`
+- `Gfx.Gfx.is_valid_fbo`
+- `Gfx.Gfx.light`
+- `Gfx.Gfx.lighting`
+- `Gfx.Gfx.line_stipple`
+- `Gfx.Gfx.line_width`
+- `Gfx.Gfx.load_font`
+- `Gfx.Gfx.load_identity`
+- `Gfx.Gfx.load_matrix`
+- `Gfx.Gfx.logic_op`
+- `Gfx.Gfx.material`
+- `Gfx.Gfx.matrix_mode`
+- `Gfx.Gfx.memory_barrier`
+- `Gfx.Gfx.mult_matrix`
+- `Gfx.Gfx.multi_tex_coord`
+- `Gfx.Gfx.multi_tex_env`
+- `Gfx.Gfx.multi_tex_gen`
+- `Gfx.Gfx.normal`
+- `Gfx.Gfx.object_label`
+- `Gfx.Gfx.ortho`
+- `Gfx.Gfx.point_parameter`
+- `Gfx.Gfx.point_size`
+- `Gfx.Gfx.point_sprite`
+- `Gfx.Gfx.polygon_mode`
+- `Gfx.Gfx.polygon_offset`
+- `Gfx.Gfx.pop_attrib`
+- `Gfx.Gfx.pop_debug_group`
+- `Gfx.Gfx.pop_matrix`
+- `Gfx.Gfx.push_attrib`
+- `Gfx.Gfx.push_debug_group`
+- `Gfx.Gfx.push_matrix`
+- `Gfx.Gfx.push_pop_matrix`
+- `Gfx.Gfx.raw_bind_fbo`
+- `Gfx.Gfx.read_pixels`
+- `Gfx.Gfx.rect`
+- `Gfx.Gfx.render_to_texture`
+- `Gfx.Gfx.reset_matrices`
+- `Gfx.Gfx.reset_state`
+- `Gfx.Gfx.rotate`
+- `Gfx.Gfx.run_query`
+- `Gfx.Gfx.save_image`
+- `Gfx.Gfx.scale`
+- `Gfx.Gfx.scissor`
+- `Gfx.Gfx.secondary_color`
+- `Gfx.Gfx.set_feature_buffer_uniforms`
+- `Gfx.Gfx.set_geometry_shader_parameter`
+- `Gfx.Gfx.set_tesselation_shader_parameter`
+- `Gfx.Gfx.set_unit_buffer_uniforms`
+- `Gfx.Gfx.shade_model`
+- `Gfx.Gfx.shape`
+- `Gfx.Gfx.slave_mini_map`
+- `Gfx.Gfx.stencil_func`
+- `Gfx.Gfx.stencil_func_separate`
+- `Gfx.Gfx.stencil_mask`
+- `Gfx.Gfx.stencil_mask_separate`
+- `Gfx.Gfx.stencil_op`
+- `Gfx.Gfx.stencil_op_separate`
+- `Gfx.Gfx.stencil_test`
+- `Gfx.Gfx.swap_buffers`
+- `Gfx.Gfx.tex_coord`
+- `Gfx.Gfx.tex_env`
+- `Gfx.Gfx.tex_gen`
+- `Gfx.Gfx.tex_rect`
+- `Gfx.Gfx.text`
+- `Gfx.Gfx.text_env`
+- `Gfx.Gfx.texture_info`
+- `Gfx.Gfx.translate`
+- `Gfx.Gfx.uniform`
+- `Gfx.Gfx.uniform_array_float`
+- `Gfx.Gfx.uniform_array_int`
+- `Gfx.Gfx.uniform_int`
+- `Gfx.Gfx.uniform_matrix`
+- `Gfx.Gfx.uniform_subroutine`
+- `Gfx.Gfx.unit`
+- `Gfx.Gfx.unit_mult_matrix`
+- `Gfx.Gfx.unit_piece`
+- `Gfx.Gfx.unit_piece_matrix`
+- `Gfx.Gfx.unit_piece_mult_matrix`
+- `Gfx.Gfx.unit_raw`
+- `Gfx.Gfx.unit_shape`
+- `Gfx.Gfx.unit_shape_textures`
+- `Gfx.Gfx.unit_textures`
+- `Gfx.Gfx.unsafe_state`
+- `Gfx.Gfx.use_shader`
+- `Gfx.Gfx.vertex`
+- `Gfx.Gfx.viewport`
 - `Lights.Lights.add_light_tracking_target`
-- `Los.Los.get_closest_valid_position`
 - `MathExtra.MathExtra.bit_and`
 - `MathExtra.MathExtra.bit_bits`
 - `MathExtra.MathExtra.bit_inv`
@@ -866,6 +1068,153 @@ Functions in Rust API with no Lua equivalent:
 - `ProjectileControl.ProjectileControl.set_projectile_spin_angle`
 - `ProjectileControl.ProjectileControl.set_projectile_spin_speed`
 - `ProjectileControl.ProjectileControl.set_projectile_spin_vec`
+- `RmlUi.RmlUi.add_translation_string`
+- `RmlUi.RmlUi.clear_translations`
+- `RmlUi.RmlUi.context_activate_theme`
+- `RmlUi.RmlUi.context_add_event_listener`
+- `RmlUi.RmlUi.context_create_document`
+- `RmlUi.RmlUi.context_enable_mouse_cursor`
+- `RmlUi.RmlUi.context_get_density_independent_pixel_ratio`
+- `RmlUi.RmlUi.context_get_dimensions`
+- `RmlUi.RmlUi.context_get_document`
+- `RmlUi.RmlUi.context_get_element_at_point`
+- `RmlUi.RmlUi.context_get_focus_element`
+- `RmlUi.RmlUi.context_get_hover_element`
+- `RmlUi.RmlUi.context_get_name`
+- `RmlUi.RmlUi.context_get_root_element`
+- `RmlUi.RmlUi.context_is_mouse_interacting`
+- `RmlUi.RmlUi.context_is_theme_active`
+- `RmlUi.RmlUi.context_load_document`
+- `RmlUi.RmlUi.context_open_data_model`
+- `RmlUi.RmlUi.context_process_key_down`
+- `RmlUi.RmlUi.context_process_key_up`
+- `RmlUi.RmlUi.context_process_mouse_button_down`
+- `RmlUi.RmlUi.context_process_mouse_button_up`
+- `RmlUi.RmlUi.context_process_mouse_leave`
+- `RmlUi.RmlUi.context_process_mouse_move`
+- `RmlUi.RmlUi.context_process_mouse_wheel`
+- `RmlUi.RmlUi.context_process_text_input`
+- `RmlUi.RmlUi.context_pull_document_to_front`
+- `RmlUi.RmlUi.context_push_document_to_back`
+- `RmlUi.RmlUi.context_remove_data_model`
+- `RmlUi.RmlUi.context_render`
+- `RmlUi.RmlUi.context_set_density_independent_pixel_ratio`
+- `RmlUi.RmlUi.context_set_dimensions`
+- `RmlUi.RmlUi.context_unload_all_documents`
+- `RmlUi.RmlUi.context_unload_document`
+- `RmlUi.RmlUi.context_update`
+- `RmlUi.RmlUi.create_context`
+- `RmlUi.RmlUi.document_append_to_style_sheet`
+- `RmlUi.RmlUi.document_close`
+- `RmlUi.RmlUi.document_create_element`
+- `RmlUi.RmlUi.document_create_text_node`
+- `RmlUi.RmlUi.document_get_context`
+- `RmlUi.RmlUi.document_get_title`
+- `RmlUi.RmlUi.document_get_url`
+- `RmlUi.RmlUi.document_hide`
+- `RmlUi.RmlUi.document_is_modal`
+- `RmlUi.RmlUi.document_load_external_script`
+- `RmlUi.RmlUi.document_load_inline_script`
+- `RmlUi.RmlUi.document_pull_to_front`
+- `RmlUi.RmlUi.document_push_to_back`
+- `RmlUi.RmlUi.document_reload_style_sheet`
+- `RmlUi.RmlUi.document_set_title`
+- `RmlUi.RmlUi.document_show`
+- `RmlUi.RmlUi.document_update_document`
+- `RmlUi.RmlUi.element_add_event_listener`
+- `RmlUi.RmlUi.element_append_child`
+- `RmlUi.RmlUi.element_are_pseudo_classes_set`
+- `RmlUi.RmlUi.element_blur`
+- `RmlUi.RmlUi.element_click`
+- `RmlUi.RmlUi.element_clone`
+- `RmlUi.RmlUi.element_closest`
+- `RmlUi.RmlUi.element_dispatch_event`
+- `RmlUi.RmlUi.element_focus`
+- `RmlUi.RmlUi.element_form_control_input_get_selection`
+- `RmlUi.RmlUi.element_form_control_input_select`
+- `RmlUi.RmlUi.element_form_control_input_set_selection`
+- `RmlUi.RmlUi.element_form_control_select_add`
+- `RmlUi.RmlUi.element_form_control_select_remove`
+- `RmlUi.RmlUi.element_form_control_select_remove_all`
+- `RmlUi.RmlUi.element_form_control_text_area_get_selection`
+- `RmlUi.RmlUi.element_form_control_text_area_select`
+- `RmlUi.RmlUi.element_form_control_text_area_set_selection`
+- `RmlUi.RmlUi.element_form_submit`
+- `RmlUi.RmlUi.element_get_active_pseudo_classes`
+- `RmlUi.RmlUi.element_get_attribute`
+- `RmlUi.RmlUi.element_get_child`
+- `RmlUi.RmlUi.element_get_class_name`
+- `RmlUi.RmlUi.element_get_element_by_id`
+- `RmlUi.RmlUi.element_get_elements_by_class_name`
+- `RmlUi.RmlUi.element_get_elements_by_class_name_count`
+- `RmlUi.RmlUi.element_get_elements_by_tag_name`
+- `RmlUi.RmlUi.element_get_elements_by_tag_name_count`
+- `RmlUi.RmlUi.element_get_id`
+- `RmlUi.RmlUi.element_get_inner_rml`
+- `RmlUi.RmlUi.element_get_scroll_left`
+- `RmlUi.RmlUi.element_get_scroll_top`
+- `RmlUi.RmlUi.element_get_tag_name`
+- `RmlUi.RmlUi.element_get_value`
+- `RmlUi.RmlUi.element_has_attribute`
+- `RmlUi.RmlUi.element_has_child_nodes`
+- `RmlUi.RmlUi.element_insert_before`
+- `RmlUi.RmlUi.element_is_class_set`
+- `RmlUi.RmlUi.element_is_point_within_element`
+- `RmlUi.RmlUi.element_is_pseudo_class_set`
+- `RmlUi.RmlUi.element_is_visible`
+- `RmlUi.RmlUi.element_matches`
+- `RmlUi.RmlUi.element_process_default_action`
+- `RmlUi.RmlUi.element_query_selector`
+- `RmlUi.RmlUi.element_query_selector_all`
+- `RmlUi.RmlUi.element_query_selector_all_count`
+- `RmlUi.RmlUi.element_remove_attribute`
+- `RmlUi.RmlUi.element_remove_child`
+- `RmlUi.RmlUi.element_replace_child`
+- `RmlUi.RmlUi.element_scroll_into_view`
+- `RmlUi.RmlUi.element_set_attribute`
+- `RmlUi.RmlUi.element_set_class`
+- `RmlUi.RmlUi.element_set_class_name`
+- `RmlUi.RmlUi.element_set_id`
+- `RmlUi.RmlUi.element_set_inner_rml`
+- `RmlUi.RmlUi.element_set_pseudo_class`
+- `RmlUi.RmlUi.element_set_scroll_left`
+- `RmlUi.RmlUi.element_set_scroll_top`
+- `RmlUi.RmlUi.element_tab_set_remove_tab`
+- `RmlUi.RmlUi.element_tab_set_set_panel`
+- `RmlUi.RmlUi.element_tab_set_set_tab`
+- `RmlUi.RmlUi.event_get_current`
+- `RmlUi.RmlUi.event_get_current_element`
+- `RmlUi.RmlUi.event_get_parameter_bool`
+- `RmlUi.RmlUi.event_get_parameter_float`
+- `RmlUi.RmlUi.event_get_parameter_int`
+- `RmlUi.RmlUi.event_get_parameter_string`
+- `RmlUi.RmlUi.event_get_parameter_type`
+- `RmlUi.RmlUi.event_get_phase`
+- `RmlUi.RmlUi.event_get_target_element`
+- `RmlUi.RmlUi.event_get_type`
+- `RmlUi.RmlUi.event_is_immediate_propagating`
+- `RmlUi.RmlUi.event_is_interruptible`
+- `RmlUi.RmlUi.event_is_propagating`
+- `RmlUi.RmlUi.event_listener_on_attach`
+- `RmlUi.RmlUi.event_listener_on_detach`
+- `RmlUi.RmlUi.event_listener_process_event`
+- `RmlUi.RmlUi.event_stop_immediate_propagation`
+- `RmlUi.RmlUi.event_stop_propagation`
+- `RmlUi.RmlUi.get_context`
+- `RmlUi.RmlUi.get_version`
+- `RmlUi.RmlUi.is_ready`
+- `RmlUi.RmlUi.load_font_face`
+- `RmlUi.RmlUi.regiser_event_type`
+- `RmlUi.RmlUi.register_event_type`
+- `RmlUi.RmlUi.remove_context`
+- `RmlUi.RmlUi.remove_context_by_name`
+- `RmlUi.RmlUi.set_debug_context`
+- `RmlUi.RmlUi.set_debug_context_by_name`
+- `RmlUi.RmlUi.set_mouse_cursor_alias`
+- `RmlUi.RmlUi.sol_lua_data_model___set_dirty`
+- `RmlUi.RmlUi.sol_lua_data_model_set_dirty`
+- `RmlUi.RmlUi.vector2f_new`
+- `RmlUi.RmlUi.vector2i_new`
 - `SyncedCtrl.SyncedCtrl.cob_script`
 - `SyncedCtrl.SyncedCtrl.effects`
 - `SyncedCtrl.SyncedCtrl.feature`
@@ -882,7 +1231,9 @@ Functions in Rust API with no Lua equivalent:
 - `Tracing.Tracing.trace_ray`
 - `Tracing.Tracing.trace_ray_features`
 - `Tracing.Tracing.trace_ray_units`
+- `UnitControl.UnitControl.set_unit_fuel`
 - `UnitControl.UnitControl.set_unit_heading`
+- `UnitControl.UnitControl.set_unit_travel`
 - `UnitDefs.UnitDefs.get_unit_def_by_id`
 - `UnitDefs.UnitDefs.get_unit_def_costs`
 - `UnitDefs.UnitDefs.get_unit_def_count`
@@ -904,21 +1255,58 @@ Functions in Rust API with no Lua equivalent:
 - `UnsyncedCtrl.UnsyncedCtrl.set_custom_palette_color`
 - `UnsyncedCtrl.UnsyncedCtrl.set_engine_build_square_rendering`
 - `UnsyncedCtrl.UnsyncedCtrl.set_feature_palette_index`
+- `UnsyncedCtrl.UnsyncedCtrl.set_shock_front_factors`
 - `UnsyncedCtrl.UnsyncedCtrl.set_unit_icon`
 - `UnsyncedCtrl.UnsyncedCtrl.set_unit_palette_index`
 - `UnsyncedRead.UnsyncedRead.get_custom_palette_color`
 - `UnsyncedRead.UnsyncedRead.get_feature_palette_index`
+- `UnsyncedRead.UnsyncedRead.get_game_seconds_interpolated`
 - `UnsyncedRead.UnsyncedRead.get_unit_palette_index`
+- `UnsyncedRead.UnsyncedRead.unit_rendering`
+- `Vfs.Vfs.calculate_hash`
+- `Vfs.Vfs.compress_folder`
+- `Vfs.Vfs.dir_list`
 - `Vfs.Vfs.file_exists`
+- `Vfs.Vfs.get_all_archives`
+- `Vfs.Vfs.get_archive_checksum`
+- `Vfs.Vfs.get_archive_containing_file`
+- `Vfs.Vfs.get_archive_dependencies`
+- `Vfs.Vfs.get_archive_info`
+- `Vfs.Vfs.get_archive_path`
+- `Vfs.Vfs.get_archive_replaces`
 - `Vfs.Vfs.get_archives`
+- `Vfs.Vfs.get_available_ais`
+- `Vfs.Vfs.get_file_absolute_path`
 - `Vfs.Vfs.get_file_info`
 - `Vfs.Vfs.get_file_size`
 - `Vfs.Vfs.get_games`
+- `Vfs.Vfs.get_loaded_archives`
 - `Vfs.Vfs.get_maps`
+- `Vfs.Vfs.get_name_from_rapid_tag`
+- `Vfs.Vfs.has_archive`
 - `Vfs.Vfs.is_directory`
 - `Vfs.Vfs.list_dir`
+- `Vfs.Vfs.load_file`
+- `Vfs.Vfs.pack_f32`
+- `Vfs.Vfs.pack_s16`
+- `Vfs.Vfs.pack_s32`
+- `Vfs.Vfs.pack_s8`
+- `Vfs.Vfs.pack_u16`
+- `Vfs.Vfs.pack_u32`
+- `Vfs.Vfs.pack_u8`
 - `Vfs.Vfs.read_file`
 - `Vfs.Vfs.read_file_as_string`
+- `Vfs.Vfs.sub_dirs`
+- `Vfs.Vfs.unpack_f32`
+- `Vfs.Vfs.unpack_s16`
+- `Vfs.Vfs.unpack_s32`
+- `Vfs.Vfs.unpack_s8`
+- `Vfs.Vfs.unpack_u16`
+- `Vfs.Vfs.unpack_u32`
+- `Vfs.Vfs.unpack_u8`
+- `Vfs.Vfs.use_archive`
+- `Vfs.Vfs.zlib_compress`
+- `Vfs.Vfs.zlib_decompress`
 - `WeaponDefs.WeaponDefs.get_weapon_def_by_id`
 - `WeaponDefs.WeaponDefs.get_weapon_def_count`
 - `WeaponDefs.WeaponDefs.get_weapon_def_custom_param`
@@ -930,5 +1318,5 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 117**
+**Total Rust-only: 504**
 

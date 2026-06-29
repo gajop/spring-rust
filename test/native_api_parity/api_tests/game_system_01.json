@@ -79,9 +79,7 @@
       "id": "heading_from_facing",
       "context": "synced_gadget",
       "kind": "readonly",
-      "requires": [
-        "facing"
-      ],
+      "requires": [],
       "lua": {
         "set": [],
         "get": [
@@ -120,15 +118,18 @@
             3
           ]
         }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetHeadingFromFacing",
+        "args": ["value.facing"],
+        "returns": ["heading"]
       }
     },
     {
       "id": "facing_from_heading",
       "context": "synced_gadget",
       "kind": "readonly",
-      "requires": [
-        "heading"
-      ],
+      "requires": [],
       "lua": {
         "set": [],
         "get": [
@@ -167,15 +168,18 @@
             32767
           ]
         }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetFacingFromHeading",
+        "args": ["value.heading"],
+        "returns": ["facing"]
       }
     },
     {
       "id": "heading_from_vector",
       "context": "synced_gadget",
       "kind": "readonly",
-      "requires": [
-        "vector2"
-      ],
+      "requires": [],
       "lua": {
         "set": [],
         "get": [
@@ -215,6 +219,11 @@
             "z"
           ]
         }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetHeadingFromVector",
+        "args": ["value.x", "value.z"],
+        "returns": ["heading"]
       }
     },
     {

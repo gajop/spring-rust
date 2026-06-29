@@ -12,6 +12,7 @@ static thread_local Error dynamicError;
 
 // Static errors
 static const Error NULL_PTR_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Vector pointer is null" };
+static constexpr uint32_t EXACT_INTEGER_MASK = 0x00FFFFFF;
 
 static void NativeHypot(const HypotQuery* query, HypotResult* result) {
 	bufferPos = 0;
@@ -122,22 +123,26 @@ static void NativeBitXor(const BitXorQuery* query, BitXorResult* result) {
 static void NativeBitInv(const BitInvQuery* query, BitInvResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->value = ~query->a;
+	result->value = (~query->a) & EXACT_INTEGER_MASK;
 }
 
 static void NativeBitBits(const BitBitsQuery* query, BitBitsResult* result) {
 	bufferPos = 0;
-	if (query->startBit > query->endBit || query->endBit > 31) {
-		result->error = nullptr;
-		result->bits = 0;
+	result->error = nullptr;
+	result->bits = 0;
+
+	if (query->bits == nullptr) {
 		return;
 	}
 
-	const uint32_t numBits = query->endBit - query->startBit + 1;
-	const uint32_t mask = (numBits == 32) ? 0xFFFFFFFF : ((1u << numBits) - 1);
+	for (uint32_t i = 0; i < query->count; ++i) {
+		const uint32_t bit = query->bits[i];
+		if (bit < 32) {
+			result->bits |= (1u << bit);
+		}
+	}
 
-	result->error = nullptr;
-	result->bits = (query->value >> query->startBit) & mask;
+	result->bits &= EXACT_INTEGER_MASK;
 }
 
 } // namespace

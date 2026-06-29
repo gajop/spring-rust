@@ -261,7 +261,7 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
     for name in RESULT_STREAMS:
         lua_rows = load_jsonl(lua_dir / name)
         native_rows = load_jsonl(native_dir / name)
-        matches = lua_rows == native_rows
+        matches = comparable_rows(lua_rows) == comparable_rows(native_rows)
         streams.append({
             "name": name,
             "lua_rows": len(lua_rows),
@@ -298,6 +298,23 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
         "native_failures": native_failures,
         "native_complete": native_complete,
     }
+
+
+def comparable_rows(rows: list[dict]) -> list[dict]:
+    return [comparable_row(row) for row in rows]
+
+
+def comparable_row(row: dict) -> dict:
+    test = API_TEST_BY_ID.get(str(row.get("name", "")))
+    compare = test.get("compare", {}) if test else {}
+    if compare.get("stream") != "shape":
+        return row
+
+    normalized = dict(row)
+    for field in compare.get("fields", []):
+        if field in normalized:
+            normalized[field] = "number" if isinstance(normalized[field], (int, float)) else type(normalized[field]).__name__
+    return normalized
 
 
 def read_first_log_match(path: Path, needle: str) -> str | None:
@@ -508,6 +525,23 @@ def read_recorded_ids_by_context(base_output: Path) -> dict[str, set[str]]:
     return recorded
 
 
+def is_portable_readonly_test(test: dict) -> bool:
+    return (
+        test.get("kind") == "readonly"
+        and test.get("lua_runtime") is not None
+        and not test.get("requires_rendering", False)
+        and not test.get("requires", [])
+    )
+
+
+def tests_for_context(context: str) -> list[dict]:
+    tests = [test for test in API_TESTS if str(test.get("context", "unknown")) == context]
+    if context in {"unsynced_gadget", "widget"}:
+        seen = {test["id"] for test in tests}
+        tests.extend(test for test in API_TESTS if test["id"] not in seen and is_portable_readonly_test(test))
+    return tests
+
+
 def context_coverage(
     checked_names: set[str],
     inventory: dict[str, set[str]] | None = None,
@@ -523,7 +557,7 @@ def context_coverage(
     )
     rows = []
     for context in contexts:
-        tests = [test for test in API_TESTS if str(test.get("context", "unknown")) == context]
+        tests = tests_for_context(context)
         test_ids = {test["id"] for test in tests}
         recorded_context_ids = recorded_by_context.get(context, test_ids & recorded_ids)
         recorded_tests = [API_TEST_BY_ID[test_id] for test_id in sorted(recorded_context_ids) if test_id in API_TEST_BY_ID]

@@ -1,4 +1,5 @@
 #include "NativeInterface/api/Game.h"
+#include "NativeInterface/api/Constants.h"
 
 #include <algorithm>
 #include <cstring>
@@ -9,14 +10,21 @@
 #include "Game/GlobalUnsynced.h"
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/LosHandler.h"
+#include "Sim/Misc/ModInfo.h"
 #include "Sim/Misc/Wind.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Misc/SideParser.h"
+#include "Sim/Units/UnitHandler.h"
+#include "Map/MapDamage.h"
+#include "Map/MetalMap.h"
 #include "Map/ReadMap.h"
 #include "Map/MapInfo.h"
 #include "Map/MapDimensions.h"
 #include "Map/MapParser.h"
+#include "System/FileSystem/ArchiveScanner.h"
+#include "System/FileSystem/FileSystem.h"
 #include "System/SpringMath.h"
+#include "System/Sync/SHA512.hpp"
 #include "System/StringUtil.h"
 
 namespace {
@@ -25,6 +33,8 @@ namespace {
 static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local sha512::hex_digest mapChecksumDigest;
+static thread_local sha512::hex_digest modChecksumDigest;
 
 // Static errors
 static const Error GAME_NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game is not initialized" };
@@ -34,7 +44,35 @@ static const Error INVALID_TEAM = { .code = ERROR_INVALID_ARGUMENT, .message = "
 static const Error NOT_FOUND = { .code = ERROR_NOT_FOUND, .message = "Not found" };
 static const Error INTERNAL = { .code = ERROR_INTERNAL, .message = "Internal error" };
 
+static_assert(GAME_MAX_TEAMS == MAX_TEAMS);
+static_assert(GAME_MAX_PLAYERS == MAX_PLAYERS);
+static_assert(GAME_MAX_AIS == MAX_AIS);
+static_assert(GAME_MAX_UNITS == MAX_UNITS);
+static_assert(GAME_MAX_FEATURES == MAX_FEATURES);
+static_assert(GAME_MAX_PROJECTILES == MAX_PROJECTILES);
+static_assert(GAME_MAX_WEAPONS_PER_UNIT == MAX_WEAPONS_PER_UNIT);
+static_assert(GAME_SQUARE_SIZE == SQUARE_SIZE);
+static_assert(GAME_METAL_MAP_SQUARE_SIZE == static_cast<int>(METAL_MAP_SQUARE_SIZE));
+static_assert(GAME_BUILD_SQUARE_SIZE == BUILD_SQUARE_SIZE);
+static_assert(GAME_BUILD_GRID_RESOLUTION == BUILD_GRID_RESOLUTION);
+static_assert(GAME_FOOTPRINT_SCALE == SPRING_FOOTPRINT_SCALE);
+static_assert(GAME_GAME_SPEED == GAME_SPEED);
+static_assert(GAME_UNIT_SLOWUPDATE_RATE == UNIT_SLOWUPDATE_RATE);
+static_assert(GAME_TEAM_SLOWUPDATE_RATE == TEAM_SLOWUPDATE_RATE);
+
 static bool GameReady() { return (game != nullptr) && (gs != nullptr); }
+
+static const char* CopyScratchString(const std::string& value)
+{
+	char* buffer = &scratchBuffer[bufferPos];
+	const size_t len = value.length();
+	if (bufferPos + len + 1 > sizeof(scratchBuffer))
+		return nullptr;
+
+	memcpy(buffer, value.c_str(), len + 1);
+	bufferPos += len + 1;
+	return buffer;
+}
 
 #define IMPL_SIMPLE_QUERY(name, check, value) \
 	static void Native##name(const name##Query* query, name##Result* result) { \
@@ -58,6 +96,103 @@ IMPL_SIMPLE_QUERY(GetGameFrame, GameReady(), result->low16 = (gs->frameNum & 0xF
 IMPL_SIMPLE_QUERY(GetGameSeconds, GameReady(), result->seconds = gs->frameNum / static_cast<float>(GAME_SPEED))
 IMPL_SIMPLE_QUERY(GetGaiaTeamID, GameReady(), result->teamID = teamHandler.GaiaTeamID())
 IMPL_SIMPLE_QUERY(GetTidal, GameReady(), result->strength = envResHandler.GetCurrentTidalStrength())
+
+static void NativeGetGameSetupInfo(const GetGameSetupInfoQuery* /*query*/, GetGameSetupInfoResult* result) {
+	bufferPos = 0;
+	if (gameSetup == nullptr) { result->error = &GAME_NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->info.startPosType = gameSetup->startPosType;
+	result->info.ghostedBuildings = gameSetup->ghostedBuildings;
+	result->info.demoPlayName = nullptr;
+
+	if (gameSetup->hostDemo) {
+		result->info.demoPlayName = CopyScratchString(FileSystem::GetBasename(gameSetup->demoName));
+		if (result->info.demoPlayName == nullptr) { result->error = &INTERNAL; return; }
+	}
+}
+
+static void NativeGetGameMapInfo(const GetGameMapInfoQuery* /*query*/, GetGameMapInfoResult* result) {
+	bufferPos = 0;
+	if (readMap == nullptr || mapInfo == nullptr) { result->error = &GAME_NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->info.mapName = mapInfo->map.name.c_str();
+	result->info.mapDescription = mapInfo->map.description.c_str();
+	result->info.mapChecksum = nullptr;
+	result->info.mapHardness = mapInfo->map.hardness;
+	result->info.extractorRadius = mapInfo->map.extractorRadius;
+	result->info.tidal = mapInfo->map.tidalStrength;
+	result->info.waterDamage = mapInfo->water.damage;
+	result->info.gravity = -mapInfo->map.gravity * GAME_SPEED * GAME_SPEED;
+	result->info.mapX = mapDims.mapx / 64;
+	result->info.mapY = mapDims.mapy / 64;
+	result->info.mapSizeX = mapDims.mapx * SQUARE_SIZE;
+	result->info.mapSizeZ = mapDims.mapy * SQUARE_SIZE;
+	result->info.mapDamage = (mapDamage != nullptr) && !mapDamage->Disabled();
+
+	if (archiveScanner != nullptr) {
+		sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(mapInfo->map.name), mapChecksumDigest);
+		result->info.mapChecksum = mapChecksumDigest.data();
+	}
+}
+
+static void NativeGetGameModInfo(const GetGameModInfoQuery* /*query*/, GetGameModInfoResult* result) {
+	bufferPos = 0;
+	if (modInfo.filename.empty()) { result->error = &GAME_NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->info.gameName = modInfo.humanName.c_str();
+	result->info.gameShortName = modInfo.shortName.c_str();
+	result->info.gameVersion = modInfo.version.c_str();
+	result->info.gameMutator = modInfo.mutator.c_str();
+	result->info.gameDesc = modInfo.description.c_str();
+	result->info.modName = modInfo.humanNameVersioned.c_str();
+	result->info.modShortName = modInfo.shortName.c_str();
+	result->info.modVersion = modInfo.version.c_str();
+	result->info.modMutator = modInfo.mutator.c_str();
+	result->info.modDesc = modInfo.description.c_str();
+	result->info.modChecksum = nullptr;
+
+	if (archiveScanner != nullptr) {
+		sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(modInfo.filename), modChecksumDigest);
+		result->info.modChecksum = modChecksumDigest.data();
+	}
+}
+
+static void NativeGetGameRulesInfo(const GetGameRulesInfoQuery* /*query*/, GetGameRulesInfoResult* result) {
+	bufferPos = 0;
+	if (modInfo.filename.empty()) { result->error = &GAME_NOT_READY_ERROR; return; }
+
+	result->error = nullptr;
+	result->info.maxUnits = unitHandler.MaxUnits();
+	result->info.constructionDecay = modInfo.constructionDecay;
+	result->info.constructionDecayTime = modInfo.constructionDecayTime;
+	result->info.constructionDecaySpeed = modInfo.constructionDecaySpeed;
+	result->info.multiReclaim = modInfo.multiReclaim;
+	result->info.reclaimMethod = modInfo.reclaimMethod;
+	result->info.reclaimUnitMethod = modInfo.reclaimUnitMethod;
+	result->info.reclaimUnitEnergyCostFactor = modInfo.reclaimUnitEnergyCostFactor;
+	result->info.reclaimUnitEfficiency = modInfo.reclaimUnitEfficiency;
+	result->info.reclaimFeatureEnergyCostFactor = modInfo.reclaimFeatureEnergyCostFactor;
+	result->info.reclaimUnitDrainHealth = modInfo.reclaimUnitDrainHealth;
+	result->info.reclaimAllowEnemies = modInfo.reclaimAllowEnemies;
+	result->info.reclaimAllowAllies = modInfo.reclaimAllowAllies;
+	result->info.repairEnergyCostFactor = modInfo.repairEnergyCostFactor;
+	result->info.resurrectEnergyCostFactor = modInfo.resurrectEnergyCostFactor;
+	result->info.captureEnergyCostFactor = modInfo.captureEnergyCostFactor;
+	result->info.transportAir = modInfo.transportAir;
+	result->info.transportShip = modInfo.transportShip;
+	result->info.transportHover = modInfo.transportHover;
+	result->info.transportGround = modInfo.transportGround;
+	result->info.fireAtKilled = modInfo.fireAtKilled;
+	result->info.fireAtCrashing = modInfo.fireAtCrashing;
+	result->info.requireSonarUnderWater = modInfo.requireSonarUnderWater;
+	result->info.paralyzeOnMaxHealth = modInfo.paralyzeOnMaxHealth;
+	result->info.paralyzeDeclineRate = modInfo.paralyzeDeclineRate;
+	result->info.allowEnginePlayerlist = modInfo.allowEnginePlayerlist;
+	result->info.nativeExcessSharing = modInfo.nativeExcessSharing;
+}
 
 static void NativeGetGlobalLos(const GetGlobalLosQuery* query, GetGlobalLosResult* result) {
 	bufferPos = 0;
@@ -294,6 +429,10 @@ const GameApi GAME_API = {
 	.GetGameFrame = NativeGetGameFrame,
 	.GetGameSeconds = NativeGetGameSeconds,
 	.GetGaiaTeamID = NativeGetGaiaTeamID,
+	.GetGameSetupInfo = NativeGetGameSetupInfo,
+	.GetGameMapInfo = NativeGetGameMapInfo,
+	.GetGameModInfo = NativeGetGameModInfo,
+	.GetGameRulesInfo = NativeGetGameRulesInfo,
 	.GetMapOption = NativeGetMapOption,
 	.GetMapOptions = NativeGetMapOptions,
 	.GetModOption = NativeGetModOption,

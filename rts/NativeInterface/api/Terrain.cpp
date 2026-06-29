@@ -211,6 +211,20 @@ static void NativeGetGroundExtremes(const GetGroundExtremesQuery* query, GetGrou
 	result->currMaxHeight = readMap->GetCurrMaxHeight();
 }
 
+static void NativeGetHeightMapSize(const GetHeightMapSizeQuery* /*query*/, GetHeightMapSizeResult* result)
+{
+	bufferPos = 0;
+
+	if (!MapReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	result->error = nullptr;
+	result->pointsX = mapDims.mapxp1;
+	result->pointsZ = mapDims.mapyp1;
+}
+
 static void NativeGetGroundBlocked(const GetGroundBlockedQuery* query, GetGroundBlockedResult* result)
 {
 	bufferPos = 0;
@@ -247,7 +261,7 @@ static void NativeGetGrass(const GetGrassQuery* query, GetGrassResult* result)
 
 	const float3 pos(query->x, 0.0f, query->z);
 	result->error = nullptr;
-	result->grassLevel = grassDrawer->GetGrass(pos.cClampInBounds()) / 255.0f;
+	result->grassLevel = grassDrawer->GetGrass(pos.cClampInBounds());
 }
 
 } // namespace
@@ -263,6 +277,7 @@ const TerrainApi TERRAIN_API = {
 	.GetGroundInfo = NativeGetGroundInfo,
 	.GetTerrainTypeData = NativeGetTerrainTypeData,
 	.GetGroundExtremes = NativeGetGroundExtremes,
+	.GetHeightMapSize = NativeGetHeightMapSize,
 	.GetGroundBlocked = NativeGetGroundBlocked,
 	.GetGrass = NativeGetGrass,
 };
