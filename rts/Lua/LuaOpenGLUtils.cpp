@@ -34,6 +34,16 @@
 #include "System/StringUtil.h"
 #include "System/Log/ILog.h"
 
+#include <cstdint>
+
+// Defined in NativeInterface/api/Gfx.cpp. Resolves a texture handle created by
+// the native (Rust) plugin ("!native<N>") to its GL id/size. Used as the interim
+// cross-pool bridge so native-created textures are usable from Lua by handle --
+// the native side already resolves Lua textures the same way (see ResolveTexture
+// in Gfx.cpp). The proper fix unifies the two pools; see
+// SBC_PORT_MISSING_BINDINGS.md.
+extern "C" bool GetNativeGfxTextureInfo(
+	const char* name, uint32_t* id, int32_t* xsize, int32_t* ysize, uint32_t* target);
 
 
 // for "$info:los", etc
@@ -381,18 +391,38 @@ bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, con
 
 	switch (image[0]) {
 		case LuaTextures::prefix: {
-			if (L == nullptr)
-				return false;
+			// This Lua state's own dynamic textures.
+			if (L != nullptr) {
+				const LuaTextures& textures = CLuaHandle::GetActiveTextures(L);
+				const LuaTextures::Texture* texInfo = textures.GetInfo(image);
 
-			// dynamic texture
-			const LuaTextures& textures = CLuaHandle::GetActiveTextures(L);
-			const LuaTextures::Texture* texInfo = textures.GetInfo(image);
+				if (texInfo != nullptr) {
+					texUnit.type = LuaMatTexture::LUATEX_LUATEXTURE;
+					texUnit.data = reinterpret_cast<const void*>(textures.GetIdx(image));
+					texUnit.texType = 0;
+					return true;
+				}
+			}
 
-			if (texInfo == nullptr)
-				return false;
+			// Interim cross-pool bridge: textures created by the native (Rust)
+			// plugin share the '!' prefix but live in the NativeInterface's own
+			// registry, not this Lua state -- so resolve them by handle here.
+			// (Native already resolves Lua/engine textures the same way; see
+			// ResolveTexture in Gfx.cpp.) Proper fix: unify the pools, see
+			// SBC_PORT_MISSING_BINDINGS.md.
+			{
+				uint32_t nativeID = 0;
+				int32_t nativeX = 0, nativeY = 0;
+				uint32_t nativeTarget = 0;
+				if (GetNativeGfxTextureInfo(image.c_str(), &nativeID, &nativeX, &nativeY, &nativeTarget) && nativeID != 0) {
+					texUnit.type = LuaMatTexture::LUATEX_NATIVE;
+					texUnit.data = reinterpret_cast<const void*>(static_cast<uintptr_t>(nativeID));
+					texUnit.texType = nativeTarget;
+					return true;
+				}
+			}
 
-			texUnit.type = LuaMatTexture::LUATEX_LUATEXTURE;
-			texUnit.data = reinterpret_cast<const void*>(textures.GetIdx(image));
+			return false;
 		} break;
 
 		case '%': {
@@ -507,6 +537,11 @@ GLuint LuaMatTexture::GetTextureID() const
 		} break;
 		case LUATEX_NAMED: {
 			texID = CNamedTextures::GetInfo(*reinterpret_cast<const size_t*>(&data))->id;
+		} break;
+
+		case LUATEX_NATIVE: {
+			// `data` holds the raw GL id of a native-plugin texture.
+			texID = static_cast<GLuint>(reinterpret_cast<uintptr_t>(data));
 		} break;
 
 		case LUATEX_LUATEXTURE: {
@@ -674,6 +709,11 @@ GLuint LuaMatTexture::GetTextureTarget() const
 				case GL_TEXTURE_CUBE_MAP: { texType = GL_TEXTURE_CUBE_MAP; } break;
 				default:                  { texType = GL_TEXTURE_2D;       } break;
 			}
+		} break;
+
+		case LUATEX_NATIVE: {
+			// `texType` holds the native texture's GL target.
+			texType = (this->texType != 0) ? this->texType : GL_TEXTURE_2D;
 		} break;
 		case LUATEX_LUATEXTURE: {
 			assert(state != nullptr);
@@ -861,6 +901,19 @@ std::tuple<int, int, int> LuaMatTexture::GetSize() const
 			const CNamedTextures::TexInfo* namedTexInfo = CNamedTextures::GetInfo(*reinterpret_cast<const size_t*>(&data));
 
 			return ReturnHelper(namedTexInfo->xsize, namedTexInfo->ysize);
+		} break;
+
+		case LUATEX_NATIVE: {
+			// Native textures store no size in the LuaMatTexture; query GL.
+			const GLuint texID = static_cast<GLuint>(reinterpret_cast<uintptr_t>(data));
+			const GLenum target = (texType != 0) ? texType : GL_TEXTURE_2D;
+			GLint w = 0, h = 0, prevBinding = 0;
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevBinding);
+			glBindTexture(target, texID);
+			glGetTexLevelParameteriv(target, 0, GL_TEXTURE_WIDTH, &w);
+			glGetTexLevelParameteriv(target, 0, GL_TEXTURE_HEIGHT, &h);
+			glBindTexture(target, static_cast<GLuint>(prevBinding));
+			return ReturnHelper(w, h);
 		} break;
 
 		case LUATEX_LUATEXTURE: {
@@ -1062,6 +1115,7 @@ void LuaMatTexture::Print(const string& indent) const
 		#define STRING_CASE(ptr, x) case x: ptr = #x; break;
 		STRING_CASE(typeName, LUATEX_NONE);
 		STRING_CASE(typeName, LUATEX_NAMED);
+		STRING_CASE(typeName, LUATEX_NATIVE);
 		STRING_CASE(typeName, LUATEX_LUATEXTURE);
 		STRING_CASE(typeName, LUATEX_UNITTEXTURE1);
 		STRING_CASE(typeName, LUATEX_UNITTEXTURE2);
