@@ -174,3 +174,9 @@ build-*
 # IDE
 /.idea
 .kilo
+
+out/
+
+# Rust workspace artifacts
+/rust/target
+/rust/Cargo.lock

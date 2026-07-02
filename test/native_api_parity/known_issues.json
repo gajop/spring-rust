@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "issues": [
+    {
+      "id": "feature_draw_flag_boolean_native_abi",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetFeatureDrawFlag"],
+      "native": ["Features.get_feature_draw_flag"],
+      "problem": "Installed native ABI returns a boolean-like draw flag while Lua returns the numeric feature drawFlag. Source is patched to return uint8_t but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "camera_target_direction_not_preserved_installed_native",
+      "status": "known_mismatch",
+      "lua": ["Spring.SetCameraTarget", "Spring.WorldToScreenCoords"],
+      "native": ["Camera.set_camera_target", "Camera.world_to_screen_coords"],
+      "problem": "Installed native Camera.set_camera_target does not preserve/apply the current camera direction like Lua Spring.SetCameraTarget, so WorldToScreenCoords can diverge after moving the camera. Source is patched but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "visible_features_lua_crash_null_feature_def",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetVisibleFeatures"],
+      "native": ["UnitRendering.get_visible_features"],
+      "problem": "Installed Lua Spring.GetVisibleFeatures can segfault when a visible feature has no def and includeGeos filtering reads f->def->geoThermal. Source is patched to guard null feature defs but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "features_screen_rectangle_invalid_render_feature",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetFeaturesInScreenRectangle"],
+      "native": ["UnitRendering.get_features_in_screen_rectangle"],
+      "problem": "Installed native UnitRendering.get_features_in_screen_rectangle can report an invalid stale feature ID in rendering runs. Source is patched to validate feature IDs against featureHandler before returning them; rendering parity row is skipped until the installed engine is rebuilt."
+    },
+    {
+      "id": "mouse_start_position_missing_camera_data",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetMouseStartPosition"],
+      "native": ["Input.get_mouse_start_position"],
+      "problem": "Installed native Input.get_mouse_start_position exposes only x/y while Lua also returns camPos and dir. Source ABI is patched to return the full Lua shape; rendering parity row is skipped until the installed engine is rebuilt."
+    },
+    {
+      "id": "units_screen_rectangle_lua_handle_visibility",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitsInScreenRectangle"],
+      "native": ["UnitRendering.get_units_in_screen_rectangle"],
+      "problem": "Lua Spring.GetUnitsInScreenRectangle filters with the calling Lua handle's read visibility, while native currently uses client-global visibility state. Rendering parity row is skipped because the native check can disagree with the unsynced gadget handle."
+    },
+    {
+      "id": "piece_root_index_base",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitRootPiece", "Spring.GetFeatureRootPiece"],
+      "native": ["UnitsPieces.get_unit_root_piece", "UnitsPieces.get_feature_root_piece"],
+      "problem": "Installed native ABI returns zero-based root piece indices while Lua returns one-based indices. Source is patched to return one-based indices but the installed engine must be rebuilt before enabling the parity rows."
+    },
+    {
+      "id": "piece_list_shape",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitPieceList", "Spring.GetFeaturePieceList", "Spring.GetUnitPieceMap", "Spring.GetFeaturePieceMap"],
+      "native": ["UnitsPieces.get_unit_piece_list", "UnitsPieces.get_feature_piece_list", "UnitsPieces.get_unit_piece_map", "UnitsPieces.get_feature_piece_map"],
+      "problem": "Installed native piece lists/maps do not match Lua's name list and name-to-one-based-index map shape. Source ABI is patched to expose names for lists and name/index entries for maps, but the installed engine must be rebuilt before enabling the parity rows."
+    },
+    {
+      "id": "math_bit_bits_semantics",
+      "status": "known_mismatch",
+      "lua": ["math.bit_bits"],
+      "native": ["MathExtra.bit_bits"],
+      "problem": "Installed native ABI extracts a bit range from a value. Source ABI is patched to take a slice of bit positions and build the same 24-bit mask as Lua math.bit_bits, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "last_attacked_piece_placeholder",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitLastAttackedPiece", "Spring.GetFeatureLastAttackedPiece"],
+      "native": ["UnitsInfo.get_unit_last_attacked_piece", "Features.get_feature_last_attacked_piece"],
+      "problem": "Installed native ABI returns placeholder -1 values and does not expose the Lua last-hit piece/frame shape. Source ABI is patched to expose name, one-based piece index, frame, and presence flag, but the installed engine must be rebuilt before enabling the parity rows."
+    },
+    {
+      "id": "unit_current_build_power_static_value",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitCurrentBuildPower"],
+      "native": ["UnitsInfo.get_unit_current_build_power"],
+      "problem": "Installed native ABI returns unitDef buildSpeed while Lua returns the current NanoPieceCache build power. Source is patched to use NanoPieceCache but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "unit_stockpile_missing_build_percent",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitStockpile"],
+      "native": ["UnitsInfo.get_unit_stockpile"],
+      "problem": "Installed native ABI reads the first weapon and lacks buildPercent/presence data. Source ABI is patched to use stockpileWeapon and expose buildPercent plus hasStockpile, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "unit_storage_reads_definition_storage",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitStorage"],
+      "native": ["UnitsInfo.get_unit_storage"],
+      "problem": "Installed native implementation reads unitDef storage while Lua reads the unit's live storage. Source is patched to read unit->storage, but the installed engine must be rebuilt before enabling the native getter parity row."
+    },
+    {
+      "id": "unit_flanking_incomplete_shape",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitFlanking"],
+      "native": ["UnitsInfo.get_unit_flanking"],
+      "problem": "Installed native ABI exposes only mode and min/max damage. Source ABI is patched to expose mode, moveFactor, min/max damage, direction, and mobility, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "group_units_sorted_shape",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetGroupUnitsSorted"],
+      "native": ["Selection.get_group_units_sorted"],
+      "problem": "Installed native ABI returns a flat sorted unitID list. Source ABI is patched to return grouped unitDefID/unitID arrays matching Lua's unitDefID-keyed table, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "unit_visible_lua_handle_visibility",
+      "status": "known_mismatch",
+      "lua": ["Spring.IsUnitVisible"],
+      "native": ["UnitRendering.is_unit_visible"],
+      "problem": "Lua evaluates visibility with the calling Lua handle's read ally/full-read state; native currently uses client global visibility state and can disagree in unsynced gadget/widget contexts."
+    },
+    {
+      "id": "unit_is_transporting_shape",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitIsTransporting"],
+      "native": ["UnitsInfo.get_unit_is_transporting"],
+      "problem": "Installed native ABI exposes only a boolean isTransporting flag. Source ABI is patched to expose transportee unit IDs plus a transport presence flag, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "unit_pos_error_params_shape",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetUnitPosErrorParams"],
+      "native": ["UnitsInfo.get_unit_pos_error_params"],
+      "problem": "Installed native ABI exposes posError plus placeholder next/error scale fields. Source ABI is patched to expose posErrorVector, posErrorDelta, nextPosErrorUpdate, and posErrorBit, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "input_key_bindings_placeholder",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetKeyBindings"],
+      "native": ["Input.get_key_bindings"],
+      "problem": "Installed native ABI returns an empty placeholder list. Source ABI is patched to return key binding records with command, extra, and boundWith fields, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "active_command_descriptors_placeholder",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetActiveCmdDesc", "Spring.GetActiveCmdDescs"],
+      "native": ["UnsyncedRead.get_active_cmd_desc", "UnsyncedRead.get_active_cmd_descs"],
+      "problem": "Installed native ABI returns only placeholder success flags. Source ABI is patched to return active command descriptor payloads matching Lua's id, type, text fields, flags, params, and presence/count shape, but the installed engine must be rebuilt before enabling the parity rows."
+    },
+    {
+      "id": "ai_info_placeholder",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetAIInfo"],
+      "native": ["Teams.get_aiinfo"],
+      "problem": "Installed native ABI returns placeholder empty AI info. Source ABI is patched to return skirmish AI id, name, hosting player, short name, version, and option records, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "synced_gc_info_not_available",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetSyncedGCInfo"],
+      "native": ["Profiling.get_synced_gcinfo"],
+      "problem": "Installed native Profiling.get_synced_gcinfo returns ERROR_NOT_AVAILABLE in the parity harness. Source has a real luaRules-backed implementation, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "find_unit_cmd_desc_missing_index",
+      "status": "known_mismatch",
+      "lua": ["Spring.FindUnitCmdDesc"],
+      "native": ["UnitsCommands.find_unit_cmd_desc"],
+      "problem": "Installed native UnitsCommands.find_unit_cmd_desc returns cmdIndex 0 when no descriptor matches, while Lua returns nil. Source is patched to return -1 for the absent case, matching the harness nil normalization, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "lua_mem_usage_not_available",
+      "status": "known_mismatch",
+      "lua": ["Spring.GetLuaMemUsage"],
+      "native": ["Profiling.get_lua_mem_usage"],
+      "problem": "Installed native Profiling.get_lua_mem_usage returns ERROR_NOT_AVAILABLE in the parity harness. Source has an allocator-backed implementation for the Lua memory counters, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "load_sound_def_semantics",
+      "status": "known_mismatch",
+      "lua": ["Spring.LoadSoundDef"],
+      "native": ["Sound.load_sound_def"],
+      "problem": "Installed native Sound.load_sound_def preloads a sound item instead of parsing/loading a SoundDefs file like Lua Spring.LoadSoundDef. Source is patched to call sound->LoadSoundDefs with LuaParser, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "play_sound_file_missing_returns_error",
+      "status": "known_mismatch",
+      "lua": ["Spring.PlaySoundFile"],
+      "native": ["Sound.play_sound_file"],
+      "problem": "Installed native Sound.play_sound_file returns ERROR_INVALID_ARGUMENT for a missing sound, while Lua Spring.PlaySoundFile returns boolean false. Source is patched to return success=false without an error for missing/empty sound names, but the installed engine must be rebuilt before enabling the parity row."
+    },
+    {
+      "id": "preload_sound_item_non_idempotent",
+      "status": "known_test_limitation",
+      "lua": ["Spring.PreloadSoundItem"],
+      "native": ["Sound.preload_sound_item"],
+      "problem": "Spring.PreloadSoundItem returns whether the name was newly inserted into the preload set, so calling Lua first and native second in the same run changes the native result. The row is kept as data but skipped until the harness can isolate or reverse this non-idempotent comparison."
+    }
+  ]
+}

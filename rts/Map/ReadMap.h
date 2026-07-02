@@ -224,6 +224,7 @@ public:
 	void UpdateHeightBounds();
 
 	bool GetHeightMapUpdated() const { return hmUpdated; }
+	void MarkHeightMapUpdated() { hmUpdated = true; }
 
 	virtual int2 GetPatch(int hmx, int hmz) const = 0;
 	virtual const float3& GetUnsyncedHeightInfo(int patchX, int patchZ) const = 0;

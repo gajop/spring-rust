@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_all_icon_data_array_count",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetAllIconDataArray"]},
+      "native": {"set": [], "get": ["Icons.get_all_icon_data_array"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetAllIconDataArray`", "native_getter": "`Icons.get_all_icon_data_array`", "fields": "`count`"},
+      "rust": {"check": "check_icons_value", "set": "set_noop"},
+      "params": {"fullData": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetAllIconDataArray", "args": ["value.fullData"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "get_icon_data_default",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetIconData"]},
+      "native": {"set": [], "get": ["Icons.get_icon_data"]},
+      "compare": {"mode": "fields", "fields": ["iconName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetIconData`", "native_getter": "`Icons.get_icon_data`", "fields": "`iconName`"},
+      "rust": {"check": "check_icons_value", "set": "set_noop"},
+      "params": {"iconName": {"type": "string", "fixed": "default"}, "fullData": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetIconData", "args": ["value.iconName", "value.fullData"], "returns": [{"field": "iconName", "path": ["name"]}]}
+    },
+    {
+      "id": "unit_icon_get_draw",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.UnitIconGetDraw"]},
+      "native": {"set": [], "get": ["Icons.unit_icon_get_draw"]},
+      "compare": {"mode": "fields", "fields": ["drawIcon"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.UnitIconGetDraw`", "native_getter": "`Icons.unit_icon_get_draw`", "fields": "`drawIcon`"},
+      "rust": {"check": "check_icons_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.UnitIconGetDraw", "args": ["fixture.unitID"], "returns": ["drawIcon"]}
+    },
+    {
+      "id": "unit_icon_draw",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.SetUnitIconDraw"], "get": ["Spring.UnitIconGetDraw"]},
+      "native": {"set": ["Icons.unit_icon_set_draw"], "get": ["Icons.unit_icon_get_draw"]},
+      "compare": {"mode": "fields", "fields": ["drawIcon"]},
+      "report": {"lua_setter": "`Spring.SetUnitIconDraw`", "native_setter": "`Icons.unit_icon_set_draw`", "lua_getter": "`Spring.UnitIconGetDraw`", "native_getter": "`Icons.unit_icon_get_draw`", "fields": "`drawIcon`"},
+      "rust": {"check": "check_icons_value", "set": "set_icons_value"},
+      "params": {"drawIcon": {"type": "bool"}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetUnitIconDraw", "args": ["fixture.unitID", "value.drawIcon"]},
+        "call": "Spring.UnitIconGetDraw",
+        "args": ["fixture.unitID"],
+        "returns": ["drawIcon"]
+      }
+    },
+    {
+      "id": "unit_icon_draw_deprecated_alias",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.UnitIconSetDraw"], "get": ["Spring.UnitIconGetDraw"]},
+      "native": {"set": ["Icons.unit_icon_set_draw"], "get": ["Icons.unit_icon_get_draw"]},
+      "compare": {"mode": "fields", "fields": ["drawIcon"]},
+      "report": {"lua_setter": "`Spring.UnitIconSetDraw`", "native_setter": "`Icons.unit_icon_set_draw`", "lua_getter": "`Spring.UnitIconGetDraw`", "native_getter": "`Icons.unit_icon_get_draw`", "fields": "`drawIcon`"},
+      "rust": {"check": "check_icons_value", "set": "set_icons_value"},
+      "params": {"drawIcon": {"type": "bool"}},
+      "lua_runtime": {
+        "set": {"call": "Spring.UnitIconSetDraw", "args": ["fixture.unitID", "value.drawIcon"]},
+        "call": "Spring.UnitIconGetDraw",
+        "args": ["fixture.unitID"],
+        "returns": ["drawIcon"]
+      }
+    }
+  ]
+}

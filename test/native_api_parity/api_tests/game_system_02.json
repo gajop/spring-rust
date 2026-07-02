@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_global_los",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGlobalLos"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_global_los"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGlobalLos`",
+        "native_getter": "`Game.get_global_los`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_global_los",
+        "set": "set_noop"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetGlobalLos",
+        "args": [
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "enabled"
+        ]
+      }
+    },
+    {
+      "id": "get_wind",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetWind"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_wind"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "windStrength"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetWind`",
+        "native_getter": "`Game.get_wind`",
+        "fields": "`windStrength`"
+      },
+      "rust": {
+        "check": "check_game_wind",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "get_vector_from_heading",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetVectorFromHeading"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_vector_from_heading"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetVectorFromHeading`",
+        "native_getter": "`Game.get_vector_from_heading`",
+        "fields": "`x`, `z`"
+      },
+      "rust": {
+        "check": "check_game_vector_from_heading",
+        "set": "set_noop"
+      },
+      "params": {
+        "heading": {
+          "type": "i32",
+          "range": [
+            -32768,
+            32767
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetVectorFromHeading",
+        "args": [
+          "value.heading"
+        ],
+        "returns": [
+          "x",
+          "z"
+        ]
+      }
+    },
+    {
+      "id": "get_mod_option",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetModOption"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_mod_option"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value",
+          "exists"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetModOption`",
+        "native_getter": "`Game.get_mod_option`",
+        "fields": "`value`, `exists`"
+      },
+      "rust": {
+        "check": "check_game_option",
+        "set": "set_noop"
+      },
+      "params": {
+        "key": {
+          "type": "string",
+          "fixed": "native_api_parity_cases"
+        }
+      }
+    },
+    {
+      "id": "get_map_option",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetMapOption"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_map_option"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value",
+          "exists"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetMapOption`",
+        "native_getter": "`Game.get_map_option`",
+        "fields": "`value`, `exists`"
+      },
+      "rust": {
+        "check": "check_game_option",
+        "set": "set_noop"
+      },
+      "params": {
+        "key": {
+          "type": "string",
+          "fixed": "blank_map_height"
+        }
+      }
+    }
+  ]
+}

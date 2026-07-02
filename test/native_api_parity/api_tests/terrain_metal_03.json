@@ -1,0 +1,198 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "wind",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetWind"
+        ],
+        "get": [
+          "Spring.GetWind"
+        ]
+      },
+      "native": {
+        "set": [
+          "TerrainControl.set_wind"
+        ],
+        "get": [
+          "Game.get_wind"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "windStrength"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetWind`",
+        "native_setter": "`TerrainControl.set_wind`",
+        "lua_getter": "`Spring.GetWind`",
+        "native_getter": "`Game.get_wind`",
+        "fields": "`windStrength`"
+      },
+      "rust": {
+        "check": "check_game_wind",
+        "set": "set_wind"
+      },
+      "params": {
+        "windStrength": {
+          "type": "f32",
+          "range": [
+            3,
+            18
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetWind",
+          "args": [
+            "value.windStrength",
+            "value.windStrength"
+          ]
+        },
+        "call": "Spring.GetWind",
+        "args": [],
+        "returns": [
+          "windX",
+          "windY",
+          "windZ",
+          "windStrength",
+          "windDirX",
+          "windDirY",
+          "windDirZ"
+        ]
+      }
+    },
+    {
+      "id": "terrain_type_data",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetTerrainTypeData"
+        ],
+        "get": [
+          "Spring.GetTerrainTypeData"
+        ]
+      },
+      "native": {
+        "set": [
+          "TerrainControl.set_terrain_type_data"
+        ],
+        "get": [
+          "Terrain.get_terrain_type_data"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "terrainTypeIndex",
+          "terrainTypeName",
+          "hardness",
+          "tankSpeed",
+          "kbotSpeed",
+          "hoverSpeed",
+          "shipSpeed",
+          "receiveTracks"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetTerrainTypeData`",
+        "native_setter": "`TerrainControl.set_terrain_type_data`",
+        "lua_getter": "`Spring.GetTerrainTypeData`",
+        "native_getter": "`Terrain.get_terrain_type_data`",
+        "fields": "`terrainTypeIndex`, `terrainTypeName`, `hardness`, `tankSpeed`, `kbotSpeed`, `hoverSpeed`, `shipSpeed`, `receiveTracks`"
+      },
+      "rust": {
+        "check": "check_terrain_info",
+        "set": "set_terrain_type_data"
+      },
+      "params": {
+        "terrainTypeIndex": {
+          "type": "i32",
+          "fixed": 0
+        },
+        "terrainTypeName": {
+          "type": "string",
+          "fixed": "native_api_parity_terrain"
+        },
+        "hardness": {
+          "type": "f32",
+          "range": [
+            0.5,
+            3
+          ]
+        },
+        "tankSpeed": {
+          "type": "f32",
+          "range": [
+            0.5,
+            2
+          ]
+        },
+        "kbotSpeed": {
+          "type": "f32",
+          "range": [
+            0.5,
+            2
+          ]
+        },
+        "hoverSpeed": {
+          "type": "f32",
+          "range": [
+            0.5,
+            2
+          ]
+        },
+        "shipSpeed": {
+          "type": "f32",
+          "range": [
+            0.5,
+            2
+          ]
+        },
+        "receiveTracks": {
+          "type": "bool"
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetTerrainTypeData",
+          "args": [
+            "value.terrainTypeIndex",
+            "value.tankSpeed",
+            "value.kbotSpeed",
+            "value.hoverSpeed",
+            "value.shipSpeed",
+            "value.hardness",
+            "value.receiveTracks",
+            "value.terrainTypeName"
+          ]
+        },
+        "call": "Spring.GetTerrainTypeData",
+        "args": [
+          "value.terrainTypeIndex"
+        ],
+        "returns": [
+          "terrainTypeIndex",
+          "terrainTypeName",
+          "hardness",
+          "tankSpeed",
+          "kbotSpeed",
+          "hoverSpeed",
+          "shipSpeed",
+          "receiveTracks"
+        ]
+      }
+    }
+  ]
+}

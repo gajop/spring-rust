@@ -52,6 +52,7 @@ private: // metatable methods
 class LuaZipFolder {
 public:
     static int ZipFolder(lua_State* L, const std::string& folderPath, const std::string& zipFilePath, bool includeFolder, const std::string& modes);
+    static bool ZipFolder(const std::string& folderPath, const std::string& zipFilePath, bool includeFolder, const std::string& modes, std::string* error);
 };
 
 

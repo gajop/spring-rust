@@ -73,6 +73,7 @@ public: // call-ins
 	bool ConfigureLayout(const string& command);
 
 	void ShockFront(const float3& pos, float power, float areaOfEffect, const float* distMod = NULL);
+	void SetShockFrontFactors(bool hasMinArea, float minArea, bool hasMinPower, float minPower, bool hasDistAdj, float distAdj);
 
 	static int GetWatchExplosionDef(lua_State* L);
 	static int SetWatchExplosionDef(lua_State* L);

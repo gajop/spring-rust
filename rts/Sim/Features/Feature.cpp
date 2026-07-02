@@ -738,4 +738,3 @@ int CFeature::ChunkNumber(float f) { return int(math::ceil(f * modInfo.reclaimMe
 // to distinguish unit and feature ID's (values >= MaxUnits() correspond to
 // features in object commands)
 int CFeature::GetBlockingMapID() const { return (id + unitHandler.MaxUnits()); }
-

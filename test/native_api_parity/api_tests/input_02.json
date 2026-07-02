@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_key_code",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetKeyCode"]},
+      "native": {"set": [], "get": ["Input.get_key_code"]},
+      "compare": {"mode": "fields", "fields": ["keyCode"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetKeyCode`", "native_getter": "`Input.get_key_code`", "fields": "`keyCode`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {"keySym": {"type": "string", "fixed": "a"}},
+      "lua_runtime": {"call": "Spring.GetKeyCode", "args": ["value.keySym"], "returns": ["keyCode"]}
+    },
+    {
+      "id": "get_key_symbol",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetKeySymbol"]},
+      "native": {"set": [], "get": ["Input.get_key_symbol"]},
+      "compare": {"mode": "fields", "fields": ["keyCodeName", "keyCodeDefaultName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetKeySymbol`", "native_getter": "`Input.get_key_symbol`", "fields": "`keyCodeName`, `keyCodeDefaultName`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {"keyCode": {"type": "i32", "fixed": 97}},
+      "lua_runtime": {"call": "Spring.GetKeySymbol", "args": ["value.keyCode"], "returns": ["keyCodeName", "keyCodeDefaultName"]}
+    },
+    {
+      "id": "get_scan_symbol",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetScanSymbol"]},
+      "native": {"set": [], "get": ["Input.get_scan_symbol"]},
+      "compare": {"mode": "fields", "fields": ["scanCodeName", "scanCodeDefaultName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetScanSymbol`", "native_getter": "`Input.get_scan_symbol`", "fields": "`scanCodeName`, `scanCodeDefaultName`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {"scanCode": {"type": "i32", "fixed": 4}},
+      "lua_runtime": {"call": "Spring.GetScanSymbol", "args": ["value.scanCode"], "returns": ["scanCodeName", "scanCodeDefaultName"]}
+    },
+    {
+      "id": "get_key_from_scan_symbol",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetKeyFromScanSymbol"]},
+      "native": {"set": [], "get": ["Input.get_key_from_scan_symbol"]},
+      "compare": {"mode": "fields", "fields": ["keyName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetKeyFromScanSymbol`", "native_getter": "`Input.get_key_from_scan_symbol`", "fields": "`keyName`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {"scanSymbol": {"type": "string", "fixed": "a"}},
+      "lua_runtime": {"call": "Spring.GetKeyFromScanSymbol", "args": ["value.scanSymbol"], "returns": ["keyName"]}
+    }
+  ]
+}

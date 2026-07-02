@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "is_replay",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.IsReplay"]},
+      "native": {"set": [], "get": ["SystemControl.is_replay"]},
+      "compare": {"mode": "fields", "fields": ["isReplay"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.IsReplay`", "native_getter": "`SystemControl.is_replay`", "fields": "`isReplay`"},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.IsReplay", "args": [], "returns": ["isReplay"]}
+    },
+    {
+      "id": "get_game_name",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetGameName"]},
+      "native": {"set": [], "get": ["SystemControl.get_game_name"]},
+      "compare": {"mode": "fields", "fields": ["gameName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetGameName`", "native_getter": "`SystemControl.get_game_name`", "fields": "`gameName`"},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetGameName", "args": [], "returns": ["gameName"]}
+    },
+    {
+      "id": "get_menu_name",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetMenuName"]},
+      "native": {"set": [], "get": ["SystemControl.get_menu_name"]},
+      "compare": {"mode": "fields", "fields": ["menuName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetMenuName`", "native_getter": "`SystemControl.get_menu_name`", "fields": "`menuName`"},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetMenuName", "args": [], "returns": ["menuName"]}
+    },
+    {
+      "id": "get_replay_length",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetReplayLength"]},
+      "native": {"set": [], "get": ["SystemControl.get_replay_length"]},
+      "compare": {"mode": "fields", "fields": ["hasReplay"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetReplayLength`", "native_getter": "`SystemControl.get_replay_length`", "fields": "`hasReplay`"},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetReplayLength", "args": [], "returns": [{"field": "hasReplay", "index": 1, "transform": "truthy"}]}
+    },
+    {
+      "id": "get_game_state",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetGameState"]},
+      "native": {"set": [], "get": ["SystemControl.get_game_state"]},
+      "compare": {"mode": "fields", "fields": ["doneLoading", "isSavedGame", "isClientPaused", "isSimLagging"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetGameState`", "native_getter": "`SystemControl.get_game_state`", "fields": "`doneLoading`, `isSavedGame`, `isClientPaused`, `isSimLagging`"},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {"maxLatency": {"type": "f32", "fixed": 500}},
+      "lua_runtime": {"call": "Spring.GetGameState", "args": ["value.maxLatency"], "returns": ["doneLoading", "isSavedGame", "isClientPaused", "isSimLagging"]}
+    },
+    {
+      "id": "get_video_capturing_mode",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetVideoCapturingMode"]},
+      "native": {"set": [], "get": ["SystemControl.get_video_capturing_mode"]},
+      "compare": {"mode": "fields", "fields": ["allowRecord"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetVideoCapturingMode`", "native_getter": "`SystemControl.get_video_capturing_mode`", "fields": "`allowRecord`"},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetVideoCapturingMode", "args": [], "returns": ["allowRecord"]}
+    },
+    {
+      "id": "get_gather_mode",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetGatherMode"]},
+      "native": {"set": [], "get": ["SystemControl.get_gather_mode"]},
+      "compare": {"mode": "fields", "fields": ["gatherMode"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetGatherMode`", "native_getter": "`SystemControl.get_gather_mode`", "fields": "`gatherMode`"},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetGatherMode", "args": [], "returns": ["gatherMode"]}
+    },
+    {
+      "id": "get_window_display_mode",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.GetWindowDisplayMode"]},
+      "native": {"set": [], "get": ["SystemControl.get_window_display_mode"]},
+      "compare": {"mode": "fields", "fields": ["width", "height", "bpp", "refresh", "pixelFormatName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetWindowDisplayMode`", "native_getter": "`SystemControl.get_window_display_mode`", "fields": "`width`, `height`, `bpp`, `refresh`, `pixelFormatName`"},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetWindowDisplayMode", "args": [], "returns": ["width", "height", "bpp", "refresh", "pixelFormatName"]}
+    }
+  ]
+}

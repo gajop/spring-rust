@@ -1,0 +1,12 @@
+[project]
+name = "ni-codegen"
+version = "0.1.0"
+description = "Generate NativeInterface C stubs from Lua*.cpp AST"
+requires-python = ">=3.11"
+dependencies = [
+    "tree-sitter>=0.24",
+    "tree-sitter-cpp>=0.23",
+]
+
+[project.scripts]
+ni-codegen = "generate:main"

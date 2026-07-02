@@ -1,0 +1,722 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "game_frame",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGameFrame"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "game().get_game_frame"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "frame"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGameFrame`",
+        "native_getter": "`game().get_game_frame`",
+        "fields": "`frame`"
+      },
+      "rust": {
+        "check": "check_game_frame",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "game_seconds",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGameSeconds"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "game().get_game_seconds"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "seconds"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGameSeconds`",
+        "native_getter": "`game().get_game_seconds`",
+        "fields": "`seconds`"
+      },
+      "rust": {
+        "check": "check_game_seconds",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "heading_from_facing",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetHeadingFromFacing"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "game().get_heading_from_facing"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "heading"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetHeadingFromFacing`",
+        "native_getter": "`game().get_heading_from_facing`",
+        "fields": "`heading`"
+      },
+      "rust": {
+        "check": "check_heading_from_facing",
+        "set": "set_noop"
+      },
+      "params": {
+        "facing": {
+          "type": "i32",
+          "range": [
+            0,
+            3
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetHeadingFromFacing",
+        "args": ["value.facing"],
+        "returns": ["heading"]
+      }
+    },
+    {
+      "id": "facing_from_heading",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFacingFromHeading"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "game().get_facing_from_heading"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "facing"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFacingFromHeading`",
+        "native_getter": "`game().get_facing_from_heading`",
+        "fields": "`facing`"
+      },
+      "rust": {
+        "check": "check_facing_from_heading",
+        "set": "set_noop"
+      },
+      "params": {
+        "heading": {
+          "type": "i32",
+          "range": [
+            -32768,
+            32767
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetFacingFromHeading",
+        "args": ["value.heading"],
+        "returns": ["facing"]
+      }
+    },
+    {
+      "id": "heading_from_vector",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetHeadingFromVector"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "game().get_heading_from_vector"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "heading"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetHeadingFromVector`",
+        "native_getter": "`game().get_heading_from_vector`",
+        "fields": "`heading`"
+      },
+      "rust": {
+        "check": "check_heading_from_vector",
+        "set": "set_noop"
+      },
+      "params": {
+        "vector": {
+          "type": "float2",
+          "generator": "unit_circle",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetHeadingFromVector",
+        "args": ["value.x", "value.z"],
+        "returns": ["heading"]
+      }
+    },
+    {
+      "id": "is_cheating_enabled",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsCheatingEnabled"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.is_cheating_enabled"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsCheatingEnabled`",
+        "native_getter": "`Game.is_cheating_enabled`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_bool",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.IsCheatingEnabled",
+        "args": [],
+        "returns": [
+          "enabled"
+        ]
+      }
+    },
+    {
+      "id": "are_helper_ais_enabled",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.AreHelperAIsEnabled"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.are_helper_ais_enabled"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.AreHelperAIsEnabled`",
+        "native_getter": "`Game.are_helper_ais_enabled`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_bool",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.AreHelperAIsEnabled",
+        "args": [],
+        "returns": [
+          "enabled"
+        ]
+      }
+    },
+    {
+      "id": "fixed_allies",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.FixedAllies"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.fixed_allies"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.FixedAllies`",
+        "native_getter": "`Game.fixed_allies`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_bool",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.FixedAllies",
+        "args": [],
+        "returns": [
+          "enabled"
+        ]
+      }
+    },
+    {
+      "id": "is_game_over",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsGameOver"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.is_game_over"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "isGameOver"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsGameOver`",
+        "native_getter": "`Game.is_game_over`",
+        "fields": "`isGameOver`"
+      },
+      "rust": {
+        "check": "check_game_bool",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.IsGameOver",
+        "args": [],
+        "returns": [
+          "isGameOver"
+        ]
+      }
+    },
+    {
+      "id": "is_dev_lua_enabled",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsDevLuaEnabled"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.is_dev_lua_enabled"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsDevLuaEnabled`",
+        "native_getter": "`Game.is_dev_lua_enabled`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_bool",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.IsDevLuaEnabled",
+        "args": [],
+        "returns": [
+          "enabled"
+        ]
+      }
+    },
+    {
+      "id": "is_god_mode_enabled",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsGodModeEnabled"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.is_god_mode_enabled"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsGodModeEnabled`",
+        "native_getter": "`Game.is_god_mode_enabled`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_bool",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.IsGodModeEnabled",
+        "args": [],
+        "returns": [
+          "enabled"
+        ]
+      }
+    },
+    {
+      "id": "is_edit_defs_enabled",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsEditDefsEnabled"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.is_edit_defs_enabled"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsEditDefsEnabled`",
+        "native_getter": "`Game.is_edit_defs_enabled`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_bool",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.IsEditDefsEnabled",
+        "args": [],
+        "returns": [
+          "enabled"
+        ]
+      }
+    },
+    {
+      "id": "is_no_cost_enabled",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsNoCostEnabled"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.is_no_cost_enabled"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "enabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsNoCostEnabled`",
+        "native_getter": "`Game.is_no_cost_enabled`",
+        "fields": "`enabled`"
+      },
+      "rust": {
+        "check": "check_game_bool",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.IsNoCostEnabled",
+        "args": [],
+        "returns": [
+          "enabled"
+        ]
+      }
+    },
+    {
+      "id": "game_rules_info",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Game.*"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_game_rules_info",
+          "Game.get_game_rules_resource_info"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "maxUnits",
+          "constructionDecay",
+          "constructionDecayTime",
+          "constructionDecaySpeed",
+          "multiReclaim",
+          "reclaimMethod",
+          "reclaimUnitMethod",
+          "reclaimUnitEnergyCostFactor",
+          "reclaimUnitEfficiency",
+          "reclaimFeatureEnergyCostFactor",
+          "reclaimUnitDrainHealth",
+          "reclaimAllowEnemies",
+          "reclaimAllowAllies",
+          "repairEnergyCostFactor",
+          "resurrectEnergyCostFactor",
+          "captureEnergyCostFactor",
+          "transportAir",
+          "transportShip",
+          "transportHover",
+          "transportGround",
+          "fireAtKilled",
+          "fireAtCrashing",
+          "requireSonarUnderWater",
+          "paralyzeOnMaxHealth",
+          "paralyzeDeclineRate",
+          "allowEnginePlayerlist",
+          "nativeExcessSharing"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Game` table constants",
+        "native_getter": "`Game.get_game_rules_info`, `Game.get_game_rules_resource_info`",
+        "fields": "`Game` rule constants plus full native resource-pack components"
+      },
+      "rust": {
+        "check": "check_game_rules_info",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "table": "Game",
+        "returns": [
+          { "field": "maxUnits", "path": ["maxUnits"] },
+          { "field": "constructionDecay", "path": ["constructionDecay"] },
+          { "field": "constructionDecayTime", "path": ["constructionDecayTime"] },
+          { "field": "constructionDecaySpeed", "path": ["constructionDecaySpeed"] },
+          { "field": "multiReclaim", "path": ["multiReclaim"] },
+          { "field": "reclaimMethod", "path": ["reclaimMethod"] },
+          { "field": "reclaimUnitMethod", "path": ["reclaimUnitMethod"] },
+          { "field": "reclaimUnitEnergyCostFactor", "path": ["reclaimUnitEnergyCostFactor"] },
+          { "field": "reclaimUnitEfficiency", "path": ["reclaimUnitEfficiency"] },
+          { "field": "reclaimFeatureEnergyCostFactor", "path": ["reclaimFeatureEnergyCostFactor"] },
+          { "field": "reclaimUnitDrainHealth", "path": ["reclaimUnitDrainHealth"] },
+          { "field": "reclaimAllowEnemies", "path": ["reclaimAllowEnemies"] },
+          { "field": "reclaimAllowAllies", "path": ["reclaimAllowAllies"] },
+          { "field": "repairEnergyCostFactor", "path": ["repairEnergyCostFactor"] },
+          { "field": "resurrectEnergyCostFactor", "path": ["resurrectEnergyCostFactor"] },
+          { "field": "captureEnergyCostFactor", "path": ["captureEnergyCostFactor"] },
+          { "field": "transportAir", "path": ["transportAir"] },
+          { "field": "transportShip", "path": ["transportShip"] },
+          { "field": "transportHover", "path": ["transportHover"] },
+          { "field": "transportGround", "path": ["transportGround"] },
+          { "field": "fireAtKilled", "path": ["fireAtKilled"] },
+          { "field": "fireAtCrashing", "path": ["fireAtCrashing"] },
+          { "field": "requireSonarUnderWater", "path": ["requireSonarUnderWater"] },
+          { "field": "paralyzeOnMaxHealth", "path": ["paralyzeOnMaxHealth"] },
+          { "field": "paralyzeDeclineRate", "path": ["paralyzeDeclineRate"] },
+          { "field": "allowEnginePlayerlist", "path": ["allowEnginePlayerlist"] },
+          { "field": "nativeExcessSharing", "path": ["nativeExcessSharing"] }
+        ]
+      }
+    },
+    {
+      "id": "get_tidal",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTidal"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_tidal"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "tidalStrength"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTidal`",
+        "native_getter": "`Game.get_tidal`",
+        "fields": "`tidalStrength`"
+      },
+      "rust": {
+        "check": "check_game_tidal",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetTidal",
+        "args": [],
+        "returns": [
+          "tidalStrength"
+        ]
+      }
+    }
+  ]
+}

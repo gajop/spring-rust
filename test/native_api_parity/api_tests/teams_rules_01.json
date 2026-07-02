@@ -1,0 +1,596 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "gaia_team_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGaiaTeamID"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "game().get_gaia_team_id"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "teamID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGaiaTeamID`",
+        "native_getter": "`game().get_gaia_team_id`",
+        "fields": "`teamID`"
+      },
+      "rust": {
+        "check": "check_gaia_team_id",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "get_ally_team_start_box",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetAllyTeamStartBox"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_ally_team_start_box"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "xMin",
+          "zMin",
+          "xMax",
+          "zMax"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetAllyTeamStartBox`",
+        "native_getter": "`Game.get_ally_team_start_box`",
+        "fields": "`xMin`, `zMin`, `xMax`, `zMax`"
+      },
+      "rust": {
+        "check": "check_game_ally_team_start_box",
+        "set": "set_noop"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetAllyTeamStartBox",
+        "args": [
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "xMin",
+          "zMin",
+          "xMax",
+          "zMax"
+        ]
+      }
+    },
+    {
+      "id": "get_team_start_position",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamStartPosition"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_team_start_position"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z",
+          "valid"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamStartPosition`",
+        "native_getter": "`Game.get_team_start_position`",
+        "fields": "`x`, `y`, `z`, `valid`"
+      },
+      "rust": {
+        "check": "check_game_team_start_position",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamStartPosition",
+        "args": [
+          "fixture.teamID"
+        ],
+        "returns": [
+          "x",
+          "y",
+          "z",
+          "valid"
+        ]
+      }
+    },
+    {
+      "id": "get_team_list",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamList"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_team_list"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "teamIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamList`",
+        "native_getter": "`Teams.get_team_list`",
+        "fields": "`teamIDs`"
+      },
+      "rust": {
+        "check": "check_teams_list",
+        "set": "set_noop"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamList",
+        "args": [
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "teamIDs"
+        ]
+      }
+    },
+    {
+      "id": "get_ally_team_list",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetAllyTeamList"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_ally_team_list"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "allyTeamIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetAllyTeamList`",
+        "native_getter": "`Teams.get_ally_team_list`",
+        "fields": "`allyTeamIDs`"
+      },
+      "rust": {
+        "check": "check_teams_list",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetAllyTeamList",
+        "args": [],
+        "returns": [
+          "allyTeamIDs"
+        ]
+      }
+    },
+    {
+      "id": "get_player_list",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetPlayerList"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_player_list"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "playerIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetPlayerList`",
+        "native_getter": "`Teams.get_player_list`",
+        "fields": "`playerIDs`"
+      },
+      "rust": {
+        "check": "check_teams_list",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "active": {
+          "type": "bool",
+          "fixed": false
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetPlayerList",
+        "args": [
+          "fixture.teamID",
+          "value.active"
+        ],
+        "returns": [
+          "playerIDs"
+        ]
+      }
+    },
+    {
+      "id": "get_player_list_in_team",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetPlayerList"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_player_list_in_team"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "playerIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetPlayerList`",
+        "native_getter": "`Teams.get_player_list_in_team`",
+        "fields": "`playerIDs`"
+      },
+      "rust": {
+        "check": "check_teams_list",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetPlayerList",
+        "args": [
+          "fixture.teamID",
+          true
+        ],
+        "returns": [
+          "playerIDs"
+        ]
+      }
+    },
+    {
+      "id": "get_player_list_in_ally_team",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetPlayerList"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_player_list_in_ally_team"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "playerIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetPlayerList`",
+        "native_getter": "`Teams.get_player_list_in_ally_team`",
+        "fields": "`playerIDs`"
+      },
+      "rust": {
+        "check": "check_teams_list",
+        "set": "set_noop"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetPlayerList",
+        "args": [
+          -1,
+          true
+        ],
+        "returns": [
+          "playerIDs"
+        ]
+      }
+    },
+    {
+      "id": "get_team_info",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamInfo"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_team_info"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "teamID",
+          "leaderID",
+          "isDead",
+          "side",
+          "allyTeamID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamInfo`",
+        "native_getter": "`Teams.get_team_info`",
+        "fields": "`teamID`, `leaderID`, `isDead`, `side`, `allyTeamID`"
+      },
+      "rust": {
+        "check": "check_team_info",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamInfo",
+        "args": [
+          "fixture.teamID",
+          false
+        ],
+        "returns": [
+          "teamID",
+          "leaderID",
+          "isDead",
+          "hasAI",
+          "side",
+          "allyTeamID",
+          "incomeMultiplier"
+        ]
+      }
+    },
+    {
+      "id": "get_player_info",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetPlayerInfo"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_player_info"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "playerName",
+          "active",
+          "spectator",
+          "teamID",
+          "allyTeamID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetPlayerInfo`",
+        "native_getter": "`Teams.get_player_info`",
+        "fields": "`playerName`, `active`, `spectator`, `teamID`, `allyTeamID`"
+      },
+      "rust": {
+        "check": "check_player_info",
+        "set": "set_noop"
+      },
+      "params": {
+        "playerID": {
+          "type": "i32",
+          "fixed": 0
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetPlayerInfo",
+        "args": [
+          "value.playerID",
+          false
+        ],
+        "returns": [
+          "playerName",
+          "active",
+          "spectator",
+          "teamID",
+          "allyTeamID",
+          "pingTime",
+          "cpuUsage",
+          "country",
+          "rank",
+          "hasSkirmishAIsInTeam",
+          "playerOpts",
+          "desynced"
+        ]
+      }
+    },
+    {
+      "id": "are_teams_allied",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.AreTeamsAllied"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.are_teams_allied"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "allied"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.AreTeamsAllied`",
+        "native_getter": "`Teams.are_teams_allied`",
+        "fields": "`allied`"
+      },
+      "rust": {
+        "check": "check_teams_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID1": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "teamID2": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.AreTeamsAllied",
+        "args": [
+          "fixture.teamID",
+          "fixture.teamID"
+        ],
+        "returns": [
+          "allied"
+        ]
+      }
+    }
+  ]
+}

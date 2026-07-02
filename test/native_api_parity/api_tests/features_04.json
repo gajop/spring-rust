@@ -1,0 +1,479 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "feature_collision_volume_data",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeatureCollisionVolumeData"
+        ],
+        "get": [
+          "Spring.GetFeatureCollisionVolumeData"
+        ]
+      },
+      "native": {
+        "set": [
+          "FeatureControl.set_feature_collision_volume_data"
+        ],
+        "get": [
+          "Features.get_feature_collision_volume_data"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "scaleX",
+          "scaleY",
+          "scaleZ",
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "volumeType",
+          "testType",
+          "primaryAxis",
+          "disabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeatureCollisionVolumeData`",
+        "native_setter": "`FeatureControl.set_feature_collision_volume_data`",
+        "lua_getter": "`Spring.GetFeatureCollisionVolumeData`",
+        "native_getter": "`Features.get_feature_collision_volume_data`",
+        "fields": "`scaleX`, `scaleY`, `scaleZ`, `offsetX`, `offsetY`, `offsetZ`, `volumeType`, `testType`, `primaryAxis`, `disabled`"
+      },
+      "rust": {
+        "check": "check_feature_collision_volume_data",
+        "set": "set_feature_collision_volume_data"
+      },
+      "params": {
+        "scaleX": {
+          "type": "f32",
+          "range": [
+            8,
+            72
+          ]
+        },
+        "scaleY": {
+          "type": "f32",
+          "range": [
+            8,
+            72
+          ]
+        },
+        "scaleZ": {
+          "type": "f32",
+          "range": [
+            8,
+            72
+          ]
+        },
+        "offsetX": {
+          "type": "f32",
+          "range": [
+            -12,
+            12
+          ]
+        },
+        "offsetY": {
+          "type": "f32",
+          "range": [
+            -12,
+            12
+          ]
+        },
+        "offsetZ": {
+          "type": "f32",
+          "range": [
+            -12,
+            12
+          ]
+        },
+        "volumeType": {
+          "type": "enum",
+          "values": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "testType": {
+          "type": "enum",
+          "values": [
+            0,
+            1
+          ]
+        },
+        "primaryAxis": {
+          "type": "enum",
+          "values": [
+            0,
+            1,
+            2
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureCollisionVolumeData",
+          "args": [
+            "fixture.featureID",
+            "value.scaleX",
+            "value.scaleY",
+            "value.scaleZ",
+            "value.offsetX",
+            "value.offsetY",
+            "value.offsetZ",
+            "value.volumeType",
+            "value.testType",
+            "value.primaryAxis"
+          ]
+        },
+        "call": "Spring.GetFeatureCollisionVolumeData",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "scaleX",
+          "scaleY",
+          "scaleZ",
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "volumeType",
+          "testType",
+          "primaryAxis",
+          "disabled"
+        ]
+      }
+    },
+    {
+      "id": "feature_radius_after_set",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeatureRadiusAndHeight"
+        ],
+        "get": [
+          "Spring.GetFeatureRadius"
+        ]
+      },
+      "native": {
+        "set": [
+          "FeatureControl.set_feature_radius_and_height"
+        ],
+        "get": [
+          "Features.get_feature_radius"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "radius"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeatureRadiusAndHeight`",
+        "native_setter": "`FeatureControl.set_feature_radius_and_height`",
+        "lua_getter": "`Spring.GetFeatureRadius`",
+        "native_getter": "`Features.get_feature_radius`",
+        "fields": "`radius`"
+      },
+      "rust": {
+        "check": "check_feature_radius",
+        "set": "set_feature_radius_and_height"
+      },
+      "params": {
+        "radius": {
+          "type": "f32",
+          "range": [
+            8,
+            80
+          ]
+        },
+        "height": {
+          "type": "f32",
+          "range": [
+            8,
+            120
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureRadiusAndHeight",
+          "args": [
+            "fixture.featureID",
+            "value.radius",
+            "value.height"
+          ]
+        },
+        "call": "Spring.GetFeatureRadius",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "radius"
+        ]
+      }
+    },
+    {
+      "id": "feature_height_after_set",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeatureRadiusAndHeight"
+        ],
+        "get": [
+          "Spring.GetFeatureHeight"
+        ]
+      },
+      "native": {
+        "set": [
+          "FeatureControl.set_feature_radius_and_height"
+        ],
+        "get": [
+          "Features.get_feature_height"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "height"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeatureRadiusAndHeight`",
+        "native_setter": "`FeatureControl.set_feature_radius_and_height`",
+        "lua_getter": "`Spring.GetFeatureHeight`",
+        "native_getter": "`Features.get_feature_height`",
+        "fields": "`height`"
+      },
+      "rust": {
+        "check": "check_feature_height",
+        "set": "set_feature_radius_and_height"
+      },
+      "params": {
+        "radius": {
+          "type": "f32",
+          "range": [
+            8,
+            80
+          ]
+        },
+        "height": {
+          "type": "f32",
+          "range": [
+            8,
+            120
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureRadiusAndHeight",
+          "args": [
+            "fixture.featureID",
+            "value.radius",
+            "value.height"
+          ]
+        },
+        "call": "Spring.GetFeatureHeight",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "height"
+        ]
+      }
+    },
+    {
+      "id": "feature_add_damage",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeatureHealth",
+          "Spring.AddFeatureDamage"
+        ],
+        "get": [
+          "Spring.GetFeatureHealth"
+        ]
+      },
+      "native": {
+        "set": [
+          "FeatureControl.set_feature_health",
+          "FeatureControl.add_feature_damage"
+        ],
+        "get": [
+          "Features.get_feature_health"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "health"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeatureHealth`, `Spring.AddFeatureDamage`",
+        "native_setter": "`FeatureControl.set_feature_health`, `FeatureControl.add_feature_damage`",
+        "lua_getter": "`Spring.GetFeatureHealth`",
+        "native_getter": "`Features.get_feature_health`",
+        "fields": "`health`"
+      },
+      "rust": {
+        "check": "check_feature_health",
+        "set": "add_feature_damage"
+      },
+      "params": {
+        "baseline": {
+          "type": "f32",
+          "range": [
+            700,
+            900
+          ]
+        },
+        "damage": {
+          "type": "f32",
+          "range": [
+            20,
+            80
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": [
+          {
+            "call": "Spring.SetFeatureHealth",
+            "args": [
+              "fixture.featureID",
+              "value.baseline",
+              false
+            ]
+          },
+          {
+            "call": "Spring.AddFeatureDamage",
+            "args": [
+              "fixture.featureID",
+              "value.damage",
+              0,
+              -1,
+              -1,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "call": "Spring.GetFeatureHealth",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "health"
+        ]
+      }
+    },
+    {
+      "id": "get_feature_no_draw",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureNoDraw"]},
+      "native": {"set": [], "get": ["Features.get_feature_no_draw"]},
+      "compare": {"mode": "fields", "fields": ["noDraw"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureNoDraw`", "native_getter": "`Features.get_feature_no_draw`", "fields": "`noDraw`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureNoDraw", "args": ["fixture.featureID"], "returns": ["noDraw"]}
+    },
+    {
+      "id": "get_feature_lua_draw",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureLuaDraw"]},
+      "native": {"set": [], "get": ["Features.get_feature_lua_draw"]},
+      "compare": {"mode": "fields", "fields": ["luaDraw"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureLuaDraw`", "native_getter": "`Features.get_feature_lua_draw`", "fields": "`luaDraw`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureLuaDraw", "args": ["fixture.featureID"], "returns": ["luaDraw"]}
+    },
+    {
+      "id": "get_feature_engine_draw_mask",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureEngineDrawMask"]},
+      "native": {"set": [], "get": ["Features.get_feature_engine_draw_mask"]},
+      "compare": {"mode": "fields", "fields": ["mask"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureEngineDrawMask`", "native_getter": "`Features.get_feature_engine_draw_mask`", "fields": "`mask`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureEngineDrawMask", "args": ["fixture.featureID"], "returns": ["mask"]}
+    },
+    {
+      "id": "get_feature_always_update_matrix",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureAlwaysUpdateMatrix"]},
+      "native": {"set": [], "get": ["Features.get_feature_always_update_matrix"]},
+      "compare": {"mode": "fields", "fields": ["update"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureAlwaysUpdateMatrix`", "native_getter": "`Features.get_feature_always_update_matrix`", "fields": "`update`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureAlwaysUpdateMatrix", "args": ["fixture.featureID"], "returns": ["update"]}
+    },
+    {
+      "id": "get_render_features",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetRenderFeatures"]},
+      "native": {"set": [], "get": ["Features.get_render_features"]},
+      "compare": {"mode": "fields", "fields": ["featureIDs"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetRenderFeatures`", "native_getter": "`Features.get_render_features`", "fields": "`featureIDs`"},
+      "rust": {"check": "check_features_spatial_list", "set": "set_noop"},
+      "params": {"drawMask": {"type": "i32", "fixed": 0}, "sendMask": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetRenderFeatures", "args": ["value.drawMask", "value.sendMask"], "returns": [{"field": "featureIDs"}]},
+      "order_insensitive_fields": ["featureIDs"]
+    },
+    {
+      "id": "get_render_features_draw_flag_changed",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetRenderFeaturesDrawFlagChanged"]},
+      "native": {"set": [], "get": ["Features.get_render_features_draw_flag_changed"]},
+      "compare": {"mode": "fields", "fields": ["featureIDs"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetRenderFeaturesDrawFlagChanged`", "native_getter": "`Features.get_render_features_draw_flag_changed`", "fields": "`featureIDs`"},
+      "rust": {"check": "check_features_spatial_list", "set": "set_noop"},
+      "params": {"sendMask": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetRenderFeaturesDrawFlagChanged", "args": ["value.sendMask"], "returns": [{"field": "featureIDs"}]},
+      "order_insensitive_fields": ["featureIDs"]
+    }
+  ]
+}

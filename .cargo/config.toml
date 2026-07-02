@@ -1,0 +1,2 @@
+[env]
+LIBCLANG_PATH = { value = "tools/libclang", relative = true }

@@ -1,0 +1,79 @@
+8f38f5dee6976c66abc81aca28caf39aaca87f00
+100644 e7d30ff7c21998b5157f3556269ba8903bcc39a9 1	.gitignore
+100644 8f37ebf521d30b432ebb1c7c743e4fa6a0413f4e 2	.gitignore
+100644 0a5ec2bb14b986651c23a5452cb3d29592146445 3	.gitignore
+100755 902714170aa038486dc0cf7037f0f8511da6bbe1 1	docker-build-v2/build.sh
+100755 daa6e83261323b2140fdd7c47978a61e9e8eca1e 2	docker-build-v2/build.sh
+100755 6bded8b8b571244b7dc322589de85bbe3f9af230 3	docker-build-v2/build.sh
+100755 e06de6051faa5acf4097ff33ec94f1753b47f359 1	docker-build/scripts/02_configure.sh
+100755 b41b5a2df0e9e83a7b5b83e385b5d1ad0bff8ac3 2	docker-build/scripts/02_configure.sh
+100644 80f5276170bfaf1403217c6ba196ccd2a0005175 1	rts/Lua/LuaSyncedRead.cpp
+100644 71d847a4cb8a7441ed7a94d2b26652b0b9a8da77 2	rts/Lua/LuaSyncedRead.cpp
+100644 40b25741b52b2fd998e50f6669ed6faf8eff9b8d 3	rts/Lua/LuaSyncedRead.cpp
+100644 a12936aaaa49bf7dde9d589b01037a77584d7f43 1	rts/Rendering/Units/UnitDrawer.cpp
+100644 02da00a027f822c49d66b6d6ad1d2d5568987f72 2	rts/Rendering/Units/UnitDrawer.cpp
+100644 a439038dabe6ece7bfdc5fe339138d61856969e3 3	rts/Rendering/Units/UnitDrawer.cpp
+100644 354f4db7bf65d263e92ab0432c3cf4d2bb4db331 1	rts/Rendering/Units/UnitDrawer.h
+100644 17a2a03e7c6fac657b7da8c49f1559dba406fa0e 2	rts/Rendering/Units/UnitDrawer.h
+100644 d6c6935afc6032c1e306f3badef7506f7394e6d2 3	rts/Rendering/Units/UnitDrawer.h
+100644 96e0028026ae72516127c75aa2d3bbccef3562fc 2	rts/Sim/Misc/CustomColorPalette.cpp
+100644 e4fc4321e39e7ea0c347085b011b964bbad67573 3	rts/Sim/Misc/CustomColorPalette.cpp
+100644 192e5b44e554cbeeaa559d89c3cdce0c8bdfb512 2	rts/Sim/Misc/CustomColorPalette.h
+100644 202e5db87132ed617a6cf9936fe6413c31f2fa5e 3	rts/Sim/Misc/CustomColorPalette.h
+100644 0054d1e28d2eff0dcd10288d19d3a38213e440df 1	rts/System/LoadSave/DemoReader.cpp
+100644 8d40c5959adcc67ad48e154c30b01318f6119d1a 2	rts/System/LoadSave/DemoReader.cpp
+100644 d999bb32a55316cd10e483b0423166af53fe04c9 3	rts/System/LoadSave/DemoReader.cpp
+160000 7a06f27db04fe5d13a5dacc19b2b4544673a4eca 1	rts/lib/RmlUi
+160000 38e51adb27f3ec20251aa0839f73b266f58a4d51 2	rts/lib/RmlUi
+160000 2230d1a6e8e0848ed87a5761e2a5160b2a175ba4 3	rts/lib/RmlUi
+
+Auto-merging .gitignore
+CONFLICT (content): Merge conflict in .gitignore
+Auto-merging docker-build-v2/build.sh
+CONFLICT (content): Merge conflict in docker-build-v2/build.sh
+CONFLICT (modify/delete): docker-build/scripts/02_configure.sh deleted in origin/master and modified in backup/rust-v2-pre-rebase-20260702.  Version backup/rust-v2-pre-rebase-20260702 of docker-build/scripts/02_configure.sh left in tree.
+Auto-merging rts/Game/Game.cpp
+Auto-merging rts/Game/UnsyncedGameCommands.cpp
+Auto-merging rts/Lua/LuaOpenGLUtils.cpp
+Auto-merging rts/Lua/LuaSyncedCtrl.cpp
+Auto-merging rts/Lua/LuaSyncedCtrl.h
+Auto-merging rts/Lua/LuaSyncedRead.cpp
+CONFLICT (content): Merge conflict in rts/Lua/LuaSyncedRead.cpp
+Auto-merging rts/Lua/LuaUI.cpp
+Auto-merging rts/Lua/LuaUnsyncedCtrl.cpp
+Auto-merging rts/Lua/LuaUnsyncedCtrl.h
+Auto-merging rts/Lua/LuaUnsyncedRead.cpp
+Auto-merging rts/Rendering/Env/Decals/GroundDecalHandler.cpp
+Auto-merging rts/Rendering/Units/UnitDrawer.cpp
+CONFLICT (content): Merge conflict in rts/Rendering/Units/UnitDrawer.cpp
+Auto-merging rts/Rendering/Units/UnitDrawer.h
+CONFLICT (content): Merge conflict in rts/Rendering/Units/UnitDrawer.h
+Auto-merging rts/Rml/Backends/RmlUi_Backend.cpp
+Auto-merging rts/Sim/CMakeLists.txt
+Auto-merging rts/Sim/Features/Feature.cpp
+Auto-merging rts/Sim/Misc/CustomColorPalette.cpp
+CONFLICT (add/add): Merge conflict in rts/Sim/Misc/CustomColorPalette.cpp
+Auto-merging rts/Sim/Misc/CustomColorPalette.h
+CONFLICT (add/add): Merge conflict in rts/Sim/Misc/CustomColorPalette.h
+Auto-merging rts/Sim/Objects/SolidObject.h
+Auto-merging rts/Sim/Units/Unit.cpp
+Auto-merging rts/System/LoadSave/Demo.h
+Auto-merging rts/System/LoadSave/DemoReader.cpp
+CONFLICT (content): Merge conflict in rts/System/LoadSave/DemoReader.cpp
+Auto-merging rts/System/LoadSave/DemoRecorder.h
+Failed to merge submodule rts/lib/RmlUi
+CONFLICT (submodule): Merge conflict in rts/lib/RmlUi
+Recursive merging with submodules currently only supports trivial cases.
+Please manually handle the merging of each conflicted submodule.
+This can be accomplished with the following steps:
+ - go to submodule (rts/lib/RmlUi), and either merge commit 2230d1a6
+   or update to an existing commit which has merged those changes
+ - come back to superproject and run:
+
+      git add rts/lib/RmlUi
+
+   to record the above merge or update
+ - resolve any other conflicts in the superproject
+ - commit the resulting index in the superproject
+
+merge-tree-exit-code=1

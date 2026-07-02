@@ -135,6 +135,11 @@ void AddPendingDelete(Rml::ElementPtr element)
 		state->pending_deletes.push_back(std::move(element));
 }
 
+bool RmlGui::IsInitialized()
+{
+	return RmlInitialized();
+}
+
 bool RmlGui::Initialize()
 {
 	LOG_L(L_INFO, "[RmlUi::%s] Beginning RmlUi Initialization", __func__);
@@ -267,6 +272,25 @@ void RmlGui::SetDebugContext(Rml::Context* context)
 
 	Rml::Debugger::SetContext(context);
 	Rml::Debugger::SetVisible(context != nullptr);
+}
+
+bool RmlGui::AddTranslationString(const std::string& key, const std::string& translation)
+{
+	if (!RmlInitialized() || state->luaPlugin == nullptr) {
+		return false;
+	}
+
+	return state->luaPlugin->translationTable.addTranslation(key, translation);
+}
+
+bool RmlGui::ClearTranslations()
+{
+	if (!RmlInitialized() || state->luaPlugin == nullptr) {
+		return false;
+	}
+
+	state->luaPlugin->translationTable.clear();
+	return true;
 }
 
 Rml::SystemInterface* RmlGui::GetSystemInterface()

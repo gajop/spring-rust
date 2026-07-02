@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_feature_def_ids",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_ids"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["ids"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.get_feature_def_ids`", "fields": "`ids`"},
+      "rust": {"check": "check_feature_defs_list_count", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"table": "FeatureDefs", "returns": [{"field": "ids", "transform": "table_int_keys"}]},
+      "order_insensitive_fields": ["ids"]
+    },
+    {
+      "id": "get_feature_def_count",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_count"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.get_feature_def_count`", "fields": "`count`"},
+      "rust": {"check": "check_feature_defs_list_count", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"table": "FeatureDefs", "returns": [{"field": "count", "transform": "table_count"}]}
+    },
+    {
+      "id": "valid_feature_def_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.valid_feature_def_id"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["valid"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.valid_feature_def_id`", "fields": "`valid`"},
+      "rust": {"check": "check_feature_defs_bool", "set": "set_noop"},
+      "params": {"featureDefID": {"type": "i32", "fixture": "featureDefID"}},
+      "lua_runtime": {"table": "FeatureDefs", "key": "fixture.featureDefID", "returns": [{"field": "valid", "transform": "truthy"}]}
+    },
+    {
+      "id": "get_feature_def_idby_name",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["FeatureDefNames"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_idby_name"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["featureDefID"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefNames`", "native_getter": "`FeatureDefs.get_feature_def_idby_name`", "fields": "`featureDefID`"},
+      "rust": {"check": "check_feature_defs_i32", "set": "set_noop"},
+      "params": {"defName": {"type": "string", "fixed": "native_api_test_feature"}},
+      "lua_runtime": {"table": "FeatureDefNames", "key": "value.defName", "returns": [{"field": "featureDefID", "path": ["id"]}]}
+    },
+    {
+      "id": "get_feature_def_name",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_name"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.get_feature_def_name`", "fields": "`value`"},
+      "rust": {"check": "check_feature_defs_string", "set": "set_noop"},
+      "params": {"featureDefID": {"type": "i32", "fixture": "featureDefID"}},
+      "lua_runtime": {"table": "FeatureDefs", "key": "fixture.featureDefID", "returns": [{"field": "value", "path": ["name"]}]}
+    },
+    {
+      "id": "get_feature_def_metal",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_metal"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.get_feature_def_metal`", "fields": "`value`"},
+      "rust": {"check": "check_feature_defs_f32", "set": "set_noop"},
+      "params": {"featureDefID": {"type": "i32", "fixture": "featureDefID"}},
+      "lua_runtime": {"table": "FeatureDefs", "key": "fixture.featureDefID", "returns": [{"field": "value", "path": ["metal"]}]}
+    },
+    {
+      "id": "get_feature_def_energy",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_energy"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.get_feature_def_energy`", "fields": "`value`"},
+      "rust": {"check": "check_feature_defs_f32", "set": "set_noop"},
+      "params": {"featureDefID": {"type": "i32", "fixture": "featureDefID"}},
+      "lua_runtime": {"table": "FeatureDefs", "key": "fixture.featureDefID", "returns": [{"field": "value", "path": ["energy"]}]}
+    },
+    {
+      "id": "get_feature_def_custom_param",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_custom_param"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.get_feature_def_custom_param`", "fields": "`value`"},
+      "rust": {"check": "check_feature_defs_string", "set": "set_noop"},
+      "params": {"featureDefID": {"type": "i32", "fixture": "featureDefID"}, "key": {"type": "string", "fixed": "native_api_parity_feature"}},
+      "lua_runtime": {"table": "FeatureDefs", "key": "fixture.featureDefID", "returns": [{"field": "value", "path": ["customParams", "native_api_parity_feature"]}]}
+    },
+    {
+      "id": "get_feature_def_custom_param_keys",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_custom_param_keys"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["keys"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.get_feature_def_custom_param_keys`", "fields": "`keys`"},
+      "rust": {"check": "check_feature_defs_keys", "set": "set_noop"},
+      "params": {"featureDefID": {"type": "i32", "fixture": "featureDefID"}},
+      "lua_runtime": {"table": "FeatureDefs", "key": "fixture.featureDefID", "returns": [{"field": "keys", "path": ["customParams"], "transform": "table_keys"}]},
+      "order_insensitive_fields": ["keys"]
+    },
+    {
+      "id": "get_feature_def_by_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["FeatureDefs"]},
+      "native": {"set": [], "get": ["FeatureDefs.get_feature_def_by_id"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists", "id", "nameValue", "metal", "energy"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`FeatureDefs`", "native_getter": "`FeatureDefs.get_feature_def_by_id`", "fields": "`exists`, `id`, `name`, `metal`, `energy`"},
+      "rust": {"check": "check_feature_def_by_id", "set": "set_noop"},
+      "params": {"featureDefID": {"type": "i32", "fixture": "featureDefID"}},
+      "lua_runtime": {
+        "table": "FeatureDefs",
+        "key": "fixture.featureDefID",
+        "returns": [
+          {"field": "exists", "transform": "truthy"},
+          {"field": "id", "path": ["id"]},
+          {"field": "nameValue", "path": ["name"]},
+          {"field": "metal", "path": ["metal"]},
+          {"field": "energy", "path": ["energy"]}
+        ]
+      }
+    }
+  ]
+}

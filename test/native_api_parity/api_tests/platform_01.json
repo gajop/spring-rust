@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "platform_architecture",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Platform.architecture"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Platform.get_architecture"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "fields": [
+          "architecture"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Platform.architecture`",
+        "native_getter": "`platform().get_architecture`",
+        "fields": "`architecture`"
+      },
+      "rust": {
+        "check": "check_platform_value",
+        "set": "set_noop"
+      },
+      "params": {
+        "key": {
+          "type": "string",
+          "fixed": "architecture"
+        }
+      },
+      "lua_runtime": {
+        "table": "Platform",
+        "key": "value.key",
+        "returns": [
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "platform_is_headless",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Platform.isHeadless"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Platform.is_headless"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "fields": [
+          "isHeadless"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Platform.isHeadless`",
+        "native_getter": "`platform().is_headless`",
+        "fields": "`isHeadless`"
+      },
+      "rust": {
+        "check": "check_platform_value",
+        "set": "set_noop"
+      },
+      "params": {
+        "key": {
+          "type": "string",
+          "fixed": "isHeadless"
+        }
+      },
+      "lua_runtime": {
+        "table": "Platform",
+        "key": "value.key",
+        "returns": [
+          "isHeadless"
+        ]
+      }
+    }
+  ]
+}

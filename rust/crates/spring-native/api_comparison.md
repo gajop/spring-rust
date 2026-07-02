@@ -1,0 +1,1339 @@
+# Lua ↔ Rust API Comparison Report
+
+## Summary Statistics
+
+**Lua API (Spring.* callouts only):**
+- Total: 762 functions
+- Matched (perfect 1.0): 762 (100.0%)
+- Uncertain matches (<1.0): 0 (0.0%)
+- Unmatched: 0 (0.0%)
+
+**Rust API:**
+- Total: 1284 functions across 52 modules
+- Matched to Lua: 762 (59.3%)
+- Rust-only: 522 (40.7%)
+
+**Parameter comparison (matched functions):**
+- Parameter matches: 759
+- Count mismatches: 3
+- Type mismatches: 0
+
+---
+
+## Matched Functions (Perfect Match)
+
+Functions with perfect 1.0 confidence match:
+
+- `Spring.AddFeatureDamage` → `FeatureControl.FeatureControl.add_feature_damage`
+- `Spring.AddGrass` → `TerrainControl.TerrainControl.add_grass`
+- `Spring.AddHeightMap` → `TerrainControl.TerrainControl.add_height_map`
+- `Spring.AddMapLight` → `Lights.Lights.add_map_light`
+- `Spring.AddModelLight` → `Lights.Lights.add_model_light`
+- `Spring.AddObjectDecal` → `UnitControl.UnitControl.add_object_decal`
+- `Spring.AddOriginalHeightMap` → `TerrainControl.TerrainControl.add_original_height_map`
+- `Spring.AddSmoothMesh` → `TerrainControl.TerrainControl.add_smooth_mesh`
+- `Spring.AddTeamResource` → `TeamControl.TeamControl.add_team_resource`
+- `Spring.AddUnitDamage` → `UnitControl.UnitControl.add_unit_damage`
+- `Spring.AddUnitExperience` → `UnitControl.UnitControl.add_unit_experience`
+- `Spring.AddUnitIcon` → `Icons.Icons.add_unit_icon`
+- `Spring.AddUnitImpulse` → `UnitControl.UnitControl.add_unit_impulse`
+- `Spring.AddUnitResource` → `UnitControl.UnitControl.add_unit_resource`
+- `Spring.AddUnitSeismicPing` → `UnitControl.UnitControl.add_unit_seismic_ping`
+- `Spring.AddWorldIcon` → `Markers.Markers.add_world_icon`
+- `Spring.AddWorldText` → `Markers.Markers.add_world_text`
+- `Spring.AddWorldUnit` → `Markers.Markers.add_world_unit`
+- `Spring.AdjustHeightMap` → `TerrainControl.TerrainControl.adjust_height_map`
+- `Spring.AdjustOriginalHeightMap` → `TerrainControl.TerrainControl.adjust_original_height_map`
+- `Spring.AdjustSmoothMesh` → `TerrainControl.TerrainControl.adjust_smooth_mesh`
+- `Spring.AreHelperAIsEnabled` → `Game.Game.are_helper_ais_enabled`
+- `Spring.ArePlayersAllied` → `Teams.Teams.are_players_allied`
+- `Spring.AreTeamsAllied` → `Teams.Teams.are_teams_allied`
+- `Spring.AssignMouseCursor` → `UnsyncedCtrl.UnsyncedCtrl.assign_mouse_cursor`
+- `Spring.AssignPlayerToTeam` → `TeamControl.TeamControl.assign_player_to_team`
+- `Spring.BuggerOff` → `UnitControl.UnitControl.bugger_off`
+- `Spring.CallCOBScript` → `CobScript.CobScript.call_cobscript`
+- `Spring.ClearFeaturesPreviousDrawFlag` → `Features.Features.clear_features_previous_draw_flag`
+- `Spring.ClearUnitGoal` → `UnitControl.UnitControl.clear_unit_goal`
+- `Spring.ClearUnitsPreviousDrawFlag` → `UnitsInfo.UnitsInfo.clear_units_previous_draw_flag`
+- `Spring.ClearWatchDogTimer` → `SystemControl.SystemControl.clear_watch_dog_timer`
+- `Spring.ClosestBuildPos` → `Utils.Utils.closest_build_pos`
+- `Spring.CreateDir` → `Vfs.Vfs.create_dir`
+- `Spring.CreateFeature` → `FeatureControl.FeatureControl.create_feature`
+- `Spring.CreateFeatureWreck` → `FeatureControl.FeatureControl.create_feature_wreck`
+- `Spring.CreateGroundDecal` → `GroundDecals.GroundDecals.create_ground_decal`
+- `Spring.CreateUnit` → `UnitControl.UnitControl.create_unit`
+- `Spring.CreateUnitWreck` → `FeatureControl.FeatureControl.create_unit_wreck`
+- `Spring.DeleteProjectile` → `ProjectileControl.ProjectileControl.delete_projectile`
+- `Spring.DeselectUnit` → `Selection.Selection.deselect_unit`
+- `Spring.DeselectUnitArray` → `Selection.Selection.deselect_unit_array`
+- `Spring.DeselectUnitMap` → `UnsyncedCtrl.UnsyncedCtrl.deselect_unit_map`
+- `Spring.DestroyFeature` → `FeatureControl.FeatureControl.destroy_feature`
+- `Spring.DestroyGroundDecal` → `GroundDecals.GroundDecals.destroy_ground_decal`
+- `Spring.DestroyUnit` → `UnitControl.UnitControl.destroy_unit`
+- `Spring.DiffTimers` → `Profiling.Profiling.diff_timers`
+- `Spring.DrawUnitCommands` → `UnsyncedCtrl.UnsyncedCtrl.draw_unit_commands`
+- `Spring.Echo` → `Messages.Messages.echo`
+- `Spring.EditUnitCmdDesc` → `UnitControl.UnitControl.edit_unit_cmd_desc`
+- `Spring.ExtractModArchiveFile` → `Vfs.Vfs.extract_mod_archive_file`
+- `Spring.FindUnitCmdDesc` → `UnitsCommands.UnitsCommands.find_unit_cmd_desc`
+- `Spring.FixedAllies` → `Game.Game.fixed_allies`
+- `Spring.ForceLayoutUpdate` → `UnsyncedCtrl.UnsyncedCtrl.force_layout_update`
+- `Spring.ForceTesselationUpdate` → `UnsyncedCtrl.UnsyncedCtrl.force_tesselation_update`
+- `Spring.ForceUnitCollisionUpdate` → `UnitControl.UnitControl.force_unit_collision_update`
+- `Spring.FreeUnitIcon` → `Icons.Icons.free_unit_icon`
+- `Spring.GameOver` → `TeamControl.TeamControl.game_over`
+- `Spring.GarbageCollectCtrl` → `SystemControl.SystemControl.garbage_collect_ctrl`
+- `Spring.GetAIInfo` → `Teams.Teams.get_aiinfo`
+- `Spring.GetActionHotKeys` → `Input.Input.get_action_hot_keys`
+- `Spring.GetActiveCmdDesc` → `UnsyncedRead.UnsyncedRead.get_active_cmd_desc`
+- `Spring.GetActiveCmdDescs` → `UnsyncedRead.UnsyncedRead.get_active_cmd_descs`
+- `Spring.GetActiveCommand` → `Input.Input.get_active_command`
+- `Spring.GetActivePage` → `Input.Input.get_active_page`
+- `Spring.GetAllFeatures` → `Features.Features.get_all_features`
+- `Spring.GetAllGroundDecals` → `GroundDecals.GroundDecals.get_all_ground_decals`
+- `Spring.GetAllIconDataArray` → `Icons.Icons.get_all_icon_data_array`
+- `Spring.GetAllProjectiles` → `Projectiles.Projectiles.get_all_projectiles`
+- `Spring.GetAllUnits` → `UnitsQuery.UnitsQuery.get_all_units`
+- `Spring.GetAllyTeamInfo` → `Teams.Teams.get_ally_team_info`
+- `Spring.GetAllyTeamList` → `Teams.Teams.get_ally_team_list`
+- `Spring.GetAllyTeamStartBox` → `Game.Game.get_ally_team_start_box`
+- `Spring.GetBoxSelectionByEngine` → `UnsyncedRead.UnsyncedRead.get_box_selection_by_engine`
+- `Spring.GetBuildFacing` → `UnsyncedRead.UnsyncedRead.get_build_facing`
+- `Spring.GetBuildSpacing` → `UnsyncedRead.UnsyncedRead.get_build_spacing`
+- `Spring.GetCEGID` → `Utils.Utils.get_cegid`
+- `Spring.GetCOBScriptID` → `CobScript.CobScript.get_cobscript_id`
+- `Spring.GetCameraDirection` → `Camera.Camera.get_camera_direction`
+- `Spring.GetCameraFOV` → `Camera.Camera.get_camera_fov`
+- `Spring.GetCameraNames` → `Camera.Camera.get_camera_names`
+- `Spring.GetCameraPosition` → `Camera.Camera.get_camera_position`
+- `Spring.GetCameraRotation` → `UnitRendering.UnitRendering.get_camera_rotation`
+- `Spring.GetCameraState` → `Camera.Camera.get_camera_state`
+- `Spring.GetCameraVectors` → `UnitRendering.UnitRendering.get_camera_vectors`
+- `Spring.GetClipboard` → `UnsyncedRead.UnsyncedRead.get_clipboard`
+- `Spring.GetClosestValidPosition` → `Los.Los.get_closest_valid_position`
+- `Spring.GetCmdDescIndex` → `UnsyncedRead.UnsyncedRead.get_cmd_desc_index`
+- `Spring.GetCommandQueue` → `UnitsCommands.UnitsCommands.get_command_queue`
+- `Spring.GetConfigFloat` → `Config.Config.get_config_float`
+- `Spring.GetConfigInt` → `Config.Config.get_config_int`
+- `Spring.GetConfigParams` → `Config.Config.get_config_params`
+- `Spring.GetConfigString` → `Config.Config.get_config_string`
+- `Spring.GetConsoleBuffer` → `Messages.Messages.get_console_buffer`
+- `Spring.GetCurrentTooltip` → `Messages.Messages.get_current_tooltip`
+- `Spring.GetDefaultCommand` → `Input.Input.get_default_command`
+- `Spring.GetDrawFrame` → `Display.Display.get_draw_frame`
+- `Spring.GetDrawSeconds` → `Profiling.Profiling.get_draw_seconds`
+- `Spring.GetDrawSelectionInfo` → `UnsyncedRead.UnsyncedRead.get_draw_selection_info`
+- `Spring.GetDualViewGeometry` → `Display.Display.get_dual_view_geometry`
+- `Spring.GetFPS` → `Display.Display.get_fps`
+- `Spring.GetFacingFromHeading` → `Game.Game.get_facing_from_heading`
+- `Spring.GetFactoryBuggerOff` → `UnitsCommands.UnitsCommands.get_factory_bugger_off`
+- `Spring.GetFactoryCommandCount` → `UnitsCommands.UnitsCommands.get_factory_command_count`
+- `Spring.GetFactoryCommands` → `UnitsCommands.UnitsCommands.get_factory_commands`
+- `Spring.GetFactoryCounts` → `UnitsCommands.UnitsCommands.get_factory_counts`
+- `Spring.GetFeatureAllyTeam` → `Features.Features.get_feature_ally_team`
+- `Spring.GetFeatureAlwaysUpdateMatrix` → `Features.Features.get_feature_always_update_matrix`
+- `Spring.GetFeatureBlocking` → `Features.Features.get_feature_blocking`
+- `Spring.GetFeatureCollisionVolumeData` → `Features.Features.get_feature_collision_volume_data`
+- `Spring.GetFeatureDefID` → `Features.Features.get_feature_def_id`
+- `Spring.GetFeatureDirection` → `Features.Features.get_feature_direction`
+- `Spring.GetFeatureDrawFlag` → `Features.Features.get_feature_draw_flag`
+- `Spring.GetFeatureEngineDrawMask` → `Features.Features.get_feature_engine_draw_mask`
+- `Spring.GetFeatureFireTime` → `Features.Features.get_feature_fire_time`
+- `Spring.GetFeatureHeading` → `Features.Features.get_feature_heading`
+- `Spring.GetFeatureHealth` → `Features.Features.get_feature_health`
+- `Spring.GetFeatureHeight` → `Features.Features.get_feature_height`
+- `Spring.GetFeatureLastAttackedPiece` → `Features.Features.get_feature_last_attacked_piece`
+- `Spring.GetFeatureLuaDraw` → `Features.Features.get_feature_lua_draw`
+- `Spring.GetFeatureMass` → `Features.Features.get_feature_mass`
+- `Spring.GetFeatureNoDraw` → `Features.Features.get_feature_no_draw`
+- `Spring.GetFeatureNoSelect` → `Features.Features.get_feature_no_select`
+- `Spring.GetFeaturePieceCollisionVolumeData` → `Features.Features.get_feature_piece_collision_volume_data`
+- `Spring.GetFeaturePieceDirection` → `UnitsPieces.UnitsPieces.get_feature_piece_direction`
+- `Spring.GetFeaturePieceInfo` → `UnitsPieces.UnitsPieces.get_feature_piece_info`
+- `Spring.GetFeaturePieceList` → `UnitsPieces.UnitsPieces.get_feature_piece_list`
+- `Spring.GetFeaturePieceMap` → `UnitsPieces.UnitsPieces.get_feature_piece_map`
+- `Spring.GetFeaturePieceMatrix` → `UnitsPieces.UnitsPieces.get_feature_piece_matrix`
+- `Spring.GetFeaturePiecePosDir` → `UnitsPieces.UnitsPieces.get_feature_piece_pos_dir`
+- `Spring.GetFeaturePiecePosition` → `UnitsPieces.UnitsPieces.get_feature_piece_position`
+- `Spring.GetFeaturePosition` → `Features.Features.get_feature_position`
+- `Spring.GetFeatureRadius` → `Features.Features.get_feature_radius`
+- `Spring.GetFeatureResources` → `Features.Features.get_feature_resources`
+- `Spring.GetFeatureResurrect` → `Features.Features.get_feature_resurrect`
+- `Spring.GetFeatureRootPiece` → `UnitsPieces.UnitsPieces.get_feature_root_piece`
+- `Spring.GetFeatureRotation` → `Features.Features.get_feature_rotation`
+- `Spring.GetFeatureRulesParam` → `RulesParams.RulesParams.get_feature_rules_param`
+- `Spring.GetFeatureRulesParams` → `RulesParams.RulesParams.get_feature_rules_params`
+- `Spring.GetFeatureSelectionVolumeData` → `Features.Features.get_feature_selection_volume_data`
+- `Spring.GetFeatureSeparation` → `Features.Features.get_feature_separation`
+- `Spring.GetFeatureSmokeTime` → `Features.Features.get_feature_smoke_time`
+- `Spring.GetFeatureTeam` → `Features.Features.get_feature_team`
+- `Spring.GetFeatureTransformMatrix` → `Features.Features.get_feature_transform_matrix`
+- `Spring.GetFeatureVelocity` → `Features.Features.get_feature_velocity`
+- `Spring.GetFeaturesInCylinder` → `Features.Features.get_features_in_cylinder`
+- `Spring.GetFeaturesInRectangle` → `Features.Features.get_features_in_rectangle`
+- `Spring.GetFeaturesInScreenRectangle` → `UnitRendering.UnitRendering.get_features_in_screen_rectangle`
+- `Spring.GetFeaturesInSphere` → `Features.Features.get_features_in_sphere`
+- `Spring.GetFrameTimeOffset` → `Display.Display.get_frame_time_offset`
+- `Spring.GetFrameTimer` → `Profiling.Profiling.get_frame_timer`
+- `Spring.GetFullBuildQueue` → `UnitsCommands.UnitsCommands.get_full_build_queue`
+- `Spring.GetGaiaTeamID` → `Game.Game.get_gaia_team_id`
+- `Spring.GetGameFrame` → `Game.Game.get_game_frame`
+- `Spring.GetGameName` → `SystemControl.SystemControl.get_game_name`
+- `Spring.GetGameRulesParam` → `RulesParams.RulesParams.get_game_rules_param`
+- `Spring.GetGameRulesParams` → `RulesParams.RulesParams.get_game_rules_params`
+- `Spring.GetGameSeconds` → `Game.Game.get_game_seconds`
+- `Spring.GetGameSpeed` → `Display.Display.get_game_speed`
+- `Spring.GetGameState` → `SystemControl.SystemControl.get_game_state`
+- `Spring.GetGatherMode` → `SystemControl.SystemControl.get_gather_mode`
+- `Spring.GetGlobalLos` → `Game.Game.get_global_los`
+- `Spring.GetGrass` → `Terrain.Terrain.get_grass`
+- `Spring.GetGroundBlocked` → `Terrain.Terrain.get_ground_blocked`
+- `Spring.GetGroundDecalAlpha` → `GroundDecals.GroundDecals.get_ground_decal_alpha`
+- `Spring.GetGroundDecalCreationFrame` → `GroundDecals.GroundDecals.get_ground_decal_creation_frame`
+- `Spring.GetGroundDecalGlowParams` → `GroundDecals.GroundDecals.get_ground_decal_glow_params`
+- `Spring.GetGroundDecalMiddlePos` → `GroundDecals.GroundDecals.get_ground_decal_middle_pos`
+- `Spring.GetGroundDecalMisc` → `GroundDecals.GroundDecals.get_ground_decal_misc`
+- `Spring.GetGroundDecalNormal` → `GroundDecals.GroundDecals.get_ground_decal_normal`
+- `Spring.GetGroundDecalOwner` → `GroundDecals.GroundDecals.get_ground_decal_owner`
+- `Spring.GetGroundDecalQuadPos` → `GroundDecals.GroundDecals.get_ground_decal_quad_pos`
+- `Spring.GetGroundDecalRotation` → `GroundDecals.GroundDecals.get_ground_decal_rotation`
+- `Spring.GetGroundDecalSizeAndHeight` → `GroundDecals.GroundDecals.get_ground_decal_size_and_height`
+- `Spring.GetGroundDecalTexture` → `GroundDecals.GroundDecals.get_ground_decal_texture`
+- `Spring.GetGroundDecalTextureParams` → `GroundDecals.GroundDecals.get_ground_decal_texture_params`
+- `Spring.GetGroundDecalTextures` → `GroundDecals.GroundDecals.get_ground_decal_textures`
+- `Spring.GetGroundDecalTint` → `GroundDecals.GroundDecals.get_ground_decal_tint`
+- `Spring.GetGroundDecalType` → `GroundDecals.GroundDecals.get_ground_decal_type`
+- `Spring.GetGroundDecalUserData` → `GroundDecals.GroundDecals.get_ground_decal_user_data`
+- `Spring.GetGroundExtremes` → `Terrain.Terrain.get_ground_extremes`
+- `Spring.GetGroundHeight` → `Terrain.Terrain.get_ground_height`
+- `Spring.GetGroundInfo` → `Terrain.Terrain.get_ground_info`
+- `Spring.GetGroundNormal` → `Terrain.Terrain.get_ground_normal`
+- `Spring.GetGroundOrigHeight` → `Terrain.Terrain.get_ground_orig_height`
+- `Spring.GetGroupList` → `Selection.Selection.get_group_list`
+- `Spring.GetGroupUnits` → `Selection.Selection.get_group_units`
+- `Spring.GetGroupUnitsCount` → `Selection.Selection.get_group_units_count`
+- `Spring.GetGroupUnitsCounts` → `Selection.Selection.get_group_units_counts`
+- `Spring.GetGroupUnitsSorted` → `Selection.Selection.get_group_units_sorted`
+- `Spring.GetHeadingFromFacing` → `Game.Game.get_heading_from_facing`
+- `Spring.GetHeadingFromVector` → `Game.Game.get_heading_from_vector`
+- `Spring.GetIconData` → `Icons.Icons.get_icon_data`
+- `Spring.GetInvertQueueKey` → `Input.Input.get_invert_queue_key`
+- `Spring.GetKeyBindings` → `Input.Input.get_key_bindings`
+- `Spring.GetKeyCode` → `Input.Input.get_key_code`
+- `Spring.GetKeyFromScanSymbol` → `Input.Input.get_key_from_scan_symbol`
+- `Spring.GetKeyState` → `Input.Input.get_key_state`
+- `Spring.GetKeySymbol` → `Input.Input.get_key_symbol`
+- `Spring.GetLastMessagePositions` → `UnsyncedRead.UnsyncedRead.get_last_message_positions`
+- `Spring.GetLastUpdateSeconds` → `Display.Display.get_last_update_seconds`
+- `Spring.GetLocalAllyTeamID` → `Player.Player.get_local_ally_team_id`
+- `Spring.GetLocalPlayerID` → `Player.Player.get_local_player_id`
+- `Spring.GetLocalTeamID` → `Player.Player.get_local_team_id`
+- `Spring.GetLogSections` → `Config.Config.get_log_sections`
+- `Spring.GetLosViewColors` → `Display.Display.get_los_view_colors`
+- `Spring.GetLuaMemUsage` → `Profiling.Profiling.get_lua_mem_usage`
+- `Spring.GetMapDrawMode` → `Display.Display.get_map_draw_mode`
+- `Spring.GetMapOption` → `Game.Game.get_map_option`
+- `Spring.GetMapOptions` → `Game.Game.get_map_options`
+- `Spring.GetMapSquareTexture` → `Vfs.Vfs.get_map_square_texture`
+- `Spring.GetMapStartPositions` → `Game.Game.get_map_start_positions`
+- `Spring.GetMenuName` → `SystemControl.SystemControl.get_menu_name`
+- `Spring.GetMetalAmount` → `MetalMap.MetalMap.get_metal_amount`
+- `Spring.GetMetalExtraction` → `MetalMap.MetalMap.get_metal_extraction`
+- `Spring.GetMetalMapSize` → `MetalMap.MetalMap.get_metal_map_size`
+- `Spring.GetMiniMapDualScreen` → `Display.Display.get_mini_map_dual_screen`
+- `Spring.GetMiniMapGeometry` → `Display.Display.get_mini_map_geometry`
+- `Spring.GetMiniMapRotation` → `Display.Display.get_mini_map_rotation`
+- `Spring.GetModKeyState` → `Input.Input.get_mod_key_state`
+- `Spring.GetModOption` → `Game.Game.get_mod_option`
+- `Spring.GetModOptions` → `Game.Game.get_mod_options`
+- `Spring.GetModelPieceList` → `UnitsPieces.UnitsPieces.get_model_piece_list`
+- `Spring.GetModelPieceMap` → `UnitsPieces.UnitsPieces.get_model_piece_map`
+- `Spring.GetModelRootPiece` → `UnitsPieces.UnitsPieces.get_model_root_piece`
+- `Spring.GetMouseButtonsPressed` → `Input.Input.get_mouse_buttons_pressed`
+- `Spring.GetMouseCursor` → `Input.Input.get_mouse_cursor`
+- `Spring.GetMouseStartPosition` → `Input.Input.get_mouse_start_position`
+- `Spring.GetMouseState` → `Input.Input.get_mouse_state`
+- `Spring.GetNanoProjectileParams` → `UnsyncedRead.UnsyncedRead.get_nano_projectile_params`
+- `Spring.GetNumDisplays` → `Display.Display.get_num_displays`
+- `Spring.GetPieceProjectileName` → `UnsyncedRead.UnsyncedRead.get_piece_projectile_name`
+- `Spring.GetPieceProjectileParams` → `Projectiles.Projectiles.get_piece_projectile_params`
+- `Spring.GetPixelDir` → `Camera.Camera.get_pixel_dir`
+- `Spring.GetPlayerControlledUnit` → `Teams.Teams.get_player_controlled_unit`
+- `Spring.GetPlayerInfo` → `Teams.Teams.get_player_info`
+- `Spring.GetPlayerList` → `Teams.Teams.get_player_list`
+- `Spring.GetPlayerRoster` → `Player.Player.get_player_roster`
+- `Spring.GetPlayerRulesParam` → `RulesParams.RulesParams.get_player_rules_param`
+- `Spring.GetPlayerRulesParams` → `RulesParams.RulesParams.get_player_rules_params`
+- `Spring.GetPlayerStatistics` → `Player.Player.get_player_statistics`
+- `Spring.GetPlayerTraffic` → `Player.Player.get_player_traffic`
+- `Spring.GetPositionLosState` → `Los.Los.get_position_los_state`
+- `Spring.GetPressedKeys` → `Input.Input.get_pressed_keys`
+- `Spring.GetPressedScans` → `Input.Input.get_pressed_scans`
+- `Spring.GetProfilerRecordNames` → `Profiling.Profiling.get_profiler_record_names`
+- `Spring.GetProfilerTimeRecord` → `Profiling.Profiling.get_profiler_time_record`
+- `Spring.GetProjectileAllyTeamID` → `Projectiles.Projectiles.get_projectile_ally_team_id`
+- `Spring.GetProjectileDamages` → `Projectiles.Projectiles.get_projectile_damages`
+- `Spring.GetProjectileDefID` → `Projectiles.Projectiles.get_projectile_def_id`
+- `Spring.GetProjectileDirection` → `Projectiles.Projectiles.get_projectile_direction`
+- `Spring.GetProjectileGravity` → `Projectiles.Projectiles.get_projectile_gravity`
+- `Spring.GetProjectileIsIntercepted` → `Projectiles.Projectiles.get_projectile_is_intercepted`
+- `Spring.GetProjectileOwnerID` → `Projectiles.Projectiles.get_projectile_owner_id`
+- `Spring.GetProjectilePosition` → `Projectiles.Projectiles.get_projectile_position`
+- `Spring.GetProjectileTarget` → `Projectiles.Projectiles.get_projectile_target`
+- `Spring.GetProjectileTeamID` → `Projectiles.Projectiles.get_projectile_team_id`
+- `Spring.GetProjectileTimeToLive` → `Projectiles.Projectiles.get_projectile_time_to_live`
+- `Spring.GetProjectileType` → `Projectiles.Projectiles.get_projectile_type`
+- `Spring.GetProjectileVelocity` → `Projectiles.Projectiles.get_projectile_velocity`
+- `Spring.GetProjectilesInRectangle` → `Projectiles.Projectiles.get_projectiles_in_rectangle`
+- `Spring.GetProjectilesInSphere` → `Projectiles.Projectiles.get_projectiles_in_sphere`
+- `Spring.GetRadarErrorParams` → `Los.Los.get_radar_error_params`
+- `Spring.GetRealBuildQueue` → `UnitsCommands.UnitsCommands.get_real_build_queue`
+- `Spring.GetRenderFeatures` → `Features.Features.get_render_features`
+- `Spring.GetRenderFeaturesDrawFlagChanged` → `Features.Features.get_render_features_draw_flag_changed`
+- `Spring.GetRenderUnits` → `UnitsQuery.UnitsQuery.get_render_units`
+- `Spring.GetRenderUnitsDrawFlagChanged` → `UnitsQuery.UnitsQuery.get_render_units_draw_flag_changed`
+- `Spring.GetReplayLength` → `SystemControl.SystemControl.get_replay_length`
+- `Spring.GetScanSymbol` → `Input.Input.get_scan_symbol`
+- `Spring.GetScreenGeometry` → `Display.Display.get_screen_geometry`
+- `Spring.GetSelectedGroup` → `Selection.Selection.get_selected_group`
+- `Spring.GetSelectedUnits` → `Selection.Selection.get_selected_units`
+- `Spring.GetSelectedUnitsCount` → `Selection.Selection.get_selected_units_count`
+- `Spring.GetSelectedUnitsCounts` → `Selection.Selection.get_selected_units_counts`
+- `Spring.GetSelectedUnitsSorted` → `Selection.Selection.get_selected_units_sorted`
+- `Spring.GetSelectionBox` → `Input.Input.get_selection_box`
+- `Spring.GetSideData` → `Game.Game.get_side_data`
+- `Spring.GetSmoothMeshHeight` → `Terrain.Terrain.get_smooth_mesh_height`
+- `Spring.GetSoundDevices` → `Sound.Sound.get_sound_devices`
+- `Spring.GetSoundEffectParams` → `Sound.Sound.get_sound_effect_params`
+- `Spring.GetSoundStreamTime` → `Sound.Sound.get_sound_stream_time`
+- `Spring.GetSpectatingState` → `Player.Player.get_spectating_state`
+- `Spring.GetSyncedGCInfo` → `Profiling.Profiling.get_synced_gcinfo`
+- `Spring.GetTeamAllyTeamID` → `Teams.Teams.get_team_ally_team_id`
+- `Spring.GetTeamColor` → `Display.Display.get_team_color`
+- `Spring.GetTeamDamageStats` → `UnsyncedRead.UnsyncedRead.get_team_damage_stats`
+- `Spring.GetTeamInfo` → `Teams.Teams.get_team_info`
+- `Spring.GetTeamList` → `Teams.Teams.get_team_list`
+- `Spring.GetTeamLuaAI` → `Teams.Teams.get_team_lua_ai`
+- `Spring.GetTeamMaxUnits` → `Teams.Teams.get_team_max_units`
+- `Spring.GetTeamOrigColor` → `Display.Display.get_team_orig_color`
+- `Spring.GetTeamResourceStats` → `Teams.Teams.get_team_resource_stats`
+- `Spring.GetTeamResources` → `Teams.Teams.get_team_resources`
+- `Spring.GetTeamRulesParam` → `RulesParams.RulesParams.get_team_rules_param`
+- `Spring.GetTeamRulesParams` → `RulesParams.RulesParams.get_team_rules_params`
+- `Spring.GetTeamStartPosition` → `Game.Game.get_team_start_position`
+- `Spring.GetTeamStatsHistory` → `Teams.Teams.get_team_stats_history`
+- `Spring.GetTeamUnitCount` → `UnitsQuery.UnitsQuery.get_team_unit_count`
+- `Spring.GetTeamUnitDefCount` → `UnitsQuery.UnitsQuery.get_team_unit_def_count`
+- `Spring.GetTeamUnitStats` → `Teams.Teams.get_team_unit_stats`
+- `Spring.GetTeamUnits` → `UnitsQuery.UnitsQuery.get_team_units`
+- `Spring.GetTeamUnitsByDefs` → `UnitsQuery.UnitsQuery.get_team_units_by_defs`
+- `Spring.GetTeamUnitsCounts` → `UnitsQuery.UnitsQuery.get_team_units_counts`
+- `Spring.GetTeamUnitsSorted` → `UnitsQuery.UnitsQuery.get_team_units_sorted`
+- `Spring.GetTerrainTypeData` → `Terrain.Terrain.get_terrain_type_data`
+- `Spring.GetTidal` → `Game.Game.get_tidal`
+- `Spring.GetTimer` → `Profiling.Profiling.get_timer`
+- `Spring.GetTimerMicros` → `Profiling.Profiling.get_timer_micros`
+- `Spring.GetUnitAllyTeam` → `UnitsInfo.UnitsInfo.get_unit_ally_team`
+- `Spring.GetUnitAlwaysUpdateMatrix` → `UnitRendering.UnitRendering.get_unit_always_update_matrix`
+- `Spring.GetUnitArmored` → `UnitsInfo.UnitsInfo.get_unit_armored`
+- `Spring.GetUnitArrayCentroid` → `UnitsQuery.UnitsQuery.get_unit_array_centroid`
+- `Spring.GetUnitBasePosition` → `UnitsInfo.UnitsInfo.get_unit_base_position`
+- `Spring.GetUnitBlocking` → `UnitsInfo.UnitsInfo.get_unit_blocking`
+- `Spring.GetUnitBuildFacing` → `UnitsInfo.UnitsInfo.get_unit_build_facing`
+- `Spring.GetUnitBuildParams` → `UnitsInfo.UnitsInfo.get_unit_build_params`
+- `Spring.GetUnitBuildeeRadius` → `UnitsInfo.UnitsInfo.get_unit_buildee_radius`
+- `Spring.GetUnitCmdDescs` → `UnitsCommands.UnitsCommands.get_unit_cmd_descs`
+- `Spring.GetUnitCollisionVolumeData` → `UnitsInfo.UnitsInfo.get_unit_collision_volume_data`
+- `Spring.GetUnitCommandCount` → `UnitsCommands.UnitsCommands.get_unit_command_count`
+- `Spring.GetUnitCommands` → `UnitsCommands.UnitsCommands.get_unit_commands`
+- `Spring.GetUnitCostTable` → `UnitsInfo.UnitsInfo.get_unit_cost_table`
+- `Spring.GetUnitCosts` → `UnitsInfo.UnitsInfo.get_unit_costs`
+- `Spring.GetUnitCurrentBuildPower` → `UnitsInfo.UnitsInfo.get_unit_current_build_power`
+- `Spring.GetUnitCurrentCommand` → `UnitsCommands.UnitsCommands.get_unit_current_command`
+- `Spring.GetUnitDefDimensions` → `Utils.Utils.get_unit_def_dimensions`
+- `Spring.GetUnitDefID` → `UnitsInfo.UnitsInfo.get_unit_def_id`
+- `Spring.GetUnitDirection` → `UnitsInfo.UnitsInfo.get_unit_direction`
+- `Spring.GetUnitDrawFlag` → `UnitRendering.UnitRendering.get_unit_draw_flag`
+- `Spring.GetUnitEffectiveBuildRange` → `UnitsInfo.UnitsInfo.get_unit_effective_build_range`
+- `Spring.GetUnitEngineDrawMask` → `UnitRendering.UnitRendering.get_unit_engine_draw_mask`
+- `Spring.GetUnitEstimatedPath` → `MoveCtrl.MoveCtrl.get_unit_estimated_path`
+- `Spring.GetUnitExperience` → `UnitsInfo.UnitsInfo.get_unit_experience`
+- `Spring.GetUnitFeatureSeparation` → `UnitControl.UnitControl.get_unit_feature_separation`
+- `Spring.GetUnitFlanking` → `UnitsInfo.UnitsInfo.get_unit_flanking`
+- `Spring.GetUnitFuel` → `UnitsInfo.UnitsInfo.get_unit_fuel`
+- `Spring.GetUnitGroup` → `Selection.Selection.get_unit_group`
+- `Spring.GetUnitHarvestStorage` → `UnitsInfo.UnitsInfo.get_unit_harvest_storage`
+- `Spring.GetUnitHeading` → `UnitsInfo.UnitsInfo.get_unit_heading`
+- `Spring.GetUnitHealth` → `UnitsInfo.UnitsInfo.get_unit_health`
+- `Spring.GetUnitHeight` → `UnitsInfo.UnitsInfo.get_unit_height`
+- `Spring.GetUnitIconData` → `UnitRendering.UnitRendering.get_unit_icon_data`
+- `Spring.GetUnitInBuildStance` → `UnitsInfo.UnitsInfo.get_unit_in_build_stance`
+- `Spring.GetUnitIsActive` → `UnitsInfo.UnitsInfo.get_unit_is_active`
+- `Spring.GetUnitIsBeingBuilt` → `UnitsInfo.UnitsInfo.get_unit_is_being_built`
+- `Spring.GetUnitIsBuilding` → `UnitsInfo.UnitsInfo.get_unit_is_building`
+- `Spring.GetUnitIsCloaked` → `UnitsInfo.UnitsInfo.get_unit_is_cloaked`
+- `Spring.GetUnitIsDead` → `UnitsInfo.UnitsInfo.get_unit_is_dead`
+- `Spring.GetUnitIsStunned` → `UnitsInfo.UnitsInfo.get_unit_is_stunned`
+- `Spring.GetUnitIsTransporting` → `UnitsInfo.UnitsInfo.get_unit_is_transporting`
+- `Spring.GetUnitLastAttackedPiece` → `UnitsInfo.UnitsInfo.get_unit_last_attacked_piece`
+- `Spring.GetUnitLastAttacker` → `UnitsInfo.UnitsInfo.get_unit_last_attacker`
+- `Spring.GetUnitLeavesGhost` → `UnitControl.UnitControl.get_unit_leaves_ghost`
+- `Spring.GetUnitLosState` → `UnitsInfo.UnitsInfo.get_unit_los_state`
+- `Spring.GetUnitLuaDraw` → `UnitRendering.UnitRendering.get_unit_lua_draw`
+- `Spring.GetUnitMapCentroid` → `UnitsQuery.UnitsQuery.get_unit_map_centroid`
+- `Spring.GetUnitMass` → `UnitsInfo.UnitsInfo.get_unit_mass`
+- `Spring.GetUnitMaxRange` → `UnitsWeapons.UnitsWeapons.get_unit_max_range`
+- `Spring.GetUnitMetalExtraction` → `UnitsInfo.UnitsInfo.get_unit_metal_extraction`
+- `Spring.GetUnitMoveTypeData` → `MoveCtrl.MoveCtrl.get_unit_move_type_data`
+- `Spring.GetUnitNanoPieces` → `UnitsInfo.UnitsInfo.get_unit_nano_pieces`
+- `Spring.GetUnitNearestAlly` → `UnitsQuery.UnitsQuery.get_unit_nearest_ally`
+- `Spring.GetUnitNearestEnemy` → `UnitsQuery.UnitsQuery.get_unit_nearest_enemy`
+- `Spring.GetUnitNeutral` → `UnitsInfo.UnitsInfo.get_unit_neutral`
+- `Spring.GetUnitNoDraw` → `UnitRendering.UnitRendering.get_unit_no_draw`
+- `Spring.GetUnitNoGroup` → `UnitRendering.UnitRendering.get_unit_no_group`
+- `Spring.GetUnitNoMinimap` → `UnitRendering.UnitRendering.get_unit_no_minimap`
+- `Spring.GetUnitNoSelect` → `UnitRendering.UnitRendering.get_unit_no_select`
+- `Spring.GetUnitPhysicalState` → `UnitControl.UnitControl.get_unit_physical_state`
+- `Spring.GetUnitPieceDirection` → `UnitsPieces.UnitsPieces.get_unit_piece_direction`
+- `Spring.GetUnitPieceInfo` → `UnitsPieces.UnitsPieces.get_unit_piece_info`
+- `Spring.GetUnitPieceList` → `UnitsPieces.UnitsPieces.get_unit_piece_list`
+- `Spring.GetUnitPieceMap` → `UnitsPieces.UnitsPieces.get_unit_piece_map`
+- `Spring.GetUnitPieceMatrix` → `UnitsPieces.UnitsPieces.get_unit_piece_matrix`
+- `Spring.GetUnitPiecePosDir` → `UnitsPieces.UnitsPieces.get_unit_piece_pos_dir`
+- `Spring.GetUnitPiecePosition` → `UnitsPieces.UnitsPieces.get_unit_piece_position`
+- `Spring.GetUnitPosErrorParams` → `UnitsInfo.UnitsInfo.get_unit_pos_error_params`
+- `Spring.GetUnitPosition` → `UnitsInfo.UnitsInfo.get_unit_position`
+- `Spring.GetUnitRadius` → `UnitsInfo.UnitsInfo.get_unit_radius`
+- `Spring.GetUnitResources` → `UnitsInfo.UnitsInfo.get_unit_resources`
+- `Spring.GetUnitRootPiece` → `UnitsPieces.UnitsPieces.get_unit_root_piece`
+- `Spring.GetUnitRotation` → `UnitsInfo.UnitsInfo.get_unit_rotation`
+- `Spring.GetUnitRulesParam` → `RulesParams.RulesParams.get_unit_rules_param`
+- `Spring.GetUnitRulesParams` → `RulesParams.RulesParams.get_unit_rules_params`
+- `Spring.GetUnitScriptNames` → `UnitsPieces.UnitsPieces.get_unit_script_names`
+- `Spring.GetUnitScriptPiece` → `UnitsPieces.UnitsPieces.get_unit_script_piece`
+- `Spring.GetUnitSeismicSignature` → `UnitsInfo.UnitsInfo.get_unit_seismic_signature`
+- `Spring.GetUnitSelectionVolumeData` → `UnitRendering.UnitRendering.get_unit_selection_volume_data`
+- `Spring.GetUnitSelfDTime` → `UnitsInfo.UnitsInfo.get_unit_self_dtime`
+- `Spring.GetUnitSensorRadius` → `UnitsInfo.UnitsInfo.get_unit_sensor_radius`
+- `Spring.GetUnitSeparation` → `UnitsQuery.UnitsQuery.get_unit_separation`
+- `Spring.GetUnitShieldState` → `UnitsInfo.UnitsInfo.get_unit_shield_state`
+- `Spring.GetUnitStates` → `UnitsInfo.UnitsInfo.get_unit_states`
+- `Spring.GetUnitStockpile` → `UnitsInfo.UnitsInfo.get_unit_stockpile`
+- `Spring.GetUnitStorage` → `UnitsInfo.UnitsInfo.get_unit_storage`
+- `Spring.GetUnitTeam` → `UnitsInfo.UnitsInfo.get_unit_team`
+- `Spring.GetUnitTooltip` → `UnitsInfo.UnitsInfo.get_unit_tooltip`
+- `Spring.GetUnitTransformMatrix` → `UnitRendering.UnitRendering.get_unit_transform_matrix`
+- `Spring.GetUnitTransporter` → `UnitsInfo.UnitsInfo.get_unit_transporter`
+- `Spring.GetUnitTravel` → `UnitsInfo.UnitsInfo.get_unit_travel`
+- `Spring.GetUnitVectors` → `UnitsInfo.UnitsInfo.get_unit_vectors`
+- `Spring.GetUnitVelocity` → `UnitsInfo.UnitsInfo.get_unit_velocity`
+- `Spring.GetUnitViewPosition` → `UnitRendering.UnitRendering.get_unit_view_position`
+- `Spring.GetUnitWeaponCanFire` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_can_fire`
+- `Spring.GetUnitWeaponDamages` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_damages`
+- `Spring.GetUnitWeaponHaveFreeLineOfFire` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_have_free_line_of_fire`
+- `Spring.GetUnitWeaponState` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_state`
+- `Spring.GetUnitWeaponTarget` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_target`
+- `Spring.GetUnitWeaponTestRange` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_test_range`
+- `Spring.GetUnitWeaponTestTarget` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_test_target`
+- `Spring.GetUnitWeaponTryTarget` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_try_target`
+- `Spring.GetUnitWeaponVectors` → `UnitsWeapons.UnitsWeapons.get_unit_weapon_vectors`
+- `Spring.GetUnitWorkerTask` → `UnitsInfo.UnitsInfo.get_unit_worker_task`
+- `Spring.GetUnitsInBox` → `UnitsQuery.UnitsQuery.get_units_in_box`
+- `Spring.GetUnitsInCylinder` → `UnitsQuery.UnitsQuery.get_units_in_cylinder`
+- `Spring.GetUnitsInPlanes` → `UnitsQuery.UnitsQuery.get_units_in_planes`
+- `Spring.GetUnitsInRectangle` → `UnitsQuery.UnitsQuery.get_units_in_rectangle`
+- `Spring.GetUnitsInScreenRectangle` → `UnitRendering.UnitRendering.get_units_in_screen_rectangle`
+- `Spring.GetUnitsInSphere` → `UnitsQuery.UnitsQuery.get_units_in_sphere`
+- `Spring.GetVectorFromHeading` → `Game.Game.get_vector_from_heading`
+- `Spring.GetVidMemUsage` → `Profiling.Profiling.get_vid_mem_usage`
+- `Spring.GetVideoCapturingMode` → `SystemControl.SystemControl.get_video_capturing_mode`
+- `Spring.GetViewGeometry` → `Display.Display.get_view_geometry`
+- `Spring.GetVisibleFeatures` → `UnitRendering.UnitRendering.get_visible_features`
+- `Spring.GetVisibleProjectiles` → `UnitRendering.UnitRendering.get_visible_projectiles`
+- `Spring.GetVisibleUnits` → `UnitRendering.UnitRendering.get_visible_units`
+- `Spring.GetWaterLevel` → `Terrain.Terrain.get_water_level`
+- `Spring.GetWaterMode` → `Display.Display.get_water_mode`
+- `Spring.GetWaterPlaneLevel` → `Terrain.Terrain.get_water_plane_level`
+- `Spring.GetWind` → `Game.Game.get_wind`
+- `Spring.GetWindowDisplayMode` → `SystemControl.SystemControl.get_window_display_mode`
+- `Spring.GetWindowGeometry` → `Display.Display.get_window_geometry`
+- `Spring.GiveOrder` → `UnitsCommands.UnitsCommands.give_order`
+- `Spring.GiveOrderArrayToUnit` → `UnitControl.UnitControl.give_order_array_to_unit`
+- `Spring.GiveOrderArrayToUnitArray` → `UnitControl.UnitControl.give_order_array_to_unit_array`
+- `Spring.GiveOrderArrayToUnitMap` → `UnitsCommands.UnitsCommands.give_order_array_to_unit_map`
+- `Spring.GiveOrderToUnit` → `UnitControl.UnitControl.give_order_to_unit`
+- `Spring.GiveOrderToUnitArray` → `UnitControl.UnitControl.give_order_to_unit_array`
+- `Spring.GiveOrderToUnitMap` → `UnitsCommands.UnitsCommands.give_order_to_unit_map`
+- `Spring.HaveAdvShading` → `Display.Display.have_adv_shading`
+- `Spring.HaveShadows` → `Display.Display.have_shadows`
+- `Spring.InsertUnitCmdDesc` → `UnitControl.UnitControl.insert_unit_cmd_desc`
+- `Spring.IsAABBInView` → `Display.Display.is_aabbin_view`
+- `Spring.IsAboveMiniMap` → `Input.Input.is_above_mini_map`
+- `Spring.IsCheatingEnabled` → `Game.Game.is_cheating_enabled`
+- `Spring.IsDevLuaEnabled` → `Game.Game.is_dev_lua_enabled`
+- `Spring.IsEditDefsEnabled` → `Game.Game.is_edit_defs_enabled`
+- `Spring.IsGUIHidden` → `Display.Display.is_guihidden`
+- `Spring.IsGameOver` → `Game.Game.is_game_over`
+- `Spring.IsGodModeEnabled` → `Game.Game.is_god_mode_enabled`
+- `Spring.IsNoCostEnabled` → `Game.Game.is_no_cost_enabled`
+- `Spring.IsPosInAirLos` → `Los.Los.is_pos_in_air_los`
+- `Spring.IsPosInLos` → `Los.Los.is_pos_in_los`
+- `Spring.IsPosInMap` → `Terrain.Terrain.is_pos_in_map`
+- `Spring.IsPosInRadar` → `Los.Los.is_pos_in_radar`
+- `Spring.IsReplay` → `SystemControl.SystemControl.is_replay`
+- `Spring.IsSphereInView` → `Display.Display.is_sphere_in_view`
+- `Spring.IsUnitAllied` → `UnsyncedRead.UnsyncedRead.is_unit_allied`
+- `Spring.IsUnitIcon` → `UnitRendering.UnitRendering.is_unit_icon`
+- `Spring.IsUnitInAirLos` → `Los.Los.is_unit_in_air_los`
+- `Spring.IsUnitInJammer` → `Los.Los.is_unit_in_jammer`
+- `Spring.IsUnitInLos` → `Los.Los.is_unit_in_los`
+- `Spring.IsUnitInRadar` → `Los.Los.is_unit_in_radar`
+- `Spring.IsUnitInView` → `UnitRendering.UnitRendering.is_unit_in_view`
+- `Spring.IsUnitSelected` → `UnsyncedRead.UnsyncedRead.is_unit_selected`
+- `Spring.IsUnitVisible` → `UnitRendering.UnitRendering.is_unit_visible`
+- `Spring.IsUserWriting` → `Messages.Messages.is_user_writing`
+- `Spring.KillTeam` → `TeamControl.TeamControl.kill_team`
+- `Spring.LevelHeightMap` → `TerrainControl.TerrainControl.level_height_map`
+- `Spring.LevelOriginalHeightMap` → `TerrainControl.TerrainControl.level_original_height_map`
+- `Spring.LevelSmoothMesh` → `TerrainControl.TerrainControl.level_smooth_mesh`
+- `Spring.LoadCmdColorsConfig` → `UnsyncedCtrl.UnsyncedCtrl.load_cmd_colors_config`
+- `Spring.LoadCtrlPanelConfig` → `UnsyncedCtrl.UnsyncedCtrl.load_ctrl_panel_config`
+- `Spring.LoadModelTextures` → `UnsyncedCtrl.UnsyncedCtrl.load_model_textures`
+- `Spring.LoadSoundDef` → `Sound.Sound.load_sound_def`
+- `Spring.Log` → `Messages.Messages.log`
+- `Spring.MarkerAddLine` → `Markers.Markers.marker_add_line`
+- `Spring.MarkerAddPoint` → `Markers.Markers.marker_add_point`
+- `Spring.MarkerErasePosition` → `Markers.Markers.marker_erase_position`
+- `Spring.PauseDollyCamera` → `UnsyncedCtrl.UnsyncedCtrl.pause_dolly_camera`
+- `Spring.PauseSoundStream` → `Sound.Sound.pause_sound_stream`
+- `Spring.Ping` → `SystemControl.SystemControl.ping`
+- `Spring.PlaySoundFile` → `Sound.Sound.play_sound_file`
+- `Spring.PlaySoundStream` → `Sound.Sound.play_sound_stream`
+- `Spring.Pos2BuildPos` → `Utils.Utils.pos2_build_pos`
+- `Spring.PreloadFeatureDefModel` → `UnsyncedCtrl.UnsyncedCtrl.preload_feature_def_model`
+- `Spring.PreloadSoundItem` → `Sound.Sound.preload_sound_item`
+- `Spring.PreloadUnitDefModel` → `UnsyncedCtrl.UnsyncedCtrl.preload_unit_def_model`
+- `Spring.Quit` → `SystemControl.SystemControl.quit`
+- `Spring.RebuildSmoothMesh` → `TerrainControl.TerrainControl.rebuild_smooth_mesh`
+- `Spring.Reload` → `SystemControl.SystemControl.reload`
+- `Spring.RemoveGrass` → `TerrainControl.TerrainControl.remove_grass`
+- `Spring.RemoveObjectDecal` → `UnitControl.UnitControl.remove_object_decal`
+- `Spring.RemoveUnitCmdDesc` → `UnitControl.UnitControl.remove_unit_cmd_desc`
+- `Spring.ReplaceMouseCursor` → `UnsyncedCtrl.UnsyncedCtrl.replace_mouse_cursor`
+- `Spring.RequestStartPosition` → `SystemControl.SystemControl.request_start_position`
+- `Spring.Restart` → `SystemControl.SystemControl.restart`
+- `Spring.ResumeDollyCamera` → `UnsyncedCtrl.UnsyncedCtrl.resume_dolly_camera`
+- `Spring.RevertHeightMap` → `TerrainControl.TerrainControl.revert_height_map`
+- `Spring.RevertOriginalHeightMap` → `TerrainControl.TerrainControl.revert_original_height_map`
+- `Spring.RevertSmoothMesh` → `TerrainControl.TerrainControl.revert_smooth_mesh`
+- `Spring.RunDollyCamera` → `UnsyncedCtrl.UnsyncedCtrl.run_dolly_camera`
+- `Spring.SDLSetTextInputRect` → `UnsyncedCtrl.UnsyncedCtrl.sdlset_text_input_rect`
+- `Spring.SDLStartTextInput` → `UnsyncedCtrl.UnsyncedCtrl.sdlstart_text_input`
+- `Spring.SDLStopTextInput` → `UnsyncedCtrl.UnsyncedCtrl.sdlstop_text_input`
+- `Spring.SelectUnit` → `Selection.Selection.select_unit`
+- `Spring.SelectUnitArray` → `Selection.Selection.select_unit_array`
+- `Spring.SelectUnitMap` → `UnsyncedCtrl.UnsyncedCtrl.select_unit_map`
+- `Spring.SendAllyChat` → `Messages.Messages.send_ally_chat`
+- `Spring.SendCommands` → `Messages.Messages.send_commands`
+- `Spring.SendLuaGaiaMsg` → `Messages.Messages.send_lua_gaia_msg`
+- `Spring.SendLuaMenuMsg` → `Messages.Messages.send_lua_menu_msg`
+- `Spring.SendLuaRulesMsg` → `Messages.Messages.send_lua_rules_msg`
+- `Spring.SendLuaUIMsg` → `Messages.Messages.send_lua_uimsg`
+- `Spring.SendMessage` → `Messages.Messages.send_message`
+- `Spring.SendMessageToAllyTeam` → `Messages.Messages.send_message_to_ally_team`
+- `Spring.SendMessageToPlayer` → `Messages.Messages.send_message_to_player`
+- `Spring.SendMessageToSpectators` → `Messages.Messages.send_message_to_spectators`
+- `Spring.SendMessageToTeam` → `Messages.Messages.send_message_to_team`
+- `Spring.SendPrivateChat` → `Messages.Messages.send_private_chat`
+- `Spring.SendPublicChat` → `Messages.Messages.send_public_chat`
+- `Spring.SendSkirmishAIMessage` → `Messages.Messages.send_skirmish_aimessage`
+- `Spring.SendSpectatorChat` → `Messages.Messages.send_spectator_chat`
+- `Spring.SetActiveCommand` → `UnsyncedCtrl.UnsyncedCtrl.set_active_command`
+- `Spring.SetAlly` → `TeamControl.TeamControl.set_ally`
+- `Spring.SetAllyTeamStartBox` → `TeamControl.TeamControl.set_ally_team_start_box`
+- `Spring.SetAtmosphere` → `UnsyncedCtrl.UnsyncedCtrl.set_atmosphere`
+- `Spring.SetAutoShowMetal` → `UnsyncedCtrl.UnsyncedCtrl.set_auto_show_metal`
+- `Spring.SetBoxSelectionByEngine` → `UnsyncedCtrl.UnsyncedCtrl.set_box_selection_by_engine`
+- `Spring.SetBuildFacing` → `UnsyncedCtrl.UnsyncedCtrl.set_build_facing`
+- `Spring.SetBuildSpacing` → `UnsyncedCtrl.UnsyncedCtrl.set_build_spacing`
+- `Spring.SetCameraOffset` → `UnsyncedCtrl.UnsyncedCtrl.set_camera_offset`
+- `Spring.SetCameraState` → `Camera.Camera.set_camera_state`
+- `Spring.SetCameraTarget` → `Camera.Camera.set_camera_target`
+- `Spring.SetClipboard` → `UnsyncedCtrl.UnsyncedCtrl.set_clipboard`
+- `Spring.SetConfigFloat` → `Config.Config.set_config_float`
+- `Spring.SetConfigInt` → `Config.Config.set_config_int`
+- `Spring.SetConfigString` → `Config.Config.set_config_string`
+- `Spring.SetCustomCommandDrawData` → `UnsyncedCtrl.UnsyncedCtrl.set_custom_command_draw_data`
+- `Spring.SetDollyCameraCurve` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_curve`
+- `Spring.SetDollyCameraLookCurve` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_look_curve`
+- `Spring.SetDollyCameraLookPosition` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_look_position`
+- `Spring.SetDollyCameraLookUnit` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_look_unit`
+- `Spring.SetDollyCameraMode` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_mode`
+- `Spring.SetDollyCameraPosition` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_position`
+- `Spring.SetDollyCameraRelativeMode` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_relative_mode`
+- `Spring.SetDrawGround` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_ground`
+- `Spring.SetDrawGroundDeferred` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_ground_deferred`
+- `Spring.SetDrawModelsDeferred` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_models_deferred`
+- `Spring.SetDrawSelectionInfo` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_selection_info`
+- `Spring.SetDrawSky` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_sky`
+- `Spring.SetDrawWater` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_water`
+- `Spring.SetExperienceGrade` → `GameConfig.GameConfig.set_experience_grade`
+- `Spring.SetFactoryBuggerOff` → `UnitControl.UnitControl.set_factory_bugger_off`
+- `Spring.SetFeatureAlwaysUpdateMatrix` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_always_update_matrix`
+- `Spring.SetFeatureAlwaysVisible` → `FeatureControl.FeatureControl.set_feature_always_visible`
+- `Spring.SetFeatureBlocking` → `FeatureControl.FeatureControl.set_feature_blocking`
+- `Spring.SetFeatureCollisionVolumeData` → `FeatureControl.FeatureControl.set_feature_collision_volume_data`
+- `Spring.SetFeatureDirection` → `FeatureControl.FeatureControl.set_feature_direction`
+- `Spring.SetFeatureEngineDrawMask` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_engine_draw_mask`
+- `Spring.SetFeatureFade` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_fade`
+- `Spring.SetFeatureFireTime` → `FeatureControl.FeatureControl.set_feature_fire_time`
+- `Spring.SetFeatureHeadingAndUpDir` → `FeatureControl.FeatureControl.set_feature_heading_and_up_dir`
+- `Spring.SetFeatureHealth` → `FeatureControl.FeatureControl.set_feature_health`
+- `Spring.SetFeatureMass` → `FeatureControl.FeatureControl.set_feature_mass`
+- `Spring.SetFeatureMaxHealth` → `FeatureControl.FeatureControl.set_feature_max_health`
+- `Spring.SetFeatureMidAndAimPos` → `FeatureControl.FeatureControl.set_feature_mid_and_aim_pos`
+- `Spring.SetFeatureMoveCtrl` → `FeatureControl.FeatureControl.set_feature_move_ctrl`
+- `Spring.SetFeatureNoDraw` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_no_draw`
+- `Spring.SetFeatureNoSelect` → `FeatureControl.FeatureControl.set_feature_no_select`
+- `Spring.SetFeaturePhysics` → `FeatureControl.FeatureControl.set_feature_physics`
+- `Spring.SetFeaturePieceCollisionVolumeData` → `FeatureControl.FeatureControl.set_feature_piece_collision_volume_data`
+- `Spring.SetFeaturePieceVisible` → `FeatureControl.FeatureControl.set_feature_piece_visible`
+- `Spring.SetFeaturePosition` → `FeatureControl.FeatureControl.set_feature_position`
+- `Spring.SetFeatureRadiusAndHeight` → `FeatureControl.FeatureControl.set_feature_radius_and_height`
+- `Spring.SetFeatureReclaim` → `FeatureControl.FeatureControl.set_feature_reclaim`
+- `Spring.SetFeatureResources` → `FeatureControl.FeatureControl.set_feature_resources`
+- `Spring.SetFeatureResurrect` → `FeatureControl.FeatureControl.set_feature_resurrect`
+- `Spring.SetFeatureRotation` → `FeatureControl.FeatureControl.set_feature_rotation`
+- `Spring.SetFeatureRulesParam` → `RulesParams.RulesParams.set_feature_rules_param`
+- `Spring.SetFeatureSelectionVolumeData` → `FeatureControl.FeatureControl.set_feature_selection_volume_data`
+- `Spring.SetFeatureSmokeTime` → `FeatureControl.FeatureControl.set_feature_smoke_time`
+- `Spring.SetFeatureUseAirLos` → `FeatureControl.FeatureControl.set_feature_use_air_los`
+- `Spring.SetFeatureVelocity` → `FeatureControl.FeatureControl.set_feature_velocity`
+- `Spring.SetGameRulesParam` → `RulesParams.RulesParams.set_game_rules_param`
+- `Spring.SetGlobalLos` → `TeamControl.TeamControl.set_global_los`
+- `Spring.SetGroundDecalAlpha` → `GroundDecals.GroundDecals.set_ground_decal_alpha`
+- `Spring.SetGroundDecalCreationFrame` → `GroundDecals.GroundDecals.set_ground_decal_creation_frame`
+- `Spring.SetGroundDecalGlowParams` → `GroundDecals.GroundDecals.set_ground_decal_glow_params`
+- `Spring.SetGroundDecalMisc` → `GroundDecals.GroundDecals.set_ground_decal_misc`
+- `Spring.SetGroundDecalNormal` → `GroundDecals.GroundDecals.set_ground_decal_normal`
+- `Spring.SetGroundDecalPosAndDims` → `GroundDecals.GroundDecals.set_ground_decal_pos_and_dims`
+- `Spring.SetGroundDecalQuadPosAndHeight` → `GroundDecals.GroundDecals.set_ground_decal_quad_pos_and_height`
+- `Spring.SetGroundDecalRotation` → `GroundDecals.GroundDecals.set_ground_decal_rotation`
+- `Spring.SetGroundDecalTexture` → `GroundDecals.GroundDecals.set_ground_decal_texture`
+- `Spring.SetGroundDecalTextureParams` → `GroundDecals.GroundDecals.set_ground_decal_texture_params`
+- `Spring.SetGroundDecalTint` → `GroundDecals.GroundDecals.set_ground_decal_tint`
+- `Spring.SetGroundDecalUserData` → `GroundDecals.GroundDecals.set_ground_decal_user_data`
+- `Spring.SetHeightMap` → `TerrainControl.TerrainControl.set_height_map`
+- `Spring.SetHeightMapFunc` → `TerrainControl.TerrainControl.set_height_map_func` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.SetLastMessagePosition` → `UnsyncedCtrl.UnsyncedCtrl.set_last_message_position`
+- `Spring.SetLogSectionFilterLevel` → `Config.Config.set_log_section_filter_level`
+- `Spring.SetLosViewColors` → `UnsyncedCtrl.UnsyncedCtrl.set_los_view_colors`
+- `Spring.SetMapLightTrackingState` → `Lights.Lights.set_map_light_tracking_state`
+- `Spring.SetMapRenderingParams` → `UnsyncedCtrl.UnsyncedCtrl.set_map_rendering_params`
+- `Spring.SetMapShader` → `UnsyncedCtrl.UnsyncedCtrl.set_map_shader`
+- `Spring.SetMapShadingTexture` → `UnsyncedCtrl.UnsyncedCtrl.set_map_shading_texture`
+- `Spring.SetMapSquareTerrainType` → `TerrainControl.TerrainControl.set_map_square_terrain_type`
+- `Spring.SetMapSquareTexture` → `Vfs.Vfs.set_map_square_texture`
+- `Spring.SetMetalAmount` → `MetalMap.MetalMap.set_metal_amount`
+- `Spring.SetMiniMapRotation` → `UnsyncedCtrl.UnsyncedCtrl.set_mini_map_rotation`
+- `Spring.SetModelLightTrackingState` → `Lights.Lights.set_model_light_tracking_state`
+- `Spring.SetMouseCursor` → `UnsyncedCtrl.UnsyncedCtrl.set_mouse_cursor`
+- `Spring.SetNanoProjectileParams` → `UnsyncedCtrl.UnsyncedCtrl.set_nano_projectile_params`
+- `Spring.SetNoPause` → `GameConfig.GameConfig.set_no_pause`
+- `Spring.SetOriginalHeightMap` → `TerrainControl.TerrainControl.set_original_height_map`
+- `Spring.SetOriginalHeightMapFunc` → `TerrainControl.TerrainControl.set_original_height_map_func` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.SetPieceProjectileParams` → `ProjectileControl.ProjectileControl.set_piece_projectile_params`
+- `Spring.SetPlayerReadyState` → `TeamControl.TeamControl.set_player_ready_state`
+- `Spring.SetPlayerRulesParam` → `RulesParams.RulesParams.set_player_rules_param`
+- `Spring.SetProjectileAlwaysVisible` → `ProjectileControl.ProjectileControl.set_projectile_always_visible`
+- `Spring.SetProjectileCEG` → `ProjectileControl.ProjectileControl.set_projectile_ceg`
+- `Spring.SetProjectileCollision` → `ProjectileControl.ProjectileControl.set_projectile_collision`
+- `Spring.SetProjectileDamages` → `ProjectileControl.ProjectileControl.set_projectile_damages`
+- `Spring.SetProjectileGravity` → `ProjectileControl.ProjectileControl.set_projectile_gravity`
+- `Spring.SetProjectileIgnoreTrackingError` → `ProjectileControl.ProjectileControl.set_projectile_ignore_tracking_error`
+- `Spring.SetProjectileIsIntercepted` → `ProjectileControl.ProjectileControl.set_projectile_is_intercepted`
+- `Spring.SetProjectileMoveControl` → `ProjectileControl.ProjectileControl.set_projectile_move_control`
+- `Spring.SetProjectilePosition` → `ProjectileControl.ProjectileControl.set_projectile_position`
+- `Spring.SetProjectileTarget` → `ProjectileControl.ProjectileControl.set_projectile_target`
+- `Spring.SetProjectileTimeToLive` → `ProjectileControl.ProjectileControl.set_projectile_time_to_live`
+- `Spring.SetProjectileUseAirLos` → `ProjectileControl.ProjectileControl.set_projectile_use_air_los`
+- `Spring.SetProjectileVelocity` → `ProjectileControl.ProjectileControl.set_projectile_velocity`
+- `Spring.SetRadarErrorParams` → `GameConfig.GameConfig.set_radar_error_params`
+- `Spring.SetShareLevel` → `SystemControl.SystemControl.set_share_level`
+- `Spring.SetSkyBoxTexture` → `UnsyncedCtrl.UnsyncedCtrl.set_sky_box_texture`
+- `Spring.SetSmoothMesh` → `TerrainControl.TerrainControl.set_smooth_mesh`
+- `Spring.SetSmoothMeshFunc` → `TerrainControl.TerrainControl.set_smooth_mesh_func` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.SetSoundEffectParams` → `Sound.Sound.set_sound_effect_params`
+- `Spring.SetSoundStreamVolume` → `Sound.Sound.set_sound_stream_volume`
+- `Spring.SetSquareBuildingMask` → `GameConfig.GameConfig.set_square_building_mask`
+- `Spring.SetSunDirection` → `UnsyncedCtrl.UnsyncedCtrl.set_sun_direction`
+- `Spring.SetSunLighting` → `UnsyncedCtrl.UnsyncedCtrl.set_sun_lighting`
+- `Spring.SetTeamColor` → `Display.Display.set_team_color`
+- `Spring.SetTeamResource` → `TeamControl.TeamControl.set_team_resource`
+- `Spring.SetTeamRulesParam` → `RulesParams.RulesParams.set_team_rules_param`
+- `Spring.SetTeamShareLevel` → `TeamControl.TeamControl.set_team_share_level`
+- `Spring.SetTeamStartPosition` → `TeamControl.TeamControl.set_team_start_position`
+- `Spring.SetTerrainTypeData` → `TerrainControl.TerrainControl.set_terrain_type_data`
+- `Spring.SetTidal` → `TerrainControl.TerrainControl.set_tidal`
+- `Spring.SetUnitAlwaysUpdateMatrix` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_always_update_matrix`
+- `Spring.SetUnitAlwaysVisible` → `UnitControl.UnitControl.set_unit_always_visible`
+- `Spring.SetUnitArmored` → `UnitControl.UnitControl.set_unit_armored`
+- `Spring.SetUnitBlocking` → `UnitControl.UnitControl.set_unit_blocking`
+- `Spring.SetUnitBuildParams` → `UnitControl.UnitControl.set_unit_build_params`
+- `Spring.SetUnitBuildSpeed` → `UnitControl.UnitControl.set_unit_build_speed`
+- `Spring.SetUnitBuildeeRadius` → `UnitControl.UnitControl.set_unit_buildee_radius`
+- `Spring.SetUnitCloak` → `UnitControl.UnitControl.set_unit_cloak`
+- `Spring.SetUnitCollisionVolumeData` → `UnitControl.UnitControl.set_unit_collision_volume_data`
+- `Spring.SetUnitCosts` → `UnitControl.UnitControl.set_unit_costs`
+- `Spring.SetUnitCrashing` → `UnitControl.UnitControl.set_unit_crashing`
+- `Spring.SetUnitDefIcon` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_def_icon`
+- `Spring.SetUnitDefImage` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_def_image`
+- `Spring.SetUnitDirection` → `UnitControl.UnitControl.set_unit_direction`
+- `Spring.SetUnitEngineDrawMask` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_engine_draw_mask`
+- `Spring.SetUnitExperience` → `UnitControl.UnitControl.set_unit_experience`
+- `Spring.SetUnitFlanking` → `UnitControl.UnitControl.set_unit_flanking`
+- `Spring.SetUnitGroup` → `Selection.Selection.set_unit_group`
+- `Spring.SetUnitHarvestStorage` → `UnitControl.UnitControl.set_unit_harvest_storage`
+- `Spring.SetUnitHeadingAndUpDir` → `UnitControl.UnitControl.set_unit_heading_and_up_dir`
+- `Spring.SetUnitHealth` → `UnitControl.UnitControl.set_unit_health`
+- `Spring.SetUnitIconDraw` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_icon_draw`
+- `Spring.SetUnitLandGoal` → `UnitControl.UnitControl.set_unit_land_goal`
+- `Spring.SetUnitLeaveTracks` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_leave_tracks`
+- `Spring.SetUnitLeavesGhost` → `UnitControl.UnitControl.set_unit_leaves_ghost`
+- `Spring.SetUnitLoadingTransport` → `UnitControl.UnitControl.set_unit_loading_transport`
+- `Spring.SetUnitLosMask` → `UnitControl.UnitControl.set_unit_los_mask`
+- `Spring.SetUnitLosState` → `UnitControl.UnitControl.set_unit_los_state`
+- `Spring.SetUnitMass` → `UnitControl.UnitControl.set_unit_mass`
+- `Spring.SetUnitMaxHealth` → `UnitControl.UnitControl.set_unit_max_health`
+- `Spring.SetUnitMaxRange` → `UnitControl.UnitControl.set_unit_max_range`
+- `Spring.SetUnitMetalExtraction` → `UnitControl.UnitControl.set_unit_metal_extraction`
+- `Spring.SetUnitMidAndAimPos` → `UnitControl.UnitControl.set_unit_mid_and_aim_pos`
+- `Spring.SetUnitMoveGoal` → `UnitControl.UnitControl.set_unit_move_goal`
+- `Spring.SetUnitNanoPieces` → `UnitControl.UnitControl.set_unit_nano_pieces`
+- `Spring.SetUnitNeutral` → `UnitControl.UnitControl.set_unit_neutral`
+- `Spring.SetUnitNoDraw` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_draw`
+- `Spring.SetUnitNoGroup` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_group`
+- `Spring.SetUnitNoMinimap` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_minimap`
+- `Spring.SetUnitNoSelect` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_select`
+- `Spring.SetUnitPhysicalStateBit` → `UnitControl.UnitControl.set_unit_physical_state_bit`
+- `Spring.SetUnitPhysics` → `UnitControl.UnitControl.set_unit_physics`
+- `Spring.SetUnitPieceCollisionVolumeData` → `UnitControl.UnitControl.set_unit_piece_collision_volume_data`
+- `Spring.SetUnitPieceMatrix` → `UnitControl.UnitControl.set_unit_piece_matrix`
+- `Spring.SetUnitPieceParent` → `UnitControl.UnitControl.set_unit_piece_parent`
+- `Spring.SetUnitPieceVisible` → `UnitControl.UnitControl.set_unit_piece_visible`
+- `Spring.SetUnitPosErrorParams` → `UnitControl.UnitControl.set_unit_pos_error_params`
+- `Spring.SetUnitPosition` → `UnitControl.UnitControl.set_unit_position`
+- `Spring.SetUnitRadiusAndHeight` → `UnitControl.UnitControl.set_unit_radius_and_height`
+- `Spring.SetUnitResourcing` → `UnitControl.UnitControl.set_unit_resourcing`
+- `Spring.SetUnitRotation` → `UnitControl.UnitControl.set_unit_rotation`
+- `Spring.SetUnitRulesParam` → `RulesParams.RulesParams.set_unit_rules_param`
+- `Spring.SetUnitSeismicSignature` → `UnitControl.UnitControl.set_unit_seismic_signature`
+- `Spring.SetUnitSelectionVolumeData` → `UnitControl.UnitControl.set_unit_selection_volume_data`
+- `Spring.SetUnitSensorRadius` → `UnitControl.UnitControl.set_unit_sensor_radius`
+- `Spring.SetUnitShieldRechargeDelay` → `UnitControl.UnitControl.set_unit_shield_recharge_delay`
+- `Spring.SetUnitShieldState` → `UnitControl.UnitControl.set_unit_shield_state`
+- `Spring.SetUnitSonarStealth` → `UnitControl.UnitControl.set_unit_sonar_stealth`
+- `Spring.SetUnitStealth` → `UnitControl.UnitControl.set_unit_stealth`
+- `Spring.SetUnitStockpile` → `UnitControl.UnitControl.set_unit_stockpile`
+- `Spring.SetUnitStorage` → `UnitControl.UnitControl.set_unit_storage`
+- `Spring.SetUnitTarget` → `UnitControl.UnitControl.set_unit_target`
+- `Spring.SetUnitTooltip` → `UnitControl.UnitControl.set_unit_tooltip`
+- `Spring.SetUnitUseAirLos` → `UnitControl.UnitControl.set_unit_use_air_los`
+- `Spring.SetUnitUseWeapons` → `UnitControl.UnitControl.set_unit_use_weapons`
+- `Spring.SetUnitVelocity` → `UnitControl.UnitControl.set_unit_velocity`
+- `Spring.SetUnitWeaponDamages` → `UnitControl.UnitControl.set_unit_weapon_damages`
+- `Spring.SetUnitWeaponState` → `UnitControl.UnitControl.set_unit_weapon_state`
+- `Spring.SetVideoCapturingMode` → `UnsyncedCtrl.UnsyncedCtrl.set_video_capturing_mode`
+- `Spring.SetVideoCapturingTimeOffset` → `UnsyncedCtrl.UnsyncedCtrl.set_video_capturing_time_offset`
+- `Spring.SetWMCaption` → `UnsyncedCtrl.UnsyncedCtrl.set_wmcaption`
+- `Spring.SetWMIcon` → `UnsyncedCtrl.UnsyncedCtrl.set_wmicon`
+- `Spring.SetWaterParams` → `UnsyncedCtrl.UnsyncedCtrl.set_water_params`
+- `Spring.SetWind` → `TerrainControl.TerrainControl.set_wind`
+- `Spring.SetWindowGeometry` → `UnsyncedCtrl.UnsyncedCtrl.set_window_geometry`
+- `Spring.SetWindowMaximized` → `UnsyncedCtrl.UnsyncedCtrl.set_window_maximized`
+- `Spring.SetWindowMinimized` → `UnsyncedCtrl.UnsyncedCtrl.set_window_minimized`
+- `Spring.ShareResources` → `SystemControl.SystemControl.share_resources`
+- `Spring.ShareTeamResource` → `TeamControl.TeamControl.share_team_resource`
+- `Spring.SolveNURBSCurve` → `UnsyncedRead.UnsyncedRead.solve_nurbscurve`
+- `Spring.SpawnCEG` → `EffectsControl.EffectsControl.spawn_ceg`
+- `Spring.SpawnExplosion` → `EffectsControl.EffectsControl.spawn_explosion`
+- `Spring.SpawnProjectile` → `ProjectileControl.ProjectileControl.spawn_projectile`
+- `Spring.SpawnSFX` → `EffectsControl.EffectsControl.spawn_sfx`
+- `Spring.Start` → `SystemControl.SystemControl.start`
+- `Spring.StopSoundStream` → `Sound.Sound.stop_sound_stream`
+- `Spring.TestBuildOrder` → `Utils.Utils.test_build_order`
+- `Spring.TestMoveOrder` → `Utils.Utils.test_move_order`
+- `Spring.TraceRayGroundBetweenPositions` → `Tracing.Tracing.trace_ray_ground_between_positions`
+- `Spring.TraceRayGroundInDirection` → `Tracing.Tracing.trace_ray_ground_in_direction`
+- `Spring.TraceScreenRay` → `Camera.Camera.trace_screen_ray`
+- `Spring.TransferFeature` → `FeatureControl.FeatureControl.transfer_feature`
+- `Spring.TransferTeamMaxUnits` → `TeamControl.TeamControl.transfer_team_max_units`
+- `Spring.TransferUnit` → `UnitControl.UnitControl.transfer_unit`
+- `Spring.UnitAttach` → `UnitControl.UnitControl.unit_attach`
+- `Spring.UnitDetach` → `UnitControl.UnitControl.unit_detach`
+- `Spring.UnitDetachFromAir` → `UnitControl.UnitControl.unit_detach_from_air`
+- `Spring.UnitFinishCommand` → `UnitControl.UnitControl.unit_finish_command`
+- `Spring.UnitIconGetDraw` → `Icons.Icons.unit_icon_get_draw`
+- `Spring.UnitIconSetDraw` → `Icons.Icons.unit_icon_set_draw`
+- `Spring.UnitWeaponFire` → `UnitControl.UnitControl.unit_weapon_fire`
+- `Spring.UnitWeaponHoldFire` → `UnitControl.UnitControl.unit_weapon_hold_fire`
+- `Spring.UpdateMapLight` → `Lights.Lights.update_map_light`
+- `Spring.UpdateModelLight` → `Lights.Lights.update_model_light`
+- `Spring.UseTeamResource` → `TeamControl.TeamControl.use_team_resource`
+- `Spring.UseUnitResource` → `UnitControl.UnitControl.use_unit_resource`
+- `Spring.ValidFeatureID` → `Features.Features.valid_feature_id`
+- `Spring.ValidUnitID` → `UnitsQuery.UnitsQuery.valid_unit_id`
+- `Spring.WarpMouse` → `UnsyncedCtrl.UnsyncedCtrl.warp_mouse`
+- `Spring.WorldToScreenCoords` → `Camera.Camera.world_to_screen_coords`
+- `Spring.Yield` → `SystemControl.SystemControl.yield`
+
+**Total: 762**
+
+---
+
+## Uncertain Matches
+
+Imperfect matches with <1.0 confidence (likely incorrect):
+
+
+**Total: 0**
+
+---
+
+## Unmatched Lua Functions
+
+Functions in Lua API with no Rust equivalent:
+
+
+**Total unmatched: 0**
+
+---
+
+## Rust-Only Functions
+
+Functions in Rust API with no Lua equivalent:
+
+- `FeatureControl.FeatureControl.set_feature_piece_matrix`
+- `FeatureDefs.FeatureDefs.get_feature_def_by_id`
+- `FeatureDefs.FeatureDefs.get_feature_def_count`
+- `FeatureDefs.FeatureDefs.get_feature_def_custom_param`
+- `FeatureDefs.FeatureDefs.get_feature_def_custom_param_keys`
+- `FeatureDefs.FeatureDefs.get_feature_def_energy`
+- `FeatureDefs.FeatureDefs.get_feature_def_idby_name`
+- `FeatureDefs.FeatureDefs.get_feature_def_ids`
+- `FeatureDefs.FeatureDefs.get_feature_def_metal`
+- `FeatureDefs.FeatureDefs.get_feature_def_name`
+- `FeatureDefs.FeatureDefs.valid_feature_def_id`
+- `Features.Features.get_feature_position_ext`
+- `Game.Game.get_game_map_info`
+- `Game.Game.get_game_mod_info`
+- `Game.Game.get_game_rules_info`
+- `Game.Game.get_game_rules_resource_info`
+- `Game.Game.get_game_setup_info`
+- `Game.Game.get_side_data_by_index`
+- `Game.Game.get_side_data_count`
+- `GameConfig.GameConfig.set_cheating_enabled`
+- `GameConfig.GameConfig.set_god_mode`
+- `Gfx.Gfx.active_fbo`
+- `Gfx.Gfx.active_shader`
+- `Gfx.Gfx.active_texture`
+- `Gfx.Gfx.add_atlas_texture`
+- `Gfx.Gfx.add_fallback_font`
+- `Gfx.Gfx.alpha_test`
+- `Gfx.Gfx.alpha_to_coverage`
+- `Gfx.Gfx.begin_end`
+- `Gfx.Gfx.begin_text`
+- `Gfx.Gfx.billboard`
+- `Gfx.Gfx.bind_image_texture`
+- `Gfx.Gfx.bind_texture`
+- `Gfx.Gfx.blend_equation`
+- `Gfx.Gfx.blend_equation_separate`
+- `Gfx.Gfx.blend_func`
+- `Gfx.Gfx.blend_func_separate`
+- `Gfx.Gfx.blending`
+- `Gfx.Gfx.blit_fbo`
+- `Gfx.Gfx.call_list`
+- `Gfx.Gfx.change_texture_params`
+- `Gfx.Gfx.clear`
+- `Gfx.Gfx.clear_attachment_fbo`
+- `Gfx.Gfx.clear_fallback_fonts`
+- `Gfx.Gfx.clip_distance`
+- `Gfx.Gfx.clip_plane`
+- `Gfx.Gfx.color`
+- `Gfx.Gfx.color_mask`
+- `Gfx.Gfx.config_mini_map`
+- `Gfx.Gfx.copy_to_texture`
+- `Gfx.Gfx.create_fbo`
+- `Gfx.Gfx.create_list`
+- `Gfx.Gfx.create_query`
+- `Gfx.Gfx.create_rbo`
+- `Gfx.Gfx.create_shader`
+- `Gfx.Gfx.create_texture`
+- `Gfx.Gfx.create_texture_atlas`
+- `Gfx.Gfx.culling`
+- `Gfx.Gfx.delete_fbo`
+- `Gfx.Gfx.delete_font`
+- `Gfx.Gfx.delete_list`
+- `Gfx.Gfx.delete_query`
+- `Gfx.Gfx.delete_rbo`
+- `Gfx.Gfx.delete_shader`
+- `Gfx.Gfx.delete_texture`
+- `Gfx.Gfx.delete_texture_atlas`
+- `Gfx.Gfx.delete_texture_fbo`
+- `Gfx.Gfx.delete_vao`
+- `Gfx.Gfx.delete_vbo`
+- `Gfx.Gfx.depth_clamp`
+- `Gfx.Gfx.depth_mask`
+- `Gfx.Gfx.depth_test`
+- `Gfx.Gfx.dispatch_compute`
+- `Gfx.Gfx.draw_func_at_unit`
+- `Gfx.Gfx.draw_ground_circle`
+- `Gfx.Gfx.draw_ground_quad`
+- `Gfx.Gfx.draw_list_at_unit`
+- `Gfx.Gfx.draw_mini_map`
+- `Gfx.Gfx.edge_flag`
+- `Gfx.Gfx.end_text`
+- `Gfx.Gfx.feature`
+- `Gfx.Gfx.feature_mult_matrix`
+- `Gfx.Gfx.feature_piece`
+- `Gfx.Gfx.feature_piece_matrix`
+- `Gfx.Gfx.feature_piece_mult_matrix`
+- `Gfx.Gfx.feature_raw`
+- `Gfx.Gfx.feature_shape`
+- `Gfx.Gfx.feature_shape_textures`
+- `Gfx.Gfx.feature_textures`
+- `Gfx.Gfx.finalize_texture_atlas`
+- `Gfx.Gfx.finish`
+- `Gfx.Gfx.flush`
+- `Gfx.Gfx.fog`
+- `Gfx.Gfx.fog_coord`
+- `Gfx.Gfx.font_begin`
+- `Gfx.Gfx.font_bind_texture`
+- `Gfx.Gfx.font_end`
+- `Gfx.Gfx.font_get_text_height`
+- `Gfx.Gfx.font_get_text_width`
+- `Gfx.Gfx.font_print`
+- `Gfx.Gfx.font_print_world`
+- `Gfx.Gfx.font_set_auto_outline_color`
+- `Gfx.Gfx.font_set_outline_color`
+- `Gfx.Gfx.font_set_text_color`
+- `Gfx.Gfx.font_submit_buffered`
+- `Gfx.Gfx.font_wrap_text`
+- `Gfx.Gfx.frustum`
+- `Gfx.Gfx.generate_mipmap`
+- `Gfx.Gfx.get_active_uniforms`
+- `Gfx.Gfx.get_atlas_texture`
+- `Gfx.Gfx.get_atmosphere`
+- `Gfx.Gfx.get_engine_atlas_textures`
+- `Gfx.Gfx.get_engine_model_uniform_data_def`
+- `Gfx.Gfx.get_engine_model_uniform_data_size`
+- `Gfx.Gfx.get_engine_uniform_buffer_def`
+- `Gfx.Gfx.get_fixed_state`
+- `Gfx.Gfx.get_font_info`
+- `Gfx.Gfx.get_global_tex_coords`
+- `Gfx.Gfx.get_global_tex_names`
+- `Gfx.Gfx.get_map_rendering`
+- `Gfx.Gfx.get_matrix_data`
+- `Gfx.Gfx.get_number`
+- `Gfx.Gfx.get_query`
+- `Gfx.Gfx.get_screen_view_trans`
+- `Gfx.Gfx.get_shader_log`
+- `Gfx.Gfx.get_shadow_map_params`
+- `Gfx.Gfx.get_string`
+- `Gfx.Gfx.get_subroutine_index`
+- `Gfx.Gfx.get_sun`
+- `Gfx.Gfx.get_text_height`
+- `Gfx.Gfx.get_text_width`
+- `Gfx.Gfx.get_uniform_location`
+- `Gfx.Gfx.get_vao`
+- `Gfx.Gfx.get_vbo`
+- `Gfx.Gfx.get_view_range`
+- `Gfx.Gfx.get_view_sizes`
+- `Gfx.Gfx.get_water_rendering`
+- `Gfx.Gfx.has_extension`
+- `Gfx.Gfx.is_valid_fbo`
+- `Gfx.Gfx.light`
+- `Gfx.Gfx.lighting`
+- `Gfx.Gfx.line_stipple`
+- `Gfx.Gfx.line_width`
+- `Gfx.Gfx.load_font`
+- `Gfx.Gfx.load_identity`
+- `Gfx.Gfx.load_matrix`
+- `Gfx.Gfx.logic_op`
+- `Gfx.Gfx.material`
+- `Gfx.Gfx.matrix_mode`
+- `Gfx.Gfx.memory_barrier`
+- `Gfx.Gfx.mult_matrix`
+- `Gfx.Gfx.multi_tex_coord`
+- `Gfx.Gfx.multi_tex_env`
+- `Gfx.Gfx.multi_tex_gen`
+- `Gfx.Gfx.normal`
+- `Gfx.Gfx.object_label`
+- `Gfx.Gfx.ortho`
+- `Gfx.Gfx.point_parameter`
+- `Gfx.Gfx.point_size`
+- `Gfx.Gfx.point_sprite`
+- `Gfx.Gfx.polygon_mode`
+- `Gfx.Gfx.polygon_offset`
+- `Gfx.Gfx.pop_attrib`
+- `Gfx.Gfx.pop_debug_group`
+- `Gfx.Gfx.pop_matrix`
+- `Gfx.Gfx.push_attrib`
+- `Gfx.Gfx.push_debug_group`
+- `Gfx.Gfx.push_matrix`
+- `Gfx.Gfx.push_pop_matrix`
+- `Gfx.Gfx.raw_bind_fbo`
+- `Gfx.Gfx.read_pixels`
+- `Gfx.Gfx.rect`
+- `Gfx.Gfx.render_to_texture`
+- `Gfx.Gfx.reset_matrices`
+- `Gfx.Gfx.reset_state`
+- `Gfx.Gfx.rotate`
+- `Gfx.Gfx.run_query`
+- `Gfx.Gfx.save_image`
+- `Gfx.Gfx.scale`
+- `Gfx.Gfx.scissor`
+- `Gfx.Gfx.secondary_color`
+- `Gfx.Gfx.set_feature_buffer_uniforms`
+- `Gfx.Gfx.set_geometry_shader_parameter`
+- `Gfx.Gfx.set_tesselation_shader_parameter`
+- `Gfx.Gfx.set_unit_buffer_uniforms`
+- `Gfx.Gfx.shade_model`
+- `Gfx.Gfx.shape`
+- `Gfx.Gfx.slave_mini_map`
+- `Gfx.Gfx.stencil_func`
+- `Gfx.Gfx.stencil_func_separate`
+- `Gfx.Gfx.stencil_mask`
+- `Gfx.Gfx.stencil_mask_separate`
+- `Gfx.Gfx.stencil_op`
+- `Gfx.Gfx.stencil_op_separate`
+- `Gfx.Gfx.stencil_test`
+- `Gfx.Gfx.swap_buffers`
+- `Gfx.Gfx.tex_coord`
+- `Gfx.Gfx.tex_env`
+- `Gfx.Gfx.tex_gen`
+- `Gfx.Gfx.tex_rect`
+- `Gfx.Gfx.text`
+- `Gfx.Gfx.text_env`
+- `Gfx.Gfx.texture_info`
+- `Gfx.Gfx.translate`
+- `Gfx.Gfx.uniform`
+- `Gfx.Gfx.uniform_array_float`
+- `Gfx.Gfx.uniform_array_int`
+- `Gfx.Gfx.uniform_int`
+- `Gfx.Gfx.uniform_matrix`
+- `Gfx.Gfx.uniform_subroutine`
+- `Gfx.Gfx.unit`
+- `Gfx.Gfx.unit_mult_matrix`
+- `Gfx.Gfx.unit_piece`
+- `Gfx.Gfx.unit_piece_matrix`
+- `Gfx.Gfx.unit_piece_mult_matrix`
+- `Gfx.Gfx.unit_raw`
+- `Gfx.Gfx.unit_shape`
+- `Gfx.Gfx.unit_shape_textures`
+- `Gfx.Gfx.unit_textures`
+- `Gfx.Gfx.unsafe_state`
+- `Gfx.Gfx.upload_texture`
+- `Gfx.Gfx.use_shader`
+- `Gfx.Gfx.vertex`
+- `Gfx.Gfx.viewport`
+- `Lights.Lights.add_light_tracking_target`
+- `MathExtra.MathExtra.bit_and`
+- `MathExtra.MathExtra.bit_bits`
+- `MathExtra.MathExtra.bit_inv`
+- `MathExtra.MathExtra.bit_or`
+- `MathExtra.MathExtra.bit_xor`
+- `MathExtra.MathExtra.clamp`
+- `MathExtra.MathExtra.diag`
+- `MathExtra.MathExtra.erf`
+- `MathExtra.MathExtra.hypot`
+- `MathExtra.MathExtra.mix`
+- `MathExtra.MathExtra.normalize`
+- `MathExtra.MathExtra.round`
+- `MathExtra.MathExtra.sgn`
+- `MathExtra.MathExtra.smooth_step`
+- `Memory.Memory.free`
+- `Memory.Memory.free_float2_array`
+- `Memory.Memory.free_float3_array`
+- `Memory.Memory.free_float4_array`
+- `Memory.Memory.free_float_array`
+- `Memory.Memory.free_int32_array`
+- `Memory.Memory.free_int3_array`
+- `Memory.Memory.free_string_array`
+- `Memory.Memory.free_uint32_array`
+- `MoveCtrl.MoveCtrl.is_move_ctrl_enabled`
+- `MoveCtrl.MoveCtrl.move_ctrl`
+- `MoveCtrl.MoveCtrl.set_move_ctrl_gravity`
+- `PathFinder.PathFinder.delete_path`
+- `PathFinder.PathFinder.free_path_node_costs_array`
+- `PathFinder.PathFinder.get_next_way_point`
+- `PathFinder.PathFinder.get_path_node_cost`
+- `PathFinder.PathFinder.get_path_node_costs`
+- `PathFinder.PathFinder.get_path_way_points`
+- `PathFinder.PathFinder.init_path_node_costs_array`
+- `PathFinder.PathFinder.request_path`
+- `PathFinder.PathFinder.set_path_node_cost`
+- `PathFinder.PathFinder.set_path_node_costs`
+- `Platform.Platform.get_architecture`
+- `Platform.Platform.is_headless`
+- `ProjectileControl.ProjectileControl.set_projectile_spin_angle`
+- `ProjectileControl.ProjectileControl.set_projectile_spin_speed`
+- `ProjectileControl.ProjectileControl.set_projectile_spin_vec`
+- `RmlUi.RmlUi.add_translation_string`
+- `RmlUi.RmlUi.clear_translations`
+- `RmlUi.RmlUi.context_activate_theme`
+- `RmlUi.RmlUi.context_add_event_listener`
+- `RmlUi.RmlUi.context_create_document`
+- `RmlUi.RmlUi.context_enable_mouse_cursor`
+- `RmlUi.RmlUi.context_get_density_independent_pixel_ratio`
+- `RmlUi.RmlUi.context_get_dimensions`
+- `RmlUi.RmlUi.context_get_document`
+- `RmlUi.RmlUi.context_get_element_at_point`
+- `RmlUi.RmlUi.context_get_focus_element`
+- `RmlUi.RmlUi.context_get_hover_element`
+- `RmlUi.RmlUi.context_get_name`
+- `RmlUi.RmlUi.context_get_root_element`
+- `RmlUi.RmlUi.context_is_mouse_interacting`
+- `RmlUi.RmlUi.context_is_theme_active`
+- `RmlUi.RmlUi.context_load_document`
+- `RmlUi.RmlUi.context_open_data_model`
+- `RmlUi.RmlUi.context_process_key_down`
+- `RmlUi.RmlUi.context_process_key_up`
+- `RmlUi.RmlUi.context_process_mouse_button_down`
+- `RmlUi.RmlUi.context_process_mouse_button_up`
+- `RmlUi.RmlUi.context_process_mouse_leave`
+- `RmlUi.RmlUi.context_process_mouse_move`
+- `RmlUi.RmlUi.context_process_mouse_wheel`
+- `RmlUi.RmlUi.context_process_text_input`
+- `RmlUi.RmlUi.context_pull_document_to_front`
+- `RmlUi.RmlUi.context_push_document_to_back`
+- `RmlUi.RmlUi.context_remove_data_model`
+- `RmlUi.RmlUi.context_render`
+- `RmlUi.RmlUi.context_set_density_independent_pixel_ratio`
+- `RmlUi.RmlUi.context_set_dimensions`
+- `RmlUi.RmlUi.context_unload_all_documents`
+- `RmlUi.RmlUi.context_unload_document`
+- `RmlUi.RmlUi.context_update`
+- `RmlUi.RmlUi.create_context`
+- `RmlUi.RmlUi.document_append_to_style_sheet`
+- `RmlUi.RmlUi.document_close`
+- `RmlUi.RmlUi.document_create_element`
+- `RmlUi.RmlUi.document_create_text_node`
+- `RmlUi.RmlUi.document_get_context`
+- `RmlUi.RmlUi.document_get_title`
+- `RmlUi.RmlUi.document_get_url`
+- `RmlUi.RmlUi.document_hide`
+- `RmlUi.RmlUi.document_is_modal`
+- `RmlUi.RmlUi.document_load_external_script`
+- `RmlUi.RmlUi.document_load_inline_script`
+- `RmlUi.RmlUi.document_pull_to_front`
+- `RmlUi.RmlUi.document_push_to_back`
+- `RmlUi.RmlUi.document_reload_style_sheet`
+- `RmlUi.RmlUi.document_set_title`
+- `RmlUi.RmlUi.document_show`
+- `RmlUi.RmlUi.document_update_document`
+- `RmlUi.RmlUi.element_add_event_listener`
+- `RmlUi.RmlUi.element_append_child`
+- `RmlUi.RmlUi.element_are_pseudo_classes_set`
+- `RmlUi.RmlUi.element_blur`
+- `RmlUi.RmlUi.element_click`
+- `RmlUi.RmlUi.element_clone`
+- `RmlUi.RmlUi.element_closest`
+- `RmlUi.RmlUi.element_dispatch_event`
+- `RmlUi.RmlUi.element_focus`
+- `RmlUi.RmlUi.element_form_control_input_get_selection`
+- `RmlUi.RmlUi.element_form_control_input_select`
+- `RmlUi.RmlUi.element_form_control_input_set_selection`
+- `RmlUi.RmlUi.element_form_control_select_add`
+- `RmlUi.RmlUi.element_form_control_select_remove`
+- `RmlUi.RmlUi.element_form_control_select_remove_all`
+- `RmlUi.RmlUi.element_form_control_text_area_get_selection`
+- `RmlUi.RmlUi.element_form_control_text_area_select`
+- `RmlUi.RmlUi.element_form_control_text_area_set_selection`
+- `RmlUi.RmlUi.element_form_submit`
+- `RmlUi.RmlUi.element_get_active_pseudo_classes`
+- `RmlUi.RmlUi.element_get_attribute`
+- `RmlUi.RmlUi.element_get_child`
+- `RmlUi.RmlUi.element_get_class_name`
+- `RmlUi.RmlUi.element_get_element_by_id`
+- `RmlUi.RmlUi.element_get_elements_by_class_name`
+- `RmlUi.RmlUi.element_get_elements_by_class_name_count`
+- `RmlUi.RmlUi.element_get_elements_by_tag_name`
+- `RmlUi.RmlUi.element_get_elements_by_tag_name_count`
+- `RmlUi.RmlUi.element_get_id`
+- `RmlUi.RmlUi.element_get_inner_rml`
+- `RmlUi.RmlUi.element_get_scroll_left`
+- `RmlUi.RmlUi.element_get_scroll_top`
+- `RmlUi.RmlUi.element_get_tag_name`
+- `RmlUi.RmlUi.element_get_value`
+- `RmlUi.RmlUi.element_has_attribute`
+- `RmlUi.RmlUi.element_has_child_nodes`
+- `RmlUi.RmlUi.element_insert_before`
+- `RmlUi.RmlUi.element_is_class_set`
+- `RmlUi.RmlUi.element_is_point_within_element`
+- `RmlUi.RmlUi.element_is_pseudo_class_set`
+- `RmlUi.RmlUi.element_is_visible`
+- `RmlUi.RmlUi.element_matches`
+- `RmlUi.RmlUi.element_process_default_action`
+- `RmlUi.RmlUi.element_query_selector`
+- `RmlUi.RmlUi.element_query_selector_all`
+- `RmlUi.RmlUi.element_query_selector_all_count`
+- `RmlUi.RmlUi.element_remove_attribute`
+- `RmlUi.RmlUi.element_remove_child`
+- `RmlUi.RmlUi.element_replace_child`
+- `RmlUi.RmlUi.element_scroll_into_view`
+- `RmlUi.RmlUi.element_set_attribute`
+- `RmlUi.RmlUi.element_set_class`
+- `RmlUi.RmlUi.element_set_class_name`
+- `RmlUi.RmlUi.element_set_id`
+- `RmlUi.RmlUi.element_set_inner_rml`
+- `RmlUi.RmlUi.element_set_pseudo_class`
+- `RmlUi.RmlUi.element_set_scroll_left`
+- `RmlUi.RmlUi.element_set_scroll_top`
+- `RmlUi.RmlUi.element_tab_set_remove_tab`
+- `RmlUi.RmlUi.element_tab_set_set_panel`
+- `RmlUi.RmlUi.element_tab_set_set_tab`
+- `RmlUi.RmlUi.event_get_current`
+- `RmlUi.RmlUi.event_get_current_element`
+- `RmlUi.RmlUi.event_get_parameter_bool`
+- `RmlUi.RmlUi.event_get_parameter_float`
+- `RmlUi.RmlUi.event_get_parameter_int`
+- `RmlUi.RmlUi.event_get_parameter_string`
+- `RmlUi.RmlUi.event_get_parameter_type`
+- `RmlUi.RmlUi.event_get_phase`
+- `RmlUi.RmlUi.event_get_target_element`
+- `RmlUi.RmlUi.event_get_type`
+- `RmlUi.RmlUi.event_is_immediate_propagating`
+- `RmlUi.RmlUi.event_is_interruptible`
+- `RmlUi.RmlUi.event_is_propagating`
+- `RmlUi.RmlUi.event_listener_on_attach`
+- `RmlUi.RmlUi.event_listener_on_detach`
+- `RmlUi.RmlUi.event_listener_process_event`
+- `RmlUi.RmlUi.event_stop_immediate_propagation`
+- `RmlUi.RmlUi.event_stop_propagation`
+- `RmlUi.RmlUi.get_context`
+- `RmlUi.RmlUi.get_version`
+- `RmlUi.RmlUi.is_ready`
+- `RmlUi.RmlUi.load_font_face`
+- `RmlUi.RmlUi.regiser_event_type`
+- `RmlUi.RmlUi.register_event_type`
+- `RmlUi.RmlUi.remove_context`
+- `RmlUi.RmlUi.remove_context_by_name`
+- `RmlUi.RmlUi.set_debug_context`
+- `RmlUi.RmlUi.set_debug_context_by_name`
+- `RmlUi.RmlUi.set_mouse_cursor_alias`
+- `RmlUi.RmlUi.sol_lua_data_model___set_dirty`
+- `RmlUi.RmlUi.sol_lua_data_model_set_dirty`
+- `RmlUi.RmlUi.vector2f_new`
+- `RmlUi.RmlUi.vector2i_new`
+- `SyncedCtrl.SyncedCtrl.cob_script`
+- `SyncedCtrl.SyncedCtrl.effects`
+- `SyncedCtrl.SyncedCtrl.feature`
+- `SyncedCtrl.SyncedCtrl.game_config`
+- `SyncedCtrl.SyncedCtrl.projectile`
+- `SyncedCtrl.SyncedCtrl.team`
+- `SyncedCtrl.SyncedCtrl.terrain`
+- `SyncedCtrl.SyncedCtrl.unit`
+- `SystemControl.SystemControl.call_as_team`
+- `SystemControl.SystemControl.get_replay_file_path`
+- `SystemControl.SystemControl.get_replay_recording_file_path`
+- `Teams.Teams.get_player_list_in_ally_team`
+- `Teams.Teams.get_player_list_in_team`
+- `Terrain.Terrain.get_height_map_size`
+- `Tracing.Tracing.trace_ray`
+- `Tracing.Tracing.trace_ray_features`
+- `Tracing.Tracing.trace_ray_units`
+- `UnitControl.UnitControl.set_unit_fuel`
+- `UnitControl.UnitControl.set_unit_heading`
+- `UnitControl.UnitControl.set_unit_travel`
+- `UnitDefs.UnitDefs.get_unit_def_by_id`
+- `UnitDefs.UnitDefs.get_unit_def_costs`
+- `UnitDefs.UnitDefs.get_unit_def_count`
+- `UnitDefs.UnitDefs.get_unit_def_custom_param`
+- `UnitDefs.UnitDefs.get_unit_def_custom_param_keys`
+- `UnitDefs.UnitDefs.get_unit_def_health`
+- `UnitDefs.UnitDefs.get_unit_def_human_name`
+- `UnitDefs.UnitDefs.get_unit_def_idby_name`
+- `UnitDefs.UnitDefs.get_unit_def_ids`
+- `UnitDefs.UnitDefs.get_unit_def_name`
+- `UnitDefs.UnitDefs.get_unit_def_speed`
+- `UnitDefs.UnitDefs.valid_unit_def_id`
+- `UnitRendering.UnitRendering.get_frustum_planes`
+- `UnitRendering.UnitRendering.get_unit_icon`
+- `UnitsCommands.UnitsCommands.get_command_params`
+- `UnitsCommands.UnitsCommands.get_unit_command_descriptions`
+- `UnitsInfo.UnitsInfo.get_unit_crashing`
+- `UnitsInfo.UnitsInfo.get_unit_move_def_id`
+- `UnitsInfo.UnitsInfo.get_unit_piece_collision_volume_data`
+- `UnitsQuery.UnitsQuery.get_closest_enemy_unit`
+- `UnitsWeapons.UnitsWeapons.get_unit_weapon_count`
+- `UnsyncedCtrl.UnsyncedCtrl.get_water_texture`
+- `UnsyncedCtrl.UnsyncedCtrl.set_custom_palette_color`
+- `UnsyncedCtrl.UnsyncedCtrl.set_engine_build_square_rendering`
+- `UnsyncedCtrl.UnsyncedCtrl.set_feature_palette_index`
+- `UnsyncedCtrl.UnsyncedCtrl.set_shock_front_factors`
+- `UnsyncedCtrl.UnsyncedCtrl.set_unit_icon`
+- `UnsyncedCtrl.UnsyncedCtrl.set_unit_palette_index`
+- `UnsyncedCtrl.UnsyncedCtrl.set_water_texture`
+- `UnsyncedRead.UnsyncedRead.get_custom_palette_color`
+- `UnsyncedRead.UnsyncedRead.get_feature_palette_index`
+- `UnsyncedRead.UnsyncedRead.get_game_seconds_interpolated`
+- `UnsyncedRead.UnsyncedRead.get_unit_palette_index`
+- `UnsyncedRead.UnsyncedRead.unit_rendering`
+- `Vfs.Vfs.calculate_hash`
+- `Vfs.Vfs.compress_folder`
+- `Vfs.Vfs.dir_list`
+- `Vfs.Vfs.file_exists`
+- `Vfs.Vfs.get_all_archives`
+- `Vfs.Vfs.get_archive_checksum`
+- `Vfs.Vfs.get_archive_containing_file`
+- `Vfs.Vfs.get_archive_dependencies`
+- `Vfs.Vfs.get_archive_info`
+- `Vfs.Vfs.get_archive_path`
+- `Vfs.Vfs.get_archive_replaces`
+- `Vfs.Vfs.get_archives`
+- `Vfs.Vfs.get_available_ais`
+- `Vfs.Vfs.get_file_absolute_path`
+- `Vfs.Vfs.get_file_info`
+- `Vfs.Vfs.get_file_size`
+- `Vfs.Vfs.get_games`
+- `Vfs.Vfs.get_loaded_archives`
+- `Vfs.Vfs.get_map_square_texture_info`
+- `Vfs.Vfs.get_maps`
+- `Vfs.Vfs.get_name_from_rapid_tag`
+- `Vfs.Vfs.has_archive`
+- `Vfs.Vfs.is_directory`
+- `Vfs.Vfs.list_dir`
+- `Vfs.Vfs.load_file`
+- `Vfs.Vfs.pack_f32`
+- `Vfs.Vfs.pack_s16`
+- `Vfs.Vfs.pack_s32`
+- `Vfs.Vfs.pack_s8`
+- `Vfs.Vfs.pack_u16`
+- `Vfs.Vfs.pack_u32`
+- `Vfs.Vfs.pack_u8`
+- `Vfs.Vfs.read_file`
+- `Vfs.Vfs.read_file_as_string`
+- `Vfs.Vfs.sub_dirs`
+- `Vfs.Vfs.unpack_f32`
+- `Vfs.Vfs.unpack_s16`
+- `Vfs.Vfs.unpack_s32`
+- `Vfs.Vfs.unpack_s8`
+- `Vfs.Vfs.unpack_u16`
+- `Vfs.Vfs.unpack_u32`
+- `Vfs.Vfs.unpack_u8`
+- `Vfs.Vfs.use_archive`
+- `Vfs.Vfs.zlib_compress`
+- `Vfs.Vfs.zlib_decompress`
+- `WeaponDefs.WeaponDefs.get_weapon_def_by_id`
+- `WeaponDefs.WeaponDefs.get_weapon_def_count`
+- `WeaponDefs.WeaponDefs.get_weapon_def_custom_param`
+- `WeaponDefs.WeaponDefs.get_weapon_def_custom_param_keys`
+- `WeaponDefs.WeaponDefs.get_weapon_def_damage`
+- `WeaponDefs.WeaponDefs.get_weapon_def_id`
+- `WeaponDefs.WeaponDefs.get_weapon_def_ids`
+- `WeaponDefs.WeaponDefs.get_weapon_def_name`
+- `WeaponDefs.WeaponDefs.get_weapon_def_range`
+- `WeaponDefs.WeaponDefs.valid_weapon_def_id`
+
+**Total Rust-only: 522**

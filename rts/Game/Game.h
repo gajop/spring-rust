@@ -6,6 +6,7 @@
 #include <atomic>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "GameController.h"
 #include "GameJobDispatcher.h"
@@ -18,6 +19,7 @@
 class LuaParser;
 class ILoadSaveHandler;
 class ChatMessage;
+class NativeInterfaceSystem;
 
 
 class CGame : public CGameController
@@ -227,6 +229,9 @@ private:
 
 	std::atomic<bool> loadDone = {false};
 	std::atomic<bool> gameOver = {false};
+
+	// NativeInterfaceSystem - owned by Game, accessed globally via s_instance
+	std::unique_ptr<NativeInterfaceSystem> nativeInterfaceSystem;
 };
 
 

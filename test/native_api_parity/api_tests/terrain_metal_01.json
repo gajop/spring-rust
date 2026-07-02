@@ -1,0 +1,704 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "ground_height",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetHeightMapFunc",
+          "Spring.SetHeightMap"
+        ],
+        "get": [
+          "Spring.GetGroundHeight"
+        ]
+      },
+      "native": {
+        "set": [
+          "TerrainControl.set_height_map"
+        ],
+        "get": [
+          "terrain().get_ground_height"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "height"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetHeightMapFunc` + `Spring.SetHeightMap`",
+        "native_setter": "`TerrainControl.set_height_map`",
+        "lua_getter": "`Spring.GetGroundHeight`",
+        "native_getter": "`terrain().get_ground_height`",
+        "fields": "`height`"
+      },
+      "rust": {
+        "check": "check_ground_height",
+        "set": "set_ground_height"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        },
+        "height": {
+          "type": "f32",
+          "generator": "raised_ground_height"
+        },
+        "terraform": {
+          "type": "f32",
+          "range": [
+            0,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "ground_orig_height",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGroundOrigHeight"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "terrain().get_ground_orig_height"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "height"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGroundOrigHeight`",
+        "native_getter": "`terrain().get_ground_orig_height`",
+        "fields": "`height`"
+      },
+      "rust": {
+        "check": "check_ground_orig_height",
+        "set": "set_noop"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ground_normal",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGroundNormal"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "terrain().get_ground_normal"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "normalX",
+          "normalY",
+          "normalZ",
+          "slope"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGroundNormal`",
+        "native_getter": "`terrain().get_ground_normal`",
+        "fields": "`normalX`, `normalY`, `normalZ`, `slope`"
+      },
+      "rust": {
+        "check": "check_ground_normal",
+        "set": "set_noop"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        },
+        "smoothed": {
+          "type": "bool"
+        }
+      }
+    },
+    {
+      "id": "get_smooth_mesh_height",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetSmoothMeshHeight"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_smooth_mesh_height"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "height"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetSmoothMeshHeight`",
+        "native_getter": "`Terrain.get_smooth_mesh_height`",
+        "fields": "`height`"
+      },
+      "rust": {
+        "check": "check_terrain_f32",
+        "set": "set_noop"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetSmoothMeshHeight",
+        "args": [
+          "value.x",
+          "value.z"
+        ],
+        "returns": [
+          "height"
+        ]
+      }
+    },
+    {
+      "id": "get_water_plane_level",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetWaterPlaneLevel"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_water_plane_level"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "waterPlaneLevel"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetWaterPlaneLevel`",
+        "native_getter": "`Terrain.get_water_plane_level`",
+        "fields": "`waterPlaneLevel`"
+      },
+      "rust": {
+        "check": "check_terrain_f32",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetWaterPlaneLevel",
+        "args": [],
+        "returns": [
+          "waterPlaneLevel"
+        ]
+      }
+    },
+    {
+      "id": "get_water_level",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetWaterLevel"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_water_level"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "waterLevel"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetWaterLevel`",
+        "native_getter": "`Terrain.get_water_level`",
+        "fields": "`waterLevel`"
+      },
+      "rust": {
+        "check": "check_terrain_f32",
+        "set": "set_noop"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetWaterLevel",
+        "args": [
+          "value.x",
+          "value.z"
+        ],
+        "returns": [
+          "waterLevel"
+        ]
+      }
+    },
+    {
+      "id": "get_ground_extremes",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGroundExtremes"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_ground_extremes"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "initMinHeight",
+          "initMaxHeight",
+          "currMinHeight",
+          "currMaxHeight"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGroundExtremes`",
+        "native_getter": "`Terrain.get_ground_extremes`",
+        "fields": "`initMinHeight`, `initMaxHeight`, `currMinHeight`, `currMaxHeight`"
+      },
+      "rust": {
+        "check": "check_ground_extremes",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetGroundExtremes",
+        "args": [],
+        "returns": [
+          "initMinHeight",
+          "initMaxHeight",
+          "currMinHeight",
+          "currMaxHeight"
+        ]
+      }
+    },
+    {
+      "id": "get_ground_blocked",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGroundBlocked"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_ground_blocked"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "blocked"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGroundBlocked`",
+        "native_getter": "`Terrain.get_ground_blocked`",
+        "fields": "`blocked`"
+      },
+      "rust": {
+        "check": "check_ground_blocked",
+        "set": "set_noop"
+      },
+      "params": {
+        "x1": {
+          "type": "f32",
+          "fixed": 0
+        },
+        "z1": {
+          "type": "f32",
+          "fixed": 0
+        },
+        "x2": {
+          "type": "f32",
+          "fixed": 0
+        },
+        "z2": {
+          "type": "f32",
+          "fixed": 0
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetGroundBlocked",
+        "args": [
+          "value.x1",
+          "value.z1",
+          "value.x2",
+          "value.z2"
+        ],
+        "returns": [
+          "blocked"
+        ]
+      }
+    },
+    {
+      "id": "get_grass",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGrass"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_grass"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "grassLevel"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGrass`",
+        "native_getter": "`Terrain.get_grass`",
+        "fields": "`grassLevel`"
+      },
+      "rust": {
+        "check": "check_terrain_f32",
+        "set": "set_noop"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetGrass",
+        "args": [
+          "value.x",
+          "value.z"
+        ],
+        "returns": [
+          "grassLevel"
+        ]
+      }
+    },
+    {
+      "id": "is_pos_in_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.IsPosInMap"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.is_pos_in_map"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "inPlayArea",
+          "inMap"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.IsPosInMap`",
+        "native_getter": "`Terrain.is_pos_in_map`",
+        "fields": "`inPlayArea`, `inMap`"
+      },
+      "rust": {
+        "check": "check_is_pos_in_map",
+        "set": "set_noop"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.IsPosInMap",
+        "args": [
+          "value.x",
+          "value.z"
+        ],
+        "returns": [
+          "inPlayArea",
+          "inMap"
+        ]
+      }
+    },
+    {
+      "id": "get_ground_info",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "ground_point"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetGroundInfo"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_ground_info"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "terrainTypeIndex",
+          "terrainTypeName",
+          "metalExtraction",
+          "hardness",
+          "tankSpeed",
+          "kbotSpeed",
+          "hoverSpeed",
+          "shipSpeed",
+          "receiveTracks"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetGroundInfo`",
+        "native_getter": "`Terrain.get_ground_info`",
+        "fields": "`terrainTypeIndex`, `terrainTypeName`, terrain fields"
+      },
+      "rust": {
+        "check": "check_terrain_info",
+        "set": "set_noop"
+      },
+      "params": {
+        "point": {
+          "type": "float2",
+          "generator": "map_point",
+          "expands_to": [
+            "x",
+            "z"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetGroundInfo",
+        "args": [
+          "value.x",
+          "value.z"
+        ],
+        "returns": [
+          "terrainTypeIndex",
+          "terrainTypeName",
+          "metalExtraction",
+          "hardness",
+          "tankSpeed",
+          "kbotSpeed",
+          "hoverSpeed",
+          "shipSpeed",
+          "receiveTracks"
+        ]
+      }
+    },
+    {
+      "id": "get_terrain_type_data",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTerrainTypeData"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Terrain.get_terrain_type_data"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "terrainTypeIndex",
+          "terrainTypeName",
+          "hardness",
+          "tankSpeed",
+          "kbotSpeed",
+          "hoverSpeed",
+          "shipSpeed",
+          "receiveTracks"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTerrainTypeData`",
+        "native_getter": "`Terrain.get_terrain_type_data`",
+        "fields": "`terrainTypeIndex`, `terrainTypeName`, terrain fields"
+      },
+      "rust": {
+        "check": "check_terrain_info",
+        "set": "set_noop"
+      },
+      "params": {
+        "terrainTypeIndex": {
+          "type": "i32",
+          "fixed": 0
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTerrainTypeData",
+        "args": [
+          "value.terrainTypeIndex"
+        ],
+        "returns": [
+          "terrainTypeIndex",
+          "terrainTypeName",
+          "hardness",
+          "tankSpeed",
+          "kbotSpeed",
+          "hoverSpeed",
+          "shipSpeed",
+          "receiveTracks"
+        ]
+      }
+    }
+  ]
+}

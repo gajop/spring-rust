@@ -1,0 +1,428 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "are_players_allied",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.ArePlayersAllied"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.are_players_allied"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "allied"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.ArePlayersAllied`",
+        "native_getter": "`Teams.are_players_allied`",
+        "fields": "`allied`"
+      },
+      "rust": {
+        "check": "check_teams_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "playerID1": {
+          "type": "i32",
+          "fixed": 0
+        },
+        "playerID2": {
+          "type": "i32",
+          "fixed": 0
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.ArePlayersAllied",
+        "args": [
+          "value.playerID1",
+          "value.playerID2"
+        ],
+        "returns": [
+          "allied"
+        ]
+      }
+    },
+    {
+      "id": "get_team_ally_team_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamAllyTeamID"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_team_ally_team_id"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "allyTeamID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamAllyTeamID`",
+        "native_getter": "`Teams.get_team_ally_team_id`",
+        "fields": "`allyTeamID`"
+      },
+      "rust": {
+        "check": "check_teams_i32",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamAllyTeamID",
+        "args": [
+          "fixture.teamID"
+        ],
+        "returns": [
+          "allyTeamID"
+        ]
+      }
+    },
+    {
+      "id": "game_rules_param",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetGameRulesParam"
+        ],
+        "get": [
+          "Spring.GetGameRulesParam",
+          "Spring.GetGameRulesParams"
+        ]
+      },
+      "native": {
+        "set": [
+          "RulesParams.set_game_rules_param"
+        ],
+        "get": [
+          "RulesParams.get_game_rules_param",
+          "RulesParams.get_game_rules_params"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value",
+          "listed"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetGameRulesParam`",
+        "native_setter": "`RulesParams.set_game_rules_param`",
+        "lua_getter": "`Spring.GetGameRulesParam`, `Spring.GetGameRulesParams`",
+        "native_getter": "`RulesParams.get_game_rules_param`, `RulesParams.get_game_rules_params`",
+        "fields": "`value`, `listed`"
+      },
+      "rust": {
+        "check": "check_rules_param",
+        "set": "set_rules_param"
+      },
+      "params": {
+        "scope": {
+          "type": "string",
+          "fixed": "game"
+        },
+        "paramName": {
+          "type": "string",
+          "fixed": "native_api_parity_game_rules_param"
+        },
+        "value": {
+          "type": "f32",
+          "range": [
+            10,
+            900
+          ]
+        }
+      }
+    },
+    {
+      "id": "team_resource",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetTeamResource"
+        ],
+        "get": [
+          "Spring.GetTeamResources"
+        ]
+      },
+      "native": {
+        "set": [
+          "TeamControl.set_team_resource"
+        ],
+        "get": [
+          "Teams.get_team_resources"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "currentLevel",
+          "storage"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetTeamResource`",
+        "native_setter": "`TeamControl.set_team_resource`",
+        "lua_getter": "`Spring.GetTeamResources`",
+        "native_getter": "`Teams.get_team_resources`",
+        "fields": "`currentLevel`, `storage`"
+      },
+      "rust": {
+        "check": "check_team_resources",
+        "set": "set_team_resource"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "resource": {
+          "type": "enum",
+          "values": [
+            "metal",
+            "energy"
+          ]
+        },
+        "amount": {
+          "type": "f32",
+          "range": [
+            100,
+            900
+          ]
+        }
+      }
+    },
+    {
+      "id": "team_rules_param",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetTeamRulesParam"
+        ],
+        "get": [
+          "Spring.GetTeamRulesParam",
+          "Spring.GetTeamRulesParams"
+        ]
+      },
+      "native": {
+        "set": [
+          "RulesParams.set_team_rules_param"
+        ],
+        "get": [
+          "RulesParams.get_team_rules_param",
+          "RulesParams.get_team_rules_params"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value",
+          "listed"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetTeamRulesParam`",
+        "native_setter": "`RulesParams.set_team_rules_param`",
+        "lua_getter": "`Spring.GetTeamRulesParam`, `Spring.GetTeamRulesParams`",
+        "native_getter": "`RulesParams.get_team_rules_param`, `RulesParams.get_team_rules_params`",
+        "fields": "`value`, `listed`"
+      },
+      "rust": {
+        "check": "check_rules_param",
+        "set": "set_rules_param"
+      },
+      "params": {
+        "scope": {
+          "type": "string",
+          "fixed": "team"
+        },
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "paramName": {
+          "type": "string",
+          "fixed": "native_api_parity_team_rules_param"
+        },
+        "value": {
+          "type": "f32",
+          "range": [
+            10,
+            900
+          ]
+        }
+      }
+    },
+    {
+      "id": "player_rules_param",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetPlayerRulesParam"
+        ],
+        "get": [
+          "Spring.GetPlayerRulesParam",
+          "Spring.GetPlayerRulesParams"
+        ]
+      },
+      "native": {
+        "set": [
+          "RulesParams.set_player_rules_param"
+        ],
+        "get": [
+          "RulesParams.get_player_rules_param",
+          "RulesParams.get_player_rules_params"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value",
+          "listed"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetPlayerRulesParam`",
+        "native_setter": "`RulesParams.set_player_rules_param`",
+        "lua_getter": "`Spring.GetPlayerRulesParam`, `Spring.GetPlayerRulesParams`",
+        "native_getter": "`RulesParams.get_player_rules_param`, `RulesParams.get_player_rules_params`",
+        "fields": "`value`, `listed`"
+      },
+      "rust": {
+        "check": "check_rules_param",
+        "set": "set_rules_param"
+      },
+      "params": {
+        "scope": {
+          "type": "string",
+          "fixed": "player"
+        },
+        "playerID": {
+          "type": "i32",
+          "fixed": 0
+        },
+        "paramName": {
+          "type": "string",
+          "fixed": "native_api_parity_player_rules_param"
+        },
+        "value": {
+          "type": "f32",
+          "range": [
+            10,
+            900
+          ]
+        }
+      }
+    },
+    {
+      "id": "get_team_resource_stats",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamResourceStats"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_team_resource_stats"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "used",
+          "produced",
+          "excessed",
+          "received",
+          "sent"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamResourceStats`",
+        "native_getter": "`Teams.get_team_resource_stats`",
+        "fields": "`used`, `produced`, `excessed`, `received`, `sent`"
+      },
+      "rust": {
+        "check": "check_team_resource_stats",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixed": 0
+        },
+        "resource": {
+          "type": "enum",
+          "values": [
+            "metal",
+            "energy"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamResourceStats",
+        "args": [
+          "teamID",
+          "resource"
+        ],
+        "returns": [
+          "used",
+          "produced",
+          "excessed",
+          "received",
+          "sent"
+        ]
+      }
+    }
+  ]
+}

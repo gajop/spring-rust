@@ -1,0 +1,650 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_unit_build_facing",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitBuildFacing"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_build_facing"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "facing"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitBuildFacing`",
+        "native_getter": "`UnitsInfo.get_unit_build_facing`",
+        "fields": "`facing`"
+      },
+      "rust": {
+        "check": "check_unit_info_i32",
+        "set": "set_noop"
+      },
+      "params": {
+        "unitID": {
+          "type": "i32",
+          "fixture": "unitID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitBuildFacing",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "facing"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_buildee_radius",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitBuildeeRadius"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_buildee_radius"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "buildeeRadius"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitBuildeeRadius`",
+        "native_getter": "`UnitsInfo.get_unit_buildee_radius`",
+        "fields": "`buildeeRadius`"
+      },
+      "rust": {
+        "check": "check_unit_info_f32",
+        "set": "set_noop"
+      },
+      "params": {
+        "unitID": {
+          "type": "i32",
+          "fixture": "unitID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitBuildeeRadius",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "buildeeRadius"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_resources",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitResources"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_resources"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "metalMake",
+          "metalUse",
+          "energyMake",
+          "energyUse"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitResources`",
+        "native_getter": "`UnitsInfo.get_unit_resources`",
+        "fields": "`metalMake`, `metalUse`, `energyMake`, `energyUse`"
+      },
+      "rust": {
+        "check": "check_unit_resources",
+        "set": "set_noop"
+      },
+      "params": {
+        "unitID": {
+          "type": "i32",
+          "fixture": "unitID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitResources",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "metalMake",
+          "metalUse",
+          "energyMake",
+          "energyUse"
+        ]
+      }
+    },
+    {
+      "id": "valid_unit_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.ValidUnitID"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.valid_unit_id"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "valid"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.ValidUnitID`",
+        "native_getter": "`UnitsQuery.valid_unit_id`",
+        "fields": "`valid`"
+      },
+      "rust": {
+        "check": "check_units_query_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "unitID": {
+          "type": "i32",
+          "fixture": "unitID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.ValidUnitID",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "valid"
+        ]
+      }
+    },
+    {
+      "id": "get_all_units",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetAllUnits"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_all_units"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "unitIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetAllUnits`",
+        "native_getter": "`UnitsQuery.get_all_units`",
+        "fields": "`unitIDs`"
+      },
+      "rust": {
+        "check": "check_units_query_list",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetAllUnits",
+        "args": [],
+        "returns": [
+          "unitIDs"
+        ]
+      }
+    },
+    {
+      "id": "get_team_unit_count",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamUnitCount"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_team_unit_count"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "count"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamUnitCount`",
+        "native_getter": "`UnitsQuery.get_team_unit_count`",
+        "fields": "`count`"
+      },
+      "rust": {
+        "check": "check_units_query_count",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamUnitCount",
+        "args": [
+          "fixture.teamID"
+        ],
+        "returns": [
+          "count"
+        ]
+      }
+    },
+    {
+      "id": "get_team_unit_def_count",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamUnitDefCount"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_team_unit_def_count"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "count"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamUnitDefCount`",
+        "native_getter": "`UnitsQuery.get_team_unit_def_count`",
+        "fields": "`count`"
+      },
+      "rust": {
+        "check": "check_units_query_count",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "unitDefID": {
+          "type": "i32",
+          "fixture": "unitDefID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamUnitDefCount",
+        "args": [
+          "fixture.teamID",
+          "fixture.unitDefID"
+        ],
+        "returns": [
+          "count"
+        ]
+      }
+    },
+    {
+      "id": "get_team_units",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamUnits"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_team_units"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "unitIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamUnits`",
+        "native_getter": "`UnitsQuery.get_team_units`",
+        "fields": "`unitIDs`"
+      },
+      "rust": {
+        "check": "check_units_query_list",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamUnits",
+        "args": [
+          "fixture.teamID"
+        ],
+        "returns": [
+          "unitIDs"
+        ]
+      }
+    },
+    {
+      "id": "get_team_units_by_defs",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamUnitsByDefs"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_team_units_by_defs"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "unitIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamUnitsByDefs`",
+        "native_getter": "`UnitsQuery.get_team_units_by_defs`",
+        "fields": "`unitIDs`"
+      },
+      "rust": {
+        "check": "check_units_query_list",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "unitDefID": {
+          "type": "i32",
+          "fixture": "unitDefID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamUnitsByDefs",
+        "args": [
+          "fixture.teamID",
+          "fixture.unitDefID"
+        ],
+        "returns": [
+          "unitIDs"
+        ]
+      },
+      "order_insensitive_fields": [
+        "unitIDs"
+      ]
+    },
+    {
+      "id": "get_units_in_rectangle",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitsInRectangle"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_units_in_rectangle"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "unitIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitsInRectangle`",
+        "native_getter": "`UnitsQuery.get_units_in_rectangle`",
+        "fields": "`unitIDs`"
+      },
+      "rust": {
+        "check": "check_units_query_set",
+        "set": "set_noop"
+      },
+      "params": {
+        "minX": {
+          "type": "f32",
+          "fixed": 0
+        },
+        "minZ": {
+          "type": "f32",
+          "fixed": 0
+        },
+        "maxX": {
+          "type": "f32",
+          "fixed": 99999
+        },
+        "maxZ": {
+          "type": "f32",
+          "fixed": 99999
+        },
+        "allegiance": {
+          "type": "i32",
+          "fixed": -1
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitsInRectangle",
+        "args": [
+          "value.minX",
+          "value.minZ",
+          "value.maxX",
+          "value.maxZ",
+          "value.allegiance"
+        ],
+        "returns": [
+          "unitIDs"
+        ]
+      },
+      "order_insensitive_fields": [
+        "unitIDs"
+      ]
+    },
+    {
+      "id": "get_units_in_box",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitsInBox"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_units_in_box"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "unitIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitsInBox`",
+        "native_getter": "`UnitsQuery.get_units_in_box`",
+        "fields": "`unitIDs`"
+      },
+      "rust": {
+        "check": "check_units_query_set",
+        "set": "set_noop"
+      },
+      "params": {
+        "minX": {
+          "type": "f32",
+          "fixed": 0
+        },
+        "minY": {
+          "type": "f32",
+          "fixed": -99999
+        },
+        "minZ": {
+          "type": "f32",
+          "fixed": 0
+        },
+        "maxX": {
+          "type": "f32",
+          "fixed": 99999
+        },
+        "maxY": {
+          "type": "f32",
+          "fixed": 99999
+        },
+        "maxZ": {
+          "type": "f32",
+          "fixed": 99999
+        },
+        "allegiance": {
+          "type": "i32",
+          "fixed": -1
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitsInBox",
+        "args": [
+          "value.minX",
+          "value.minY",
+          "value.minZ",
+          "value.maxX",
+          "value.maxY",
+          "value.maxZ",
+          "value.allegiance"
+        ],
+        "returns": [
+          "unitIDs"
+        ]
+      },
+      "order_insensitive_fields": [
+        "unitIDs"
+      ]
+    }
+  ]
+}

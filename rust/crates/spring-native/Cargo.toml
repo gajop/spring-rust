@@ -1,0 +1,15 @@
+[package]
+name = "spring-native"
+version = "0.1.0"
+edition = "2021"
+description = "Safe Rust façade over Spring's NativeInterface"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+spring-native-sys = { path = "../spring-native-sys" }
+
+[dev-dependencies]
+once_cell = "1.19"
+
+[build-dependencies]
+spring-native-codegen = { path = "../spring-native-codegen" }

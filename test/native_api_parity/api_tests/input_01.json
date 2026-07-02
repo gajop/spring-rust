@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_mod_key_state",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetModKeyState"]},
+      "native": {"set": [], "get": ["Input.get_mod_key_state"]},
+      "compare": {"mode": "fields", "fields": ["alt", "ctrl", "meta", "shift"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetModKeyState`", "native_getter": "`Input.get_mod_key_state`", "fields": "`alt`, `ctrl`, `meta`, `shift`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetModKeyState", "args": [], "returns": ["alt", "ctrl", "meta", "shift"]}
+    },
+    {
+      "id": "get_invert_queue_key",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetInvertQueueKey"]},
+      "native": {"set": [], "get": ["Input.get_invert_queue_key"]},
+      "compare": {"mode": "fields", "fields": ["invert"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetInvertQueueKey`", "native_getter": "`Input.get_invert_queue_key`", "fields": "`invert`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetInvertQueueKey", "args": [], "returns": ["invert"]}
+    },
+    {
+      "id": "get_mouse_state",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetMouseState"]},
+      "native": {"set": [], "get": ["Input.get_mouse_state"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["x", "y", "left", "middle", "right", "offscreen"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetMouseState`", "native_getter": "`Input.get_mouse_state`", "fields": "`x`, `y`, `left`, `middle`, `right`, `offscreen`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetMouseState", "args": [], "returns": ["x", "y", "left", "middle", "right", "offscreen"]}
+    },
+    {
+      "id": "get_mouse_cursor",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetMouseCursor"]},
+      "native": {"set": [], "get": ["Input.get_mouse_cursor"]},
+      "compare": {"mode": "fields", "fields": ["cursor"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetMouseCursor`", "native_getter": "`Input.get_mouse_cursor`", "fields": "`cursor`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetMouseCursor", "args": [], "returns": ["cursor"]}
+    },
+    {
+      "id": "get_mouse_buttons_pressed",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetMouseButtonsPressed"]},
+      "native": {"set": [], "get": ["Input.get_mouse_buttons_pressed"]},
+      "compare": {"mode": "fields", "fields": ["left", "middle", "right"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetMouseButtonsPressed`", "native_getter": "`Input.get_mouse_buttons_pressed`", "fields": "`left`, `middle`, `right`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetMouseButtonsPressed", "args": [1, 2, 3], "returns": ["left", "middle", "right"]}
+    },
+    {
+      "id": "is_above_mini_map",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.IsAboveMiniMap"]},
+      "native": {"set": [], "get": ["Input.is_above_mini_map"]},
+      "compare": {"mode": "fields", "fields": ["above"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.IsAboveMiniMap`", "native_getter": "`Input.is_above_mini_map`", "fields": "`above`"},
+      "rust": {"check": "check_input_value", "set": "set_noop"},
+      "params": {"screenX": {"type": "f32", "fixed": 0}, "screenY": {"type": "f32", "fixed": 0}},
+      "lua_runtime": {"call": "Spring.IsAboveMiniMap", "args": ["value.screenX", "value.screenY"], "returns": ["above"]}
+    }
+  ]
+}

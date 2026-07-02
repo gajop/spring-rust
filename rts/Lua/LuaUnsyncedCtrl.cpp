@@ -28,6 +28,7 @@
 #include "Game/Players/PlayerHandler.h"
 #include "Game/InMapDraw.h"
 #include "Game/InMapDrawModel.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 #include "Game/UI/CommandColors.h"
 #include "Game/UI/CursorIcons.h"
 #include "Game/UI/GuiHandler.h"
@@ -92,6 +93,7 @@
 #include "System/Platform/WindowManagerHelper.h"
 #include "System/SpringHash.h"
 #include "System/LoadLock.h"
+// #include "NativeInterface/NativeInterfaceSystem.h"
 
 
 #if !defined(HEADLESS) && !defined(NO_SOUND)
@@ -347,6 +349,8 @@ bool LuaUnsyncedCtrl::PushEntries(lua_State* L)
 	REGISTER_LUA_CFUNC(RequestStartPosition);
 
 	REGISTER_LUA_CFUNC(Yield);
+
+	REGISTER_LUA_CFUNC(InvokeNativeModule);
 
 	return true;
 }
@@ -673,12 +677,12 @@ int LuaUnsyncedCtrl::SendMessage(lua_State* L)
 
 /*** @function Spring.SendMessageToSpectators
  * @param message string ``"`<PLAYER#>`"`` where `#` is a player ID.
- * 
+ *
  * This will be replaced with the player's name. e.g.
  * ```lua
  * Spring.SendMessage("`<PLAYER1>` did something") -- "ProRusher did something"
  * ```
- * 
+ *
  * @return nil
  */
 int LuaUnsyncedCtrl::SendMessageToSpectators(lua_State* L)
@@ -1276,7 +1280,7 @@ int LuaUnsyncedCtrl::SetCameraOffset(lua_State* L)
  * @function Spring.SetCameraState
  *
  * @param cameraState CameraState The fields must be consistent with the name/mode and current/new camera mode.
- * 
+ *
  * @param transitionTime number? (Default: `0`) in nanoseconds
  *
  * @param transitionTimeFactor number?
@@ -1380,7 +1384,7 @@ int LuaUnsyncedCtrl::SetDollyCameraPosition(lua_State* L)
  *
  * @class ControlPoint
  * @x_helper
- * 
+ *
  * @field [1] number x
  * @field [2] number y
  * @field [3] number z
@@ -2247,12 +2251,12 @@ int LuaUnsyncedCtrl::SetUnitNoMinimap(lua_State* L)
  */
 int LuaUnsyncedCtrl::SetMiniMapRotation(lua_State* L)
 {
-	
+
 	const float radians = luaL_checkfloat(L, 1);
-	
+
 	if (minimap == nullptr)
 		return 0;
-	
+
 	if (minimap->minimapCanFlip)
 		return 0;
 
@@ -4201,6 +4205,12 @@ int LuaUnsyncedCtrl::SetSunDirection(lua_State* L)
 	auto dir = float3(luaL_checkfloat(L, 1), luaL_checkfloat(L, 2), luaL_checkfloat(L, 3));
 	auto intensity = luaL_optfloat(L, 4, 1.0f); // seems broken atm, only toggles shadows off when set to 0
 	ISky::GetSky()->GetLight()->SetLightDir(float4(dir.SafeNormalize(), intensity));
+	sunLighting->SetUpdated();
+	// Notify listeners the sun changed so the ground/model shaders re-upload the
+	// new light direction (SMFRenderState::UpdateShaderSkyUniforms reads it from
+	// the sky light). Without this only the shading texture refreshes, leaving the
+	// lit terrain stale until an unrelated SetSunLighting fires the same event.
+	eventHandler.SunChanged();
 	return 0;
 }
 
@@ -5575,4 +5585,15 @@ int LuaUnsyncedCtrl::Yield(lua_State* L)
 
 	lua_pushboolean(L, true); //hint Lua should keep calling Yield
 	return 1;
+}
+
+int LuaUnsyncedCtrl::InvokeNativeModule(lua_State* L)
+{
+	size_t msgLen = 0;
+	const char* msg = luaL_checklstring(L, 1, &msgLen);
+
+	if (NativeInterfaceSystem::s_instance)
+		NativeInterfaceSystem::s_instance->HandleLuaCall(msg, msgLen);
+
+	return 0;
 }
