@@ -374,6 +374,7 @@ decltype(glad_glTexParameteri) glad_glTexParameteri = nullptr;
 decltype(glad_glTexParameteriv) glad_glTexParameteriv = nullptr;
 decltype(glad_glTexStorage2D) glad_glTexStorage2D = nullptr;
 decltype(glad_glTexStorage3D) glad_glTexStorage3D = nullptr;
+decltype(glad_glTexSubImage1D) glad_glTexSubImage1D = nullptr;
 decltype(glad_glTexSubImage2D) glad_glTexSubImage2D = nullptr;
 decltype(glad_glTexSubImage3D) glad_glTexSubImage3D = nullptr;
 decltype(glad_glTranslatef) glad_glTranslatef = nullptr;
@@ -813,6 +814,7 @@ int gladLoadGL(void) {
     glad_glTexParameteriv = MakeStubImpl(glad_glTexParameteriv);
     glad_glTexStorage2D = MakeStubImpl(glad_glTexStorage2D);
     glad_glTexStorage3D = MakeStubImpl(glad_glTexStorage3D);
+    glad_glTexSubImage1D = MakeStubImpl(glad_glTexSubImage1D);
     glad_glTexSubImage2D = MakeStubImpl(glad_glTexSubImage2D);
     glad_glTexSubImage3D = MakeStubImpl(glad_glTexSubImage3D);
     glad_glTranslatef = MakeStubImpl(glad_glTranslatef);

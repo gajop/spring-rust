@@ -1,0 +1,276 @@
+35ad8662d7 2025-11-16 Fix DGun projectiles getting stuck on uneven ground, disables precise ground collisions for FireBallProjectile
+f40d6da8b4 2025-11-17 Don't bind invalid iconAtlasTex[1] for the icons rendering
+c1b687fbbb 2025-11-17 Make Rml GL error reporting useful (and much less annoying)
+52ca578413 2025-11-17 Fix the prominent dead ghost buildings related crash, also assert the DGB pool cleaniness and clear it
+369660a3ce 2025-11-14 Add GL stencil ops Lua constants
+48ccab7a1e 2025-11-17 Slightly better code in CUnitDrawerData::~CUnitDrawerData()
+b2befaf3e7 2025-11-17 Add some robsutness to the way iconIndex is determined for the purpose of rendering of the dead ghost building icons
+d343e4fdca 2025-11-18 Enable reloading decal shaders (special code path as it's loaded from Lua)
+00c5ed35ab 2025-11-20 Remove vtable from AIFloat3
+c3b8b6397a 2025-11-22 Support UTF8 paths on Windows (#2235)
+f1dba726b5 2025-11-26 Bump up the archive cache version as changes introduced in the utf8 branch break file seperator conventions on Windows (\ vs /) This made going between 2025.06 and master annoying
+9af12595fe 2025-11-26 Don't assume the GPU based atlas rendering of icons has succeeded. In theory, which I couldn't reproduce, the window might lose the GPU/OpenGL context at around the time the icons atlas is rendered if the user minimize or hide the window. So more a robust atlas rendering approach is needed. Might fix https://github.com/beyond-all-reason/RecoilEngine/issues/2661
+b21b7c5c6a 2025-11-26 Fix atlas index typo in LuaMatTexture::GetTextureID(). It was reported somewhere, but probably not on the ticket
+fb4c98e85c 2025-11-26 Add SDL_WINDOWEVENT_DISPLAY_CHANGED logging as it might be a possible source of https://github.com/beyond-all-reason/RecoilEngine/issues/2661
+b3bf2d9eac 2025-11-26 Revert "Add SDL_WINDOWEVENT_DISPLAY_CHANGED logging as it might be a possible source of https://github.com/beyond-all-reason/RecoilEngine/issues/2661" Our ancient SDL linux headers don't have SDL_WINDOWEVENT_DISPLAY_CHANGED :|
+79d6fb5891 2025-11-24 Improve USE_ASAN configuration for all build types
+4cee11c144 2025-11-24 Fix stack-use-after-scope in TextureCreationParams
+ff1d9718be 2025-11-26 Probably fixed savegame load. Deals with https://github.com/beyond-all-reason/RecoilEngine/issues/2665
+0ac9c58817 2025-11-26 Remove some fragile stuff from creg::FakeType, should fix https://github.com/beyond-all-reason/RecoilEngine/issues/2654
+094f99e08d 2025-11-26 Always output logs to stdout, flush logs on exit
+aa424dc749 2025-11-26 Fix saving the DevIL images, ideally DevIL should be recompiled with _UNICODE definition, but it's involved, so we instead go with saving to a buffer. This might break some image formats as ilSaveL reportedly doesn't support all the formats that ilSave supports Fixes https://github.com/beyond-all-reason/RecoilEngine/issues/2657
+3651ef05f8 2025-11-27 Remove the dead code from the FS::IsPathOnSpinningDisk
+22a61b6edc 2025-11-28 Fix https://github.com/beyond-all-reason/RecoilEngine/issues/2659
+49e2613a8d 2025-11-28 Improve 22a61b6edc582fe68ade9559431b4f05404b59a9
+8bc2f7b7d1 2025-12-03 change README to use http instead of SSH for upstream
+42b4ab4846 2025-12-04 Don't draw LaserProjectile parts behind the muzzle point (#2670)
+a55f3a03ea 2025-12-04 Make setting of the initial transform on the unit / feature creation more straighforward (#2668)
+3c02186780 2025-12-04 Improve icons atlas robustness (#2671)
+705a89ea80 2025-12-07 Slim down LMP a bit
+7759c9c795 2025-12-07 Do not measure the Lua allocation timings by default, apparently it's considerably expensive to call spring_time() that often
+ddcf91348c 2025-12-07 Update BARb 1.6.22
+ca5d52ac33 2025-12-07 Revert "Update BARb 1.6.22" for now
+590fbcad1c 2025-12-07 Fix the range calculation of BeamLaser and LightningCannon. CWeapon::GetShapedWeaponRange is expected to work with distances already adjusted by the targetBorder settings
+0ccd60a7dc 2025-12-08 Update BARb 1.6.23
+a5e9db90f4 2025-12-09 Rearrange WindowManagerHelper::SetIconSurface calls to handle invalid OpenGL or any other window / context failures without a crash
+218a8225c7 2025-12-14 Actually erase all .done animation in CUnitScript::TickAllAnims() and not only just one (#2679)
+3c1232d215 2025-12-14 Selection and collision volumes are relative to unit/feature midPos. Adjust DebugColVolDrawer code accordingly. Fixes https://github.com/beyond-all-reason/RecoilEngine/issues/2678
+9c6e746c2d 2025-12-14 QTPFS path fixes (#2677)
+a11fdae1b2 2025-12-16 Add [[fallthrough]] instead of // fall-through in CCobThread::Tick()
+c19c879a4a 2025-12-16 Fix desync in CCobInstance::AimShieldWeapon.
+919396a9fd 2025-12-16 Include the animation data into the global synced checksum (#2689)
+a95b2ca2eb 2025-12-14 Revise compilation instructions in README
+f4236cb737 2025-12-16 Fix and improve DumpState (#2688)
+b8ef81bcbe 2025-12-17 Update BARb 1.6.24
+298ca32a9e 2025-12-15 Changelog: mark 2025.04 as released
+75bca20cf4 2025-12-15 Changelog for `2025.06`.
+81fc6fa28d 2025-12-18 Fix QTPFS desync caused by lua gc-triggered path delete (#2691)
+385c6eb819 2025-12-18 Part 2 of QTPFS dealing with Lua GC non-determinism (#2695)
+d3482cc99e 2025-12-21 Speculatively handle SDL_WINDOWEVENT_DISPLAY_CHANGED. (#2692)
+f897f65801 2025-10-03 Add spSetGodMode and spSetCheatingEnabled
+a45265f66d 2025-12-21 Track rml resources (#2626)
+89fcec418c 2025-12-21 Call icon::iconHandler.Update() regularly so in case it failed the first time, there's a chance to recover
+48b3c2a194 2025-11-08 doc: fix links by replacing templating with a shortcode
+ce5a7f52d6 2025-12-21 Rmlui datamodel fixes (#2646)
+d0e2df8e69 2025-12-24 Fix NaN in CBitmapMuzzleFlame::Init()
+8a66c629b3 2025-12-24 Fix ground scars not being drawn
+15e32adc17 2025-12-25 Fix CCobThread::AnimFinished() handling of waiting for scale event
+05dddd95ce 2025-12-24 Fix mixed or uppper case archive extensions recognition Fixes https://github.com/beyond-all-reason/RecoilEngine/issues/2705
+6333ddf363 2025-12-25 Document erase templates (#2682)
+0e0df1cee2 2025-12-26 Add Docker build image pinning (#2708)
+ce424e8a5d 2025-12-26 Remove dangling texture references & more thorough cleanup in CIconHandler
+7e43014cab 2025-12-26 Run engine CI after building new docker images (#2711)
+32bb4e707b 2025-12-27 A few improvements from a failed branch
+561e6b890a 2025-12-28 Automatic docker build image update from 32bb4e707b9a798621d02305ce6c5eaae3696676
+203c7464fc 2025-12-29 hard-remove CSphereParticleSpawner
+addeaf2861 2025-12-27 Fix a "no return" compile warning
+e6f36a4e89 2025-12-30 Fix missing git submodules instruction
+21d500acc9 2026-01-01 added missing Quaternion dependency for Matrix44f unit tests (#2732)
+f91ffd973c 2026-01-01 fixed 'CREG: Test3 (Missing Class Members)' (#2727)
+c80f82cedd 2025-12-31 Fix nowide linking (#2735)
+2816e9c058 2026-01-02 fixed missing nowide library for FileSink (#2733)
+8b6ec34a07 2026-01-02 changed Threading not to include ConfigHandler when UNIT_TEST is defined (#2731)
+589a3b5610 2026-01-03 added missing lzma library for unitsync unit tests (#2739)
+979185740e 2026-01-03 Added character literal u8 at TestFileSystem (#2740)
+630604e9e0 2026-01-03 Added missing TaskType at parallel_reduce call in TestFileSystem (#2741)
+df1bfa07de 2026-01-03 added missing param cmdID and return for FindUnitCmdDesc (#2745)
+67736294de 2026-01-02 Make `LogSections` slightly more discoverable (#2718)
+2999718586 2026-01-02 Extend support of docker-build-v2 to more setups (#2738)
+94eaa54044 2025-12-30 Apply a missed `unit->leavesGhost`
+a5d8de37f6 2026-01-03 docs: fix missing pieceID in spGetFooPieceMatrix (#2749)
+462e9276cb 2026-01-04 moved libraries out of test_common_libraries to the test that needs it (#2748)
+4fe51c6561 2026-01-03 Drop docker build v1 and refresh docs (#2751)
+32c93c10e3 2026-01-03 Fix readme header levels
+49fc39f365 2026-01-05 Add builderDefID and builderTeam to UnitCreated (#2722)
+041cff5eda 2026-01-04 Fix docker build for WSL+Docker Desktop
+cf4931a2a1 2026-01-04 Harden the build script against uid mapping heuristic issues
+5585868816 2026-01-05 Changed to pass cmake_flag to compile script as well (#2723)
+80376361ab 2026-01-08 me not that kind of orc
+fa0970072c 2026-01-14 Fixed resurrectors occasionally skipping repair of freshly resurrected units: * Fixes the handling of resurrectors in CBuilderCaches::IsFeatureBeingResurrected not taking into account CMD_RESURRECT might have 5 parameters * Count hours spend on some WTF handling of the resurrect command in CBuilder::UpdateResurrect() * Bring some C++11 into CBuilderCaches
+dc4dce4990 2026-01-08 Added more test cases for FileSystem::GetNormalizedPath
+0ead00b824 2026-01-05 Revert "Add builderDefID and builderTeam to UnitCreated (#2722)"
+b8df31319c 2026-01-01 Default missile smokePeriod 8 -> 1
+b942a1b43d 2026-01-15 added SetFeaturePieceMatrix (#2750)
+93ea0249fa 2025-12-30 Handle nonpositive `weaponDef.stockpileTime` better
+7e4339a51b 2026-01-15 Document spMarkerAddPoint playerID override
+96917a3e88 2026-01-17 Fix spawned features not moving as they should sometimes
+82e2f7f6a8 2026-01-18 Get back to matrix components CFactory::UpdateBuild() to orient the buildee. Note this only worked (and now working) because of rounding errors in matrix vs transform.
+36534e4397 2026-01-19 Fix tests linkage on Windows (#2758)
+e5f371ed37 2026-01-21 Revert "Fix incorrect drag calculations  (#2442)" Retrofit small pieces of code from #2442
+d2574f2df6 2026-01-21 Report only necessary fails to find decal bitmaps, also improve possible error reporting on the bitmap load error
+45da324e3d 2026-01-19 removed empty BENCHMARK at testMatrix44f
+b94c56bda5 2026-01-22 Do some changes to address https://github.com/beyond-all-reason/RecoilEngine/issues/2775 Broader changes are stashed https://github.com/beyond-all-reason/RecoilEngine/pull/2779
+e7d441bca4 2026-01-24 Create AI_POLICY.md
+7f94da3117 2026-01-24 Update README.markdown
+24ed2fb631 2026-01-24 Some GLTF / skinning fixes * Fix the crash related to the contention on the shared static variable in Skinning::ReparentCompleteMeshesToBones/ReparentMeshesTrianglesToBones * Fix the default vertex weight assignment in GLTF's ReadGeometryData
+9640fbb32f 2026-01-24 Update AI_POLICY.md
+6b1e82cea0 2026-01-26 Enable building MinGW/g++ debug builds without errors
+8ceb1c0e85 2026-01-26 Fix https://github.com/beyond-all-reason/RecoilEngine/issues/2783
+f94bbb81f1 2026-01-31 Remove unneeded linkage
+f6d2d117e1 2026-01-27 removed expected ./ for TestFileSystem
+cfc89927ef 2026-02-07 Fix icons bleeding and some atlas calculation inconsistencies
+af6df99dc9 2026-02-07 Speculative fix of tangent / bitangent calculation in GLTF loader code. Ref: https://github.com/KhronosGroup/glTF/issues/1252#issuecomment-367055223
+e12df897cd 2026-02-08 Make hash_combine output the same value across different stdlibs
+c3f4cc948c 2026-02-07 Fix #2719, add `spGetUnitMoveDef` (#2734)
+71675a899b 2026-02-08 Fix #2595, add `dt` to `wupdget:Update` (#2644)
+53654e471f 2026-02-10 Fix inadvertent return of a reference to a temporary value caused crashes on Linux (introduced in https://github.com/beyond-all-reason/RecoilEngine/commit/cfc89927eff598d5ff449f9c884059b30aa58d76). Also some int --> uint.
+506700f617 2026-01-31 Add explicit, but optional "force" parameter into spUnitAttach to allow overriding the transportation rules completely Adding as a PR to enforce the CI build.
+2d88099ca6 2026-02-13 Fix ModelUtils::CalculateTangents calculating bitangents incorrectly
+2ca37cc822 2026-02-03 added trailing slashes to expected result in TestFileSystem
+b23af2ea1c 2026-02-15 Fix SetSolidObjectPhysicalState breaking the quadfields state (at least for features)
+fe467cc3dc 2026-02-15 Fix a longstainding issue in CGroundDecalHandler::AddTrack(), also rename some methods for harmony
+f1634d470b 2026-02-15 Rearrange #ifdefs in TypeToStr.h so they don't longer trip up clangd
+cb13a08902 2026-02-14 Fix widget:Update crash in LuaMenu (#2801)
+defc0b1590 2026-02-15 fix(docker): use git rev-parse for worktree detection in build script (#2800)
+2b6684e519 2026-02-18 Fix crash when a search is started in an isolated node; one which has no neighbours.
+fb385e4bec 2026-02-21 Send Unit-Relative Headings and Pitch to AimWeaponX Fixes incorrect weapon angles on steep slopes. https://github.com/beyond-all-reason/RecoilEngine/pull/2814
+0ef5a79ab8 2026-02-24 Add two COB GET ops [139 and 140] to obtain current piece heading and obtain current piece pitch repectively (#2810)
+e2e5163325 2026-02-24 Fix wantedHeight bug (#2808)
+b8ffd78fc8 2026-02-26 Get rid of spatial check macros (#2057)
+db677daf52 2026-02-26 Add MiniMapChanged Callins (#2098)
+71ba4a0b77 2026-02-27 Add custom unit icon API with Lua support (#2782)
+c5fb220650 2025-12-27 Minor SResourcePack cleanup
+aa29fdffba 2025-12-30 Get rid of `LuaHandle::allowChanges`
+c31aff2741 2026-01-04 Make CMD names not return legacy aliases
+6c61a2f7f8 2025-12-18 Block AI control by default
+795ea564d0 2026-03-01 QTPFS Background Threaded Pathing (#2822)
+c0249a0211 2026-03-01 Try opencode workflow
+3b0b8432cf 2026-03-01 Don't show vclibs64
+b453d118ad 2026-03-01 assert() fix. Amend https://github.com/beyond-all-reason/RecoilEngine/commit/795ea564d05c54d7d8f3ca90b9331987db1fd646
+23d3777f83 2026-03-01 Tidy up SpringTime.h
+45ac7d372d 2026-03-01 Remove an obsolete comment
+d01c4961df 2026-03-01 Remove of incorrect code, no real impact though
+6f41d54f99 2025-11-11 Reworked QTPFS node search limit calculation to follow more reasonable logic and to search further on the shorter paths.
+ad716fe785 2026-03-02 Do proper modulo for heading (#2827)
+353977aacd 2026-03-02 Add MSVC NavVis files for spring::unordered_map / unordered_set, otherwise it's a pain to inspect them
+ef348d2907 2026-03-02 Fix docker images build pull_request flow (#2835)
+1a959b4507 2026-03-04 Destroy projectile renderbuffers while the GL context is still alive. Fixes crashes on exit on Linux.
+2d2cf2f325 2026-03-04 CTextureRenderAtlas::CreateAtlasTexture() headless guard
+4a4637d4e7 2026-03-04 Fix regression in 23d3777f83ba8a711961bb2660c89a16643ab89a. This likely caused spam from the HangDetector
+73ad5983f6 2026-03-04 Migrate to upstream fmt as submodule (#2824)
+bcdd31a022 2026-03-04 Defensive dt handling in loose LuaUI files
+434a50f220 2026-03-04 Extra safeguard in CZipArchive::CZipArchive()
+a5c6843d6a 2026-03-05 Attach navvis files better + fix SpringHashSet.natvis
+ff9e1600d9 2026-03-05 Fix CArchiveScanner::ReadCache()
+ec0388af8f 2026-03-05 Bump up IsRotMatrix/IsRotOrRotTranMatrix tolerances again
+14f58bee32 2026-03-06 Another attempt to not crash on exit on Linux. Redo of 1a959b45075a087f9d3b1b03b7f6e4acdb0d4224
+14f29afd6d 2026-03-06 Add AGENTS.md (feel free to task better agents to fix / amend it, or do it manually)
+75ff276d07 2026-03-06 Clear out all QTPFS paths registered for destruction at match end.
+17e3ff97a0 2026-03-06 Change include guard style to #pragma once
+d351211e1c 2026-03-06 Fix typos and enhance naming conventions clarity
+5bf5eda51d 2026-03-08 Add Mimalloc allocator (#2842)
+3b51258e06 2026-03-08 Update CMakeLists.txt for cmake 4.0.0 (#2142)
+16a384a7a5 2026-03-07 Add `Engine.isHeadless`. Unsynced only.
+8b4e965a47 2026-03-09 Fix piece projectile rendering: apply bpose rotation and scale (#2848)
+1278a40599 2026-03-10 More internal use of `SResourcePack` (#2639)
+f506f68fc1 2026-03-11 Some post cfc89927eff598d5ff449f9c884059b30aa58d76 cleaning and refactoring
+6a5f98a122 2026-03-14 Remove a few sources of NaNs in CUnitScript::GetUnitVal()
+108361ff40 2026-03-14 --ugliness
+774e35d397 2026-03-01 Simplify scribbling internals: remove TeamController ptr
+cb933fbeb8 2026-03-12 Move some value wrangling out of resource-related lines
+d90acc2361 2026-03-11 Fix GUI with negative upkeep
+6aa7653ed8 2026-03-14 QTPFS Release Fixes (#2851)
+e0d3a3c2cb 2026-03-15 Add arm support for build-v2 and ci building images (#2550)
+71d7755c44 2026-03-15 Automatic docker build image update from e0d3a3c2cbf22bccf740db2971e42bd3f012e78c
+6a929be83f 2026-03-15 Revert "added iteration at chunk level for SIMD operations and multi-… (#2860)
+094e682885 2026-03-15 Drop nscr.io build image caching (#2864)
+0c5948250c 2026-03-17 Move to upstream ChunkedArray
+fdd97ccec0 2026-03-19 Fix the vertical padding in CLegacyAtlasAlloc lacking sometimes
+84514f784c 2026-03-12 Lua unit/team resourcing now always uses resource packs
+067cc641f9 2026-03-21 upstream rmlsollua changes (#2649)
+8c22c4fdfc 2026-03-21 RmlUI 6.2 (#2879)
+08379da1be 2026-03-22 QTPFS: optimize map updates for ~30% performance improvement (#2871)
+36f826ec37 2026-03-22 YardmapStatusMap: switch from z-ordering to linear tiles (#2874)
+5ed2647d2d 2026-03-22 Add ARM64 platform support with deterministic floating-point (#2819)
+6c4b8a00a0 2026-03-22 Update pr-downloader reference (#2884)
+98f6be2096 2026-03-22 Add building of linux-arm64 target in CI (#2885)
+bfac96a4f4 2026-03-22 Add .idea to .gitignore
+c9347c068c 2026-03-22 Set CMAKE_SYSTEM_PROCESSOR properly in windows image
+b9fa909597 2026-03-22 Automatic docker build image update from c9347c068cabe24237a29da1d8129d94cf340149
+818acf5f7a 2026-03-22 Fix stale version embedding in binaries
+439e51f7ca 2026-03-22 Fix the rules of decals drawing (#2876)
+74e145c707 2026-03-22 Add ARM64/NEON platform support with streflop as submodule (#2886)
+8a1058436c 2026-03-23 docs: add 'First Steps with the Engine' guide for game developers
+0dc363d129 2026-03-26 Sanitize NaNs in CHoverAirMoveType::UpdateMoveRate()
+6d7bc11b31 2026-03-27 Add mimalloc vs std::malloc / free / etc benchmark
+9f810b3f06 2026-03-27 Stabilize atlas output for deterministic builds
+4804cb70e7 2026-03-22 Add configurable file extension to dumpatlas command
+ce685e9f7d 2026-03-27 Fix icon sliding artifact and add edge-pixel padding to atlas
+35b89a67fa 2026-03-31 Fix MSVC build
+f2791d5303 2026-03-31 Maybe fix getting-started/first-steps-with-the-engine.md
+82fb8cbcc9 2026-03-31 Fix Hugo build and improve first-steps guide
+49fa150526 2026-04-03 Update pr-downloader reference (#2898)
+23e03d61b0 2026-04-05 Add warning about unsynced git submodules (#2902)
+449849bc0f 2026-04-05 Fix `spGetUnitNearestEnemy` docs
+523d519db2 2026-04-05 Quick fix for 23e03d61b0229fef8b27e989298fdc57403b0f0f
+2f6e18a3d0 2026-04-05 Fix #2793, add `spGetClosestEnemyUnit` (#2807)
+8e55267dfa 2026-04-07 LuaSocket no longer inits before sandboxing (#2903)
+bf1778d9b6 2026-04-07 minimum cameracontroller height
+a7a3c512dc 2026-04-06 Extract synced lib loader to a helper function
+482e05a1ce 2026-04-06 Extract unsynced lib loader to a helper
+8c73edf6ec 2026-04-06 Unsynced wrapper handles its sandboxing
+2e3fc25c19 2026-03-24 `VFS.GetAvailableAIs`: add `isLuaAI`
+6f8ccc2892 2026-04-13 Remove annoying false assert() from  QTPFS::NodeLayer::Update(). Temporary solution until https://github.com/beyond-all-reason/RecoilEngine/issues/2905 is fixed
+dd3e4ced63 2026-04-12 fix: do not run atlas/iconhandler in headless
+f9c151cdf9 2026-04-13 Fix a rare crash in UnitDrawer / IconsDrawer caused by inconsistent LOS settings set from Lua. Fixes https://github.com/beyond-all-reason/RecoilEngine/issues/2916 Thanks to https://github.com/Bruno-DaSilva for investigation.
+6a14e4a015 2026-04-14 Update gitignore to ignore KiloCode
+5d6da694b2 2026-04-14 Baseline .clangd
+76c6f129e8 2026-04-14 Enable IO, OS and debug libraries for unsynced gadgets (#2858)
+f44647195f 2026-04-19 Make invalid buildoption warning more verbose
+892ff9eaaa 2026-04-19 fix: Restore lowercasing in FileSystem::GetExtension (#2937)
+072278106a 2026-04-20 Extract 2025.06 release changelog to its own file.
+9fbd0f1b78 2026-04-20 Update changelogs.
+eb1c69f903 2026-04-22 Fix annoying compilation warning
+61067a9a0a 2026-04-21 Demo handlers improvements
+45f41d651a 2026-04-21 Add Lua API to get current replay file paths
+daddb48360 2026-04-24 Early block check for build commands (#2557)
+681aea7cb8 2026-04-24 fix: memory barrier bitfield now pulls from correct parameter (#2949)
+af5a29cd65 2026-04-25 Lua: implement DrawBuildSquare callin and add example GL4 widget (#2938)
+0c41eafbfd 2026-04-25 Implement Custom Color Palette (#2945)
+63b351d7b9 2026-04-26 Radical solution to icons bleeding: adjust CTextureRenderAtlas so it always works with the original/biggest lod
+37e13b5986 2026-04-29 Add `Platform.architecture` (#2825)
+7cc7a57ed2 2026-05-06 Update changelog.
+e0f5ebce08 2026-05-08 Fix missing cstdint include in ChatMessage.h (#2968)
+a9e5520976 2026-05-14 doc: UnitDestroyed attacker not always available (#2572)
+93539b8f6c 2026-05-20 Fix #2978, the Nonus backlash.
+58b9a94060 2026-05-24 docs: fix wupget:DefaultCommand missing cmdID (#2984)
+eff5a00234 2026-05-27 Update engine-build.yml
+6f10748824 2026-05-27 fix: compiler warnings for missing overrides (#2931)
+9fdfaad501 2026-05-28 fix: ignore compiler warnings for libs/submodules (#2932)
+a6a8186190 2026-06-02 fix: compiler warnings with no side effects (#2933)
+d6a481d9df 2026-06-02 fix: compiler warnings with potential side effects (#2934)
+e18dfcf441 2026-06-02 fix: legit bugs found by compiler warnings (#2946)
+ae1db84a3d 2026-06-03 Address desync related to path repair
+63cf45c0e0 2026-05-20 validate AI Commands sent to server
+4b7e53aee6 2026-05-23 updated to allow genuine commands through
+030a51c9c7 2026-05-24 specific checks for spectators
+c53bec3994 2026-05-23 Add header
+10ff7b0523 2026-06-06 fix potential desyncs around path sharing.
+ec6619664a 2026-06-08 fix: FileSystem::FindFiles should return relative paths (#3007)
+acd074ce52 2026-06-08 Fix out of bounds issue (#3008)
+c6fb86e8df 2026-06-09 ArchiveScanner: fix WriteCacheData crash when pool cache outlives .sdp archives (#2961)
+4d76fd88ba 2026-06-13 SpringController: name the camera focus point a "focus surface"
+a43ebcdd64 2026-06-18 SolLua: use sol::lua_nil instead of the sol::nil alias
+3e83e20c28 2026-06-18 float3: drop redundant direct streflop_cond.h include
+517608f407 2026-06-19 SafeUtil: include <type_traits> and <memory> directly (#3025)
+6318fb6c44 2026-06-18 LuaTextures: log glTexImage failures instead of returning nil silently
+54348ff04d 2026-06-18 fix: guard against already-dead reclaim targets (#3020)
+e91a58f5c5 2026-06-20 CUtils: use const dirent* for the scandir selector on all platforms
+580100a0df 2026-06-20 legacy: only require X11 on non-Apple UNIX
+d13dcd3413 2026-06-20 FindSevenZip: also accept the 7zz binary name
+0da81b433a 2026-06-19 macOS: remove dead SDL 1.2-era SDLMain.{m,h}
+83642b066f 2026-06-21 Fix SplinterFaction card link format
+13b6804534 2026-06-22 fix: update section min-level in place instead of appending duplicates (#3052)
+1caa3c5261 2026-06-23 Convert `u8string_view` to `string` using explicit size
+2186ee490c 2026-06-05 Fix inconsistent class/struct forward declarations
+a854046cef 2026-06-25 macOS: guard X11/Xlib.h include for non-X11 platforms
+ab68d6fc27 2026-06-29 fix: address sse2neon/streflop macro redefinition warning (#2999)
+52b55cf38a 2026-06-29 glad: do not build the GLX loader on macOS
+4034d5a132 2026-06-29 docs: add ENGINE_PERFORMANCE.md with some notes on engine internals (#2919)
+7e07543f7f 2026-06-29 System: add missing <algorithm> includes for libc++
+cf3b083040 2026-06-29 DemoTool: link nowide and fmt for their include directories
+f898efc6c3 2026-06-18 Fix truncated sync checksum in demotool dump
+8141bf23dc 2026-06-30 Portability in archive handlers
+898dd6cf86 2026-04-11 docs: add BACKWARDS_COMPATIBILITY.md guidance doc for coding agents
+487fd436e7 2026-07-01 docs: improve running/testing instructions in AGENTS.md (#2917)
+d313449ce9 2026-07-02 Move `isHeadless` from `Engine` to `Platform`. (#3067)

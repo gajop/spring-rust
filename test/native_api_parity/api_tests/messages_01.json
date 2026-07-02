@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "is_user_writing",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.IsUserWriting"]},
+      "native": {"set": [], "get": ["Messages.is_user_writing"]},
+      "compare": {"mode": "fields", "fields": ["writing"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.IsUserWriting`", "native_getter": "`Messages.is_user_writing`", "fields": "`writing`"},
+      "rust": {"check": "check_messages_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.IsUserWriting", "args": [], "returns": ["writing"]}
+    },
+    {
+      "id": "get_current_tooltip",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetCurrentTooltip"]},
+      "native": {"set": [], "get": ["Messages.get_current_tooltip"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["tooltip"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetCurrentTooltip`", "native_getter": "`Messages.get_current_tooltip`", "fields": "`tooltip`"},
+      "rust": {"check": "check_messages_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetCurrentTooltip", "args": [], "returns": ["tooltip"]}
+    },
+    {
+      "id": "get_console_buffer_count",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetConsoleBuffer"]},
+      "native": {"set": [], "get": ["Messages.get_console_buffer"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetConsoleBuffer`", "native_getter": "`Messages.get_console_buffer`", "fields": "`count`"},
+      "rust": {"check": "check_messages_value", "set": "set_noop"},
+      "params": {
+        "maxLines": {"type": "i32", "fixed": 3}
+      },
+      "lua_runtime": {"call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "echo_console_buffer_count",
+      "context": "widget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.Echo"], "get": ["Spring.GetConsoleBuffer"]},
+      "native": {"set": ["Messages.echo"], "get": ["Messages.get_console_buffer"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "`Spring.Echo`", "native_setter": "`Messages.echo`", "lua_getter": "`Spring.GetConsoleBuffer`", "native_getter": "`Messages.get_console_buffer`", "fields": "`count`"},
+      "rust": {"check": "check_messages_value", "set": "set_messages_value"},
+      "params": {
+        "message": {"type": "string", "fixed": "native-api-parity-echo"},
+        "rest": {"type": "string", "fixed": ""},
+        "maxLines": {"type": "i32", "fixed": 8}
+      },
+      "lua_runtime": {"set": {"call": "Spring.Echo", "args": ["value.message", "value.rest"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "send_message_console_buffer_count",
+      "context": "widget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SendMessage"], "get": ["Spring.GetConsoleBuffer"]},
+      "native": {"set": ["Messages.send_message"], "get": ["Messages.get_console_buffer"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "`Spring.SendMessage`", "native_setter": "`Messages.send_message`", "lua_getter": "`Spring.GetConsoleBuffer`", "native_getter": "`Messages.get_console_buffer`", "fields": "`count`"},
+      "rust": {"check": "check_messages_value", "set": "set_messages_value"},
+      "params": {
+        "message": {"type": "string", "fixed": "native-api-parity-message"},
+        "maxLines": {"type": "i32", "fixed": 8}
+      },
+      "lua_runtime": {"set": {"call": "Spring.SendMessage", "args": ["value.message"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "log_console_buffer_count",
+      "context": "widget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.Log"], "get": ["Spring.GetConsoleBuffer"]},
+      "native": {"set": ["Messages.log"], "get": ["Messages.get_console_buffer"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "`Spring.Log`", "native_setter": "`Messages.log`", "lua_getter": "`Spring.GetConsoleBuffer`", "native_getter": "`Messages.get_console_buffer`", "fields": "`count`"},
+      "rust": {"check": "check_messages_value", "set": "set_messages_value"},
+      "params": {
+        "section": {"type": "string", "fixed": "native-api-parity"},
+        "level": {"type": "i32", "fixed": 3},
+        "levelName": {"type": "string", "fixed": "notice"},
+        "message": {"type": "string", "fixed": "native-api-parity-log"},
+        "maxLines": {"type": "i32", "fixed": 8}
+      },
+      "lua_runtime": {"set": {"call": "Spring.Log", "args": ["value.section", "value.levelName", "value.message"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "send_message_to_player_console_buffer_count",
+      "context": "widget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SendMessageToPlayer"], "get": ["Spring.GetConsoleBuffer"]},
+      "native": {"set": ["Messages.send_message_to_player"], "get": ["Messages.get_console_buffer"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "`Spring.SendMessageToPlayer`", "native_setter": "`Messages.send_message_to_player`", "lua_getter": "`Spring.GetConsoleBuffer`", "native_getter": "`Messages.get_console_buffer`", "fields": "`count`"},
+      "rust": {"check": "check_messages_value", "set": "set_messages_value"},
+      "params": {
+        "playerID": {"type": "i32", "fixed": 0},
+        "message": {"type": "string", "fixed": "native-api-parity-player-message"},
+        "maxLines": {"type": "i32", "fixed": 8}
+      },
+      "lua_runtime": {"set": {"call": "Spring.SendMessageToPlayer", "args": ["value.playerID", "value.message"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "send_message_to_team_console_buffer_count",
+      "context": "widget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SendMessageToTeam"], "get": ["Spring.GetConsoleBuffer"]},
+      "native": {"set": ["Messages.send_message_to_team"], "get": ["Messages.get_console_buffer"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "`Spring.SendMessageToTeam`", "native_setter": "`Messages.send_message_to_team`", "lua_getter": "`Spring.GetConsoleBuffer`", "native_getter": "`Messages.get_console_buffer`", "fields": "`count`"},
+      "rust": {"check": "check_messages_value", "set": "set_messages_value"},
+      "params": {
+        "teamID": {"type": "i32", "fixed": 0},
+        "message": {"type": "string", "fixed": "native-api-parity-team-message"},
+        "maxLines": {"type": "i32", "fixed": 8}
+      },
+      "lua_runtime": {"set": {"call": "Spring.SendMessageToTeam", "args": ["value.teamID", "value.message"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "send_message_to_ally_team_console_buffer_count",
+      "context": "widget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SendMessageToAllyTeam"], "get": ["Spring.GetConsoleBuffer"]},
+      "native": {"set": ["Messages.send_message_to_ally_team"], "get": ["Messages.get_console_buffer"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "`Spring.SendMessageToAllyTeam`", "native_setter": "`Messages.send_message_to_ally_team`", "lua_getter": "`Spring.GetConsoleBuffer`", "native_getter": "`Messages.get_console_buffer`", "fields": "`count`"},
+      "rust": {"check": "check_messages_value", "set": "set_messages_value"},
+      "params": {
+        "allyTeamID": {"type": "i32", "fixed": 0},
+        "message": {"type": "string", "fixed": "native-api-parity-ally-team-message"},
+        "maxLines": {"type": "i32", "fixed": 8}
+      },
+      "lua_runtime": {"set": {"call": "Spring.SendMessageToAllyTeam", "args": ["value.allyTeamID", "value.message"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "send_message_to_spectators_console_buffer_count",
+      "context": "widget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SendMessageToSpectators"], "get": ["Spring.GetConsoleBuffer"]},
+      "native": {"set": ["Messages.send_message_to_spectators"], "get": ["Messages.get_console_buffer"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "`Spring.SendMessageToSpectators`", "native_setter": "`Messages.send_message_to_spectators`", "lua_getter": "`Spring.GetConsoleBuffer`", "native_getter": "`Messages.get_console_buffer`", "fields": "`count`"},
+      "rust": {"check": "check_messages_value", "set": "set_messages_value"},
+      "params": {
+        "message": {"type": "string", "fixed": "native-api-parity-spectator-message"},
+        "maxLines": {"type": "i32", "fixed": 8}
+      },
+      "lua_runtime": {"set": {"call": "Spring.SendMessageToSpectators", "args": ["value.message"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    }
+  ]
+}

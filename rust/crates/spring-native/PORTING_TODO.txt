@@ -1,0 +1,4 @@
+Current API port TODO (one function per line; generated from api_comparison.md)
+Spring.SetHeightMapFunc param mismatch count mismatch (lua=2, rust=1)
+Spring.SetOriginalHeightMapFunc param mismatch count mismatch (lua=2, rust=1)
+Spring.SetSmoothMeshFunc param mismatch count mismatch (lua=2, rust=1)

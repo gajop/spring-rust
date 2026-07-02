@@ -1,0 +1,611 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "feature_position",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeaturePosition"
+        ],
+        "get": [
+          "Spring.GetFeaturePosition"
+        ]
+      },
+      "native": {
+        "set": [
+          "FeatureControl.set_feature_position"
+        ],
+        "get": [
+          "features().get_feature_position"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeaturePosition`",
+        "native_setter": "`FeatureControl.set_feature_position`",
+        "lua_getter": "`Spring.GetFeaturePosition`",
+        "native_getter": "`features().get_feature_position`",
+        "fields": "`x`, `y`, `z`"
+      },
+      "rust": {
+        "check": "check_feature_position",
+        "set": "set_feature_position"
+      },
+      "params": {
+        "position": {
+          "type": "float3",
+          "generator": "map_position",
+          "expands_to": [
+            "x",
+            "y",
+            "z"
+          ]
+        },
+        "snapToGround": {
+          "type": "bool",
+          "fixed": false,
+          "optional_cases": [
+            "omit",
+            "false",
+            "true"
+          ]
+        }
+      }
+    },
+    {
+      "id": "feature_height",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFeatureHeight"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "features().get_feature_height"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "height"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFeatureHeight`",
+        "native_getter": "`features().get_feature_height`",
+        "fields": "`height`"
+      },
+      "rust": {
+        "check": "check_feature_height",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "feature_radius",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFeatureRadius"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "features().get_feature_radius"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "radius"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFeatureRadius`",
+        "native_getter": "`features().get_feature_radius`",
+        "fields": "`radius`"
+      },
+      "rust": {
+        "check": "check_feature_radius",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "feature_heading",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFeatureHeading"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "features().get_feature_heading"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "heading"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFeatureHeading`",
+        "native_getter": "`features().get_feature_heading`",
+        "fields": "`heading`"
+      },
+      "rust": {
+        "check": "check_feature_heading",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "feature_velocity",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeatureVelocity"
+        ],
+        "get": [
+          "Spring.GetFeatureVelocity"
+        ]
+      },
+      "native": {
+        "set": [
+          "FeatureControl.set_feature_velocity"
+        ],
+        "get": [
+          "features().get_feature_velocity"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeatureVelocity`",
+        "native_setter": "`FeatureControl.set_feature_velocity`",
+        "lua_getter": "`Spring.GetFeatureVelocity`",
+        "native_getter": "`features().get_feature_velocity`",
+        "fields": "`x`, `y`, `z`"
+      },
+      "rust": {
+        "check": "check_feature_velocity",
+        "set": "set_feature_velocity"
+      },
+      "params": {
+        "velocity": {
+          "type": "float3",
+          "generator": "flat_velocity",
+          "expands_to": [
+            "x",
+            "y",
+            "z"
+          ]
+        }
+      }
+    },
+    {
+      "id": "feature_direction",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeatureDirection"
+        ],
+        "get": [
+          "Spring.GetFeatureDirection"
+        ]
+      },
+      "native": {
+        "set": [
+          "FeatureControl.set_feature_direction"
+        ],
+        "get": [
+          "features().get_feature_direction"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "frontX",
+          "frontY",
+          "frontZ",
+          "rightX",
+          "rightY",
+          "rightZ"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeatureDirection`",
+        "native_setter": "`FeatureControl.set_feature_direction`",
+        "lua_getter": "`Spring.GetFeatureDirection`",
+        "native_getter": "`features().get_feature_direction`",
+        "fields": "`frontX`, `frontY`, `frontZ`, `rightX`, `rightY`, `rightZ`"
+      },
+      "rust": {
+        "check": "check_feature_direction",
+        "set": "set_feature_direction"
+      },
+      "params": {
+        "front": {
+          "type": "float3",
+          "generator": "front_vector",
+          "expands_to": [
+            "frontX",
+            "frontY",
+            "frontZ"
+          ]
+        },
+        "right": {
+          "type": "float3",
+          "generator": "right_vector",
+          "expands_to": [
+            "rightX",
+            "rightY",
+            "rightZ"
+          ]
+        }
+      }
+    },
+    {
+      "id": "feature_no_select",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetFeatureNoSelect"
+        ],
+        "get": [
+          "Spring.GetFeatureNoSelect"
+        ]
+      },
+      "native": {
+        "set": [
+          "FeatureControl.set_feature_no_select"
+        ],
+        "get": [
+          "features().get_feature_no_select"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "noSelect"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetFeatureNoSelect`",
+        "native_setter": "`FeatureControl.set_feature_no_select`",
+        "lua_getter": "`Spring.GetFeatureNoSelect`",
+        "native_getter": "`features().get_feature_no_select`",
+        "fields": "`noSelect`"
+      },
+      "rust": {
+        "check": "check_feature_no_select",
+        "set": "set_feature_no_select"
+      },
+      "params": {
+        "noSelect": {
+          "type": "bool"
+        }
+      }
+    },
+    {
+      "id": "valid_feature_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.ValidFeatureID"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Features.valid_feature_id"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "valid"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.ValidFeatureID`",
+        "native_getter": "`Features.valid_feature_id`",
+        "fields": "`valid`"
+      },
+      "rust": {
+        "check": "check_features_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "featureID": {
+          "type": "i32",
+          "fixture": "featureID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.ValidFeatureID",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "valid"
+        ]
+      }
+    },
+    {
+      "id": "get_all_features",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetAllFeatures"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Features.get_all_features"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "featureIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetAllFeatures`",
+        "native_getter": "`Features.get_all_features`",
+        "fields": "`featureIDs`"
+      },
+      "rust": {
+        "check": "check_features_list",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetAllFeatures",
+        "args": [],
+        "returns": [
+          "featureIDs"
+        ]
+      }
+    },
+    {
+      "id": "get_feature_def_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFeatureDefID"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Features.get_feature_def_id"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "defID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFeatureDefID`",
+        "native_getter": "`Features.get_feature_def_id`",
+        "fields": "`defID`"
+      },
+      "rust": {
+        "check": "check_feature_identity",
+        "set": "set_noop"
+      },
+      "params": {
+        "featureID": {
+          "type": "i32",
+          "fixture": "featureID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetFeatureDefID",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "defID"
+        ]
+      }
+    },
+    {
+      "id": "get_feature_team",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFeatureTeam"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Features.get_feature_team"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "teamID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFeatureTeam`",
+        "native_getter": "`Features.get_feature_team`",
+        "fields": "`teamID`"
+      },
+      "rust": {
+        "check": "check_feature_identity",
+        "set": "set_noop"
+      },
+      "params": {
+        "featureID": {
+          "type": "i32",
+          "fixture": "featureID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetFeatureTeam",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "teamID"
+        ]
+      }
+    },
+    {
+      "id": "get_feature_ally_team",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFeatureAllyTeam"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Features.get_feature_ally_team"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "allyTeamID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFeatureAllyTeam`",
+        "native_getter": "`Features.get_feature_ally_team`",
+        "fields": "`allyTeamID`"
+      },
+      "rust": {
+        "check": "check_feature_identity",
+        "set": "set_noop"
+      },
+      "params": {
+        "featureID": {
+          "type": "i32",
+          "fixture": "featureID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetFeatureAllyTeam",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          "allyTeamID"
+        ]
+      }
+    }
+  ]
+}

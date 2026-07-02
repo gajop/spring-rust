@@ -1,0 +1,8 @@
+0932c12ddc 2025-11-15 wip
+be7cb5349d 2025-11-16 wip
+022f5b4d71 2025-12-05 wip
+fad680c14f 2026-05-10 NativeInterface: extend API with UnsyncedCtrl, UnsyncedRead, VFS, SyncedCtrl, Input, Display, and other modules
+fa7bc0af3b 2026-05-23 wip
+acbadef7b2 2026-06-30 Deliver native LuaUI messages
+f3fad232e3 2026-06-30 Snapshot native API work
+2230857424 2026-06-30 Lua: resolve native-plugin texture handles (LUATEX_NATIVE)

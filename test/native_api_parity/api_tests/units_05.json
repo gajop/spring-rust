@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_unit_feature_separation",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit",
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitFeatureSeparation"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitControl.get_unit_feature_separation"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "separation"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitFeatureSeparation`",
+        "native_getter": "`UnitControl.get_unit_feature_separation`",
+        "fields": "`separation`"
+      },
+      "rust": {
+        "check": "check_unit_feature_separation",
+        "set": "set_noop"
+      },
+      "params": {
+        "featureID": {
+          "type": "i32",
+          "fixture": "featureID"
+        },
+        "surfaceDist": {
+          "type": "bool"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitFeatureSeparation",
+        "args": [
+          "fixture.unitID",
+          "fixture.featureID",
+          "value.surfaceDist"
+        ],
+        "returns": [
+          "separation"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_leaves_ghost",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitLeavesGhost"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitControl.get_unit_leaves_ghost"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "leavesGhost"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitLeavesGhost`",
+        "native_getter": "`UnitControl.get_unit_leaves_ghost`",
+        "fields": "`leavesGhost`"
+      },
+      "rust": {
+        "check": "check_unit_leaves_ghost",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitLeavesGhost",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "leavesGhost"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_self_dtime",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitSelfDTime"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_self_dtime"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "selfDTime"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitSelfDTime`",
+        "native_getter": "`UnitsInfo.get_unit_self_dtime`",
+        "fields": "`selfDTime`"
+      },
+      "rust": {
+        "check": "check_unit_self_dtime",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitSelfDTime",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "selfDTime"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_collision_volume_data",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitCollisionVolumeData"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_collision_volume_data"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "scaleX",
+          "scaleY",
+          "scaleZ",
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "volumeType",
+          "testType",
+          "primaryAxis",
+          "disabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitCollisionVolumeData`",
+        "native_getter": "`UnitsInfo.get_unit_collision_volume_data`",
+        "fields": "`scaleX`, `scaleY`, `scaleZ`, `offsetX`, `offsetY`, `offsetZ`, `volumeType`, `testType`, `primaryAxis`, `disabled`"
+      },
+      "rust": {
+        "check": "check_unit_collision_volume_data",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitCollisionVolumeData",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "scaleX",
+          "scaleY",
+          "scaleZ",
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "volumeType",
+          "testType",
+          "primaryAxis",
+          "disabled"
+        ]
+      }
+    }
+  ]
+}

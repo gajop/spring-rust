@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_unit_script_names",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetUnitScriptNames"]},
+      "native": {"set": [], "get": ["UnitsPieces.get_unit_script_names"]},
+      "compare": {"mode": "fields", "fields": ["names"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitScriptNames`", "native_getter": "`UnitsPieces.get_unit_script_names`", "fields": "`names`"},
+      "rust": {"check": "check_pieces_string_set", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetUnitScriptNames", "args": ["fixture.unitID"], "returns": [{"field": "names", "index": 1, "transform": "table_keys"}]},
+      "order_insensitive_fields": ["names"]
+    },
+    {
+      "id": "get_unit_piece_list",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetUnitPieceList"]},
+      "native": {"set": [], "get": ["UnitsPieces.get_unit_piece_list"]},
+      "compare": {"mode": "fields", "fields": ["names"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitPieceList`", "native_getter": "`UnitsPieces.get_unit_piece_list`", "fields": "`names`"},
+      "rust": {"check": "check_pieces_string_set", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetUnitPieceList", "args": ["fixture.unitID"], "returns": [{"field": "names"}]},
+      "order_insensitive_fields": ["names"]
+    },
+    {
+      "id": "get_feature_piece_list",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetFeaturePieceList"]},
+      "native": {"set": [], "get": ["UnitsPieces.get_feature_piece_list"]},
+      "compare": {"mode": "fields", "fields": ["names"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeaturePieceList`", "native_getter": "`UnitsPieces.get_feature_piece_list`", "fields": "`names`"},
+      "rust": {"check": "check_pieces_string_set", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeaturePieceList", "args": ["fixture.featureID"], "returns": [{"field": "names"}]},
+      "order_insensitive_fields": ["names"]
+    },
+    {
+      "id": "get_unit_piece_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetUnitPieceMap"]},
+      "native": {"set": [], "get": ["UnitsPieces.get_unit_piece_map"]},
+      "compare": {"mode": "fields", "fields": ["pieces"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitPieceMap`", "native_getter": "`UnitsPieces.get_unit_piece_map`", "fields": "`pieces`"},
+      "rust": {"check": "check_pieces_map", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetUnitPieceMap", "args": ["fixture.unitID"], "returns": [{"field": "pieces", "transform": "table_string_int_pairs"}]}
+    },
+    {
+      "id": "get_feature_piece_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature", "native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetFeaturePieceMap"]},
+      "native": {"set": [], "get": ["UnitsPieces.get_feature_piece_map"]},
+      "compare": {"mode": "fields", "fields": ["pieces"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeaturePieceMap`", "native_getter": "`UnitsPieces.get_feature_piece_map`", "fields": "`pieces`"},
+      "rust": {"check": "check_pieces_map", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeaturePieceMap", "args": ["fixture.featureID"], "returns": [{"field": "pieces", "transform": "table_string_int_pairs"}]}
+    }
+  ]
+}

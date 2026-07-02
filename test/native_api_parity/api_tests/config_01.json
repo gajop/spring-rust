@@ -1,0 +1,242 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_config_int",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetConfigInt"]},
+      "native": {"set": [], "get": ["Config.get_config_int"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value", "exists"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetConfigInt`", "native_getter": "`Config.get_config_int`", "fields": "`value`, `exists`"},
+      "rust": {"check": "check_config_value", "set": "set_noop"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_missing_int"},
+        "defaultValue": {"type": "i32", "range": [100, 200]},
+        "hasDefault": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetConfigInt",
+        "args": ["value.key", "value.defaultValue"],
+        "returns": ["value", {"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "get_config_float",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetConfigFloat"]},
+      "native": {"set": [], "get": ["Config.get_config_float"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value", "exists"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetConfigFloat`", "native_getter": "`Config.get_config_float`", "fields": "`value`, `exists`"},
+      "rust": {"check": "check_config_value", "set": "set_noop"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_missing_float"},
+        "defaultValue": {"type": "f32", "range": [1.25, 4.75]},
+        "hasDefault": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetConfigFloat",
+        "args": ["value.key", "value.defaultValue"],
+        "returns": ["value", {"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "get_config_string",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetConfigString"]},
+      "native": {"set": [], "get": ["Config.get_config_string"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value", "exists"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetConfigString`", "native_getter": "`Config.get_config_string`", "fields": "`value`, `exists`"},
+      "rust": {"check": "check_config_value", "set": "set_noop"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_missing_string"},
+        "defaultValue": {"type": "string", "fixed": "native-api-parity-default"},
+        "hasDefault": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetConfigString",
+        "args": ["value.key", "value.defaultValue"],
+        "returns": ["value", {"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "get_config_int_nil_default",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetConfigInt"]},
+      "native": {"set": [], "get": ["Config.get_config_int"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetConfigInt`", "native_getter": "`Config.get_config_int`", "fields": "`exists`"},
+      "rust": {"check": "check_config_value", "set": "set_noop"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_missing_int_nil"},
+        "defaultValue": {"type": "i32", "fixed": 0},
+        "hasDefault": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetConfigInt",
+        "args": ["value.key"],
+        "returns": [{"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "get_config_float_nil_default",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetConfigFloat"]},
+      "native": {"set": [], "get": ["Config.get_config_float"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetConfigFloat`", "native_getter": "`Config.get_config_float`", "fields": "`exists`"},
+      "rust": {"check": "check_config_value", "set": "set_noop"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_missing_float_nil"},
+        "defaultValue": {"type": "f32", "fixed": 0},
+        "hasDefault": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetConfigFloat",
+        "args": ["value.key"],
+        "returns": [{"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "get_config_string_nil_default",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetConfigString"]},
+      "native": {"set": [], "get": ["Config.get_config_string"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetConfigString`", "native_getter": "`Config.get_config_string`", "fields": "`exists`"},
+      "rust": {"check": "check_config_value", "set": "set_noop"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_missing_string_nil"},
+        "defaultValue": {"type": "string", "fixed": ""},
+        "hasDefault": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetConfigString",
+        "args": ["value.key"],
+        "returns": [{"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "get_config_params",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetConfigParams"]},
+      "native": {"set": [], "get": ["Config.get_config_params"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetConfigParams`", "native_getter": "`Config.get_config_params`", "fields": "`count`"},
+      "rust": {"check": "check_config_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetConfigParams",
+        "args": [],
+        "returns": [
+          {"field": "count", "index": 1, "transform": "table_count"}
+        ]
+      }
+    },
+    {
+      "id": "get_log_sections",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetLogSections"]},
+      "native": {"set": [], "get": ["Config.get_log_sections"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["keys"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetLogSections`", "native_getter": "`Config.get_log_sections`", "fields": "`keys`"},
+      "rust": {"check": "check_config_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetLogSections",
+        "args": [],
+        "returns": [
+          {"field": "keys", "index": 1, "transform": "table_keys"}
+        ]
+      },
+      "order_insensitive_fields": ["keys"]
+    },
+    {
+      "id": "config_int",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetConfigInt"], "get": ["Spring.GetConfigInt"]},
+      "native": {"set": ["Config.set_config_int"], "get": ["Config.get_config_int"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value", "exists"]},
+      "report": {"lua_setter": "`Spring.SetConfigInt`", "native_setter": "`Config.set_config_int`", "lua_getter": "`Spring.GetConfigInt`", "native_getter": "`Config.get_config_int`", "fields": "`value`, `exists`"},
+      "rust": {"check": "check_config_value", "set": "set_config_value"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_config_int"},
+        "value": {"type": "i32", "range": [20, 40]},
+        "defaultValue": {"type": "i32", "fixed": 0},
+        "hasDefault": {"type": "bool", "fixed": false},
+        "useOverlay": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.SetConfigInt", "args": ["value.key", "value.value", "value.useOverlay"]},
+        "call": "Spring.GetConfigInt",
+        "args": ["value.key"],
+        "returns": ["value", {"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "config_float",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetConfigFloat"], "get": ["Spring.GetConfigFloat"]},
+      "native": {"set": ["Config.set_config_float"], "get": ["Config.get_config_float"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value", "exists"]},
+      "report": {"lua_setter": "`Spring.SetConfigFloat`", "native_setter": "`Config.set_config_float`", "lua_getter": "`Spring.GetConfigFloat`", "native_getter": "`Config.get_config_float`", "fields": "`value`, `exists`"},
+      "rust": {"check": "check_config_value", "set": "set_config_value"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_config_float"},
+        "value": {"type": "f32", "range": [2.5, 8.5]},
+        "defaultValue": {"type": "f32", "fixed": 0},
+        "hasDefault": {"type": "bool", "fixed": false},
+        "useOverlay": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.SetConfigFloat", "args": ["value.key", "value.value", "value.useOverlay"]},
+        "call": "Spring.GetConfigFloat",
+        "args": ["value.key"],
+        "returns": ["value", {"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "config_string",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetConfigString"], "get": ["Spring.GetConfigString"]},
+      "native": {"set": ["Config.set_config_string"], "get": ["Config.get_config_string"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value", "exists"]},
+      "report": {"lua_setter": "`Spring.SetConfigString`", "native_setter": "`Config.set_config_string`", "lua_getter": "`Spring.GetConfigString`", "native_getter": "`Config.get_config_string`", "fields": "`value`, `exists`"},
+      "rust": {"check": "check_config_value", "set": "set_config_value"},
+      "params": {
+        "key": {"type": "string", "fixed": "native_api_parity_config_string"},
+        "value": {"type": "string", "fixed": "native-api-parity"},
+        "defaultValue": {"type": "string", "fixed": ""},
+        "hasDefault": {"type": "bool", "fixed": false},
+        "useOverlay": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.SetConfigString", "args": ["value.key", "value.value", "value.useOverlay"]},
+        "call": "Spring.GetConfigString",
+        "args": ["value.key"],
+        "returns": ["value", {"field": "exists", "index": 1, "transform": "truthy"}]
+      }
+    }
+  ]
+}

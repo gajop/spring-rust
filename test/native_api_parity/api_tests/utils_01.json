@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_cegid",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetCEGID"]},
+      "native": {"set": [], "get": ["Utils.get_cegid"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetCEGID`", "native_getter": "`Utils.get_cegid`", "fields": "`value`"},
+      "rust": {"check": "check_utils_i32", "set": "set_noop"},
+      "params": {"cegName": {"type": "string", "fixed": "native_api_parity_missing_ceg"}},
+      "lua_runtime": {"call": "Spring.GetCEGID", "args": ["value.cegName"], "returns": ["value"]}
+    },
+    {
+      "id": "pos2_build_pos",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.Pos2BuildPos"]},
+      "native": {"set": [], "get": ["Utils.pos2_build_pos"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["buildX", "buildY", "buildZ"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.Pos2BuildPos`", "native_getter": "`Utils.pos2_build_pos`", "fields": "`buildX`, `buildY`, `buildZ`"},
+      "rust": {"check": "check_utils_vec3", "set": "set_noop"},
+      "params": {
+        "unitDefID": {"type": "i32", "fixture": "unitDefID"},
+        "position": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
+        "facing": {"type": "enum", "values": [0, 1, 2, 3]}
+      },
+      "lua_runtime": {"call": "Spring.Pos2BuildPos", "args": ["fixture.unitDefID", "value.x", "value.y", "value.z", "value.facing"], "returns": ["buildX", "buildY", "buildZ"]}
+    },
+    {
+      "id": "test_move_order",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.TestMoveOrder"]},
+      "native": {"set": [], "get": ["Utils.test_move_order"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["canMove"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.TestMoveOrder`", "native_getter": "`Utils.test_move_order`", "fields": "`canMove`"},
+      "rust": {"check": "check_test_move_order", "set": "set_noop"},
+      "params": {
+        "unitDefID": {"type": "i32", "fixture": "unitDefID"},
+        "position": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
+        "dirX": {"type": "f32", "fixed": 1},
+        "dirY": {"type": "f32", "fixed": 0},
+        "dirZ": {"type": "f32", "fixed": 0},
+        "testTerrain": {"type": "bool", "fixed": true},
+        "testObjects": {"type": "bool", "fixed": true},
+        "centerOnly": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {"call": "Spring.TestMoveOrder", "args": ["fixture.unitDefID", "value.x", "value.y", "value.z", "value.dirX", "value.dirY", "value.dirZ", "value.testTerrain", "value.testObjects", "value.centerOnly"], "returns": ["canMove"]}
+    }
+  ]
+}

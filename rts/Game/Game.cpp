@@ -136,6 +136,7 @@
 
 #include "fmt/ranges.h"
 
+#include "NativeInterface/NativeInterfaceSystem.h"
 
 #undef CreateDirectory
 
@@ -512,6 +513,9 @@ void CGame::Load(const std::string& mapFileName)
 			forcedQuit = true;
 		}
 	}
+
+	nativeInterfaceSystem = std::make_unique<NativeInterfaceSystem>();
+	NativeInterfaceSystem::s_instance->Reload();
 
 	Watchdog::DeregisterThread(WDT_LOAD);
 	AddTimedJobs();
@@ -2204,4 +2208,3 @@ const ActionList& CGame::GetLastActionList()
 {
 	return gameInputReceiver.lastActionList;
 }
-

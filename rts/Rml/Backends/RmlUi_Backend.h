@@ -43,6 +43,7 @@ namespace RmlGui
 	bool Initialize();
 	bool InitializeLua(lua_State* lua_state);
 	bool RemoveLua();
+	bool IsInitialized();
 
 	void Shutdown();
 	void Reload();
@@ -61,6 +62,8 @@ namespace RmlGui
 	bool ProcessMouseWheel(float delta);
 
 	void SetDebugContext(Rml::Context* context);
+	bool AddTranslationString(const std::string& key, const std::string& translation);
+	bool ClearTranslations();
 
 	bool IsMouseInteractingWith();
 	const std::string& GetMouseCursor();

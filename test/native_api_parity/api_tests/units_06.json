@@ -1,0 +1,591 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "unit_add_experience",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitExperience",
+          "Spring.AddUnitExperience"
+        ],
+        "get": [
+          "Spring.GetUnitExperience"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_experience",
+          "UnitControl.add_unit_experience"
+        ],
+        "get": [
+          "UnitsInfo.get_unit_experience"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "experience"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitExperience`, `Spring.AddUnitExperience`",
+        "native_setter": "`UnitControl.set_unit_experience`, `UnitControl.add_unit_experience`",
+        "lua_getter": "`Spring.GetUnitExperience`",
+        "native_getter": "`UnitsInfo.get_unit_experience`",
+        "fields": "`experience`"
+      },
+      "rust": {
+        "check": "check_unit_experience",
+        "set": "add_unit_experience"
+      },
+      "params": {
+        "baseline": {
+          "type": "f32",
+          "range": [
+            0,
+            2
+          ]
+        },
+        "deltaExperience": {
+          "type": "f32",
+          "range": [
+            0,
+            1
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": [
+          {
+            "call": "Spring.SetUnitExperience",
+            "args": [
+              "fixture.unitID",
+              "value.baseline"
+            ]
+          },
+          {
+            "call": "Spring.AddUnitExperience",
+            "args": [
+              "fixture.unitID",
+              "value.deltaExperience"
+            ]
+          }
+        ],
+        "call": "Spring.GetUnitExperience",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "experience"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_vectors",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitVectors"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_vectors"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "frontX",
+          "frontY",
+          "frontZ",
+          "upX",
+          "upY",
+          "upZ",
+          "rightX",
+          "rightY",
+          "rightZ"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitVectors`",
+        "native_getter": "`UnitsInfo.get_unit_vectors`",
+        "fields": "`frontX`, `frontY`, `frontZ`, `upX`, `upY`, `upZ`, `rightX`, `rightY`, `rightZ`"
+      },
+      "rust": {
+        "check": "check_unit_vectors",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitVectors",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          {
+            "field": "frontX",
+            "index": 1,
+            "path": [
+              1
+            ]
+          },
+          {
+            "field": "frontY",
+            "index": 1,
+            "path": [
+              2
+            ]
+          },
+          {
+            "field": "frontZ",
+            "index": 1,
+            "path": [
+              3
+            ]
+          },
+          {
+            "field": "upX",
+            "index": 2,
+            "path": [
+              1
+            ]
+          },
+          {
+            "field": "upY",
+            "index": 2,
+            "path": [
+              2
+            ]
+          },
+          {
+            "field": "upZ",
+            "index": 2,
+            "path": [
+              3
+            ]
+          },
+          {
+            "field": "rightX",
+            "index": 3,
+            "path": [
+              1
+            ]
+          },
+          {
+            "field": "rightY",
+            "index": 3,
+            "path": [
+              2
+            ]
+          },
+          {
+            "field": "rightZ",
+            "index": 3,
+            "path": [
+              3
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "unit_collision_volume_data",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitCollisionVolumeData"
+        ],
+        "get": [
+          "Spring.GetUnitCollisionVolumeData"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_collision_volume_data"
+        ],
+        "get": [
+          "UnitsInfo.get_unit_collision_volume_data"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "scaleX",
+          "scaleY",
+          "scaleZ",
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "volumeType",
+          "testType",
+          "primaryAxis",
+          "disabled"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitCollisionVolumeData`",
+        "native_setter": "`UnitControl.set_unit_collision_volume_data`",
+        "lua_getter": "`Spring.GetUnitCollisionVolumeData`",
+        "native_getter": "`UnitsInfo.get_unit_collision_volume_data`",
+        "fields": "`scaleX`, `scaleY`, `scaleZ`, `offsetX`, `offsetY`, `offsetZ`, `volumeType`, `testType`, `primaryAxis`, `disabled`"
+      },
+      "rust": {
+        "check": "check_unit_collision_volume_data",
+        "set": "set_unit_collision_volume_data"
+      },
+      "params": {
+        "scaleX": {
+          "type": "f32",
+          "range": [
+            8,
+            72
+          ]
+        },
+        "scaleY": {
+          "type": "f32",
+          "range": [
+            8,
+            72
+          ]
+        },
+        "scaleZ": {
+          "type": "f32",
+          "range": [
+            8,
+            72
+          ]
+        },
+        "offsetX": {
+          "type": "f32",
+          "range": [
+            -12,
+            12
+          ]
+        },
+        "offsetY": {
+          "type": "f32",
+          "range": [
+            -12,
+            12
+          ]
+        },
+        "offsetZ": {
+          "type": "f32",
+          "range": [
+            -12,
+            12
+          ]
+        },
+        "volumeType": {
+          "type": "enum",
+          "values": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "testType": {
+          "type": "enum",
+          "values": [
+            0,
+            1
+          ]
+        },
+        "primaryAxis": {
+          "type": "enum",
+          "values": [
+            0,
+            1,
+            2
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitCollisionVolumeData",
+          "args": [
+            "fixture.unitID",
+            "value.scaleX",
+            "value.scaleY",
+            "value.scaleZ",
+            "value.offsetX",
+            "value.offsetY",
+            "value.offsetZ",
+            "value.volumeType",
+            "value.testType",
+            "value.primaryAxis"
+          ]
+        },
+        "call": "Spring.GetUnitCollisionVolumeData",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "scaleX",
+          "scaleY",
+          "scaleZ",
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "volumeType",
+          "testType",
+          "primaryAxis",
+          "disabled"
+        ]
+      }
+    },
+    {
+      "id": "unit_radius_after_set",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitRadiusAndHeight"
+        ],
+        "get": [
+          "Spring.GetUnitRadius"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_radius_and_height"
+        ],
+        "get": [
+          "UnitsInfo.get_unit_radius"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "radius"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitRadiusAndHeight`",
+        "native_setter": "`UnitControl.set_unit_radius_and_height`",
+        "lua_getter": "`Spring.GetUnitRadius`",
+        "native_getter": "`UnitsInfo.get_unit_radius`",
+        "fields": "`radius`"
+      },
+      "rust": {
+        "check": "check_unit_radius",
+        "set": "set_unit_radius_and_height"
+      },
+      "params": {
+        "radius": {
+          "type": "f32",
+          "range": [
+            8,
+            80
+          ]
+        },
+        "height": {
+          "type": "f32",
+          "range": [
+            8,
+            120
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitRadiusAndHeight",
+          "args": [
+            "fixture.unitID",
+            "value.radius",
+            "value.height"
+          ]
+        },
+        "call": "Spring.GetUnitRadius",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "radius"
+        ]
+      }
+    },
+    {
+      "id": "unit_height_after_set",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitRadiusAndHeight"
+        ],
+        "get": [
+          "Spring.GetUnitHeight"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_radius_and_height"
+        ],
+        "get": [
+          "UnitsInfo.get_unit_height"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "height"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitRadiusAndHeight`",
+        "native_setter": "`UnitControl.set_unit_radius_and_height`",
+        "lua_getter": "`Spring.GetUnitHeight`",
+        "native_getter": "`UnitsInfo.get_unit_height`",
+        "fields": "`height`"
+      },
+      "rust": {
+        "check": "check_unit_height",
+        "set": "set_unit_radius_and_height"
+      },
+      "params": {
+        "radius": {
+          "type": "f32",
+          "range": [
+            8,
+            80
+          ]
+        },
+        "height": {
+          "type": "f32",
+          "range": [
+            8,
+            120
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitRadiusAndHeight",
+          "args": [
+            "fixture.unitID",
+            "value.radius",
+            "value.height"
+          ]
+        },
+        "call": "Spring.GetUnitHeight",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "height"
+        ]
+      }
+    },
+    {
+      "id": "unit_sensor_radius",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitSensorRadius"
+        ],
+        "get": [
+          "Spring.GetUnitSensorRadius"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_sensor_radius"
+        ],
+        "get": [
+          "UnitsInfo.get_unit_sensor_radius"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "radius"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitSensorRadius`",
+        "native_setter": "`UnitControl.set_unit_sensor_radius`",
+        "lua_getter": "`Spring.GetUnitSensorRadius`",
+        "native_getter": "`UnitsInfo.get_unit_sensor_radius`",
+        "fields": "`radius`"
+      },
+      "rust": {
+        "check": "check_unit_sensor_radius",
+        "set": "set_unit_sensor_radius"
+      },
+      "params": {
+        "sensorType": {
+          "type": "enum",
+          "values": [
+            "los",
+            "airLos",
+            "radar",
+            "sonar",
+            "seismic",
+            "radarJammer",
+            "sonarJammer"
+          ]
+        },
+        "radius": {
+          "type": "i32",
+          "range": [
+            64,
+            512
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitSensorRadius",
+          "args": [
+            "fixture.unitID",
+            "value.sensorType",
+            "value.radius"
+          ]
+        },
+        "call": "Spring.GetUnitSensorRadius",
+        "args": [
+          "fixture.unitID",
+          "value.sensorType"
+        ],
+        "returns": [
+          "radius"
+        ]
+      }
+    }
+  ]
+}

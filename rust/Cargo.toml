@@ -1,0 +1,3 @@
+[workspace]
+members = ["crates/spring-native-sys", "crates/spring-native"]
+resolver = "2"

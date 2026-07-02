@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_weapon_def_ids",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_ids"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["ids"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_ids`", "fields": "`ids`"},
+      "rust": {"check": "check_weapon_defs_list_count", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"table": "WeaponDefs", "returns": [{"field": "ids", "transform": "table_int_keys"}]},
+      "order_insensitive_fields": ["ids"]
+    },
+    {
+      "id": "get_weapon_def_count",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_count"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_count`", "fields": "`count`"},
+      "rust": {"check": "check_weapon_defs_list_count", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"table": "WeaponDefs", "returns": [{"field": "count", "transform": "table_count"}]}
+    },
+    {
+      "id": "get_weapon_def_name",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_name"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_name`", "fields": "`value`"},
+      "rust": {"check": "check_weapon_defs_string", "set": "set_noop"},
+      "params": {"weaponDefID": {"type": "i32", "fixture": "weaponDefID"}},
+      "lua_runtime": {"table": "WeaponDefs", "key": "fixture.weaponDefID", "returns": [{"field": "value", "path": ["name"]}]}
+    },
+    {
+      "id": "valid_weapon_def_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.valid_weapon_def_id"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["valid"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.valid_weapon_def_id`", "fields": "`valid`"},
+      "rust": {"check": "check_weapon_defs_bool", "set": "set_noop"},
+      "params": {"weaponDefID": {"type": "i32", "fixture": "weaponDefID"}},
+      "lua_runtime": {"table": "WeaponDefs", "key": "fixture.weaponDefID", "returns": [{"field": "valid", "transform": "truthy"}]}
+    },
+    {
+      "id": "get_weapon_def_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_id"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["weaponDefID"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_id`", "fields": "`weaponDefID`"},
+      "rust": {"check": "check_weapon_defs_i32", "set": "set_noop"},
+      "params": {"weaponDefID": {"type": "i32", "fixture": "weaponDefID"}},
+      "lua_runtime": {
+        "table": "WeaponDefs",
+        "key": "fixture.weaponDefID",
+        "returns": [
+          {"field": "defName", "path": ["name"]},
+          {"field": "weaponDefID", "path": ["id"]}
+        ]
+      }
+    },
+    {
+      "id": "get_weapon_def_range",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_range"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_range`", "fields": "`value`"},
+      "rust": {"check": "check_weapon_defs_f32", "set": "set_noop"},
+      "params": {"weaponDefID": {"type": "i32", "fixture": "weaponDefID"}},
+      "lua_runtime": {"table": "WeaponDefs", "key": "fixture.weaponDefID", "returns": [{"field": "value", "path": ["range"]}]}
+    },
+    {
+      "id": "get_weapon_def_damage",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_damage"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_damage`", "fields": "`value`"},
+      "rust": {"check": "check_weapon_defs_f32", "set": "set_noop"},
+      "params": {"weaponDefID": {"type": "i32", "fixture": "weaponDefID"}},
+      "lua_runtime": {"table": "WeaponDefs", "key": "fixture.weaponDefID", "returns": [{"field": "value", "path": ["damages", 0]}]}
+    },
+    {
+      "id": "get_weapon_def_custom_param",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_custom_param"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_custom_param`", "fields": "`value`"},
+      "rust": {"check": "check_weapon_defs_string", "set": "set_noop"},
+      "params": {"weaponDefID": {"type": "i32", "fixture": "weaponDefID"}, "key": {"type": "string", "fixed": "native_api_parity_weapon"}},
+      "lua_runtime": {"table": "WeaponDefs", "key": "fixture.weaponDefID", "returns": [{"field": "value", "path": ["customParams", "native_api_parity_weapon"]}]}
+    },
+    {
+      "id": "get_weapon_def_custom_param_keys",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_custom_param_keys"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["keys"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_custom_param_keys`", "fields": "`keys`"},
+      "rust": {"check": "check_weapon_defs_keys", "set": "set_noop"},
+      "params": {"weaponDefID": {"type": "i32", "fixture": "weaponDefID"}},
+      "lua_runtime": {"table": "WeaponDefs", "key": "fixture.weaponDefID", "returns": [{"field": "keys", "path": ["customParams"], "transform": "table_keys"}]},
+      "order_insensitive_fields": ["keys"]
+    },
+    {
+      "id": "get_weapon_def_by_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["WeaponDefs"]},
+      "native": {"set": [], "get": ["WeaponDefs.get_weapon_def_by_id"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists", "id", "nameValue", "range", "damage"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`WeaponDefs`", "native_getter": "`WeaponDefs.get_weapon_def_by_id`", "fields": "`exists`, `id`, `name`, `range`, `damage`"},
+      "rust": {"check": "check_weapon_def_by_id", "set": "set_noop"},
+      "params": {"weaponDefID": {"type": "i32", "fixture": "weaponDefID"}},
+      "lua_runtime": {
+        "table": "WeaponDefs",
+        "key": "fixture.weaponDefID",
+        "returns": [
+          {"field": "exists", "transform": "truthy"},
+          {"field": "id", "path": ["id"]},
+          {"field": "nameValue", "path": ["name"]},
+          {"field": "range", "path": ["range"]},
+          {"field": "damage", "path": ["damages", 0]}
+        ]
+      }
+    }
+  ]
+}

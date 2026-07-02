@@ -1,0 +1,619 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "ally_team_start_box",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetAllyTeamStartBox"
+        ],
+        "get": [
+          "Spring.GetAllyTeamStartBox"
+        ]
+      },
+      "native": {
+        "set": [
+          "TeamControl.set_ally_team_start_box"
+        ],
+        "get": [
+          "Game.get_ally_team_start_box"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "xMin",
+          "zMin",
+          "xMax",
+          "zMax"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetAllyTeamStartBox`",
+        "native_setter": "`TeamControl.set_ally_team_start_box`",
+        "lua_getter": "`Spring.GetAllyTeamStartBox`",
+        "native_getter": "`Game.get_ally_team_start_box`",
+        "fields": "`xMin`, `zMin`, `xMax`, `zMax`"
+      },
+      "rust": {
+        "check": "check_game_ally_team_start_box",
+        "set": "set_ally_team_start_box"
+      },
+      "params": {
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        },
+        "xMin": {
+          "type": "f32",
+          "range": [
+            200,
+            500
+          ]
+        },
+        "zMin": {
+          "type": "f32",
+          "range": [
+            200,
+            500
+          ]
+        },
+        "xMax": {
+          "type": "f32",
+          "range": [
+            1200,
+            1600
+          ]
+        },
+        "zMax": {
+          "type": "f32",
+          "range": [
+            1200,
+            1600
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetAllyTeamStartBox",
+          "args": [
+            "fixture.allyTeamID",
+            "value.xMin",
+            "value.zMin",
+            "value.xMax",
+            "value.zMax"
+          ]
+        },
+        "call": "Spring.GetAllyTeamStartBox",
+        "args": [
+          "fixture.allyTeamID"
+        ],
+        "returns": [
+          "xMin",
+          "zMin",
+          "xMax",
+          "zMax"
+        ]
+      }
+    },
+    {
+      "id": "team_start_position",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetAllyTeamStartBox",
+          "Spring.SetTeamStartPosition"
+        ],
+        "get": [
+          "Spring.GetTeamStartPosition"
+        ]
+      },
+      "native": {
+        "set": [
+          "TeamControl.set_ally_team_start_box",
+          "TeamControl.set_team_start_position"
+        ],
+        "get": [
+          "Game.get_team_start_position"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetAllyTeamStartBox`, `Spring.SetTeamStartPosition`",
+        "native_setter": "`TeamControl.set_ally_team_start_box`, `TeamControl.set_team_start_position`",
+        "lua_getter": "`Spring.GetTeamStartPosition`",
+        "native_getter": "`Game.get_team_start_position`",
+        "fields": "`x`, `y`, `z`"
+      },
+      "rust": {
+        "check": "check_game_team_start_position",
+        "set": "set_team_start_position"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "allyTeamID": {
+          "type": "i32",
+          "fixture": "allyTeamID"
+        },
+        "x": {
+          "type": "f32",
+          "range": [
+            800,
+            1200
+          ]
+        },
+        "y": {
+          "type": "f32",
+          "fixed": 96
+        },
+        "z": {
+          "type": "f32",
+          "range": [
+            800,
+            1200
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": [
+          {
+            "call": "Spring.SetAllyTeamStartBox",
+            "args": [
+              "fixture.allyTeamID",
+              0,
+              0,
+              2000,
+              2000
+            ]
+          },
+          {
+            "call": "Spring.SetTeamStartPosition",
+            "args": [
+              "fixture.teamID",
+              "value.x",
+              "value.y",
+              "value.z"
+            ]
+          }
+        ],
+        "call": "Spring.GetTeamStartPosition",
+        "args": [
+          "fixture.teamID"
+        ],
+        "returns": [
+          "x",
+          "y",
+          "z",
+          "valid"
+        ]
+      }
+    },
+    {
+      "id": "team_add_resource",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetTeamResource",
+          "Spring.AddTeamResource"
+        ],
+        "get": [
+          "Spring.GetTeamResources"
+        ]
+      },
+      "native": {
+        "set": [
+          "TeamControl.set_team_resource",
+          "TeamControl.add_team_resource"
+        ],
+        "get": [
+          "Teams.get_team_resources"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "currentLevel",
+          "storage"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetTeamResource`, `Spring.AddTeamResource`",
+        "native_setter": "`TeamControl.set_team_resource`, `TeamControl.add_team_resource`",
+        "lua_getter": "`Spring.GetTeamResources`",
+        "native_getter": "`Teams.get_team_resources`",
+        "fields": "`currentLevel`, `storage`"
+      },
+      "rust": {
+        "check": "check_team_resources",
+        "set": "add_team_resource"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "resource": {
+          "type": "enum",
+          "values": [
+            "metal",
+            "energy"
+          ]
+        },
+        "baseline": {
+          "type": "f32",
+          "range": [
+            100,
+            300
+          ]
+        },
+        "amount": {
+          "type": "f32",
+          "range": [
+            25,
+            75
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": [
+          {
+            "call": "Spring.SetTeamResource",
+            "args": [
+              "fixture.teamID",
+              "value.resource",
+              "value.baseline"
+            ]
+          },
+          {
+            "call": "Spring.AddTeamResource",
+            "args": [
+              "fixture.teamID",
+              "value.resource",
+              "value.amount"
+            ]
+          }
+        ],
+        "call": "Spring.GetTeamResources",
+        "args": [
+          "fixture.teamID",
+          "value.resource"
+        ],
+        "returns": [
+          "currentLevel",
+          "storage",
+          "pull",
+          "income",
+          "expense",
+          "share",
+          "sent",
+          "received"
+        ]
+      }
+    },
+    {
+      "id": "team_use_resource",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetTeamResource",
+          "Spring.UseTeamResource"
+        ],
+        "get": [
+          "Spring.GetTeamResources"
+        ]
+      },
+      "native": {
+        "set": [
+          "TeamControl.set_team_resource",
+          "TeamControl.use_team_resource"
+        ],
+        "get": [
+          "Teams.get_team_resources"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "currentLevel",
+          "storage"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetTeamResource`, `Spring.UseTeamResource`",
+        "native_setter": "`TeamControl.set_team_resource`, `TeamControl.use_team_resource`",
+        "lua_getter": "`Spring.GetTeamResources`",
+        "native_getter": "`Teams.get_team_resources`",
+        "fields": "`currentLevel`, `storage`"
+      },
+      "rust": {
+        "check": "check_team_resources",
+        "set": "use_team_resource"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "resource": {
+          "type": "enum",
+          "values": [
+            "metal",
+            "energy"
+          ]
+        },
+        "baseline": {
+          "type": "f32",
+          "range": [
+            300,
+            700
+          ]
+        },
+        "amount": {
+          "type": "f32",
+          "range": [
+            25,
+            125
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": [
+          {
+            "call": "Spring.SetTeamResource",
+            "args": [
+              "fixture.teamID",
+              "value.resource",
+              "value.baseline"
+            ]
+          },
+          {
+            "call": "Spring.UseTeamResource",
+            "args": [
+              "fixture.teamID",
+              "value.resource",
+              "value.amount"
+            ]
+          }
+        ],
+        "call": "Spring.GetTeamResources",
+        "args": [
+          "fixture.teamID",
+          "value.resource"
+        ],
+        "returns": [
+          "currentLevel",
+          "storage",
+          "pull",
+          "income",
+          "expense",
+          "share",
+          "sent",
+          "received"
+        ]
+      }
+    },
+    {
+      "id": "get_team_damage_stats",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamDamageStats"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnsyncedRead.get_team_damage_stats"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "damageDealt",
+          "damageReceived"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamDamageStats`",
+        "native_getter": "`UnsyncedRead.get_team_damage_stats`",
+        "fields": "`damageDealt`, `damageReceived`"
+      },
+      "rust": {
+        "check": "check_team_damage_stats",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamDamageStats",
+        "args": [
+          "fixture.teamID"
+        ],
+        "returns": [
+          "damageDealt",
+          "damageReceived"
+        ]
+      }
+    },
+    {
+      "id": "get_team_stats_history",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamStatsHistory"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_team_stats_history"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "count"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamStatsHistory`",
+        "native_getter": "`Teams.get_team_stats_history`",
+        "fields": "`count`"
+      },
+      "rust": {
+        "check": "check_team_stats_history_count",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "startIndex": {
+          "type": "i32",
+          "fixed": 1
+        },
+        "endIndex": {
+          "type": "i32",
+          "fixed": 1
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamStatsHistory",
+        "args": [
+          "fixture.teamID",
+          "value.startIndex",
+          "value.endIndex"
+        ],
+        "returns": [
+          {
+            "field": "count",
+            "transform": "table_count"
+          }
+        ]
+      }
+    },
+    {
+      "id": "team_share_level",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": [
+          "Spring.SetTeamShareLevel"
+        ],
+        "get": [
+          "Spring.GetTeamResources"
+        ]
+      },
+      "native": {
+        "set": [
+          "TeamControl.set_team_share_level"
+        ],
+        "get": [
+          "Teams.get_team_resources"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "share"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetTeamShareLevel`",
+        "native_setter": "`TeamControl.set_team_share_level`",
+        "lua_getter": "`Spring.GetTeamResources`",
+        "native_getter": "`Teams.get_team_resources`",
+        "fields": "`share`"
+      },
+      "rust": {
+        "check": "check_team_resources",
+        "set": "set_team_share_level"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        },
+        "resource": {
+          "type": "enum",
+          "values": [
+            "metal",
+            "energy"
+          ]
+        },
+        "share": {
+          "type": "f32",
+          "range": [
+            0.1,
+            0.9
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetTeamShareLevel",
+          "args": [
+            "fixture.teamID",
+            "value.resource",
+            "value.share"
+          ]
+        },
+        "call": "Spring.GetTeamResources",
+        "args": [
+          "fixture.teamID",
+          "value.resource"
+        ],
+        "returns": [
+          "currentLevel",
+          "storage",
+          "pull",
+          "income",
+          "expense",
+          "share"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,635 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_units_in_sphere",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitsInSphere"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_units_in_sphere"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "unitIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitsInSphere`",
+        "native_getter": "`UnitsQuery.get_units_in_sphere`",
+        "fields": "`unitIDs`"
+      },
+      "rust": {
+        "check": "check_units_query_set",
+        "set": "set_noop"
+      },
+      "params": {
+        "x": {
+          "type": "f32",
+          "fixed": 1024
+        },
+        "y": {
+          "type": "f32",
+          "fixed": 96
+        },
+        "z": {
+          "type": "f32",
+          "fixed": 1024
+        },
+        "radius": {
+          "type": "f32",
+          "fixed": 99999
+        },
+        "allegiance": {
+          "type": "i32",
+          "fixed": -1
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitsInSphere",
+        "args": [
+          "value.x",
+          "value.y",
+          "value.z",
+          "value.radius",
+          "value.allegiance"
+        ],
+        "returns": [
+          "unitIDs"
+        ]
+      },
+      "order_insensitive_fields": [
+        "unitIDs"
+      ]
+    },
+    {
+      "id": "get_units_in_cylinder",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitsInCylinder"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_units_in_cylinder"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "unitIDs"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitsInCylinder`",
+        "native_getter": "`UnitsQuery.get_units_in_cylinder`",
+        "fields": "`unitIDs`"
+      },
+      "rust": {
+        "check": "check_units_query_set",
+        "set": "set_noop"
+      },
+      "params": {
+        "x": {
+          "type": "f32",
+          "fixed": 1024
+        },
+        "z": {
+          "type": "f32",
+          "fixed": 1024
+        },
+        "radius": {
+          "type": "f32",
+          "fixed": 99999
+        },
+        "allegiance": {
+          "type": "i32",
+          "fixed": -1
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitsInCylinder",
+        "args": [
+          "value.x",
+          "value.z",
+          "value.radius",
+          "value.allegiance"
+        ],
+        "returns": [
+          "unitIDs"
+        ]
+      },
+      "order_insensitive_fields": [
+        "unitIDs"
+      ]
+    },
+    {
+      "id": "get_unit_separation",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitSeparation"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsQuery.get_unit_separation"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "separation"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitSeparation`",
+        "native_getter": "`UnitsQuery.get_unit_separation`",
+        "fields": "`separation`"
+      },
+      "rust": {
+        "check": "check_unit_separation",
+        "set": "set_noop"
+      },
+      "params": {
+        "unitID1": {
+          "type": "i32",
+          "fixture": "unitID"
+        },
+        "unitID2": {
+          "type": "i32",
+          "fixture": "unitID"
+        },
+        "positional": {
+          "type": "bool",
+          "fixed": true
+        },
+        "checkMap": {
+          "type": "bool",
+          "fixed": false
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitSeparation",
+        "args": [
+          "fixture.unitID",
+          "fixture.unitID",
+          false,
+          false
+        ],
+        "returns": [
+          "separation"
+        ]
+      }
+    },
+    {
+      "id": "get_team_max_units",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetTeamMaxUnits"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_team_max_units"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "maxUnits"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetTeamMaxUnits`",
+        "native_getter": "`Teams.get_team_max_units`",
+        "fields": "`maxUnits`"
+      },
+      "rust": {
+        "check": "check_teams_i32",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetTeamMaxUnits",
+        "args": [
+          "fixture.teamID"
+        ],
+        "returns": [
+          "maxUnits"
+        ]
+      }
+    },
+    {
+      "id": "unit_rules_param",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitRulesParam"
+        ],
+        "get": [
+          "Spring.GetUnitRulesParam",
+          "Spring.GetUnitRulesParams"
+        ]
+      },
+      "native": {
+        "set": [
+          "RulesParams.set_unit_rules_param"
+        ],
+        "get": [
+          "RulesParams.get_unit_rules_param",
+          "RulesParams.get_unit_rules_params"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "value",
+          "listed"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitRulesParam`",
+        "native_setter": "`RulesParams.set_unit_rules_param`",
+        "lua_getter": "`Spring.GetUnitRulesParam`, `Spring.GetUnitRulesParams`",
+        "native_getter": "`RulesParams.get_unit_rules_param`, `RulesParams.get_unit_rules_params`",
+        "fields": "`value`, `listed`"
+      },
+      "rust": {
+        "check": "check_rules_param",
+        "set": "set_rules_param"
+      },
+      "params": {
+        "scope": {
+          "type": "string",
+          "fixed": "unit"
+        },
+        "unitID": {
+          "type": "i32",
+          "fixture": "unitID"
+        },
+        "paramName": {
+          "type": "string",
+          "fixed": "native_api_parity_unit_rules_param"
+        },
+        "value": {
+          "type": "f32",
+          "range": [
+            10,
+            900
+          ]
+        }
+      }
+    },
+    {
+      "id": "get_unit_cost_table",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitCostTable"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_cost_table"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "metalCost",
+          "energyCost",
+          "buildTime"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitCostTable`",
+        "native_getter": "`UnitsInfo.get_unit_cost_table`",
+        "fields": "`metalCost`, `energyCost`, `buildTime`"
+      },
+      "rust": {
+        "check": "check_unit_cost_table",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitCostTable",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          {
+            "field": "metalCost",
+            "index": 1,
+            "path": [
+              "metal"
+            ]
+          },
+          {
+            "field": "energyCost",
+            "index": 1,
+            "path": [
+              "energy"
+            ]
+          },
+          {
+            "field": "buildTime",
+            "index": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "unit_metal_extraction",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitMetalExtraction"
+        ],
+        "get": [
+          "Spring.GetUnitMetalExtraction"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_metal_extraction"
+        ],
+        "get": [
+          "UnitsInfo.get_unit_metal_extraction"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "metalExtraction"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitMetalExtraction`",
+        "native_setter": "`UnitControl.set_unit_metal_extraction`",
+        "lua_getter": "`Spring.GetUnitMetalExtraction`",
+        "native_getter": "`UnitsInfo.get_unit_metal_extraction`",
+        "fields": "`metalExtraction`"
+      },
+      "rust": {
+        "check": "check_unit_metal_extraction",
+        "set": "set_unit_metal_extraction"
+      },
+      "params": {
+        "depth": {
+          "type": "f32",
+          "range": [
+            0.1,
+            2.0
+          ]
+        },
+        "range": {
+          "type": "f32",
+          "range": [
+            32,
+            256
+          ]
+        }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitMetalExtraction",
+          "args": [
+            "fixture.unitID",
+            "value.depth",
+            "value.range"
+          ]
+        },
+        "call": "Spring.GetUnitMetalExtraction",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "metalExtraction"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_states",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitStates"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_states"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "firestate",
+          "movestate",
+          "repeat",
+          "cloak",
+          "active",
+          "trajectory"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitStates`",
+        "native_getter": "`UnitsInfo.get_unit_states`",
+        "fields": "`firestate`, `movestate`, `repeat`, `cloak`, `active`, `trajectory`"
+      },
+      "rust": {
+        "check": "check_unit_states",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitStates",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          {
+            "field": "firestate",
+            "index": 1,
+            "path": [
+              "firestate"
+            ]
+          },
+          {
+            "field": "movestate",
+            "index": 1,
+            "path": [
+              "movestate"
+            ]
+          },
+          {
+            "field": "repeat",
+            "index": 1,
+            "path": [
+              "repeat"
+            ]
+          },
+          {
+            "field": "cloak",
+            "index": 1,
+            "path": [
+              "cloak"
+            ]
+          },
+          {
+            "field": "active",
+            "index": 1,
+            "path": [
+              "active"
+            ]
+          },
+          {
+            "field": "trajectory",
+            "index": 1,
+            "path": [
+              "trajectory"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "get_unit_sensor_radius",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitSensorRadius"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_sensor_radius"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "radius"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitSensorRadius`",
+        "native_getter": "`UnitsInfo.get_unit_sensor_radius`",
+        "fields": "`radius`"
+      },
+      "rust": {
+        "check": "check_unit_sensor_radius",
+        "set": "set_noop"
+      },
+      "params": {
+        "sensorType": {
+          "type": "enum",
+          "values": [
+            "los",
+            "airLos",
+            "radar",
+            "sonar",
+            "seismic",
+            "radarJammer",
+            "sonarJammer"
+          ]
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitSensorRadius",
+        "args": [
+          "fixture.unitID",
+          "value.sensorType"
+        ],
+        "returns": [
+          "radius"
+        ]
+      }
+    }
+  ]
+}

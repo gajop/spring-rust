@@ -26,4 +26,3 @@ protected:
 };
 
 #endif // _DEMO_H
-

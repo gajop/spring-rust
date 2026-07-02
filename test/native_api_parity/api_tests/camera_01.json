@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_camera_names",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetCameraNames"]},
+      "native": {"set": [], "get": ["Camera.get_camera_names"]},
+      "compare": {"mode": "fields", "fields": ["names"]},
+      "order_insensitive_fields": ["names"],
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetCameraNames`", "native_getter": "`Camera.get_camera_names`", "fields": "`names`"},
+      "rust": {"check": "check_camera_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetCameraNames", "args": [], "returns": [{"field": "names", "index": 1, "transform": "table_keys"}]}
+    },
+    {
+      "id": "get_camera_position",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetCameraPosition"]},
+      "native": {"set": [], "get": ["Camera.get_camera_position"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["x", "y", "z"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetCameraPosition`", "native_getter": "`Camera.get_camera_position`", "fields": "`x`, `y`, `z`"},
+      "rust": {"check": "check_camera_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetCameraPosition", "args": [], "returns": ["x", "y", "z"]}
+    },
+    {
+      "id": "get_camera_state",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetCameraState"]},
+      "native": {"set": [], "get": ["Camera.get_camera_state"]},
+      "compare": {"mode": "fields", "fields": ["cameraName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetCameraState`", "native_getter": "`Camera.get_camera_state`", "fields": "`cameraName`"},
+      "rust": {"check": "check_camera_value", "set": "set_noop"},
+      "params": {"useTable": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.GetCameraState", "args": ["value.useTable"], "returns": [{"field": "cameraName", "index": 1, "path": ["name"]}]}
+    },
+    {
+      "id": "get_camera_direction",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetCameraDirection"]},
+      "native": {"set": [], "get": ["Camera.get_camera_direction"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["x", "y", "z"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetCameraDirection`", "native_getter": "`Camera.get_camera_direction`", "fields": "`x`, `y`, `z`"},
+      "rust": {"check": "check_camera_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetCameraDirection", "args": [], "returns": ["x", "y", "z"]}
+    },
+    {
+      "id": "get_camera_fov",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetCameraFOV"]},
+      "native": {"set": [], "get": ["Camera.get_camera_fov"]},
+      "compare": {"mode": "fields", "fields": ["vFOV"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetCameraFOV`", "native_getter": "`Camera.get_camera_fov`", "fields": "`vFOV`"},
+      "rust": {"check": "check_camera_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetCameraFOV", "args": [], "returns": ["vFOV"]}
+    },
+    {
+      "id": "get_pixel_dir",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetPixelDir"]},
+      "native": {"set": [], "get": ["Camera.get_pixel_dir"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["x", "y", "z"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPixelDir`", "native_getter": "`Camera.get_pixel_dir`", "fields": "`x`, `y`, `z`"},
+      "rust": {"check": "check_camera_value", "set": "set_noop"},
+      "params": {"screenX": {"type": "f32", "fixed": 320}, "screenY": {"type": "f32", "fixed": 240}},
+      "lua_runtime": {"call": "Spring.GetPixelDir", "args": ["value.screenX", "value.screenY"], "returns": ["x", "y", "z"]}
+    },
+    {
+      "id": "world_to_screen_coords",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires_rendering": true,
+      "requires": ["native_rebuild"],
+      "lua": {"set": ["Spring.SetCameraTarget"], "get": ["Spring.WorldToScreenCoords"]},
+      "native": {"set": ["Camera.set_camera_target"], "get": ["Camera.world_to_screen_coords"]},
+      "compare": {"mode": "fields", "fields": ["x", "y", "z"]},
+      "report": {"lua_setter": "`Spring.SetCameraTarget`", "native_setter": "`Camera.set_camera_target`", "lua_getter": "`Spring.WorldToScreenCoords`", "native_getter": "`Camera.world_to_screen_coords`", "fields": "`x`, `y`, `z`"},
+      "rust": {"check": "check_camera_value", "set": "set_camera_target"},
+      "params": {"x": {"type": "f32", "fixed": 1024}, "y": {"type": "f32", "fixed": 256}, "z": {"type": "f32", "fixed": 1024}, "transitionTime": {"type": "f32", "fixed": 0}},
+      "lua_runtime": {"set": {"call": "Spring.SetCameraTarget", "args": ["value.x", "value.y", "value.z", "value.transitionTime"]}, "call": "Spring.WorldToScreenCoords", "args": ["value.x", "value.y", "value.z"], "returns": ["x", "y", "z"]}
+    }
+  ]
+}

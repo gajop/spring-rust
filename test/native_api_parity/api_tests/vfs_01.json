@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "vfs_file_exists",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.FileExists"]},
+      "native": {"set": [], "get": ["Vfs.file_exists"]},
+      "compare": {"mode": "fields", "fields": ["exists"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.FileExists`", "native_getter": "`Vfs.file_exists`", "fields": "`exists`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules/Gadgets/native_api_parity.lua"}},
+      "lua_runtime": {"call": "VFS.FileExists", "args": ["value.path"], "returns": ["exists"]}
+    },
+    {
+      "id": "vfs_missing_file_exists",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.FileExists"]},
+      "native": {"set": [], "get": ["Vfs.file_exists"]},
+      "compare": {"mode": "fields", "fields": ["exists"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.FileExists`", "native_getter": "`Vfs.file_exists`", "fields": "`exists`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules/Gadgets/does_not_exist.lua"}},
+      "lua_runtime": {"call": "VFS.FileExists", "args": ["value.path"], "returns": ["exists"]}
+    },
+    {
+      "id": "vfs_file_size",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.LoadFile"]},
+      "native": {"set": [], "get": ["Vfs.get_file_size"]},
+      "compare": {"mode": "fields", "fields": ["size"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.LoadFile`", "native_getter": "`Vfs.get_file_size`", "fields": "`size`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules/Gadgets/native_api_parity.lua"}},
+      "lua_runtime": {"call": "VFS.LoadFile", "args": ["value.path"], "returns": [{"field": "size", "transform": "string_len"}]}
+    },
+    {
+      "id": "vfs_file_info",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.FileExists", "VFS.LoadFile"]},
+      "native": {"set": [], "get": ["Vfs.get_file_info"]},
+      "compare": {"mode": "fields", "fields": ["exists", "size"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.LoadFile`", "native_getter": "`Vfs.get_file_info`", "fields": "`exists`, `size`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules/Gadgets/native_api_parity.lua"}},
+      "lua_runtime": {
+        "call": "VFS.LoadFile",
+        "args": ["value.path"],
+        "returns": [
+          {"field": "exists", "transform": "truthy"},
+          {"field": "size", "transform": "string_len"}
+        ]
+      }
+    },
+    {
+      "id": "vfs_read_file",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.LoadFile"]},
+      "native": {"set": [], "get": ["Vfs.read_file"]},
+      "compare": {"mode": "fields", "fields": ["size"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.LoadFile`", "native_getter": "`Vfs.read_file`", "fields": "`size`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules/Gadgets/native_api_parity.lua"}},
+      "lua_runtime": {"call": "VFS.LoadFile", "args": ["value.path"], "returns": [{"field": "size", "transform": "string_len"}]}
+    },
+    {
+      "id": "vfs_read_file_as_string",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.LoadFile"]},
+      "native": {"set": [], "get": ["Vfs.read_file_as_string"]},
+      "compare": {"mode": "fields", "fields": ["size"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.LoadFile`", "native_getter": "`Vfs.read_file_as_string`", "fields": "`size`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules/Gadgets/native_api_parity.lua"}},
+      "lua_runtime": {"call": "VFS.LoadFile", "args": ["value.path"], "returns": [{"field": "size", "transform": "string_len"}]}
+    },
+    {
+      "id": "vfs_list_dir_count",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.DirList"]},
+      "native": {"set": [], "get": ["Vfs.list_dir"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.DirList`", "native_getter": "`Vfs.list_dir`", "fields": "`count`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules/Gadgets/"}, "pattern": {"type": "string", "fixed": "*"}},
+      "lua_runtime": {"call": "VFS.DirList", "args": ["value.path", "value.pattern"], "returns": [{"field": "count", "transform": "table_count"}]}
+    },
+    {
+      "id": "vfs_get_all_archives_count",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.GetAllArchives"]},
+      "native": {"set": [], "get": ["Vfs.get_archives"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.GetAllArchives`", "native_getter": "`Vfs.get_archives`", "fields": "`count`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": ""}},
+      "lua_runtime": {"call": "VFS.GetAllArchives", "args": [], "returns": [{"field": "count", "transform": "table_count"}]}
+    },
+    {
+      "id": "vfs_get_maps_count",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.GetMaps"]},
+      "native": {"set": [], "get": ["Vfs.get_maps"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.GetMaps`", "native_getter": "`Vfs.get_maps`", "fields": "`count`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": ""}},
+      "lua_runtime": {"call": "VFS.GetMaps", "args": [], "returns": [{"field": "count", "transform": "table_count"}]}
+    },
+    {
+      "id": "vfs_get_games_count",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.GetGames"]},
+      "native": {"set": [], "get": ["Vfs.get_games"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.GetGames`", "native_getter": "`Vfs.get_games`", "fields": "`count`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": ""}},
+      "lua_runtime": {"call": "VFS.GetGames", "args": [], "returns": [{"field": "count", "transform": "table_count"}]}
+    },
+    {
+      "id": "vfs_is_directory",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.SubDirs"]},
+      "native": {"set": [], "get": ["Vfs.is_directory"]},
+      "compare": {"mode": "fields", "fields": ["isDirectory"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.SubDirs`", "native_getter": "`Vfs.is_directory`", "fields": "`isDirectory`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules/"}},
+      "lua_runtime": {"call": "VFS.SubDirs", "args": ["value.path"], "returns": [{"field": "isDirectory", "transform": "table_nonempty"}]}
+    },
+    {
+      "id": "vfs_missing_is_directory",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["VFS.SubDirs"]},
+      "native": {"set": [], "get": ["Vfs.is_directory"]},
+      "compare": {"mode": "fields", "fields": ["isDirectory"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`VFS.SubDirs`", "native_getter": "`Vfs.is_directory`", "fields": "`isDirectory`"},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "does/not/exist/"}},
+      "lua_runtime": {"call": "VFS.SubDirs", "args": ["value.path"], "returns": [{"field": "isDirectory", "transform": "table_nonempty"}]}
+    }
+  ]
+}

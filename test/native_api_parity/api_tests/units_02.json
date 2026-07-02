@@ -1,0 +1,612 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "unit_def_id",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitDefID"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_def_id"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "defID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitDefID`",
+        "native_getter": "`units_info().get_unit_def_id`",
+        "fields": "`defID`"
+      },
+      "rust": {
+        "check": "check_unit_def_id",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_team",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitTeam"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_team"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "teamID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitTeam`",
+        "native_getter": "`units_info().get_unit_team`",
+        "fields": "`teamID`"
+      },
+      "rust": {
+        "check": "check_unit_team",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_ally_team",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitAllyTeam"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_ally_team"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "allyTeamID"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitAllyTeam`",
+        "native_getter": "`units_info().get_unit_ally_team`",
+        "fields": "`allyTeamID`"
+      },
+      "rust": {
+        "check": "check_unit_ally_team",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_is_dead",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitIsDead"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_is_dead"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "isDead"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitIsDead`",
+        "native_getter": "`units_info().get_unit_is_dead`",
+        "fields": "`isDead`"
+      },
+      "rust": {
+        "check": "check_unit_is_dead",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_is_stunned",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitIsStunned"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_is_stunned"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "stunned"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitIsStunned`",
+        "native_getter": "`units_info().get_unit_is_stunned`",
+        "fields": "`stunned`"
+      },
+      "rust": {
+        "check": "check_unit_is_stunned",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_height",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitHeight"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_height"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "height"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitHeight`",
+        "native_getter": "`units_info().get_unit_height`",
+        "fields": "`height`"
+      },
+      "rust": {
+        "check": "check_unit_height",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_radius",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitRadius"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_radius"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "radius"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitRadius`",
+        "native_getter": "`units_info().get_unit_radius`",
+        "fields": "`radius`"
+      },
+      "rust": {
+        "check": "check_unit_radius",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_base_position",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitBasePosition"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_base_position"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitBasePosition`",
+        "native_getter": "`units_info().get_unit_base_position`",
+        "fields": "`x`, `z`"
+      },
+      "rust": {
+        "check": "check_unit_base_position",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_direction",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitDirection"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_direction"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitDirection`",
+        "native_getter": "`units_info().get_unit_direction`",
+        "fields": "`x`, `y`, `z` front vector"
+      },
+      "rust": {
+        "check": "check_unit_direction",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_heading",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitHeading"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "units_info().get_unit_heading"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "heading"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitHeading`",
+        "native_getter": "`units_info().get_unit_heading`",
+        "fields": "`heading`"
+      },
+      "rust": {
+        "check": "check_unit_heading",
+        "set": "set_noop"
+      },
+      "params": {}
+    },
+    {
+      "id": "unit_velocity",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitVelocity"
+        ],
+        "get": [
+          "Spring.GetUnitVelocity"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_velocity"
+        ],
+        "get": [
+          "units_info().get_unit_velocity"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitVelocity`",
+        "native_setter": "`UnitControl.set_unit_velocity`",
+        "lua_getter": "`Spring.GetUnitVelocity`",
+        "native_getter": "`units_info().get_unit_velocity`",
+        "fields": "`x`, `y`, `z`"
+      },
+      "rust": {
+        "check": "check_unit_velocity",
+        "set": "set_unit_velocity"
+      },
+      "params": {
+        "velocity": {
+          "type": "float3",
+          "generator": "unit_velocity",
+          "expands_to": [
+            "x",
+            "y",
+            "z"
+          ]
+        }
+      }
+    },
+    {
+      "id": "get_unit_is_active",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitIsActive"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_is_active"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "isActive"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitIsActive`",
+        "native_getter": "`UnitsInfo.get_unit_is_active`",
+        "fields": "`isActive`"
+      },
+      "rust": {
+        "check": "check_unit_info_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "unitID": {
+          "type": "i32",
+          "fixture": "unitID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitIsActive",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "isActive"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_is_cloaked",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitIsCloaked"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_is_cloaked"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "isCloaked"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitIsCloaked`",
+        "native_getter": "`UnitsInfo.get_unit_is_cloaked`",
+        "fields": "`isCloaked`"
+      },
+      "rust": {
+        "check": "check_unit_info_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "unitID": {
+          "type": "i32",
+          "fixture": "unitID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitIsCloaked",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "isCloaked"
+        ]
+      }
+    },
+    {
+      "id": "get_unit_is_being_built",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitIsBeingBuilt"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_is_being_built"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "isBeingBuilt"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitIsBeingBuilt`",
+        "native_getter": "`UnitsInfo.get_unit_is_being_built`",
+        "fields": "`isBeingBuilt`"
+      },
+      "rust": {
+        "check": "check_unit_info_bool",
+        "set": "set_noop"
+      },
+      "params": {
+        "unitID": {
+          "type": "i32",
+          "fixture": "unitID"
+        }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitIsBeingBuilt",
+        "args": [
+          "fixture.unitID"
+        ],
+        "returns": [
+          "isBeingBuilt"
+        ]
+      }
+    }
+  ]
+}

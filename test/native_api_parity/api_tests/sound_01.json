@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_sound_devices_count",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetSoundDevices"]},
+      "native": {"set": [], "get": ["Sound.get_sound_devices"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSoundDevices`", "native_getter": "`Sound.get_sound_devices`", "fields": "`count`"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetSoundDevices", "args": [], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "get_sound_stream_time",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetSoundStreamTime"]},
+      "native": {"set": [], "get": ["Sound.get_sound_stream_time"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["time"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSoundStreamTime`", "native_getter": "`Sound.get_sound_stream_time`", "fields": "`time`"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetSoundStreamTime", "args": [], "returns": [{"field": "time", "index": 2}]}
+    },
+    {
+      "id": "play_sound_stream_missing",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.PlaySoundStream"]},
+      "native": {"set": [], "get": ["Sound.play_sound_stream"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.PlaySoundStream`", "native_getter": "`Sound.play_sound_stream`", "fields": "`success`"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {"oggFile": {"type": "string", "fixed": "sounds/native_api_parity_missing.ogg"}, "volume": {"type": "f32", "range": [0.0, 0.25]}, "enqueue": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.PlaySoundStream", "args": ["value.oggFile", "value.volume", "value.enqueue"], "returns": ["success"]}
+    },
+    {
+      "id": "stop_sound_stream",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.StopSoundStream"]},
+      "native": {"set": [], "get": ["Sound.stop_sound_stream"]},
+      "compare": {"mode": "fields", "fields": []},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.StopSoundStream`", "native_getter": "`Sound.stop_sound_stream`", "fields": "n/a"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.StopSoundStream", "args": [], "returns": []}
+    },
+    {
+      "id": "pause_sound_stream",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.PauseSoundStream"]},
+      "native": {"set": [], "get": ["Sound.pause_sound_stream"]},
+      "compare": {"mode": "fields", "fields": []},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.PauseSoundStream`", "native_getter": "`Sound.pause_sound_stream`", "fields": "n/a"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.PauseSoundStream", "args": [], "returns": []}
+    },
+    {
+      "id": "set_sound_stream_volume",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.SetSoundStreamVolume"]},
+      "native": {"set": [], "get": ["Sound.set_sound_stream_volume"]},
+      "compare": {"mode": "fields", "fields": []},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.SetSoundStreamVolume`", "native_getter": "`Sound.set_sound_stream_volume`", "fields": "n/a"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {"volume": {"type": "f32", "range": [0.0, 0.4]}},
+      "lua_runtime": {"call": "Spring.SetSoundStreamVolume", "args": ["value.volume"], "returns": []}
+    },
+    {
+      "id": "preload_sound_item_missing",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["non_idempotent_lua_then_native"],
+      "lua": {"set": [], "get": ["Spring.PreloadSoundItem"]},
+      "native": {"set": [], "get": ["Sound.preload_sound_item"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.PreloadSoundItem`", "native_getter": "`Sound.preload_sound_item`", "fields": "`success`"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {"soundName": {"type": "string", "fixed": "native_api_parity_missing_sound"}},
+      "lua_runtime": {"call": "Spring.PreloadSoundItem", "args": ["value.soundName"], "returns": ["success"]}
+    },
+    {
+      "id": "load_sound_def_missing",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.LoadSoundDef"]},
+      "native": {"set": [], "get": ["Sound.load_sound_def"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.LoadSoundDef`", "native_getter": "`Sound.load_sound_def`", "fields": "`success`"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {"soundFile": {"type": "string", "fixed": "gamedata/native_api_parity_missing_sounds.lua"}},
+      "lua_runtime": {"call": "Spring.LoadSoundDef", "args": ["value.soundFile"], "returns": ["success"]}
+    },
+    {
+      "id": "play_sound_file_missing",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.PlaySoundFile"]},
+      "native": {"set": [], "get": ["Sound.play_sound_file"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.PlaySoundFile`", "native_getter": "`Sound.play_sound_file`", "fields": "`success`"},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {"soundFile": {"type": "string", "fixed": "native_api_parity_missing_sound"}, "volume": {"type": "f32", "range": [0.0, 0.25]}, "channel": {"type": "i32", "fixed": 0}},
+      "lua_runtime": {"call": "Spring.PlaySoundFile", "args": ["value.soundFile", "value.volume", "value.channel"], "returns": ["success"]}
+    }
+  ]
+}

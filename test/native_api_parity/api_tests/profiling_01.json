@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_profiler_record_names_count",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetProfilerRecordNames"]},
+      "native": {"set": [], "get": ["Profiling.get_profiler_record_names"]},
+      "compare": {"mode": "fields", "fields": ["count"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetProfilerRecordNames`", "native_getter": "`Profiling.get_profiler_record_names`", "fields": "`count`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetProfilerRecordNames", "args": [], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+    },
+    {
+      "id": "get_lua_mem_usage",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["native_rebuild"],
+      "lua": {"set": [], "get": ["Spring.GetLuaMemUsage"]},
+      "native": {"set": [], "get": ["Profiling.get_lua_mem_usage"]},
+      "compare": {"mode": "fields", "fields": ["hasGlobalAlloced"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetLuaMemUsage`", "native_getter": "`Profiling.get_lua_mem_usage`", "fields": "`hasGlobalAlloced`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetLuaMemUsage", "args": [], "returns": [{"field": "hasGlobalAlloced", "index": 3, "transform": "truthy"}]}
+    },
+    {
+      "id": "diff_timers",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.DiffTimers"]},
+      "native": {"set": [], "get": ["Profiling.diff_timers"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["delta"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.DiffTimers`", "native_getter": "`Profiling.diff_timers`", "fields": "`delta`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {
+        "returnMs": {"type": "bool", "fixed": true},
+        "fromMicroSecs": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {
+        "locals": {"timer": {"call": "Spring.GetTimer", "args": []}},
+        "call": "Spring.DiffTimers",
+        "args": ["local.timer", "local.timer", "value.returnMs", "value.fromMicroSecs"],
+        "returns": ["delta"]
+      }
+    },
+    {
+      "id": "get_timer",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetTimer"]},
+      "native": {"set": [], "get": ["Profiling.get_timer"]},
+      "compare": {"mode": "fields", "fields": ["hasTimer"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetTimer`", "native_getter": "`Profiling.get_timer`", "fields": "`hasTimer`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetTimer", "args": [], "returns": [{"field": "hasTimer", "index": 1, "transform": "truthy"}]}
+    },
+    {
+      "id": "get_timer_micros",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetTimerMicros"]},
+      "native": {"set": [], "get": ["Profiling.get_timer_micros"]},
+      "compare": {"mode": "fields", "fields": ["hasTimer"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetTimerMicros`", "native_getter": "`Profiling.get_timer_micros`", "fields": "`hasTimer`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetTimerMicros", "args": [], "returns": [{"field": "hasTimer", "index": 1, "transform": "truthy"}]}
+    },
+    {
+      "id": "get_frame_timer",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetFrameTimer"]},
+      "native": {"set": [], "get": ["Profiling.get_frame_timer"]},
+      "compare": {"mode": "fields", "fields": ["hasTimer"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFrameTimer`", "native_getter": "`Profiling.get_frame_timer`", "fields": "`hasTimer`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {"lastFrameTime": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetFrameTimer", "args": ["value.lastFrameTime"], "returns": [{"field": "hasTimer", "index": 1, "transform": "truthy"}]}
+    },
+    {
+      "id": "get_draw_seconds",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetDrawSeconds"]},
+      "native": {"set": [], "get": ["Profiling.get_draw_seconds"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["seconds"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetDrawSeconds`", "native_getter": "`Profiling.get_draw_seconds`", "fields": "`seconds`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetDrawSeconds", "args": [], "returns": ["seconds"]}
+    },
+    {
+      "id": "get_profiler_time_record_empty",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetProfilerTimeRecord"]},
+      "native": {"set": [], "get": ["Profiling.get_profiler_time_record"]},
+      "compare": {"mode": "fields", "fields": ["total", "current", "maxDt", "timePct", "peakPct"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetProfilerTimeRecord`", "native_getter": "`Profiling.get_profiler_time_record`", "fields": "`total`, `current`, `maxDt`, `timePct`, `peakPct`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {"profilerName": {"type": "string", "fixed": "native_api_parity_missing_profiler"}, "frameData": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.GetProfilerTimeRecord", "args": ["value.profilerName", "value.frameData"], "returns": ["total", "current", "maxDt", "timePct", "peakPct"]}
+    },
+    {
+      "id": "get_vid_mem_usage",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetVidMemUsage"]},
+      "native": {"set": [], "get": ["Profiling.get_vid_mem_usage"]},
+      "compare": {"mode": "fields", "stream": "shape", "epsilon": 1.0, "fields": ["usedMB", "availableMB"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetVidMemUsage`", "native_getter": "`Profiling.get_vid_mem_usage`", "fields": "`usedMB`, `availableMB`"},
+      "rust": {"check": "check_profiling_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetVidMemUsage", "args": [], "returns": ["usedMB", "availableMB"]}
+    }
+  ]
+}
