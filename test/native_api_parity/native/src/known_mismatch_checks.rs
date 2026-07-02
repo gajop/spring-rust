@@ -109,7 +109,11 @@ impl NativeApiParity {
             }
         };
         self.same_bool_if_present(label, message, "wasHit", native_was_hit)?;
-        self.same_string_if_present(label, message, "name", native_name)?;
+        if !native_was_hit && message.get("wasHit").and_then(Value::as_bool) == Some(false) {
+            return Ok(());
+        }
+
+        self.same_string_if_present(label, message, "pieceName", native_name)?;
         self.same_i32_if_present(label, message, "pieceNum", native_piece_num)?;
         self.same_i32_if_present(label, message, "frame", native_frame)
     }

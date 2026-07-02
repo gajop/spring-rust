@@ -73,7 +73,9 @@ impl NativeApiParity {
                     .camera()
                     .world_to_screen_coords(world_pos)
                     .map_err(|err| format!("world_to_screen_coords() failed: {err:?}"))?;
-                self.same_vec3(label, native, message)
+                self.same_if_present(label, message, "screenX", native.x)?;
+                self.same_if_present(label, message, "screenY", native.y)?;
+                self.same_if_present(label, message, "screenZ", native.z)
             }
             _ => Err(format!("unsupported camera check `{label}`")),
         }

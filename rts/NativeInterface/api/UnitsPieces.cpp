@@ -674,12 +674,12 @@ static void NativeGetUnitScriptNames(const GetUnitScriptNamesQuery* query, GetUn
 		return;
 	}
 
-	const LocalModel& localModel = unit->localModel;
-	if (!localModel.Initialized()) {
+	if (unit->script == nullptr) {
 		return;
 	}
 
-	uint32_t count = static_cast<uint32_t>(localModel.pieces.size());
+	const std::vector<LocalModelPiece*>& pieces = unit->script->pieces;
+	uint32_t count = static_cast<uint32_t>(pieces.size());
 	if (count == 0) {
 		return;
 	}
@@ -691,9 +691,9 @@ static void NativeGetUnitScriptNames(const GetUnitScriptNamesQuery* query, GetUn
 	}
 
 	for (uint32_t i = 0; i < count; ++i) {
-		const LocalModelPiece& piece = localModel.pieces[i];
-		if (piece.original != nullptr) {
-			result->names[i] = CopyString(piece.original->name);
+		const LocalModelPiece* piece = pieces[i];
+		if (piece != nullptr && piece->original != nullptr) {
+			result->names[i] = CopyString(piece->original->name);
 			if (result->names[i] == nullptr) {
 				result->error = &BUFFER_OVERFLOW_ERROR;
 				result->count = i;

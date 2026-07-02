@@ -83,7 +83,6 @@
       "id": "get_mouse_start_position",
       "context": "widget",
       "kind": "readonly",
-      "skip_when_rendering": true,
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetMouseStartPosition"]},
       "native": {"set": [], "get": ["Input.get_mouse_start_position"]},

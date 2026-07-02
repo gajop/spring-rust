@@ -35,6 +35,8 @@ namespace {
 static thread_local char scratchBuffer[1024];
 static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
+static thread_local std::vector<KeyBindingEntry> keyBindingStorage;
+static thread_local std::vector<std::string> keyBindingStringStorage;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
@@ -420,29 +422,27 @@ static void NativeGetKeyBindings(const GetKeyBindingsQuery* query, GetKeyBinding
 		return;
 	}
 
-	const size_t entryBytes = actions.size() * sizeof(KeyBindingEntry);
-	if (bufferPos + entryBytes > sizeof(scratchBuffer)) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	KeyBindingEntry* bindings = reinterpret_cast<KeyBindingEntry*>(&scratchBuffer[bufferPos]);
-	bufferPos += entryBytes;
+	keyBindingStorage.clear();
+	keyBindingStringStorage.clear();
+	keyBindingStorage.reserve(actions.size());
+	keyBindingStringStorage.reserve(actions.size() * 3);
 
 	for (const Action& action: actions) {
-		KeyBindingEntry& binding = bindings[result->count];
-		binding.command = CopyString(action.command);
-		binding.extra = CopyString(action.extra);
-		binding.boundWith = CopyString(action.boundWith);
-		if (bufferPos > sizeof(scratchBuffer)) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = 0;
-			return;
-		}
-		result->count++;
+		keyBindingStringStorage.emplace_back(action.command);
+		const char* command = keyBindingStringStorage.back().c_str();
+		keyBindingStringStorage.emplace_back(action.extra);
+		const char* extra = keyBindingStringStorage.back().c_str();
+		keyBindingStringStorage.emplace_back(action.boundWith);
+		const char* boundWith = keyBindingStringStorage.back().c_str();
+		keyBindingStorage.push_back({
+			.command = command,
+			.extra = extra,
+			.boundWith = boundWith,
+		});
 	}
 
-	result->bindings = bindings;
+	result->bindings = keyBindingStorage.data();
+	result->count = static_cast<uint32_t>(keyBindingStorage.size());
 }
 
 static void NativeGetKeyCode(const GetKeyCodeQuery* query, GetKeyCodeResult* result)

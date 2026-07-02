@@ -86,7 +86,7 @@ impl NativeApiParity {
                 self.same_if_present(label, message, "usedMB", used)?;
                 self.same_if_present(label, message, "availableMB", available)
             }
-            "get_synced_gc_info" => {
+            "get_synced_gc_info" | "get_synced_gc_info_fixed_available" => {
                 let collect = bool_field(message, "collect")?;
                 let native = self
                     .interface

@@ -9,6 +9,24 @@ Counts are against the current engine tree.
 \* The single gap is `VFS.Include`, which is intentionally absent — it is Lua-only
 by nature (see "Not portable to native" below), not an unimplemented binding.
 
+## Audit refresh (2026-07-03)
+
+- `PORTING_TODO.txt` is clean except for its generated header. The previous
+  `SetHeightMapFunc` / `SetOriginalHeightMapFunc` / `SetSmoothMeshFunc` entries
+  were matcher false positives: Lua exposes `function, ...`, while native Rust
+  exposes a closure backed by the C ABI callback/userdata pair.
+- Rendering parity passes at `test/native_api_parity/out/20260703-080002` with
+  one known test limitation (`Spring.PreloadSoundItem` is non-idempotent when Lua
+  and native are called sequentially in the same run).
+- The old parity `native_rebuild` blockers are no longer blockers. Rows for
+  camera target/world-to-screen, script names, last-hit pieces, key bindings,
+  visible features, screen-rectangle unit/feature queries, mouse start position,
+  synced GC info, sound loading/playback, active command descriptors, AI info,
+  math bit masks, and the unit shape regressions now run in the generated harness.
+- Remaining non-harness SBC follow-ups are still the live editor checks below:
+  map-square texture seeding/display readback, named texture sampling smoke tests,
+  and final in-editor confirmation for terrain relighting/sun-direction behavior.
+
 ## Not portable to native (NOT a missing binding)
 
 - `VFS.Include`: **fundamentally Lua-only — cannot be a native binding.** Verified

@@ -23,6 +23,12 @@ FLATTENED_TYPES = {
     'sys::teamcolor': ['float', 'float', 'float', 'float'],
 }
 
+CALLBACK_SHAPE_EQUIVALENTS = {
+    'Spring.SetHeightMapFunc',
+    'Spring.SetOriginalHeightMapFunc',
+    'Spring.SetSmoothMeshFunc',
+}
+
 
 def expand_params(params: List[Dict]) -> List[str]:
     """Expand only explicit native aggregate types into normalized scalar slots."""
@@ -194,8 +200,14 @@ def compare_params(lua_params: List[Dict], rust_params: List[Dict]) -> Tuple[boo
     return True, "match"
 
 
+def compare_function_params(lua_func: Dict, rust_func: Dict) -> Tuple[bool, str]:
+    if lua_func.get('name') in CALLBACK_SHAPE_EQUIVALENTS:
+        return True, "callback shape equivalent"
+    return compare_params(lua_func.get('params', []), rust_func.get('params', []))
+
+
 def param_mismatch_msg(lua_func: Dict, rust_func: Dict) -> Optional[str]:
-    ok, msg = compare_params(lua_func.get('params', []), rust_func.get('params', []))
+    ok, msg = compare_function_params(lua_func, rust_func)
     if ok:
         return None
     return f'{lua_func["name"]} param mismatch {msg}'
@@ -399,7 +411,7 @@ def main():
     unmatched_rust = all_rust - matched_rust
     param_results = []
     for lua_func, rust_full, _, _, rust_meta in matched + uncertain:
-        ok, msg = compare_params(lua_func.get('params', []), rust_meta.get('params', []))
+        ok, msg = compare_function_params(lua_func, rust_meta)
         param_results.append((ok, msg))
     param_ok = sum(1 for ok, _ in param_results if ok)
     count_mismatches = sum(1 for ok, msg in param_results if not ok and msg.startswith('count mismatch'))
@@ -434,7 +446,7 @@ def main():
         f.write('Functions with perfect 1.0 confidence match:\n\n')
 
         for lua_func, rust_func, return_type, confidence, rust_meta in sorted(matched, key=lambda x: x[0]['name']):
-            ok, msg = compare_params(lua_func.get('params', []), rust_meta.get('params', []))
+            ok, msg = compare_function_params(lua_func, rust_meta)
             suffix = "" if ok else f" (param mismatch: {msg})"
             f.write(f'- `{lua_func["name"]}` → `{rust_func}`{suffix}\n')
 
@@ -446,7 +458,7 @@ def main():
         f.write('Imperfect matches with <1.0 confidence (likely incorrect):\n\n')
 
         for lua_func, rust_func, return_type, confidence, rust_meta in sorted(uncertain, key=lambda x: -x[3]):
-            ok, msg = compare_params(lua_func.get('params', []), rust_meta.get('params', []))
+            ok, msg = compare_function_params(lua_func, rust_meta)
             suffix = "" if ok else f"; params: {msg}"
             f.write(f'- `{lua_func["name"]}` → `{rust_func}` (confidence: {confidence:.2f}{suffix})\n')
 
