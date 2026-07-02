@@ -54,8 +54,7 @@
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": [
-        "unit",
-        "native_rebuild"
+        "unit"
       ],
       "lua": {
         "set": [],
@@ -226,8 +225,7 @@
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": [
-        "unit",
-        "native_rebuild"
+        "unit"
       ],
       "lua": {
         "set": [],

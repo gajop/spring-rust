@@ -14,8 +14,8 @@
 - Rust-only: 522 (40.7%)
 
 **Parameter comparison (matched functions):**
-- Parameter matches: 759
-- Count mismatches: 3
+- Parameter matches: 762
+- Count mismatches: 0
 - Type mismatches: 0
 
 ---
@@ -624,7 +624,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetGroundDecalTint` → `GroundDecals.GroundDecals.set_ground_decal_tint`
 - `Spring.SetGroundDecalUserData` → `GroundDecals.GroundDecals.set_ground_decal_user_data`
 - `Spring.SetHeightMap` → `TerrainControl.TerrainControl.set_height_map`
-- `Spring.SetHeightMapFunc` → `TerrainControl.TerrainControl.set_height_map_func` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.SetHeightMapFunc` → `TerrainControl.TerrainControl.set_height_map_func`
 - `Spring.SetLastMessagePosition` → `UnsyncedCtrl.UnsyncedCtrl.set_last_message_position`
 - `Spring.SetLogSectionFilterLevel` → `Config.Config.set_log_section_filter_level`
 - `Spring.SetLosViewColors` → `UnsyncedCtrl.UnsyncedCtrl.set_los_view_colors`
@@ -641,7 +641,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetNanoProjectileParams` → `UnsyncedCtrl.UnsyncedCtrl.set_nano_projectile_params`
 - `Spring.SetNoPause` → `GameConfig.GameConfig.set_no_pause`
 - `Spring.SetOriginalHeightMap` → `TerrainControl.TerrainControl.set_original_height_map`
-- `Spring.SetOriginalHeightMapFunc` → `TerrainControl.TerrainControl.set_original_height_map_func` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.SetOriginalHeightMapFunc` → `TerrainControl.TerrainControl.set_original_height_map_func`
 - `Spring.SetPieceProjectileParams` → `ProjectileControl.ProjectileControl.set_piece_projectile_params`
 - `Spring.SetPlayerReadyState` → `TeamControl.TeamControl.set_player_ready_state`
 - `Spring.SetPlayerRulesParam` → `RulesParams.RulesParams.set_player_rules_param`
@@ -662,7 +662,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetShareLevel` → `SystemControl.SystemControl.set_share_level`
 - `Spring.SetSkyBoxTexture` → `UnsyncedCtrl.UnsyncedCtrl.set_sky_box_texture`
 - `Spring.SetSmoothMesh` → `TerrainControl.TerrainControl.set_smooth_mesh`
-- `Spring.SetSmoothMeshFunc` → `TerrainControl.TerrainControl.set_smooth_mesh_func` (param mismatch: count mismatch (lua=2, rust=1))
+- `Spring.SetSmoothMeshFunc` → `TerrainControl.TerrainControl.set_smooth_mesh_func`
 - `Spring.SetSoundEffectParams` → `Sound.Sound.set_sound_effect_params`
 - `Spring.SetSoundStreamVolume` → `Sound.Sound.set_sound_stream_volume`
 - `Spring.SetSquareBuildingMask` → `GameConfig.GameConfig.set_square_building_mask`

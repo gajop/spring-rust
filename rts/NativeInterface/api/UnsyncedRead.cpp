@@ -237,26 +237,41 @@ static bool UnitVisibleToClient(const CUnit* unit, int readAllyTeam, bool fullVi
 	return true;
 }
 
+static bool UnitVisibleToLuaReadAllyTeam(const CUnit* unit, int readAllyTeam, bool fullView)
+{
+	if (unit == nullptr)
+		return false;
+
+	if (fullView)
+		return true;
+
+	if (readAllyTeam < 0)
+		return false;
+
+	if (unit->allyteam == readAllyTeam)
+		return true;
+
+	return (unit->losStatus[readAllyTeam] & (LOS_INLOS | LOS_INRADAR)) != 0;
+}
+
 static bool UnitVisibleForScreenRectangle(const CUnit* unit, int allegiance, int readTeam, int readAllyTeam, bool fullView)
 {
-	if (unit == nullptr || unit->noDraw)
+	if (unit == nullptr)
 		return false;
 
 	switch (allegiance) {
 		case MY_UNITS:
-			return (readTeam >= 0 && unit->team == readTeam);
+			return (readTeam >= 0 && unit->team == readTeam && UnitVisibleToLuaReadAllyTeam(unit, readAllyTeam, fullView));
 		case ALLY_UNITS:
-			return (readAllyTeam >= 0 && unit->allyteam == readAllyTeam);
+			return (readAllyTeam >= 0 && unit->allyteam == readAllyTeam && UnitVisibleToLuaReadAllyTeam(unit, readAllyTeam, fullView));
 		case ENEMY_UNITS:
-			return (readAllyTeam >= 0 && unit->allyteam != readAllyTeam);
+			return (readAllyTeam >= 0 && unit->allyteam != readAllyTeam && UnitVisibleToLuaReadAllyTeam(unit, readAllyTeam, fullView));
 		case ALL_UNITS:
-			return UnitVisibleToClient(unit, readAllyTeam, fullView, false);
+			return UnitVisibleToLuaReadAllyTeam(unit, readAllyTeam, fullView);
 		default:
 			if (allegiance < 0 || unit->team != allegiance)
 				return false;
-			if (readTeam >= 0 && teamHandler.AlliedTeams(readTeam, allegiance))
-				return true;
-			return UnitVisibleToClient(unit, readAllyTeam, fullView, false);
+			return UnitVisibleToLuaReadAllyTeam(unit, readAllyTeam, fullView);
 	}
 }
 

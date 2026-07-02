@@ -174,7 +174,7 @@
       "id": "math_bit_bits",
       "context": "synced_gadget",
       "kind": "readonly",
-      "requires": ["native_rebuild"],
+      "requires": [],
       "lua": {"set": [], "get": ["math.bit_bits"]},
       "native": {"set": [], "get": ["MathExtra.bit_bits"]},
       "compare": {"mode": "fields", "fields": ["value"]},

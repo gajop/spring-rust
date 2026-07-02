@@ -18,7 +18,7 @@
       "id": "get_lua_mem_usage",
       "context": "unsynced_gadget",
       "kind": "readonly",
-      "requires": ["native_rebuild"],
+      "requires": [],
       "lua": {"set": [], "get": ["Spring.GetLuaMemUsage"]},
       "native": {"set": [], "get": ["Profiling.get_lua_mem_usage"]},
       "compare": {"mode": "fields", "fields": ["hasGlobalAlloced"]},

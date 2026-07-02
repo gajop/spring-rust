@@ -2,22 +2,22 @@
 
 Goal: reach 100% API parity coverage.
 
-Current rendering baseline from `out/20260527-083927/report.md`:
+Current rendering baseline from `out/20260703-080002/report.md`:
 
-- Lua: 418 / 762 functions tested (54.9%)
-- Native Rust: 475 / 878 functions tested (54.1%)
-- Full generated gap list: `out/20260527-083927/coverage_details.md`
+- Lua: 447 / 762 functions tested (58.7%)
+- Native Rust: 510 / 1284 functions tested (39.7%)
+- Full generated gap list: `out/20260703-080002/coverage_details.md`
 
 Context baseline:
 
-- Synced gadget: 253 / 612 runtime Spring APIs tested; 359 untested; 14 known mismatch issues; 307 native APIs recorded.
-- Unsynced gadget: 120 / 596 runtime Spring APIs tested; 476 untested; 25 known mismatch issues; 120 native APIs recorded.
-- Widget: 47 / 597 runtime Spring APIs tested; 550 untested; 25 known mismatch issues; 50 native APIs recorded.
+- Synced gadget: 267 / 622 runtime Spring APIs tested; 355 untested; 0 known mismatch issues; 325 native APIs recorded.
+- Unsynced gadget: 130 / 609 runtime Spring APIs tested; 479 untested; 0 known mismatch issues; 132 native APIs recorded.
+- Widget: 52 / 610 runtime Spring APIs tested; 558 untested; 0 known mismatch issues; 55 native APIs recorded.
 
 Known problem baseline:
 
-- known_mismatch: 26 issues; 32 Spring Lua APIs plus `math.bit_bits`; 33 native APIs.
 - known_test_limitation: 1 issue; 1 Spring Lua API; 1 native API.
+- Only unrecorded spec row with a known reason: `preload_sound_item_missing`, because `Spring.PreloadSoundItem` is stateful/non-idempotent when Lua and native are called in the same engine run.
 
 Process:
 

@@ -19,7 +19,7 @@
       "id": "get_camera_position",
       "context": "unsynced_gadget",
       "kind": "readonly",
-      "requires": ["native_rebuild"],
+      "requires": [],
       "lua": {"set": [], "get": ["Spring.GetCameraPosition"]},
       "native": {"set": [], "get": ["Camera.get_camera_position"]},
       "compare": {"mode": "fields", "stream": "shape", "fields": ["x", "y", "z"]},
@@ -85,14 +85,14 @@
       "context": "unsynced_gadget",
       "kind": "setter_getter",
       "requires_rendering": true,
-      "requires": ["native_rebuild"],
+      "requires": [],
       "lua": {"set": ["Spring.SetCameraTarget"], "get": ["Spring.WorldToScreenCoords"]},
       "native": {"set": ["Camera.set_camera_target"], "get": ["Camera.world_to_screen_coords"]},
-      "compare": {"mode": "fields", "fields": ["x", "y", "z"]},
-      "report": {"lua_setter": "`Spring.SetCameraTarget`", "native_setter": "`Camera.set_camera_target`", "lua_getter": "`Spring.WorldToScreenCoords`", "native_getter": "`Camera.world_to_screen_coords`", "fields": "`x`, `y`, `z`"},
+      "compare": {"mode": "fields", "fields": ["screenX", "screenY", "screenZ"]},
+      "report": {"lua_setter": "`Spring.SetCameraTarget`", "native_setter": "`Camera.set_camera_target`", "lua_getter": "`Spring.WorldToScreenCoords`", "native_getter": "`Camera.world_to_screen_coords`", "fields": "`screenX`, `screenY`, `screenZ`"},
       "rust": {"check": "check_camera_value", "set": "set_camera_target"},
       "params": {"x": {"type": "f32", "fixed": 1024}, "y": {"type": "f32", "fixed": 256}, "z": {"type": "f32", "fixed": 1024}, "transitionTime": {"type": "f32", "fixed": 0}},
-      "lua_runtime": {"set": {"call": "Spring.SetCameraTarget", "args": ["value.x", "value.y", "value.z", "value.transitionTime"]}, "call": "Spring.WorldToScreenCoords", "args": ["value.x", "value.y", "value.z"], "returns": ["x", "y", "z"]}
+      "lua_runtime": {"set": {"call": "Spring.SetCameraTarget", "args": ["value.x", "value.y", "value.z", "value.transitionTime"]}, "call": "Spring.WorldToScreenCoords", "args": ["value.x", "value.y", "value.z"], "returns": ["screenX", "screenY", "screenZ"]}
     }
   ]
 }
