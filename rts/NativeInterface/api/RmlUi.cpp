@@ -10,6 +10,7 @@
 #include <RmlUi/Core/Factory.h>
 #include <RmlUi/Core/StyleSheetContainer.h>
 #include <RmlUi/Core/Elements/ElementForm.h>
+#include <RmlUi/Core/Elements/ElementFormControl.h>
 #include <RmlUi/Core/Elements/ElementFormControlInput.h>
 #include <RmlUi/Core/Elements/ElementFormControlSelect.h>
 #include <RmlUi/Core/Elements/ElementFormControlTextArea.h>
@@ -1505,10 +1506,8 @@ static void NativeElementGetValue(const RmlElementHandleQuery* query, RmlElement
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	if (auto* input = dynamic_cast<Rml::ElementFormControlInput*>(element)) {
-		value = input->GetValue();
-	} else if (auto* textarea = dynamic_cast<Rml::ElementFormControlTextArea*>(element)) {
-		value = textarea->GetValue();
+	if (auto* control = dynamic_cast<Rml::ElementFormControl*>(element)) {
+		value = control->GetValue();
 	} else {
 		value.clear();
 	}
