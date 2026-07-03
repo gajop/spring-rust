@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_unsynced_read_value(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unsynced_read_value(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         match base_test_name(label) {
             "get_box_selection_by_engine" | "box_selection_by_engine" => {
                 let native = self
@@ -91,7 +95,12 @@ impl NativeApiParity {
                     self.same_bool_if_present(label, message, "queueing", cmd_desc.queueing)?;
                     self.same_bool_if_present(label, message, "hidden", cmd_desc.hidden)?;
                     self.same_bool_if_present(label, message, "disabled", cmd_desc.disabled)?;
-                    self.same_i32_if_present(label, message, "paramCount", cmd_desc.paramCount as i32)?;
+                    self.same_i32_if_present(
+                        label,
+                        message,
+                        "paramCount",
+                        cmd_desc.paramCount as i32,
+                    )?;
                 }
                 Ok(())
             }
@@ -202,7 +211,11 @@ impl NativeApiParity {
                     .unsynced_read()
                     .unit_rendering()
                     .is_unit_visible(unit_id, radius, check_icon)
-                    .map_err(|err| format!("is_unit_visible({unit_id}, {radius}, {check_icon}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!(
+                            "is_unit_visible({unit_id}, {radius}, {check_icon}) failed: {err:?}"
+                        )
+                    })?;
                 self.same_bool_if_present(label, message, "visible", native)
             }
             "get_visible_units" => {

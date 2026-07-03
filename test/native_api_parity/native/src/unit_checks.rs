@@ -16,7 +16,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "captureProgress", native.captureProgress)?;
         self.same_if_present(label, message, "buildProgress", native.buildProgress)
     }
-    pub(crate) fn check_unit_experience(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_experience(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -25,7 +29,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_experience({unit_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "experience", native)
     }
-    pub(crate) fn check_unit_neutral(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_neutral(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -34,7 +42,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_neutral({unit_id}) failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "neutral", native)
     }
-    pub(crate) fn check_unit_seismic_signature(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_seismic_signature(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -52,7 +64,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_mass({unit_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "mass", native)
     }
-    pub(crate) fn check_unit_armored(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_armored(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -73,17 +89,27 @@ impl NativeApiParity {
         self.same_if_present(label, message, "metalCost", native.metalCost)?;
         self.same_if_present(label, message, "energyCost", native.energyCost)
     }
-    pub(crate) fn check_unit_storage(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_storage(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let _ = i32_field(message, "unitID")?;
         match str_field(message, "resource")? {
             "metal" | "energy" => {
                 let _ = f32_field(message, "amount")?;
                 Ok(())
             }
-            resource => Err(format!("{label}.resource: unsupported resource `{resource}`")),
+            resource => Err(format!(
+                "{label}.resource: unsupported resource `{resource}`"
+            )),
         }
     }
-    pub(crate) fn check_unit_harvest_storage(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_harvest_storage(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -95,14 +121,20 @@ impl NativeApiParity {
         self.same_if_present(label, message, "storedEnergy", native.storedEnergy)?;
         self.same_if_present(label, message, "maxStoredEnergy", native.maxStoredEnergy)
     }
-    pub(crate) fn check_unit_los_state(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_los_state(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let ally_team_id = i32_field(message, "allyTeamID")?;
         let native = self
             .interface
             .units_info()
             .get_unit_los_state(unit_id, ally_team_id, false)
-            .map_err(|err| format!("get_unit_los_state({unit_id}, {ally_team_id}, false) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("get_unit_los_state({unit_id}, {ally_team_id}, false) failed: {err:?}")
+            })?;
         self.same_i32_if_present(label, message, "rawMask", i32::from(native.rawMask))?;
         self.same_bool_if_present(label, message, "los", native.los)?;
         self.same_bool_if_present(label, message, "radar", native.radar)?;
@@ -117,22 +149,32 @@ impl NativeApiParity {
             .synced_ctrl()
             .unit()
             .set_unit_los_mask(unit_id, ally_team_id, 15)
-            .map_err(|err| format!("set_unit_los_mask({unit_id}, {ally_team_id}, 15) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("set_unit_los_mask({unit_id}, {ally_team_id}, 15) failed: {err:?}")
+            })?;
         self.interface
             .synced_ctrl()
             .unit()
             .set_unit_los_state(unit_id, ally_team_id, raw_mask)
-            .map_err(|err| format!("set_unit_los_state({unit_id}, {ally_team_id}, {raw_mask}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("set_unit_los_state({unit_id}, {ally_team_id}, {raw_mask}) failed: {err:?}")
+            })?;
         Ok(())
     }
-    pub(crate) fn check_unit_build_param(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_build_param(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let param_name = str_field(message, "paramName")?;
         let native = self
             .interface
             .units_info()
             .get_unit_build_params(unit_id, param_name)
-            .map_err(|err| format!("get_unit_build_params({unit_id}, {param_name}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("get_unit_build_params({unit_id}, {param_name}) failed: {err:?}")
+            })?;
         let (value, has_value) = native;
         self.same_bool_if_present(label, message, "hasValue", has_value)?;
         if !has_value {
@@ -164,10 +206,16 @@ impl NativeApiParity {
             .synced_ctrl()
             .unit()
             .set_unit_build_params(unit_id, param_name, value)
-            .map_err(|err| format!("set_unit_build_params({unit_id}, {param_name}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("set_unit_build_params({unit_id}, {param_name}) failed: {err:?}")
+            })?;
         Ok(())
     }
-    pub(crate) fn check_unit_worker_task(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_worker_task(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -179,7 +227,11 @@ impl NativeApiParity {
         self.same_bool_if_present(label, message, "hasTarget", native.hasTarget)?;
         self.same_i32_if_present(label, message, "targetID", native.targetID)
     }
-    pub(crate) fn check_unit_blocking(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_blocking(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -187,14 +239,43 @@ impl NativeApiParity {
             .get_unit_blocking(unit_id)
             .map_err(|err| format!("get_unit_blocking({unit_id}) failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "isBlocking", native.isBlocking)?;
-        self.same_bool_if_present(label, message, "isSolidObjectCollidable", native.isSolidObjectCollidable)?;
-        self.same_bool_if_present(label, message, "isProjectileCollidable", native.isProjectileCollidable)?;
-        self.same_bool_if_present(label, message, "isRaySegmentCollidable", native.isRaySegmentCollidable)?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "isSolidObjectCollidable",
+            native.isSolidObjectCollidable,
+        )?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "isProjectileCollidable",
+            native.isProjectileCollidable,
+        )?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "isRaySegmentCollidable",
+            native.isRaySegmentCollidable,
+        )?;
         self.same_bool_if_present(label, message, "crushable", native.crushable)?;
-        self.same_bool_if_present(label, message, "blockEnemyPushing", native.blockEnemyPushing)?;
-        self.same_bool_if_present(label, message, "blockHeightChanges", native.blockHeightChanges)
+        self.same_bool_if_present(
+            label,
+            message,
+            "blockEnemyPushing",
+            native.blockEnemyPushing,
+        )?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "blockHeightChanges",
+            native.blockHeightChanges,
+        )
     }
-    pub(crate) fn check_unit_render_flag(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_render_flag(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let unsynced_read = self.interface.unsynced_read();
         let unit_rendering = unsynced_read.unit_rendering();
@@ -232,13 +313,17 @@ impl NativeApiParity {
             "get_unit_engine_draw_mask" | "unit_engine_draw_mask" => {
                 let native = unit_rendering
                     .get_unit_engine_draw_mask(unit_id)
-                    .map_err(|err| format!("get_unit_engine_draw_mask({unit_id}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_unit_engine_draw_mask({unit_id}) failed: {err:?}")
+                    })?;
                 self.same_i32_if_present(label, message, "mask", native as i32)
             }
             "get_unit_always_update_matrix" | "unit_always_update_matrix" => {
                 let native = unit_rendering
                     .get_unit_always_update_matrix(unit_id)
-                    .map_err(|err| format!("get_unit_always_update_matrix({unit_id}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_unit_always_update_matrix({unit_id}) failed: {err:?}")
+                    })?;
                 self.same_bool_if_present(label, message, "update", native)
             }
             "get_unit_draw_flag" => {
@@ -271,7 +356,9 @@ impl NativeApiParity {
                 .map_err(|err| format!("set_unit_engine_draw_mask({unit_id}) failed: {err:?}"))?,
             "unit_always_update_matrix" => unsynced_ctrl
                 .set_unit_always_update_matrix(unit_id, bool_field(message, "update")?)
-                .map_err(|err| format!("set_unit_always_update_matrix({unit_id}) failed: {err:?}"))?,
+                .map_err(|err| {
+                    format!("set_unit_always_update_matrix({unit_id}) failed: {err:?}")
+                })?,
             name => return Err(format!("unsupported unit render setter `{name}`")),
         };
         if success {
@@ -298,7 +385,11 @@ impl NativeApiParity {
             .map_err(|err| format!("set_unit_blocking({unit_id}) failed: {err:?}"))?;
         Ok(())
     }
-    pub(crate) fn check_unit_max_range(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_max_range(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -307,7 +398,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_max_range({unit_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "maxRange", native)
     }
-    pub(crate) fn check_unit_position(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_position(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -334,7 +429,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_team({unit_id}) failed: {err:?}"))?;
         self.same_i32_if_present(label, message, "teamID", native)
     }
-    pub(crate) fn check_unit_ally_team(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_ally_team(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -343,7 +442,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_ally_team({unit_id}) failed: {err:?}"))?;
         self.same_i32_if_present(label, message, "allyTeamID", native)
     }
-    pub(crate) fn check_unit_is_dead(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_is_dead(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -352,7 +455,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_is_dead({unit_id}) failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "isDead", native)
     }
-    pub(crate) fn check_unit_is_stunned(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_is_stunned(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -379,7 +486,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_radius({unit_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "radius", native)
     }
-    pub(crate) fn check_unit_base_position(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_base_position(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -390,7 +501,11 @@ impl NativeApiParity {
         self.same(&format!("{label}.z"), native.z, f32_field(message, "z")?)?;
         Ok(())
     }
-    pub(crate) fn check_unit_direction(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_direction(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -399,24 +514,68 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_direction({unit_id}) failed: {err:?}"))?;
         self.same_vec3(label, native, message)
     }
-    pub(crate) fn check_unit_vectors(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_vectors(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
             .units_info()
             .get_unit_vectors(unit_id)
             .map_err(|err| format!("get_unit_vectors({unit_id}) failed: {err:?}"))?;
-        self.same(&format!("{label}.frontX"), native.frontDir.x, f32_field(message, "frontX")?)?;
-        self.same(&format!("{label}.frontY"), native.frontDir.y, f32_field(message, "frontY")?)?;
-        self.same(&format!("{label}.frontZ"), native.frontDir.z, f32_field(message, "frontZ")?)?;
-        self.same(&format!("{label}.upX"), native.upDir.x, f32_field(message, "upX")?)?;
-        self.same(&format!("{label}.upY"), native.upDir.y, f32_field(message, "upY")?)?;
-        self.same(&format!("{label}.upZ"), native.upDir.z, f32_field(message, "upZ")?)?;
-        self.same(&format!("{label}.rightX"), native.rightDir.x, f32_field(message, "rightX")?)?;
-        self.same(&format!("{label}.rightY"), native.rightDir.y, f32_field(message, "rightY")?)?;
-        self.same(&format!("{label}.rightZ"), native.rightDir.z, f32_field(message, "rightZ")?)
+        self.same(
+            &format!("{label}.frontX"),
+            native.frontDir.x,
+            f32_field(message, "frontX")?,
+        )?;
+        self.same(
+            &format!("{label}.frontY"),
+            native.frontDir.y,
+            f32_field(message, "frontY")?,
+        )?;
+        self.same(
+            &format!("{label}.frontZ"),
+            native.frontDir.z,
+            f32_field(message, "frontZ")?,
+        )?;
+        self.same(
+            &format!("{label}.upX"),
+            native.upDir.x,
+            f32_field(message, "upX")?,
+        )?;
+        self.same(
+            &format!("{label}.upY"),
+            native.upDir.y,
+            f32_field(message, "upY")?,
+        )?;
+        self.same(
+            &format!("{label}.upZ"),
+            native.upDir.z,
+            f32_field(message, "upZ")?,
+        )?;
+        self.same(
+            &format!("{label}.rightX"),
+            native.rightDir.x,
+            f32_field(message, "rightX")?,
+        )?;
+        self.same(
+            &format!("{label}.rightY"),
+            native.rightDir.y,
+            f32_field(message, "rightY")?,
+        )?;
+        self.same(
+            &format!("{label}.rightZ"),
+            native.rightDir.z,
+            f32_field(message, "rightZ")?,
+        )
     }
-    pub(crate) fn check_unit_rotation(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_rotation(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -427,7 +586,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "yaw", native.yaw)?;
         self.same_if_present(label, message, "roll", native.roll)
     }
-    pub(crate) fn check_unit_heading(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_heading(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -436,7 +599,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_heading({unit_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "heading", native)
     }
-    pub(crate) fn check_unit_velocity(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_velocity(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -445,50 +612,112 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_velocity({unit_id}) failed: {err:?}"))?;
         self.same_vec3(label, native, message)
     }
-    pub(crate) fn check_unit_info_bool(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_info_bool(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let test_name = base_test_name(label);
         let unit_id = i32_field(message, "unitID")?;
         let (field, native) = match test_name {
-            "get_unit_is_active" => ("isActive", self.interface.units_info().get_unit_is_active(unit_id)
-                .map_err(|err| format!("get_unit_is_active({unit_id}) failed: {err:?}"))?),
-            "get_unit_is_cloaked" => ("isCloaked", self.interface.units_info().get_unit_is_cloaked(unit_id)
-                .map_err(|err| format!("get_unit_is_cloaked({unit_id}) failed: {err:?}"))?),
-            "get_unit_is_being_built" => ("isBeingBuilt", self.interface.units_info().get_unit_is_being_built(unit_id)
-                .map_err(|err| format!("get_unit_is_being_built({unit_id}) failed: {err:?}"))?),
-            "get_unit_in_build_stance" => ("inBuildStance", self.interface.units_info().get_unit_in_build_stance(unit_id)
-                .map_err(|err| format!("get_unit_in_build_stance({unit_id}) failed: {err:?}"))?),
+            "get_unit_is_active" => (
+                "isActive",
+                self.interface
+                    .units_info()
+                    .get_unit_is_active(unit_id)
+                    .map_err(|err| format!("get_unit_is_active({unit_id}) failed: {err:?}"))?,
+            ),
+            "get_unit_is_cloaked" => (
+                "isCloaked",
+                self.interface
+                    .units_info()
+                    .get_unit_is_cloaked(unit_id)
+                    .map_err(|err| format!("get_unit_is_cloaked({unit_id}) failed: {err:?}"))?,
+            ),
+            "get_unit_is_being_built" => (
+                "isBeingBuilt",
+                self.interface
+                    .units_info()
+                    .get_unit_is_being_built(unit_id)
+                    .map_err(|err| format!("get_unit_is_being_built({unit_id}) failed: {err:?}"))?,
+            ),
+            "get_unit_in_build_stance" => (
+                "inBuildStance",
+                self.interface
+                    .units_info()
+                    .get_unit_in_build_stance(unit_id)
+                    .map_err(|err| {
+                        format!("get_unit_in_build_stance({unit_id}) failed: {err:?}")
+                    })?,
+            ),
             "get_unit_last_attacker" => {
-                let (_attacker, has_attacker) = self.interface.units_info().get_unit_last_attacker(unit_id)
+                let (_attacker, has_attacker) = self
+                    .interface
+                    .units_info()
+                    .get_unit_last_attacker(unit_id)
                     .map_err(|err| format!("get_unit_last_attacker({unit_id}) failed: {err:?}"))?;
                 ("hasAttacker", has_attacker)
             }
             "get_unit_shield_state" => {
                 let weapon_num = i32_field(message, "weaponNum")?;
-                let (_shield, has_shield) = self.interface.units_info().get_unit_shield_state(unit_id, weapon_num)
-                    .map_err(|err| format!("get_unit_shield_state({unit_id}, {weapon_num}) failed: {err:?}"))?;
+                let (_shield, has_shield) = self
+                    .interface
+                    .units_info()
+                    .get_unit_shield_state(unit_id, weapon_num)
+                    .map_err(|err| {
+                        format!("get_unit_shield_state({unit_id}, {weapon_num}) failed: {err:?}")
+                    })?;
                 ("hasShield", has_shield)
             }
             _ => return Err(format!("unsupported unit info bool check `{label}`")),
         };
         self.same_bool_if_present(label, message, field, native)
     }
-    pub(crate) fn check_unit_info_i32(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_info_i32(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let test_name = base_test_name(label);
         let unit_id = i32_field(message, "unitID")?;
         let (field, native) = match test_name {
-            "get_unit_build_facing" => ("facing", self.interface.units_info().get_unit_build_facing(unit_id)
-                .map_err(|err| format!("get_unit_build_facing({unit_id}) failed: {err:?}"))?),
-            "get_unit_move_def_id" => ("moveDefID", self.interface.units_info().get_unit_move_def_id(unit_id)
-                .map_err(|err| format!("get_unit_move_def_id({unit_id}) failed: {err:?}"))?),
-            "get_unit_is_building" => ("buildeeID", self.interface.units_info().get_unit_is_building(unit_id)
-                .map_err(|err| format!("get_unit_is_building({unit_id}) failed: {err:?}"))?),
-            "get_unit_transporter" => ("transporterID", self.interface.units_info().get_unit_transporter(unit_id)
-                .map_err(|err| format!("get_unit_transporter({unit_id}) failed: {err:?}"))?),
+            "get_unit_build_facing" => (
+                "facing",
+                self.interface
+                    .units_info()
+                    .get_unit_build_facing(unit_id)
+                    .map_err(|err| format!("get_unit_build_facing({unit_id}) failed: {err:?}"))?,
+            ),
+            "get_unit_move_def_id" => (
+                "moveDefID",
+                self.interface
+                    .units_info()
+                    .get_unit_move_def_id(unit_id)
+                    .map_err(|err| format!("get_unit_move_def_id({unit_id}) failed: {err:?}"))?,
+            ),
+            "get_unit_is_building" => (
+                "buildeeID",
+                self.interface
+                    .units_info()
+                    .get_unit_is_building(unit_id)
+                    .map_err(|err| format!("get_unit_is_building({unit_id}) failed: {err:?}"))?,
+            ),
+            "get_unit_transporter" => (
+                "transporterID",
+                self.interface
+                    .units_info()
+                    .get_unit_transporter(unit_id)
+                    .map_err(|err| format!("get_unit_transporter({unit_id}) failed: {err:?}"))?,
+            ),
             _ => return Err(format!("unsupported unit info i32 check `{label}`")),
         };
         self.same_i32_if_present(label, message, field, native)
     }
-    pub(crate) fn check_unit_info_list_count(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_info_list_count(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let test_name = base_test_name(label);
         let unit_id = i32_field(message, "unitID")?;
         let count = match test_name {
@@ -502,29 +731,57 @@ impl NativeApiParity {
         };
         self.same_i32_if_present(label, message, "count", count as i32)
     }
-    pub(crate) fn check_unit_info_f32(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_info_f32(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let test_name = base_test_name(label);
         let unit_id = i32_field(message, "unitID")?;
         let (field, native) = match test_name {
-            "get_unit_buildee_radius" | "unit_buildee_radius" => ("buildeeRadius", self.interface.units_info().get_unit_buildee_radius(unit_id)
-                .map_err(|err| format!("get_unit_buildee_radius({unit_id}) failed: {err:?}"))?),
-            "get_unit_current_build_power" => ("buildPower", self.interface.units_info().get_unit_current_build_power(unit_id)
-                .map_err(|err| format!("get_unit_current_build_power({unit_id}) failed: {err:?}"))?),
+            "get_unit_buildee_radius" | "unit_buildee_radius" => (
+                "buildeeRadius",
+                self.interface
+                    .units_info()
+                    .get_unit_buildee_radius(unit_id)
+                    .map_err(|err| format!("get_unit_buildee_radius({unit_id}) failed: {err:?}"))?,
+            ),
+            "get_unit_current_build_power" => (
+                "buildPower",
+                self.interface
+                    .units_info()
+                    .get_unit_current_build_power(unit_id)
+                    .map_err(|err| {
+                        format!("get_unit_current_build_power({unit_id}) failed: {err:?}")
+                    })?,
+            ),
             _ => return Err(format!("unsupported unit info f32 check `{label}`")),
         };
         self.same_if_present(label, message, field, native)
     }
-    pub(crate) fn check_unit_effective_build_range(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_effective_build_range(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let buildee_def_id = i32_field(message, "buildeeDefID")?;
         let native = self
             .interface
             .units_info()
             .get_unit_effective_build_range(unit_id, buildee_def_id)
-            .map_err(|err| format!("get_unit_effective_build_range({unit_id}, {buildee_def_id}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!(
+                    "get_unit_effective_build_range({unit_id}, {buildee_def_id}) failed: {err:?}"
+                )
+            })?;
         self.same_if_present(label, message, "range", native)
     }
-    pub(crate) fn check_unit_view_position(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_view_position(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let mid_pos = bool_field(message, "midPos")?;
         let native = self
@@ -532,10 +789,16 @@ impl NativeApiParity {
             .unsynced_read()
             .unit_rendering()
             .get_unit_view_position(unit_id, mid_pos)
-            .map_err(|err| format!("get_unit_view_position({unit_id}, {mid_pos}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("get_unit_view_position({unit_id}, {mid_pos}) failed: {err:?}")
+            })?;
         self.same_vec3(label, native, message)
     }
-    pub(crate) fn check_unit_icon_data(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_icon_data(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let full_data = bool_field(message, "fullData")?;
         let native = self
@@ -544,7 +807,12 @@ impl NativeApiParity {
             .unit_rendering()
             .get_unit_icon_data(unit_id, full_data)
             .map_err(|err| format!("get_unit_icon_data({unit_id}, {full_data}) failed: {err:?}"))?;
-        self.same_string_if_present(label, message, "iconName", native.0.as_deref().unwrap_or(""))
+        self.same_string_if_present(
+            label,
+            message,
+            "iconName",
+            native.0.as_deref().unwrap_or(""),
+        )
     }
     pub(crate) fn set_unit_buildee_radius(&mut self, message: &Value) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
@@ -555,7 +823,11 @@ impl NativeApiParity {
             .map_err(|err| format!("set_unit_buildee_radius({unit_id}) failed: {err:?}"))?;
         Ok(())
     }
-    pub(crate) fn check_unit_resources(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_resources(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -567,7 +839,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "energyMake", native.energyMake)?;
         self.same_if_present(label, message, "energyUse", native.energyUse)
     }
-    pub(crate) fn check_unit_cost_table(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_cost_table(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -578,7 +854,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "energyCost", native.energyCost)?;
         self.same_if_present(label, message, "buildTime", native.buildTime)
     }
-    pub(crate) fn check_unit_metal_extraction(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_metal_extraction(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -601,14 +881,20 @@ impl NativeApiParity {
         self.same_bool_if_present(label, message, "active", native.active)?;
         self.same_bool_if_present(label, message, "trajectory", native.trajectory)
     }
-    pub(crate) fn check_unit_sensor_radius(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_sensor_radius(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let sensor_type = str_field(message, "sensorType")?;
         let native = self
             .interface
             .units_info()
             .get_unit_sensor_radius(unit_id, sensor_type)
-            .map_err(|err| format!("get_unit_sensor_radius({unit_id}, {sensor_type}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("get_unit_sensor_radius({unit_id}, {sensor_type}) failed: {err:?}")
+            })?;
         let radius = match sensor_type {
             "los" => native.los,
             "airLos" => native.airLos,
@@ -617,11 +903,19 @@ impl NativeApiParity {
             "seismic" => native.seismic,
             "radarJammer" => native.radarJammer,
             "sonarJammer" => native.sonarJammer,
-            _ => return Err(format!("{label}.sensorType: unsupported sensor type `{sensor_type}`")),
+            _ => {
+                return Err(format!(
+                    "{label}.sensorType: unsupported sensor type `{sensor_type}`"
+                ))
+            }
         };
         self.same_if_present(label, message, "radius", radius)
     }
-    pub(crate) fn check_unit_leaves_ghost(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_leaves_ghost(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -631,7 +925,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_leaves_ghost({unit_id}) failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "leavesGhost", native)
     }
-    pub(crate) fn check_unit_self_dtime(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_self_dtime(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -640,7 +938,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_self_dtime({unit_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "selfDTime", native)
     }
-    pub(crate) fn check_unit_collision_volume_data(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_collision_volume_data(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -669,7 +971,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "fuel", native.fuel)?;
         self.same_if_present(label, message, "maxFuel", native.maxFuel)
     }
-    pub(crate) fn check_unit_tooltip(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_tooltip(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -678,7 +984,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_tooltip({unit_id}) failed: {err:?}"))?;
         self.same_string_if_present(label, message, "tooltip", native.as_deref().unwrap_or(""))
     }
-    pub(crate) fn check_unit_physical_state(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_physical_state(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
             .interface
@@ -688,7 +998,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_physical_state({unit_id}) failed: {err:?}"))?;
         self.same_i32_if_present(label, message, "physicalState", native as i32)
     }
-    pub(crate) fn check_unit_weapon_state_f32(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_weapon_state_f32(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let weapon_num = i32_field(message, "weaponNum")?;
         let key = str_field(message, "key")?;
@@ -696,7 +1010,9 @@ impl NativeApiParity {
             .interface
             .units_weapons()
             .get_unit_weapon_state(unit_id, weapon_num, key)
-            .map_err(|err| format!("get_unit_weapon_state({unit_id}, {weapon_num}, {key}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("get_unit_weapon_state({unit_id}, {weapon_num}, {key}) failed: {err:?}")
+            })?;
         let value = match key {
             "range" => native.range,
             "projectileSpeed" => native.projectileSpeed,
@@ -706,7 +1022,11 @@ impl NativeApiParity {
         };
         self.same_if_present(label, message, "value", value)
     }
-    pub(crate) fn check_unit_weapon_bool(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_weapon_bool(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let test_name = base_test_name(label);
         let unit_id = i32_field(message, "unitID")?;
         let weapon_num = i32_field(message, "weaponNum")?;
@@ -715,19 +1035,29 @@ impl NativeApiParity {
                 .interface
                 .units_weapons()
                 .get_unit_weapon_can_fire(unit_id, weapon_num)
-                .map_err(|err| format!("get_unit_weapon_can_fire({unit_id}, {weapon_num}) failed: {err:?}"))?,
+                .map_err(|err| {
+                    format!("get_unit_weapon_can_fire({unit_id}, {weapon_num}) failed: {err:?}")
+                })?,
             "get_unit_weapon_test_range" => {
                 let target_pos = vec3_from_fields(message, "x", "y", "z")?;
                 self.interface
                     .units_weapons()
                     .get_unit_weapon_test_range(unit_id, weapon_num, target_pos)
-                    .map_err(|err| format!("get_unit_weapon_test_range({unit_id}, {weapon_num}) failed: {err:?}"))?
+                    .map_err(|err| {
+                        format!(
+                            "get_unit_weapon_test_range({unit_id}, {weapon_num}) failed: {err:?}"
+                        )
+                    })?
             }
             _ => return Err(format!("unsupported unit weapon bool check `{label}`")),
         };
         self.same_bool_if_present(label, message, "value", native)
     }
-    pub(crate) fn check_unit_weapon_damages_f32(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_weapon_damages_f32(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let weapon_num = i32_field(message, "weaponNum")?;
         let key = str_field(message, "key")?;
@@ -735,14 +1065,20 @@ impl NativeApiParity {
             .interface
             .units_weapons()
             .get_unit_weapon_damages(unit_id, weapon_num)
-            .map_err(|err| format!("get_unit_weapon_damages({unit_id}, {weapon_num}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("get_unit_weapon_damages({unit_id}, {weapon_num}) failed: {err:?}")
+            })?;
         let value = match key {
             "paralyzeDamageTime" => native.paralyzeDamageTime,
             "impulseFactor" => native.impulseFactor,
             "impulseBoost" => native.impulseBoost,
             "craterMult" => native.craterMult,
             "craterBoost" => native.craterBoost,
-            _ => return Err(format!("{label}.key: unsupported weapon damages key `{key}`")),
+            _ => {
+                return Err(format!(
+                    "{label}.key: unsupported weapon damages key `{key}`"
+                ))
+            }
         };
         self.same_if_present(label, message, "value", value)
     }
@@ -771,7 +1107,9 @@ impl NativeApiParity {
             .synced_ctrl()
             .unit()
             .set_unit_physical_state_bit(unit_id, state_bit)
-            .map_err(|err| format!("set_unit_physical_state_bit({unit_id}, {state_bit}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("set_unit_physical_state_bit({unit_id}, {state_bit}) failed: {err:?}")
+            })?;
         Ok(())
     }
     pub(crate) fn set_unit_radius_and_height(&mut self, message: &Value) -> Result<(), String> {
@@ -779,7 +1117,11 @@ impl NativeApiParity {
         self.interface
             .synced_ctrl()
             .unit()
-            .set_unit_radius_and_height(unit_id, f32_field(message, "radius")?, f32_field(message, "height")?)
+            .set_unit_radius_and_height(
+                unit_id,
+                f32_field(message, "radius")?,
+                f32_field(message, "height")?,
+            )
             .map_err(|err| format!("set_unit_radius_and_height({unit_id}) failed: {err:?}"))?;
         Ok(())
     }
@@ -791,7 +1133,9 @@ impl NativeApiParity {
             .synced_ctrl()
             .unit()
             .set_unit_sensor_radius(unit_id, sensor_type, radius)
-            .map_err(|err| format!("set_unit_sensor_radius({unit_id}, {sensor_type}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("set_unit_sensor_radius({unit_id}, {sensor_type}) failed: {err:?}")
+            })?;
         Ok(())
     }
     pub(crate) fn set_unit_cloak(&mut self, message: &Value) -> Result<(), String> {
@@ -901,9 +1245,13 @@ impl NativeApiParity {
             0.0,
             -1,
             -1,
-            spring_native::sys::Float3 { x: 0.0, y: 0.0, z: 0.0 },
+            spring_native::sys::Float3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
         )
-            .map_err(|err| format!("add_unit_damage({unit_id}) failed: {err:?}"))?;
+        .map_err(|err| format!("add_unit_damage({unit_id}) failed: {err:?}"))?;
         Ok(())
     }
     pub(crate) fn set_unit_neutral(&mut self, message: &Value) -> Result<(), String> {
@@ -979,7 +1327,13 @@ impl NativeApiParity {
         self.interface
             .synced_ctrl()
             .unit()
-            .set_unit_harvest_storage(unit_id, stored_metal, max_stored_metal, stored_energy, max_stored_energy)
+            .set_unit_harvest_storage(
+                unit_id,
+                stored_metal,
+                max_stored_metal,
+                stored_energy,
+                max_stored_energy,
+            )
             .map_err(|err| format!("set_unit_harvest_storage({unit_id}) failed: {err:?}"))?;
         Ok(())
     }

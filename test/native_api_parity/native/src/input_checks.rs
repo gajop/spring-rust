@@ -42,7 +42,12 @@ impl NativeApiParity {
                     .input()
                     .get_mouse_cursor()
                     .map_err(|err| format!("get_mouse_cursor() failed: {err:?}"))?;
-                self.same_string_if_present(label, message, "cursor", native.as_deref().unwrap_or(""))
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "cursor",
+                    native.as_deref().unwrap_or(""),
+                )
             }
             "get_mouse_buttons_pressed" => {
                 let native = self
@@ -51,7 +56,10 @@ impl NativeApiParity {
                     .get_mouse_buttons_pressed(&[1, 2, 3])
                     .map_err(|err| format!("get_mouse_buttons_pressed() failed: {err:?}"))?;
                 if native.len() != 3 {
-                    return Err(format!("{label}: expected 3 button states, got {}", native.len()));
+                    return Err(format!(
+                        "{label}: expected 3 button states, got {}",
+                        native.len()
+                    ));
                 }
                 self.same_bool_if_present(label, message, "left", native[0])?;
                 self.same_bool_if_present(label, message, "middle", native[1])?;
@@ -64,7 +72,9 @@ impl NativeApiParity {
                     .interface
                     .input()
                     .is_above_mini_map(screen_x, screen_y)
-                    .map_err(|err| format!("is_above_mini_map({screen_x}, {screen_y}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("is_above_mini_map({screen_x}, {screen_y}) failed: {err:?}")
+                    })?;
                 self.same_bool_if_present(label, message, "above", native)
             }
             "get_key_code" => {
@@ -83,8 +93,18 @@ impl NativeApiParity {
                     .input()
                     .get_key_symbol(key_code)
                     .map_err(|err| format!("get_key_symbol({key_code}) failed: {err:?}"))?;
-                self.same_string_if_present(label, message, "keyCodeName", name.as_deref().unwrap_or(""))?;
-                self.same_string_if_present(label, message, "keyCodeDefaultName", default_name.as_deref().unwrap_or(""))
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "keyCodeName",
+                    name.as_deref().unwrap_or(""),
+                )?;
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "keyCodeDefaultName",
+                    default_name.as_deref().unwrap_or(""),
+                )
             }
             "get_scan_symbol" => {
                 let scan_code = i32_field(message, "scanCode")?;
@@ -93,8 +113,18 @@ impl NativeApiParity {
                     .input()
                     .get_scan_symbol(scan_code)
                     .map_err(|err| format!("get_scan_symbol({scan_code}) failed: {err:?}"))?;
-                self.same_string_if_present(label, message, "scanCodeName", name.as_deref().unwrap_or(""))?;
-                self.same_string_if_present(label, message, "scanCodeDefaultName", default_name.as_deref().unwrap_or(""))
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "scanCodeName",
+                    name.as_deref().unwrap_or(""),
+                )?;
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "scanCodeDefaultName",
+                    default_name.as_deref().unwrap_or(""),
+                )
             }
             "get_key_from_scan_symbol" => {
                 let scan_symbol = str_field(message, "scanSymbol")?;
@@ -102,8 +132,15 @@ impl NativeApiParity {
                     .interface
                     .input()
                     .get_key_from_scan_symbol(scan_symbol)
-                    .map_err(|err| format!("get_key_from_scan_symbol({scan_symbol}) failed: {err:?}"))?;
-                self.same_string_if_present(label, message, "keyName", native.as_deref().unwrap_or(""))
+                    .map_err(|err| {
+                        format!("get_key_from_scan_symbol({scan_symbol}) failed: {err:?}")
+                    })?;
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "keyName",
+                    native.as_deref().unwrap_or(""),
+                )
             }
             "get_key_state" => {
                 let key_code = i32_field(message, "keyCode")?;
@@ -121,7 +158,9 @@ impl NativeApiParity {
                     .interface
                     .input()
                     .get_key_bindings(key_set1, key_set2)
-                    .map_err(|err| format!("get_key_bindings({key_set1}, {key_set2}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_key_bindings({key_set1}, {key_set2}) failed: {err:?}")
+                    })?;
                 self.same_i32_if_present(label, message, "count", native.len() as i32)
             }
             "get_pressed_keys" => {

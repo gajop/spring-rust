@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_projectiles_list(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_projectiles_list(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let test_name = base_test_name(label);
         let synced = bool_field(message, "synced")?;
         let weapon = bool_field(message, "weapon")?;
@@ -11,7 +15,9 @@ impl NativeApiParity {
                 .interface
                 .projectiles()
                 .get_all_projectiles(synced, weapon)
-                .map_err(|err| format!("get_all_projectiles({synced}, {weapon}) failed: {err:?}"))?,
+                .map_err(|err| {
+                    format!("get_all_projectiles({synced}, {weapon}) failed: {err:?}")
+                })?,
             "get_projectiles_in_rectangle" => self
                 .interface
                 .projectiles()

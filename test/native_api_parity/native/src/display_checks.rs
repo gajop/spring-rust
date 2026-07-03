@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_display_value(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_display_value(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         match base_test_name(label) {
             "get_num_displays" => {
                 let native = self
@@ -86,7 +90,9 @@ impl NativeApiParity {
                     .interface
                     .display()
                     .get_screen_geometry(screen_num, query_usable)
-                    .map_err(|err| format!("get_screen_geometry({screen_num}, {query_usable}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_screen_geometry({screen_num}, {query_usable}) failed: {err:?}")
+                    })?;
                 self.same_view_geometry(label, message, native)
             }
             "get_mini_map_geometry" => {
@@ -133,7 +139,12 @@ impl NativeApiParity {
                     .get_water_mode()
                     .map_err(|err| format!("get_water_mode() failed: {err:?}"))?;
                 self.same_i32_if_present(label, message, "mode", mode)?;
-                self.same_string_if_present(label, message, "waterName", name.as_deref().unwrap_or(""))
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "waterName",
+                    name.as_deref().unwrap_or(""),
+                )
             }
             "get_team_color" => {
                 let team_id = i32_field(message, "teamID")?;
@@ -200,7 +211,11 @@ impl NativeApiParity {
                 self.same_bool_if_present(label, message, "enabled", native)
             }
             "is_sphere_in_view" => {
-                let center = sys::Float3 { x: f32_field(message, "x")?, y: f32_field(message, "y")?, z: f32_field(message, "z")? };
+                let center = sys::Float3 {
+                    x: f32_field(message, "x")?,
+                    y: f32_field(message, "y")?,
+                    z: f32_field(message, "z")?,
+                };
                 let radius = f32_field(message, "radius")?;
                 let native = self
                     .interface
@@ -210,8 +225,16 @@ impl NativeApiParity {
                 self.same_bool_if_present(label, message, "inView", native)
             }
             "is_aabb_in_view" => {
-                let mins = sys::Float3 { x: f32_field(message, "minX")?, y: f32_field(message, "minY")?, z: f32_field(message, "minZ")? };
-                let maxs = sys::Float3 { x: f32_field(message, "maxX")?, y: f32_field(message, "maxY")?, z: f32_field(message, "maxZ")? };
+                let mins = sys::Float3 {
+                    x: f32_field(message, "minX")?,
+                    y: f32_field(message, "minY")?,
+                    z: f32_field(message, "minZ")?,
+                };
+                let maxs = sys::Float3 {
+                    x: f32_field(message, "maxX")?,
+                    y: f32_field(message, "maxY")?,
+                    z: f32_field(message, "maxZ")?,
+                };
                 let native = self
                     .interface
                     .display()
@@ -223,14 +246,24 @@ impl NativeApiParity {
         }
     }
 
-    fn same_view_geometry(&self, label: &str, message: &Value, native: sys::ViewGeometry) -> Result<(), String> {
+    fn same_view_geometry(
+        &self,
+        label: &str,
+        message: &Value,
+        native: sys::ViewGeometry,
+    ) -> Result<(), String> {
         self.same_i32_if_present(label, message, "viewSizeX", native.viewSizeX)?;
         self.same_i32_if_present(label, message, "viewSizeY", native.viewSizeY)?;
         self.same_i32_if_present(label, message, "viewPosX", native.viewPosX)?;
         self.same_i32_if_present(label, message, "viewPosY", native.viewPosY)
     }
 
-    fn same_team_color(&self, label: &str, message: &Value, native: sys::TeamColor) -> Result<(), String> {
+    fn same_team_color(
+        &self,
+        label: &str,
+        message: &Value,
+        native: sys::TeamColor,
+    ) -> Result<(), String> {
         self.same_if_present(label, message, "r", native.r)?;
         self.same_if_present(label, message, "g", native.g)?;
         self.same_if_present(label, message, "b", native.b)?;

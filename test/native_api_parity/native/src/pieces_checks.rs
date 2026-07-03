@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_pieces_string_set(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_pieces_string_set(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         match base_test_name(label) {
             "get_unit_script_names" => {
                 let unit_id = i32_field(message, "unitID")?;
@@ -28,7 +32,9 @@ impl NativeApiParity {
                     .interface
                     .units_pieces()
                     .get_feature_piece_list(feature_id)
-                    .map_err(|err| format!("get_feature_piece_list({feature_id}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_feature_piece_list({feature_id}) failed: {err:?}")
+                    })?;
                 self.same_string_set_if_present(label, message, "names", &native)
             }
             name => Err(format!("unsupported pieces string-set check `{name}`")),
@@ -56,7 +62,9 @@ impl NativeApiParity {
         let native = native_entries
             .iter()
             .map(|entry| {
-                let name = unsafe { CStr::from_ptr(entry.name) }.to_string_lossy().into_owned();
+                let name = unsafe { CStr::from_ptr(entry.name) }
+                    .to_string_lossy()
+                    .into_owned();
                 (name, entry.pieceNum)
             })
             .collect::<Vec<_>>();

@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_camera_value(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_camera_value(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         match base_test_name(label) {
             "get_camera_names" => {
                 let native = self
@@ -59,7 +63,9 @@ impl NativeApiParity {
                     .interface
                     .camera()
                     .get_pixel_dir(screen_x, screen_y)
-                    .map_err(|err| format!("get_pixel_dir({screen_x}, {screen_y}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_pixel_dir({screen_x}, {screen_y}) failed: {err:?}")
+                    })?;
                 self.same_vec3(label, native, message)
             }
             "world_to_screen_coords" => {

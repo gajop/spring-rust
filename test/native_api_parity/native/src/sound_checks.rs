@@ -75,7 +75,11 @@ impl NativeApiParity {
                 let sound_file = str_field(message, "soundFile")?;
                 let volume = f32_field(message, "volume")?;
                 let channel = i32_field(message, "channel")?;
-                let zero = spring_native::sys::Float3 { x: 0.0, y: 0.0, z: 0.0 };
+                let zero = spring_native::sys::Float3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                };
                 let native = self
                     .interface
                     .sound()

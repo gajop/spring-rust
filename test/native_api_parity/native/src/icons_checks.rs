@@ -10,7 +10,9 @@ impl NativeApiParity {
                     .interface
                     .icons()
                     .get_all_icon_data_array(full_data)
-                    .map_err(|err| format!("get_all_icon_data_array({full_data}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_all_icon_data_array({full_data}) failed: {err:?}")
+                    })?;
                 self.same_i32_if_present(label, message, "count", native.len() as i32)
             }
             "get_icon_data_default" => {
@@ -20,8 +22,15 @@ impl NativeApiParity {
                     .interface
                     .icons()
                     .get_icon_data(icon_name, full_data)
-                    .map_err(|err| format!("get_icon_data({icon_name}, {full_data}) failed: {err:?}"))?;
-                self.same_string_if_present(label, message, "iconName", &cstr_or_empty(native.name)?)
+                    .map_err(|err| {
+                        format!("get_icon_data({icon_name}, {full_data}) failed: {err:?}")
+                    })?;
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "iconName",
+                    &cstr_or_empty(native.name)?,
+                )
             }
             "unit_icon_get_draw" | "unit_icon_draw" | "unit_icon_draw_deprecated_alias" => {
                 let unit_id = i32_field(message, "unitID")?;
@@ -45,11 +54,15 @@ impl NativeApiParity {
                     .interface
                     .icons()
                     .unit_icon_set_draw(unit_id, draw_icon)
-                    .map_err(|err| format!("unit_icon_set_draw({unit_id}, {draw_icon}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("unit_icon_set_draw({unit_id}, {draw_icon}) failed: {err:?}")
+                    })?;
                 if success {
                     Ok(())
                 } else {
-                    Err(format!("unit_icon_set_draw({unit_id}, {draw_icon}) returned false"))
+                    Err(format!(
+                        "unit_icon_set_draw({unit_id}, {draw_icon}) returned false"
+                    ))
                 }
             }
             name => Err(format!("unsupported icons setter `{name}`")),

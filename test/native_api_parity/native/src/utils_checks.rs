@@ -7,7 +7,9 @@ impl NativeApiParity {
         let native = match test_name {
             "get_cegid" => {
                 let ceg_name = str_field(message, "cegName")?;
-                self.interface.utils().get_cegid(ceg_name)
+                self.interface
+                    .utils()
+                    .get_cegid(ceg_name)
                     .map_err(|err| format!("get_cegid({ceg_name}) failed: {err:?}"))?
             }
             _ => return Err(format!("unsupported utils i32 check `{label}`")),
@@ -25,8 +27,13 @@ impl NativeApiParity {
         };
         let facing = i32_field(message, "facing")?;
         let native = match test_name {
-            "pos2_build_pos" => self.interface.utils().pos2_build_pos(unit_def_id, pos, facing)
-                .map_err(|err| format!("pos2_build_pos({unit_def_id}, _, {facing}) failed: {err:?}"))?,
+            "pos2_build_pos" => self
+                .interface
+                .utils()
+                .pos2_build_pos(unit_def_id, pos, facing)
+                .map_err(|err| {
+                    format!("pos2_build_pos({unit_def_id}, _, {facing}) failed: {err:?}")
+                })?,
             "closest_build_pos" => {
                 let team_id = i32_field(message, "teamID")?;
                 let search_radius = f32_field(message, "searchRadius")?;
@@ -44,7 +51,11 @@ impl NativeApiParity {
         self.same_vec3(label, native, message)
     }
 
-    pub(crate) fn check_unit_def_dimensions(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_unit_def_dimensions(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_def_id = i32_field(message, "unitDefID")?;
         let native = self
             .interface
@@ -64,23 +75,34 @@ impl NativeApiParity {
         self.same_if_present(label, message, "maxz", native.maxz)
     }
 
-    pub(crate) fn check_test_move_order(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_test_move_order(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_def_id = i32_field(message, "unitDefID")?;
         let pos = vec3_from_fields(message, "x", "y", "z")?;
         let dir = vec3_from_fields(message, "dirX", "dirY", "dirZ")?;
-        let native = self.interface.utils().test_move_order(
-            unit_def_id,
-            pos,
-            dir,
-            bool_field(message, "testTerrain")?,
-            bool_field(message, "testObjects")?,
-            bool_field(message, "centerOnly")?,
-        )
+        let native = self
+            .interface
+            .utils()
+            .test_move_order(
+                unit_def_id,
+                pos,
+                dir,
+                bool_field(message, "testTerrain")?,
+                bool_field(message, "testObjects")?,
+                bool_field(message, "centerOnly")?,
+            )
             .map_err(|err| format!("test_move_order({unit_def_id}) failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "canMove", native)
     }
 
-    pub(crate) fn check_test_build_order(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_test_build_order(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let unit_def_id = i32_field(message, "unitDefID")?;
         let pos = vec3_from_fields(message, "x", "y", "z")?;
         let facing = i32_field(message, "facing")?;
@@ -88,10 +110,11 @@ impl NativeApiParity {
             .interface
             .utils()
             .test_build_order(unit_def_id, pos, facing)
-            .map_err(|err| format!("test_build_order({unit_def_id}, _, {facing}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("test_build_order({unit_def_id}, _, {facing}) failed: {err:?}")
+            })?;
         self.same_i32_if_present(label, message, "status", status)?;
         self.same_bool_if_present(label, message, "canBuild", can_build)?;
         self.same_i32_if_present(label, message, "featureID", feature_id)
     }
-
 }
