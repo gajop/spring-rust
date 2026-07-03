@@ -8,6 +8,7 @@
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
 #include <RmlUi/Core/Factory.h>
+#include <RmlUi/Core/StyleSheetContainer.h>
 #include <RmlUi/Core/Elements/ElementForm.h>
 #include <RmlUi/Core/Elements/ElementFormControlInput.h>
 #include <RmlUi/Core/Elements/ElementFormControlSelect.h>
@@ -929,8 +930,19 @@ static void NativeDocumentAppendToStyleSheet(const RmlDocumentStringQuery* query
 		return;
 	}
 	auto styleSheet = Rml::Factory::InstanceStyleSheetString(query->value);
-	auto combined = styleSheet->CombineStyleSheetContainer(*document->GetStyleSheetContainer());
-	document->SetStyleSheetContainer(std::move(combined));
+	if (styleSheet == nullptr) {
+		return;
+	}
+
+	const Rml::StyleSheetContainer* existingStyleSheet = document->GetStyleSheetContainer();
+	if (existingStyleSheet != nullptr) {
+		styleSheet = styleSheet->CombineStyleSheetContainer(*existingStyleSheet);
+		if (styleSheet == nullptr) {
+			return;
+		}
+	}
+
+	document->SetStyleSheetContainer(std::move(styleSheet));
 	result->success = true;
 }
 
