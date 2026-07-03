@@ -280,6 +280,16 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
         if not matches:
             print(f"mismatch: {name}")
             ok = False
+        for side, rows in (("lua", lua_rows), ("native", native_rows)):
+            failures = [
+                row for row in rows
+                if str(row.get("name", "")).startswith("lua_rml_") and row.get("status") == "fail"
+            ]
+            if failures:
+                print(f"{side} {name} RmlUi failures: {len(failures)}")
+                for row in failures[:10]:
+                    print(json.dumps(row, sort_keys=True))
+                ok = False
 
     native_path = native_dir / "native.jsonl"
     native_jsonl_exists = native_path.exists()
