@@ -1,1 +1,11 @@
 Current API port TODO (one function per line; generated from api_comparison.md)
+
+Known native API crashers / edge cases:
+- RmlUi DocumentAppendToStyleSheet used to crash when called on a native-created
+  document with no existing StyleSheetContainer, e.g. ContextCreateDocument("body")
+  followed by DocumentAppendToStyleSheet("body { ... }"). The 2026-07-03
+  SpringBoard native chonsole test reproduced it with a libunwind stack at
+  NativeDocumentAppendToStyleSheet -> StyleSheetContainer::CombineStyleSheetContainer.
+  ASAN was not enabled in build-amd64-linux (USE_ASAN=OFF). The API must install
+  the new stylesheet directly when there is no existing container and must not
+  segfault if RmlUi rejects stylesheet input.

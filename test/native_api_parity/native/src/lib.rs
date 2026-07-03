@@ -1,8 +1,8 @@
 use serde_json::Value;
 use spring_native::prelude::*;
 use std::{
-    ffi::{CStr, CString},
     env,
+    ffi::{CStr, CString},
     fs::{self, OpenOptions},
     io::Write,
     path::PathBuf,
@@ -34,7 +34,10 @@ macro_rules! native_tests {
     };
 }
 
-include!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/generated_tests.rs"));
+include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/generated_tests.rs"
+));
 
 impl NativeModule for NativeApiParity {
     fn new(interface: NativeInterfaceRef) -> Self {
@@ -54,7 +57,11 @@ impl NativeModule for NativeApiParity {
             Ok(parsed) => parsed,
             Err(err) => {
                 self.failures += 1;
-                self.record("parse", "fail", &format!("parse failure: {err}; message={message}"));
+                self.record(
+                    "parse",
+                    "fail",
+                    &format!("parse failure: {err}; message={message}"),
+                );
                 return Ok(());
             }
         };
@@ -63,7 +70,11 @@ impl NativeModule for NativeApiParity {
             Some(name) => name,
             None => {
                 self.failures += 1;
-                self.record("parse", "fail", &format!("missing string field `name`; message={message}"));
+                self.record(
+                    "parse",
+                    "fail",
+                    &format!("missing string field `name`; message={message}"),
+                );
                 return Ok(());
             }
         };
@@ -105,7 +116,11 @@ impl NativeModule for NativeApiParity {
             Ok(false) => {}
             Err(err) => {
                 self.failures += 1;
-                self.record("gfx_compute_upload", "fail", &format!("Platform.is_headless failed: {err:?}"));
+                self.record(
+                    "gfx_compute_upload",
+                    "fail",
+                    &format!("Platform.is_headless failed: {err:?}"),
+                );
                 return Ok(());
             }
         }
@@ -117,41 +132,50 @@ impl NativeModule for NativeApiParity {
                 self.record("gfx_compute_upload", "fail", &err);
             }
         }
+
+        match self.check_rml_append_stylesheet_smoke() {
+            Ok(()) => self.record("rml_append_stylesheet_empty_document", "pass", ""),
+            Err(err) => {
+                self.failures += 1;
+                self.record("rml_append_stylesheet_empty_document", "fail", &err);
+            }
+        }
         Ok(())
     }
 }
 
-mod core;
-mod game_checks;
-mod query_checks;
-mod metal_checks;
-mod rules_checks;
-mod unit_checks;
-mod feature_checks;
-mod terrain_checks;
-mod los_checks;
-mod defs_checks;
-mod utils_checks;
+mod camera_checks;
 mod commands_checks;
 mod config_checks;
-mod camera_checks;
+mod core;
+mod defs_checks;
 mod display_checks;
-mod input_checks;
+mod feature_checks;
+mod game_checks;
+mod gfx_checks;
 mod icons_checks;
+mod input_checks;
+mod known_mismatch_checks;
+mod los_checks;
 mod math_extra_checks;
+mod messages_checks;
+mod metal_checks;
+mod pieces_checks;
 mod platform_checks;
 mod player_checks;
-mod pieces_checks;
-mod system_control_checks;
-mod messages_checks;
-mod selection_checks;
-mod sound_checks;
 mod profiling_checks;
 mod projectiles_checks;
-mod unsynced_read_checks;
-mod vfs_checks;
-mod known_mismatch_checks;
-mod gfx_checks;
+mod query_checks;
+mod rml_checks;
+mod rules_checks;
+mod selection_checks;
+mod sound_checks;
 mod support;
+mod system_control_checks;
+mod terrain_checks;
+mod unit_checks;
+mod unsynced_read_checks;
+mod utils_checks;
+mod vfs_checks;
 
 spring_native::export_module!(NativeApiParity);
