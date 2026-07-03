@@ -122,6 +122,117 @@ impl NativeApiParity {
         })
     }
 
+    pub(crate) fn check_rml_global_input_behavior(&self) -> Result<(), String> {
+        let rml = self.interface.rml_ui();
+        ensure(
+            rml.clear_translations().map_err(format_error)?,
+            "clear_translations should succeed",
+        )?;
+        let _ = rml
+            .add_translation_string("native_api_parity_key", "translated")
+            .map_err(format_error)?;
+        ensure(
+            rml.set_mouse_cursor_alias("native-api-parity-cursor", "Move")
+                .map_err(format_error)?,
+            "set_mouse_cursor_alias should succeed",
+        )?;
+
+        let event_type = format!("native_api_parity_custom_{}", std::process::id());
+        ensure(
+            rml.register_event_type(&event_type, true, true, None)
+                .map_err(format_error)?
+                > 0,
+            "register_event_type should return a valid event id",
+        )?;
+        let legacy_event_type = format!("native_api_parity_legacy_{}", std::process::id());
+        ensure(
+            rml.regiser_event_type(&legacy_event_type, false, true, None)
+                .map_err(format_error)?
+                > 0,
+            "regiser_event_type alias should return a valid event id",
+        )?;
+        ensure_eq(
+            "vector2f_new",
+            rml.vector2f_new(1.5, -2.25).map_err(format_error)?,
+            (1.5, -2.25),
+        )?;
+        ensure_eq(
+            "vector2i_new",
+            rml.vector2i_new(7, -8).map_err(format_error)?,
+            (7, -8),
+        )?;
+
+        self.with_rml_context("input", |rml, context| {
+            ensure(
+                rml.set_debug_context(context).map_err(format_error)?,
+                "set_debug_context should succeed",
+            )?;
+            ensure(
+                rml.set_debug_context_by_name(&context_name("input"))
+                    .map_err(format_error)?,
+                "set_debug_context_by_name should succeed",
+            )?;
+            ensure(
+                rml.context_enable_mouse_cursor(context, true)
+                    .map_err(format_error)?,
+                "context_enable_mouse_cursor should succeed",
+            )?;
+
+            let document = create_document(rml, context, "input")?;
+            ensure(
+                rml.document_show(document, None, None)
+                    .map_err(format_error)?,
+                "document_show should succeed before input processing",
+            )?;
+            let _ = rml
+                .context_process_mouse_move(context, 4.0, 5.0, 0)
+                .map_err(format_error)?;
+            let _ = rml
+                .context_process_mouse_button_down(context, 0, 0)
+                .map_err(format_error)?;
+            let _ = rml
+                .context_process_mouse_button_up(context, 0, 0)
+                .map_err(format_error)?;
+            let _ = rml
+                .context_process_mouse_wheel(context, 0.0, -1.0, 0)
+                .map_err(format_error)?;
+            let _ = rml
+                .context_process_mouse_leave(context)
+                .map_err(format_error)?;
+            let _ = rml
+                .context_is_mouse_interacting(context)
+                .map_err(format_error)?;
+            let _ = rml
+                .context_process_key_down(context, 65, 0)
+                .map_err(format_error)?;
+            let _ = rml
+                .context_process_key_up(context, 65, 0)
+                .map_err(format_error)?;
+            let _ = rml
+                .context_process_text_input(context, "native")
+                .map_err(format_error)?;
+
+            let data_model_name = format!("native_api_parity_model_{}", std::process::id());
+            let (data_model, opened) = rml
+                .context_open_data_model(context, &data_model_name)
+                .map_err(format_error)?;
+            ensure(
+                opened && data_model != 0,
+                "context_open_data_model should return a handle",
+            )?;
+            ensure(
+                rml.sol_lua_data_model___set_dirty(data_model, "missing_property")
+                    .map_err(format_error)?,
+                "sol_lua_data_model___set_dirty should accept native data model handle",
+            )?;
+            ensure(
+                rml.context_remove_data_model(context, &data_model_name)
+                    .map_err(format_error)?,
+                "context_remove_data_model should succeed",
+            )
+        })
+    }
+
     pub(crate) fn check_rml_dom_query_behavior(&self) -> Result<(), String> {
         self.with_rml_document("dom", |rml, document| {
             let container = append_new_element(rml, document, document, "div", Some("container"))?;
