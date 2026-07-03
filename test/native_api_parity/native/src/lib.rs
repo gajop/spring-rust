@@ -133,11 +133,43 @@ impl NativeModule for NativeApiParity {
             }
         }
 
-        match self.check_rml_append_stylesheet_smoke() {
-            Ok(()) => self.record("rml_append_stylesheet_empty_document", "pass", ""),
-            Err(err) => {
-                self.failures += 1;
-                self.record("rml_append_stylesheet_empty_document", "fail", &err);
+        for (name, check) in [
+            (
+                "rml_context_document_lifecycle",
+                NativeApiParity::check_rml_context_document_lifecycle
+                    as fn(&NativeApiParity) -> Result<(), String>,
+            ),
+            (
+                "rml_dom_query_behavior",
+                NativeApiParity::check_rml_dom_query_behavior,
+            ),
+            (
+                "rml_child_mutation_behavior",
+                NativeApiParity::check_rml_child_mutation_behavior,
+            ),
+            (
+                "rml_event_behavior",
+                NativeApiParity::check_rml_event_behavior,
+            ),
+            (
+                "rml_form_control_behavior",
+                NativeApiParity::check_rml_form_control_behavior,
+            ),
+            (
+                "rml_stylesheet_append_behavior",
+                NativeApiParity::check_rml_stylesheet_append_behavior,
+            ),
+            (
+                "rml_invalid_zero_handle_behavior",
+                NativeApiParity::check_rml_invalid_zero_handle_behavior,
+            ),
+        ] {
+            match check(self) {
+                Ok(()) => self.record(name, "pass", ""),
+                Err(err) => {
+                    self.failures += 1;
+                    self.record(name, "fail", &err);
+                }
             }
         }
         Ok(())
