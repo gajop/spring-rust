@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_profiling_value(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_profiling_value(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         match base_test_name(label) {
             "get_profiler_record_names_count" => {
                 let native = self
@@ -13,7 +17,16 @@ impl NativeApiParity {
                 self.same_i32_if_present(label, message, "count", native.len() as i32)
             }
             "get_lua_mem_usage" => {
-                let (_handle_alloced, _handle_allocs, global_alloced, _global_allocs, _unsynced_alloced, _unsynced_allocs, _synced_alloced, _synced_allocs) = self
+                let (
+                    _handle_alloced,
+                    _handle_allocs,
+                    global_alloced,
+                    _global_allocs,
+                    _unsynced_alloced,
+                    _unsynced_allocs,
+                    _synced_alloced,
+                    _synced_allocs,
+                ) = self
                     .interface
                     .profiling()
                     .get_lua_mem_usage()
@@ -70,7 +83,9 @@ impl NativeApiParity {
                     .interface
                     .profiling()
                     .get_profiler_time_record(name, frame_data)
-                    .map_err(|err| format!("get_profiler_time_record({name}, {frame_data}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_profiler_time_record({name}, {frame_data}) failed: {err:?}")
+                    })?;
                 self.same_if_present(label, message, "total", total)?;
                 self.same_if_present(label, message, "current", current)?;
                 self.same_if_present(label, message, "maxDt", max_dt)?;

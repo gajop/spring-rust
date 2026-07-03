@@ -11,7 +11,10 @@ impl NativeApiParity {
             self.record(
                 "complete",
                 "fail",
-                &format!("Native API parity checks finished with {} failure(s)", self.failures),
+                &format!(
+                    "Native API parity checks finished with {} failure(s)",
+                    self.failures
+                ),
             );
         }
         Ok(())

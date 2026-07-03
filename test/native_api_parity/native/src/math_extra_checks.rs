@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_math_extra_value(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_math_extra_value(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         match base_test_name(label) {
             "math_hypot" => {
                 let native = self
@@ -13,7 +17,11 @@ impl NativeApiParity {
                 self.same_if_present(label, message, "value", native)
             }
             "math_diag" => {
-                let values = [f32_field(message, "x")?, f32_field(message, "y")?, f32_field(message, "z")?];
+                let values = [
+                    f32_field(message, "x")?,
+                    f32_field(message, "y")?,
+                    f32_field(message, "z")?,
+                ];
                 let native = self
                     .interface
                     .math_extra()
@@ -25,7 +33,11 @@ impl NativeApiParity {
                 let native = self
                     .interface
                     .math_extra()
-                    .clamp(f32_field(message, "valueIn")?, f32_field(message, "min")?, f32_field(message, "max")?)
+                    .clamp(
+                        f32_field(message, "valueIn")?,
+                        f32_field(message, "min")?,
+                        f32_field(message, "max")?,
+                    )
                     .map_err(|err| format!("clamp() failed: {err:?}"))?;
                 self.same_if_present(label, message, "value", native)
             }
@@ -41,7 +53,11 @@ impl NativeApiParity {
                 let native = self
                     .interface
                     .math_extra()
-                    .mix(f32_field(message, "a")?, f32_field(message, "b")?, f32_field(message, "t")?)
+                    .mix(
+                        f32_field(message, "a")?,
+                        f32_field(message, "b")?,
+                        f32_field(message, "t")?,
+                    )
                     .map_err(|err| format!("mix() failed: {err:?}"))?;
                 self.same_if_present(label, message, "value", native)
             }
@@ -65,7 +81,11 @@ impl NativeApiParity {
                 let native = self
                     .interface
                     .math_extra()
-                    .smooth_step(f32_field(message, "edge0")?, f32_field(message, "edge1")?, f32_field(message, "x")?)
+                    .smooth_step(
+                        f32_field(message, "edge0")?,
+                        f32_field(message, "edge1")?,
+                        f32_field(message, "x")?,
+                    )
                     .map_err(|err| format!("smooth_step() failed: {err:?}"))?;
                 self.same_if_present(label, message, "value", native)
             }

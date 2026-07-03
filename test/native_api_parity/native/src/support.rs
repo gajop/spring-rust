@@ -1,19 +1,40 @@
 use super::*;
 
 impl NativeApiParity {
-    pub(crate) fn same_vec3(&self, label: &str, native: spring_native::sys::Float3, message: &Value) -> Result<(), String> {
+    pub(crate) fn same_vec3(
+        &self,
+        label: &str,
+        native: spring_native::sys::Float3,
+        message: &Value,
+    ) -> Result<(), String> {
         self.same(&format!("{label}.x"), native.x, f32_field(message, "x")?)?;
         self.same(&format!("{label}.y"), native.y, f32_field(message, "y")?)?;
         self.same(&format!("{label}.z"), native.z, f32_field(message, "z")?)?;
         Ok(())
     }
-    pub(crate) fn same_if_present(&self, label: &str, message: &Value, field: &str, native: f32) -> Result<(), String> {
+    pub(crate) fn same_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: f32,
+    ) -> Result<(), String> {
         if message.get(field).is_some() {
-            self.same(&format!("{label}.{field}"), native, f32_field(message, field)?)?;
+            self.same(
+                &format!("{label}.{field}"),
+                native,
+                f32_field(message, field)?,
+            )?;
         }
         Ok(())
     }
-    pub(crate) fn same_bool_if_present(&self, label: &str, message: &Value, field: &str, native: bool) -> Result<(), String> {
+    pub(crate) fn same_bool_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: bool,
+    ) -> Result<(), String> {
         if message.get(field).is_some() {
             let lua = bool_field(message, field)?;
             if native != lua {
@@ -22,7 +43,13 @@ impl NativeApiParity {
         }
         Ok(())
     }
-    pub(crate) fn same_i32_if_present(&self, label: &str, message: &Value, field: &str, native: i32) -> Result<(), String> {
+    pub(crate) fn same_i32_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: i32,
+    ) -> Result<(), String> {
         if message.get(field).is_some() {
             let lua = i32_field(message, field)?;
             if native != lua {
@@ -31,7 +58,13 @@ impl NativeApiParity {
         }
         Ok(())
     }
-    pub(crate) fn same_string_if_present(&self, label: &str, message: &Value, field: &str, native: &str) -> Result<(), String> {
+    pub(crate) fn same_string_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &str,
+    ) -> Result<(), String> {
         if message.get(field).is_some() {
             let lua = str_field(message, field)?;
             if native != lua {
@@ -40,7 +73,13 @@ impl NativeApiParity {
         }
         Ok(())
     }
-    pub(crate) fn same_i32_list_if_present(&self, label: &str, message: &Value, field: &str, native: &[i32]) -> Result<(), String> {
+    pub(crate) fn same_i32_list_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &[i32],
+    ) -> Result<(), String> {
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -56,11 +95,19 @@ impl NativeApiParity {
             })
             .collect::<Result<Vec<_>, _>>()?;
         if native != lua_values.as_slice() {
-            return Err(format!("{label}.{field}: native={native:?}, lua={lua_values:?}"));
+            return Err(format!(
+                "{label}.{field}: native={native:?}, lua={lua_values:?}"
+            ));
         }
         Ok(())
     }
-    pub(crate) fn same_i32_set_if_present(&self, label: &str, message: &Value, field: &str, native: &[i32]) -> Result<(), String> {
+    pub(crate) fn same_i32_set_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &[i32],
+    ) -> Result<(), String> {
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -79,11 +126,19 @@ impl NativeApiParity {
         lua_values.sort_unstable();
         native_values.sort_unstable();
         if native_values != lua_values {
-            return Err(format!("{label}.{field}: native={native_values:?}, lua={lua_values:?}"));
+            return Err(format!(
+                "{label}.{field}: native={native_values:?}, lua={lua_values:?}"
+            ));
         }
         Ok(())
     }
-    pub(crate) fn same_string_set_if_present(&self, label: &str, message: &Value, field: &str, native: &[String]) -> Result<(), String> {
+    pub(crate) fn same_string_set_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &[String],
+    ) -> Result<(), String> {
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -102,11 +157,19 @@ impl NativeApiParity {
         lua_values.sort();
         native_values.sort();
         if native_values != lua_values {
-            return Err(format!("{label}.{field}: native={native_values:?}, lua={lua_values:?}"));
+            return Err(format!(
+                "{label}.{field}: native={native_values:?}, lua={lua_values:?}"
+            ));
         }
         Ok(())
     }
-    pub(crate) fn same_string_i32_pairs_if_present(&self, label: &str, message: &Value, field: &str, native: &[(String, i32)]) -> Result<(), String> {
+    pub(crate) fn same_string_i32_pairs_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &[(String, i32)],
+    ) -> Result<(), String> {
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -132,11 +195,19 @@ impl NativeApiParity {
         lua_values.sort();
         native_values.sort();
         if native_values != lua_values {
-            return Err(format!("{label}.{field}: native={native_values:?}, lua={lua_values:?}"));
+            return Err(format!(
+                "{label}.{field}: native={native_values:?}, lua={lua_values:?}"
+            ));
         }
         Ok(())
     }
-    pub(crate) fn same_unit_def_counts_if_present(&self, label: &str, message: &Value, field: &str, native: &[spring_native::sys::UnitDefCount]) -> Result<(), String> {
+    pub(crate) fn same_unit_def_counts_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &[spring_native::sys::UnitDefCount],
+    ) -> Result<(), String> {
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -165,11 +236,19 @@ impl NativeApiParity {
         lua_values.sort_unstable();
         native_values.sort_unstable();
         if native_values != lua_values {
-            return Err(format!("{label}.{field}: native={native_values:?}, lua={lua_values:?}"));
+            return Err(format!(
+                "{label}.{field}: native={native_values:?}, lua={lua_values:?}"
+            ));
         }
         Ok(())
     }
-    pub(crate) fn same_team_units_by_def_if_present(&self, label: &str, message: &Value, field: &str, native: &[spring_native::sys::TeamUnitsByDef]) -> Result<(), String> {
+    pub(crate) fn same_team_units_by_def_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &[spring_native::sys::TeamUnitsByDef],
+    ) -> Result<(), String> {
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -205,7 +284,10 @@ impl NativeApiParity {
                 let mut units = if group.count == 0 || group.units.is_null() {
                     Vec::new()
                 } else {
-                    unsafe { std::slice::from_raw_parts(group.units as *const i32, group.count as usize) }.to_vec()
+                    unsafe {
+                        std::slice::from_raw_parts(group.units as *const i32, group.count as usize)
+                    }
+                    .to_vec()
                 };
                 units.sort_unstable();
                 (group.unitDefID, units)
@@ -214,11 +296,19 @@ impl NativeApiParity {
         lua_values.sort_unstable();
         native_values.sort_unstable();
         if native_values != lua_values {
-            return Err(format!("{label}.{field}: native={native_values:?}, lua={lua_values:?}"));
+            return Err(format!(
+                "{label}.{field}: native={native_values:?}, lua={lua_values:?}"
+            ));
         }
         Ok(())
     }
-    pub(crate) fn same_start_positions_if_present(&self, label: &str, message: &Value, field: &str, native: &[spring_native::sys::StartPosition]) -> Result<(), String> {
+    pub(crate) fn same_start_positions_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &[spring_native::sys::StartPosition],
+    ) -> Result<(), String> {
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -234,9 +324,21 @@ impl NativeApiParity {
                     .ok_or_else(|| format!("{label}.{field}: expected teamID"))?;
                 Ok((
                     team_id,
-                    value.get("x").and_then(Value::as_f64).ok_or_else(|| format!("{label}.{field}: expected x"))? as f32,
-                    value.get("y").and_then(Value::as_f64).ok_or_else(|| format!("{label}.{field}: expected y"))? as f32,
-                    value.get("z").and_then(Value::as_f64).ok_or_else(|| format!("{label}.{field}: expected z"))? as f32,
+                    value
+                        .get("x")
+                        .and_then(Value::as_f64)
+                        .ok_or_else(|| format!("{label}.{field}: expected x"))?
+                        as f32,
+                    value
+                        .get("y")
+                        .and_then(Value::as_f64)
+                        .ok_or_else(|| format!("{label}.{field}: expected y"))?
+                        as f32,
+                    value
+                        .get("z")
+                        .and_then(Value::as_f64)
+                        .ok_or_else(|| format!("{label}.{field}: expected z"))?
+                        as f32,
                 ))
             })
             .collect::<Result<Vec<_>, String>>()?;
@@ -247,11 +349,18 @@ impl NativeApiParity {
         lua_values.sort_by_key(|value| value.0);
         native_values.sort_by_key(|value| value.0);
         if native_values.len() != lua_values.len() {
-            return Err(format!("{label}.{field}: native_len={}, lua_len={}", native_values.len(), lua_values.len()));
+            return Err(format!(
+                "{label}.{field}: native_len={}, lua_len={}",
+                native_values.len(),
+                lua_values.len()
+            ));
         }
         for (index, (native, lua)) in native_values.iter().zip(lua_values.iter()).enumerate() {
             if native.0 != lua.0 {
-                return Err(format!("{label}.{field}[{index}].teamID: native={}, lua={}", native.0, lua.0));
+                return Err(format!(
+                    "{label}.{field}[{index}].teamID: native={}, lua={}",
+                    native.0, lua.0
+                ));
             }
             self.same(&format!("{label}.{field}[{index}].x"), native.1, lua.1)?;
             self.same(&format!("{label}.{field}[{index}].y"), native.2, lua.2)?;
@@ -259,7 +368,12 @@ impl NativeApiParity {
         }
         Ok(())
     }
-    pub(crate) fn same_collision_volume(&self, label: &str, message: &Value, native: spring_native::sys::CollisionVolumeData) -> Result<(), String> {
+    pub(crate) fn same_collision_volume(
+        &self,
+        label: &str,
+        message: &Value,
+        native: spring_native::sys::CollisionVolumeData,
+    ) -> Result<(), String> {
         self.same_if_present(label, message, "scaleX", native.scaleX)?;
         self.same_if_present(label, message, "scaleY", native.scaleY)?;
         self.same_if_present(label, message, "scaleZ", native.scaleZ)?;
@@ -297,7 +411,10 @@ impl NativeApiParity {
             let _ = writeln!(file, "{row}");
         }
 
-        let _ = self.interface.messages().echo("[native-api-parity]", message);
+        let _ = self
+            .interface
+            .messages()
+            .echo("[native-api-parity]", message);
     }
 }
 
@@ -349,7 +466,12 @@ pub(crate) fn cstr_or_empty(value: *const std::os::raw::c_char) -> Result<String
         .map_err(|err| format!("invalid native string: {err}"))
 }
 
-pub(crate) fn vec3_from_fields(message: &Value, x: &str, y: &str, z: &str) -> Result<spring_native::sys::Float3, String> {
+pub(crate) fn vec3_from_fields(
+    message: &Value,
+    x: &str,
+    y: &str,
+    z: &str,
+) -> Result<spring_native::sys::Float3, String> {
     Ok(spring_native::sys::Float3 {
         x: f32_field(message, x)?,
         y: f32_field(message, y)?,

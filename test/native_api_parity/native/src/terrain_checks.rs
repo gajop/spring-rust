@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_ground_height(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_ground_height(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let x = f32_field(message, "x")?;
         let z = f32_field(message, "z")?;
         let native = self
@@ -12,7 +16,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_ground_height({x}, {z}) failed: {err:?}"))?;
         self.same_if_present(label, message, "height", native)
     }
-    pub(crate) fn check_ground_orig_height(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_ground_orig_height(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let x = f32_field(message, "x")?;
         let z = f32_field(message, "z")?;
         let native = self
@@ -22,7 +30,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_ground_orig_height({x}, {z}) failed: {err:?}"))?;
         self.same_if_present(label, message, "height", native)
     }
-    pub(crate) fn check_ground_normal(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_ground_normal(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let x = f32_field(message, "x")?;
         let z = f32_field(message, "z")?;
         let (normal, slope) = self
@@ -30,9 +42,21 @@ impl NativeApiParity {
             .terrain()
             .get_ground_normal(x, z, bool_field(message, "smoothed")?)
             .map_err(|err| format!("get_ground_normal({x}, {z}) failed: {err:?}"))?;
-        self.same(&format!("{label}.normalX"), normal.x, f32_field(message, "normalX")?)?;
-        self.same(&format!("{label}.normalY"), normal.y, f32_field(message, "normalY")?)?;
-        self.same(&format!("{label}.normalZ"), normal.z, f32_field(message, "normalZ")?)?;
+        self.same(
+            &format!("{label}.normalX"),
+            normal.x,
+            f32_field(message, "normalX")?,
+        )?;
+        self.same(
+            &format!("{label}.normalY"),
+            normal.y,
+            f32_field(message, "normalY")?,
+        )?;
+        self.same(
+            &format!("{label}.normalZ"),
+            normal.z,
+            f32_field(message, "normalZ")?,
+        )?;
         self.same_if_present(label, message, "slope", slope)
     }
     pub(crate) fn check_terrain_f32(&mut self, message: &Value, label: &str) -> Result<(), String> {
@@ -62,7 +86,11 @@ impl NativeApiParity {
         };
         self.same_if_present(label, message, field, native)
     }
-    pub(crate) fn check_ground_extremes(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_ground_extremes(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let (init_min, init_max, curr_min, curr_max) = self
             .interface
             .terrain()
@@ -73,7 +101,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "currMinHeight", curr_min)?;
         self.same_if_present(label, message, "currMaxHeight", curr_max)
     }
-    pub(crate) fn check_ground_blocked(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_ground_blocked(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let native = self
             .interface
             .terrain()
@@ -86,7 +118,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_ground_blocked() failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "blocked", native)
     }
-    pub(crate) fn check_is_pos_in_map(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_is_pos_in_map(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let (in_map, in_play_area) = self
             .interface
             .terrain()
@@ -95,17 +131,36 @@ impl NativeApiParity {
         self.same_bool_if_present(label, message, "inPlayArea", in_play_area)?;
         self.same_bool_if_present(label, message, "inMap", in_map)
     }
-    pub(crate) fn check_terrain_info(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_terrain_info(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let test_name = base_test_name(label);
         match test_name {
             "get_ground_info" | "map_square_terrain_type" => {
-                let (index, name, metal_extraction, hardness, tank_speed, kbot_speed, hover_speed, ship_speed, receive_tracks) = self
+                let (
+                    index,
+                    name,
+                    metal_extraction,
+                    hardness,
+                    tank_speed,
+                    kbot_speed,
+                    hover_speed,
+                    ship_speed,
+                    receive_tracks,
+                ) = self
                     .interface
                     .terrain()
                     .get_ground_info(f32_field(message, "x")?, f32_field(message, "z")?)
                     .map_err(|err| format!("get_ground_info() failed: {err:?}"))?;
                 self.same_i32_if_present(label, message, "terrainTypeIndex", index)?;
-                self.same_string_if_present(label, message, "terrainTypeName", name.as_deref().unwrap_or(""))?;
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "terrainTypeName",
+                    name.as_deref().unwrap_or(""),
+                )?;
                 self.same_if_present(label, message, "metalExtraction", metal_extraction)?;
                 self.same_if_present(label, message, "hardness", hardness)?;
                 self.same_if_present(label, message, "tankSpeed", tank_speed)?;
@@ -116,13 +171,29 @@ impl NativeApiParity {
             }
             "get_terrain_type_data" | "terrain_type_data" => {
                 let terrain_type_index = i32_field(message, "terrainTypeIndex")?;
-                let (index, name, hardness, tank_speed, kbot_speed, hover_speed, ship_speed, receive_tracks) = self
+                let (
+                    index,
+                    name,
+                    hardness,
+                    tank_speed,
+                    kbot_speed,
+                    hover_speed,
+                    ship_speed,
+                    receive_tracks,
+                ) = self
                     .interface
                     .terrain()
                     .get_terrain_type_data(terrain_type_index)
-                    .map_err(|err| format!("get_terrain_type_data({terrain_type_index}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_terrain_type_data({terrain_type_index}) failed: {err:?}")
+                    })?;
                 self.same_i32_if_present(label, message, "terrainTypeIndex", index)?;
-                self.same_string_if_present(label, message, "terrainTypeName", name.as_deref().unwrap_or(""))?;
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "terrainTypeName",
+                    name.as_deref().unwrap_or(""),
+                )?;
                 self.same_if_present(label, message, "hardness", hardness)?;
                 self.same_if_present(label, message, "tankSpeed", tank_speed)?;
                 self.same_if_present(label, message, "kbotSpeed", kbot_speed)?;
@@ -178,7 +249,9 @@ impl NativeApiParity {
                 bool_field(message, "receiveTracks")?,
                 str_field(message, "terrainTypeName")?,
             )
-            .map_err(|err| format!("set_terrain_type_data({terrain_type_index}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("set_terrain_type_data({terrain_type_index}) failed: {err:?}")
+            })?;
         Ok(())
     }
     pub(crate) fn set_map_square_terrain_type(&mut self, message: &Value) -> Result<(), String> {
@@ -189,7 +262,11 @@ impl NativeApiParity {
             .synced_ctrl()
             .terrain()
             .set_map_square_terrain_type(x, z, terrain_type_index)
-            .map_err(|err| format!("set_map_square_terrain_type({x}, {z}, {terrain_type_index}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!(
+                    "set_map_square_terrain_type({x}, {z}, {terrain_type_index}) failed: {err:?}"
+                )
+            })?;
         Ok(())
     }
 }

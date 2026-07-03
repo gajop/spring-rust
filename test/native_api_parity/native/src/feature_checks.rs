@@ -2,7 +2,11 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
-    pub(crate) fn check_feature_health(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_health(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -13,7 +17,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "health", native.health)?;
         self.same_if_present(label, message, "maxHealth", native.maxHealth)
     }
-    pub(crate) fn check_feature_mass(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_mass(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -22,7 +30,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_mass({feature_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "mass", native)
     }
-    pub(crate) fn check_feature_resources(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_resources(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -35,7 +47,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "reclaimTime", native.reclaimTime)?;
         self.same_if_present(label, message, "reclaimLeft", native.reclaimLeft)
     }
-    pub(crate) fn check_feature_separation(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_separation(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id1 = i32_field(message, "featureID1")?;
         let feature_id2 = i32_field(message, "featureID2")?;
         let positional = bool_field(message, "positional")?;
@@ -46,44 +62,71 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_separation({feature_id1}, {feature_id2}, {positional}) failed: {err:?}"))?;
         self.same_if_present(label, message, "separation", native)
     }
-    pub(crate) fn check_features_spatial_list(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_features_spatial_list(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let test_name = base_test_name(label);
         let native = match test_name {
-            "get_features_in_rectangle" => self.interface.features().get_features_in_rectangle(
-                f32_field(message, "minX")?,
-                f32_field(message, "minZ")?,
-                f32_field(message, "maxX")?,
-                f32_field(message, "maxZ")?,
-            )
+            "get_features_in_rectangle" => self
+                .interface
+                .features()
+                .get_features_in_rectangle(
+                    f32_field(message, "minX")?,
+                    f32_field(message, "minZ")?,
+                    f32_field(message, "maxX")?,
+                    f32_field(message, "maxZ")?,
+                )
                 .map_err(|err| format!("get_features_in_rectangle() failed: {err:?}"))?,
-            "get_features_in_sphere" => self.interface.features().get_features_in_sphere(
-                vec3_from_fields(message, "x", "y", "z")?,
-                f32_field(message, "radius")?,
-            )
+            "get_features_in_sphere" => self
+                .interface
+                .features()
+                .get_features_in_sphere(
+                    vec3_from_fields(message, "x", "y", "z")?,
+                    f32_field(message, "radius")?,
+                )
                 .map_err(|err| format!("get_features_in_sphere() failed: {err:?}"))?,
-            "get_features_in_cylinder" => self.interface.features().get_features_in_cylinder(
-                f32_field(message, "x")?,
-                f32_field(message, "z")?,
-                f32_field(message, "radius")?,
-                f32_field(message, "height")?,
-            )
+            "get_features_in_cylinder" => self
+                .interface
+                .features()
+                .get_features_in_cylinder(
+                    f32_field(message, "x")?,
+                    f32_field(message, "z")?,
+                    f32_field(message, "radius")?,
+                    f32_field(message, "height")?,
+                )
                 .map_err(|err| format!("get_features_in_cylinder() failed: {err:?}"))?,
             "get_render_features" => {
                 let draw_mask = i32_field(message, "drawMask")?;
                 let send_mask = bool_field(message, "sendMask")?;
-                self.interface.features().get_render_features(draw_mask, send_mask)
-                    .map_err(|err| format!("get_render_features({draw_mask}, {send_mask}) failed: {err:?}"))?
+                self.interface
+                    .features()
+                    .get_render_features(draw_mask, send_mask)
+                    .map_err(|err| {
+                        format!("get_render_features({draw_mask}, {send_mask}) failed: {err:?}")
+                    })?
             }
             "get_render_features_draw_flag_changed" => {
                 let send_mask = bool_field(message, "sendMask")?;
-                self.interface.features().get_render_features_draw_flag_changed(send_mask)
-                    .map_err(|err| format!("get_render_features_draw_flag_changed({send_mask}) failed: {err:?}"))?
+                self.interface
+                    .features()
+                    .get_render_features_draw_flag_changed(send_mask)
+                    .map_err(|err| {
+                        format!(
+                            "get_render_features_draw_flag_changed({send_mask}) failed: {err:?}"
+                        )
+                    })?
             }
             _ => return Err(format!("unsupported feature spatial list check `{label}`")),
         };
         self.same_i32_set_if_present(label, message, "featureIDs", &native)
     }
-    pub(crate) fn check_feature_reclaim(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_reclaim(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -92,7 +135,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_health({feature_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "reclaimLeft", native.reclaimLeft)
     }
-    pub(crate) fn check_feature_resurrect(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_resurrect(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let (native, _) = self
             .interface
@@ -116,7 +163,11 @@ impl NativeApiParity {
         }
         Ok(())
     }
-    pub(crate) fn check_feature_position(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_position(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -125,7 +176,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_position({feature_id}) failed: {err:?}"))?;
         self.same_vec3(label, native, message)
     }
-    pub(crate) fn check_feature_height(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_height(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -134,7 +189,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_height({feature_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "height", native)
     }
-    pub(crate) fn check_feature_radius(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_radius(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -143,7 +202,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_radius({feature_id}) failed: {err:?}"))?;
         self.same_if_present(label, message, "radius", native)
     }
-    pub(crate) fn check_feature_heading(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_heading(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -152,7 +215,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_heading({feature_id}) failed: {err:?}"))?;
         self.same_i32_if_present(label, message, "heading", native)
     }
-    pub(crate) fn check_feature_velocity(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_velocity(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -161,7 +228,11 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_velocity({feature_id}) failed: {err:?}"))?;
         self.same_vec3(label, native, message)
     }
-    pub(crate) fn check_feature_direction(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_direction(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let front = self
             .interface
@@ -169,11 +240,27 @@ impl NativeApiParity {
             .get_feature_direction(feature_id)
             .map_err(|err| format!("get_feature_direction({feature_id}) failed: {err:?}"))?;
 
-        self.same(&format!("{label}.frontX"), front.x, f32_field(message, "frontX")?)?;
-        self.same(&format!("{label}.frontY"), front.y, f32_field(message, "frontY")?)?;
-        self.same(&format!("{label}.frontZ"), front.z, f32_field(message, "frontZ")?)
+        self.same(
+            &format!("{label}.frontX"),
+            front.x,
+            f32_field(message, "frontX")?,
+        )?;
+        self.same(
+            &format!("{label}.frontY"),
+            front.y,
+            f32_field(message, "frontY")?,
+        )?;
+        self.same(
+            &format!("{label}.frontZ"),
+            front.z,
+            f32_field(message, "frontZ")?,
+        )
     }
-    pub(crate) fn check_feature_rotation(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_rotation(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -184,7 +271,11 @@ impl NativeApiParity {
         self.same_if_present(label, message, "yaw", native.yaw)?;
         self.same_if_present(label, message, "roll", native.roll)
     }
-    pub(crate) fn check_feature_no_select(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_no_select(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -193,28 +284,56 @@ impl NativeApiParity {
             .map_err(|err| format!("get_feature_no_select({feature_id}) failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "noSelect", native)
     }
-    pub(crate) fn check_feature_collision_volume_data(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_collision_volume_data(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
             .features()
             .get_feature_collision_volume_data(feature_id)
-            .map_err(|err| format!("get_feature_collision_volume_data({feature_id}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("get_feature_collision_volume_data({feature_id}) failed: {err:?}")
+            })?;
         self.same_collision_volume(label, message, native)
     }
-    pub(crate) fn check_feature_time(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_time(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let test_name = base_test_name(label);
         let (field, native) = match test_name {
-            "feature_fire_time" => ("fireTime", self.interface.features().get_feature_fire_time(feature_id)
-                .map_err(|err| format!("get_feature_fire_time({feature_id}) failed: {err:?}"))?),
-            "feature_smoke_time" => ("smokeTime", self.interface.features().get_feature_smoke_time(feature_id)
-                .map_err(|err| format!("get_feature_smoke_time({feature_id}) failed: {err:?}"))?),
+            "feature_fire_time" => (
+                "fireTime",
+                self.interface
+                    .features()
+                    .get_feature_fire_time(feature_id)
+                    .map_err(|err| {
+                        format!("get_feature_fire_time({feature_id}) failed: {err:?}")
+                    })?,
+            ),
+            "feature_smoke_time" => (
+                "smokeTime",
+                self.interface
+                    .features()
+                    .get_feature_smoke_time(feature_id)
+                    .map_err(|err| {
+                        format!("get_feature_smoke_time({feature_id}) failed: {err:?}")
+                    })?,
+            ),
             _ => return Err(format!("unsupported feature time check `{label}`")),
         };
         self.same_if_present(label, message, field, native)
     }
-    pub(crate) fn check_feature_blocking(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_blocking(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let native = self
             .interface
@@ -222,14 +341,43 @@ impl NativeApiParity {
             .get_feature_blocking(feature_id)
             .map_err(|err| format!("get_feature_blocking({feature_id}) failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "isBlocking", native.isBlocking)?;
-        self.same_bool_if_present(label, message, "isSolidObjectCollidable", native.isSolidObjectCollidable)?;
-        self.same_bool_if_present(label, message, "isProjectileCollidable", native.isProjectileCollidable)?;
-        self.same_bool_if_present(label, message, "isRaySegmentCollidable", native.isRaySegmentCollidable)?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "isSolidObjectCollidable",
+            native.isSolidObjectCollidable,
+        )?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "isProjectileCollidable",
+            native.isProjectileCollidable,
+        )?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "isRaySegmentCollidable",
+            native.isRaySegmentCollidable,
+        )?;
         self.same_bool_if_present(label, message, "crushable", native.crushable)?;
-        self.same_bool_if_present(label, message, "blockEnemyPushing", native.blockEnemyPushing)?;
-        self.same_bool_if_present(label, message, "blockHeightChanges", native.blockHeightChanges)
+        self.same_bool_if_present(
+            label,
+            message,
+            "blockEnemyPushing",
+            native.blockEnemyPushing,
+        )?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "blockHeightChanges",
+            native.blockHeightChanges,
+        )
     }
-    pub(crate) fn check_feature_render_flag(&mut self, message: &Value, label: &str) -> Result<(), String> {
+    pub(crate) fn check_feature_render_flag(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         match base_test_name(label) {
             "get_feature_no_draw" => {
@@ -253,7 +401,9 @@ impl NativeApiParity {
                     .interface
                     .features()
                     .get_feature_engine_draw_mask(feature_id)
-                    .map_err(|err| format!("get_feature_engine_draw_mask({feature_id}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_feature_engine_draw_mask({feature_id}) failed: {err:?}")
+                    })?;
                 self.same_i32_if_present(label, message, "mask", native as i32)
             }
             "get_feature_draw_flag" => {
@@ -261,7 +411,9 @@ impl NativeApiParity {
                     .interface
                     .features()
                     .get_feature_draw_flag(feature_id)
-                    .map_err(|err| format!("get_feature_draw_flag({feature_id}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_feature_draw_flag({feature_id}) failed: {err:?}")
+                    })?;
                 self.same_i32_if_present(label, message, "flag", native as i32)
             }
             "get_feature_always_update_matrix" => {
@@ -269,13 +421,18 @@ impl NativeApiParity {
                     .interface
                     .features()
                     .get_feature_always_update_matrix(feature_id)
-                    .map_err(|err| format!("get_feature_always_update_matrix({feature_id}) failed: {err:?}"))?;
+                    .map_err(|err| {
+                        format!("get_feature_always_update_matrix({feature_id}) failed: {err:?}")
+                    })?;
                 self.same_bool_if_present(label, message, "update", native)
             }
             _ => Err(format!("unsupported feature render flag check `{label}`")),
         }
     }
-    pub(crate) fn set_feature_collision_volume_data(&mut self, message: &Value) -> Result<(), String> {
+    pub(crate) fn set_feature_collision_volume_data(
+        &mut self,
+        message: &Value,
+    ) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
         let scales = vec3_from_fields(message, "scaleX", "scaleY", "scaleZ")?;
         let offsets = vec3_from_fields(message, "offsetX", "offsetY", "offsetZ")?;
@@ -290,7 +447,9 @@ impl NativeApiParity {
                 i32_field(message, "testType")?,
                 i32_field(message, "primaryAxis")?,
             )
-            .map_err(|err| format!("set_feature_collision_volume_data({feature_id}) failed: {err:?}"))?;
+            .map_err(|err| {
+                format!("set_feature_collision_volume_data({feature_id}) failed: {err:?}")
+            })?;
         Ok(())
     }
     pub(crate) fn set_feature_radius_and_height(&mut self, message: &Value) -> Result<(), String> {
@@ -298,8 +457,14 @@ impl NativeApiParity {
         self.interface
             .synced_ctrl()
             .feature()
-            .set_feature_radius_and_height(feature_id, f32_field(message, "radius")?, f32_field(message, "height")?)
-            .map_err(|err| format!("set_feature_radius_and_height({feature_id}) failed: {err:?}"))?;
+            .set_feature_radius_and_height(
+                feature_id,
+                f32_field(message, "radius")?,
+                f32_field(message, "height")?,
+            )
+            .map_err(|err| {
+                format!("set_feature_radius_and_height({feature_id}) failed: {err:?}")
+            })?;
         Ok(())
     }
     pub(crate) fn set_feature_health(&mut self, message: &Value) -> Result<(), String> {
@@ -319,16 +484,22 @@ impl NativeApiParity {
         let feature_id = i32_field(message, "featureID")?;
         let synced_ctrl = self.interface.synced_ctrl();
         let feature = synced_ctrl.feature();
-        feature.set_feature_health(feature_id, f32_field(message, "baseline")?, false)
+        feature
+            .set_feature_health(feature_id, f32_field(message, "baseline")?, false)
             .map_err(|err| format!("set_feature_health({feature_id}) failed: {err:?}"))?;
-        feature.add_feature_damage(
-            feature_id,
-            f32_field(message, "damage")?,
-            0.0,
-            -1,
-            -1,
-            spring_native::sys::Float3 { x: 0.0, y: 0.0, z: 0.0 },
-        )
+        feature
+            .add_feature_damage(
+                feature_id,
+                f32_field(message, "damage")?,
+                0.0,
+                -1,
+                -1,
+                spring_native::sys::Float3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+            )
             .map_err(|err| format!("add_feature_damage({feature_id}) failed: {err:?}"))?;
         Ok(())
     }
@@ -377,12 +548,14 @@ impl NativeApiParity {
         let feature_id = i32_field(message, "featureID")?;
         let test_name = base_test_name(str_field(message, "name")?);
         match test_name {
-            "feature_fire_time" => self.interface
+            "feature_fire_time" => self
+                .interface
                 .synced_ctrl()
                 .feature()
                 .set_feature_fire_time(feature_id, f32_field(message, "fireTime")?)
                 .map_err(|err| format!("set_feature_fire_time({feature_id}) failed: {err:?}"))?,
-            "feature_smoke_time" => self.interface
+            "feature_smoke_time" => self
+                .interface
                 .synced_ctrl()
                 .feature()
                 .set_feature_smoke_time(feature_id, f32_field(message, "smokeTime")?)
