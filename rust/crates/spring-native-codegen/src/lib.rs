@@ -908,7 +908,7 @@ enum ParamType {
     },
     CStr,
     /// A `{ NativeEditCallback callback; void* userData; }` pair surfaced as a
-    /// `FnMut()` closure; the wrapper builds an extern-C trampoline.
+    /// boxed `FnMut()` closure; the wrapper builds an extern-C trampoline.
     Callback,
 }
 
@@ -960,7 +960,7 @@ enum QueryExpr {
     Zero,
     /// The callback function pointer field: emits `Some(trampoline::<F>)`.
     CallbackFn,
-    /// The userData field paired with a callback: emits `&mut <param> as *mut _`.
+    /// The userData field paired with a callback: emits the boxed closure pointer.
     CallbackUserData {
         param: String,
     },
@@ -1021,7 +1021,14 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
     let ret_kind = build_return(result)?;
 
     let has_callback = params.iter().any(|p| matches!(p.ty, ParamType::Callback));
-    let generics = if has_callback { "<F: FnMut()>" } else { "" };
+    let has_persistent_callback = has_callback && func.name.contains("EventListener");
+    let generics = if has_persistent_callback {
+        "<F: FnMut() + 'static>"
+    } else if has_callback {
+        "<F: FnMut()>"
+    } else {
+        ""
+    };
     let mut sig = format!("    pub fn {}{}(&self", method_name, generics);
     for param in &params {
         let ty = match &param.ty {
@@ -1037,7 +1044,7 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
             ParamType::CStr => "&str".to_string(),
             ParamType::Callback => "F".to_string(),
         };
-        let prefix = if matches!(param.ty, ParamType::Callback) {
+        let prefix = if matches!(param.ty, ParamType::Callback) && !has_persistent_callback {
             "mut "
         } else {
             ""
@@ -1087,6 +1094,17 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
         body.push_str("                let f = &mut *(user_data as *mut F);\n");
         body.push_str("                f();\n");
         body.push_str("            }\n");
+        if has_persistent_callback {
+            for param in params
+                .iter()
+                .filter(|param| matches!(param.ty, ParamType::Callback))
+            {
+                body.push_str(&format!(
+                    "            let {0}_user_data = Box::into_raw(Box::new({0}));\n",
+                    param.name
+                ));
+            }
+        }
     }
 
     body.push_str(&format!("            let query = sys::{} {{\n", query.name));
@@ -1121,7 +1139,11 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
             QueryExpr::Zero => "0".into(),
             QueryExpr::CallbackFn => "Some(trampoline::<F>)".to_string(),
             QueryExpr::CallbackUserData { param } => {
-                format!("&mut {} as *mut F as *mut std::ffi::c_void", param)
+                if has_persistent_callback {
+                    format!("{param}_user_data as *mut std::ffi::c_void")
+                } else {
+                    format!("&mut {param} as *mut F as *mut std::ffi::c_void")
+                }
             }
         };
         body.push_str(&format!("                {}: {},\n", field.field, expr));
@@ -1137,6 +1159,17 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
     ));
     body.push_str("            func(&query, result.as_mut_ptr());\n");
     body.push_str("            let result = result.assume_init();\n");
+    if has_persistent_callback {
+        for param in params
+            .iter()
+            .filter(|param| matches!(param.ty, ParamType::Callback))
+        {
+            body.push_str(&format!(
+                "            if !result.error.is_null() {{ drop(Box::from_raw({0}_user_data)); }}\n",
+                param.name
+            ));
+        }
+    }
     body.push_str(&render_return(&ret_kind));
     body.push_str("        }\n");
     body.push_str("    }\n");

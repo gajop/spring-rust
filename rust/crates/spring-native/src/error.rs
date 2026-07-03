@@ -43,7 +43,7 @@ impl Error {
 
     pub(crate) fn invalid_argument(name: &str) -> Self {
         // Mirrors CommonErrorCode::ERROR_INVALID_ARGUMENT
-        const ERROR_INVALID_ARGUMENT: i32 = 2;
+        const ERROR_INVALID_ARGUMENT: i32 = 1;
         Self::new(
             ERROR_INVALID_ARGUMENT,
             format!("Invalid argument for parameter `{}`", name),
