@@ -47,7 +47,13 @@ static Rml::Context* FromHandle(uint64_t handle)
 static uint64_t nextElementPtrHandle = 1;
 static uint64_t nextDataModelHandle = 1;
 static std::unordered_map<uint64_t, Rml::ElementPtr> ownedElementPtrs;
-static std::unordered_map<uint64_t, Rml::DataModelHandle> nativeDataModels;
+struct NativeDataModelRecord
+{
+	Rml::Context* context = nullptr;
+	Rml::String name;
+	Rml::DataModelHandle handle;
+};
+static std::unordered_map<uint64_t, NativeDataModelRecord> nativeDataModels;
 static thread_local std::vector<uint64_t> elementHandleResults;
 static thread_local std::vector<Rml::String> stringResults;
 static thread_local std::vector<const char*> stringPtrResults;
@@ -80,6 +86,28 @@ static Rml::ElementDocument* FromDocumentHandle(uint64_t handle) { return FromHa
 static Rml::Element* FromElementHandle(uint64_t handle) { return FromHandle<Rml::Element>(handle); }
 static Rml::Event* FromEventHandle(uint64_t handle) { return FromHandle<Rml::Event>(handle); }
 static Rml::EventListener* FromEventListenerHandle(uint64_t handle) { return FromHandle<Rml::EventListener>(handle); }
+
+static void EraseNativeDataModelHandles(Rml::Context* context)
+{
+	for (auto it = nativeDataModels.begin(); it != nativeDataModels.end(); ) {
+		if (it->second.context == context) {
+			it = nativeDataModels.erase(it);
+		} else {
+			++it;
+		}
+	}
+}
+
+static void EraseNativeDataModelHandles(Rml::Context* context, const Rml::String& name)
+{
+	for (auto it = nativeDataModels.begin(); it != nativeDataModels.end(); ) {
+		if (it->second.context == context && it->second.name == name) {
+			it = nativeDataModels.erase(it);
+		} else {
+			++it;
+		}
+	}
+}
 
 static const Rml::Variant* GetEventParameter(Rml::Event* event, const char* name)
 {
@@ -197,6 +225,7 @@ static void NativeRemoveContext(const RmlRemoveContextQuery* query, RmlRemoveCon
 	Rml::Context* context = FromHandle(query->contextHandle);
 	result->success = (context != nullptr);
 	if (context != nullptr) {
+		EraseNativeDataModelHandles(context);
 		RmlGui::MarkContextForRemoval(context);
 	}
 }
@@ -214,6 +243,7 @@ static void NativeRemoveContextByName(const RmlRemoveContextByNameQuery* query, 
 	Rml::Context* context = RmlGui::GetContext(query->name);
 	result->success = (context != nullptr);
 	if (context != nullptr) {
+		EraseNativeDataModelHandles(context);
 		RmlGui::MarkContextForRemoval(context);
 	}
 }
@@ -450,6 +480,9 @@ static void NativeContextRemoveDataModel(const RmlContextStringQuery* query, Rml
 		return;
 	}
 	result->success = context->RemoveDataModel(query->name);
+	if (result->success) {
+		EraseNativeDataModelHandles(context, query->name);
+	}
 }
 
 static void NativeContextOpenDataModel(const RmlContextOpenDataModelQuery* query, RmlContextOpenDataModelResult* result)
@@ -472,7 +505,11 @@ static void NativeContextOpenDataModel(const RmlContextOpenDataModelQuery* query
 	}
 
 	const uint64_t handle = nextDataModelHandle++;
-	nativeDataModels.emplace(handle, constructor.GetModelHandle());
+	nativeDataModels.emplace(handle, NativeDataModelRecord{
+		.context = context,
+		.name = query->name,
+		.handle = constructor.GetModelHandle(),
+	});
 	result->dataModelHandle = handle;
 	result->success = true;
 }
@@ -2121,7 +2158,7 @@ static void NativeSolLuaDataModelSetDirty(const RmlSolLuaDataModelSetDirtyQuery*
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	it->second.DirtyVariable(query->property);
+	it->second.handle.DirtyVariable(query->property);
 	result->success = true;
 }
 
