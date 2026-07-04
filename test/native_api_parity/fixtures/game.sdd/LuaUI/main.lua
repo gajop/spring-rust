@@ -36,6 +36,12 @@ local function assertEqual(label, actual, expected)
 	end
 end
 
+local function assertNear(label, actual, expected)
+	if math.abs(actual - expected) > 0.001 then
+		error(label .. ": actual=" .. tostring(actual) .. ", expected=" .. tostring(expected), 0)
+	end
+end
+
 local function expectElement(label, element)
 	if element == nil then
 		error(label .. " should exist", 0)
@@ -127,6 +133,46 @@ local function runRmlUiTests()
 			document:Hide()
 			assertEqual("document visible after hide", document:IsVisible(), false)
 			context:UnloadDocument(document)
+		end)
+	end)
+
+	runRmlCheck("lua_rml_context_document_extra_behavior", function()
+		withRmlContext("context_document_extra", function(context)
+			context.dimensions = RmlUi.Vector2i.new(320, 240)
+			assertEqual("context dimensions x", context.dimensions.x, 320)
+			assertEqual("context dimensions y", context.dimensions.y, 240)
+			context.dp_ratio = 1.5
+			assertNear("context dp_ratio", context.dp_ratio, 1.5)
+
+			context:ActivateTheme("native-api-parity-theme", true)
+			assertEqual("theme active", context:IsThemeActive("native-api-parity-theme"), true)
+			context:ActivateTheme("native-api-parity-theme", false)
+			assertEqual("theme inactive", context:IsThemeActive("native-api-parity-theme"), false)
+			assertEqual("path requests initially empty", tableLength(RmlUi.GetDocumentPathRequests("native-api-parity.rml")), 0)
+			RmlUi.ClearDocumentPathRequests("native-api-parity.rml")
+			assertEqual("path requests after clear", tableLength(RmlUi.GetDocumentPathRequests("native-api-parity.rml")), 0)
+
+			local document = createDocument(context)
+			document.id = "extra-document"
+			document.title = "Lua Extra Document"
+			document:Show(RmlUi.RmlModalFlag.Modal, RmlUi.RmlFocusFlag.Document)
+			assertEqual("document modal after show", document.modal, true)
+			assertEqual("context get document", context:GetDocument("extra-document"), document)
+			assertEqual("document url type", type(document.url), "string")
+
+			local text = expectElement("text node", document:AppendChild(document:CreateTextNode("hello")))
+			local textElement = expectCast("text node cast", RmlUi.Element.As.ElementText(text))
+			assertEqual("text node initial text", textElement.text, "hello")
+			textElement.text = "world"
+			assertEqual("text node updated text", textElement.text, "world")
+
+			local closeDocument = createDocument(context)
+			closeDocument.id = "close-document"
+			closeDocument:Show()
+			assertEqual("close document lookup before close", context:GetDocument("close-document"), closeDocument)
+			closeDocument:Close()
+			context:Update()
+			assertEqual("close document lookup after close", context:GetDocument("close-document"), nil)
 		end)
 	end)
 

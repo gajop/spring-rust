@@ -122,6 +122,140 @@ impl NativeApiParity {
         })
     }
 
+    pub(crate) fn check_rml_context_document_extra_behavior(&self) -> Result<(), String> {
+        self.with_rml_context("context_document_extra", |rml, context| {
+            ensure(
+                rml.context_activate_theme(context, "native-api-parity-theme", true)
+                    .map_err(format_error)?,
+                "context_activate_theme(true) should succeed",
+            )?;
+            ensure(
+                rml.context_is_theme_active(context, "native-api-parity-theme")
+                    .map_err(format_error)?,
+                "theme should be active after activation",
+            )?;
+            ensure(
+                rml.context_activate_theme(context, "native-api-parity-theme", false)
+                    .map_err(format_error)?,
+                "context_activate_theme(false) should succeed",
+            )?;
+            ensure(
+                !rml.context_is_theme_active(context, "native-api-parity-theme")
+                    .map_err(format_error)?,
+                "theme should be inactive after deactivation",
+            )?;
+
+            let document = create_document(rml, context, "context_document_extra")?;
+            ensure(
+                rml.element_set_id(document, "native-extra-document")
+                    .map_err(format_error)?,
+                "element_set_id(document) should succeed",
+            )?;
+            ensure(
+                rml.document_show(document, Some(1), Some(1))
+                    .map_err(format_error)?,
+                "document_show(modal, document focus) should succeed",
+            )?;
+            ensure(
+                rml.document_is_modal(document).map_err(format_error)?,
+                "document should be modal after modal show",
+            )?;
+            ensure(
+                rml.document_get_url(document)
+                    .map_err(format_error)?
+                    .is_some(),
+                "document_get_url should return a string",
+            )?;
+            ensure_eq(
+                "context_get_document(extra)",
+                rml.context_get_document(context, "native-extra-document")
+                    .map_err(format_error)?,
+                (document, true),
+            )?;
+            ensure(
+                rml.context_pull_document_to_front(context, document)
+                    .map_err(format_error)?,
+                "context_pull_document_to_front should succeed",
+            )?;
+            ensure(
+                rml.context_push_document_to_back(context, document)
+                    .map_err(format_error)?,
+                "context_push_document_to_back should succeed",
+            )?;
+            ensure(
+                rml.document_pull_to_front(document).map_err(format_error)?,
+                "document_pull_to_front should succeed",
+            )?;
+            ensure(
+                rml.document_push_to_back(document).map_err(format_error)?,
+                "document_push_to_back should succeed",
+            )?;
+
+            let (text_ptr, text_created) = rml
+                .document_create_text_node(document, "native text")
+                .map_err(format_error)?;
+            ensure(
+                text_created && text_ptr != 0,
+                "document_create_text_node should create an element ptr",
+            )?;
+            let text = expect_element(
+                "appended text node",
+                rml.element_append_child(document, text_ptr)
+                    .map_err(format_error)?,
+            )?;
+            ensure(
+                rml.element_get_inner_rml(document)
+                    .map_err(format_error)?
+                    .is_some_and(|rml| rml.contains("native text")),
+                "document inner_rml should include appended text",
+            )?;
+            ensure(
+                rml.element_set_scroll_left(text, 0).map_err(format_error)?,
+                "element_set_scroll_left should succeed",
+            )?;
+            ensure_eq(
+                "element scroll left",
+                rml.element_get_scroll_left(text).map_err(format_error)?,
+                0,
+            )?;
+            let _ = rml
+                .context_get_element_at_point(context, 1.0, 1.0, 0)
+                .map_err(format_error)?;
+
+            let close_document = create_document(rml, context, "close")?;
+            ensure(
+                rml.element_set_id(close_document, "native-close-document")
+                    .map_err(format_error)?,
+                "element_set_id(close document) should succeed",
+            )?;
+            ensure(
+                rml.document_show(close_document, None, None)
+                    .map_err(format_error)?,
+                "close document show should succeed",
+            )?;
+            ensure_eq(
+                "context_get_document(close) before close",
+                rml.context_get_document(context, "native-close-document")
+                    .map_err(format_error)?,
+                (close_document, true),
+            )?;
+            ensure(
+                rml.document_close(close_document).map_err(format_error)?,
+                "document_close should succeed",
+            )?;
+            ensure(
+                rml.context_update(context).map_err(format_error)?,
+                "context_update after close should succeed",
+            )?;
+            ensure_eq(
+                "context_get_document(close) after close",
+                rml.context_get_document(context, "native-close-document")
+                    .map_err(format_error)?,
+                (0, false),
+            )
+        })
+    }
+
     pub(crate) fn check_rml_global_input_behavior(&self) -> Result<(), String> {
         let rml = self.interface.rml_ui();
         ensure(
