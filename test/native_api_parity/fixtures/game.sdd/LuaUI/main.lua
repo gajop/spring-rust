@@ -360,6 +360,49 @@ local function runRmlUiTests()
 		end)
 	end)
 
+	runRmlCheck("lua_rml_scrollbar_teardown_behavior", function()
+		withRmlContext("scrollbar_teardown", function(context)
+			context.dimensions = RmlUi.Vector2i.new(320, 240)
+
+			local document = createDocument(context)
+			document:AppendToStyleSheet([[
+				#host {
+					display: block;
+					position: absolute;
+					left: 0px;
+					top: 0px;
+					width: 80px;
+					height: 80px;
+					overflow: auto;
+				}
+				#large {
+					display: block;
+					width: 320px;
+					height: 320px;
+				}
+			]])
+			document.inner_rml = [[
+				<div id="host">
+					<div id="large">large content</div>
+				</div>
+			]]
+			document:Show()
+			document:UpdateDocument()
+			context:Update()
+
+			local host = expectElement("scroll host", document:GetElementById("host"))
+			assertEqual("scroll host overflows vertically", host.scroll_height > host.client_height, true)
+			host.scroll_top = 16
+			assertEqual("scroll top changed", host.scroll_top > 0, true)
+
+			document.inner_rml = [[<div id="replacement">replacement</div>]]
+			document:UpdateDocument()
+			context:Update()
+
+			assertEqual("replacement element exists", document:GetElementById("replacement") ~= nil, true)
+		end)
+	end)
+
 	runRmlCheck("lua_rml_debug_context_removal_behavior", function()
 		local context = RmlUi.CreateContext("native_api_parity_lua_rml_debug_remove")
 		if context == nil then
