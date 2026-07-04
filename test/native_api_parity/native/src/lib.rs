@@ -140,6 +140,10 @@ impl NativeModule for NativeApiParity {
                     as fn(&NativeApiParity) -> Result<(), String>,
             ),
             (
+                "rml_context_document_extra_behavior",
+                NativeApiParity::check_rml_context_document_extra_behavior,
+            ),
+            (
                 "rml_global_input_behavior",
                 NativeApiParity::check_rml_global_input_behavior,
             ),
