@@ -313,6 +313,16 @@ local function runRmlUiTests()
 			malformedDocument:AppendToStyleSheet("body { color: ")
 		end)
 	end)
+
+	runRmlCheck("lua_rml_debug_context_removal_behavior", function()
+		local context = RmlUi.CreateContext("native_api_parity_lua_rml_debug_remove")
+		if context == nil then
+			error("RmlUi.CreateContext(debug_remove) returned nil", 0)
+		end
+		RmlUi.SetDebugContext(context)
+		context:UnloadAllDocuments()
+		RmlUi.RemoveContext(context)
+	end)
 end
 
 function NativeApiParityResult(stream, encodedPayload)

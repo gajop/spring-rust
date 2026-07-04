@@ -62,6 +62,7 @@ namespace RmlGui
 	bool ProcessMouseWheel(float delta);
 
 	void SetDebugContext(Rml::Context* context);
+	bool ClearDebugContext(Rml::Context* context);
 	bool AddTranslationString(const std::string& key, const std::string& translation);
 	bool ClearTranslations();
 

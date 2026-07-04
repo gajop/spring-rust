@@ -409,6 +409,7 @@ static void NativeContextUnloadAllDocuments(const RmlContextHandleQuery* query, 
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
+	RmlGui::ClearDebugContext(context);
 	context->UnloadAllDocuments();
 	result->success = true;
 }
