@@ -42,6 +42,18 @@ local function assertNear(label, actual, expected)
 	end
 end
 
+local function assertContains(label, actual, expected)
+	if type(actual) ~= "string" or not string.find(actual, expected, 1, true) then
+		error(label .. ": actual=" .. tostring(actual) .. ", expected substring=" .. tostring(expected), 0)
+	end
+end
+
+local function assertNotContains(label, actual, unexpected)
+	if type(actual) == "string" and string.find(actual, unexpected, 1, true) then
+		error(label .. ": actual=" .. tostring(actual) .. ", unexpected substring=" .. tostring(unexpected), 0)
+	end
+end
+
 local function expectElement(label, element)
 	if element == nil then
 		error(label .. " should exist", 0)
@@ -345,6 +357,111 @@ local function runRmlUiTests()
 			assertEqual("base control value", input:GetValue(), "updated")
 			baseControl.disabled = true
 			assertEqual("base control disabled", baseControl.disabled, true)
+		end)
+	end)
+
+	runRmlCheck("lua_rml_data_model_binding_behavior", function()
+		withRmlContext("data_model_binding", function(context)
+			local clickLog = {}
+			local model = context:OpenDataModel("native_api_parity_lua_model", {
+				title = "Alpha",
+				showDetails = true,
+				nested = {
+					label = "Nested A",
+				},
+				items = {
+					{ name = "One", count = 1 },
+					{ name = "Two", count = 2 },
+				},
+				record_click = function(event, payload, observedTitle)
+					clickLog[#clickLog + 1] = table.concat({
+						event.type,
+						tostring(payload),
+						tostring(observedTitle),
+					}, ":")
+				end,
+			})
+			if model == nil then
+				error("Context:OpenDataModel returned nil", 0)
+			end
+
+			local document = createDocument(context)
+
+			local function refresh()
+				context:Update()
+			end
+
+			local function renderText()
+				refresh()
+				return document.inner_rml
+			end
+
+			document.inner_rml = [[
+				<div id="root" data-model="native_api_parity_lua_model">
+					<span id="title">{{title}}</span>
+					<span id="nested">{{nested.label}}</span>
+					<span id="count">{{items.size}}</span>
+					<div id="details" data-if="showDetails">details visible</div>
+					<span class="row" data-for="item : items">{{item.name}}={{item.count}};</span>
+					<button id="model-event" data-event-click="record_click('payload', title)">Click</button>
+				</div>
+			]]
+			document:Show()
+			document:UpdateDocument()
+
+			local text = renderText()
+			assertContains("initial title binding", text, "Alpha")
+			assertContains("initial nested binding", text, "Nested A")
+			assertEqual("initial array size binding", expectElement("count", document:GetElementById("count")).inner_rml, "2")
+			assertContains("initial first row", text, "One=1")
+			assertContains("initial second row", text, "Two=2")
+			assertContains("initial conditional", text, "details visible")
+			assertEqual("initial conditional visible", expectElement("details", document:GetElementById("details")).visible, true)
+
+			local eventButton = expectElement("model event button", document:GetElementById("model-event"))
+			assertEqual("model event dispatch", eventButton:DispatchEvent("click"), true)
+			assertEqual("model event callback count", #clickLog, 1)
+			assertEqual("model event callback args", clickLog[1], "click:payload:Alpha")
+
+			model.title = "Beta"
+			model.nested.label = "Nested B"
+			model.items[2].name = "Deux"
+			model.items[2].count = 22
+			model.showDetails = false
+
+			text = renderText()
+			assertContains("updated title binding", text, "Beta")
+			assertContains("updated nested binding", text, "Nested B")
+			assertContains("updated second row", text, "Deux=22")
+			assertEqual("details element hidden by data-if", expectElement("details", document:GetElementById("details")).visible, false)
+
+			local raw = model:__GetTable()
+			raw.title = "Gamma"
+			text = renderText()
+			assertContains("raw mutation without dirty keeps previous title", text, "Beta")
+			assertNotContains("raw mutation without dirty not rendered", text, "Gamma")
+
+			model:__SetDirty("title")
+			text = renderText()
+			assertContains("manual dirty renders raw title", text, "Gamma")
+
+			raw.items[#raw.items + 1] = { name = "Three", count = 3 }
+			text = renderText()
+			assertNotContains("raw append without dirty not rendered", text, "Three=3")
+
+			model:__SetDirty("items")
+			text = renderText()
+			assertContains("manual dirty after raw append rendered", text, "Three=3")
+			assertEqual("manual dirty after raw append size", expectElement("count", document:GetElementById("count")).inner_rml, "3")
+
+			assertEqual("root new key rejected", pcall(function()
+				model.unbound = true
+			end), false)
+			assertEqual("root function replacement rejected", pcall(function()
+				model.record_click = function() end
+			end), false)
+
+			context:RemoveDataModel("native_api_parity_lua_model")
 		end)
 	end)
 
