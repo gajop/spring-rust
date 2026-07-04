@@ -365,6 +365,8 @@ local function runRmlUiTests()
 			local clickLog = {}
 			local model = context:OpenDataModel("native_api_parity_lua_model", {
 				title = "Alpha",
+				field = "First",
+				flag = false,
 				showDetails = true,
 				nested = {
 					label = "Nested A",
@@ -402,6 +404,9 @@ local function runRmlUiTests()
 					<span id="nested">{{nested.label}}</span>
 					<span id="count">{{items.size}}</span>
 					<div id="details" data-if="showDetails">details visible</div>
+					<input id="field-input" type="text" data-value="field" />
+					<span id="field-text">{{field}}</span>
+					<input id="flag-input" type="checkbox" value="yes" data-checked="flag" />
 					<span class="row" data-for="item : items">{{item.name}}={{item.count}};</span>
 					<button id="model-event" data-event-click="record_click('payload', title)">Click</button>
 				</div>
@@ -417,6 +422,10 @@ local function runRmlUiTests()
 			assertContains("initial second row", text, "Two=2")
 			assertContains("initial conditional", text, "details visible")
 			assertEqual("initial conditional visible", expectElement("details", document:GetElementById("details")).visible, true)
+			local fieldInput = expectCast("field input", RmlUi.Element.As.ElementFormControl(expectElement("field input", document:GetElementById("field-input"))))
+			assertEqual("initial data-value input", fieldInput.value, "First")
+			local flagInput = expectCast("flag input", RmlUi.Element.As.ElementFormControlInput(expectElement("flag input", document:GetElementById("flag-input"))))
+			assertEqual("initial data-checked checkbox", flagInput.checked, false)
 
 			local eventButton = expectElement("model event button", document:GetElementById("model-event"))
 			assertEqual("model event dispatch", eventButton:DispatchEvent("click"), true)
@@ -424,6 +433,8 @@ local function runRmlUiTests()
 			assertEqual("model event callback args", clickLog[1], "click:payload:Alpha")
 
 			model.title = "Beta"
+			model.field = "Second"
+			model.flag = true
 			model.nested.label = "Nested B"
 			model.items[2].name = "Deux"
 			model.items[2].count = 22
@@ -434,6 +445,24 @@ local function runRmlUiTests()
 			assertContains("updated nested binding", text, "Nested B")
 			assertContains("updated second row", text, "Deux=22")
 			assertEqual("details element hidden by data-if", expectElement("details", document:GetElementById("details")).visible, false)
+			assertEqual("updated data-value input", fieldInput.value, "Second")
+			assertEqual("updated data-value text", expectElement("field text", document:GetElementById("field-text")).inner_rml, "Second")
+			assertEqual("updated data-checked checkbox", flagInput.checked, true)
+
+			assertEqual("data-value change dispatch", fieldInput:DispatchEvent("change", { value = "Third" }), true)
+			text = renderText()
+			assertEqual("data-value change updated model", model.field, "Third")
+			assertEqual("data-value change updated text", expectElement("field text", document:GetElementById("field-text")).inner_rml, "Third")
+			assertEqual("data-value change updated input", fieldInput.value, "Third")
+
+			assertEqual("data-checked change dispatch", flagInput:DispatchEvent("change", {
+				["data-binding-override-value"] = false,
+				value = "",
+				checked = false,
+			}), true)
+			text = renderText()
+			assertEqual("data-checked change updated model", model.flag, false)
+			assertEqual("data-checked change updated checkbox", flagInput.checked, false)
 
 			local raw = model:__GetTable()
 			raw.title = "Gamma"
