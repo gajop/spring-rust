@@ -33,6 +33,7 @@
 
 #include "../plugin/SolLuaDataModel.h"
 #include "../plugin/SolLuaDocument.h"
+#include "Rml/Backends/RmlUi_Backend.h"
 #include "sol2/sol.hpp"
 
 #include <memory>
@@ -435,7 +436,10 @@ void bind_context(sol::table& namespace_table, SolLuaPlugin* slp)
 		 * Closes all documents currently loaded with the context.
 		 * @function RmlUi.Context:UnloadAllDocuments
 		 */
-		"UnloadAllDocuments", &Rml::Context::UnloadAllDocuments,
+		"UnloadAllDocuments", [](Rml::Context& self) {
+			RmlGui::ClearDebugContext(&self);
+			self.UnloadAllDocuments();
+		},
 		/***
 		 * Unloads a specific document within the context.
 		 * @function RmlUi.Context:UnloadDocument

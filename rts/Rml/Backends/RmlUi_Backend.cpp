@@ -101,6 +101,7 @@ public:
 	std::unordered_set<Rml::Context*> contexts_to_remove;
 
 	Rml::Context* debug_host_context = nullptr;
+	Rml::Context* debug_context = nullptr;
 	Rml::Context* clicked_context = nullptr;
 
 	InputHandler::HandlerTokenT inputCon;
@@ -199,6 +200,7 @@ bool RmlGui::RemoveLua()
 		state->debug_host_context = nullptr;
 		Update();
 		Rml::Debugger::Shutdown();
+		state->debug_context = nullptr;
 	}
 
 	state->luaPlugin->RemoveLuaItems();
@@ -222,6 +224,7 @@ void RmlGui::Shutdown()
 
 	if (state->debug_host_context) {
 		Rml::Debugger::Shutdown();
+		state->debug_context = nullptr;
 	}
 
 	// note: during SpringApp shutdown, RmlGui::RemoveLua() was already called when LuaUI was shutdown
@@ -253,6 +256,10 @@ void RmlGui::SetDebugContext(Rml::Context* context)
 	}
 
 	if (state->debug_host_context == nullptr) {
+		if (context == nullptr) {
+			return;
+		}
+
 		state->debug_host_context = Rml::CreateContext(RML_DEBUG_HOST_CONTEXT_NAME, {0, 0});
 
 		// TODO?: Make own Debugger UI that better suits our needs
@@ -261,6 +268,19 @@ void RmlGui::SetDebugContext(Rml::Context* context)
 
 	Rml::Debugger::SetContext(context);
 	Rml::Debugger::SetVisible(context != nullptr);
+	state->debug_context = context;
+}
+
+bool RmlGui::ClearDebugContext(Rml::Context* context)
+{
+	if (!RmlInitialized() || context == nullptr || context != state->debug_context) {
+		return false;
+	}
+
+	Rml::Debugger::SetContext(nullptr);
+	Rml::Debugger::SetVisible(false);
+	state->debug_context = nullptr;
+	return true;
 }
 
 bool RmlGui::AddTranslationString(const std::string& key, const std::string& translation)
@@ -336,6 +356,12 @@ void RmlGui::OnContextCreate(Rml::Context* context)
 
 void RmlGui::OnContextDestroy(Rml::Context* context)
 {
+	if (context == state->debug_context) {
+		state->debug_context = nullptr;
+	}
+	if (context == state->clicked_context) {
+		state->clicked_context = nullptr;
+	}
 	state->contexts.erase(std::ranges::find(state->contexts, context));
 }
 
@@ -400,6 +426,7 @@ void RmlGui::Update()
 
 	if unlikely(!state->contexts_to_remove.empty()) {
 		for (const auto& context : state->contexts_to_remove) {
+			ClearDebugContext(context);
 			Rml::RemoveContext(context->GetName());
 		}
 		state->contexts_to_remove.clear();
