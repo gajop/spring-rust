@@ -363,6 +363,10 @@ impl NativeApiParity {
                 rml.context_remove_data_model(context, &data_model_name)
                     .map_err(format_error)?,
                 "context_remove_data_model should succeed",
+            )?;
+            expect_invalid(
+                "sol_lua_data_model___set_dirty removed data model",
+                rml.sol_lua_data_model___set_dirty(data_model, "missing_property"),
             )
         })
     }
