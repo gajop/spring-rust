@@ -914,3 +914,38 @@ the unrelated existing `unsynced_gadget.jsonl` mismatch.
 (`featureDef` resolves, `pos` finite). The suite is green through every terrain /
 map / water test (grass, metal, heightmap, level, shape, sun, atmosphere, water);
 the abort was purely the missing synced-code scope on native Lua-call dispatch.
+
+## SBC editor/testing build: sync checks disabled (2026-07-05)
+
+SBC is a map editor integration, not an online deterministic game client. For
+local SBC native-binding testing we now build the engine with sync checks
+disabled so editor operations are not aborted by multiplayer determinism asserts:
+
+```
+docker-build-v2/build.sh --configure linux \
+  -DCMAKE_BUILD_TYPE=DEBUG \
+  -DUSE_ASAN=ON \
+  -DSYNCCHECK=OFF \
+  -DPREFER_STATIC_LIBS=ON \
+  -DMATH_LIBRARY=/usr/lib/x86_64-linux-gnu/libm.so
+docker-build-v2/build.sh --compile linux -t install -j 8
+```
+
+`-DSYNCCHECK=OFF` removes the `CSyncChecker::InSyncedCode()` assertion path for
+this build. `-DMATH_LIBRARY=/usr/lib/x86_64-linux-gnu/libm.so` is needed with the
+ASAN debug build in the current Docker image because the static `libm.a` link
+path fails on unresolved glibc IFUNC symbols (`_dl_x86_cpu_features`). The build
+keeps `-DPREFER_STATIC_LIBS=ON` because the static DevIL archive needs CMake's
+static-dependency path for PNG/TIFF/JPEG/GIF.
+
+Engine-side compatibility fixes made for this configuration:
+
+- `SYNC_HISTORY` is forced off when `SYNCCHECK` is off, avoiding stale
+  `CSyncChecker` references.
+- `ENTER_SYNCED_CODE()` / `LEAVE_SYNCED_CODE()` become no-ops when `SYNCCHECK` is
+  off.
+- Several old no-`SYNCCHECK` compile breaks were fixed (`SyncedFloat3` waypoint
+  comparison and missing standard headers).
+
+This does not change the recommendation for normal multiplayer builds. It is an
+SBC editor/testing build choice.
