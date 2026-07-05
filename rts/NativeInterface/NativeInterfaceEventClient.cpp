@@ -16,6 +16,9 @@
 #include "Sim/Weapons/Weapon.h"
 #include "System/Log/ILog.h"
 #include "System/Rectangle.h"
+#ifdef SYNCCHECK
+#include "System/Sync/SyncChecker.h"
+#endif
 
 #define LOAD_SYMBOL(SymbolName)                                                   \
 	{                                                                               \
@@ -25,6 +28,31 @@
 			LOG_L(L_ERROR, "Failed to load symbol " #SymbolName ": %s", dlerror());   \
 		}                                                                            \
 	}
+
+namespace {
+	class ScopedNativeSyncedCode {
+	public:
+		ScopedNativeSyncedCode(bool synced)
+			: synced(synced)
+		{
+		#ifdef SYNCCHECK
+			if (synced)
+				CSyncChecker::EnterSyncedCode();
+		#endif
+		}
+
+		~ScopedNativeSyncedCode()
+		{
+		#ifdef SYNCCHECK
+			if (synced)
+				CSyncChecker::LeaveSyncedCode();
+		#endif
+		}
+
+	private:
+		bool synced;
+	};
+}
 
 NativeInterfaceEventClient::NativeInterfaceEventClient(NativeInterface* nativeInterface, void* dllHandle)
 	: CEventClient("[NativeInterfaceEventClient]", 23253, false)
@@ -1220,13 +1248,14 @@ void NativeInterfaceEventClient::HandleLuaMsg(int playerID, int script, int mode
 	}
 }
 
-void NativeInterfaceEventClient::HandleLuaCall(const char* msg, size_t msgLength) {
+void NativeInterfaceEventClient::HandleLuaCall(const char* msg, size_t msgLength, bool synced) {
 	if (m_HandleLuaCallFuncPtr) {
 		HandleLuaCallQuery query = {
 			.message = msg,
 			.messageLength = static_cast<uint32_t>(msgLength),
 		};
 		HandleLuaCallResult result = {};
+		ScopedNativeSyncedCode syncedCode(synced);
 		m_HandleLuaCallFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
 }

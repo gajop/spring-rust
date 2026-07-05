@@ -855,3 +855,62 @@ so these keep the suite red on the NaN-trapping debug engine build
 level (`L_DEBUG`), while still erroring if an active attribute is linked at the
 wrong location. Verified with the rendered native API parity harness:
 `test/native_api_parity/out/20260705-100058`.
+
+## Bug: `SyncedCtrl.CreateFeature` aborts — synced object built outside synced code (2026-07-05)
+
+`NativeCreateFeature` (`rts/NativeInterface/api/SyncedCtrl.cpp:3724`) calls
+`featureHandler.LoadFeature(params)` (`:3761`), which constructs a synced
+`CFeature`. On a `SYNCCHECK` build the `CFeature` ctor path hits
+`Sync::Assert` → `assert(CSyncChecker::InSyncedCode())` and **aborts (SIGABRT)**.
+The native call runs with `inSyncedCode == 0`, so the assert fails.
+
+Assert / halted stacktrace (engine build `2026.06.06-106-gfa4b5ae rust-wip
+(Debug Signal-NaNs)`):
+
+```
+Aborted in Spring ... (SIGABRT)
+  __assert_fail
+  Sync::Assert(void const*, unsigned int, char const*)          System/Sync/SyncedPrimitiveBase.h:47
+  std::vector<LocalModelPiece, ...>::vector()                     bits/stl_vector.h
+  LocalModel::LocalModel()                                        Rendering/Models/LocalModel.hpp:18
+  CSolidObject::CSolidObject()                                    Sim/Objects/SolidObject.cpp:89
+  CFeature::CFeature()                                            Sim/Features/Feature.cpp:80
+  entt::basic_registry<entt::entity>::create()                   lib/entt/.../registry.hpp:559
+  CFeatureHandler::LoadFeature(FeatureLoadParams const&)         Sim/Features/FeatureHandler.cpp:114
+  (anon)::NativeCreateFeature(CreateFeatureQuery const*, ...)    NativeInterface/api/SyncedCtrl.cpp:3761
+```
+
+The assert is at `SyncedPrimitiveBase.h:47`
+(`Assert` → `assert(CSyncChecker::InSyncedCode())` in
+`System/Sync/SyncChecker.h:26`).
+
+**Root cause.** `CSyncChecker` gates synced-object construction behind a counter
+(`SyncChecker.h`: `InSyncedCode()`, `EnterSyncedCode()` / `LeaveSyncedCode()`).
+Lua's `LuaSyncedCtrl::CreateFeature` (`rts/Lua/LuaSyncedCtrl.cpp:4655`) runs from
+inside a synced callin, where the counter is already > 0, so its identical
+`featureHandler.LoadFeature(params)` (`:4718`) is legal. The native
+`SyncedCtrl` entry points do **not** enter synced code — grep finds no
+`EnterSyncedCode`/`LeaveSyncedCode` anywhere under `rts/NativeInterface/` — so any
+native synced op that constructs a synced object trips the assert. `CreateFeature`
+is just the first one SBC's integration suite exercises (test
+`objects/tests/test_add_remove.rs::feature_add_remove`); `CreateUnit` and the other
+synced-object constructors in `SyncedCtrl.cpp` are almost certainly affected too.
+
+**Resolved (engine).** `Spring.InvokeNativeModule` now preserves whether the Lua
+call came from the synced or unsynced Lua surface. Synced calls pass that context
+through `NativeInterfaceSystem::HandleLuaCall` to
+`NativeInterfaceEventClient::HandleLuaCall`, which wraps the native module
+callback in an RAII `CSyncChecker::EnterSyncedCode()` / `LeaveSyncedCode()` scope
+on `SYNCCHECK` builds. Unsynced calls remain unwrapped. This fixes the
+native-dispatch boundary once, instead of special-casing `CreateFeature`.
+
+Verified with the rendered native API parity harness:
+`test/native_api_parity/out/20260705-195528`. The engine no longer aborts, no
+`Sync::Assert` / `CSyncChecker` failure appears in the fresh logs, and
+`synced_gadget.jsonl` matches (`356 / 356` rows). The run still exits nonzero on
+the unrelated existing `unsynced_gadget.jsonl` mismatch.
+
+**SBC side.** Nothing to change — `feature_add_remove` sends valid params
+(`featureDef` resolves, `pos` finite). The suite is green through every terrain /
+map / water test (grass, metal, heightmap, level, shape, sun, atmosphere, water);
+the abort was purely the missing synced-code scope on native Lua-call dispatch.
