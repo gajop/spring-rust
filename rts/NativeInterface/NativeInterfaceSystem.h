@@ -26,7 +26,7 @@ public:
 
 	// Special events (called from Lua)
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
-	void HandleLuaCall(const char* msg, size_t msgLength);
+	void HandleLuaCall(const char* msg, size_t msgLength, bool synced);
 
 public:
 	static NativeInterfaceSystem* s_instance;

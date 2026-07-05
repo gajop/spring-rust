@@ -242,7 +242,7 @@ void NativeInterfaceSystem::HandleLuaMsg(int playerID, int script, int mode, con
 		pImpl->eventClient->HandleLuaMsg(playerID, script, mode, data);
 }
 
-void NativeInterfaceSystem::HandleLuaCall(const char* msg, size_t msgLength) {
+void NativeInterfaceSystem::HandleLuaCall(const char* msg, size_t msgLength, bool synced) {
 	if (pImpl->eventClient)
-		pImpl->eventClient->HandleLuaCall(msg, msgLength);
+		pImpl->eventClient->HandleLuaCall(msg, msgLength, synced);
 }

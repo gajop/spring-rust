@@ -5593,7 +5593,7 @@ int LuaUnsyncedCtrl::InvokeNativeModule(lua_State* L)
 	const char* msg = luaL_checklstring(L, 1, &msgLen);
 
 	if (NativeInterfaceSystem::s_instance)
-		NativeInterfaceSystem::s_instance->HandleLuaCall(msg, msgLen);
+		NativeInterfaceSystem::s_instance->HandleLuaCall(msg, msgLen, false);
 
 	return 0;
 }
