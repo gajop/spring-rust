@@ -926,13 +926,15 @@ docker-build-v2/build.sh --configure linux \
   -DCMAKE_BUILD_TYPE=DEBUG \
   -DUSE_ASAN=ON \
   -DSYNCCHECK=OFF \
+  -DDEBUG_SIGNAL_NANS=OFF \
   -DPREFER_STATIC_LIBS=ON \
   -DMATH_LIBRARY=/usr/lib/x86_64-linux-gnu/libm.so
 docker-build-v2/build.sh --compile linux -t install -j 8
 ```
 
 `-DSYNCCHECK=OFF` removes the `CSyncChecker::InSyncedCode()` assertion path for
-this build. `-DMATH_LIBRARY=/usr/lib/x86_64-linux-gnu/libm.so` is needed with the
+this build and now also forces `DEBUG_SIGNAL_NANS=OFF`, disabling the FP
+exception-trap path described below. `-DMATH_LIBRARY=/usr/lib/x86_64-linux-gnu/libm.so` is needed with the
 ASAN debug build in the current Docker image because the static `libm.a` link
 path fails on unresolved glibc IFUNC symbols (`_dl_x86_cpu_features`). The build
 keeps `-DPREFER_STATIC_LIBS=ON` because the static DevIL archive needs CMake's
@@ -944,8 +946,50 @@ Engine-side compatibility fixes made for this configuration:
   `CSyncChecker` references.
 - `ENTER_SYNCED_CODE()` / `LEAVE_SYNCED_CODE()` become no-ops when `SYNCCHECK` is
   off.
+- `DEBUG_SIGNAL_NANS` is forced off when `SYNCCHECK` is off, avoiding FP traps
+  from editor/plugin code.
 - Several old no-`SYNCCHECK` compile breaks were fixed (`SyncedFloat3` waypoint
   comparison and missing standard headers).
 
 This does not change the recommendation for normal multiplayer builds. It is an
 SBC editor/testing build choice.
+
+## SBC editor/testing build: FP signalling-NaN traps disabled (2026-07-05)
+
+The debug engine builds with signalling-NaN / FP-exception trapping on (version
+string `... Signal-NaNs`): the FPU is configured to raise `SIGFPE` on
+`FE_INVALID` / `FE_DIVBYZERO` / `FE_OVERFLOW` instead of silently producing
+inf/NaN. This aborts the SBC native plugin on **benign** floating-point results
+that IEEE-754 defines as legal and that a normal (non-trapping) build ignores.
+
+Confirmed case: `terrain_paint_diffuse` → `paint_shading_textures`
+([native/src/sbc/textures/model/draw/shading.rs]) SIGFPEs at a `divps` in an
+**optimized** (`--release`) plugin build. The engine reports a valid map size
+(5120×4096) and the arithmetic is correct; the trap comes from the Rust
+optimizer auto-vectorizing the two `region / map_size_{x,z}` divisions into a
+packed `divps` over the vector `[map_size_x, map_size_z, 0, 0]`. The two **dead**
+upper lanes (map size is a 2-tuple) compute `1.0/0.0 = inf`, which the
+signalling build turns into a fatal `SIGFPE`. A **debug** plugin build (no
+vectorization) does not crash — proving it is a codegen/dead-lane artifact, not a
+logic div-by-zero.
+
+This is not fixable cleanly in the Rust: source rewrites (reciprocal-multiply,
+`f32::recip`) are re-vectorized by the optimizer back into the same dead-lane
+`divps`, and there are many such vectorizable float-divides across the textures
+paint code. Suppressing it per-site (`black_box`/volatile) is brittle and costs
+performance. Since SBC is a map editor, not a bit-exact multiplayer client, the
+plugin has no need for signalling-NaN FP traps.
+
+**Decision (same rationale as `SYNCCHECK=OFF`): disable the FP signalling-NaN
+trap for the SBC editor/testing build.** Engine CMake now forces
+`DEBUG_SIGNAL_NANS=OFF` whenever `SYNCCHECK=OFF`, so the FPU leaves
+`FE_INVALID`/`FE_DIVBYZERO`/`FE_OVERFLOW` masked for this editor build. The
+version string should no longer say `Signal-NaNs`.
+
+The proper long-term fix, if the trap is ever wanted back for SBC, is engine-side:
+mask FP exceptions around the native plugin `Update` callin
+(`NativeInterfaceEventClient::Update`), mirroring how `ENTER_SYNCED_CODE` was
+scoped — so plugin SIMD dead-lane NaNs don't fault while engine sim code keeps the
+trap. Deferred; not needed while the flag is simply off.
+
+This does not change the recommendation for normal multiplayer builds.
