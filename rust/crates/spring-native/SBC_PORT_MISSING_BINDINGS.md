@@ -993,3 +993,53 @@ scoped — so plugin SIMD dead-lane NaNs don't fault while engine sim code keeps
 trap. Deferred; not needed while the flag is simply off.
 
 This does not change the recommendation for normal multiplayer builds.
+
+## Bug: archive-cache reload asserts on duplicate filename (map save → crash) (2026-07-05)
+
+Saving a map in SBC aborts the engine. Saving triggers `SpringApp::Reload`
+(projects are Spring archives, so a save rescans archives), and the reload's
+archive-cache **read** hits a duplicate-filename assertion:
+
+```
+ArchiveScanner.cpp:1158: ...ReadCacheData(...)::<lambda(const LuaTable&, ...)>:
+Assertion `!filesInfoMap.contains(fn)' failed.
+```
+
+Halted stacktrace (engine `2026.06.06-109-ga70c927 rust-wip
+(Debug Sync-Check-Disabled)`, SIGABRT):
+
+```
+__assert_fail
+CArchiveScanner::ReadCacheData(...)::{lambda ...}::operator()   ArchiveScanner.cpp:1158
+CArchiveScanner::ReadCacheData(const std::string&, bool)        ArchiveScanner.cpp:1191
+CArchiveScanner::ReadCache()                                    ArchiveScanner.cpp:657
+CArchiveScanner::Reload()                                       ArchiveScanner.cpp:438/657
+FileSystemInitializer::Reload()                                 FileSystemInitializer.cpp:121
+SpringApp::Reload(std::string)                                  SpringApp.cpp:802
+SpringApp::Run()                                                SpringApp.cpp:928
+```
+
+**Root cause (engine-side, no SBC/native code in the stack).** The `ReadFileInfoMap`
+lambda in `CArchiveScanner::ReadCacheData` (`ArchiveScanner.cpp:1151-1165`) iterates
+an archive's cached `filesInfo` table and asserts each `fileName` is not already in
+`filesInfoMap`:
+
+```cpp
+assert(!filesInfoMap.contains(fn));
+auto& val = filesInfoMap[fn];
+```
+
+The cache (`ArchiveCache.lua`) evidently ends up with the **same filename listed
+twice** for one archive, so the read aborts. This is either the cache **writer**
+emitting duplicate `filesInfo` entries, or a stale/partial cache that the **reader**
+should tolerate rather than hard-assert.
+
+**Resolved (engine).** `CArchiveScanner::ReadCacheData` now treats duplicate
+`filesInfo` rows as recoverable cache data: it logs a warning and overwrites the
+previous row instead of asserting. It also clears an archive's `filesInfo` before
+reading that archive's cache table, so a duplicate archive record cannot append
+new file rows into stale rows from the previous record.
+
+The cache writer already serializes `filesInfo` from a map, so the next cache
+write naturally emits the deduped state. A stale or partially duplicated
+`ArchiveCache.lua` can still be loaded, but it no longer aborts the editor.
