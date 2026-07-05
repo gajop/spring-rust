@@ -829,3 +829,29 @@ result in the `unsynced_ctrl` module, whose host wrapper
 (`crates/spring-native/src/unsynced_ctrl.rs`) didn't `use std::ffi::CStr` (other
 modules with string getters already do). Added that import — the generated code
 emits a bare `CStr::from_ptr`, resolved by the host module's `use`.
+
+## Shader warnings: unused vertex attributes on boot (2026-07-05)
+
+SBC's integration boot emits 8 GLSL warnings from the shader-program reloader,
+none traceable to any shader in the SBC repo (grepped `springboard/assets/core/
+shaders`, `shaders/`, `libs_sb/chilifx/.../shaders` — none declare these
+attributes). They come from **engine-internal** shader programs:
+
+```
+[Shader] Warning: [GLSL-PO::Reload] Attribute userDefined1 for program 79 is unused(-1)
+[Shader] Warning: [GLSL-PO::Reload] Attribute userDefined0 for program 79 is unused(-1)
+[Shader] Warning: [GLSL-PO::Reload] Attribute inTexCoord0 for program 117 is unused(-1)
+[Shader] Warning: [GLSL-PO::Reload] Attribute inColor0 for program 129 is unused(-1)
+[Shader] Warning: [GLSL-PO::Reload] Attribute inColor0 for program 132/135/138/141 is unused(-1)
+```
+
+Each is a vertex attribute the engine's GLSL-PO binds but the linked program
+doesn't consume (link-time reports location `-1`). Not a missing binding and not
+fixable from the SBC side. SBC's integration baseline asserts **zero warnings**,
+so these keep the suite red on the NaN-trapping debug engine build
+(`rust-wip (Debug Signal-NaNs)`).
+
+**Resolved:** the engine now demotes optimized-out attribute reports below warning
+level (`L_DEBUG`), while still erroring if an active attribute is linked at the
+wrong location. Verified with the rendered native API parity harness:
+`test/native_api_parity/out/20260705-100058`.
