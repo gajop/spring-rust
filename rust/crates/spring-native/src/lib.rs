@@ -222,7 +222,7 @@ pub use synced_ctrl::{
     TeamControl, TerrainControl, UnitControl,
 };
 pub use system_control::SystemControl;
-pub use teams::Teams;
+pub use teams::{TeamInfo, Teams};
 pub use terrain::Terrain;
 pub use tracing::Tracing;
 pub use unit_defs::UnitDefs;
