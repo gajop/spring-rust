@@ -3,6 +3,7 @@
 #include <catch_amalgamated.hpp>
 
 #include "Rml/SolLua/plugin/SolLuaPlugin.h"
+#include "Rml/SolLua/plugin/SolLuaEventListener.h"
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/Context.h>
@@ -116,6 +117,68 @@ TEST_CASE("SolLuaPlugin tracks element lifetime so stale Lua handles are detecta
 	// so it is safe to ask.
 	detached.reset();
 	REQUIRE_FALSE(Rml::SolLua::IsSolLuaElementAlive(element));
+
+	REQUIRE(Rml::RemoveContext(context->GetName()));
+	Rml::UnregisterPlugin(luaPlugin);
+	Rml::Shutdown();
+}
+
+// A Lua event handler is allowed to destroy the element it is attached to --
+// rebuilding a parent's inner_rml does exactly that -- which detaches and
+// deletes the listener while it is still on the stack. sol2 reads the
+// function's lua_state() again *after* the call returns (invoke() computes
+// poststacksize = lua_gettop(lua_state())), so SolLuaEventListener::ProcessEvent
+// must not touch any member once it has called into Lua.
+//
+// This is the failing example: before ProcessEvent copied the function onto the
+// stack, this test aborted under ASAN with
+//   use-after-poison ... in sol::basic_reference<false>::lua_state()
+//   #3 Rml::SolLua::SolLuaEventListener::ProcessEvent
+TEST_CASE("SolLuaEventListener survives a handler that destroys its own element")
+{
+	NullRenderInterface renderInterface;
+	Rml::SetRenderInterface(&renderInterface);
+	REQUIRE(Rml::Initialise());
+
+	sol::state lua;
+	lua.open_libraries(sol::lib::base);
+	auto* luaPlugin = new Rml::SolLua::SolLuaPlugin(lua, "rmlDocumentId");
+	Rml::RegisterPlugin(luaPlugin);
+
+	Rml::Context* context = Rml::CreateContext("sol-lua-listener-suicide", {1024, 768});
+	REQUIRE(context != nullptr);
+
+	// The plugin registers the "body" instancer, so this is a SolLuaDocument.
+	Rml::ElementDocument* document = context->CreateDocument();
+	REQUIRE(document != nullptr);
+
+	Rml::Element* element = document->AppendChild(document->CreateElement("div"));
+	REQUIRE(element != nullptr);
+
+	// The handler destroys the element the listener is attached to.
+	bool handlerRan = false;
+	lua.set_function("destroyElement", [&]() {
+		handlerRan = true;
+		Rml::ElementPtr owned = document->RemoveChild(element);
+		owned.reset();
+	});
+
+	auto chunk = lua.load("return function(event, element, document) destroyElement() end");
+	REQUIRE(chunk.valid());
+	sol::protected_function factory = chunk.get<sol::protected_function>();
+	sol::protected_function handler = factory().get<sol::protected_function>();
+	REQUIRE(handler.valid());
+
+	// Owned by the element: OnDetach deletes it, which is what happens mid-call.
+	auto* listener = new Rml::SolLua::SolLuaEventListener(handler, element);
+	element->AddEventListener(Rml::EventId::Click, listener, false);
+	REQUIRE(Rml::SolLua::IsSolLuaElementAlive(element));
+
+	element->DispatchEvent(Rml::EventId::Click, Rml::Dictionary());
+
+	REQUIRE(handlerRan);
+	REQUIRE_FALSE(Rml::SolLua::IsSolLuaElementAlive(element));
+	REQUIRE(document->GetNumChildren() == 0);
 
 	REQUIRE(Rml::RemoveContext(context->GetName()));
 	Rml::UnregisterPlugin(luaPlugin);

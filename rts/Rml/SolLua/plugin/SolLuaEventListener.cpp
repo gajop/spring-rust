@@ -138,23 +138,31 @@ namespace Rml::SolLua
 			return;
 
 		auto document = dynamic_cast<SolLuaDocument*>(m_element->GetOwnerDocument());
-		if (document != nullptr && m_func.valid())
-		{
-			auto& env = document->GetLuaEnvironment();
-			const auto& ident = document->GetLuaEnvironmentIdentifier();
+		if (document == nullptr || !m_func.valid())
+			return;
 
-			// Move our event into the Lua environment.
-			sol::set_environment(env, m_func);
+		auto& env = document->GetLuaEnvironment();
+		const auto& ident = document->GetLuaEnvironmentIdentifier();
 
-			// If we have an identifier, set it now.
-			if (!ident.empty())
-				env.set(ident, document->GetId());
+		// Move our event into the Lua environment.
+		sol::set_environment(env, m_func);
 
-			// Call the event!
-			auto result = m_func.call(event, m_element, document);
-			if (!result.valid()){
-				ErrorHandler(m_func.lua_state(), std::move(result));
-			}
+		// If we have an identifier, set it now.
+		if (!ident.empty())
+			env.set(ident, document->GetId());
+
+		// The handler is free to destroy this element (rebuilding a parent's
+		// inner_rml does), which detaches and deletes this listener. sol2 reads
+		// the function's lua_state() again after the call returns, so nothing
+		// below may touch a member. Copy what the call needs onto the stack.
+		sol::protected_function func = m_func;
+		Rml::Element* element = m_element;
+		lua_State* state = func.lua_state();
+
+		// Call the event!
+		auto result = func.call(event, element, document);
+		if (!result.valid()) {
+			ErrorHandler(state, std::move(result));
 		}
 
 		// After processing, check if we were detached during the callback
