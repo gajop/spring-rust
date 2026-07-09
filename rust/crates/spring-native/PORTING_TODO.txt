@@ -9,3 +9,12 @@ Known native API crashers / edge cases:
   ASAN was not enabled in build-amd64-linux (USE_ASAN=OFF). The API must install
   the new stylesheet directly when there is no existing container and must not
   segfault if RmlUi rejects stylesheet input.
+- RmlUi ElementRemoveChild can poison later Rml shutdown if a native caller removes
+  children and drops the returned ElementPtr handle on the floor. Reproducer was
+  SpringBoard native chonsole repeatedly clearing root children with
+  ElementHasChildNodes + ElementGetChild(0) + ElementRemoveChild before
+  ElementSetInnerRml, then closing the editor. ASAN stack:
+  Rml::Element::Release -> Context::ReleaseUnloadedDocuments -> Rml::Shutdown.
+  The binding either needs an explicit safe way to release returned ElementPtr
+  handles or a clear-children/replace-inner API that does not expose ownership
+  traps to Rust callers.

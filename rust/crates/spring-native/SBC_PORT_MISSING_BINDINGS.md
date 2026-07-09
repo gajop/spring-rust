@@ -1043,3 +1043,102 @@ new file rows into stale rows from the previous record.
 The cache writer already serializes `filesInfo` from a map, so the next cache
 write naturally emits the deduped state. A stale or partially duplicated
 `ArchiveCache.lua` can still be loaded, but it no longer aborts the editor.
+
+## Bug: `CTeamHandler::LoadFromSetup` aborts on a start script with no teams (2026-07-06)
+
+**Symptom.** Reloading into a project (`Spring.Reload` with a project start
+script) aborts the engine during pre-game setup:
+
+```
+TeamHandler.cpp:35: void CTeamHandler::LoadFromSetup(const CGameSetup*):
+  Assertion `!setup->GetTeamStartingDataCont().empty()' failed.  (SIGABRT)
+
+CTeamHandler::LoadFromSetup(CGameSetup const*)   TeamHandler.cpp:35
+CGlobalSynced::LoadFromSetup(CGameSetup const*)  GlobalSynced.cpp:97
+CPreGame::GameDataReceived(...)                  PreGame.cpp:590
+```
+
+**Trigger (SBC-side, already fixed in SBC).** A start script whose `[GAME]`
+section contains **zero `[TEAM*]` sections**. In our case the SBC reload path was
+losing the team sections while rewriting the script; that parser bug is fixed on
+the SBC side (`project/ops/reload.rs` now parses inline `[TEAM0] { ... }`
+sections). So this is not blocking us anymore.
+
+**Engine ask (defensive).** A hard `assert` that aborts the whole process is a
+harsh failure mode for malformed/edited start scripts — a user-supplied or
+tool-generated script with no teams takes the engine down with a SIGABRT and a
+C++ stack trace rather than a recoverable error. Please consider degrading
+`CTeamHandler::LoadFromSetup` (and the `GetTeamStartingDataCont().empty()` check)
+to a logged error / graceful setup failure instead of an assert, so a bad start
+script surfaces as an error the host can handle rather than a crash. Low priority
+now that SBC no longer emits a teamless script, but it would make the engine more
+robust to bad inputs.
+
+## Bug: native Rml document/context teardown can ASAN on shutdown (2026-07-06)
+
+**Symptom.** The SBC native chonsole creates an Rml context/document from Rust,
+updates the document with `ElementSetInnerRml`, then closes the editor. Shutdown
+can abort under ASAN with a use-after-poison while Rml releases unloaded
+documents:
+
+```
+==25960==ERROR: AddressSanitizer: use-after-poison
+READ of size 8
+Rml::Element::Release()                         Element.cpp:2113
+Rml::Context::ReleaseUnloadedDocuments()        Context.cpp:1557
+Rml::Context::~Context()                        Context.cpp:111
+Rml::Context::Release()                         Context.cpp:1602
+Rml::Shutdown()                                 Core.cpp:165
+RmlGui::Shutdown()                              RmlUi_Backend.cpp:236
+CGame::~CGame()                                 Game.cpp:293
+SpringApp::Kill(bool)                           SpringApp.cpp:1015
+```
+
+Observed on `2026.06.06-111-g0bcccec rust-wip` after using the native chonsole
+Rml UI and stopping the editor. Calling native `DocumentClose` /
+`RemoveContext` from SBC before shutdown did **not** eliminate the crash.
+Earlier, using native `ElementRemoveChild` during live updates also made this
+class of failure easier to trigger, so SBC currently avoids removing individual
+Rml children and instead replaces document/root RML.
+
+**Why this is an engine/native binding issue.** A native caller should not be
+able to poison Rml's shutdown path merely by creating a context/document and
+updating its contents through exported bindings. Even if SBC passes invalid RML
+or misorders teardown, the native API should fail or no-op safely rather than
+leaving Rml internals in a state that crashes process shutdown.
+
+**Engine ask.** Audit the native Rml lifecycle bindings and ownership rules:
+
+1. Define the safe native teardown order for contexts/documents/elements.
+2. Make `DocumentClose`, `RemoveContext`, and any element mutation bindings
+   idempotent or defensively reject handles that are already unloaded/detached.
+3. Add a native smoke/parity test that creates a context/document, calls
+   `ElementSetInnerRml` at least once, closes/removes it, and then shuts Rml down
+   under ASAN without touching poisoned memory.
+
+This is important for all future native UI work, not only chonsole: SBC needs to
+be able to iterate native Rml UI without making editor shutdown unstable.
+
+## Bug: Lua Rml `Element:SetAttribute` can ASAN while editing form fields (2026-07-07)
+
+**Symptom.** In SBC `luaui-rmlui`, opening Env -> Lighting and typing `5` into
+the Dir X field can abort under ASAN:
+
+```
+==53041==ERROR: AddressSanitizer: use-after-poison
+READ of size 8
+std::string::size()
+std::string::compare(...)
+itlib::flat_map<std::string, Rml::Variant>::operator[](...)
+Rml::Element::SetAttribute<std::string>(...)
+sol::member_function_wrapper<... Rml::Element::SetAttribute ...>
+```
+
+**Trigger.** Lua calls `element:SetAttribute("value", "...")` on a live Rml form
+control while processing the editor's field update. The crash happens inside
+RmlUi's attribute map lookup before the call returns to Lua.
+
+**Engine fix.** Do not bind the templated `Rml::Element::SetAttribute` member
+directly through sol2. Route the Lua method through a wrapper that takes owned
+`Rml::String` values before entering RmlUi, so Lua/sol temporary conversion
+lifetime cannot leak into RmlUi's attribute-map mutation path.
