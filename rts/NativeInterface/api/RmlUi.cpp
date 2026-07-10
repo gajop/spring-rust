@@ -1496,6 +1496,26 @@ static void NativeElementIsPointWithinElement(const RmlElementPointQuery* query,
 	result->success = element->IsPointWithinElement(Rml::Vector2f(query->x, query->y));
 }
 
+static void NativeElementGetRect(const RmlElementHandleQuery* query, RmlElementGetRectResult* result)
+{
+	result->error = nullptr;
+	result->left = 0.0f;
+	result->top = 0.0f;
+	result->width = 0.0f;
+	result->height = 0.0f;
+	Rml::Element* element = FromElementHandle(query->elementHandle);
+	if (element == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const Rml::Vector2f offset = element->GetAbsoluteOffset(Rml::BoxArea::Border);
+	const Rml::Vector2f size = element->GetBox().GetSize(Rml::BoxArea::Border);
+	result->left = offset.x;
+	result->top = offset.y;
+	result->width = size.x;
+	result->height = size.y;
+}
+
 static void NativeElementMatches(const RmlElementGetByStringQuery* query, RmlElementBoolResult* result)
 {
 	result->error = nullptr;
@@ -2274,6 +2294,7 @@ const RmlUiApi RMLUI_API = {
 	.ElementArePseudoClassesSet = NativeElementArePseudoClassesSet,
 	.ElementGetActivePseudoClasses = NativeElementGetActivePseudoClasses,
 	.ElementIsPointWithinElement = NativeElementIsPointWithinElement,
+	.ElementGetRect = NativeElementGetRect,
 	.ElementMatches = NativeElementMatches,
 	.ElementDispatchEvent = NativeElementDispatchEvent,
 	.ElementProcessDefaultAction = NativeElementProcessDefaultAction,
