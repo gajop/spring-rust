@@ -107,6 +107,9 @@ struct RmlElementStringListResult { const Error* error; const char** values; uin
 struct RmlElementHandleListResult { const Error* error; uint64_t* elementHandles; uint32_t elementHandleCount; };
 struct RmlElementSetStringQuery { uint64_t elementHandle; const char* value; };
 struct RmlElementGetIntResult { const Error* error; int32_t value; };
+/// Element geometry, in context (screen) coordinates. `left`/`top` are the
+/// element's absolute offset; `width`/`height` are its border box.
+struct RmlElementGetRectResult { const Error* error; float left; float top; float width; float height; };
 struct RmlElementSetIntQuery { uint64_t elementHandle; int32_t value; };
 struct RmlElementGetFloatResult { const Error* error; float value; };
 struct RmlElementSetFloatQuery { uint64_t elementHandle; float value; };
@@ -238,6 +241,9 @@ struct RmlUiApi {
 	void (*ElementArePseudoClassesSet)(const RmlElementGetByStringQuery* query, RmlElementBoolResult* result);
 	void (*ElementGetActivePseudoClasses)(const RmlElementHandleQuery* query, RmlElementStringListResult* result);
 	void (*ElementIsPointWithinElement)(const RmlElementPointQuery* query, RmlElementBoolResult* result);
+	/// Absolute offset and border-box size of an element, in context coordinates.
+	/// Needed to map a cursor position onto an element (colour pickers, sliders).
+	void (*ElementGetRect)(const RmlElementHandleQuery* query, RmlElementGetRectResult* result);
 	void (*ElementMatches)(const RmlElementGetByStringQuery* query, RmlElementBoolResult* result);
 	void (*ElementDispatchEvent)(const RmlElementDispatchEventQuery* query, RmlElementBoolResult* result);
 	void (*ElementProcessDefaultAction)(const RmlElementProcessDefaultActionQuery* query, RmlElementBoolResult* result);
