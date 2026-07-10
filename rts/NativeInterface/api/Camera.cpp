@@ -216,14 +216,16 @@ static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRa
 	const float3& pos = camera->GetPos();
 	(void)query->useMinimap;
 	(void)query->includeSky;
-	(void)query->ignoreWater;
 	(void)query->heightOffset;
 
-	// Simplified: trace against units, features, and ground
+	// Trace against units, features, and ground. `onlyCoords` asks for the
+	// ground position regardless of what stands on it, which is what a terrain
+	// brush needs to paint under a unit; it maps onto GuiTraceRay's groundOnly.
 	const CUnit* hitUnit = nullptr;
 	const CFeature* hitFeature = nullptr;
 
-	const float dist = TraceRay::GuiTraceRay(pos, dir, 9999999.0f, nullptr, hitUnit, hitFeature, false, false, true);
+	const float dist = TraceRay::GuiTraceRay(
+		pos, dir, 9999999.0f, nullptr, hitUnit, hitFeature, false, query->onlyCoords, query->ignoreWater);
 
 	result->error = nullptr;
 	result->hitType = 0; // No hit
