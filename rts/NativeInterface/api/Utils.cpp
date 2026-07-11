@@ -4,6 +4,8 @@
 #include "Sim/Units/UnitDefHandler.h"
 #include "Sim/Units/BuildInfo.h"
 #include "Sim/Features/Feature.h"
+#include "Sim/Features/FeatureDef.h"
+#include "Sim/Features/FeatureDefHandler.h"
 #include "Game/GameHelper.h"
 #include "Rendering/Models/3DModel.hpp"
 #include "System/float3.h"
@@ -24,6 +26,11 @@ static const Error NOT_READY_ERROR = {
 static const Error INVALID_UNITDEF_ERROR = {
 	.code = ERROR_INVALID_ARGUMENT,
 	.message = "Invalid unit definition ID"
+};
+
+static const Error INVALID_FEATUREDEF_ERROR = {
+	.code = ERROR_INVALID_ARGUMENT,
+	.message = "Invalid feature definition ID"
 };
 
 // Helper: check if ready
@@ -195,6 +202,41 @@ static void NativeGetUnitDefDimensions(const GetUnitDefDimensionsQuery* query, G
 	}
 }
 
+static void NativeGetFeatureDefDimensions(const GetFeatureDefDimensionsQuery* query, GetFeatureDefDimensionsResult* result)
+{
+	bufferPos = 0;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	const FeatureDef* featureDef = featureDefHandler->GetFeatureDefByID(query->featureDefID);
+	if (featureDef == nullptr) {
+		result->error = &INVALID_FEATUREDEF_ERROR;
+		return;
+	}
+
+	const S3DModel* model = featureDef->LoadModel();
+	result->error = nullptr;
+	if (model != nullptr) {
+		const float3& mid = model->relMidPos;
+		result->dimensions.height = model->height;
+		result->dimensions.radius = model->radius;
+		result->dimensions.midx = mid.x;
+		result->dimensions.minx = model->mins.x;
+		result->dimensions.maxx = model->maxs.x;
+		result->dimensions.midy = mid.y;
+		result->dimensions.miny = model->mins.y;
+		result->dimensions.maxy = model->maxs.y;
+		result->dimensions.midz = mid.z;
+		result->dimensions.minz = model->mins.z;
+		result->dimensions.maxz = model->maxs.z;
+	} else {
+		result->dimensions = {};
+	}
+}
+
 } // namespace
 
 const UtilsApi UTILS_API = {
@@ -207,4 +249,5 @@ const UtilsApi UTILS_API = {
 	.TestMoveOrder = NativeTestMoveOrder,
 
 	.GetUnitDefDimensions = NativeGetUnitDefDimensions,
+	.GetFeatureDefDimensions = NativeGetFeatureDefDimensions,
 };

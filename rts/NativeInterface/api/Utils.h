@@ -93,6 +93,17 @@ struct GetUnitDefDimensionsResult {
 	UnitDefDimensions dimensions;
 };
 
+// A feature def's model bounds. Same shape as a unit's: a caller that has to
+// frame or box a definition needs this for both, and only units had it.
+struct GetFeatureDefDimensionsQuery {
+	int32_t featureDefID;
+};
+
+struct GetFeatureDefDimensionsResult {
+	const Error* error;
+	UnitDefDimensions dimensions;
+};
+
 // API structure
 struct UtilsApi {
 	void (*GetCEGID)(
@@ -123,6 +134,11 @@ struct UtilsApi {
 	void (*GetUnitDefDimensions)(
 		const GetUnitDefDimensionsQuery* query,
 		GetUnitDefDimensionsResult* result
+	);
+
+	void (*GetFeatureDefDimensions)(
+		const GetFeatureDefDimensionsQuery* query,
+		GetFeatureDefDimensionsResult* result
 	);
 };
 
