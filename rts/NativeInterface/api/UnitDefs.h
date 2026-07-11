@@ -14,7 +14,7 @@ extern "C" {
 // Static unit definition data (read-only game data from unit files)
 // ============================================================================
 
-// Note: This is a simplified API. Full UnitDef has 200+ properties.
+// Note: This is a partial API. Full UnitDef has 200+ properties.
 // Extend as needed for specific use cases.
 
 struct UnitDefBasicInfo {
@@ -44,7 +44,77 @@ struct UnitDefPhysics {
 	bool canHover;
 	bool floatOnWater;
 	int32_t moveDefID;
+	// Where the unit can exist. Lua exposes all four (LuaUnitDefs.cpp); without
+	// them a caller cannot tell a ground unit from an amphibious or naval one.
+	bool canSubmerge;
+	float waterline;
+	float minWaterDepth;
+	float maxWaterDepth;
 };
+
+// The unit's classification. These are computed by UnitDef, not stored, and Lua
+// exposes them as functions (ADD_FUNCTION("isBuilding", ...) and friends), so
+// they cannot be read from the fields above.
+struct UnitDefClassify {
+	bool isTransport;
+	bool isImmobile;
+	bool isBuilding;
+	bool isBuilder;
+	bool isMobileBuilder;
+	bool isStaticBuilder;
+	bool isFactory;
+	bool isExtractor;
+	bool isGroundUnit;
+	bool isAirUnit;
+	bool isStrafingAirUnit;
+	bool isHoveringAirUnit;
+	bool isFighterAirUnit;
+	bool isBomberAirUnit;
+};
+
+// ----------------------------------------------------------------------------
+// Every UnitDef property, by name
+//
+// The structs above are a hand-picked subset, which is how callers kept ending
+// up short. These read the *same reflection table Lua reads*
+// (LuaUnitDefs::GetParamMap), so every property `UnitDefs[id].foo` has in Lua is
+// reachable here as GetUnitDefParam*(id, "foo") -- and a property added to the
+// engine shows up in both at once, with no list to keep in sync.
+//
+// Scalars only. A handful of Lua's entries are tables (model, weapons, sounds,
+// collisionVolume, customParams, buildOptions); those have dedicated calls
+// above, and GetUnitDefParamType reports them as UNIT_DEF_PARAM_TABLE.
+// ----------------------------------------------------------------------------
+
+enum UnitDefParamType {
+	UNIT_DEF_PARAM_MISSING = 0,
+	UNIT_DEF_PARAM_INT = 1,
+	UNIT_DEF_PARAM_BOOL = 2,
+	UNIT_DEF_PARAM_FLOAT = 3,
+	UNIT_DEF_PARAM_STRING = 4,
+	UNIT_DEF_PARAM_TABLE = 5,
+};
+
+struct UnitDefParamKey { const char* name; int32_t type; };
+
+// Every property name the engine knows, with its type.
+struct GetUnitDefParamKeysQuery { uint8_t _unused; };
+struct GetUnitDefParamKeysResult { const Error* error; UnitDefParamKey* keys; uint32_t count; };
+
+struct GetUnitDefParamTypeQuery { const char* key; };
+struct GetUnitDefParamTypeResult { const Error* error; int32_t type; };
+
+struct GetUnitDefParamBoolQuery { int32_t unitDefID; const char* key; };
+struct GetUnitDefParamBoolResult { const Error* error; bool value; };
+
+struct GetUnitDefParamIntQuery { int32_t unitDefID; const char* key; };
+struct GetUnitDefParamIntResult { const Error* error; int32_t value; };
+
+struct GetUnitDefParamFloatQuery { int32_t unitDefID; const char* key; };
+struct GetUnitDefParamFloatResult { const Error* error; float value; };
+
+struct GetUnitDefParamStringQuery { int32_t unitDefID; const char* key; };
+struct GetUnitDefParamStringResult { const Error* error; const char* value; };
 
 struct UnitDefWeapons {
 	int32_t* weaponDefIDs;
@@ -91,7 +161,11 @@ struct GetUnitDefByIDResult {
 	UnitDefBuildOptions buildOptions;
 	UnitDefSensors sensors;
 	UnitDefHealth health;
+	UnitDefClassify classify;
 };
+
+struct GetUnitDefClassifyQuery { int32_t unitDefID; };
+struct GetUnitDefClassifyResult { const Error* error; UnitDefClassify classify; };
 
 struct GetUnitDefIDByNameQuery { const char* unitDefName; };
 struct GetUnitDefIDByNameResult { const Error* error; int32_t id; };
@@ -134,6 +208,13 @@ struct UnitDefsApi {
 	void (*GetUnitDefHealth)(const GetUnitDefHealthQuery* query, GetUnitDefHealthResult* result);
 	void (*GetUnitDefCustomParam)(const GetUnitDefCustomParamQuery* query, GetUnitDefCustomParamResult* result);
 	void (*GetUnitDefCustomParamKeys)(const GetUnitDefCustomParamKeysQuery* query, GetUnitDefCustomParamKeysResult* result);
+	void (*GetUnitDefClassify)(const GetUnitDefClassifyQuery* query, GetUnitDefClassifyResult* result);
+	void (*GetUnitDefParamKeys)(const GetUnitDefParamKeysQuery* query, GetUnitDefParamKeysResult* result);
+	void (*GetUnitDefParamType)(const GetUnitDefParamTypeQuery* query, GetUnitDefParamTypeResult* result);
+	void (*GetUnitDefParamBool)(const GetUnitDefParamBoolQuery* query, GetUnitDefParamBoolResult* result);
+	void (*GetUnitDefParamInt)(const GetUnitDefParamIntQuery* query, GetUnitDefParamIntResult* result);
+	void (*GetUnitDefParamFloat)(const GetUnitDefParamFloatQuery* query, GetUnitDefParamFloatResult* result);
+	void (*GetUnitDefParamString)(const GetUnitDefParamStringQuery* query, GetUnitDefParamStringResult* result);
 };
 
 extern const UnitDefsApi UNIT_DEFS_API;
