@@ -53,6 +53,17 @@ static int CategorySetFromString(lua_State* L, const void* data);
 /******************************************************************************/
 /******************************************************************************/
 
+const ParamMap& LuaUnitDefs::GetParamMap()
+{
+	// Built lazily: it needs unitDefHandler, which does not exist at static-init
+	// time. PushEntries does the same.
+	if (paramMap.empty())
+		InitParamMap();
+
+	return paramMap;
+}
+
+
 bool LuaUnitDefs::PushEntries(lua_State* L)
 {
 	InitParamMap();

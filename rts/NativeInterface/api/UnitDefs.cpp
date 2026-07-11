@@ -1,18 +1,26 @@
 #include "UnitDefs.h"
 
 #include "Sim/Units/UnitDefHandler.h"
+#include "Sim/Units/UnitDef.h"
 #include "Sim/Weapons/WeaponDef.h"
+#include "Lua/LuaUnitDefs.h"
+#include "Lua/LuaDefs.h"
 #include <cstring>
+#include <string>
 
 namespace {
 
 // Scratch buffer
-static thread_local uint8_t scratchBuffer[1024];
+// Results that are lists are written here. 1KB was not enough for any of them:
+// it truncated GetUnitDefIDs at 256 defs (a real game has more), and the
+// property table at 64 of its 249 entries.
+static thread_local uint8_t scratchBuffer[64 * 1024];
 static thread_local size_t bufferPos = 0;
 
 // Static errors
 static const Error INVALID_UNITDEF_ERROR = { .code = ERROR_INVALID_ID, .message = "Invalid unit def ID" };
 static const Error NOT_FOUND_ERROR = { .code = ERROR_NOT_FOUND, .message = "UnitDef not found" };
+static const Error INVALID_UNITDEF_PARAM_ERROR = { .code = ERROR_NOT_FOUND, .message = "No such UnitDef property, or it is not of the requested type" };
 
 static void NativeGetUnitDefIDs(const GetUnitDefIDsQuery* query, GetUnitDefIDsResult* result) {
 	bufferPos = 0;
@@ -40,6 +48,229 @@ static void NativeGetUnitDefCount(const GetUnitDefCountQuery* query, GetUnitDefC
 	bufferPos = 0;
 	result->error = nullptr;
 	result->count = static_cast<uint32_t>(unitDefHandler->NumUnitDefs());
+}
+
+// UnitDef computes these rather than storing them, which is why Lua exposes them
+// as functions (ADD_FUNCTION("isBuilding", ...)) instead of fields. They have no
+// offset in the reflection table, so they are read through here.
+static void FillClassify(const UnitDef* ud, UnitDefClassify* out) {
+	out->isTransport = ud->IsTransportUnit();
+	out->isImmobile = ud->IsImmobileUnit();
+	out->isBuilding = ud->IsBuildingUnit();
+	out->isBuilder = ud->IsBuilderUnit();
+	out->isMobileBuilder = ud->IsMobileBuilderUnit();
+	out->isStaticBuilder = ud->IsStaticBuilderUnit();
+	out->isFactory = ud->IsFactoryUnit();
+	out->isExtractor = ud->IsExtractorUnit();
+	out->isGroundUnit = ud->IsGroundUnit();
+	out->isAirUnit = ud->IsAirUnit();
+	out->isStrafingAirUnit = ud->IsStrafingAirUnit();
+	out->isHoveringAirUnit = ud->IsHoveringAirUnit();
+	out->isFighterAirUnit = ud->IsFighterAirUnit();
+	out->isBomberAirUnit = ud->IsBomberAirUnit();
+}
+
+// The computed booleans, by the same names Lua uses, so GetUnitDefParamBool can
+// serve them alongside the offset-based fields.
+static bool ClassifyByName(const UnitDef* ud, const std::string& key, bool* found) {
+	*found = true;
+	if (key == "isTransport")       return ud->IsTransportUnit();
+	if (key == "isImmobile")        return ud->IsImmobileUnit();
+	if (key == "isBuilding")        return ud->IsBuildingUnit();
+	if (key == "isBuilder")         return ud->IsBuilderUnit();
+	if (key == "isMobileBuilder")   return ud->IsMobileBuilderUnit();
+	if (key == "isStaticBuilder")   return ud->IsStaticBuilderUnit();
+	if (key == "isFactory")         return ud->IsFactoryUnit();
+	if (key == "isExtractor")       return ud->IsExtractorUnit();
+	if (key == "isGroundUnit")      return ud->IsGroundUnit();
+	if (key == "isAirUnit")         return ud->IsAirUnit();
+	if (key == "isStrafingAirUnit") return ud->IsStrafingAirUnit();
+	if (key == "isHoveringAirUnit") return ud->IsHoveringAirUnit();
+	if (key == "isFighterAirUnit")  return ud->IsFighterAirUnit();
+	if (key == "isBomberAirUnit")   return ud->IsBomberAirUnit();
+	*found = false;
+	return false;
+}
+
+// Resolve a property name against the engine's reflection table.
+static const DataElement* FindParam(const char* key) {
+	if (key == nullptr)
+		return nullptr;
+
+	const ParamMap& params = LuaUnitDefs::GetParamMap();
+	const auto it = params.find(key);
+
+	if (it == params.end())
+		return nullptr;
+
+	return &it->second;
+}
+
+// The field's address inside this UnitDef. Offsets in the reflection table are
+// relative to a UnitDef instance.
+static const void* ParamAddress(const UnitDef* ud, const DataElement* elem) {
+	return reinterpret_cast<const char*>(ud) + elem->offset;
+}
+
+static int32_t ParamTypeOf(const DataElement* elem) {
+	switch (elem->type) {
+		case INT_TYPE:      return UNIT_DEF_PARAM_INT;
+		case BOOL_TYPE:     return UNIT_DEF_PARAM_BOOL;
+		case FLOAT_TYPE:    return UNIT_DEF_PARAM_FLOAT;
+		case STRING_TYPE:   return UNIT_DEF_PARAM_STRING;
+		// Lua serves these by calling an accessor. The boolean classifiers are
+		// answered natively (ClassifyByName); the rest are tables.
+		case FUNCTION_TYPE: return UNIT_DEF_PARAM_TABLE;
+		default:            return UNIT_DEF_PARAM_MISSING;
+	}
+}
+
+// Is this one of the computed booleans rather than a stored field?
+static bool IsClassifyKey(const char* key) {
+	if (key == nullptr)
+		return false;
+
+	bool found = false;
+	const UnitDef* ud = &unitDefHandler->GetUnitDefsVec()[0];
+	ClassifyByName(ud, key, &found);
+	return found;
+}
+
+static void NativeGetUnitDefParamKeys(const GetUnitDefParamKeysQuery* query, GetUnitDefParamKeysResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+
+	const ParamMap& params = LuaUnitDefs::GetParamMap();
+
+	const size_t maxKeys = (sizeof(scratchBuffer) - bufferPos) / sizeof(UnitDefParamKey);
+	UnitDefParamKey* keys = reinterpret_cast<UnitDefParamKey*>(scratchBuffer + bufferPos);
+	uint32_t count = 0;
+
+	for (const auto& pair : params) {
+		if (count >= maxKeys)
+			break;
+		// Lua's own iteration helpers, not properties.
+		if (pair.first == "next" || pair.first == "pairs")
+			continue;
+
+		keys[count].name = pair.first.c_str();
+		keys[count].type = IsClassifyKey(pair.first.c_str())
+			? UNIT_DEF_PARAM_BOOL
+			: ParamTypeOf(&pair.second);
+		count++;
+	}
+
+	result->keys = keys;
+	result->count = count;
+	bufferPos += count * sizeof(UnitDefParamKey);
+}
+
+static void NativeGetUnitDefParamType(const GetUnitDefParamTypeQuery* query, GetUnitDefParamTypeResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+
+	if (IsClassifyKey(query->key)) {
+		result->type = UNIT_DEF_PARAM_BOOL;
+		return;
+	}
+
+	const DataElement* elem = FindParam(query->key);
+	result->type = (elem == nullptr) ? UNIT_DEF_PARAM_MISSING : ParamTypeOf(elem);
+}
+
+static void NativeGetUnitDefParamBool(const GetUnitDefParamBoolQuery* query, GetUnitDefParamBoolResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = false;
+
+	const UnitDef* ud = unitDefHandler->GetUnitDefByID(query->unitDefID);
+	if (ud == nullptr) {
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
+	}
+
+	bool found = false;
+	const bool value = ClassifyByName(ud, query->key != nullptr ? query->key : "", &found);
+	if (found) {
+		result->value = value;
+		return;
+	}
+
+	const DataElement* elem = FindParam(query->key);
+	if (elem == nullptr || elem->type != BOOL_TYPE) {
+		result->error = &INVALID_UNITDEF_PARAM_ERROR;
+		return;
+	}
+	result->value = *reinterpret_cast<const bool*>(ParamAddress(ud, elem));
+}
+
+static void NativeGetUnitDefParamInt(const GetUnitDefParamIntQuery* query, GetUnitDefParamIntResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = 0;
+
+	const UnitDef* ud = unitDefHandler->GetUnitDefByID(query->unitDefID);
+	if (ud == nullptr) {
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
+	}
+
+	const DataElement* elem = FindParam(query->key);
+	if (elem == nullptr || elem->type != INT_TYPE) {
+		result->error = &INVALID_UNITDEF_PARAM_ERROR;
+		return;
+	}
+	result->value = *reinterpret_cast<const int*>(ParamAddress(ud, elem));
+}
+
+static void NativeGetUnitDefParamFloat(const GetUnitDefParamFloatQuery* query, GetUnitDefParamFloatResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = 0.0f;
+
+	const UnitDef* ud = unitDefHandler->GetUnitDefByID(query->unitDefID);
+	if (ud == nullptr) {
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
+	}
+
+	const DataElement* elem = FindParam(query->key);
+	if (elem == nullptr || elem->type != FLOAT_TYPE) {
+		result->error = &INVALID_UNITDEF_PARAM_ERROR;
+		return;
+	}
+	result->value = *reinterpret_cast<const float*>(ParamAddress(ud, elem));
+}
+
+static void NativeGetUnitDefParamString(const GetUnitDefParamStringQuery* query, GetUnitDefParamStringResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->value = nullptr;
+
+	const UnitDef* ud = unitDefHandler->GetUnitDefByID(query->unitDefID);
+	if (ud == nullptr) {
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
+	}
+
+	const DataElement* elem = FindParam(query->key);
+	if (elem == nullptr || elem->type != STRING_TYPE) {
+		result->error = &INVALID_UNITDEF_PARAM_ERROR;
+		return;
+	}
+	result->value = reinterpret_cast<const std::string*>(ParamAddress(ud, elem))->c_str();
+}
+
+static void NativeGetUnitDefClassify(const GetUnitDefClassifyQuery* query, GetUnitDefClassifyResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+
+	const UnitDef* ud = unitDefHandler->GetUnitDefByID(query->unitDefID);
+	if (ud == nullptr) {
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
+	}
+	FillClassify(ud, &result->classify);
 }
 
 static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByIDResult* result) {
@@ -113,6 +344,13 @@ static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByI
 	result->physics.canHover = ud->hoverAttack;  // Closest equivalent
 	result->physics.floatOnWater = ud->floatOnWater;
 	result->physics.moveDefID = (ud->pathType != -1U) ? static_cast<int32_t>(ud->pathType) : -1;
+	result->physics.canSubmerge = ud->canSubmerge;
+	result->physics.waterline = ud->waterline;
+	result->physics.minWaterDepth = ud->minWaterDepth;
+	result->physics.maxWaterDepth = ud->maxWaterDepth;
+
+	// Classification
+	FillClassify(ud, &result->classify);
 
 	// Weapons
 	const size_t maxWeapons = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
@@ -358,4 +596,11 @@ const UnitDefsApi UNIT_DEFS_API = {
 	.GetUnitDefHealth = NativeGetUnitDefHealth,
 	.GetUnitDefCustomParam = NativeGetUnitDefCustomParam,
 	.GetUnitDefCustomParamKeys = NativeGetUnitDefCustomParamKeys,
+	.GetUnitDefClassify = NativeGetUnitDefClassify,
+	.GetUnitDefParamKeys = NativeGetUnitDefParamKeys,
+	.GetUnitDefParamType = NativeGetUnitDefParamType,
+	.GetUnitDefParamBool = NativeGetUnitDefParamBool,
+	.GetUnitDefParamInt = NativeGetUnitDefParamInt,
+	.GetUnitDefParamFloat = NativeGetUnitDefParamFloat,
+	.GetUnitDefParamString = NativeGetUnitDefParamString,
 };
