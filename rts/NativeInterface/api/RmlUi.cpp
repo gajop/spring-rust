@@ -33,6 +33,39 @@ static uint64_t ToHandle(T* pointer)
 	return reinterpret_cast<uintptr_t>(pointer);
 }
 
+// Element handles must be validated before they are used.
+//
+// A handle is the element's address, and a native plugin holds on to it across
+// frames. RmlUi destroys elements whenever a subtree is rebuilt (setting
+// inner_rml, say), which leaves the plugin holding a dangling handle -- and
+// every call below dereferenced it without checking, so the next SetAttribute
+// wrote through freed memory.
+//
+// Rml::Element derives from EnableObserverPtr, so RmlUi already knows whether an
+// element is still alive. Every handle handed out is remembered with an observer
+// pointer, and resolving one that has since died returns null instead of a wild
+// pointer.
+static std::unordered_map<uint64_t, Rml::ObserverPtr<Rml::Element>> liveElements;
+
+static uint64_t ToElementHandle(Rml::Element* element)
+{
+	if (element == nullptr)
+		return 0;
+
+	// Elements die constantly -- every rebuilt subtree -- and a dead entry is
+	// only noticed when its handle is next resolved, which may be never. Sweep
+	// them rather than grow without bound.
+	if (liveElements.size() > 4096) {
+		for (auto it = liveElements.begin(); it != liveElements.end(); ) {
+			it = (it->second.get() == nullptr) ? liveElements.erase(it) : std::next(it);
+		}
+	}
+
+	const uint64_t handle = ToHandle(element);
+	liveElements.insert_or_assign(handle, element->GetObserverPtr());
+	return handle;
+}
+
 template <typename T>
 static T* FromHandle(uint64_t handle)
 {
@@ -83,7 +116,26 @@ static Rml::ElementPtr TakeElementPtr(uint64_t handle)
 }
 
 static Rml::ElementDocument* FromDocumentHandle(uint64_t handle) { return FromHandle<Rml::ElementDocument>(handle); }
-static Rml::Element* FromElementHandle(uint64_t handle) { return FromHandle<Rml::Element>(handle); }
+
+// Null if the element behind this handle has been destroyed since it was handed
+// out, rather than a pointer into freed memory.
+static Rml::Element* FromElementHandle(uint64_t handle)
+{
+	if (handle == 0)
+		return nullptr;
+
+	const auto it = liveElements.find(handle);
+	if (it == liveElements.end()) {
+		// Never handed out by us (or already reaped). Refuse it: the alternative
+		// is trusting an address the caller made up.
+		return nullptr;
+	}
+	if (Rml::Element* element = it->second.get())
+		return element;
+
+	liveElements.erase(it);
+	return nullptr;
+}
 static Rml::Event* FromEventHandle(uint64_t handle) { return FromHandle<Rml::Event>(handle); }
 static Rml::EventListener* FromEventListenerHandle(uint64_t handle) { return FromHandle<Rml::EventListener>(handle); }
 
@@ -363,7 +415,7 @@ static void NativeContextCreateDocument(const RmlContextCreateDocumentQuery* que
 	}
 
 	Rml::ElementDocument* document = (query->tag != nullptr) ? context->CreateDocument(query->tag) : context->CreateDocument();
-	result->documentHandle = ToHandle(document);
+	result->documentHandle = ToElementHandle(document);
 	result->success = (document != nullptr);
 }
 
@@ -380,7 +432,7 @@ static void NativeContextLoadDocument(const RmlContextLoadDocumentQuery* query, 
 	}
 
 	Rml::ElementDocument* document = context->LoadDocument(query->documentPath);
-	result->documentHandle = ToHandle(document);
+	result->documentHandle = ToElementHandle(document);
 	result->success = (document != nullptr);
 }
 
@@ -397,7 +449,7 @@ static void NativeContextGetDocument(const RmlContextGetDocumentQuery* query, Rm
 	}
 
 	Rml::ElementDocument* document = context->GetDocument(query->name);
-	result->documentHandle = ToHandle(document);
+	result->documentHandle = ToElementHandle(document);
 	result->exists = (document != nullptr);
 }
 
@@ -671,7 +723,7 @@ static void NativeContextGetElementAtPoint(const RmlContextGetElementAtPointQuer
 		return;
 	}
 	Rml::Element* element = context->GetElementAtPoint(Rml::Vector2f(query->x, query->y), FromElementHandle(query->ignoreElementHandle));
-	result->elementHandle = ToHandle(element);
+	result->elementHandle = ToElementHandle(element);
 	result->exists = (element != nullptr);
 }
 
@@ -771,7 +823,7 @@ static void NativeContextSetDensityIndependentPixelRatio(const RmlContextSetFloa
 static void FillContextElementResult(Rml::Element* element, RmlContextGetElementResult* result)
 {
 	result->error = nullptr;
-	result->elementHandle = ToHandle(element);
+	result->elementHandle = ToElementHandle(element);
 	result->exists = (element != nullptr);
 }
 
@@ -1052,7 +1104,7 @@ static void NativeDocumentIsModal(const RmlDocumentHandleQuery* query, RmlDocume
 static void FillElementResult(Rml::Element* element, RmlElementGetElementResult* result)
 {
 	result->error = nullptr;
-	result->elementHandle = ToHandle(element);
+	result->elementHandle = ToElementHandle(element);
 	result->exists = (element != nullptr);
 }
 
@@ -1347,7 +1399,7 @@ static void FillElementHandleList(const Rml::ElementList& elements, RmlElementHa
 	elementHandleResults.clear();
 	elementHandleResults.reserve(elements.size());
 	for (Rml::Element* element : elements) {
-		elementHandleResults.push_back(ToHandle(element));
+		elementHandleResults.push_back(ToElementHandle(element));
 	}
 
 	result->error = nullptr;
@@ -1967,8 +2019,8 @@ static void NativeEventGetCurrent(const RmlEventCurrentQuery*, RmlEventCurrentRe
 {
 	result->error = nullptr;
 	result->eventHandle = ToHandle(currentEvent);
-	result->elementHandle = ToHandle(currentEventElement);
-	result->documentHandle = ToHandle(currentEventDocument);
+	result->elementHandle = ToElementHandle(currentEventElement);
+	result->documentHandle = ToElementHandle(currentEventDocument);
 	result->exists = (currentEvent != nullptr);
 }
 
@@ -2008,7 +2060,7 @@ static void NativeEventGetCurrentElement(const RmlEventHandleQuery* query, RmlEl
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	result->elementHandle = ToHandle(event->GetCurrentElement());
+	result->elementHandle = ToElementHandle(event->GetCurrentElement());
 	result->exists = (result->elementHandle != 0);
 }
 
@@ -2022,7 +2074,7 @@ static void NativeEventGetTargetElement(const RmlEventHandleQuery* query, RmlEle
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	result->elementHandle = ToHandle(event->GetTargetElement());
+	result->elementHandle = ToElementHandle(event->GetTargetElement());
 	result->exists = (result->elementHandle != 0);
 }
 
