@@ -5,6 +5,7 @@
 
 #include <string>
 #include <tuple>
+#include <vector>
 
 #include "System/type2.h"
 
@@ -137,6 +138,9 @@ public:
 	static const CMatrix44f* GetNamedMatrix(const char* name);
 
 	static LuaMatTexture::Type GetLuaMatTextureType(const std::string& name);
+	/// All named engine textures accepted by GetLuaMatTextureType.  This is the
+	/// single registry shared by Lua, the native API, and UI completion.
+	static const std::vector<std::string>& GetEngineTextureNames();
 	static LuaMatrixType GetLuaMatrixType(const char* name);
 
 	static bool ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, const std::string& image);
