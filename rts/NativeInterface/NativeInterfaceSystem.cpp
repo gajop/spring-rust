@@ -277,6 +277,14 @@ void NativeInterfaceSystem::Update() {
 	pImpl->Update();
 }
 
+bool NativeInterfaceSystem::KeyPress(int keyCode, int scanCode, bool isRepeat) {
+	return pImpl->eventClient && pImpl->eventClient->KeyPress(keyCode, scanCode, isRepeat);
+}
+
+bool NativeInterfaceSystem::KeyRelease(int keyCode, int scanCode) {
+	return pImpl->eventClient && pImpl->eventClient->KeyRelease(keyCode, scanCode);
+}
+
 void NativeInterfaceSystem::HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data) {
 	if (pImpl->eventClient)
 		pImpl->eventClient->HandleLuaMsg(playerID, script, mode, data);

@@ -11,6 +11,7 @@
 #include "Game/UI/KeySet.h"
 #include "Game/UI/ScanCodes.h"
 #include "Lua/LuaInputReceiver.h"
+#include "NativeInterface/NativeInterfaceSystem.h"
 #include "Lua/LuaMenu.h"
 #include "Lua/LuaUI.h"
 #include <Rml/Backends/RmlUi_Backend.h>
@@ -37,6 +38,12 @@ bool CGameInputReceiver::KeyPressed(int keyCode, int scanCode, bool isRepeat)
 
 	lastActionList = keyBindings.GetActionList(curKeyCodeChain, curScanCodeChain);
 
+	// Native modules own their modal input (for example Chonsole completion)
+	// before RmlUi can use Tab to traverse unrelated editor controls. If they
+	// decline it, the normal RmlUi/Lua/input-receiver path remains unchanged.
+	if (NativeInterfaceSystem::s_instance != nullptr && NativeInterfaceSystem::s_instance->KeyPress(keyCode, scanCode, isRepeat))
+		return false;
+
 	if (RmlGui::ProcessKeyPressed(keyCode, scanCode, isRepeat))
 		return false;
 
@@ -58,6 +65,9 @@ bool CGameInputReceiver::KeyPressed(int keyCode, int scanCode, bool isRepeat)
 
 bool CGameInputReceiver::KeyReleased(int keyCode, int scanCode)
 {
+	if (NativeInterfaceSystem::s_instance != nullptr && NativeInterfaceSystem::s_instance->KeyRelease(keyCode, scanCode))
+		return false;
+
 	if (RmlGui::ProcessKeyReleased(keyCode, scanCode))
 		return false;
 

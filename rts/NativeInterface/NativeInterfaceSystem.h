@@ -28,6 +28,10 @@ public:
 	// Called by CGame after eventHandler.Update(), when native callbacks have
 	// returned and it is safe to unload a module.
 	void Update();
+	// Give a native module first refusal on keyboard input before RmlUi performs
+	// focus traversal. Returning true consumes the event.
+	bool KeyPress(int keyCode, int scanCode, bool isRepeat);
+	bool KeyRelease(int keyCode, int scanCode);
 
 	// Special events (called from Lua)
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
