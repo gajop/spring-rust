@@ -219,7 +219,26 @@ void* NativeInterfaceEventClient::Initialize() {
 		result.moduleVersionMajor, result.moduleVersionMinor, result.moduleVersionPatch);
 
 	m_moduleData = result.moduleData;
+	m_initialized = true;
 	return m_moduleData;
+}
+
+void NativeInterfaceEventClient::Shutdown() {
+	if (!m_initialized)
+		return;
+
+	if (m_ShutdownFuncPtr != nullptr) {
+		ShutdownQuery query = {};
+		ShutdownResult result = {};
+		m_ShutdownFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		if (result.error != nullptr)
+			LOG_L(L_ERROR, "Native module shutdown failed: %s", result.error->message);
+	}
+
+	// A native module owns this pointer. Never permit a later unload path to call
+	// into the same instance twice.
+	m_moduleData = nullptr;
+	m_initialized = false;
 }
 
 static NativeCallinCommand ToNativeCallinCommand(const Command& command)

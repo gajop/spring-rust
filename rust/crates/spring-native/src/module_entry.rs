@@ -454,12 +454,33 @@ macro_rules! export_module {
             $crate::sys::GameStartQuery,
             $crate::sys::GameStartResult
         );
-        export_simple_callback!(
-            Shutdown,
-            shutdown,
-            $crate::sys::ShutdownQuery,
-            $crate::sys::ShutdownResult
-        );
+        // Shutdown transfers ownership of the opaque module pointer back to
+        // Rust. The host is about to unload the shared object, so merely
+        // forwarding NativeModule::shutdown is insufficient: Drop must run
+        // while module code is still loaded to release host resources such as
+        // RmlUi contexts.
+        #[no_mangle]
+        pub extern "C" fn Shutdown(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            _query: *const $crate::sys::ShutdownQuery,
+            result: *mut $crate::sys::ShutdownResult,
+        ) {
+            if module_data.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let mut data = Box::from_raw(
+                    module_data as *mut $crate::ModuleData<$module_type>,
+                );
+                (*result).error = $crate::module_entry::catch_panic_ffi(
+                    std::panic::AssertUnwindSafe(|| data.module().shutdown()),
+                );
+                // `data` is dropped here even if shutdown returned an error or
+                // panicked. The engine guarantees this call occurs once before
+                // unloading the native shared object.
+            }
+        }
         export_simple_callback!(
             Update,
             update,

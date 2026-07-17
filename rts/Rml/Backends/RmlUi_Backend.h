@@ -81,6 +81,10 @@ namespace RmlGui
 	Rml::Context* GetOrCreateContext(const std::string& name);
 	Rml::Context* GetContext(const std::string& name);
 	void MarkContextForRemoval(Rml::Context* context);
+	// Remove a context immediately. Used by native-module teardown after the
+	// module has stopped receiving events, before another module can reuse its
+	// context name.
+	void RemoveContextImmediately(Rml::Context* context);
 
 	void BeginFrame();
 	void PresentFrame();

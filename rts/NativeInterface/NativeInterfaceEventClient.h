@@ -187,6 +187,10 @@ public:
 	// Initialize the native module
 	void* Initialize();
 
+	// Release module-owned state before its shared object is unloaded. Must be
+	// called after the event client is unregistered and while m_dllHandle is valid.
+	void Shutdown();
+
 	// CEventClient interface
 	bool WantsEvent(const std::string& eventName) override {
 		return true;
@@ -333,6 +337,7 @@ private:
 	NativeInterface* m_nativeInterface;
 	void* m_dllHandle;
 	void* m_moduleData = nullptr;
+	bool m_initialized = false;
 
 	// Function pointers to native module
 	fptr::InitializeNativeModuleFuncPtr m_InitializeNativeModuleFuncPtr = nullptr;

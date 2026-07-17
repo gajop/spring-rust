@@ -20,6 +20,7 @@
 #include <memory>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace {
@@ -80,6 +81,7 @@ static Rml::Context* FromHandle(uint64_t handle)
 static uint64_t nextElementPtrHandle = 1;
 static uint64_t nextDataModelHandle = 1;
 static std::unordered_map<uint64_t, Rml::ElementPtr> ownedElementPtrs;
+static std::unordered_set<Rml::String> nativeContextNames;
 struct NativeDataModelRecord
 {
 	Rml::Context* context = nullptr;
@@ -177,9 +179,10 @@ static const Rml::Variant* GetEventParameter(Rml::Event* event, const char* name
 class NativeRmlEventListener : public Rml::EventListener
 {
 public:
-	NativeRmlEventListener(NativeCallback callback, void* userData, Rml::Element* element)
+	NativeRmlEventListener(NativeCallback callback, void* userData, NativeCallback destroyCallback, Rml::Element* element)
 		: callback(callback)
 		, userData(userData)
+		, destroyCallback(destroyCallback)
 		, element(element)
 	{}
 
@@ -190,6 +193,9 @@ public:
 
 	void OnDetach(Rml::Element*) override
 	{
+		if (destroyCallback != nullptr) {
+			destroyCallback(userData);
+		}
 		delete this;
 	}
 
@@ -214,6 +220,7 @@ public:
 private:
 	NativeCallback callback = nullptr;
 	void* userData = nullptr;
+	NativeCallback destroyCallback = nullptr;
 	Rml::Element* element = nullptr;
 };
 
@@ -250,6 +257,9 @@ static void NativeCreateContext(const RmlCreateContextQuery* query, RmlCreateCon
 	Rml::Context* context = RmlGui::GetOrCreateContext(query->name);
 	result->contextHandle = ToHandle(context);
 	result->success = (context != nullptr);
+	if (result->success) {
+		nativeContextNames.emplace(query->name);
+	}
 	if (!result->success) {
 		result->error = &NOT_READY_ERROR;
 	}
@@ -464,7 +474,7 @@ static void NativeContextAddEventListener(const RmlContextEventListenerCallbackQ
 		return;
 	}
 
-	auto* listener = new NativeRmlEventListener(query->callback, query->userData, context->GetRootElement());
+	auto* listener = new NativeRmlEventListener(query->callback, query->userData, query->destroyCallback, context->GetRootElement());
 	context->AddEventListener(query->event, listener, query->inCapturePhase);
 	result->eventListenerHandle = ToHandle(listener);
 	result->success = true;
@@ -1132,7 +1142,7 @@ static void NativeElementAddEventListener(const RmlEventListenerCallbackQuery* q
 		return;
 	}
 
-	auto* listener = new NativeRmlEventListener(query->callback, query->userData, element);
+	auto* listener = new NativeRmlEventListener(query->callback, query->userData, query->destroyCallback, element);
 	element->AddEventListener(query->event, listener, query->inCapturePhase);
 	result->eventListenerHandle = ToHandle(listener);
 	result->success = true;
@@ -2249,6 +2259,33 @@ static void NativeVector2iNew(const RmlVector2iNewQuery* query, RmlVector2iNewRe
 }
 
 } // namespace
+
+namespace NativeRmlUi {
+
+void ClearAllContexts(ContextRemover removeContext)
+{
+	// Context removal is normally deferred until RmlGui::Update. A native
+	// reload loads the replacement module before that update, however, so a new
+	// CreateContext with the same name would revive the old context and leave its
+	// event callbacks pointing at freed module data.
+	if (RmlGui::IsInitialized()) {
+		for (const Rml::String& name : nativeContextNames) {
+			if (Rml::Context* context = Rml::GetContext(name)) {
+				EraseNativeDataModelHandles(context);
+				if (removeContext != nullptr) {
+					removeContext(ToHandle(context));
+				}
+			}
+		}
+	}
+
+	nativeContextNames.clear();
+	nativeDataModels.clear();
+	ownedElementPtrs.clear();
+	liveElements.clear();
+}
+
+} // namespace NativeRmlUi
 
 const RmlUiApi RMLUI_API = {
 	.CreateContext = NativeCreateContext,
