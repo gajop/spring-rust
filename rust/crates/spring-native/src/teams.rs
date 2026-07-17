@@ -46,6 +46,10 @@ fn c_string(ptr: *const std::ffi::c_char) -> Option<String> {
     if ptr.is_null() {
         None
     } else {
-        Some(unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned())
+        Some(
+            unsafe { CStr::from_ptr(ptr) }
+                .to_string_lossy()
+                .into_owned(),
+        )
     }
 }
