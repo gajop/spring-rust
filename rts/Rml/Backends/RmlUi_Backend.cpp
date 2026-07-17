@@ -417,6 +417,18 @@ void RmlGui::MarkContextForRemoval(Rml::Context *context) {
 	state->contexts_to_remove.insert(context);
 }
 
+void RmlGui::RemoveContextImmediately(Rml::Context* context)
+{
+	if (!RmlInitialized() || context == nullptr) {
+		return;
+	}
+
+	state->contexts_to_remove.erase(context);
+	ClearDebugContext(context);
+	const Rml::String name = context->GetName();
+	Rml::RemoveContext(name);
+}
+
 void RmlGui::Update()
 {
 	ZoneScopedN("RmlGui Update");
@@ -440,11 +452,11 @@ void RmlGui::Update()
 	}
 
 	if unlikely(!state->contexts_to_remove.empty()) {
-		for (const auto& context : state->contexts_to_remove) {
-			ClearDebugContext(context);
-			Rml::RemoveContext(context->GetName());
-		}
+		auto contexts_to_remove = std::move(state->contexts_to_remove);
 		state->contexts_to_remove.clear();
+		for (const auto& context : contexts_to_remove) {
+			RemoveContextImmediately(context);
+		}
 	}
 
 	// Clear deferred element deletions - safe point outside event processing

@@ -964,6 +964,8 @@ enum QueryExpr {
     CallbackUserData {
         param: String,
     },
+    /// The callback-data destructor paired with a persistent callback.
+    CallbackDestroyFn,
 }
 
 #[derive(Debug)]
@@ -1095,6 +1097,11 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
         body.push_str("                f();\n");
         body.push_str("            }\n");
         if has_persistent_callback {
+            body.push_str("            unsafe extern \"C\" fn destroy_callback<F>(user_data: *mut std::ffi::c_void) {\n");
+            body.push_str("                drop(Box::from_raw(user_data as *mut F));\n");
+            body.push_str("            }\n");
+        }
+        if has_persistent_callback {
             for param in params
                 .iter()
                 .filter(|param| matches!(param.ty, ParamType::Callback))
@@ -1145,6 +1152,7 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
                     format!("&mut {param} as *mut F as *mut std::ffi::c_void")
                 }
             }
+            QueryExpr::CallbackDestroyFn => "Some(destroy_callback::<F>)".to_string(),
         };
         body.push_str(&format!("                {}: {},\n", field.field, expr));
     }
@@ -1165,7 +1173,7 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
             .filter(|param| matches!(param.ty, ParamType::Callback))
         {
             body.push_str(&format!(
-                "            if !result.error.is_null() {{ drop(Box::from_raw({0}_user_data)); }}\n",
+                "            if !result.success || !result.error.is_null() {{ drop(Box::from_raw({0}_user_data)); }}\n",
                 param.name
             ));
         }
@@ -1264,6 +1272,17 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
     let mut i = 0;
     while i < query.fields.len() {
         let field = &query.fields[i];
+        // RmlUi persistent listeners are owned by the host. Their callback
+        // payload needs an explicit host-side destructor when the listener is
+        // detached, rather than another Rust closure parameter.
+        if field.name == "destroyCallback" && matches!(field.ty, CType::FnPtr) {
+            inits.push(QueryInitField {
+                field: make_field_name(&field.name),
+                expr: QueryExpr::CallbackDestroyFn,
+            });
+            i += 1;
+            continue;
+        }
         if let Some(next) = query.fields.get(i + 1) {
             if is_optional_presence_pair(field, next) {
                 let param_name = make_param_name(&field.name);

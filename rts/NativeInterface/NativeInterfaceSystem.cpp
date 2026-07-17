@@ -12,6 +12,9 @@
 
 #include "NativeInterface.h"
 #include "NativeInterfaceEventClient.h"
+#include "NativeInterface/api/RmlUi.h"
+
+#include "Rml/Backends/RmlUi_Backend.h"
 
 #include "System/EventHandler.h"
 #include "System/Log/ILog.h"
@@ -21,6 +24,11 @@ namespace fs = std::filesystem;
 NativeInterfaceSystem* NativeInterfaceSystem::s_instance = nullptr;
 
 namespace {
+	void RemoveNativeRmlContext(uint64_t contextHandle) {
+		RmlGui::RemoveContextImmediately(
+			reinterpret_cast<Rml::Context*>(static_cast<uintptr_t>(contextHandle)));
+	}
+
 	std::string GenerateRandomName(int length) {
 		const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 		const int charset_size = sizeof(charset) - 1;
@@ -119,9 +127,12 @@ public:
 	}
 
 	~Impl() {
-		// Unregister event client before cleanup
+		// Stop callbacks, then let the module release resources while its shared
+		// object (and therefore its shutdown function) is still loaded.
 		if (eventClient) {
 			eventHandler.RemoveClient(eventClient.get());
+			NativeRmlUi::ClearAllContexts(RemoveNativeRmlContext);
+			eventClient->Shutdown();
 			eventClient.reset();
 		}
 
@@ -132,9 +143,13 @@ public:
 	}
 
 	void LoadDLL(const std::string& path) {
-		// Cleanup previous DLL if any
+		// Stop callbacks, then let the old module release resources before its
+		// shared object is unloaded. This is essential for module-owned RmlUi
+		// contexts and other host resources.
 		if (eventClient) {
 			eventHandler.RemoveClient(eventClient.get());
+			NativeRmlUi::ClearAllContexts(RemoveNativeRmlContext);
+			eventClient->Shutdown();
 			eventClient.reset();
 		}
 
@@ -210,6 +225,32 @@ public:
 		eventClient->Initialize();
 		eventHandler.AddClient(eventClient.get());
 	}
+
+	void RequestReload() {
+		if (eventClient) {
+			reloadRequested = true;
+			return;
+		}
+		ReloadNow();
+	}
+
+	void ReloadNow() {
+		const char* envPath = std::getenv("SPRING_NATIVE_MODULE");
+		if (envPath == nullptr || envPath[0] == '\0')
+			return;
+
+		LoadDLL(envPath);
+	}
+
+	void Update() {
+		if (!reloadRequested)
+			return;
+
+		reloadRequested = false;
+		ReloadNow();
+	}
+
+	bool reloadRequested = false;
 };
 
 NativeInterfaceSystem::NativeInterfaceSystem()
@@ -229,12 +270,11 @@ NativeInterfaceSystem::~NativeInterfaceSystem() {
 }
 
 void NativeInterfaceSystem::Reload() {
-	const char* envPath = std::getenv("SPRING_NATIVE_MODULE");
-	if (envPath == nullptr || envPath[0] == '\0')
-		return;
+	pImpl->RequestReload();
+}
 
-	std::string path = envPath;
-	pImpl->LoadDLL(path);
+void NativeInterfaceSystem::Update() {
+	pImpl->Update();
 }
 
 void NativeInterfaceSystem::HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data) {

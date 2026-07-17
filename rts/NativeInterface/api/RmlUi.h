@@ -126,9 +126,11 @@ struct RmlVector2fNewResult { const Error* error; float x; float y; };
 struct RmlVector2iNewQuery { int32_t x; int32_t y; };
 struct RmlVector2iNewResult { const Error* error; int32_t x; int32_t y; };
 struct RmlElementDispatchEventQuery { uint64_t elementHandle; const char* event; };
-struct RmlEventListenerCallbackQuery { uint64_t elementHandle; const char* event; bool inCapturePhase; NativeCallback callback; void* userData; };
+// `destroyCallback` releases the callback data after RmlUi detaches the
+// listener. It must run before the module that supplied `callback` is unloaded.
+struct RmlEventListenerCallbackQuery { uint64_t elementHandle; const char* event; bool inCapturePhase; NativeCallback callback; void* userData; NativeCallback destroyCallback; };
 struct RmlEventListenerCallbackResult { const Error* error; uint64_t eventListenerHandle; bool success; };
-struct RmlContextEventListenerCallbackQuery { uint64_t contextHandle; const char* event; bool inCapturePhase; NativeCallback callback; void* userData; };
+struct RmlContextEventListenerCallbackQuery { uint64_t contextHandle; const char* event; bool inCapturePhase; NativeCallback callback; void* userData; NativeCallback destroyCallback; };
 struct RmlEventListenerHandleQuery { uint64_t eventListenerHandle; };
 struct RmlEventListenerElementQuery { uint64_t eventListenerHandle; uint64_t elementHandle; };
 struct RmlEventListenerEventQuery { uint64_t eventListenerHandle; uint64_t eventHandle; };
@@ -300,5 +302,13 @@ struct RmlUiApi {
 extern const RmlUiApi RMLUI_API;
 
 #ifdef __cplusplus
+}
+
+// Native modules are hot-reloaded independently of RmlUi. The engine owns
+// contexts created through this API and must destroy them before unloading a
+// module, otherwise their event listeners retain callbacks into the old .so.
+namespace NativeRmlUi {
+	using ContextRemover = void (*)(uint64_t contextHandle);
+	void ClearAllContexts(ContextRemover removeContext);
 }
 #endif

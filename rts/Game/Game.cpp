@@ -1413,6 +1413,12 @@ bool CGame::UpdateUnsynced(const spring_time currentTime)
 		eventHandler.Update();
 	}
 
+	// Native modules can request a reload from any callback (including input).
+	// Process it only after EventHandler has returned so a module never unloads
+	// itself while its callback still has live stack frames.
+	if (nativeInterfaceSystem)
+		nativeInterfaceSystem->Update();
+
 	if (unitTracker.Enabled())
 		unitTracker.SetCam();
 
