@@ -121,6 +121,9 @@ struct GfxTextureNameQuery { const char* name; };
 struct GfxTextureBindQuery { const char* name; int32_t texNum; bool enable; };
 struct GfxChangeTextureParamsQuery { const char* name; GfxTextureParams params; };
 struct GfxTextureInfoResult { const Error* error; int32_t xsize; int32_t ysize; int32_t zsize; uint32_t id; uint32_t target; uint32_t fbo; };
+struct GfxEngineTextureNamesResult { const Error* error; const char** names; uint32_t count; };
+struct GfxConsoleCommandEntry { const char* command; const char* description; bool synced; bool cheat; };
+struct GfxConsoleCommandsResult { const Error* error; const GfxConsoleCommandEntry* entries; uint32_t count; };
 
 #ifdef __cplusplus
 bool GetNativeGfxTextureInfo(const char* name, uint32_t* id, int32_t* xsize, int32_t* ysize, uint32_t* target);
@@ -379,6 +382,8 @@ struct GfxApi {
 	void (*DeleteTextureFBO)(const GfxTextureNameQuery* query, GfxBoolResult* result);
 	void (*BindTexture)(const GfxTextureBindQuery* query, GfxBoolResult* result);
 	void (*TextureInfo)(const GfxTextureNameQuery* query, GfxTextureInfoResult* result);
+	void (*GetEngineTextureNames)(const GfxEmptyQuery* query, GfxEngineTextureNamesResult* result);
+	void (*GetConsoleCommands)(const GfxEmptyQuery* query, GfxConsoleCommandsResult* result);
 	void (*ChangeTextureParams)(const GfxChangeTextureParamsQuery* query, GfxEmptyResult* result);
 	void (*CopyToTexture)(const GfxCopyToTextureQuery* query, GfxEmptyResult* result);
 	void (*UploadTexture)(const GfxUploadTextureQuery* query, GfxEmptyResult* result);

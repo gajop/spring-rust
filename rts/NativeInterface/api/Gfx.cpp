@@ -11,10 +11,13 @@
 #include <vector>
 
 #include "Game/Camera.h"
+#include "Game/SyncedGameCommands.h"
+#include "Game/UnsyncedGameCommands.h"
 #include "Game/CameraHandler.h"
 #include "Game/UI/MiniMap.h"
 #include "Map/MapInfo.h"
 #include "Map/ReadMap.h"
+#include "Rendering/Map/InfoTexture/IInfoTextureHandler.h"
 #include "Rendering/Env/ISky.h"
 #include "Rendering/Env/MapRendering.h"
 #include "Rendering/Env/Particles/ProjectileDrawer.h"
@@ -1685,6 +1688,60 @@ static void TextureInfo(const GfxTextureNameQuery* query, GfxTextureInfoResult* 
 	result->id = texture.id;
 	result->target = texture.target;
 	result->fbo = texture.native != nullptr ? texture.native->fbo : 0;
+}
+
+static void GetEngineTextureNames(const GfxEmptyQuery*, GfxEngineTextureNamesResult* result)
+{
+	static thread_local std::vector<const char*> names;
+	const auto& source = LuaOpenGLUtils::GetEngineTextureNames();
+	names.clear();
+	names.reserve(source.size());
+	for (const std::string& name: source)
+		names.push_back(name.c_str());
+	if (infoTextureHandler != nullptr) {
+		// Named info textures are resolved by the same parser as Lua's
+		// `$info_<mode>`/`$extra_<mode>` syntax.  Report only modes the
+		// running map actually provides.
+		static thread_local std::vector<std::string> dynamicNames;
+		dynamicNames.clear();
+		for (const std::string& mode: infoTextureHandler->GetModes()) {
+			dynamicNames.push_back("$info_" + mode);
+			dynamicNames.push_back("$extra_" + mode);
+		}
+		for (const std::string& name: dynamicNames)
+			names.push_back(name.c_str());
+	}
+	result->error = nullptr;
+	result->names = names.data();
+	result->count = uint32_t(names.size());
+}
+
+static void GetConsoleCommands(const GfxEmptyQuery*, GfxConsoleCommandsResult* result)
+{
+	static thread_local std::vector<GfxConsoleCommandEntry> commands;
+	commands.clear();
+	if (syncedGameCommands == nullptr || unsyncedGameCommands == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		result->entries = nullptr;
+		result->count = 0;
+		return;
+	}
+	const auto append = [](const auto& executors) {
+		for (const auto& pair: executors) {
+			const auto* executor = pair.second;
+			commands.push_back({
+				.command = executor->GetCommand().c_str(),
+				.description = executor->GetDescription().c_str(),
+				.synced = executor->IsSynced(),
+				.cheat = executor->IsCheatRequired(),
+			});
+		}
+	};
+	append(syncedGameCommands->GetSortedActionExecutors());
+	append(unsyncedGameCommands->GetSortedActionExecutors());
+	result->error = nullptr;
+	result->entries = commands.data();
+	result->count = uint32_t(commands.size());
 }
 
 static void ChangeTextureParams(const GfxChangeTextureParamsQuery* query, GfxEmptyResult* result)
@@ -3913,6 +3970,8 @@ const GfxApi GFX_API = {
 	.DeleteTextureFBO = DeleteTextureFBO,
 	.BindTexture = BindTexture,
 	.TextureInfo = TextureInfo,
+	.GetEngineTextureNames = GetEngineTextureNames,
+	.GetConsoleCommands = GetConsoleCommands,
 	.ChangeTextureParams = ChangeTextureParams,
 	.CopyToTexture = CopyToTexture,
 	.UploadTexture = UploadTexture,
