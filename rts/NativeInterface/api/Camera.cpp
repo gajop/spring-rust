@@ -245,7 +245,11 @@ static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRa
 		result->hitPos.x = hitPos.x;
 		result->hitPos.y = hitPos.y;
 		result->hitPos.z = hitPos.z;
-	} else if (dist > 0.0f) {
+	} else if (dist >= 0.0f) {
+		// Lua's Spring.TraceScreenRay treats a zero-distance terrain
+		// intersection as ground. This matters when the camera is exactly on
+		// a terrain surface: reporting a miss makes editor brushes disappear
+		// even though their cursor has a valid map position.
 		result->hitType = 3; // Ground
 		const float3 hitPos = pos + (dir * dist);
 		result->hitPos.x = hitPos.x;
