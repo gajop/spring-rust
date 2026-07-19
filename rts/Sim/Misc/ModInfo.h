@@ -40,6 +40,8 @@ public:
 	std::string version;
 	std::string mutator;
 	std::string description;
+	/// Platform-neutral VFS path stem declared by the selected game's modinfo.lua.
+	std::string nativeModule;
 
 	// Movement behaviour
 	bool allowAircraftToLeaveMap;    //< determines if gunships are allowed to leave map boundaries

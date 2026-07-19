@@ -27,6 +27,7 @@ void CModInfo::ResetState()
 	version.clear();
 	mutator.clear();
 	description.clear();
+	nativeModule.clear();
 
 	{
 		allowAircraftToLeaveMap    = true;
@@ -170,6 +171,7 @@ void CModInfo::Init(const std::string& modFileName)
 		version     = md.GetVersion();
 		mutator     = md.GetMutator();
 		description = md.GetDescription();
+		nativeModule = md.GetNativeModule();
 	}
 
 	LuaParser parser("gamedata/modrules.lua", SPRING_VFS_MOD_BASE, SPRING_VFS_ZIP);
@@ -420,4 +422,3 @@ void CModInfo::Init(const std::string& modFileName)
 	smoothMeshSmoothRadius                   = std::max  (smoothMeshSmoothRadius                  ,    1          );
 	unitQuadPositionUpdateRate               = std::clamp(unitQuadPositionUpdateRate              ,    1    ,   15);
 }
-

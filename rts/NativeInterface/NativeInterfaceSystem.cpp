@@ -12,11 +12,14 @@
 
 #include "NativeInterface.h"
 #include "NativeInterfaceEventClient.h"
+#include "NativeModulePath.h"
 #include "NativeInterface/api/RmlUi.h"
 
 #include "Rml/Backends/RmlUi_Backend.h"
 
 #include "System/EventHandler.h"
+#include "System/FileSystem/FileHandler.h"
+#include "System/FileSystem/VFSModes.h"
 #include "System/Log/ILog.h"
 
 namespace fs = std::filesystem;
@@ -45,26 +48,41 @@ namespace {
 		return result;
 	}
 
-	std::optional<fs::path> CopySOToTemp(const std::string& source_path) {
+	std::optional<fs::path> CopyFileToTemp(const NativeModuleSource& source) {
 		try {
-			if (!fs::exists(source_path)) {
-				std::cerr << "Source file does not exist: " << source_path << std::endl;
-				return std::nullopt;
-			}
-
-			std::string random_name = GenerateRandomName(10) + ".so";
+			const std::string extension = fs::path(source.path).extension().string();
+			std::string random_name = GenerateRandomName(10) + extension;
 			fs::path temp_dir = fs::temp_directory_path();
 			fs::path dest_path = temp_dir / random_name;
 
-			fs::copy_file(source_path, dest_path, fs::copy_options::overwrite_existing);
+			if (source.isVfsFile) {
+				CFileHandler moduleFile(source.path, SPRING_VFS_MOD);
+				std::string moduleData;
+				if (!moduleFile.FileExists() || !moduleFile.LoadStringData(moduleData)) {
+					LOG_L(L_ERROR, "Native module does not exist in the selected game: %s", source.path.c_str());
+					return std::nullopt;
+				}
 
-			std::cout << "File copied successfully to: " << dest_path << std::endl;
+				std::ofstream output(dest_path, std::ios::binary | std::ios::trunc);
+				output.write(moduleData.data(), static_cast<std::streamsize>(moduleData.size()));
+				if (!output) {
+					LOG_L(L_ERROR, "Failed to extract native module to: %s", dest_path.string().c_str());
+					return std::nullopt;
+				}
+			} else {
+				if (!fs::exists(source.path)) {
+					LOG_L(L_ERROR, "Native module source does not exist: %s", source.path.c_str());
+					return std::nullopt;
+				}
+				fs::copy_file(source.path, dest_path, fs::copy_options::overwrite_existing);
+			}
+
 			return dest_path;
 		} catch (const fs::filesystem_error& e) {
-			std::cerr << "Filesystem error: " << e.what() << std::endl;
+			LOG_L(L_ERROR, "Failed to prepare native module: %s", e.what());
 			return std::nullopt;
 		} catch (const std::exception& e) {
-			std::cerr << "Error: " << e.what() << std::endl;
+			LOG_L(L_ERROR, "Failed to prepare native module: %s", e.what());
 			return std::nullopt;
 		}
 	}
@@ -142,7 +160,7 @@ public:
 		}
 	}
 
-	void LoadDLL(const std::string& path) {
+	void LoadDLL(const NativeModuleSource& source) {
 		// Stop callbacks, then let the old module release resources before its
 		// shared object is unloaded. This is essential for module-owned RmlUi
 		// contexts and other host resources.
@@ -156,14 +174,13 @@ public:
 		if (dllHandle != nullptr) {
 			const int closed = dlclose(dllHandle);
 			if (closed != 0) {
-				LOG_L(L_ERROR, "Failed to close plugin %s: %s", path.c_str(), dlerror());
+				LOG_L(L_ERROR, "Failed to close plugin %s: %s", source.path.c_str(), dlerror());
 			}
 			dllHandle = nullptr;
 		}
 
 		// Copy to temp location for hot reload support
-		const auto orig_path = path;
-		auto temp_path = CopySOToTemp(path);
+		auto temp_path = CopyFileToTemp(source);
 		if (!temp_path.has_value()) {
 			LOG_L(L_ERROR, "Failed to copy plugin to temp location");
 			return;
@@ -175,7 +192,7 @@ public:
 			return;
 		}
 
-		LOG("Successfully opened plugin %s", orig_path.c_str());
+		LOG("Successfully opened native module %s", source.path.c_str());
 
 		// Check module API version BEFORE calling any module code
 		uint32_t* moduleVersion = static_cast<uint32_t*>(dlsym(dllHandle, "NativeModuleApiVersion"));
@@ -235,11 +252,11 @@ public:
 	}
 
 	void ReloadNow() {
-		const char* envPath = std::getenv("SPRING_NATIVE_MODULE");
-		if (envPath == nullptr || envPath[0] == '\0')
+		const auto source = ResolveNativeModuleSource();
+		if (!source.has_value())
 			return;
 
-		LoadDLL(envPath);
+		LoadDLL(*source);
 	}
 
 	void Update() {
