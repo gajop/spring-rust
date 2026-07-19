@@ -85,6 +85,7 @@ make_global_var(sources_engine_Game
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/VFS.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/WeaponDefs.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/NativeInterfaceEventClient.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/NativeModulePath.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/NativeInterfaceSystem.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/SelectedUnitsHandler.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/SelectedUnitsAI.cpp"
