@@ -2,7 +2,6 @@
 
 #include "NativeInterfaceSystem.h"
 
-#include <dlfcn.h>
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
@@ -21,6 +20,7 @@
 #include "System/FileSystem/FileHandler.h"
 #include "System/FileSystem/VFSModes.h"
 #include "System/Log/ILog.h"
+#include "System/Platform/SharedLib.h"
 
 namespace fs = std::filesystem;
 
@@ -94,7 +94,7 @@ namespace {
 class NativeInterfaceSystem::Impl {
 public:
 	NativeInterface nativeInterface;
-	void* dllHandle = nullptr;
+	std::unique_ptr<SharedLib> sharedLib;
 	std::unique_ptr<NativeInterfaceEventClient> eventClient;
 
 	Impl() {
@@ -154,10 +154,7 @@ public:
 			eventClient.reset();
 		}
 
-		if (dllHandle != nullptr) {
-			dlclose(dllHandle);
-			dllHandle = nullptr;
-		}
+		sharedLib.reset();
 	}
 
 	void LoadDLL(const NativeModuleSource& source) {
@@ -171,13 +168,7 @@ public:
 			eventClient.reset();
 		}
 
-		if (dllHandle != nullptr) {
-			const int closed = dlclose(dllHandle);
-			if (closed != 0) {
-				LOG_L(L_ERROR, "Failed to close plugin %s: %s", source.path.c_str(), dlerror());
-			}
-			dllHandle = nullptr;
-		}
+		sharedLib.reset();
 
 		// Copy to temp location for hot reload support
 		auto temp_path = CopyFileToTemp(source);
@@ -186,20 +177,19 @@ public:
 			return;
 		}
 
-		dllHandle = dlopen(temp_path->c_str(), RTLD_LAZY);
-		if (!dllHandle) {
-			LOG_L(L_ERROR, "Failed to open plugin %s: %s", temp_path->c_str(), dlerror());
+		sharedLib.reset(SharedLib::Instantiate(temp_path->string()));
+		if (!sharedLib) {
+			LOG_L(L_ERROR, "Failed to open plugin %s", temp_path->string().c_str());
 			return;
 		}
 
 		LOG("Successfully opened native module %s", source.path.c_str());
 
 		// Check module API version BEFORE calling any module code
-		uint32_t* moduleVersion = static_cast<uint32_t*>(dlsym(dllHandle, "NativeModuleApiVersion"));
+		uint32_t* moduleVersion = static_cast<uint32_t*>(sharedLib->FindAddress("NativeModuleApiVersion"));
 		if (moduleVersion == nullptr) {
 			LOG_L(L_ERROR, "Module does not export NativeModuleApiVersion symbol - incompatible module");
-			dlclose(dllHandle);
-			dllHandle = nullptr;
+			sharedLib.reset();
 			return;
 		}
 
@@ -222,8 +212,7 @@ public:
 			LOG_L(L_ERROR, "Incompatible API version: module v%u.%u.%u, host v%u.%u.%u (major version mismatch)",
 				moduleMajor, moduleMinor, modulePatch,
 				hostMajor, hostMinor, hostPatch);
-			dlclose(dllHandle);
-			dllHandle = nullptr;
+			sharedLib.reset();
 			return;
 		}
 
@@ -231,13 +220,12 @@ public:
 			LOG_L(L_ERROR, "Incompatible API version: module v%u.%u.%u, host v%u.%u.%u (module requires newer minor version)",
 				moduleMajor, moduleMinor, modulePatch,
 				hostMajor, hostMinor, hostPatch);
-			dlclose(dllHandle);
-			dllHandle = nullptr;
+			sharedLib.reset();
 			return;
 		}
 
 		// Create event client, load symbols, and register with event handler
-		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, dllHandle);
+		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, sharedLib.get());
 		eventClient->LoadSymbols();
 		eventClient->Initialize();
 		eventHandler.AddClient(eventClient.get());
