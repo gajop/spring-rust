@@ -8,7 +8,7 @@ pub enum ConfigValueType {
     Float,
     String,
     Boolean,
-    Unknown(u32),
+    Unknown(i64),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -60,6 +60,18 @@ impl ConfigParameter {
 
 impl From<u32> for ConfigValueType {
     fn from(value: u32) -> Self {
+        Self::from(i64::from(value))
+    }
+}
+
+impl From<i32> for ConfigValueType {
+    fn from(value: i32) -> Self {
+        Self::from(i64::from(value))
+    }
+}
+
+impl From<i64> for ConfigValueType {
+    fn from(value: i64) -> Self {
         match value {
             0 => Self::Integer,
             1 => Self::Float,
