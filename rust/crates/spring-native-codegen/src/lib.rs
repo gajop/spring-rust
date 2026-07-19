@@ -698,19 +698,16 @@ fn visit_entity(
     structs: &mut HashMap<String, StructDef>,
     api: &mut Option<ApiDef>,
 ) {
-    match entity.get_kind() {
-        EntityKind::StructDecl => {
-            if let Some(name) = entity.get_name() {
-                if entity.is_definition() {
-                    if name == api_name {
-                        *api = Some(parse_api_struct(entity));
-                    } else if is_query_struct(&name) {
-                        structs.insert(name.clone(), parse_struct(entity));
-                    }
+    if entity.get_kind() == EntityKind::StructDecl {
+        if let Some(name) = entity.get_name() {
+            if entity.is_definition() {
+                if name == api_name {
+                    *api = Some(parse_api_struct(entity));
+                } else if is_query_struct(&name) {
+                    structs.insert(name.clone(), parse_struct(entity));
                 }
             }
         }
-        _ => {}
     }
 
     entity.visit_children(|child, _| {
@@ -828,16 +825,12 @@ fn classify_type(ty: Type) -> CType {
             let element_ty = ty.get_element_type();
             let element = element_ty
                 .as_ref()
-                .map(|t| classify_type(t.clone()))
+                .map(|t| classify_type(*t))
                 .unwrap_or(CType::Unknown("unknown".into()));
             // Calculate array length: total_size / element_size
             let total_size = ty.get_sizeof().unwrap_or(0);
             let elem_size = element_ty.and_then(|t| t.get_sizeof().ok()).unwrap_or(1);
-            let len = if elem_size > 0 {
-                total_size / elem_size
-            } else {
-                0
-            };
+            let len = total_size.checked_div(elem_size).unwrap_or(0);
             CType::Array {
                 element: Box::new(element),
                 length: len as u64,
@@ -1381,67 +1374,67 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                 }
 
                 // Check if the next field is a count
-                if i + 1 < query.fields.len() {
-                    if matches!(query.fields[i + 1].ty, CType::Primitive(Primitive::U32)) {
-                        // Special case: const char** + length should be a raw pointer (for Memory::Free* functions)
-                        if let CType::Pointer {
-                            pointee: inner_pointee,
-                            is_const: inner_const,
-                        } = &**pointee
+                if i + 1 < query.fields.len()
+                    && matches!(query.fields[i + 1].ty, CType::Primitive(Primitive::U32))
+                {
+                    // Special case: const char** + length should be a raw pointer (for Memory::Free* functions)
+                    if let CType::Pointer {
+                        pointee: inner_pointee,
+                        is_const: inner_const,
+                    } = &**pointee
+                    {
+                        if *inner_const
+                            && matches!(**inner_pointee, CType::Primitive(Primitive::Char))
                         {
-                            if *inner_const
-                                && matches!(**inner_pointee, CType::Primitive(Primitive::Char))
-                            {
-                                let param_name = make_param_name(&field.name);
-                                params.push(ParamSpec {
-                                    name: param_name.clone(),
-                                    ty: ParamType::Primitive("*mut *const i8"),
-                                });
-                                inits.push(QueryInitField {
-                                    field: make_field_name(&field.name),
-                                    expr: QueryExpr::Param(param_name.clone()),
-                                });
-                                // Also add the length field
-                                let len_param_name = make_param_name(&query.fields[i + 1].name);
-                                params.push(ParamSpec {
-                                    name: len_param_name.clone(),
-                                    ty: ParamType::Primitive("u32"),
-                                });
-                                inits.push(QueryInitField {
-                                    field: make_field_name(&query.fields[i + 1].name),
-                                    expr: QueryExpr::Param(len_param_name),
-                                });
-                                i += 2;
-                                continue;
-                            }
+                            let param_name = make_param_name(&field.name);
+                            params.push(ParamSpec {
+                                name: param_name.clone(),
+                                ty: ParamType::Primitive("*mut *const i8"),
+                            });
+                            inits.push(QueryInitField {
+                                field: make_field_name(&field.name),
+                                expr: QueryExpr::Param(param_name.clone()),
+                            });
+                            // Also add the length field
+                            let len_param_name = make_param_name(&query.fields[i + 1].name);
+                            params.push(ParamSpec {
+                                name: len_param_name.clone(),
+                                ty: ParamType::Primitive("u32"),
+                            });
+                            inits.push(QueryInitField {
+                                field: make_field_name(&query.fields[i + 1].name),
+                                expr: QueryExpr::Param(len_param_name),
+                            });
+                            i += 2;
+                            continue;
                         }
-
-                        let elem = rust_type_from_pointer(pointee)
-                            .ok_or_else(|| anyhow!("unsupported pointer field {}", field.name))?;
-                        let param_name = make_param_name(&field.name);
-                        params.push(ParamSpec {
-                            name: param_name.clone(),
-                            ty: ParamType::Slice {
-                                element: elem.clone(),
-                            },
-                        });
-                        inits.push(QueryInitField {
-                            field: make_field_name(&field.name),
-                            expr: QueryExpr::SlicePtr {
-                                param: param_name.clone(),
-                                mutable_ptr: !is_const,
-                            },
-                        });
-                        inits.push(QueryInitField {
-                            field: make_field_name(&query.fields[i + 1].name),
-                            expr: QueryExpr::SliceLen {
-                                param: param_name,
-                                cast: "u32",
-                            },
-                        });
-                        i += 2;
-                        continue;
                     }
+
+                    let elem = rust_type_from_pointer(pointee)
+                        .ok_or_else(|| anyhow!("unsupported pointer field {}", field.name))?;
+                    let param_name = make_param_name(&field.name);
+                    params.push(ParamSpec {
+                        name: param_name.clone(),
+                        ty: ParamType::Slice {
+                            element: elem.clone(),
+                        },
+                    });
+                    inits.push(QueryInitField {
+                        field: make_field_name(&field.name),
+                        expr: QueryExpr::SlicePtr {
+                            param: param_name.clone(),
+                            mutable_ptr: !is_const,
+                        },
+                    });
+                    inits.push(QueryInitField {
+                        field: make_field_name(&query.fields[i + 1].name),
+                        expr: QueryExpr::SliceLen {
+                            param: param_name,
+                            cast: "u32",
+                        },
+                    });
+                    i += 2;
+                    continue;
                 }
 
                 // void* or unknown pointer types - use raw pointer
