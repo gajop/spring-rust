@@ -71,11 +71,16 @@ fn main() {
     println!("cargo:rerun-if-changed={}", include_dir.display());
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let codegen = spring_native_codegen::CodeGenerator::new()
+        .unwrap_or_else(|error| panic!("initialize code generator: {error}"));
 
     // Generate code for all APIs
     for (i, (module_name, _)) in api_headers.iter().enumerate() {
         let generator = match *module_name {
-            "units_query" => spring_native_codegen::generate_units_query as fn(&_, &_) -> _,
+            "units_query" => {
+                spring_native_codegen::generate_units_query
+                    as fn(&spring_native_codegen::CodeGenerator, &_, &_) -> _
+            }
             "units_info" => spring_native_codegen::generate_units_info,
             "units_weapons" => spring_native_codegen::generate_units_weapons,
             "units_commands" => spring_native_codegen::generate_units_commands,
@@ -121,7 +126,7 @@ fn main() {
             _ => panic!("Unknown module: {}", module_name),
         };
 
-        let code = generator(&headers[i], &includes)
+        let code = generator(&codegen, &headers[i], &includes)
             .unwrap_or_else(|e| panic!("{} codegen: {}", module_name, e));
         fs::write(out_dir.join(format!("{}_generated.rs", module_name)), code)
             .unwrap_or_else(|e| panic!("write {}: {}", module_name, e));
@@ -132,7 +137,8 @@ fn main() {
     let sub_apis = [
         (
             "team_control",
-            spring_native_codegen::generate_team_control as fn(&_, &_) -> _,
+            spring_native_codegen::generate_team_control
+                as fn(&spring_native_codegen::CodeGenerator, &_, &_) -> _,
         ),
         ("unit_control", spring_native_codegen::generate_unit_control),
         (
@@ -156,7 +162,7 @@ fn main() {
     ];
 
     for (name, generator) in &sub_apis {
-        let code = generator(&synced_ctrl_header, &includes)
+        let code = generator(&codegen, &synced_ctrl_header, &includes)
             .unwrap_or_else(|e| panic!("{} codegen: {}", name, e));
         fs::write(out_dir.join(format!("{}_generated.rs", name)), code)
             .unwrap_or_else(|e| panic!("write {}: {}", name, e));
@@ -166,7 +172,7 @@ fn main() {
     let unsynced_read_header = project_root.join("rts/NativeInterface/api/UnsyncedRead.h");
     println!("cargo:rerun-if-changed={}", unsynced_read_header.display());
     let unit_rendering_code =
-        spring_native_codegen::generate_unit_rendering(&unsynced_read_header, &includes)
+        spring_native_codegen::generate_unit_rendering(&codegen, &unsynced_read_header, &includes)
             .unwrap_or_else(|e| panic!("unit_rendering codegen: {}", e));
     fs::write(
         out_dir.join("unit_rendering_generated.rs"),

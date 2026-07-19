@@ -11,8 +11,12 @@ pub struct ApiConfig<'a> {
     pub wrapper_struct: &'a str,
 }
 
-pub fn generate_units_query(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_units_query(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -22,8 +26,12 @@ pub fn generate_units_query(header: &Path, include_dirs: &[PathBuf]) -> Result<S
     )
 }
 
-pub fn generate_units_info(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_units_info(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -33,8 +41,12 @@ pub fn generate_units_info(header: &Path, include_dirs: &[PathBuf]) -> Result<St
     )
 }
 
-pub fn generate_teams(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_teams(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -44,8 +56,12 @@ pub fn generate_teams(header: &Path, include_dirs: &[PathBuf]) -> Result<String>
     )
 }
 
-pub fn generate_units_weapons(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_units_weapons(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -55,8 +71,12 @@ pub fn generate_units_weapons(header: &Path, include_dirs: &[PathBuf]) -> Result
     )
 }
 
-pub fn generate_units_commands(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_units_commands(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -66,8 +86,12 @@ pub fn generate_units_commands(header: &Path, include_dirs: &[PathBuf]) -> Resul
     )
 }
 
-pub fn generate_units_pieces(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_units_pieces(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -77,8 +101,12 @@ pub fn generate_units_pieces(header: &Path, include_dirs: &[PathBuf]) -> Result<
     )
 }
 
-pub fn generate_features(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_features(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -88,8 +116,12 @@ pub fn generate_features(header: &Path, include_dirs: &[PathBuf]) -> Result<Stri
     )
 }
 
-pub fn generate_projectiles(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_projectiles(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -99,8 +131,12 @@ pub fn generate_projectiles(header: &Path, include_dirs: &[PathBuf]) -> Result<S
     )
 }
 
-pub fn generate_los(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_los(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -110,8 +146,12 @@ pub fn generate_los(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
     )
 }
 
-pub fn generate_unit_defs(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_unit_defs(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -121,8 +161,12 @@ pub fn generate_unit_defs(header: &Path, include_dirs: &[PathBuf]) -> Result<Str
     )
 }
 
-pub fn generate_feature_defs(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_feature_defs(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -132,8 +176,12 @@ pub fn generate_feature_defs(header: &Path, include_dirs: &[PathBuf]) -> Result<
     )
 }
 
-pub fn generate_weapon_defs(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_weapon_defs(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -143,8 +191,12 @@ pub fn generate_weapon_defs(header: &Path, include_dirs: &[PathBuf]) -> Result<S
     )
 }
 
-pub fn generate_game(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_game(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -154,8 +206,12 @@ pub fn generate_game(header: &Path, include_dirs: &[PathBuf]) -> Result<String> 
     )
 }
 
-pub fn generate_terrain(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_terrain(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -165,8 +221,12 @@ pub fn generate_terrain(header: &Path, include_dirs: &[PathBuf]) -> Result<Strin
     )
 }
 
-pub fn generate_player(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_player(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -176,8 +236,12 @@ pub fn generate_player(header: &Path, include_dirs: &[PathBuf]) -> Result<String
     )
 }
 
-pub fn generate_math_extra(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_math_extra(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -187,8 +251,12 @@ pub fn generate_math_extra(header: &Path, include_dirs: &[PathBuf]) -> Result<St
     )
 }
 
-pub fn generate_metal_map(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_metal_map(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -198,8 +266,12 @@ pub fn generate_metal_map(header: &Path, include_dirs: &[PathBuf]) -> Result<Str
     )
 }
 
-pub fn generate_path_finder(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_path_finder(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -209,8 +281,12 @@ pub fn generate_path_finder(header: &Path, include_dirs: &[PathBuf]) -> Result<S
     )
 }
 
-pub fn generate_platform(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_platform(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -220,8 +296,12 @@ pub fn generate_platform(header: &Path, include_dirs: &[PathBuf]) -> Result<Stri
     )
 }
 
-pub fn generate_rules_params(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_rules_params(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -231,8 +311,12 @@ pub fn generate_rules_params(header: &Path, include_dirs: &[PathBuf]) -> Result<
     )
 }
 
-pub fn generate_move_ctrl(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_move_ctrl(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -242,8 +326,12 @@ pub fn generate_move_ctrl(header: &Path, include_dirs: &[PathBuf]) -> Result<Str
     )
 }
 
-pub fn generate_synced_ctrl(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_synced_ctrl(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -253,8 +341,12 @@ pub fn generate_synced_ctrl(header: &Path, include_dirs: &[PathBuf]) -> Result<S
     )
 }
 
-pub fn generate_camera(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_camera(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -264,8 +356,12 @@ pub fn generate_camera(header: &Path, include_dirs: &[PathBuf]) -> Result<String
     )
 }
 
-pub fn generate_input(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_input(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -275,8 +371,12 @@ pub fn generate_input(header: &Path, include_dirs: &[PathBuf]) -> Result<String>
     )
 }
 
-pub fn generate_display(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_display(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -286,8 +386,12 @@ pub fn generate_display(header: &Path, include_dirs: &[PathBuf]) -> Result<Strin
     )
 }
 
-pub fn generate_selection(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_selection(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -297,8 +401,12 @@ pub fn generate_selection(header: &Path, include_dirs: &[PathBuf]) -> Result<Str
     )
 }
 
-pub fn generate_vfs(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_vfs(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -308,8 +416,12 @@ pub fn generate_vfs(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
     )
 }
 
-pub fn generate_rml_ui(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_rml_ui(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -319,8 +431,12 @@ pub fn generate_rml_ui(header: &Path, include_dirs: &[PathBuf]) -> Result<String
     )
 }
 
-pub fn generate_sound(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_sound(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -330,8 +446,12 @@ pub fn generate_sound(header: &Path, include_dirs: &[PathBuf]) -> Result<String>
     )
 }
 
-pub fn generate_messages(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_messages(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -341,8 +461,12 @@ pub fn generate_messages(header: &Path, include_dirs: &[PathBuf]) -> Result<Stri
     )
 }
 
-pub fn generate_config(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_config(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -352,8 +476,12 @@ pub fn generate_config(header: &Path, include_dirs: &[PathBuf]) -> Result<String
     )
 }
 
-pub fn generate_tracing(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_tracing(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -363,8 +491,12 @@ pub fn generate_tracing(header: &Path, include_dirs: &[PathBuf]) -> Result<Strin
     )
 }
 
-pub fn generate_lights(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_lights(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -374,8 +506,12 @@ pub fn generate_lights(header: &Path, include_dirs: &[PathBuf]) -> Result<String
     )
 }
 
-pub fn generate_gfx(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_gfx(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -385,8 +521,12 @@ pub fn generate_gfx(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
     )
 }
 
-pub fn generate_utils(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_utils(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -396,8 +536,12 @@ pub fn generate_utils(header: &Path, include_dirs: &[PathBuf]) -> Result<String>
     )
 }
 
-pub fn generate_icons(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_icons(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -407,8 +551,12 @@ pub fn generate_icons(header: &Path, include_dirs: &[PathBuf]) -> Result<String>
     )
 }
 
-pub fn generate_markers(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_markers(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -418,8 +566,12 @@ pub fn generate_markers(header: &Path, include_dirs: &[PathBuf]) -> Result<Strin
     )
 }
 
-pub fn generate_ground_decals(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_ground_decals(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -429,8 +581,12 @@ pub fn generate_ground_decals(header: &Path, include_dirs: &[PathBuf]) -> Result
     )
 }
 
-pub fn generate_system_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_system_control(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -440,8 +596,12 @@ pub fn generate_system_control(header: &Path, include_dirs: &[PathBuf]) -> Resul
     )
 }
 
-pub fn generate_profiling(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_profiling(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -451,8 +611,12 @@ pub fn generate_profiling(header: &Path, include_dirs: &[PathBuf]) -> Result<Str
     )
 }
 
-pub fn generate_memory(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_memory(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -462,8 +626,12 @@ pub fn generate_memory(header: &Path, include_dirs: &[PathBuf]) -> Result<String
     )
 }
 
-pub fn generate_unsynced_ctrl(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_unsynced_ctrl(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -474,8 +642,12 @@ pub fn generate_unsynced_ctrl(header: &Path, include_dirs: &[PathBuf]) -> Result
 }
 
 // SyncedCtrl sub-APIs
-pub fn generate_team_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_team_control(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -485,8 +657,12 @@ pub fn generate_team_control(header: &Path, include_dirs: &[PathBuf]) -> Result<
     )
 }
 
-pub fn generate_unit_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_unit_control(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -496,8 +672,12 @@ pub fn generate_unit_control(header: &Path, include_dirs: &[PathBuf]) -> Result<
     )
 }
 
-pub fn generate_feature_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_feature_control(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -507,8 +687,12 @@ pub fn generate_feature_control(header: &Path, include_dirs: &[PathBuf]) -> Resu
     )
 }
 
-pub fn generate_terrain_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_terrain_control(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -518,8 +702,12 @@ pub fn generate_terrain_control(header: &Path, include_dirs: &[PathBuf]) -> Resu
     )
 }
 
-pub fn generate_projectile_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_projectile_control(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -529,8 +717,12 @@ pub fn generate_projectile_control(header: &Path, include_dirs: &[PathBuf]) -> R
     )
 }
 
-pub fn generate_effects_control(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_effects_control(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -540,8 +732,12 @@ pub fn generate_effects_control(header: &Path, include_dirs: &[PathBuf]) -> Resu
     )
 }
 
-pub fn generate_game_config(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_game_config(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -551,8 +747,12 @@ pub fn generate_game_config(header: &Path, include_dirs: &[PathBuf]) -> Result<S
     )
 }
 
-pub fn generate_cob_script(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_cob_script(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -562,8 +762,12 @@ pub fn generate_cob_script(header: &Path, include_dirs: &[PathBuf]) -> Result<St
     )
 }
 
-pub fn generate_unsynced_read(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_unsynced_read(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -573,8 +777,12 @@ pub fn generate_unsynced_read(header: &Path, include_dirs: &[PathBuf]) -> Result
     )
 }
 
-pub fn generate_unit_rendering(header: &Path, include_dirs: &[PathBuf]) -> Result<String> {
-    generate_api(
+pub fn generate_unit_rendering(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
@@ -584,9 +792,25 @@ pub fn generate_unit_rendering(header: &Path, include_dirs: &[PathBuf]) -> Resul
     )
 }
 
-fn generate_api(header: &Path, include_dirs: &[PathBuf], config: ApiConfig<'_>) -> Result<String> {
-    let spec = parse_api(header, include_dirs, config.api_struct)?;
-    render_api(&spec, &config)
+pub struct CodeGenerator {
+    clang: Clang,
+}
+
+impl CodeGenerator {
+    pub fn new() -> Result<Self> {
+        let clang = Clang::new().map_err(|error| anyhow!(error))?;
+        Ok(Self { clang })
+    }
+
+    fn generate_api(
+        &self,
+        header: &Path,
+        include_dirs: &[PathBuf],
+        config: ApiConfig<'_>,
+    ) -> Result<String> {
+        let spec = parse_api(&self.clang, header, include_dirs, config.api_struct)?;
+        render_api(&spec, &config)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -672,9 +896,13 @@ struct ApiFunction {
     result: String,
 }
 
-fn parse_api(header: &Path, include_dirs: &[PathBuf], api_struct: &str) -> Result<ApiSpec> {
-    let clang = Clang::new().map_err(|e| anyhow!(e))?;
-    let index = Index::new(&clang, false, false);
+fn parse_api(
+    clang: &Clang,
+    header: &Path,
+    include_dirs: &[PathBuf],
+    api_struct: &str,
+) -> Result<ApiSpec> {
+    let index = Index::new(clang, false, false);
     let mut parser = index.parser(header);
     let mut args = vec!["-xc++".to_string(), "-std=c++17".to_string()];
     for dir in include_dirs {
