@@ -206,12 +206,12 @@ pub use los::Los;
 pub use markers::Markers;
 pub use math_extra::MathExtra;
 pub use memory::Memory;
-pub use messages::Messages;
+pub use messages::{ConsoleEntry, Messages};
 pub use metal_map::MetalMap;
 pub use move_ctrl::MoveCtrl;
 pub use path_finder::PathFinder;
 pub use platform::Platform;
-pub use player::Player;
+pub use player::{Player, RosterEntry};
 pub use profiling::Profiling;
 pub use projectiles::Projectiles;
 pub use rml_ui::RmlUi;
@@ -223,7 +223,7 @@ pub use synced_ctrl::{
     TeamControl, TerrainControl, UnitControl,
 };
 pub use system_control::SystemControl;
-pub use teams::{TeamInfo, Teams};
+pub use teams::{PlayerInfo, TeamInfo, Teams};
 pub use terrain::Terrain;
 pub use tracing::Tracing;
 pub use unit_defs::UnitDefs;
