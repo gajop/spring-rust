@@ -89,6 +89,11 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           path: src
+      - name: Fetch upstream version tags
+        if: github.repository != 'beyond-all-reason/RecoilEngine'
+        run: |
+          git -C src fetch --force --tags \
+            https://github.com/beyond-all-reason/RecoilEngine.git
       - name: Setup ccache cache
         if: github.repository == 'beyond-all-reason/RecoilEngine'
         uses: namespacelabs/nscloud-cache-action@v1
