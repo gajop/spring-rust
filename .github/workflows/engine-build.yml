@@ -67,6 +67,7 @@ jobs:
   build-engine:
     if: github.repository == 'beyond-all-reason/RecoilEngine' || github.event_name == 'workflow_dispatch'
     strategy:
+      fail-fast: false
       matrix:
         target: ${{ fromJSON(inputs.targets || '["amd64-linux","arm64-linux","amd64-windows"]') }}
     name: Build ${{ matrix.target }} engine

@@ -41,6 +41,7 @@
 #include "System/Platform/Watchdog.h"
 #include "System/Platform/WindowManagerHelper.h"
 #include "System/SafeUtil.h"
+#include "System/Sound/ISound.h"
 #include "System/EventClient.h"
 #include "System/FileSystem/DataDirLocater.h"
 
