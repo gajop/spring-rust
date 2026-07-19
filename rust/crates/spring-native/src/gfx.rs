@@ -2,7 +2,15 @@ use std::ffi::CStr;
 use std::mem::MaybeUninit;
 use std::slice;
 
-use crate::{error::Error, sys};
+use crate::{error::Error, raw::copy_c_string, sys};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ConsoleCommand {
+    pub command: String,
+    pub description: String,
+    pub synced: bool,
+    pub cheat: bool,
+}
 
 pub struct Gfx<'a> {
     api: &'a sys::GfxApi,
@@ -11,6 +19,29 @@ pub struct Gfx<'a> {
 impl<'a> Gfx<'a> {
     pub(crate) fn new(api: &'a sys::GfxApi) -> Self {
         Self { api }
+    }
+
+    pub fn get_console_command_entries(&self) -> Result<Vec<ConsoleCommand>, Error> {
+        self.get_console_commands().map(|commands| {
+            commands
+                .into_iter()
+                .filter_map(ConsoleCommand::from_raw)
+                .collect()
+        })
+    }
+}
+
+impl ConsoleCommand {
+    fn from_raw(command: sys::GfxConsoleCommandEntry) -> Option<Self> {
+        // SAFETY: command metadata is engine-owned and valid for this call.
+        unsafe {
+            Some(Self {
+                command: copy_c_string(command.command)?,
+                description: copy_c_string(command.description).unwrap_or_default(),
+                synced: command.synced,
+                cheat: command.cheat,
+            })
+        }
     }
 }
 
