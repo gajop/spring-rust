@@ -171,7 +171,7 @@ Macro    (fetch_spring_version dir prefix)
 			# deterministic and self-contained by deriving the base version from
 			# the commit date instead of depending on another repository's tags.
 			If     ("${${prefix}_Describe}" MATCHES "^[0-9a-f]+$")
-				git_util_command(${prefix}_CommitDate "${dir}" show -s --format=%cs HEAD)
+				git_util_command(${prefix}_CommitDate "${dir}" show -s --date=short --format=%ad HEAD)
 				git_util_command(${prefix}_ShortHash "${dir}" rev-parse --short=7 HEAD)
 				If     (NOT ${prefix}_CommitDate OR NOT ${prefix}_ShortHash)
 					Message(FATAL_ERROR "Failed to derive a tagless version for ${prefix}.")
