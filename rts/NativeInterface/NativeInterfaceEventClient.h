@@ -20,6 +20,7 @@ class WeaponDef;
 struct Command;
 struct SCommandDescription;
 struct SRectangle;
+class SharedLib;
 
 /**
  * Function pointer types for native module callbacks (using Query/Result pattern)
@@ -179,7 +180,7 @@ namespace fptr {
  */
 class NativeInterfaceEventClient : public CEventClient {
 public:
-	NativeInterfaceEventClient(NativeInterface* nativeInterface, void* dllHandle);
+	NativeInterfaceEventClient(NativeInterface* nativeInterface, SharedLib* sharedLib);
 
 	// Load symbols from DLL
 	void LoadSymbols();
@@ -188,7 +189,7 @@ public:
 	void* Initialize();
 
 	// Release module-owned state before its shared object is unloaded. Must be
-	// called after the event client is unregistered and while m_dllHandle is valid.
+	// called after the event client is unregistered and while m_sharedLib is valid.
 	void Shutdown();
 
 	// CEventClient interface
@@ -335,7 +336,7 @@ public:
 
 private:
 	NativeInterface* m_nativeInterface;
-	void* m_dllHandle;
+	SharedLib* m_sharedLib;
 	void* m_moduleData = nullptr;
 	bool m_initialized = false;
 

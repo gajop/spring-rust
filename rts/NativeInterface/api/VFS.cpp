@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <fstream>
 #include <algorithm>
 
 extern "C" bool GetNativeGfxTextureInfo(const char* name, uint32_t* id, int32_t* xsize, int32_t* ysize, uint32_t* target);

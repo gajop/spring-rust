@@ -2,7 +2,6 @@
 
 #include "NativeInterfaceEventClient.h"
 
-#include <dlfcn.h>
 #include <cstring>
 
 #include "Game/GameHelper.h"
@@ -15,18 +14,18 @@
 #include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Sim/Weapons/Weapon.h"
 #include "System/Log/ILog.h"
+#include "System/Platform/SharedLib.h"
 #include "System/Rectangle.h"
 #ifdef SYNCCHECK
 #include "System/Sync/SyncChecker.h"
 #endif
 
-#define LOAD_SYMBOL(SymbolName)                                                   \
-	{                                                                               \
-		m_##SymbolName##FuncPtr = reinterpret_cast<fptr::SymbolName##FuncPtr>(      \
-				dlsym(m_dllHandle, #SymbolName));                                      \
-		if (m_##SymbolName##FuncPtr == nullptr) {                                   \
-			LOG_L(L_ERROR, "Failed to load symbol " #SymbolName ": %s", dlerror());   \
-		}                                                                            \
+#define LOAD_SYMBOL(SymbolName)                                                               \
+	{                                                                                           \
+		m_##SymbolName##FuncPtr = m_sharedLib->FindAddressTyped<fptr::SymbolName##FuncPtr>(      \
+			#SymbolName);                                                                          \
+		if (m_##SymbolName##FuncPtr == nullptr)                                                   \
+			LOG_L(L_ERROR, "Failed to load native module symbol " #SymbolName);                     \
 	}
 
 namespace {
@@ -54,10 +53,10 @@ namespace {
 	};
 }
 
-NativeInterfaceEventClient::NativeInterfaceEventClient(NativeInterface* nativeInterface, void* dllHandle)
+NativeInterfaceEventClient::NativeInterfaceEventClient(NativeInterface* nativeInterface, SharedLib* sharedLib)
 	: CEventClient("[NativeInterfaceEventClient]", 23253, false)
 	, m_nativeInterface(nativeInterface)
-	, m_dllHandle(dllHandle)
+	, m_sharedLib(sharedLib)
 {
 }
 
