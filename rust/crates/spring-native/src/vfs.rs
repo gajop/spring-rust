@@ -1,6 +1,6 @@
 use std::{ffi::CStr, mem::MaybeUninit, slice};
 
-use crate::{error::Error, sys};
+use crate::{error::Error, raw::copy_c_string, sys};
 
 pub struct Vfs<'a> {
     api: &'a sys::VFSApi,
@@ -66,7 +66,8 @@ impl<'a> Vfs<'a> {
 }
 
 fn directory_entry(entry: &sys::DirEntry) -> Option<DirectoryEntry> {
-    c_string(entry.name).map(|name| DirectoryEntry {
+    // SAFETY: `DirEntry::name` is engine-owned and valid for this call.
+    unsafe { copy_c_string(entry.name) }.map(|name| DirectoryEntry {
         name,
         is_directory: entry.isDirectory,
     })
@@ -76,22 +77,11 @@ fn entry_names(entries: Vec<sys::DirEntry>, directories: bool) -> Vec<String> {
     entries
         .iter()
         .filter(|entry| entry.isDirectory == directories)
-        .filter_map(|entry| c_string(entry.name))
+        .filter_map(|entry| {
+            // SAFETY: `DirEntry::name` is engine-owned and valid for this call.
+            unsafe { copy_c_string(entry.name) }
+        })
         .collect()
-}
-
-fn c_string(raw: *const std::ffi::c_char) -> Option<String> {
-    if raw.is_null() {
-        return None;
-    }
-    // SAFETY: directory entries are engine-owned NUL-terminated strings that
-    // remain valid for this call. Copying them here prevents the raw pointer
-    // from escaping the safe binding.
-    Some(
-        unsafe { CStr::from_ptr(raw) }
-            .to_string_lossy()
-            .into_owned(),
-    )
 }
 
 include!(concat!(env!("OUT_DIR"), "/vfs_generated.rs"));
