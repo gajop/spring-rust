@@ -166,6 +166,7 @@ mod player;
 pub mod prelude;
 mod profiling;
 mod projectiles;
+mod raw;
 mod rml_ui;
 mod rules_params;
 mod selection;
@@ -194,7 +195,7 @@ pub use display::Display;
 pub use error::Error;
 pub use feature_defs::FeatureDefs;
 pub use features::Features;
-pub use game::Game;
+pub use game::{Game, GameModInfo, SideData};
 pub use gfx::Gfx;
 pub use ground_decals::GroundDecals;
 pub use icons::Icons;
@@ -234,7 +235,7 @@ pub use units_weapons::UnitsWeapons;
 pub use unsynced_ctrl::UnsyncedCtrl;
 pub use unsynced_read::{UnitRendering, UnsyncedRead};
 pub use utils::Utils;
-pub use vfs::Vfs;
+pub use vfs::{DirectoryEntry, Vfs};
 pub use weapon_defs::WeaponDefs;
 
 pub mod sys {
