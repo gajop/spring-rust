@@ -158,7 +158,7 @@ macro_rules! impl_callback {
         ) -> |$module:ident: &mut $module_type:ty| $body:block
     ) => {
         #[no_mangle]
-        pub extern "C" fn $name(
+        pub unsafe extern "C" fn $name(
             _interface: *const $iface,
             module_data: *mut std::ffi::c_void,
             _query: *const $query,
@@ -224,7 +224,7 @@ macro_rules! export_module {
 
         /// Module entry point - Spring calls this when loading the module
         #[no_mangle]
-        pub extern "C" fn InitializeNativeModule(
+        pub unsafe extern "C" fn InitializeNativeModule(
             interface: *const $crate::sys::NativeInterface,
             query: *const $crate::sys::InitializeNativeModuleQuery,
             result: *mut $crate::sys::InitializeNativeModuleResult,
@@ -275,7 +275,7 @@ macro_rules! export_module {
         macro_rules! export_simple_callback {
             ($name:ident, $method:ident, $query:ty, $result:ty) => {
                 #[no_mangle]
-                pub extern "C" fn $name(
+                pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
                     _query: *const $query,
@@ -297,7 +297,7 @@ macro_rules! export_module {
         macro_rules! export_unit_id_callback {
             ($name:ident, $method:ident, $query:ty, $result:ty) => {
                 #[no_mangle]
-                pub extern "C" fn $name(
+                pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
                     query: *const $query,
@@ -319,7 +319,7 @@ macro_rules! export_module {
         macro_rules! export_unit_los_callback {
             ($name:ident, $method:ident) => {
                 #[no_mangle]
-                pub extern "C" fn $name(
+                pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
                     query: *const $crate::sys::UnitLosEventQuery,
@@ -342,7 +342,7 @@ macro_rules! export_module {
         macro_rules! export_projectile_id_callback {
             ($name:ident, $method:ident) => {
                 #[no_mangle]
-                pub extern "C" fn $name(
+                pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
                     query: *const $crate::sys::ProjectileEventQuery,
@@ -379,7 +379,7 @@ macro_rules! export_module {
         macro_rules! export_simple_bool_callback {
             ($name:ident, $method:ident) => {
                 #[no_mangle]
-                pub extern "C" fn $name(
+                pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
                     _query: *const $crate::sys::SimpleCallinQuery,
@@ -425,7 +425,7 @@ macro_rules! export_module {
 
         // Game events
         #[no_mangle]
-        pub extern "C" fn Load(
+        pub unsafe extern "C" fn Load(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::ArchiveCallinQuery,
@@ -460,7 +460,7 @@ macro_rules! export_module {
         // while module code is still loaded to release host resources such as
         // RmlUi contexts.
         #[no_mangle]
-        pub extern "C" fn Shutdown(
+        pub unsafe extern "C" fn Shutdown(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             _query: *const $crate::sys::ShutdownQuery,
@@ -470,12 +470,11 @@ macro_rules! export_module {
                 return;
             }
             unsafe {
-                let mut data = Box::from_raw(
-                    module_data as *mut $crate::ModuleData<$module_type>,
-                );
-                (*result).error = $crate::module_entry::catch_panic_ffi(
-                    std::panic::AssertUnwindSafe(|| data.module().shutdown()),
-                );
+                let mut data = Box::from_raw(module_data as *mut $crate::ModuleData<$module_type>);
+                (*result).error =
+                    $crate::module_entry::catch_panic_ffi(std::panic::AssertUnwindSafe(|| {
+                        data.module().shutdown()
+                    }));
                 // `data` is dropped here even if shutdown returned an error or
                 // panicked. The engine guarantees this call occurs once before
                 // unloading the native shared object.
@@ -519,7 +518,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn DrawWorldPreParticles(
+        pub unsafe extern "C" fn DrawWorldPreParticles(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::DrawWorldPreParticlesQuery,
@@ -640,7 +639,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn DrawBuildSquare(
+        pub unsafe extern "C" fn DrawBuildSquare(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::DrawBuildSquareQuery,
@@ -667,7 +666,7 @@ macro_rules! export_module {
         macro_rules! export_draw_objects_lua_callback {
             ($name:ident, $method:ident) => {
                 #[no_mangle]
-                pub extern "C" fn $name(
+                pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
                     query: *const $crate::sys::DrawObjectsLuaQuery,
@@ -694,7 +693,7 @@ macro_rules! export_module {
         macro_rules! export_draw_alpha_objects_lua_callback {
             ($name:ident, $method:ident) => {
                 #[no_mangle]
-                pub extern "C" fn $name(
+                pub unsafe extern "C" fn $name(
                     _interface: *const $crate::sys::NativeInterface,
                     module_data: *mut c_void,
                     query: *const $crate::sys::DrawAlphaObjectsLuaQuery,
@@ -732,7 +731,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn GameOver(
+        pub unsafe extern "C" fn GameOver(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::GameOverEventQuery,
@@ -756,7 +755,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn GameFrame(
+        pub unsafe extern "C" fn GameFrame(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::GameFrameQuery,
@@ -774,7 +773,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn GameFramePost(
+        pub unsafe extern "C" fn GameFramePost(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::GameFramePostQuery,
@@ -793,7 +792,7 @@ macro_rules! export_module {
 
         // Download events
         #[no_mangle]
-        pub extern "C" fn DownloadFailed(
+        pub unsafe extern "C" fn DownloadFailed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::DownloadFailedQuery,
@@ -812,7 +811,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn DownloadFinished(
+        pub unsafe extern "C" fn DownloadFinished(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::DownloadFinishedQuery,
@@ -830,7 +829,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn DownloadProgress(
+        pub unsafe extern "C" fn DownloadProgress(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::DownloadProgressQuery,
@@ -850,7 +849,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn DownloadQueued(
+        pub unsafe extern "C" fn DownloadQueued(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::DownloadQueuedQuery,
@@ -883,7 +882,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn DownloadStarted(
+        pub unsafe extern "C" fn DownloadStarted(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::DownloadStartedQuery,
@@ -901,7 +900,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn Save(
+        pub unsafe extern "C" fn Save(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::ArchiveCallinQuery,
@@ -920,7 +919,7 @@ macro_rules! export_module {
 
         // Feature events
         #[no_mangle]
-        pub extern "C" fn FeatureCreated(
+        pub unsafe extern "C" fn FeatureCreated(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::FeatureCreatedQuery,
@@ -938,7 +937,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn FeatureDestroyed(
+        pub unsafe extern "C" fn FeatureDestroyed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::FeatureDestroyedQuery,
@@ -957,7 +956,7 @@ macro_rules! export_module {
 
         // Game events
         #[no_mangle]
-        pub extern "C" fn GameID(
+        pub unsafe extern "C" fn GameID(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::GameIDQuery,
@@ -981,7 +980,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn GamePaused(
+        pub unsafe extern "C" fn GamePaused(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::GamePausedQuery,
@@ -1001,7 +1000,7 @@ macro_rules! export_module {
 
         // Player events
         #[no_mangle]
-        pub extern "C" fn PlayerAdded(
+        pub unsafe extern "C" fn PlayerAdded(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::PlayerAddedQuery,
@@ -1019,7 +1018,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn PlayerChanged(
+        pub unsafe extern "C" fn PlayerChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::PlayerChangedQuery,
@@ -1037,7 +1036,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn PlayerRemoved(
+        pub unsafe extern "C" fn PlayerRemoved(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::PlayerRemovedQuery,
@@ -1057,7 +1056,7 @@ macro_rules! export_module {
 
         // Team events
         #[no_mangle]
-        pub extern "C" fn TeamChanged(
+        pub unsafe extern "C" fn TeamChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::TeamChangedQuery,
@@ -1075,7 +1074,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn TeamDied(
+        pub unsafe extern "C" fn TeamDied(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::TeamDiedQuery,
@@ -1094,7 +1093,7 @@ macro_rules! export_module {
 
         // Unit events
         #[no_mangle]
-        pub extern "C" fn UnitCreated(
+        pub unsafe extern "C" fn UnitCreated(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitCreatedQuery,
@@ -1113,7 +1112,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitDestroyed(
+        pub unsafe extern "C" fn UnitDestroyed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitDestroyedQuery,
@@ -1132,7 +1131,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitExperience(
+        pub unsafe extern "C" fn UnitExperience(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitExperienceQuery,
@@ -1151,7 +1150,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitFinished(
+        pub unsafe extern "C" fn UnitFinished(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitFinishedQuery,
@@ -1176,7 +1175,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn UnitConstructionDecayed(
+        pub unsafe extern "C" fn UnitConstructionDecayed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitConstructionDecayedQuery,
@@ -1200,7 +1199,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitFromFactory(
+        pub unsafe extern "C" fn UnitFromFactory(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitFromFactoryQuery,
@@ -1220,7 +1219,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitGiven(
+        pub unsafe extern "C" fn UnitGiven(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitGivenQuery,
@@ -1246,7 +1245,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn UnitCommand(
+        pub unsafe extern "C" fn UnitCommand(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitCommandQuery,
@@ -1273,7 +1272,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitCmdDone(
+        pub unsafe extern "C" fn UnitCmdDone(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitCmdDoneQuery,
@@ -1293,7 +1292,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitDamaged(
+        pub unsafe extern "C" fn UnitDamaged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitDamagedQuery,
@@ -1330,7 +1329,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn UnitSeismicPing(
+        pub unsafe extern "C" fn UnitSeismicPing(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitSeismicPingQuery,
@@ -1395,7 +1394,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn UnitLoaded(
+        pub unsafe extern "C" fn UnitLoaded(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitLoadedQuery,
@@ -1414,7 +1413,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitStunned(
+        pub unsafe extern "C" fn UnitStunned(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitStunnedQuery,
@@ -1433,7 +1432,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitTaken(
+        pub unsafe extern "C" fn UnitTaken(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitTakenQuery,
@@ -1452,7 +1451,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitUnloaded(
+        pub unsafe extern "C" fn UnitUnloaded(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitUnloadedQuery,
@@ -1502,7 +1501,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn UnitUnitCollision(
+        pub unsafe extern "C" fn UnitUnitCollision(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitUnitCollisionQuery,
@@ -1525,7 +1524,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnitFeatureCollision(
+        pub unsafe extern "C" fn UnitFeatureCollision(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::UnitFeatureCollisionQuery,
@@ -1548,7 +1547,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn RenderUnitDestroyed(
+        pub unsafe extern "C" fn RenderUnitDestroyed(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::RenderUnitDestroyedQuery,
@@ -1566,7 +1565,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn FeatureMoved(
+        pub unsafe extern "C" fn FeatureMoved(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::FeatureMovedQuery,
@@ -1585,7 +1584,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn FeatureDamaged(
+        pub unsafe extern "C" fn FeatureDamaged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::FeatureDamagedQuery,
@@ -1617,7 +1616,7 @@ macro_rules! export_module {
         export_projectile_id_callback!(ProjectileDestroyed, projectile_destroyed);
 
         #[no_mangle]
-        pub extern "C" fn Explosion(
+        pub unsafe extern "C" fn Explosion(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::ExplosionQuery,
@@ -1640,7 +1639,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn LastMessagePosition(
+        pub unsafe extern "C" fn LastMessagePosition(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::LastMessagePositionQuery,
@@ -1658,7 +1657,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn UnsyncedHeightMapUpdate(
+        pub unsafe extern "C" fn UnsyncedHeightMapUpdate(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::RectChangedQuery,
@@ -1678,7 +1677,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn CameraRotationChanged(
+        pub unsafe extern "C" fn CameraRotationChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::Float3CallinQuery,
@@ -1696,7 +1695,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn CameraPositionChanged(
+        pub unsafe extern "C" fn CameraPositionChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::Float3CallinQuery,
@@ -1716,7 +1715,7 @@ macro_rules! export_module {
         export_simple_bool_callback!(KeyMapChanged, key_map_changed);
 
         #[no_mangle]
-        pub extern "C" fn KeyPress(
+        pub unsafe extern "C" fn KeyPress(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::KeyPressQuery,
@@ -1738,7 +1737,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn KeyRelease(
+        pub unsafe extern "C" fn KeyRelease(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::KeyReleaseQuery,
@@ -1760,7 +1759,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn TextInput(
+        pub unsafe extern "C" fn TextInput(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::TextInputQuery,
@@ -1783,7 +1782,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn TextEditing(
+        pub unsafe extern "C" fn TextEditing(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::TextEditingQuery,
@@ -1806,7 +1805,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn MouseMove(
+        pub unsafe extern "C" fn MouseMove(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::MouseMoveQuery,
@@ -1828,7 +1827,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn MousePress(
+        pub unsafe extern "C" fn MousePress(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::MousePressQuery,
@@ -1850,7 +1849,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn MouseRelease(
+        pub unsafe extern "C" fn MouseRelease(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::MouseReleaseQuery,
@@ -1869,7 +1868,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn MouseWheel(
+        pub unsafe extern "C" fn MouseWheel(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::MouseWheelQuery,
@@ -1891,7 +1890,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn IsAbove(
+        pub unsafe extern "C" fn IsAbove(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::ScreenPositionQuery,
@@ -1913,7 +1912,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn GetTooltip(
+        pub unsafe extern "C" fn GetTooltip(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::ScreenPositionQuery,
@@ -1935,7 +1934,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn DefaultCommand(
+        pub unsafe extern "C" fn DefaultCommand(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::DefaultCommandQuery,
@@ -1973,7 +1972,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn ActiveCommandChanged(
+        pub unsafe extern "C" fn ActiveCommandChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::ActiveCommandChangedQuery,
@@ -1998,7 +1997,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn CommandNotify(
+        pub unsafe extern "C" fn CommandNotify(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::CommandNotifyQuery,
@@ -2019,7 +2018,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn AddConsoleLine(
+        pub unsafe extern "C" fn AddConsoleLine(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::AddConsoleLineQuery,
@@ -2045,7 +2044,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn GroupChanged(
+        pub unsafe extern "C" fn GroupChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::GroupChangedQuery,
@@ -2066,7 +2065,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn GameSetup(
+        pub unsafe extern "C" fn GameSetup(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::GameSetupQuery,
@@ -2104,7 +2103,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn WorldTooltip(
+        pub unsafe extern "C" fn WorldTooltip(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::WorldTooltipQuery,
@@ -2127,7 +2126,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn MapDrawCmd(
+        pub unsafe extern "C" fn MapDrawCmd(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::MapDrawCmdQuery,
@@ -2179,7 +2178,7 @@ macro_rules! export_module {
         );
 
         #[no_mangle]
-        pub extern "C" fn GameProgress(
+        pub unsafe extern "C" fn GameProgress(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::GameProgressQuery,
@@ -2197,7 +2196,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn StockpileChanged(
+        pub unsafe extern "C" fn StockpileChanged(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::StockpileChangedQuery,
@@ -2223,7 +2222,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn CollectGarbage(
+        pub unsafe extern "C" fn CollectGarbage(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::CollectGarbageQuery,
@@ -2241,7 +2240,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn Pong(
+        pub unsafe extern "C" fn Pong(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::PongQuery,
@@ -2262,7 +2261,7 @@ macro_rules! export_module {
 
         // Special events
         #[no_mangle]
-        pub extern "C" fn HandleLuaMsg(
+        pub unsafe extern "C" fn HandleLuaMsg(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::HandleLuaMsgQuery,
@@ -2288,7 +2287,7 @@ macro_rules! export_module {
         }
 
         #[no_mangle]
-        pub extern "C" fn HandleLuaCall(
+        pub unsafe extern "C" fn HandleLuaCall(
             _interface: *const $crate::sys::NativeInterface,
             module_data: *mut c_void,
             query: *const $crate::sys::HandleLuaCallQuery,
