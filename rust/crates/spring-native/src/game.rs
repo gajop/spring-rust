@@ -18,6 +18,14 @@ pub struct GameModInfo {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GameMapInfo {
+    pub map_name: String,
+    pub map_description: String,
+    pub map_x: i32,
+    pub map_y: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SideData {
     pub name: String,
     pub case_name: String,
@@ -36,6 +44,10 @@ impl<'a> Game<'a> {
 
     pub fn get_game_mod_info_owned(&self) -> Result<GameModInfo, Error> {
         self.get_game_mod_info().map(GameModInfo::from_raw)
+    }
+
+    pub fn get_game_map_info_owned(&self) -> Result<GameMapInfo, Error> {
+        self.get_game_map_info().map(GameMapInfo::from_raw)
     }
 
     pub fn get_side_data_owned(&self, side_name: &str) -> Result<SideData, Error> {
@@ -65,6 +77,21 @@ impl GameModInfo {
                 mod_mutator: copy_c_string(info.modMutator).unwrap_or_default(),
                 mod_description: copy_c_string(info.modDesc).unwrap_or_default(),
                 mod_checksum: copy_c_string(info.modChecksum).unwrap_or_default(),
+            }
+        }
+    }
+}
+
+impl GameMapInfo {
+    fn from_raw(info: sys::GameMapInfo) -> Self {
+        // SAFETY: every pointer belongs to the engine and remains valid while
+        // this result is copied into owned Rust strings.
+        unsafe {
+            Self {
+                map_name: copy_c_string(info.mapName).unwrap_or_default(),
+                map_description: copy_c_string(info.mapDescription).unwrap_or_default(),
+                map_x: info.mapX,
+                map_y: info.mapY,
             }
         }
     }
