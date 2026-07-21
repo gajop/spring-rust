@@ -421,6 +421,12 @@ static void NativeGetMaps(const GetMapsQuery* query, GetMapsResult* result) {
 	result->count = static_cast<uint32_t>(mapNames.size());
 }
 
+static void NativeScanAllDirs(const ScanAllDirsQuery* query, ScanAllDirsResult* result) {
+	if (!IsArchiveScannerReady()) { result->error = &NOT_READY_ERROR; return; }
+	archiveScanner->ScanAllDirs();
+	result->error = nullptr;
+}
+
 static void NativeGetGames(const GetGamesQuery* query, GetGamesResult* result) {
 	bufferPos = 0;
 	if (!IsArchiveScannerReady()) { result->error = &NOT_READY_ERROR; return; }
@@ -1104,4 +1110,5 @@ const VFSApi VFS_API = {
 	.GetMapSquareTexture = NativeGetMapSquareTexture,
 	.SetMapSquareTexture = NativeSetMapSquareTexture,
 	.GetMapSquareTextureInfo = NativeGetMapSquareTextureInfo,
+	.ScanAllDirs = NativeScanAllDirs,
 };

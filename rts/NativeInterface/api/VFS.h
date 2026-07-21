@@ -182,6 +182,13 @@ struct SetMapSquareTextureResult { const Error* error; bool success; };
 struct GetMapSquareTextureInfoQuery { uint8_t _unused; };
 struct GetMapSquareTextureInfoResult { const Error* error; int32_t squareSize; int32_t numSquaresX; int32_t numSquaresZ; };
 
+// Rescan every data directory so archives added since startup (e.g. a map the
+// editor just exported) become visible to GetMaps/HasArchive without a restart.
+// Mirrors Lua's VFS.ScanAllDirs. Note: picks up added archives but the scanner
+// still reports deleted ones as present until a restart.
+struct ScanAllDirsQuery { uint8_t _unused; };
+struct ScanAllDirsResult { const Error* error; };
+
 // API structure
 struct VFSApi {
 	void (*FileExists)(const FileExistsQuery* query, FileExistsResult* result);
@@ -234,6 +241,7 @@ struct VFSApi {
 	void (*SetMapSquareTexture)(const SetMapSquareTextureQuery* query, SetMapSquareTextureResult* result);
 	// NEW (no Lua equivalent) — see GetMapSquareTextureInfoResult above.
 	void (*GetMapSquareTextureInfo)(const GetMapSquareTextureInfoQuery* query, GetMapSquareTextureInfoResult* result);
+	void (*ScanAllDirs)(const ScanAllDirsQuery* query, ScanAllDirsResult* result);
 };
 
 extern const VFSApi VFS_API;
