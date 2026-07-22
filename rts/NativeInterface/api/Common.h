@@ -10,7 +10,7 @@ extern "C" {
 // Version format: major*10000 + minor*100 + patch
 // Example: 1.2.3 = 10203
 #define NATIVE_API_VERSION(major, minor, patch) ((major)*10000 + (minor)*100 + (patch))
-#define NATIVE_API_CURRENT_VERSION NATIVE_API_VERSION(1, 2, 0)
+#define NATIVE_API_CURRENT_VERSION NATIVE_API_VERSION(1, 3, 0)
 
 // Helper macros to extract version components
 #define NATIVE_API_MAJOR(v) ((v) / 10000)

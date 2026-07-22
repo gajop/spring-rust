@@ -262,15 +262,11 @@ static void NativeGetModKeyState(const GetModKeyStateQuery* query, GetModKeyStat
 {
 	bufferPos = 0;
 
-	// Return as bitfield: shift | ctrl | alt | meta
-	uint32_t modState = 0;
-	if (KeyInput::GetKeyModState(KMOD_SHIFT)) modState |= (1 << 0);
-	if (KeyInput::GetKeyModState(KMOD_CTRL))  modState |= (1 << 1);
-	if (KeyInput::GetKeyModState(KMOD_ALT))   modState |= (1 << 2);
-	if (KeyInput::GetKeyModState(KMOD_GUI))   modState |= (1 << 3);
-
 	result->error = nullptr;
-	result->modState = modState;
+	result->alt = KeyInput::GetKeyModState(KMOD_ALT);
+	result->ctrl = KeyInput::GetKeyModState(KMOD_CTRL);
+	result->meta = KeyInput::GetKeyModState(KMOD_GUI);
+	result->shift = KeyInput::GetKeyModState(KMOD_SHIFT);
 }
 
 // Selection

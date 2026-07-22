@@ -111,7 +111,10 @@ struct GetModKeyStateQuery {
 
 struct GetModKeyStateResult {
 	const Error* error;
-	uint32_t modState;  // Bitfield: shift | ctrl | alt | meta
+	bool alt;
+	bool ctrl;
+	bool meta;
+	bool shift;
 };
 
 struct GetSelectionBoxQuery {

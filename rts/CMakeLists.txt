@@ -64,11 +64,15 @@ endif (NO_SOUND)
 ### Find include directories and add platform specific libraries
 if    (UNIX AND NOT MINGW)
 	if    (PREFER_STATIC_LIBS)
-		prefer_static_libs()
+		if    (NOT USE_ASAN)
+			prefer_static_libs()
+		endif (NOT USE_ASAN)
 		find_library(MATH_LIBRARY m)
 		#FIND_LIBRARY(PTHREAD_LIBRARY pthread)
 		#FIND_LIBRARY(OMP_LIBRARY gomp) FIXME it's hidden in some subfolders
-		unprefer_static_libs()
+		if    (NOT USE_ASAN)
+			unprefer_static_libs()
+		endif (NOT USE_ASAN)
 
 		list(APPEND engineCommonLibraries ${MATH_LIBRARY})
 		#list(APPEND engineCommonLibraries ${PTHREAD_LIBRARY} ${OMP_LIBRARY})

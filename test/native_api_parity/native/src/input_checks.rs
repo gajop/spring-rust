@@ -5,15 +5,15 @@ impl NativeApiParity {
     pub(crate) fn check_input_value(&mut self, message: &Value, label: &str) -> Result<(), String> {
         match base_test_name(label) {
             "get_mod_key_state" => {
-                let native = self
+                let (alt, ctrl, meta, shift) = self
                     .interface
                     .input()
                     .get_mod_key_state()
                     .map_err(|err| format!("get_mod_key_state() failed: {err:?}"))?;
-                self.same_bool_if_present(label, message, "alt", native & (1 << 2) != 0)?;
-                self.same_bool_if_present(label, message, "ctrl", native & (1 << 1) != 0)?;
-                self.same_bool_if_present(label, message, "meta", native & (1 << 3) != 0)?;
-                self.same_bool_if_present(label, message, "shift", native & (1 << 0) != 0)
+                self.same_bool_if_present(label, message, "alt", alt)?;
+                self.same_bool_if_present(label, message, "ctrl", ctrl)?;
+                self.same_bool_if_present(label, message, "meta", meta)?;
+                self.same_bool_if_present(label, message, "shift", shift)
             }
             "get_invert_queue_key" => {
                 let native = self

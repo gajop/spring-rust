@@ -147,7 +147,7 @@ impl NativeApiParity {
         label: &str,
     ) -> Result<(), String> {
         let unit_def_id = i32_field(message, "unitDefID")?;
-        let (exists, basic, costs, _, _, _, _, health) = self
+        let (exists, basic, costs, _, _, _, _, health, _) = self
             .interface
             .unit_defs()
             .get_unit_def_by_id(unit_def_id)
