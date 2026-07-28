@@ -254,6 +254,17 @@ impl<'a> RmlUi<'a> {
         require_success(success, "create")?;
         Ok(RmlDataModel { handle, ui: *self })
     }
+
+    /// Removes a native RmlUi data model and all handles bound through it.
+    ///
+    /// This lets a dynamic subtree replace a model of the same semantic role
+    /// without accumulating a model for every rebuild.
+    pub fn remove_data_model(&self, context_handle: u64, name: &str) -> Result<(), Error> {
+        require_success(
+            self.context_remove_data_model(context_handle, name)?,
+            "remove",
+        )
+    }
 }
 
 impl<'api> RmlDataModel<'api> {
