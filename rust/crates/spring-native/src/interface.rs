@@ -310,7 +310,7 @@ impl NativeInterfaceRef {
         RulesParams::new(self.rules_params_api)
     }
 
-    pub fn rml_ui(&self) -> RmlUi<'_> {
+    pub fn rml_ui(&self) -> RmlUi<'static> {
         RmlUi::new(self.rml_ui_api)
     }
 

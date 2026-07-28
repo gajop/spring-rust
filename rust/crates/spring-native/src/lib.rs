@@ -214,7 +214,10 @@ pub use platform::Platform;
 pub use player::{Player, RosterEntry};
 pub use profiling::Profiling;
 pub use projectiles::Projectiles;
-pub use rml_ui::RmlUi;
+pub use rml_ui::{
+    RmlDataIconRows, RmlDataModel, RmlDataNotificationRows, RmlDataOptionRows, RmlDataTextRows,
+    RmlDataValue, RmlDataVariable, RmlIconRow, RmlNotificationRow, RmlOptionRow, RmlTextRow, RmlUi,
+};
 pub use rules_params::{RulesParamValue, RulesParams};
 pub use selection::Selection;
 pub use sound::Sound;

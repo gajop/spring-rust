@@ -146,6 +146,50 @@ struct RmlElementProcessDefaultActionQuery { uint64_t elementHandle; uint64_t ev
 struct RmlContextOpenDataModelQuery { uint64_t contextHandle; const char* name; };
 struct RmlContextOpenDataModelResult { const Error* error; uint64_t dataModelHandle; bool success; };
 struct RmlSolLuaDataModelSetDirtyQuery { uint64_t dataModelHandle; const char* property; };
+// Typed data-model values are owned by the engine.  The native module only
+// receives opaque handles, so it can never lend Rust allocations across the
+// ABI or encode a model as a string payload.
+struct RmlContextCreateDataModelQuery { uint64_t contextHandle; const char* name; };
+struct RmlDataModelBindBoolQuery { uint64_t dataModelHandle; const char* name; bool initialValue; };
+struct RmlDataModelBindIntQuery { uint64_t dataModelHandle; const char* name; int32_t initialValue; };
+struct RmlDataModelBindFloatQuery { uint64_t dataModelHandle; const char* name; float initialValue; };
+struct RmlDataModelBindStringQuery { uint64_t dataModelHandle; const char* name; const char* initialValue; };
+struct RmlDataModelBindResult { const Error* error; uint64_t variableHandle; bool success; };
+// A native-owned collection of text rows. The engine copies every row during
+// SetTextRows, so pointers are valid only for that call and never become part
+// of the data model's lifetime.
+struct RmlDataTextRow { const char* text; bool muted; };
+struct RmlDataModelBindTextRowsQuery { uint64_t dataModelHandle; const char* name; };
+struct RmlDataModelSetTextRowsQuery { uint64_t rowsHandle; const RmlDataTextRow* rows; uint64_t count; };
+struct RmlDataModelTextRowsResult { const Error* error; uint64_t rowsHandle; bool success; };
+// A native-owned collection for toast notifications. `hasProgress` makes an
+// optional progress bar explicit without overloading a sentinel float value.
+struct RmlDataNotificationRow { const char* title; const char* body; bool warning; bool hasProgress; float progress; };
+struct RmlDataModelBindNotificationRowsQuery { uint64_t dataModelHandle; const char* name; };
+struct RmlDataModelSetNotificationRowsQuery { uint64_t rowsHandle; const RmlDataNotificationRow* rows; uint64_t count; };
+struct RmlDataModelNotificationRowsResult { const Error* error; uint64_t rowsHandle; bool success; };
+// A native-owned collection for controls that combine a caption, icon, and
+// tooltip. This is a reusable visual row shape; it avoids generated RML for
+// toolbars and icon-button pickers while retaining typed native values.
+struct RmlDataIconRow { const char* label; const char* icon; const char* tooltip; };
+struct RmlDataModelBindIconRowsQuery { uint64_t dataModelHandle; const char* name; };
+struct RmlDataModelSetIconRowsQuery { uint64_t rowsHandle; const RmlDataIconRow* rows; uint64_t count; };
+struct RmlDataModelIconRowsResult { const Error* error; uint64_t rowsHandle; bool success; };
+// A native-owned collection for select options. Labels and stored values are
+// separate so UI wording never leaks into the command value.
+struct RmlDataOptionRow { const char* value; const char* label; };
+struct RmlDataModelBindOptionRowsQuery { uint64_t dataModelHandle; const char* name; };
+struct RmlDataModelSetOptionRowsQuery { uint64_t rowsHandle; const RmlDataOptionRow* rows; uint64_t count; };
+struct RmlDataModelOptionRowsResult { const Error* error; uint64_t rowsHandle; bool success; };
+struct RmlDataModelVariableBoolQuery { uint64_t variableHandle; bool value; };
+struct RmlDataModelVariableIntQuery { uint64_t variableHandle; int32_t value; };
+struct RmlDataModelVariableFloatQuery { uint64_t variableHandle; float value; };
+struct RmlDataModelVariableStringQuery { uint64_t variableHandle; const char* value; };
+struct RmlDataModelVariableHandleQuery { uint64_t variableHandle; };
+struct RmlDataModelGetBoolResult { const Error* error; bool value; bool success; };
+struct RmlDataModelGetIntResult { const Error* error; int32_t value; bool success; };
+struct RmlDataModelGetFloatResult { const Error* error; float value; bool success; };
+struct RmlDataModelGetStringResult { const Error* error; const char* value; bool success; };
 
 struct RmlUiApi {
 	void (*CreateContext)(const RmlCreateContextQuery* query, RmlCreateContextResult* result);
@@ -171,6 +215,7 @@ struct RmlUiApi {
 	void (*ContextUnloadDocument)(const RmlContextDocumentQuery* query, RmlContextBoolResult* result);
 	void (*ContextUpdate)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextOpenDataModel)(const RmlContextOpenDataModelQuery* query, RmlContextOpenDataModelResult* result);
+	void (*ContextCreateDataModel)(const RmlContextCreateDataModelQuery* query, RmlContextOpenDataModelResult* result);
 	void (*ContextRemoveDataModel)(const RmlContextStringQuery* query, RmlContextBoolResult* result);
 	void (*ContextProcessMouseMove)(const RmlContextMouseMoveQuery* query, RmlContextBoolResult* result);
 	void (*ContextProcessMouseButtonDown)(const RmlContextMouseButtonQuery* query, RmlContextBoolResult* result);
@@ -295,8 +340,30 @@ struct RmlUiApi {
 	void (*EventGetParameterFloat)(const RmlEventParameterQuery* query, RmlEventGetFloatResult* result);
 	void (*EventGetParameterString)(const RmlEventParameterQuery* query, RmlEventGetStringResult* result);
 	void (*SolLuaDataModelSetDirty)(const RmlSolLuaDataModelSetDirtyQuery* query, RmlElementBoolResult* result);
+	void (*DataModelBindBool)(const RmlDataModelBindBoolQuery* query, RmlDataModelBindResult* result);
+	void (*DataModelBindInt)(const RmlDataModelBindIntQuery* query, RmlDataModelBindResult* result);
+	void (*DataModelBindFloat)(const RmlDataModelBindFloatQuery* query, RmlDataModelBindResult* result);
+	void (*DataModelBindString)(const RmlDataModelBindStringQuery* query, RmlDataModelBindResult* result);
+	void (*DataModelBindTextRows)(const RmlDataModelBindTextRowsQuery* query, RmlDataModelTextRowsResult* result);
+	void (*DataModelSetBool)(const RmlDataModelVariableBoolQuery* query, RmlElementBoolResult* result);
+	void (*DataModelSetInt)(const RmlDataModelVariableIntQuery* query, RmlElementBoolResult* result);
+	void (*DataModelSetFloat)(const RmlDataModelVariableFloatQuery* query, RmlElementBoolResult* result);
+	void (*DataModelSetString)(const RmlDataModelVariableStringQuery* query, RmlElementBoolResult* result);
+	void (*DataModelSetTextRows)(const RmlDataModelSetTextRowsQuery* query, RmlElementBoolResult* result);
+	void (*DataModelGetBool)(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetBoolResult* result);
+	void (*DataModelGetInt)(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetIntResult* result);
+	void (*DataModelGetFloat)(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetFloatResult* result);
+	void (*DataModelGetString)(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetStringResult* result);
 	void (*Vector2fNew)(const RmlVector2fNewQuery* query, RmlVector2fNewResult* result);
 	void (*Vector2iNew)(const RmlVector2iNewQuery* query, RmlVector2iNewResult* result);
+	// Keep additions at the end: native modules compiled against an earlier
+	// table retain the offsets of every pre-existing function pointer.
+	void (*DataModelBindNotificationRows)(const RmlDataModelBindNotificationRowsQuery* query, RmlDataModelNotificationRowsResult* result);
+	void (*DataModelSetNotificationRows)(const RmlDataModelSetNotificationRowsQuery* query, RmlElementBoolResult* result);
+	void (*DataModelBindIconRows)(const RmlDataModelBindIconRowsQuery* query, RmlDataModelIconRowsResult* result);
+	void (*DataModelSetIconRows)(const RmlDataModelSetIconRowsQuery* query, RmlElementBoolResult* result);
+	void (*DataModelBindOptionRows)(const RmlDataModelBindOptionRowsQuery* query, RmlDataModelOptionRowsResult* result);
+	void (*DataModelSetOptionRows)(const RmlDataModelSetOptionRowsQuery* query, RmlElementBoolResult* result);
 };
 
 extern const RmlUiApi RMLUI_API;

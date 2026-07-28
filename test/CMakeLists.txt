@@ -554,6 +554,26 @@ endif()
 	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/lib/)
 
 ################################################################################
+### RmlNativeDataModel
+	set(test_name RmlNativeDataModel)
+	set(test_src
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/TestNativeDataModel.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/TestNativeDataModelBenchmark.cpp"
+			"${ENGINE_SOURCE_DIR}/NativeInterface/api/RmlUi.cpp"
+			"${ENGINE_SOURCE_DIR}/System/Misc/SpringTime.cpp"
+			${sources_engine_System_Threading}
+			${test_Common_sources}
+		)
+	set(test_libs
+			rmlui_core
+			lua
+			smmalloc
+		)
+	add_spring_test(${test_name} "${test_src}" "${test_libs}" "-DNOT_USING_CREG -DBUILDING_AI")
+	target_link_libraries(test_${test_name} SDL2::SDL2 ${FREETYPE_LIBRARY_RELEASE} PNG::PNG ZLIB::ZLIB)
+	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/lib/)
+
+################################################################################
 ### RmlSolLuaPluginShutdown
 	find_package(PNG REQUIRED)
 

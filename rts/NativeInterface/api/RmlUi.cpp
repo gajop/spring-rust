@@ -80,15 +80,111 @@ static Rml::Context* FromHandle(uint64_t handle)
 
 static uint64_t nextElementPtrHandle = 1;
 static uint64_t nextDataModelHandle = 1;
+static uint64_t nextDataModelVariableHandle = 1;
 static std::unordered_map<uint64_t, Rml::ElementPtr> ownedElementPtrs;
 static std::unordered_set<Rml::String> nativeContextNames;
+
+enum class NativeDataValueType { Bool, Int, Float, String };
+
+struct NativeDataVariable
+{
+	NativeDataValueType type;
+	Rml::String name;
+	bool boolValue = false;
+	int32_t intValue = 0;
+	float floatValue = 0.0f;
+	Rml::String stringValue;
+};
+
+struct NativeDataTextRow
+{
+	Rml::String text;
+	bool muted = false;
+};
+
+struct NativeDataTextRows
+{
+	Rml::String name;
+	std::vector<NativeDataTextRow> rows;
+};
+
+struct NativeDataNotificationRow
+{
+	Rml::String title;
+	Rml::String body;
+	bool warning = false;
+	bool hasProgress = false;
+	float progress = 0.0f;
+};
+
+struct NativeDataNotificationRows
+{
+	Rml::String name;
+	std::vector<NativeDataNotificationRow> rows;
+};
+
+struct NativeDataIconRow
+{
+	Rml::String label;
+	Rml::String icon;
+	Rml::String tooltip;
+	bool visible = false;
+};
+
+struct NativeDataIconRows
+{
+	Rml::String name;
+	std::vector<NativeDataIconRow> rows;
+};
+
+struct NativeDataOptionRow
+{
+	Rml::String value;
+	Rml::String label;
+	bool visible = false;
+};
+
+struct NativeDataOptionRows
+{
+	Rml::String name;
+	std::vector<NativeDataOptionRow> rows;
+};
+
+struct NativeDataModel
+{
+	NativeDataModel(Rml::DataModelConstructor constructor, Rml::Context* context)
+		: constructor(std::move(constructor))
+		, handle(this->constructor.GetModelHandle())
+		, context(context)
+	{}
+
+	Rml::DataModelConstructor constructor;
+	Rml::DataModelHandle handle;
+	Rml::Context* context;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataVariable>> variables;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataTextRows>> textRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataNotificationRows>> notificationRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataIconRows>> iconRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataOptionRows>> optionRows;
+};
+
 struct NativeDataModelRecord
 {
 	Rml::Context* context = nullptr;
 	Rml::String name;
 	Rml::DataModelHandle handle;
+	std::unique_ptr<NativeDataModel> native;
 };
 static std::unordered_map<uint64_t, NativeDataModelRecord> nativeDataModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataVariableModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataTextRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataNotificationRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataIconRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataOptionRowsModels;
+static std::unordered_set<Rml::Context*> nativeTextRowTypes;
+static std::unordered_set<Rml::Context*> nativeNotificationRowTypes;
+static std::unordered_set<Rml::Context*> nativeIconRowTypes;
+static std::unordered_set<Rml::Context*> nativeOptionRowTypes;
 static thread_local std::vector<uint64_t> elementHandleResults;
 static thread_local std::vector<Rml::String> stringResults;
 static thread_local std::vector<const char*> stringPtrResults;
@@ -145,6 +241,45 @@ static void EraseNativeDataModelHandles(Rml::Context* context)
 {
 	for (auto it = nativeDataModels.begin(); it != nativeDataModels.end(); ) {
 		if (it->second.context == context) {
+			if (it->second.native != nullptr) {
+				for (const auto& [variableHandle, _] : it->second.native->variables)
+					nativeDataVariableModels.erase(variableHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->textRows)
+					nativeDataTextRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->notificationRows)
+					nativeDataNotificationRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->iconRows)
+					nativeDataIconRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->optionRows)
+					nativeDataOptionRowsModels.erase(rowsHandle);
+			}
+			it = nativeDataModels.erase(it);
+		} else {
+			++it;
+		}
+	}
+	nativeTextRowTypes.erase(context);
+	nativeNotificationRowTypes.erase(context);
+	nativeIconRowTypes.erase(context);
+	nativeOptionRowTypes.erase(context);
+}
+
+static void EraseNativeDataModelHandles(Rml::Context* context, const Rml::String& name)
+{
+	for (auto it = nativeDataModels.begin(); it != nativeDataModels.end(); ) {
+		if (it->second.context == context && it->second.name == name) {
+			if (it->second.native != nullptr) {
+				for (const auto& [variableHandle, _] : it->second.native->variables)
+					nativeDataVariableModels.erase(variableHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->textRows)
+					nativeDataTextRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->notificationRows)
+					nativeDataNotificationRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->iconRows)
+					nativeDataIconRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->optionRows)
+					nativeDataOptionRowsModels.erase(rowsHandle);
+			}
 			it = nativeDataModels.erase(it);
 		} else {
 			++it;
@@ -152,16 +287,92 @@ static void EraseNativeDataModelHandles(Rml::Context* context)
 	}
 }
 
-static void EraseNativeDataModelHandles(Rml::Context* context, const Rml::String& name)
+static NativeDataModel* GetNativeDataModel(uint64_t handle)
 {
-	for (auto it = nativeDataModels.begin(); it != nativeDataModels.end(); ) {
-		if (it->second.context == context && it->second.name == name) {
-			it = nativeDataModels.erase(it);
-		} else {
-			++it;
-		}
-	}
+	auto it = nativeDataModels.find(handle);
+	return (it == nativeDataModels.end()) ? nullptr : it->second.native.get();
 }
+
+static NativeDataVariable* GetNativeDataVariable(uint64_t variableHandle, NativeDataValueType expectedType, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataVariableModels.find(variableHandle);
+	if (ownerIt == nativeDataVariableModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto variableIt = model->variables.find(variableHandle);
+	if (variableIt == model->variables.end() || variableIt->second->type != expectedType)
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return variableIt->second.get();
+}
+
+static NativeDataTextRows* GetNativeDataTextRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataTextRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataTextRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->textRows.find(rowsHandle);
+	if (rowsIt == model->textRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataNotificationRows* GetNativeDataNotificationRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataNotificationRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataNotificationRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->notificationRows.find(rowsHandle);
+	if (rowsIt == model->notificationRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataIconRows* GetNativeDataIconRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataIconRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataIconRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->iconRows.find(rowsHandle);
+	if (rowsIt == model->iconRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataOptionRows* GetNativeDataOptionRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataOptionRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataOptionRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->optionRows.find(rowsHandle);
+	if (rowsIt == model->optionRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
 
 static const Rml::Variant* GetEventParameter(Rml::Event* event, const char* name)
 {
@@ -573,6 +784,539 @@ static void NativeContextOpenDataModel(const RmlContextOpenDataModelQuery* query
 		.handle = constructor.GetModelHandle(),
 	});
 	result->dataModelHandle = handle;
+	result->success = true;
+}
+
+static void NativeContextCreateDataModel(const RmlContextCreateDataModelQuery* query, RmlContextOpenDataModelResult* result)
+{
+	result->error = nullptr;
+	result->dataModelHandle = 0;
+	result->success = false;
+	Rml::Context* context = FromHandle(query->contextHandle);
+	if (context == nullptr || query->name == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	Rml::DataModelConstructor constructor = context->CreateDataModel(query->name);
+	if (!constructor) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const uint64_t dataModelHandle = nextDataModelHandle++;
+	nativeDataModels.emplace(dataModelHandle, NativeDataModelRecord{
+		.context = context,
+		.name = query->name,
+		.handle = constructor.GetModelHandle(),
+		.native = std::make_unique<NativeDataModel>(std::move(constructor), context),
+	});
+	result->dataModelHandle = dataModelHandle;
+	result->success = true;
+}
+
+static void NativeDataModelBindBool(const RmlDataModelBindBoolQuery* query, RmlDataModelBindResult* result)
+{
+	result->error = nullptr;
+	result->variableHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto variable = std::make_unique<NativeDataVariable>();
+	variable->type = NativeDataValueType::Bool;
+	variable->name = query->name;
+	variable->boolValue = query->initialValue;
+	if (!model->constructor.Bind(variable->name, &variable->boolValue)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t variableHandle = nextDataModelVariableHandle++;
+	model->variables.emplace(variableHandle, std::move(variable));
+	nativeDataVariableModels.emplace(variableHandle, query->dataModelHandle);
+	result->variableHandle = variableHandle;
+	result->success = true;
+}
+
+static void NativeDataModelBindInt(const RmlDataModelBindIntQuery* query, RmlDataModelBindResult* result)
+{
+	result->error = nullptr;
+	result->variableHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto variable = std::make_unique<NativeDataVariable>();
+	variable->type = NativeDataValueType::Int;
+	variable->name = query->name;
+	variable->intValue = query->initialValue;
+	if (!model->constructor.Bind(variable->name, &variable->intValue)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t variableHandle = nextDataModelVariableHandle++;
+	model->variables.emplace(variableHandle, std::move(variable));
+	nativeDataVariableModels.emplace(variableHandle, query->dataModelHandle);
+	result->variableHandle = variableHandle;
+	result->success = true;
+}
+
+static void NativeDataModelBindFloat(const RmlDataModelBindFloatQuery* query, RmlDataModelBindResult* result)
+{
+	result->error = nullptr;
+	result->variableHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto variable = std::make_unique<NativeDataVariable>();
+	variable->type = NativeDataValueType::Float;
+	variable->name = query->name;
+	variable->floatValue = query->initialValue;
+	if (!model->constructor.Bind(variable->name, &variable->floatValue)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t variableHandle = nextDataModelVariableHandle++;
+	model->variables.emplace(variableHandle, std::move(variable));
+	nativeDataVariableModels.emplace(variableHandle, query->dataModelHandle);
+	result->variableHandle = variableHandle;
+	result->success = true;
+}
+
+static void NativeDataModelBindString(const RmlDataModelBindStringQuery* query, RmlDataModelBindResult* result)
+{
+	result->error = nullptr;
+	result->variableHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || query->initialValue == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto variable = std::make_unique<NativeDataVariable>();
+	variable->type = NativeDataValueType::String;
+	variable->name = query->name;
+	variable->stringValue = query->initialValue;
+	if (!model->constructor.Bind(variable->name, &variable->stringValue)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t variableHandle = nextDataModelVariableHandle++;
+	model->variables.emplace(variableHandle, std::move(variable));
+	nativeDataVariableModels.emplace(variableHandle, query->dataModelHandle);
+	result->variableHandle = variableHandle;
+	result->success = true;
+}
+
+static bool RegisterNativeTextRowTypes(NativeDataModel* model)
+{
+	if (!nativeTextRowTypes.insert(model->context).second)
+		return true;
+
+	auto row = model->constructor.RegisterStruct<NativeDataTextRow>();
+	if (!row
+		|| !row.RegisterMember("text", &NativeDataTextRow::text)
+		|| !row.RegisterMember("muted", &NativeDataTextRow::muted)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataTextRow>>()) {
+		nativeTextRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindTextRows(const RmlDataModelBindTextRowsQuery* query, RmlDataModelTextRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeTextRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataTextRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->textRows.emplace(rowsHandle, std::move(rows));
+	nativeDataTextRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static bool RegisterNativeNotificationRowTypes(NativeDataModel* model)
+{
+	if (!nativeNotificationRowTypes.insert(model->context).second)
+		return true;
+
+	auto row = model->constructor.RegisterStruct<NativeDataNotificationRow>();
+	if (!row
+		|| !row.RegisterMember("title", &NativeDataNotificationRow::title)
+		|| !row.RegisterMember("body", &NativeDataNotificationRow::body)
+		|| !row.RegisterMember("warning", &NativeDataNotificationRow::warning)
+		|| !row.RegisterMember("has_progress", &NativeDataNotificationRow::hasProgress)
+		|| !row.RegisterMember("progress", &NativeDataNotificationRow::progress)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataNotificationRow>>()) {
+		nativeNotificationRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindNotificationRows(const RmlDataModelBindNotificationRowsQuery* query, RmlDataModelNotificationRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeNotificationRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataNotificationRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->notificationRows.emplace(rowsHandle, std::move(rows));
+	nativeDataNotificationRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static bool RegisterNativeIconRowTypes(NativeDataModel* model)
+{
+	if (!nativeIconRowTypes.insert(model->context).second)
+		return true;
+
+	auto row = model->constructor.RegisterStruct<NativeDataIconRow>();
+	if (!row
+		|| !row.RegisterMember("label", &NativeDataIconRow::label)
+		|| !row.RegisterMember("icon", &NativeDataIconRow::icon)
+		|| !row.RegisterMember("tooltip", &NativeDataIconRow::tooltip)
+		|| !row.RegisterMember("visible", &NativeDataIconRow::visible)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataIconRow>>()) {
+		nativeIconRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindIconRows(const RmlDataModelBindIconRowsQuery* query, RmlDataModelIconRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeIconRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataIconRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->iconRows.emplace(rowsHandle, std::move(rows));
+	nativeDataIconRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static bool RegisterNativeOptionRowTypes(NativeDataModel* model)
+{
+	if (!nativeOptionRowTypes.insert(model->context).second)
+		return true;
+
+	auto row = model->constructor.RegisterStruct<NativeDataOptionRow>();
+	if (!row
+		|| !row.RegisterMember("value", &NativeDataOptionRow::value)
+		|| !row.RegisterMember("label", &NativeDataOptionRow::label)
+		|| !row.RegisterMember("visible", &NativeDataOptionRow::visible)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataOptionRow>>()) {
+		nativeOptionRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindOptionRows(const RmlDataModelBindOptionRowsQuery* query, RmlDataModelOptionRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeOptionRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataOptionRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->optionRows.emplace(rowsHandle, std::move(rows));
+	nativeDataOptionRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static void NativeDataModelSetBool(const RmlDataModelVariableBoolQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Bool, &model);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	variable->boolValue = query->value;
+	model->handle.DirtyVariable(variable->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetInt(const RmlDataModelVariableIntQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Int, &model);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	variable->intValue = query->value;
+	model->handle.DirtyVariable(variable->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetFloat(const RmlDataModelVariableFloatQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Float, &model);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	variable->floatValue = query->value;
+	model->handle.DirtyVariable(variable->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetString(const RmlDataModelVariableStringQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::String, &model);
+	if (variable == nullptr || query->value == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	variable->stringValue = query->value;
+	model->handle.DirtyVariable(variable->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetTextRows(const RmlDataModelSetTextRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataTextRows* textRows = GetNativeDataTextRows(query->rowsHandle, &model);
+	if (textRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataTextRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataTextRow& row = query->rows[index];
+		if (row.text == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataTextRow{ .text = row.text, .muted = row.muted });
+	}
+	textRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(textRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetNotificationRows(const RmlDataModelSetNotificationRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataNotificationRows* notificationRows = GetNativeDataNotificationRows(query->rowsHandle, &model);
+	if (notificationRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataNotificationRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataNotificationRow& row = query->rows[index];
+		if (row.title == nullptr || row.body == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataNotificationRow{
+			.title = row.title,
+			.body = row.body,
+			.warning = row.warning,
+			.hasProgress = row.hasProgress,
+			.progress = row.progress,
+		});
+	}
+	notificationRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(notificationRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetIconRows(const RmlDataModelSetIconRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataIconRows* iconRows = GetNativeDataIconRows(query->rowsHandle, &model);
+	if (iconRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataIconRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataIconRow& row = query->rows[index];
+		if (row.label == nullptr || row.icon == nullptr || row.tooltip == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataIconRow{
+			.label = row.label,
+			.icon = row.icon,
+			.tooltip = row.tooltip,
+			.visible = row.label[0] != '\0',
+		});
+	}
+	iconRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(iconRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetOptionRows(const RmlDataModelSetOptionRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataOptionRows* optionRows = GetNativeDataOptionRows(query->rowsHandle, &model);
+	if (optionRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataOptionRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataOptionRow& row = query->rows[index];
+		if (row.value == nullptr || row.label == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataOptionRow{
+			.value = row.value,
+			.label = row.label,
+			.visible = row.label[0] != '\0',
+		});
+	}
+	optionRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(optionRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelGetBool(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetBoolResult* result)
+{
+	result->error = nullptr;
+	result->value = false;
+	result->success = false;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Bool);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = variable->boolValue;
+	result->success = true;
+}
+
+static void NativeDataModelGetInt(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetIntResult* result)
+{
+	result->error = nullptr;
+	result->value = 0;
+	result->success = false;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Int);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = variable->intValue;
+	result->success = true;
+}
+
+static void NativeDataModelGetFloat(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetFloatResult* result)
+{
+	result->error = nullptr;
+	result->value = 0.0f;
+	result->success = false;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Float);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = variable->floatValue;
+	result->success = true;
+}
+
+static void NativeDataModelGetString(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetStringResult* result)
+{
+	result->error = nullptr;
+	result->value = nullptr;
+	result->success = false;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::String);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = variable->stringValue.c_str();
 	result->success = true;
 }
 
@@ -2281,6 +3025,9 @@ void ClearAllContexts(ContextRemover removeContext)
 
 	nativeContextNames.clear();
 	nativeDataModels.clear();
+	nativeTextRowTypes.clear();
+	nativeNotificationRowTypes.clear();
+	nativeIconRowTypes.clear();
 	ownedElementPtrs.clear();
 	liveElements.clear();
 }
@@ -2311,6 +3058,7 @@ const RmlUiApi RMLUI_API = {
 	.ContextUnloadDocument = NativeContextUnloadDocument,
 	.ContextUpdate = NativeContextUpdate,
 	.ContextOpenDataModel = NativeContextOpenDataModel,
+	.ContextCreateDataModel = NativeContextCreateDataModel,
 	.ContextRemoveDataModel = NativeContextRemoveDataModel,
 	.ContextProcessMouseMove = NativeContextProcessMouseMove,
 	.ContextProcessMouseButtonDown = NativeContextProcessMouseButtonDown,
@@ -2433,6 +3181,26 @@ const RmlUiApi RMLUI_API = {
 	.EventGetParameterFloat = NativeEventGetParameterFloat,
 	.EventGetParameterString = NativeEventGetParameterString,
 	.SolLuaDataModelSetDirty = NativeSolLuaDataModelSetDirty,
+	.DataModelBindBool = NativeDataModelBindBool,
+	.DataModelBindInt = NativeDataModelBindInt,
+	.DataModelBindFloat = NativeDataModelBindFloat,
+	.DataModelBindString = NativeDataModelBindString,
+	.DataModelBindTextRows = NativeDataModelBindTextRows,
+	.DataModelSetBool = NativeDataModelSetBool,
+	.DataModelSetInt = NativeDataModelSetInt,
+	.DataModelSetFloat = NativeDataModelSetFloat,
+	.DataModelSetString = NativeDataModelSetString,
+	.DataModelSetTextRows = NativeDataModelSetTextRows,
+	.DataModelGetBool = NativeDataModelGetBool,
+	.DataModelGetInt = NativeDataModelGetInt,
+	.DataModelGetFloat = NativeDataModelGetFloat,
+	.DataModelGetString = NativeDataModelGetString,
 	.Vector2fNew = NativeVector2fNew,
 	.Vector2iNew = NativeVector2iNew,
+	.DataModelBindNotificationRows = NativeDataModelBindNotificationRows,
+	.DataModelSetNotificationRows = NativeDataModelSetNotificationRows,
+	.DataModelBindIconRows = NativeDataModelBindIconRows,
+	.DataModelSetIconRows = NativeDataModelSetIconRows,
+	.DataModelBindOptionRows = NativeDataModelBindOptionRows,
+	.DataModelSetOptionRows = NativeDataModelSetOptionRows,
 };
