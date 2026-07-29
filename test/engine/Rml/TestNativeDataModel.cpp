@@ -84,7 +84,7 @@ struct LogRows {
 		rows.reserve(rowCount);
 		for (size_t index = 0; index < rowCount; ++index) {
 			texts.emplace_back("line " + std::to_string(index) + " revision " + std::to_string(revision) + " -- representative console output");
-			rows.push_back({.text = texts.back().c_str(), .muted = false});
+			rows.push_back({.text = texts.back().c_str(), .muted = false, .visible = true});
 		}
 	}
 };
@@ -167,6 +167,26 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	REQUIRE(floatResult.error == nullptr);
 	REQUIRE(floatResult.success);
 
+	RmlDataModelBindPixelsQuery bindPixels = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "offset",
+		.initialValue = 0.25f,
+	};
+	RmlDataModelBindResult pixelsResult = {};
+	RMLUI_API.DataModelBindPixels(&bindPixels, &pixelsResult);
+	REQUIRE(pixelsResult.error == nullptr);
+	REQUIRE(pixelsResult.success);
+
+	RmlDataModelBindPercentQuery bindPercent = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "progress",
+		.initialValue = 25.0f,
+	};
+	RmlDataModelBindResult percentResult = {};
+	RMLUI_API.DataModelBindPercent(&bindPercent, &percentResult);
+	REQUIRE(percentResult.error == nullptr);
+	REQUIRE(percentResult.success);
+
 	RmlDataModelBindStringQuery bindString = {
 		.dataModelHandle = createResult.dataModelHandle,
 		.name = "title",
@@ -186,6 +206,15 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	REQUIRE(historyResult.error == nullptr);
 	REQUIRE(historyResult.success);
 
+	RmlDataModelBindLogRowsQuery bindLog = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "log",
+	};
+	RmlDataModelLogRowsResult logResult = {};
+	RMLUI_API.DataModelBindLogRows(&bindLog, &logResult);
+	REQUIRE(logResult.error == nullptr);
+	REQUIRE(logResult.success);
+
 	RmlDataModelBindNotificationRowsQuery bindNotifications = {
 		.dataModelHandle = createResult.dataModelHandle,
 		.name = "notifications",
@@ -194,6 +223,15 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	RMLUI_API.DataModelBindNotificationRows(&bindNotifications, &notificationsResult);
 	REQUIRE(notificationsResult.error == nullptr);
 	REQUIRE(notificationsResult.success);
+
+	RmlDataModelBindIconRowsQuery bindIcons = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "icons",
+	};
+	RmlDataModelIconRowsResult iconsResult = {};
+	RMLUI_API.DataModelBindIconRows(&bindIcons, &iconsResult);
+	REQUIRE(iconsResult.error == nullptr);
+	REQUIRE(iconsResult.success);
 
 	RmlDataModelBindOptionRowsQuery bindOptions = {
 		.dataModelHandle = createResult.dataModelHandle,
@@ -204,15 +242,73 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	REQUIRE(optionsResult.error == nullptr);
 	REQUIRE(optionsResult.success);
 
+	RmlDataModelBindChoiceRowsQuery bindChoices = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "choices",
+	};
+	RmlDataModelChoiceRowsResult choicesResult = {};
+	RMLUI_API.DataModelBindChoiceRows(&bindChoices, &choicesResult);
+	REQUIRE(choicesResult.error == nullptr);
+	REQUIRE(choicesResult.success);
+
+	RmlDataModelBindStatusRowsQuery bindStatuses = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "statuses",
+	};
+	RmlDataModelStatusRowsResult statusesResult = {};
+	RMLUI_API.DataModelBindStatusRows(&bindStatuses, &statusesResult);
+	REQUIRE(statusesResult.error == nullptr);
+	REQUIRE(statusesResult.success);
+
+	RmlDataModelBindSwatchRowsQuery bindSwatches = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "swatches",
+	};
+	RmlDataModelSwatchRowsResult swatchesResult = {};
+	RMLUI_API.DataModelBindSwatchRows(&bindSwatches, &swatchesResult);
+	REQUIRE(swatchesResult.error == nullptr);
+	REQUIRE(swatchesResult.success);
+
+	RmlDataModelBindGridRowsQuery bindGrid = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "grid",
+	};
+	RmlDataModelGridRowsResult gridResult = {};
+	RMLUI_API.DataModelBindGridRows(&bindGrid, &gridResult);
+	REQUIRE(gridResult.error == nullptr);
+	REQUIRE(gridResult.success);
+
+	RmlDataModelBindColorQuery bindColour = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "accent_colour",
+		.red = 16,
+		.green = 64,
+		.blue = 192,
+		.alpha = 255,
+	};
+	RmlDataModelBindResult colourResult = {};
+	RMLUI_API.DataModelBindColor(&bindColour, &colourResult);
+	REQUIRE(colourResult.error == nullptr);
+	REQUIRE(colourResult.success);
+
 	Rml::ElementDocument* document = context->CreateDocument();
 	REQUIRE(document != nullptr);
 	document->SetInnerRML(R"(
 		<div data-model="editor">
 			<p id="bound-title">{{ title }}</p>
+			<span id="bound-colour" data-style-background-color="accent_colour"></span>
+			<span id="bound-left" data-style-left="offset"></span>
+			<span id="bound-progress" data-style-width="progress"></span>
 			<input id="bound-input" type="text" data-value="title"/>
-			<div id="bound-history"><div data-for="row : history">{{ row.text }}</div></div>
-			<div id="bound-notifications"><div data-for="notification : notifications"><span>{{ notification.title }}</span><span>{{ notification.body }}</span><span>{{ notification.progress }}</span></div></div>
+			<div id="bound-history"><div data-for="row : history" data-if="row.visible" data-class-undone="row.muted">{{ row.text }}</div></div>
+			<div id="bound-log"><div data-for="line : log" data-if="line.visible" data-class-severity-info="line.info" data-class-severity-warning="line.warning" data-class-severity-error="line.error" data-class-selected="line.selected">{{ line.text }}</div></div>
+			<div id="bound-notifications"><div data-for="notification : notifications" data-class-warning="notification.warning"><span>{{ notification.title }}</span><span>{{ notification.body }}</span><span data-if="notification.has_progress" data-style-width="notification.progress"></span></div></div>
+			<div id="bound-icons"><button data-for="icon : icons" data-if="icon.visible" data-attr-title="icon.tooltip" data-class-pressed="icon.pressed" data-class-disabled="icon.disabled"><img data-attr-src="icon.icon"/><span>{{ icon.label }}</span></button></div>
 			<select id="bound-options"><option data-for="option : options" data-if="option.visible" data-attr-value="option.value">{{ option.label }}</option></select>
+			<div id="bound-choices"><div data-for="choice : choices" data-if="choice.visible" data-class-selected="choice.selected" data-class-highlighted="choice.highlighted"><span>{{ choice.label }}</span><span>{{ choice.detail }}</span></div></div>
+			<div id="bound-statuses"><div data-for="status : statuses" data-if="status.visible" data-class-positive="status.positive">{{ status.label }}</div></div>
+			<div id="bound-swatches"><div data-for="swatch : swatches" data-if="swatch.visible"><span data-style-background-color="swatch.colour"></span><span>{{ swatch.label }}</span><button data-if="swatch.actions_enabled">Edit</button></div></div>
+			<div id="bound-grid"><div data-for="item : grid" data-if="item.visible" data-class-selected="item.selected" data-class-folder="item.folder" data-class-grid-filler="item.filler" data-style-flex-basis="item.cell_size"><img data-if="item.has_image &amp;&amp; !item.native_image" data-attr-src="item.image"/><texture data-if="item.has_image &amp;&amp; item.native_image" data-attr-src="item.image"/><span>{{ item.label }}</span></div></div>
 		</div>
 	)");
 	document->Show();
@@ -222,6 +318,50 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	REQUIRE(title != nullptr);
 	REQUIRE(input != nullptr);
 	CHECK(title->GetInnerRML() == "initial");
+	Rml::Element* left = document->GetElementById("bound-left");
+	REQUIRE(left != nullptr);
+	REQUIRE(left->GetProperty(Rml::PropertyId::Left) != nullptr);
+	CHECK(left->GetProperty(Rml::PropertyId::Left)->unit == Rml::Unit::PX);
+	CHECK(left->GetProperty(Rml::PropertyId::Left)->Get<float>() == Catch::Approx(0.25f));
+
+	RmlDataModelVariablePixelsQuery setPixels = {.variableHandle = pixelsResult.variableHandle, .value = 42.0f};
+	RmlElementBoolResult setPixelsResult = {};
+	RMLUI_API.DataModelSetPixels(&setPixels, &setPixelsResult);
+	REQUIRE(setPixelsResult.error == nullptr);
+	REQUIRE(setPixelsResult.success);
+	context->Update();
+	CHECK(left->GetProperty(Rml::PropertyId::Left)->unit == Rml::Unit::PX);
+	CHECK(left->GetProperty(Rml::PropertyId::Left)->Get<float>() == Catch::Approx(42.0f));
+	Rml::Element* progress = document->GetElementById("bound-progress");
+	REQUIRE(progress != nullptr);
+	CHECK(progress->GetProperty(Rml::PropertyId::Width)->unit == Rml::Unit::PERCENT);
+	CHECK(progress->GetProperty(Rml::PropertyId::Width)->Get<float>() == Catch::Approx(25.0f));
+
+	RmlDataModelVariablePercentQuery setPercent = {.variableHandle = percentResult.variableHandle, .value = 88.0f};
+	RmlElementBoolResult setPercentResult = {};
+	RMLUI_API.DataModelSetPercent(&setPercent, &setPercentResult);
+	REQUIRE(setPercentResult.error == nullptr);
+	REQUIRE(setPercentResult.success);
+	context->Update();
+	CHECK(progress->GetProperty(Rml::PropertyId::Width)->unit == Rml::Unit::PERCENT);
+	CHECK(progress->GetProperty(Rml::PropertyId::Width)->Get<float>() == Catch::Approx(88.0f));
+	Rml::Element* colour = document->GetElementById("bound-colour");
+	REQUIRE(colour != nullptr);
+	CHECK(colour->GetProperty<Rml::Colourb>("background-color") == Rml::Colourb(16, 64, 192, 255));
+
+	RmlDataModelVariableColorQuery setColour = {
+		.variableHandle = colourResult.variableHandle,
+		.red = 255,
+		.green = 96,
+		.blue = 32,
+		.alpha = 200,
+	};
+	RmlElementBoolResult setColourResult = {};
+	RMLUI_API.DataModelSetColor(&setColour, &setColourResult);
+	REQUIRE(setColourResult.error == nullptr);
+	REQUIRE(setColourResult.success);
+	context->Update();
+	CHECK(colour->GetProperty<Rml::Colourb>("background-color") == Rml::Colourb(255, 96, 32, 200));
 
 	RmlDataModelVariableBoolQuery setBool = {.variableHandle = boolResult.variableHandle, .value = true};
 	RmlElementBoolResult setBoolResult = {};
@@ -250,9 +390,9 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	CHECK(title->GetInnerRML() == "updated");
 
 	RmlDataTextRow historyRows[] = {
-		{.text = "initial edit", .muted = false},
-		{.text = "undone edit", .muted = true},
-		{.text = "time={{863.446, 0.402}}ms", .muted = false},
+		{.text = "initial edit", .muted = false, .visible = true},
+		{.text = "undone edit", .muted = true, .visible = true},
+		{.text = "time={{863.446, 0.402}}ms", .muted = false, .visible = true},
 	};
 	RmlDataModelSetTextRowsQuery setHistory = {
 		.rowsHandle = historyResult.rowsHandle,
@@ -270,7 +410,32 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	REQUIRE(history->GetNumChildren() == 4);
 	CHECK(history->GetChild(0)->GetInnerRML() == "initial edit");
 	CHECK(history->GetChild(1)->GetInnerRML() == "undone edit");
+	CHECK(history->GetChild(1)->IsClassSet("undone"));
 	CHECK(history->GetChild(2)->GetInnerRML() == "time={{863.446, 0.402}}ms");
+
+	RmlDataLogRow logRows[] = {
+		{.text = "routine", .severity = 0, .selected = false},
+		{.text = "careful", .severity = 1, .selected = true},
+		{.text = "failed", .severity = 2, .selected = false},
+		{.text = "", .severity = 0, .selected = false},
+	};
+	RmlDataModelSetLogRowsQuery setLog = {
+		.rowsHandle = logResult.rowsHandle,
+		.rows = logRows,
+		.count = 4,
+	};
+	RmlElementBoolResult setLogResult = {};
+	RMLUI_API.DataModelSetLogRows(&setLog, &setLogResult);
+	REQUIRE(setLogResult.error == nullptr);
+	REQUIRE(setLogResult.success);
+	context->Update();
+	Rml::Element* log = document->GetElementById("bound-log");
+	REQUIRE(log != nullptr);
+	REQUIRE(log->GetNumChildren() == 5);
+	CHECK(log->GetChild(0)->IsClassSet("severity-info"));
+	CHECK(log->GetChild(1)->IsClassSet("severity-warning"));
+	CHECK(log->GetChild(1)->IsClassSet("selected"));
+	CHECK(log->GetChild(2)->IsClassSet("severity-error"));
 
 	RmlDataNotificationRow notificationRows[] = {
 		{.title = "Warning", .body = "Actual lines are native data", .warning = true, .hasProgress = false, .progress = 0.0f},
@@ -289,8 +454,15 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	Rml::Element* notifications = document->GetElementById("bound-notifications");
 	REQUIRE(notifications != nullptr);
 	REQUIRE(notifications->GetNumChildren() == 3);
-	CHECK(notifications->GetChild(0)->GetInnerRML() == "<span>Warning</span><span>Actual lines are native data</span><span>0</span>");
-	CHECK(notifications->GetChild(1)->GetInnerRML() == "<span>Progress</span><span>Loading</span><span>42</span>");
+	CHECK(notifications->GetChild(0)->IsClassSet("warning"));
+	CHECK(notifications->GetChild(0)->GetChild(0)->GetInnerRML() == "Warning");
+	CHECK_FALSE(notifications->GetChild(0)->GetChild(2)->IsVisible());
+	CHECK_FALSE(notifications->GetChild(1)->IsClassSet("warning"));
+	CHECK(notifications->GetChild(1)->GetChild(1)->GetInnerRML() == "Loading");
+	const Rml::Property* progressWidth = notifications->GetChild(1)->GetChild(2)->GetProperty(Rml::PropertyId::Width);
+	REQUIRE(progressWidth != nullptr);
+	CHECK(progressWidth->unit == Rml::Unit::PERCENT);
+	CHECK(progressWidth->Get<float>() == Catch::Approx(42.0f));
 
 	RmlDataOptionRow options[] = {
 		{.value = "diffuse", .label = "Diffuse map"},
@@ -317,6 +489,133 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	select->SetValue("height");
 	CHECK(select->GetValue() == "height");
 	CHECK(SelectValueRml(select) == "Heightmap");
+
+	// Collections are kept at their previous high-water count by the Rust
+	// wrapper. A blank tail row keeps RmlUi from evaluating stale data-for
+	// indexes, while `visible` keeps it hidden from the rendered list.
+	RmlDataChoiceRow choices[] = {
+		{.label = "/airmesh", .detail = "Show or hide the air mesh", .selected = true, .highlighted = false},
+		{.label = "/autocheat", .detail = "Toggle automatic cheating", .selected = false, .highlighted = true},
+		{.label = "", .detail = "", .selected = false, .highlighted = false},
+	};
+	RmlDataModelSetChoiceRowsQuery setChoices = {
+		.rowsHandle = choicesResult.rowsHandle,
+		.rows = choices,
+		.count = 3,
+	};
+	RmlElementBoolResult setChoicesResult = {};
+	RMLUI_API.DataModelSetChoiceRows(&setChoices, &setChoicesResult);
+	REQUIRE(setChoicesResult.error == nullptr);
+	REQUIRE(setChoicesResult.success);
+	context->Update();
+	Rml::Element* boundChoices = document->GetElementById("bound-choices");
+	REQUIRE(boundChoices != nullptr);
+	CHECK(boundChoices->GetInnerRML().find("/airmesh") != Rml::String::npos);
+	CHECK(boundChoices->GetInnerRML().find("Show or hide the air mesh") != Rml::String::npos);
+	CHECK(boundChoices->GetInnerRML().find("/autocheat") != Rml::String::npos);
+	CHECK(boundChoices->GetInnerRML().find("Toggle automatic cheating") != Rml::String::npos);
+	// RmlUi retains the hidden generated row and its data-for template in the
+	// DOM, so the two visible choices occupy the first two children.
+	REQUIRE(boundChoices->GetNumChildren() == 4);
+	CHECK(boundChoices->GetChild(0)->IsClassSet("selected"));
+	CHECK_FALSE(boundChoices->GetChild(1)->IsClassSet("selected"));
+	CHECK(boundChoices->GetChild(1)->IsClassSet("highlighted"));
+
+	RmlDataIconRow icons[] = {
+		{.label = "Paint", .icon = "LuaUI/images/paint.png", .tooltip = "Paint terrain", .pressed = true, .disabled = false},
+		{.label = "Smooth", .icon = "LuaUI/images/smooth.png", .tooltip = "Smooth terrain", .pressed = false, .disabled = true},
+	};
+	RmlDataModelSetIconRowsQuery setIcons = {
+		.rowsHandle = iconsResult.rowsHandle,
+		.rows = icons,
+		.count = 2,
+	};
+	RmlElementBoolResult setIconsResult = {};
+	RMLUI_API.DataModelSetIconRows(&setIcons, &setIconsResult);
+	REQUIRE(setIconsResult.error == nullptr);
+	REQUIRE(setIconsResult.success);
+	context->Update();
+	Rml::Element* boundIcons = document->GetElementById("bound-icons");
+	REQUIRE(boundIcons != nullptr);
+	CHECK(boundIcons->GetChild(0)->IsClassSet("pressed"));
+	CHECK_FALSE(boundIcons->GetChild(0)->IsClassSet("disabled"));
+	CHECK(boundIcons->GetChild(1)->IsClassSet("disabled"));
+	CHECK(boundIcons->GetChild(1)->GetAttribute("title", Rml::String{}) == "Smooth terrain");
+
+	RmlDataStatusRow statuses[] = {
+		{.label = "Diffuse", .positive = true},
+		{.label = "Specular", .positive = false},
+		{.label = "", .positive = false},
+	};
+	RmlDataModelSetStatusRowsQuery setStatuses = {
+		.rowsHandle = statusesResult.rowsHandle,
+		.rows = statuses,
+		.count = 3,
+	};
+	RmlElementBoolResult setStatusesResult = {};
+	RMLUI_API.DataModelSetStatusRows(&setStatuses, &setStatusesResult);
+	REQUIRE(setStatusesResult.error == nullptr);
+	REQUIRE(setStatusesResult.success);
+	context->Update();
+	Rml::Element* boundStatuses = document->GetElementById("bound-statuses");
+	REQUIRE(boundStatuses != nullptr);
+	REQUIRE(boundStatuses->GetNumChildren() == 4);
+	CHECK(boundStatuses->GetChild(0)->GetInnerRML() == "Diffuse");
+	CHECK(boundStatuses->GetChild(0)->IsClassSet("positive"));
+	CHECK_FALSE(boundStatuses->GetChild(1)->IsClassSet("positive"));
+
+	RmlDataSwatchRow swatches[] = {
+		{.label = "Player", .red = 64, .green = 128, .blue = 255, .alpha = 255, .actionsEnabled = true},
+		{.label = "Gaia", .red = 64, .green = 192, .blue = 96, .alpha = 255, .actionsEnabled = false},
+		{.label = "", .red = 0, .green = 0, .blue = 0, .alpha = 0, .actionsEnabled = false},
+	};
+	RmlDataModelSetSwatchRowsQuery setSwatches = {
+		.rowsHandle = swatchesResult.rowsHandle,
+		.rows = swatches,
+		.count = 3,
+	};
+	RmlElementBoolResult setSwatchesResult = {};
+	RMLUI_API.DataModelSetSwatchRows(&setSwatches, &setSwatchesResult);
+	REQUIRE(setSwatchesResult.error == nullptr);
+	REQUIRE(setSwatchesResult.success);
+	context->Update();
+	Rml::Element* boundSwatches = document->GetElementById("bound-swatches");
+	REQUIRE(boundSwatches != nullptr);
+	REQUIRE(boundSwatches->GetNumChildren() == 4);
+	CHECK(boundSwatches->GetChild(0)->GetChild(1)->GetInnerRML() == "Player");
+	CHECK(boundSwatches->GetChild(0)->GetChild(0)->GetProperty<Rml::Colourb>("background-color") == Rml::Colourb(64, 128, 255, 255));
+	CHECK(boundSwatches->GetChild(0)->GetChild(2) != nullptr);
+	CHECK_FALSE(boundSwatches->GetChild(1)->GetChild(2)->IsVisible());
+
+	RmlDataGridRow gridRows[] = {
+		{.label = "Diffuse", .image = "textures/diffuse.png", .cellSize = 96.0f, .hasImage = true, .nativeImage = false, .selected = true, .folder = false, .filler = false},
+		{.label = "Brushes", .image = "$native_texture", .cellSize = 96.0f, .hasImage = true, .nativeImage = true, .selected = false, .folder = true, .filler = false},
+		{.label = "", .image = "", .cellSize = 96.0f, .hasImage = false, .nativeImage = false, .selected = false, .folder = false, .filler = true},
+	};
+	RmlDataModelSetGridRowsQuery setGrid = {
+		.rowsHandle = gridResult.rowsHandle,
+		.rows = gridRows,
+		.count = 3,
+	};
+	RmlElementBoolResult setGridResult = {};
+	RMLUI_API.DataModelSetGridRows(&setGrid, &setGridResult);
+	REQUIRE(setGridResult.error == nullptr);
+	REQUIRE(setGridResult.success);
+	context->Update();
+	Rml::Element* boundGrid = document->GetElementById("bound-grid");
+	REQUIRE(boundGrid != nullptr);
+	REQUIRE(boundGrid->GetNumChildren() == 4);
+	CHECK(boundGrid->GetChild(0)->IsClassSet("selected"));
+	CHECK_FALSE(boundGrid->GetChild(0)->IsClassSet("folder"));
+	CHECK(boundGrid->GetChild(0)->GetProperty<float>("flex-basis") == 96.0f);
+	CHECK(boundGrid->GetChild(0)->GetChild(0)->GetAttribute("src", Rml::String{}) == "textures/diffuse.png");
+	CHECK(boundGrid->GetChild(0)->GetChild(0)->IsVisible());
+	CHECK_FALSE(boundGrid->GetChild(0)->GetChild(1)->IsVisible());
+	CHECK_FALSE(boundGrid->GetChild(1)->IsClassSet("selected"));
+	CHECK(boundGrid->GetChild(2)->IsClassSet("grid-filler"));
+	CHECK(boundGrid->GetChild(1)->IsClassSet("folder"));
+	CHECK_FALSE(boundGrid->GetChild(1)->GetChild(0)->IsVisible());
+	CHECK(boundGrid->GetChild(1)->GetChild(1)->IsVisible());
 
 	RmlDataModelSetTextRowsQuery clearHistory = {
 		.rowsHandle = historyResult.rowsHandle,
@@ -364,6 +663,30 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	CHECK(getStringResult.error == nullptr);
 	CHECK(getStringResult.success);
 	CHECK(std::string(getStringResult.value) == "from-view");
+
+	RmlDataModelVariableHandleQuery getColour = {.variableHandle = colourResult.variableHandle};
+	RmlDataModelGetColorResult getColourResult = {};
+	RMLUI_API.DataModelGetColor(&getColour, &getColourResult);
+	CHECK(getColourResult.error == nullptr);
+	CHECK(getColourResult.success);
+	CHECK(getColourResult.red == 255);
+	CHECK(getColourResult.green == 96);
+	CHECK(getColourResult.blue == 32);
+	CHECK(getColourResult.alpha == 200);
+
+	RmlDataModelVariableHandleQuery getPixels = {.variableHandle = pixelsResult.variableHandle};
+	RmlDataModelGetPixelsResult getPixelsResult = {};
+	RMLUI_API.DataModelGetPixels(&getPixels, &getPixelsResult);
+	CHECK(getPixelsResult.error == nullptr);
+	CHECK(getPixelsResult.success);
+	CHECK(getPixelsResult.value == Catch::Approx(42.0f));
+
+	RmlDataModelVariableHandleQuery getPercent = {.variableHandle = percentResult.variableHandle};
+	RmlDataModelGetPercentResult getPercentResult = {};
+	RMLUI_API.DataModelGetPercent(&getPercent, &getPercentResult);
+	CHECK(getPercentResult.error == nullptr);
+	CHECK(getPercentResult.success);
+	CHECK(getPercentResult.value == Catch::Approx(88.0f));
 
 	SECTION("a mismatched typed handle is rejected without touching the slot")
 	{

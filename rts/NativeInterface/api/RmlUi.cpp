@@ -84,7 +84,15 @@ static uint64_t nextDataModelVariableHandle = 1;
 static std::unordered_map<uint64_t, Rml::ElementPtr> ownedElementPtrs;
 static std::unordered_set<Rml::String> nativeContextNames;
 
-enum class NativeDataValueType { Bool, Int, Float, String };
+enum class NativeDataValueType { Bool, Int, Float, String, Color, Pixels, Percent };
+
+struct NativeDataPixels {
+	float value = 0.0f;
+};
+
+struct NativeDataPercent {
+	float value = 0.0f;
+};
 
 struct NativeDataVariable
 {
@@ -94,12 +102,16 @@ struct NativeDataVariable
 	int32_t intValue = 0;
 	float floatValue = 0.0f;
 	Rml::String stringValue;
+	Rml::Colourb colourValue;
+	NativeDataPixels pixelsValue;
+	NativeDataPercent percentValue;
 };
 
 struct NativeDataTextRow
 {
 	Rml::String text;
 	bool muted = false;
+	bool visible = false;
 };
 
 struct NativeDataTextRows
@@ -108,13 +120,29 @@ struct NativeDataTextRows
 	std::vector<NativeDataTextRow> rows;
 };
 
+struct NativeDataLogRow
+{
+	Rml::String text;
+	bool info = true;
+	bool warning = false;
+	bool error = false;
+	bool selected = false;
+	bool visible = false;
+};
+
+struct NativeDataLogRows
+{
+	Rml::String name;
+	std::vector<NativeDataLogRow> rows;
+};
+
 struct NativeDataNotificationRow
 {
 	Rml::String title;
 	Rml::String body;
 	bool warning = false;
 	bool hasProgress = false;
-	float progress = 0.0f;
+	NativeDataPercent progress;
 };
 
 struct NativeDataNotificationRows
@@ -128,6 +156,8 @@ struct NativeDataIconRow
 	Rml::String label;
 	Rml::String icon;
 	Rml::String tooltip;
+	bool pressed = false;
+	bool disabled = false;
 	bool visible = false;
 };
 
@@ -150,6 +180,67 @@ struct NativeDataOptionRows
 	std::vector<NativeDataOptionRow> rows;
 };
 
+struct NativeDataChoiceRow
+{
+	Rml::String label;
+	Rml::String detail;
+	bool selected = false;
+	bool highlighted = false;
+	bool visible = false;
+};
+
+struct NativeDataChoiceRows
+{
+	Rml::String name;
+	std::vector<NativeDataChoiceRow> rows;
+};
+
+struct NativeDataStatusRow
+{
+	Rml::String label;
+	bool positive = false;
+	bool visible = false;
+};
+
+struct NativeDataStatusRows
+{
+	Rml::String name;
+	std::vector<NativeDataStatusRow> rows;
+};
+
+struct NativeDataSwatchRow
+{
+	Rml::String label;
+	Rml::Colourb colour;
+	bool actionsEnabled = false;
+	bool visible = false;
+};
+
+struct NativeDataSwatchRows
+{
+	Rml::String name;
+	std::vector<NativeDataSwatchRow> rows;
+};
+
+struct NativeDataGridRow
+{
+	Rml::String label;
+	Rml::String image;
+	NativeDataPixels cellSize;
+	bool hasImage = false;
+	bool nativeImage = false;
+	bool selected = false;
+	bool folder = false;
+	bool filler = false;
+	bool visible = false;
+};
+
+struct NativeDataGridRows
+{
+	Rml::String name;
+	std::vector<NativeDataGridRow> rows;
+};
+
 struct NativeDataModel
 {
 	NativeDataModel(Rml::DataModelConstructor constructor, Rml::Context* context)
@@ -163,9 +254,14 @@ struct NativeDataModel
 	Rml::Context* context;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataVariable>> variables;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataTextRows>> textRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataLogRows>> logRows;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataNotificationRows>> notificationRows;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataIconRows>> iconRows;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataOptionRows>> optionRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataChoiceRows>> choiceRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataStatusRows>> statusRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataSwatchRows>> swatchRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataGridRows>> gridRows;
 };
 
 struct NativeDataModelRecord
@@ -178,13 +274,26 @@ struct NativeDataModelRecord
 static std::unordered_map<uint64_t, NativeDataModelRecord> nativeDataModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataVariableModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataTextRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataLogRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataNotificationRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataIconRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataOptionRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataChoiceRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataStatusRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataSwatchRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataGridRowsModels;
 static std::unordered_set<Rml::Context*> nativeTextRowTypes;
+static std::unordered_set<Rml::Context*> nativeLogRowTypes;
 static std::unordered_set<Rml::Context*> nativeNotificationRowTypes;
 static std::unordered_set<Rml::Context*> nativeIconRowTypes;
 static std::unordered_set<Rml::Context*> nativeOptionRowTypes;
+static std::unordered_set<Rml::Context*> nativeChoiceRowTypes;
+static std::unordered_set<Rml::Context*> nativeStatusRowTypes;
+static std::unordered_set<Rml::Context*> nativeSwatchRowTypes;
+static std::unordered_set<Rml::Context*> nativeGridRowTypes;
+static std::unordered_set<Rml::Context*> nativeColourTypes;
+static std::unordered_set<Rml::Context*> nativePixelTypes;
+static std::unordered_set<Rml::Context*> nativePercentTypes;
 static thread_local std::vector<uint64_t> elementHandleResults;
 static thread_local std::vector<Rml::String> stringResults;
 static thread_local std::vector<const char*> stringPtrResults;
@@ -246,12 +355,22 @@ static void EraseNativeDataModelHandles(Rml::Context* context)
 					nativeDataVariableModels.erase(variableHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->textRows)
 					nativeDataTextRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->logRows)
+					nativeDataLogRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->notificationRows)
 					nativeDataNotificationRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->iconRows)
 					nativeDataIconRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->optionRows)
 					nativeDataOptionRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->choiceRows)
+					nativeDataChoiceRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->statusRows)
+					nativeDataStatusRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->swatchRows)
+					nativeDataSwatchRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->gridRows)
+					nativeDataGridRowsModels.erase(rowsHandle);
 			}
 			it = nativeDataModels.erase(it);
 		} else {
@@ -259,9 +378,17 @@ static void EraseNativeDataModelHandles(Rml::Context* context)
 		}
 	}
 	nativeTextRowTypes.erase(context);
+	nativeLogRowTypes.erase(context);
 	nativeNotificationRowTypes.erase(context);
 	nativeIconRowTypes.erase(context);
 	nativeOptionRowTypes.erase(context);
+	nativeChoiceRowTypes.erase(context);
+	nativeStatusRowTypes.erase(context);
+	nativeSwatchRowTypes.erase(context);
+	nativeGridRowTypes.erase(context);
+	nativeColourTypes.erase(context);
+	nativePixelTypes.erase(context);
+	nativePercentTypes.erase(context);
 }
 
 static void EraseNativeDataModelHandles(Rml::Context* context, const Rml::String& name)
@@ -273,12 +400,22 @@ static void EraseNativeDataModelHandles(Rml::Context* context, const Rml::String
 					nativeDataVariableModels.erase(variableHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->textRows)
 					nativeDataTextRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->logRows)
+					nativeDataLogRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->notificationRows)
 					nativeDataNotificationRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->iconRows)
 					nativeDataIconRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->optionRows)
 					nativeDataOptionRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->choiceRows)
+					nativeDataChoiceRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->statusRows)
+					nativeDataStatusRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->swatchRows)
+					nativeDataSwatchRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->gridRows)
+					nativeDataGridRowsModels.erase(rowsHandle);
 			}
 			it = nativeDataModels.erase(it);
 		} else {
@@ -319,6 +456,22 @@ static NativeDataTextRows* GetNativeDataTextRows(uint64_t rowsHandle, NativeData
 		return nullptr;
 	auto rowsIt = model->textRows.find(rowsHandle);
 	if (rowsIt == model->textRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataLogRows* GetNativeDataLogRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataLogRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataLogRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->logRows.find(rowsHandle);
+	if (rowsIt == model->logRows.end())
 		return nullptr;
 	if (outModel != nullptr)
 		*outModel = model;
@@ -367,6 +520,70 @@ static NativeDataOptionRows* GetNativeDataOptionRows(uint64_t rowsHandle, Native
 		return nullptr;
 	auto rowsIt = model->optionRows.find(rowsHandle);
 	if (rowsIt == model->optionRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataChoiceRows* GetNativeDataChoiceRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataChoiceRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataChoiceRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->choiceRows.find(rowsHandle);
+	if (rowsIt == model->choiceRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataStatusRows* GetNativeDataStatusRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataStatusRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataStatusRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->statusRows.find(rowsHandle);
+	if (rowsIt == model->statusRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataSwatchRows* GetNativeDataSwatchRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataSwatchRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataSwatchRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->swatchRows.find(rowsHandle);
+	if (rowsIt == model->swatchRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataGridRows* GetNativeDataGridRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataGridRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataGridRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->gridRows.find(rowsHandle);
+	if (rowsIt == model->gridRows.end())
 		return nullptr;
 	if (outModel != nullptr)
 		*outModel = model;
@@ -490,6 +707,35 @@ static void NativeGetContext(const RmlGetContextQuery* query, RmlGetContextResul
 	Rml::Context* context = RmlGui::GetContext(query->name);
 	result->contextHandle = ToHandle(context);
 	result->exists = (context != nullptr);
+}
+
+static void NativeContextPullToFront(const RmlContextHandleQuery* query, RmlContextBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	Rml::Context* context = FromHandle(query->contextHandle);
+	if (context == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->success = RmlGui::PullContextToFront(context);
+	if (!result->success)
+		result->error = &INVALID_ARGUMENT_ERROR;
+}
+
+static void NativeContextSetPointerCapture(const RmlContextPointerCaptureQuery* query, RmlContextBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	Rml::Context* context = FromHandle(query->contextHandle);
+	if (context == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->success = RmlGui::SetPointerCapture(
+		context, query->anchorX, query->anchorY, query->active);
+	if (!result->success)
+		result->error = &INVALID_ARGUMENT_ERROR;
 }
 
 static void NativeRemoveContext(const RmlRemoveContextQuery* query, RmlRemoveContextResult* result)
@@ -919,6 +1165,123 @@ static void NativeDataModelBindString(const RmlDataModelBindStringQuery* query, 
 	result->success = true;
 }
 
+static bool RegisterNativeColourType(NativeDataModel* model)
+{
+	if (!nativeColourTypes.insert(model->context).second)
+		return true;
+	if (!model->constructor.RegisterScalar<Rml::Colourb>([](const Rml::Colourb& colour, Rml::Variant& value) {
+		value = Rml::ToString(colour);
+	})) {
+		nativeColourTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindColor(const RmlDataModelBindColorQuery* query, RmlDataModelBindResult* result)
+{
+	result->error = nullptr;
+	result->variableHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeColourType(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto variable = std::make_unique<NativeDataVariable>();
+	variable->type = NativeDataValueType::Color;
+	variable->name = query->name;
+	variable->colourValue = Rml::Colourb(query->red, query->green, query->blue, query->alpha);
+	if (!model->constructor.Bind(variable->name, &variable->colourValue)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t variableHandle = nextDataModelVariableHandle++;
+	model->variables.emplace(variableHandle, std::move(variable));
+	nativeDataVariableModels.emplace(variableHandle, query->dataModelHandle);
+	result->variableHandle = variableHandle;
+	result->success = true;
+}
+
+static bool RegisterNativePixelType(NativeDataModel* model)
+{
+	if (!nativePixelTypes.insert(model->context).second)
+		return true;
+	if (!model->constructor.RegisterScalar<NativeDataPixels>([](const NativeDataPixels& pixels, Rml::Variant& value) {
+		value = Rml::ToString(pixels.value) + "px";
+	})) {
+		nativePixelTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static bool RegisterNativePercentType(NativeDataModel* model)
+{
+	if (!nativePercentTypes.insert(model->context).second)
+		return true;
+	if (!model->constructor.RegisterScalar<NativeDataPercent>([](const NativeDataPercent& percent, Rml::Variant& value) {
+		value = Rml::ToString(percent.value) + "%";
+	})) {
+		nativePercentTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindPixels(const RmlDataModelBindPixelsQuery* query, RmlDataModelBindResult* result)
+{
+	result->error = nullptr;
+	result->variableHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativePixelType(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto variable = std::make_unique<NativeDataVariable>();
+	variable->type = NativeDataValueType::Pixels;
+	variable->name = query->name;
+	variable->pixelsValue.value = query->initialValue;
+	if (!model->constructor.Bind(variable->name, &variable->pixelsValue)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t variableHandle = nextDataModelVariableHandle++;
+	model->variables.emplace(variableHandle, std::move(variable));
+	nativeDataVariableModels.emplace(variableHandle, query->dataModelHandle);
+	result->variableHandle = variableHandle;
+	result->success = true;
+}
+
+static void NativeDataModelBindPercent(const RmlDataModelBindPercentQuery* query, RmlDataModelBindResult* result)
+{
+	result->error = nullptr;
+	result->variableHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativePercentType(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto variable = std::make_unique<NativeDataVariable>();
+	variable->type = NativeDataValueType::Percent;
+	variable->name = query->name;
+	variable->percentValue.value = query->initialValue;
+	if (!model->constructor.Bind(variable->name, &variable->percentValue)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t variableHandle = nextDataModelVariableHandle++;
+	model->variables.emplace(variableHandle, std::move(variable));
+	nativeDataVariableModels.emplace(variableHandle, query->dataModelHandle);
+	result->variableHandle = variableHandle;
+	result->success = true;
+}
+
 static bool RegisterNativeTextRowTypes(NativeDataModel* model)
 {
 	if (!nativeTextRowTypes.insert(model->context).second)
@@ -928,6 +1291,7 @@ static bool RegisterNativeTextRowTypes(NativeDataModel* model)
 	if (!row
 		|| !row.RegisterMember("text", &NativeDataTextRow::text)
 		|| !row.RegisterMember("muted", &NativeDataTextRow::muted)
+		|| !row.RegisterMember("visible", &NativeDataTextRow::visible)
 		|| !model->constructor.RegisterArray<std::vector<NativeDataTextRow>>()) {
 		nativeTextRowTypes.erase(model->context);
 		return false;
@@ -959,11 +1323,59 @@ static void NativeDataModelBindTextRows(const RmlDataModelBindTextRowsQuery* que
 	result->success = true;
 }
 
+static bool RegisterNativeLogRowTypes(NativeDataModel* model)
+{
+	if (!nativeLogRowTypes.insert(model->context).second)
+		return true;
+
+	auto row = model->constructor.RegisterStruct<NativeDataLogRow>();
+	if (!row
+		|| !row.RegisterMember("text", &NativeDataLogRow::text)
+		|| !row.RegisterMember("info", &NativeDataLogRow::info)
+		|| !row.RegisterMember("warning", &NativeDataLogRow::warning)
+		|| !row.RegisterMember("error", &NativeDataLogRow::error)
+		|| !row.RegisterMember("selected", &NativeDataLogRow::selected)
+		|| !row.RegisterMember("visible", &NativeDataLogRow::visible)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataLogRow>>()) {
+		nativeLogRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindLogRows(const RmlDataModelBindLogRowsQuery* query, RmlDataModelLogRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeLogRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataLogRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->logRows.emplace(rowsHandle, std::move(rows));
+	nativeDataLogRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
 static bool RegisterNativeNotificationRowTypes(NativeDataModel* model)
 {
 	if (!nativeNotificationRowTypes.insert(model->context).second)
 		return true;
 
+	if (!RegisterNativePercentType(model)) {
+		nativeNotificationRowTypes.erase(model->context);
+		return false;
+	}
 	auto row = model->constructor.RegisterStruct<NativeDataNotificationRow>();
 	if (!row
 		|| !row.RegisterMember("title", &NativeDataNotificationRow::title)
@@ -1012,6 +1424,8 @@ static bool RegisterNativeIconRowTypes(NativeDataModel* model)
 		|| !row.RegisterMember("label", &NativeDataIconRow::label)
 		|| !row.RegisterMember("icon", &NativeDataIconRow::icon)
 		|| !row.RegisterMember("tooltip", &NativeDataIconRow::tooltip)
+		|| !row.RegisterMember("pressed", &NativeDataIconRow::pressed)
+		|| !row.RegisterMember("disabled", &NativeDataIconRow::disabled)
 		|| !row.RegisterMember("visible", &NativeDataIconRow::visible)
 		|| !model->constructor.RegisterArray<std::vector<NativeDataIconRow>>()) {
 		nativeIconRowTypes.erase(model->context);
@@ -1085,6 +1499,183 @@ static void NativeDataModelBindOptionRows(const RmlDataModelBindOptionRowsQuery*
 	result->success = true;
 }
 
+static bool RegisterNativeChoiceRowTypes(NativeDataModel* model)
+{
+	if (!nativeChoiceRowTypes.insert(model->context).second)
+		return true;
+
+	auto row = model->constructor.RegisterStruct<NativeDataChoiceRow>();
+	if (!row
+		|| !row.RegisterMember("label", &NativeDataChoiceRow::label)
+		|| !row.RegisterMember("detail", &NativeDataChoiceRow::detail)
+		|| !row.RegisterMember("selected", &NativeDataChoiceRow::selected)
+		|| !row.RegisterMember("highlighted", &NativeDataChoiceRow::highlighted)
+		|| !row.RegisterMember("visible", &NativeDataChoiceRow::visible)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataChoiceRow>>()) {
+		nativeChoiceRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindChoiceRows(const RmlDataModelBindChoiceRowsQuery* query, RmlDataModelChoiceRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeChoiceRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataChoiceRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->choiceRows.emplace(rowsHandle, std::move(rows));
+	nativeDataChoiceRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static bool RegisterNativeStatusRowTypes(NativeDataModel* model)
+{
+	if (!nativeStatusRowTypes.insert(model->context).second)
+		return true;
+
+	auto row = model->constructor.RegisterStruct<NativeDataStatusRow>();
+	if (!row
+		|| !row.RegisterMember("label", &NativeDataStatusRow::label)
+		|| !row.RegisterMember("positive", &NativeDataStatusRow::positive)
+		|| !row.RegisterMember("visible", &NativeDataStatusRow::visible)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataStatusRow>>()) {
+		nativeStatusRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindStatusRows(const RmlDataModelBindStatusRowsQuery* query, RmlDataModelStatusRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeStatusRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataStatusRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->statusRows.emplace(rowsHandle, std::move(rows));
+	nativeDataStatusRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static bool RegisterNativeSwatchRowTypes(NativeDataModel* model)
+{
+	if (!nativeSwatchRowTypes.insert(model->context).second)
+		return true;
+
+	if (!RegisterNativeColourType(model)) {
+		nativeSwatchRowTypes.erase(model->context);
+		return false;
+	}
+	auto row = model->constructor.RegisterStruct<NativeDataSwatchRow>();
+	if (!row
+		|| !row.RegisterMember("label", &NativeDataSwatchRow::label)
+		|| !row.RegisterMember("colour", &NativeDataSwatchRow::colour)
+		|| !row.RegisterMember("actions_enabled", &NativeDataSwatchRow::actionsEnabled)
+		|| !row.RegisterMember("visible", &NativeDataSwatchRow::visible)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataSwatchRow>>()) {
+		nativeSwatchRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindSwatchRows(const RmlDataModelBindSwatchRowsQuery* query, RmlDataModelSwatchRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeSwatchRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataSwatchRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->swatchRows.emplace(rowsHandle, std::move(rows));
+	nativeDataSwatchRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static bool RegisterNativeGridRowTypes(NativeDataModel* model)
+{
+	if (!RegisterNativePixelType(model) || !nativeGridRowTypes.insert(model->context).second)
+		return true;
+
+	auto row = model->constructor.RegisterStruct<NativeDataGridRow>();
+	if (!row
+		|| !row.RegisterMember("label", &NativeDataGridRow::label)
+		|| !row.RegisterMember("image", &NativeDataGridRow::image)
+		|| !row.RegisterMember("cell_size", &NativeDataGridRow::cellSize)
+		|| !row.RegisterMember("has_image", &NativeDataGridRow::hasImage)
+		|| !row.RegisterMember("native_image", &NativeDataGridRow::nativeImage)
+		|| !row.RegisterMember("selected", &NativeDataGridRow::selected)
+		|| !row.RegisterMember("folder", &NativeDataGridRow::folder)
+		|| !row.RegisterMember("filler", &NativeDataGridRow::filler)
+		|| !row.RegisterMember("visible", &NativeDataGridRow::visible)
+		|| !model->constructor.RegisterArray<std::vector<NativeDataGridRow>>()) {
+		nativeGridRowTypes.erase(model->context);
+		return false;
+	}
+	return true;
+}
+
+static void NativeDataModelBindGridRows(const RmlDataModelBindGridRowsQuery* query, RmlDataModelGridRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || !RegisterNativeGridRowTypes(model)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataGridRows>();
+	rows->name = query->name;
+	if (!model->constructor.Bind(rows->name, &rows->rows)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->gridRows.emplace(rowsHandle, std::move(rows));
+	nativeDataGridRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
 static void NativeDataModelSetBool(const RmlDataModelVariableBoolQuery* query, RmlElementBoolResult* result)
 {
 	result->error = nullptr;
@@ -1145,6 +1736,51 @@ static void NativeDataModelSetString(const RmlDataModelVariableStringQuery* quer
 	result->success = true;
 }
 
+static void NativeDataModelSetColor(const RmlDataModelVariableColorQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Color, &model);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	variable->colourValue = Rml::Colourb(query->red, query->green, query->blue, query->alpha);
+	model->handle.DirtyVariable(variable->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetPixels(const RmlDataModelVariablePixelsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Pixels, &model);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	variable->pixelsValue.value = query->value;
+	model->handle.DirtyVariable(variable->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetPercent(const RmlDataModelVariablePercentQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Percent, &model);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	variable->percentValue.value = query->value;
+	model->handle.DirtyVariable(variable->name);
+	result->success = true;
+}
+
 static void NativeDataModelSetTextRows(const RmlDataModelSetTextRowsQuery* query, RmlElementBoolResult* result)
 {
 	result->error = nullptr;
@@ -1164,10 +1800,43 @@ static void NativeDataModelSetTextRows(const RmlDataModelSetTextRowsQuery* query
 			result->error = &INVALID_ARGUMENT_ERROR;
 			return;
 		}
-		copiedRows.push_back(NativeDataTextRow{ .text = row.text, .muted = row.muted });
+		copiedRows.push_back(NativeDataTextRow{ .text = row.text, .muted = row.muted, .visible = row.visible });
 	}
 	textRows->rows = std::move(copiedRows);
 	model->handle.DirtyVariable(textRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetLogRows(const RmlDataModelSetLogRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataLogRows* logRows = GetNativeDataLogRows(query->rowsHandle, &model);
+	if (logRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataLogRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataLogRow& row = query->rows[index];
+		if (row.text == nullptr || row.severity > 2) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataLogRow{
+			.text = row.text,
+			.info = row.severity == 0,
+			.warning = row.severity == 1,
+			.error = row.severity == 2,
+			.selected = row.selected,
+			.visible = row.text[0] != '\0',
+		});
+	}
+	logRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(logRows->name);
 	result->success = true;
 }
 
@@ -1195,7 +1864,7 @@ static void NativeDataModelSetNotificationRows(const RmlDataModelSetNotification
 			.body = row.body,
 			.warning = row.warning,
 			.hasProgress = row.hasProgress,
-			.progress = row.progress,
+			.progress = {.value = row.progress},
 		});
 	}
 	notificationRows->rows = std::move(copiedRows);
@@ -1226,6 +1895,8 @@ static void NativeDataModelSetIconRows(const RmlDataModelSetIconRowsQuery* query
 			.label = row.label,
 			.icon = row.icon,
 			.tooltip = row.tooltip,
+			.pressed = row.pressed,
+			.disabled = row.disabled,
 			.visible = row.label[0] != '\0',
 		});
 	}
@@ -1261,6 +1932,135 @@ static void NativeDataModelSetOptionRows(const RmlDataModelSetOptionRowsQuery* q
 	}
 	optionRows->rows = std::move(copiedRows);
 	model->handle.DirtyVariable(optionRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetChoiceRows(const RmlDataModelSetChoiceRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataChoiceRows* choiceRows = GetNativeDataChoiceRows(query->rowsHandle, &model);
+	if (choiceRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataChoiceRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataChoiceRow& row = query->rows[index];
+		if (row.label == nullptr || row.detail == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataChoiceRow{
+			.label = row.label,
+			.detail = row.detail,
+			.selected = row.selected,
+			.highlighted = row.highlighted,
+			.visible = row.label[0] != '\0',
+		});
+	}
+	choiceRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(choiceRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetStatusRows(const RmlDataModelSetStatusRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataStatusRows* statusRows = GetNativeDataStatusRows(query->rowsHandle, &model);
+	if (statusRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataStatusRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataStatusRow& row = query->rows[index];
+		if (row.label == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataStatusRow{
+			.label = row.label,
+			.positive = row.positive,
+			.visible = row.label[0] != '\0',
+		});
+	}
+	statusRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(statusRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetSwatchRows(const RmlDataModelSetSwatchRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataSwatchRows* swatchRows = GetNativeDataSwatchRows(query->rowsHandle, &model);
+	if (swatchRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataSwatchRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataSwatchRow& row = query->rows[index];
+		if (row.label == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataSwatchRow{
+			.label = row.label,
+			.colour = Rml::Colourb(row.red, row.green, row.blue, row.alpha),
+			.actionsEnabled = row.actionsEnabled,
+			.visible = row.label[0] != '\0',
+		});
+	}
+	swatchRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(swatchRows->name);
+	result->success = true;
+}
+
+static void NativeDataModelSetGridRows(const RmlDataModelSetGridRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataGridRows* gridRows = GetNativeDataGridRows(query->rowsHandle, &model);
+	if (gridRows == nullptr || (query->count > 0 && query->rows == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataGridRow> copiedRows;
+	copiedRows.reserve(query->count);
+	for (uint64_t index = 0; index < query->count; ++index) {
+		const RmlDataGridRow& row = query->rows[index];
+		if (row.label == nullptr || row.image == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		copiedRows.push_back(NativeDataGridRow{
+			.label = row.label,
+			.image = row.image,
+			.cellSize = NativeDataPixels{.value = row.cellSize},
+			.hasImage = row.hasImage,
+			.nativeImage = row.nativeImage,
+			.selected = row.selected,
+			.folder = row.folder,
+			.filler = row.filler,
+			.visible = row.filler || row.label[0] != '\0',
+		});
+	}
+	gridRows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(gridRows->name);
 	result->success = true;
 }
 
@@ -1317,6 +2117,54 @@ static void NativeDataModelGetString(const RmlDataModelVariableHandleQuery* quer
 		return;
 	}
 	result->value = variable->stringValue.c_str();
+	result->success = true;
+}
+
+static void NativeDataModelGetColor(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetColorResult* result)
+{
+	result->error = nullptr;
+	result->red = 0;
+	result->green = 0;
+	result->blue = 0;
+	result->alpha = 0;
+	result->success = false;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Color);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->red = variable->colourValue.red;
+	result->green = variable->colourValue.green;
+	result->blue = variable->colourValue.blue;
+	result->alpha = variable->colourValue.alpha;
+	result->success = true;
+}
+
+static void NativeDataModelGetPixels(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetPixelsResult* result)
+{
+	result->error = nullptr;
+	result->value = 0.0f;
+	result->success = false;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Pixels);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = variable->pixelsValue.value;
+	result->success = true;
+}
+
+static void NativeDataModelGetPercent(const RmlDataModelVariableHandleQuery* query, RmlDataModelGetPercentResult* result)
+{
+	result->error = nullptr;
+	result->value = 0.0f;
+	result->success = false;
+	NativeDataVariable* variable = GetNativeDataVariable(query->variableHandle, NativeDataValueType::Percent);
+	if (variable == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = variable->percentValue.value;
 	result->success = true;
 }
 
@@ -3028,6 +3876,14 @@ void ClearAllContexts(ContextRemover removeContext)
 	nativeTextRowTypes.clear();
 	nativeNotificationRowTypes.clear();
 	nativeIconRowTypes.clear();
+	nativeOptionRowTypes.clear();
+	nativeChoiceRowTypes.clear();
+	nativeStatusRowTypes.clear();
+	nativeSwatchRowTypes.clear();
+	nativeGridRowTypes.clear();
+	nativeColourTypes.clear();
+	nativePixelTypes.clear();
+	nativePercentTypes.clear();
 	ownedElementPtrs.clear();
 	liveElements.clear();
 }
@@ -3203,4 +4059,25 @@ const RmlUiApi RMLUI_API = {
 	.DataModelSetIconRows = NativeDataModelSetIconRows,
 	.DataModelBindOptionRows = NativeDataModelBindOptionRows,
 	.DataModelSetOptionRows = NativeDataModelSetOptionRows,
+	.DataModelBindChoiceRows = NativeDataModelBindChoiceRows,
+	.DataModelSetChoiceRows = NativeDataModelSetChoiceRows,
+	.DataModelBindStatusRows = NativeDataModelBindStatusRows,
+	.DataModelSetStatusRows = NativeDataModelSetStatusRows,
+	.DataModelBindSwatchRows = NativeDataModelBindSwatchRows,
+	.DataModelSetSwatchRows = NativeDataModelSetSwatchRows,
+	.DataModelBindGridRows = NativeDataModelBindGridRows,
+	.DataModelSetGridRows = NativeDataModelSetGridRows,
+	.DataModelBindColor = NativeDataModelBindColor,
+	.DataModelSetColor = NativeDataModelSetColor,
+	.DataModelGetColor = NativeDataModelGetColor,
+	.DataModelBindPixels = NativeDataModelBindPixels,
+	.DataModelSetPixels = NativeDataModelSetPixels,
+	.DataModelGetPixels = NativeDataModelGetPixels,
+	.DataModelBindPercent = NativeDataModelBindPercent,
+	.DataModelSetPercent = NativeDataModelSetPercent,
+	.DataModelGetPercent = NativeDataModelGetPercent,
+	.DataModelBindLogRows = NativeDataModelBindLogRows,
+	.DataModelSetLogRows = NativeDataModelSetLogRows,
+	.ContextPullToFront = NativeContextPullToFront,
+	.ContextSetPointerCapture = NativeContextSetPointerCapture,
 };

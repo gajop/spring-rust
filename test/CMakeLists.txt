@@ -538,6 +538,7 @@ endif()
 	set(test_name RmlNativeElementRect)
 	set(test_src
 			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/TestNativeElementRect.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/RmlNativeApiBackendStub.cpp"
 			"${ENGINE_SOURCE_DIR}/NativeInterface/api/RmlUi.cpp"
 			"${ENGINE_SOURCE_DIR}/System/Misc/SpringTime.cpp"
 			${sources_engine_System_Threading}
@@ -559,6 +560,7 @@ endif()
 	set(test_src
 			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/TestNativeDataModel.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/TestNativeDataModelBenchmark.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/RmlNativeApiBackendStub.cpp"
 			"${ENGINE_SOURCE_DIR}/NativeInterface/api/RmlUi.cpp"
 			"${ENGINE_SOURCE_DIR}/System/Misc/SpringTime.cpp"
 			${sources_engine_System_Threading}

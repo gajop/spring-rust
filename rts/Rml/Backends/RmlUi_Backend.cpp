@@ -37,6 +37,7 @@
 #include <ranges>
 #include <tracy/Tracy.hpp>
 
+#include "Game/Game.h"
 #include "System/Log/ILog.h"
 #include "Lua/LuaUI.h"
 #include "Rendering/GlobalRendering.h"
@@ -103,6 +104,9 @@ public:
 	Rml::Context* debug_host_context = nullptr;
 	Rml::Context* debug_context = nullptr;
 	Rml::Context* clicked_context = nullptr;
+	Rml::Context* pointer_capture_context = nullptr;
+	int pointer_capture_x = 0;
+	int pointer_capture_y = 0;
 
 	InputHandler::HandlerTokenT inputCon;
 	CRmlInputReceiver inputReceiver;
@@ -134,6 +138,44 @@ void AddPendingDelete(Rml::ElementPtr element)
 {
 	if (RmlInitialized() && element)
 		state->pending_deletes.push_back(std::move(element));
+}
+
+/// Native RmlUi contexts bypass widget `DrawScreen`, so they must observe the
+/// engine's global UI toggle directly.  Keep this at the backend boundary so
+/// every RmlUi user (Lua and native) follows `/hideinterface` consistently.
+static bool IsInterfaceHidden()
+{
+	return game != nullptr && game->hideInterface;
+}
+
+static void CancelPointerCapture();
+
+static bool CanProcessInput()
+{
+	if (!RmlInitialized()) {
+		return false;
+	}
+	if (!IsInterfaceHidden()) {
+		return true;
+	}
+	// A previously hovered Rml element must not remain an active input receiver
+	// after the interface disappears.
+	state->inputReceiver.setActive(false);
+	// A capture only has meaning while RmlUi is receiving the pointer. Do not
+	// retain one across /hideinterface and later redirect an unrelated move.
+	CancelPointerCapture();
+	return false;
+}
+
+static void CancelPointerCapture()
+{
+	Rml::Context* context = state->pointer_capture_context;
+	if (context == nullptr)
+		return;
+
+	// Clear first: mouseup and dragend listeners may release the capture too.
+	state->pointer_capture_context = nullptr;
+	RmlSDLRecoil::EventMouseRelease(context, state->pointer_capture_x, state->pointer_capture_y, SDL_BUTTON_LEFT);
 }
 
 bool RmlGui::IsInitialized()
@@ -329,7 +371,7 @@ Rml::RenderInterface* RmlGui::GetRenderInterface()
 
 bool RmlGui::IsMouseInteractingWith()
 {
-	if (!RmlInitialized()) {
+	if (!RmlInitialized() || IsInterfaceHidden()) {
 		return false;
 	}
 	return state->inputReceiver.IsAbove();
@@ -353,7 +395,7 @@ void RmlGui::SetMouseCursorAlias(std::string from, std::string to) {
 
 CInputReceiver* RmlGui::GetInputReceiver()
 {
-	if (!RmlInitialized()) {
+	if (!RmlInitialized() || IsInterfaceHidden()) {
 		return nullptr;
 	}
 	return &state->inputReceiver;
@@ -377,7 +419,44 @@ void RmlGui::OnContextDestroy(Rml::Context* context)
 	if (context == state->clicked_context) {
 		state->clicked_context = nullptr;
 	}
+	if (context == state->pointer_capture_context) {
+		state->pointer_capture_context = nullptr;
+	}
 	state->contexts.erase(std::ranges::find(state->contexts, context));
+}
+
+bool RmlGui::PullContextToFront(Rml::Context* context)
+{
+	if (!RmlInitialized() || context == nullptr)
+		return false;
+
+	// Index zero renders last, and is therefore visually on top. Keep the
+	// debug host reserved there when it exists.
+	auto start = state->contexts.begin() + (state->debug_host_context ? 1 : 0);
+	auto position = std::ranges::find(start, state->contexts.end(), context);
+	if (position == state->contexts.end())
+		return false;
+	if (position != start)
+		std::ranges::rotate(start, position, position + 1);
+	return true;
+}
+
+bool RmlGui::SetPointerCapture(Rml::Context* context, int anchor_x, int anchor_y, bool active)
+{
+	if (!RmlInitialized() || context == nullptr)
+		return false;
+	if (!active) {
+		if (state->pointer_capture_context != context)
+			return false;
+		state->pointer_capture_context = nullptr;
+		return true;
+	}
+	if (std::ranges::find(state->contexts, context) == state->contexts.end())
+		return false;
+	state->pointer_capture_context = context;
+	state->pointer_capture_x = anchor_x;
+	state->pointer_capture_y = anchor_y;
+	return true;
 }
 
 Rml::Context* RmlGui::GetOrCreateContext(const std::string& name)
@@ -435,6 +514,8 @@ void RmlGui::Update()
 	if (!RmlInitialized()) {
 		return;
 	}
+	if (IsInterfaceHidden())
+		state->inputReceiver.setActive(false);
 
 	for (const auto& context : state->contexts) {
 		context->Update();
@@ -466,7 +547,7 @@ void RmlGui::Update()
 void RmlGui::RenderFrame()
 {
 	ZoneScopedN("RmlGui Draw");
-	if (!RmlInitialized()) {
+	if (!RmlInitialized() || IsInterfaceHidden()) {
 		return;
 	}
 
@@ -499,8 +580,18 @@ void RmlGui::PresentFrame()
 */
 bool RmlGui::ProcessMouseMove(int x, int y, int dx, int dy, int button)
 {
-	if (!RmlInitialized()) {
+	if (!CanProcessInput()) {
 		return false;
+	}
+	if (Rml::Context* context = state->pointer_capture_context) {
+		// Let the captured element consume the real movement once, then restore
+		// its virtual pointer before rendering. This prevents transient hover on
+		// any neighbouring controls the physical pointer crossed.
+		RmlSDLRecoil::EventMouseMove(context, x, y);
+		RmlSDLRecoil::EventMouseMove(
+			context, state->pointer_capture_x, state->pointer_capture_y);
+		state->inputReceiver.setActive(true);
+		return true;
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
@@ -516,9 +607,13 @@ bool RmlGui::ProcessMouseMove(int x, int y, int dx, int dy, int button)
 */
 bool RmlGui::ProcessMousePress(int x, int y, int button)
 {
-	if (!RmlInitialized()) {
+	if (!CanProcessInput()) {
 		return false;
 	}
+	// A new button press means a prior captured gesture was interrupted (for
+	// example after alt-tab or by a right click). End it before delivering the
+	// new gesture so its application cannot remain in a dragging state.
+	CancelPointerCapture();
 
 	bool result = false;
 	for (const auto& context : state->contexts) {
@@ -548,8 +643,17 @@ bool RmlGui::ProcessMousePress(int x, int y, int button)
 */
 bool RmlGui::ProcessMouseRelease(int x, int y, int button)
 {
-	if (!RmlInitialized()) {
+	if (!CanProcessInput()) {
 		return false;
+	}
+	if (Rml::Context* context = state->pointer_capture_context) {
+		if (button != SDL_BUTTON_LEFT) {
+			return !RmlSDLRecoil::EventMouseRelease(context, x, y, button);
+		}
+		state->pointer_capture_context = nullptr;
+		const bool result = !RmlSDLRecoil::EventMouseRelease(context, x, y, button);
+		state->inputReceiver.setActive(result);
+		return result;
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
@@ -565,7 +669,7 @@ bool RmlGui::ProcessMouseRelease(int x, int y, int button)
 */
 bool RmlGui::ProcessMouseWheel(float delta)
 {
-	if (!RmlInitialized()) {
+	if (!CanProcessInput()) {
 		return false;
 	}
 	bool result = false;
@@ -582,7 +686,7 @@ bool RmlGui::ProcessMouseWheel(float delta)
 */
 bool RmlGui::ProcessKeyPressed(int keyCode, int scanCode, bool isRepeat)
 {
-	if (!RmlInitialized()) {
+	if (!CanProcessInput()) {
 		return false;
 	}
 	bool result = false;
@@ -596,7 +700,7 @@ bool RmlGui::ProcessKeyPressed(int keyCode, int scanCode, bool isRepeat)
 
 bool RmlGui::ProcessKeyReleased(int keyCode, int scanCode)
 {
-	if (!RmlInitialized()) {
+	if (!CanProcessInput()) {
 		return false;
 	}
 	bool result = false;
@@ -609,7 +713,7 @@ bool RmlGui::ProcessKeyReleased(int keyCode, int scanCode)
 
 bool RmlGui::ProcessTextInput(const std::string& text)
 {
-	if (!RmlInitialized()) {
+	if (!CanProcessInput()) {
 		return false;
 	}
 	bool result = false;
@@ -654,6 +758,9 @@ bool RmlGui::ProcessEvent(const SDL_Event& event)
 {
 	if (!RmlInitialized()) {
 		return false;
+	}
+	if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+		CancelPointerCapture();
 	}
 
 	bool result = false;

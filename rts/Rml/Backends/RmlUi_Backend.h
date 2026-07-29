@@ -77,6 +77,13 @@ namespace RmlGui
 
 	void OnContextCreate(Rml::Context* context);
 	void OnContextDestroy(Rml::Context* context);
+	// Contexts are independent UI planes. Hosts use this to explicitly promote
+	// transient UI (tooltips, drag overlays, etc.) above other contexts.
+	bool PullContextToFront(Rml::Context* context);
+	// Captures mouse motion for a context and restores its virtual pointer to
+	// the supplied anchor after each event. This supports relative-value drags
+	// without leaving controls crossed by the physical cursor hovered.
+	bool SetPointerCapture(Rml::Context* context, int anchor_x, int anchor_y, bool active);
 	
 	Rml::Context* GetOrCreateContext(const std::string& name);
 	Rml::Context* GetContext(const std::string& name);
