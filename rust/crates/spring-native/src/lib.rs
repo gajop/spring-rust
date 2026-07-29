@@ -219,7 +219,7 @@ pub use rml_ui::{
     RmlDataLogRows, RmlDataModel, RmlDataNotificationRows, RmlDataOptionRows, RmlDataStatusRows,
     RmlDataSwatchRows, RmlDataTextRows, RmlDataValue, RmlDataVariable, RmlGridRow, RmlIconRow,
     RmlLogRow, RmlLogSeverity, RmlNotificationRow, RmlOptionRow, RmlPercent, RmlPixels, RmlStatusRow,
-    RmlSwatchRow, RmlTextRow, RmlUi,
+    RmlPointerCaptureDelta, RmlPointerCaptureStatus, RmlSwatchRow, RmlTextRow, RmlUi,
 };
 pub use rules_params::{RulesParamValue, RulesParams};
 pub use selection::Selection;

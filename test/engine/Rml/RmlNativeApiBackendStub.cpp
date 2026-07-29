@@ -15,3 +15,13 @@ bool RmlGui::SetPointerCapture(Rml::Context*, int, int, bool)
 {
 	return false;
 }
+
+bool RmlGui::ProcessPointerCaptureRelease(int, int, int)
+{
+	return false;
+}
+
+bool RmlGui::TakePointerCaptureDelta(Rml::Context*, int&, int&, int&)
+{
+	return false;
+}

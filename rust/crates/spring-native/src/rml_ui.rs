@@ -13,6 +13,28 @@ pub struct RmlUi<'a> {
     api: &'a sys::RmlUiApi,
 }
 
+/// Relative pointer movement accumulated by an engine-owned RmlUi capture.
+///
+/// The engine returns the physical cursor to its capture anchor after every
+/// input event. `delta_x` and `delta_y` are therefore relative movement since
+/// the last call rather than an absolute screen position.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct RmlPointerCaptureDelta {
+    pub delta_x: i32,
+    pub delta_y: i32,
+    pub status: RmlPointerCaptureStatus,
+}
+
+/// Lifecycle state returned with an engine-owned pointer capture sample.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum RmlPointerCaptureStatus {
+    #[default]
+    None,
+    Active,
+    Released,
+    Cancelled,
+}
+
 /// An engine-owned RmlUi data model.
 ///
 /// Values live entirely in the engine. Rust receives only opaque handles, so a
@@ -467,6 +489,27 @@ impl<'a> RmlUi<'a> {
             self.context_remove_data_model(context_handle, name)?,
             "remove",
         )
+    }
+
+    /// Returns and clears the captured relative movement accumulated since the
+    /// prior call. No string or serialized event payload crosses this boundary.
+    pub fn take_pointer_capture_delta(
+        &self,
+        context_handle: u64,
+    ) -> Result<RmlPointerCaptureDelta, Error> {
+        let (delta_x, delta_y, status) = self.context_take_pointer_capture_delta(context_handle)?;
+        let status = match status {
+            0 => RmlPointerCaptureStatus::None,
+            1 => RmlPointerCaptureStatus::Active,
+            2 => RmlPointerCaptureStatus::Released,
+            3 => RmlPointerCaptureStatus::Cancelled,
+            _ => return Err(Error::new(1, "invalid RmlUi pointer capture status")),
+        };
+        Ok(RmlPointerCaptureDelta {
+            delta_x,
+            delta_y,
+            status,
+        })
     }
 }
 

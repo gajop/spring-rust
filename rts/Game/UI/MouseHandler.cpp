@@ -539,6 +539,13 @@ void CMouseHandler::MouseRelease(int x, int y, int button)
 	buttons[button].pressed = false;
 	pressedBitMask &= ~(1 << button);
 
+	// A captured RmlUi gesture owns its release regardless of the engine mode
+	// active underneath it. In particular, map drawing must not swallow the
+	// release that ends a native numeric-field drag.
+	if (RmlGui::ProcessPointerCaptureRelease(x, y, button)) {
+		return;
+	}
+
 	if (inMapDrawer != nullptr && inMapDrawer->IsDrawMode()) {
 		inMapDrawer->MouseRelease(x, y, button);
 		return;

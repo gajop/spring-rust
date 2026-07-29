@@ -738,6 +738,21 @@ static void NativeContextSetPointerCapture(const RmlContextPointerCaptureQuery* 
 		result->error = &INVALID_ARGUMENT_ERROR;
 }
 
+static void NativeContextTakePointerCaptureDelta(const RmlContextHandleQuery* query, RmlContextPointerDeltaResult* result)
+{
+	result->error = nullptr;
+	result->deltaX = 0;
+	result->deltaY = 0;
+	result->status = 0;
+	Rml::Context* context = FromHandle(query->contextHandle);
+	if (context == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (!RmlGui::TakePointerCaptureDelta(context, result->deltaX, result->deltaY, result->status))
+		result->error = &INVALID_ARGUMENT_ERROR;
+}
+
 static void NativeRemoveContext(const RmlRemoveContextQuery* query, RmlRemoveContextResult* result)
 {
 	result->error = nullptr;
@@ -4080,4 +4095,5 @@ const RmlUiApi RMLUI_API = {
 	.DataModelSetLogRows = NativeDataModelSetLogRows,
 	.ContextPullToFront = NativeContextPullToFront,
 	.ContextSetPointerCapture = NativeContextSetPointerCapture,
+	.ContextTakePointerCaptureDelta = NativeContextTakePointerCaptureDelta,
 };

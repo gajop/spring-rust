@@ -58,6 +58,10 @@ namespace RmlGui
 	bool ProcessTextInput(const std::string& text);
 	bool ProcessMouseMove(int x, int y, int dx, int dy, int button);
 	bool ProcessMousePress(int x, int y, int button);
+	/// End an existing engine-owned pointer capture without dispatching an
+	/// ordinary release to every RmlUi context. A capture owns its release even
+	/// while another engine mode (such as map drawing) is active.
+	bool ProcessPointerCaptureRelease(int x, int y, int button);
 	bool ProcessMouseRelease(int x, int y, int button);
 	bool ProcessMouseWheel(float delta);
 
@@ -80,10 +84,11 @@ namespace RmlGui
 	// Contexts are independent UI planes. Hosts use this to explicitly promote
 	// transient UI (tooltips, drag overlays, etc.) above other contexts.
 	bool PullContextToFront(Rml::Context* context);
-	// Captures mouse motion for a context and restores its virtual pointer to
-	// the supplied anchor after each event. This supports relative-value drags
-	// without leaving controls crossed by the physical cursor hovered.
+	// Captures relative mouse motion for a context. The physical pointer is
+	// returned to the supplied anchor after every motion; callers consume the
+	// accumulated delta explicitly, rather than making RmlUi synthesize a drag.
 	bool SetPointerCapture(Rml::Context* context, int anchor_x, int anchor_y, bool active);
+	bool TakePointerCaptureDelta(Rml::Context* context, int& delta_x, int& delta_y, int& status);
 	
 	Rml::Context* GetOrCreateContext(const std::string& name);
 	Rml::Context* GetContext(const std::string& name);

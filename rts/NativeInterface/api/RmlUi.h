@@ -73,6 +73,8 @@ struct RmlContextGetNameResult { const Error* error; const char* name; };
 struct RmlContextGetDimensionsResult { const Error* error; int32_t x; int32_t y; };
 struct RmlContextSetDimensionsQuery { uint64_t contextHandle; int32_t x; int32_t y; };
 struct RmlContextPointerCaptureQuery { uint64_t contextHandle; int32_t anchorX; int32_t anchorY; bool active; };
+// status: 0 = none, 1 = active, 2 = released, 3 = cancelled.
+struct RmlContextPointerDeltaResult { const Error* error; int32_t deltaX; int32_t deltaY; int32_t status; };
 struct RmlContextGetFloatResult { const Error* error; float value; };
 struct RmlContextSetFloatQuery { uint64_t contextHandle; float value; };
 
@@ -433,6 +435,7 @@ struct RmlUiApi {
 	void (*DataModelSetLogRows)(const RmlDataModelSetLogRowsQuery* query, RmlElementBoolResult* result);
 	void (*ContextPullToFront)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextSetPointerCapture)(const RmlContextPointerCaptureQuery* query, RmlContextBoolResult* result);
+	void (*ContextTakePointerCaptureDelta)(const RmlContextHandleQuery* query, RmlContextPointerDeltaResult* result);
 };
 
 extern const RmlUiApi RMLUI_API;

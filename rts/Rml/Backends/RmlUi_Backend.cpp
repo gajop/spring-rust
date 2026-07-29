@@ -38,6 +38,7 @@
 #include <tracy/Tracy.hpp>
 
 #include "Game/Game.h"
+#include "Game/UI/MouseHandler.h"
 #include "System/Log/ILog.h"
 #include "Lua/LuaUI.h"
 #include "Rendering/GlobalRendering.h"
@@ -105,8 +106,12 @@ public:
 	Rml::Context* debug_context = nullptr;
 	Rml::Context* clicked_context = nullptr;
 	Rml::Context* pointer_capture_context = nullptr;
+	Rml::Context* pointer_capture_end_context = nullptr;
+	enum class PointerCaptureEnd { None, Released, Cancelled } pointer_capture_end = PointerCaptureEnd::None;
 	int pointer_capture_x = 0;
 	int pointer_capture_y = 0;
+	int pointer_capture_delta_x = 0;
+	int pointer_capture_delta_y = 0;
 
 	InputHandler::HandlerTokenT inputCon;
 	CRmlInputReceiver inputReceiver;
@@ -173,8 +178,15 @@ static void CancelPointerCapture()
 	if (context == nullptr)
 		return;
 
-	// Clear first: mouseup and dragend listeners may release the capture too.
+	// Clear first: mouseup listeners may inspect the capture state.
 	state->pointer_capture_context = nullptr;
+	// A new press, focus loss, or hidden interface interrupts a gesture. Do not
+	// let the physical move that reached that new click become a late numeric
+	// drag delta on the next application update.
+	state->pointer_capture_delta_x = 0;
+	state->pointer_capture_delta_y = 0;
+	state->pointer_capture_end_context = context;
+	state->pointer_capture_end = BackendState::PointerCaptureEnd::Cancelled;
 	RmlSDLRecoil::EventMouseRelease(context, state->pointer_capture_x, state->pointer_capture_y, SDL_BUTTON_LEFT);
 }
 
@@ -419,8 +431,12 @@ void RmlGui::OnContextDestroy(Rml::Context* context)
 	if (context == state->clicked_context) {
 		state->clicked_context = nullptr;
 	}
-	if (context == state->pointer_capture_context) {
+	if (context == state->pointer_capture_context || context == state->pointer_capture_end_context) {
 		state->pointer_capture_context = nullptr;
+		state->pointer_capture_end_context = nullptr;
+		state->pointer_capture_end = BackendState::PointerCaptureEnd::None;
+		state->pointer_capture_delta_x = 0;
+		state->pointer_capture_delta_y = 0;
 	}
 	state->contexts.erase(std::ranges::find(state->contexts, context));
 }
@@ -449,13 +465,47 @@ bool RmlGui::SetPointerCapture(Rml::Context* context, int anchor_x, int anchor_y
 		if (state->pointer_capture_context != context)
 			return false;
 		state->pointer_capture_context = nullptr;
+		state->pointer_capture_end_context = context;
+		state->pointer_capture_end = BackendState::PointerCaptureEnd::Cancelled;
+		state->pointer_capture_delta_x = 0;
+		state->pointer_capture_delta_y = 0;
 		return true;
 	}
 	if (std::ranges::find(state->contexts, context) == state->contexts.end())
 		return false;
 	state->pointer_capture_context = context;
+	state->pointer_capture_end_context = nullptr;
+	state->pointer_capture_end = BackendState::PointerCaptureEnd::None;
 	state->pointer_capture_x = anchor_x;
 	state->pointer_capture_y = anchor_y;
+	state->pointer_capture_delta_x = 0;
+	state->pointer_capture_delta_y = 0;
+	return true;
+}
+
+bool RmlGui::TakePointerCaptureDelta(Rml::Context* context, int& delta_x, int& delta_y, int& status)
+{
+	delta_x = 0;
+	delta_y = 0;
+	status = 0;
+	if (!RmlInitialized() || context == nullptr)
+		return false;
+	if (context == state->pointer_capture_context) {
+		status = 1;
+	} else if (context == state->pointer_capture_end_context) {
+		status = 1 + static_cast<int>(state->pointer_capture_end);
+	} else {
+		return true;
+	}
+
+	delta_x = state->pointer_capture_delta_x;
+	delta_y = state->pointer_capture_delta_y;
+	state->pointer_capture_delta_x = 0;
+	state->pointer_capture_delta_y = 0;
+	if (context == state->pointer_capture_end_context) {
+		state->pointer_capture_end_context = nullptr;
+		state->pointer_capture_end = BackendState::PointerCaptureEnd::None;
+	}
 	return true;
 }
 
@@ -584,12 +634,14 @@ bool RmlGui::ProcessMouseMove(int x, int y, int dx, int dy, int button)
 		return false;
 	}
 	if (Rml::Context* context = state->pointer_capture_context) {
-		// Let the captured element consume the real movement once, then restore
-		// its virtual pointer before rendering. This prevents transient hover on
-		// any neighbouring controls the physical pointer crossed.
-		RmlSDLRecoil::EventMouseMove(context, x, y);
-		RmlSDLRecoil::EventMouseMove(
-			context, state->pointer_capture_x, state->pointer_capture_y);
+		// Captured motion is application data, not an RmlUi drag. In particular,
+		// do not send the physical position into RmlUi: it would transiently
+		// hover crossed controls and create unrelated tooltips. Pinning here also
+		// keeps each delta relative to the original press, like the Lua fields.
+		state->pointer_capture_delta_x += dx;
+		state->pointer_capture_delta_y += dy;
+		if (mouse != nullptr)
+			mouse->WarpMouse(state->pointer_capture_x, state->pointer_capture_y);
 		state->inputReceiver.setActive(true);
 		return true;
 	}
@@ -641,19 +693,34 @@ bool RmlGui::ProcessMousePress(int x, int y, int button)
 /*
   Return true if the event was handled by rmlui
 */
+bool RmlGui::ProcessPointerCaptureRelease(int x, int y, int button)
+{
+	if (!CanProcessInput()) {
+		return false;
+	}
+	Rml::Context* context = state->pointer_capture_context;
+	if (context == nullptr) {
+		return false;
+	}
+	if (button != SDL_BUTTON_LEFT)
+		return false;
+	state->pointer_capture_context = nullptr;
+	state->pointer_capture_end_context = context;
+	state->pointer_capture_end = BackendState::PointerCaptureEnd::Released;
+	const bool result = !RmlSDLRecoil::EventMouseRelease(
+		context, state->pointer_capture_x, state->pointer_capture_y, button);
+	state->inputReceiver.setActive(result);
+	// Pointer capture, not RmlUi's event return value, determines ownership.
+	return true;
+}
+
 bool RmlGui::ProcessMouseRelease(int x, int y, int button)
 {
 	if (!CanProcessInput()) {
 		return false;
 	}
-	if (Rml::Context* context = state->pointer_capture_context) {
-		if (button != SDL_BUTTON_LEFT) {
-			return !RmlSDLRecoil::EventMouseRelease(context, x, y, button);
-		}
-		state->pointer_capture_context = nullptr;
-		const bool result = !RmlSDLRecoil::EventMouseRelease(context, x, y, button);
-		state->inputReceiver.setActive(result);
-		return result;
+	if (ProcessPointerCaptureRelease(x, y, button)) {
+		return true;
 	}
 	bool result = false;
 	for (const auto& context : state->contexts) {
