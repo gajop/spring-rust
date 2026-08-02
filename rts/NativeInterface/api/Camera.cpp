@@ -101,15 +101,19 @@ static void NativeGetCameraState(const GetCameraStateQuery* query, GetCameraStat
 	result->error = nullptr;
 	result->state.name = nameBuf;
 
-	const float3& pos = camera->GetPos();
-	result->state.pos.x = pos.x;
-	result->state.pos.y = pos.y;
-	result->state.pos.z = pos.z;
-
-	const float3& dir = camera->GetDir();
-	result->state.dir.x = dir.x;
-	result->state.dir.y = dir.y;
-	result->state.dir.z = dir.z;
+	// `CameraState` follows Spring.GetCameraState: px/py/pz and the
+	// controller-specific fields belong to the active controller.  The actual
+	// rendered camera position remains available through GetCameraPosition.
+	// This distinction matters for overhead cameras, whose controller position
+	// is the ground focus while the rendered camera is offset by height.
+	CCameraController::StateMap camState;
+	camHandler->GetState(camState);
+	result->state.pos.x = camState["px"];
+	result->state.pos.y = camState["py"];
+	result->state.pos.z = camState["pz"];
+	result->state.dir.x = camState["dx"];
+	result->state.dir.y = camState["dy"];
+	result->state.dir.z = camState["dz"];
 
 	const float3& up = camera->GetUp();
 	result->state.up.x = up.x;
@@ -121,17 +125,10 @@ static void NativeGetCameraState(const GetCameraStateQuery* query, GetCameraStat
 	result->state.right.y = right.y;
 	result->state.right.z = right.z;
 
-	result->state.fov = camera->GetVFOV();
-
-	const float3& rot = camera->GetRot();
-	result->state.rx = rot.x;
-	result->state.ry = rot.y;
-	result->state.rz = rot.z;
-
-	// Controller-specific state (simplified)
-	CCameraController::StateMap camState;
-	camHandler->GetState(camState);
-
+	result->state.fov = camState["fov"];
+	result->state.rx = camState["rx"];
+	result->state.ry = camState["ry"];
+	result->state.rz = camState["rz"];
 	result->state.dist = camState["dist"];
 	result->state.height = camState["height"];
 	result->state.angle = camState["angle"];
@@ -274,7 +271,7 @@ static void NativeGetPixelDir(const GetPixelDirQuery* query, GetPixelDirResult* 
 	result->direction.z = dir.z;
 }
 
-// Control (unsynced) - simplified implementations
+// Control (unsynced)
 static void NativeSetCameraState(const SetCameraStateQuery* query, SetCameraStateResult* result)
 {
 	bufferPos = 0;
@@ -284,14 +281,30 @@ static void NativeSetCameraState(const SetCameraStateQuery* query, SetCameraStat
 		return;
 	}
 
-	// Simplified: just return false as camera state setting requires
-	// complex controller-specific logic
-	(void)query->state;
-	(void)query->transitionTime;
-	(void)query->transitionTimeFactor;
-	(void)query->transitionTimeExponent;
+	// The query is deliberately a complete controller state, just as the Lua
+	// Spring.SetCameraState path is.  Start from the live map so fields not
+	// represented in the compact C struct (for example `flipped`, velocities,
+	// or the free-camera flags) are preserved instead of being zeroed.
+	CCameraController::StateMap state = camHandler->GetState();
+	state["fov"] = query->state.fov;
+	state["px"] = query->state.pos.x;
+	state["py"] = query->state.pos.y;
+	state["pz"] = query->state.pos.z;
+	state["dx"] = query->state.dir.x;
+	state["dy"] = query->state.dir.y;
+	state["dz"] = query->state.dir.z;
+	state["rx"] = query->state.rx;
+	state["ry"] = query->state.ry;
+	state["rz"] = query->state.rz;
+	state["height"] = query->state.height;
+	state["angle"] = query->state.angle;
+	state["dist"] = query->state.dist;
+
+	camHandler->SetTransitionParams(query->transitionTimeFactor, query->transitionTimeExponent);
+	const bool success = camHandler->SetState(state);
+	camHandler->CameraTransition(std::max(0.0f, query->transitionTime));
 	result->error = nullptr;
-	result->success = false;
+	result->success = success;
 }
 
 static void NativeSetCameraTarget(const SetCameraTargetQuery* query, SetCameraTargetResult* result)

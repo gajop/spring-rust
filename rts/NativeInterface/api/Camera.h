@@ -17,8 +17,8 @@ extern "C" {
 // Camera state
 struct CameraState {
 	const char* name;  // "fps", "ta", "spring", "rot", "ov", etc.
-	Float3 pos;
-	Float3 dir;
+	Float3 pos;        // controller px/py/pz (the Lua state map), not rendered position
+	Float3 dir;        // controller dx/dy/dz
 	Float3 up;
 	Float3 right;
 	float fov;
