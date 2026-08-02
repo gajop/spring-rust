@@ -3,7 +3,9 @@ use std::{
     ffi::{CStr, CString},
     marker::PhantomData,
     mem::MaybeUninit,
-    ptr, rc::Rc, slice,
+    ptr,
+    rc::Rc,
+    slice,
 };
 
 use crate::{error::Error, sys};
@@ -923,11 +925,15 @@ impl<'api> RmlDataChoiceRows<'api> {
         });
         let labels = padded_rows
             .iter()
-            .map(|row| CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label")))
+            .map(|row| {
+                CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label"))
+            })
             .collect::<Result<Vec<_>, _>>()?;
         let details = padded_rows
             .iter()
-            .map(|row| CString::new(row.detail.as_str()).map_err(|_| Error::invalid_argument("detail")))
+            .map(|row| {
+                CString::new(row.detail.as_str()).map_err(|_| Error::invalid_argument("detail"))
+            })
             .collect::<Result<Vec<_>, _>>()?;
         let native_rows = padded_rows
             .iter()
@@ -975,7 +981,9 @@ impl<'api> RmlDataStatusRows<'api> {
         });
         let labels = padded_rows
             .iter()
-            .map(|row| CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label")))
+            .map(|row| {
+                CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label"))
+            })
             .collect::<Result<Vec<_>, _>>()?;
         let native_rows = padded_rows
             .iter()
@@ -1028,7 +1036,9 @@ impl<'api> RmlDataSwatchRows<'api> {
         });
         let labels = padded_rows
             .iter()
-            .map(|row| CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label")))
+            .map(|row| {
+                CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label"))
+            })
             .collect::<Result<Vec<_>, _>>()?;
         let native_rows = padded_rows
             .iter()
@@ -1086,14 +1096,12 @@ impl<'api> RmlDataGridRows<'api> {
         let strings = padded_rows
             .iter()
             .map(|row| {
-                Ok::<_, Error>(
-                    (
-                        CString::new(row.label.as_str())
-                            .map_err(|_| Error::invalid_argument("label"))?,
-                        CString::new(row.image.as_str())
-                            .map_err(|_| Error::invalid_argument("image"))?,
-                    ),
-                )
+                Ok::<_, Error>((
+                    CString::new(row.label.as_str())
+                        .map_err(|_| Error::invalid_argument("label"))?,
+                    CString::new(row.image.as_str())
+                        .map_err(|_| Error::invalid_argument("image"))?,
+                ))
             })
             .collect::<Result<Vec<_>, _>>()?;
         let native_rows = padded_rows
