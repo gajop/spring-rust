@@ -39,6 +39,7 @@
 
 #include "Game/Game.h"
 #include "Game/UI/MouseHandler.h"
+#include "NativeInterface/api/RmlUi.h"
 #include "System/Log/ILog.h"
 #include "Lua/LuaUI.h"
 #include "Rendering/GlobalRendering.h"
@@ -131,6 +132,15 @@ public:
 };
 
 static Rml::UniquePtr<BackendState> state;
+
+// Native contexts and their data-model/type registrations outlive LuaUI's
+// state. Clear them before the Lua plugin tears down or a replacement LuaUI
+// starts creating contexts with the same names.
+static void RemoveNativeRmlContext(uint64_t contextHandle)
+{
+	RmlGui::RemoveContextImmediately(
+		reinterpret_cast<Rml::Context*>(static_cast<uintptr_t>(contextHandle)));
+}
 
 bool RmlInitialized()
 {
@@ -254,7 +264,17 @@ bool RmlGui::InitializeLua(lua_State* lua_state)
 
 bool RmlGui::RemoveLua()
 {
-	if (!RmlInitialized() || state->ls == nullptr) {
+	if (!RmlInitialized()) {
+		return false;
+	}
+
+	// Native modules are not owned by LuaUI, so RemoveLuaItems() does not
+	// release their contexts or the engine-side data-model registrations. Do
+	// this while the old contexts and callbacks are still valid; otherwise a
+	// subsequent /luaui reload can report duplicate models or stale value types.
+	NativeRmlUi::ClearAllContexts(RemoveNativeRmlContext);
+
+	if (state->ls == nullptr) {
 		return false;
 	}
 
