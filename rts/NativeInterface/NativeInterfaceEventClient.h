@@ -148,6 +148,14 @@ namespace fptr {
 	using MouseWheelFuncPtr = void(*)(NativeInterface*, void*, const MouseWheelQuery*, BoolCallinResult*);
 	using ScreenPositionFuncPtr = void(*)(NativeInterface*, void*, const ScreenPositionQuery*, BoolCallinResult*);
 	using IsAboveFuncPtr = ScreenPositionFuncPtr;
+	using MiniMapRotationChangedFuncPtr = void(*)(NativeInterface*, void*, const MiniMapRotationChangedQuery*, SimpleCallinResult*);
+	using MiniMapStateChangedFuncPtr = void(*)(NativeInterface*, void*, const MiniMapStateChangedQuery*, SimpleCallinResult*);
+	using MiniMapGeometryChangedFuncPtr = void(*)(NativeInterface*, void*, const MiniMapGeometryChangedQuery*, SimpleCallinResult*);
+	using DrawUnitFuncPtr = void(*)(NativeInterface*, void*, const DrawUnitQuery*, BoolCallinResult*);
+	using DrawFeatureFuncPtr = void(*)(NativeInterface*, void*, const DrawFeatureQuery*, BoolCallinResult*);
+	using DrawShieldFuncPtr = void(*)(NativeInterface*, void*, const DrawShieldQuery*, BoolCallinResult*);
+	using DrawProjectileFuncPtr = void(*)(NativeInterface*, void*, const DrawProjectileQuery*, BoolCallinResult*);
+	using DrawMaterialFuncPtr = void(*)(NativeInterface*, void*, const DrawMaterialQuery*, BoolCallinResult*);
 	using ActiveCommandChangedFuncPtr = void(*)(NativeInterface*, void*, const ActiveCommandChangedQuery*, ActiveCommandChangedResult*);
 	using CommandNotifyFuncPtr = void(*)(NativeInterface*, void*, const CommandNotifyQuery*, BoolCallinResult*);
 	using AddConsoleLineFuncPtr = void(*)(NativeInterface*, void*, const AddConsoleLineQuery*, BoolCallinResult*);
@@ -291,6 +299,11 @@ public:
 	void DrawAlphaFeaturesLua(bool drawReflection, bool drawRefraction) override;
 	void DrawShadowUnitsLua() override;
 	void DrawShadowFeaturesLua() override;
+	bool DrawUnit(const CUnit* unit) override;
+	bool DrawFeature(const CFeature* feature) override;
+	bool DrawShield(const CUnit* unit, const CWeapon* weapon) override;
+	bool DrawProjectile(const CProjectile* projectile) override;
+	bool DrawMaterial(const LuaMaterial* material) override;
 
 	// Unsynced events
 	void DownloadFailed(int ID, int errorID) override;
@@ -319,6 +332,9 @@ public:
 	bool CommandNotify(const Command& cmd) override;
 	bool AddConsoleLine(const std::string& msg, const std::string& section, int level) override;
 	bool GroupChanged(int groupID) override;
+	void MiniMapRotationChanged(float newRot, float oldRot) override;
+	void MiniMapStateChanged(bool isMinimized, bool isMaximized, bool isSlaved) override;
+	void MiniMapGeometryChanged(int2 newPos, int2 newDim, int2 oldPos, int2 oldDim) override;
 	bool GameSetup(const std::string& state, bool& ready, const std::vector<std::pair<int, std::string>>& playerStates) override;
 	std::string WorldTooltip(const CUnit* unit, const CFeature* feature, const float3* groundPos) override;
 	bool MapDrawCmd(int playerID, int type, const float3* pos0, const float3* pos1, const std::string* label) override;
@@ -421,6 +437,14 @@ private:
 	fptr::MouseReleaseFuncPtr m_MouseReleaseFuncPtr = nullptr;
 	fptr::MouseWheelFuncPtr m_MouseWheelFuncPtr = nullptr;
 	fptr::ScreenPositionFuncPtr m_IsAboveFuncPtr = nullptr;
+	fptr::MiniMapRotationChangedFuncPtr m_MiniMapRotationChangedFuncPtr = nullptr;
+	fptr::MiniMapStateChangedFuncPtr m_MiniMapStateChangedFuncPtr = nullptr;
+	fptr::MiniMapGeometryChangedFuncPtr m_MiniMapGeometryChangedFuncPtr = nullptr;
+	fptr::DrawUnitFuncPtr m_DrawUnitFuncPtr = nullptr;
+	fptr::DrawFeatureFuncPtr m_DrawFeatureFuncPtr = nullptr;
+	fptr::DrawShieldFuncPtr m_DrawShieldFuncPtr = nullptr;
+	fptr::DrawProjectileFuncPtr m_DrawProjectileFuncPtr = nullptr;
+	fptr::DrawMaterialFuncPtr m_DrawMaterialFuncPtr = nullptr;
 	fptr::DefaultCommandFuncPtr m_DefaultCommandFuncPtr = nullptr;
 	fptr::ActiveCommandChangedFuncPtr m_ActiveCommandChangedFuncPtr = nullptr;
 	fptr::CommandNotifyFuncPtr m_CommandNotifyFuncPtr = nullptr;

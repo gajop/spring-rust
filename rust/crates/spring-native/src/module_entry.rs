@@ -649,6 +649,216 @@ macro_rules! export_module {
             $crate::sys::SimpleCallinResult
         );
 
+        macro_rules! export_minimap_2_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::SimpleCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            let q = &*query;
+                            data.module().$method(q.$field1, q.$field2)
+                        });
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_minimap_3_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::SimpleCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            let q = &*query;
+                            data.module().$method(q.$field1, q.$field2, q.$field3)
+                        });
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_minimap_8_callback {
+            (
+                $name:ident,
+                $method:ident,
+                $query:ty,
+                $field1:ident,
+                $field2:ident,
+                $field3:ident,
+                $field4:ident,
+                $field5:ident,
+                $field6:ident,
+                $field7:ident,
+                $field8:ident
+            ) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::SimpleCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            let q = &*query;
+                            data.module().$method(
+                                q.$field1,
+                                q.$field2,
+                                q.$field3,
+                                q.$field4,
+                                q.$field5,
+                                q.$field6,
+                                q.$field7,
+                                q.$field8,
+                            )
+                        });
+                    }
+                }
+            };
+        }
+
+        export_minimap_2_callback!(
+            MiniMapRotationChanged,
+            minimap_rotation_changed,
+            $crate::sys::MiniMapRotationChangedQuery,
+            newRot,
+            oldRot
+        );
+        export_minimap_3_callback!(
+            MiniMapStateChanged,
+            minimap_state_changed,
+            $crate::sys::MiniMapStateChangedQuery,
+            isMinimized,
+            isMaximized,
+            isSlaved
+        );
+        export_minimap_8_callback!(
+            MiniMapGeometryChanged,
+            minimap_geometry_changed,
+            $crate::sys::MiniMapGeometryChangedQuery,
+            newPosX,
+            newPosY,
+            newDimX,
+            newDimY,
+            oldPosX,
+            oldPosY,
+            oldDimX,
+            oldDimY
+        );
+
+        macro_rules! export_draw_bool_2_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::BoolCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        let callback_result =
+                            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                let data =
+                                    &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                                let q = &*query;
+                                data.module().$method(q.$field1, q.$field2)
+                            }))
+                            .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                        finish_bool_callback!(result, callback_result);
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_draw_bool_3_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::BoolCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        let callback_result =
+                            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                let data =
+                                    &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                                let q = &*query;
+                                data.module().$method(q.$field1, q.$field2, q.$field3)
+                            }))
+                            .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                        finish_bool_callback!(result, callback_result);
+                    }
+                }
+            };
+        }
+
+        export_draw_bool_2_callback!(
+            DrawUnit,
+            draw_unit,
+            $crate::sys::DrawUnitQuery,
+            unitID,
+            drawMode
+        );
+        export_draw_bool_2_callback!(
+            DrawFeature,
+            draw_feature,
+            $crate::sys::DrawFeatureQuery,
+            featureID,
+            drawMode
+        );
+        export_draw_bool_3_callback!(
+            DrawShield,
+            draw_shield,
+            $crate::sys::DrawShieldQuery,
+            unitID,
+            weaponID,
+            drawMode
+        );
+        export_draw_bool_2_callback!(
+            DrawProjectile,
+            draw_projectile,
+            $crate::sys::DrawProjectileQuery,
+            projectileID,
+            drawMode
+        );
+        export_draw_bool_2_callback!(
+            DrawMaterial,
+            draw_material,
+            $crate::sys::DrawMaterialQuery,
+            uuid,
+            drawMode
+        );
+
         #[no_mangle]
         pub unsafe extern "C" fn DrawBuildSquare(
             _interface: *const $crate::sys::NativeInterface,

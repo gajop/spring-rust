@@ -597,6 +597,54 @@ struct ScreenPositionQuery {
 	int32_t y;
 };
 
+struct MiniMapRotationChangedQuery {
+	float newRot;
+	float oldRot;
+};
+
+struct MiniMapStateChangedQuery {
+	bool isMinimized;
+	bool isMaximized;
+	bool isSlaved;
+};
+
+struct MiniMapGeometryChangedQuery {
+	int32_t newPosX;
+	int32_t newPosY;
+	int32_t newDimX;
+	int32_t newDimY;
+	int32_t oldPosX;
+	int32_t oldPosY;
+	int32_t oldDimX;
+	int32_t oldDimY;
+};
+
+struct DrawUnitQuery {
+	int32_t unitID;
+	int32_t drawMode;
+};
+
+struct DrawFeatureQuery {
+	int32_t featureID;
+	int32_t drawMode;
+};
+
+struct DrawShieldQuery {
+	int32_t unitID;
+	int32_t weaponID;
+	int32_t drawMode;
+};
+
+struct DrawProjectileQuery {
+	int32_t projectileID;
+	int32_t drawMode;
+};
+
+struct DrawMaterialQuery {
+	int32_t uuid;
+	int32_t drawMode;
+};
+
 struct ActiveCommandChangedQuery {
 	int32_t cmdID;
 	int32_t cmdType;

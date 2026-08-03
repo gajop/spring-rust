@@ -12,11 +12,11 @@ See `api_surface_contract.md` for intentional-difference policy.
 | Lua `SyncedCallins` | 28 |
 | Lua `UnsyncedCallins` | 6 |
 | Lua documented entries | 189 |
-| Native C++ callback symbols | 125 |
-| Shared callback names | 114 |
-| Documented Lua names without native callback | 41 |
+| Native C++ callback symbols | 133 |
+| Shared callback names | 122 |
+| Documented Lua names without native callback | 33 |
 | Native callback names without documented Lua callin | 11 |
-| Native callbacks without Rust trait method | 2 |
+| Native callbacks without Rust trait method | 0 |
 
 ## Lua names without native callback
 
@@ -43,18 +43,10 @@ These are unresolved until individually classified or ported. They are not treat
 - `AllowWeaponTarget`
 - `AllowWeaponTargetCheck`
 - `CommandFallback`
-- `DrawFeature`
-- `DrawMaterial`
-- `DrawProjectile`
-- `DrawShield`
-- `DrawUnit`
 - `FeaturePreDamaged`
 - `GotChatMsg`
 - `Initialize`
 - `LoadCode`
-- `MiniMapGeometryChanged`
-- `MiniMapRotationChanged`
-- `MiniMapStateChanged`
 - `MoveCtrlNotify`
 - `RecvFromSynced`
 - `RecvLuaMsg`
@@ -80,8 +72,7 @@ These are unresolved until individually classified or ported. They are not treat
 
 ## Native callbacks without a Rust trait method
 
-- `DrawInMiniMap`
-- `DrawInMiniMapBackground`
+- None
 
 ## Raw signature field-count audit
 
@@ -104,6 +95,7 @@ a source-level decision and, where applicable, a behavior test.
 | `DownloadQueued` | 3 | 3 | `DownloadQueued` | `same_raw_field_count` |
 | `DownloadStarted` | 1 | 1 | `DownloadStarted` | `same_raw_field_count` |
 | `DrawBuildSquare` | 5 | 6 | `DrawBuildSquare` | `field_count_differs` |
+| `DrawFeature` | 2 | 2 | `DrawFeature` | `same_raw_field_count` |
 | `DrawFeaturesPostDeferred` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawGenesis` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawGroundDeferred` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
@@ -113,13 +105,17 @@ a source-level decision and, where applicable, a behavior test.
 | `DrawGroundPreForward` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawInMiniMap` | 2 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawInMiniMapBackground` | 2 | 1 | `SimpleCallin` | `field_count_differs` |
+| `DrawMaterial` | 2 | 2 | `DrawMaterial` | `same_raw_field_count` |
 | `DrawPreDecals` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
+| `DrawProjectile` | 2 | 2 | `DrawProjectile` | `same_raw_field_count` |
 | `DrawScreen` | 2 | 0 | `DrawScreen` | `field_count_differs` |
 | `DrawScreenEffects` | 2 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawScreenPost` | 2 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawShadowFeaturesLua` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawShadowPassTransparent` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawShadowUnitsLua` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
+| `DrawShield` | 3 | 3 | `DrawShield` | `same_raw_field_count` |
+| `DrawUnit` | 2 | 2 | `DrawUnit` | `same_raw_field_count` |
 | `DrawUnitsPostDeferred` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawWaterPost` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
 | `DrawWorld` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
@@ -150,6 +146,9 @@ a source-level decision and, where applicable, a behavior test.
 | `KeyRelease` | 6 | 2 | `KeyRelease` | `field_count_differs` |
 | `Load` | 1 | 1 | `ArchiveCallin` | `same_raw_field_count` |
 | `MapDrawCmd` | 8 | 8 | `MapDrawCmd` | `same_raw_field_count` |
+| `MiniMapGeometryChanged` | 8 | 8 | `MiniMapGeometryChanged` | `same_raw_field_count` |
+| `MiniMapRotationChanged` | 2 | 2 | `MiniMapRotationChanged` | `same_raw_field_count` |
+| `MiniMapStateChanged` | 2 | 3 | `MiniMapStateChanged` | `field_count_differs` |
 | `MouseMove` | 5 | 5 | `MouseMove` | `same_raw_field_count` |
 | `MousePress` | 3 | 3 | `MousePress` | `same_raw_field_count` |
 | `MouseRelease` | 3 | 3 | `MouseRelease` | `same_raw_field_count` |

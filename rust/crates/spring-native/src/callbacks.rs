@@ -277,6 +277,76 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
+    /// Called when the minimap rotation changes.
+    fn minimap_rotation_changed(&mut self, new_rot: f32, old_rot: f32) -> Result<(), Error> {
+        let _ = (new_rot, old_rot);
+        Ok(())
+    }
+
+    /// Called when the minimap minimized/maximized/slaved state changes.
+    fn minimap_state_changed(
+        &mut self,
+        is_minimized: bool,
+        is_maximized: bool,
+        is_slaved: bool,
+    ) -> Result<(), Error> {
+        let _ = (is_minimized, is_maximized, is_slaved);
+        Ok(())
+    }
+
+    /// Called when the minimap geometry changes.
+    fn minimap_geometry_changed(
+        &mut self,
+        new_pos_x: i32,
+        new_pos_y: i32,
+        new_dim_x: i32,
+        new_dim_y: i32,
+        old_pos_x: i32,
+        old_pos_y: i32,
+        old_dim_x: i32,
+        old_dim_y: i32,
+    ) -> Result<(), Error> {
+        let _ = (
+            new_pos_x, new_pos_y, new_dim_x, new_dim_y, old_pos_x, old_pos_y, old_dim_x, old_dim_y,
+        );
+        Ok(())
+    }
+
+    /// Called while the engine renders a unit. Returning true suppresses the
+    /// engine's default draw, matching Lua's `UnsyncedCallins:DrawUnit`.
+    fn draw_unit(&mut self, unit_id: i32, draw_mode: i32) -> Result<bool, Error> {
+        let _ = (unit_id, draw_mode);
+        Ok(false)
+    }
+
+    /// Called while the engine renders a feature. Returning true suppresses
+    /// the engine's default draw.
+    fn draw_feature(&mut self, feature_id: i32, draw_mode: i32) -> Result<bool, Error> {
+        let _ = (feature_id, draw_mode);
+        Ok(false)
+    }
+
+    /// Called while the engine renders a shield. Returning true suppresses the
+    /// engine's default draw.
+    fn draw_shield(&mut self, unit_id: i32, weapon_id: i32, draw_mode: i32) -> Result<bool, Error> {
+        let _ = (unit_id, weapon_id, draw_mode);
+        Ok(false)
+    }
+
+    /// Called while the engine renders a projectile. Returning true suppresses
+    /// the engine's default draw.
+    fn draw_projectile(&mut self, projectile_id: i32, draw_mode: i32) -> Result<bool, Error> {
+        let _ = (projectile_id, draw_mode);
+        Ok(false)
+    }
+
+    /// Called while the engine renders a Lua material. Returning true
+    /// suppresses the engine's default draw.
+    fn draw_material(&mut self, uuid: i32, draw_mode: i32) -> Result<bool, Error> {
+        let _ = (uuid, draw_mode);
+        Ok(false)
+    }
+
     fn draw_build_square(
         &mut self,
         unit_def_id: i32,

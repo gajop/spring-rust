@@ -4,7 +4,10 @@
 
 #include <cstring>
 
+#include "Game/Game.h"
 #include "Game/GameHelper.h"
+#include "Lua/LuaConfig.h"
+#include "Lua/LuaMaterial.h"
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureDef.h"
 #include "Sim/Projectiles/Projectile.h"
@@ -159,6 +162,11 @@ void NativeInterfaceEventClient::LoadSymbols() {
 	LOAD_SYMBOL(DrawAlphaFeaturesLua);
 	LOAD_SYMBOL(DrawShadowUnitsLua);
 	LOAD_SYMBOL(DrawShadowFeaturesLua);
+	LOAD_SYMBOL(DrawUnit);
+	LOAD_SYMBOL(DrawFeature);
+	LOAD_SYMBOL(DrawShield);
+	LOAD_SYMBOL(DrawProjectile);
+	LOAD_SYMBOL(DrawMaterial);
 	LOAD_SYMBOL(LastMessagePosition);
 	LOAD_SYMBOL(UnsyncedHeightMapUpdate);
 	LOAD_SYMBOL(KeyMapChanged);
@@ -179,6 +187,9 @@ void NativeInterfaceEventClient::LoadSymbols() {
 	LOAD_SYMBOL(CommandNotify);
 	LOAD_SYMBOL(AddConsoleLine);
 	LOAD_SYMBOL(GroupChanged);
+	LOAD_SYMBOL(MiniMapRotationChanged);
+	LOAD_SYMBOL(MiniMapStateChanged);
+	LOAD_SYMBOL(MiniMapGeometryChanged);
 	LOAD_SYMBOL(GameSetup);
 	LOAD_SYMBOL(WorldTooltip);
 	LOAD_SYMBOL(MapDrawCmd);
@@ -353,6 +364,72 @@ DISPATCH_SIMPLE_CALLIN(DrawShadowUnitsLua)
 DISPATCH_SIMPLE_CALLIN(DrawShadowFeaturesLua)
 
 #undef DISPATCH_SIMPLE_CALLIN
+
+bool NativeInterfaceEventClient::DrawUnit(const CUnit* unit) {
+	if (m_DrawUnitFuncPtr == nullptr)
+		return false;
+
+	DrawUnitQuery query = {
+		.unitID = (unit != nullptr) ? unit->id : -1,
+		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
+	};
+	BoolCallinResult result = {.value = false};
+	m_DrawUnitFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::DrawFeature(const CFeature* feature) {
+	if (m_DrawFeatureFuncPtr == nullptr)
+		return false;
+
+	DrawFeatureQuery query = {
+		.featureID = (feature != nullptr) ? feature->id : -1,
+		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
+	};
+	BoolCallinResult result = {.value = false};
+	m_DrawFeatureFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::DrawShield(const CUnit* unit, const CWeapon* weapon) {
+	if (m_DrawShieldFuncPtr == nullptr)
+		return false;
+
+	DrawShieldQuery query = {
+		.unitID = (unit != nullptr) ? unit->id : -1,
+		.weaponID = (weapon != nullptr) ? weapon->weaponNum + LUA_WEAPON_BASE_INDEX : -1,
+		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
+	};
+	BoolCallinResult result = {.value = false};
+	m_DrawShieldFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::DrawProjectile(const CProjectile* projectile) {
+	if (m_DrawProjectileFuncPtr == nullptr)
+		return false;
+
+	DrawProjectileQuery query = {
+		.projectileID = (projectile != nullptr) ? projectile->id : -1,
+		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
+	};
+	BoolCallinResult result = {.value = false};
+	m_DrawProjectileFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::DrawMaterial(const LuaMaterial* material) {
+	if (m_DrawMaterialFuncPtr == nullptr)
+		return false;
+
+	DrawMaterialQuery query = {
+		.uuid = (material != nullptr) ? material->uuid : -1,
+		.drawMode = (game != nullptr) ? static_cast<int>(game->GetDrawMode()) : 0,
+	};
+	BoolCallinResult result = {.value = false};
+	m_DrawMaterialFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
 
 void NativeInterfaceEventClient::DrawWorldPreParticles(bool drawAboveWater, bool drawBelowWater, bool drawReflection, bool drawRefraction) {
 	if (m_DrawWorldPreParticlesFuncPtr) {
@@ -1136,6 +1213,46 @@ bool NativeInterfaceEventClient::GroupChanged(int groupID) {
 		return result.value;
 	}
 	return false;
+}
+
+void NativeInterfaceEventClient::MiniMapRotationChanged(float newRot, float oldRot) {
+	if (m_MiniMapRotationChangedFuncPtr == nullptr)
+		return;
+
+	MiniMapRotationChangedQuery query = {.newRot = newRot, .oldRot = oldRot};
+	SimpleCallinResult result = {};
+	m_MiniMapRotationChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+}
+
+void NativeInterfaceEventClient::MiniMapStateChanged(bool isMinimized, bool isMaximized, bool isSlaved) {
+	if (m_MiniMapStateChangedFuncPtr == nullptr)
+		return;
+
+	MiniMapStateChangedQuery query = {
+		.isMinimized = isMinimized,
+		.isMaximized = isMaximized,
+		.isSlaved = isSlaved,
+	};
+	SimpleCallinResult result = {};
+	m_MiniMapStateChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+}
+
+void NativeInterfaceEventClient::MiniMapGeometryChanged(int2 newPos, int2 newDim, int2 oldPos, int2 oldDim) {
+	if (m_MiniMapGeometryChangedFuncPtr == nullptr)
+		return;
+
+	MiniMapGeometryChangedQuery query = {
+		.newPosX = newPos.x,
+		.newPosY = newPos.y,
+		.newDimX = newDim.x,
+		.newDimY = newDim.y,
+		.oldPosX = oldPos.x,
+		.oldPosY = oldPos.y,
+		.oldDimX = oldDim.x,
+		.oldDimY = oldDim.y,
+	};
+	SimpleCallinResult result = {};
+	m_MiniMapGeometryChangedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 }
 
 bool NativeInterfaceEventClient::GameSetup(const std::string& state, bool& ready, const std::vector<std::pair<int, std::string>>& playerStates) {

@@ -81,6 +81,9 @@ def parse_trait_methods() -> set[str]:
 
 
 def camel_to_snake(value: str) -> str:
+    # The Rust trait keeps the engine's `MiniMap` spelling as `Minimap` in
+    # method names; normalize that acronym before applying ordinary casing.
+    value = value.replace("MiniMap", "Minimap")
     value = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", value)
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value).lower()
 
