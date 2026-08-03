@@ -978,7 +978,7 @@ bool CSyncedLuaHandle::AllowUnitCloak(const CUnit* unit, const CUnit* enemy)
 
 /***
  *
- * @function SyncedCallins:AllowUnitCloak
+ * @function SyncedCallins:AllowUnitDecloak
  * @param unitID integer
  * @param objectID integer?
  * @param weaponNum number?

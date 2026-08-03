@@ -336,6 +336,41 @@ def extract_source_doc_functions(project_root: Path) -> List[Dict]:
         functions.extend(extract_lua_functions_from_markdown(content, infer_signatures=False))
     return functions
 
+def extract_source_callins(project_root: Path) -> List[Dict]:
+    """Extract call-ins documented in the checked-out engine sources.
+
+    The public documentation can lag behind a local engine change.  Keep the
+    generated inventory grounded in both sources so an implemented call-in is
+    not silently omitted from parity work.
+    """
+    callins = []
+    seen = set()
+    lua_dir = project_root / 'rts' / 'Lua'
+    if not lua_dir.exists():
+        return callins
+
+    pattern = re.compile(
+        r'@function\s+((?:Callins|SyncedCallins|UnsyncedCallins):([A-Za-z0-9_]+))'
+    )
+    for path in lua_dir.rglob('*'):
+        if path.suffix not in {'.cpp', '.h'}:
+            continue
+        try:
+            content = path.read_text(encoding='utf-8', errors='ignore')
+        except OSError:
+            continue
+        for match in pattern.finditer(content):
+            full_name = match.group(1).replace(':', '.')
+            if full_name in seen:
+                continue
+            seen.add(full_name)
+            callins.append({
+                'namespace': 'Callins',
+                'name': full_name,
+                'full_name': full_name,
+            })
+    return callins
+
 def main():
     rust_dir = Path(__file__).parent
     project_root = rust_dir.parents[2]
@@ -358,6 +393,17 @@ def main():
     # Extract callins (GameStart, UnitCreated, etc.)
     print("Extracting callin functions...")
     callins = extract_callins(content)
+
+    source_callins = extract_source_callins(project_root)
+    callins_by_name = {func['full_name']: func for func in callins}
+    added_source_callins = 0
+    for func in source_callins:
+        if func['full_name'] not in callins_by_name:
+            callins.append(func)
+            callins_by_name[func['full_name']] = func
+            added_source_callins += 1
+    if added_source_callins:
+        print(f"Merged local source callins: added {added_source_callins}")
 
     # Combine all functions
     all_functions = callouts + callins

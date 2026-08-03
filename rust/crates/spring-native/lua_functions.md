@@ -2,10 +2,10 @@
 
 Total Namespaces: 6
 
-Total Functions: 1325
+Total Functions: 1326
 
 Callouts (Plugin → Engine): 1136
-Callins (Engine → Plugin): 189
+Callins (Engine → Plugin): 190
 
 ---
 
@@ -1164,7 +1164,7 @@ Callins (Engine → Plugin): 189
 
 ## Callins (Engine → Plugin)
 
-Total: 189 functions
+Total: 190 functions
 
 - `Callins.ActiveCommandChanged`
 - `Callins.AddConsoleLine`
@@ -1333,6 +1333,7 @@ Total: 189 functions
 - `SyncedCallins.AllowUnitCaptureStep`
 - `SyncedCallins.AllowUnitCloak`
 - `SyncedCallins.AllowUnitCreation`
+- `SyncedCallins.AllowUnitDecloak`
 - `SyncedCallins.AllowUnitKamikaze`
 - `SyncedCallins.AllowUnitTransfer`
 - `SyncedCallins.AllowUnitTransport`
