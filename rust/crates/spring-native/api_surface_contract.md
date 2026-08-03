@@ -34,6 +34,27 @@ from Lua/native result equality.
 
 No other currently unmatched Lua callout is declared Lua-only by this file.
 
+### Lua-handle lifecycle and message callins
+
+The following documented callins are Lua-only by design because they belong to
+the engine's embedded Lua-handle lifecycle or to communication between its
+synced and unsynced Lua states. A native module is loaded and messaged through
+different ABI entry points, so adding a same-named native callback would not
+preserve the Lua contract:
+
+| Lua callin | Reason |
+| --- | --- |
+| `Initialize` | Native modules use `InitializeNativeModule`. |
+| `LoadCode` | Native modules are loaded as shared libraries, not Lua chunks. |
+| `RecvFromSynced` | It is IPC between the two Lua handles. |
+| `GotChatMsg` | It is Lua-handle chat routing. |
+| `RecvLuaMsg` | It is Lua-handle message routing; native uses `HandleLuaMsg`. |
+| `RecvSkirmishAIMessage` | It is Lua-handle skirmish-AI routing. |
+
+These are still required to have Lua-side registration/argument/error tests;
+they are excluded from Lua/native equality because no equivalent native call
+exists by design.
+
 ## Confirmed native-only representation surfaces
 
 The following are native representation mechanisms, not omissions from the
@@ -50,22 +71,24 @@ Lua API:
 
 These still require signature and behavior tests at their own interface
 boundary. They must not be used as evidence that a corresponding Lua surface
-was tested.
+was tested. The current native-only callback names are:
+
+- `CollectGarbage`
+- `DrawAlphaFeaturesLua`, `DrawAlphaUnitsLua`, `DrawOpaqueFeaturesLua`,
+  `DrawOpaqueUnitsLua`
+- `FeatureMoved`, `UnitMoved`
+- `HandleLuaCall`, `HandleLuaMsg`
+- `LastMessagePosition`
+- `Pong`
 
 ## Deliberately unresolved until audited
 
 The following categories are not yet classified as intentional differences:
 
 - Lua `Script.*` functions;
-- Lua-only control callins such as `Allow*`, `UnitPreDamaged`, and
-  `CommandFallback`;
-- Lua-only rendering callins such as `DrawUnit`, `DrawFeature`, and
-  `DrawProjectile`;
-- Lua input/message callins such as `RecvLuaMsg`, `GotChatMsg`, and
-  `RecvFromSynced`;
 - Lua constant tables, definition proxies, and userdata metamethods;
-- native-only `Gfx`, `RmlUi`, and `Vfs` labels beyond the representation
-  mechanisms listed above.
+- native-only labels not listed in the confirmed native-only section;
+- exact runtime parity tests for the newly bridged engine-to-native callins.
 
 These remain `unresolved` in the audit until source registration, signatures,
 and executable behavior have been checked. A missing native callback may need

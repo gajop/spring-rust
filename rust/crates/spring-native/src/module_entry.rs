@@ -378,7 +378,6 @@ macro_rules! export_module {
                         (*$result).error = std::ptr::null();
                     }
                     Err(err) => {
-                        (*$result).value = false;
                         (*$result).error = $crate::module_entry::result_to_error_ptr(Err(err));
                     }
                 }
@@ -403,6 +402,141 @@ macro_rules! export_module {
                                 let data =
                                     &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                                 data.module().$method()
+                            }))
+                            .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                        finish_bool_callback!(result, callback_result);
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_bool_3_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::BoolCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        let callback_result =
+                            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                let data =
+                                    &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                                let q = &*query;
+                                data.module().$method(q.$field1, q.$field2, q.$field3)
+                            }))
+                            .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                        finish_bool_callback!(result, callback_result);
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_bool_4_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident, $field4:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::BoolCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        let callback_result =
+                            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                let data =
+                                    &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                                let q = &*query;
+                                data.module().$method(q.$field1, q.$field2, q.$field3, q.$field4)
+                            }))
+                            .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                        finish_bool_callback!(result, callback_result);
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_bool_5_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident, $field4:ident, $field5:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::BoolCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        let callback_result =
+                            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                let data =
+                                    &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                                let q = &*query;
+                                data.module().$method(q.$field1, q.$field2, q.$field3, q.$field4, q.$field5)
+                            }))
+                            .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                        finish_bool_callback!(result, callback_result);
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_bool_6_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident, $field4:ident, $field5:ident, $field6:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::BoolCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        let callback_result =
+                            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                let data =
+                                    &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                                let q = &*query;
+                                data.module().$method(q.$field1, q.$field2, q.$field3, q.$field4, q.$field5, q.$field6)
+                            }))
+                            .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                        finish_bool_callback!(result, callback_result);
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_bool_7_callback {
+            ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident, $field3:ident, $field4:ident, $field5:ident, $field6:ident, $field7:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $crate::sys::BoolCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        let callback_result =
+                            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                let data =
+                                    &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                                let q = &*query;
+                                data.module().$method(q.$field1, q.$field2, q.$field3, q.$field4, q.$field5, q.$field6, q.$field7)
                             }))
                             .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
                         finish_bool_callback!(result, callback_result);
@@ -1492,6 +1626,224 @@ macro_rules! export_module {
             }
         }
 
+        export_bool_4_callback!(
+            CommandFallback,
+            command_fallback,
+            $crate::sys::CommandFallbackQuery,
+            unitID,
+            unitDefID,
+            unitTeam,
+            command
+        );
+        export_bool_7_callback!(
+            AllowCommand,
+            allow_command,
+            $crate::sys::UnitCommandQuery,
+            unitID,
+            unitDefID,
+            unitTeam,
+            command,
+            playerNum,
+            fromSynced,
+            fromLua
+        );
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowUnitCreation(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowUnitCreationQuery,
+            result: *mut $crate::sys::AllowUnitCreationResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().allow_unit_creation(
+                        q.unitDefID,
+                        q.builderID,
+                        q.builderTeam,
+                        q.hasBuildInfo.then_some(q.buildPos),
+                        q.buildFacing,
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                match callback_result {
+                    Ok((allow, drop_order)) => {
+                        (*result).allow = allow;
+                        (*result).dropOrder = drop_order;
+                        (*result).error = std::ptr::null();
+                    }
+                    Err(error) => {
+                        (*result).error =
+                            $crate::module_entry::result_to_error_ptr(Err(error));
+                    }
+                }
+            }
+        }
+
+        export_bool_5_callback!(
+            AllowUnitTransfer,
+            allow_unit_transfer,
+            $crate::sys::AllowUnitTransferQuery,
+            unitID,
+            unitDefID,
+            oldTeam,
+            newTeam,
+            capture
+        );
+        export_bool_5_callback!(
+            AllowUnitBuildStep,
+            allow_unit_build_step,
+            $crate::sys::AllowUnitBuildStepQuery,
+            builderID,
+            builderTeam,
+            unitID,
+            unitDefID,
+            part
+        );
+        export_bool_5_callback!(
+            AllowUnitCaptureStep,
+            allow_unit_capture_step,
+            $crate::sys::AllowUnitBuildStepQuery,
+            builderID,
+            builderTeam,
+            unitID,
+            unitDefID,
+            part
+        );
+
+        export_bool_6_callback!(
+            AllowUnitTransport,
+            allow_unit_transport,
+            $crate::sys::AllowUnitTransportQuery,
+            transporterID,
+            transporterDefID,
+            transporterTeam,
+            transporteeID,
+            transporteeDefID,
+            transporteeTeam
+        );
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowUnitTransportLoad(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowUnitTransportPositionQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().allow_unit_transport_load(
+                        q.units.transporterID,
+                        q.units.transporterDefID,
+                        q.units.transporterTeam,
+                        q.units.transporteeID,
+                        q.units.transporteeDefID,
+                        q.units.transporteeTeam,
+                        q.position,
+                        q.allowed,
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowUnitTransportUnload(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowUnitTransportPositionQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().allow_unit_transport_unload(
+                        q.units.transporterID,
+                        q.units.transporterDefID,
+                        q.units.transporterTeam,
+                        q.units.transporteeID,
+                        q.units.transporteeDefID,
+                        q.units.transporteeTeam,
+                        q.position,
+                        q.allowed,
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowUnitCloak(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowUnitCloakQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module()
+                        .allow_unit_cloak(q.unitID, q.hasEnemy.then_some(q.enemyID))
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowUnitDecloak(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowUnitDecloakQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().allow_unit_decloak(
+                        q.unitID,
+                        q.hasObject.then_some(q.objectID),
+                        q.hasWeapon.then_some(q.weaponNum),
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        export_bool_3_callback!(
+            AllowUnitKamikaze,
+            allow_unit_kamikaze,
+            $crate::sys::AllowUnitKamikazeQuery,
+            unitID,
+            targetID,
+            allowed
+        );
+
         #[no_mangle]
         pub unsafe extern "C" fn UnitCmdDone(
             _interface: *const $crate::sys::NativeInterface,
@@ -1785,6 +2137,164 @@ macro_rules! export_module {
             }
         }
 
+        export_bool_3_callback!(
+            AllowFeatureCreation,
+            allow_feature_creation,
+            $crate::sys::AllowFeatureCreationQuery,
+            featureDefID,
+            teamID,
+            position
+        );
+
+        export_bool_5_callback!(
+            AllowFeatureBuildStep,
+            allow_feature_build_step,
+            $crate::sys::AllowFeatureBuildStepQuery,
+            builderID,
+            builderTeam,
+            featureID,
+            featureDefID,
+            part
+        );
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowResourceLevel(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowResourceLevelQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    let resource_type = $crate::cstr_to_str!(q.type_)?;
+                    data.module()
+                        .allow_resource_level(q.teamID, resource_type, q.level)
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowResourceTransfer(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowResourceTransferQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    let resource_type = $crate::cstr_to_str!(q.type_)?;
+                    data.module()
+                        .allow_resource_transfer(q.oldTeam, q.newTeam, resource_type, q.amount)
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn ResourceExcess(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::ResourceExcessQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    let entries = if q.count == 0 || q.entries.is_null() {
+                        &[]
+                    } else {
+                        std::slice::from_raw_parts(q.entries, q.count as usize)
+                    };
+                    data.module().resource_excess(entries)
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        export_bool_4_callback!(
+            AllowDirectUnitControl,
+            allow_direct_unit_control,
+            $crate::sys::AllowDirectUnitControlQuery,
+            unitID,
+            unitDefID,
+            unitTeam,
+            playerID
+        );
+        export_bool_3_callback!(
+            AllowBuilderHoldFire,
+            allow_builder_hold_fire,
+            $crate::sys::AllowBuilderHoldFireQuery,
+            unitID,
+            unitDefID,
+            action
+        );
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowStartPosition(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowStartPositionQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().allow_start_position(
+                        q.playerID,
+                        q.teamID,
+                        q.readyState,
+                        q.clampedPos,
+                        q.rawPickPos,
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        export_bool_6_callback!(
+            TerraformComplete,
+            terraform_complete,
+            $crate::sys::TerraformCompleteQuery,
+            unitID,
+            unitDefID,
+            unitTeam,
+            buildUnitID,
+            buildUnitDefID,
+            buildUnitTeam
+        );
+        export_bool_4_callback!(
+            MoveCtrlNotify,
+            move_ctrl_notify,
+            $crate::sys::MoveCtrlNotifyQuery,
+            unitID,
+            unitDefID,
+            unitTeam,
+            data
+        );
+
         #[no_mangle]
         pub unsafe extern "C" fn FeatureMoved(
             _interface: *const $crate::sys::NativeInterface,
@@ -1855,6 +2365,204 @@ macro_rules! export_module {
                             .explosion(q.weaponDefID, q.pos, q.ownerID, q.projectileID)
                     }))
                     .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                finish_bool_callback!(result, callback_result);
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowWeaponTargetCheck(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowWeaponTargetCheckQuery,
+            result: *mut $crate::sys::IntCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().allow_weapon_target_check(
+                        q.attackerID,
+                        q.attackerWeaponNum,
+                        q.attackerWeaponDefID,
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                match callback_result {
+                    Ok(value) => {
+                        (*result).value = value;
+                        (*result).error = std::ptr::null();
+                    }
+                    Err(error) => {
+                        (*result).error =
+                            $crate::module_entry::result_to_error_ptr(Err(error));
+                    }
+                }
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn AllowWeaponTarget(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::AllowWeaponTargetQuery,
+            result: *mut $crate::sys::AllowWeaponTargetResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().allow_weapon_target(
+                        q.attackerID,
+                        q.targetID,
+                        q.attackerWeaponNum,
+                        q.attackerWeaponDefID,
+                        q.hasTargetPriority.then_some(q.targetPriority),
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                match callback_result {
+                    Ok((allowed, target_priority)) => {
+                        (*result).allowed = allowed;
+                        (*result).targetPriority = target_priority;
+                        (*result).error = std::ptr::null();
+                    }
+                    Err(error) => {
+                        (*result).error =
+                            $crate::module_entry::result_to_error_ptr(Err(error));
+                    }
+                }
+            }
+        }
+
+        export_bool_3_callback!(
+            AllowWeaponInterceptTarget,
+            allow_weapon_intercept_target,
+            $crate::sys::AllowWeaponInterceptTargetQuery,
+            interceptorUnitID,
+            interceptorWeaponID,
+            interceptorTargetID
+        );
+
+        #[no_mangle]
+        pub unsafe extern "C" fn UnitPreDamaged(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::UnitDamagedQuery,
+            result: *mut $crate::sys::DamageCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().unit_pre_damaged(
+                        q.unitID,
+                        q.unitDefID,
+                        q.unitTeam,
+                        q.damage,
+                        q.paralyzer,
+                        q.weaponDefID,
+                        q.projectileID,
+                        q.attackerID,
+                        q.attackerDefID,
+                        q.attackerTeam,
+                        (*result).newDamage,
+                        (*result).impulseMult,
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                match callback_result {
+                    Ok((new_damage, impulse_mult)) => {
+                        (*result).newDamage = new_damage;
+                        (*result).impulseMult = impulse_mult;
+                        (*result).error = std::ptr::null();
+                    }
+                    Err(error) => {
+                        (*result).error =
+                            $crate::module_entry::result_to_error_ptr(Err(error));
+                    }
+                }
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn FeaturePreDamaged(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::FeatureDamagedQuery,
+            result: *mut $crate::sys::DamageCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().feature_pre_damaged(
+                        q.featureID,
+                        q.featureDefID,
+                        q.featureTeam,
+                        q.damage,
+                        q.weaponDefID,
+                        q.projectileID,
+                        q.attackerID,
+                        q.attackerDefID,
+                        q.attackerTeam,
+                        (*result).newDamage,
+                        (*result).impulseMult,
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
+                match callback_result {
+                    Ok((new_damage, impulse_mult)) => {
+                        (*result).newDamage = new_damage;
+                        (*result).impulseMult = impulse_mult;
+                        (*result).error = std::ptr::null();
+                    }
+                    Err(error) => {
+                        (*result).error =
+                            $crate::module_entry::result_to_error_ptr(Err(error));
+                    }
+                }
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn ShieldPreDamaged(
+            _interface: *const $crate::sys::NativeInterface,
+            module_data: *mut c_void,
+            query: *const $crate::sys::ShieldPreDamagedQuery,
+            result: *mut $crate::sys::BoolCallinResult,
+        ) {
+            if module_data.is_null() || query.is_null() || result.is_null() {
+                return;
+            }
+            unsafe {
+                let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                    let q = &*query;
+                    data.module().shield_pre_damaged(
+                        q.projectileID,
+                        q.projectileOwnerID,
+                        q.shieldWeaponNum,
+                        q.shieldCarrierID,
+                        q.bounceProjectile,
+                        q.beamEmitterWeaponNum,
+                        q.beamEmitterUnitID,
+                        q.startPos,
+                        q.hitPos,
+                    )
+                }))
+                .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
                 finish_bool_callback!(result, callback_result);
             }
         }

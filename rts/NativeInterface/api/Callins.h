@@ -542,6 +542,206 @@ struct BoolCallinResult {
 	bool value;
 };
 
+// Results used by synced control callins.  The initial values are supplied by
+// the engine so a native module can preserve the engine default when it does
+// not handle an event.
+struct AllowUnitCreationResult {
+	const Error* error;
+	bool allow;
+	bool dropOrder;
+};
+
+struct IntCallinResult {
+	const Error* error;
+	int32_t value;
+};
+
+struct DamageCallinResult {
+	const Error* error;
+	float newDamage;
+	float impulseMult;
+};
+
+struct AllowWeaponTargetResult {
+	const Error* error;
+	bool allowed;
+	float targetPriority;
+};
+
+struct CommandFallbackQuery {
+	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
+	NativeCallinCommand command;
+};
+
+struct AllowUnitCreationQuery {
+	int32_t unitDefID;
+	int32_t builderID;
+	int32_t builderTeam;
+	bool hasBuildInfo;
+	Float3 buildPos;
+	int32_t buildFacing;
+};
+
+struct AllowUnitTransferQuery {
+	int32_t unitID;
+	int32_t unitDefID;
+	int32_t oldTeam;
+	int32_t newTeam;
+	bool capture;
+};
+
+struct AllowUnitBuildStepQuery {
+	int32_t builderID;
+	int32_t builderTeam;
+	int32_t unitID;
+	int32_t unitDefID;
+	float part;
+};
+
+struct AllowUnitTransportQuery {
+	int32_t transporterID;
+	int32_t transporterDefID;
+	int32_t transporterTeam;
+	int32_t transporteeID;
+	int32_t transporteeDefID;
+	int32_t transporteeTeam;
+};
+
+struct AllowUnitTransportPositionQuery {
+	AllowUnitTransportQuery units;
+	Float3 position;
+	bool allowed;
+};
+
+struct AllowUnitCloakQuery {
+	int32_t unitID;
+	bool hasEnemy;
+	int32_t enemyID;
+};
+
+struct AllowUnitDecloakQuery {
+	int32_t unitID;
+	bool hasObject;
+	int32_t objectID;
+	bool hasWeapon;
+	int32_t weaponNum;
+};
+
+struct AllowUnitKamikazeQuery {
+	int32_t unitID;
+	int32_t targetID;
+	bool allowed;
+};
+
+struct AllowFeatureCreationQuery {
+	int32_t featureDefID;
+	int32_t teamID;
+	Float3 position;
+};
+
+struct AllowFeatureBuildStepQuery {
+	int32_t builderID;
+	int32_t builderTeam;
+	int32_t featureID;
+	int32_t featureDefID;
+	float part;
+};
+
+struct AllowResourceLevelQuery {
+	int32_t teamID;
+	const char* type;
+	float level;
+};
+
+struct AllowResourceTransferQuery {
+	int32_t oldTeam;
+	int32_t newTeam;
+	const char* type;
+	float amount;
+};
+
+struct ResourceExcessEntry {
+	int32_t teamID;
+	float resources[2];
+};
+
+struct ResourceExcessQuery {
+	const ResourceExcessEntry* entries;
+	uint32_t count;
+};
+
+struct AllowDirectUnitControlQuery {
+	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
+	int32_t playerID;
+};
+
+struct AllowBuilderHoldFireQuery {
+	int32_t unitID;
+	int32_t unitDefID;
+	int32_t action;
+};
+
+struct AllowStartPositionQuery {
+	int32_t playerID;
+	int32_t teamID;
+	uint8_t readyState;
+	Float3 clampedPos;
+	Float3 rawPickPos;
+};
+
+struct TerraformCompleteQuery {
+	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
+	int32_t buildUnitID;
+	int32_t buildUnitDefID;
+	int32_t buildUnitTeam;
+};
+
+struct MoveCtrlNotifyQuery {
+	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
+	int32_t data;
+};
+
+struct AllowWeaponTargetCheckQuery {
+	uint32_t attackerID;
+	int32_t attackerWeaponNum;
+	uint32_t attackerWeaponDefID;
+};
+
+struct AllowWeaponTargetQuery {
+	uint32_t attackerID;
+	uint32_t targetID;
+	int32_t attackerWeaponNum;
+	uint32_t attackerWeaponDefID;
+	bool hasTargetPriority;
+	float targetPriority;
+};
+
+struct AllowWeaponInterceptTargetQuery {
+	int32_t interceptorUnitID;
+	int32_t interceptorWeaponID;
+	int32_t interceptorTargetID;
+};
+
+struct ShieldPreDamagedQuery {
+	int32_t projectileID;
+	int32_t projectileOwnerID;
+	int32_t shieldWeaponNum;
+	int32_t shieldCarrierID;
+	bool bounceProjectile;
+	int32_t beamEmitterWeaponNum;
+	int32_t beamEmitterUnitID;
+	Float3 startPos;
+	Float3 hitPos;
+};
+
 struct KeyPressQuery {
 	int32_t keyCode;
 	int32_t scanCode;

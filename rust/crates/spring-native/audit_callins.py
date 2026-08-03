@@ -23,6 +23,30 @@ CALLINS_TYPES = REPO_ROOT / "rts/NativeInterface/api/Callins.h"
 LUA_SOURCE_DIR = REPO_ROOT / "rts/Lua"
 
 
+LUA_ONLY_BY_DESIGN = {
+    "GotChatMsg": "Lua-handle chat routing; native modules receive a separate integration stream.",
+    "Initialize": "Lua-handle lifecycle callback; native modules use InitializeNativeModule.",
+    "LoadCode": "Lua-handle code-loading lifecycle callback; native modules are loaded through the native ABI.",
+    "RecvFromSynced": "IPC between the engine's synced and unsynced Lua handles; native modules are not Lua handles.",
+    "RecvLuaMsg": "Lua-handle message routing; native modules receive the separate HandleLuaMsg hook.",
+    "RecvSkirmishAIMessage": "Lua-handle skirmish-AI message routing; no native event-client counterpart exists.",
+}
+
+NATIVE_ONLY_BY_DESIGN = {
+    "CollectGarbage": "Native event-client garbage-collection scheduling hook; not a script call-in.",
+    "DrawAlphaFeaturesLua": "Native renderer phase hook; it is separate from Lua's DrawFeature call-in.",
+    "DrawAlphaUnitsLua": "Native renderer phase hook; it is separate from Lua's DrawUnit call-in.",
+    "DrawOpaqueFeaturesLua": "Native renderer phase hook; it is separate from Lua's DrawFeature call-in.",
+    "DrawOpaqueUnitsLua": "Native renderer phase hook; it is separate from Lua's DrawUnit call-in.",
+    "FeatureMoved": "Native engine/rendering movement notification; no script call-in is registered.",
+    "HandleLuaCall": "Native-module ingress for Lua-to-native messages; not a Lua call-in.",
+    "HandleLuaMsg": "Native-module ingress for network Lua messages; not a Lua call-in.",
+    "LastMessagePosition": "Native event for message-position consumers; scripts expose Get/Set callouts instead.",
+    "Pong": "Native network timing callback; no script call-in is registered.",
+    "UnitMoved": "Native engine/rendering movement notification; no script call-in is registered.",
+}
+
+
 def parse_documented_callins() -> dict[str, set[str]]:
     text = LUA_DOC.read_text(encoding="utf-8")
     result: dict[str, set[str]] = defaultdict(set)
@@ -156,6 +180,10 @@ def main() -> int:
     matched_names = documented_names & native_event_symbols
     lua_only_names = documented_names - native_event_symbols
     native_only_names = native_event_symbols - documented_names
+    lua_only_by_design = set(lua_only_names) & set(LUA_ONLY_BY_DESIGN)
+    native_only_by_design = set(native_only_names) & set(NATIVE_ONLY_BY_DESIGN)
+    lua_only_unclassified = lua_only_names - lua_only_by_design
+    native_only_unclassified = native_only_names - native_only_by_design
     trait_missing = {
         symbol
         for symbol in native_event_symbols
@@ -205,17 +233,31 @@ def main() -> int:
             f"| Shared callback names | {len(matched_names)} |",
             f"| Documented Lua names without native callback | {len(lua_only_names)} |",
             f"| Native callback names without documented Lua callin | {len(native_only_names)} |",
+            f"| Lua-only callins classified by design | {len(lua_only_by_design)} |",
+            f"| Native-only callbacks classified by design | {len(native_only_by_design)} |",
+            f"| Unclassified Lua-only names | {len(lua_only_unclassified)} |",
+            f"| Unclassified native-only names | {len(native_only_unclassified)} |",
             f"| Native callbacks without Rust trait method | {len(trait_missing)} |",
             "",
             "## Lua names without native callback",
             "",
-            "These are unresolved until individually classified or ported. They are not treated as intentional.",
+            "Every entry is classified below. Classification is a design decision, not evidence that its runtime behavior has already been tested.",
             "",
         ]
     )
-    lines.extend(markdown_list(sorted(lua_only_names)))
+    lines.extend(["| Name | Classification | Reason |", "| --- | --- | --- |"])
+    for name in sorted(lua_only_names):
+        if name in LUA_ONLY_BY_DESIGN:
+            lines.append(f"| `{name}` | `lua_only_by_design` | {LUA_ONLY_BY_DESIGN[name]} |")
+        else:
+            lines.append(f"| `{name}` | `unresolved_gap` | Requires source-level decision. |")
     lines.extend(["", "## Native callback names without documented Lua callin", ""])
-    lines.extend(markdown_list(sorted(native_only_names)))
+    lines.extend(["| Name | Classification | Reason |", "| --- | --- | --- |"])
+    for name in sorted(native_only_names):
+        if name in NATIVE_ONLY_BY_DESIGN:
+            lines.append(f"| `{name}` | `native_only_by_design` | {NATIVE_ONLY_BY_DESIGN[name]} |")
+        else:
+            lines.append(f"| `{name}` | `unresolved_gap` | Requires source-level decision. |")
     lines.extend(["", "## Native callbacks without a Rust trait method", ""])
     lines.extend(markdown_list(sorted(trait_missing)) or ["- None"])
     lines.extend(
@@ -244,7 +286,10 @@ def main() -> int:
     print(
         f"Lua={sum(len(values) for values in documented.values())} "
         f"native={len(native_event_symbols)} shared={len(matched_names)} "
-        f"lua_only_unresolved={len(lua_only_names)} native_only={len(native_only_names)}"
+        f"lua_only_by_design={len(lua_only_by_design)} "
+        f"native_only_by_design={len(native_only_by_design)} "
+        f"lua_only_unclassified={len(lua_only_unclassified)} "
+        f"native_only_unclassified={len(native_only_unclassified)}"
     )
     return 0
 

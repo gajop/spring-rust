@@ -538,6 +538,189 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
+    /// Called when a unit reaches a command the engine does not handle.
+    /// Returning true removes the command from the queue.
+    fn command_fallback(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        command: crate::sys::NativeCallinCommand,
+    ) -> Result<bool, Error> {
+        let _ = (unit_id, unit_def_id, unit_team, command);
+        Ok(false)
+    }
+
+    /// Called before a command is added to a unit's queue.
+    fn allow_command(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        command: crate::sys::NativeCallinCommand,
+        player_num: i32,
+        from_synced: bool,
+        from_lua: bool,
+    ) -> Result<bool, Error> {
+        let _ = (
+            unit_id,
+            unit_def_id,
+            unit_team,
+            command,
+            player_num,
+            from_synced,
+            from_lua,
+        );
+        Ok(true)
+    }
+
+    fn allow_unit_creation(
+        &mut self,
+        unit_def_id: i32,
+        builder_id: i32,
+        builder_team: i32,
+        build_pos: Option<crate::sys::Float3>,
+        build_facing: i32,
+    ) -> Result<(bool, bool), Error> {
+        let _ = (
+            unit_def_id,
+            builder_id,
+            builder_team,
+            build_pos,
+            build_facing,
+        );
+        Ok((true, true))
+    }
+
+    fn allow_unit_transfer(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        old_team: i32,
+        new_team: i32,
+        capture: bool,
+    ) -> Result<bool, Error> {
+        let _ = (unit_id, unit_def_id, old_team, new_team, capture);
+        Ok(true)
+    }
+
+    fn allow_unit_build_step(
+        &mut self,
+        builder_id: i32,
+        builder_team: i32,
+        unit_id: i32,
+        unit_def_id: i32,
+        part: f32,
+    ) -> Result<bool, Error> {
+        let _ = (builder_id, builder_team, unit_id, unit_def_id, part);
+        Ok(true)
+    }
+
+    fn allow_unit_capture_step(
+        &mut self,
+        builder_id: i32,
+        builder_team: i32,
+        unit_id: i32,
+        unit_def_id: i32,
+        part: f32,
+    ) -> Result<bool, Error> {
+        let _ = (builder_id, builder_team, unit_id, unit_def_id, part);
+        Ok(true)
+    }
+
+    fn allow_unit_transport(
+        &mut self,
+        transporter_id: i32,
+        transporter_def_id: i32,
+        transporter_team: i32,
+        transportee_id: i32,
+        transportee_def_id: i32,
+        transportee_team: i32,
+    ) -> Result<bool, Error> {
+        let _ = (
+            transporter_id,
+            transporter_def_id,
+            transporter_team,
+            transportee_id,
+            transportee_def_id,
+            transportee_team,
+        );
+        Ok(true)
+    }
+
+    fn allow_unit_transport_load(
+        &mut self,
+        transporter_id: i32,
+        transporter_def_id: i32,
+        transporter_team: i32,
+        transportee_id: i32,
+        transportee_def_id: i32,
+        transportee_team: i32,
+        position: crate::sys::Float3,
+        allowed: bool,
+    ) -> Result<bool, Error> {
+        let _ = (
+            transporter_id,
+            transporter_def_id,
+            transporter_team,
+            transportee_id,
+            transportee_def_id,
+            transportee_team,
+            position,
+            allowed,
+        );
+        Ok(allowed)
+    }
+
+    fn allow_unit_transport_unload(
+        &mut self,
+        transporter_id: i32,
+        transporter_def_id: i32,
+        transporter_team: i32,
+        transportee_id: i32,
+        transportee_def_id: i32,
+        transportee_team: i32,
+        position: crate::sys::Float3,
+        allowed: bool,
+    ) -> Result<bool, Error> {
+        let _ = (
+            transporter_id,
+            transporter_def_id,
+            transporter_team,
+            transportee_id,
+            transportee_def_id,
+            transportee_team,
+            position,
+            allowed,
+        );
+        Ok(allowed)
+    }
+
+    fn allow_unit_cloak(&mut self, unit_id: i32, enemy_id: Option<i32>) -> Result<bool, Error> {
+        let _ = (unit_id, enemy_id);
+        Ok(true)
+    }
+
+    fn allow_unit_decloak(
+        &mut self,
+        unit_id: i32,
+        object_id: Option<i32>,
+        weapon_num: Option<i32>,
+    ) -> Result<bool, Error> {
+        let _ = (unit_id, object_id, weapon_num);
+        Ok(true)
+    }
+
+    fn allow_unit_kamikaze(
+        &mut self,
+        unit_id: i32,
+        target_id: i32,
+        allowed: bool,
+    ) -> Result<bool, Error> {
+        let _ = (unit_id, target_id, allowed);
+        Ok(allowed)
+    }
+
     fn unit_cmd_done(
         &mut self,
         unit_id: i32,
@@ -743,6 +926,246 @@ pub trait NativeModule: Sized {
             attacker_team,
         );
         Ok(())
+    }
+
+    fn allow_feature_creation(
+        &mut self,
+        feature_def_id: i32,
+        team_id: i32,
+        position: crate::sys::Float3,
+    ) -> Result<bool, Error> {
+        let _ = (feature_def_id, team_id, position);
+        Ok(true)
+    }
+
+    fn allow_feature_build_step(
+        &mut self,
+        builder_id: i32,
+        builder_team: i32,
+        feature_id: i32,
+        feature_def_id: i32,
+        part: f32,
+    ) -> Result<bool, Error> {
+        let _ = (builder_id, builder_team, feature_id, feature_def_id, part);
+        Ok(true)
+    }
+
+    fn allow_resource_level(
+        &mut self,
+        team_id: i32,
+        resource_type: &str,
+        level: f32,
+    ) -> Result<bool, Error> {
+        let _ = (team_id, resource_type, level);
+        Ok(true)
+    }
+
+    fn allow_resource_transfer(
+        &mut self,
+        old_team: i32,
+        new_team: i32,
+        resource_type: &str,
+        amount: f32,
+    ) -> Result<bool, Error> {
+        let _ = (old_team, new_team, resource_type, amount);
+        Ok(true)
+    }
+
+    fn resource_excess(
+        &mut self,
+        entries: &[crate::sys::ResourceExcessEntry],
+    ) -> Result<bool, Error> {
+        let _ = entries;
+        Ok(false)
+    }
+
+    fn allow_direct_unit_control(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        player_id: i32,
+    ) -> Result<bool, Error> {
+        let _ = (unit_id, unit_def_id, unit_team, player_id);
+        Ok(true)
+    }
+
+    fn allow_builder_hold_fire(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        action: i32,
+    ) -> Result<bool, Error> {
+        let _ = (unit_id, unit_def_id, action);
+        Ok(true)
+    }
+
+    fn allow_start_position(
+        &mut self,
+        player_id: i32,
+        team_id: i32,
+        ready_state: u8,
+        clamped_pos: crate::sys::Float3,
+        raw_pick_pos: crate::sys::Float3,
+    ) -> Result<bool, Error> {
+        let _ = (player_id, team_id, ready_state, clamped_pos, raw_pick_pos);
+        Ok(true)
+    }
+
+    fn terraform_complete(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        build_unit_id: i32,
+        build_unit_def_id: i32,
+        build_unit_team: i32,
+    ) -> Result<bool, Error> {
+        let _ = (
+            unit_id,
+            unit_def_id,
+            unit_team,
+            build_unit_id,
+            build_unit_def_id,
+            build_unit_team,
+        );
+        Ok(false)
+    }
+
+    fn move_ctrl_notify(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        data: i32,
+    ) -> Result<bool, Error> {
+        let _ = (unit_id, unit_def_id, unit_team, data);
+        Ok(false)
+    }
+
+    fn allow_weapon_target_check(
+        &mut self,
+        attacker_id: u32,
+        attacker_weapon_num: i32,
+        attacker_weapon_def_id: u32,
+    ) -> Result<i32, Error> {
+        let _ = (attacker_id, attacker_weapon_num, attacker_weapon_def_id);
+        Ok(-1)
+    }
+
+    fn allow_weapon_target(
+        &mut self,
+        attacker_id: u32,
+        target_id: u32,
+        attacker_weapon_num: i32,
+        attacker_weapon_def_id: u32,
+        target_priority: Option<f32>,
+    ) -> Result<(bool, f32), Error> {
+        let _ = (
+            attacker_id,
+            target_id,
+            attacker_weapon_num,
+            attacker_weapon_def_id,
+        );
+        Ok((true, target_priority.unwrap_or_default()))
+    }
+
+    fn allow_weapon_intercept_target(
+        &mut self,
+        interceptor_unit_id: i32,
+        interceptor_weapon_id: i32,
+        interceptor_target_id: i32,
+    ) -> Result<bool, Error> {
+        let _ = (
+            interceptor_unit_id,
+            interceptor_weapon_id,
+            interceptor_target_id,
+        );
+        Ok(true)
+    }
+
+    fn unit_pre_damaged(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        damage: f32,
+        paralyzer: bool,
+        weapon_def_id: i32,
+        projectile_id: i32,
+        attacker_id: i32,
+        attacker_def_id: i32,
+        attacker_team: i32,
+        new_damage: f32,
+        impulse_mult: f32,
+    ) -> Result<(f32, f32), Error> {
+        let _ = (
+            unit_id,
+            unit_def_id,
+            unit_team,
+            damage,
+            paralyzer,
+            weapon_def_id,
+            projectile_id,
+            attacker_id,
+            attacker_def_id,
+            attacker_team,
+        );
+        Ok((new_damage, impulse_mult))
+    }
+
+    fn feature_pre_damaged(
+        &mut self,
+        feature_id: i32,
+        feature_def_id: i32,
+        feature_team: i32,
+        damage: f32,
+        weapon_def_id: i32,
+        projectile_id: i32,
+        attacker_id: i32,
+        attacker_def_id: i32,
+        attacker_team: i32,
+        new_damage: f32,
+        impulse_mult: f32,
+    ) -> Result<(f32, f32), Error> {
+        let _ = (
+            feature_id,
+            feature_def_id,
+            feature_team,
+            damage,
+            weapon_def_id,
+            projectile_id,
+            attacker_id,
+            attacker_def_id,
+            attacker_team,
+        );
+        Ok((new_damage, impulse_mult))
+    }
+
+    fn shield_pre_damaged(
+        &mut self,
+        projectile_id: i32,
+        projectile_owner_id: i32,
+        shield_weapon_num: i32,
+        shield_carrier_id: i32,
+        bounce_projectile: bool,
+        beam_emitter_weapon_num: i32,
+        beam_emitter_unit_id: i32,
+        start_pos: crate::sys::Float3,
+        hit_pos: crate::sys::Float3,
+    ) -> Result<bool, Error> {
+        let _ = (
+            projectile_id,
+            projectile_owner_id,
+            shield_weapon_num,
+            shield_carrier_id,
+            bounce_projectile,
+            beam_emitter_weapon_num,
+            beam_emitter_unit_id,
+            start_pos,
+            hit_pos,
+        );
+        Ok(false)
     }
 
     fn projectile_created(&mut self, projectile_id: i32) -> Result<(), Error> {

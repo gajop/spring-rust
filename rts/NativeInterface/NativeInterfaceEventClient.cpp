@@ -11,8 +11,11 @@
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureDef.h"
 #include "Sim/Projectiles/Projectile.h"
+#include "Sim/Misc/Resource.h"
+#include "Sim/Objects/SolidObject.h"
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitDef.h"
+#include "Sim/Units/BuildInfo.h"
 #include "Sim/Units/CommandAI/Command.h"
 #include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Sim/Weapons/Weapon.h"
@@ -99,6 +102,34 @@ void NativeInterfaceEventClient::LoadSymbols() {
 	LOAD_SYMBOL(UnitGiven);
 	LOAD_SYMBOL(UnitIdle);
 	LOAD_SYMBOL(UnitCommand);
+	LOAD_SYMBOL(CommandFallback);
+	LOAD_SYMBOL(AllowCommand);
+	LOAD_SYMBOL(AllowUnitCreation);
+	LOAD_SYMBOL(AllowUnitTransfer);
+	LOAD_SYMBOL(AllowUnitBuildStep);
+	LOAD_SYMBOL(AllowUnitCaptureStep);
+	LOAD_SYMBOL(AllowUnitTransport);
+	LOAD_SYMBOL(AllowUnitTransportLoad);
+	LOAD_SYMBOL(AllowUnitTransportUnload);
+	LOAD_SYMBOL(AllowUnitCloak);
+	LOAD_SYMBOL(AllowUnitDecloak);
+	LOAD_SYMBOL(AllowUnitKamikaze);
+	LOAD_SYMBOL(AllowFeatureCreation);
+	LOAD_SYMBOL(AllowFeatureBuildStep);
+	LOAD_SYMBOL(AllowResourceLevel);
+	LOAD_SYMBOL(AllowResourceTransfer);
+	LOAD_SYMBOL(ResourceExcess);
+	LOAD_SYMBOL(AllowDirectUnitControl);
+	LOAD_SYMBOL(AllowBuilderHoldFire);
+	LOAD_SYMBOL(AllowStartPosition);
+	LOAD_SYMBOL(TerraformComplete);
+	LOAD_SYMBOL(MoveCtrlNotify);
+	LOAD_SYMBOL(AllowWeaponTargetCheck);
+	LOAD_SYMBOL(AllowWeaponTarget);
+	LOAD_SYMBOL(AllowWeaponInterceptTarget);
+	LOAD_SYMBOL(UnitPreDamaged);
+	LOAD_SYMBOL(FeaturePreDamaged);
+	LOAD_SYMBOL(ShieldPreDamaged);
 	LOAD_SYMBOL(UnitCmdDone);
 	LOAD_SYMBOL(UnitDamaged);
 	LOAD_SYMBOL(UnitHarvestStorageFull);
@@ -671,6 +702,207 @@ void NativeInterfaceEventClient::UnitCommand(const CUnit* unit, const Command& c
 	}
 }
 
+bool NativeInterfaceEventClient::CommandFallback(const CUnit* unit, const Command& command) {
+	if (m_CommandFallbackFuncPtr == nullptr)
+		return false;
+
+	CommandFallbackQuery query = {
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.unitTeam = unit->team,
+		.command = ToNativeCallinCommand(command),
+	};
+	BoolCallinResult result = {.value = false};
+	m_CommandFallbackFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowCommand(const CUnit* unit, const Command& command, int playerNum, bool fromSynced, bool fromLua) {
+	if (m_AllowCommandFuncPtr == nullptr)
+		return true;
+
+	UnitCommandQuery query = {
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.unitTeam = unit->team,
+		.command = ToNativeCallinCommand(command),
+		.playerNum = playerNum,
+		.fromSynced = fromSynced,
+		.fromLua = fromLua,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowCommandFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDef* unitDef, const CUnit* builder, const BuildInfo* buildInfo) {
+	if (m_AllowUnitCreationFuncPtr == nullptr)
+		return {true, true};
+
+	AllowUnitCreationQuery query = {
+		.unitDefID = (unitDef != nullptr) ? unitDef->id : -1,
+		.builderID = (builder != nullptr) ? builder->id : -1,
+		.builderTeam = (builder != nullptr) ? builder->team : -1,
+		.hasBuildInfo = (buildInfo != nullptr),
+		.buildPos = (buildInfo != nullptr) ? Float3{buildInfo->pos.x, buildInfo->pos.y, buildInfo->pos.z} : Float3{},
+		.buildFacing = (buildInfo != nullptr) ? buildInfo->buildFacing : 0,
+	};
+	AllowUnitCreationResult result = {.allow = true, .dropOrder = true};
+	m_AllowUnitCreationFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return {result.allow, result.dropOrder};
+}
+
+bool NativeInterfaceEventClient::AllowUnitTransfer(const CUnit* unit, int newTeam, bool capture) {
+	if (m_AllowUnitTransferFuncPtr == nullptr)
+		return true;
+
+	AllowUnitTransferQuery query = {
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.oldTeam = unit->team,
+		.newTeam = newTeam,
+		.capture = capture,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowUnitTransferFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowUnitBuildStep(const CUnit* builder, const CUnit* unit, float part) {
+	if (m_AllowUnitBuildStepFuncPtr == nullptr)
+		return true;
+
+	AllowUnitBuildStepQuery query = {
+		.builderID = builder->id,
+		.builderTeam = builder->team,
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.part = part,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowUnitBuildStepFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowUnitCaptureStep(const CUnit* builder, const CUnit* unit, float part) {
+	if (m_AllowUnitCaptureStepFuncPtr == nullptr)
+		return true;
+
+	AllowUnitBuildStepQuery query = {
+		.builderID = builder->id,
+		.builderTeam = builder->team,
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.part = part,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowUnitCaptureStepFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowUnitTransport(const CUnit* transporter, const CUnit* transportee) {
+	if (m_AllowUnitTransportFuncPtr == nullptr)
+		return true;
+
+	AllowUnitTransportQuery query = {
+		.transporterID = transporter->id,
+		.transporterDefID = (transporter->unitDef != nullptr) ? transporter->unitDef->id : -1,
+		.transporterTeam = transporter->team,
+		.transporteeID = transportee->id,
+		.transporteeDefID = (transportee->unitDef != nullptr) ? transportee->unitDef->id : -1,
+		.transporteeTeam = transportee->team,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowUnitTransportFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter, const CUnit* transportee, const float3& loadPos, bool allowed) {
+	if (m_AllowUnitTransportLoadFuncPtr == nullptr)
+		return allowed;
+
+	AllowUnitTransportPositionQuery query = {
+		.units = {
+			.transporterID = transporter->id,
+			.transporterDefID = (transporter->unitDef != nullptr) ? transporter->unitDef->id : -1,
+			.transporterTeam = transporter->team,
+			.transporteeID = transportee->id,
+			.transporteeDefID = (transportee->unitDef != nullptr) ? transportee->unitDef->id : -1,
+			.transporteeTeam = transportee->team,
+		},
+		.position = {.x = loadPos.x, .y = loadPos.y, .z = loadPos.z},
+		.allowed = allowed,
+	};
+	BoolCallinResult result = {.value = allowed};
+	m_AllowUnitTransportLoadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowUnitTransportUnload(const CUnit* transporter, const CUnit* transportee, const float3& unloadPos, bool allowed) {
+	if (m_AllowUnitTransportUnloadFuncPtr == nullptr)
+		return allowed;
+
+	AllowUnitTransportPositionQuery query = {
+		.units = {
+			.transporterID = transporter->id,
+			.transporterDefID = (transporter->unitDef != nullptr) ? transporter->unitDef->id : -1,
+			.transporterTeam = transporter->team,
+			.transporteeID = transportee->id,
+			.transporteeDefID = (transportee->unitDef != nullptr) ? transportee->unitDef->id : -1,
+			.transporteeTeam = transportee->team,
+		},
+		.position = {.x = unloadPos.x, .y = unloadPos.y, .z = unloadPos.z},
+		.allowed = allowed,
+	};
+	BoolCallinResult result = {.value = allowed};
+	m_AllowUnitTransportUnloadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowUnitCloak(const CUnit* unit, const CUnit* enemy) {
+	if (m_AllowUnitCloakFuncPtr == nullptr)
+		return true;
+
+	AllowUnitCloakQuery query = {
+		.unitID = unit->id,
+		.hasEnemy = (enemy != nullptr),
+		.enemyID = (enemy != nullptr) ? enemy->id : -1,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowUnitCloakFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowUnitDecloak(const CUnit* unit, const CSolidObject* object, const CWeapon* weapon) {
+	if (m_AllowUnitDecloakFuncPtr == nullptr)
+		return true;
+
+	AllowUnitDecloakQuery query = {
+		.unitID = unit->id,
+		.hasObject = (object != nullptr),
+		.objectID = (object != nullptr) ? object->id : -1,
+		.hasWeapon = (weapon != nullptr),
+		.weaponNum = (weapon != nullptr) ? weapon->weaponNum : -1,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowUnitDecloakFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowUnitKamikaze(const CUnit* unit, const CUnit* target, bool allowed) {
+	if (m_AllowUnitKamikazeFuncPtr == nullptr)
+		return allowed;
+
+	AllowUnitKamikazeQuery query = {
+		.unitID = unit->id,
+		.targetID = (target != nullptr) ? target->id : -1,
+		.allowed = allowed,
+	};
+	BoolCallinResult result = {.value = allowed};
+	m_AllowUnitKamikazeFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
 void NativeInterfaceEventClient::UnitCmdDone(const CUnit* unit, const Command& command) {
 	if (m_UnitCmdDoneFuncPtr) {
 		UnitCmdDoneQuery query = {
@@ -902,6 +1134,164 @@ void NativeInterfaceEventClient::FeatureDamaged(const CFeature* feature, const C
 	}
 }
 
+bool NativeInterfaceEventClient::AllowFeatureCreation(const FeatureDef* featureDef, int allyTeamID, const float3& pos) {
+	if (m_AllowFeatureCreationFuncPtr == nullptr)
+		return true;
+
+	AllowFeatureCreationQuery query = {
+		.featureDefID = (featureDef != nullptr) ? featureDef->id : -1,
+		.teamID = allyTeamID,
+		.position = {.x = pos.x, .y = pos.y, .z = pos.z},
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowFeatureCreationFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowFeatureBuildStep(const CUnit* builder, const CFeature* feature, float part) {
+	if (m_AllowFeatureBuildStepFuncPtr == nullptr)
+		return true;
+
+	AllowFeatureBuildStepQuery query = {
+		.builderID = builder->id,
+		.builderTeam = builder->team,
+		.featureID = feature->id,
+		.featureDefID = (feature->def != nullptr) ? feature->def->id : -1,
+		.part = part,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowFeatureBuildStepFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowResourceLevel(int teamID, const std::string& type, float level) {
+	if (m_AllowResourceLevelFuncPtr == nullptr)
+		return true;
+
+	AllowResourceLevelQuery query = {
+		.teamID = teamID,
+		.type = type.c_str(),
+		.level = level,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowResourceLevelFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowResourceTransfer(int oldTeam, int newTeam, const char* type, float amount) {
+	if (m_AllowResourceTransferFuncPtr == nullptr)
+		return true;
+
+	AllowResourceTransferQuery query = {
+		.oldTeam = oldTeam,
+		.newTeam = newTeam,
+		.type = type,
+		.amount = amount,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowResourceTransferFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::ResourceExcess(const std::map<int, SResourcePack>& excess) {
+	if (m_ResourceExcessFuncPtr == nullptr)
+		return false;
+
+	std::vector<ResourceExcessEntry> entries;
+	entries.reserve(excess.size());
+	for (const auto& [teamID, resources] : excess) {
+		entries.push_back({
+			.teamID = teamID,
+			.resources = {resources[0], resources[1]},
+		});
+	}
+
+	ResourceExcessQuery query = {
+		.entries = entries.data(),
+		.count = static_cast<uint32_t>(entries.size()),
+	};
+	BoolCallinResult result = {.value = false};
+	m_ResourceExcessFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowDirectUnitControl(int playerID, const CUnit* unit) {
+	if (m_AllowDirectUnitControlFuncPtr == nullptr)
+		return true;
+
+	AllowDirectUnitControlQuery query = {
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.unitTeam = unit->team,
+		.playerID = playerID,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowDirectUnitControlFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowBuilderHoldFire(const CUnit* unit, int action) {
+	if (m_AllowBuilderHoldFireFuncPtr == nullptr)
+		return true;
+
+	AllowBuilderHoldFireQuery query = {
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.action = action,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowBuilderHoldFireFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowStartPosition(int playerID, int teamID, unsigned char readyState, const float3& clampedPos, const float3& rawPickPos) {
+	if (m_AllowStartPositionFuncPtr == nullptr)
+		return true;
+
+	AllowStartPositionQuery query = {
+		.playerID = playerID,
+		.teamID = teamID,
+		.readyState = readyState,
+		.clampedPos = {.x = clampedPos.x, .y = clampedPos.y, .z = clampedPos.z},
+		.rawPickPos = {.x = rawPickPos.x, .y = rawPickPos.y, .z = rawPickPos.z},
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowStartPositionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::TerraformComplete(const CUnit* unit, const CUnit* build) {
+	if (m_TerraformCompleteFuncPtr == nullptr)
+		return false;
+
+	TerraformCompleteQuery query = {
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.unitTeam = unit->team,
+		.buildUnitID = build->id,
+		.buildUnitDefID = (build->unitDef != nullptr) ? build->unitDef->id : -1,
+		.buildUnitTeam = build->team,
+	};
+	BoolCallinResult result = {.value = false};
+	m_TerraformCompleteFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::MoveCtrlNotify(const CUnit* unit, int data) {
+	if (m_MoveCtrlNotifyFuncPtr == nullptr)
+		return false;
+
+	MoveCtrlNotifyQuery query = {
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.unitTeam = unit->team,
+		.data = data,
+	};
+	BoolCallinResult result = {.value = false};
+	m_MoveCtrlNotifyFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
 void NativeInterfaceEventClient::FeatureMoved(const CFeature* feature, const float3& oldpos) {
 	if (m_FeatureMovedFuncPtr) {
 		FeatureMovedQuery query = {
@@ -943,6 +1333,132 @@ bool NativeInterfaceEventClient::Explosion(int weaponID, const WeaponDef* weapon
 		return result.value;
 	}
 	return false;
+}
+
+int NativeInterfaceEventClient::AllowWeaponTargetCheck(unsigned int attackerID, unsigned int attackerWeaponNum, unsigned int attackerWeaponDefID) {
+	if (m_AllowWeaponTargetCheckFuncPtr == nullptr)
+		return -1;
+
+	AllowWeaponTargetCheckQuery query = {
+		.attackerID = attackerID,
+		.attackerWeaponNum = static_cast<int32_t>(attackerWeaponNum + LUA_WEAPON_BASE_INDEX),
+		.attackerWeaponDefID = attackerWeaponDefID,
+	};
+	IntCallinResult result = {.value = -1};
+	m_AllowWeaponTargetCheckFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::AllowWeaponTarget(unsigned int attackerID, unsigned int targetID, unsigned int attackerWeaponNum, unsigned int attackerWeaponDefID, float* targetPriority) {
+	if (m_AllowWeaponTargetFuncPtr == nullptr)
+		return true;
+
+	const int attackerWeaponNumber = static_cast<int>(attackerWeaponNum);
+	AllowWeaponTargetQuery query = {
+		.attackerID = attackerID,
+		.targetID = targetID,
+		.attackerWeaponNum = attackerWeaponNumber + LUA_WEAPON_BASE_INDEX * (attackerWeaponNumber >= 0),
+		.attackerWeaponDefID = attackerWeaponDefID,
+		.hasTargetPriority = (targetPriority != nullptr),
+		.targetPriority = (targetPriority != nullptr) ? *targetPriority : 0.0f,
+	};
+	AllowWeaponTargetResult result = {
+		.allowed = true,
+		.targetPriority = query.targetPriority,
+	};
+	m_AllowWeaponTargetFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	if (targetPriority != nullptr)
+		*targetPriority = result.targetPriority;
+	return result.allowed;
+}
+
+bool NativeInterfaceEventClient::AllowWeaponInterceptTarget(const CUnit* interceptorUnit, const CWeapon* interceptorWeapon, const CProjectile* interceptorTarget) {
+	if (m_AllowWeaponInterceptTargetFuncPtr == nullptr)
+		return true;
+
+	AllowWeaponInterceptTargetQuery query = {
+		.interceptorUnitID = (interceptorUnit != nullptr) ? interceptorUnit->id : -1,
+		.interceptorWeaponID = (interceptorWeapon != nullptr) ? interceptorWeapon->weaponNum + LUA_WEAPON_BASE_INDEX : -1,
+		.interceptorTargetID = (interceptorTarget != nullptr) ? interceptorTarget->id : -1,
+	};
+	BoolCallinResult result = {.value = true};
+	m_AllowWeaponInterceptTargetFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
+}
+
+bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* attacker, float damage, int weaponDefID, int projectileID, bool paralyzer, float* newDamage, float* impulseMult) {
+	if (m_UnitPreDamagedFuncPtr == nullptr)
+		return false;
+
+	UnitDamagedQuery query = {
+		.unitID = unit->id,
+		.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+		.unitTeam = unit->team,
+		.damage = damage,
+		.paralyzer = paralyzer,
+		.weaponDefID = weaponDefID,
+		.projectileID = projectileID,
+		.attackerID = (attacker != nullptr) ? attacker->id : -1,
+		.attackerDefID = (attacker != nullptr && attacker->unitDef != nullptr) ? attacker->unitDef->id : -1,
+		.attackerTeam = (attacker != nullptr) ? attacker->team : -1,
+	};
+	DamageCallinResult result = {
+		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
+		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
+	};
+	m_UnitPreDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	if (newDamage != nullptr)
+		*newDamage = result.newDamage;
+	if (impulseMult != nullptr)
+		*impulseMult = result.impulseMult;
+	return result.newDamage == 0.0f && result.impulseMult == 0.0f;
+}
+
+bool NativeInterfaceEventClient::FeaturePreDamaged(const CFeature* feature, const CUnit* attacker, float damage, int weaponDefID, int projectileID, float* newDamage, float* impulseMult) {
+	if (m_FeaturePreDamagedFuncPtr == nullptr)
+		return false;
+
+	FeatureDamagedQuery query = {
+		.featureID = feature->id,
+		.featureDefID = (feature->def != nullptr) ? feature->def->id : -1,
+		.featureTeam = feature->team,
+		.damage = damage,
+		.weaponDefID = weaponDefID,
+		.projectileID = projectileID,
+		.attackerID = (attacker != nullptr) ? attacker->id : -1,
+		.attackerDefID = (attacker != nullptr && attacker->unitDef != nullptr) ? attacker->unitDef->id : -1,
+		.attackerTeam = (attacker != nullptr) ? attacker->team : -1,
+	};
+	DamageCallinResult result = {
+		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
+		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
+	};
+	m_FeaturePreDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	if (newDamage != nullptr)
+		*newDamage = result.newDamage;
+	if (impulseMult != nullptr)
+		*impulseMult = result.impulseMult;
+	return result.newDamage == 0.0f && result.impulseMult == 0.0f;
+}
+
+bool NativeInterfaceEventClient::ShieldPreDamaged(const CProjectile* projectile, const CWeapon* shieldEmitter, const CUnit* shieldCarrier, bool bounceProjectile, const CWeapon* beamEmitter, const CUnit* beamCarrier, const float3& startPos, const float3& hitPos) {
+	if (m_ShieldPreDamagedFuncPtr == nullptr)
+		return false;
+
+	ShieldPreDamagedQuery query = {
+		.projectileID = (projectile != nullptr) ? projectile->id : -1,
+		.projectileOwnerID = (projectile != nullptr) ? static_cast<int32_t>(projectile->GetOwnerID()) : -1,
+		.shieldWeaponNum = (shieldEmitter != nullptr) ? shieldEmitter->weaponNum + LUA_WEAPON_BASE_INDEX : -1,
+		.shieldCarrierID = (shieldCarrier != nullptr) ? shieldCarrier->id : -1,
+		.bounceProjectile = bounceProjectile,
+		.beamEmitterWeaponNum = (beamEmitter != nullptr) ? beamEmitter->weaponNum + LUA_WEAPON_BASE_INDEX : -1,
+		.beamEmitterUnitID = (beamCarrier != nullptr) ? beamCarrier->id : -1,
+		.startPos = {.x = startPos.x, .y = startPos.y, .z = startPos.z},
+		.hitPos = {.x = hitPos.x, .y = hitPos.y, .z = hitPos.z},
+	};
+	BoolCallinResult result = {.value = false};
+	m_ShieldPreDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	return result.value;
 }
 
 void NativeInterfaceEventClient::DownloadFailed(int ID, int errorID) {

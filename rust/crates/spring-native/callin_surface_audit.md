@@ -9,66 +9,47 @@ See `api_surface_contract.md` for intentional-difference policy.
 | Surface | Count |
 | --- | ---: |
 | Lua `Callins` | 155 |
-| Lua `SyncedCallins` | 28 |
+| Lua `SyncedCallins` | 29 |
 | Lua `UnsyncedCallins` | 6 |
-| Lua documented entries | 189 |
-| Native C++ callback symbols | 133 |
-| Shared callback names | 122 |
-| Documented Lua names without native callback | 33 |
+| Lua documented entries | 190 |
+| Native C++ callback symbols | 161 |
+| Shared callback names | 150 |
+| Documented Lua names without native callback | 6 |
 | Native callback names without documented Lua callin | 11 |
+| Lua-only callins classified by design | 6 |
+| Native-only callbacks classified by design | 11 |
+| Unclassified Lua-only names | 0 |
+| Unclassified native-only names | 0 |
 | Native callbacks without Rust trait method | 0 |
 
 ## Lua names without native callback
 
-These are unresolved until individually classified or ported. They are not treated as intentional.
+Every entry is classified below. Classification is a design decision, not evidence that its runtime behavior has already been tested.
 
-- `AllowBuilderHoldFire`
-- `AllowCommand`
-- `AllowDirectUnitControl`
-- `AllowFeatureBuildStep`
-- `AllowFeatureCreation`
-- `AllowResourceLevel`
-- `AllowResourceTransfer`
-- `AllowStartPosition`
-- `AllowUnitBuildStep`
-- `AllowUnitCaptureStep`
-- `AllowUnitCloak`
-- `AllowUnitCreation`
-- `AllowUnitKamikaze`
-- `AllowUnitTransfer`
-- `AllowUnitTransport`
-- `AllowUnitTransportLoad`
-- `AllowUnitTransportUnload`
-- `AllowWeaponInterceptTarget`
-- `AllowWeaponTarget`
-- `AllowWeaponTargetCheck`
-- `CommandFallback`
-- `FeaturePreDamaged`
-- `GotChatMsg`
-- `Initialize`
-- `LoadCode`
-- `MoveCtrlNotify`
-- `RecvFromSynced`
-- `RecvLuaMsg`
-- `RecvSkirmishAIMessage`
-- `ResourceExcess`
-- `ShieldPreDamaged`
-- `TerraformComplete`
-- `UnitPreDamaged`
+| Name | Classification | Reason |
+| --- | --- | --- |
+| `GotChatMsg` | `lua_only_by_design` | Lua-handle chat routing; native modules receive a separate integration stream. |
+| `Initialize` | `lua_only_by_design` | Lua-handle lifecycle callback; native modules use InitializeNativeModule. |
+| `LoadCode` | `lua_only_by_design` | Lua-handle code-loading lifecycle callback; native modules are loaded through the native ABI. |
+| `RecvFromSynced` | `lua_only_by_design` | IPC between the engine's synced and unsynced Lua handles; native modules are not Lua handles. |
+| `RecvLuaMsg` | `lua_only_by_design` | Lua-handle message routing; native modules receive the separate HandleLuaMsg hook. |
+| `RecvSkirmishAIMessage` | `lua_only_by_design` | Lua-handle skirmish-AI message routing; no native event-client counterpart exists. |
 
 ## Native callback names without documented Lua callin
 
-- `CollectGarbage`
-- `DrawAlphaFeaturesLua`
-- `DrawAlphaUnitsLua`
-- `DrawOpaqueFeaturesLua`
-- `DrawOpaqueUnitsLua`
-- `FeatureMoved`
-- `HandleLuaCall`
-- `HandleLuaMsg`
-- `LastMessagePosition`
-- `Pong`
-- `UnitMoved`
+| Name | Classification | Reason |
+| --- | --- | --- |
+| `CollectGarbage` | `native_only_by_design` | Native event-client garbage-collection scheduling hook; not a script call-in. |
+| `DrawAlphaFeaturesLua` | `native_only_by_design` | Native renderer phase hook; it is separate from Lua's DrawFeature call-in. |
+| `DrawAlphaUnitsLua` | `native_only_by_design` | Native renderer phase hook; it is separate from Lua's DrawUnit call-in. |
+| `DrawOpaqueFeaturesLua` | `native_only_by_design` | Native renderer phase hook; it is separate from Lua's DrawFeature call-in. |
+| `DrawOpaqueUnitsLua` | `native_only_by_design` | Native renderer phase hook; it is separate from Lua's DrawUnit call-in. |
+| `FeatureMoved` | `native_only_by_design` | Native engine/rendering movement notification; no script call-in is registered. |
+| `HandleLuaCall` | `native_only_by_design` | Native-module ingress for Lua-to-native messages; not a Lua call-in. |
+| `HandleLuaMsg` | `native_only_by_design` | Native-module ingress for network Lua messages; not a Lua call-in. |
+| `LastMessagePosition` | `native_only_by_design` | Native event for message-position consumers; scripts expose Get/Set callouts instead. |
+| `Pong` | `native_only_by_design` | Native network timing callback; no script call-in is registered. |
+| `UnitMoved` | `native_only_by_design` | Native engine/rendering movement notification; no script call-in is registered. |
 
 ## Native callbacks without a Rust trait method
 
@@ -85,8 +66,30 @@ a source-level decision and, where applicable, a behavior test.
 | --- | ---: | ---: | --- | --- |
 | `ActiveCommandChanged` | 2 | 5 | `ActiveCommandChanged` | `field_count_differs` |
 | `AddConsoleLine` | 2 | 3 | `AddConsoleLine` | `field_count_differs` |
+| `AllowBuilderHoldFire` | 3 | 3 | `AllowBuilderHoldFire` | `same_raw_field_count` |
+| `AllowCommand` | 9 | 7 | `UnitCommand` | `field_count_differs` |
+| `AllowDirectUnitControl` | 4 | 4 | `AllowDirectUnitControl` | `same_raw_field_count` |
+| `AllowFeatureBuildStep` | 5 | 5 | `AllowFeatureBuildStep` | `same_raw_field_count` |
+| `AllowFeatureCreation` | 5 | 3 | `AllowFeatureCreation` | `field_count_differs` |
+| `AllowResourceLevel` | 3 | 3 | `AllowResourceLevel` | `same_raw_field_count` |
+| `AllowResourceTransfer` | 4 | 4 | `AllowResourceTransfer` | `same_raw_field_count` |
+| `AllowStartPosition` | 9 | 5 | `AllowStartPosition` | `field_count_differs` |
+| `AllowUnitBuildStep` | 5 | 5 | `AllowUnitBuildStep` | `same_raw_field_count` |
+| `AllowUnitCaptureStep` | 5 | 5 | `AllowUnitBuildStep` | `same_raw_field_count` |
+| `AllowUnitCloak` | 2 | 3 | `AllowUnitCloak` | `field_count_differs` |
+| `AllowUnitCreation` | 7 | 6 | `AllowUnitCreation` | `field_count_differs` |
+| `AllowUnitDecloak` | 3 | 5 | `AllowUnitDecloak` | `field_count_differs` |
+| `AllowUnitKamikaze` | 2 | 3 | `AllowUnitKamikaze` | `field_count_differs` |
+| `AllowUnitTransfer` | 5 | 5 | `AllowUnitTransfer` | `same_raw_field_count` |
+| `AllowUnitTransport` | 6 | 6 | `AllowUnitTransport` | `same_raw_field_count` |
+| `AllowUnitTransportLoad` | 9 | 3 | `AllowUnitTransportPosition` | `field_count_differs` |
+| `AllowUnitTransportUnload` | 9 | 3 | `AllowUnitTransportPosition` | `field_count_differs` |
+| `AllowWeaponInterceptTarget` | 3 | 3 | `AllowWeaponInterceptTarget` | `same_raw_field_count` |
+| `AllowWeaponTarget` | 5 | 6 | `AllowWeaponTarget` | `field_count_differs` |
+| `AllowWeaponTargetCheck` | 3 | 3 | `AllowWeaponTargetCheck` | `same_raw_field_count` |
 | `CameraPositionChanged` | 3 | 1 | `Float3Callin` | `field_count_differs` |
 | `CameraRotationChanged` | 3 | 1 | `Float3Callin` | `field_count_differs` |
+| `CommandFallback` | 7 | 4 | `CommandFallback` | `field_count_differs` |
 | `CommandNotify` | 3 | 1 | `CommandNotify` | `field_count_differs` |
 | `DefaultCommand` | 3 | 3 | `DefaultCommand` | `same_raw_field_count` |
 | `DownloadFailed` | 2 | 2 | `DownloadFailed` | `same_raw_field_count` |
@@ -128,6 +131,7 @@ a source-level decision and, where applicable, a behavior test.
 | `FeatureCreated` | 2 | 1 | `FeatureCreated` | `field_count_differs` |
 | `FeatureDamaged` | 9 | 9 | `FeatureDamaged` | `same_raw_field_count` |
 | `FeatureDestroyed` | 2 | 1 | `FeatureDestroyed` | `field_count_differs` |
+| `FeaturePreDamaged` | 9 | 9 | `FeatureDamaged` | `same_raw_field_count` |
 | `FontsChanged` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
 | `GameFrame` | 1 | 1 | `GameFrame` | `same_raw_field_count` |
 | `GameFramePost` | 1 | 1 | `GameFramePost` | `same_raw_field_count` |
@@ -153,18 +157,22 @@ a source-level decision and, where applicable, a behavior test.
 | `MousePress` | 3 | 3 | `MousePress` | `same_raw_field_count` |
 | `MouseRelease` | 3 | 3 | `MouseRelease` | `same_raw_field_count` |
 | `MouseWheel` | 2 | 2 | `MouseWheel` | `same_raw_field_count` |
+| `MoveCtrlNotify` | 4 | 4 | `MoveCtrlNotify` | `same_raw_field_count` |
 | `PlayerAdded` | 1 | 1 | `PlayerAdded` | `same_raw_field_count` |
 | `PlayerChanged` | 1 | 1 | `PlayerChanged` | `same_raw_field_count` |
 | `PlayerRemoved` | 2 | 2 | `PlayerRemoved` | `same_raw_field_count` |
 | `ProjectileCreated` | 3 | 1 | `ProjectileEvent` | `field_count_differs` |
 | `ProjectileDestroyed` | 3 | 1 | `ProjectileEvent` | `field_count_differs` |
 | `RenderUnitDestroyed` | 3 | 1 | `RenderUnitDestroyed` | `field_count_differs` |
+| `ResourceExcess` | 1 | 2 | `ResourceExcess` | `field_count_differs` |
 | `Save` | 1 | 1 | `ArchiveCallin` | `same_raw_field_count` |
+| `ShieldPreDamaged` | 13 | 9 | `ShieldPreDamaged` | `field_count_differs` |
 | `Shutdown` | 0 | 0 | `Shutdown` | `same_raw_field_count` |
 | `StockpileChanged` | 6 | 6 | `StockpileChanged` | `same_raw_field_count` |
 | `SunChanged` | 0 | 1 | `SunChanged` | `field_count_differs` |
 | `TeamChanged` | 1 | 1 | `TeamChanged` | `same_raw_field_count` |
 | `TeamDied` | 1 | 1 | `TeamDied` | `same_raw_field_count` |
+| `TerraformComplete` | 6 | 6 | `TerraformComplete` | `same_raw_field_count` |
 | `TextEditing` | 3 | 3 | `TextEditing` | `same_raw_field_count` |
 | `TextInput` | 1 | 1 | `TextInput` | `same_raw_field_count` |
 | `UnitArrivedAtGoal` | 3 | 1 | `UnitMoveEvent` | `field_count_differs` |
@@ -195,6 +203,7 @@ a source-level decision and, where applicable, a behavior test.
 | `UnitLeftWater` | 3 | 1 | `UnitMovementClassEvent` | `field_count_differs` |
 | `UnitLoaded` | 5 | 2 | `UnitLoaded` | `field_count_differs` |
 | `UnitMoveFailed` | 3 | 1 | `UnitMoveEvent` | `field_count_differs` |
+| `UnitPreDamaged` | 10 | 10 | `UnitDamaged` | `same_raw_field_count` |
 | `UnitReverseBuilt` | 3 | 1 | `UnitReverseBuilt` | `field_count_differs` |
 | `UnitSeismicPing` | 7 | 5 | `UnitSeismicPing` | `field_count_differs` |
 | `UnitStunned` | 4 | 2 | `UnitStunned` | `field_count_differs` |
