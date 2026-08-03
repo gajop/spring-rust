@@ -2,6 +2,81 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
+    pub(crate) fn check_units_query_extra(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
+        match base_test_name(label) {
+            "get_closest_enemy_unit" => {
+                let native = self
+                    .interface
+                    .units_query()
+                    .get_closest_enemy_unit(
+                        vec3_from_fields(message, "x", "y", "z")?,
+                        f32_field(message, "range")?,
+                        i32_field(message, "allyTeamID")?,
+                        spring_native::GetClosestEnemyUnitOptions {
+                            use_los: bool_field(message, "useLOS")?,
+                            sphere_dist_test: bool_field(message, "sphereDistTest")?,
+                            check_sight_dist: bool_field(message, "checkSightDist")?,
+                        },
+                    )
+                    .map_err(|err| format!("get_closest_enemy_unit() failed: {err:?}"))?;
+                self.same_i32_if_present(label, message, "unitID", native)
+            }
+            "get_units_in_planes" => {
+                let planes_value = message
+                    .get("planes")
+                    .and_then(Value::as_array)
+                    .ok_or_else(|| format!("{label}.planes: expected array"))?;
+                let mut planes = [spring_native::sys::Float4 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                    w: 0.0,
+                }; 6];
+                let plane_count = planes_value.len().min(6);
+                for (index, plane) in planes_value.iter().take(6).enumerate() {
+                    let values = plane
+                        .as_array()
+                        .ok_or_else(|| format!("{label}.planes[{index}]: expected array"))?;
+                    if values.len() != 4 {
+                        return Err(format!("{label}.planes[{index}]: expected four values"));
+                    }
+                    planes[index] =
+                        spring_native::sys::Float4 {
+                            x: values[0].as_f64().ok_or_else(|| {
+                                format!("{label}.planes[{index}][0]: expected number")
+                            })? as f32,
+                            y: values[1].as_f64().ok_or_else(|| {
+                                format!("{label}.planes[{index}][1]: expected number")
+                            })? as f32,
+                            z: values[2].as_f64().ok_or_else(|| {
+                                format!("{label}.planes[{index}][2]: expected number")
+                            })? as f32,
+                            w: values[3].as_f64().ok_or_else(|| {
+                                format!("{label}.planes[{index}][3]: expected number")
+                            })? as f32,
+                        };
+                }
+                let native = self
+                    .interface
+                    .units_query()
+                    .get_units_in_planes(
+                        spring_native::sys::PlanesQuery {
+                            planes,
+                            planeCount: plane_count as u32,
+                        },
+                        i32_field(message, "allegiance")?,
+                    )
+                    .map_err(|err| format!("get_units_in_planes() failed: {err:?}"))?;
+                self.same_i32_set_if_present(label, message, "unitIDs", &native)
+            }
+            name => Err(format!("unsupported units query extra check `{name}`")),
+        }
+    }
+
     pub(crate) fn check_units_query_bool(
         &mut self,
         message: &Value,
@@ -192,7 +267,14 @@ impl NativeApiParity {
         let native = self
             .interface
             .units_query()
-            .get_unit_separation(unit_id1, unit_id2, positional, check_map)
+            .get_unit_separation(
+                unit_id1,
+                unit_id2,
+                spring_native::GetUnitSeparationOptions {
+                    positional,
+                    check_map,
+                },
+            )
             .map_err(|err| format!("get_unit_separation({unit_id1}, {unit_id2}, {positional}, {check_map}) failed: {err:?}"))?;
         self.same_if_present(label, message, "separation", native)
     }
@@ -260,7 +342,7 @@ impl NativeApiParity {
                 let use_los = bool_field(message, "useLOS")?;
                 let sphere_dist_test = bool_field(message, "sphereDistTest")?;
                 let check_sight_dist = bool_field(message, "checkSightDist")?;
-                ("unitIDResult", self.interface.units_query().get_unit_nearest_enemy(unit_id, range, use_los, sphere_dist_test, check_sight_dist)
+                ("unitIDResult", self.interface.units_query().get_unit_nearest_enemy(unit_id, range, spring_native::GetUnitNearestEnemyOptions { use_los, sphere_dist_test, check_sight_dist })
                     .map_err(|err| format!("get_unit_nearest_enemy({unit_id}, {range}, {use_los}, {sphere_dist_test}, {check_sight_dist}) failed: {err:?}"))?)
             }
             "get_closest_enemy_unit" => {
@@ -270,7 +352,7 @@ impl NativeApiParity {
                 let use_los = bool_field(message, "useLOS")?;
                 let sphere_dist_test = bool_field(message, "sphereDistTest")?;
                 let check_sight_dist = bool_field(message, "checkSightDist")?;
-                ("unitIDResult", self.interface.units_query().get_closest_enemy_unit(pos, range, ally_team_id, use_los, sphere_dist_test, check_sight_dist)
+                ("unitIDResult", self.interface.units_query().get_closest_enemy_unit(pos, range, ally_team_id, spring_native::GetClosestEnemyUnitOptions { use_los, sphere_dist_test, check_sight_dist })
                     .map_err(|err| format!("get_closest_enemy_unit(_, {range}, {ally_team_id}, {use_los}, {sphere_dist_test}, {check_sight_dist}) failed: {err:?}"))?)
             }
             _ => return Err(format!("unsupported units query i32 check `{label}`")),
@@ -338,7 +420,7 @@ impl NativeApiParity {
     pub(crate) fn check_teams_bool(&mut self, message: &Value, label: &str) -> Result<(), String> {
         let test_name = base_test_name(label);
         let native = match test_name {
-            "are_teams_allied" => {
+            "are_teams_allied" | "set_ally" => {
                 let team_id1 = i32_field(message, "teamID1")?;
                 let team_id2 = i32_field(message, "teamID2")?;
                 self.interface
@@ -529,7 +611,18 @@ impl NativeApiParity {
         self.same_bool_if_present(label, message, "active", native.isActive)?;
         self.same_bool_if_present(label, message, "spectator", native.isSpec)?;
         self.same_i32_if_present(label, message, "teamID", native.teamID)?;
-        self.same_i32_if_present(label, message, "allyTeamID", native.allyTeamID)
+        self.same_i32_if_present(label, message, "allyTeamID", native.allyTeamID)?;
+        self.same_if_present(label, message, "pingTime", native.pingTime)?;
+        self.same_u32_if_present(label, message, "cpuUsage", native.cpuUsage)?;
+        self.same_string_if_present(label, message, "country", &cstr_or_empty(native.country)?)?;
+        self.same_i32_if_present(label, message, "rank", native.rank)?;
+        self.same_bool_if_present(
+            label,
+            message,
+            "hasSkirmishAIsInTeam",
+            native.hasSkirmishAIsInTeam,
+        )?;
+        self.same_bool_if_present(label, message, "desynced", native.desynced)
     }
     pub(crate) fn check_player_controlled_unit(
         &mut self,

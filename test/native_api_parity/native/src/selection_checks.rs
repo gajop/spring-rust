@@ -121,7 +121,7 @@ impl NativeApiParity {
     }
 
     pub(crate) fn set_selection_value(&mut self, message: &Value) -> Result<(), String> {
-        match base_test_name(str_field(message, "name")?) {
+        match base_test_name(test_name_field(message)?) {
             "select_unit" => {
                 let unit_id = i32_field(message, "unitID")?;
                 let append = bool_field(message, "append")?;

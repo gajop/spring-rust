@@ -73,7 +73,7 @@ impl NativeApiParity {
     pub(crate) fn set_config_value(&mut self, message: &Value) -> Result<(), String> {
         let key = str_field(message, "key")?;
         let use_overlay = bool_field(message, "useOverlay")?;
-        match base_test_name(str_field(message, "name")?) {
+        match base_test_name(test_name_field(message)?) {
             "config_int" => {
                 let value = i32_field(message, "value")?;
                 self.interface

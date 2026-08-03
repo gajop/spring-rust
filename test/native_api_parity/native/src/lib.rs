@@ -48,7 +48,7 @@ impl NativeModule for NativeApiParity {
             output_path: env::var_os("SPRING_NATIVE_PARITY_OUTPUT_DIR")
                 .map(PathBuf::from)
                 .unwrap_or_else(|| PathBuf::from("native_api_parity"))
-                .join("native.jsonl"),
+                .join(format!("native-{}.jsonl", std::process::id())),
         }
     }
 
@@ -66,18 +66,30 @@ impl NativeModule for NativeApiParity {
             }
         };
 
-        let name = match parsed.get("name").and_then(Value::as_str) {
+        let name = match parsed
+            .get("testName")
+            .or_else(|| parsed.get("name"))
+            .and_then(Value::as_str)
+        {
             Some(name) => name,
             None => {
                 self.failures += 1;
                 self.record(
                     "parse",
                     "fail",
-                    &format!("missing string field `name`; message={message}"),
+                    &format!("missing string field `testName`; message={message}"),
                 );
                 return Ok(());
             }
         };
+
+        // Diagnostic escape hatch for isolating engine-state corruption during
+        // rendering runs.  Normal parity runs leave this unset; skipped
+        // checks are still emitted so the harness can show the run shape.
+        if native_parity_skip(name) {
+            self.record(name, "skip", "diagnostic skip");
+            return Ok(());
+        }
 
         let result = if name == "complete" {
             self.check_complete()
@@ -184,15 +196,42 @@ impl NativeModule for NativeApiParity {
     }
 }
 
+fn native_parity_skip(name: &str) -> bool {
+    let test_name = name
+        .strip_prefix("set_native_")
+        .or_else(|| name.strip_prefix("native_"))
+        .unwrap_or(name);
+    let matches = |value: String| {
+        value
+            .split(',')
+            .map(str::trim)
+            .any(|candidate| candidate == "*" || candidate == name || candidate == test_name)
+    };
+    if let Ok(only) = env::var("SPRING_NATIVE_PARITY_ONLY") {
+        if !matches(only) {
+            return true;
+        }
+    }
+    env::var("SPRING_NATIVE_PARITY_SKIP")
+        .ok()
+        .map(matches)
+        .unwrap_or(false)
+}
+
 mod camera_checks;
+mod cob_script_checks;
 mod commands_checks;
 mod config_checks;
+mod control_calls_checks;
 mod core;
 mod defs_checks;
 mod display_checks;
+mod effects_path_checks;
 mod feature_checks;
+mod feature_control_calls_checks;
 mod game_checks;
 mod gfx_checks;
+mod ground_decal_checks;
 mod icons_checks;
 mod input_checks;
 mod known_mismatch_checks;
@@ -200,12 +239,19 @@ mod los_checks;
 mod math_extra_checks;
 mod messages_checks;
 mod metal_checks;
+mod object_lifecycle_checks;
+mod parity_gap_checks;
+mod order_checks;
 mod pieces_checks;
 mod platform_checks;
 mod player_checks;
+mod process_control_checks;
 mod profiling_checks;
 mod projectiles_checks;
 mod query_checks;
+mod remaining_synced_checks;
+mod render_control_checks;
+mod remaining_tail_checks;
 mod rml_checks;
 mod rules_checks;
 mod selection_checks;
@@ -213,8 +259,11 @@ mod sound_checks;
 mod support;
 mod system_control_checks;
 mod terrain_checks;
+mod terrain_control_checks;
 mod tracing_checks;
 mod unit_checks;
+mod unit_control_calls_checks;
+mod unsynced_control_checks;
 mod unsynced_read_checks;
 mod utils_checks;
 mod vfs_checks;

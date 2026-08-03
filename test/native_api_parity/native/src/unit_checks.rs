@@ -2,6 +2,201 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
+    pub(crate) fn check_unit_extra_read(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
+        match base_test_name(label) {
+            "get_unit_current_build_power" => {
+                let unit_id = i32_field(message, "unitID")?;
+                let native = self
+                    .interface
+                    .units_info()
+                    .get_unit_current_build_power(unit_id)
+                    .map_err(|err| {
+                        format!("get_unit_current_build_power({unit_id}) failed: {err:?}")
+                    })?;
+                self.same_if_present(label, message, "buildPower", native)
+            }
+            "get_unit_move_def_id" => {
+                let unit_id = i32_field(message, "unitID")?;
+                let native = self
+                    .interface
+                    .units_info()
+                    .get_unit_move_def_id(unit_id)
+                    .map_err(|err| format!("get_unit_move_def_id({unit_id}) failed: {err:?}"))?;
+                self.same_i32_if_present(label, message, "moveDefID", native)
+            }
+            "get_unit_travel" => {
+                let unit_id = i32_field(message, "unitID")?;
+                let native = self
+                    .interface
+                    .units_info()
+                    .get_unit_travel(unit_id)
+                    .map_err(|err| format!("get_unit_travel({unit_id}) failed: {err:?}"))?;
+                self.same_if_present(label, message, "travelPeriod", native.travelPeriod)?;
+                self.same_if_present(label, message, "travelTime", native.travelTime)
+            }
+            "get_unit_fuel" => {
+                let unit_id = i32_field(message, "unitID")?;
+                let native = self
+                    .interface
+                    .units_info()
+                    .get_unit_fuel(unit_id)
+                    .map_err(|err| format!("get_unit_fuel({unit_id}) failed: {err:?}"))?;
+                self.same_if_present(label, message, "fuel", native.fuel)?;
+                self.same_if_present(label, message, "maxFuel", native.maxFuel)
+            }
+            "get_unit_move_type_data" => {
+                let unit_id = i32_field(message, "unitID")?;
+                let native = self
+                    .interface
+                    .move_ctrl()
+                    .get_unit_move_type_data(unit_id)
+                    .map_err(|err| format!("get_unit_move_type_data({unit_id}) failed: {err:?}"))?;
+                let name = unsafe {
+                    if native.name.is_null() {
+                        ""
+                    } else {
+                        CStr::from_ptr(native.name).to_str().unwrap_or("")
+                    }
+                };
+                self.same_string_if_present(label, message, "moveTypeName", name)?;
+                self.same_if_present(label, message, "maxSpeed", native.maxSpeed)?;
+                self.same_if_present(label, message, "maxWantedSpeed", native.maxWantedSpeed)?;
+                self.same_if_present(label, message, "goalx", native.goalX)?;
+                self.same_if_present(label, message, "goaly", native.goalY)?;
+                self.same_if_present(label, message, "goalz", native.goalZ)?;
+                self.same_if_present(label, message, "turnRate", native.turnRate)?;
+                self.same_if_present(label, message, "accRate", native.accRate)?;
+                self.same_if_present(label, message, "decRate", native.decRate)?;
+                self.same_if_present(label, message, "maxReverseSpeed", native.maxReverseSpeed)?;
+                self.same_if_present(label, message, "wantedSpeed", native.wantedSpeed)?;
+                self.same_if_present(label, message, "currentSpeed", native.currentSpeed)?;
+                self.same_if_present(label, message, "deltaSpeed", native.deltaSpeed)
+            }
+            "get_unit_estimated_path" => {
+                let unit_id = i32_field(message, "unitID")?;
+                let native = self
+                    .interface
+                    .move_ctrl()
+                    .get_unit_estimated_path(unit_id)
+                    .map_err(|err| format!("get_unit_estimated_path({unit_id}) failed: {err:?}"))?;
+                let (waypoints, starts) = native;
+                self.same_i32_if_present(label, message, "count", waypoints.len() as i32)?;
+                self.same_i32_list_if_present(label, message, "starts", &starts)
+            }
+            name => Err(format!("unsupported unit extra read check `{name}`")),
+        }
+    }
+
+    pub(crate) fn check_unit_weapon_extra(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
+        let unit_id = i32_field(message, "unitID")?;
+        let weapon_num = i32_field(message, "weaponNum")?;
+        match base_test_name(label) {
+            "get_unit_weapon_vectors" => {
+                let native = self
+                    .interface
+                    .units_weapons()
+                    .get_unit_weapon_vectors(unit_id, weapon_num)
+                    .map_err(|err| {
+                        format!("get_unit_weapon_vectors({unit_id}, {weapon_num}) failed: {err:?}")
+                    })?;
+                self.same_if_present(label, message, "posX", native.weaponMuzzlePos.x)?;
+                self.same_if_present(label, message, "posY", native.weaponMuzzlePos.y)?;
+                self.same_if_present(label, message, "posZ", native.weaponMuzzlePos.z)?;
+                self.same_if_present(label, message, "dirX", native.weaponDir.x)?;
+                self.same_if_present(label, message, "dirY", native.weaponDir.y)?;
+                self.same_if_present(label, message, "dirZ", native.weaponDir.z)
+            }
+            "get_unit_weapon_target" => {
+                let native = self
+                    .interface
+                    .units_weapons()
+                    .get_unit_weapon_target(unit_id, weapon_num)
+                    .map_err(|err| {
+                        format!("get_unit_weapon_target({unit_id}, {weapon_num}) failed: {err:?}")
+                    })?;
+                self.same_i32_if_present(label, message, "targetType", native.targetType)?;
+                self.same_i32_if_present(label, message, "targetID", native.targetID)?;
+                self.same_if_present(label, message, "targetX", native.targetPos.x)?;
+                self.same_if_present(label, message, "targetY", native.targetPos.y)?;
+                self.same_if_present(label, message, "targetZ", native.targetPos.z)
+            }
+            "get_unit_weapon_try_target"
+            | "get_unit_weapon_test_target"
+            | "get_unit_weapon_have_free_line_of_fire" => {
+                let target_id = i32_field(message, "targetID")?;
+                let is_ground_target = bool_field(message, "isGroundTarget")?;
+                let test_name = base_test_name(label);
+                let native = match test_name {
+                    "get_unit_weapon_try_target" => {
+                        let target_pos = vec3_from_fields(message, "x", "y", "z")?;
+                        self.interface
+                            .units_weapons()
+                            .get_unit_weapon_try_target(
+                                unit_id,
+                                weapon_num,
+                                target_id,
+                                target_pos,
+                                spring_native::GetUnitWeaponTryTargetOptions {
+                                    user_target: bool_field(message, "userTarget")?,
+                                    is_ground_target,
+                                },
+                            )
+                            .map_err(|err| {
+                                format!("get_unit_weapon_try_target() failed: {err:?}")
+                            })?
+                    }
+                    "get_unit_weapon_test_target" => {
+                        let target_pos = vec3_from_fields(message, "x", "y", "z")?;
+                        self.interface
+                            .units_weapons()
+                            .get_unit_weapon_test_target(
+                                unit_id,
+                                weapon_num,
+                                target_id,
+                                target_pos,
+                                spring_native::GetUnitWeaponTestTargetOptions { is_ground_target },
+                            )
+                            .map_err(|err| {
+                                format!("get_unit_weapon_test_target() failed: {err:?}")
+                            })?
+                    }
+                    "get_unit_weapon_have_free_line_of_fire" => {
+                        let source_pos =
+                            vec3_from_fields(message, "sourceX", "sourceY", "sourceZ")?;
+                        let target_pos =
+                            vec3_from_fields(message, "targetX", "targetY", "targetZ")?;
+                        self.interface
+                            .units_weapons()
+                            .get_unit_weapon_have_free_line_of_fire(
+                                unit_id,
+                                weapon_num,
+                                target_id,
+                                source_pos,
+                                target_pos,
+                                spring_native::GetUnitWeaponHaveFreeLineOfFireOptions {
+                                    is_ground_target,
+                                },
+                            )
+                            .map_err(|err| {
+                                format!("get_unit_weapon_have_free_line_of_fire() failed: {err:?}")
+                            })?
+                    }
+                    _ => return Err(format!("unsupported unit weapon extra check `{label}`")),
+                };
+                self.same_bool_if_present(label, message, "value", native)
+            }
+            name => Err(format!("unsupported unit weapon extra check `{name}`")),
+        }
+    }
+
     pub(crate) fn check_unit_health(&mut self, message: &Value, label: &str) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self
@@ -338,7 +533,7 @@ impl NativeApiParity {
     pub(crate) fn set_unit_render_flag(&mut self, message: &Value) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let unsynced_ctrl = self.interface.unsynced_ctrl();
-        let success = match base_test_name(str_field(message, "name")?) {
+        let success = match base_test_name(test_name_field(message)?) {
             "unit_no_draw" => unsynced_ctrl
                 .set_unit_no_draw(unit_id, bool_field(message, "noDraw")?)
                 .map_err(|err| format!("set_unit_no_draw({unit_id}) failed: {err:?}"))?,
@@ -374,13 +569,15 @@ impl NativeApiParity {
             .unit()
             .set_unit_blocking(
                 unit_id,
-                bool_field(message, "isBlocking")?,
-                bool_field(message, "isSolidObjectCollidable")?,
-                bool_field(message, "isProjectileCollidable")?,
-                bool_field(message, "isRaySegmentCollidable")?,
-                bool_field(message, "crushable")?,
-                bool_field(message, "blockEnemyPushing")?,
-                bool_field(message, "blockHeightChanges")?,
+                spring_native::SetUnitBlockingOptions {
+                    blocking: bool_field(message, "isBlocking")?,
+                    solid_objects: bool_field(message, "isSolidObjectCollidable")?,
+                    projectiles: bool_field(message, "isProjectileCollidable")?,
+                    quad_map_rays: bool_field(message, "isRaySegmentCollidable")?,
+                    crushable: bool_field(message, "crushable")?,
+                    block_enemy_pushing: bool_field(message, "blockEnemyPushing")?,
+                    block_height_changes: bool_field(message, "blockHeightChanges")?,
+                },
             )
             .map_err(|err| format!("set_unit_blocking({unit_id}) failed: {err:?}"))?;
         Ok(())
@@ -407,7 +604,7 @@ impl NativeApiParity {
         let native = self
             .interface
             .units_info()
-            .get_unit_position(unit_id, false, false)
+            .get_unit_position(unit_id, spring_native::GetUnitPositionOptions::default())
             .map_err(|err| format!("get_unit_position({unit_id}) failed: {err:?}"))?;
         self.same_vec3(label, native, message)
     }
@@ -872,7 +1069,7 @@ impl NativeApiParity {
         let native = self
             .interface
             .units_info()
-            .get_unit_states(unit_id, None, None, None)
+            .get_unit_states(unit_id, spring_native::UnitStatesOptions::default())
             .map_err(|err| format!("get_unit_states({unit_id}) failed: {err:?}"))?;
         self.same_i32_if_present(label, message, "firestate", native.fireState)?;
         self.same_i32_if_present(label, message, "movestate", native.moveState)?;

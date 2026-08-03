@@ -1,0 +1,275 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "unit_add_impulse",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.AddUnitImpulse"]},
+      "native": {"set": [], "get": ["UnitControl.add_unit_impulse"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {
+        "impulse": {"type": "float3", "generator": "unit_velocity", "expands_to": ["x", "y", "z"]},
+        "decayRate": {"type": "f32", "range": [0, 1]}
+      },
+      "lua_runtime": {"call": "Spring.AddUnitImpulse", "args": ["fixture.unitID", "value.x", "value.y", "value.z", "value.decayRate"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_add_seismic_ping",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.AddUnitSeismicPing"]},
+      "native": {"set": [], "get": ["UnitControl.add_unit_seismic_ping"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"pingSize": {"type": "f32", "range": [1, 64]}},
+      "lua_runtime": {"call": "Spring.AddUnitSeismicPing", "args": ["fixture.unitID", "value.pingSize"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_add_resource",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.AddUnitResource"]},
+      "native": {"set": [], "get": ["UnitControl.add_unit_resource"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"resource": {"type": "enum", "values": ["m", "e"]}, "amount": {"type": "f32", "range": [0, 10]}},
+      "lua_runtime": {"call": "Spring.AddUnitResource", "args": ["fixture.unitID", "value.resource", "value.amount"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_use_resource",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.UseUnitResource"]},
+      "native": {"set": [], "get": ["UnitControl.use_unit_resource"]},
+      "compare": {"mode": "fields", "fields": ["ok"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"resource": {"type": "enum", "values": ["m", "e"]}, "amount": {"type": "f32", "fixed": 0}},
+      "lua_runtime": {"call": "Spring.UseUnitResource", "args": ["fixture.unitID", "value.resource", "value.amount"], "returns": ["ok"]}
+    },
+    {
+      "id": "unit_clear_goal",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.ClearUnitGoal"]},
+      "native": {"set": [], "get": ["UnitControl.clear_unit_goal"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"cancelRaw": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.ClearUnitGoal", "args": ["fixture.unitID", "value.cancelRaw"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_force_collision_update",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.ForceUnitCollisionUpdate"]},
+      "native": {"set": [], "get": ["UnitControl.force_unit_collision_update"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.ForceUnitCollisionUpdate", "args": ["fixture.unitID"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_build_speed",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitBuildSpeed"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_build_speed"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {
+        "buildSpeed": {"type": "f32", "range": [1, 40]}, "repairSpeed": {"type": "f32", "range": [1, 40]},
+        "reclaimSpeed": {"type": "f32", "range": [1, 40]}, "captureSpeed": {"type": "f32", "range": [1, 40]},
+        "resurrectSpeed": {"type": "f32", "range": [1, 40]}, "terraformSpeed": {"type": "f32", "range": [1, 40]}
+      },
+      "lua_runtime": {"call": "Spring.SetUnitBuildSpeed", "args": ["fixture.unitID", "value.buildSpeed", "value.repairSpeed", "value.reclaimSpeed", "value.resurrectSpeed", "value.captureSpeed", "value.terraformSpeed"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_flanking",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitFlanking"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_flanking"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"type": {"type": "string", "fixed": "dir"}, "direction": {"type": "float3", "generator": "unit_orientation", "expands_to": ["frontX", "frontY", "frontZ"]}},
+      "lua_runtime": {"call": "Spring.SetUnitFlanking", "args": ["fixture.unitID", "value.type", "value.frontX", "value.frontY", "value.frontZ"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_mid_and_aim_pos",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitMidAndAimPos"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_mid_and_aim_pos"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {
+        "mid": {"type": "float3", "generator": "map_position", "expands_to": ["midX", "midY", "midZ"], "expands_from": ["x", "y", "z"]},
+        "aim": {"type": "float3", "generator": "map_position", "expands_to": ["aimX", "aimY", "aimZ"], "expands_from": ["x", "y", "z"]},
+        "relative": {"type": "bool"}
+      },
+      "lua_runtime": {"call": "Spring.SetUnitMidAndAimPos", "args": ["fixture.unitID", "value.midX", "value.midY", "value.midZ", "value.aimX", "value.aimY", "value.aimZ", "value.relative"], "returns": ["result"]}
+    },
+    {
+      "id": "unit_set_move_goal",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitMoveGoal"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_move_goal"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"pos": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]}, "radius": {"type": "f32", "range": [0, 32]}, "speed": {"type": "f32", "range": [0, 4]}, "raw": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.SetUnitMoveGoal", "args": ["fixture.unitID", "value.x", "value.y", "value.z", "value.radius", "value.speed", "value.raw"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_physics",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitPhysics"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_physics"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["posX", "posY", "posZ"], "expands_from": ["x", "y", "z"]},
+        "velocity": {"type": "float3", "generator": "unit_velocity", "expands_to": ["velX", "velY", "velZ"], "expands_from": ["x", "y", "z"]},
+        "rotation": {"type": "float3", "generator": "unit_orientation", "expands_to": ["rotX", "rotY", "rotZ"], "expands_from": ["frontX", "frontY", "frontZ"]},
+        "drag": {"type": "float3", "generator": "unit_velocity", "expands_to": ["dragX", "dragY", "dragZ"], "expands_from": ["x", "y", "z"]}
+      },
+      "lua_runtime": {"call": "Spring.SetUnitPhysics", "args": ["fixture.unitID", "value.posX", "value.posY", "value.posZ", "value.velX", "value.velY", "value.velZ", "value.rotX", "value.rotY", "value.rotZ", "value.dragX", "value.dragY", "value.dragZ"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_pos_error_params",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitPosErrorParams"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_pos_error_params"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {
+        "errorVector": {"type": "float3", "generator": "unit_velocity", "expands_to": ["errorX", "errorY", "errorZ"], "expands_from": ["x", "y", "z"]},
+        "errorDelta": {"type": "float3", "generator": "unit_velocity", "expands_to": ["deltaX", "deltaY", "deltaZ"], "expands_from": ["x", "y", "z"]},
+        "nextUpdate": {"type": "i32", "range": [0, 10]}, "allyTeamID": {"type": "i32", "fixed": 0}, "setBit": {"type": "bool"}
+      },
+      "lua_runtime": {"call": "Spring.SetUnitPosErrorParams", "args": ["fixture.unitID", "value.errorX", "value.errorY", "value.errorZ", "value.deltaX", "value.deltaY", "value.deltaZ", "value.nextUpdate", "value.allyTeamID", "value.setBit"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_resourcing",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitResourcing"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_resourcing"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"type": {"type": "enum", "values": ["uum", "uue", "umm", "ume", "cum", "cue", "cmm", "cme"]}, "amount": {"type": "f32", "range": [0, 20]}},
+      "lua_runtime": {"call": "Spring.SetUnitResourcing", "args": ["fixture.unitID", "value.type", "value.amount"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_stealth",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitStealth"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_stealth"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"enabled": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.SetUnitStealth", "args": ["fixture.unitID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_sonar_stealth",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitSonarStealth"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_sonar_stealth"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"enabled": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.SetUnitSonarStealth", "args": ["fixture.unitID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_always_visible",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitAlwaysVisible"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_always_visible"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"enabled": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.SetUnitAlwaysVisible", "args": ["fixture.unitID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_use_air_los",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitUseAirLos"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_use_air_los"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"enabled": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.SetUnitUseAirLos", "args": ["fixture.unitID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_crashing",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitCrashing"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_crashing"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"wantCrash": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.SetUnitCrashing", "args": ["fixture.unitID", "value.wantCrash"], "returns": ["result"]}
+    },
+    {
+      "id": "unit_set_tooltip",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitTooltip"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_tooltip"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"tooltip": {"type": "string", "fixed": "native_api_parity_tooltip"}},
+      "lua_runtime": {"call": "Spring.SetUnitTooltip", "args": ["fixture.unitID", "value.tooltip"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_stockpile",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitStockpile"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_stockpile"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"stockpile": {"type": "i32", "range": [0, 2]}, "buildPercent": {"type": "f32", "range": [0, 1]}},
+      "lua_runtime": {"call": "Spring.SetUnitStockpile", "args": ["fixture.unitID", "value.stockpile", "value.buildPercent"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_shield_state",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitShieldState"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_shield_state"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"enabled": {"type": "bool"}, "power": {"type": "f32", "range": [0, 10]}},
+      "lua_runtime": {"call": "Spring.SetUnitShieldState", "args": ["fixture.unitID", "value.enabled", "value.power"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_shield_recharge_delay",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitShieldRechargeDelay"]},
+      "native": {"set": [], "get": ["UnitControl.set_unit_shield_recharge_delay"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"delay": {"type": "f32", "range": [0, 2]}},
+      "lua_runtime": {"call": "Spring.SetUnitShieldRechargeDelay", "args": ["fixture.unitID", "value.delay"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_weapon_fire",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.UnitWeaponFire"]},
+      "native": {"set": [], "get": ["UnitControl.unit_weapon_fire"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"weaponNum": {"type": "i32", "fixed": 1}},
+      "lua_runtime": {"call": "Spring.UnitWeaponFire", "args": ["fixture.unitID", "value.weaponNum"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_weapon_hold_fire",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.UnitWeaponHoldFire"]},
+      "native": {"set": [], "get": ["UnitControl.unit_weapon_hold_fire"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {"weaponNum": {"type": "i32", "fixed": 1}},
+      "lua_runtime": {"call": "Spring.UnitWeaponHoldFire", "args": ["fixture.unitID", "value.weaponNum"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_finish_command",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.UnitFinishCommand"]},
+      "native": {"set": [], "get": ["UnitControl.unit_finish_command"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.UnitFinishCommand", "args": ["fixture.unitID"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    }
+  ]
+}

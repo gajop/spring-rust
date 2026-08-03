@@ -3,18 +3,18 @@
 ## Summary Statistics
 
 **Lua API (Spring.* callouts only):**
-- Total: 787 functions
-- Matched (perfect 1.0): 787 (100.0%)
+- Total: 793 functions
+- Matched (perfect 1.0): 793 (100.0%)
 - Uncertain matches (<1.0): 0 (0.0%)
 - Unmatched: 0 (0.0%)
 
 **Rust API:**
-- Total: 1382 functions across 52 modules
-- Matched to Lua: 787 (56.9%)
-- Rust-only: 586 (42.4%)
+- Total: 1384 functions across 52 modules
+- Matched to Lua: 793 (57.3%)
+- Rust-only: 582 (42.1%)
 
 **Parameter comparison (matched functions):**
-- Parameter matches: 787
+- Parameter matches: 793
 - Count mismatches: 0
 - Type mismatches: 0
 
@@ -113,6 +113,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetCameraVectors` → `UnitRendering.UnitRendering.get_camera_vectors`
 - `Spring.GetClipboard` → `UnsyncedRead.UnsyncedRead.get_clipboard`
 - `Spring.GetClosestEnemyUnit` → `UnitsQuery.UnitsQuery.get_closest_enemy_unit`
+- `Spring.GetClosestValidPosition` → `Los.Los.get_closest_valid_position`
 - `Spring.GetCmdDescIndex` → `UnsyncedRead.UnsyncedRead.get_cmd_desc_index`
 - `Spring.GetCommandQueue` → `UnitsCommands.UnitsCommands.get_command_queue`
 - `Spring.GetConfigFloat` → `Config.Config.get_config_float`
@@ -369,6 +370,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitExperience` → `UnitsInfo.UnitsInfo.get_unit_experience`
 - `Spring.GetUnitFeatureSeparation` → `UnitControl.UnitControl.get_unit_feature_separation`
 - `Spring.GetUnitFlanking` → `UnitsInfo.UnitsInfo.get_unit_flanking`
+- `Spring.GetUnitFuel` → `UnitsInfo.UnitsInfo.get_unit_fuel`
 - `Spring.GetUnitGroup` → `Selection.Selection.get_unit_group`
 - `Spring.GetUnitHarvestStorage` → `UnitsInfo.UnitsInfo.get_unit_harvest_storage`
 - `Spring.GetUnitHeading` → `UnitsInfo.UnitsInfo.get_unit_heading`
@@ -435,6 +437,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitTooltip` → `UnitsInfo.UnitsInfo.get_unit_tooltip`
 - `Spring.GetUnitTransformMatrix` → `UnitRendering.UnitRendering.get_unit_transform_matrix`
 - `Spring.GetUnitTransporter` → `UnitsInfo.UnitsInfo.get_unit_transporter`
+- `Spring.GetUnitTravel` → `UnitsInfo.UnitsInfo.get_unit_travel`
 - `Spring.GetUnitVectors` → `UnitsInfo.UnitsInfo.get_unit_vectors`
 - `Spring.GetUnitVelocity` → `UnitsInfo.UnitsInfo.get_unit_velocity`
 - `Spring.GetUnitViewPosition` → `UnitRendering.UnitRendering.get_unit_view_position`
@@ -674,6 +677,9 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetProjectileIsIntercepted` → `ProjectileControl.ProjectileControl.set_projectile_is_intercepted`
 - `Spring.SetProjectileMoveControl` → `ProjectileControl.ProjectileControl.set_projectile_move_control`
 - `Spring.SetProjectilePosition` → `ProjectileControl.ProjectileControl.set_projectile_position`
+- `Spring.SetProjectileSpinAngle` → `ProjectileControl.ProjectileControl.set_projectile_spin_angle`
+- `Spring.SetProjectileSpinSpeed` → `ProjectileControl.ProjectileControl.set_projectile_spin_speed`
+- `Spring.SetProjectileSpinVec` → `ProjectileControl.ProjectileControl.set_projectile_spin_vec`
 - `Spring.SetProjectileTarget` → `ProjectileControl.ProjectileControl.set_projectile_target`
 - `Spring.SetProjectileTimeToLive` → `ProjectileControl.ProjectileControl.set_projectile_time_to_live`
 - `Spring.SetProjectileUseAirLos` → `ProjectileControl.ProjectileControl.set_projectile_use_air_los`
@@ -812,7 +818,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.WorldToScreenCoords` → `Camera.Camera.world_to_screen_coords`
 - `Spring.Yield` → `SystemControl.SystemControl.yield`
 
-**Total: 787**
+**Total: 793**
 
 ---
 
@@ -1068,7 +1074,6 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.vertex`
 - `Gfx.Gfx.viewport`
 - `Lights.Lights.add_light_tracking_target`
-- `Los.Los.get_closest_valid_position`
 - `MathExtra.MathExtra.bit_and`
 - `MathExtra.MathExtra.bit_bits`
 - `MathExtra.MathExtra.bit_inv`
@@ -1102,9 +1107,6 @@ Functions in Rust API with no Lua equivalent:
 - `Platform.Platform.get_architecture`
 - `Platform.Platform.is_headless`
 - `Player.Player.get_player_roster_owned`
-- `ProjectileControl.ProjectileControl.set_projectile_spin_angle`
-- `ProjectileControl.ProjectileControl.set_projectile_spin_speed`
-- `ProjectileControl.ProjectileControl.set_projectile_spin_vec`
 - `RmlUi.RmlUi.add_translation_string`
 - `RmlUi.RmlUi.bind`
 - `RmlUi.RmlUi.bind_choice_rows`
@@ -1116,6 +1118,7 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.bind_status_rows`
 - `RmlUi.RmlUi.bind_swatch_rows`
 - `RmlUi.RmlUi.bind_text_rows`
+- `RmlUi.RmlUi.clear_document_path_requests`
 - `RmlUi.RmlUi.clear_translations`
 - `RmlUi.RmlUi.context_activate_theme`
 - `RmlUi.RmlUi.context_add_event_listener`
@@ -1294,6 +1297,7 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.event_stop_propagation`
 - `RmlUi.RmlUi.get`
 - `RmlUi.RmlUi.get_context`
+- `RmlUi.RmlUi.get_document_path_requests`
 - `RmlUi.RmlUi.get_version`
 - `RmlUi.RmlUi.is_ready`
 - `RmlUi.RmlUi.load_font_face`
@@ -1356,9 +1360,7 @@ Functions in Rust API with no Lua equivalent:
 - `UnitsCommands.UnitsCommands.get_command_params`
 - `UnitsCommands.UnitsCommands.get_unit_command_descriptions`
 - `UnitsInfo.UnitsInfo.get_unit_crashing`
-- `UnitsInfo.UnitsInfo.get_unit_fuel`
 - `UnitsInfo.UnitsInfo.get_unit_piece_collision_volume_data`
-- `UnitsInfo.UnitsInfo.get_unit_travel`
 - `UnitsWeapons.UnitsWeapons.get_unit_weapon_count`
 - `UnsyncedCtrl.UnsyncedCtrl.get_water_texture`
 - `UnsyncedCtrl.UnsyncedCtrl.set_water_texture`
@@ -1425,4 +1427,4 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 586**
+**Total Rust-only: 582**

@@ -2,6 +2,41 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
+    pub(crate) fn check_feature_extra_read(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
+        match base_test_name(label) {
+            "get_feature_draw_flag" => {
+                let feature_id = i32_field(message, "featureID")?;
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_draw_flag(feature_id)
+                    .map_err(|err| {
+                        format!("get_feature_draw_flag({feature_id}) failed: {err:?}")
+                    })?;
+                self.same_i32_if_present(label, message, "flag", native as i32)
+            }
+            "get_feature_piece_collision_volume_data" => {
+                let feature_id = i32_field(message, "featureID")?;
+                let piece_num = i32_field(message, "pieceNum")?;
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_piece_collision_volume_data(feature_id, piece_num)
+                    .map_err(|err| {
+                        format!(
+                            "get_feature_piece_collision_volume_data({feature_id}) failed: {err:?}"
+                        )
+                    })?;
+                self.same_collision_volume(label, message, native)
+            }
+            name => Err(format!("unsupported feature extra read check `{name}`")),
+        }
+    }
+
     pub(crate) fn check_feature_health(
         &mut self,
         message: &Value,
@@ -426,7 +461,71 @@ impl NativeApiParity {
                     })?;
                 self.same_bool_if_present(label, message, "update", native)
             }
+            "feature_no_draw" => {
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_no_draw(feature_id)
+                    .map_err(|err| format!("get_feature_no_draw({feature_id}) failed: {err:?}"))?;
+                self.same_bool_if_present(label, message, "noDraw", native)
+            }
+            "feature_engine_draw_mask" => {
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_engine_draw_mask(feature_id)
+                    .map_err(|err| {
+                        format!("get_feature_engine_draw_mask({feature_id}) failed: {err:?}")
+                    })?;
+                self.same_i32_if_present(label, message, "mask", native as i32)
+            }
+            "feature_always_update_matrix" => {
+                let native = self
+                    .interface
+                    .features()
+                    .get_feature_always_update_matrix(feature_id)
+                    .map_err(|err| {
+                        format!("get_feature_always_update_matrix({feature_id}) failed: {err:?}")
+                    })?;
+                self.same_bool_if_present(label, message, "update", native)
+            }
+            "feature_fade" => self.same_i32_if_present(label, message, "returnCount", 0),
             _ => Err(format!("unsupported feature render flag check `{label}`")),
+        }
+    }
+    pub(crate) fn set_feature_render_flag(&mut self, message: &Value) -> Result<(), String> {
+        let feature_id = i32_field(message, "featureID")?;
+        let success = match base_test_name(test_name_field(message)?) {
+            "feature_no_draw" => self
+                .interface
+                .unsynced_ctrl()
+                .set_feature_no_draw(feature_id, bool_field(message, "noDraw")?)
+                .map_err(|err| format!("set_feature_no_draw({feature_id}) failed: {err:?}"))?,
+            "feature_engine_draw_mask" => self
+                .interface
+                .unsynced_ctrl()
+                .set_feature_engine_draw_mask(feature_id, i32_field(message, "mask")? as u32)
+                .map_err(|err| {
+                    format!("set_feature_engine_draw_mask({feature_id}) failed: {err:?}")
+                })?,
+            "feature_always_update_matrix" => self
+                .interface
+                .unsynced_ctrl()
+                .set_feature_always_update_matrix(feature_id, bool_field(message, "update")?)
+                .map_err(|err| {
+                    format!("set_feature_always_update_matrix({feature_id}) failed: {err:?}")
+                })?,
+            "feature_fade" => self
+                .interface
+                .unsynced_ctrl()
+                .set_feature_fade(feature_id, bool_field(message, "allow")?)
+                .map_err(|err| format!("set_feature_fade({feature_id}) failed: {err:?}"))?,
+            name => return Err(format!("unsupported feature render setter `{name}`")),
+        };
+        if success {
+            Ok(())
+        } else {
+            Err("feature render setter returned false".to_string())
         }
     }
     pub(crate) fn set_feature_collision_volume_data(
@@ -546,7 +645,7 @@ impl NativeApiParity {
     }
     pub(crate) fn set_feature_time(&mut self, message: &Value) -> Result<(), String> {
         let feature_id = i32_field(message, "featureID")?;
-        let test_name = base_test_name(str_field(message, "name")?);
+        let test_name = base_test_name(test_name_field(message)?);
         match test_name {
             "feature_fire_time" => self
                 .interface

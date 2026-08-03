@@ -1,0 +1,355 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "set_atmosphere_params",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetAtmosphere"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_atmosphere"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "atmosphere": {"type": "object", "fixed": {
+          "fogColor": [0.1, 0.2, 0.3, 0.4],
+          "skyColor": [0.2, 0.3, 0.4, 0.5],
+          "sunColor": [0.3, 0.4, 0.5, 0.6],
+          "cloudColor": [0.4, 0.5, 0.6, 0.7],
+          "skyAxisAngle": [0, 1, 0, 0.25],
+          "fogStart": 128,
+          "fogEnd": 4096
+        }}
+      },
+      "lua_runtime": null,
+      "rust": {"check": "check_control_calls", "set": "set_noop"}
+    },
+    {
+      "id": "set_sun_direction",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetSunDirection"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_sun_direction"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "x": {"type": "f32", "fixed": 0.25},
+        "y": {"type": "f32", "fixed": -0.9},
+        "z": {"type": "f32", "fixed": 0.35},
+        "intensity": {"type": "f32", "fixed": 1.1}
+      },
+      "lua_runtime": {
+        "call": "Spring.SetSunDirection",
+        "args": ["value.x", "value.y", "value.z", "value.intensity"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      },
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_sun_lighting_params",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetSunLighting"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_sun_lighting"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "lighting": {"type": "object", "fixed": {
+          "groundAmbientColor": [0.1, 0.2, 0.3, 1],
+          "groundDiffuseColor": [0.3, 0.4, 0.5, 1],
+          "groundSpecularColor": [0.5, 0.6, 0.7, 1],
+          "modelAmbientColor": [0.2, 0.3, 0.4, 1],
+          "modelDiffuseColor": [0.4, 0.5, 0.6, 1],
+          "modelSpecularColor": [0.6, 0.7, 0.8, 1],
+          "specularExponent": 16,
+          "groundShadowDensity": 0.75,
+          "modelShadowDensity": 0.65
+        }}
+      },
+      "lua_runtime": null,
+      "rust": {"check": "check_control_calls", "set": "set_noop"}
+    },
+    {
+      "id": "set_water_params",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetWaterParams"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_water_params", "UnsyncedCtrl.set_water_texture"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "water": {"type": "object", "fixed": {
+          "absorb": [0.1, 0.2, 0.3],
+          "baseColor": [0.2, 0.3, 0.4],
+          "minColor": [0.05, 0.06, 0.07],
+          "surfaceColor": [0.3, 0.4, 0.5],
+          "diffuseColor": [0.4, 0.5, 0.6],
+          "specularColor": [0.6, 0.7, 0.8],
+          "planeColor": [0.1, 0.1, 0.12],
+          "texture": "bitmaps/watertex.png",
+          "foamTexture": "bitmaps/waterfoam.png",
+          "normalTexture": "bitmaps/waternormal.png",
+          "repeatX": 1.25,
+          "repeatY": 1.5,
+          "surfaceAlpha": 0.8,
+          "ambientFactor": 0.4,
+          "diffuseFactor": 0.7,
+          "specularFactor": 0.9,
+          "specularPower": 32,
+          "fresnelMin": 0.1,
+          "fresnelMax": 0.8,
+          "fresnelPower": 3,
+          "reflectionDistortion": 0.2,
+          "blurBase": 0.1,
+          "blurExponent": 1.2,
+          "perlinStartFreq": 0.5,
+          "perlinLacunarity": 2,
+          "perlinAmplitude": 0.6,
+          "windSpeed": 0.7,
+          "waveOffsetFactor": 0.8,
+          "waveLength": 1.1,
+          "waveFoamDistortion": 0.2,
+          "waveFoamIntensity": 0.3,
+          "causticsResolution": 256,
+          "causticsStrength": 0.4,
+          "numTiles": 4,
+          "shoreWaves": false,
+          "forceRendering": false,
+          "hasWaterPlane": true
+        }}
+      },
+      "lua_runtime": null,
+      "rust": {"check": "check_control_calls", "set": "set_noop"}
+    },
+    {
+      "id": "set_map_rendering_params",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetMapRenderingParams"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_map_rendering_params"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "mapRendering": {"type": "object", "fixed": {
+          "splatTexScales": [1, 2, 3, 4],
+          "splatTexMults": [0.25, 0.5, 0.75, 1],
+          "voidWater": false,
+          "voidGround": false,
+          "splatDetailNormalDiffuseAlpha": true
+        }}
+      },
+      "lua_runtime": null,
+      "rust": {"check": "check_control_calls", "set": "set_noop"}
+    },
+    {
+      "id": "set_draw_ground",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetDrawGround"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_draw_ground"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"drawGround": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.SetDrawGround", "args": ["value.drawGround"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_draw_sky",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetDrawSky"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_draw_sky"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"drawSky": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.SetDrawSky", "args": ["value.drawSky"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_draw_water",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetDrawWater"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_draw_water"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"drawWater": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.SetDrawWater", "args": ["value.drawWater"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_draw_ground_deferred",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetDrawGroundDeferred"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_draw_ground_deferred"]},
+      "compare": {"mode": "fields", "fields": ["deferred", "forward"]},
+      "params": {"drawDeferred": {"type": "bool", "fixed": true}, "drawForward": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.SetDrawGroundDeferred", "args": ["value.drawDeferred", "value.drawForward"], "returns": [{"field": "deferred", "index": 1}, {"field": "forward", "index": 2}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_draw_models_deferred",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetDrawModelsDeferred"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_draw_models_deferred"]},
+      "compare": {"mode": "fields", "fields": ["unitsDeferred", "featuresDeferred", "unitsForward", "featuresForward"]},
+      "params": {
+        "unitsDeferred": {"type": "bool", "fixed": true},
+        "featuresDeferred": {"type": "bool", "fixed": true},
+        "unitsForward": {"type": "bool", "fixed": true},
+        "featuresForward": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {"call": "Spring.SetDrawModelsDeferred", "args": ["value.unitsDeferred", "value.featuresDeferred", "value.unitsForward", "value.featuresForward"], "returns": [{"field": "unitsDeferred", "index": 1}, {"field": "featuresDeferred", "index": 2}, {"field": "unitsForward", "index": 3}, {"field": "featuresForward", "index": 4}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_engine_build_square_rendering",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetEngineBuildSquareRendering"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_engine_build_square_rendering"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"enabled": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.SetEngineBuildSquareRendering", "args": ["value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_auto_show_metal",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetAutoShowMetal"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_auto_show_metal"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"enable": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.SetAutoShowMetal", "args": ["value.enable"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "force_layout_update",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.ForceLayoutUpdate"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.force_layout_update"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {},
+      "lua_runtime": {"call": "Spring.ForceLayoutUpdate", "args": [], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "force_tesselation_update",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.ForceTesselationUpdate"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.force_tesselation_update"]},
+      "compare": {"mode": "fields", "fields": ["updated"]},
+      "params": {"normal": {"type": "bool", "fixed": true}, "shadow": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.ForceTesselationUpdate", "args": ["value.normal", "value.shadow"], "returns": [{"field": "updated", "transform": "truthy"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_custom_command_draw_data",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetCustomCommandDrawData"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_custom_command_draw_data"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"cmdID": {"type": "i32", "fixed": -1234}, "color": {"type": "object", "fixed": [1, 0.5, 0.25, 1]}, "showArea": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"call": "Spring.SetCustomCommandDrawData", "args": ["value.cmdID", "nil", "value.color", "value.showArea"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_unit_def_icon",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitDefIcon"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_unit_def_icon"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"unitDefID": {"type": "i32", "fixture": "unitDefID"}, "iconName": {"type": "string", "fixed": "default"}},
+      "lua_runtime": {"call": "Spring.SetUnitDefIcon", "args": ["value.unitDefID", "value.iconName"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_unit_def_image",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SetUnitDefImage"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_unit_def_image"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"unitDefID": {"type": "i32", "fixture": "unitDefID"}, "image": {"type": "string", "fixed": ""}},
+      "lua_runtime": {"call": "Spring.SetUnitDefImage", "args": ["value.unitDefID", "nil"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_map_shader",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetMapShader"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_map_shader"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"standardShaderID": {"type": "i32", "fixed": 0}, "deferredShaderID": {"type": "i32", "fixed": 0}},
+      "lua_runtime": {"call": "Spring.SetMapShader", "args": ["value.standardShaderID", "value.deferredShaderID"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_map_shading_texture",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetMapShadingTexture"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_map_shading_texture"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "params": {"texType": {"type": "string", "fixed": "$ssmf_specular"}, "texName": {"type": "string", "fixed": ""}, "num": {"type": "i32", "fixed": 0}},
+      "lua_runtime": {"call": "Spring.SetMapShadingTexture", "args": ["value.texType", "value.texName", "value.num"], "returns": [{"field": "result", "index": 1, "transform": "truthy"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_sky_box_texture",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetSkyBoxTexture"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_sky_box_texture"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"texName": {"type": "string", "fixed": ""}},
+      "lua_runtime": {"call": "Spring.SetSkyBoxTexture", "args": ["value.texName"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_wm_caption",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetWMCaption"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_wmcaption"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"title": {"type": "string", "fixed": "Native API Parity"}, "titleShort": {"type": "string", "fixed": "Native API Parity"}},
+      "lua_runtime": {"call": "Spring.SetWMCaption", "args": ["value.title", "value.titleShort"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    },
+    {
+      "id": "set_shock_front_factors",
+      "context": "widget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetShockFrontFactors"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_shock_front_factors"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {"minArea": {"type": "f32", "fixed": 0.25}, "minPower": {"type": "f32", "fixed": 0.5}, "distAdj": {"type": "f32", "fixed": 1.5}},
+      "lua_runtime": {"call": "Spring.SetShockFrontFactors", "args": ["value.minArea", "value.minPower", "value.distAdj"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"}
+    }
+  ]
+}

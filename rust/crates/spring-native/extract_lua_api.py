@@ -411,6 +411,7 @@ def main():
     all_functions = callouts + callins
 
     source_overrides = {
+        "Spring.AddGrass": [("x", "number"), ("z", "number"), ("grassValue", "integer?")],
         "Spring.AddUnitIcon": [("iconName", "string"), ("texFile", "string"), ("size", "number?"), ("dist", "number?"), ("radAdjust", "boolean?"), ("u0", "number?"), ("v0", "number?"), ("u1", "number?"), ("v1", "number?")],
         "Spring.AddLightTrackingTarget": [("lightHandle", "integer"), ("objectID", "integer"), ("trackUnit", "boolean"), ("enableTracking", "boolean")],
         "Spring.BuggerOff": [("x", "number"), ("y", "number"), ("z", "number?"), ("radius", "number"), ("teamID", "integer"), ("spherical", "boolean?"), ("forced", "boolean?"), ("excludeUnitID", "integer?"), ("excludeUnitDefIDs", "integer[]?")],
@@ -430,6 +431,7 @@ def main():
         "Spring.GetTerrainTypeData": [("terrainTypeIndex", "integer")],
         "Spring.GetGameRulesParam": [("paramName", "string")],
         "Spring.GetFeatureRulesParam": [("featureID", "integer"), ("paramName", "string")],
+        "Spring.GetFeaturePieceCollisionVolumeData": [("featureID", "integer"), ("pieceNum", "integer")],
         "Spring.GetPlayerRulesParam": [("playerID", "integer"), ("paramName", "string")],
         "Spring.GetTeamRulesParam": [("teamID", "integer"), ("paramName", "string")],
         "Spring.GetUnitRulesParam": [("unitID", "integer"), ("paramName", "string")],

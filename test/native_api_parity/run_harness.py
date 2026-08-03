@@ -48,7 +48,27 @@ NATIVE_ACCESSOR_TYPES = {
 }
 API_TESTS = load_api_tests()
 KNOWN_ISSUES = load_known_issues()
-CHECK_COVERAGE = {test["id"]: test.get("report", {}) for test in API_TESTS}
+
+
+def coverage_metadata(test: dict) -> dict:
+    """Return coverage labels, deriving them from the canonical spec when needed."""
+    report = dict(test.get("report", {}))
+    lua = test.get("lua", {})
+    native = test.get("native", {})
+    if not report.get("lua_setter") and lua.get("set"):
+        report["lua_setter"] = ", ".join(f"`{name}`" for name in lua["set"])
+    if not report.get("lua_getter") and lua.get("get"):
+        report["lua_getter"] = ", ".join(f"`{name}`" for name in lua["get"])
+    if not report.get("native_setter") and native.get("set"):
+        report["native_setter"] = ", ".join(f"`{name}`" for name in native["set"])
+    if not report.get("native_getter") and native.get("get"):
+        report["native_getter"] = ", ".join(f"`{name}`" for name in native["get"])
+    if not report.get("fields") and test.get("compare", {}).get("fields"):
+        report["fields"] = ", ".join(f"`{field}`" for field in test["compare"]["fields"])
+    return report
+
+
+CHECK_COVERAGE = {test["id"]: coverage_metadata(test) for test in API_TESTS}
 API_TEST_BY_ID = {test["id"]: test for test in API_TESTS}
 
 
@@ -65,7 +85,26 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--blank-map-seed", type=int)
     parser.add_argument("--test-seed", type=int)
     parser.add_argument("--cases", type=int, default=3)
+    parser.add_argument(
+        "--tests",
+        help="comma-separated parity test IDs to run (useful for focused diagnostics)",
+    )
+    parser.add_argument(
+        "--test-prefix",
+        type=int,
+        help="also run the first N generated synced tests (for focused diagnostics)",
+    )
     parser.add_argument("--mode", choices=("lua", "native", "both", "compare"), default="both")
+    parser.add_argument(
+        "--load-native-module-for-lua",
+        action="store_true",
+        help="load the native module while retaining Lua-mode setter/readback behavior",
+    )
+    parser.add_argument(
+        "--process-test",
+        choices=("quit", "reload", "restart", "start"),
+        help="run one isolated process-control parity case at the end of the fixture",
+    )
     parser.add_argument("--output-dir", type=Path, default=HARNESS / "out")
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--keep-workdir", action="store_true")
@@ -126,7 +165,11 @@ def blank_map_name(args: argparse.Namespace, run_mode: str) -> str:
     if seed is None:
         seed = random.SystemRandom().randint(1, 1_000_000_000)
 
-    return f"native_api_parity_blank_{seed}_{run_mode}_{args.blank_map_x}x{args.blank_map_y}"
+    # Lua and native runs are separate Spring processes, but they must load
+    # the same generated map for a meaningful parity comparison.  Including
+    # the process mode here creates two different map identities and makes
+    # the fixture depend on an accidental second RNG draw.
+    return f"native_api_parity_blank_{seed}_{args.blank_map_x}x{args.blank_map_y}"
 
 
 def write_script(
@@ -184,7 +227,11 @@ def write_script(
         native_api_parity_output_dir={output_dir};
         native_api_parity_seed={test_seed};
         native_api_parity_cases={args.cases};
+        native_api_parity_tests={args.tests or ''};
+        native_api_parity_test_prefix={args.test_prefix if args.test_prefix is not None else ''};
         native_api_parity_enable_rendering_tests={1 if args.enable_rendering_tests else 0};
+        native_api_parity_process_test={args.process_test or ''};
+        native_api_parity_process_stage=initial;
     }}
 {map_options}
 
@@ -226,7 +273,7 @@ def run_spring(args: argparse.Namespace, datadir: Path, script: Path, output_dir
     env["SPRING_ISOLATED"] = str(datadir)
     env["SPRING_NATIVE_PARITY_OUTPUT_DIR"] = str(result_dir)
 
-    if run_mode == "native":
+    if run_mode == "native" or (run_mode == "lua" and args.load_native_module_for_lua):
         env["SPRING_NATIVE_MODULE"] = str(NATIVE_SO)
     else:
         env["SPRING_NATIVE_MODULE"] = ""
@@ -242,6 +289,7 @@ def run_spring(args: argparse.Namespace, datadir: Path, script: Path, output_dir
 
     with (output_dir / "spring.log").open("wb") as log:
         proc = subprocess.Popen(cmd, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
+        (output_dir / "spring.pid").write_text(f"{proc.pid}\n", encoding="utf-8")
         try:
             return proc.wait(timeout=args.timeout)
         except subprocess.TimeoutExpired:
@@ -258,6 +306,11 @@ def load_jsonl(path: Path) -> list[dict]:
         if line.strip():
             rows.append(json.loads(line))
     return rows
+
+
+def row_test_name(row: dict) -> str:
+    """Return the parity test identity without confusing API result `name` fields."""
+    return str(row.get("testName", row.get("name", "")))
 
 
 def compare(lua_dir: Path, native_dir: Path) -> bool:
@@ -283,7 +336,7 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
         for side, rows in (("lua", lua_rows), ("native", native_rows)):
             failures = [
                 row for row in rows
-                if str(row.get("name", "")).startswith("lua_rml_") and row.get("status") == "fail"
+                if row_test_name(row).startswith("lua_rml_") and row.get("status") == "fail"
             ]
             if failures:
                 print(f"{side} {name} RmlUi failures: {len(failures)}")
@@ -299,7 +352,7 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
 
     native_rows = load_jsonl(native_path)
     native_failures = [row for row in native_rows if row.get("status") == "fail"]
-    native_complete = any(row.get("name") == "complete" and row.get("status") == "pass" for row in native_rows)
+    native_complete = any(row_test_name(row) == "complete" and row.get("status") == "pass" for row in native_rows)
     if native_failures:
         print(f"native failures: {len(native_failures)}")
         for row in native_failures[:10]:
@@ -324,20 +377,68 @@ def comparable_rows(rows: list[dict]) -> list[dict]:
 
 
 def comparable_row(row: dict) -> dict:
-    test = API_TEST_BY_ID.get(canonical_row_test_id(str(row.get("name", ""))) or "")
+    test = API_TEST_BY_ID.get(canonical_row_test_id(row_test_name(row)) or "")
     compare = test.get("compare", {}) if test else {}
-    normalized = dict(row)
-    epsilon = compare.get("epsilon")
-    if isinstance(epsilon, (int, float)):
-        for field in compare.get("fields", []):
-            if isinstance(normalized.get(field), (int, float)):
-                normalized[field] = round(float(normalized[field]) / float(epsilon))
-    if compare.get("stream") != "shape":
-        return normalized
+    test_id = canonical_row_test_id(row_test_name(row))
 
+    # The two sides run in separate engine processes.  Fixture/object IDs and
+    # the arguments copied into a result row are transport data, not the API
+    # result contract; they can legitimately differ when object allocation or
+    # cleanup differs.  The manifest's compare.fields is the authoritative set
+    # of values that this test promises to compare.
+    if test is None:
+        if row_test_name(row) == "context_inventory":
+            return {
+                "testName": row_test_name(row),
+                "context": row.get("context"),
+                "functions": row.get("functions", []),
+            }
+        return {
+            "testName": row_test_name(row),
+            "context": row.get("context"),
+            "case": row.get("case"),
+            "status": row.get("status"),
+        }
+
+    normalized = {
+        "testName": test_id,
+        "context": row.get("context"),
+        "case": row.get("case"),
+    }
+    # Error-path rows and native-side failures are part of the observable
+    # contract even when a spec has no result fields to compare.
+    for field in ("status", "error"):
+        if field in row:
+            normalized[field] = row[field]
+
+    epsilon = compare.get("epsilon")
+    order_insensitive = set(test.get("order_insensitive_fields", []))
+    normalizers = compare.get("normalizers", {})
     for field in compare.get("fields", []):
-        if field in normalized:
-            normalized[field] = "number" if isinstance(normalized[field], (int, float)) else type(normalized[field]).__name__
+        if field not in row:
+            # Preserve missing-vs-null and missing-vs-present distinctions.
+            normalized[field] = {"__missing__": True}
+            continue
+
+        value = row[field]
+        if field in order_insensitive and isinstance(value, list):
+            value = sorted(value, key=lambda item: json.dumps(item, sort_keys=True))
+
+        if normalizers.get(field) == "id_list":
+            # Object IDs are allocated independently in the Lua baseline and
+            # native processes.  Preserve the observable collection shape
+            # while the native checker still compares the actual IDs within
+            # the same process.
+            normalized[field] = {
+                "count": len(value) if isinstance(value, list) else None,
+            }
+        elif compare.get("stream") == "shape":
+            normalized[field] = "number" if isinstance(value, (int, float)) else type(value).__name__
+        elif isinstance(epsilon, (int, float)) and isinstance(value, (int, float)):
+            normalized[field] = round(float(value) / float(epsilon))
+        else:
+            normalized[field] = value
+
     return normalized
 
 
@@ -362,7 +463,7 @@ def read_first_log_match(path: Path, needle: str) -> str | None:
 
 
 def result_names(rows: list[dict]) -> list[str]:
-    return [str(row.get("name", "<unnamed>")) for row in rows]
+    return [row_test_name(row) or "<unnamed>" for row in rows]
 
 
 def read_report_option(script: Path, option: str) -> str | None:
@@ -524,7 +625,7 @@ def read_context_inventory(base_output: Path) -> dict[str, set[str]]:
     lua_dir = base_output / "lua"
     for stream_name in RESULT_STREAMS:
         for row in load_jsonl(lua_dir / stream_name):
-            if row.get("name") != "context_inventory":
+            if row_test_name(row) != "context_inventory":
                 continue
             context = str(row.get("context") or stream_name.removesuffix(".jsonl"))
             functions = {
@@ -551,7 +652,7 @@ def read_recorded_ids_by_context(base_output: Path) -> dict[str, set[str]]:
     for stream_name in RESULT_STREAMS:
         stream_context = stream_name.removesuffix(".jsonl")
         for row in load_jsonl(lua_dir / stream_name):
-            name = str(row.get("name", ""))
+            name = row_test_name(row)
             test_id = canonical_test_id(name)
             if test_id is None:
                 continue
@@ -931,7 +1032,7 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         native_counts: dict[str, dict[str, int]] = {}
         native_failures = []
         for row in native_rows:
-            name = str(row.get("name", "<unnamed>"))
+            name = row_test_name(row) or "<unnamed>"
             status = str(row.get("status", ""))
             native_counts.setdefault(name, {"pass": 0, "fail": 0})
             if status == "pass":
@@ -946,7 +1047,7 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         if native_failures:
             lines.extend(["", "### Native Failures", ""])
             for row in native_failures:
-                lines.append(f"- `{row.get('name', '<unnamed>')}`: {row.get('message', '')}")
+                lines.append(f"- `{row_test_name(row) or '<unnamed>'}`: {row.get('message', '')}")
     else:
         lines.append("| n/a | 0 | 0 |")
 
@@ -1077,6 +1178,15 @@ def run_one(args: argparse.Namespace, base_output: Path, run_mode: str, test_see
         exit_code = run_spring(args, datadir, script, run_output, run_mode)
         for result_file in result_dir.glob("*.jsonl"):
             shutil.copy2(result_file, run_output / result_file.name)
+        if run_mode == "native":
+            try:
+                spring_pid = int((run_output / "spring.pid").read_text(encoding="utf-8"))
+            except (OSError, ValueError) as err:
+                raise RuntimeError(f"could not determine native Spring PID: {err}") from err
+            parent_result = result_dir / f"native-{spring_pid}.jsonl"
+            if not parent_result.is_file():
+                raise RuntimeError(f"missing native result stream for Spring PID {spring_pid}: {parent_result}")
+            shutil.copy2(parent_result, run_output / "native.jsonl")
         if args.keep_workdir:
             kept = run_output / "workdir"
             if kept.exists():
@@ -1091,6 +1201,10 @@ def run_one(args: argparse.Namespace, base_output: Path, run_mode: str, test_see
 
 def main() -> int:
     args = parse_args()
+    # Spring requires absolute isolated and write-directory paths.  Resolve
+    # user-supplied relative output roots before creating temporary fixtures;
+    # this also makes custom diagnostic output roots behave like the default.
+    args.output_dir = args.output_dir.resolve()
     if not args.spring.is_file():
         raise SystemExit(f"spring binary not found: {args.spring}")
     if not args.spring_headless.is_file():
@@ -1112,10 +1226,16 @@ def main() -> int:
         write_report(latest, args, compare_info)
         return 0 if compare_info["ok"] else 1
 
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    # Include a sub-second suffix so concurrent or rapid diagnostic runs do
+    # not write into the same result directory.
+    timestamp = f"{time.strftime('%Y%m%d-%H%M%S')}-{time.time_ns() % 1_000_000:06d}"
     test_seed = args.test_seed
     if test_seed is None:
         test_seed = random.SystemRandom().randint(1, 1_000_000_000)
+    if args.map is None and args.blank_map_seed is None:
+        # Choose the generated map identity once per parity run so both
+        # process modes receive identical map metadata and content.
+        args.blank_map_seed = random.SystemRandom().randint(1, 1_000_000_000)
     base_output = args.output_dir / timestamp
     base_output.mkdir(parents=True, exist_ok=True)
 

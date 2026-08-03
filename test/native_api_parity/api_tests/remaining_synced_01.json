@@ -1,0 +1,252 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "add_height_map",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetHeightMapFunc", "Spring.AddHeightMap"], "get": ["Spring.GetGroundHeight"]},
+      "native": {"set": ["TerrainControl.set_height_map_func", "TerrainControl.add_height_map"], "get": ["Terrain.get_ground_height"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["height"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {
+        "x": {"type": "f32", "fixed": 1600},
+        "z": {"type": "f32", "fixed": 1600},
+        "delta": {"type": "f32", "fixed": 2}
+      }
+    },
+    {
+      "id": "add_original_height_map",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetOriginalHeightMapFunc", "Spring.AddOriginalHeightMap"], "get": ["Spring.GetGroundOrigHeight"]},
+      "native": {"set": ["TerrainControl.set_original_height_map_func", "TerrainControl.add_original_height_map"], "get": ["Terrain.get_ground_orig_height"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["height"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {
+        "x": {"type": "f32", "fixed": 1600},
+        "z": {"type": "f32", "fixed": 1600},
+        "delta": {"type": "f32", "fixed": 2}
+      }
+    },
+    {
+      "id": "add_smooth_mesh",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetSmoothMeshFunc", "Spring.AddSmoothMesh"], "get": ["Spring.GetSmoothMeshHeight"]},
+      "native": {"set": ["TerrainControl.set_smooth_mesh_func", "TerrainControl.add_smooth_mesh"], "get": ["Terrain.get_smooth_mesh_height"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["height"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {
+        "x": {"type": "f32", "fixed": 1600},
+        "z": {"type": "f32", "fixed": 1600},
+        "delta": {"type": "f32", "fixed": 2}
+      }
+    },
+    {
+      "id": "add_team_resource_excess_stats",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.AddTeamResourceExcessStats"], "get": ["Spring.GetTeamResourceStats"]},
+      "native": {"set": ["TeamControl.add_team_resource_excess_stats"], "get": ["Teams.get_team_resource_stats"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["used", "produced", "excessed", "received", "sent"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {
+        "teamID": {"type": "i32", "fixture": "teamID"},
+        "resource": {"type": "enum", "values": ["metal", "energy"]},
+        "amount": {"type": "f32", "fixed": 3}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.AddTeamResourceExcessStats", "args": ["value.teamID", "value.resource", "value.amount"]},
+        "call": "Spring.GetTeamResourceStats",
+        "args": ["value.teamID", "value.resource"],
+        "returns": ["used", "produced", "excessed", "received", "sent"]
+      }
+    },
+    {
+      "id": "share_team_resource",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetTeamResource", "Spring.ShareTeamResource"], "get": ["Spring.GetTeamResources"]},
+      "native": {"set": ["TeamControl.set_team_resource", "TeamControl.share_team_resource"], "get": ["Teams.get_team_resources"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["currentLevel", "storage", "share"]},
+      "rust": {"check": "check_team_resources", "set": "set_remaining_synced"},
+      "params": {
+        "teamID": {"type": "i32", "fixed": 0},
+        "targetTeamID": {"type": "i32", "fixed": 0},
+        "resource": {"type": "enum", "values": ["metal", "energy"]},
+        "baseline": {"type": "f32", "fixed": 100},
+        "amount": {"type": "f32", "fixed": 3}
+      },
+      "lua_runtime": {
+        "set": [
+          {"call": "Spring.SetTeamResource", "args": ["value.teamID", "value.resource", "value.baseline"]},
+          {"call": "Spring.ShareTeamResource", "args": ["value.teamID", "value.targetTeamID", "value.resource", "value.amount"]}
+        ],
+        "call": "Spring.GetTeamResources",
+        "args": ["value.teamID", "value.resource"],
+        "returns": ["currentLevel", "storage", "pull", "income", "expense", "share"]
+      }
+    },
+    {
+      "id": "set_ally",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetAlly"], "get": ["Spring.AreTeamsAllied"]},
+      "native": {"set": ["TeamControl.set_ally"], "get": ["Teams.are_teams_allied"]},
+      "compare": {"mode": "fields", "fields": ["allied"]},
+      "rust": {"check": "check_teams_bool", "set": "set_remaining_synced"},
+      "params": {
+        "firstAllyTeamID": {"type": "i32", "fixed": 0},
+        "secondAllyTeamID": {"type": "i32", "fixed": 0},
+        "allied": {"type": "bool", "fixed": true},
+        "teamID1": {"type": "i32", "fixed": 0},
+        "teamID2": {"type": "i32", "fixed": 0}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.SetAlly", "args": ["value.firstAllyTeamID", "value.secondAllyTeamID", "value.allied"]},
+        "call": "Spring.AreTeamsAllied",
+        "args": ["value.teamID1", "value.teamID2"],
+        "returns": ["allied"]
+      }
+    },
+    {
+      "id": "assign_player_to_team",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.AssignPlayerToTeam"], "get": ["Spring.GetPlayerInfo"]},
+      "native": {"set": ["TeamControl.assign_player_to_team"], "get": ["Teams.get_player_info"]},
+      "compare": {"mode": "fields", "fields": ["teamID", "allyTeamID"]},
+      "rust": {"check": "check_player_info", "set": "set_remaining_synced"},
+      "params": {
+        "playerID": {"type": "i32", "fixed": 0},
+        "teamID": {"type": "i32", "fixed": 0}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.AssignPlayerToTeam", "args": ["value.playerID", "value.teamID"]},
+        "call": "Spring.GetPlayerInfo",
+        "args": ["value.playerID", false],
+        "returns": [
+          {"field": "teamID", "index": 4},
+          {"field": "allyTeamID", "index": 5}
+        ]
+      }
+    },
+    {
+      "id": "set_cheating_enabled",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetCheatingEnabled"], "get": ["Spring.IsCheatingEnabled"]},
+      "native": {"set": ["GameConfig.set_cheating_enabled"], "get": ["Game.is_cheating_enabled"]},
+      "compare": {"mode": "fields", "fields": ["enabled"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {"enabled": {"type": "bool", "fixed": true}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetCheatingEnabled", "args": ["value.enabled"]},
+        "call": "Spring.IsCheatingEnabled",
+        "args": [],
+        "returns": ["enabled"]
+      }
+    },
+    {
+      "id": "set_god_mode",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetGodMode"], "get": ["Spring.IsGodModeEnabled"]},
+      "native": {"set": ["GameConfig.set_god_mode"], "get": ["Game.is_god_mode_enabled"]},
+      "compare": {"mode": "fields", "fields": ["enabled"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {
+        "controlAllies": {"type": "bool", "fixed": true},
+        "controlEnemies": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.SetGodMode", "args": ["value.controlAllies", "value.controlEnemies"]},
+        "call": "Spring.IsGodModeEnabled",
+        "args": [],
+        "returns": ["enabled"]
+      }
+    },
+    {
+      "id": "set_experience_grade",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetExperienceGrade"]},
+      "native": {"set": ["GameConfig.set_experience_grade"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {
+        "expGrade": {"type": "f32", "fixed": 0.25},
+        "expPowerScale": {"type": "f32", "fixed": 1.1},
+        "expHealthScale": {"type": "f32", "fixed": 1.2},
+        "expReloadScale": {"type": "f32", "fixed": 1.3}
+      }
+    },
+    {
+      "id": "set_no_pause",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetNoPause"]},
+      "native": {"set": ["GameConfig.set_no_pause"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {"noPause": {"type": "bool", "fixed": true}}
+    },
+    {
+      "id": "set_player_ready_state",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetPlayerReadyState"], "get": ["Spring.SetPlayerReadyState"]},
+      "native": {"set": ["TeamControl.set_player_ready_state"], "get": ["TeamControl.set_player_ready_state"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {"playerID": {"type": "i32", "fixed": 0}, "ready": {"type": "bool", "fixed": true}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetPlayerReadyState", "args": ["value.playerID", "value.ready"]},
+        "call": "Spring.SetPlayerReadyState",
+        "args": ["value.playerID", "value.ready"],
+        "returns": ["result"]
+      }
+    },
+    {
+      "id": "set_square_building_mask",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetSquareBuildingMask"]},
+      "native": {"set": ["GameConfig.set_square_building_mask"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {"x": {"type": "i32", "fixed": 1}, "z": {"type": "i32", "fixed": 1}, "mask": {"type": "i32", "fixed": 1}}
+    },
+    {
+      "id": "transfer_team_max_units",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.TransferTeamMaxUnits"], "get": ["Spring.TransferTeamMaxUnits"]},
+      "native": {"set": ["TeamControl.transfer_team_max_units"], "get": ["TeamControl.transfer_team_max_units"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {"fromTeamID": {"type": "i32", "fixed": 0}, "newTeamID": {"type": "i32", "fixed": 0}, "transferAmnt": {"type": "i32", "fixed": 0}},
+      "lua_runtime": {
+        "set": {"call": "Spring.TransferTeamMaxUnits", "args": ["value.fromTeamID", "value.newTeamID", "value.transferAmnt"]},
+        "call": "Spring.TransferTeamMaxUnits",
+        "args": ["value.fromTeamID", "value.newTeamID", "value.transferAmnt"],
+        "returns": ["result"]
+      }
+    }
+  ]
+}

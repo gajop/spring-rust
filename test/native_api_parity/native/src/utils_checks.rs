@@ -90,9 +90,11 @@ impl NativeApiParity {
                 unit_def_id,
                 pos,
                 dir,
-                bool_field(message, "testTerrain")?,
-                bool_field(message, "testObjects")?,
-                bool_field(message, "centerOnly")?,
+                spring_native::TestMoveOrderOptions {
+                    test_terrain: bool_field(message, "testTerrain")?,
+                    test_objects: bool_field(message, "testObjects")?,
+                    center_only: bool_field(message, "centerOnly")?,
+                },
             )
             .map_err(|err| format!("test_move_order({unit_def_id}) failed: {err:?}"))?;
         self.same_bool_if_present(label, message, "canMove", native)

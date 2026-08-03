@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "feature_set_always_visible",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeatureAlwaysVisible"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_always_visible"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {"enabled": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.SetFeatureAlwaysVisible", "args": ["fixture.featureID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "feature_set_use_air_los",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeatureUseAirLos"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_use_air_los"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {"useAirLos": {"type": "bool"}},
+      "lua_runtime": {"call": "Spring.SetFeatureUseAirLos", "args": ["fixture.featureID", "value.useAirLos"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "feature_set_move_ctrl",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeatureMoveCtrl"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_move_ctrl"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {
+        "enabled": {"type": "bool", "fixed": false},
+        "velocity": {"type": "float3", "generator": "unit_velocity", "expands_to": ["velocityX", "velocityY", "velocityZ"], "expands_from": ["x", "y", "z"]},
+        "accel": {"type": "float3", "generator": "unit_velocity", "expands_to": ["accelX", "accelY", "accelZ"], "expands_from": ["x", "y", "z"]},
+        "movement": {"type": "float3", "generator": "unit_velocity", "expands_to": ["movementX", "movementY", "movementZ"], "expands_from": ["x", "y", "z"]}
+      },
+      "lua_runtime": {"call": "Spring.SetFeatureMoveCtrl", "args": ["fixture.featureID", "value.enabled", "value.velocityX", "value.velocityY", "value.velocityZ", "value.accelX", "value.accelY", "value.accelZ", "value.movementX", "value.movementY", "value.movementZ"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "feature_set_physics",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeaturePhysics"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_physics"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["posX", "posY", "posZ"], "expands_from": ["x", "y", "z"]},
+        "velocity": {"type": "float3", "generator": "unit_velocity", "expands_to": ["velX", "velY", "velZ"], "expands_from": ["x", "y", "z"]},
+        "rotation": {"type": "float3", "generator": "unit_orientation", "expands_to": ["rotX", "rotY", "rotZ"], "expands_from": ["frontX", "frontY", "frontZ"]},
+        "drag": {"type": "float3", "generator": "unit_velocity", "expands_to": ["dragX", "dragY", "dragZ"], "expands_from": ["x", "y", "z"]}
+      },
+      "lua_runtime": {"call": "Spring.SetFeaturePhysics", "args": ["fixture.featureID", "value.posX", "value.posY", "value.posZ", "value.velX", "value.velY", "value.velZ", "value.rotX", "value.rotY", "value.rotZ", "value.dragX", "value.dragY", "value.dragZ"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "feature_set_heading_and_up_dir",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeatureHeadingAndUpDir"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_heading_and_up_dir"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {"heading": {"type": "i32", "range": [-32768, 32767]}, "up": {"type": "float3", "generator": "unit_orientation", "expands_to": ["upX", "upY", "upZ"], "expands_from": ["frontX", "frontY", "frontZ"]}},
+      "lua_runtime": {"call": "Spring.SetFeatureHeadingAndUpDir", "args": ["fixture.featureID", "value.heading", "value.upX", "value.upY", "value.upZ"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "feature_set_mid_and_aim_pos",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeatureMidAndAimPos"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_mid_and_aim_pos"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {
+        "mid": {"type": "float3", "generator": "map_position", "expands_to": ["midX", "midY", "midZ"], "expands_from": ["x", "y", "z"]},
+        "aim": {"type": "float3", "generator": "map_position", "expands_to": ["aimX", "aimY", "aimZ"], "expands_from": ["x", "y", "z"]},
+        "relative": {"type": "bool"}
+      },
+      "lua_runtime": {"call": "Spring.SetFeatureMidAndAimPos", "args": ["fixture.featureID", "value.midX", "value.midY", "value.midZ", "value.aimX", "value.aimY", "value.aimZ", "value.relative"], "returns": ["result"]}
+    },
+    {
+      "id": "feature_set_blocking",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeatureBlocking"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_blocking"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {
+        "blocking": {"type": "bool", "fixed": true}, "solidObjects": {"type": "bool", "fixed": true}, "projectiles": {"type": "bool", "fixed": true},
+        "quadMapRays": {"type": "bool", "fixed": true}, "crushable": {"type": "bool", "fixed": true}, "blockEnemyPushing": {"type": "bool", "fixed": true}, "blockHeightChanges": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {"call": "Spring.SetFeatureBlocking", "args": ["fixture.featureID", "value.blocking", "value.solidObjects", "value.projectiles", "value.quadMapRays", "value.crushable", "value.blockEnemyPushing", "value.blockHeightChanges"], "returns": ["result"]}
+    },
+    {
+      "id": "feature_set_selection_volume_data",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeatureSelectionVolumeData"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_selection_volume_data"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {"scale": {"type": "float3", "generator": "unit_velocity", "expands_to": ["scaleX", "scaleY", "scaleZ"], "expands_from": ["x", "y", "z"]}, "offset": {"type": "float3", "generator": "unit_velocity", "expands_to": ["offsetX", "offsetY", "offsetZ"], "expands_from": ["x", "y", "z"]}, "volumeType": {"type": "i32", "fixed": 2}, "testType": {"type": "i32", "fixed": 1}, "primaryAxis": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"call": "Spring.SetFeatureSelectionVolumeData", "args": ["fixture.featureID", "value.scaleX", "value.scaleY", "value.scaleZ", "value.offsetX", "value.offsetY", "value.offsetZ", "value.volumeType", "value.testType", "value.primaryAxis"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "feature_set_piece_visible",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeaturePieceVisible"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_piece_visible"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {"pieceNum": {"type": "i32", "fixed": 1}, "visible": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.SetFeaturePieceVisible", "args": ["fixture.featureID", "value.pieceNum", "value.visible"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "feature_set_piece_collision_volume_data",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeaturePieceCollisionVolumeData"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_piece_collision_volume_data"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {"pieceNum": {"type": "i32", "fixed": 1}, "enable": {"type": "bool", "fixed": true}, "scale": {"type": "float3", "generator": "unit_velocity", "expands_to": ["scaleX", "scaleY", "scaleZ"], "expands_from": ["x", "y", "z"]}, "offset": {"type": "float3", "generator": "unit_velocity", "expands_to": ["offsetX", "offsetY", "offsetZ"], "expands_from": ["x", "y", "z"]}, "volumeType": {"type": "i32", "fixed": 2}, "primaryAxis": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"call": "Spring.SetFeaturePieceCollisionVolumeData", "args": ["fixture.featureID", "value.pieceNum", "value.enable", "value.scaleX", "value.scaleY", "value.scaleZ", "value.offsetX", "value.offsetY", "value.offsetZ", "value.volumeType", "value.primaryAxis"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "feature_set_piece_matrix",
+      "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.SetFeaturePieceMatrix"]},
+      "native": {"set": [], "get": ["FeatureControl.set_feature_piece_matrix"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_feature_control_call", "set": "set_noop"},
+      "params": {"pieceNum": {"type": "i32", "fixed": 1}, "matrix": {"type": "object", "fixed": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]}},
+      "lua_runtime": {"call": "Spring.SetFeaturePieceMatrix", "args": ["fixture.featureID", "value.pieceNum", "value.matrix"], "returns": ["result"]}
+    }
+  ]
+}

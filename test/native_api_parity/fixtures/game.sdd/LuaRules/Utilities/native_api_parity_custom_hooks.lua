@@ -11,6 +11,7 @@ return function(env)
 	local unitPayload = env.unitPayload
 	local featurePayload = env.featurePayload
 	local groundPayload = env.groundPayload
+	local objectPayload = env.objectPayload
 
 local TEST_HOOKS = {
 	{
@@ -1128,6 +1129,1237 @@ TEST_HOOKS[#TEST_HOOKS + 1] = {
 	get = function(ids)
 		local descs = Spring.GetUnitCmdDescs(ids.unitID) or {}
 		return { count = #descs }
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "unit_cmd_desc_lifecycle",
+	payload = unitPayload,
+	make = function()
+		return {
+			cmdID = 34567,
+			cmdType = 21,
+			action = "native_api_parity_cmd",
+			editedAction = "native_api_parity_cmd_edited",
+		}
+	end,
+	set = function(ids, value)
+		local before = #(Spring.GetUnitCmdDescs(ids.unitID) or {})
+		local description = {
+			id = value.cmdID,
+			type = value.cmdType,
+			name = "Native parity command",
+			action = value.action,
+			tooltip = "Native parity command",
+			params = {"native_api_parity"},
+		}
+		Spring.InsertUnitCmdDesc(ids.unitID, description)
+		local index = Spring.FindUnitCmdDesc(ids.unitID, value.cmdID)
+		if index == nil then
+			value.success = false
+			return
+		end
+		Spring.EditUnitCmdDesc(ids.unitID, index, {action = value.editedAction})
+		local edited = false
+		for _, desc in ipairs(Spring.GetUnitCmdDescs(ids.unitID) or {}) do
+			if desc.id == value.cmdID and desc.action == value.editedAction then
+				edited = true
+				break
+			end
+		end
+		Spring.RemoveUnitCmdDesc(ids.unitID, index)
+		local after = #(Spring.GetUnitCmdDescs(ids.unitID) or {})
+		value.success = edited and before == after and Spring.FindUnitCmdDesc(ids.unitID, value.cmdID) == nil
+	end,
+	nativeSet = function(_, value, invoke)
+		invoke()
+		value.success = true
+	end,
+	get = function(_, value)
+		return {success = value.success == true}
+	end,
+}
+
+local function orderValue()
+	return {cmdID = 0, timeout = 0}
+end
+
+local function orderSuccess(result)
+	if type(result) == "number" then
+		return result > 0
+	end
+	return result == true
+end
+
+local function orderCommands(value)
+	return {{value.cmdID, {}, {}, value.timeout}}
+end
+
+local function addOrderHook(name, call)
+	TEST_HOOKS[#TEST_HOOKS + 1] = {
+		name = name,
+		payload = unitPayload,
+		make = orderValue,
+		set = function(ids, value)
+			value.success = orderSuccess(call(ids, value))
+		end,
+		nativeSet = function(_, value, invoke)
+			invoke()
+			value.success = true
+		end,
+		get = function(_, value)
+			return {success = value.success == true}
+		end,
+	}
+end
+
+addOrderHook("give_order_to_unit_synced", function(ids, value)
+	return Spring.GiveOrderToUnit(ids.unitID, value.cmdID, {}, {}, value.timeout)
+end)
+
+addOrderHook("give_order_to_unit_array_synced", function(ids, value)
+	return Spring.GiveOrderToUnitArray({ids.unitID}, value.cmdID, {}, {}, value.timeout)
+end)
+
+addOrderHook("give_order_to_unit_map_synced", function(ids, value)
+	return Spring.GiveOrderToUnitMap({[ids.unitID] = true}, value.cmdID, {}, {}, value.timeout)
+end)
+
+addOrderHook("give_order_array_to_unit_synced", function(ids, value)
+	return Spring.GiveOrderArrayToUnit(ids.unitID, orderCommands(value))
+end)
+
+addOrderHook("give_order_array_to_unit_map_synced", function(ids, value)
+	return Spring.GiveOrderArrayToUnitMap({[ids.unitID] = true}, orderCommands(value))
+end)
+
+addOrderHook("give_order_array_to_unit_array_synced_pairwise", function(ids, value)
+	return Spring.GiveOrderArrayToUnitArray({ids.unitID}, orderCommands(value), true)
+end)
+
+addOrderHook("give_order_array_to_unit_array_synced_broadcast", function(ids, value)
+	return Spring.GiveOrderArrayToUnitArray({ids.unitID}, orderCommands(value), false)
+end)
+
+local function addTerrainCallbackHook(name, callback, nativeRegistration, getter)
+	TEST_HOOKS[#TEST_HOOKS + 1] = {
+		name = name,
+		payload = groundPayload,
+		make = function()
+			return { x = 1600, z = 1600, delta = 2 }
+		end,
+		set = function(_, value)
+			callback(function()
+				return value.x, value.z, value.delta
+			end)
+		end,
+		nativeSet = function(_, _, invoke)
+			nativeRegistration(invoke)
+		end,
+		get = function(_, value)
+			return {
+				x = value.x,
+				z = value.z,
+				height = getter(value.x, value.z),
+			}
+		end,
+	}
+end
+
+addTerrainCallbackHook("add_height_map", function(point)
+		Spring.SetHeightMapFunc(function()
+			local x, z, delta = point()
+			Spring.AddHeightMap(x, z, delta)
+		end)
+	end, function(invoke)
+		Spring.SetHeightMapFunc(invoke)
+	end, Spring.GetGroundHeight)
+
+addTerrainCallbackHook("add_original_height_map", function(point)
+		Spring.SetOriginalHeightMapFunc(function()
+			local x, z, delta = point()
+			Spring.AddOriginalHeightMap(x, z, delta)
+		end)
+	end, function(invoke)
+		Spring.SetOriginalHeightMapFunc(invoke)
+	end, Spring.GetGroundOrigHeight)
+
+addTerrainCallbackHook("add_smooth_mesh", function(point)
+		Spring.SetSmoothMeshFunc(function()
+			local x, z, delta = point()
+			Spring.AddSmoothMesh(x, z, delta)
+		end)
+	end, function(invoke)
+		Spring.SetSmoothMeshFunc(invoke)
+	end, Spring.GetSmoothMeshHeight)
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_original_height_map",
+	payload = groundPayload,
+	make = function()
+		return {
+			x = 1600,
+			z = 1600,
+			height = Spring.GetGroundOrigHeight(1600, 1600) + 6,
+			factor = 0.5,
+		}
+	end,
+	set = function(_, value)
+		Spring.SetOriginalHeightMapFunc(function()
+			Spring.SetOriginalHeightMap(value.x, value.z, value.height, value.factor)
+		end)
+	end,
+	nativeSet = function(_, _, invoke)
+		Spring.SetOriginalHeightMapFunc(invoke)
+	end,
+	get = function(_, value)
+		return {x = value.x, z = value.z, height = Spring.GetGroundOrigHeight(value.x, value.z)}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_smooth_mesh",
+	payload = groundPayload,
+	make = function()
+		return {
+			x = 1600,
+			z = 1600,
+			height = Spring.GetSmoothMeshHeight(1600, 1600) + 6,
+			terraform = 0.5,
+		}
+	end,
+	set = function(_, value)
+		Spring.SetSmoothMeshFunc(function()
+			Spring.SetSmoothMesh(value.x, value.z, value.height, value.terraform)
+		end)
+	end,
+	nativeSet = function(_, _, invoke)
+		Spring.SetSmoothMeshFunc(invoke)
+	end,
+	get = function(_, value)
+		return {x = value.x, z = value.z, height = Spring.GetSmoothMeshHeight(value.x, value.z)}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_experience_grade",
+	payload = groundPayload,
+	make = function()
+		return {
+			expGrade = 0.25,
+			expPowerScale = 1.1,
+			expHealthScale = 1.2,
+			expReloadScale = 1.3,
+		}
+	end,
+	set = function(_, value)
+		Spring.SetExperienceGrade(value.expGrade, value.expPowerScale, value.expHealthScale, value.expReloadScale)
+	end,
+	get = function()
+		return { returnCount = 0 }
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_no_pause",
+	payload = groundPayload,
+	make = function() return { noPause = true } end,
+	set = function(_, value) Spring.SetNoPause(value.noPause) end,
+	get = function() return { returnCount = 0 } end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_square_building_mask",
+	payload = groundPayload,
+	make = function() return { x = 1, z = 1, mask = 1 } end,
+	set = function(_, value) Spring.SetSquareBuildingMask(value.x, value.z, value.mask) end,
+	get = function() return { returnCount = 0 } end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "path_node_costs",
+	readonly = true,
+	payload = groundPayload,
+	make = function()
+		return {
+			overlayIndex = 7,
+			sizeX = 2,
+			sizeZ = 2,
+			costIndex = 0,
+			nodeX = 0,
+			nodeZ = 0,
+			cost = 17.25,
+		}
+	end,
+	get = function(_, value)
+		local initialized = Spring.InitPathNodeCostsArray(value.overlayIndex, value.sizeX, value.sizeZ)
+		local setCost = Spring.SetPathNodeCost(value.overlayIndex, value.costIndex, value.cost)
+		local active = Spring.SetPathNodeCosts(value.overlayIndex)
+		local costs = Spring.GetPathNodeCosts(value.overlayIndex) or {}
+		local activeCost = Spring.GetPathNodeCost(value.nodeX, value.nodeZ)
+		local freed = Spring.FreePathNodeCostsArray(value.overlayIndex)
+		return {
+			init = initialized,
+			setCost = setCost,
+			active = active,
+			costCount = #costs,
+			costValue = costs[value.costIndex + 1],
+			activeCost = activeCost,
+			free = freed,
+		}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "request_path",
+	readonly = true,
+	payload = unitPayload,
+	make = function(ids)
+		return {
+			moveDefName = "KBOT1",
+			startX = 900,
+			startY = 96,
+			startZ = 900,
+			endX = 1120,
+			endY = 96,
+			endZ = 1120,
+			radius = 8,
+		}
+	end,
+	get = function(_, value)
+		local path = Spring.RequestPath(
+			value.moveDefName,
+			value.startX, value.startY, value.startZ,
+			value.endX, value.endY, value.endZ,
+			value.radius
+		)
+		local valid = path ~= nil
+		path = nil
+		return { valid = valid }
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "map_model_lights_lifecycle",
+	payload = unitPayload,
+	readonly = true,
+	make = function()
+		return {
+			lightParams = {
+				position = {1024, 128, 1024},
+				direction = {0, -1, 0},
+				ambientColor = {0.1, 0.2, 0.3},
+				diffuseColor = {0.4, 0.5, 0.6},
+				specularColor = {0.7, 0.8, 0.9},
+				radius = 128,
+				fov = 90,
+				ttl = 1000,
+				priority = 1,
+				ignoreLOS = true,
+				localSpace = false,
+			},
+		}
+	end,
+	get = function(ids, value)
+		local mapHandle = Spring.AddMapLight(value.lightParams)
+		local mapHandleSecond = Spring.AddMapLight(value.lightParams)
+		local mapAdded = type(mapHandleSecond) == "number" and mapHandleSecond < 4294967295
+		local mapUpdated = Spring.UpdateMapLight(mapHandle, value.lightParams) == true
+		local mapTracked = Spring.SetMapLightTrackingState(mapHandle, ids.unitID, true, true) == true
+		local mapUntracked = Spring.SetMapLightTrackingState(mapHandle, ids.unitID, false, true) == true
+
+		local modelHandle = Spring.AddModelLight(value.lightParams)
+		local modelHandleSecond = Spring.AddModelLight(value.lightParams)
+		local modelAdded = type(modelHandleSecond) == "number" and modelHandleSecond < 4294967295
+		local modelUpdated = Spring.UpdateModelLight(modelHandle, value.lightParams) == true
+		local modelTracked = Spring.SetModelLightTrackingState(modelHandle, ids.unitID, true, true) == true
+		local modelUntracked = Spring.SetModelLightTrackingState(modelHandle, ids.unitID, false, true) == true
+
+		return {
+			mapHandle = mapHandle,
+			modelHandle = modelHandle,
+			mapAdded = mapAdded,
+			mapUpdated = mapUpdated,
+			mapTracked = mapTracked,
+			mapUntracked = mapUntracked,
+			modelAdded = modelAdded,
+			modelUpdated = modelUpdated,
+			modelTracked = modelTracked,
+			modelUntracked = modelUntracked,
+		}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "camera_state_roundtrip",
+	payload = groundPayload,
+	readonly = true,
+	make = function() return {} end,
+	get = function()
+		local state = Spring.GetCameraState(true)
+		return { applied = Spring.SetCameraState(state, 0, 1, 1) == true }
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "preload_sound_item_missing",
+	payload = groundPayload,
+	-- PreloadSoundItem reports whether this name was newly added.  The Lua
+	-- and native calls therefore need separate fresh names.  nativeOnly makes
+	-- the native run use its set_native call instead of invoking the API a
+	-- second time during the result check.
+	readonly = false,
+	nativeOnly = true,
+	make = function(_, caseIndex)
+		return {soundName = "native_api_parity_missing_sound_" .. tostring(caseIndex)}
+	end,
+	set = function(_, value)
+		value.success = Spring.PreloadSoundItem(value.soundName)
+	end,
+	nativeSet = function(_, value, invoke)
+		local luaSoundName = value.soundName
+		value.success = Spring.PreloadSoundItem(luaSoundName)
+		-- The native call must use a distinct name because PreloadSoundItem is
+		-- stateful: repeating the same call would test the already-preloaded
+		-- entry rather than the same fresh-state contract.
+		value.soundName = luaSoundName .. "_native"
+		invoke()
+		value.soundName = luaSoundName
+	end,
+	get = function(_, value)
+		return {success = value.success}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_atmosphere_params",
+	payload = groundPayload,
+	readonly = true,
+	make = function()
+		return {
+			atmosphere = {
+				fogColor = {0.1, 0.2, 0.3, 0.4},
+				skyColor = {0.2, 0.3, 0.4, 0.5},
+				sunColor = {0.3, 0.4, 0.5, 0.6},
+				cloudColor = {0.4, 0.5, 0.6, 0.7},
+				skyAxisAngle = {0, 1, 0, 0.25},
+				fogStart = 128,
+				fogEnd = 4096,
+			},
+		}
+	end,
+	get = function(_, value)
+		Spring.SetAtmosphere(value.atmosphere)
+		return {returnCount = 0}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_sun_lighting_params",
+	payload = groundPayload,
+	readonly = true,
+	make = function()
+		return {
+			lighting = {
+				groundAmbientColor = {0.1, 0.2, 0.3, 1},
+				groundDiffuseColor = {0.3, 0.4, 0.5, 1},
+				groundSpecularColor = {0.5, 0.6, 0.7, 1},
+				modelAmbientColor = {0.2, 0.3, 0.4, 1},
+				modelDiffuseColor = {0.4, 0.5, 0.6, 1},
+				modelSpecularColor = {0.6, 0.7, 0.8, 1},
+				specularExponent = 16,
+				groundShadowDensity = 0.75,
+				modelShadowDensity = 0.65,
+			},
+		}
+	end,
+	get = function(_, value)
+		Spring.SetSunLighting(value.lighting)
+		return {returnCount = 0}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_water_params",
+	payload = groundPayload,
+	readonly = true,
+	make = function()
+		return {
+			water = {
+				absorb = {0.1, 0.2, 0.3},
+				baseColor = {0.2, 0.3, 0.4},
+				minColor = {0.05, 0.06, 0.07},
+				surfaceColor = {0.3, 0.4, 0.5},
+				diffuseColor = {0.4, 0.5, 0.6},
+				specularColor = {0.6, 0.7, 0.8},
+				planeColor = {0.1, 0.1, 0.12},
+				texture = "bitmaps/watertex.png",
+				foamTexture = "bitmaps/waterfoam.png",
+				normalTexture = "bitmaps/waternormal.png",
+				repeatX = 1.25,
+				repeatY = 1.5,
+				surfaceAlpha = 0.8,
+				ambientFactor = 0.4,
+				diffuseFactor = 0.7,
+				specularFactor = 0.9,
+				specularPower = 32,
+				fresnelMin = 0.1,
+				fresnelMax = 0.8,
+				fresnelPower = 3,
+				reflectionDistortion = 0.2,
+				blurBase = 0.1,
+				blurExponent = 1.2,
+				perlinStartFreq = 0.5,
+				perlinLacunarity = 2,
+				perlinAmplitude = 0.6,
+				windSpeed = 0.7,
+				waveOffsetFactor = 0.8,
+				waveLength = 1.1,
+				waveFoamDistortion = 0.2,
+				waveFoamIntensity = 0.3,
+				causticsResolution = 256,
+				causticsStrength = 0.4,
+				numTiles = 4,
+				shoreWaves = false,
+				forceRendering = false,
+				hasWaterPlane = true,
+			},
+		}
+	end,
+	get = function(_, value)
+		Spring.SetWaterParams(value.water)
+		return {returnCount = 0}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_map_rendering_params",
+	payload = groundPayload,
+	readonly = true,
+	make = function()
+		return {
+			mapRendering = {
+				splatTexScales = {1, 2, 3, 4},
+				splatTexMults = {0.25, 0.5, 0.75, 1},
+				voidWater = false,
+				voidGround = false,
+				splatDetailNormalDiffuseAlpha = true,
+			},
+		}
+	end,
+	get = function(_, value)
+		Spring.SetMapRenderingParams(value.mapRendering)
+		return {returnCount = 0}
+	end,
+}
+
+local function temporaryUnit(ids)
+	return Spring.CreateUnit(
+		"native_api_test_unit",
+		ids.groundX or 1024,
+		ids.groundY or 96,
+		ids.groundZ or 1024,
+		0,
+		ids.teamID or 0,
+		false,
+		false
+	)
+end
+
+local function temporaryFeature(ids)
+	return Spring.CreateFeature(
+		"native_api_test_feature",
+		ids.groundX or 1024,
+		ids.groundY or 96,
+		ids.groundZ or 1024,
+		0,
+		ids.teamID or 0
+	)
+end
+
+local function objectPayloadWithFixture(caseIndex, ids, values)
+	values.case = caseIndex
+	values.unitDefID = ids.unitDefID
+	values.featureDefID = ids.featureDefID
+	values.teamID = ids.teamID or 0
+	values.x = ids.groundX or 1024
+	values.y = ids.groundY or 96
+	values.z = ids.groundZ or 1024
+	values.unitID = ids.unitID
+	values.featureID = ids.featureID
+	return values
+end
+
+local lifecyclePayload = objectPayload or objectPayloadWithFixture
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "create_unit_cleanup",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local unitID = temporaryUnit(ids)
+		local created = unitID ~= nil
+		if created then
+			Spring.DestroyUnit(unitID, false, true, nil, true)
+		end
+		return {created = created}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "destroy_unit",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local unitID = temporaryUnit(ids)
+		local destroyed = false
+		if unitID ~= nil then
+			Spring.DestroyUnit(unitID, false, true, nil, true)
+			destroyed = not Spring.ValidUnitID(unitID)
+		end
+		return {destroyed = destroyed}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "transfer_unit",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local unitID = temporaryUnit(ids)
+		local success = false
+		local teamAfter = -1
+		if unitID ~= nil then
+			success = Spring.TransferUnit(unitID, ids.teamID or 0, true, false) == true
+			teamAfter = Spring.GetUnitTeam(unitID) or -1
+			Spring.DestroyUnit(unitID, false, true, nil, true)
+		end
+		return {success = success, teamAfter = teamAfter}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "create_feature_cleanup",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local featureID = temporaryFeature(ids)
+		local created = featureID ~= nil
+		if created then
+			Spring.DestroyFeature(featureID)
+		end
+		return {created = created}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "destroy_feature",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local featureID = temporaryFeature(ids)
+		local destroyed = false
+		if featureID ~= nil then
+			Spring.DestroyFeature(featureID)
+			destroyed = not Spring.ValidFeatureID(featureID)
+		end
+		return {destroyed = destroyed}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "transfer_feature",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local featureID = temporaryFeature(ids)
+		local teamAfter = -1
+		if featureID ~= nil then
+			Spring.TransferFeature(featureID, ids.teamID or 0)
+			teamAfter = Spring.GetFeatureTeam(featureID) or -1
+			Spring.DestroyFeature(featureID)
+		end
+		return {teamAfter = teamAfter}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "create_unit_wreck_cleanup",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local featureID = Spring.CreateUnitWreck(ids.unitID, 1, false)
+		local created = featureID ~= nil
+		if created then
+			Spring.DestroyFeature(featureID)
+		end
+		return {created = created}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "create_feature_wreck_cleanup",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local featureID = Spring.CreateFeatureWreck(ids.featureID, 1, false)
+		local created = featureID ~= nil
+		if created then
+			Spring.DestroyFeature(featureID)
+		end
+		return {created = created}
+	end,
+}
+
+local function attachTemporaryPassenger(ids)
+	local passengerID = temporaryUnit(ids)
+	if passengerID == nil then
+		return nil, false
+	end
+	Spring.UnitAttach(ids.unitID, passengerID, 0, true)
+	return passengerID, Spring.GetUnitTransporter(passengerID) == ids.unitID
+end
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "unit_attach",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local passengerID, attached = attachTemporaryPassenger(ids)
+		if passengerID ~= nil then
+			if attached then
+				Spring.UnitDetach(passengerID)
+			end
+			Spring.DestroyUnit(passengerID, false, true, nil, true)
+		end
+		return {attached = attached}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "unit_detach",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local passengerID, attached = attachTemporaryPassenger(ids)
+		local detached = false
+		if passengerID ~= nil then
+			if attached then
+				Spring.UnitDetach(passengerID)
+			end
+			detached = Spring.GetUnitTransporter(passengerID) == nil
+			Spring.DestroyUnit(passengerID, false, true, nil, true)
+		end
+		return {detached = detached}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "unit_detach_from_air",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		local passengerID, attached = attachTemporaryPassenger(ids)
+		local detached = false
+		if passengerID ~= nil then
+			if attached then
+				Spring.UnitDetachFromAir(passengerID, ids.groundX or 1024, ids.groundY or 96, ids.groundZ or 1024)
+			end
+			detached = Spring.GetUnitTransporter(passengerID) == nil
+			Spring.DestroyUnit(passengerID, false, true, nil, true)
+		end
+		return {detached = detached}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "bugger_off",
+	deferred = true,
+	readonly = true,
+	payload = lifecyclePayload,
+	make = function() return {} end,
+	get = function(ids)
+		Spring.BuggerOff(ids.groundX or 1024, ids.groundY or 96, ids.groundZ or 1024, 128, ids.teamID or 0, true, true, -1)
+		return {called = true}
+	end,
+}
+
+local function factoryPayload(caseIndex, ids, values)
+	values.case = caseIndex
+	values.factoryDefID = UnitDefNames.native_api_test_factory.id
+	if values.factoryID ~= nil then
+		values.unitID = values.factoryID
+	end
+	return values
+end
+
+local function getterFactoryPayload(caseIndex, ids, values)
+	values.case = caseIndex
+	if values.factoryID ~= nil then
+		values.factoryDefID = UnitDefNames.native_api_test_factory.id
+		values.unitID = values.factoryID
+	end
+	return values
+end
+
+local function temporaryFactory(ids)
+	return Spring.CreateUnit(
+		"native_api_test_factory",
+		(ids.groundX or 1024) + 64,
+		ids.groundY or 96,
+		ids.groundZ or 1024,
+		0,
+		ids.teamID or 0,
+		false,
+		false
+	)
+end
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "get_factory_bugger_off",
+	nativeFirst = true,
+	readonly = false,
+	deferred = true,
+	payload = getterFactoryPayload,
+	make = function(ids)
+		local factoryID = temporaryFactory(ids)
+		local perform = Spring.SetFactoryBuggerOff(factoryID, true, 128, 256, 0, true, true)
+		return {
+			factoryID = factoryID,
+			perform = perform,
+			offset = 128,
+			radius = 256,
+			relHeading = 0,
+			spherical = true,
+			forced = true,
+		}
+	end,
+	set = function() end,
+	nativeSet = function(_, value, invoke)
+		invoke()
+	end,
+	get = function(_, value)
+		local factoryID = value.factoryID
+		local perform, offset, radius, relHeading, spherical, forced = Spring.GetFactoryBuggerOff(factoryID)
+		value.factoryID = nil
+		value.factoryDefID = nil
+		value.unitID = nil
+		value.nativeGetterChecked = true
+		Spring.DestroyUnit(factoryID, false, true, nil, true)
+		return {
+			perform = perform,
+			offset = offset,
+			radius = radius,
+			relHeading = relHeading,
+			spherical = spherical,
+			forced = forced,
+		}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_factory_bugger_off",
+	nativeFirst = true,
+	payload = factoryPayload,
+	make = function()
+		return {
+			perform = true,
+			offset = 128,
+			radius = 256,
+			relHeading = 0,
+			spherical = true,
+			forced = true,
+		}
+	end,
+	set = function(ids, value)
+		value.factoryID = temporaryFactory(ids)
+		value.perform = Spring.SetFactoryBuggerOff(
+			value.factoryID,
+			value.perform,
+			value.offset,
+			value.radius,
+			value.relHeading,
+			value.spherical,
+			value.forced
+		)
+	end,
+	nativeSet = function(ids, value, invoke)
+		value.factoryID = temporaryFactory(ids)
+		invoke()
+		value.perform = true
+		value.nativeMode = true
+	end,
+	get = function(ids, value)
+		if value.factoryID == nil then
+			value.factoryID = temporaryFactory(ids)
+			value.perform = Spring.SetFactoryBuggerOff(
+				value.factoryID,
+				value.perform,
+				value.offset,
+				value.radius,
+				value.relHeading,
+				value.spherical,
+				value.forced
+			)
+		end
+		local perform, offset, radius, relHeading, spherical, forced = Spring.GetFactoryBuggerOff(value.factoryID)
+		Spring.DestroyUnit(value.factoryID, false, true, nil, true)
+		value.factoryID = nil
+		value.unitID = nil
+		if value.nativeMode then
+			-- Keep the native-first run's fixture allocation lifecycle aligned
+			-- with the Lua baseline, which performs a second readback pass.
+			local extraFactoryID = temporaryFactory(ids)
+			if extraFactoryID ~= nil then
+				Spring.DestroyUnit(extraFactoryID, false, true, nil, true)
+			end
+			value.nativeMode = nil
+		end
+		return {
+			perform = perform,
+			offset = offset,
+			radius = radius,
+			relHeading = relHeading,
+			spherical = spherical,
+			forced = forced,
+		}
+	end,
+}
+
+local function teamPayload(caseIndex, ids, values)
+	values.case = caseIndex
+	values.teamID = ids.teamID or 0
+	return values
+end
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "kill_team",
+	nativeFirst = true,
+	deferred = true,
+	singleCase = true,
+	payload = teamPayload,
+	make = function(ids)
+		return {teamID = ids.teamID or 0, expectedDead = true}
+	end,
+	set = function(_, value)
+		Spring.KillTeam(value.teamID)
+	end,
+	nativeSet = function(_, _, invoke)
+		invoke()
+	end,
+	get = function(_, value)
+		local _, _, isDead = Spring.GetTeamInfo(value.teamID, false)
+		return {isDead = isDead}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "game_over",
+	nativeFirst = true,
+	deferred = true,
+	singleCase = true,
+	payload = teamPayload,
+	make = function(ids)
+		return {winningAllyTeamID = ids.allyTeamID or 0, accepted = 1}
+	end,
+	set = function(_, value)
+		value.accepted = Spring.GameOver({value.winningAllyTeamID})
+	end,
+	nativeSet = function(_, _, invoke)
+		invoke()
+	end,
+	get = function(_, value)
+		return {accepted = value.accepted or 1, gameOver = Spring.IsGameOver()}
+	end,
+}
+
+local function windowPayload(caseIndex, _, values)
+	values.case = caseIndex
+	return values
+end
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "set_window_geometry",
+	payload = windowPayload,
+	make = function()
+		return {
+			displayIndex = 1,
+			windowPosX = 0,
+			windowPosY = 0,
+			windowSizeX = 640,
+			windowSizeY = 480,
+			fullScreen = false,
+			borderless = false,
+		}
+	end,
+	set = function(_, value)
+		local ok, returnCount = pcall(function()
+			return select("#", Spring.SetWindowGeometry(
+				value.displayIndex,
+				value.windowPosX,
+				value.windowPosY,
+				value.windowSizeX,
+				value.windowSizeY,
+				value.fullScreen,
+				value.borderless
+			))
+		end)
+		value.called = ok
+		value.returnCount = ok and returnCount or -1
+	end,
+	nativeSet = function(_, value, invoke)
+		invoke()
+		value.called = true
+		value.returnCount = 0
+	end,
+	get = function(_, value)
+		return {called = value.called, returnCount = value.returnCount}
+	end,
+}
+
+local function addWindowStateHook(name, springCall, expected)
+	TEST_HOOKS[#TEST_HOOKS + 1] = {
+		name = name,
+		payload = windowPayload,
+		make = function() return {expected = expected} end,
+		set = function(_, value)
+			-- The first call establishes the requested state; the second call
+			-- observes the documented idempotent result, independent of the
+			-- window state at process startup.
+			springCall()
+			value.result = springCall()
+		end,
+		nativeSet = function(_, value, invoke)
+			-- Keep the native comparison process in the same SDL state as the
+			-- Lua baseline before making the Rust call.  The native API call is
+			-- still the result under test; these Lua calls only normalize the
+			-- process-local window state.
+			springCall()
+			springCall()
+			invoke()
+			value.result = value.expected
+		end,
+		get = function(_, value)
+			return {result = value.result}
+		end,
+	}
+end
+
+addWindowStateHook("set_window_minimized", Spring.SetWindowMinimized, false)
+addWindowStateHook("set_window_maximized", Spring.SetWindowMaximized, false)
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "yield",
+	payload = windowPayload,
+	make = function() return {expected = false} end,
+	set = function(_, value)
+		value.result = Spring.Yield()
+	end,
+	nativeSet = function(_, value, invoke)
+		invoke()
+		value.result = value.expected
+	end,
+	get = function(_, value)
+		return {result = value.result}
+	end,
+}
+
+local function processStartScript()
+	local options = Spring.GetModOptions() or {}
+	local mode = tostring(options.native_api_parity_mode or "lua")
+	local outputDir = tostring(options.native_api_parity_output_dir or "native_api_parity")
+	local seed = tostring(options.native_api_parity_seed or 1)
+	local cases = tostring(options.native_api_parity_cases or 1)
+	local rendering = tostring(options.native_api_parity_enable_rendering_tests or 0)
+	local processTest = tostring(options.native_api_parity_process_test or "")
+	return "[GAME]\n"
+		.. "{\n"
+		.. "    IsHost=1;\n"
+		.. "    MyPlayerName=NativeApiParity;\n"
+		.. "    MapName=native_api_parity_process_reload;\n"
+		.. "    GameType=Native API Parity 0.1;\n"
+		.. "    InitBlank=1;\n"
+		.. "    StartPosType=0;\n"
+		.. "    FixedRNGSeed=1;\n"
+		.. "    OnlyLocal=1;\n"
+		.. "    HostIP=localhost;\n"
+		.. "    HostPort=43817;\n"
+		.. "    MyPlayerNum=0;\n"
+		.. "    RecordDemo=0;\n"
+		.. "    GameStartDelay=0;\n"
+		.. "    MaxSpeed=1;\n"
+		.. "    MinSpeed=1;\n"
+		.. "    NumPlayers=1;\n"
+		.. "    NumTeams=1;\n"
+		.. "    NumAllyTeams=1;\n"
+		.. "\n"
+		.. "    [MODOPTIONS]\n"
+		.. "    {\n"
+		.. "        LuaRules=1;\n"
+		.. "        LuaGaia=0;\n"
+		.. "        native_api_parity_mode=" .. mode .. ";\n"
+		.. "        native_api_parity_output_dir=" .. outputDir .. ";\n"
+		.. "        native_api_parity_seed=" .. seed .. ";\n"
+		.. "        native_api_parity_cases=" .. cases .. ";\n"
+		.. "        native_api_parity_enable_rendering_tests=" .. rendering .. ";\n"
+		.. "        native_api_parity_process_test=" .. processTest .. ";\n"
+		.. "        native_api_parity_process_stage=resume;\n"
+		.. "    }\n"
+		.. "\n"
+		.. "    [MAPOPTIONS]\n"
+		.. "    {\n"
+		.. "        blank_map_x=10;\n"
+		.. "        blank_map_y=8;\n"
+		.. "        blank_map_height=96;\n"
+		.. "        blank_map_color_r=64;\n"
+		.. "        blank_map_color_g=128;\n"
+		.. "        blank_map_color_b=64;\n"
+		.. "    }\n"
+		.. "\n"
+		.. "    [PLAYER0]\n"
+		.. "    {\n"
+		.. "        Name=NativeApiParity;\n"
+		.. "        Spectator=0;\n"
+		.. "        Team=0;\n"
+		.. "    }\n"
+		.. "\n"
+		.. "    [TEAM0]\n"
+		.. "    {\n"
+		.. "        TeamLeader=0;\n"
+		.. "        AllyTeam=0;\n"
+		.. "        RGBColor=1 1 1;\n"
+		.. "        Side=Arm;\n"
+		.. "    }\n"
+		.. "\n"
+		.. "    [ALLYTEAM0]\n"
+		.. "    {\n"
+		.. "        NumAllies=0;\n"
+		.. "    }\n"
+		.. "}\n"
+end
+
+local function processPayload(caseIndex, _, values)
+	values.case = caseIndex
+	return values
+end
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "quit",
+	payload = processPayload,
+	make = function() return {} end,
+	set = function(_, value)
+		local ok, returnCount = pcall(function()
+			return select("#", Spring.Quit())
+		end)
+		value.called = ok
+		value.returnCount = ok and returnCount or -1
+	end,
+	nativeSet = function(_, value, invoke)
+		invoke()
+		value.called = true
+		value.returnCount = 0
+	end,
+	get = function(_, value)
+		return {called = value.called, returnCount = value.returnCount}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "reload",
+	payload = processPayload,
+	make = function()
+		return {startScript = processStartScript(), reloaded = false}
+	end,
+	set = function(_, value)
+		local ok, returnCount = pcall(function()
+			return select("#", Spring.Reload(value.startScript))
+		end)
+		value.called = ok
+		value.returnCount = ok and returnCount or -1
+		value.startScript = nil
+	end,
+	nativeSet = function(_, value, invoke)
+		invoke()
+		value.called = true
+		value.returnCount = 0
+		value.startScript = nil
+	end,
+	get = function(_, value)
+		return {called = value.called, returnCount = value.returnCount, reloaded = value.reloaded}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "restart",
+	payload = processPayload,
+	make = function()
+		return {cmdArgs = "--ignored-by-restart", startScript = processStartScript(), reloaded = false}
+	end,
+	set = function(_, value)
+		local ok, returnCount = pcall(function()
+			return select("#", Spring.Restart(value.cmdArgs, value.startScript))
+		end)
+		value.called = ok
+		value.returnCount = ok and returnCount or -1
+		value.cmdArgs = nil
+		value.startScript = nil
+	end,
+	nativeSet = function(_, value, invoke)
+		invoke()
+		value.called = true
+		value.returnCount = 0
+		value.cmdArgs = nil
+		value.startScript = nil
+	end,
+	get = function(_, value)
+		return {called = value.called, returnCount = value.returnCount, reloaded = value.reloaded}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "start",
+	payload = processPayload,
+	make = function() return {cmdArgs = "--help", startScript = ""} end,
+	set = function(_, value)
+		local ok, result = pcall(Spring.Start, value.cmdArgs, value.startScript)
+		value.called = ok
+		value.returnCount = ok and 1 or -1
+		value.result = ok and result or false
+		value.cmdArgs = nil
+		value.startScript = nil
+	end,
+	nativeSet = function(_, value, invoke)
+		invoke()
+		value.called = true
+		value.returnCount = 1
+		value.result = false
+		value.cmdArgs = nil
+		value.startScript = nil
+	end,
+	get = function(_, value)
+		return {called = value.called, returnCount = value.returnCount, result = value.result}
 	end,
 }
 

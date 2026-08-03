@@ -2,6 +2,30 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
+    pub(crate) fn set_sound_value(&mut self, message: &Value) -> Result<(), String> {
+        match base_test_name(test_name_field(message)?) {
+            "preload_sound_item_missing" => {
+                let sound_name = str_field(message, "soundName")?;
+                let expected = bool_field(message, "success")?;
+                let native = self
+                    .interface
+                    .sound()
+                    .preload_sound_item(sound_name)
+                    .map_err(|err| format!("preload_sound_item({sound_name:?}) failed: {err:?}"))?;
+                if native != expected {
+                    return Err(format!(
+                        "preload_sound_item({sound_name:?}) returned {native}, expected {expected}"
+                    ));
+                }
+                Ok(())
+            }
+            _ => Err(format!(
+                "unsupported sound setter `{}`",
+                test_name_field(message)?
+            )),
+        }
+    }
+
     pub(crate) fn check_sound_value(&mut self, message: &Value, label: &str) -> Result<(), String> {
         match base_test_name(label) {
             "get_sound_devices_count" => {
@@ -86,6 +110,25 @@ impl NativeApiParity {
                     .play_sound_file(sound_file, volume, zero, zero, channel)
                     .map_err(|err| format!("play_sound_file({sound_file:?}) failed: {err:?}"))?;
                 self.same_bool_if_present(label, message, "success", native)
+            }
+            "get_sound_effect_params" => {
+                let native = self
+                    .interface
+                    .sound()
+                    .get_sound_effect_params()
+                    .map_err(|err| format!("get_sound_effect_params() failed: {err:?}"))?;
+                self.same_bool_if_present(label, message, "supported", native)
+            }
+            "set_sound_effect_params" => {
+                let preset = CString::new(str_field(message, "preset")?)
+                    .map_err(|_| "preset contains an embedded NUL".to_string())?;
+                self.interface
+                    .sound()
+                    .set_sound_effect_params(spring_native::sys::SoundEffectParams {
+                        preset: preset.as_ptr(),
+                    })
+                    .map_err(|err| format!("set_sound_effect_params() failed: {err:?}"))?;
+                Ok(())
             }
             _ => Err(format!("unsupported sound check `{label}`")),
         }

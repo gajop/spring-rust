@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "add_unit_icon",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.AddUnitIcon"]},
+      "native": {"set": [], "get": ["Icons.add_unit_icon"]},
+      "compare": {"mode": "fields", "fields": ["added"]},
+      "params": {
+        "iconName": {"type": "string", "fixed": "native_api_parity_icon"},
+        "texFile": {"type": "string", "fixed": "bitmaps/icons/frame.png"},
+        "size": {"type": "f32", "fixed": 1.0},
+        "distance": {"type": "f32", "fixed": 1.0},
+        "radiusAdjust": {"type": "bool", "fixed": false},
+        "u0": {"type": "f32", "fixed": 0.0},
+        "v0": {"type": "f32", "fixed": 0.0},
+        "u1": {"type": "f32", "fixed": 1.0},
+        "v1": {"type": "f32", "fixed": 1.0}
+      },
+      "lua_runtime": {
+        "call": "Spring.AddUnitIcon",
+        "args": ["value.iconName", "value.texFile", "value.size", "value.distance", "value.radiusAdjust", "value.u0", "value.v0", "value.u1", "value.v1"],
+        "returns": ["added"]
+      },
+      "rust": {"check": "check_render_control", "set": "set_noop"}
+    },
+    {
+      "id": "free_unit_icon",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.FreeUnitIcon"]},
+      "native": {"set": [], "get": ["Icons.free_unit_icon"]},
+      "compare": {"mode": "fields", "fields": ["freed"]},
+      "params": {
+        "iconName": {"type": "string", "fixed": "native_api_parity_icon"},
+        "texFile": {"type": "string", "fixed": "bitmaps/icons/frame.png"},
+        "size": {"type": "f32", "fixed": 1.0},
+        "distance": {"type": "f32", "fixed": 1.0},
+        "radiusAdjust": {"type": "bool", "fixed": false},
+        "u0": {"type": "f32", "fixed": 0.0},
+        "v0": {"type": "f32", "fixed": 0.0},
+        "u1": {"type": "f32", "fixed": 1.0},
+        "v1": {"type": "f32", "fixed": 1.0}
+      },
+      "lua_runtime": {
+        "call": "Spring.FreeUnitIcon",
+        "args": ["value.iconName"],
+        "returns": ["freed"]
+      },
+      "rust": {"check": "check_render_control", "set": "set_noop"}
+    },
+    {
+      "id": "set_unit_icon",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires_rendering": true,
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.SetUnitIcon"], "get": ["Spring.GetUnitIcon"]},
+      "native": {"set": ["UnsyncedCtrl.set_unit_icon"], "get": ["UnitRendering.get_unit_icon"]},
+      "compare": {"mode": "fields", "fields": ["iconName"]},
+      "params": {"iconName": {"type": "string", "fixed": "default"}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetUnitIcon", "args": ["fixture.unitID", "value.iconName"]},
+        "call": "Spring.GetUnitIcon",
+        "args": ["fixture.unitID"],
+        "returns": ["iconName"]
+      },
+      "rust": {"check": "check_unsynced_render_data", "set": "set_render_control"}
+    },
+    {
+      "id": "add_world_icon",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.AddWorldIcon"]},
+      "native": {"set": [], "get": ["Markers.add_world_icon"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "cmdID": {"type": "i32", "fixed": 34567},
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]}
+      },
+      "lua_runtime": {
+        "call": "Spring.AddWorldIcon",
+        "args": ["value.cmdID", "value.x", "value.y", "value.z"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      },
+      "rust": {"check": "check_render_control", "set": "set_noop"}
+    },
+    {
+      "id": "add_world_text",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.AddWorldText"]},
+      "native": {"set": [], "get": ["Markers.add_world_text"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "text": {"type": "string", "fixed": "native-api-parity"},
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]}
+      },
+      "lua_runtime": {
+        "call": "Spring.AddWorldText",
+        "args": ["value.text", "value.x", "value.y", "value.z"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      },
+      "rust": {"check": "check_render_control", "set": "set_noop"}
+    },
+    {
+      "id": "add_world_unit",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.AddWorldUnit"]},
+      "native": {"set": [], "get": ["Markers.add_world_unit"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "unitDefID": {"type": "i32", "fixture": "unitDefID"},
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
+        "teamID": {"type": "i32", "fixture": "teamID"},
+        "facing": {"type": "enum", "values": [0, 1, 2, 3]}
+      },
+      "lua_runtime": {
+        "call": "Spring.AddWorldUnit",
+        "args": ["value.unitDefID", "value.x", "value.y", "value.z", "value.teamID", "value.facing"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      },
+      "rust": {"check": "check_render_control", "set": "set_noop"}
+    },
+    {
+      "id": "marker_add_point",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.MarkerAddPoint"]},
+      "native": {"set": [], "get": ["Markers.marker_add_point"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
+        "text": {"type": "string", "fixed": "native-api-parity-point"},
+        "localOnly": {"type": "bool", "fixed": true},
+        "playerID": {"type": "i32", "fixture": "playerID"}
+      },
+      "lua_runtime": {
+        "call": "Spring.MarkerAddPoint",
+        "args": ["value.x", "value.y", "value.z", "value.text", "value.localOnly", "value.playerID"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      },
+      "rust": {"check": "check_render_control", "set": "set_noop"}
+    },
+    {
+      "id": "marker_add_line",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.MarkerAddLine"]},
+      "native": {"set": [], "get": ["Markers.marker_add_line"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "from": {"type": "float3", "generator": "map_position", "expands_to": ["x1", "y1", "z1"], "expands_from": ["x", "y", "z"]},
+        "to": {"type": "float3", "generator": "map_position", "expands_to": ["x2", "y2", "z2"], "expands_from": ["x", "y", "z"]},
+        "localOnly": {"type": "bool", "fixed": true},
+        "playerID": {"type": "i32", "fixture": "playerID"}
+      },
+      "lua_runtime": {
+        "call": "Spring.MarkerAddLine",
+        "args": ["value.x1", "value.y1", "value.z1", "value.x2", "value.y2", "value.z2", "value.localOnly", "value.playerID"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      },
+      "rust": {"check": "check_render_control", "set": "set_noop"}
+    },
+    {
+      "id": "marker_erase_position",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.MarkerErasePosition"]},
+      "native": {"set": [], "get": ["Markers.marker_erase_position"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "params": {
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
+        "unused": {"type": "f32", "fixed": 0.0},
+        "localOnly": {"type": "bool", "fixed": true},
+        "playerID": {"type": "i32", "fixture": "playerID"},
+        "alwaysErase": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {
+        "call": "Spring.MarkerErasePosition",
+        "args": ["value.x", "value.y", "value.z", "value.unused", "value.localOnly", "value.playerID", "value.alwaysErase"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      },
+      "rust": {"check": "check_render_control", "set": "set_noop"}
+    }
+  ]
+}

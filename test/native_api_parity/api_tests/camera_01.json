@@ -93,6 +93,32 @@
       "rust": {"check": "check_camera_value", "set": "set_camera_target"},
       "params": {"x": {"type": "f32", "fixed": 1024}, "y": {"type": "f32", "fixed": 256}, "z": {"type": "f32", "fixed": 1024}, "transitionTime": {"type": "f32", "fixed": 0}},
       "lua_runtime": {"set": {"call": "Spring.SetCameraTarget", "args": ["value.x", "value.y", "value.z", "value.transitionTime"]}, "call": "Spring.WorldToScreenCoords", "args": ["value.x", "value.y", "value.z"], "returns": ["screenX", "screenY", "screenZ"]}
+    },
+    {
+      "id": "trace_screen_ray_ground",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.TraceScreenRay"]},
+      "native": {"set": [], "get": ["Camera.trace_screen_ray"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["hitType", "x", "y", "z"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.TraceScreenRay`", "native_getter": "`Camera.trace_screen_ray`", "fields": "`hitType`, `x`, `y`, `z`"},
+      "rust": {"check": "check_camera_value", "set": "set_noop"},
+      "params": {
+        "screenX": {"type": "f32", "fixed": 320},
+        "screenY": {"type": "f32", "fixed": 240},
+        "onlyCoords": {"type": "bool", "fixed": true},
+        "useMinimap": {"type": "bool", "fixed": false},
+        "includeSky": {"type": "bool", "fixed": false},
+        "ignoreWater": {"type": "bool", "fixed": false},
+        "heightOffset": {"type": "f32", "fixed": 0}
+      },
+      "lua_runtime": {
+        "call": "Spring.TraceScreenRay",
+        "args": ["value.screenX", "value.screenY", "value.onlyCoords", "value.useMinimap", "value.includeSky", "value.ignoreWater", "value.heightOffset"],
+        "returns": ["hitType", {"field": "x", "index": 2, "path": [1]}, {"field": "y", "index": 2, "path": [2]}, {"field": "z", "index": 2, "path": [3]}]
+      }
     }
   ]
 }

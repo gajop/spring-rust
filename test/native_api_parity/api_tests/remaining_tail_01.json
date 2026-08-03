@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "set_factory_bugger_off",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetFactoryBuggerOff"], "get": ["Spring.GetFactoryBuggerOff"]},
+      "native": {"set": ["UnitControl.set_factory_bugger_off"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["perform", "offset", "radius", "relHeading", "spherical", "forced"]},
+      "report": {"lua_setter": "`Spring.SetFactoryBuggerOff`", "lua_getter": "`Spring.GetFactoryBuggerOff`", "native_setter": "`UnitControl.set_factory_bugger_off`", "fields": "factory bugger-off configuration"},
+      "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
+      "params": {}
+    },
+    {
+      "id": "kill_team",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.KillTeam"], "get": ["Spring.GetTeamInfo"]},
+      "native": {"set": ["TeamControl.kill_team"], "get": ["Teams.get_team_info"]},
+      "compare": {"mode": "fields", "fields": ["isDead"]},
+      "report": {"lua_setter": "`Spring.KillTeam`", "lua_getter": "`Spring.GetTeamInfo`", "native_setter": "`TeamControl.kill_team`", "native_getter": "`Teams.get_team_info`", "fields": "team death state"},
+      "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
+      "params": {}
+    },
+    {
+      "id": "game_over",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.GameOver"], "get": ["Spring.IsGameOver"]},
+      "native": {"set": ["TeamControl.game_over"], "get": ["Game.is_game_over"]},
+      "compare": {"mode": "fields", "fields": ["accepted", "gameOver"]},
+      "report": {"lua_setter": "`Spring.GameOver`", "lua_getter": "`Spring.IsGameOver`", "native_setter": "`TeamControl.game_over`", "native_getter": "`Game.is_game_over`", "fields": "accepted winner and game-over state"},
+      "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
+      "params": {}
+    },
+    {
+      "id": "set_window_geometry",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": ["Spring.SetWindowGeometry"]},
+      "native": {"set": ["UnsyncedCtrl.set_window_geometry"]},
+      "compare": {"mode": "fields", "fields": ["called", "returnCount"]},
+      "report": {"lua_setter": "`Spring.SetWindowGeometry`", "native_setter": "`UnsyncedCtrl.set_window_geometry`", "fields": "successful invocation and Lua return count"},
+      "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
+      "params": {}
+    },
+    {
+      "id": "set_window_minimized",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": ["Spring.SetWindowMinimized"]},
+      "native": {"set": ["UnsyncedCtrl.set_window_minimized"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "report": {"lua_setter": "`Spring.SetWindowMinimized`", "native_setter": "`UnsyncedCtrl.set_window_minimized`", "fields": "minimized result"},
+      "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
+      "params": {}
+    },
+    {
+      "id": "set_window_maximized",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": ["Spring.SetWindowMaximized"]},
+      "native": {"set": ["UnsyncedCtrl.set_window_maximized"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "report": {"lua_setter": "`Spring.SetWindowMaximized`", "native_setter": "`UnsyncedCtrl.set_window_maximized`", "fields": "maximized result"},
+      "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
+      "params": {}
+    },
+    {
+      "id": "yield",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.Yield"]},
+      "native": {"set": ["SystemControl.yield"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "report": {"lua_setter": "`Spring.Yield`", "native_setter": "`SystemControl.yield`", "fields": "yield continuation hint"},
+      "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
+      "params": {}
+    }
+  ]
+}

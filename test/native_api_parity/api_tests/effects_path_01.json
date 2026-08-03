@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "spawn_explosion",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.SpawnExplosion"]},
+      "native": {"set": [], "get": ["EffectsControl.spawn_explosion"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_effects_path_value", "set": "set_noop"},
+      "params": {
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["posX", "posY", "posZ"], "expands_from": ["x", "y", "z"]},
+        "dir": {"type": "float3", "generator": "unit_orientation", "expands_to": ["dirX", "dirY", "dirZ"], "expands_from": ["frontX", "frontY", "frontZ"]},
+        "damages": {"type": "f32", "fixed": 1},
+        "weaponDef": {"type": "i32", "fixed": -1},
+        "owner": {"type": "i32", "fixed": -1},
+        "hitUnit": {"type": "i32", "fixed": -1},
+        "hitFeature": {"type": "i32", "fixed": -1},
+        "craterAreaOfEffect": {"type": "f32", "fixed": 0},
+        "damageAreaOfEffect": {"type": "f32", "fixed": 0},
+        "edgeEffectiveness": {"type": "f32", "fixed": 0},
+        "explosionSpeed": {"type": "f32", "fixed": 0},
+        "gfxMod": {"type": "f32", "fixed": 0},
+        "impactOnly": {"type": "bool", "fixed": false},
+        "ignoreOwner": {"type": "bool", "fixed": false},
+        "damageGround": {"type": "bool", "fixed": false},
+        "projectileID": {"type": "i32", "fixed": -1}
+      },
+      "lua_runtime": {
+        "call": "Spring.SpawnExplosion",
+        "args": ["value.posX", "value.posY", "value.posZ", "value.dirX", "value.dirY", "value.dirZ", {"damages": "value.damages", "weaponDef": "value.weaponDef", "owner": "value.owner", "hitUnit": "value.hitUnit", "hitFeature": "value.hitFeature", "craterAreaOfEffect": "value.craterAreaOfEffect", "damageAreaOfEffect": "value.damageAreaOfEffect", "edgeEffectiveness": "value.edgeEffectiveness", "explosionSpeed": "value.explosionSpeed", "gfxMod": "value.gfxMod", "impactOnly": "value.impactOnly", "ignoreOwner": "value.ignoreOwner", "damageGround": "value.damageGround", "projectileID": "value.projectileID"}],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      }
+    },
+    {
+      "id": "spawn_ceg",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.SpawnCEG"]},
+      "native": {"set": [], "get": ["EffectsControl.spawn_ceg"]},
+      "compare": {"mode": "fields", "fields": ["success", "cegID"]},
+      "rust": {"check": "check_effects_path_value", "set": "set_noop"},
+      "params": {
+        "cegName": {"type": "string", "fixed": "native_api_parity_missing_ceg"},
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["posX", "posY", "posZ"], "expands_from": ["x", "y", "z"]},
+        "dir": {"type": "float3", "generator": "unit_orientation", "expands_to": ["dirX", "dirY", "dirZ"], "expands_from": ["frontX", "frontY", "frontZ"]},
+        "radius": {"type": "f32", "fixed": 0},
+        "damage": {"type": "f32", "fixed": 0},
+        "dmgMod": {"type": "f32", "fixed": 1}
+      },
+      "lua_runtime": {"call": "Spring.SpawnCEG", "args": ["value.cegName", "value.posX", "value.posY", "value.posZ", "value.dirX", "value.dirY", "value.dirZ", "value.radius", "value.damage", "value.dmgMod"], "returns": ["success", "cegID"]}
+    },
+    {
+      "id": "spawn_sfx",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.SpawnSFX"]},
+      "native": {"set": [], "get": ["EffectsControl.spawn_sfx"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_effects_path_value", "set": "set_noop"},
+      "params": {
+        "sfxID": {"type": "i32", "fixed": 2},
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["posX", "posY", "posZ"], "expands_from": ["x", "y", "z"]},
+        "dir": {"type": "float3", "generator": "unit_orientation", "expands_to": ["dirX", "dirY", "dirZ"], "expands_from": ["frontX", "frontY", "frontZ"]},
+        "radius": {"type": "f32", "fixed": 0},
+        "damage": {"type": "f32", "fixed": 0},
+        "absolute": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {"call": "Spring.SpawnSFX", "args": ["fixture.unitID", "value.sfxID", "value.posX", "value.posY", "value.posZ", "value.dirX", "value.dirY", "value.dirZ", "value.absolute"], "returns": ["success"]}
+    },
+    {
+      "id": "path_node_costs",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.InitPathNodeCostsArray", "Spring.FreePathNodeCostsArray", "Spring.SetPathNodeCosts", "Spring.GetPathNodeCosts", "Spring.SetPathNodeCost", "Spring.GetPathNodeCost"]},
+      "native": {"set": [], "get": ["PathFinder.init_path_node_costs_array", "PathFinder.free_path_node_costs_array", "PathFinder.set_path_node_costs", "PathFinder.get_path_node_costs", "PathFinder.set_path_node_cost", "PathFinder.get_path_node_cost"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["init", "setCost", "active", "costCount", "costValue", "activeCost", "free"]},
+      "rust": {"check": "check_effects_path_value", "set": "set_noop"},
+      "params": {
+        "overlayIndex": {"type": "i32", "fixed": 7},
+        "sizeX": {"type": "i32", "fixed": 2},
+        "sizeZ": {"type": "i32", "fixed": 2},
+        "costIndex": {"type": "i32", "fixed": 0},
+        "nodeX": {"type": "i32", "fixed": 0},
+        "nodeZ": {"type": "i32", "fixed": 0},
+        "cost": {"type": "f32", "fixed": 17.25}
+      },
+      "lua_runtime": null
+    },
+    {
+      "id": "request_path",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.RequestPath"]},
+      "native": {"set": [], "get": ["PathFinder.request_path"]},
+      "compare": {"mode": "fields", "fields": ["valid"]},
+      "rust": {"check": "check_effects_path_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": null
+    }
+  ]
+}

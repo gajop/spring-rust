@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_replay_file_path",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.GetReplayFilePath"]},
+      "native": {"set": [], "get": ["SystemControl.get_replay_file_path"]},
+      "compare": {"mode": "fields", "fields": ["available"]},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "lua_runtime": {
+        "call": "Spring.GetReplayFilePath",
+        "args": [],
+        "returns": [{"field": "available", "index": 1, "transform": "truthy"}]
+      }
+    },
+    {
+      "id": "get_replay_recording_file_path",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.GetReplayRecordingFilePath"]},
+      "native": {"set": [], "get": ["SystemControl.get_replay_recording_file_path"]},
+      "compare": {"mode": "fields", "fields": ["available"]},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "lua_runtime": {
+        "call": "Spring.GetReplayRecordingFilePath",
+        "args": [],
+        "returns": [{"field": "available", "index": 1, "transform": "truthy"}]
+      }
+    }
+  ]
+}

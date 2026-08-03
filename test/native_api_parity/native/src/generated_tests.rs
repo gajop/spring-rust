@@ -46,6 +46,7 @@ native_tests! {
     get_camera_fov { check = check_camera_value, set = set_noop, }
     get_pixel_dir { check = check_camera_value, set = set_noop, }
     world_to_screen_coords { check = check_camera_value, set = set_camera_target, }
+    trace_screen_ray_ground { check = check_camera_value, set = set_noop, }
     get_num_displays { check = check_display_value, set = set_noop, }
     get_draw_frame { check = check_display_value, set = set_noop, }
     get_frame_time_offset { check = check_display_value, set = set_noop, }
@@ -95,6 +96,15 @@ native_tests! {
     unit_icon_get_draw { check = check_icons_value, set = set_noop, }
     unit_icon_draw { check = check_icons_value, set = set_icons_value, }
     unit_icon_draw_deprecated_alias { check = check_icons_value, set = set_icons_value, }
+    add_unit_icon { check = check_render_control, set = set_noop, }
+    free_unit_icon { check = check_render_control, set = set_noop, }
+    set_unit_icon { check = check_unsynced_render_data, set = set_render_control, }
+    add_world_icon { check = check_render_control, set = set_noop, }
+    add_world_text { check = check_render_control, set = set_noop, }
+    add_world_unit { check = check_render_control, set = set_noop, }
+    marker_add_point { check = check_render_control, set = set_noop, }
+    marker_add_line { check = check_render_control, set = set_noop, }
+    marker_erase_position { check = check_render_control, set = set_noop, }
     math_hypot { check = check_math_extra_value, set = set_noop, }
     math_diag { check = check_math_extra_value, set = set_noop, }
     math_clamp { check = check_math_extra_value, set = set_noop, }
@@ -140,9 +150,11 @@ native_tests! {
     stop_sound_stream { check = check_sound_value, set = set_noop, }
     pause_sound_stream { check = check_sound_value, set = set_noop, }
     set_sound_stream_volume { check = check_sound_value, set = set_noop, }
-    preload_sound_item_missing { check = check_sound_value, set = set_noop, }
+    preload_sound_item_missing { check = check_sound_value, set = set_sound_value, }
     load_sound_def_missing { check = check_sound_value, set = set_noop, }
     play_sound_file_missing { check = check_sound_value, set = set_noop, }
+    get_sound_effect_params { check = check_sound_value, set = set_noop, }
+    set_sound_effect_params { check = check_sound_value, set = set_noop, }
     get_profiler_record_names_count { check = check_profiling_value, set = set_noop, }
     get_lua_mem_usage { check = check_profiling_value, set = set_noop, }
     diff_timers { check = check_profiling_value, set = set_noop, }
@@ -164,6 +176,12 @@ native_tests! {
     vfs_get_games_count { check = check_vfs_value, set = set_noop, }
     vfs_is_directory { check = check_vfs_value, set = set_noop, }
     vfs_missing_is_directory { check = check_vfs_value, set = set_noop, }
+    vfs_create_dir_existing { check = check_vfs_value, set = set_noop, }
+    vfs_create_dir_invalid { check = check_vfs_value, set = set_noop, }
+    vfs_extract_archive_invalid { check = check_vfs_value, set = set_noop, }
+    vfs_get_map_square_texture_invalid { check = check_vfs_value, set = set_noop, }
+    vfs_set_map_square_texture_invalid { check = check_vfs_value, set = set_noop, }
+    vfs_set_map_square_texture_default { check = check_vfs_value, set = set_noop, }
     get_prev_frame_sync_checksum { check = check_unsynced_read_value, set = set_noop, }
     get_box_selection_by_engine { check = check_unsynced_read_value, set = set_noop, }
     get_build_facing { check = check_unsynced_read_value, set = set_noop, }
@@ -187,14 +205,37 @@ native_tests! {
     get_features_in_screen_rectangle { check = check_unsynced_read_value, set = set_noop, }
     get_render_units { check = check_units_query_list, set = set_noop, }
     get_render_units_draw_flag_changed { check = check_units_query_list, set = set_noop, }
+    get_unit_selection_volume_data { check = check_unsynced_render_data, set = set_noop, }
+    get_feature_selection_volume_data { check = check_unsynced_render_data, set = set_noop, }
+    get_unit_transform_matrix { check = check_unsynced_render_data, set = set_noop, }
+    get_feature_transform_matrix { check = check_unsynced_render_data, set = set_noop, }
+    get_unit_palette_index { check = check_unsynced_render_data, set = set_noop, }
+    get_feature_palette_index { check = check_unsynced_render_data, set = set_noop, }
+    get_unit_icon { check = check_unsynced_render_data, set = set_noop, }
     box_selection_by_engine { check = check_unsynced_read_value, set = set_unsynced_read_value, }
     build_facing { check = check_unsynced_read_value, set = set_unsynced_read_value, }
     build_spacing { check = check_unsynced_read_value, set = set_unsynced_read_value, }
     draw_selection_info { check = check_unsynced_read_value, set = set_unsynced_read_value, }
     last_message_position_count { check = check_unsynced_read_value, set = set_unsynced_read_value, }
     los_view_colors { check = check_display_value, set = set_display_value, }
+    assign_mouse_cursor { check = check_unsynced_control_call, set = set_noop, }
+    replace_mouse_cursor { check = check_unsynced_control_call, set = set_noop, }
+    set_mouse_cursor { check = check_unsynced_control_call, set = set_noop, }
+    warp_mouse { check = check_unsynced_control_call, set = set_noop, }
+    set_active_command { check = check_unsynced_control_call, set = set_noop, }
+    sdl_start_text_input { check = check_unsynced_control_call, set = set_noop, }
+    sdl_stop_text_input { check = check_unsynced_control_call, set = set_noop, }
+    sdl_set_text_input_rect { check = check_unsynced_control_call, set = set_noop, }
+    unit_set_leave_tracks_unsynced { check = check_unsynced_control_call, set = set_noop, }
+    draw_unit_commands_unsynced { check = check_unsynced_control_call, set = set_noop, }
+    set_video_capturing_mode { check = check_unsynced_control_call, set = set_noop, }
+    set_video_capturing_time_offset { check = check_unsynced_control_call, set = set_noop, }
+    set_log_section_filter_level { check = check_unsynced_control_call, set = set_noop, }
+    garbage_collect_ctrl { check = check_unsynced_control_call, set = set_noop, }
     trace_ray_ground_in_direction { check = check_tracing_value, set = set_noop, }
     trace_ray_ground_between_positions { check = check_tracing_value, set = set_noop, }
+    trace_ray_in_direction { check = check_tracing_value, set = set_noop, }
+    trace_ray_between_positions { check = check_tracing_value, set = set_noop, }
     get_selected_units { check = check_selection_value, set = set_noop, }
     get_selected_units_count { check = check_selection_value, set = set_noop, }
     get_selected_units_sorted { check = check_selection_value, set = set_noop, }
@@ -306,11 +347,46 @@ native_tests! {
     get_unit_weapon_can_fire { check = check_unit_weapon_bool, set = set_noop, }
     get_unit_weapon_test_range { check = check_unit_weapon_bool, set = set_noop, }
     get_unit_weapon_damages { check = check_unit_weapon_damages_f32, set = set_noop, }
+    get_feature_draw_flag { check = check_feature_extra_read, set = set_noop, }
+    get_feature_piece_collision_volume_data { check = check_feature_extra_read, set = set_noop, }
+    get_unit_current_build_power { check = check_unit_extra_read, set = set_noop, }
+    get_unit_move_def_id { check = check_unit_extra_read, set = set_noop, }
+    get_unit_move_type_data { check = check_unit_extra_read, set = set_noop, }
+    get_unit_estimated_path { check = check_unit_extra_read, set = set_noop, }
+    get_unit_weapon_vectors { check = check_unit_weapon_extra, set = set_noop, }
+    get_unit_weapon_target { check = check_unit_weapon_extra, set = set_noop, }
+    get_unit_weapon_try_target { check = check_unit_weapon_extra, set = set_noop, }
+    get_unit_weapon_test_target { check = check_unit_weapon_extra, set = set_noop, }
+    get_unit_weapon_have_free_line_of_fire { check = check_unit_weapon_extra, set = set_noop, }
+    get_factory_command_count { check = check_factory_read, set = set_noop, }
+    get_factory_commands { check = check_factory_read, set = set_noop, }
+    get_factory_counts { check = check_factory_read, set = set_noop, }
+    get_factory_bugger_off { check = check_factory_read, set = set_remaining_tail, }
+    get_full_build_queue { check = check_factory_read, set = set_noop, }
+    get_real_build_queue { check = check_factory_read, set = set_noop, }
+    get_closest_enemy_unit { check = check_units_query_extra, set = set_noop, }
+    get_units_in_planes { check = check_units_query_extra, set = set_noop, }
     get_unit_script_names { check = check_pieces_string_set, set = set_noop, }
     get_unit_piece_list { check = check_pieces_string_set, set = set_noop, }
     get_feature_piece_list { check = check_pieces_string_set, set = set_noop, }
     get_unit_piece_map { check = check_pieces_map, set = set_noop, }
     get_feature_piece_map { check = check_pieces_map, set = set_noop, }
+    get_model_root_piece { check = check_pieces_root, set = set_noop, }
+    get_unit_root_piece { check = check_pieces_root, set = set_noop, }
+    get_feature_root_piece { check = check_pieces_root, set = set_noop, }
+    get_model_piece_list { check = check_pieces_string_set, set = set_noop, }
+    get_model_piece_map { check = check_pieces_map, set = set_noop, }
+    get_unit_piece_position { check = check_pieces_vec3, set = set_noop, }
+    get_unit_piece_direction { check = check_pieces_vec3, set = set_noop, }
+    get_unit_piece_pos_dir { check = check_pieces_pos_dir, set = set_noop, }
+    get_unit_piece_matrix { check = check_pieces_matrix, set = set_noop, }
+    get_feature_piece_position { check = check_pieces_vec3, set = set_noop, }
+    get_feature_piece_direction { check = check_pieces_vec3, set = set_noop, }
+    get_feature_piece_pos_dir { check = check_pieces_pos_dir, set = set_noop, }
+    get_feature_piece_matrix { check = check_pieces_matrix, set = set_noop, }
+    get_unit_piece_info { check = check_pieces_info, set = set_noop, }
+    get_feature_piece_info { check = check_pieces_info, set = set_noop, }
+    get_unit_script_piece { check = check_pieces_script_piece, set = set_noop, }
     get_all_projectiles { check = check_projectiles_list, set = set_noop, }
     get_projectiles_in_rectangle { check = check_projectiles_list, set = set_noop, }
     get_projectiles_in_sphere { check = check_projectiles_list, set = set_noop, }
@@ -411,6 +487,19 @@ native_tests! {
     metal_amount { check = check_metal_map, set = set_metal_amount, }
     wind { check = check_game_wind, set = set_wind, }
     terrain_type_data { check = check_terrain_info, set = set_terrain_type_data, }
+    terrain_add_grass { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_remove_grass { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_level_height_map { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_adjust_height_map { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_revert_height_map { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_level_original_height_map { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_adjust_original_height_map { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_revert_original_height_map { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_level_smooth_mesh { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_adjust_smooth_mesh { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_revert_smooth_mesh { check = check_terrain_control_result, set = set_terrain_control_call, }
+    terrain_rebuild_smooth_mesh { check = check_terrain_control_result, set = set_terrain_control_call, }
+    set_tidal { check = check_game_tidal, set = set_tidal, }
     is_unit_in_los { check = check_los_bool, set = set_noop, }
     is_unit_in_radar { check = check_los_bool, set = set_noop, }
     is_unit_in_air_los { check = check_los_bool, set = set_noop, }
@@ -480,4 +569,267 @@ native_tests! {
     get_team_damage_stats { check = check_team_damage_stats, set = set_noop, }
     get_team_stats_history { check = check_team_stats_history_count, set = set_noop, }
     team_share_level { check = check_team_resources, set = set_team_share_level, }
+    unit_add_impulse { check = check_unit_control_call, set = set_noop, }
+    unit_add_seismic_ping { check = check_unit_control_call, set = set_noop, }
+    unit_add_resource { check = check_unit_control_call, set = set_noop, }
+    unit_use_resource { check = check_unit_control_call, set = set_noop, }
+    unit_clear_goal { check = check_unit_control_call, set = set_noop, }
+    unit_force_collision_update { check = check_unit_control_call, set = set_noop, }
+    unit_set_build_speed { check = check_unit_control_call, set = set_noop, }
+    unit_set_flanking { check = check_unit_control_call, set = set_noop, }
+    unit_set_mid_and_aim_pos { check = check_unit_control_call, set = set_noop, }
+    unit_set_move_goal { check = check_unit_control_call, set = set_noop, }
+    unit_set_physics { check = check_unit_control_call, set = set_noop, }
+    unit_set_pos_error_params { check = check_unit_control_call, set = set_noop, }
+    unit_set_resourcing { check = check_unit_control_call, set = set_noop, }
+    unit_set_stealth { check = check_unit_control_call, set = set_noop, }
+    unit_set_sonar_stealth { check = check_unit_control_call, set = set_noop, }
+    unit_set_always_visible { check = check_unit_control_call, set = set_noop, }
+    unit_set_use_air_los { check = check_unit_control_call, set = set_noop, }
+    unit_set_crashing { check = check_unit_control_call, set = set_noop, }
+    unit_set_tooltip { check = check_unit_control_call, set = set_noop, }
+    unit_set_stockpile { check = check_unit_control_call, set = set_noop, }
+    unit_set_shield_state { check = check_unit_control_call, set = set_noop, }
+    unit_set_shield_recharge_delay { check = check_unit_control_call, set = set_noop, }
+    unit_weapon_fire { check = check_unit_control_call, set = set_noop, }
+    unit_weapon_hold_fire { check = check_unit_control_call, set = set_noop, }
+    unit_finish_command { check = check_unit_control_call, set = set_noop, }
+    unit_set_leaves_ghost { check = check_unit_control_call, set = set_noop, }
+    unit_set_use_weapons { check = check_unit_control_call, set = set_noop, }
+    unit_set_target_clear { check = check_unit_control_call, set = set_noop, }
+    unit_set_loading_transport_clear { check = check_unit_control_call, set = set_noop, }
+    unit_set_weapon_state { check = check_unit_control_call, set = set_noop, }
+    unit_set_weapon_damages { check = check_unit_control_call, set = set_noop, }
+    unit_set_heading_and_up_dir { check = check_unit_control_call, set = set_noop, }
+    unit_add_object_decal { check = check_unit_control_call, set = set_noop, }
+    unit_remove_object_decal { check = check_unit_control_call, set = set_noop, }
+    unit_set_selection_volume_data { check = check_unit_control_call, set = set_noop, }
+    unit_set_piece_collision_volume_data { check = check_unit_control_call, set = set_noop, }
+    unit_set_piece_visible { check = check_unit_control_call, set = set_noop, }
+    unit_set_piece_matrix { check = check_unit_control_call, set = set_noop, }
+    unit_set_piece_parent { check = check_unit_control_call, set = set_noop, }
+    unit_set_nano_pieces { check = check_unit_control_call, set = set_noop, }
+    unit_set_travel { check = check_unit_control_call, set = set_noop, }
+    unit_set_fuel { check = check_unit_control_call, set = set_noop, }
+    unit_set_land_goal_not_air { check = check_unit_control_call, set = set_noop, }
+    feature_set_always_visible { check = check_feature_control_call, set = set_noop, }
+    feature_set_use_air_los { check = check_feature_control_call, set = set_noop, }
+    feature_set_move_ctrl { check = check_feature_control_call, set = set_noop, }
+    feature_set_physics { check = check_feature_control_call, set = set_noop, }
+    feature_set_heading_and_up_dir { check = check_feature_control_call, set = set_noop, }
+    feature_set_mid_and_aim_pos { check = check_feature_control_call, set = set_noop, }
+    feature_set_blocking { check = check_feature_control_call, set = set_noop, }
+    feature_set_selection_volume_data { check = check_feature_control_call, set = set_noop, }
+    feature_set_piece_visible { check = check_feature_control_call, set = set_noop, }
+    feature_set_piece_collision_volume_data { check = check_feature_control_call, set = set_noop, }
+    feature_set_piece_matrix { check = check_feature_control_call, set = set_noop, }
+    projectile_position { check = check_projectile_read, set = set_noop, }
+    projectile_direction { check = check_projectile_read, set = set_noop, }
+    projectile_velocity { check = check_projectile_read, set = set_noop, }
+    projectile_gravity { check = check_projectile_read, set = set_noop, }
+    projectile_target { check = check_projectile_read, set = set_noop, }
+    projectile_intercepted { check = check_projectile_read, set = set_noop, }
+    projectile_ttl { check = check_projectile_read, set = set_noop, }
+    projectile_owner { check = check_projectile_read, set = set_noop, }
+    projectile_team { check = check_projectile_read, set = set_noop, }
+    projectile_ally_team { check = check_projectile_read, set = set_noop, }
+    projectile_type { check = check_projectile_read, set = set_noop, }
+    projectile_def_id { check = check_projectile_read, set = set_noop, }
+    piece_projectile_params { check = check_projectile_read, set = set_noop, }
+    projectile_damage_armor { check = check_projectile_read, set = set_noop, }
+    projectile_damage_paralyze { check = check_projectile_read, set = set_noop, }
+    projectile_damage_impulse_factor { check = check_projectile_read, set = set_noop, }
+    projectile_damage_impulse_boost { check = check_projectile_read, set = set_noop, }
+    projectile_damage_crater_mult { check = check_projectile_read, set = set_noop, }
+    projectile_damage_crater_boost { check = check_projectile_read, set = set_noop, }
+    projectile_damage_dyn_exp { check = check_projectile_read, set = set_noop, }
+    projectile_damage_dyn_min { check = check_projectile_read, set = set_noop, }
+    projectile_damage_dyn_range { check = check_projectile_read, set = set_noop, }
+    projectile_damage_dyn_inverted { check = check_projectile_read, set = set_noop, }
+    projectile_damage_crater_aoe { check = check_projectile_read, set = set_noop, }
+    projectile_damage_damage_aoe { check = check_projectile_read, set = set_noop, }
+    projectile_damage_edge_effectiveness { check = check_projectile_read, set = set_noop, }
+    projectile_damage_explosion_speed { check = check_projectile_read, set = set_noop, }
+    projectile_position_after_set { check = check_projectile_control_call, set = set_projectile_control, }
+    projectile_velocity_after_set { check = check_projectile_control_call, set = set_projectile_control, }
+    projectile_gravity_after_set { check = check_projectile_control_call, set = set_projectile_control, }
+    projectile_target_after_set { check = check_projectile_control_call, set = set_projectile_control, }
+    projectile_intercepted_after_set { check = check_projectile_control_call, set = set_projectile_control, }
+    projectile_ttl_after_set { check = check_projectile_control_call, set = set_projectile_control, }
+    projectile_damage_after_set { check = check_projectile_control_call, set = set_projectile_control, }
+    piece_projectile_params_after_set { check = check_projectile_control_call, set = set_projectile_control, }
+    projectile_set_always_visible { check = check_projectile_control_call, set = set_noop, }
+    projectile_set_use_air_los { check = check_projectile_control_call, set = set_noop, }
+    projectile_set_move_control { check = check_projectile_control_call, set = set_noop, }
+    projectile_set_ignore_tracking_error { check = check_projectile_control_call, set = set_noop, }
+    projectile_set_spin_angle { check = check_projectile_control_call, set = set_noop, }
+    projectile_set_spin_speed { check = check_projectile_control_call, set = set_noop, }
+    projectile_set_spin_vec { check = check_projectile_control_call, set = set_noop, }
+    projectile_set_ceg { check = check_projectile_control_call, set = set_noop, }
+    projectile_spawn { check = check_projectile_control_call, set = set_noop, }
+    projectile_collision { check = check_projectile_control_call, set = set_projectile_control, }
+    projectile_delete { check = check_projectile_control_call, set = set_projectile_control, }
+    get_replay_file_path { check = check_system_control_value, set = set_noop, }
+    get_replay_recording_file_path { check = check_system_control_value, set = set_noop, }
+    add_height_map { check = check_remaining_synced, set = set_remaining_synced, }
+    add_original_height_map { check = check_remaining_synced, set = set_remaining_synced, }
+    add_smooth_mesh { check = check_remaining_synced, set = set_remaining_synced, }
+    add_team_resource_excess_stats { check = check_remaining_synced, set = set_remaining_synced, }
+    share_team_resource { check = check_team_resources, set = set_remaining_synced, }
+    set_ally { check = check_teams_bool, set = set_remaining_synced, }
+    assign_player_to_team { check = check_player_info, set = set_remaining_synced, }
+    set_cheating_enabled { check = check_remaining_synced, set = set_remaining_synced, }
+    set_god_mode { check = check_remaining_synced, set = set_remaining_synced, }
+    set_experience_grade { check = check_remaining_synced, set = set_remaining_synced, }
+    set_no_pause { check = check_remaining_synced, set = set_remaining_synced, }
+    set_player_ready_state { check = check_remaining_synced, set = set_remaining_synced, }
+    set_square_building_mask { check = check_remaining_synced, set = set_remaining_synced, }
+    transfer_team_max_units { check = check_remaining_synced, set = set_remaining_synced, }
+    custom_palette_color { check = check_unsynced_render_data, set = set_unsynced_read_value, }
+    unit_palette_index { check = check_unsynced_render_data, set = set_unsynced_read_value, }
+    feature_palette_index { check = check_unsynced_render_data, set = set_unsynced_read_value, }
+    feature_no_draw { check = check_feature_render_flag, set = set_feature_render_flag, }
+    feature_engine_draw_mask { check = check_feature_render_flag, set = set_feature_render_flag, }
+    feature_always_update_matrix { check = check_feature_render_flag, set = set_feature_render_flag, }
+    feature_fade { check = check_feature_render_flag, set = set_feature_render_flag, }
+    clear_features_previous_draw_flag { check = check_unsynced_read_value, set = set_noop, }
+    clear_units_previous_draw_flag { check = check_unsynced_read_value, set = set_noop, }
+    clear_watch_dog_timer { check = check_system_control_value, set = set_system_control_value, }
+    get_piece_projectile_name { check = check_unsynced_read_value, set = set_noop, }
+    ground_decal_create { check = check_ground_decal, set = set_noop, }
+    ground_decal_all { check = check_ground_decal, set = set_noop, }
+    ground_decal_type { check = check_ground_decal, set = set_noop, }
+    ground_decal_owner { check = check_ground_decal, set = set_noop, }
+    ground_decal_textures_all { check = check_ground_decal, set = set_noop, }
+    ground_decal_textures_main_with_files { check = check_ground_decal, set = set_noop, }
+    ground_decal_texture { check = check_ground_decal, set = set_noop, }
+    ground_decal_texture_params { check = check_ground_decal, set = set_noop, }
+    ground_decal_alpha { check = check_ground_decal, set = set_noop, }
+    ground_decal_tint { check = check_ground_decal, set = set_noop, }
+    ground_decal_normal { check = check_ground_decal, set = set_noop, }
+    ground_decal_glow { check = check_ground_decal, set = set_noop, }
+    ground_decal_misc { check = check_ground_decal, set = set_noop, }
+    ground_decal_creation_frame { check = check_ground_decal, set = set_noop, }
+    ground_decal_user_data { check = check_ground_decal, set = set_noop, }
+    ground_decal_middle { check = check_ground_decal, set = set_noop, }
+    ground_decal_quad { check = check_ground_decal, set = set_noop, }
+    ground_decal_rotation { check = check_ground_decal, set = set_noop, }
+    ground_decal_size { check = check_ground_decal, set = set_noop, }
+    ground_decal_pos_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_quad_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_rotation_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_texture_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_texture_params_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_alpha_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_tint_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_normal_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_glow_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_misc_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_creation_frame_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_user_data_after_set { check = check_ground_decal, set = set_ground_decal, }
+    ground_decal_destroy { check = check_ground_decal, set = set_ground_decal, }
+    spawn_explosion { check = check_effects_path_value, set = set_noop, }
+    spawn_ceg { check = check_effects_path_value, set = set_noop, }
+    spawn_sfx { check = check_effects_path_value, set = set_noop, }
+    path_node_costs { check = check_effects_path_value, set = set_noop, }
+    request_path { check = check_effects_path_value, set = set_noop, }
+    map_model_lights_lifecycle { check = check_control_calls, set = set_noop, }
+    camera_state_roundtrip { check = check_control_calls, set = set_noop, }
+    set_camera_offset { check = check_unsynced_control_call, set = set_noop, }
+    run_dolly_camera { check = check_unsynced_control_call, set = set_noop, }
+    pause_dolly_camera { check = check_unsynced_control_call, set = set_noop, }
+    resume_dolly_camera { check = check_unsynced_control_call, set = set_noop, }
+    set_dolly_camera_mode { check = check_unsynced_control_call, set = set_noop, }
+    set_dolly_camera_position { check = check_unsynced_control_call, set = set_noop, }
+    set_dolly_camera_curve { check = check_unsynced_control_call, set = set_noop, }
+    set_dolly_camera_look_curve { check = check_unsynced_control_call, set = set_noop, }
+    set_dolly_camera_look_position { check = check_unsynced_control_call, set = set_noop, }
+    set_dolly_camera_look_unit { check = check_unsynced_control_call, set = set_noop, }
+    set_dolly_camera_relative_mode { check = check_unsynced_control_call, set = set_noop, }
+    send_public_chat { check = check_messages_value, set = set_noop, }
+    send_ally_chat { check = check_messages_value, set = set_noop, }
+    send_spectator_chat { check = check_messages_value, set = set_noop, }
+    send_private_chat { check = check_messages_value, set = set_noop, }
+    send_commands { check = check_messages_value, set = set_noop, }
+    send_lua_menu_msg { check = check_messages_value, set = set_noop, }
+    send_lua_ui_msg { check = check_messages_value, set = set_noop, }
+    send_lua_gaia_msg { check = check_messages_value, set = set_noop, }
+    send_lua_rules_msg { check = check_messages_value, set = set_noop, }
+    send_skirmish_ai_message { check = check_messages_value, set = set_noop, }
+    set_atmosphere_params { check = check_control_calls, set = set_noop, }
+    set_sun_direction { check = check_unsynced_control_call, set = set_noop, }
+    set_sun_lighting_params { check = check_control_calls, set = set_noop, }
+    set_water_params { check = check_control_calls, set = set_noop, }
+    set_map_rendering_params { check = check_control_calls, set = set_noop, }
+    set_draw_ground { check = check_unsynced_control_call, set = set_noop, }
+    set_draw_sky { check = check_unsynced_control_call, set = set_noop, }
+    set_draw_water { check = check_unsynced_control_call, set = set_noop, }
+    set_draw_ground_deferred { check = check_unsynced_control_call, set = set_noop, }
+    set_draw_models_deferred { check = check_unsynced_control_call, set = set_noop, }
+    set_engine_build_square_rendering { check = check_unsynced_control_call, set = set_noop, }
+    set_auto_show_metal { check = check_unsynced_control_call, set = set_noop, }
+    force_layout_update { check = check_unsynced_control_call, set = set_noop, }
+    force_tesselation_update { check = check_unsynced_control_call, set = set_noop, }
+    set_custom_command_draw_data { check = check_unsynced_control_call, set = set_noop, }
+    set_unit_def_icon { check = check_unsynced_control_call, set = set_noop, }
+    set_unit_def_image { check = check_unsynced_control_call, set = set_noop, }
+    set_map_shader { check = check_unsynced_control_call, set = set_noop, }
+    set_map_shading_texture { check = check_unsynced_control_call, set = set_noop, }
+    set_sky_box_texture { check = check_unsynced_control_call, set = set_noop, }
+    set_wm_caption { check = check_unsynced_control_call, set = set_noop, }
+    set_shock_front_factors { check = check_unsynced_control_call, set = set_noop, }
+    ping { check = check_system_control_value, set = set_noop, }
+    request_start_position { check = check_system_control_value, set = set_noop, }
+    set_share_level { check = check_system_control_value, set = set_noop, }
+    share_resources { check = check_system_control_value, set = set_noop, }
+    is_unit_visible { check = check_unsynced_read_value, set = set_noop, }
+    preload_unit_def_model { check = check_unsynced_control_call, set = set_noop, }
+    preload_feature_def_model { check = check_unsynced_control_call, set = set_noop, }
+    load_model_textures { check = check_unsynced_control_call, set = set_noop, }
+    load_cmd_colors_config { check = check_unsynced_control_call, set = set_noop, }
+    load_ctrl_panel_config { check = check_unsynced_control_call, set = set_noop, }
+    set_wm_icon { check = check_unsynced_control_call, set = set_noop, }
+    unit_cmd_desc_lifecycle { check = check_unit_cmd_desc_lifecycle, set = set_unit_cmd_desc_lifecycle, }
+    solve_nurbscurve { check = check_unsynced_read_value, set = set_noop, }
+    set_original_height_map { check = check_remaining_synced, set = set_remaining_synced, }
+    set_smooth_mesh { check = check_remaining_synced, set = set_remaining_synced, }
+    give_order_selected { check = check_order_variant, set = set_noop, }
+    give_order_to_unit_unsynced { check = check_order_variant, set = set_noop, }
+    give_order_to_unit_array_unsynced { check = check_order_variant, set = set_noop, }
+    give_order_to_unit_map_unsynced { check = check_order_variant, set = set_noop, }
+    give_order_array_to_unit_unsynced { check = check_order_variant, set = set_noop, }
+    give_order_array_to_unit_map_unsynced { check = check_order_variant, set = set_noop, }
+    give_order_array_to_unit_array_unsynced { check = check_order_variant, set = set_noop, }
+    give_order_to_unit_synced { check = check_order_variant, set = set_order_variant, }
+    give_order_to_unit_array_synced { check = check_order_variant, set = set_order_variant, }
+    give_order_to_unit_map_synced { check = check_order_variant, set = set_order_variant, }
+    give_order_array_to_unit_synced { check = check_order_variant, set = set_order_variant, }
+    give_order_array_to_unit_map_synced { check = check_order_variant, set = set_order_variant, }
+    give_order_array_to_unit_array_synced_pairwise { check = check_order_variant, set = set_order_variant, }
+    give_order_array_to_unit_array_synced_broadcast { check = check_order_variant, set = set_order_variant, }
+    get_cobscript_id_non_cob { check = check_cob_script, set = set_noop, }
+    call_cobscript_non_cob { check = check_cob_script, set = set_noop, }
+    create_unit_cleanup { check = check_object_lifecycle, set = set_noop, }
+    destroy_unit { check = check_object_lifecycle, set = set_noop, }
+    transfer_unit { check = check_object_lifecycle, set = set_noop, }
+    create_feature_cleanup { check = check_object_lifecycle, set = set_noop, }
+    destroy_feature { check = check_object_lifecycle, set = set_noop, }
+    transfer_feature { check = check_object_lifecycle, set = set_noop, }
+    create_unit_wreck_cleanup { check = check_object_lifecycle, set = set_noop, }
+    create_feature_wreck_cleanup { check = check_object_lifecycle, set = set_noop, }
+    unit_attach { check = check_object_lifecycle, set = set_noop, }
+    unit_detach { check = check_object_lifecycle, set = set_noop, }
+    unit_detach_from_air { check = check_object_lifecycle, set = set_noop, }
+    bugger_off { check = check_object_lifecycle, set = set_noop, }
+    set_factory_bugger_off { check = check_remaining_tail, set = set_remaining_tail, }
+    kill_team { check = check_remaining_tail, set = set_remaining_tail, }
+    game_over { check = check_remaining_tail, set = set_remaining_tail, }
+    set_window_geometry { check = check_remaining_tail, set = set_remaining_tail, }
+    set_window_minimized { check = check_remaining_tail, set = set_remaining_tail, }
+    set_window_maximized { check = check_remaining_tail, set = set_remaining_tail, }
+    yield { check = check_remaining_tail, set = set_remaining_tail, }
+    quit { check = check_process_control, set = set_process_control, }
+    reload { check = check_process_control, set = set_process_control, }
+    restart { check = check_process_control, set = set_process_control, }
+    start { check = check_process_control, set = set_process_control, }
 }

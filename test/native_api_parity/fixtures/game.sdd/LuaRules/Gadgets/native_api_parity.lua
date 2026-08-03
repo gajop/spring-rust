@@ -14,6 +14,56 @@ if not gadgetHandler:IsSyncedCode() then
 	local sentInventory = false
 	local ranGeneratedTests = false
 	local fixtureIDs = {}
+	local groundDecalID
+	local parityOptions = Spring.GetModOptions() or {}
+	local processTest = tostring(parityOptions.native_api_parity_process_test or "")
+	local processStage = tostring(parityOptions.native_api_parity_process_stage or "initial")
+	local function unitPayload(caseIndex, ids, values)
+		values.case = caseIndex
+		values.unitID = ids.unitID
+		return values
+	end
+	local function groundPayload(caseIndex, _, values)
+		values.case = caseIndex
+		return values
+	end
+	local allHooks = VFS.Include("LuaRules/Utilities/native_api_parity_custom_hooks.lua")({
+			unitPayload = unitPayload,
+			groundPayload = groundPayload,
+		})
+	local function customUnsyncedTests(processOnly)
+		local selected = {}
+		for _, hook in ipairs(allHooks) do
+			local normalTest = hook.name == "map_model_lights_lifecycle"
+				or hook.name == "camera_state_roundtrip"
+				or hook.name == "set_atmosphere_params"
+				or hook.name == "set_sun_lighting_params"
+				or hook.name == "set_water_params"
+				or hook.name == "set_map_rendering_params"
+				or hook.name == "preload_sound_item_missing"
+				or hook.name == "set_window_geometry"
+				or hook.name == "set_window_minimized"
+				or hook.name == "set_window_maximized"
+				or hook.name == "yield"
+			local processTestMatch = processOnly
+				and processStage == "initial"
+				and hook.name == processTest
+			if (not processOnly and normalTest) or processTestMatch then
+				selected[#selected + 1] = hook
+			end
+		end
+		return selected
+	end
+	local CustomTests = customUnsyncedTests()
+	local ProcessTests = customUnsyncedTests(true)
+
+	local function ensureGroundDecal()
+		if groundDecalID == nil or groundDecalID <= 0 or Spring.GetGroundDecalType(groundDecalID) == nil then
+			groundDecalID = Spring.CreateGroundDecal()
+		end
+		fixtureIDs.groundDecalID = groundDecalID
+		fixtureIDs.decalID = groundDecalID
+	end
 
 	local function forward(stream, payload)
 		if Script.LuaUI.NativeApiParityResult then
@@ -35,21 +85,36 @@ if not gadgetHandler:IsSyncedCode() then
 
 	local function record(name, payload)
 		payload.context = "unsynced_gadget"
-		payload.name = name
+		Common.setTestName(payload, name)
 		forward("unsynced_gadget", Common.encode(payload))
 	end
 
 	local function runGeneratedTests()
+		if processStage == "resume" then
+			return
+		end
 		if ranGeneratedTests then
 			return
 		end
 		ranGeneratedTests = true
 		Common.runPortableReadOnlyTests("unsynced_gadget", GeneratedTests, record, function(encoded)
 			Spring.InvokeNativeModule(encoded)
+		end, fixtureIDs, function()
+			-- Some rendering tests are destructive by design.  Give each random
+			-- case a valid decal fixture instead of reusing the ID destroyed by the
+			-- preceding case.
+			ensureGroundDecal()
+		end)
+		Common.runCustomTests("unsynced_gadget", CustomTests, GeneratedTests, record, function(encoded)
+			Spring.InvokeNativeModule(encoded)
 		end, fixtureIDs)
 	end
 
 	function gadget:Initialize()
+		-- Ground decals are an unsynced rendering fixture.  Create one after the
+		-- engine has initialized the unsynced decal drawer, then pass its ID to
+		-- the widget/native runner alongside the synced fixture IDs.
+		ensureGroundDecal()
 		forward("unsynced_gadget", Common.encode({
 			context = "unsynced_gadget",
 			name = "game_frame_initial",
@@ -59,18 +124,21 @@ if not gadgetHandler:IsSyncedCode() then
 
 	function gadget:RecvFromSynced(name, ...)
 		if name == "native_api_parity_fixture" then
-			local unitID, featureID, unitDefID, featureDefID, weaponDefID, teamID, allyTeamID = ...
+			local unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID = ...
 			fixtureIDs = {
 				unitID = unitID,
 				featureID = featureID,
 				unitDefID = unitDefID,
 				featureDefID = featureDefID,
 				weaponDefID = weaponDefID,
+				projectileID = projectileID,
+				pieceProjectileID = pieceProjectileID,
 				teamID = teamID,
 				allyTeamID = allyTeamID,
+				groundDecalID = groundDecalID,
 			}
 			if Script.LuaUI.NativeApiParityFixture then
-				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, teamID, allyTeamID)
+				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID)
 			end
 			return
 		elseif name == "native_api_parity_result" then
@@ -79,20 +147,55 @@ if not gadgetHandler:IsSyncedCode() then
 		end
 	end
 
+	local function runProcessTests()
+		if processTest == "" or processStage ~= "initial" then
+			return
+		end
+		Common.runCustomTests("unsynced_gadget", ProcessTests, GeneratedTests, record, function(encoded)
+			Spring.InvokeNativeModule(encoded)
+		end, fixtureIDs)
+	end
+
 	function gadget:GameFrame(frame)
+		if frame == 1 and processStage == "resume"
+			and (processTest == "reload" or processTest == "restart")
+		then
+			local payload = {
+				case = 1,
+				called = true,
+				returnCount = 0,
+				reloaded = true,
+			}
+			record(processTest, payload)
+			if Common.mode() == "native" then
+				Spring.InvokeNativeModule(Common.encode(payload))
+			end
+			Spring.Quit()
+			return
+		end
 		if frame == 4 then
+			-- Depending on renderer startup timing, CreateGroundDecal can be
+			-- unavailable during gadget Initialize.  Retry once the first game
+			-- frame has been reached before deciding which decal tests can run.
+			ensureGroundDecal()
 			sendInventory()
 			runGeneratedTests()
 		end
 		if frame == 20 then
 			sendInventory()
 			runGeneratedTests()
+			runProcessTests()
 			forward("unsynced_gadget", Common.encode({
 				context = "unsynced_gadget",
 				name = "game_frame",
 				value = Spring.GetGameFrame(),
 			}))
-			Spring.SendCommands("quitforce")
+			if processTest == "reload" or processTest == "restart" then
+				-- The process-control API is expected to reload the valid fixture
+				-- script.  The resumed fixture quits at frame one.
+			else
+				Spring.SendCommands("quitforce")
+			end
 		end
 	end
 
@@ -101,6 +204,8 @@ end
 
 local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
+local syncedParityOptions = Spring.GetModOptions() or {}
+local syncedProcessStage = tostring(syncedParityOptions.native_api_parity_process_stage or "initial")
 
 local function options()
 	return Spring.GetModOptions() or {}
@@ -108,6 +213,16 @@ end
 
 local rngState = tonumber(options().native_api_parity_seed) or 1
 local caseCount = tonumber(options().native_api_parity_cases) or 1
+local selectedTestsOption = tostring(options().native_api_parity_tests or "")
+local selectedTestPrefix = tonumber(options().native_api_parity_test_prefix or "")
+local selectedTests = {}
+for testName in string.gmatch(selectedTestsOption, "[^,]+") do
+	selectedTests[testName] = true
+end
+
+local function selectedTest(testName)
+	return selectedTestsOption == "" and selectedTestPrefix == nil or selectedTests[testName] == true
+end
 
 local function rand01()
 	rngState = (1103515245 * rngState + 12345) % 2147483648
@@ -127,7 +242,7 @@ local function rounded(value)
 end
 
 local function send(name, payload)
-	payload.name = name
+	Common.setTestName(payload, name)
 	payload.context = "synced_gadget"
 	local encoded = Common.encode(payload)
 	SendToUnsynced("native_api_parity_result", "synced_gadget", encoded)
@@ -146,7 +261,7 @@ local function sendInventory()
 end
 
 local function requestNativeSet(name, payload, luaFallback)
-	payload.name = name
+	Common.setTestName(payload, name)
 	payload.context = "synced_gadget"
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
@@ -164,11 +279,55 @@ end
 local function featurePayload(caseIndex, ids, values)
 	values.case = caseIndex
 	values.featureID = ids.featureID
+	-- Diagnostic fixture state: keep the object transform alongside piece
+	-- queries so cross-process differences can be attributed to the feature
+	-- itself versus LocalModelPiece emission data.  These fields are not part
+	-- of any declared comparison contract.
+	local x, y, z = Spring.GetFeaturePosition(ids.featureID)
+	values.fixtureFeaturePosX = x
+	values.fixtureFeaturePosY = y
+	values.fixtureFeaturePosZ = z
+	values.fixtureFeatureInputX = ids.featureInputX
+	values.fixtureFeatureInputZ = ids.featureInputZ
+	values.fixtureFeatureFacing = ids.featureFacing
+	local frontX, frontY, frontZ = Spring.GetFeatureDirection(ids.featureID)
+	values.fixtureFeatureFrontX = frontX
+	values.fixtureFeatureFrontY = frontY
+	values.fixtureFeatureFrontZ = frontZ
+	return values
+end
+
+local function projectilePayload(caseIndex, ids, values)
+	values.case = caseIndex
+	values.projectileID = ids.projectileID
+	return values
+end
+
+local function pieceProjectilePayload(caseIndex, ids, values)
+	values.case = caseIndex
+	values.projectileID = ids.pieceProjectileID
+	values.isPiece = true
 	return values
 end
 
 local function groundPayload(caseIndex, _, values)
 	values.case = caseIndex
+	return values
+end
+
+local function objectPayload(caseIndex, ids, values)
+	values.case = caseIndex
+	values.unitID = ids.unitID
+	values.featureID = ids.featureID
+	values.unitDefID = ids.unitDefID
+	values.featureDefID = ids.featureDefID
+	values.teamID = ids.teamID
+	values.groundX = ids.groundX
+	values.groundY = 96
+	values.groundZ = ids.groundZ
+	values.x = ids.groundX
+	values.y = 96
+	values.z = ids.groundZ
 	return values
 end
 
@@ -286,8 +445,9 @@ local function generatedMake(test)
 		for name, param in pairs(test.params or {}) do
 			local value = generatedParamValue(param, ids)
 			if param.expands_to and type(value) == "table" then
-				for _, field in ipairs(param.expands_to) do
-					values[field] = value[field]
+				for index, field in ipairs(param.expands_to) do
+					local sourceField = param.expands_from and param.expands_from[index] or field
+					values[field] = value[sourceField]
 				end
 			else
 				values[name] = value
@@ -307,6 +467,9 @@ local function generatedArg(spec, ids, value)
 	end
 	if type(spec) ~= "string" then
 		return spec
+	end
+	if spec == "nil" then
+		return nil
 	end
 	local fixtureKey = spec:match("^fixture%.(.+)$")
 	if fixtureKey then
@@ -373,6 +536,14 @@ local function generatedReturnValue(returnSpec, returns)
 			end
 		end
 		value = count
+	elseif returnSpec.transform == "table_int_values" then
+		local values = {}
+		if type(value) == "table" then
+			for _, item in ipairs(value) do
+				values[#values + 1] = item
+			end
+		end
+		value = values
 	elseif returnSpec.transform == "table_nonempty" then
 		local nonempty = false
 		if type(value) == "table" then
@@ -382,12 +553,20 @@ local function generatedReturnValue(returnSpec, returns)
 			end
 		end
 		value = nonempty
+	elseif returnSpec.transform == "return_count" then
+		value = returns.n or 0
 	elseif returnSpec.transform == "truthy" then
 		value = value ~= nil and value ~= false
+	elseif returnSpec.transform == "valid_id" then
+		value = type(value) == "number" and value >= 0
 	elseif returnSpec.transform == "string_len" then
 		value = type(value) == "string" and #value or 0
 	elseif returnSpec.transform == "nil_to_minus_one" then
 		if value == nil then
+			value = -1
+		end
+	elseif returnSpec.transform == "false_to_minus_one" then
+		if value == nil or value == false then
 			value = -1
 		end
 	elseif returnSpec.transform == "build_status_can_build" then
@@ -464,35 +643,83 @@ local function generatedReturnValue(returnSpec, returns)
 	return field, value
 end
 
+local function packReturns(...)
+	local packed = { n = select("#", ...) }
+	for index = 1, packed.n do
+		packed[index] = select(index, ...)
+	end
+	return packed
+end
+
+local function invokeGeneratedRuntime(runtime, ids, value)
+	if runtime.table then
+		local tableValue = _G[runtime.table]
+		if type(tableValue) ~= "table" then
+			error("Lua API value is not a table: " .. tostring(runtime.table))
+		end
+		local key = generatedArg(runtime.key, ids, value)
+		if key ~= nil then
+			tableValue = tableValue[key]
+		end
+		return { tableValue }
+	end
+
+	local func = resolveLuaFunction(runtime.call)
+	local args = {}
+	local argCount = 0
+	for _, argSpec in ipairs(runtime.args or {}) do
+		argCount = argCount + 1
+		args[argCount] = generatedArg(argSpec, ids, value)
+	end
+	return packReturns(func(unpack(args, 1, argCount)))
+end
+
+local function appendGeneratedReadback(readback, runtime, returns)
+	for index, returnSpec in ipairs(runtime.returns or {}) do
+		local field, returnValue = generatedReturnValue(returnSpec, returns)
+		if type(returnSpec) == "string" then
+			returnValue = returns[index]
+		end
+		readback[field] = returnValue
+	end
+end
+
+local function hasOnlyReturnCountResults(runtime)
+	local returns = runtime.returns
+	if type(returns) ~= "table" or #returns == 0 or #(runtime.post or {}) ~= 0 then
+		return false
+	end
+
+	for _, returnSpec in ipairs(returns) do
+		if type(returnSpec) ~= "table" or returnSpec.transform ~= "return_count" then
+			return false
+		end
+	end
+	return true
+end
+
 local function generatedGet(test)
 	return function(ids, value)
 		local runtime = test.lua_runtime
 		local returns
-		if runtime.table then
-			local tableValue = _G[runtime.table]
-			if type(tableValue) ~= "table" then
-				error("Lua API value is not a table: " .. tostring(runtime.table))
-			end
-			local key = generatedArg(runtime.key, ids, value)
-			if key ~= nil then
-				tableValue = tableValue[key]
-			end
-			returns = { tableValue }
+		if test.native_only and Common.mode() == "native" then
+			-- Native-only mutators are applied by the native setter callback
+			-- before this readback.  Do not invoke their Lua call a second time.
+			returns = { n = 0 }
+		elseif Common.mode() == "native" and test.readonly and hasOnlyReturnCountResults(runtime) then
+			-- Write-only Lua controls are represented as readonly parity tests
+			-- because their generated readback is just the Lua return count.  The
+			-- native check invokes the Rust control call separately; invoking the
+			-- Lua control here as well would apply the side effect twice in native
+			-- mode (and can consume synced RNG or otherwise change later checks).
+			returns = { n = 0 }
 		else
-			local func = resolveLuaFunction(runtime.call)
-			local args = {}
-			for _, argSpec in ipairs(runtime.args or {}) do
-				args[#args + 1] = generatedArg(argSpec, ids, value)
-			end
-			returns = { func(unpack(args)) }
+			returns = invokeGeneratedRuntime(runtime, ids, value)
 		end
 		local readback = {}
-		for index, returnSpec in ipairs(runtime.returns or {}) do
-			local field, returnValue = generatedReturnValue(returnSpec, returns)
-			if type(returnSpec) == "string" then
-				returnValue = returns[index]
-			end
-			readback[field] = returnValue
+		appendGeneratedReadback(readback, runtime, returns)
+		for _, postRuntime in ipairs(runtime.post or {}) do
+			appendGeneratedReadback(readback, postRuntime, invokeGeneratedRuntime(postRuntime, ids, value))
 		end
 		for _, field in ipairs(test.order_insensitive_fields or {}) do
 			if type(readback[field]) == "table" then
@@ -518,10 +745,12 @@ local function generatedSet(test)
 		for _, setter in ipairs(setters) do
 			local func = resolveLuaFunction(setter.call)
 			local args = {}
+			local argCount = 0
 			for _, argSpec in ipairs(setter.args or {}) do
-				args[#args + 1] = generatedArg(argSpec, ids, value)
+				argCount = argCount + 1
+				args[argCount] = generatedArg(argSpec, ids, value)
 			end
-			func(unpack(args))
+			func(unpack(args, 1, argCount))
 		end
 	end
 end
@@ -533,27 +762,77 @@ function Fixture.create()
 	local baseX = randFloat(880, 1180)
 	local baseZ = randFloat(880, 1180)
 	local unitID = Spring.CreateUnit("native_api_test_unit", baseX, 96, baseZ, randInt(0, 3), teamID, false, false)
-	local featureID = Spring.CreateFeature("native_api_test_feature", baseX + randFloat(24, 80), 96, baseZ + randFloat(24, 80), randInt(0, 3), teamID)
+	-- Lua unit scripts are created lazily.  The piece/script parity checks need
+	-- the same CLuaUnitScript piece map that a real script-backed unit has.
+	if unitID and Spring.UnitScript and Spring.UnitScript.CreateScript then
+		Spring.UnitScript.CreateScript(unitID, {})
+	end
+	local featureInputX = baseX + randFloat(24, 80)
+	local featureInputZ = baseZ + randFloat(24, 80)
+	local featureFacing = randInt(0, 3)
+	local featureID = Spring.CreateFeature("native_api_test_feature", featureInputX, 96, featureInputZ, featureFacing, teamID)
 	local unitDefID = Spring.GetUnitDefID(unitID)
 	local unitDef = UnitDefs[unitDefID]
 	local weaponEntry = unitDef and unitDef.weapons and (unitDef.weapons[1] or unitDef.weapons[0])
 	local weaponDefID = weaponEntry and weaponEntry.weaponDef
+	local projectileID = weaponDefID and Spring.SpawnProjectile(weaponDefID, {
+		pos = {baseX, 96, baseZ},
+		speed = {0, 0, 0},
+		["end"] = {baseX + 128, 96, baseZ + 128},
+		owner = unitID,
+		team = teamID,
+		ttl = 10000,
+		gravity = 0,
+	})
+	local existingProjectiles = {}
+	for _, id in ipairs(Spring.GetAllProjectiles(false, false) or {}) do
+		existingProjectiles[id] = true
+	end
+	local pieceProjectileID
+	if unitID and Spring.UnitScript and Spring.UnitScript.CallAsUnit and SFX then
+		Spring.UnitScript.CallAsUnit(unitID, function()
+			Spring.UnitScript.Explode(1, SFX.EXPLODE + SFX.NO_CEG_TRAIL)
+		end)
+		for _, id in ipairs(Spring.GetAllProjectiles(false, false) or {}) do
+			if not existingProjectiles[id] then
+				local isWeapon, isPiece = Spring.GetProjectileType(id)
+				if isPiece and not isWeapon then
+					pieceProjectileID = id
+					break
+				end
+			end
+		end
+	end
 	return {
 		teamID = teamID,
 		allyTeamID = 0,
 		unitID = unitID,
 		unitDefID = unitDefID,
 		featureID = featureID,
+		featureInputX = rounded(featureInputX),
+		featureInputZ = rounded(featureInputZ),
+		featureFacing = featureFacing,
 		featureDefID = Spring.GetFeatureDefID(featureID),
 		weaponDefID = weaponDefID,
+		projectileID = projectileID,
+		pieceProjectileID = pieceProjectileID,
 		groundX = rounded(baseX),
 		groundZ = rounded(baseZ),
 	}
 end
 
 function Fixture.destroy(ids)
+	if ids.unitID then
+		for _, id in ipairs(Spring.GetAllProjectiles(false, false) or {}) do
+			if Spring.GetProjectileOwnerID(id) == ids.unitID then
+				Spring.DeleteProjectile(id)
+			end
+		end
+	end
 	if ids.unitID and (not Spring.ValidUnitID or Spring.ValidUnitID(ids.unitID)) then
-		Spring.DestroyUnit(ids.unitID, false, true)
+		-- Test fixtures are owned by this case.  Use Lua's immediate-cleanup
+		-- option so the next randomized case cannot observe a dead fixture.
+		Spring.DestroyUnit(ids.unitID, false, true, nil, true)
 	end
 	if ids.featureID and (not Spring.ValidFeatureID or Spring.ValidFeatureID(ids.featureID)) then
 		Spring.DestroyFeature(ids.featureID)
@@ -574,6 +853,7 @@ local TEST_HOOKS = CustomHooks({
 	unitPayload = unitPayload,
 	featurePayload = featurePayload,
 	groundPayload = groundPayload,
+	objectPayload = objectPayload,
 })
 
 local function buildGeneratedTests(hooks)
@@ -581,7 +861,7 @@ local function buildGeneratedTests(hooks)
 	local seen = {}
 	local function hasUnsupportedRequirement(metadata)
 		for _, requirement in ipairs(metadata.requires or {}) do
-			if requirement ~= "unit" and requirement ~= "feature" and requirement ~= "ground_point" then
+			if requirement ~= "unit" and requirement ~= "feature" and requirement ~= "projectile" and requirement ~= "piece_projectile" and requirement ~= "ground_point" then
 				return true
 			end
 		end
@@ -592,9 +872,14 @@ local function buildGeneratedTests(hooks)
 	end
 
 	local tests = {}
-	for _, metadata in ipairs(GeneratedTests) do
+	for index, metadata in ipairs(GeneratedTests) do
+		if selectedTestPrefix ~= nil and index <= selectedTestPrefix then
+			selectedTests[metadata.id] = true
+		end
 		local context = metadata.context or "synced_gadget"
-		if context ~= "synced_gadget" then
+		if not selectedTest(metadata.id) then
+			seen[metadata.id] = true
+		elseif context ~= "synced_gadget" then
 			seen[metadata.id] = true
 		elseif metadata.requires_rendering and not Common.enableRenderingTests() then
 			seen[metadata.id] = true
@@ -618,12 +903,16 @@ local function buildGeneratedTests(hooks)
 					test.payload = unitPayload
 				elseif metadata.requires and metadata.requires[1] == "feature" then
 					test.payload = featurePayload
+				elseif metadata.requires and metadata.requires[1] == "projectile" then
+					test.payload = projectilePayload
+				elseif metadata.requires and metadata.requires[1] == "piece_projectile" then
+					test.payload = pieceProjectilePayload
 				else
 					test.payload = groundPayload
 				end
 				test.make = generatedMake(metadata)
-				test.get = generatedGet(metadata)
-				test.set = generatedSet(metadata)
+				test.get = generatedGet(test)
+				test.set = generatedSet(test)
 			else
 				error("generated parity metadata has no Lua runtime hook for " .. metadata.id)
 			end
@@ -633,7 +922,7 @@ local function buildGeneratedTests(hooks)
 	end
 
 	for _, hook in ipairs(hooks) do
-		if not seen[hook.name] then
+		if selectedTest(hook.name) and not seen[hook.name] then
 			error("Lua runtime hook has no generated parity metadata for " .. hook.name)
 		end
 	end
@@ -643,6 +932,7 @@ end
 
 local TESTS = buildGeneratedTests(TEST_HOOKS)
 local persistentFixture
+local ranDeferredSyncedChecks = false
 
 local function mergePayload(caseIndex, ids, test, value, readback)
 	local payload = test.payload(caseIndex, ids, readback)
@@ -655,9 +945,58 @@ local function mergePayload(caseIndex, ids, test, value, readback)
 end
 
 local function runOneTest(test, ids, caseIndex)
+	if test.native_only then
+		local value = test.make(ids)
+		if Common.mode() == "native" then
+			local payload = test.payload(caseIndex, ids, value)
+			requestNativeSet("set_native_" .. test.name, payload)
+		end
+		-- In Lua mode this invokes the Lua mutator.  In native mode generatedGet
+		-- returns its declared zero-return shape after the native setter above.
+		send(test.name, mergePayload(caseIndex, ids, test, value, test.get(ids, value)))
+		return
+	end
+
+	-- A few synced controls are destructive or one-shot (for example
+	-- KillTeam and GameOver).  In the native run, invoke the native operation
+	-- before the Lua readback instead of first invoking the Lua operation and
+	-- accidentally masking the native state transition.  The Lua baseline
+	-- still exercises the Lua call, while the native baseline exercises the
+	-- corresponding Rust call and emits the same pair of comparison rows.
+	if Common.mode() == "native" and test.nativeFirst then
+		local nativeValue = test.make(ids)
+		local function invokeNativeSet()
+			requestNativeSet("set_native_" .. test.name, test.payload(caseIndex, ids, nativeValue), function()
+				test.set(ids, nativeValue)
+			end)
+		end
+		if test.nativeSet == nil then
+			error("native-first parity hook has no native setter for " .. test.name)
+		end
+		test.nativeSet(ids, nativeValue, invokeNativeSet)
+		-- requestNativeSet annotates the transport object in-place.  Do not let
+		-- that annotation become the ordinary comparison row's display name.
+		nativeValue.name = nil
+		nativeValue.testName = nil
+		local readback = test.get(ids, nativeValue)
+		local payload = mergePayload(caseIndex, ids, test, nativeValue, readback)
+		send(test.name, payload)
+		local nativePayload = mergePayload(caseIndex, ids, test, nativeValue, readback)
+		nativePayload.name = "set_native_" .. test.name
+		send("native_" .. test.name, nativePayload)
+		return
+	end
+
 	local luaValue = test.make(ids)
 	if test.readonly then
-		send(test.name, mergePayload(caseIndex, ids, test, luaValue, test.get(ids, luaValue)))
+		local ok, readback = pcall(test.get, ids, luaValue)
+		if ok then
+			send(test.name, mergePayload(caseIndex, ids, test, luaValue, readback))
+		elseif test.expect_error then
+			send(test.name, mergePayload(caseIndex, ids, test, luaValue, { error = true }))
+		else
+			error(readback)
+		end
 		return
 	end
 
@@ -685,9 +1024,29 @@ local function runSyncedChecks()
 		local ids = Fixture.create()
 
 		for _, test in ipairs(TESTS) do
-			runOneTest(test, ids, caseIndex)
+			if not test.deferred then
+				runOneTest(test, ids, caseIndex)
+			end
 		end
 
+		Fixture.destroy(ids)
+	end
+
+end
+
+local function runDeferredSyncedChecks()
+	if ranDeferredSyncedChecks then
+		return
+	end
+	ranDeferredSyncedChecks = true
+
+	for caseIndex = 1, caseCount do
+		local ids = Fixture.create()
+		for _, test in ipairs(TESTS) do
+			if test.deferred and (not test.singleCase or caseIndex == caseCount) then
+				runOneTest(test, ids, caseIndex)
+			end
+		end
 		Fixture.destroy(ids)
 	end
 
@@ -695,6 +1054,9 @@ local function runSyncedChecks()
 end
 
 function gadget:GameFrame(frame)
+	if syncedProcessStage == "resume" then
+		return
+	end
 	if frame == 1 then
 		persistentFixture = Fixture.create()
 		SendToUnsynced(
@@ -704,12 +1066,17 @@ function gadget:GameFrame(frame)
 			persistentFixture.unitDefID,
 			persistentFixture.featureDefID,
 			persistentFixture.weaponDefID,
+			persistentFixture.projectileID,
+			persistentFixture.pieceProjectileID,
 			persistentFixture.teamID,
 			persistentFixture.allyTeamID
 		)
 	end
 	if frame == 2 then
 		runSyncedChecks()
+	end
+	if frame == 18 then
+		runDeferredSyncedChecks()
 	end
 	if frame == 20 and persistentFixture ~= nil then
 		Fixture.destroy(persistentFixture)

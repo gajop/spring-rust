@@ -1,4 +1,9 @@
 use super::*;
+use std::sync::Mutex;
+
+// Native callbacks can be re-entered while a lifecycle call is being handled.
+// Serialize JSONL writes so a row cannot be interleaved with another callback.
+static RECORD_LOCK: Mutex<()> = Mutex::new(());
 
 impl NativeApiParity {
     pub(crate) fn same_vec3(
@@ -58,6 +63,21 @@ impl NativeApiParity {
         }
         Ok(())
     }
+    pub(crate) fn same_u32_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: u32,
+    ) -> Result<(), String> {
+        if message.get(field).is_some() {
+            let lua = u32_field(message, field)?;
+            if native != lua {
+                return Err(format!("{label}.{field}: native={native}, lua={lua}"));
+            }
+        }
+        Ok(())
+    }
     pub(crate) fn same_string_if_present(
         &self,
         label: &str,
@@ -98,6 +118,39 @@ impl NativeApiParity {
             return Err(format!(
                 "{label}.{field}: native={native:?}, lua={lua_values:?}"
             ));
+        }
+        Ok(())
+    }
+    pub(crate) fn same_f32_list_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: &[f32],
+    ) -> Result<(), String> {
+        let Some(value) = message.get(field) else {
+            return Ok(());
+        };
+        let lua_values = value
+            .as_array()
+            .ok_or_else(|| format!("{label}.{field}: expected array"))?
+            .iter()
+            .map(|value| {
+                value
+                    .as_f64()
+                    .map(|value| value as f32)
+                    .ok_or_else(|| format!("{label}.{field}: expected number array element"))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        if native.len() != lua_values.len() {
+            return Err(format!(
+                "{label}.{field}: native_len={}, lua_len={}",
+                native.len(),
+                lua_values.len()
+            ));
+        }
+        for (index, (native, lua)) in native.iter().zip(lua_values.iter()).enumerate() {
+            self.same(&format!("{label}.{field}[{index}]"), *native, *lua)?;
         }
         Ok(())
     }
@@ -397,18 +450,21 @@ impl NativeApiParity {
             let _ = fs::create_dir_all(parent);
         }
 
-        if let Ok(mut file) = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&self.output_path)
         {
-            let row = serde_json::json!({
-                "context": "native",
-                "name": name,
-                "status": status,
-                "message": message,
-            });
-            let _ = writeln!(file, "{row}");
+            let _record_guard = RECORD_LOCK.lock().expect("native parity recorder lock");
+            if let Ok(mut file) = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&self.output_path)
+            {
+                let row = serde_json::json!({
+                    "context": "native",
+                    "name": name,
+                    "status": status,
+                    "message": message,
+                });
+                let _ = writeln!(file, "{row}");
+            }
         }
 
         let _ = self
@@ -424,6 +480,14 @@ pub(crate) fn i32_field(message: &Value, field: &str) -> Result<i32, String> {
         .and_then(Value::as_i64)
         .and_then(|value| i32::try_from(value).ok())
         .ok_or_else(|| format!("missing integer field `{field}`"))
+}
+
+pub(crate) fn test_name_field(message: &Value) -> Result<&str, String> {
+    message
+        .get("testName")
+        .or_else(|| message.get("name"))
+        .and_then(Value::as_str)
+        .ok_or_else(|| "missing string field `testName`".to_string())
 }
 
 pub(crate) fn u32_field(message: &Value, field: &str) -> Result<u32, String> {

@@ -64,6 +64,17 @@ function M.appendJsonLine(path, row)
 	return true
 end
 
+-- Keep the test identity separate from API result fields.  Several Spring
+-- callouts legitimately return a field named `name`; using that same key for
+-- the parity transport used to overwrite the value before native comparison.
+function M.setTestName(payload, name)
+	payload.testName = name
+	if payload.name == nil then
+		payload.name = name
+	end
+	return payload
+end
+
 function M.springFunctionInventory()
 	local names = {}
 	for name, value in pairs(Spring) do
@@ -165,6 +176,9 @@ function M.fixtureIDs(extra)
 			ids[key] = value
 		end
 	end
+	if ids.decalID == nil then
+		ids.decalID = ids.groundDecalID
+	end
 	return ids
 end
 
@@ -232,8 +246,9 @@ local function generatedMake(test, ids)
 	for name, param in pairs(test.params or {}) do
 		local value = generatedParamValue(param, ids)
 		if param.expands_to and type(value) == "table" then
-			for _, field in ipairs(param.expands_to) do
-				values[field] = value[field]
+			for index, field in ipairs(param.expands_to) do
+				local sourceField = param.expands_from and param.expands_from[index] or field
+				values[field] = value[sourceField]
 			end
 		else
 			values[name] = value
@@ -244,6 +259,14 @@ end
 
 local function generatedArg(spec, ids, value, locals)
 	if type(spec) == "table" then
+		if spec.__fixture_array then
+			return {ids[spec.__fixture_array]}
+		end
+		if spec.__fixture_map_key then
+			local map = {}
+			map[ids[spec.__fixture_map_key]] = true
+			return map
+		end
 		local resolved = {}
 		for key, item in pairs(spec) do
 			local resolvedKey = key
@@ -256,6 +279,9 @@ local function generatedArg(spec, ids, value, locals)
 	end
 	if type(spec) ~= "string" then
 		return spec
+	end
+	if spec == "nil" then
+		return nil
 	end
 	local localKey = spec:match("^local%.(.+)$")
 	if localKey then
@@ -326,6 +352,14 @@ local function generatedReturnValue(returnSpec, returns)
 			end
 		end
 		value = count
+	elseif returnSpec.transform == "table_int_values" then
+		local values = {}
+		if type(value) == "table" then
+			for _, item in ipairs(value) do
+				values[#values + 1] = item
+			end
+		end
+		value = values
 	elseif returnSpec.transform == "table_nonempty" then
 		local nonempty = false
 		if type(value) == "table" then
@@ -335,12 +369,20 @@ local function generatedReturnValue(returnSpec, returns)
 			end
 		end
 		value = nonempty
+	elseif returnSpec.transform == "return_count" then
+		value = returns.n or 0
 	elseif returnSpec.transform == "truthy" then
 		value = value ~= nil and value ~= false
+	elseif returnSpec.transform == "valid_id" then
+		value = type(value) == "number" and value >= 0
 	elseif returnSpec.transform == "string_len" then
 		value = type(value) == "string" and #value or 0
 	elseif returnSpec.transform == "nil_to_minus_one" then
 		if value == nil then
+			value = -1
+		end
+	elseif returnSpec.transform == "false_to_minus_one" then
+		if value == nil or value == false then
 			value = -1
 		end
 	elseif returnSpec.transform == "build_status_can_build" then
@@ -417,16 +459,26 @@ local function generatedReturnValue(returnSpec, returns)
 	return field, value
 end
 
+local function packReturns(...)
+	local packed = { n = select("#", ...) }
+	for index = 1, packed.n do
+		packed[index] = select(index, ...)
+	end
+	return packed
+end
+
 local function generatedGet(test, ids, value)
 	local runtime = test.lua_runtime
 	local locals = {}
 	for name, localSpec in pairs(runtime.locals or {}) do
 		local func = resolveLuaFunction(localSpec.call)
 		local args = {}
+		local argCount = 0
 		for _, argSpec in ipairs(localSpec.args or {}) do
-			args[#args + 1] = generatedArg(argSpec, ids, value, locals)
+			argCount = argCount + 1
+			args[argCount] = generatedArg(argSpec, ids, value, locals)
 		end
-		locals[name] = func(unpack(args))
+		locals[name] = func(unpack(args, 1, argCount))
 	end
 	local returns
 	if runtime.table then
@@ -442,10 +494,12 @@ local function generatedGet(test, ids, value)
 	else
 		local func = resolveLuaFunction(runtime.call)
 		local args = {}
+		local argCount = 0
 		for _, argSpec in ipairs(runtime.args or {}) do
-			args[#args + 1] = generatedArg(argSpec, ids, value, locals)
+			argCount = argCount + 1
+			args[argCount] = generatedArg(argSpec, ids, value, locals)
 		end
-		returns = { func(unpack(args)) }
+		returns = packReturns(func(unpack(args, 1, argCount)))
 	end
 	local readback = {}
 	for index, returnSpec in ipairs(runtime.returns or {}) do
@@ -477,10 +531,12 @@ local function generatedSet(test, ids, value)
 	for _, setter in ipairs(setters) do
 		local func = resolveLuaFunction(setter.call)
 		local args = {}
+		local argCount = 0
 		for _, argSpec in ipairs(setter.args or {}) do
-			args[#args + 1] = generatedArg(argSpec, ids, value)
+			argCount = argCount + 1
+			args[argCount] = generatedArg(argSpec, ids, value)
 		end
-		func(unpack(args))
+		func(unpack(args, 1, argCount))
 	end
 end
 
@@ -504,6 +560,18 @@ local function canRunPortableTest(test, ids)
 			end
 		elseif requirement == "feature" then
 			if ids.featureID == nil then
+				return false
+			end
+		elseif requirement == "projectile" then
+			if ids.projectileID == nil then
+				return false
+			end
+		elseif requirement == "piece_projectile" then
+			if ids.pieceProjectileID == nil then
+				return false
+			end
+		elseif requirement == "ground_decal" then
+			if ids.groundDecalID == nil then
 				return false
 			end
 		else
@@ -534,7 +602,7 @@ local function canRunPortableTest(test, ids)
 	return true
 end
 
-function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNative, fixtureIDs)
+function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNative, fixtureIDs, beforeCase)
 	M.initRandom(M.seed(), context == "widget" and 20 or 10)
 	local ids = M.fixtureIDs(fixtureIDs)
 	ids.context = context
@@ -544,6 +612,12 @@ function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNativ
 				payload.unitID = ids.unitID
 			elseif requirement == "feature" then
 				payload.featureID = ids.featureID
+			elseif requirement == "projectile" then
+				payload.projectileID = ids.projectileID
+			elseif requirement == "piece_projectile" then
+				payload.projectileID = ids.pieceProjectileID
+			elseif requirement == "ground_decal" then
+				payload.decalID = ids.groundDecalID
 			end
 		end
 		for key, fieldValue in pairs(value) do
@@ -553,8 +627,13 @@ function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNativ
 		end
 	end
 	for caseIndex = 1, M.caseCount() do
+		if caseIndex > 1 and beforeCase ~= nil then
+			beforeCase(fixtureIDs)
+			ids = M.fixtureIDs(fixtureIDs)
+			ids.context = context
+		end
 		for _, test in ipairs(generatedTests) do
-			if canRunPortableTest(test, ids) then
+			if canRunPortableTest(test, ids) and (not test.single_case or caseIndex == 1) then
 				local value = generatedMake(test, ids)
 				local ok, readback = pcall(function()
 					if M.mode() == "native" and invokeNative and test.kind == "setter_getter" and test.lua_runtime.set ~= nil then
@@ -570,19 +649,120 @@ function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNativ
 					end
 					return generatedGet(test, ids, value)
 				end)
-				if ok then
-					local payload = { case = caseIndex }
-					addFixtureAndValues(payload, test, value)
-					for key, fieldValue in pairs(readback) do
+			if ok then
+				local payload = { case = caseIndex }
+				addFixtureAndValues(payload, test, value)
+				for key, fieldValue in pairs(readback) do
+					payload[key] = fieldValue
+				end
+				record(test.id, payload)
+				if M.mode() == "native" and invokeNative then
+					payload.context = context
+					M.setTestName(payload, test.id)
+					invokeNative(M.encode(payload))
+				end
+			elseif test.expect_error then
+				-- Error-path parity is still a real API result.  Keep the
+				-- transport stable across the Lua and native runs instead of
+				-- dropping the call from coverage when Lua rejects its arguments.
+				local payload = { case = caseIndex, error = true }
+				addFixtureAndValues(payload, test, value)
+				record(test.id, payload)
+				if M.mode() == "native" and invokeNative then
+					payload.context = context
+					M.setTestName(payload, test.id)
+					invokeNative(M.encode(payload))
+				end
+			end
+			end
+		end
+	end
+end
+
+-- Run tests whose Lua call sequence cannot be expressed by the portable
+-- `lua_runtime` description.  Unsynced controls commonly need a stateful
+-- callback (or a cleanup step) between the native setter and the Lua
+-- readback, so keep that sequence explicit instead of making consumers
+-- duplicate it in each fixture.
+function M.runCustomTests(context, customTests, generatedTests, record, invokeNative, fixtureIDs)
+	local metadataByID = {}
+	for _, metadata in ipairs(generatedTests) do
+		metadataByID[metadata.id] = metadata
+	end
+
+	local ids = M.fixtureIDs(fixtureIDs)
+	ids.context = context
+	for _, test in ipairs(customTests) do
+		local metadata = metadataByID[test.name]
+		if metadata == nil then
+			error("custom parity hook has no generated parity metadata for " .. tostring(test.name))
+		end
+		if (metadata.context or "synced_gadget") ~= context then
+			error("custom parity hook has the wrong context for " .. tostring(test.name))
+		end
+	end
+
+	local function mergePayload(caseIndex, test, value, readback)
+		local payload = test.payload(caseIndex, ids, readback)
+		for key, fieldValue in pairs(value) do
+			if payload[key] == nil then
+				payload[key] = fieldValue
+			end
+		end
+		return payload
+	end
+
+	for caseIndex = 1, M.caseCount() do
+		for _, test in ipairs(customTests) do
+			-- Pass the case number to custom makers so stateful APIs can use a
+			-- fresh, deterministic input for every invocation.  Existing makers
+			-- intentionally accept fewer arguments and remain compatible.
+			local value = test.make(ids, caseIndex)
+			local function invokeNativeSet()
+				-- Payload builders commonly return `value` itself.  Copy the
+				-- top-level fields before adding transport metadata so the
+				-- temporary set_native name cannot leak into the result row.
+				local source = test.payload(caseIndex, ids, value)
+				local payload = {}
+				for key, fieldValue in pairs(source) do
+					payload[key] = fieldValue
+				end
+				M.setTestName(payload, "set_native_" .. test.name)
+				payload.context = context
+				for key, fieldValue in pairs(value) do
+					if payload[key] == nil then
 						payload[key] = fieldValue
 					end
-					record(test.id, payload)
-					if M.mode() == "native" and invokeNative then
-						payload.context = context
-						payload.name = test.id
-						invokeNative(M.encode(payload))
-					end
 				end
+				invokeNative(M.encode(payload))
+			end
+
+			local ok, readback = pcall(function()
+				if test.readonly then
+					return test.get(ids, value)
+				end
+				if M.mode() == "native" then
+					if test.nativeSet == nil then
+						error("custom parity hook has no native setter for " .. test.name)
+					end
+					test.nativeSet(ids, value, invokeNativeSet)
+				else
+					test.set(ids, value)
+				end
+				return test.get(ids, value)
+			end)
+
+			local payload
+			if ok then
+				payload = mergePayload(caseIndex, test, value, readback)
+			else
+				payload = mergePayload(caseIndex, test, value, { error = tostring(readback) })
+			end
+			record(test.name, payload)
+			if M.mode() == "native" and invokeNative and not test.nativeOnly then
+				payload.context = context
+				M.setTestName(payload, test.name)
+				invokeNative(M.encode(payload))
 			end
 		end
 	end

@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "clear_features_previous_draw_flag",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.ClearFeaturesPreviousDrawFlag"]},
+      "native": {"set": [], "get": ["Features.clear_features_previous_draw_flag"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.ClearFeaturesPreviousDrawFlag` (return count)", "native_getter": "`Features.clear_features_previous_draw_flag`", "fields": "`returnCount`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.ClearFeaturesPreviousDrawFlag", "args": [], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "clear_units_previous_draw_flag",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.ClearUnitsPreviousDrawFlag"]},
+      "native": {"set": [], "get": ["UnitsInfo.clear_units_previous_draw_flag"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.ClearUnitsPreviousDrawFlag` (return count)", "native_getter": "`UnitsInfo.clear_units_previous_draw_flag`", "fields": "`returnCount`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.ClearUnitsPreviousDrawFlag", "args": [], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "clear_watch_dog_timer",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.ClearWatchDogTimer"]},
+      "native": {"set": ["SystemControl.clear_watch_dog_timer"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "report": {"lua_setter": "`Spring.ClearWatchDogTimer`", "native_setter": "`SystemControl.clear_watch_dog_timer`", "lua_getter": "`Spring.ClearWatchDogTimer` (return count)", "native_getter": "n/a", "fields": "`returnCount`"},
+      "rust": {"check": "check_system_control_value", "set": "set_system_control_value"},
+      "params": {"threadName": {"type": "string", "fixed": ""}, "keepStopped": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"set": {"call": "Spring.ClearWatchDogTimer", "args": ["value.threadName", "value.keepStopped"]}, "call": "Spring.ClearWatchDogTimer", "args": ["value.threadName", "value.keepStopped"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "get_piece_projectile_name",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["piece_projectile"],
+      "lua": {"set": [], "get": ["Spring.GetPieceProjectileName"]},
+      "native": {"set": [], "get": ["UnsyncedRead.get_piece_projectile_name"]},
+      "compare": {"mode": "fields", "fields": ["name"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPieceProjectileName`", "native_getter": "`UnsyncedRead.get_piece_projectile_name`", "fields": "`name`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetPieceProjectileName", "args": ["fixture.pieceProjectileID"], "returns": ["name"]}
+    }
+  ]
+}

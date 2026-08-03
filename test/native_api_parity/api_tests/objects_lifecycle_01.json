@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "create_unit_cleanup",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateUnit", "Spring.DestroyUnit"]},
+      "native": {"set": [], "get": ["UnitControl.create_unit", "UnitControl.destroy_unit"]},
+      "compare": {"mode": "fields", "fields": ["created"]},
+      "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.destroy_unit`", "fields": "temporary unit creation and cleanup"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "destroy_unit",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateUnit", "Spring.DestroyUnit", "Spring.ValidUnitID"]},
+      "native": {"set": [], "get": ["UnitControl.create_unit", "UnitControl.destroy_unit", "UnitsQuery.valid_unit_id"]},
+      "compare": {"mode": "fields", "fields": ["destroyed"]},
+      "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.DestroyUnit`, `Spring.ValidUnitID`", "native_getter": "`UnitControl.create_unit`, `UnitControl.destroy_unit`, `UnitsQuery.valid_unit_id`", "fields": "unit destruction state"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "transfer_unit",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateUnit", "Spring.TransferUnit", "Spring.GetUnitTeam", "Spring.DestroyUnit"]},
+      "native": {"set": [], "get": ["UnitControl.create_unit", "UnitControl.transfer_unit", "UnitsInfo.get_unit_team", "UnitControl.destroy_unit"]},
+      "compare": {"mode": "fields", "fields": ["success", "teamAfter"]},
+      "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.TransferUnit`, `Spring.GetUnitTeam`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.transfer_unit`, `UnitsInfo.get_unit_team`, `UnitControl.destroy_unit`", "fields": "transfer result and resulting team"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "create_feature_cleanup",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateFeature", "Spring.DestroyFeature"]},
+      "native": {"set": [], "get": ["FeatureControl.create_feature", "FeatureControl.destroy_feature"]},
+      "compare": {"mode": "fields", "fields": ["created"]},
+      "report": {"lua_getter": "`Spring.CreateFeature`, `Spring.DestroyFeature`", "native_getter": "`FeatureControl.create_feature`, `FeatureControl.destroy_feature`", "fields": "temporary feature creation and cleanup"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "destroy_feature",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateFeature", "Spring.DestroyFeature", "Spring.ValidFeatureID"]},
+      "native": {"set": [], "get": ["FeatureControl.create_feature", "FeatureControl.destroy_feature", "Features.valid_feature_id"]},
+      "compare": {"mode": "fields", "fields": ["destroyed"]},
+      "report": {"lua_getter": "`Spring.CreateFeature`, `Spring.DestroyFeature`, `Spring.ValidFeatureID`", "native_getter": "`FeatureControl.create_feature`, `FeatureControl.destroy_feature`, `Features.valid_feature_id`", "fields": "feature destruction state"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "transfer_feature",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateFeature", "Spring.TransferFeature", "Spring.GetFeatureTeam", "Spring.DestroyFeature"]},
+      "native": {"set": [], "get": ["FeatureControl.create_feature", "FeatureControl.transfer_feature", "Features.get_feature_team", "FeatureControl.destroy_feature"]},
+      "compare": {"mode": "fields", "fields": ["teamAfter"]},
+      "report": {"lua_getter": "`Spring.CreateFeature`, `Spring.TransferFeature`, `Spring.GetFeatureTeam`, `Spring.DestroyFeature`", "native_getter": "`FeatureControl.create_feature`, `FeatureControl.transfer_feature`, `Features.get_feature_team`, `FeatureControl.destroy_feature`", "fields": "resulting feature team"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "create_unit_wreck_cleanup",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.CreateUnitWreck", "Spring.DestroyFeature"]},
+      "native": {"set": [], "get": ["FeatureControl.create_unit_wreck", "FeatureControl.destroy_feature"]},
+      "compare": {"mode": "fields", "fields": ["created"]},
+      "report": {"lua_getter": "`Spring.CreateUnitWreck`, `Spring.DestroyFeature`", "native_getter": "`FeatureControl.create_unit_wreck`, `FeatureControl.destroy_feature`", "fields": "unit wreck creation and cleanup"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "create_feature_wreck_cleanup",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.CreateFeatureWreck", "Spring.DestroyFeature"]},
+      "native": {"set": [], "get": ["FeatureControl.create_feature_wreck", "FeatureControl.destroy_feature"]},
+      "compare": {"mode": "fields", "fields": ["created"]},
+      "report": {"lua_getter": "`Spring.CreateFeatureWreck`, `Spring.DestroyFeature`", "native_getter": "`FeatureControl.create_feature_wreck`, `FeatureControl.destroy_feature`", "fields": "feature wreck creation and cleanup"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "unit_attach",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateUnit", "Spring.UnitAttach", "Spring.GetUnitTransporter", "Spring.UnitDetach", "Spring.DestroyUnit"]},
+      "native": {"set": [], "get": ["UnitControl.create_unit", "UnitControl.unit_attach", "UnitsInfo.get_unit_transporter", "UnitControl.unit_detach", "UnitControl.destroy_unit"]},
+      "compare": {"mode": "fields", "fields": ["attached"]},
+      "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.UnitAttach`, `Spring.GetUnitTransporter`, `Spring.UnitDetach`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.unit_attach`, `UnitsInfo.get_unit_transporter`, `UnitControl.unit_detach`, `UnitControl.destroy_unit`", "fields": "transport attachment state"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "unit_detach",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateUnit", "Spring.UnitAttach", "Spring.UnitDetach", "Spring.GetUnitTransporter", "Spring.DestroyUnit"]},
+      "native": {"set": [], "get": ["UnitControl.create_unit", "UnitControl.unit_attach", "UnitControl.unit_detach", "UnitsInfo.get_unit_transporter", "UnitControl.destroy_unit"]},
+      "compare": {"mode": "fields", "fields": ["detached"]},
+      "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.UnitAttach`, `Spring.UnitDetach`, `Spring.GetUnitTransporter`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.unit_attach`, `UnitControl.unit_detach`, `UnitsInfo.get_unit_transporter`, `UnitControl.destroy_unit`", "fields": "transport detachment state"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "unit_detach_from_air",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit", "ground_point"],
+      "lua": {"set": [], "get": ["Spring.CreateUnit", "Spring.UnitAttach", "Spring.UnitDetachFromAir", "Spring.GetUnitTransporter", "Spring.DestroyUnit"]},
+      "native": {"set": [], "get": ["UnitControl.create_unit", "UnitControl.unit_attach", "UnitControl.unit_detach_from_air", "UnitsInfo.get_unit_transporter", "UnitControl.destroy_unit"]},
+      "compare": {"mode": "fields", "fields": ["detached"]},
+      "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.UnitAttach`, `Spring.UnitDetachFromAir`, `Spring.GetUnitTransporter`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.unit_attach`, `UnitControl.unit_detach_from_air`, `UnitsInfo.get_unit_transporter`, `UnitControl.destroy_unit`", "fields": "air detachment state"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    },
+    {
+      "id": "bugger_off",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.BuggerOff"]},
+      "native": {"set": [], "get": ["UnitControl.bugger_off"]},
+      "compare": {"mode": "fields", "fields": ["called"]},
+      "report": {"lua_getter": "`Spring.BuggerOff`", "native_getter": "`UnitControl.bugger_off`", "fields": "successful invocation"},
+      "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
+      "params": {}
+    }
+  ]
+}

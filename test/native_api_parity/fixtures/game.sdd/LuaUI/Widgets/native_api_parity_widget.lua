@@ -20,7 +20,7 @@ local function record(name, payload)
 		outputPath = Common.outputDir() .. "/widget.jsonl"
 	end
 	payload.context = "widget"
-	payload.name = name
+	Common.setTestName(payload, name)
 	Common.appendJsonLine(outputPath, payload)
 end
 
@@ -42,15 +42,18 @@ local function runGeneratedTests()
 	end, fixtureIDs)
 end
 
-function widget:NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, teamID, allyTeamID)
+function widget:NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID)
 	fixtureIDs = {
 		unitID = unitID,
 		featureID = featureID,
 		unitDefID = unitDefID,
 		featureDefID = featureDefID,
 		weaponDefID = weaponDefID,
+		projectileID = projectileID,
+		pieceProjectileID = pieceProjectileID,
 		teamID = teamID,
 		allyTeamID = allyTeamID,
+		groundDecalID = groundDecalID,
 	}
 	ranGeneratedTests = false
 end
@@ -71,6 +74,10 @@ function widget:GameFrame(frame)
 		record("visible_units", { count = #(Spring.GetVisibleUnits() or {}) })
 	elseif frame == 20 then
 		runGeneratedTests()
-		Spring.SendCommands("quitforce")
+		local options = Spring.GetModOptions() or {}
+		local processTest = tostring(options.native_api_parity_process_test or "")
+		if processTest ~= "reload" and processTest ~= "restart" then
+			Spring.SendCommands("quitforce")
+		end
 	end
 end

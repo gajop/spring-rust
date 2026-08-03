@@ -2,9 +2,9 @@
 
 Total Namespaces: 6
 
-Total Functions: 1319
+Total Functions: 1325
 
-Callouts (Plugin → Engine): 1130
+Callouts (Plugin → Engine): 1136
 Callins (Engine → Plugin): 189
 
 ---
@@ -144,10 +144,10 @@ Callins (Engine → Plugin): 189
 - `Script.SetWatchWeapon` (params: weaponDefID:integer, watch:boolean)
 - `Script.UpdateCallin` (params: name:string)
 
-### Spring (787 functions)
+### Spring (793 functions)
 
 - `Spring.AddFeatureDamage` (params: featureID:integer, damage:number, paralyze:number?, attackerID:integer?, weaponID:integer?, impulseX:number?, impulseY:number?, impulseZ:number?)
-- `Spring.AddGrass` (params: x:number, z:number)
+- `Spring.AddGrass` (params: x:number, z:number, grassValue:integer?)
 - `Spring.AddHeightMap` (params: x:number, z:number, height:number)
 - `Spring.AddMapLight` (params: lightParams:LightParams)
 - `Spring.AddModelLight` (params: lightParams:LightParams)
@@ -235,6 +235,7 @@ Callins (Engine → Plugin): 189
 - `Spring.GetCameraVectors` (params: )
 - `Spring.GetClipboard` (params: )
 - `Spring.GetClosestEnemyUnit` (params: x:number, y:number, z:number, range:number?, allyTeamID:number?, useLOS:boolean?, sphereDistTest:boolean?, checkSightDist:boolean?)
+- `Spring.GetClosestValidPosition` (params: unitDefID:integer, x:number, z:number, radius:number)
 - `Spring.GetCmdDescIndex` (params: cmdID:integer)
 - `Spring.GetCommandQueue` (params: unitID:integer, count:0)
 - `Spring.GetConfigFloat` (params: name:string, default:number?)
@@ -273,7 +274,7 @@ Callins (Engine → Plugin): 189
 - `Spring.GetFeatureNoDraw` (params: featureID:integer)
 - `Spring.GetFeatureNoSelect` (params: featureID:integer)
 - `Spring.GetFeaturePaletteIndex` (params: featureID:integer)
-- `Spring.GetFeaturePieceCollisionVolumeData` (params: featureID:integer)
+- `Spring.GetFeaturePieceCollisionVolumeData` (params: featureID:integer, pieceNum:integer)
 - `Spring.GetFeaturePieceDirection` (params: featureID:integer, pieceIndex:integer)
 - `Spring.GetFeaturePieceInfo` (params: featureID:integer, pieceIndex:integer)
 - `Spring.GetFeaturePieceList` (params: featureID:integer)
@@ -491,6 +492,7 @@ Callins (Engine → Plugin): 189
 - `Spring.GetUnitExperience` (params: unitID:integer)
 - `Spring.GetUnitFeatureSeparation` (params: unitID:integer, featureID:integer, surfaceDist:boolean?)
 - `Spring.GetUnitFlanking` (params: unitID:integer)
+- `Spring.GetUnitFuel` (params: unitID:integer)
 - `Spring.GetUnitGroup` (params: unitID:integer)
 - `Spring.GetUnitHarvestStorage` (params: unitID:integer)
 - `Spring.GetUnitHeading` (params: unitID:integer, convertToRadians:boolean?)
@@ -557,6 +559,7 @@ Callins (Engine → Plugin): 189
 - `Spring.GetUnitTooltip` (params: unitID:integer)
 - `Spring.GetUnitTransformMatrix` (params: unitID:integer)
 - `Spring.GetUnitTransporter` (params: unitID:integer)
+- `Spring.GetUnitTravel` (params: unitID:integer)
 - `Spring.GetUnitVectors` (params: unitID:integer)
 - `Spring.GetUnitVelocity` (params: unitID:integer)
 - `Spring.GetUnitViewPosition` (params: unitID:integer, midPos:boolean?)
@@ -796,6 +799,9 @@ Callins (Engine → Plugin): 189
 - `Spring.SetProjectileIsIntercepted` (params: projectileID:integer, intercepted:boolean)
 - `Spring.SetProjectileMoveControl` (params: projectileID:integer, enable:boolean?)
 - `Spring.SetProjectilePosition` (params: projectileID:integer, posX:number?, posY:number?, posZ:number?)
+- `Spring.SetProjectileSpinAngle` (params: projectileID:integer, angle:number)
+- `Spring.SetProjectileSpinSpeed` (params: projectileID:integer, speed:number)
+- `Spring.SetProjectileSpinVec` (params: projectileID:integer, x:number, y:number, z:number)
 - `Spring.SetProjectileTarget` (params: projectileID:integer, target:ProjectileTargetRef)
 - `Spring.SetProjectileTimeToLive` (params: projectileID:integer, ttl:integer)
 - `Spring.SetProjectileUseAirLos` (params: projectileID:integer, useAirLos:boolean)

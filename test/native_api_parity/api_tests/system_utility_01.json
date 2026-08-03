@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "ping",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.Ping"]},
+      "native": {"set": [], "get": ["SystemControl.ping"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {"tag": {"type": "i32", "fixed": 17}},
+      "lua_runtime": {"call": "Spring.Ping", "args": ["value.tag"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "request_start_position",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.RequestStartPosition"]},
+      "native": {"set": [], "get": ["SystemControl.request_start_position"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {
+        "x": {"type": "f32", "fixed": 1024},
+        "y": {"type": "f32", "fixed": 96},
+        "z": {"type": "f32", "fixed": 1024},
+        "ready": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {"call": "Spring.RequestStartPosition", "args": ["value.x", "value.y", "value.z", "value.ready"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "set_share_level",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.SetShareLevel"]},
+      "native": {"set": [], "get": ["SystemControl.set_share_level"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {
+        "resource": {"type": "string", "fixed": "metal"},
+        "level": {"type": "f32", "fixed": 0}
+      },
+      "lua_runtime": {"call": "Spring.SetShareLevel", "args": ["value.resource", "value.level"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "share_resources",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.ShareResources"]},
+      "native": {"set": [], "get": ["SystemControl.share_resources"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_system_control_value", "set": "set_noop"},
+      "params": {
+        "teamID": {"type": "i32", "fixture": "teamID"},
+        "resource": {"type": "string", "fixed": "metal"},
+        "amount": {"type": "f32", "fixed": 0}
+      },
+      "lua_runtime": {"call": "Spring.ShareResources", "args": ["value.teamID", "value.resource", "value.amount"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "is_unit_visible",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.IsUnitVisible"]},
+      "native": {"set": [], "get": ["UnitRendering.is_unit_visible"]},
+      "compare": {"mode": "fields", "fields": ["visible"]},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {
+        "radius": {"type": "f32", "fixed": 64},
+        "checkIcon": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {"call": "Spring.IsUnitVisible", "args": ["fixture.unitID", "value.radius", "value.checkIcon"], "returns": ["visible"]}
+    },
+    {
+      "id": "preload_unit_def_model",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.PreloadUnitDefModel"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.preload_unit_def_model"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"defID": {"type": "i32", "fixture": "unitDefID"}},
+      "lua_runtime": {"call": "Spring.PreloadUnitDefModel", "args": ["value.defID"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "preload_feature_def_model",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.PreloadFeatureDefModel"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.preload_feature_def_model"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"defID": {"type": "i32", "fixture": "featureDefID"}},
+      "lua_runtime": {"call": "Spring.PreloadFeatureDefModel", "args": ["value.defID"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "load_model_textures",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.LoadModelTextures"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.load_model_textures"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"modelName": {"type": "string", "fixed": "fir_tree_small.s3o"}},
+      "lua_runtime": {"call": "Spring.LoadModelTextures", "args": ["value.modelName"], "returns": [{"field": "success", "transform": "truthy"}]}
+    },
+    {
+      "id": "load_cmd_colors_config",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.LoadCmdColorsConfig"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.load_cmd_colors_config"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"config": {"type": "string", "fixed": "alwaysDrawQueue 0\n"}},
+      "lua_runtime": {"call": "Spring.LoadCmdColorsConfig", "args": ["value.config"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "load_ctrl_panel_config",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.LoadCtrlPanelConfig"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.load_ctrl_panel_config"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"config": {"type": "string", "fixed": ""}},
+      "lua_runtime": {"call": "Spring.LoadCtrlPanelConfig", "args": ["value.config"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "set_wm_icon",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetWMIcon"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_wmicon"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {
+        "iconFileName": {"type": "string", "fixed": "bitmaps/icons/frame.png"},
+        "forceResolution": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {"call": "Spring.SetWMIcon", "args": ["value.iconFileName", "value.forceResolution"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    }
+  ]
+}

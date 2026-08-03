@@ -1,0 +1,291 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "terrain_add_grass",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.AddGrass"]},
+      "native": {"set": [], "get": ["TerrainControl.add_grass"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postGrassLevel"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "point": {"type": "float2", "generator": "map_point", "expands_to": ["x", "z"]},
+        "grass": {"type": "i32", "range": [0, 3]}
+      },
+      "lua_runtime": {
+        "call": "Spring.AddGrass",
+        "args": ["value.x", "value.z", "value.grass"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [{"call": "Spring.GetGrass", "args": ["value.x", "value.z"], "returns": ["postGrassLevel"]}]
+      }
+    },
+    {
+      "id": "terrain_remove_grass",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.RemoveGrass"]},
+      "native": {"set": [], "get": ["TerrainControl.remove_grass"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postGrassLevel"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {"point": {"type": "float2", "generator": "map_point", "expands_to": ["x", "z"]}},
+      "lua_runtime": {
+        "call": "Spring.RemoveGrass",
+        "args": ["value.x", "value.z"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [{"call": "Spring.GetGrass", "args": ["value.x", "value.z"], "returns": ["postGrassLevel"]}]
+      }
+    },
+    {
+      "id": "terrain_level_height_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.LevelHeightMap"]},
+      "native": {"set": [], "get": ["TerrainControl.level_height_map"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postGroundHeight", "postNormalX", "postNormalY", "postNormalZ", "postAffectedGroundHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "height": {"type": "f32", "range": [96, 110]}
+      },
+      "lua_runtime": {
+        "call": "Spring.LevelHeightMap",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [
+          {"call": "Spring.GetGroundHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundHeight"]},
+          {"call": "Spring.GetGroundNormal", "args": ["value.x1", "value.z1", false], "returns": ["postNormalX", "postNormalY", "postNormalZ"]},
+          {"call": "Spring.GetGroundHeight", "args": [880, 919.315979], "returns": ["postAffectedGroundHeight"]}
+        ]
+      }
+    },
+    {
+      "id": "terrain_adjust_height_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.AdjustHeightMap"]},
+      "native": {"set": [], "get": ["TerrainControl.adjust_height_map"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postGroundHeight", "postNormalX", "postNormalY", "postNormalZ"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "height": {"type": "f32", "range": [-4, 4]}
+      },
+      "lua_runtime": {
+        "call": "Spring.AdjustHeightMap",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [
+          {"call": "Spring.GetGroundHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundHeight"]},
+          {"call": "Spring.GetGroundNormal", "args": ["value.x1", "value.z1", false], "returns": ["postNormalX", "postNormalY", "postNormalZ"]}
+        ]
+      }
+    },
+    {
+      "id": "terrain_revert_height_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.RevertHeightMap"]},
+      "native": {"set": [], "get": ["TerrainControl.revert_height_map"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postGroundHeight", "postNormalX", "postNormalY", "postNormalZ", "postAffectedGroundHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "factor": {"type": "f32", "range": [0, 1]}
+      },
+      "lua_runtime": {
+        "call": "Spring.RevertHeightMap",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.factor"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [
+          {"call": "Spring.GetGroundHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundHeight"]},
+          {"call": "Spring.GetGroundNormal", "args": ["value.x1", "value.z1", false], "returns": ["postNormalX", "postNormalY", "postNormalZ"]},
+          {"call": "Spring.GetGroundHeight", "args": [880, 919.315979], "returns": ["postAffectedGroundHeight"]}
+        ]
+      }
+    },
+    {
+      "id": "terrain_level_original_height_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.LevelOriginalHeightMap"]},
+      "native": {"set": [], "get": ["TerrainControl.level_original_height_map"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postGroundOrigHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "height": {"type": "f32", "range": [96, 110]}
+      },
+      "lua_runtime": {
+        "call": "Spring.LevelOriginalHeightMap",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [{"call": "Spring.GetGroundOrigHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundOrigHeight"]}]
+      }
+    },
+    {
+      "id": "terrain_adjust_original_height_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.AdjustOriginalHeightMap"]},
+      "native": {"set": [], "get": ["TerrainControl.adjust_original_height_map"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postGroundOrigHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "height": {"type": "f32", "range": [-4, 4]}
+      },
+      "lua_runtime": {
+        "call": "Spring.AdjustOriginalHeightMap",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [{"call": "Spring.GetGroundOrigHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundOrigHeight"]}]
+      }
+    },
+    {
+      "id": "terrain_revert_original_height_map",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.RevertOriginalHeightMap"]},
+      "native": {"set": [], "get": ["TerrainControl.revert_original_height_map"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postGroundOrigHeight", "postAffectedGroundOrigHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "factor": {"type": "f32", "range": [0, 1]}
+      },
+      "lua_runtime": {
+        "call": "Spring.RevertOriginalHeightMap",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.factor"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [
+          {"call": "Spring.GetGroundOrigHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundOrigHeight"]},
+          {"call": "Spring.GetGroundOrigHeight", "args": [880, 919.315979], "returns": ["postAffectedGroundOrigHeight"]}
+        ]
+      }
+    },
+    {
+      "id": "terrain_level_smooth_mesh",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.LevelSmoothMesh"]},
+      "native": {"set": [], "get": ["TerrainControl.level_smooth_mesh"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postSmoothMeshHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "height": {"type": "f32", "range": [96, 110]}
+      },
+      "lua_runtime": {
+        "call": "Spring.LevelSmoothMesh",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [{"call": "Spring.GetSmoothMeshHeight", "args": ["value.x1", "value.z1"], "returns": ["postSmoothMeshHeight"]}]
+      }
+    },
+    {
+      "id": "terrain_adjust_smooth_mesh",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.AdjustSmoothMesh"]},
+      "native": {"set": [], "get": ["TerrainControl.adjust_smooth_mesh"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postSmoothMeshHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "height": {"type": "f32", "range": [-4, 4]}
+      },
+      "lua_runtime": {
+        "call": "Spring.AdjustSmoothMesh",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [{"call": "Spring.GetSmoothMeshHeight", "args": ["value.x1", "value.z1"], "returns": ["postSmoothMeshHeight"]}]
+      }
+    },
+    {
+      "id": "terrain_revert_smooth_mesh",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": ["ground_point"],
+      "lua": {"set": [], "get": ["Spring.RevertSmoothMesh"]},
+      "native": {"set": [], "get": ["TerrainControl.revert_smooth_mesh"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postSmoothMeshHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {
+        "x1": {"type": "f32", "range": [880, 940]}, "z1": {"type": "f32", "range": [880, 940]},
+        "x2": {"type": "f32", "range": [944, 1000]}, "z2": {"type": "f32", "range": [944, 1000]},
+        "factor": {"type": "f32", "range": [0, 1]}
+      },
+      "lua_runtime": {
+        "call": "Spring.RevertSmoothMesh",
+        "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.factor"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [{"call": "Spring.GetSmoothMeshHeight", "args": ["value.x1", "value.z1"], "returns": ["postSmoothMeshHeight"]}]
+      }
+    },
+    {
+      "id": "terrain_rebuild_smooth_mesh",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "native_only": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.RebuildSmoothMesh"]},
+      "native": {"set": [], "get": ["TerrainControl.rebuild_smooth_mesh"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["returnCount", "postSmoothMeshHeight"]},
+      "rust": {"check": "check_terrain_control_result", "set": "set_terrain_control_call"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.RebuildSmoothMesh",
+        "args": [],
+        "returns": [{"field": "returnCount", "transform": "return_count"}],
+        "post": [{"call": "Spring.GetSmoothMeshHeight", "args": [904, 904], "returns": ["postSmoothMeshHeight"]}]
+      }
+    },
+    {
+      "id": "set_tidal",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetTidal"], "get": ["Spring.GetTidal"]},
+      "native": {"set": ["TerrainControl.set_tidal"], "get": ["Game.get_tidal"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["tidalStrength"]},
+      "rust": {"check": "check_game_tidal", "set": "set_tidal"},
+      "params": {"tidalStrength": {"type": "f32", "range": [0.1, 5]}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetTidal", "args": ["value.tidalStrength"]},
+        "call": "Spring.GetTidal",
+        "args": [],
+        "returns": ["tidalStrength"]
+      }
+    }
+  ]
+}

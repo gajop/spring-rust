@@ -82,15 +82,15 @@
     {
       "id": "preload_sound_item_missing",
       "context": "unsynced_gadget",
-      "kind": "readonly",
-      "requires": ["non_idempotent_lua_then_native"],
+      "kind": "setter_getter",
+      "requires": [],
       "lua": {"set": [], "get": ["Spring.PreloadSoundItem"]},
       "native": {"set": [], "get": ["Sound.preload_sound_item"]},
       "compare": {"mode": "fields", "fields": ["success"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.PreloadSoundItem`", "native_getter": "`Sound.preload_sound_item`", "fields": "`success`"},
-      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "rust": {"check": "check_sound_value", "set": "set_sound_value"},
       "params": {"soundName": {"type": "string", "fixed": "native_api_parity_missing_sound"}},
-      "lua_runtime": {"call": "Spring.PreloadSoundItem", "args": ["value.soundName"], "returns": ["success"]}
+      "lua_runtime": null
     },
     {
       "id": "load_sound_def_missing",
@@ -117,6 +117,30 @@
       "rust": {"check": "check_sound_value", "set": "set_noop"},
       "params": {"soundFile": {"type": "string", "fixed": "native_api_parity_missing_sound"}, "volume": {"type": "f32", "range": [0.0, 0.25]}, "channel": {"type": "i32", "fixed": 0}},
       "lua_runtime": {"call": "Spring.PlaySoundFile", "args": ["value.soundFile", "value.volume", "value.channel"], "returns": ["success"]}
+    },
+    {
+      "id": "get_sound_effect_params",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetSoundEffectParams"]},
+      "native": {"set": [], "get": ["Sound.get_sound_effect_params"]},
+      "compare": {"mode": "fields", "fields": ["supported"]},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetSoundEffectParams", "args": [], "returns": [{"field": "supported", "transform": "truthy"}]}
+    },
+    {
+      "id": "set_sound_effect_params",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.SetSoundEffectParams"]},
+      "native": {"set": [], "get": ["Sound.set_sound_effect_params"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_sound_value", "set": "set_noop"},
+      "params": {"preset": {"type": "string", "fixed": "default"}},
+      "lua_runtime": {"call": "Spring.SetSoundEffectParams", "args": [{"preset": "value.preset"}], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     }
   ]
 }

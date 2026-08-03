@@ -98,7 +98,7 @@ impl NativeApiParity {
                 Some("Native Rml Behavior".to_owned()),
             )?;
             ensure(
-                rml.document_show(document, None, None)
+                rml.document_show(document, spring_native::RmlDocumentShowOptions::default())
                     .map_err(format_error)?,
                 "document_show should succeed",
             )?;
@@ -144,6 +144,24 @@ impl NativeApiParity {
                     .map_err(format_error)?,
                 "theme should be inactive after deactivation",
             )?;
+            let document_path = "native-api-parity.rml";
+            ensure(
+                rml.get_document_path_requests(document_path)
+                    .map_err(format_error)?
+                    .is_empty(),
+                "document path requests should initially be empty",
+            )?;
+            ensure(
+                rml.clear_document_path_requests(document_path)
+                    .map_err(format_error)?,
+                "clear_document_path_requests should succeed",
+            )?;
+            ensure(
+                rml.get_document_path_requests(document_path)
+                    .map_err(format_error)?
+                    .is_empty(),
+                "document path requests should be empty after clear",
+            )?;
 
             let document = create_document(rml, context, "context_document_extra")?;
             ensure(
@@ -152,8 +170,14 @@ impl NativeApiParity {
                 "element_set_id(document) should succeed",
             )?;
             ensure(
-                rml.document_show(document, Some(1), Some(1))
-                    .map_err(format_error)?,
+                rml.document_show(
+                    document,
+                    spring_native::RmlDocumentShowOptions {
+                        modal: Some(1),
+                        focus: Some(1),
+                    },
+                )
+                .map_err(format_error)?,
                 "document_show(modal, document focus) should succeed",
             )?;
             ensure(
@@ -229,8 +253,11 @@ impl NativeApiParity {
                 "element_set_id(close document) should succeed",
             )?;
             ensure(
-                rml.document_show(close_document, None, None)
-                    .map_err(format_error)?,
+                rml.document_show(
+                    close_document,
+                    spring_native::RmlDocumentShowOptions::default(),
+                )
+                .map_err(format_error)?,
                 "close document show should succeed",
             )?;
             ensure_eq(
@@ -273,15 +300,28 @@ impl NativeApiParity {
 
         let event_type = format!("native_api_parity_custom_{}", std::process::id());
         ensure(
-            rml.register_event_type(&event_type, true, true, None)
-                .map_err(format_error)?
+            rml.register_event_type(
+                &event_type,
+                spring_native::RmlRegisterEventTypeOptions {
+                    interruptible: true,
+                    bubbles: true,
+                    ..Default::default()
+                },
+            )
+            .map_err(format_error)?
                 > 0,
             "register_event_type should return a valid event id",
         )?;
         let legacy_event_type = format!("native_api_parity_legacy_{}", std::process::id());
         ensure(
-            rml.regiser_event_type(&legacy_event_type, false, true, None)
-                .map_err(format_error)?
+            rml.regiser_event_type(
+                &legacy_event_type,
+                spring_native::RmlRegisterEventTypeOptions {
+                    bubbles: true,
+                    ..Default::default()
+                },
+            )
+            .map_err(format_error)?
                 > 0,
             "regiser_event_type alias should return a valid event id",
         )?;
@@ -314,7 +354,7 @@ impl NativeApiParity {
 
             let document = create_document(rml, context, "input")?;
             ensure(
-                rml.document_show(document, None, None)
+                rml.document_show(document, spring_native::RmlDocumentShowOptions::default())
                     .map_err(format_error)?,
                 "document_show should succeed before input processing",
             )?;
@@ -722,7 +762,8 @@ impl NativeApiParity {
                     .map_err(format_error)?,
             )?;
             ensure(
-                rml.document_show(document, None, None).map_err(format_error)?,
+                rml.document_show(document, spring_native::RmlDocumentShowOptions::default())
+                    .map_err(format_error)?,
                 "document_show should succeed before form focus",
             )?;
             ensure(

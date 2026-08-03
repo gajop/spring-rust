@@ -291,7 +291,7 @@ impl NativeApiParity {
     }
 
     pub(crate) fn set_display_value(&mut self, message: &Value) -> Result<(), String> {
-        match base_test_name(str_field(message, "name")?) {
+        match base_test_name(test_name_field(message)?) {
             "mini_map_rotation" => {
                 let radians = f32_field(message, "rotation")?;
                 let (success, _) = self

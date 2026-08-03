@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "unit_cmd_desc_lifecycle",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {
+        "set": ["Spring.InsertUnitCmdDesc", "Spring.EditUnitCmdDesc", "Spring.RemoveUnitCmdDesc"],
+        "get": ["Spring.GetUnitCmdDescs"]
+      },
+      "native": {
+        "set": ["UnitControl.insert_unit_cmd_desc", "UnitControl.edit_unit_cmd_desc", "UnitControl.remove_unit_cmd_desc"],
+        "get": ["UnitsCommands.get_unit_cmd_descs"]
+      },
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "report": {
+        "lua_setter": "`Spring.InsertUnitCmdDesc`, `Spring.EditUnitCmdDesc`, `Spring.RemoveUnitCmdDesc`",
+        "native_setter": "`UnitControl.insert_unit_cmd_desc`, `UnitControl.edit_unit_cmd_desc`, `UnitControl.remove_unit_cmd_desc`",
+        "lua_getter": "`Spring.GetUnitCmdDescs`",
+        "native_getter": "`UnitsCommands.get_unit_cmd_descs`",
+        "fields": "`success`"
+      },
+      "rust": {"check": "check_unit_cmd_desc_lifecycle", "set": "set_unit_cmd_desc_lifecycle"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "solve_nurbscurve",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.SolveNURBSCurve"]},
+      "native": {"set": [], "get": ["UnsyncedRead.solve_nurbscurve"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["points"]},
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.SolveNURBSCurve`",
+        "native_getter": "`UnsyncedRead.solve_nurbscurve`",
+        "fields": "`points`"
+      },
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {
+        "degree": {"type": "i32", "fixed": 2},
+        "controlPoints": {"type": "object", "fixed": [0, 0, 0, 1, 256, 64, 128, 1, 512, 0, 256, 1]},
+        "knots": {"type": "object", "fixed": [0, 0, 0, 1, 1, 1]},
+        "segments": {"type": "i32", "fixed": 4}
+      },
+      "lua_runtime": {
+        "call": "Spring.SolveNURBSCurve",
+        "args": ["value.degree", "value.controlPoints", "value.knots", "value.segments"],
+        "returns": [{"field": "points", "index": 1}]
+      }
+    },
+    {
+      "id": "set_original_height_map",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": ["Spring.SetOriginalHeightMapFunc", "Spring.SetOriginalHeightMap"],
+        "get": ["Spring.GetGroundOrigHeight"]
+      },
+      "native": {
+        "set": ["TerrainControl.set_original_height_map_func", "TerrainControl.set_original_height_map"],
+        "get": ["Terrain.get_ground_orig_height"]
+      },
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["height"]},
+      "report": {
+        "lua_setter": "`Spring.SetOriginalHeightMapFunc`, `Spring.SetOriginalHeightMap`",
+        "native_setter": "`TerrainControl.set_original_height_map_func`, `TerrainControl.set_original_height_map`",
+        "lua_getter": "`Spring.GetGroundOrigHeight`",
+        "native_getter": "`Terrain.get_ground_orig_height`",
+        "fields": "`height`"
+      },
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "set_smooth_mesh",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {
+        "set": ["Spring.SetSmoothMeshFunc", "Spring.SetSmoothMesh"],
+        "get": ["Spring.GetSmoothMeshHeight"]
+      },
+      "native": {
+        "set": ["TerrainControl.set_smooth_mesh_func", "TerrainControl.set_smooth_mesh"],
+        "get": ["Terrain.get_smooth_mesh_height"]
+      },
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["height"]},
+      "report": {
+        "lua_setter": "`Spring.SetSmoothMeshFunc`, `Spring.SetSmoothMesh`",
+        "native_setter": "`TerrainControl.set_smooth_mesh_func`, `TerrainControl.set_smooth_mesh`",
+        "lua_getter": "`Spring.GetSmoothMeshHeight`",
+        "native_getter": "`Terrain.get_smooth_mesh_height`",
+        "fields": "`height`"
+      },
+      "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
+      "params": {},
+      "lua_runtime": null
+    }
+  ]
+}

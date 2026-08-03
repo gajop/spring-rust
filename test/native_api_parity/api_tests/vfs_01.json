@@ -163,6 +163,97 @@
       "rust": {"check": "check_vfs_value", "set": "set_noop"},
       "params": {"path": {"type": "string", "fixed": "does/not/exist/"}},
       "lua_runtime": {"call": "VFS.SubDirs", "args": ["value.path"], "returns": [{"field": "isDirectory", "transform": "table_nonempty"}]}
+    },
+    {
+      "id": "vfs_create_dir_existing",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.CreateDir"]},
+      "native": {"set": [], "get": ["Vfs.create_dir"]},
+      "compare": {"mode": "fields", "fields": ["created"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "LuaRules"}},
+      "lua_runtime": {"call": "Spring.CreateDir", "args": ["value.path"], "returns": ["created"]}
+    },
+    {
+      "id": "vfs_create_dir_invalid",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "expect_error": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.CreateDir"]},
+      "native": {"set": [], "get": ["Vfs.create_dir"]},
+      "compare": {"mode": "fields", "fields": ["error"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "../native_api_parity_invalid"}},
+      "lua_runtime": {"call": "Spring.CreateDir", "args": ["value.path"], "returns": []}
+    },
+    {
+      "id": "vfs_extract_archive_invalid",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "expect_error": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.ExtractModArchiveFile"]},
+      "native": {"set": [], "get": ["Vfs.extract_mod_archive_file"]},
+      "compare": {"mode": "fields", "fields": ["error"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"path": {"type": "string", "fixed": "native_api_parity_missing_archive_file"}},
+      "lua_runtime": {"call": "Spring.ExtractModArchiveFile", "args": ["value.path"], "returns": []}
+    },
+    {
+      "id": "vfs_get_map_square_texture_invalid",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetMapSquareTexture"]},
+      "native": {"set": [], "get": ["Vfs.get_map_square_texture"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {
+        "texSquareX": {"type": "i32", "fixed": 0},
+        "texSquareY": {"type": "i32", "fixed": 0},
+        "lodMin": {"type": "i32", "fixed": 0},
+        "textureName": {"type": "string", "fixed": "native_api_parity_missing_texture"},
+        "lodMax": {"type": "i32", "fixed": 0}
+      },
+      "lua_runtime": {"call": "Spring.GetMapSquareTexture", "args": ["value.texSquareX", "value.texSquareY", "value.lodMin", "value.textureName", "value.lodMax"], "returns": ["success"]}
+    },
+    {
+      "id": "vfs_set_map_square_texture_invalid",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.SetMapSquareTexture"]},
+      "native": {"set": [], "get": ["Vfs.set_map_square_texture"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {
+        "texSquareX": {"type": "i32", "fixed": 0},
+        "texSquareY": {"type": "i32", "fixed": 0},
+        "textureName": {"type": "string", "fixed": "native_api_parity_missing_texture"}
+      },
+      "lua_runtime": {"call": "Spring.SetMapSquareTexture", "args": ["value.texSquareX", "value.texSquareY", "value.textureName"], "returns": ["success"]}
+    },
+    {
+      "id": "vfs_set_map_square_texture_default",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.SetMapSquareTexture"]},
+      "native": {"set": [], "get": ["Vfs.set_map_square_texture"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {
+        "texSquareX": {"type": "i32", "fixed": 0},
+        "texSquareY": {"type": "i32", "fixed": 0},
+        "textureName": {"type": "string", "fixed": ""}
+      },
+      "lua_runtime": {"call": "Spring.SetMapSquareTexture", "args": ["value.texSquareX", "value.texSquareY", "value.textureName"], "returns": ["success"]}
     }
   ]
 }

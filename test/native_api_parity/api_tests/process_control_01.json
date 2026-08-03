@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "quit",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.Quit"]},
+      "native": {"set": ["SystemControl.quit"]},
+      "compare": {"mode": "fields", "fields": ["called", "returnCount"]},
+      "report": {"lua_setter": "`Spring.Quit`", "native_setter": "`SystemControl.quit`", "fields": "quit request and Lua return count"},
+      "rust": {"check": "check_process_control", "set": "set_process_control"},
+      "params": {}
+    },
+    {
+      "id": "reload",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.Reload"]},
+      "native": {"set": ["SystemControl.reload"]},
+      "compare": {"mode": "fields", "fields": ["called", "returnCount", "reloaded"]},
+      "report": {"lua_setter": "`Spring.Reload`", "native_setter": "`SystemControl.reload`", "fields": "reload request, Lua return count, and resumed fixture"},
+      "rust": {"check": "check_process_control", "set": "set_process_control"},
+      "params": {}
+    },
+    {
+      "id": "restart",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.Restart"]},
+      "native": {"set": ["SystemControl.restart"]},
+      "compare": {"mode": "fields", "fields": ["called", "returnCount", "reloaded"]},
+      "report": {"lua_setter": "`Spring.Restart`", "native_setter": "`SystemControl.restart`", "fields": "restart request, Lua return count, and resumed fixture"},
+      "rust": {"check": "check_process_control", "set": "set_process_control"},
+      "params": {}
+    },
+    {
+      "id": "start",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.Start"]},
+      "native": {"set": ["SystemControl.start"]},
+      "compare": {"mode": "fields", "fields": ["called", "returnCount", "result"]},
+      "report": {"lua_setter": "`Spring.Start`", "native_setter": "`SystemControl.start`", "fields": "child launch result and Lua return shape"},
+      "rust": {"check": "check_process_control", "set": "set_process_control"},
+      "params": {}
+    }
+  ]
+}

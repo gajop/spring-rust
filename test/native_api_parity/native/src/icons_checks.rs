@@ -16,7 +16,7 @@ impl NativeApiParity {
                 self.same_i32_if_present(label, message, "count", native.len() as i32)
             }
             "get_icon_data_default" => {
-                let icon_name = str_field(message, "iconName")?;
+                let icon_name = str_field(message, "requestedIconName")?;
                 let full_data = bool_field(message, "fullData")?;
                 let native = self
                     .interface
@@ -46,17 +46,27 @@ impl NativeApiParity {
     }
 
     pub(crate) fn set_icons_value(&mut self, message: &Value) -> Result<(), String> {
-        match base_test_name(str_field(message, "name")?) {
+        match base_test_name(test_name_field(message)?) {
             "unit_icon_draw" | "unit_icon_draw_deprecated_alias" => {
                 let unit_id = i32_field(message, "unitID")?;
                 let draw_icon = bool_field(message, "drawIcon")?;
-                let success = self
-                    .interface
-                    .icons()
-                    .unit_icon_set_draw(unit_id, draw_icon)
-                    .map_err(|err| {
-                        format!("unit_icon_set_draw({unit_id}, {draw_icon}) failed: {err:?}")
-                    })?;
+                let success = match base_test_name(test_name_field(message)?) {
+                    "unit_icon_draw" => self
+                        .interface
+                        .unsynced_ctrl()
+                        .set_unit_icon_draw(unit_id, draw_icon)
+                        .map_err(|err| {
+                            format!("set_unit_icon_draw({unit_id}, {draw_icon}) failed: {err:?}")
+                        })?,
+                    "unit_icon_draw_deprecated_alias" => self
+                        .interface
+                        .icons()
+                        .unit_icon_set_draw(unit_id, draw_icon)
+                        .map_err(|err| {
+                            format!("unit_icon_set_draw({unit_id}, {draw_icon}) failed: {err:?}")
+                        })?,
+                    name => return Err(format!("unsupported icons setter `{name}`")),
+                };
                 if success {
                     Ok(())
                 } else {

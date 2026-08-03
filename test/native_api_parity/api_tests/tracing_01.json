@@ -51,6 +51,57 @@
         "args": ["value.startX", "value.startY", "value.startZ", "value.endX", "value.endY", "value.endZ", "value.testWater"],
         "returns": ["rayLength", "posX", "posY", "posZ"]
       }
+    },
+    {
+      "id": "trace_ray_in_direction",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.TraceRayInDirection"]},
+      "native": {"set": [], "get": ["Tracing.trace_ray_in_direction"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["hits"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.TraceRayInDirection`", "native_getter": "`Tracing.trace_ray_in_direction`", "fields": "`hits`"},
+      "rust": {"check": "check_tracing_value", "set": "set_noop"},
+      "params": {
+        "posX": {"type": "f32", "fixed": 0},
+        "posY": {"type": "f32", "fixed": 256},
+        "posZ": {"type": "f32", "fixed": 0},
+        "dirX": {"type": "f32", "fixed": 1},
+        "dirY": {"type": "f32", "fixed": 0},
+        "dirZ": {"type": "f32", "fixed": 0},
+        "maxLength": {"type": "f32", "fixed": 512},
+        "objectType": {"type": "string", "fixed": "both"}
+      },
+      "lua_runtime": {
+        "call": "Spring.TraceRayInDirection",
+        "args": ["value.posX", "value.posY", "value.posZ", "value.dirX", "value.dirY", "value.dirZ", "value.maxLength", "value.objectType"],
+        "returns": ["hits"]
+      }
+    },
+    {
+      "id": "trace_ray_between_positions",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.TraceRayBetweenPositions"]},
+      "native": {"set": [], "get": ["Tracing.trace_ray_between_positions"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["hits"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.TraceRayBetweenPositions`", "native_getter": "`Tracing.trace_ray_between_positions`", "fields": "`hits`"},
+      "rust": {"check": "check_tracing_value", "set": "set_noop"},
+      "params": {
+        "startX": {"type": "f32", "fixed": 0},
+        "startY": {"type": "f32", "fixed": 256},
+        "startZ": {"type": "f32", "fixed": 0},
+        "endX": {"type": "f32", "fixed": 512},
+        "endY": {"type": "f32", "fixed": 256},
+        "endZ": {"type": "f32", "fixed": 0},
+        "objectType": {"type": "string", "fixed": "both"}
+      },
+      "lua_runtime": {
+        "call": "Spring.TraceRayBetweenPositions",
+        "args": ["value.startX", "value.startY", "value.startZ", "value.endX", "value.endY", "value.endZ", "value.objectType"],
+        "returns": ["hits"]
+      }
     }
   ]
 }

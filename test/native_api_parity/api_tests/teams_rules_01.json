@@ -488,14 +488,9 @@
       },
       "compare": {
         "mode": "fields",
+        "stream": "shape",
         "epsilon": 0.05,
-        "fields": [
-          "playerName",
-          "active",
-          "spectator",
-          "teamID",
-          "allyTeamID"
-        ]
+        "fields": ["pingTime", "cpuUsage"]
       },
       "report": {
         "lua_setter": "n/a",

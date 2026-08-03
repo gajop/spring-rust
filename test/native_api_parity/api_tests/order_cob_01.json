@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "give_order_selected",
+      "context": "widget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.GiveOrder"]},
+      "native": {"set": [], "get": ["UnitsCommands.give_order"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GiveOrder",
+        "args": [0, {}, {}, 0],
+        "returns": ["success"]
+      }
+    },
+    {
+      "id": "give_order_to_unit_unsynced",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GiveOrderToUnit"]},
+      "native": {"set": [], "get": ["UnitsCommands.give_order_to_unit_map"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GiveOrderToUnit",
+        "args": ["fixture.unitID", 0, {}, {}, 0],
+        "returns": ["success"]
+      }
+    },
+    {
+      "id": "give_order_to_unit_array_unsynced",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GiveOrderToUnitArray"]},
+      "native": {"set": [], "get": ["UnitsCommands.give_order_to_unit_map"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GiveOrderToUnitArray",
+        "args": [{"__fixture_array": "unitID"}, 0, {}, {}, 0],
+        "returns": ["success"]
+      }
+    },
+    {
+      "id": "give_order_to_unit_map_unsynced",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GiveOrderToUnitMap"]},
+      "native": {"set": [], "get": ["UnitsCommands.give_order_to_unit_map"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GiveOrderToUnitMap",
+        "args": [{"__fixture_map_key": "unitID"}, 0, {}, {}, 0],
+        "returns": ["success"]
+      }
+    },
+    {
+      "id": "give_order_array_to_unit_unsynced",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GiveOrderArrayToUnit"]},
+      "native": {"set": [], "get": ["UnitsCommands.give_order_array_to_unit_map"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GiveOrderArrayToUnit",
+        "args": ["fixture.unitID", [[0, {}, {}, 0]]],
+        "returns": ["success"]
+      }
+    },
+    {
+      "id": "give_order_array_to_unit_map_unsynced",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GiveOrderArrayToUnitMap"]},
+      "native": {"set": [], "get": ["UnitsCommands.give_order_array_to_unit_map"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GiveOrderArrayToUnitMap",
+        "args": [{"__fixture_map_key": "unitID"}, [[0, {}, {}, 0]]],
+        "returns": ["success"]
+      }
+    },
+    {
+      "id": "give_order_array_to_unit_array_unsynced",
+      "context": "widget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GiveOrderArrayToUnitArray"]},
+      "native": {"set": [], "get": ["UnitsCommands.give_order_array_to_unit_map"]},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GiveOrderArrayToUnitArray",
+        "args": [{"__fixture_array": "unitID"}, [[0, {}, {}, 0]], true],
+        "returns": ["success"]
+      }
+    },
+    {
+      "id": "give_order_to_unit_synced",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.GiveOrderToUnit"], "get": []},
+      "native": {"set": ["UnitControl.give_order_to_unit"], "get": []},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_order_variant"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "give_order_to_unit_array_synced",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.GiveOrderToUnitArray"], "get": []},
+      "native": {"set": ["UnitControl.give_order_to_unit_array"], "get": []},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_order_variant"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "give_order_to_unit_map_synced",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.GiveOrderToUnitMap"], "get": []},
+      "native": {"set": ["UnitControl.give_order_array_to_unit_array"], "get": []},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_order_variant"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "give_order_array_to_unit_synced",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.GiveOrderArrayToUnit"], "get": []},
+      "native": {"set": ["UnitControl.give_order_array_to_unit"], "get": []},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_order_variant"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "give_order_array_to_unit_map_synced",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.GiveOrderArrayToUnitMap"], "get": []},
+      "native": {"set": ["UnitControl.give_order_array_to_unit_array"], "get": []},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_order_variant"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "give_order_array_to_unit_array_synced_pairwise",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.GiveOrderArrayToUnitArray"], "get": []},
+      "native": {"set": ["UnitControl.give_order_array_to_unit_array"], "get": []},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_order_variant"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "give_order_array_to_unit_array_synced_broadcast",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.GiveOrderArrayToUnitArray"], "get": []},
+      "native": {"set": ["UnitControl.give_order_array_to_unit_array"], "get": []},
+      "compare": {"mode": "fields", "fields": ["success"]},
+      "rust": {"check": "check_order_variant", "set": "set_order_variant"},
+      "params": {},
+      "lua_runtime": null
+    },
+    {
+      "id": "get_cobscript_id_non_cob",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GetCOBScriptID"]},
+      "native": {"set": [], "get": ["CobScript.get_cobscript_id"]},
+      "compare": {"mode": "fields", "fields": ["funcID"]},
+      "rust": {"check": "check_cob_script", "set": "set_noop"},
+      "params": {"funcName": {"type": "string", "fixed": "NativeApiParityMissingCobFunction"}},
+      "lua_runtime": {
+        "call": "Spring.GetCOBScriptID",
+        "args": ["fixture.unitID", "value.funcName"],
+        "returns": [{"field": "funcID", "transform": "nil_to_minus_one"}]
+      }
+    },
+    {
+      "id": "call_cobscript_non_cob",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "expect_error": true,
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.CallCOBScript"]},
+      "native": {"set": [], "get": ["CobScript.call_cobscript"]},
+      "compare": {"mode": "fields", "fields": ["error"]},
+      "rust": {"check": "check_cob_script", "set": "set_noop"},
+      "params": {
+        "funcName": {"type": "string", "fixed": "NativeApiParityMissingCobFunction"},
+        "retArgs": {"type": "i32", "fixed": 0}
+      },
+      "lua_runtime": {
+        "call": "Spring.CallCOBScript",
+        "args": ["fixture.unitID", "value.funcName", "value.retArgs"],
+        "returns": []
+      }
+    }
+  ]
+}

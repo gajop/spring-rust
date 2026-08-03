@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "get_unit_selection_volume_data",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GetUnitSelectionVolumeData"]},
+      "native": {"set": [], "get": ["UnitRendering.get_unit_selection_volume_data"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["scaleX", "scaleY", "scaleZ", "offsetX", "offsetY", "offsetZ", "volumeType", "useContHitTest", "primaryAxis", "ignoreHits"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitSelectionVolumeData`", "native_getter": "`UnitRendering.get_unit_selection_volume_data`", "fields": "selection volume"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetUnitSelectionVolumeData", "args": ["fixture.unitID"], "returns": ["scaleX", "scaleY", "scaleZ", "offsetX", "offsetY", "offsetZ", "volumeType", "useContHitTest", "primaryAxis", "ignoreHits"]}
+    },
+    {
+      "id": "get_feature_selection_volume_data",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureSelectionVolumeData"]},
+      "native": {"set": [], "get": ["Features.get_feature_selection_volume_data"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["scaleX", "scaleY", "scaleZ", "offsetX", "offsetY", "offsetZ", "volumeType", "useContHitTest", "primaryAxis", "ignoreHits"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureSelectionVolumeData`", "native_getter": "`Features.get_feature_selection_volume_data`", "fields": "selection volume"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureSelectionVolumeData", "args": ["fixture.featureID"], "returns": ["scaleX", "scaleY", "scaleZ", "offsetX", "offsetY", "offsetZ", "volumeType", "useContHitTest", "primaryAxis", "ignoreHits"]}
+    },
+    {
+      "id": "get_unit_transform_matrix",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GetUnitTransformMatrix"]},
+      "native": {"set": [], "get": ["UnitRendering.get_unit_transform_matrix"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitTransformMatrix`", "native_getter": "`UnitRendering.get_unit_transform_matrix`", "fields": "`m1` ... `m16`"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetUnitTransformMatrix", "args": ["fixture.unitID"], "returns": ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16"]}
+    },
+    {
+      "id": "get_feature_transform_matrix",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeatureTransformMatrix"]},
+      "native": {"set": [], "get": ["Features.get_feature_transform_matrix"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureTransformMatrix`", "native_getter": "`Features.get_feature_transform_matrix`", "fields": "`m1` ... `m16`"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeatureTransformMatrix", "args": ["fixture.featureID"], "returns": ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16"]}
+    },
+    {
+      "id": "get_unit_palette_index",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GetUnitPaletteIndex"]},
+      "native": {"set": [], "get": ["UnsyncedRead.get_unit_palette_index"]},
+      "compare": {"mode": "fields", "fields": ["hasCustomColor", "customIndex"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitPaletteIndex`", "native_getter": "`UnsyncedRead.get_unit_palette_index`", "fields": "palette presence/index"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetUnitPaletteIndex", "args": ["fixture.unitID"], "returns": [{"field": "hasCustomColor", "transform": "truthy"}, {"field": "customIndex", "transform": "nil_to_minus_one"}]}
+    },
+    {
+      "id": "get_feature_palette_index",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["feature"],
+      "lua": {"set": [], "get": ["Spring.GetFeaturePaletteIndex"]},
+      "native": {"set": [], "get": ["UnsyncedRead.get_feature_palette_index"]},
+      "compare": {"mode": "fields", "fields": ["hasCustomColor", "customIndex"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeaturePaletteIndex`", "native_getter": "`UnsyncedRead.get_feature_palette_index`", "fields": "palette presence/index"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetFeaturePaletteIndex", "args": ["fixture.featureID"], "returns": [{"field": "hasCustomColor", "transform": "truthy"}, {"field": "customIndex", "transform": "nil_to_minus_one"}]}
+    },
+    {
+      "id": "get_unit_icon",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GetUnitIcon"]},
+      "native": {"set": [], "get": ["UnitRendering.get_unit_icon"]},
+      "compare": {"mode": "fields", "fields": ["iconName"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitIcon`", "native_getter": "`UnitRendering.get_unit_icon`", "fields": "`iconName`"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetUnitIcon", "args": ["fixture.unitID"], "returns": ["iconName"]}
+    }
+  ]
+}

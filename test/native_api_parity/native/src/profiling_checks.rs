@@ -39,7 +39,14 @@ impl NativeApiParity {
                 let native = self
                     .interface
                     .profiling()
-                    .diff_timers(1000, 1000, return_ms, from_micro_secs)
+                    .diff_timers(
+                        1000,
+                        1000,
+                        spring_native::DiffTimersOptions {
+                            return_ms,
+                            from_micro_secs,
+                        },
+                    )
                     .map_err(|err| format!("diff_timers(1000, 1000, {return_ms}, {from_micro_secs}) failed: {err:?}"))?;
                 self.same_if_present(label, message, "delta", native)
             }

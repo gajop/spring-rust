@@ -58,12 +58,7 @@ impl NativeApiParity {
                 "",
                 "",
                 COMPUTE_SHADER,
-                false,
-                0,
-                false,
-                0,
-                false,
-                0,
+                spring_native::GfxCreateShaderOptions::default(),
             )
             .map_err(|error| format!("{error:?}"))?;
         let result = self.dispatch_and_read(shader, source, destination);

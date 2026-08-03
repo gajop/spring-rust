@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "assign_mouse_cursor",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.AssignMouseCursor"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.assign_mouse_cursor"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {
+        "commandName": {"type": "string", "fixed": "NativeApiParityCursor"},
+        "cursorFileName": {"type": "string", "fixed": "cursorattack"},
+        "overwrite": {"type": "bool", "fixed": true},
+        "hotSpotTopLeft": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {"call": "Spring.AssignMouseCursor", "args": ["value.commandName", "value.cursorFileName", "value.overwrite", "value.hotSpotTopLeft"], "returns": [{"field": "result", "transform": "truthy"}]}
+    },
+    {
+      "id": "replace_mouse_cursor",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.ReplaceMouseCursor"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.replace_mouse_cursor"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {
+        "oldCursorFileName": {"type": "string", "fixed": "cursorattack"},
+        "newCursorFileName": {"type": "string", "fixed": "cursorattackbad"},
+        "hotSpotTopLeft": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {"call": "Spring.ReplaceMouseCursor", "args": ["value.oldCursorFileName", "value.newCursorFileName", "value.hotSpotTopLeft"], "returns": [{"field": "result", "transform": "truthy"}]}
+    },
+    {
+      "id": "set_mouse_cursor",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetMouseCursor"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_mouse_cursor"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"cursorName": {"type": "string", "fixed": "cursornormal"}, "scale": {"type": "f32", "fixed": 1}},
+      "lua_runtime": {"call": "Spring.SetMouseCursor", "args": ["value.cursorName", "value.scale"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "warp_mouse",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.WarpMouse"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.warp_mouse"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"x": {"type": "i32", "fixed": 16}, "y": {"type": "i32", "fixed": 16}},
+      "lua_runtime": {"call": "Spring.WarpMouse", "args": ["value.x", "value.y"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "set_active_command",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetActiveCommand"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_active_command"]},
+      "compare": {"mode": "fields", "fields": ["result"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {
+        "cmdIndex": {"type": "i32", "fixed": -1},
+        "button": {"type": "i32", "fixed": 1},
+        "leftClick": {"type": "bool", "fixed": false},
+        "rightClick": {"type": "bool", "fixed": false},
+        "alt": {"type": "bool", "fixed": false},
+        "ctrl": {"type": "bool", "fixed": false},
+        "meta": {"type": "bool", "fixed": false},
+        "shift": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {"call": "Spring.SetActiveCommand", "args": ["nil"], "returns": [{"field": "result", "transform": "truthy"}]}
+    },
+    {
+      "id": "sdl_start_text_input",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.SDLStartTextInput"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.sdlstart_text_input"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.SDLStartTextInput", "args": [], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "sdl_stop_text_input",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.SDLStopTextInput"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.sdlstop_text_input"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.SDLStopTextInput", "args": [], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "sdl_set_text_input_rect",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.SDLSetTextInputRect"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.sdlset_text_input_rect"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"x": {"type": "i32", "fixed": 0}, "y": {"type": "i32", "fixed": 0}, "w": {"type": "i32", "fixed": 32}, "h": {"type": "i32", "fixed": 32}},
+      "lua_runtime": {"call": "Spring.SDLSetTextInputRect", "args": ["value.x", "value.y", "value.w", "value.h"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "unit_set_leave_tracks_unsynced",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetUnitLeaveTracks"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_unit_leave_tracks"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"leaveTracks": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.SetUnitLeaveTracks", "args": ["fixture.unitID", "value.leaveTracks"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "draw_unit_commands_unsynced",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.DrawUnitCommands"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.draw_unit_commands"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"tableOrArray": {"type": "bool", "fixed": false}, "queueDrawDepth": {"type": "i32", "fixed": -1}},
+      "lua_runtime": {"call": "Spring.DrawUnitCommands", "args": [["fixture.unitID"], "value.tableOrArray", "value.queueDrawDepth"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "set_video_capturing_mode",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires_rendering": true,
+      "lua": {"set": [], "get": ["Spring.SetVideoCapturingMode"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_video_capturing_mode"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"allowCaptureMode": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Spring.SetVideoCapturingMode", "args": ["value.allowCaptureMode"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "set_video_capturing_time_offset",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.SetVideoCapturingTimeOffset"]},
+      "native": {"set": [], "get": ["UnsyncedCtrl.set_video_capturing_time_offset"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"timeOffset": {"type": "f32", "fixed": 0.25}},
+      "lua_runtime": {"call": "Spring.SetVideoCapturingTimeOffset", "args": ["value.timeOffset"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "set_log_section_filter_level",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.SetLogSectionFilterLevel"]},
+      "native": {"set": [], "get": ["Config.set_log_section_filter_level"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {"section": {"type": "string", "fixed": "NativeApiParity"}, "level": {"type": "i32", "fixed": 3}},
+      "lua_runtime": {"call": "Spring.SetLogSectionFilterLevel", "args": ["value.section", "value.level"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    },
+    {
+      "id": "garbage_collect_ctrl",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["Spring.GarbageCollectCtrl"]},
+      "native": {"set": [], "get": ["SystemControl.garbage_collect_ctrl"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "rust": {"check": "check_unsynced_control_call", "set": "set_noop"},
+      "params": {
+        "itersPerBatch": {"type": "i32", "fixed": 1},
+        "numStepsPerIter": {"type": "i32", "fixed": 1},
+        "minStepsPerIter": {"type": "i32", "fixed": 1},
+        "maxStepsPerIter": {"type": "i32", "fixed": 2},
+        "minLoopRunTime": {"type": "f32", "fixed": 0},
+        "maxLoopRunTime": {"type": "f32", "fixed": 0},
+        "baseRunTimeMult": {"type": "f32", "fixed": 1},
+        "baseMemLoadMult": {"type": "f32", "fixed": 1}
+      },
+      "lua_runtime": {"call": "Spring.GarbageCollectCtrl", "args": ["value.itersPerBatch", "value.numStepsPerIter", "value.minStepsPerIter", "value.maxStepsPerIter", "value.minLoopRunTime", "value.maxLoopRunTime", "value.baseRunTimeMult", "value.baseMemLoadMult"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    }
+  ]
+}

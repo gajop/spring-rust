@@ -73,7 +73,7 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetGameSpeed"]},
       "native": {"set": [], "get": ["Display.get_game_speed"]},
-      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["wantedSpeedFactor", "speedFactor", "paused"]},
+      "compare": {"mode": "fields", "stream": "shape", "epsilon": 0.05, "fields": ["wantedSpeedFactor", "speedFactor", "paused"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetGameSpeed`", "native_getter": "`Display.get_game_speed`", "fields": "`wantedSpeedFactor`, `speedFactor`, `paused`"},
       "rust": {"check": "check_display_value", "set": "set_noop"},
       "params": {},

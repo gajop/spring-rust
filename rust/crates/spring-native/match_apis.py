@@ -21,12 +21,86 @@ FLATTENED_TYPES = {
     'sys::spherequery': ['float', 'float', 'float', 'float'],
     'sys::cylinderquery': ['float', 'float', 'float', 'float', 'float'],
     'sys::teamcolor': ['float', 'float', 'float', 'float'],
+
+    # Named option records keep the Rust/FFI callsites readable while still
+    # representing the same logical Lua arguments.  Compare their fields as
+    # parameter slots, without treating the descriptor itself as one opaque
+    # parameter.  The names intentionally describe the API shape rather than
+    # the C++ presence flags (which are implementation details).
+    'buggeroffoptions': ['bool', 'bool', 'int'],
+    'createunitoptions': ['bool', 'bool', 'int', 'int'],
+    'destroyunitoptions': ['bool', 'bool', 'int', 'bool'],
+    'difftimersoptions': ['bool', 'bool'],
+    'getallprojectilesoptions': ['bool', 'bool'],
+    'getclosestenemyunitoptions': ['bool', 'bool', 'bool'],
+    'getgrounddecaltexturesoptions': ['bool', 'bool'],
+    'getprojectilesinrectangleoptions': ['bool', 'bool'],
+    'getprojectilesinsphereoptions': ['bool', 'bool'],
+    'getunitnearestenemyoptions': ['bool', 'bool', 'bool'],
+    'getunitpositionoptions': ['bool', 'bool'],
+    'getunitseparationoptions': ['bool', 'bool'],
+    'getunitstatesoptions': ['bool', 'bool', 'bool'],
+    'getunitweaponhavefreelineoffireoptions': ['bool'],
+    'getunitweapontesttargetoptions': ['bool'],
+    'getunitweapontrytargetoptions': ['bool', 'bool'],
+    'getvisiblefeaturesoptions': ['bool', 'bool'],
+    'getvisibleprojectilesoptions': ['bool', 'bool', 'bool'],
+    'markererasepositionoptions': ['bool', 'bool'],
+    'rmldocumentshowoptions': ['bool', 'bool'],
+    'rmlregistereventtypeoptions': ['bool', 'bool', 'int'],
+    'setactivecommandoptions': ['bool', 'bool', 'bool', 'bool', 'bool', 'bool'],
+    'setcameratargetoptions': ['float', 'float', 'float', 'float'],
+    'setfactorybuggeroffoptions': ['bool', 'float', 'float', 'int', 'bool', 'bool'],
+    'setfeatureblockingoptions': ['bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool'],
+    'setgodmodeoptions': ['bool', 'bool'],
+    'setshockfrontfactorsoptions': ['float', 'float', 'float'],
+    'setunitblockingoptions': ['bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool'],
+    'setunitleavesghostoptions': ['bool', 'bool'],
+    'setunittargetoptions': ['bool', 'bool'],
+    'setunituseweaponsoptions': ['bool', 'bool'],
+    'setwindowgeometryoptions': ['bool', 'bool'],
+    'testmoveorderoptions': ['bool', 'bool', 'bool'],
+    'traceraygroundbetweenpositionsoptions': ['bool'],
+    'traceraygroundindirectionoptions': ['float', 'bool'],
+    'tracerayindirectionoptions': ['float'],
+    'tracescreenrayoptions': ['bool', 'bool', 'bool', 'bool', 'float'],
+    'unitstatesoptions': ['bool', 'bool', 'bool'],
 }
 
 CALLBACK_SHAPE_EQUIVALENTS = {
     'Spring.SetHeightMapFunc',
     'Spring.SetOriginalHeightMapFunc',
     'Spring.SetSmoothMeshFunc',
+}
+
+# MarkerErasePosition uses a named Rust options record for the two boolean
+# flags, while playerID remains a separate argument.  Lua places playerID
+# between those flags, so flattening the Rust record contiguously would report
+# a false positional mismatch even though the generated wrapper initializes
+# the C query fields correctly.
+PARAMETER_LAYOUT_EQUIVALENTS = {
+    'Spring.MarkerErasePosition': [
+        ('pos', 'float3'),
+        ('unused', 'float'),
+        ('localOnly', 'bool'),
+        ('playerID', 'int'),
+        ('alwaysErase', 'bool'),
+    ],
+}
+
+# Lua exposes several accepted argument shapes for this callout.  The native
+# query makes all of those choices explicit: targetID, source/target points,
+# and the ground-target flag.  Defaults let the native caller represent each
+# Lua overload without changing the engine operation.
+OVERLOAD_EQUIVALENTS = {
+    'Spring.GetUnitWeaponHaveFreeLineOfFire': [
+        ('unitID', 'int'),
+        ('weaponNum', 'int'),
+        ('targetID', 'int'),
+        ('sourcePos', 'float3'),
+        ('targetPos', 'float3'),
+        ('isGroundTarget', 'bool'),
+    ],
 }
 
 
@@ -203,6 +277,34 @@ def compare_params(lua_params: List[Dict], rust_params: List[Dict]) -> Tuple[boo
 def compare_function_params(lua_func: Dict, rust_func: Dict) -> Tuple[bool, str]:
     if lua_func.get('name') in CALLBACK_SHAPE_EQUIVALENTS:
         return True, "callback shape equivalent"
+
+    layout = PARAMETER_LAYOUT_EQUIVALENTS.get(lua_func.get('name'))
+    if layout is not None:
+        rust_params = rust_func.get('params', [])
+        if len(rust_params) != 4:
+            return False, f"count mismatch (lua={len(layout)}, rust={len(rust_params)})"
+        option_type = normalize_type(rust_params[2].get('type', ''))
+        option_fields = FLATTENED_TYPES.get(option_type)
+        if option_fields != ['bool', 'bool']:
+            return False, f"unexpected options type {rust_params[2].get('type', '')}"
+        rust_logical = [
+            rust_params[0],
+            rust_params[1],
+            {'name': 'localOnly', 'type': option_fields[0]},
+            rust_params[3],
+            {'name': 'alwaysErase', 'type': option_fields[1]},
+        ]
+        return compare_params(
+            lua_func.get('params', []),
+            rust_logical,
+        )
+
+    overload = OVERLOAD_EQUIVALENTS.get(lua_func.get('name'))
+    if overload is not None:
+        return compare_params(
+            [{'name': name, 'type': ptype} for name, ptype in overload],
+            rust_func.get('params', []),
+        )
 
     # RequestPath accepts one Lua union (number|string).  The C ABI keeps the
     # two representations explicit so bindgen can expose a typed optional

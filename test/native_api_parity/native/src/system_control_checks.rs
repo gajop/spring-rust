@@ -8,6 +8,66 @@ impl NativeApiParity {
         label: &str,
     ) -> Result<(), String> {
         match base_test_name(label) {
+            "clear_watch_dog_timer" => self.same_i32_if_present(label, message, "returnCount", 0),
+            "ping" => {
+                let tag = u32::try_from(i32_field(message, "tag")?)
+                    .map_err(|_| "ping tag must be non-negative".to_string())?;
+                let success = self
+                    .interface
+                    .system_control()
+                    .ping(tag)
+                    .map_err(|err| format!("ping({tag}) failed: {err:?}"))?;
+                if !success {
+                    return Err("ping returned false".to_string());
+                }
+                self.same_i32_if_present(label, message, "returnCount", 0)
+            }
+            "request_start_position" => {
+                let pos = vec3_from_fields(message, "x", "y", "z")?;
+                let ready = bool_field(message, "ready")?;
+                let success = self
+                    .interface
+                    .system_control()
+                    .request_start_position(pos, ready)
+                    .map_err(|err| format!("request_start_position({ready}) failed: {err:?}"))?;
+                if !success {
+                    return Err("request_start_position returned false".to_string());
+                }
+                self.same_i32_if_present(label, message, "returnCount", 0)
+            }
+            "set_share_level" => {
+                let resource = str_field(message, "resource")?;
+                let level = f32_field(message, "level")?;
+                let success = self
+                    .interface
+                    .system_control()
+                    .set_share_level(resource, level)
+                    .map_err(|err| {
+                        format!("set_share_level({resource:?}, {level}) failed: {err:?}")
+                    })?;
+                if !success {
+                    return Err("set_share_level returned false".to_string());
+                }
+                self.same_i32_if_present(label, message, "returnCount", 0)
+            }
+            "share_resources" => {
+                let team_id = i32_field(message, "teamID")?;
+                let resource = str_field(message, "resource")?;
+                let amount = f32_field(message, "amount")?;
+                let success = self
+                    .interface
+                    .system_control()
+                    .share_resources(team_id, resource, amount)
+                    .map_err(|err| {
+                        format!(
+                            "share_resources({team_id}, {resource:?}, {amount}) failed: {err:?}"
+                        )
+                    })?;
+                if !success {
+                    return Err("share_resources returned false".to_string());
+                }
+                self.same_i32_if_present(label, message, "returnCount", 0)
+            }
             "is_replay" => {
                 let native = self
                     .interface
@@ -49,6 +109,22 @@ impl NativeApiParity {
                     .get_replay_length()
                     .map_err(|err| format!("get_replay_length() failed: {err:?}"))?;
                 self.same_bool_if_present(label, message, "hasReplay", success)
+            }
+            "get_replay_file_path" => {
+                let (_path, success) = self
+                    .interface
+                    .system_control()
+                    .get_replay_file_path()
+                    .map_err(|err| format!("get_replay_file_path() failed: {err:?}"))?;
+                self.same_bool_if_present(label, message, "available", success)
+            }
+            "get_replay_recording_file_path" => {
+                let (_path, success) = self
+                    .interface
+                    .system_control()
+                    .get_replay_recording_file_path()
+                    .map_err(|err| format!("get_replay_recording_file_path() failed: {err:?}"))?;
+                self.same_bool_if_present(label, message, "available", success)
             }
             "get_game_state" => {
                 let max_latency = f32_field(message, "maxLatency")?;
@@ -99,6 +175,27 @@ impl NativeApiParity {
                 )
             }
             _ => Err(format!("unsupported system control check `{label}`")),
+        }
+    }
+
+    pub(crate) fn set_system_control_value(&mut self, message: &Value) -> Result<(), String> {
+        match base_test_name(test_name_field(message)?) {
+            "clear_watch_dog_timer" => {
+                let success = self
+                    .interface
+                    .system_control()
+                    .clear_watch_dog_timer(
+                        str_field(message, "threadName")?,
+                        bool_field(message, "keepStopped")?,
+                    )
+                    .map_err(|err| format!("clear_watch_dog_timer() failed: {err:?}"))?;
+                if success {
+                    Ok(())
+                } else {
+                    Err("clear_watch_dog_timer returned false".to_string())
+                }
+            }
+            name => Err(format!("unsupported system control setter `{name}`")),
         }
     }
 }

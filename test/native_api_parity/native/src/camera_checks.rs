@@ -68,6 +68,34 @@ impl NativeApiParity {
                     })?;
                 self.same_vec3(label, native, message)
             }
+            "trace_screen_ray_ground" => {
+                let (hit_type, _hit_id, hit_pos) = self
+                    .interface
+                    .camera()
+                    .trace_screen_ray(
+                        f32_field(message, "screenX")?,
+                        f32_field(message, "screenY")?,
+                        spring_native::TraceScreenRayOptions {
+                            only_coords: bool_field(message, "onlyCoords")?,
+                            use_minimap: bool_field(message, "useMinimap")?,
+                            include_sky: bool_field(message, "includeSky")?,
+                            ignore_water: bool_field(message, "ignoreWater")?,
+                            height_offset: f32_field(message, "heightOffset")?,
+                        },
+                    )
+                    .map_err(|err| format!("trace_screen_ray() failed: {err:?}"))?;
+                let native_type = match hit_type {
+                    1 => "unit",
+                    2 => "feature",
+                    3 => "ground",
+                    4 => "sky",
+                    _ => "",
+                };
+                self.same_string_if_present(label, message, "hitType", native_type)?;
+                self.same_if_present(label, message, "x", hit_pos.x)?;
+                self.same_if_present(label, message, "y", hit_pos.y)?;
+                self.same_if_present(label, message, "z", hit_pos.z)
+            }
             "world_to_screen_coords" => {
                 let world_pos = sys::Float3 {
                     x: f32_field(message, "x")?,
@@ -97,7 +125,13 @@ impl NativeApiParity {
         let success = self
             .interface
             .camera()
-            .set_camera_target(target, Some(transition_time), None, None, None)
+            .set_camera_target(
+                target,
+                spring_native::SetCameraTargetOptions {
+                    transition_time: Some(transition_time),
+                    ..Default::default()
+                },
+            )
             .map_err(|err| format!("set_camera_target({transition_time}) failed: {err:?}"))?;
         if success {
             Ok(())

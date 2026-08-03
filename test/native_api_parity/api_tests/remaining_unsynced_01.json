@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "custom_palette_color",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Spring.SetCustomPaletteColor"], "get": ["Spring.GetCustomPaletteColor"]},
+      "native": {"set": ["UnsyncedCtrl.set_custom_palette_color"], "get": ["UnsyncedRead.get_custom_palette_color"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["r", "g", "b"]},
+      "report": {"lua_setter": "`Spring.SetCustomPaletteColor`", "native_setter": "`UnsyncedCtrl.set_custom_palette_color`", "lua_getter": "`Spring.GetCustomPaletteColor`", "native_getter": "`UnsyncedRead.get_custom_palette_color`", "fields": "`r`, `g`, `b`"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_unsynced_read_value"},
+      "params": {"index": {"type": "i32", "fixed": 4}, "r": {"type": "f32", "fixed": 0.2}, "g": {"type": "f32", "fixed": 0.4}, "b": {"type": "f32", "fixed": 0.8}},
+      "lua_runtime": {"set": {"call": "Spring.SetCustomPaletteColor", "args": ["value.index", "value.r", "value.g", "value.b"]}, "call": "Spring.GetCustomPaletteColor", "args": ["value.index"], "returns": ["r", "g", "b"]}
+    },
+    {
+      "id": "unit_palette_index",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": ["unit"],
+      "lua": {"set": ["Spring.SetUnitPaletteIndex"], "get": ["Spring.GetUnitPaletteIndex"]},
+      "native": {"set": ["UnsyncedCtrl.set_unit_palette_index"], "get": ["UnsyncedRead.get_unit_palette_index"]},
+      "compare": {"mode": "fields", "fields": ["hasCustomColor", "customIndex"]},
+      "report": {"lua_setter": "`Spring.SetUnitPaletteIndex`", "native_setter": "`UnsyncedCtrl.set_unit_palette_index`", "lua_getter": "`Spring.GetUnitPaletteIndex`", "native_getter": "`UnsyncedRead.get_unit_palette_index`", "fields": "palette presence/index"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_unsynced_read_value"},
+      "params": {"customIndex": {"type": "i32", "fixed": 4}},
+      "lua_runtime": {"set": {"call": "Spring.SetUnitPaletteIndex", "args": ["fixture.unitID", "value.customIndex"]}, "call": "Spring.GetUnitPaletteIndex", "args": ["fixture.unitID"], "returns": [{"field": "hasCustomColor", "transform": "truthy"}, {"field": "customIndex", "transform": "nil_to_minus_one"}]}
+    },
+    {
+      "id": "feature_palette_index",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": ["feature"],
+      "lua": {"set": ["Spring.SetFeaturePaletteIndex"], "get": ["Spring.GetFeaturePaletteIndex"]},
+      "native": {"set": ["UnsyncedCtrl.set_feature_palette_index"], "get": ["UnsyncedRead.get_feature_palette_index"]},
+      "compare": {"mode": "fields", "fields": ["hasCustomColor", "customIndex"]},
+      "report": {"lua_setter": "`Spring.SetFeaturePaletteIndex`", "native_setter": "`UnsyncedCtrl.set_feature_palette_index`", "lua_getter": "`Spring.GetFeaturePaletteIndex`", "native_getter": "`UnsyncedRead.get_feature_palette_index`", "fields": "palette presence/index"},
+      "rust": {"check": "check_unsynced_render_data", "set": "set_unsynced_read_value"},
+      "params": {"customIndex": {"type": "i32", "fixed": 5}},
+      "lua_runtime": {"set": {"call": "Spring.SetFeaturePaletteIndex", "args": ["fixture.featureID", "value.customIndex"]}, "call": "Spring.GetFeaturePaletteIndex", "args": ["fixture.featureID"], "returns": [{"field": "hasCustomColor", "transform": "truthy"}, {"field": "customIndex", "transform": "nil_to_minus_one"}]}
+    },
+    {
+      "id": "feature_no_draw",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": ["feature"],
+      "lua": {"set": ["Spring.SetFeatureNoDraw"], "get": ["Spring.GetFeatureNoDraw"]},
+      "native": {"set": ["UnsyncedCtrl.set_feature_no_draw"], "get": ["Features.get_feature_no_draw"]},
+      "compare": {"mode": "fields", "fields": ["noDraw"]},
+      "report": {"lua_setter": "`Spring.SetFeatureNoDraw`", "native_setter": "`UnsyncedCtrl.set_feature_no_draw`", "lua_getter": "`Spring.GetFeatureNoDraw`", "native_getter": "`Features.get_feature_no_draw`", "fields": "`noDraw`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_feature_render_flag"},
+      "params": {"noDraw": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"set": {"call": "Spring.SetFeatureNoDraw", "args": ["fixture.featureID", "value.noDraw"]}, "call": "Spring.GetFeatureNoDraw", "args": ["fixture.featureID"], "returns": ["noDraw"]}
+    },
+    {
+      "id": "feature_engine_draw_mask",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": ["feature"],
+      "lua": {"set": ["Spring.SetFeatureEngineDrawMask"], "get": ["Spring.GetFeatureEngineDrawMask"]},
+      "native": {"set": ["UnsyncedCtrl.set_feature_engine_draw_mask"], "get": ["Features.get_feature_engine_draw_mask"]},
+      "compare": {"mode": "fields", "fields": ["mask"]},
+      "report": {"lua_setter": "`Spring.SetFeatureEngineDrawMask`", "native_setter": "`UnsyncedCtrl.set_feature_engine_draw_mask`", "lua_getter": "`Spring.GetFeatureEngineDrawMask`", "native_getter": "`Features.get_feature_engine_draw_mask`", "fields": "`mask`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_feature_render_flag"},
+      "params": {"mask": {"type": "i32", "fixed": 3}},
+      "lua_runtime": {"set": {"call": "Spring.SetFeatureEngineDrawMask", "args": ["fixture.featureID", "value.mask"]}, "call": "Spring.GetFeatureEngineDrawMask", "args": ["fixture.featureID"], "returns": ["mask"]}
+    },
+    {
+      "id": "feature_always_update_matrix",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": ["feature"],
+      "lua": {"set": ["Spring.SetFeatureAlwaysUpdateMatrix"], "get": ["Spring.GetFeatureAlwaysUpdateMatrix"]},
+      "native": {"set": ["UnsyncedCtrl.set_feature_always_update_matrix"], "get": ["Features.get_feature_always_update_matrix"]},
+      "compare": {"mode": "fields", "fields": ["update"]},
+      "report": {"lua_setter": "`Spring.SetFeatureAlwaysUpdateMatrix`", "native_setter": "`UnsyncedCtrl.set_feature_always_update_matrix`", "lua_getter": "`Spring.GetFeatureAlwaysUpdateMatrix`", "native_getter": "`Features.get_feature_always_update_matrix`", "fields": "`update`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_feature_render_flag"},
+      "params": {"update": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"set": {"call": "Spring.SetFeatureAlwaysUpdateMatrix", "args": ["fixture.featureID", "value.update"]}, "call": "Spring.GetFeatureAlwaysUpdateMatrix", "args": ["fixture.featureID"], "returns": ["update"]}
+    },
+    {
+      "id": "feature_fade",
+      "context": "unsynced_gadget",
+      "kind": "setter_getter",
+      "requires": ["feature"],
+      "lua": {"set": ["Spring.SetFeatureFade"]},
+      "native": {"set": ["UnsyncedCtrl.set_feature_fade"]},
+      "compare": {"mode": "fields", "fields": ["returnCount"]},
+      "report": {"lua_setter": "`Spring.SetFeatureFade`", "native_setter": "`UnsyncedCtrl.set_feature_fade`", "lua_getter": "`Spring.SetFeatureFade` (return count)", "native_getter": "n/a", "fields": "`returnCount`"},
+      "rust": {"check": "check_feature_render_flag", "set": "set_feature_render_flag"},
+      "params": {"allow": {"type": "bool", "fixed": true}},
+      "lua_runtime": {"set": {"call": "Spring.SetFeatureFade", "args": ["fixture.featureID", "value.allow"]}, "call": "Spring.SetFeatureFade", "args": ["fixture.featureID", "value.allow"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+    }
+  ]
+}
