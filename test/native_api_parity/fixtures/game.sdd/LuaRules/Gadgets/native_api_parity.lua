@@ -111,6 +111,12 @@ if not gadgetHandler:IsSyncedCode() then
 	end
 
 	function gadget:Initialize()
+		-- Keep rendering-sensitive camera checks independent of the physical
+		-- pointer position of the process that launched the fixture.  WarpMouse
+		-- uses the same bottom-origin coordinates as the camera APIs under test.
+		local viewSizeX, viewSizeY = Spring.GetViewGeometry()
+		Spring.WarpMouse(viewSizeX * 0.5, viewSizeY * 0.5)
+
 		-- Ground decals are an unsynced rendering fixture.  Create one after the
 		-- engine has initialized the unsynced decal drawer, then pass its ID to
 		-- the widget/native runner alongside the synced fixture IDs.
