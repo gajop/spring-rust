@@ -11,6 +11,16 @@ bool RmlGui::PullContextToFront(Rml::Context*)
 	return false;
 }
 
+std::vector<std::string> RmlGui::GetDocumentPathRequests(const std::string&)
+{
+	return {};
+}
+
+bool RmlGui::ClearDocumentPathRequests(const std::string&)
+{
+	return false;
+}
+
 bool RmlGui::SetPointerCapture(Rml::Context*, int, int, bool)
 {
 	return false;

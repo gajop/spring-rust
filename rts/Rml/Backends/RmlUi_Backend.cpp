@@ -396,6 +396,25 @@ Rml::SystemInterface* RmlGui::GetSystemInterface()
 	return &state->system_interface;
 }
 
+std::vector<std::string> RmlGui::GetDocumentPathRequests(const std::string& document_path)
+{
+	if (!RmlInitialized()) {
+		return {};
+	}
+
+	return state->system_interface.GetDocumentPathRequests(document_path);
+}
+
+bool RmlGui::ClearDocumentPathRequests(const std::string& document_path)
+{
+	if (!RmlInitialized()) {
+		return false;
+	}
+
+	state->system_interface.ClearDocumentPathRequests(document_path);
+	return true;
+}
+
 Rml::RenderInterface* RmlGui::GetRenderInterface()
 {
 	return &state->render_interface;

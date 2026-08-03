@@ -49,6 +49,8 @@ namespace RmlGui
 	void Reload();
 
 	Rml::SystemInterface* GetSystemInterface();
+	std::vector<std::string> GetDocumentPathRequests(const std::string& document_path);
+	bool ClearDocumentPathRequests(const std::string& document_path);
 	Rml::RenderInterface* GetRenderInterface();
 
 	bool ProcessEvent(const SDL_Event& event);
