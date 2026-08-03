@@ -423,9 +423,13 @@ static void NativeGetPlayerInfo(const GetPlayerInfoQuery* query, GetPlayerInfoRe
 	result->info.isSpec = player->spectator;
 	result->info.teamID = player->team;
 	result->info.allyTeamID = teamHandler.AllyTeam(player->team);
-	result->info.pingTime = player->ping;
+	result->info.pingTime = player->ping * 0.001f;
 	result->info.cpuUsage = player->cpuUsage;
+	result->info.country = player->countryCode.c_str();
+	result->info.rank = player->rank;
+	result->info.hasSkirmishAIsInTeam = skirmishAIHandler.HasSkirmishAIsInTeam(player->team);
 	result->info.customKeys = query->getPlayerOpts ? "" : nullptr;
+	result->info.desynced = player->desynced;
 }
 
 static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* query, GetPlayerControlledUnitResult* result) {

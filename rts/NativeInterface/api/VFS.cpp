@@ -928,7 +928,12 @@ static void NativeGetMapSquareTexture(const GetMapSquareTextureQuery* query, Get
 
 	CBaseGroundTextures* groundTextures = readMap->GetGroundDrawer()->GetGroundTextures();
 	if (groundTextures == nullptr) {
-		result->error = &MAP_TEX_ERROR;
+		// Lua returns false when the ground-texture drawer is not available.
+		result->error = nullptr;
+		return;
+	}
+	if (query->textureName[0] == '\0') {
+		result->error = nullptr;
 		return;
 	}
 
@@ -944,7 +949,7 @@ static void NativeGetMapSquareTexture(const GetMapSquareTextureQuery* query, Get
 	uint32_t nativeTarget = 0;
 	if (GetNativeGfxTextureInfo(query->textureName, &nativeID, &nativeXSize, &nativeYSize, &nativeTarget)) {
 		if (nativeTarget != GL_TEXTURE_2D || nativeXSize != nativeYSize) {
-			result->error = &INVALID_ARGUMENT_ERROR;
+			result->error = nullptr;
 			return;
 		}
 
@@ -962,7 +967,7 @@ static void NativeGetMapSquareTexture(const GetMapSquareTextureQuery* query, Get
 
 	const CNamedTextures::TexInfo* namedTexture = CNamedTextures::GetInfo(query->textureName);
 	if (namedTexture == nullptr) {
-		result->error = &INVALID_ARGUMENT_ERROR;
+		result->error = nullptr;
 		return;
 	}
 
@@ -971,7 +976,7 @@ static void NativeGetMapSquareTexture(const GetMapSquareTextureQuery* query, Get
 	const int tys = namedTexture->ysize;
 
 	if (txs != tys) {
-		result->error = &INVALID_ARGUMENT_ERROR;
+		result->error = nullptr;
 		return;
 	}
 
@@ -998,7 +1003,8 @@ static void NativeSetMapSquareTexture(const SetMapSquareTextureQuery* query, Set
 
 	CBaseGroundTextures* groundTextures = readMap->GetGroundDrawer()->GetGroundTextures();
 	if (groundTextures == nullptr) {
-		result->error = &MAP_TEX_ERROR;
+		// Lua returns false when the ground-texture drawer is not available.
+		result->error = nullptr;
 		return;
 	}
 
@@ -1019,7 +1025,7 @@ static void NativeSetMapSquareTexture(const SetMapSquareTextureQuery* query, Set
 	uint32_t nativeTarget = 0;
 	if (GetNativeGfxTextureInfo(texName.c_str(), &nativeID, &nativeXSize, &nativeYSize, &nativeTarget)) {
 		if (nativeTarget != GL_TEXTURE_2D || nativeXSize != nativeYSize) {
-			result->error = &INVALID_ARGUMENT_ERROR;
+			result->error = nullptr;
 			return;
 		}
 
@@ -1029,7 +1035,7 @@ static void NativeSetMapSquareTexture(const SetMapSquareTextureQuery* query, Set
 
 	const CNamedTextures::TexInfo* namedTexture = CNamedTextures::GetInfo(texName);
 	if (namedTexture == nullptr || namedTexture->xsize != namedTexture->ysize) {
-		result->error = &INVALID_ARGUMENT_ERROR;
+		result->error = nullptr;
 		return;
 	}
 

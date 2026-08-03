@@ -713,9 +713,19 @@ static void NativeGetFeaturePieceCollisionVolumeData(const GetFeaturePieceCollis
 		return;
 	}
 
-	// Features don't have piece-specific collision volumes in Spring
-	// Return the main collision volume
-	const CollisionVolume& cv = feature->collisionVolume;
+	const LocalModel& localModel = feature->localModel;
+	if (query->pieceNum <= 0 || !localModel.HasPiece(query->pieceNum - 1)) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum - 1);
+	if (piece == nullptr) {
+		result->error = &INVALID_FEATURE_ERROR;
+		return;
+	}
+
+	const CollisionVolume& cv = piece->GetCollisionVolume();
 	result->volume.scaleX = cv.GetScales().x;
 	result->volume.scaleY = cv.GetScales().y;
 	result->volume.scaleZ = cv.GetScales().z;
@@ -859,7 +869,7 @@ static void NativeGetFeatureTransformMatrix(const GetFeatureTransformMatrixQuery
 		return;
 	}
 
-	const CMatrix44f m = feature->GetTransformMatrix(false, true);
+	const CMatrix44f m = feature->GetTransformMatrix(false);
 	for (size_t i = 0; i < 16; ++i) {
 		result->matrix.values[i] = m[i];
 	}
@@ -871,7 +881,10 @@ static void NativeGetFeatureSelectionVolumeData(const GetFeatureSelectionVolumeD
 	result->error = nullptr;
 	result->data.scales = {0.0f, 0.0f, 0.0f};
 	result->data.offsets = {0.0f, 0.0f, 0.0f};
+	result->data.volumeType = 0;
 	result->data.primaryAxis = 0;
+	result->data.useContHitTest = false;
+	result->data.ignoreHits = false;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -887,7 +900,10 @@ static void NativeGetFeatureSelectionVolumeData(const GetFeatureSelectionVolumeD
 	const CollisionVolume& vol = feature->selectionVolume;
 	result->data.scales = {vol.GetScales().x, vol.GetScales().y, vol.GetScales().z};
 	result->data.offsets = {vol.GetOffsets().x, vol.GetOffsets().y, vol.GetOffsets().z};
+	result->data.volumeType = vol.GetVolumeType();
 	result->data.primaryAxis = vol.GetPrimaryAxis();
+	result->data.useContHitTest = vol.UseContHitTest();
+	result->data.ignoreHits = vol.IgnoreHits();
 }
 
 static void NativeGetFeatureFireTime(const GetFeatureFireTimeQuery* query, GetFeatureFireTimeResult* result)

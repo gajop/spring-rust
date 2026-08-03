@@ -17,7 +17,7 @@ pub struct TeamInfo {
     pub custom_keys: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PlayerInfo {
     pub player_id: i32,
     pub name: String,
@@ -26,9 +26,13 @@ pub struct PlayerInfo {
     pub is_spectator: bool,
     pub team_id: i32,
     pub ally_team_id: i32,
-    pub ping_time: u32,
+    pub ping_time: f32,
     pub cpu_usage: u32,
+    pub country: String,
+    pub rank: i32,
+    pub has_skirmish_ais_in_team: bool,
     pub custom_keys: Option<String>,
+    pub desynced: bool,
 }
 
 impl<'a> Teams<'a> {
@@ -81,7 +85,11 @@ impl PlayerInfo {
                 ally_team_id: info.allyTeamID,
                 ping_time: info.pingTime,
                 cpu_usage: info.cpuUsage,
+                country: copy_c_string(info.country).unwrap_or_default(),
+                rank: info.rank,
+                has_skirmish_ais_in_team: info.hasSkirmishAIsInTeam,
                 custom_keys: copy_c_string(info.customKeys),
+                desynced: info.desynced,
             }
         }
     }

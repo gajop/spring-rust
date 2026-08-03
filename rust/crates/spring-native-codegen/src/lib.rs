@@ -948,6 +948,7 @@ fn is_query_struct(name: &str) -> bool {
     name.ends_with("Query")
         || name.ends_with("Result")
         || name.ends_with("Params")
+        || name.ends_with("Options")
         || name.ends_with("Count")
 }
 
@@ -1086,6 +1087,35 @@ fn primitive_from_name(name: &str) -> Option<Primitive> {
 
 fn render_api(spec: &ApiSpec, config: &ApiConfig<'_>) -> Result<String> {
     let mut out = String::new();
+
+    // Query options are deliberately represented as public Rust descriptors,
+    // rather than exposing bindgen's C-field names and presence flags.  Keep
+    // this limited to option records that are actually accepted by a query;
+    // result-only records such as UnitDefBuildOptions do not belong in the
+    // API's call surface.
+    let mut option_names = spec
+        .api
+        .functions
+        .iter()
+        .filter_map(|func| spec.structs.get(&func.query))
+        .flat_map(|query| query.fields.iter())
+        .filter_map(|field| match &field.ty {
+            CType::Record(name) if name.ends_with("Options") => Some(name.clone()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    option_names.sort();
+    option_names.dedup();
+
+    for name in option_names {
+        let options = spec
+            .structs
+            .get(&name)
+            .with_context(|| format!("missing option struct {name}"))?;
+        out.push_str(&render_options(options)?);
+        out.push('\n');
+    }
+
     out.push_str(&format!("impl<'a> {}<'a> {{\n", config.wrapper_struct));
     for func in &spec.api.functions {
         if let (Some(query), Some(result)) = (
@@ -1101,6 +1131,65 @@ fn render_api(spec: &ApiSpec, config: &ApiConfig<'_>) -> Result<String> {
     Ok(out)
 }
 
+fn render_options(options: &StructDef) -> Result<String> {
+    let mut fields = Vec::new();
+    let mut conversions = Vec::new();
+    let mut i = 0;
+
+    while i < options.fields.len() {
+        let field = &options.fields[i];
+        let rust_name = make_param_name(&field.name);
+
+        if let Some(next) = options.fields.get(i + 1) {
+            if is_optional_presence_pair(field, next) {
+                let CType::Primitive(primitive) = &field.ty else {
+                    return Err(anyhow!(
+                        "option presence pair {}.{} has unsupported value type",
+                        options.name,
+                        field.name
+                    ));
+                };
+                let rust_type = primitive.rust_type();
+                fields.push(format!("    pub {rust_name}: Option<{rust_type}>,"));
+                conversions.push(format!(
+                    "            {}: options.{}.unwrap_or({}),\n            {}: options.{}.is_some(),",
+                    field.name,
+                    rust_name,
+                    primitive_default_expr(*primitive),
+                    next.name,
+                    rust_name,
+                ));
+                i += 2;
+                continue;
+            }
+        }
+
+        let rust_type = match rust_type_from_c(&field.ty) {
+            Some(ty) => type_ref_to_string(&ty),
+            None => {
+                return Err(anyhow!(
+                    "option struct {} has unsupported field {}",
+                    options.name,
+                    field.name
+                ));
+            }
+        };
+        fields.push(format!("    pub {rust_name}: {rust_type},"));
+        conversions.push(format!(
+            "            {}: options.{},",
+            field.name, rust_name
+        ));
+        i += 1;
+    }
+
+    Ok(format!(
+        "#[derive(Debug, Clone, Copy, Default)]\npub struct {name} {{\n{fields}}}\n\nimpl From<{name}> for sys::{name} {{\n    fn from(options: {name}) -> Self {{\n        sys::{name} {{\n{conversions}        }}\n    }}\n}}\n",
+        name = options.name,
+        fields = fields.join("\n") + "\n",
+        conversions = conversions.join("\n") + "\n",
+    ))
+}
+
 #[derive(Debug)]
 struct ParamSpec {
     name: String,
@@ -1114,6 +1203,7 @@ enum ParamType {
     OptionCStr,
     RulesParamValue,
     Struct(String),
+    Options(String),
     Slice {
         element: TypeRef,
     },
@@ -1176,6 +1266,9 @@ enum QueryExpr {
         param: String,
     },
     RulesParamValue {
+        param: String,
+    },
+    Options {
         param: String,
     },
     Zero,
@@ -1260,6 +1353,7 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
             ParamType::OptionCStr => "Option<&str>".to_string(),
             ParamType::RulesParamValue => "RulesParamValue".to_string(),
             ParamType::Struct(struct_name) => format!("sys::{}", struct_name),
+            ParamType::Options(struct_name) => struct_name.clone(),
             ParamType::Slice { element } => format!("&[{}]", type_ref_to_string(element)),
             ParamType::Ref { element } => format!("&{}", type_ref_to_string(element)),
             ParamType::MutRef { element } => format!("&mut {}", type_ref_to_string(element)),
@@ -1364,6 +1458,7 @@ fn render_method(func: &ApiFunction, query: &StructDef, result: &StructDef) -> R
                 )
             }
             QueryExpr::RulesParamValue { param } => format!("{param}_sys.value"),
+            QueryExpr::Options { param } => format!("{}.into()", param),
             QueryExpr::Zero => "0".into(),
             QueryExpr::CallbackFn => "Some(trampoline::<F>)".to_string(),
             QueryExpr::CallbackUserData { param } => {
@@ -1761,6 +1856,9 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                             TypeRef::Struct(name) if name == "RulesParamValue" => {
                                 ParamType::RulesParamValue
                             }
+                            TypeRef::Struct(name) if name.ends_with("Options") => {
+                                ParamType::Options(name.clone())
+                            }
                             TypeRef::Struct(name) => ParamType::Struct(name.clone()),
                         },
                     });
@@ -1769,6 +1867,9 @@ fn build_params(query: &StructDef) -> Result<(Vec<ParamSpec>, Vec<QueryInitField
                         expr: match &ty {
                             TypeRef::Struct(name) if name == "RulesParamValue" => {
                                 QueryExpr::RulesParamValue { param: param_name }
+                            }
+                            TypeRef::Struct(name) if name.ends_with("Options") => {
+                                QueryExpr::Options { param: param_name }
                             }
                             _ => QueryExpr::Param(param_name),
                         },

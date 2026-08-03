@@ -815,8 +815,8 @@ static void NativeGetVisibleFeatures(const GetVisibleFeaturesQuery* query, GetVi
 		return;
 	}
 
-	const bool includeIcons = query->includeIcons;
-	const bool includeGeos = query->includeGeos;
+	const bool includeIcons = query->options.includeIcons;
+	const bool includeGeos = query->options.includeGeos;
 	const float testRadius = std::max(query->radius, -query->radius);
 	const bool useFeatureRadius = (query->radius >= 0.0f);
 	const bool fullView = (gu != nullptr) && gu->spectatingFullView;
@@ -878,9 +878,9 @@ static void NativeGetVisibleProjectiles(const GetVisibleProjectilesQuery* query,
 		return;
 	}
 
-	const bool includeWeapon = query->includeWeaponProjectiles;
-	const bool includePiece = query->includePieceProjectiles;
-	(void)query->includeSyncedProjectiles;
+	const bool includeWeapon = query->options.includeWeaponProjectiles;
+	const bool includePiece = query->options.includePieceProjectiles;
+	(void)query->options.includeSyncedProjectiles;
 	const bool fullView = (gu != nullptr) && gu->spectatingFullView;
 	const int readAllyTeam = (gu != nullptr) ? gu->myAllyTeam : query->allyTeamID;
 	const int allyTeamID = (query->allyTeamID >= 0) ? query->allyTeamID : readAllyTeam;
@@ -1071,11 +1071,21 @@ static void NativeIsUnitVisible(const IsUnitVisibleQuery* query, IsUnitVisibleRe
 	const bool fullView = (gu != nullptr) && gu->spectatingFullView;
 	const int readAllyTeam = (gu != nullptr) ? gu->myAllyTeam : -1;
 
-	if (!UnitVisibleToClient(unit, readAllyTeam, fullView, query->checkIcon))
-		return;
-
 	const float radius = (query->radius == 0.0f) ? unit->radius : query->radius;
-	result->visible = camera->InView(unit->midPos, radius);
+
+	// Keep this predicate aligned with LuaUnsyncedRead::IsUnitVisible.  That
+	// Lua call deliberately does not apply the unit's noDraw flag; noDraw is
+	// part of GetVisibleUnits' filtering, but is not part of IsUnitVisible's
+	// contract.
+	if (readAllyTeam < 0) {
+		if (!fullView)
+			return;
+	} else if ((unit->losStatus[readAllyTeam] & LOS_INLOS) == 0) {
+		return;
+	}
+
+	result->visible = (!query->checkIcon || !unit->GetIsIcon()) &&
+		camera->InView(unit->midPos, radius);
 }
 
 static void NativeIsUnitInView(const IsUnitInViewQuery* query, IsUnitInViewResult* result)
@@ -1244,7 +1254,10 @@ static void NativeGetNanoProjectileParams(const GetNanoProjectileParamsQuery* /*
 
 static void NativeGetPieceProjectileName(const GetPieceProjectileNameQuery* query, GetPieceProjectileNameResult* result) {
 	bufferPos = 0;
-	const CProjectile* proj = projectileHandler.GetProjectileByUnsyncedID(query->projectileID);
+	// Spring.GetPieceProjectileName is a synced Lua callout and receives the
+	// projectile's synced ID.  The native API is exposed through UnsyncedRead,
+	// but its lookup must still follow that Lua contract.
+	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
 	if (proj == nullptr || !proj->piece) {
 		result->error = nullptr;
 		result->name = "";

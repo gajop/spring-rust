@@ -470,10 +470,10 @@ static void NativeSetActiveCommand(const SetActiveCommandQuery* query, SetActive
 		return;
 	}
 
-	const bool hasClickState = query->leftClick || query->rightClick || query->alt || query->ctrl || query->meta || query->shift;
+	const bool hasClickState = query->options.leftClick || query->options.rightClick || query->options.alt || query->options.ctrl || query->options.meta || query->options.shift;
 
 	if (hasClickState) {
-		result->success = guihandler->SetActiveCommand(cmdIndex, button, query->leftClick, query->rightClick, query->alt, query->ctrl, query->meta, query->shift);
+		result->success = guihandler->SetActiveCommand(cmdIndex, button, query->options.leftClick, query->options.rightClick, query->options.alt, query->options.ctrl, query->options.meta, query->options.shift);
 	} else {
 		result->success = guihandler->SetActiveCommand(cmdIndex, button != SDL_BUTTON_LEFT);
 	}
@@ -565,8 +565,8 @@ static void NativeSetWindowGeometry(const SetWindowGeometryQuery* query, SetWind
 		query->windowPosY,
 		query->windowSizeX,
 		query->windowSizeY,
-		query->fullScreen,
-		query->borderless
+		query->options.fullScreen,
+		query->options.borderless
 	);
 
 	if (!ok) {
@@ -1246,9 +1246,34 @@ static void NativeSetMapShadingTexture(const SetMapShadingTextureQuery* query, S
 	result->success = readMap->SetLuaTexture(texData);
 }
 
-static void NativeSetSkyBoxTexture(const SetSkyBoxTextureQuery* /*query*/, SetSkyBoxTextureResult* result)
+static void NativeSetSkyBoxTexture(const SetSkyBoxTextureQuery* query, SetSkyBoxTextureResult* result)
 {
 	result->error = nullptr;
+	result->success = false;
+
+	if (query == nullptr || query->texName == nullptr) {
+		result->error = &INVALID_TEXTURE_ERROR;
+		return;
+	}
+
+	MapTextureData texData;
+	const char* texName = query->texName;
+	if (texName[0] != '\0') {
+		uint32_t nativeID = 0;
+		int32_t nativeXSize = 0;
+		int32_t nativeYSize = 0;
+		uint32_t nativeTarget = 0;
+
+		if (GetNativeGfxTextureInfo(texName, &nativeID, &nativeXSize, &nativeYSize, &nativeTarget)) {
+			texData.id = nativeID;
+			texData.size = int2(nativeXSize, nativeYSize);
+		} else if (const CNamedTextures::TexInfo* namedTexture = CNamedTextures::GetInfo(texName)) {
+			texData.id = namedTexture->id;
+			texData.size = int2(namedTexture->xsize, namedTexture->ysize);
+		}
+	}
+
+	ISky::SetSkyLuaTexture(texData);
 	result->success = true;
 }
 
@@ -1327,9 +1352,9 @@ static void NativeSetShockFrontFactors(const SetShockFrontFactorsQuery* query, S
 	}
 
 	luaUI->SetShockFrontFactors(
-		query->hasMinArea, query->minArea,
-		query->hasMinPower, query->minPower,
-		query->hasDistAdj, query->distAdj
+		query->options.hasMinArea, query->options.minArea,
+		query->options.hasMinPower, query->options.minPower,
+		query->options.hasDistAdj, query->options.distAdj
 	);
 	result->success = true;
 }
@@ -1372,14 +1397,14 @@ static void NativeLoadCmdColorsConfig(const LoadCmdColorsConfigQuery* query, Loa
 	result->error = nullptr;
 	result->success = false;
 
-	const std::string filename = (query != nullptr && query->filename != nullptr) ? query->filename : "";
-	if (filename.empty()) {
-		result->error = &INVALID_CURSOR_ERROR;
+	if (query == nullptr || query->filename == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
 
-	cmdColors.LoadConfigFromFile(filename);
-	result->success = true;
+	// Spring.LoadCmdColorsConfig receives the configuration text itself, not a
+	// VFS filename.  Keep the native path on the same contract as Lua.
+	result->success = cmdColors.LoadConfigFromString(query->filename);
 }
 
 static void NativeLoadCtrlPanelConfig(const LoadCtrlPanelConfigQuery* query, LoadCtrlPanelConfigResult* result)
@@ -1392,13 +1417,14 @@ static void NativeLoadCtrlPanelConfig(const LoadCtrlPanelConfigQuery* query, Loa
 		return;
 	}
 
-	const std::string filename = (query != nullptr && query->filename != nullptr) ? query->filename : "";
-	if (filename.empty()) {
-		result->error = &INVALID_CURSOR_ERROR;
+	if (query == nullptr || query->filename == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
 
-	result->success = guihandler->ReloadConfigFromFile(filename);
+	// Spring.LoadCtrlPanelConfig likewise passes an inline configuration string
+	// to ReloadConfigFromString; it does not resolve a filename.
+	result->success = guihandler->ReloadConfigFromString(query->filename);
 }
 
 static void NativeLoadModelTextures(const LoadModelTexturesQuery* query, LoadModelTexturesResult* result)
@@ -1506,9 +1532,24 @@ static void NativeSetUnitIcon(const SetUnitIconQuery* query, SetUnitIconResult* 
 		return;
 	}
 
-	unit->currentIconIndex = (query->iconName != nullptr)
-		? icon::iconHandler.GetIconIdxOrDefault(query->iconName)
-		: icon::iconHandler.GetDefaultIconIdx();
+	if (query->iconName == nullptr) {
+		unit->customIconIndex = icon::INVALID_ICON_INDEX;
+	} else {
+		const auto iconIdx = icon::iconHandler.GetIconIdx(query->iconName);
+		if (iconIdx == icon::INVALID_ICON_INDEX) {
+			result->error = &INVALID_UNIT_ICON_ERROR;
+			return;
+		}
+
+		unit->customIconIndex = iconIdx;
+	}
+
+	if (unitDrawer == nullptr) {
+		result->error = &RENDERING_UNAVAILABLE_ERROR;
+		return;
+	}
+
+	unitDrawer->UpdateCurrentUnitIcon(unit);
 	result->success = true;
 }
 

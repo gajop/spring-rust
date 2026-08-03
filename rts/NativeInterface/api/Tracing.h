@@ -81,11 +81,14 @@ struct TraceRayHit {
 	int32_t objectType;
 };
 
+struct TraceRayInDirectionOptions {
+	float maxLength;
+	bool hasMaxLength;
+};
 struct TraceRayInDirectionQuery {
 	Float3 pos;
 	Float3 dir;
-	float maxLength;
-	bool hasMaxLength;
+	TraceRayInDirectionOptions options;
 	const char* type;  // "unit", "feature", or "both"
 };
 
@@ -107,11 +110,14 @@ struct TraceRayBetweenPositionsResult {
 	uint32_t count;
 };
 
+struct TraceRayGroundBetweenPositionsOptions {
+	bool testWater;
+	bool hasTestWater;
+};
 struct TraceRayGroundBetweenPositionsQuery {
 	Float3 start;
 	Float3 end;
-	bool testWater;
-	bool hasTestWater;
+	TraceRayGroundBetweenPositionsOptions options;
 };
 
 struct TraceRayGroundBetweenPositionsResult {
@@ -122,13 +128,16 @@ struct TraceRayGroundBetweenPositionsResult {
 	Float3 hitNormal;
 };
 
-struct TraceRayGroundInDirectionQuery {
-	Float3 start;
-	Float3 dir;
+struct TraceRayGroundInDirectionOptions {
 	float length;
 	bool hasLength;
 	bool testWater;
 	bool hasTestWater;
+};
+struct TraceRayGroundInDirectionQuery {
+	Float3 start;
+	Float3 dir;
+	TraceRayGroundInDirectionOptions options;
 };
 
 struct TraceRayGroundInDirectionResult {

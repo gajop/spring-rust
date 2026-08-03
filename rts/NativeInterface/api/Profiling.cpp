@@ -79,12 +79,12 @@ static void NativeDiffTimers(const DiffTimersQuery* query, DiffTimersResult* res
 
 	const uint64_t delta = t1 - t2;
 
-	if (query->fromMicroSecs) {
+	if (query->options.fromMicroSecs) {
 		const spring_time dt = spring_time::fromMicroSecs(delta);
-		result->seconds = query->returnMs ? dt.toMilliSecsf() : dt.toSecsf();
+		result->seconds = query->options.returnMs ? dt.toMilliSecsf() : dt.toSecsf();
 	} else {
 		const spring_time dt = spring_time::fromMilliSecs(delta);
-		result->seconds = query->returnMs ? dt.toMilliSecsf() : dt.toSecsf();
+		result->seconds = query->options.returnMs ? dt.toMilliSecsf() : dt.toSecsf();
 	}
 }
 

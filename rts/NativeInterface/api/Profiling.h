@@ -15,7 +15,8 @@ struct GetTimerResult { const Error* error; uint64_t timer; };
 struct GetTimerMicrosQuery { uint8_t _unused; };
 struct GetTimerMicrosResult { const Error* error; uint64_t timer; };
 
-struct DiffTimersQuery { uint64_t endTimer; uint64_t startTimer; bool returnMs; bool fromMicroSecs; };
+struct DiffTimersOptions { bool returnMs; bool fromMicroSecs; };
+struct DiffTimersQuery { uint64_t endTimer; uint64_t startTimer; DiffTimersOptions options; };
 struct DiffTimersResult { const Error* error; float seconds; };
 
 struct GetFrameTimerQuery { bool lastFrameTime; };

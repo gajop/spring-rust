@@ -16,7 +16,7 @@ extern "C" {
 
 // Projectile target
 struct ProjectileTarget {
-	int32_t targetType;  // 0=none, 1=unit, 2=ground, 3=feature
+	int32_t targetType;  // ASCII: 'g'=ground, 'u'=unit, 'f'=feature, 'p'=projectile; 0=none
 	int32_t targetID;    // Unit or feature ID
 	Float3 targetPos;
 };
@@ -27,6 +27,9 @@ struct PieceProjectileParams {
 	Float3 speed;
 	Float3 gravity;
 	Float3 spinVec;
+	int32_t explFlags;
+	float spinAngle;
+	float spinSpeed;
 	int32_t modelPieceNum;
 	int32_t modelObjectType;  // 1=s3o, 2=obj, etc.
 	const char* modelName;
@@ -43,13 +46,29 @@ struct ProjectileDamages {
 	float craterMult;
 	float craterBoost;
 	float defaultDamage;
+	float dynDamageExp;
+	float dynDamageMin;
+	float dynDamageRange;
+	bool dynDamageInverted;
+	float craterAreaOfEffect;
+	float damageAreaOfEffect;
+	float edgeEffectiveness;
+	float explosionSpeed;
 };
 
 // Queries
-struct GetProjectilesInRectangleQuery { float minX; float minZ; float maxX; float maxZ; bool synced; bool weapon; };
+struct GetProjectilesInRectangleOptions {
+	bool excludeWeaponProjectiles;
+	bool excludePieceProjectiles;
+};
+struct GetProjectilesInRectangleQuery { float minX; float minZ; float maxX; float maxZ; GetProjectilesInRectangleOptions options; };
 struct GetProjectilesInRectangleResult { const Error* error; int32_t* projectiles; uint32_t count; };
 
-struct GetProjectilesInSphereQuery { Float3 center; float radius; bool synced; bool weapon; };
+struct GetProjectilesInSphereOptions {
+	bool excludeWeaponProjectiles;
+	bool excludePieceProjectiles;
+};
+struct GetProjectilesInSphereQuery { Float3 center; float radius; GetProjectilesInSphereOptions options; };
 struct GetProjectilesInSphereResult { const Error* error; int32_t* projectiles; uint32_t count; };
 
 struct GetProjectilePositionQuery { int32_t projectileID; };
@@ -86,7 +105,7 @@ struct GetProjectileAllyTeamIDQuery { int32_t projectileID; };
 struct GetProjectileAllyTeamIDResult { const Error* error; int32_t allyTeamID; };
 
 struct GetProjectileTypeQuery { int32_t projectileID; };
-struct GetProjectileTypeResult { const Error* error; uint32_t type; };
+struct GetProjectileTypeResult { const Error* error; bool weapon; bool piece; };
 
 struct GetProjectileDefIDQuery { int32_t projectileID; };
 struct GetProjectileDefIDResult { const Error* error; int32_t defID; };
@@ -94,7 +113,11 @@ struct GetProjectileDefIDResult { const Error* error; int32_t defID; };
 struct GetProjectileDamagesQuery { int32_t projectileID; const char* tag; };
 struct GetProjectileDamagesResult { const Error* error; ProjectileDamages damages; };
 
-struct GetAllProjectilesQuery { bool synced; bool weapon; };
+struct GetAllProjectilesOptions {
+	bool excludeWeaponProjectiles;
+	bool excludePieceProjectiles;
+};
+struct GetAllProjectilesQuery { GetAllProjectilesOptions options; };
 struct GetAllProjectilesResult { const Error* error; int32_t* projectiles; uint32_t count; };
 
 // API structure

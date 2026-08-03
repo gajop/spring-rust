@@ -19,12 +19,16 @@ struct GetAllGroundDecalsQuery { uint8_t _unused; };
 struct GetAllGroundDecalsResult { const Error* error; const uint32_t* decalIDs; uint32_t count; };
 
 struct GetGroundDecalTypeQuery { uint32_t decalID; };
-struct GetGroundDecalTypeResult { const Error* error; uint8_t type; };
+struct GetGroundDecalTypeResult { const Error* error; const char* type; };
 
 struct GetGroundDecalOwnerQuery { uint32_t decalID; };
 struct GetGroundDecalOwnerResult { const Error* error; bool hasOwner; int32_t ownerID; };
 
-struct GetGroundDecalTexturesQuery { bool mainTex; bool includeFilenames; };
+// `mainTex` is tri-state to preserve Lua's distinction between an omitted
+// filter (all textures), false (normal/glow textures), and true (main
+// textures).  `hasMainTex` is false when the Lua argument was nil/omitted.
+struct GetGroundDecalTexturesOptions { bool mainTex; bool hasMainTex; bool includeFilenames; };
+struct GetGroundDecalTexturesQuery { GetGroundDecalTexturesOptions options; };
 struct GetGroundDecalTexturesResult { const Error* error; const char** textures; uint32_t textureCount; const char** filenames; uint32_t filenameCount; };
 
 struct GetGroundDecalTextureQuery { uint32_t decalID; bool mainTex; };

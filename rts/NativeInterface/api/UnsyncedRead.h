@@ -96,10 +96,12 @@ struct GetFrustumPlanesResult { const Error* error; float planes[16]; }; // top,
 struct GetVisibleUnitsQuery { int32_t teamID; float radius; bool includeIcons; };
 struct GetVisibleUnitsResult { const Error* error; int32_t* unitIDs; uint32_t count; };
 
-struct GetVisibleFeaturesQuery { int32_t allyTeamID; float radius; bool includeIcons; bool includeGeos; };
+struct GetVisibleFeaturesOptions { bool includeIcons; bool includeGeos; };
+struct GetVisibleFeaturesQuery { int32_t allyTeamID; float radius; GetVisibleFeaturesOptions options; };
 struct GetVisibleFeaturesResult { const Error* error; int32_t* featureIDs; uint32_t count; };
 
-struct GetVisibleProjectilesQuery { int32_t allyTeamID; bool includeSyncedProjectiles; bool includeWeaponProjectiles; bool includePieceProjectiles; };
+struct GetVisibleProjectilesOptions { bool includeSyncedProjectiles; bool includeWeaponProjectiles; bool includePieceProjectiles; };
+struct GetVisibleProjectilesQuery { int32_t allyTeamID; GetVisibleProjectilesOptions options; };
 struct GetVisibleProjectilesResult { const Error* error; int32_t* projectileIDs; uint32_t count; };
 
 struct GetUnitsInScreenRectangleQuery { float left; float top; float right; float bottom; int32_t allegiance; };

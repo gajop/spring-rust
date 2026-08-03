@@ -18,6 +18,7 @@
 #include "Sim/Units/UnitTypes/Builder.h"
 #include "Sim/Units/UnitToolTipMap.hpp"
 #include "Rendering/Models/3DModel.hpp"
+#include "Rendering/Models/IModelParser.h"
 #include "Rendering/Env/IGroundDecalDrawer.h"
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureDef.h"
@@ -51,7 +52,9 @@
 #include "Sim/Projectiles/ExplosionGenerator.h"
 #include "Sim/Projectiles/PieceProjectile.h"
 #include "Sim/Misc/BuildingMaskMap.h"
+#include "Sim/Misc/QuadField.h"
 #include "Net/GameServer.h"
+#include "Game/Game.h"
 #include "Game/GameHelper.h"
 #include "Game/GameSetup.h"
 #include "Game/Players/PlayerHandler.h"
@@ -260,7 +263,9 @@ static void NativeKillTeam(const KillTeamQuery* query, KillTeamResult* result)
 		return;
 	}
 
-	team->Died(false);
+	// Match Spring.KillTeam: the Lua path uses the normal-death behavior,
+	// including the associated player/AI state transitions.
+	team->Died();
 	result->success = true;
 }
 
@@ -308,27 +313,17 @@ static void NativeGameOver(const GameOverQuery* query, GameOverResult* result)
 		return;
 	}
 
-	// Mark all non-winning ally teams as dead
-	for (int i = 0; i < teamHandler.ActiveAllyTeams(); ++i) {
-		bool isWinner = false;
-		for (uint32_t j = 0; j < query->count; ++j) {
-			if (query->winningAllyTeams[j] == i) {
-				isWinner = true;
-				break;
-			}
-		}
-
-		if (!isWinner) {
-			for (int t = 0; t < teamHandler.ActiveTeams(); ++t) {
-				if (teamHandler.AllyTeam(t) == i) {
-					CTeam* team = teamHandler.Team(t);
-					if (team != nullptr && !team->isDead) {
-						team->Died(false);
-					}
-				}
-			}
-		}
+	// Match Spring.GameOver: filter invalid ally-team IDs and let CGame perform
+	// the complete game-end transition and event notification.
+	std::vector<unsigned char> winningAllyTeams;
+	winningAllyTeams.reserve(query->count);
+	for (uint32_t i = 0; i < query->count; ++i) {
+		const int allyTeamID = query->winningAllyTeams[i];
+		if (teamHandler.ValidAllyTeam(allyTeamID))
+			winningAllyTeams.push_back(static_cast<unsigned char>(allyTeamID));
 	}
+
+	game->GameEnd(winningAllyTeams);
 
 	result->success = true;
 }
@@ -383,13 +378,11 @@ static void NativeAddTeamResource(const AddTeamResourceQuery* query, AddTeamReso
 		return;
 	}
 
-	if (resIdx == 0) {
-		team->res.metal += query->amount;
-		team->res.metal = std::max(0.0f, std::min(team->res.metal, team->resStorage.metal));
-	} else {
-		team->res.energy += query->amount;
-		team->res.energy = std::max(0.0f, std::min(team->res.energy, team->resStorage.energy));
-	}
+	const float amount = std::max(0.0f, query->amount);
+	if (resIdx == 0)
+		team->AddResources({amount, 0.0f});
+	else
+		team->AddResources({0.0f, amount});
 
 	result->success = true;
 }
@@ -460,11 +453,13 @@ static void NativeUseTeamResource(const UseTeamResourceQuery* query, UseTeamReso
 		return;
 	}
 
-	float* resource = (resIdx == 0) ? &team->res.metal : &team->res.energy;
-
-	if (*resource >= query->amount) {
-		*resource -= query->amount;
-		result->success = true;
+	const float amount = std::max(0.0f, query->amount);
+	if (resIdx == 0) {
+		team->resPull.metal += amount;
+		result->success = team->UseResources({amount, 0.0f});
+	} else {
+		team->resPull.energy += amount;
+		result->success = team->UseResources({0.0f, amount});
 	}
 }
 
@@ -484,8 +479,10 @@ static void NativeSetTeamResource(const SetTeamResourceQuery* query, SetTeamReso
 		return;
 	}
 
+	const bool metalStorage = (strcmp(query->resourceType, "metalStorage") == 0);
+	const bool energyStorage = (strcmp(query->resourceType, "energyStorage") == 0);
 	int resIdx = GetResourceIndex(query->resourceType);
-	if (resIdx < 0) {
+	if (resIdx < 0 && !metalStorage && !energyStorage) {
 		result->error = &INVALID_RESOURCE_ERROR;
 		return;
 	}
@@ -496,10 +493,17 @@ static void NativeSetTeamResource(const SetTeamResourceQuery* query, SetTeamReso
 		return;
 	}
 
-	if (resIdx == 0) {
-		team->res.metal = std::max(0.0f, std::min(query->amount, team->resStorage.metal));
+	const float amount = std::max(0.0f, query->amount);
+	if (metalStorage) {
+		team->resStorage.metal = amount;
+		team->res.metal = std::min(team->res.metal, team->resStorage.metal);
+	} else if (energyStorage) {
+		team->resStorage.energy = amount;
+		team->res.energy = std::min(team->res.energy, team->resStorage.energy);
+	} else if (resIdx == 0) {
+		team->res.metal = std::min(team->resStorage.metal, amount);
 	} else {
-		team->res.energy = std::max(0.0f, std::min(query->amount, team->resStorage.energy));
+		team->res.energy = std::min(team->resStorage.energy, amount);
 	}
 
 	result->success = true;
@@ -576,24 +580,24 @@ static void NativeShareTeamResource(const ShareTeamResourceQuery* query, ShareTe
 
 	float* sourceRes = (resIdx == 0) ? &team->res.metal : &team->res.energy;
 	float* targetRes = (resIdx == 0) ? &targetTeam->res.metal : &targetTeam->res.energy;
-	float* targetStorage = (resIdx == 0) ? &targetTeam->resStorage.metal : &targetTeam->resStorage.energy;
 
 	float amount = std::min(query->amount, *sourceRes);
-	if (amount > 0.0f) {
-		*sourceRes -= amount;
-		*targetRes += amount;
-		*targetRes = std::min(*targetRes, *targetStorage);
+	*sourceRes -= amount;
+	*targetRes += amount;
 
-		if (resIdx == 0) {
-			team->resSent.metal += amount;
-			targetTeam->resReceived.metal += amount;
-		} else {
-			team->resSent.energy += amount;
-			targetTeam->resReceived.energy += amount;
-		}
-
-		result->success = true;
+	if (resIdx == 0) {
+		team->resSent.metal += amount;
+		targetTeam->resReceived.metal += amount;
+		team->GetCurrentStats().metalSent += amount;
+		targetTeam->GetCurrentStats().metalReceived += amount;
+	} else {
+		team->resSent.energy += amount;
+		targetTeam->resReceived.energy += amount;
+		team->GetCurrentStats().energySent += amount;
+		targetTeam->GetCurrentStats().energyReceived += amount;
 	}
+
+	result->success = true;
 }
 
 static void NativeSetTeamStartPosition(const SetTeamStartPositionQuery* query, SetTeamStartPositionResult* result)
@@ -721,8 +725,8 @@ static void NativeCreateUnit(const CreateUnitQuery* query, CreateUnitResult* res
 	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
 
 	const CUnit* builder = nullptr;
-	if (query->builderID >= 0) {
-		builder = unitHandler.GetUnit(query->builderID);
+	if (query->options.builderID >= 0) {
+		builder = unitHandler.GetUnit(query->options.builderID);
 	}
 
 	UnitLoadParams params;
@@ -730,11 +734,11 @@ static void NativeCreateUnit(const CreateUnitQuery* query, CreateUnitResult* res
 	params.builder = builder;
 	params.pos = pos;
 	params.speed = ZeroVector;
-	params.unitID = (query->unitID >= 0) ? query->unitID : -1;
+	params.unitID = (query->options.unitID >= 0) ? query->options.unitID : -1;
 	params.teamID = query->teamID;
 	params.facing = query->facing;
-	params.beingBuilt = query->build;
-	params.flattenGround = query->flattenGround;
+	params.beingBuilt = query->options.build;
+	params.flattenGround = query->options.flattenGround;
 
 	CUnit* unit = unitLoader->LoadUnit(params);
 
@@ -764,17 +768,17 @@ static void NativeDestroyUnit(const DestroyUnitQuery* query, DestroyUnitResult* 
 	}
 
 	CUnit* attacker = nullptr;
-	if (query->attackerID >= 0) {
-		attacker = unitHandler.GetUnit(query->attackerID);
+	if (query->options.attackerID >= 0) {
+		attacker = unitHandler.GetUnit(query->options.attackerID);
 	}
 
-	if (query->selfd) {
-		unit->KillUnit(attacker, true, query->reclaimed);
+	if (query->options.selfd) {
+		unit->KillUnit(attacker, true, query->options.reclaimed);
 	} else {
-		unit->KillUnit(attacker, false, query->reclaimed);
+		unit->KillUnit(attacker, false, query->options.reclaimed);
 	}
 
-	if (query->recycleID) {
+	if (query->options.recycleID) {
 		unitHandler.GarbageCollectUnit(unit->id);
 	}
 
@@ -1146,15 +1150,9 @@ static void NativeSetUnitResourcing(const SetUnitResourcingQuery* query, SetUnit
 		unit->resourcesUncondUse.metal = amount;
 	} else if (strcmp(type, "uue") == 0) {
 		unit->resourcesUncondUse.energy = amount;
-	} else if (strcmp(type, "umu") == 0) {
-		unit->resourcesUncondUse.metal = amount;
-	} else if (strcmp(type, "ueu") == 0) {
-		unit->resourcesUncondUse.energy = amount;
 	} else if (strcmp(type, "umm") == 0) {
 		unit->resourcesUncondMake.metal = amount;
 	} else if (strcmp(type, "ume") == 0) {
-		unit->resourcesUncondMake.energy = amount;
-	} else if (strcmp(type, "uem") == 0) {
 		unit->resourcesUncondMake.energy = amount;
 	} else if (strcmp(type, "cum") == 0) {
 		unit->resourcesCondUse.metal = amount;
@@ -1165,7 +1163,7 @@ static void NativeSetUnitResourcing(const SetUnitResourcingQuery* query, SetUnit
 	} else if (strcmp(type, "cme") == 0) {
 		unit->resourcesCondMake.energy = amount;
 	} else {
-		result->error = &INVALID_RESOURCE_ERROR;
+		// Lua's SetUnitResourcing silently ignores an unknown resource key.
 		return;
 	}
 
@@ -1511,27 +1509,27 @@ static void NativeSetUnitBlocking(const SetUnitBlockingQuery* query, SetUnitBloc
 	}
 
 	// Update solid objects collidable bit
-	if (query->solidObjects) {
+	if (query->options.solidObjects) {
 		unit->SetCollidableStateBit(CSolidObject::CSTATE_BIT_SOLIDOBJECTS);
 	} else {
 		unit->ClearCollidableStateBit(CSolidObject::CSTATE_BIT_SOLIDOBJECTS);
 	}
 
 	// Update blocking bit (do this after changing the SO-bit so it is reversible)
-	if (query->blocking) {
+	if (query->options.blocking) {
 		unit->Block();
 	} else {
 		unit->UnBlock();
 	}
 
 	// Update other collidable bits
-	unit->UpdateCollidableStateBit(CSolidObject::CSTATE_BIT_PROJECTILES, query->projectiles);
-	unit->UpdateCollidableStateBit(CSolidObject::CSTATE_BIT_QUADMAPRAYS, query->quadMapRays);
+	unit->UpdateCollidableStateBit(CSolidObject::CSTATE_BIT_PROJECTILES, query->options.projectiles);
+	unit->UpdateCollidableStateBit(CSolidObject::CSTATE_BIT_QUADMAPRAYS, query->options.quadMapRays);
 
 	// Update other blocking properties
-	unit->crushable = query->crushable;
-	unit->blockEnemyPushing = query->blockEnemyPushing;
-	unit->blockHeightChanges = query->blockHeightChanges;
+	unit->crushable = query->options.crushable;
+	unit->blockEnemyPushing = query->options.blockEnemyPushing;
+	unit->blockHeightChanges = query->options.blockHeightChanges;
 
 	result->success = true;
 }
@@ -1574,7 +1572,7 @@ static void NativeSetUnitLeavesGhost(const SetUnitLeavesGhostQuery* query, SetUn
 		return;
 	}
 
-	unit->SetLeavesGhost(query->leavesGhost, query->leaveDeadGhost);
+	unit->SetLeavesGhost(query->options.leavesGhost, query->options.leaveDeadGhost);
 	result->success = true;
 }
 
@@ -2035,10 +2033,10 @@ static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetRe
 
 	if (query->target.isGroundTarget) {
 		if (query->weaponNum < 0) {
-			result->success = unit->AttackGround(targetPos, query->userTarget, query->manualFire);
+			result->success = unit->AttackGround(targetPos, query->options.userTarget, query->options.manualFire);
 		} else if (static_cast<size_t>(query->weaponNum) < unit->weapons.size()) {
-			SWeaponTarget trg(targetPos, query->userTarget);
-			trg.isManualFire = query->manualFire;
+			SWeaponTarget trg(targetPos, query->options.userTarget);
+			trg.isManualFire = query->options.manualFire;
 			result->success = unit->weapons[query->weaponNum]->Attack(trg);
 		}
 		return;
@@ -2057,10 +2055,10 @@ static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetRe
 	}
 
 	if (query->weaponNum < 0) {
-		result->success = unit->AttackUnit(target, query->userTarget, query->manualFire);
+		result->success = unit->AttackUnit(target, query->options.userTarget, query->options.manualFire);
 	} else if (static_cast<size_t>(query->weaponNum) < unit->weapons.size()) {
-		SWeaponTarget trg(target, query->userTarget);
-		trg.isManualFire = query->manualFire;
+		SWeaponTarget trg(target, query->options.userTarget);
+		trg.isManualFire = query->options.manualFire;
 		result->success = unit->weapons[query->weaponNum]->Attack(trg);
 	}
 }
@@ -2089,7 +2087,8 @@ static void NativeSetUnitShieldState(const SetUnitShieldStateQuery* query, SetUn
 	}
 
 	if (shield == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no shield weapon");
+		// Lua treats a unit without a matching shield as a no-op.
+		result->success = true;
 		return;
 	}
 
@@ -2125,7 +2124,8 @@ static void NativeSetUnitShieldRechargeDelay(const SetUnitShieldRechargeDelayQue
 	}
 
 	if (shield == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no shield weapon");
+		// Lua treats a unit without a matching shield as a no-op.
+		result->success = true;
 		return;
 	}
 
@@ -2346,7 +2346,8 @@ static void NativeSetUnitStockpile(const SetUnitStockpileQuery* query, SetUnitSt
 
 	CWeapon* w = unit->stockpileWeapon;
 	if (w == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no stockpile weapon");
+		// Lua treats a unit without a stockpile weapon as a no-op.
+		result->success = true;
 		return;
 	}
 
@@ -2559,7 +2560,7 @@ static void NativeSetUnitCrashing(const SetUnitCrashingQuery* query, SetUnitCras
 
 	AAirMoveType* amt = dynamic_cast<AAirMoveType*>(unit->moveType);
 	if (amt == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not an aircraft");
+		// Lua returns false for non-air units instead of raising an error.
 		return;
 	}
 
@@ -2752,8 +2753,8 @@ static void NativeSetUnitUseWeapons(const SetUnitUseWeaponsQuery* query, SetUnit
 		return;
 	}
 
-	unit->forceUseWeapons = query->forceUseWeapons;
-	unit->allowUseWeapons = query->allowUseWeapons;
+	unit->forceUseWeapons = query->options.forceUseWeapons;
+	unit->allowUseWeapons = query->options.allowUseWeapons;
 
 	result->success = true;
 }
@@ -3358,12 +3359,12 @@ static void NativeSetFactoryBuggerOff(const SetFactoryBuggerOffQuery* query, Set
 		return;
 	}
 
-	factory->boPerform = query->perform;
-	factory->boOffset = query->offset;
-	factory->boRadius = query->radius;
-	factory->boRelHeading = query->relHeading;
-	factory->boSherical = query->spherical;
-	factory->boForced = query->forced;
+	factory->boPerform = query->options.perform;
+	factory->boOffset = query->options.offset;
+	factory->boRadius = query->options.radius;
+	factory->boRelHeading = query->options.relHeading;
+	factory->boSherical = query->options.spherical;
+	factory->boForced = query->options.forced;
 
 	result->perform = factory->boPerform;
 }
@@ -3387,8 +3388,8 @@ static void NativeBuggerOff(const BuggerOffQuery* query, BuggerOffResult* result
 	float3 pos(query->pos.x, query->pos.y, query->pos.z);
 
 	CUnit* excludeUnit = nullptr;
-	if (query->excludeUnitID >= 0) {
-		excludeUnit = unitHandler.GetUnit(query->excludeUnitID);
+	if (query->options.excludeUnitID >= 0) {
+		excludeUnit = unitHandler.GetUnit(query->options.excludeUnitID);
 	}
 
 	if (query->excludeUnitDefIDs != nullptr && query->excludeUnitDefCount > 0) {
@@ -3400,9 +3401,9 @@ static void NativeBuggerOff(const BuggerOffQuery* query, BuggerOffResult* result
 				exclDefs.push_back(unitDefHandler->GetUnitDefByID(defID));
 			}
 		}
-		CGameHelper::BuggerOff(pos, query->radius, query->spherical, query->forced, query->teamID, excludeUnit, exclDefs);
+		CGameHelper::BuggerOff(pos, query->radius, query->options.spherical, query->options.forced, query->teamID, excludeUnit, exclDefs);
 	} else {
-		CGameHelper::BuggerOff(pos, query->radius, query->spherical, query->forced, query->teamID, excludeUnit);
+		CGameHelper::BuggerOff(pos, query->radius, query->options.spherical, query->options.forced, query->teamID, excludeUnit);
 	}
 	result->success = true;
 }
@@ -4045,27 +4046,27 @@ static void NativeSetFeatureBlocking(const SetFeatureBlockingQuery* query, SetFe
 	}
 
 	// Update solid objects collidable bit
-	if (query->solidObjects) {
+	if (query->options.solidObjects) {
 		feature->SetCollidableStateBit(CSolidObject::CSTATE_BIT_SOLIDOBJECTS);
 	} else {
 		feature->ClearCollidableStateBit(CSolidObject::CSTATE_BIT_SOLIDOBJECTS);
 	}
 
 	// Update blocking bit
-	if (query->blocking) {
+	if (query->options.blocking) {
 		feature->Block();
 	} else {
 		feature->UnBlock();
 	}
 
 	// Update other collidable bits
-	feature->UpdateCollidableStateBit(CSolidObject::CSTATE_BIT_PROJECTILES, query->projectiles);
-	feature->UpdateCollidableStateBit(CSolidObject::CSTATE_BIT_QUADMAPRAYS, query->quadMapRays);
+	feature->UpdateCollidableStateBit(CSolidObject::CSTATE_BIT_PROJECTILES, query->options.projectiles);
+	feature->UpdateCollidableStateBit(CSolidObject::CSTATE_BIT_QUADMAPRAYS, query->options.quadMapRays);
 
 	// Update other blocking properties
-	feature->crushable = query->crushable;
-	feature->blockEnemyPushing = query->blockEnemyPushing;
-	feature->blockHeightChanges = query->blockHeightChanges;
+	feature->crushable = query->options.crushable;
+	feature->blockEnemyPushing = query->options.blockEnemyPushing;
+	feature->blockHeightChanges = query->options.blockHeightChanges;
 
 	result->success = true;
 }
@@ -4183,22 +4184,18 @@ static void NativeSetFeaturePhysics(const SetFeaturePhysicsQuery* query, SetFeat
 	}
 
 	float3 pos(query->pos.x, query->pos.y, query->pos.z);
-	feature->Move(pos, false);
-
-	feature->SetVelocityAndSpeed(float3(query->velocity.x, query->velocity.y, query->velocity.z));
-
 	const float3 rot(query->rotation.x, query->rotation.y, query->rotation.z);
-	CMatrix44f rotMatrix;
-	rotMatrix.RotateEulerYXZ(-rot);
-
-	feature->frontdir = rotMatrix.GetZ();
-	feature->updir = rotMatrix.GetY();
-	feature->rightdir = rotMatrix.GetX();
 	feature->dragScales.x = std::clamp(query->drag.x, 0.0f, 1.0f);
 	feature->dragScales.y = std::clamp(query->drag.y, 0.0f, 1.0f);
 	feature->dragScales.z = std::clamp(query->drag.z, 0.0f, 1.0f);
+
+	// Keep this sequence identical to LuaSyncedCtrl::SetSolidObjectPhysicalState.
+	// In particular, ForcedMove must be the operation that changes the position:
+	// moving first and then calling ForcedMove makes the quad-field removal use
+	// the new position and leaves a stale pointer in the old quad.
+	feature->SetDirVectorsEuler(rot);
 	feature->ForcedMove(pos);
-	feature->UpdateTransform(feature->pos, true);
+	feature->SetVelocityAndSpeed(float3(query->velocity.x, query->velocity.y, query->velocity.z));
 
 	result->success = true;
 }
@@ -4262,8 +4259,14 @@ static void NativeSetFeatureHeadingAndUpDir(const SetFeatureHeadingAndUpDirQuery
 	upDir.SafeNormalize();
 
 	feature->heading = query->heading;
-	feature->updir = upDir;
-	feature->UpdateDirVectors(false);
+	// Keep this sequence identical to LuaSyncedCtrl's
+	// SetSolidObjectHeadingAndUpDir.  In particular, UpdateDirVectors(const
+	// float3&) preserves the requested heading while applying the new up
+	// direction; the bool overload has different ground/object-normal
+	// semantics.
+	feature->UpdateDirVectors(upDir);
+	feature->SetFacingFromHeading();
+	feature->UpdateMidAndAimPos();
 	feature->UpdateTransform(feature->pos, true);
 
 	result->success = true;
@@ -4288,13 +4291,10 @@ static void NativeSetFeatureRotation(const SetFeatureRotationQuery* query, SetFe
 
 	const float3 rot(query->rotation.x, query->rotation.y, query->rotation.z);
 	feature->SetDirVectorsEuler(rot);
-	// Lua's SetFeatureRotation only updates the transform after SetDirVectorsEuler.
-	// Native-driven editor changes also need the CFeature ForcedSpin side effect
-	// (`prevFrameNeedsUpdate = true`), matching the stable SetFeatureDirection path
-	// used by ctrl-drag rotation and preventing the feature from fighting stale
-	// previous-frame transform state. Do not call UpdateTransform here: CFeature's
-	// ForcedSpin overload already updates the synced transform.
-	feature->ForcedSpin(feature->frontdir, feature->rightdir);
+	// Lua's SetFeatureRotation performs exactly these two operations.  Do not
+	// replace the transform update with ForcedSpin: that recomputes the basis,
+	// heading, and mid/aim state and is an observable extra side effect.
+	feature->UpdateTransform(feature->pos, true);
 
 	result->success = true;
 }
@@ -4381,8 +4381,15 @@ static void NativeSetFeatureMidAndAimPos(const SetFeatureMidAndAimPosQuery* quer
 
 	const float3 newMidPos(query->midPos.x, query->midPos.y, query->midPos.z);
 	const float3 newAimPos(query->aimPos.x, query->aimPos.y, query->aimPos.z);
+	const bool updateQuads = (newMidPos != feature->midPos);
+
+	if (updateQuads)
+		quadField.RemoveFeature(feature);
 
 	feature->SetMidAndAimPos(newMidPos, newAimPos, query->setRelative);
+
+	if (updateQuads)
+		quadField.AddFeature(feature);
 
 	result->success = true;
 }
@@ -4406,8 +4413,16 @@ static void NativeSetFeatureRadiusAndHeight(const SetFeatureRadiusAndHeightQuery
 
 	const float newRadius = std::max(0.0f, query->radius);
 	const float newHeight = std::max(0.0f, query->height);
+	const bool updateQuads = (newRadius != feature->radius);
+
+	if (updateQuads)
+		quadField.RemoveFeature(feature);
 
 	feature->SetRadiusAndHeight(newRadius, newHeight);
+
+	if (updateQuads)
+		quadField.AddFeature(feature);
+
 	result->success = true;
 }
 
@@ -4829,10 +4844,10 @@ static void NativeAddSmoothMesh(const AddSmoothMeshQuery* query, AddSmoothMeshRe
 		return;
 	}
 
-	const int x = static_cast<int>(query->x / (SQUARE_SIZE * 2));
-	const int z = static_cast<int>(query->z / (SQUARE_SIZE * 2));
+	const int x = static_cast<int>(query->x / smoothGround.GetResolution());
+	const int z = static_cast<int>(query->z / smoothGround.GetResolution());
 
-	if (x < 0 || x >= smoothGround.GetMaxX() || z < 0 || z >= smoothGround.GetMaxY()) {
+	if (x < 0 || x > smoothGround.GetMaxX() - 1 || z < 0 || z > smoothGround.GetMaxY() - 1) {
 		result->success = false;
 		return;
 	}
@@ -5018,7 +5033,7 @@ static void NativeAddGrass(const AddGrassQuery* query, AddGrassResult* result)
 		return;
 	}
 
-	grassDrawer->AddGrass(float3(query->x, 0.0f, query->z), /*grassValue*/ 1);
+	grassDrawer->AddGrass(float3(query->x, 0.0f, query->z).cClampInBounds(), query->grassValue);
 
 	result->success = true;
 }
@@ -5039,7 +5054,7 @@ static void NativeRemoveGrass(const RemoveGrassQuery* query, RemoveGrassResult* 
 		return;
 	}
 
-	grassDrawer->RemoveGrass(float3(query->x, 0.0f, query->z));
+	grassDrawer->RemoveGrass(float3(query->x, 0.0f, query->z).cClampInBounds());
 
 	result->success = true;
 }
@@ -5098,10 +5113,17 @@ static void NativeLevelHeightMap(const LevelHeightMapQuery* query, LevelHeightMa
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / SQUARE_SIZE));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / SQUARE_SIZE));
-	const int x2 = std::min(mapDims.mapx, static_cast<int>(query->x2 / SQUARE_SIZE));
-	const int z2 = std::min(mapDims.mapy, static_cast<int>(query->z2 / SQUARE_SIZE));
+	float fx1 = query->x1;
+	float fx2 = query->x2;
+	float fz1 = query->z1;
+	float fz2 = query->z2;
+	if (fx1 > fx2) std::swap(fx1, fx2);
+	if (fz1 > fz2) std::swap(fz1, fz2);
+
+	const int x1 = std::clamp(static_cast<int>(fx1 / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z1 = std::clamp(static_cast<int>(fz1 / SQUARE_SIZE), 0, mapDims.mapy);
+	const int x2 = std::clamp(static_cast<int>(fx2 / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z2 = std::clamp(static_cast<int>(fz2 / SQUARE_SIZE), 0, mapDims.mapy);
 
 	for (int z = z1; z <= z2; z++) {
 		for (int x = x1; x <= x2; x++) {
@@ -5135,8 +5157,13 @@ static void NativeAddOriginalHeightMap(const AddOriginalHeightMapQuery* query, A
 		return;
 	}
 
-	const int x = std::clamp(static_cast<int>(query->x / SQUARE_SIZE), 0, mapDims.mapx);
-	const int z = std::clamp(static_cast<int>(query->z / SQUARE_SIZE), 0, mapDims.mapy);
+	const int x = static_cast<int>(query->x / SQUARE_SIZE);
+	const int z = static_cast<int>(query->z / SQUARE_SIZE);
+	if (x < 0 || x > mapDims.mapx || z < 0 || z > mapDims.mapy) {
+		result->success = true;
+		return;
+	}
+
 	const int idx = (z * mapDims.mapxp1) + x;
 
 	readMap->AddOriginalHeight(idx, query->height);
@@ -5193,22 +5220,39 @@ static void NativeRevertOriginalHeightMap(const RevertOriginalHeightMapQuery* qu
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / SQUARE_SIZE));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / SQUARE_SIZE));
-	const int x2 = std::min(mapDims.mapx, static_cast<int>(query->x2 / SQUARE_SIZE));
-	const int z2 = std::min(mapDims.mapy, static_cast<int>(query->z2 / SQUARE_SIZE));
+	float fx1 = query->x1;
+	float fx2 = query->x2;
+	float fz1 = query->z1;
+	float fz2 = query->z2;
+	if (fx1 > fx2) std::swap(fx1, fx2);
+	if (fz1 > fz2) std::swap(fz1, fz2);
 
-	for (int z = z1; z <= z2; z++) {
-		for (int x = x1; x <= x2; x++) {
-			const int idx = (z * mapDims.mapxp1) + x;
-			const float curHeight = readMap->GetCenterHeightMapSynced()[idx];
-			const float orgHeight = readMap->GetOriginalHeightMapSynced()[idx];
-			const float newHeight = curHeight * (1.0f - query->origFactor) + orgHeight * query->origFactor;
-			readMap->SetHeight(idx, newHeight);
+	const int x1 = std::clamp(static_cast<int>(fx1 / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z1 = std::clamp(static_cast<int>(fz1 / SQUARE_SIZE), 0, mapDims.mapy);
+	const int x2 = std::clamp(static_cast<int>(fx2 / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z2 = std::clamp(static_cast<int>(fz2 / SQUARE_SIZE), 0, mapDims.mapy);
+	const float* origMap = readMap->GetMapFileHeightMapSynced();
+	const float* currMap = readMap->GetOriginalHeightMapSynced();
+
+	if (query->origFactor == 1.0f) {
+		for (int z = z1; z <= z2; ++z) {
+			for (int x = x1; x <= x2; ++x) {
+				const int idx = (z * mapDims.mapxp1) + x;
+				readMap->SetOriginalHeight(idx, origMap[idx]);
+			}
+		}
+	} else {
+		const float currFactor = (1.0f - query->origFactor);
+		for (int z = z1; z <= z2; ++z) {
+			for (int x = x1; x <= x2; ++x) {
+				const int idx = (z * mapDims.mapxp1) + x;
+				const float ofh = query->origFactor * origMap[idx];
+				const float cfh = currFactor * currMap[idx];
+				readMap->SetOriginalHeight(idx, ofh + cfh);
+			}
 		}
 	}
 
-	mapDamage->RecalcArea(x1, x2, z1, z2);
 	result->success = true;
 }
 
@@ -5266,10 +5310,17 @@ static void NativeLevelOriginalHeightMap(const LevelOriginalHeightMapQuery* quer
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / SQUARE_SIZE));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / SQUARE_SIZE));
-	const int x2 = std::min(mapDims.mapx, static_cast<int>(query->x2 / SQUARE_SIZE));
-	const int z2 = std::min(mapDims.mapy, static_cast<int>(query->z2 / SQUARE_SIZE));
+	float fx1 = query->x1;
+	float fx2 = query->x2;
+	float fz1 = query->z1;
+	float fz2 = query->z2;
+	if (fx1 > fx2) std::swap(fx1, fx2);
+	if (fz1 > fz2) std::swap(fz1, fz2);
+
+	const int x1 = std::clamp(static_cast<int>(fx1 / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z1 = std::clamp(static_cast<int>(fz1 / SQUARE_SIZE), 0, mapDims.mapy);
+	const int x2 = std::clamp(static_cast<int>(fx2 / SQUARE_SIZE), 0, mapDims.mapx);
+	const int z2 = std::clamp(static_cast<int>(fz2 / SQUARE_SIZE), 0, mapDims.mapy);
 
 	for (int z = z1; z <= z2; z++) {
 		for (int x = x1; x <= x2; x++) {
@@ -5334,10 +5385,17 @@ static void NativeLevelSmoothMesh(const LevelSmoothMeshQuery* query, LevelSmooth
 		return;
 	}
 
-	const int x1 = std::max(0, static_cast<int>(query->x1 / (SQUARE_SIZE * 2)));
-	const int z1 = std::max(0, static_cast<int>(query->z1 / (SQUARE_SIZE * 2)));
-	const int x2 = std::min(smoothGround.GetMaxX(), static_cast<int>(query->x2 / (SQUARE_SIZE * 2)));
-	const int z2 = std::min(smoothGround.GetMaxY(), static_cast<int>(query->z2 / (SQUARE_SIZE * 2)));
+	float fx1 = query->x1;
+	float fx2 = query->x2;
+	float fz1 = query->z1;
+	float fz2 = query->z2;
+	if (fx1 > fx2) std::swap(fx1, fx2);
+	if (fz1 > fz2) std::swap(fz1, fz2);
+
+	const int x1 = std::clamp(static_cast<int>(fx1 / smoothGround.GetResolution()), 0, smoothGround.GetMaxX() - 1);
+	const int z1 = std::clamp(static_cast<int>(fz1 / smoothGround.GetResolution()), 0, smoothGround.GetMaxY() - 1);
+	const int x2 = std::clamp(static_cast<int>(fx2 / smoothGround.GetResolution()), 0, smoothGround.GetMaxX() - 1);
+	const int z2 = std::clamp(static_cast<int>(fz2 / smoothGround.GetResolution()), 0, smoothGround.GetMaxY() - 1);
 
 	for (int z = z1; z <= z2; z++) {
 		for (int x = x1; x <= x2; x++) {
@@ -5526,28 +5584,31 @@ static void NativeSpawnProjectile(const SpawnProjectileQuery* query, SpawnProjec
 		return;
 	}
 
-	CUnit* owner = nullptr;
-	if (nativeParams.owner >= 0) {
-		owner = unitHandler.GetUnit(nativeParams.owner);
-	}
+	ProjectileParams params;
+	params.pos = float3(nativeParams.pos.x, nativeParams.pos.y, nativeParams.pos.z);
+	params.end = float3(nativeParams.end.x, nativeParams.end.y, nativeParams.end.z);
+	params.speed = float3(nativeParams.speed.x, nativeParams.speed.y, nativeParams.speed.z);
+	params.spread = float3(nativeParams.spread.x, nativeParams.spread.y, nativeParams.spread.z);
+	params.error = float3(nativeParams.error.x, nativeParams.error.y, nativeParams.error.z);
+	params.ownerID = (nativeParams.owner >= 0) ? static_cast<unsigned int>(nativeParams.owner) : -1u;
+	params.teamID = (nativeParams.team >= 0) ? static_cast<unsigned int>(nativeParams.team) : teamHandler.GaiaTeamID();
+	params.weaponNum = (nativeParams.weaponNum >= 0) ? static_cast<unsigned int>(nativeParams.weaponNum) : -1u;
+	params.ttl = static_cast<int>(nativeParams.ttl);
+	params.gravity = nativeParams.gravity;
+	params.tracking = nativeParams.tracking;
+	params.maxRange = nativeParams.maxRange;
+	params.upTime = nativeParams.upTime;
+	params.startAlpha = nativeParams.startAlpha;
+	params.endAlpha = nativeParams.endAlpha;
+	params.weaponDef = weaponDef;
 
-	if (weaponDef != nullptr) {
-		const float3 pos(nativeParams.pos.x, nativeParams.pos.y, nativeParams.pos.z);
-		const float3 velocity(nativeParams.speed.x, nativeParams.speed.y, nativeParams.speed.z);
-		const float3 target(nativeParams.end.x, nativeParams.end.y, nativeParams.end.z);
+	if (nativeParams.model != nullptr && nativeParams.model[0] != '\0')
+		params.model = modelLoader.LoadModel(nativeParams.model);
+	if (nativeParams.cegTag != nullptr && nativeParams.cegTag[0] != '\0')
+		params.cegID = explGenHandler.LoadGeneratorID(nativeParams.cegTag);
 
-		ProjectileParams params;
-		params.pos = pos;
-		params.end = target;
-		params.speed = velocity;
-		params.owner = owner;
-		params.ttl = static_cast<int>(nativeParams.ttl);
-		params.gravity = nativeParams.gravity;
-		params.weaponDef = weaponDef;
-
-		unsigned int projectileID = WeaponProjectileFactory::LoadProjectile(params);
-		result->projectileID = static_cast<int32_t>(projectileID);
-	}
+	const unsigned int projectileID = WeaponProjectileFactory::LoadProjectile(params);
+	result->projectileID = static_cast<int32_t>(projectileID);
 }
 
 static void NativeDeleteProjectile(const DeleteProjectileQuery* query, DeleteProjectileResult* result)
@@ -5567,8 +5628,7 @@ static void NativeDeleteProjectile(const DeleteProjectileQuery* query, DeletePro
 		return;
 	}
 
-	projectile->DeleteDeathDependence(nullptr, DEPENDENCE_WEAPONTARGET);
-	projectile->deleteMe = true;
+	projectile->Delete();
 
 	result->success = true;
 }
@@ -5615,13 +5675,7 @@ static void NativeSetProjectileVelocity(const SetProjectileVelocityQuery* query,
 	}
 
 	const float3 velocity(query->velocity.x, query->velocity.y, query->velocity.z);
-	projectile->speed = velocity;
-
-	// Update direction based on velocity
-	if (velocity.SqLength() > 0.0f) {
-		projectile->dir = velocity;
-		projectile->dir.SafeNormalize();
-	}
+	projectile->SetVelocityAndSpeed(velocity);
 
 	result->success = true;
 }
@@ -5643,7 +5697,7 @@ static void NativeSetProjectileGravity(const SetProjectileGravityQuery* query, S
 		return;
 	}
 
-	projectile->mygravity = std::abs(query->gravity);
+	projectile->mygravity = query->gravity;
 
 	result->success = true;
 }
@@ -5671,25 +5725,40 @@ static void NativeSetProjectileTarget(const SetProjectileTargetQuery* query, Set
 		return;
 	}
 
+	CWorldObject* oldTargetObject = weaponProj->GetTargetObject();
+	CWorldObject* newTargetObject = nullptr;
+
 	if (query->target.isGroundTarget) {
 		const float3 targetPos(query->target.pos.x, query->target.pos.y, query->target.pos.z);
+		if (oldTargetObject != nullptr) {
+			weaponProj->DeleteDeathDependence(oldTargetObject, DEPENDENCE_WEAPONTARGET);
+			weaponProj->DeleteDeathDependence(oldTargetObject, DEPENDENCE_INTERCEPTTARGET);
+		}
 		weaponProj->SetTargetObject(nullptr);
 		weaponProj->SetTargetPos(targetPos);
 	} else {
-		CWorldObject* targetObject = nullptr;
 		switch (query->target.targetType) {
-			case 'u': targetObject = unitHandler.GetUnit(query->target.targetID); break;
-			case 'f': targetObject = featureHandler.GetFeature(query->target.targetID); break;
-			case 'p': targetObject = projectileHandler.GetProjectileBySyncedID(query->target.targetID); break;
+			case 'u': newTargetObject = unitHandler.GetUnit(query->target.targetID); break;
+			case 'f': newTargetObject = featureHandler.GetFeature(query->target.targetID); break;
+			case 'p': newTargetObject = projectileHandler.GetProjectileBySyncedID(query->target.targetID); break;
 			default: break;
 		}
 
-		if (targetObject != nullptr) {
-			weaponProj->SetTargetObject(targetObject);
+		if (oldTargetObject != nullptr) {
+			weaponProj->DeleteDeathDependence(oldTargetObject, DEPENDENCE_WEAPONTARGET);
+			weaponProj->DeleteDeathDependence(oldTargetObject, DEPENDENCE_INTERCEPTTARGET);
+		}
+		weaponProj->SetTargetObject(nullptr);
+		if (newTargetObject != nullptr) {
+			if (dynamic_cast<CSolidObject*>(newTargetObject) != nullptr)
+				weaponProj->AddDeathDependence(newTargetObject, DEPENDENCE_WEAPONTARGET);
+			else if (dynamic_cast<CWeaponProjectile*>(newTargetObject) != nullptr)
+				weaponProj->AddDeathDependence(newTargetObject, DEPENDENCE_INTERCEPTTARGET);
+			weaponProj->SetTargetObject(newTargetObject);
 		}
 	}
 
-	result->success = true;
+	result->success = (oldTargetObject != nullptr || newTargetObject != nullptr || query->target.isGroundTarget);
 }
 
 static void NativeSetProjectileDamages(const SetProjectileDamagesQuery* query, SetProjectileDamagesResult* result)
@@ -5712,13 +5781,26 @@ static void NativeSetProjectileDamages(const SetProjectileDamagesQuery* query, S
 	CWeaponProjectile* wpro = static_cast<CWeaponProjectile*>(proj);
 	DynDamageArray* damages = DynDamageArray::GetMutable(wpro->damages);
 	(void)query->unused;
-	(void)query->damageKey;
-	(void)query->damageValue;
-	(void)damages;
+	if (query->damageKey == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Damage key is null");
+		return;
+	}
 
-	// Simple implementation: set damage by key
-	// Full implementation would need proper damage type parsing
-	result->success = true;
+	char* endptr = nullptr;
+	const long armType = std::strtol(query->damageKey, &endptr, 10);
+	if (*endptr == '\0' && armType >= 0) {
+		if (static_cast<unsigned long>(armType) >= static_cast<unsigned long>(damages->GetNumTypes())) {
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid armor type index");
+			return;
+		}
+		damages->Set(static_cast<int>(armType), query->damageValue);
+		result->success = true;
+		return;
+	}
+
+	result->success = SetSingleDynDamagesKey(damages, query->damageKey, query->damageValue);
+	if (!result->success)
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown damage key");
 }
 
 static void NativeSetProjectileTimeToLive(const SetProjectileTimeToLiveQuery* query, SetProjectileTimeToLiveResult* result)
@@ -5791,15 +5873,29 @@ static void NativeSetProjectileCEG(const SetProjectileCEGQuery* query, SetProjec
 {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->success = false;
+	result->cegID = static_cast<int32_t>(CExplosionGeneratorHandler::EXPGEN_ID_INVALID);
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
-	// CEG (custom explosion generator) handling would need proper implementation
-	result->success = true;
+	CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	if (proj == nullptr) {
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
+	}
+	if (!proj->weapon && !proj->piece)
+		return;
+	if (query->cegName == nullptr) {
+		result->error = MakeError(ERROR_INVALID_ARGUMENT, "CEG name is null");
+		return;
+	}
+
+	const unsigned int cegID = explGenHandler.LoadCustomGeneratorID(query->cegName);
+	result->cegID = static_cast<int32_t>(cegID);
+	if (explGenHandler.GetGenerator(cegID) != nullptr)
+		proj->SetCustomExpGenID(cegID);
 }
 
 static void NativeSetProjectileAlwaysVisible(const SetProjectileAlwaysVisibleQuery* query, SetProjectileAlwaysVisibleResult* result)
@@ -5855,7 +5951,13 @@ static void NativeSetProjectileMoveControl(const SetProjectileMoveControlQuery* 
 		return;
 	}
 
-	// MoveControl handling would need proper implementation
+	CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	if (proj == nullptr) {
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
+	}
+	if (proj->weapon || proj->piece)
+		proj->luaMoveCtrl = query->enable;
 	result->success = true;
 }
 
@@ -6098,9 +6200,14 @@ static void NativeSpawnSFX(const SpawnSFXQuery* query, SpawnSFXResult* result)
 	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
 	const float3 dir(query->dir.x, query->dir.y, query->dir.z);
 
-	// SFX spawning requires script integration
-	// For now, basic implementation
-	result->success = true;
+	// Keep this in lockstep with LuaSyncedCtrl::SpawnSFX.  The radius and
+	// damage fields are accepted by the Lua ABI for compatibility but are not
+	// consumed by EmitAbsSFX/EmitRelSFX.
+	if (query->absolute) {
+		result->success = unit->script->EmitAbsSFX(query->sfxID, pos, dir);
+	} else {
+		result->success = unit->script->EmitRelSFX(query->sfxID, pos, dir);
+	}
 }
 
 static const EffectsControlApi EFFECTS_CONTROL_API = {
@@ -6160,9 +6267,9 @@ static void NativeSetGodMode(const SetGodModeQuery* query, SetGodModeResult* res
 	}
 
 	gs->godMode = 0;
-	if (query->controlAllies)
+	if (query->options.controlAllies)
 		gs->godMode |= GODMODE_ATC_BIT;
-	if (query->controlEnemies)
+	if (query->options.controlEnemies)
 		gs->godMode |= GODMODE_ETC_BIT;
 
 	CLuaUI::UpdateTeams();

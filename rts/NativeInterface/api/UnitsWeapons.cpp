@@ -187,9 +187,20 @@ static void NativeGetUnitWeaponVectors(const GetUnitWeaponVectorsQuery* query, G
 	result->vectors.weaponAimPos.y = weapon->aimFromPos.y;
 	result->vectors.weaponAimPos.z = weapon->aimFromPos.z;
 
-	result->vectors.weaponDir.x = weapon->weaponDir.x;
-	result->vectors.weaponDir.y = weapon->weaponDir.y;
-	result->vectors.weaponDir.z = weapon->weaponDir.z;
+	const float3* dir = &weapon->wantedDir;
+	switch (weapon->weaponDef->projectileType) {
+		case WEAPON_MISSILE_PROJECTILE:
+		case WEAPON_TORPEDO_PROJECTILE:
+		case WEAPON_STARBURST_PROJECTILE:
+			dir = &weapon->weaponDir;
+			break;
+		default:
+			break;
+	}
+
+	result->vectors.weaponDir.x = dir->x;
+	result->vectors.weaponDir.y = dir->y;
+	result->vectors.weaponDir.z = dir->z;
 }
 
 static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* query, GetUnitWeaponTryTargetResult* result)
@@ -216,7 +227,7 @@ static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* quer
 	}
 
 	SWeaponTarget target;
-	if (query->isGroundTarget) {
+	if (query->options.isGroundTarget) {
 		target.type = Target_Pos;
 		target.groundPos = float3(query->targetPos.x, query->targetPos.y, query->targetPos.z);
 	} else if (query->targetID >= 0) {
@@ -255,7 +266,7 @@ static void NativeGetUnitWeaponTestTarget(const GetUnitWeaponTestTargetQuery* qu
 	SWeaponTarget target;
 	float3 tgtPos(query->targetPos.x, query->targetPos.y, query->targetPos.z);
 
-	if (query->isGroundTarget) {
+	if (query->options.isGroundTarget) {
 		target.type = Target_Pos;
 		target.groundPos = tgtPos;
 	} else if (query->targetID >= 0) {
@@ -326,9 +337,10 @@ static void NativeGetUnitWeaponHaveFreeLineOfFire(const GetUnitWeaponHaveFreeLin
 	}
 
 	SWeaponTarget target;
+	float3 srcPos(query->sourcePos.x, query->sourcePos.y, query->sourcePos.z);
 	float3 tgtPos(query->targetPos.x, query->targetPos.y, query->targetPos.z);
 
-	if (query->isGroundTarget) {
+	if (query->options.isGroundTarget) {
 		target.type = Target_Pos;
 		target.groundPos = tgtPos;
 	} else if (query->targetID >= 0) {
@@ -341,7 +353,7 @@ static void NativeGetUnitWeaponHaveFreeLineOfFire(const GetUnitWeaponHaveFreeLin
 		return; // Invalid target
 	}
 
-	result->hasFreeLineOfFire = weapon->HaveFreeLineOfFire(weapon->weaponMuzzlePos, tgtPos, target);
+	result->hasFreeLineOfFire = weapon->HaveFreeLineOfFire(srcPos, tgtPos, target);
 }
 
 static void NativeGetUnitWeaponCanFire(const GetUnitWeaponCanFireQuery* query, GetUnitWeaponCanFireResult* result)

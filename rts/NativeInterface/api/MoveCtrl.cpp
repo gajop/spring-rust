@@ -6,9 +6,15 @@
 #include "Sim/MoveTypes/ScriptMoveType.h"
 #include "Sim/MoveTypes/GroundMoveType.h"
 #include "Sim/MoveTypes/AAirMoveType.h"
+#include "Sim/MoveTypes/HoverAirMoveType.h"
+#include "Sim/MoveTypes/StaticMoveType.h"
 #include "Sim/MoveTypes/StrafeAirMoveType.h"
 #include "Sim/Misc/GlobalSynced.h"
+#include "Sim/Path/IPathManager.h"
+#include "Sim/Misc/GlobalConstants.h"
 #include "System/StringUtil.h"
+
+#include <vector>
 
 namespace {
 
@@ -28,6 +34,11 @@ static const Error INVALID_UNIT_ERROR = {
 	.message = "Invalid unit ID"
 };
 
+static const Error BUFFER_OVERFLOW_ERROR = {
+	.code = ERROR_BUFFER_OVERFLOW,
+	.message = "Buffer overflow"
+};
+
 // Get move type data
 static void NativeGetUnitMoveTypeData(const GetUnitMoveTypeDataQuery* query, GetUnitMoveTypeDataResult* result)
 {
@@ -40,24 +51,26 @@ static void NativeGetUnitMoveTypeData(const GetUnitMoveTypeDataQuery* query, Get
 	}
 
 	const AMoveType* mt = unit->moveType;
+	result->data = {};
 
-	// Determine move type name and store in scratch buffer
+	// Keep this classification and the scalar units identical to
+	// LuaSyncedRead::GetUnitMoveTypeData.
 	const char* moveTypeName = "unknown";
-	if (dynamic_cast<const CGroundMoveType*>(mt) != nullptr) {
+	if (const auto* gmt = dynamic_cast<const CGroundMoveType*>(mt); gmt != nullptr) {
 		moveTypeName = "ground";
-		const CGroundMoveType* gmt = static_cast<const CGroundMoveType*>(mt);
 
 		result->data.turnRate = gmt->GetTurnRate();
 		result->data.accRate = gmt->GetAccRate();
 		result->data.decRate = gmt->GetDecRate();
-		result->data.maxReverseSpeed = gmt->GetMaxReverseSpeed();
-		result->data.wantedSpeed = gmt->GetWantedSpeed();
-		result->data.currentSpeed = gmt->GetCurrentSpeed();
+		result->data.maxReverseSpeed = gmt->GetMaxReverseSpeed() * GAME_SPEED;
+		result->data.wantedSpeed = gmt->GetWantedSpeed() * GAME_SPEED;
+		result->data.currentSpeed = gmt->GetCurrentSpeed() * GAME_SPEED;
 		result->data.deltaSpeed = gmt->GetDeltaSpeed();
-	} else if (dynamic_cast<const AAirMoveType*>(mt) != nullptr) {
-		moveTypeName = "air";
+	} else if (dynamic_cast<const CHoverAirMoveType*>(mt) != nullptr) {
+		moveTypeName = "gunship";
+	} else if (dynamic_cast<const CStrafeAirMoveType*>(mt) != nullptr) {
+		moveTypeName = "airplane";
 
-		// StrafeAirMoveType-specific fields (not all air move types have these)
 		const CStrafeAirMoveType* samt = dynamic_cast<const CStrafeAirMoveType*>(mt);
 		if (samt != nullptr) {
 			result->data.maxBank = samt->maxBank;
@@ -66,14 +79,16 @@ static void NativeGetUnitMoveTypeData(const GetUnitMoveTypeDataQuery* query, Get
 			result->data.maxElevator = samt->maxElevator;
 			result->data.maxRudder = samt->maxRudder;
 		}
-	} else {
+	} else if (dynamic_cast<const CStaticMoveType*>(mt) != nullptr) {
 		moveTypeName = "static";
+	} else if (dynamic_cast<const CScriptMoveType*>(mt) != nullptr) {
+		moveTypeName = "script";
 	}
 
 	result->error = nullptr;
 	result->data.name = moveTypeName;
-	result->data.maxSpeed = mt->GetMaxSpeed();
-	result->data.maxWantedSpeed = mt->GetMaxWantedSpeed();
+	result->data.maxSpeed = mt->GetMaxSpeed() * GAME_SPEED;
+	result->data.maxWantedSpeed = mt->GetMaxWantedSpeed() * GAME_SPEED;
 	result->data.goalX = mt->goalPos.x;
 	result->data.goalY = mt->goalPos.y;
 	result->data.goalZ = mt->goalPos.z;
@@ -83,6 +98,11 @@ static void NativeGetUnitMoveTypeData(const GetUnitMoveTypeDataQuery* query, Get
 static void NativeGetUnitEstimatedPath(const GetUnitEstimatedPathQuery* query, GetUnitEstimatedPathResult* result)
 {
 	bufferPos = 0;
+	result->error = nullptr;
+	result->waypoints = nullptr;
+	result->count = 0;
+	result->starts = nullptr;
+	result->startCount = 0;
 
 	const CUnit* unit = unitHandler.GetUnit(query->unitID);
 	if (unit == nullptr || unit->moveType == nullptr) {
@@ -90,24 +110,47 @@ static void NativeGetUnitEstimatedPath(const GetUnitEstimatedPathQuery* query, G
 		return;
 	}
 
-	// Simplified: return goal as single waypoint using scratch buffer
-	PathWaypoint* waypoints = reinterpret_cast<PathWaypoint*>(&scratchBuffer[bufferPos]);
-
-	if (bufferPos + sizeof(PathWaypoint) > sizeof(scratchBuffer)) {
-		result->error = &NOT_READY_ERROR;
+	const auto* gmt = dynamic_cast<const CGroundMoveType*>(unit->moveType);
+	if (gmt == nullptr || gmt->GetPathID() == 0 || pathManager == nullptr)
 		return;
+
+	std::vector<float3> points;
+	std::vector<int> starts;
+	pathManager->GetPathWayPoints(gmt->GetPathID(), points, starts);
+
+	if (!points.empty()) {
+		if (bufferPos + points.size() * sizeof(PathWaypoint) > sizeof(scratchBuffer)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+
+		result->waypoints = reinterpret_cast<PathWaypoint*>(&scratchBuffer[bufferPos]);
+		bufferPos += points.size() * sizeof(PathWaypoint);
+		result->count = static_cast<uint32_t>(points.size());
+
+		for (size_t i = 0; i < points.size(); ++i) {
+			result->waypoints[i].pos.x = points[i].x;
+			result->waypoints[i].pos.y = points[i].y;
+			result->waypoints[i].pos.z = points[i].z;
+			result->waypoints[i].eta = 0.0f;
+		}
 	}
 
-	waypoints[0].pos.x = unit->moveType->goalPos.x;
-	waypoints[0].pos.y = unit->moveType->goalPos.y;
-	waypoints[0].pos.z = unit->moveType->goalPos.z;
-	waypoints[0].eta = 0.0f; // ETA not calculated
+	if (!starts.empty()) {
+		if (bufferPos + starts.size() * sizeof(int32_t) > sizeof(scratchBuffer)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			result->waypoints = nullptr;
+			result->count = 0;
+			return;
+		}
 
-	bufferPos += sizeof(PathWaypoint);
+		result->starts = reinterpret_cast<int32_t*>(&scratchBuffer[bufferPos]);
+		bufferPos += starts.size() * sizeof(int32_t);
+		result->startCount = static_cast<uint32_t>(starts.size());
 
-	result->error = nullptr;
-	result->waypoints = waypoints;
-	result->count = 1;
+		for (size_t i = 0; i < starts.size(); ++i)
+			result->starts[i] = starts[i] + 1;
+	}
 }
 
 static void NativeMoveCtrl(const MoveCtrlQuery* query, MoveCtrlResult* result)

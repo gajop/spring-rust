@@ -86,10 +86,14 @@ struct NativeProjectileParams {
 	Float3 end;
 	int32_t owner;
 	int32_t team;
+	// Zero-based weapon number used to inherit a live weapon's mutable
+	// projectile state. Use -1 when there is no firing weapon instance.
+	int32_t weaponNum;
 	float ttl;
 	float gravity;
 	float tracking;
 	float maxRange;
+	float upTime;
 	float startAlpha;
 	float endAlpha;
 	const char* model;

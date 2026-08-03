@@ -154,11 +154,14 @@ static void NativeGetSoundDevices(const GetSoundDevicesQuery* /*query*/, GetSoun
 static void NativeGetSoundEffectParams(const GetSoundEffectParamsQuery* /*query*/, GetSoundEffectParamsResult* result) {
 	bufferPos = 0;
 #if defined(HEADLESS) || defined(NO_SOUND)
-	result->error = &SOUND_EFFECTS_UNSUPPORTED_ERROR;
+	// LuaUnsyncedRead::GetSoundEffectParams returns no values when EFX is
+	// unavailable; lack of support is a normal result, not a failed native
+	// invocation.
+	result->error = nullptr;
 	result->success = false;
 #else
 	result->success = efx.Supported();
-	result->error = result->success ? nullptr : &SOUND_EFFECTS_UNSUPPORTED_ERROR;
+	result->error = nullptr;
 #endif
 }
 
@@ -166,13 +169,15 @@ static void NativeSetSoundEffectParams(const SetSoundEffectParamsQuery* query, S
 	bufferPos = 0;
 #if defined(HEADLESS) || defined(NO_SOUND)
 	(void)query;
-	result->error = &SOUND_EFFECTS_UNSUPPORTED_ERROR;
+	// LuaUnsyncedCtrl::SetSoundEffectParams is a no-op when EFX is
+	// unavailable, including in headless builds.
+	result->error = nullptr;
 	result->success = false;
 #else
 	result->success = false;
 
 	if (!efx.Supported()) {
-		result->error = &SOUND_EFFECTS_UNSUPPORTED_ERROR;
+		result->error = nullptr;
 		return;
 	}
 

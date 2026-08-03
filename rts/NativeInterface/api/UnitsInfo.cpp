@@ -412,12 +412,9 @@ static void NativeGetUnitStates(const GetUnitStatesQuery* query, GetUnitStatesRe
 	// native ABI returns one typed UnitStates value instead, so it always
 	// materializes the complete state; accepting the same selectors keeps the
 	// call contract compatible while giving Rust callers a stable result shape.
-	(void)query->retTable;
-	(void)query->hasRetTable;
-	(void)query->binState;
-	(void)query->hasBinState;
-	(void)query->amtState;
-	(void)query->hasAmtState;
+	(void)query->options.retTable;
+	(void)query->options.binState;
+	(void)query->options.amtState;
 
 	result->states.fireState = unit->fireState;
 	result->states.moveState = unit->moveState;
@@ -660,7 +657,7 @@ static void NativeGetUnitPosition(const GetUnitPositionQuery* query, GetUnitPosi
 		return;
 	}
 
-	const float3 pos = query->midPos ? float3(unit->midPos) : (query->aimPos ? float3(unit->aimPos) : unit->pos);
+	const float3 pos = query->options.midPos ? float3(unit->midPos) : (query->options.aimPos ? float3(unit->aimPos) : unit->pos);
 	result->position.x = pos.x;
 	result->position.y = pos.y;
 	result->position.z = pos.z;

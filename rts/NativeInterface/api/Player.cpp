@@ -127,7 +127,9 @@ static void NativeGetPlayerRoster(const GetPlayerRosterQuery* query, GetPlayerRo
 		entry.isAI = false;
 		entry.isSpec = p->spectator;
 		entry.isActive = p->active;
-		entry.pingTime = p->ping;
+		entry.pingTime = (query->showPathingPlayers && p->ping == PATHING_FLAG)
+			? static_cast<float>(p->ping)
+			: p->ping * 0.001f;
 		entry.cpuUsage = p->cpuUsage;
 		entry.country = p->countryCode.empty() ? nullptr : p->countryCode.c_str();
 		entry.rank = p->rank;

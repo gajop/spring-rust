@@ -164,13 +164,32 @@ static void NativeGetGroundDecalType(const GetGroundDecalTypeQuery* query, GetGr
 {
 	ResetBuffer();
 	result->error = nullptr;
-	result->type = 0;
+	result->type = nullptr;
 
 	const GroundDecal* decal = GetDecalConst(query->decalID, &result->error);
 	if (decal == nullptr)
 		return;
 
-	result->type = decal->info.type;
+	const char* type = "unknown";
+	switch (decal->info.type) {
+		case static_cast<uint8_t>(GroundDecal::Type::DECAL_PLATE):
+			type = "plate";
+			break;
+		case static_cast<uint8_t>(GroundDecal::Type::DECAL_EXPLOSION):
+			type = "explosion";
+			break;
+		case static_cast<uint8_t>(GroundDecal::Type::DECAL_TRACK):
+			type = "track";
+			break;
+		case static_cast<uint8_t>(GroundDecal::Type::DECAL_LUA):
+			type = "lua";
+			break;
+		default:
+			break;
+	}
+
+	if (!CopyString(type, &result->type))
+		result->error = &BUFFER_OVERFLOW_ERROR;
 }
 
 static void NativeGetGroundDecalOwner(const GetGroundDecalOwnerQuery* query, GetGroundDecalOwnerResult* result)
@@ -210,7 +229,11 @@ static void NativeGetGroundDecalTextures(const GetGroundDecalTexturesQuery* quer
 		return;
 	}
 
-	const auto& texNames = groundDecals->GetDecalTextures(query->mainTex ? std::optional<bool>(true) : std::optional<bool>(false));
+	std::optional<bool> mainTex;
+	if (query->options.hasMainTex)
+		mainTex = query->options.mainTex;
+
+	const auto& texNames = groundDecals->GetDecalTextures(mainTex);
 	const auto texCount = texNames.size();
 
 	if (texCount > 0) {
@@ -234,7 +257,7 @@ static void NativeGetGroundDecalTextures(const GetGroundDecalTexturesQuery* quer
 		result->textureCount = static_cast<uint32_t>(texCount);
 	}
 
-	if (!query->includeFilenames || texCount == 0)
+	if (!query->options.includeFilenames || texCount == 0)
 		return;
 
 	const auto& texFileNames = groundDecals->GetDecalTextureFileNames(texNames);
@@ -273,7 +296,9 @@ static void NativeGetGroundDecalTexture(const GetGroundDecalTextureQuery* query,
 		return;
 
 	const auto& texName = groundDecals->GetDecalTexture(query->decalID, query->mainTex);
-	if (!texName.empty() && !CopyString(texName, &result->texture)) {
+	// Lua returns an empty string when the decal has no texture.  Copy it as
+	// well so the native result is an empty string rather than nil/null.
+	if (!CopyString(texName, &result->texture)) {
 		result->error = &BUFFER_OVERFLOW_ERROR;
 	}
 }
@@ -480,8 +505,10 @@ static void NativeGetGroundDecalSizeAndHeight(const GetGroundDecalSizeAndHeightQ
 	if (decal == nullptr)
 		return;
 
-	result->sizeX = (decal->posTL.Distance(decal->posTR) + decal->posBL.Distance(decal->posBR)) * 0.25f * 2.0f;
-	result->sizeZ = (decal->posTL.Distance(decal->posBL) + decal->posTR.Distance(decal->posBR)) * 0.25f * 2.0f;
+	// Match LuaUnsyncedRead::GetGroundDecalSizeAndHeight: average the two
+	// opposite edge lengths and return half of that average.
+	result->sizeX = (decal->posTL.Distance(decal->posTR) + decal->posBL.Distance(decal->posBR)) * 0.25f;
+	result->sizeZ = (decal->posTL.Distance(decal->posBL) + decal->posTR.Distance(decal->posBR)) * 0.25f;
 	result->height = decal->height;
 	result->success = true;
 }

@@ -2,6 +2,7 @@
 
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
+#include "Sim/Units/UnitTypes/Factory.h"
 #include "Sim/Units/CommandAI/CommandAI.h"
 #include "Sim/Units/CommandAI/FactoryCAI.h"
 #include "Sim/Units/CommandAI/Command.h"
@@ -24,6 +25,7 @@ static thread_local Error dynamicError;
 // Static errors
 static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
 static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
+static const Error NOT_FACTORY_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Unit is not a factory" };
 static const Error NO_COMMAND_AI_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit has no command AI" };
 static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
 static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Command issuing not implemented" };
@@ -391,11 +393,12 @@ static void NativeGetFactoryBuggerOff(const GetFactoryBuggerOffQuery* query, Get
 {
 	bufferPos = 0;
 	result->error = nullptr;
-	result->isBuggingOff = false;
-	result->buggerOffPos.x = 0.0f;
-	result->buggerOffPos.y = 0.0f;
-	result->buggerOffPos.z = 0.0f;
-	result->buggerOffRadius = 0.0f;
+	result->perform = false;
+	result->offset = 0.0f;
+	result->radius = 0.0f;
+	result->relHeading = 0;
+	result->spherical = false;
+	result->forced = false;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -408,8 +411,18 @@ static void NativeGetFactoryBuggerOff(const GetFactoryBuggerOffQuery* query, Get
 		return;
 	}
 
-	// BuggerOff is a complex feature not easily accessible, return default
-	// Would need to track internal factory state
+	const CFactory* factory = dynamic_cast<const CFactory*>(unit);
+	if (factory == nullptr) {
+		result->error = &NOT_FACTORY_ERROR;
+		return;
+	}
+
+	result->perform = factory->boPerform;
+	result->offset = factory->boOffset;
+	result->radius = factory->boRadius;
+	result->relHeading = factory->boRelHeading;
+	result->spherical = factory->boSherical;
+	result->forced = factory->boForced;
 }
 
 static void NativeGetCommandQueue(const GetCommandQueueQuery* query, GetCommandQueueResult* result)

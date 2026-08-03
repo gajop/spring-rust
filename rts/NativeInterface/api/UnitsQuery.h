@@ -121,20 +121,21 @@ struct GetUnitMapCentroidResult { const Error* error; Float3 centroid; };
 struct GetUnitNearestAllyQuery { int32_t unitID; float range; };
 struct GetUnitNearestAllyResult { const Error* error; int32_t unitID; };
 
-struct GetUnitNearestEnemyQuery { int32_t unitID; float range; bool useLOS; bool sphereDistTest; bool checkSightDist; };
+struct GetUnitNearestEnemyOptions { bool useLOS; bool sphereDistTest; bool checkSightDist; };
+struct GetUnitNearestEnemyQuery { int32_t unitID; float range; GetUnitNearestEnemyOptions options; };
 struct GetUnitNearestEnemyResult { const Error* error; int32_t unitID; };
 
+struct GetClosestEnemyUnitOptions { bool useLOS; bool sphereDistTest; bool checkSightDist; };
 struct GetClosestEnemyUnitQuery {
 	Float3 pos;
 	float range;
 	int32_t allyTeamID;
-	bool useLOS;
-	bool sphereDistTest;
-	bool checkSightDist;
+	GetClosestEnemyUnitOptions options;
 };
 struct GetClosestEnemyUnitResult { const Error* error; int32_t unitID; };
 
-struct GetUnitSeparationQuery { int32_t unitID1; int32_t unitID2; bool positional; bool checkMap; };
+struct GetUnitSeparationOptions { bool positional; bool checkMap; };
+struct GetUnitSeparationQuery { int32_t unitID1; int32_t unitID2; GetUnitSeparationOptions options; };
 struct GetUnitSeparationResult { const Error* error; float separation; };
 
 struct GetRenderUnitsQuery { int32_t drawMask; bool sendMask; };

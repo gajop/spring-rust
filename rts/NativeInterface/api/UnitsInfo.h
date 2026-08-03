@@ -255,14 +255,15 @@ struct GetUnitMetalExtractionResult { const Error* error; float metalExtraction;
 struct GetUnitExperienceQuery { int32_t unitID; };
 struct GetUnitExperienceResult { const Error* error; float experience; };
 
+struct UnitStatesOptions {
+	bool retTable;
+	bool binState;
+	bool amtState;
+};
+
 struct GetUnitStatesQuery {
 	int32_t unitID;
-	bool retTable;
-	bool hasRetTable;
-	bool binState;
-	bool hasBinState;
-	bool amtState;
-	bool hasAmtState;
+	UnitStatesOptions options;
 };
 struct GetUnitStatesResult { const Error* error; UnitStates states; };
 
@@ -296,7 +297,8 @@ struct GetUnitBuildeeRadiusResult { const Error* error; float radius; };
 struct GetUnitMassQuery { int32_t unitID; };
 struct GetUnitMassResult { const Error* error; float mass; };
 
-struct GetUnitPositionQuery { int32_t unitID; bool midPos; bool aimPos; };
+struct GetUnitPositionOptions { bool midPos; bool aimPos; };
+struct GetUnitPositionQuery { int32_t unitID; GetUnitPositionOptions options; };
 struct GetUnitPositionResult { const Error* error; Float3 position; };
 
 struct GetUnitBasePositionQuery { int32_t unitID; };

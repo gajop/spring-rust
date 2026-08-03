@@ -9,7 +9,7 @@
 //! ## Features
 //!
 //! - **Automatic code generation** - Bindings are generated from C++ headers using libclang
-//! - **Type safety** - Query structs are flattened into strongly-typed function parameters
+//! - **Type safety** - Query structs become strongly-typed parameters and named option descriptors
 //! - **Idiomatic Rust** - Uses `Result<T, Error>`, `&[T]` slices, and `&str` strings
 //! - **Zero unsafe in user code** - All FFI unsafe code is encapsulated in the generated wrappers
 //! - **47 API modules** - Complete coverage of all Spring Native Interface APIs (39 main + 8 sub-APIs)
@@ -40,7 +40,13 @@
 //! let unit_ctrl = synced.unit();
 //! let unit_def = spring_native::sys::DefRef { name: std::ptr::null(), id: 42 };
 //! let pos = spring_native::sys::Float3 { x: 100.0, y: 0.0, z: 200.0 };
-//! let unit_id = unit_ctrl.create_unit(unit_def, pos, 0, 0, false, false, -1, -1)?;
+//! let unit_id = unit_ctrl.create_unit(
+//!     unit_def,
+//!     pos,
+//!     0,
+//!     0,
+//!     spring_native::CreateUnitOptions::default(),
+//! )?;
 //! # Ok(())
 //! # }
 //! ```
@@ -179,6 +185,45 @@ mod tracing;
 mod unit_defs;
 mod units_commands;
 mod units_info;
+
+// Descriptor types used by generated APIs with optional or flag-heavy query
+// arguments. Re-export them at the crate root so callers do not need to know
+// which private API module owns the method.
+pub use camera::{SetCameraTargetOptions, TraceScreenRayOptions};
+pub use gfx::{
+    GfxColorMaskOptions, GfxCreateShaderOptions, GfxDepthTestOptions, GfxFeatureDrawOptions,
+    GfxFontSubmitBufferedOptions, GfxLightOptions, GfxMultiTexGenOptions, GfxObjectShapeOptions,
+    GfxSaveImageOptions, GfxTexGenOptions, GfxUnitDrawOptions,
+};
+pub use ground_decals::GetGroundDecalTexturesOptions;
+pub use markers::MarkerErasePositionOptions;
+pub use profiling::DiffTimersOptions;
+pub use projectiles::{
+    GetAllProjectilesOptions, GetProjectilesInRectangleOptions, GetProjectilesInSphereOptions,
+};
+pub use rml_ui::{RmlDocumentShowOptions, RmlRegisterEventTypeOptions};
+pub use synced_ctrl::{
+    BuggerOffOptions, CreateUnitOptions, DestroyUnitOptions, SetFactoryBuggerOffOptions,
+    SetFeatureBlockingOptions, SetGodModeOptions, SetUnitBlockingOptions,
+    SetUnitLeavesGhostOptions, SetUnitTargetOptions, SetUnitUseWeaponsOptions,
+};
+pub use tracing::{
+    TraceRayGroundBetweenPositionsOptions, TraceRayGroundInDirectionOptions,
+    TraceRayInDirectionOptions,
+};
+pub use units_info::{GetUnitPositionOptions, UnitStatesOptions};
+pub use units_query::{
+    GetClosestEnemyUnitOptions, GetUnitNearestEnemyOptions, GetUnitSeparationOptions,
+};
+pub use units_weapons::{
+    GetUnitWeaponHaveFreeLineOfFireOptions, GetUnitWeaponTestTargetOptions,
+    GetUnitWeaponTryTargetOptions,
+};
+pub use unsynced_ctrl::{
+    SetActiveCommandOptions, SetShockFrontFactorsOptions, SetWindowGeometryOptions,
+};
+pub use unsynced_read::{GetVisibleFeaturesOptions, GetVisibleProjectilesOptions};
+pub use utils::TestMoveOrderOptions;
 mod units_pieces;
 mod units_query;
 mod units_weapons;

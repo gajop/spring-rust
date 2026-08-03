@@ -131,10 +131,12 @@ struct COBScriptApi {
 // ============================================================================
 
 // Queries - Unit Control
-struct CreateUnitQuery { DefRef unitDef; Float3 pos; int32_t facing; int32_t teamID; bool build; bool flattenGround; int32_t unitID; int32_t builderID; };
+struct CreateUnitOptions { bool build; bool flattenGround; int32_t unitID; int32_t builderID; };
+struct CreateUnitQuery { DefRef unitDef; Float3 pos; int32_t facing; int32_t teamID; CreateUnitOptions options; };
 struct CreateUnitResult { const Error* error; int32_t unitID; };
 
-struct DestroyUnitQuery { int32_t unitID; bool selfd; bool reclaimed; int32_t attackerID; bool recycleID; };
+struct DestroyUnitOptions { bool selfd; bool reclaimed; int32_t attackerID; bool recycleID; };
+struct DestroyUnitQuery { int32_t unitID; DestroyUnitOptions options; };
 struct DestroyUnitResult { const Error* error; bool success; };
 
 struct TransferUnitQuery { int32_t unitID; int32_t newTeamID; bool given; bool adjustUnitLimit; };
@@ -230,13 +232,15 @@ struct SetUnitSeismicSignatureResult { const Error* error; bool success; };
 struct SetUnitArmoredQuery { int32_t unitID; bool armoredState; float armoredMultiple; };
 struct SetUnitArmoredResult { const Error* error; bool success; };
 
-struct SetUnitBlockingQuery { int32_t unitID; bool blocking; bool solidObjects; bool projectiles; bool quadMapRays; bool crushable; bool blockEnemyPushing; bool blockHeightChanges; };
+struct SetUnitBlockingOptions { bool blocking; bool solidObjects; bool projectiles; bool quadMapRays; bool crushable; bool blockEnemyPushing; bool blockHeightChanges; };
+struct SetUnitBlockingQuery { int32_t unitID; SetUnitBlockingOptions options; };
 struct SetUnitBlockingResult { const Error* error; bool success; };
 
 struct SetUnitMassQuery { int32_t unitID; float mass; };
 struct SetUnitMassResult { const Error* error; bool success; };
 
-struct SetUnitLeavesGhostQuery { int32_t unitID; bool leavesGhost; bool leaveDeadGhost; };
+struct SetUnitLeavesGhostOptions { bool leavesGhost; bool leaveDeadGhost; };
+struct SetUnitLeavesGhostQuery { int32_t unitID; SetUnitLeavesGhostOptions options; };
 struct SetUnitLeavesGhostResult { const Error* error; bool success; };
 
 struct SetUnitAlwaysVisibleQuery { int32_t unitID; bool alwaysVisible; };
@@ -326,11 +330,11 @@ struct SetUnitPieceCollisionVolumeDataQuery {
 struct SetUnitPieceCollisionVolumeDataResult { const Error* error; bool success; };
 
 // Unit target queries
+struct SetUnitTargetOptions { bool manualFire; bool userTarget; };
 struct SetUnitTargetQuery {
 	int32_t unitID;
 	UnitTargetRef target;
-	bool manualFire;
-	bool userTarget;
+	SetUnitTargetOptions options;
 	int32_t weaponNum;          // -1 for all weapons
 };
 struct SetUnitTargetResult { const Error* error; bool success; };
@@ -464,11 +468,8 @@ struct UnitWeaponHoldFireQuery {
 };
 struct UnitWeaponHoldFireResult { const Error* error; bool success; };
 
-struct SetUnitUseWeaponsQuery {
-	int32_t unitID;
-	bool forceUseWeapons;
-	bool allowUseWeapons;
-};
+struct SetUnitUseWeaponsOptions { bool forceUseWeapons; bool allowUseWeapons; };
+struct SetUnitUseWeaponsQuery { int32_t unitID; SetUnitUseWeaponsOptions options; };
 struct SetUnitUseWeaponsResult { const Error* error; bool success; };
 
 // Unit max range query
@@ -584,8 +585,7 @@ struct SetUnitTooltipQuery {
 struct SetUnitTooltipResult { const Error* error; bool success; };
 
 // Set factory bugger off query
-struct SetFactoryBuggerOffQuery {
-	int32_t unitID;
+struct SetFactoryBuggerOffOptions {
 	bool perform;
 	float offset;
 	float radius;
@@ -593,16 +593,23 @@ struct SetFactoryBuggerOffQuery {
 	bool spherical;
 	bool forced;
 };
+struct SetFactoryBuggerOffQuery {
+	int32_t unitID;
+	SetFactoryBuggerOffOptions options;
+};
 struct SetFactoryBuggerOffResult { const Error* error; bool perform; };
 
 // Bugger off query (tells units to move away from position)
+struct BuggerOffOptions {
+	bool spherical;
+	bool forced;
+	int32_t excludeUnitID;
+};
 struct BuggerOffQuery {
 	Float3 pos;
 	float radius;
 	int32_t teamID;
-	bool spherical;
-	bool forced;
-	int32_t excludeUnitID;         // -1 for none
+	BuggerOffOptions options;
 	const int32_t* excludeUnitDefIDs; // optional array of unit def IDs
 	uint32_t excludeUnitDefCount;
 };
@@ -785,7 +792,8 @@ struct SetFeatureResourcesResult { const Error* error; bool success; };
 struct AddFeatureDamageQuery { int32_t featureID; float damage; float paralyzeTime; int32_t weaponDefID; int32_t attackerID; Float3 impulse; };
 struct AddFeatureDamageResult { const Error* error; bool success; };
 
-struct SetFeatureBlockingQuery { int32_t featureID; bool blocking; bool solidObjects; bool projectiles; bool quadMapRays; bool crushable; bool blockEnemyPushing; bool blockHeightChanges; };
+struct SetFeatureBlockingOptions { bool blocking; bool solidObjects; bool projectiles; bool quadMapRays; bool crushable; bool blockEnemyPushing; bool blockHeightChanges; };
+struct SetFeatureBlockingQuery { int32_t featureID; SetFeatureBlockingOptions options; };
 struct SetFeatureBlockingResult { const Error* error; bool success; };
 
 struct SetFeatureMassQuery { int32_t featureID; float mass; };
@@ -969,7 +977,7 @@ struct SetWindQuery { float minWind; float maxWind; };
 struct SetWindResult { const Error* error; bool success; };
 
 // Grass queries
-struct AddGrassQuery { float x; float z; };
+struct AddGrassQuery { float x; float z; uint8_t grassValue; };
 struct AddGrassResult { const Error* error; bool success; };
 
 struct RemoveGrassQuery { float x; float z; };
@@ -1084,7 +1092,7 @@ struct SetProjectileCollisionQuery { int32_t projectileID; };
 struct SetProjectileCollisionResult { const Error* error; bool success; };
 
 struct SetProjectileCEGQuery { int32_t projectileID; const char* cegName; };
-struct SetProjectileCEGResult { const Error* error; bool success; };
+struct SetProjectileCEGResult { const Error* error; int32_t cegID; };
 
 struct SetProjectileAlwaysVisibleQuery { int32_t projectileID; bool alwaysVisible; };
 struct SetProjectileAlwaysVisibleResult { const Error* error; bool success; };
@@ -1191,7 +1199,8 @@ struct SetNoPauseResult { const Error* error; bool success; };
 struct SetCheatingEnabledQuery { bool enabled; };
 struct SetCheatingEnabledResult { const Error* error; bool success; };
 
-struct SetGodModeQuery { bool controlAllies; bool controlEnemies; };
+struct SetGodModeOptions { bool controlAllies; bool controlEnemies; };
+struct SetGodModeQuery { SetGodModeOptions options; };
 struct SetGodModeResult { const Error* error; bool success; };
 
 // Set experience grade query (controls UnitExperience callin frequency)

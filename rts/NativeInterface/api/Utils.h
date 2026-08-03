@@ -56,13 +56,16 @@ struct ClosestBuildPosResult {
 	Float3 buildPos;
 };
 
+struct TestMoveOrderOptions {
+	bool testTerrain;
+	bool testObjects;
+	bool centerOnly;
+};
 struct TestMoveOrderQuery {
 	int32_t unitDefID;
 	Float3 pos;
 	Float3 dir;
-	bool testTerrain;
-	bool testObjects;
-	bool centerOnly;
+	TestMoveOrderOptions options;
 };
 
 struct TestMoveOrderResult {

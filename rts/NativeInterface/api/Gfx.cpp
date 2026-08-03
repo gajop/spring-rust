@@ -817,9 +817,9 @@ static void ResetMatrices(const GfxEmptyQuery*, GfxEmptyResult* result)
 static void DepthTest(const GfxDepthTestQuery* query, GfxEmptyResult* result)
 {
 	result->error = nullptr;
-	query->enable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
-	if (query->setFunc)
-		glDepthFunc(query->func);
+	query->options.enable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+	if (query->options.setFunc)
+		glDepthFunc(query->options.func);
 }
 
 static void DepthMask(const GfxBoolQuery* query, GfxEmptyResult* result) { result->error = nullptr; glDepthMask(query->value ? GL_TRUE : GL_FALSE); }
@@ -829,7 +829,7 @@ static void BlendFunc(const GfxBlendFuncQuery* query, GfxEmptyResult* result) { 
 static void BlendFuncSeparate(const GfxBlendFuncSeparateQuery* query, GfxEmptyResult* result) { result->error = nullptr; glBlendFuncSeparate(query->srcRGB, query->dstRGB, query->srcAlpha, query->dstAlpha); }
 static void BlendEquation(const GfxBlendEquationQuery* query, GfxEmptyResult* result) { result->error = nullptr; glBlendEquation(query->mode); }
 static void BlendEquationSeparate(const GfxBlendEquationSeparateQuery* query, GfxEmptyResult* result) { result->error = nullptr; glBlendEquationSeparate(query->modeRGB, query->modeAlpha); }
-static void ColorMask(const GfxColorMaskQuery* query, GfxEmptyResult* result) { result->error = nullptr; glColorMask(query->red, query->green, query->blue, query->alpha); }
+static void ColorMask(const GfxColorMaskQuery* query, GfxEmptyResult* result) { result->error = nullptr; glColorMask(query->options.red, query->options.green, query->options.blue, query->options.alpha); }
 static void AlphaTest(const GfxAlphaTestQuery* query, GfxEmptyResult* result) { result->error = nullptr; query->enable ? glEnable(GL_ALPHA_TEST) : glDisable(GL_ALPHA_TEST); glAlphaFunc(query->func, query->ref); }
 static void AlphaToCoverage(const GfxBoolQuery* query, GfxEmptyResult* result) { result->error = nullptr; query->value ? glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE) : glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE); }
 static void StencilTest(const GfxStencilTestQuery* query, GfxEmptyResult* result) { result->error = nullptr; query->enable ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST); }
@@ -895,8 +895,8 @@ static void Light(const GfxLightQuery* query, GfxEmptyResult* result)
 		return;
 	}
 
-	if (query->setState) {
-		query->state ? glEnable(light) : glDisable(light);
+	if (query->options.setState) {
+		query->options.state ? glEnable(light) : glDisable(light);
 		return;
 	}
 
@@ -950,8 +950,8 @@ static void TexGen(const GfxTexGenQuery* query, GfxEmptyResult* result)
 {
 	result->error = nullptr;
 
-	if (query->setState) {
-		SetTexGenState(query->target, query->state);
+	if (query->options.setState) {
+		SetTexGenState(query->target, query->options.state);
 		return;
 	}
 
@@ -973,8 +973,8 @@ static void MultiTexGen(const GfxMultiTexGenQuery* query, GfxEmptyResult* result
 	}
 
 	glActiveTexture(GL_TEXTURE0 + query->texNum);
-	if (query->setState) {
-		SetTexGenState(query->target, query->state);
+	if (query->options.setState) {
+		SetTexGenState(query->target, query->options.state);
 	} else if (query->count <= 1) {
 		glTexGenf(query->target, query->pname, query->values[0]);
 		SetTexGenState(query->target, true);
@@ -1116,12 +1116,12 @@ static void CreateShader(const GfxCreateShaderQuery* query, GfxCreateShaderResul
 	for (const NativeShaderObject& object: program.objects)
 		glAttachShader(program.id, object.id);
 
-	if (query->hasGeoInputType && IS_GL_FUNCTION_AVAILABLE(glProgramParameteriEXT))
-		glProgramParameteriEXT(program.id, GL_GEOMETRY_INPUT_TYPE_EXT, query->geoInputType);
-	if (query->hasGeoOutputType && IS_GL_FUNCTION_AVAILABLE(glProgramParameteriEXT))
-		glProgramParameteriEXT(program.id, GL_GEOMETRY_OUTPUT_TYPE_EXT, query->geoOutputType);
-	if (query->hasGeoOutputVerts && IS_GL_FUNCTION_AVAILABLE(glProgramParameteriEXT))
-		glProgramParameteriEXT(program.id, GL_GEOMETRY_VERTICES_OUT_EXT, query->geoOutputVerts);
+	if (query->options.hasGeoInputType && IS_GL_FUNCTION_AVAILABLE(glProgramParameteriEXT))
+		glProgramParameteriEXT(program.id, GL_GEOMETRY_INPUT_TYPE_EXT, query->options.geoInputType);
+	if (query->options.hasGeoOutputType && IS_GL_FUNCTION_AVAILABLE(glProgramParameteriEXT))
+		glProgramParameteriEXT(program.id, GL_GEOMETRY_OUTPUT_TYPE_EXT, query->options.geoOutputType);
+	if (query->options.hasGeoOutputVerts && IS_GL_FUNCTION_AVAILABLE(glProgramParameteriEXT))
+		glProgramParameteriEXT(program.id, GL_GEOMETRY_VERTICES_OUT_EXT, query->options.geoOutputVerts);
 
 	glLinkProgram(program.id);
 	GLint linkStatus = GL_FALSE;
@@ -2609,10 +2609,10 @@ static void SaveImage(const GfxSaveImageQuery* query, GfxBoolResult* result)
 	bitmap.Alloc(query->width, query->height);
 	glReadPixels(query->x, query->y, query->width, query->height, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.GetRawMem());
 
-	if (query->yflip)
+	if (query->options.yflip)
 		bitmap.ReverseYAxis();
 
-	result->value = query->grayscale16bit ? bitmap.SaveGrayScale(query->filename) : bitmap.Save(query->filename, !query->alpha);
+	result->value = query->options.grayscale16bit ? bitmap.SaveGrayScale(query->filename) : bitmap.Save(query->filename, !query->options.alpha);
 
 	if (query->readBuffer != 0)
 		glReadBuffer(curReadBuffer);
@@ -3051,10 +3051,10 @@ static void FontSubmitBuffered(const GfxFontSubmitBufferedQuery* query, GfxEmpty
 		return;
 	}
 
-	if (query->noBillboarding)
-		f->DrawBuffered(query->userDefinedBlending);
+	if (query->options.noBillboarding)
+		f->DrawBuffered(query->options.userDefinedBlending);
 	else
-		f->DrawWorldBuffered(query->userDefinedBlending);
+		f->DrawWorldBuffered(query->options.userDefinedBlending);
 }
 
 static void FontWrapText(const GfxFontWrapTextQuery* query, GfxFontWrapTextResult* result)
@@ -3498,10 +3498,10 @@ static void ObjectShape(const SolidObjectDef* def, const GfxObjectShapeQuery* qu
 		return;
 	}
 
-	if (query->opaque) {
-		unitDrawer->DrawIndividualDefOpaque(def, query->teamID, query->rawState, query->toScreen);
+	if (query->options.opaque) {
+		unitDrawer->DrawIndividualDefOpaque(def, query->teamID, query->options.rawState, query->options.toScreen);
 	} else {
-		unitDrawer->DrawIndividualDefAlpha(def, query->teamID, query->rawState, query->toScreen);
+		unitDrawer->DrawIndividualDefAlpha(def, query->teamID, query->options.rawState, query->options.toScreen);
 	}
 }
 
@@ -3549,17 +3549,17 @@ static void UnitCommon(const GfxUnitDrawQuery* query, bool applyTransform, bool 
 	}
 
 	glPushAttrib(GL_ENABLE_BIT);
-	if (query->doRawDraw) {
+	if (query->options.doRawDraw) {
 		if (applyTransform) {
-			unitDrawer->DrawUnitTrans(unit, 0, 0, query->fullModel, query->noLuaCall);
+			unitDrawer->DrawUnitTrans(unit, 0, 0, query->options.fullModel, query->options.noLuaCall);
 		} else {
-			unitDrawer->DrawUnitNoTrans(unit, 0, 0, query->fullModel, query->noLuaCall || defaultNoLuaCall);
+			unitDrawer->DrawUnitNoTrans(unit, 0, 0, query->options.fullModel, query->options.noLuaCall || defaultNoLuaCall);
 		}
 	} else {
 		if (applyTransform) {
-			unitDrawer->DrawIndividual(unit, query->noLuaCall);
+			unitDrawer->DrawIndividual(unit, query->options.noLuaCall);
 		} else {
-			unitDrawer->DrawIndividualNoTrans(unit, query->noLuaCall || defaultNoLuaCall);
+			unitDrawer->DrawIndividualNoTrans(unit, query->options.noLuaCall || defaultNoLuaCall);
 		}
 	}
 	glPopAttrib();
@@ -3625,17 +3625,17 @@ static void FeatureCommon(const GfxFeatureDrawQuery* query, bool applyTransform,
 	}
 
 	glPushAttrib(GL_ENABLE_BIT);
-	if (query->doRawDraw) {
+	if (query->options.doRawDraw) {
 		if (applyTransform) {
-			featureDrawer->DrawFeatureTrans(feature, 0, 0, false, query->noLuaCall);
+			featureDrawer->DrawFeatureTrans(feature, 0, 0, false, query->options.noLuaCall);
 		} else {
-			featureDrawer->DrawFeatureNoTrans(feature, 0, 0, false, query->noLuaCall || defaultNoLuaCall);
+			featureDrawer->DrawFeatureNoTrans(feature, 0, 0, false, query->options.noLuaCall || defaultNoLuaCall);
 		}
 	} else {
 		if (applyTransform) {
-			featureDrawer->DrawIndividual(feature, query->noLuaCall);
+			featureDrawer->DrawIndividual(feature, query->options.noLuaCall);
 		} else {
-			featureDrawer->DrawIndividualNoTrans(feature, query->noLuaCall || defaultNoLuaCall);
+			featureDrawer->DrawIndividualNoTrans(feature, query->options.noLuaCall || defaultNoLuaCall);
 		}
 	}
 	glPopAttrib();

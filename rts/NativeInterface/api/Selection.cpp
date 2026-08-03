@@ -4,6 +4,7 @@
 #include "Game/UI/Groups/GroupHandler.h"
 #include "Game/UI/Groups/Group.h"
 #include "Game/GlobalUnsynced.h"
+#include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Units/UnitHandler.h"
@@ -291,53 +292,39 @@ static void NativeGetUnitGroup(const GetUnitGroupQuery* query, GetUnitGroupResul
 	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
 
 	result->error = nullptr;
-	result->groupID = -1;  // Default: not in any group
+	// Lua returns no value when the unit has no group; the parity-facing
+	// native result represents that same absence as zero.
+	result->groupID = 0;
 
-	// Find which group contains this unit (units don't track their group directly)
-	for (int g = 0; g < 10; g++) {
-		const CGroup* group = uiGroupHandlers[unit->team].GetGroup(g);
-		if (group != nullptr && group->units.count(unit->id) > 0) {
-			result->groupID = g;
-			return;
-		}
-	}
+	if (unit->team != gu->myTeam)
+		return;
+
+	const CGroup* group = unit->GetGroup();
+	if (group != nullptr)
+		result->groupID = group->id;
 }
 
 static void NativeSetUnitGroup(const SetUnitGroupQuery* query, SetUnitGroupResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	result->error = nullptr;
+	result->success = true;
+
+	if (gs->noHelperAIs)
+		return;
 
 	CUnit* unit = unitHandler.GetUnit(query->unitID);
 	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
 
-	if (query->groupID >= 0 && query->groupID < 10) {
-		// First remove from current group (if any)
-		for (int g = 0; g < 10; g++) {
-			CGroup* group = uiGroupHandlers[unit->team].GetGroup(g);
-			if (group != nullptr && group->units.count(unit->id) > 0) {
-				group->RemoveUnit(unit);
-				break;
-			}
-		}
-		// Then add to new group
-		CGroup* newGroup = uiGroupHandlers[unit->team].GetGroup(query->groupID);
-		if (newGroup != nullptr) {
-			newGroup->AddUnit(unit);
-		}
-		result->error = nullptr;
-		result->success = true;
-	} else {
-		// Remove from any group
-		for (int g = 0; g < 10; g++) {
-			CGroup* group = uiGroupHandlers[unit->team].GetGroup(g);
-			if (group != nullptr && group->units.count(unit->id) > 0) {
-				group->RemoveUnit(unit);
-				break;
-			}
-		}
-		result->error = nullptr;
-		result->success = true;
+	if (query->groupID == -1) {
+		unit->SetGroup(nullptr);
+		return;
 	}
+
+	if (!uiGroupHandlers[gu->myTeam].HasGroup(query->groupID))
+		return;
+
+	unit->SetGroup(uiGroupHandlers[gu->myTeam].GetGroup(query->groupID));
 }
 
 static void NativeGetGroupUnitsCount(const GetGroupUnitsCountQuery* query, GetGroupUnitsCountResult* result) {

@@ -28,7 +28,8 @@ struct RmlSetDebugContextByNameResult { const Error* error; bool success; };
 struct RmlLoadFontFaceQuery { const char* filePath; bool fallback; int32_t weight; bool hasWeight; };
 struct RmlLoadFontFaceResult { const Error* error; bool success; };
 
-struct RmlRegisterEventTypeQuery { const char* eventType; bool interruptible; bool bubbles; int32_t defaultPhase; bool hasDefaultPhase; };
+struct RmlRegisterEventTypeOptions { bool interruptible; bool bubbles; int32_t defaultPhase; bool hasDefaultPhase; };
+struct RmlRegisterEventTypeQuery { const char* eventType; RmlRegisterEventTypeOptions options; };
 struct RmlRegisterEventTypeResult { const Error* error; int32_t eventID; };
 
 struct RmlAddTranslationStringQuery { const char* key; const char* translation; };
@@ -39,6 +40,12 @@ struct RmlClearTranslationsResult { const Error* error; bool success; };
 
 struct RmlSetMouseCursorAliasQuery { const char* rmlName; const char* recoilName; };
 struct RmlSetMouseCursorAliasResult { const Error* error; bool success; };
+
+struct RmlGetDocumentPathRequestsQuery { const char* documentPath; };
+struct RmlGetDocumentPathRequestsResult { const Error* error; const char** paths; uint32_t count; };
+
+struct RmlClearDocumentPathRequestsQuery { const char* documentPath; };
+struct RmlClearDocumentPathRequestsResult { const Error* error; bool success; };
 
 struct RmlGetVersionQuery { uint8_t _unused; };
 struct RmlGetVersionResult { const Error* error; const char* version; };
@@ -80,7 +87,8 @@ struct RmlContextSetFloatQuery { uint64_t contextHandle; float value; };
 
 struct RmlDocumentHandleQuery { uint64_t documentHandle; };
 struct RmlDocumentBoolResult { const Error* error; bool success; };
-struct RmlDocumentShowQuery { uint64_t documentHandle; int32_t modal; bool hasModal; int32_t focus; bool hasFocus; };
+struct RmlDocumentShowOptions { int32_t modal; bool hasModal; int32_t focus; bool hasFocus; };
+struct RmlDocumentShowQuery { uint64_t documentHandle; RmlDocumentShowOptions options; };
 struct RmlDocumentCreateElementQuery { uint64_t documentHandle; const char* tagName; };
 struct RmlDocumentCreateElementResult { const Error* error; uint64_t elementPtrHandle; bool success; };
 struct RmlDocumentStringQuery { uint64_t documentHandle; const char* value; };
@@ -436,6 +444,10 @@ struct RmlUiApi {
 	void (*ContextPullToFront)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextSetPointerCapture)(const RmlContextPointerCaptureQuery* query, RmlContextBoolResult* result);
 	void (*ContextTakePointerCaptureDelta)(const RmlContextHandleQuery* query, RmlContextPointerDeltaResult* result);
+	// Keep additions at the end: native modules compiled against an earlier
+	// table retain the offsets of every pre-existing function pointer.
+	void (*GetDocumentPathRequests)(const RmlGetDocumentPathRequestsQuery* query, RmlGetDocumentPathRequestsResult* result);
+	void (*ClearDocumentPathRequests)(const RmlClearDocumentPathRequestsQuery* query, RmlClearDocumentPathRequestsResult* result);
 };
 
 extern const RmlUiApi RMLUI_API;

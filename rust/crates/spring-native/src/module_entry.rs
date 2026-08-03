@@ -29,6 +29,15 @@ pub fn setup_panic_handler() {
     }));
 }
 
+/// Restore Rust's default panic hook when a native module is unloaded.
+///
+/// The hook installed by [`setup_panic_handler`] is process-global.  Native
+/// modules can be hot-reloaded, so leaving the boxed hook in that global slot
+/// would retain module-owned code and state until process exit.
+pub fn clear_panic_handler() {
+    drop(std::panic::take_hook());
+}
+
 /// Helper macro to convert C string pointers to Rust &str safely.
 ///
 /// Returns `Err` if the pointer is null or contains invalid UTF-8.
@@ -471,10 +480,12 @@ macro_rules! export_module {
             }
             unsafe {
                 let mut data = Box::from_raw(module_data as *mut $crate::ModuleData<$module_type>);
-                (*result).error =
+                let shutdown_result =
                     $crate::module_entry::catch_panic_ffi(std::panic::AssertUnwindSafe(|| {
                         data.module().shutdown()
                     }));
+                $crate::module_entry::clear_panic_handler();
+                (*result).error = shutdown_result;
                 // `data` is dropped here even if shutdown returned an error or
                 // panicked. The engine guarantees this call occurs once before
                 // unloading the native shared object.

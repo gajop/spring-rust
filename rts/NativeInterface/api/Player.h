@@ -23,7 +23,7 @@ struct RosterEntry {
 	bool isAI;
 	bool isSpec;
 	bool isActive;
-	uint32_t pingTime;
+	float pingTime; // seconds, matching Spring.GetPlayerRoster
 	uint32_t cpuUsage;
 	const char* country;
 	int32_t rank;

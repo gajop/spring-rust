@@ -81,17 +81,21 @@ struct WorldToScreenCoordsResult {
 	bool valid;
 };
 
+struct TraceScreenRayOptions {
+	bool onlyCoords;
+	bool useMinimap;
+	bool includeSky;
+	bool ignoreWater;
+	float heightOffset;
+};
+
 struct TraceScreenRayQuery {
 	// Same numeric arguments as Spring.TraceScreenRay. The implementation
 	// performs the same conversion to the renderer's pixel-ray coordinates;
 	// callers should pass the value they would pass to the Lua function.
 	float screenX;
 	float screenY;
-	bool onlyCoords;
-	bool useMinimap;
-	bool includeSky;
-	bool ignoreWater;
-	float heightOffset;
+	TraceScreenRayOptions options;
 };
 
 struct TraceScreenRayResult {
@@ -123,8 +127,7 @@ struct SetCameraStateResult {
 	bool success;
 };
 
-struct SetCameraTargetQuery {
-	Float3 target;
+struct SetCameraTargetOptions {
 	float transitionTime;
 	bool hasTransitionTime;
 	float dirX;
@@ -133,6 +136,11 @@ struct SetCameraTargetQuery {
 	bool hasDirY;
 	float dirZ;
 	bool hasDirZ;
+};
+
+struct SetCameraTargetQuery {
+	Float3 target;
+	SetCameraTargetOptions options;
 };
 
 struct SetCameraTargetResult {

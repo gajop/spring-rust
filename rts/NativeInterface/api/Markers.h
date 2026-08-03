@@ -24,7 +24,8 @@ struct MarkerAddPointResult { const Error* error; bool success; };
 struct MarkerAddLineQuery { Float3 from; Float3 to; bool localOnly; int32_t playerID; };
 struct MarkerAddLineResult { const Error* error; bool success; };
 
-struct MarkerErasePositionQuery { Float3 pos; float unused; bool localOnly; int32_t playerID; bool alwaysErase; };
+struct MarkerErasePositionOptions { bool localOnly; bool alwaysErase; };
+struct MarkerErasePositionQuery { Float3 pos; float unused; MarkerErasePositionOptions options; int32_t playerID; };
 struct MarkerErasePositionResult { const Error* error; bool success; };
 
 struct MarkersApi {

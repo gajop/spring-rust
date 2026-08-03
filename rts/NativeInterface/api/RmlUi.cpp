@@ -832,8 +832,8 @@ static void NativeRegisterEventType(const RmlRegisterEventTypeQuery* query, RmlR
 		return;
 	}
 
-	const auto phase = query->hasDefaultPhase ? static_cast<Rml::DefaultActionPhase>(query->defaultPhase) : Rml::DefaultActionPhase::None;
-	result->eventID = static_cast<int32_t>(Rml::RegisterEventType(query->eventType, query->interruptible, query->bubbles, phase));
+	const auto phase = query->options.hasDefaultPhase ? static_cast<Rml::DefaultActionPhase>(query->options.defaultPhase) : Rml::DefaultActionPhase::None;
+	result->eventID = static_cast<int32_t>(Rml::RegisterEventType(query->eventType, query->options.interruptible, query->options.bubbles, phase));
 }
 
 static void NativeAddTranslationString(const RmlAddTranslationStringQuery* query, RmlAddTranslationStringResult* result)
@@ -853,6 +853,52 @@ static void NativeClearTranslations(const RmlClearTranslationsQuery*, RmlClearTr
 {
 	result->error = nullptr;
 	result->success = RmlGui::ClearTranslations();
+}
+
+static void NativeGetDocumentPathRequests(const RmlGetDocumentPathRequestsQuery* query, RmlGetDocumentPathRequestsResult* result)
+{
+	result->error = nullptr;
+	result->paths = nullptr;
+	result->count = 0;
+
+	if (query->documentPath == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	static thread_local std::vector<std::string> pathStorage;
+	static thread_local std::vector<const char*> pathPointers;
+	pathStorage = RmlGui::GetDocumentPathRequests(query->documentPath);
+	pathPointers.clear();
+	pathPointers.reserve(pathStorage.size());
+	for (const auto& path : pathStorage)
+		pathPointers.push_back(path.c_str());
+
+	result->paths = pathPointers.data();
+	result->count = static_cast<uint32_t>(pathPointers.size());
+}
+
+static void NativeClearDocumentPathRequests(const RmlClearDocumentPathRequestsQuery* query, RmlClearDocumentPathRequestsResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+
+	if (query->documentPath == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	result->success = RmlGui::ClearDocumentPathRequests(query->documentPath);
+	if (!result->success)
+		result->error = &NOT_READY_ERROR;
 }
 
 static void NativeSetMouseCursorAlias(const RmlSetMouseCursorAliasQuery* query, RmlSetMouseCursorAliasResult* result)
@@ -2515,8 +2561,8 @@ static void NativeDocumentShow(const RmlDocumentShowQuery* query, RmlDocumentBoo
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	const auto modal = query->hasModal ? static_cast<Rml::ModalFlag>(query->modal) : Rml::ModalFlag::None;
-	const auto focus = query->hasFocus ? static_cast<Rml::FocusFlag>(query->focus) : Rml::FocusFlag::Auto;
+	const auto modal = query->options.hasModal ? static_cast<Rml::ModalFlag>(query->options.modal) : Rml::ModalFlag::None;
+	const auto focus = query->options.hasFocus ? static_cast<Rml::FocusFlag>(query->options.focus) : Rml::FocusFlag::Auto;
 	document->Show(modal, focus);
 	result->success = true;
 }
@@ -4096,4 +4142,6 @@ const RmlUiApi RMLUI_API = {
 	.ContextPullToFront = NativeContextPullToFront,
 	.ContextSetPointerCapture = NativeContextSetPointerCapture,
 	.ContextTakePointerCaptureDelta = NativeContextTakePointerCaptureDelta,
+	.GetDocumentPathRequests = NativeGetDocumentPathRequests,
+	.ClearDocumentPathRequests = NativeClearDocumentPathRequests,
 };

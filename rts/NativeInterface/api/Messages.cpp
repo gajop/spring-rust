@@ -265,13 +265,10 @@ static void NativeSendLuaMenuMsg(const SendLuaMenuMsgQuery* query, SendLuaMenuMs
 		result->success = false;
 		return;
 	}
-	if (luaMenu == nullptr || gu == nullptr) {
-		result->error = &NOT_READY_ERROR;
-		result->success = false;
-		return;
+	if (luaMenu != nullptr && gu != nullptr) {
+		luaMenu->RecvLuaMsg(query->message, gu->myPlayerNum);
 	}
 
-	luaMenu->RecvLuaMsg(query->message, gu->myPlayerNum);
 	result->error = nullptr;
 	result->success = true;
 }

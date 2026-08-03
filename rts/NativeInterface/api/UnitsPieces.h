@@ -17,6 +17,12 @@ extern "C" {
 // Piece info
 struct PieceInfo {
 	const char* name;
+	const char* parent;
+	const char** children;
+	uint32_t childCount;
+	bool isEmpty;
+	Float3 min;
+	Float3 max;
 	int32_t pieceNum;
 	Float3 offset;
 	Float3 emitDir;
@@ -49,10 +55,10 @@ struct GetFeatureRootPieceQuery { int32_t featureID; };
 struct GetFeatureRootPieceResult { const Error* error; int32_t rootPiece; };
 
 struct GetModelPieceListQuery { const char* modelName; };
-struct GetModelPieceListResult { const Error* error; int32_t* pieces; uint32_t count; };
+struct GetModelPieceListResult { const Error* error; const char** names; uint32_t count; };
 
 struct GetModelPieceMapQuery { const char* modelName; };
-struct GetModelPieceMapResult { const Error* error; const char** names; uint32_t count; };
+struct GetModelPieceMapResult { const Error* error; PieceMapEntry* entries; uint32_t count; };
 
 struct GetUnitPieceListQuery { int32_t unitID; };
 struct GetUnitPieceListResult { const Error* error; const char** names; uint32_t count; };

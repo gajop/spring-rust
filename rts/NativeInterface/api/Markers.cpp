@@ -111,8 +111,8 @@ static void NativeMarkerErasePosition(const MarkerErasePositionQuery* query, Mar
 	(void)query->unused;
 	const int playerID = (query->playerID >= 0) ? query->playerID : gu->myPlayerNum;
 
-	if (query->localOnly) {
-		const bool alwaysErase = query->alwaysErase && gu->spectating;
+	if (query->options.localOnly) {
+		const bool alwaysErase = query->options.alwaysErase && gu->spectating;
 		inMapDrawerModel->EraseNear(pos, playerID, alwaysErase);
 	} else {
 		inMapDrawer->SendErase(pos);

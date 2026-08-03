@@ -2,7 +2,7 @@ use std::{mem::MaybeUninit, slice};
 
 use crate::{error::Error, raw::copy_c_string, sys};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct RosterEntry {
     pub name: String,
     pub player_id: i32,
@@ -11,7 +11,7 @@ pub struct RosterEntry {
     pub is_ai: bool,
     pub is_spectator: bool,
     pub is_active: bool,
-    pub ping_time: u32,
+    pub ping_time: f32,
     pub cpu_usage: u32,
     pub country: String,
     pub rank: i32,

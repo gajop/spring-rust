@@ -95,6 +95,8 @@ struct GetUnitEstimatedPathResult {
 	const Error* error;
 	PathWaypoint* waypoints;
 	uint32_t count;
+	int32_t* starts;
+	uint32_t startCount;
 };
 
 // API structure

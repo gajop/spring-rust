@@ -59,6 +59,23 @@ static bool UnitMatchesAllegiance(const CUnit* unit, int32_t allegiance)
 	return true;
 }
 
+static bool UnitInPlanes(const CUnit* unit, const PlanesQuery& planes)
+{
+	if (unit == nullptr)
+		return false;
+
+	for (uint32_t i = 0; i < planes.planeCount && i < 6; ++i) {
+		const Float4& plane = planes.planes[i];
+		const float distance = (unit->pos.x * plane.x) +
+			(unit->pos.y * plane.y) +
+			(unit->pos.z * plane.z) + plane.w;
+		if ((distance - unit->radius) > 0.0f)
+			return false;
+	}
+
+	return true;
+}
+
 // Validation
 static void NativeValidUnitID(const ValidUnitIDQuery* query, ValidUnitIDResult* result)
 {
@@ -426,9 +443,9 @@ static void NativeGetUnitsInPlanes(const GetUnitsInPlanesQuery* query, GetUnitsI
 	uint32_t count = 0;
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
-	// Simplified - would need proper frustum culling
 	for (const CUnit* unit : unitHandler.GetActiveUnits()) {
-		if (UnitMatchesAllegiance(unit, query->allegiance) && count < maxUnits) {
+		if (UnitMatchesAllegiance(unit, query->allegiance) &&
+			UnitInPlanes(unit, query->planes) && count < maxUnits) {
 			units[count++] = unit->id;
 		}
 	}
@@ -607,9 +624,9 @@ static void NativeGetUnitNearestEnemy(const GetUnitNearestEnemyQuery* query, Get
 		return;
 	}
 
-	const CUnit* target = query->useLOS
+	const CUnit* target = query->options.useLOS
 		? CGameHelper::GetClosestEnemyUnit(unit, unit->pos, query->range, unit->allyteam)
-		: CGameHelper::GetClosestEnemyUnitNoLosTest(unit, unit->pos, query->range, unit->allyteam, query->sphereDistTest, query->checkSightDist);
+		: CGameHelper::GetClosestEnemyUnitNoLosTest(unit, unit->pos, query->range, unit->allyteam, query->options.sphereDistTest, query->options.checkSightDist);
 	if (target != nullptr) {
 		result->unitID = target->id;
 	}
@@ -633,9 +650,9 @@ static void NativeGetClosestEnemyUnit(const GetClosestEnemyUnitQuery* query, Get
 
 	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
 	const CUnit* unit =
-		query->useLOS
+		query->options.useLOS
 			? CGameHelper::GetClosestEnemyUnit(nullptr, pos, query->range, query->allyTeamID)
-			: CGameHelper::GetClosestEnemyUnitNoLosTest(nullptr, pos, query->range, query->allyTeamID, query->sphereDistTest, query->checkSightDist);
+			: CGameHelper::GetClosestEnemyUnitNoLosTest(nullptr, pos, query->range, query->allyTeamID, query->options.sphereDistTest, query->options.checkSightDist);
 
 	if (unit != nullptr)
 		result->unitID = unit->id;
@@ -661,7 +678,7 @@ static void NativeGetUnitSeparation(const GetUnitSeparationQuery* query, GetUnit
 		return;
 	}
 
-	if (query->positional) {
+	if (query->options.positional) {
 		result->separation = unit1->pos.distance(unit2->pos);
 	} else {
 		// Collision volume based distance

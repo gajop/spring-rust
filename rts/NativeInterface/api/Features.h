@@ -146,7 +146,7 @@ struct GetFeatureLastAttackedPieceResult { const Error* error; FeatureLastHitPie
 struct GetFeatureCollisionVolumeDataQuery { int32_t featureID; };
 struct GetFeatureCollisionVolumeDataResult { const Error* error; CollisionVolumeData volume; };
 
-struct GetFeaturePieceCollisionVolumeDataQuery { int32_t featureID; };
+struct GetFeaturePieceCollisionVolumeDataQuery { int32_t featureID; int32_t pieceNum; };
 struct GetFeaturePieceCollisionVolumeDataResult { const Error* error; CollisionVolumeData volume; };
 
 struct ClearFeaturesPreviousDrawFlagQuery { uint8_t _unused; };
@@ -174,7 +174,10 @@ struct GetFeatureTransformMatrixResult { const Error* error; FeatureTransformMat
 struct FeatureSelectionVolumeData {
 	Float3 scales;
 	Float3 offsets;
+	int32_t volumeType;
 	int32_t primaryAxis;
+	bool useContHitTest;
+	bool ignoreHits;
 };
 
 struct GetFeatureSelectionVolumeDataQuery { int32_t featureID; };

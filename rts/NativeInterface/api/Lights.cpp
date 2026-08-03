@@ -127,7 +127,8 @@ static void NativeAddMapLight(const AddMapLightQuery* query, AddMapLightResult* 
 
 	GL::LightHandler* handler = GetMapLightHandler();
 	if (handler == nullptr) {
-		result->error = &NOT_READY_ERROR;
+		// Lua returns -1 when dynamic map lighting is unavailable; this is a
+		// normal result, not an API error.
 		return;
 	}
 
@@ -143,7 +144,8 @@ static void NativeAddModelLight(const AddModelLightQuery* query, AddModelLightRe
 
 	GL::LightHandler* handler = GetModelLightHandler();
 	if (handler == nullptr) {
-		result->error = &NOT_READY_ERROR;
+		// Lua returns -1 when dynamic model lighting is unavailable; this is a
+		// normal result, not an API error.
 		return;
 	}
 
@@ -159,13 +161,11 @@ static void NativeUpdateMapLight(const UpdateMapLightQuery* query, UpdateMapLigh
 
 	GL::LightHandler* handler = GetMapLightHandler();
 	if (handler == nullptr) {
-		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
 	GL::Light* light = handler->GetLight(query->lightHandle);
 	if (light == nullptr) {
-		result->error = &INVALID_LIGHT_ERROR;
 		return;
 	}
 
@@ -180,13 +180,11 @@ static void NativeUpdateModelLight(const UpdateModelLightQuery* query, UpdateMod
 
 	GL::LightHandler* handler = GetModelLightHandler();
 	if (handler == nullptr) {
-		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
 	GL::Light* light = handler->GetLight(query->lightHandle);
 	if (light == nullptr) {
-		result->error = &INVALID_LIGHT_ERROR;
 		return;
 	}
 
@@ -201,13 +199,11 @@ static void NativeSetMapLightTrackingState(const SetMapLightTrackingStateQuery* 
 
 	GL::LightHandler* handler = GetMapLightHandler();
 	if (handler == nullptr) {
-		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
 	GL::Light* light = handler->GetLight(query->lightHandle);
 	if (light == nullptr) {
-		result->error = &INVALID_LIGHT_ERROR;
 		return;
 	}
 
@@ -231,13 +227,11 @@ static void NativeSetModelLightTrackingState(const SetModelLightTrackingStateQue
 
 	GL::LightHandler* handler = GetModelLightHandler();
 	if (handler == nullptr) {
-		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
 	GL::Light* light = handler->GetLight(query->lightHandle);
 	if (light == nullptr) {
-		result->error = &INVALID_LIGHT_ERROR;
 		return;
 	}
 

@@ -52,6 +52,7 @@ fn main() {
         .allowlist_type(".*Query")
         .allowlist_type(".*Result")
         .allowlist_type(".*Params")
+        .allowlist_type(".*Options")
         .allowlist_type(".*Error")
         .allowlist_type(".*Struct")
         .allowlist_function(".*")

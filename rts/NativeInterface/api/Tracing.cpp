@@ -296,7 +296,7 @@ static void NativeTraceRayInDirection(const TraceRayInDirectionQuery* query, Tra
 
 	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
 	const float3 dir(query->dir.x, query->dir.y, query->dir.z);
-	const float maxLength = query->hasMaxLength ? query->maxLength : 999999.0f;
+	const float maxLength = query->options.hasMaxLength ? query->options.maxLength : 999999.0f;
 
 	NativeTraceRayAllHits(pos, dir, maxLength, query->type, result->error, result->hits, result->count);
 }
@@ -338,7 +338,7 @@ static void NativeTraceRayGroundBetweenPositions(const TraceRayGroundBetweenPosi
 	const float3 start(query->start.x, query->start.y, query->start.z);
 	const float3 end(query->end.x, query->end.y, query->end.z);
 	const auto [dir, length] = (end - start).GetNormalized();
-	const bool testWater = query->hasTestWater ? query->testWater : true;
+	const bool testWater = query->options.hasTestWater ? query->options.testWater : true;
 	const float hitLength = CGround::LineGroundWaterCol(start, dir, length, testWater, NativeTraceIsSynced());
 
 	if (hitLength < 0.0f)
@@ -375,8 +375,8 @@ static void NativeTraceRayGroundInDirection(const TraceRayGroundInDirectionQuery
 
 	const float3 vStart(query->start.x, query->start.y, query->start.z);
 	const float3 vDir = float3(query->dir.x, query->dir.y, query->dir.z).SafeNormalize();
-	const float maxLength = query->hasLength ? query->length : 999999.0f;
-	const bool testWater = query->hasTestWater ? query->testWater : true;
+	const float maxLength = query->options.hasLength ? query->options.length : 999999.0f;
+	const bool testWater = query->options.hasTestWater ? query->options.testWater : true;
 	const float hitLength = CGround::LineGroundWaterCol(vStart, vDir, maxLength, testWater, NativeTraceIsSynced());
 
 	if (hitLength < 0.0f)

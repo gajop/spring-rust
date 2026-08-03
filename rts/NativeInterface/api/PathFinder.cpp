@@ -88,12 +88,19 @@ static void NativeRequestPath(const RequestPathQuery* query, RequestPathResult* 
 	const MoveDef* moveDef = nullptr;
 	if (query->hasMoveDefName) {
 		moveDef = moveDefHandler.GetMoveDefByName(query->moveDefName);
-	} else if (query->moveDefID > 0) {
+	} else {
+		// Lua accepts every path type in [0, GetNumMoveDefs()).  Zero is a
+		// valid path type; treating it as a sentinel made the native call
+		// diverge from Spring.RequestPath for the first movement definition.
 		moveDef = moveDefHandler.GetMoveDefByPathType(query->moveDefID);
 	}
 
 	if (moveDef == nullptr) {
-		result->error = &INVALID_MOVEDEF_ERROR;
+		// Lua returns no values when a string does not resolve to a move
+		// definition.  Numeric path IDs are different: Lua raises for an
+		// out-of-range ID, so preserve an error for that form.
+		if (!query->hasMoveDefName)
+			result->error = &INVALID_MOVEDEF_ERROR;
 		return;
 	}
 

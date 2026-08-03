@@ -73,16 +73,19 @@ struct GetUnitWeaponDamagesResult { const Error* error; UnitWeaponDamages damage
 struct GetUnitWeaponVectorsQuery { int32_t unitID; int32_t weaponNum; };
 struct GetUnitWeaponVectorsResult { const Error* error; UnitWeaponVectors vectors; };
 
-struct GetUnitWeaponTryTargetQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 targetPos; bool userTarget; bool isGroundTarget; };
+struct GetUnitWeaponTryTargetOptions { bool userTarget; bool isGroundTarget; };
+struct GetUnitWeaponTryTargetQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 targetPos; GetUnitWeaponTryTargetOptions options; };
 struct GetUnitWeaponTryTargetResult { const Error* error; bool canTarget; };
 
-struct GetUnitWeaponTestTargetQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 targetPos; bool isGroundTarget; };
+struct GetUnitWeaponTestTargetOptions { bool isGroundTarget; };
+struct GetUnitWeaponTestTargetQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 targetPos; GetUnitWeaponTestTargetOptions options; };
 struct GetUnitWeaponTestTargetResult { const Error* error; bool canTarget; };
 
 struct GetUnitWeaponTestRangeQuery { int32_t unitID; int32_t weaponNum; Float3 targetPos; };
 struct GetUnitWeaponTestRangeResult { const Error* error; bool inRange; };
 
-struct GetUnitWeaponHaveFreeLineOfFireQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 targetPos; bool isGroundTarget; };
+struct GetUnitWeaponHaveFreeLineOfFireOptions { bool isGroundTarget; };
+struct GetUnitWeaponHaveFreeLineOfFireQuery { int32_t unitID; int32_t weaponNum; int32_t targetID; Float3 sourcePos; Float3 targetPos; GetUnitWeaponHaveFreeLineOfFireOptions options; };
 struct GetUnitWeaponHaveFreeLineOfFireResult { const Error* error; bool hasFreeLineOfFire; };
 
 struct GetUnitWeaponCanFireQuery { int32_t unitID; int32_t weaponNum; };

@@ -66,9 +66,13 @@ struct PlayerInfo {
 	bool isSpec;
 	int32_t teamID;
 	int32_t allyTeamID;
-	uint32_t pingTime;
+	float pingTime; // seconds, matching Spring.GetPlayerInfo
 	uint32_t cpuUsage;
+	const char* country;
+	int32_t rank;
+	bool hasSkirmishAIsInTeam;
 	const char* customKeys;
+	bool desynced;
 };
 
 // AllyTeam info

@@ -323,7 +323,6 @@ static void NativeGetReplayFilePath(const GetReplayFilePathQuery*, GetReplayFile
 		return;
 	}
 
-	result->error = &NOT_AVAILABLE_ERROR;
 }
 
 static void NativeGetReplayRecordingFilePath(const GetReplayRecordingFilePathQuery*, GetReplayRecordingFilePathResult* result)
@@ -344,7 +343,6 @@ static void NativeGetReplayRecordingFilePath(const GetReplayRecordingFilePathQue
 		return;
 	}
 
-	result->error = &NOT_AVAILABLE_ERROR;
 }
 
 static void NativeIsReplay(const IsReplayQuery*, IsReplayResult* result)
@@ -381,7 +379,6 @@ static void NativeGetWindowDisplayMode(const GetWindowDisplayModeQuery*, GetWind
 		return;
 	}
 
-	result->error = &NOT_AVAILABLE_ERROR;
 }
 
 static void NativeGetGatherMode(const GetGatherModeQuery*, GetGatherModeResult* result)

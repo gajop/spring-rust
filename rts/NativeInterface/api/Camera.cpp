@@ -230,7 +230,7 @@ static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRa
 	// Match the Lua minimap path before applying the normal viewport bounds.
 	// The minimap coordinates are relative to the same viewport as mx/my, while
 	// GetMapPosition expects the full renderer coordinates wx/wy.
-	if (query->useMinimap && minimap != nullptr && !minimap->GetMinimized()) {
+	if (query->options.useMinimap && minimap != nullptr && !minimap->GetMinimized()) {
 		const int px = minimap->GetPosX() - globalRendering->viewPosX;
 		const int py = minimap->GetPosY() - globalRendering->viewPosY;
 		const int sx = minimap->GetSizeX();
@@ -238,7 +238,7 @@ static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRa
 
 		if ((mx >= px) && (mx < (px + sx)) && (my >= py) && (my < (py + sy))) {
 			const float3 mapPos = minimap->GetMapPosition(wx, wy);
-			if (!query->onlyCoords) {
+			if (!query->options.onlyCoords) {
 				const CUnit* unit = minimap->GetSelectUnit(mapPos);
 				if (unit != nullptr) {
 					result->hitType = 1; // Unit
@@ -272,8 +272,8 @@ static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRa
 	const CFeature* hitFeature = nullptr;
 
 	const float dist = TraceRay::GuiTraceRay(
-		camPos, dir, rawRange, nullptr, hitUnit, hitFeature, true, query->onlyCoords, query->ignoreWater);
-	const float planeDist = CGround::LinePlaneCol(camPos, dir, rawRange, query->heightOffset);
+		camPos, dir, rawRange, nullptr, hitUnit, hitFeature, true, query->options.onlyCoords, query->options.ignoreWater);
+	const float planeDist = CGround::LinePlaneCol(camPos, dir, rawRange, query->options.heightOffset);
 	const float3 tracePos = camPos + (dir * dist);
 	const float3 planePos = camPos + (dir * planeDist);
 
@@ -289,7 +289,7 @@ static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRa
 		result->hitPos.x = tracePos.x;
 		result->hitPos.y = tracePos.y;
 		result->hitPos.z = tracePos.z;
-	} else if ((dist < 0.0f || dist > badRange) && !query->includeSky) {
+	} else if ((dist < 0.0f || dist > badRange) && !query->options.includeSky) {
 		// Lua reports no result when the ray misses the map and sky results were
 		// not requested. A zero-distance ground hit remains valid.
 		return;
@@ -383,14 +383,14 @@ static void NativeSetCameraTarget(const SetCameraTargetQuery* query, SetCameraTa
 		query->target.x,
 		query->target.y,
 		query->target.z,
-		std::max(0.0f, query->hasTransitionTime ? query->transitionTime : 0.5f),
+		std::max(0.0f, query->options.hasTransitionTime ? query->options.transitionTime : 0.5f),
 	};
 
 	const float3 currentDir = camera->GetDir();
 	const float3 targetDir = {
-		query->hasDirX ? query->dirX : currentDir.x,
-		query->hasDirY ? query->dirY : currentDir.y,
-		query->hasDirZ ? query->dirZ : currentDir.z,
+		query->options.hasDirX ? query->options.dirX : currentDir.x,
+		query->options.hasDirY ? query->options.dirY : currentDir.y,
+		query->options.hasDirZ ? query->options.dirZ : currentDir.z,
 	};
 
 	camHandler->GetCurrentController().SetPos(targetPos);

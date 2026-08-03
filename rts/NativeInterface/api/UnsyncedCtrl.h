@@ -68,15 +68,18 @@ struct ReplaceMouseCursorResult { const Error* error; bool success; };
 struct WarpMouseQuery { int32_t x; int32_t y; };
 struct WarpMouseResult { const Error* error; bool success; };
 
-struct SetActiveCommandQuery {
-	int32_t cmdIndex;           // -1 to clear, or non-negative command index
-	int32_t button;             // SDL button (use 1 for left)
+struct SetActiveCommandOptions {
 	bool leftClick;
 	bool rightClick;
 	bool alt;
 	bool ctrl;
 	bool meta;
 	bool shift;
+};
+struct SetActiveCommandQuery {
+	int32_t cmdIndex;           // -1 to clear, or non-negative command index
+	int32_t button;             // SDL button (use 1 for left)
+	SetActiveCommandOptions options;
 };
 struct SetActiveCommandResult { const Error* error; bool success; };
 
@@ -98,14 +101,14 @@ struct SetBuildFacingResult { const Error* error; bool success; };
 struct SetBuildSpacingQuery { int32_t spacing; };
 struct SetBuildSpacingResult { const Error* error; bool success; };
 
+struct SetWindowGeometryOptions { bool fullScreen; bool borderless; };
 struct SetWindowGeometryQuery {
 	int32_t displayIndex;
 	int32_t windowPosX;
 	int32_t windowPosY;
 	int32_t windowSizeX;
 	int32_t windowSizeY;
-	bool fullScreen;
-	bool borderless;
+	SetWindowGeometryOptions options;
 };
 struct SetWindowGeometryResult { const Error* error; bool success; };
 
@@ -230,7 +233,7 @@ struct SetLosViewColorsResult { const Error* error; bool success; };
 struct SetDrawSelectionInfoQuery { bool draw; };
 struct SetDrawSelectionInfoResult { const Error* error; bool success; };
 
-struct SetShockFrontFactorsQuery {
+struct SetShockFrontFactorsOptions {
 	float minArea;
 	bool hasMinArea;
 	float minPower;
@@ -238,6 +241,7 @@ struct SetShockFrontFactorsQuery {
 	float distAdj;
 	bool hasDistAdj;
 };
+struct SetShockFrontFactorsQuery { SetShockFrontFactorsOptions options; };
 struct SetShockFrontFactorsResult { const Error* error; bool success; };
 
 struct SetCustomCommandDrawDataQuery { int32_t cmdID; DefRef cmdReference; Float4 color; bool showArea; };

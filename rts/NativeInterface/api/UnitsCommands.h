@@ -82,7 +82,15 @@ struct GetFactoryCommandsQuery { int32_t unitID; uint32_t maxCommands; };
 struct GetFactoryCommandsResult { const Error* error; CommandFFI* commands; uint32_t count; };
 
 struct GetFactoryBuggerOffQuery { int32_t unitID; };
-struct GetFactoryBuggerOffResult { const Error* error; bool isBuggingOff; Float3 buggerOffPos; float buggerOffRadius; };
+struct GetFactoryBuggerOffResult {
+	const Error* error;
+	bool perform;
+	float offset;
+	float radius;
+	int32_t relHeading;
+	bool spherical;
+	bool forced;
+};
 
 struct GetCommandQueueQuery { int32_t unitID; uint32_t maxCommands; };
 struct GetCommandQueueResult { const Error* error; CommandFFI* commands; uint32_t count; };
