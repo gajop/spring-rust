@@ -454,7 +454,7 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetRenderFeatures"]},
       "native": {"set": [], "get": ["Features.get_render_features"]},
-      "compare": {"mode": "fields", "fields": ["featureIDs"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["featureIDs"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetRenderFeatures`", "native_getter": "`Features.get_render_features`", "fields": "`featureIDs`"},
       "rust": {"check": "check_features_spatial_list", "set": "set_noop"},
       "params": {"drawMask": {"type": "i32", "fixed": 0}, "sendMask": {"type": "bool", "fixed": false}},

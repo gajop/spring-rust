@@ -15,7 +15,8 @@ extern "C" {
 // Queries
 struct RequestPathQuery {
 	uint32_t moveDefID;
-	const char* moveDefName;  // If non-null, use name instead of ID
+	const char* moveDefName;  // If present, use name instead of ID
+	bool hasMoveDefName;
 	Float3 startPos;
 	Float3 endPos;
 	float radius;

@@ -2,6 +2,19 @@
   "version": 1,
   "tests": [
     {
+      "id": "get_prev_frame_sync_checksum",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetPrevFrameSyncChecksum"]},
+      "native": {"set": [], "get": ["UnsyncedRead.get_prev_frame_sync_checksum"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["checksum"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPrevFrameSyncChecksum`", "native_getter": "`UnsyncedRead.get_prev_frame_sync_checksum`", "fields": "`checksum`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetPrevFrameSyncChecksum", "args": [], "returns": ["checksum"]}
+    },
+    {
       "id": "get_box_selection_by_engine",
       "context": "unsynced_gadget",
       "kind": "readonly",
@@ -261,7 +274,7 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetVisibleUnits"]},
       "native": {"set": [], "get": ["UnitRendering.get_visible_units"]},
-      "compare": {"mode": "fields", "fields": ["unitIDs"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["unitIDs"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetVisibleUnits`", "native_getter": "`UnitRendering.get_visible_units`", "fields": "`unitIDs`"},
       "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
       "params": {"teamID": {"type": "i32", "fixture": "teamID"}, "radius": {"type": "f32", "fixed": 0}, "includeIcons": {"type": "bool", "fixed": true}},

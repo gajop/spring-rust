@@ -3,13 +3,17 @@
 #include "Game/Camera.h"
 #include "Game/CameraHandler.h"
 #include "Game/UI/MouseHandler.h"
+#include "Game/UI/MiniMap.h"
 #include "Game/TraceRay.h"
+#include "Map/Ground.h"
+#include "Rendering/GlobalRendering.h"
 #include "Sim/Units/Unit.h"
 #include "Sim/Features/Feature.h"
 #include "System/float4.h"
 #include "System/float3.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace {
 
@@ -202,18 +206,64 @@ static void NativeWorldToScreenCoords(const WorldToScreenCoordsQuery* query, Wor
 static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRayResult* result)
 {
 	bufferPos = 0;
+	result->error = nullptr;
+	result->hitType = 0;
+	result->hitID = -1;
+	result->hitPos = {};
 
-	if (!IsReady()) {
+	if (!IsReady() || globalRendering == nullptr) {
 		result->error = &NOT_READY_ERROR;
 		return;
 	}
 
-	// Get pixel direction
-	const float3 dir = camera->CalcPixelDir(static_cast<int>(query->screenX), static_cast<int>(query->screenY));
-	const float3& pos = camera->GetPos();
-	(void)query->useMinimap;
-	(void)query->includeSky;
-	(void)query->heightOffset;
+	// Keep the native query on the same coordinate contract as Lua's
+	// Spring.TraceScreenRay. Convert to the renderer-space coordinate exactly
+	// as the Lua implementation does before calling CalcPixelDir.
+	if (!std::isfinite(query->screenX) || !std::isfinite(query->screenY))
+		return;
+
+	const int mx = static_cast<int>(query->screenX);
+	const int my = static_cast<int>(query->screenY);
+	const int wx = mx + globalRendering->viewPosX;
+	const int wy = globalRendering->viewSizeY - 1 - my;
+
+	// Match the Lua minimap path before applying the normal viewport bounds.
+	// The minimap coordinates are relative to the same viewport as mx/my, while
+	// GetMapPosition expects the full renderer coordinates wx/wy.
+	if (query->useMinimap && minimap != nullptr && !minimap->GetMinimized()) {
+		const int px = minimap->GetPosX() - globalRendering->viewPosX;
+		const int py = minimap->GetPosY() - globalRendering->viewPosY;
+		const int sx = minimap->GetSizeX();
+		const int sy = minimap->GetSizeY();
+
+		if ((mx >= px) && (mx < (px + sx)) && (my >= py) && (my < (py + sy))) {
+			const float3 mapPos = minimap->GetMapPosition(wx, wy);
+			if (!query->onlyCoords) {
+				const CUnit* unit = minimap->GetSelectUnit(mapPos);
+				if (unit != nullptr) {
+					result->hitType = 1; // Unit
+					result->hitID = unit->id;
+					return;
+				}
+			}
+
+			result->hitType = 3; // Ground
+			result->hitPos.x = mapPos.x;
+			result->hitPos.y = CGround::GetHeightReal(mapPos.x, mapPos.z, false);
+			result->hitPos.z = mapPos.z;
+			return;
+		}
+	}
+
+	// Lua rejects coordinates outside the active viewport. In particular, do
+	// not let an off-window mouse event turn into a ray at a clamped edge.
+	if (mx < 0 || mx >= globalRendering->viewSizeX || my < 0 || my >= globalRendering->viewSizeY)
+		return;
+
+	const float rawRange = camera->GetFarPlaneDist() * 1.4f;
+	const float badRange = rawRange - 300.0f;
+	const float3 camPos = camera->GetPos();
+	const float3 dir = camera->CalcPixelDir(wx, wy);
 
 	// Trace against units, features, and ground. `onlyCoords` asks for the
 	// ground position regardless of what stands on it, which is what a terrain
@@ -222,36 +272,44 @@ static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRa
 	const CFeature* hitFeature = nullptr;
 
 	const float dist = TraceRay::GuiTraceRay(
-		pos, dir, 9999999.0f, nullptr, hitUnit, hitFeature, false, query->onlyCoords, query->ignoreWater);
-
-	result->error = nullptr;
-	result->hitType = 0; // No hit
-	result->hitID = -1;
+		camPos, dir, rawRange, nullptr, hitUnit, hitFeature, true, query->onlyCoords, query->ignoreWater);
+	const float planeDist = CGround::LinePlaneCol(camPos, dir, rawRange, query->heightOffset);
+	const float3 tracePos = camPos + (dir * dist);
+	const float3 planePos = camPos + (dir * planeDist);
 
 	if (hitUnit != nullptr) {
 		result->hitType = 1; // Unit
 		result->hitID = hitUnit->id;
-		const float3 hitPos = pos + (dir * dist);
-		result->hitPos.x = hitPos.x;
-		result->hitPos.y = hitPos.y;
-		result->hitPos.z = hitPos.z;
+		result->hitPos.x = tracePos.x;
+		result->hitPos.y = tracePos.y;
+		result->hitPos.z = tracePos.z;
 	} else if (hitFeature != nullptr) {
 		result->hitType = 2; // Feature
 		result->hitID = hitFeature->id;
-		const float3 hitPos = pos + (dir * dist);
-		result->hitPos.x = hitPos.x;
-		result->hitPos.y = hitPos.y;
-		result->hitPos.z = hitPos.z;
-	} else if (dist >= 0.0f) {
+		result->hitPos.x = tracePos.x;
+		result->hitPos.y = tracePos.y;
+		result->hitPos.z = tracePos.z;
+	} else if ((dist < 0.0f || dist > badRange) && !query->includeSky) {
+		// Lua reports no result when the ray misses the map and sky results were
+		// not requested. A zero-distance ground hit remains valid.
+		return;
+	} else if (dist < 0.0f || dist > badRange) {
+		// The compact native result has one position, while Lua returns both the
+		// ray position and the custom-plane fallback. For a sky hit the fallback
+		// is the useful position, so expose it here and use the explicit sky tag.
+		result->hitType = 4; // Sky
+		result->hitPos.x = planePos.x;
+		result->hitPos.y = planePos.y;
+		result->hitPos.z = planePos.z;
+	} else {
 		// Lua's Spring.TraceScreenRay treats a zero-distance terrain
 		// intersection as ground. This matters when the camera is exactly on
 		// a terrain surface: reporting a miss makes editor brushes disappear
 		// even though their cursor has a valid map position.
 		result->hitType = 3; // Ground
-		const float3 hitPos = pos + (dir * dist);
-		result->hitPos.x = hitPos.x;
-		result->hitPos.y = hitPos.y;
-		result->hitPos.z = hitPos.z;
+		result->hitPos.x = tracePos.x;
+		result->hitPos.y = tracePos.y;
+		result->hitPos.z = tracePos.z;
 	}
 }
 
@@ -311,6 +369,11 @@ static void NativeSetCameraTarget(const SetCameraTargetQuery* query, SetCameraTa
 {
 	bufferPos = 0;
 
+	if (query == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
 	if (!IsReady() || mouse == nullptr) {
 		result->error = &NOT_READY_ERROR;
 		return;
@@ -320,10 +383,15 @@ static void NativeSetCameraTarget(const SetCameraTargetQuery* query, SetCameraTa
 		query->target.x,
 		query->target.y,
 		query->target.z,
-		std::max(0.0f, query->transitionTime),
+		std::max(0.0f, query->hasTransitionTime ? query->transitionTime : 0.5f),
 	};
 
-	const float3 targetDir = camera->GetDir();
+	const float3 currentDir = camera->GetDir();
+	const float3 targetDir = {
+		query->hasDirX ? query->dirX : currentDir.x,
+		query->hasDirY ? query->dirY : currentDir.y,
+		query->hasDirZ ? query->dirZ : currentDir.z,
+	};
 
 	camHandler->GetCurrentController().SetPos(targetPos);
 	camHandler->GetCurrentController().SetDir(targetDir);

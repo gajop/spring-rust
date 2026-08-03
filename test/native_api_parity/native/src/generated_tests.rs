@@ -164,6 +164,7 @@ native_tests! {
     vfs_get_games_count { check = check_vfs_value, set = set_noop, }
     vfs_is_directory { check = check_vfs_value, set = set_noop, }
     vfs_missing_is_directory { check = check_vfs_value, set = set_noop, }
+    get_prev_frame_sync_checksum { check = check_unsynced_read_value, set = set_noop, }
     get_box_selection_by_engine { check = check_unsynced_read_value, set = set_noop, }
     get_build_facing { check = check_unsynced_read_value, set = set_noop, }
     get_build_spacing { check = check_unsynced_read_value, set = set_noop, }
@@ -192,6 +193,8 @@ native_tests! {
     draw_selection_info { check = check_unsynced_read_value, set = set_unsynced_read_value, }
     last_message_position_count { check = check_unsynced_read_value, set = set_unsynced_read_value, }
     los_view_colors { check = check_display_value, set = set_display_value, }
+    trace_ray_ground_in_direction { check = check_tracing_value, set = set_noop, }
+    trace_ray_ground_between_positions { check = check_tracing_value, set = set_noop, }
     get_selected_units { check = check_selection_value, set = set_noop, }
     get_selected_units_count { check = check_selection_value, set = set_noop, }
     get_selected_units_sorted { check = check_selection_value, set = set_noop, }

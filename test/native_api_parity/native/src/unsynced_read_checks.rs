@@ -8,6 +8,19 @@ impl NativeApiParity {
         label: &str,
     ) -> Result<(), String> {
         match base_test_name(label) {
+            "get_prev_frame_sync_checksum" => {
+                let native = self
+                    .interface
+                    .unsynced_read()
+                    .get_prev_frame_sync_checksum()
+                    .map_err(|err| format!("get_prev_frame_sync_checksum() failed: {err:?}"))?;
+                self.same_string_if_present(
+                    label,
+                    message,
+                    "checksum",
+                    native.as_deref().unwrap_or(""),
+                )
+            }
             "get_box_selection_by_engine" | "box_selection_by_engine" => {
                 let native = self
                     .interface

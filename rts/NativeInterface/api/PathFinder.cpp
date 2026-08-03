@@ -86,7 +86,7 @@ static void NativeRequestPath(const RequestPathQuery* query, RequestPathResult* 
 
 	// Get MoveDef either by ID or name
 	const MoveDef* moveDef = nullptr;
-	if (query->moveDefName != nullptr && query->moveDefName[0] != '\0') {
+	if (query->hasMoveDefName) {
 		moveDef = moveDefHandler.GetMoveDefByName(query->moveDefName);
 	} else if (query->moveDefID > 0) {
 		moveDef = moveDefHandler.GetMoveDefByPathType(query->moveDefID);

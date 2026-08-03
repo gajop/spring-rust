@@ -407,6 +407,18 @@ static void NativeGetUnitStates(const GetUnitStatesQuery* query, GetUnitStatesRe
 		return;
 	}
 
+	// Lua can choose between a table and a variable-length positional return,
+	// and can independently omit the binary or air-move-type fields.  The
+	// native ABI returns one typed UnitStates value instead, so it always
+	// materializes the complete state; accepting the same selectors keeps the
+	// call contract compatible while giving Rust callers a stable result shape.
+	(void)query->retTable;
+	(void)query->hasRetTable;
+	(void)query->binState;
+	(void)query->hasBinState;
+	(void)query->amtState;
+	(void)query->hasAmtState;
+
 	result->states.fireState = unit->fireState;
 	result->states.moveState = unit->moveState;
 	result->states.autoRepairLevel = -1.0f;

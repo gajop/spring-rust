@@ -394,6 +394,44 @@ static void NativeAddTeamResource(const AddTeamResourceQuery* query, AddTeamReso
 	result->success = true;
 }
 
+static void NativeAddTeamResourceExcessStats(const AddTeamResourceExcessStatsQuery* query, AddTeamResourceExcessStatsResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	if (!teamHandler.IsValidTeam(query->teamID)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
+
+	const int resIdx = GetResourceIndex(query->resourceType);
+	if (resIdx < 0) {
+		result->error = &INVALID_RESOURCE_ERROR;
+		return;
+	}
+
+	CTeam* team = teamHandler.Team(query->teamID);
+	if (team == nullptr) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
+
+	const float amount = std::max(0.0f, query->amount);
+	float& resourceExcess = (resIdx == 0) ? team->resPrevExcess.metal : team->resPrevExcess.energy;
+	TeamStatistics& statistics = team->GetCurrentStats();
+	float& statisticsExcess = (resIdx == 0) ? statistics.metalExcess : statistics.energyExcess;
+
+	resourceExcess += amount;
+	statisticsExcess += amount;
+	result->success = true;
+}
+
 static void NativeUseTeamResource(const UseTeamResourceQuery* query, UseTeamResourceResult* result)
 {
 	bufferPos = 0;
@@ -642,6 +680,7 @@ static const TeamControlApi TEAM_CONTROL_API = {
 	.GameOver = NativeGameOver,
 	.SetGlobalLos = NativeSetGlobalLos,
 	.AddTeamResource = NativeAddTeamResource,
+	.AddTeamResourceExcessStats = NativeAddTeamResourceExcessStats,
 	.UseTeamResource = NativeUseTeamResource,
 	.SetTeamResource = NativeSetTeamResource,
 	.SetTeamShareLevel = NativeSetTeamShareLevel,

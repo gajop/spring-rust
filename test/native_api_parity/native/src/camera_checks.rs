@@ -97,7 +97,7 @@ impl NativeApiParity {
         let success = self
             .interface
             .camera()
-            .set_camera_target(target, transition_time)
+            .set_camera_target(target, Some(transition_time), None, None, None)
             .map_err(|err| format!("set_camera_target({transition_time}) failed: {err:?}"))?;
         if success {
             Ok(())

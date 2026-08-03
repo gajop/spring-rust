@@ -4835,6 +4835,7 @@ int LuaSyncedRead::GetUnitHarvestStorage(lua_State* L)
  *
  * @function Spring.GetUnitBuildParams
  * @param unitID integer
+ * @param paramName string
  */
 int LuaSyncedRead::GetUnitBuildParams(lua_State* L)
 {
@@ -9279,6 +9280,7 @@ static int TraceRayGroundImpl(lua_State *const L, const float3 &pos, const float
  * @param dirX number
  * @param dirY number
  * @param dirZ number
+ * @param maxLength number? (Default: `999999`)
  * @param testWater boolean? (Default: `true`)
  * @return number rayLength
  * @return number posX

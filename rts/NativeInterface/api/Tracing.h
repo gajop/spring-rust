@@ -73,15 +73,51 @@ struct TraceRayFeaturesResult {
 	Float3 hitNormal;
 };
 
+// A hit returned by the multi-hit Lua ray tracing functions. objectType is
+// 1 for a unit and 2 for a feature.
+struct TraceRayHit {
+	float hitLength;
+	int32_t objectID;
+	int32_t objectType;
+};
+
+struct TraceRayInDirectionQuery {
+	Float3 pos;
+	Float3 dir;
+	float maxLength;
+	bool hasMaxLength;
+	const char* type;  // "unit", "feature", or "both"
+};
+
+struct TraceRayInDirectionResult {
+	const Error* error;
+	TraceRayHit* hits;
+	uint32_t count;
+};
+
+struct TraceRayBetweenPositionsQuery {
+	Float3 start;
+	Float3 end;
+	const char* type;  // "unit", "feature", or "both"
+};
+
+struct TraceRayBetweenPositionsResult {
+	const Error* error;
+	TraceRayHit* hits;
+	uint32_t count;
+};
+
 struct TraceRayGroundBetweenPositionsQuery {
 	Float3 start;
 	Float3 end;
 	bool testWater;
+	bool hasTestWater;
 };
 
 struct TraceRayGroundBetweenPositionsResult {
 	const Error* error;
 	bool hit;
+	float hitLength;
 	Float3 hitPos;
 	Float3 hitNormal;
 };
@@ -90,11 +126,15 @@ struct TraceRayGroundInDirectionQuery {
 	Float3 start;
 	Float3 dir;
 	float length;
+	bool hasLength;
+	bool testWater;
+	bool hasTestWater;
 };
 
 struct TraceRayGroundInDirectionResult {
 	const Error* error;
 	bool hit;
+	float hitLength;
 	Float3 hitPos;
 	Float3 hitNormal;
 };
@@ -114,6 +154,16 @@ struct TracingApi {
 	void (*TraceRayFeatures)(
 		const TraceRayFeaturesQuery* query,
 		TraceRayFeaturesResult* result
+	);
+
+	void (*TraceRayInDirection)(
+		const TraceRayInDirectionQuery* query,
+		TraceRayInDirectionResult* result
+	);
+
+	void (*TraceRayBetweenPositions)(
+		const TraceRayBetweenPositionsQuery* query,
+		TraceRayBetweenPositionsResult* result
 	);
 
 	void (*TraceRayGroundBetweenPositions)(

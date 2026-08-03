@@ -22,6 +22,7 @@
     "api_tests/vfs_01.json",
     "api_tests/unsynced_read_01.json",
     "api_tests/unsynced_ctrl_01.json",
+    "api_tests/tracing_01.json",
     "api_tests/selection_01.json",
     "api_tests/units_01.json",
     "api_tests/units_02.json",

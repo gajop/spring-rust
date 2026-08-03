@@ -27,7 +27,10 @@ fn main() {
 
     println!("cargo:rerun-if-changed={}", header.display());
     println!("cargo:rerun-if-changed={}", constants_header.display());
-    println!("cargo:rerun-if-changed={}", include_dir.display());
+    for entry in fs::read_dir(&include_dir).expect("read NativeInterface API directory") {
+        let entry = entry.expect("read NativeInterface API directory entry");
+        println!("cargo:rerun-if-changed={}", entry.path().display());
+    }
 
     let bindings = bindgen::Builder::default()
         .header(bindgen_header.to_string_lossy())

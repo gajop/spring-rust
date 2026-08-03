@@ -82,6 +82,9 @@ struct WorldToScreenCoordsResult {
 };
 
 struct TraceScreenRayQuery {
+	// Same numeric arguments as Spring.TraceScreenRay. The implementation
+	// performs the same conversion to the renderer's pixel-ray coordinates;
+	// callers should pass the value they would pass to the Lua function.
 	float screenX;
 	float screenY;
 	bool onlyCoords;
@@ -93,9 +96,9 @@ struct TraceScreenRayQuery {
 
 struct TraceScreenRayResult {
 	const Error* error;
-	int32_t hitType;  // 0=none, 1=unit, 2=feature, 3=ground
+	int32_t hitType;  // 0=none, 1=unit, 2=feature, 3=ground, 4=sky
 	int32_t hitID;    // Unit or feature ID
-	Float3 hitPos;
+	Float3 hitPos;    // Trace position, or heightOffset plane for sky
 };
 
 struct GetPixelDirQuery {
@@ -123,6 +126,13 @@ struct SetCameraStateResult {
 struct SetCameraTargetQuery {
 	Float3 target;
 	float transitionTime;
+	bool hasTransitionTime;
+	float dirX;
+	bool hasDirX;
+	float dirY;
+	bool hasDirY;
+	float dirZ;
+	bool hasDirZ;
 };
 
 struct SetCameraTargetResult {

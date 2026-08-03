@@ -156,6 +156,8 @@ def main():
 
             f.write('\n')
 
+    output_file.write_text(output_file.read_text(encoding='utf-8').rstrip() + '\n', encoding='utf-8')
+
     print(f"Wrote {total_functions} functions from {len(all_methods)} APIs to {output_file}")
 
 if __name__ == '__main__':

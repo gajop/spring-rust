@@ -255,7 +255,15 @@ struct GetUnitMetalExtractionResult { const Error* error; float metalExtraction;
 struct GetUnitExperienceQuery { int32_t unitID; };
 struct GetUnitExperienceResult { const Error* error; float experience; };
 
-struct GetUnitStatesQuery { int32_t unitID; };
+struct GetUnitStatesQuery {
+	int32_t unitID;
+	bool retTable;
+	bool hasRetTable;
+	bool binState;
+	bool hasBinState;
+	bool amtState;
+	bool hasAmtState;
+};
 struct GetUnitStatesResult { const Error* error; UnitStates states; };
 
 struct GetUnitArmoredQuery { int32_t unitID; };

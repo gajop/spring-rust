@@ -3,18 +3,18 @@
 ## Summary Statistics
 
 **Lua API (Spring.* callouts only):**
-- Total: 762 functions
-- Matched (perfect 1.0): 762 (100.0%)
+- Total: 787 functions
+- Matched (perfect 1.0): 787 (100.0%)
 - Uncertain matches (<1.0): 0 (0.0%)
 - Unmatched: 0 (0.0%)
 
 **Rust API:**
-- Total: 1284 functions across 52 modules
-- Matched to Lua: 762 (59.3%)
-- Rust-only: 522 (40.7%)
+- Total: 1382 functions across 52 modules
+- Matched to Lua: 787 (56.9%)
+- Rust-only: 586 (42.4%)
 
 **Parameter comparison (matched functions):**
-- Parameter matches: 762
+- Parameter matches: 787
 - Count mismatches: 0
 - Type mismatches: 0
 
@@ -33,6 +33,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.AddOriginalHeightMap` → `TerrainControl.TerrainControl.add_original_height_map`
 - `Spring.AddSmoothMesh` → `TerrainControl.TerrainControl.add_smooth_mesh`
 - `Spring.AddTeamResource` → `TeamControl.TeamControl.add_team_resource`
+- `Spring.AddTeamResourceExcessStats` → `TeamControl.TeamControl.add_team_resource_excess_stats`
 - `Spring.AddUnitDamage` → `UnitControl.UnitControl.add_unit_damage`
 - `Spring.AddUnitExperience` → `UnitControl.UnitControl.add_unit_experience`
 - `Spring.AddUnitIcon` → `Icons.Icons.add_unit_icon`
@@ -80,6 +81,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.ForceLayoutUpdate` → `UnsyncedCtrl.UnsyncedCtrl.force_layout_update`
 - `Spring.ForceTesselationUpdate` → `UnsyncedCtrl.UnsyncedCtrl.force_tesselation_update`
 - `Spring.ForceUnitCollisionUpdate` → `UnitControl.UnitControl.force_unit_collision_update`
+- `Spring.FreePathNodeCostsArray` → `PathFinder.PathFinder.free_path_node_costs_array`
 - `Spring.FreeUnitIcon` → `Icons.Icons.free_unit_icon`
 - `Spring.GameOver` → `TeamControl.TeamControl.game_over`
 - `Spring.GarbageCollectCtrl` → `SystemControl.SystemControl.garbage_collect_ctrl`
@@ -110,7 +112,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetCameraState` → `Camera.Camera.get_camera_state`
 - `Spring.GetCameraVectors` → `UnitRendering.UnitRendering.get_camera_vectors`
 - `Spring.GetClipboard` → `UnsyncedRead.UnsyncedRead.get_clipboard`
-- `Spring.GetClosestValidPosition` → `Los.Los.get_closest_valid_position`
+- `Spring.GetClosestEnemyUnit` → `UnitsQuery.UnitsQuery.get_closest_enemy_unit`
 - `Spring.GetCmdDescIndex` → `UnsyncedRead.UnsyncedRead.get_cmd_desc_index`
 - `Spring.GetCommandQueue` → `UnitsCommands.UnitsCommands.get_command_queue`
 - `Spring.GetConfigFloat` → `Config.Config.get_config_float`
@@ -119,6 +121,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetConfigString` → `Config.Config.get_config_string`
 - `Spring.GetConsoleBuffer` → `Messages.Messages.get_console_buffer`
 - `Spring.GetCurrentTooltip` → `Messages.Messages.get_current_tooltip`
+- `Spring.GetCustomPaletteColor` → `UnsyncedRead.UnsyncedRead.get_custom_palette_color`
 - `Spring.GetDefaultCommand` → `Input.Input.get_default_command`
 - `Spring.GetDrawFrame` → `Display.Display.get_draw_frame`
 - `Spring.GetDrawSeconds` → `Profiling.Profiling.get_draw_seconds`
@@ -147,6 +150,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetFeatureMass` → `Features.Features.get_feature_mass`
 - `Spring.GetFeatureNoDraw` → `Features.Features.get_feature_no_draw`
 - `Spring.GetFeatureNoSelect` → `Features.Features.get_feature_no_select`
+- `Spring.GetFeaturePaletteIndex` → `UnsyncedRead.UnsyncedRead.get_feature_palette_index`
 - `Spring.GetFeaturePieceCollisionVolumeData` → `Features.Features.get_feature_piece_collision_volume_data`
 - `Spring.GetFeaturePieceDirection` → `UnitsPieces.UnitsPieces.get_feature_piece_direction`
 - `Spring.GetFeaturePieceInfo` → `UnitsPieces.UnitsPieces.get_feature_piece_info`
@@ -255,6 +259,8 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetMouseState` → `Input.Input.get_mouse_state`
 - `Spring.GetNanoProjectileParams` → `UnsyncedRead.UnsyncedRead.get_nano_projectile_params`
 - `Spring.GetNumDisplays` → `Display.Display.get_num_displays`
+- `Spring.GetPathNodeCost` → `PathFinder.PathFinder.get_path_node_cost`
+- `Spring.GetPathNodeCosts` → `PathFinder.PathFinder.get_path_node_costs`
 - `Spring.GetPieceProjectileName` → `UnsyncedRead.UnsyncedRead.get_piece_projectile_name`
 - `Spring.GetPieceProjectileParams` → `Projectiles.Projectiles.get_piece_projectile_params`
 - `Spring.GetPixelDir` → `Camera.Camera.get_pixel_dir`
@@ -269,6 +275,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetPositionLosState` → `Los.Los.get_position_los_state`
 - `Spring.GetPressedKeys` → `Input.Input.get_pressed_keys`
 - `Spring.GetPressedScans` → `Input.Input.get_pressed_scans`
+- `Spring.GetPrevFrameSyncChecksum` → `UnsyncedRead.UnsyncedRead.get_prev_frame_sync_checksum`
 - `Spring.GetProfilerRecordNames` → `Profiling.Profiling.get_profiler_record_names`
 - `Spring.GetProfilerTimeRecord` → `Profiling.Profiling.get_profiler_time_record`
 - `Spring.GetProjectileAllyTeamID` → `Projectiles.Projectiles.get_projectile_ally_team_id`
@@ -292,7 +299,9 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetRenderFeaturesDrawFlagChanged` → `Features.Features.get_render_features_draw_flag_changed`
 - `Spring.GetRenderUnits` → `UnitsQuery.UnitsQuery.get_render_units`
 - `Spring.GetRenderUnitsDrawFlagChanged` → `UnitsQuery.UnitsQuery.get_render_units_draw_flag_changed`
+- `Spring.GetReplayFilePath` → `SystemControl.SystemControl.get_replay_file_path`
 - `Spring.GetReplayLength` → `SystemControl.SystemControl.get_replay_length`
+- `Spring.GetReplayRecordingFilePath` → `SystemControl.SystemControl.get_replay_recording_file_path`
 - `Spring.GetScanSymbol` → `Input.Input.get_scan_symbol`
 - `Spring.GetScreenGeometry` → `Display.Display.get_screen_geometry`
 - `Spring.GetSelectedGroup` → `Selection.Selection.get_selected_group`
@@ -360,12 +369,12 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitExperience` → `UnitsInfo.UnitsInfo.get_unit_experience`
 - `Spring.GetUnitFeatureSeparation` → `UnitControl.UnitControl.get_unit_feature_separation`
 - `Spring.GetUnitFlanking` → `UnitsInfo.UnitsInfo.get_unit_flanking`
-- `Spring.GetUnitFuel` → `UnitsInfo.UnitsInfo.get_unit_fuel`
 - `Spring.GetUnitGroup` → `Selection.Selection.get_unit_group`
 - `Spring.GetUnitHarvestStorage` → `UnitsInfo.UnitsInfo.get_unit_harvest_storage`
 - `Spring.GetUnitHeading` → `UnitsInfo.UnitsInfo.get_unit_heading`
 - `Spring.GetUnitHealth` → `UnitsInfo.UnitsInfo.get_unit_health`
 - `Spring.GetUnitHeight` → `UnitsInfo.UnitsInfo.get_unit_height`
+- `Spring.GetUnitIcon` → `UnitRendering.UnitRendering.get_unit_icon`
 - `Spring.GetUnitIconData` → `UnitRendering.UnitRendering.get_unit_icon_data`
 - `Spring.GetUnitInBuildStance` → `UnitsInfo.UnitsInfo.get_unit_in_build_stance`
 - `Spring.GetUnitIsActive` → `UnitsInfo.UnitsInfo.get_unit_is_active`
@@ -384,6 +393,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitMass` → `UnitsInfo.UnitsInfo.get_unit_mass`
 - `Spring.GetUnitMaxRange` → `UnitsWeapons.UnitsWeapons.get_unit_max_range`
 - `Spring.GetUnitMetalExtraction` → `UnitsInfo.UnitsInfo.get_unit_metal_extraction`
+- `Spring.GetUnitMoveDefID` → `UnitsInfo.UnitsInfo.get_unit_move_def_id`
 - `Spring.GetUnitMoveTypeData` → `MoveCtrl.MoveCtrl.get_unit_move_type_data`
 - `Spring.GetUnitNanoPieces` → `UnitsInfo.UnitsInfo.get_unit_nano_pieces`
 - `Spring.GetUnitNearestAlly` → `UnitsQuery.UnitsQuery.get_unit_nearest_ally`
@@ -393,6 +403,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitNoGroup` → `UnitRendering.UnitRendering.get_unit_no_group`
 - `Spring.GetUnitNoMinimap` → `UnitRendering.UnitRendering.get_unit_no_minimap`
 - `Spring.GetUnitNoSelect` → `UnitRendering.UnitRendering.get_unit_no_select`
+- `Spring.GetUnitPaletteIndex` → `UnsyncedRead.UnsyncedRead.get_unit_palette_index`
 - `Spring.GetUnitPhysicalState` → `UnitControl.UnitControl.get_unit_physical_state`
 - `Spring.GetUnitPieceDirection` → `UnitsPieces.UnitsPieces.get_unit_piece_direction`
 - `Spring.GetUnitPieceInfo` → `UnitsPieces.UnitsPieces.get_unit_piece_info`
@@ -424,7 +435,6 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitTooltip` → `UnitsInfo.UnitsInfo.get_unit_tooltip`
 - `Spring.GetUnitTransformMatrix` → `UnitRendering.UnitRendering.get_unit_transform_matrix`
 - `Spring.GetUnitTransporter` → `UnitsInfo.UnitsInfo.get_unit_transporter`
-- `Spring.GetUnitTravel` → `UnitsInfo.UnitsInfo.get_unit_travel`
 - `Spring.GetUnitVectors` → `UnitsInfo.UnitsInfo.get_unit_vectors`
 - `Spring.GetUnitVelocity` → `UnitsInfo.UnitsInfo.get_unit_velocity`
 - `Spring.GetUnitViewPosition` → `UnitRendering.UnitRendering.get_unit_view_position`
@@ -466,6 +476,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GiveOrderToUnitMap` → `UnitsCommands.UnitsCommands.give_order_to_unit_map`
 - `Spring.HaveAdvShading` → `Display.Display.have_adv_shading`
 - `Spring.HaveShadows` → `Display.Display.have_shadows`
+- `Spring.InitPathNodeCostsArray` → `PathFinder.PathFinder.init_path_node_costs_array`
 - `Spring.InsertUnitCmdDesc` → `UnitControl.UnitControl.insert_unit_cmd_desc`
 - `Spring.IsAABBInView` → `Display.Display.is_aabbin_view`
 - `Spring.IsAboveMiniMap` → `Input.Input.is_above_mini_map`
@@ -520,6 +531,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.RemoveObjectDecal` → `UnitControl.UnitControl.remove_object_decal`
 - `Spring.RemoveUnitCmdDesc` → `UnitControl.UnitControl.remove_unit_cmd_desc`
 - `Spring.ReplaceMouseCursor` → `UnsyncedCtrl.UnsyncedCtrl.replace_mouse_cursor`
+- `Spring.RequestPath` → `PathFinder.PathFinder.request_path`
 - `Spring.RequestStartPosition` → `SystemControl.SystemControl.request_start_position`
 - `Spring.Restart` → `SystemControl.SystemControl.restart`
 - `Spring.ResumeDollyCamera` → `UnsyncedCtrl.UnsyncedCtrl.resume_dolly_camera`
@@ -559,11 +571,13 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetCameraOffset` → `UnsyncedCtrl.UnsyncedCtrl.set_camera_offset`
 - `Spring.SetCameraState` → `Camera.Camera.set_camera_state`
 - `Spring.SetCameraTarget` → `Camera.Camera.set_camera_target`
+- `Spring.SetCheatingEnabled` → `GameConfig.GameConfig.set_cheating_enabled`
 - `Spring.SetClipboard` → `UnsyncedCtrl.UnsyncedCtrl.set_clipboard`
 - `Spring.SetConfigFloat` → `Config.Config.set_config_float`
 - `Spring.SetConfigInt` → `Config.Config.set_config_int`
 - `Spring.SetConfigString` → `Config.Config.set_config_string`
 - `Spring.SetCustomCommandDrawData` → `UnsyncedCtrl.UnsyncedCtrl.set_custom_command_draw_data`
+- `Spring.SetCustomPaletteColor` → `UnsyncedCtrl.UnsyncedCtrl.set_custom_palette_color`
 - `Spring.SetDollyCameraCurve` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_curve`
 - `Spring.SetDollyCameraLookCurve` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_look_curve`
 - `Spring.SetDollyCameraLookPosition` → `UnsyncedCtrl.UnsyncedCtrl.set_dolly_camera_look_position`
@@ -577,6 +591,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetDrawSelectionInfo` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_selection_info`
 - `Spring.SetDrawSky` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_sky`
 - `Spring.SetDrawWater` → `UnsyncedCtrl.UnsyncedCtrl.set_draw_water`
+- `Spring.SetEngineBuildSquareRendering` → `UnsyncedCtrl.UnsyncedCtrl.set_engine_build_square_rendering`
 - `Spring.SetExperienceGrade` → `GameConfig.GameConfig.set_experience_grade`
 - `Spring.SetFactoryBuggerOff` → `UnitControl.UnitControl.set_factory_bugger_off`
 - `Spring.SetFeatureAlwaysUpdateMatrix` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_always_update_matrix`
@@ -595,8 +610,10 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetFeatureMoveCtrl` → `FeatureControl.FeatureControl.set_feature_move_ctrl`
 - `Spring.SetFeatureNoDraw` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_no_draw`
 - `Spring.SetFeatureNoSelect` → `FeatureControl.FeatureControl.set_feature_no_select`
+- `Spring.SetFeaturePaletteIndex` → `UnsyncedCtrl.UnsyncedCtrl.set_feature_palette_index`
 - `Spring.SetFeaturePhysics` → `FeatureControl.FeatureControl.set_feature_physics`
 - `Spring.SetFeaturePieceCollisionVolumeData` → `FeatureControl.FeatureControl.set_feature_piece_collision_volume_data`
+- `Spring.SetFeaturePieceMatrix` → `FeatureControl.FeatureControl.set_feature_piece_matrix`
 - `Spring.SetFeaturePieceVisible` → `FeatureControl.FeatureControl.set_feature_piece_visible`
 - `Spring.SetFeaturePosition` → `FeatureControl.FeatureControl.set_feature_position`
 - `Spring.SetFeatureRadiusAndHeight` → `FeatureControl.FeatureControl.set_feature_radius_and_height`
@@ -611,6 +628,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetFeatureVelocity` → `FeatureControl.FeatureControl.set_feature_velocity`
 - `Spring.SetGameRulesParam` → `RulesParams.RulesParams.set_game_rules_param`
 - `Spring.SetGlobalLos` → `TeamControl.TeamControl.set_global_los`
+- `Spring.SetGodMode` → `GameConfig.GameConfig.set_god_mode`
 - `Spring.SetGroundDecalAlpha` → `GroundDecals.GroundDecals.set_ground_decal_alpha`
 - `Spring.SetGroundDecalCreationFrame` → `GroundDecals.GroundDecals.set_ground_decal_creation_frame`
 - `Spring.SetGroundDecalGlowParams` → `GroundDecals.GroundDecals.set_ground_decal_glow_params`
@@ -642,6 +660,8 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetNoPause` → `GameConfig.GameConfig.set_no_pause`
 - `Spring.SetOriginalHeightMap` → `TerrainControl.TerrainControl.set_original_height_map`
 - `Spring.SetOriginalHeightMapFunc` → `TerrainControl.TerrainControl.set_original_height_map_func`
+- `Spring.SetPathNodeCost` → `PathFinder.PathFinder.set_path_node_cost`
+- `Spring.SetPathNodeCosts` → `PathFinder.PathFinder.set_path_node_costs`
 - `Spring.SetPieceProjectileParams` → `ProjectileControl.ProjectileControl.set_piece_projectile_params`
 - `Spring.SetPlayerReadyState` → `TeamControl.TeamControl.set_player_ready_state`
 - `Spring.SetPlayerRulesParam` → `RulesParams.RulesParams.set_player_rules_param`
@@ -660,6 +680,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetProjectileVelocity` → `ProjectileControl.ProjectileControl.set_projectile_velocity`
 - `Spring.SetRadarErrorParams` → `GameConfig.GameConfig.set_radar_error_params`
 - `Spring.SetShareLevel` → `SystemControl.SystemControl.set_share_level`
+- `Spring.SetShockFrontFactors` → `UnsyncedCtrl.UnsyncedCtrl.set_shock_front_factors`
 - `Spring.SetSkyBoxTexture` → `UnsyncedCtrl.UnsyncedCtrl.set_sky_box_texture`
 - `Spring.SetSmoothMesh` → `TerrainControl.TerrainControl.set_smooth_mesh`
 - `Spring.SetSmoothMeshFunc` → `TerrainControl.TerrainControl.set_smooth_mesh_func`
@@ -696,6 +717,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetUnitHarvestStorage` → `UnitControl.UnitControl.set_unit_harvest_storage`
 - `Spring.SetUnitHeadingAndUpDir` → `UnitControl.UnitControl.set_unit_heading_and_up_dir`
 - `Spring.SetUnitHealth` → `UnitControl.UnitControl.set_unit_health`
+- `Spring.SetUnitIcon` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_icon`
 - `Spring.SetUnitIconDraw` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_icon_draw`
 - `Spring.SetUnitLandGoal` → `UnitControl.UnitControl.set_unit_land_goal`
 - `Spring.SetUnitLeaveTracks` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_leave_tracks`
@@ -715,6 +737,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetUnitNoGroup` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_group`
 - `Spring.SetUnitNoMinimap` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_minimap`
 - `Spring.SetUnitNoSelect` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_no_select`
+- `Spring.SetUnitPaletteIndex` → `UnsyncedCtrl.UnsyncedCtrl.set_unit_palette_index`
 - `Spring.SetUnitPhysicalStateBit` → `UnitControl.UnitControl.set_unit_physical_state_bit`
 - `Spring.SetUnitPhysics` → `UnitControl.UnitControl.set_unit_physics`
 - `Spring.SetUnitPieceCollisionVolumeData` → `UnitControl.UnitControl.set_unit_piece_collision_volume_data`
@@ -763,8 +786,10 @@ Functions with perfect 1.0 confidence match:
 - `Spring.StopSoundStream` → `Sound.Sound.stop_sound_stream`
 - `Spring.TestBuildOrder` → `Utils.Utils.test_build_order`
 - `Spring.TestMoveOrder` → `Utils.Utils.test_move_order`
+- `Spring.TraceRayBetweenPositions` → `Tracing.Tracing.trace_ray_between_positions`
 - `Spring.TraceRayGroundBetweenPositions` → `Tracing.Tracing.trace_ray_ground_between_positions`
 - `Spring.TraceRayGroundInDirection` → `Tracing.Tracing.trace_ray_ground_in_direction`
+- `Spring.TraceRayInDirection` → `Tracing.Tracing.trace_ray_in_direction`
 - `Spring.TraceScreenRay` → `Camera.Camera.trace_screen_ray`
 - `Spring.TransferFeature` → `FeatureControl.FeatureControl.transfer_feature`
 - `Spring.TransferTeamMaxUnits` → `TeamControl.TeamControl.transfer_team_max_units`
@@ -787,7 +812,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.WorldToScreenCoords` → `Camera.Camera.world_to_screen_coords`
 - `Spring.Yield` → `SystemControl.SystemControl.yield`
 
-**Total: 762**
+**Total: 787**
 
 ---
 
@@ -813,7 +838,7 @@ Functions in Lua API with no Rust equivalent:
 
 Functions in Rust API with no Lua equivalent:
 
-- `FeatureControl.FeatureControl.set_feature_piece_matrix`
+- `Config.Config.get_config_parameters`
 - `FeatureDefs.FeatureDefs.get_feature_def_by_id`
 - `FeatureDefs.FeatureDefs.get_feature_def_count`
 - `FeatureDefs.FeatureDefs.get_feature_def_custom_param`
@@ -821,19 +846,22 @@ Functions in Rust API with no Lua equivalent:
 - `FeatureDefs.FeatureDefs.get_feature_def_energy`
 - `FeatureDefs.FeatureDefs.get_feature_def_idby_name`
 - `FeatureDefs.FeatureDefs.get_feature_def_ids`
+- `FeatureDefs.FeatureDefs.get_feature_def_info`
 - `FeatureDefs.FeatureDefs.get_feature_def_metal`
 - `FeatureDefs.FeatureDefs.get_feature_def_name`
 - `FeatureDefs.FeatureDefs.valid_feature_def_id`
 - `Features.Features.get_feature_position_ext`
 - `Game.Game.get_game_map_info`
+- `Game.Game.get_game_map_info_owned`
 - `Game.Game.get_game_mod_info`
+- `Game.Game.get_game_mod_info_owned`
 - `Game.Game.get_game_rules_info`
 - `Game.Game.get_game_rules_resource_info`
 - `Game.Game.get_game_setup_info`
 - `Game.Game.get_side_data_by_index`
+- `Game.Game.get_side_data_by_index_owned`
 - `Game.Game.get_side_data_count`
-- `GameConfig.GameConfig.set_cheating_enabled`
-- `GameConfig.GameConfig.set_god_mode`
+- `Game.Game.get_side_data_owned`
 - `Gfx.Gfx.active_fbo`
 - `Gfx.Gfx.active_shader`
 - `Gfx.Gfx.active_texture`
@@ -924,9 +952,11 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.get_active_uniforms`
 - `Gfx.Gfx.get_atlas_texture`
 - `Gfx.Gfx.get_atmosphere`
+- `Gfx.Gfx.get_console_commands`
 - `Gfx.Gfx.get_engine_atlas_textures`
 - `Gfx.Gfx.get_engine_model_uniform_data_def`
 - `Gfx.Gfx.get_engine_model_uniform_data_size`
+- `Gfx.Gfx.get_engine_texture_names`
 - `Gfx.Gfx.get_engine_uniform_buffer_def`
 - `Gfx.Gfx.get_fixed_state`
 - `Gfx.Gfx.get_font_info`
@@ -1038,6 +1068,7 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.vertex`
 - `Gfx.Gfx.viewport`
 - `Lights.Lights.add_light_tracking_target`
+- `Los.Los.get_closest_valid_position`
 - `MathExtra.MathExtra.bit_and`
 - `MathExtra.MathExtra.bit_bits`
 - `MathExtra.MathExtra.bit_inv`
@@ -1061,28 +1092,34 @@ Functions in Rust API with no Lua equivalent:
 - `Memory.Memory.free_int3_array`
 - `Memory.Memory.free_string_array`
 - `Memory.Memory.free_uint32_array`
+- `Messages.Messages.get_console_entries`
 - `MoveCtrl.MoveCtrl.is_move_ctrl_enabled`
 - `MoveCtrl.MoveCtrl.move_ctrl`
 - `MoveCtrl.MoveCtrl.set_move_ctrl_gravity`
 - `PathFinder.PathFinder.delete_path`
-- `PathFinder.PathFinder.free_path_node_costs_array`
 - `PathFinder.PathFinder.get_next_way_point`
-- `PathFinder.PathFinder.get_path_node_cost`
-- `PathFinder.PathFinder.get_path_node_costs`
 - `PathFinder.PathFinder.get_path_way_points`
-- `PathFinder.PathFinder.init_path_node_costs_array`
-- `PathFinder.PathFinder.request_path`
-- `PathFinder.PathFinder.set_path_node_cost`
-- `PathFinder.PathFinder.set_path_node_costs`
 - `Platform.Platform.get_architecture`
 - `Platform.Platform.is_headless`
+- `Player.Player.get_player_roster_owned`
 - `ProjectileControl.ProjectileControl.set_projectile_spin_angle`
 - `ProjectileControl.ProjectileControl.set_projectile_spin_speed`
 - `ProjectileControl.ProjectileControl.set_projectile_spin_vec`
 - `RmlUi.RmlUi.add_translation_string`
+- `RmlUi.RmlUi.bind`
+- `RmlUi.RmlUi.bind_choice_rows`
+- `RmlUi.RmlUi.bind_grid_rows`
+- `RmlUi.RmlUi.bind_icon_rows`
+- `RmlUi.RmlUi.bind_log_rows`
+- `RmlUi.RmlUi.bind_notification_rows`
+- `RmlUi.RmlUi.bind_option_rows`
+- `RmlUi.RmlUi.bind_status_rows`
+- `RmlUi.RmlUi.bind_swatch_rows`
+- `RmlUi.RmlUi.bind_text_rows`
 - `RmlUi.RmlUi.clear_translations`
 - `RmlUi.RmlUi.context_activate_theme`
 - `RmlUi.RmlUi.context_add_event_listener`
+- `RmlUi.RmlUi.context_create_data_model`
 - `RmlUi.RmlUi.context_create_document`
 - `RmlUi.RmlUi.context_enable_mouse_cursor`
 - `RmlUi.RmlUi.context_get_density_independent_pixel_ratio`
@@ -1106,15 +1143,58 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.context_process_mouse_wheel`
 - `RmlUi.RmlUi.context_process_text_input`
 - `RmlUi.RmlUi.context_pull_document_to_front`
+- `RmlUi.RmlUi.context_pull_to_front`
 - `RmlUi.RmlUi.context_push_document_to_back`
 - `RmlUi.RmlUi.context_remove_data_model`
 - `RmlUi.RmlUi.context_render`
 - `RmlUi.RmlUi.context_set_density_independent_pixel_ratio`
 - `RmlUi.RmlUi.context_set_dimensions`
+- `RmlUi.RmlUi.context_set_pointer_capture`
+- `RmlUi.RmlUi.context_take_pointer_capture_delta`
 - `RmlUi.RmlUi.context_unload_all_documents`
 - `RmlUi.RmlUi.context_unload_document`
 - `RmlUi.RmlUi.context_update`
 - `RmlUi.RmlUi.create_context`
+- `RmlUi.RmlUi.create_data_model`
+- `RmlUi.RmlUi.data_model_bind_bool`
+- `RmlUi.RmlUi.data_model_bind_choice_rows`
+- `RmlUi.RmlUi.data_model_bind_color`
+- `RmlUi.RmlUi.data_model_bind_float`
+- `RmlUi.RmlUi.data_model_bind_grid_rows`
+- `RmlUi.RmlUi.data_model_bind_icon_rows`
+- `RmlUi.RmlUi.data_model_bind_int`
+- `RmlUi.RmlUi.data_model_bind_log_rows`
+- `RmlUi.RmlUi.data_model_bind_notification_rows`
+- `RmlUi.RmlUi.data_model_bind_option_rows`
+- `RmlUi.RmlUi.data_model_bind_percent`
+- `RmlUi.RmlUi.data_model_bind_pixels`
+- `RmlUi.RmlUi.data_model_bind_status_rows`
+- `RmlUi.RmlUi.data_model_bind_string`
+- `RmlUi.RmlUi.data_model_bind_swatch_rows`
+- `RmlUi.RmlUi.data_model_bind_text_rows`
+- `RmlUi.RmlUi.data_model_get_bool`
+- `RmlUi.RmlUi.data_model_get_color`
+- `RmlUi.RmlUi.data_model_get_float`
+- `RmlUi.RmlUi.data_model_get_int`
+- `RmlUi.RmlUi.data_model_get_percent`
+- `RmlUi.RmlUi.data_model_get_pixels`
+- `RmlUi.RmlUi.data_model_get_string`
+- `RmlUi.RmlUi.data_model_set_bool`
+- `RmlUi.RmlUi.data_model_set_choice_rows`
+- `RmlUi.RmlUi.data_model_set_color`
+- `RmlUi.RmlUi.data_model_set_float`
+- `RmlUi.RmlUi.data_model_set_grid_rows`
+- `RmlUi.RmlUi.data_model_set_icon_rows`
+- `RmlUi.RmlUi.data_model_set_int`
+- `RmlUi.RmlUi.data_model_set_log_rows`
+- `RmlUi.RmlUi.data_model_set_notification_rows`
+- `RmlUi.RmlUi.data_model_set_option_rows`
+- `RmlUi.RmlUi.data_model_set_percent`
+- `RmlUi.RmlUi.data_model_set_pixels`
+- `RmlUi.RmlUi.data_model_set_status_rows`
+- `RmlUi.RmlUi.data_model_set_string`
+- `RmlUi.RmlUi.data_model_set_swatch_rows`
+- `RmlUi.RmlUi.data_model_set_text_rows`
 - `RmlUi.RmlUi.document_append_to_style_sheet`
 - `RmlUi.RmlUi.document_close`
 - `RmlUi.RmlUi.document_create_element`
@@ -1162,6 +1242,7 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.element_get_elements_by_tag_name_count`
 - `RmlUi.RmlUi.element_get_id`
 - `RmlUi.RmlUi.element_get_inner_rml`
+- `RmlUi.RmlUi.element_get_rect`
 - `RmlUi.RmlUi.element_get_scroll_left`
 - `RmlUi.RmlUi.element_get_scroll_top`
 - `RmlUi.RmlUi.element_get_tag_name`
@@ -1211,6 +1292,7 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.event_listener_process_event`
 - `RmlUi.RmlUi.event_stop_immediate_propagation`
 - `RmlUi.RmlUi.event_stop_propagation`
+- `RmlUi.RmlUi.get`
 - `RmlUi.RmlUi.get_context`
 - `RmlUi.RmlUi.get_version`
 - `RmlUi.RmlUi.is_ready`
@@ -1219,11 +1301,14 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.register_event_type`
 - `RmlUi.RmlUi.remove_context`
 - `RmlUi.RmlUi.remove_context_by_name`
+- `RmlUi.RmlUi.remove_data_model`
+- `RmlUi.RmlUi.set`
 - `RmlUi.RmlUi.set_debug_context`
 - `RmlUi.RmlUi.set_debug_context_by_name`
 - `RmlUi.RmlUi.set_mouse_cursor_alias`
 - `RmlUi.RmlUi.sol_lua_data_model___set_dirty`
 - `RmlUi.RmlUi.sol_lua_data_model_set_dirty`
+- `RmlUi.RmlUi.take_pointer_capture_delta`
 - `RmlUi.RmlUi.vector2f_new`
 - `RmlUi.RmlUi.vector2i_new`
 - `SyncedCtrl.SyncedCtrl.cob_script`
@@ -1235,10 +1320,10 @@ Functions in Rust API with no Lua equivalent:
 - `SyncedCtrl.SyncedCtrl.terrain`
 - `SyncedCtrl.SyncedCtrl.unit`
 - `SystemControl.SystemControl.call_as_team`
-- `SystemControl.SystemControl.get_replay_file_path`
-- `SystemControl.SystemControl.get_replay_recording_file_path`
+- `Teams.Teams.get_player_info_owned`
 - `Teams.Teams.get_player_list_in_ally_team`
 - `Teams.Teams.get_player_list_in_team`
+- `Teams.Teams.get_team_info_owned`
 - `Terrain.Terrain.get_height_map_size`
 - `Tracing.Tracing.trace_ray`
 - `Tracing.Tracing.trace_ray_features`
@@ -1246,7 +1331,9 @@ Functions in Rust API with no Lua equivalent:
 - `UnitControl.UnitControl.set_unit_fuel`
 - `UnitControl.UnitControl.set_unit_heading`
 - `UnitControl.UnitControl.set_unit_travel`
+- `UnitDefs.UnitDefs.get_unit_def_basic_info`
 - `UnitDefs.UnitDefs.get_unit_def_by_id`
+- `UnitDefs.UnitDefs.get_unit_def_classify`
 - `UnitDefs.UnitDefs.get_unit_def_costs`
 - `UnitDefs.UnitDefs.get_unit_def_count`
 - `UnitDefs.UnitDefs.get_unit_def_custom_param`
@@ -1256,33 +1343,32 @@ Functions in Rust API with no Lua equivalent:
 - `UnitDefs.UnitDefs.get_unit_def_idby_name`
 - `UnitDefs.UnitDefs.get_unit_def_ids`
 - `UnitDefs.UnitDefs.get_unit_def_name`
+- `UnitDefs.UnitDefs.get_unit_def_param_bool`
+- `UnitDefs.UnitDefs.get_unit_def_param_float`
+- `UnitDefs.UnitDefs.get_unit_def_param_int`
+- `UnitDefs.UnitDefs.get_unit_def_param_keys`
+- `UnitDefs.UnitDefs.get_unit_def_param_string`
+- `UnitDefs.UnitDefs.get_unit_def_param_type`
+- `UnitDefs.UnitDefs.get_unit_def_parameter_keys`
 - `UnitDefs.UnitDefs.get_unit_def_speed`
 - `UnitDefs.UnitDefs.valid_unit_def_id`
 - `UnitRendering.UnitRendering.get_frustum_planes`
-- `UnitRendering.UnitRendering.get_unit_icon`
 - `UnitsCommands.UnitsCommands.get_command_params`
 - `UnitsCommands.UnitsCommands.get_unit_command_descriptions`
 - `UnitsInfo.UnitsInfo.get_unit_crashing`
-- `UnitsInfo.UnitsInfo.get_unit_move_def_id`
+- `UnitsInfo.UnitsInfo.get_unit_fuel`
 - `UnitsInfo.UnitsInfo.get_unit_piece_collision_volume_data`
-- `UnitsQuery.UnitsQuery.get_closest_enemy_unit`
+- `UnitsInfo.UnitsInfo.get_unit_travel`
 - `UnitsWeapons.UnitsWeapons.get_unit_weapon_count`
 - `UnsyncedCtrl.UnsyncedCtrl.get_water_texture`
-- `UnsyncedCtrl.UnsyncedCtrl.set_custom_palette_color`
-- `UnsyncedCtrl.UnsyncedCtrl.set_engine_build_square_rendering`
-- `UnsyncedCtrl.UnsyncedCtrl.set_feature_palette_index`
-- `UnsyncedCtrl.UnsyncedCtrl.set_shock_front_factors`
-- `UnsyncedCtrl.UnsyncedCtrl.set_unit_icon`
-- `UnsyncedCtrl.UnsyncedCtrl.set_unit_palette_index`
 - `UnsyncedCtrl.UnsyncedCtrl.set_water_texture`
-- `UnsyncedRead.UnsyncedRead.get_custom_palette_color`
-- `UnsyncedRead.UnsyncedRead.get_feature_palette_index`
 - `UnsyncedRead.UnsyncedRead.get_game_seconds_interpolated`
-- `UnsyncedRead.UnsyncedRead.get_unit_palette_index`
 - `UnsyncedRead.UnsyncedRead.unit_rendering`
+- `Utils.Utils.get_feature_def_dimensions`
 - `Vfs.Vfs.calculate_hash`
 - `Vfs.Vfs.compress_folder`
 - `Vfs.Vfs.dir_list`
+- `Vfs.Vfs.dir_list_names`
 - `Vfs.Vfs.file_exists`
 - `Vfs.Vfs.get_all_archives`
 - `Vfs.Vfs.get_archive_checksum`
@@ -1304,6 +1390,8 @@ Functions in Rust API with no Lua equivalent:
 - `Vfs.Vfs.has_archive`
 - `Vfs.Vfs.is_directory`
 - `Vfs.Vfs.list_dir`
+- `Vfs.Vfs.list_dir_names`
+- `Vfs.Vfs.list_entries`
 - `Vfs.Vfs.load_file`
 - `Vfs.Vfs.pack_f32`
 - `Vfs.Vfs.pack_s16`
@@ -1314,6 +1402,7 @@ Functions in Rust API with no Lua equivalent:
 - `Vfs.Vfs.pack_u8`
 - `Vfs.Vfs.read_file`
 - `Vfs.Vfs.read_file_as_string`
+- `Vfs.Vfs.scan_all_dirs`
 - `Vfs.Vfs.sub_dirs`
 - `Vfs.Vfs.unpack_f32`
 - `Vfs.Vfs.unpack_s16`
@@ -1336,4 +1425,4 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 522**
+**Total Rust-only: 586**

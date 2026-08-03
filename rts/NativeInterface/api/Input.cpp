@@ -373,11 +373,45 @@ static void NativeGetActiveCommand(const GetActiveCommandQuery* query, GetActive
 static void NativeGetActionHotKeys(const GetActionHotKeysQuery* query, GetActionHotKeysResult* result)
 {
 	bufferPos = 0;
-	(void)query;
-
-	result->error = nullptr;
 	result->hotkeys = nullptr;
 	result->count = 0;
+
+	if (query == nullptr || query->action == nullptr) {
+		result->error = &INVALID_ARG_ERROR;
+		return;
+	}
+
+	const CKeyBindings::HotkeyList& hotkeys = keyBindings.GetHotkeys(query->action);
+	if (hotkeys.empty()) {
+		result->error = nullptr;
+		return;
+	}
+
+	if (hotkeys.size() > (sizeof(scratchBuffer) - bufferPos) / sizeof(const char*)) {
+		result->error = &BUFFER_OVERFLOW_ERROR;
+		return;
+	}
+
+	const size_t pointerBytes = hotkeys.size() * sizeof(const char*);
+	const char** pointers = reinterpret_cast<const char**>(&scratchBuffer[bufferPos]);
+	bufferPos += pointerBytes;
+
+	for (size_t i = 0; i < hotkeys.size(); ++i) {
+		const std::string& hotkey = hotkeys[i];
+		if (hotkey.size() + 1 > sizeof(scratchBuffer) - bufferPos) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
+
+		char* string = &scratchBuffer[bufferPos];
+		memcpy(string, hotkey.c_str(), hotkey.size() + 1);
+		pointers[i] = string;
+		bufferPos += hotkey.size() + 1;
+	}
+
+	result->error = nullptr;
+	result->hotkeys = pointers;
+	result->count = static_cast<uint32_t>(hotkeys.size());
 }
 
 static void NativeGetKeyBindings(const GetKeyBindingsQuery* query, GetKeyBindingsResult* result)

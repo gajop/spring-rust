@@ -41,6 +41,9 @@ struct SetGlobalLosResult { const Error* error; bool success; };
 struct AddTeamResourceQuery { int32_t teamID; const char* resourceType; float amount; };
 struct AddTeamResourceResult { const Error* error; bool success; };
 
+struct AddTeamResourceExcessStatsQuery { int32_t teamID; const char* resourceType; float amount; };
+struct AddTeamResourceExcessStatsResult { const Error* error; bool success; };
+
 struct UseTeamResourceQuery { int32_t teamID; const char* resourceType; float amount; };
 struct UseTeamResourceResult { const Error* error; bool success; };
 
@@ -77,6 +80,7 @@ struct TeamControlApi {
 	void (*GameOver)(const GameOverQuery* query, GameOverResult* result);
 	void (*SetGlobalLos)(const SetGlobalLosQuery* query, SetGlobalLosResult* result);
 	void (*AddTeamResource)(const AddTeamResourceQuery* query, AddTeamResourceResult* result);
+	void (*AddTeamResourceExcessStats)(const AddTeamResourceExcessStatsQuery* query, AddTeamResourceExcessStatsResult* result);
 	void (*UseTeamResource)(const UseTeamResourceQuery* query, UseTeamResourceResult* result);
 	void (*SetTeamResource)(const SetTeamResourceQuery* query, SetTeamResourceResult* result);
 	void (*SetTeamShareLevel)(const SetTeamShareLevelQuery* query, SetTeamShareLevelResult* result);

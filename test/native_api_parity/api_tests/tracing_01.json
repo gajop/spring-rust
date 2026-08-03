@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "trace_ray_ground_in_direction",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.TraceRayGroundInDirection"]},
+      "native": {"set": [], "get": ["Tracing.trace_ray_ground_in_direction"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["rayLength", "posX", "posY", "posZ"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.TraceRayGroundInDirection`", "native_getter": "`Tracing.trace_ray_ground_in_direction`", "fields": "`rayLength`, `posX`, `posY`, `posZ`"},
+      "rust": {"check": "check_tracing_value", "set": "set_noop"},
+      "params": {
+        "startX": {"type": "f32", "fixed": 1024},
+        "startY": {"type": "f32", "fixed": 256},
+        "startZ": {"type": "f32", "fixed": 1024},
+        "dirX": {"type": "f32", "fixed": 0},
+        "dirY": {"type": "f32", "fixed": -1},
+        "dirZ": {"type": "f32", "fixed": 0},
+        "maxLength": {"type": "f32", "fixed": 512},
+        "testWater": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {
+        "call": "Spring.TraceRayGroundInDirection",
+        "args": ["value.startX", "value.startY", "value.startZ", "value.dirX", "value.dirY", "value.dirZ", "value.maxLength", "value.testWater"],
+        "returns": ["rayLength", "posX", "posY", "posZ"]
+      }
+    },
+    {
+      "id": "trace_ray_ground_between_positions",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.TraceRayGroundBetweenPositions"]},
+      "native": {"set": [], "get": ["Tracing.trace_ray_ground_between_positions"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["rayLength", "posX", "posY", "posZ"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.TraceRayGroundBetweenPositions`", "native_getter": "`Tracing.trace_ray_ground_between_positions`", "fields": "`rayLength`, `posX`, `posY`, `posZ`"},
+      "rust": {"check": "check_tracing_value", "set": "set_noop"},
+      "params": {
+        "startX": {"type": "f32", "fixed": 1024},
+        "startY": {"type": "f32", "fixed": 256},
+        "startZ": {"type": "f32", "fixed": 1024},
+        "endX": {"type": "f32", "fixed": 1024},
+        "endY": {"type": "f32", "fixed": -256},
+        "endZ": {"type": "f32", "fixed": 1024},
+        "testWater": {"type": "bool", "fixed": false}
+      },
+      "lua_runtime": {
+        "call": "Spring.TraceRayGroundBetweenPositions",
+        "args": ["value.startX", "value.startY", "value.startZ", "value.endX", "value.endY", "value.endZ", "value.testWater"],
+        "returns": ["rayLength", "posX", "posY", "posZ"]
+      }
+    }
+  ]
+}

@@ -121,6 +121,9 @@ struct IsUnitIconResult { const Error* error; bool isIcon; };
 struct GetClipboardQuery { uint8_t _unused; };
 struct GetClipboardResult { const Error* error; const char* text; };
 
+struct GetPrevFrameSyncChecksumQuery { uint8_t _unused; };
+struct GetPrevFrameSyncChecksumResult { const Error* error; const char* checksum; };
+
 // Command/GUI queries
 struct ActiveCommandDescription {
 	int32_t id;
@@ -232,6 +235,7 @@ struct UnitRenderingApi {
 struct UnsyncedReadApi {
 	const UnitRenderingApi* unitRendering;
 	void (*GetClipboard)(const GetClipboardQuery* query, GetClipboardResult* result);
+	void (*GetPrevFrameSyncChecksum)(const GetPrevFrameSyncChecksumQuery* query, GetPrevFrameSyncChecksumResult* result);
 	void (*GetActiveCmdDesc)(const GetActiveCmdDescQuery* query, GetActiveCmdDescResult* result);
 	void (*GetActiveCmdDescs)(const GetActiveCmdDescsQuery* query, GetActiveCmdDescsResult* result);
 	void (*GetCmdDescIndex)(const GetCmdDescIndexQuery* query, GetCmdDescIndexResult* result);

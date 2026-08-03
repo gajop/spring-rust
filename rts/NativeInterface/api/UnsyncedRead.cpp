@@ -1,5 +1,6 @@
 #include "UnsyncedRead.h"
 #include <cstring>
+#include <cstdio>
 #include <algorithm>
 #include <vector>
 
@@ -36,6 +37,7 @@
 #include "Sim/Projectiles/WeaponProjectiles/WeaponProjectile.h"
 #include "System/Math/NURBS.h"
 #include "System/SpringMath.h"
+#include "System/Sync/SyncChecker.h"
 #include "Lua/LuaConfig.h"
 #include "Game/SelectedUnitsHandler.h"
 #include "Sim/Misc/Team.h"
@@ -640,6 +642,22 @@ static void NativeGetClipboard(const GetClipboardQuery* query, GetClipboardResul
 	bufferPos += len + 1;
 
 	result->text = buf;
+}
+
+static void NativeGetPrevFrameSyncChecksum(const GetPrevFrameSyncChecksumQuery* query, GetPrevFrameSyncChecksumResult* result)
+{
+	(void)query;
+	bufferPos = 0;
+
+	unsigned checksum = 0;
+#ifdef SYNCCHECK
+	checksum = CSyncChecker::GetPrevChecksum();
+#endif
+
+	char checksumString[9];
+	std::snprintf(checksumString, sizeof(checksumString), "%08x", checksum);
+	result->checksum = CopyToScratch(checksumString);
+	result->error = (result->checksum[0] == '\0') ? &BUFFER_OVERFLOW_ERROR : nullptr;
 }
 
 static void NativeGetGameSecondsInterpolated(const GetGameSecondsInterpolatedQuery* query, GetGameSecondsInterpolatedResult* result)
@@ -1471,6 +1489,7 @@ static const UnitRenderingApi UNIT_RENDERING_API = {
 const UnsyncedReadApi UNSYNCED_READ_API = {
 	.unitRendering = &UNIT_RENDERING_API,
 	.GetClipboard = NativeGetClipboard,
+	.GetPrevFrameSyncChecksum = NativeGetPrevFrameSyncChecksum,
 	.GetActiveCmdDesc = NativeGetActiveCmdDesc,
 	.GetActiveCmdDescs = NativeGetActiveCmdDescs,
 	.GetCmdDescIndex = NativeGetCmdDescIndex,

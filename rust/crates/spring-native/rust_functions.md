@@ -2,7 +2,7 @@
 
 Total APIs: 52
 
-Total Functions: 1284
+Total Functions: 1382
 
 ---
 
@@ -15,7 +15,7 @@ Total Functions: 1284
 - `Camera.get_camera_state` (params: use_table:bool) → `Result<sys::CameraState, Error>`
 - `Camera.get_pixel_dir` (params: screen_x:f32, screen_y:f32) → `Result<sys::Float3, Error>`
 - `Camera.set_camera_state` (params: state:sys::CameraState, transition_time:f32, transition_time_factor:f32, transition_time_exponent:f32) → `Result<bool, Error>`
-- `Camera.set_camera_target` (params: target:sys::Float3, transition_time:f32) → `Result<bool, Error>`
+- `Camera.set_camera_target` (params: target:sys::Float3, transition_time:Option<f32>, dir_x:Option<f32>, dir_y:Option<f32>, dir_z:Option<f32>) → `Result<bool, Error>`
 - `Camera.trace_screen_ray` (params: screen_x:f32, screen_y:f32, only_coords:bool, use_minimap:bool, include_sky:bool, ignore_water:bool, height_offset:f32) → `Result<(i32, i32, sys::Float3), Error>`
 - `Camera.world_to_screen_coords` (params: world_pos:sys::Float3) → `Result<(sys::Float3, bool), Error>`
 
@@ -24,10 +24,11 @@ Total Functions: 1284
 - `CobScript.call_cobscript` (params: unit_id:i32, func:sys::CobFunctionRef, ret_args:u32, args:&[i32]) → `Result<(i32, Vec<i32>), Error>`
 - `CobScript.get_cobscript_id` (params: unit_id:i32, func_name:&str) → `Result<i32, Error>`
 
-## Config (9 functions)
+## Config (10 functions)
 
 - `Config.get_config_float` (params: key:&str, default_value:Option<f32>) → `Result<(f32, bool), Error>`
 - `Config.get_config_int` (params: key:&str, default_value:Option<i32>) → `Result<(i32, bool), Error>`
+- `Config.get_config_parameters` (params: ) → `Result<Vec<ConfigParameter>, Error>`
 - `Config.get_config_params` (params: ) → `Result<Vec<sys::ConfigParam>, Error>`
 - `Config.get_config_string` (params: key:&str, default_value:Option<&str>) → `Result<(Option<String>, bool), Error>`
 - `Config.get_log_sections` (params: ) → `Result<Vec<String>, Error>`
@@ -104,7 +105,7 @@ Total Functions: 1284
 - `FeatureControl.set_feature_velocity` (params: feature_id:i32, velocity:sys::Float3) → `Result<bool, Error>`
 - `FeatureControl.transfer_feature` (params: feature_id:i32, new_team_id:i32) → `Result<bool, Error>`
 
-## FeatureDefs (10 functions)
+## FeatureDefs (11 functions)
 
 - `FeatureDefs.get_feature_def_by_id` (params: feature_def_id:i32) → `Result<(sys::FeatureDefInfo, bool), Error>`
 - `FeatureDefs.get_feature_def_count` (params: ) → `Result<u32, Error>`
@@ -113,6 +114,7 @@ Total Functions: 1284
 - `FeatureDefs.get_feature_def_energy` (params: feature_def_id:i32) → `Result<f32, Error>`
 - `FeatureDefs.get_feature_def_idby_name` (params: feature_def_name:&str) → `Result<i32, Error>`
 - `FeatureDefs.get_feature_def_ids` (params: ) → `Result<Vec<i32>, Error>`
+- `FeatureDefs.get_feature_def_info` (params: feature_def_id:i32) → `Result<Option<FeatureDefInfo>, Error>`
 - `FeatureDefs.get_feature_def_metal` (params: feature_def_id:i32) → `Result<f32, Error>`
 - `FeatureDefs.get_feature_def_name` (params: feature_def_id:i32) → `Result<Option<String>, Error>`
 - `FeatureDefs.valid_feature_def_id` (params: feature_def_id:i32) → `Result<bool, Error>`
@@ -158,7 +160,7 @@ Total Functions: 1284
 - `Features.get_render_features_draw_flag_changed` (params: send_mask:bool) → `Result<Vec<i32>, Error>`
 - `Features.valid_feature_id` (params: feature_id:i32) → `Result<bool, Error>`
 
-## Game (33 functions)
+## Game (37 functions)
 
 - `Game.are_helper_ais_enabled` (params: ) → `Result<bool, Error>`
 - `Game.fixed_allies` (params: ) → `Result<bool, Error>`
@@ -167,7 +169,9 @@ Total Functions: 1284
 - `Game.get_gaia_team_id` (params: ) → `Result<i32, Error>`
 - `Game.get_game_frame` (params: ) → `Result<(u32, u32), Error>`
 - `Game.get_game_map_info` (params: ) → `Result<sys::GameMapInfo, Error>`
+- `Game.get_game_map_info_owned` (params: ) → `Result<GameMapInfo, Error>`
 - `Game.get_game_mod_info` (params: ) → `Result<sys::GameModInfo, Error>`
+- `Game.get_game_mod_info_owned` (params: ) → `Result<GameModInfo, Error>`
 - `Game.get_game_rules_info` (params: ) → `Result<sys::GameRulesInfo, Error>`
 - `Game.get_game_rules_resource_info` (params: ) → `Result<sys::GameRulesResourceInfo, Error>`
 - `Game.get_game_seconds` (params: ) → `Result<f32, Error>`
@@ -182,7 +186,9 @@ Total Functions: 1284
 - `Game.get_mod_options` (params: ) → `Result<Vec<String>, Error>`
 - `Game.get_side_data` (params: side_name:&str) → `Result<sys::SideData, Error>`
 - `Game.get_side_data_by_index` (params: side_index:u32) → `Result<sys::SideData, Error>`
+- `Game.get_side_data_by_index_owned` (params: side_index:u32) → `Result<SideData, Error>`
 - `Game.get_side_data_count` (params: ) → `Result<u32, Error>`
+- `Game.get_side_data_owned` (params: side_name:&str) → `Result<SideData, Error>`
 - `Game.get_team_start_position` (params: team_id:i32) → `Result<sys::Float3, Error>`
 - `Game.get_tidal` (params: ) → `Result<f32, Error>`
 - `Game.get_vector_from_heading` (params: heading:i32) → `Result<sys::Float2, Error>`
@@ -203,7 +209,7 @@ Total Functions: 1284
 - `GameConfig.set_radar_error_params` (params: ally_team_id:i32, ally_team_error_size:f32, base_error_size:f32, base_error_mult:f32) → `Result<bool, Error>`
 - `GameConfig.set_square_building_mask` (params: x:i32, z:i32, mask:u16) → `Result<bool, Error>`
 
-## Gfx (203 functions)
+## Gfx (205 functions)
 
 - `Gfx.active_fbo` (params: fbo_id:u32, target:u32, identities:bool, callback:F) → `Result<(), Error>`
 - `Gfx.active_shader` (params: shader_id:u32, callback:F) → `Result<(), Error>`
@@ -295,9 +301,11 @@ Total Functions: 1284
 - `Gfx.get_active_uniforms` (params: shader_id:u32) → `Result<Vec<sys::GfxActiveUniformEntry>, Error>`
 - `Gfx.get_atlas_texture` (params: atlas_name:&str, texture_name:&str) → `Result<(f32, f32, f32, f32, i32), Error>`
 - `Gfx.get_atmosphere` (params: key:&str, mode:&str) → `Result<([f32`
+- `Gfx.get_console_commands` (params: ) → `Result<Vec<sys::GfxConsoleCommandEntry>, Error>`
 - `Gfx.get_engine_atlas_textures` (params: name:&str) → `Result<Vec<sys::GfxAtlasTextureEntry>, Error>`
 - `Gfx.get_engine_model_uniform_data_def` (params: ) → `Result<Option<String>, Error>`
 - `Gfx.get_engine_model_uniform_data_size` (params: ) → `Result<(u32, u32), Error>`
+- `Gfx.get_engine_texture_names` (params: ) → `Result<Vec<String>, Error>`
 - `Gfx.get_engine_uniform_buffer_def` (params: index:i32) → `Result<Option<String>, Error>`
 - `Gfx.get_fixed_state` (params: param:&str) → `Result<([bool`
 - `Gfx.get_font_info` (params: font_id:u32) → `Result<(Option<String>, Option<String>, Option<String>, f32, f32, f32, f32, f32, i32, i32), Error>`
@@ -464,7 +472,7 @@ Total Functions: 1284
 - `Input.get_key_from_scan_symbol` (params: scan_symbol:&str) → `Result<Option<String>, Error>`
 - `Input.get_key_state` (params: key_code:i32) → `Result<bool, Error>`
 - `Input.get_key_symbol` (params: key_code:i32) → `Result<(Option<String>, Option<String>), Error>`
-- `Input.get_mod_key_state` (params: ) → `Result<u32, Error>`
+- `Input.get_mod_key_state` (params: ) → `Result<(bool, bool, bool, bool), Error>`
 - `Input.get_mouse_buttons_pressed` (params: buttons:&[i32]) → `Result<Vec<bool>, Error>`
 - `Input.get_mouse_cursor` (params: ) → `Result<Option<String>, Error>`
 - `Input.get_mouse_start_position` (params: button:i32) → `Result<(sys::Float2, sys::Float3, sys::Float3), Error>`
@@ -536,10 +544,11 @@ Total Functions: 1284
 - `Memory.free_string_array` (params: data:*mut *const i8, length:u32) → `Result<(), Error>`
 - `Memory.free_uint32_array` (params: data:&[u32]) → `Result<(), Error>`
 
-## Messages (20 functions)
+## Messages (21 functions)
 
 - `Messages.echo` (params: message:&str, rest:&str) → `Result<bool, Error>`
 - `Messages.get_console_buffer` (params: max_lines:u32) → `Result<Vec<sys::ConsoleEntry>, Error>`
+- `Messages.get_console_entries` (params: max_lines:u32) → `Result<Vec<ConsoleEntry>, Error>`
 - `Messages.get_current_tooltip` (params: ) → `Result<Option<String>, Error>`
 - `Messages.is_user_writing` (params: ) → `Result<bool, Error>`
 - `Messages.log` (params: section:&str, level:i32, message:&str) → `Result<bool, Error>`
@@ -583,7 +592,7 @@ Total Functions: 1284
 - `PathFinder.get_path_node_costs` (params: overlay_index:u32) → `Result<Vec<f32>, Error>`
 - `PathFinder.get_path_way_points` (params: path_id:u32) → `Result<(Vec<sys::Float3>, Vec<i32>), Error>`
 - `PathFinder.init_path_node_costs_array` (params: overlay_index:u32, size_x:u32, size_z:u32) → `Result<bool, Error>`
-- `PathFinder.request_path` (params: move_def_id:u32, move_def_name:&str, start_pos:sys::Float3, end_pos:sys::Float3, radius:f32) → `Result<u32, Error>`
+- `PathFinder.request_path` (params: move_def_id:u32, move_def_name:Option<&str>, start_pos:sys::Float3, end_pos:sys::Float3, radius:f32) → `Result<u32, Error>`
 - `PathFinder.set_path_node_cost` (params: overlay_index:u32, cost_index:u32, cost:f32) → `Result<bool, Error>`
 - `PathFinder.set_path_node_costs` (params: overlay_index:u32) → `Result<bool, Error>`
 
@@ -592,12 +601,13 @@ Total Functions: 1284
 - `Platform.get_architecture` (params: ) → `Result<Option<String>, Error>`
 - `Platform.is_headless` (params: ) → `Result<bool, Error>`
 
-## Player (7 functions)
+## Player (8 functions)
 
 - `Player.get_local_ally_team_id` (params: ) → `Result<i32, Error>`
 - `Player.get_local_player_id` (params: ) → `Result<i32, Error>`
 - `Player.get_local_team_id` (params: ) → `Result<i32, Error>`
 - `Player.get_player_roster` (params: sort_mode:i32, show_pathing_players:bool) → `Result<Vec<sys::RosterEntry>, Error>`
+- `Player.get_player_roster_owned` (params: sort_mode:i32, show_pathing_players:bool) → `Result<Vec<RosterEntry>, Error>`
 - `Player.get_player_statistics` (params: player_id:i32) → `Result<sys::PlayerStats, Error>`
 - `Player.get_player_traffic` (params: player_id:i32, packet_id:i32) → `Result<Vec<sys::PlayerTraffic>, Error>`
 - `Player.get_spectating_state` (params: ) → `Result<bool, Error>`
@@ -657,12 +667,23 @@ Total Functions: 1284
 - `Projectiles.get_projectiles_in_rectangle` (params: min_x:f32, min_z:f32, max_x:f32, max_z:f32, synced:bool, weapon:bool) → `Result<Vec<i32>, Error>`
 - `Projectiles.get_projectiles_in_sphere` (params: center:sys::Float3, radius:f32, synced:bool, weapon:bool) → `Result<Vec<i32>, Error>`
 
-## RmlUi (147 functions)
+## RmlUi (215 functions)
 
 - `RmlUi.add_translation_string` (params: key:&str, translation:&str) → `Result<bool, Error>`
+- `RmlUi.bind` (params: name:&str, initial:T) → `Result<RmlDataVariable<'api, T>, Error>`
+- `RmlUi.bind_choice_rows` (params: name:&str) → `Result<RmlDataChoiceRows<'api>, Error>`
+- `RmlUi.bind_grid_rows` (params: name:&str) → `Result<RmlDataGridRows<'api>, Error>`
+- `RmlUi.bind_icon_rows` (params: name:&str) → `Result<RmlDataIconRows<'api>, Error>`
+- `RmlUi.bind_log_rows` (params: name:&str) → `Result<RmlDataLogRows<'api>, Error>`
+- `RmlUi.bind_notification_rows` (params: name:&str) → `Result<RmlDataNotificationRows<'api>, Error>`
+- `RmlUi.bind_option_rows` (params: name:&str) → `Result<RmlDataOptionRows<'api>, Error>`
+- `RmlUi.bind_status_rows` (params: name:&str) → `Result<RmlDataStatusRows<'api>, Error>`
+- `RmlUi.bind_swatch_rows` (params: name:&str) → `Result<RmlDataSwatchRows<'api>, Error>`
+- `RmlUi.bind_text_rows` (params: name:&str) → `Result<RmlDataTextRows<'api>, Error>`
 - `RmlUi.clear_translations` (params: ) → `Result<bool, Error>`
 - `RmlUi.context_activate_theme` (params: context_handle:u64, name:&str, value:bool) → `Result<bool, Error>`
 - `RmlUi.context_add_event_listener` (params: context_handle:u64, event:&str, in_capture_phase:bool, callback:F) → `Result<(u64, bool), Error>`
+- `RmlUi.context_create_data_model` (params: context_handle:u64, name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.context_create_document` (params: context_handle:u64, tag:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.context_enable_mouse_cursor` (params: context_handle:u64, value:bool) → `Result<bool, Error>`
 - `RmlUi.context_get_density_independent_pixel_ratio` (params: context_handle:u64) → `Result<f32, Error>`
@@ -686,15 +707,58 @@ Total Functions: 1284
 - `RmlUi.context_process_mouse_wheel` (params: context_handle:u64, x:f32, y:f32, key_modifier_state:i32) → `Result<bool, Error>`
 - `RmlUi.context_process_text_input` (params: context_handle:u64, text:&str) → `Result<bool, Error>`
 - `RmlUi.context_pull_document_to_front` (params: context_handle:u64, document_handle:u64) → `Result<bool, Error>`
+- `RmlUi.context_pull_to_front` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.context_push_document_to_back` (params: context_handle:u64, document_handle:u64) → `Result<bool, Error>`
 - `RmlUi.context_remove_data_model` (params: context_handle:u64, name:&str) → `Result<bool, Error>`
 - `RmlUi.context_render` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.context_set_density_independent_pixel_ratio` (params: context_handle:u64, value:f32) → `Result<bool, Error>`
 - `RmlUi.context_set_dimensions` (params: context_handle:u64, x:i32, y:i32) → `Result<bool, Error>`
+- `RmlUi.context_set_pointer_capture` (params: context_handle:u64, anchor_x:i32, anchor_y:i32, active:bool) → `Result<bool, Error>`
+- `RmlUi.context_take_pointer_capture_delta` (params: context_handle:u64) → `Result<(i32, i32, i32), Error>`
 - `RmlUi.context_unload_all_documents` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.context_unload_document` (params: context_handle:u64, document_handle:u64) → `Result<bool, Error>`
 - `RmlUi.context_update` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.create_context` (params: name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.create_data_model` (params: context_handle:u64, name:&str) → `Result<RmlDataModel<'a>, Error>`
+- `RmlUi.data_model_bind_bool` (params: data_model_handle:u64, name:&str, initial_value:bool) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_choice_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_color` (params: data_model_handle:u64, name:&str, red:u8, green:u8, blue:u8, alpha:u8) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_float` (params: data_model_handle:u64, name:&str, initial_value:f32) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_grid_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_icon_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_int` (params: data_model_handle:u64, name:&str, initial_value:i32) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_log_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_notification_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_option_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_percent` (params: data_model_handle:u64, name:&str, initial_value:f32) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_pixels` (params: data_model_handle:u64, name:&str, initial_value:f32) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_status_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_string` (params: data_model_handle:u64, name:&str, initial_value:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_swatch_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_bind_text_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
+- `RmlUi.data_model_get_bool` (params: variable_handle:u64) → `Result<(bool, bool), Error>`
+- `RmlUi.data_model_get_color` (params: variable_handle:u64) → `Result<(u8, u8, u8, u8, bool), Error>`
+- `RmlUi.data_model_get_float` (params: variable_handle:u64) → `Result<(f32, bool), Error>`
+- `RmlUi.data_model_get_int` (params: variable_handle:u64) → `Result<(i32, bool), Error>`
+- `RmlUi.data_model_get_percent` (params: variable_handle:u64) → `Result<(f32, bool), Error>`
+- `RmlUi.data_model_get_pixels` (params: variable_handle:u64) → `Result<(f32, bool), Error>`
+- `RmlUi.data_model_get_string` (params: variable_handle:u64) → `Result<(Option<String>, bool), Error>`
+- `RmlUi.data_model_set_bool` (params: variable_handle:u64, value:bool) → `Result<bool, Error>`
+- `RmlUi.data_model_set_choice_rows` (params: rows_handle:u64, rows:&sys::RmlDataChoiceRow, count:u64) → `Result<bool, Error>`
+- `RmlUi.data_model_set_color` (params: variable_handle:u64, red:u8, green:u8, blue:u8, alpha:u8) → `Result<bool, Error>`
+- `RmlUi.data_model_set_float` (params: variable_handle:u64, value:f32) → `Result<bool, Error>`
+- `RmlUi.data_model_set_grid_rows` (params: rows_handle:u64, rows:&sys::RmlDataGridRow, count:u64) → `Result<bool, Error>`
+- `RmlUi.data_model_set_icon_rows` (params: rows_handle:u64, rows:&sys::RmlDataIconRow, count:u64) → `Result<bool, Error>`
+- `RmlUi.data_model_set_int` (params: variable_handle:u64, value:i32) → `Result<bool, Error>`
+- `RmlUi.data_model_set_log_rows` (params: rows_handle:u64, rows:&sys::RmlDataLogRow, count:u64) → `Result<bool, Error>`
+- `RmlUi.data_model_set_notification_rows` (params: rows_handle:u64, rows:&sys::RmlDataNotificationRow, count:u64) → `Result<bool, Error>`
+- `RmlUi.data_model_set_option_rows` (params: rows_handle:u64, rows:&sys::RmlDataOptionRow, count:u64) → `Result<bool, Error>`
+- `RmlUi.data_model_set_percent` (params: variable_handle:u64, value:f32) → `Result<bool, Error>`
+- `RmlUi.data_model_set_pixels` (params: variable_handle:u64, value:f32) → `Result<bool, Error>`
+- `RmlUi.data_model_set_status_rows` (params: rows_handle:u64, rows:&sys::RmlDataStatusRow, count:u64) → `Result<bool, Error>`
+- `RmlUi.data_model_set_string` (params: variable_handle:u64, value:&str) → `Result<bool, Error>`
+- `RmlUi.data_model_set_swatch_rows` (params: rows_handle:u64, rows:&sys::RmlDataSwatchRow, count:u64) → `Result<bool, Error>`
+- `RmlUi.data_model_set_text_rows` (params: rows_handle:u64, rows:&sys::RmlDataTextRow, count:u64) → `Result<bool, Error>`
 - `RmlUi.document_append_to_style_sheet` (params: document_handle:u64, value:&str) → `Result<bool, Error>`
 - `RmlUi.document_close` (params: document_handle:u64) → `Result<bool, Error>`
 - `RmlUi.document_create_element` (params: document_handle:u64, tag_name:&str) → `Result<(u64, bool), Error>`
@@ -742,6 +806,7 @@ Total Functions: 1284
 - `RmlUi.element_get_elements_by_tag_name_count` (params: element_handle:u64, value:&str) → `Result<i32, Error>`
 - `RmlUi.element_get_id` (params: element_handle:u64) → `Result<Option<String>, Error>`
 - `RmlUi.element_get_inner_rml` (params: element_handle:u64) → `Result<Option<String>, Error>`
+- `RmlUi.element_get_rect` (params: element_handle:u64) → `Result<(f32, f32, f32, f32), Error>`
 - `RmlUi.element_get_scroll_left` (params: element_handle:u64) → `Result<i32, Error>`
 - `RmlUi.element_get_scroll_top` (params: element_handle:u64) → `Result<i32, Error>`
 - `RmlUi.element_get_tag_name` (params: element_handle:u64) → `Result<Option<String>, Error>`
@@ -791,6 +856,7 @@ Total Functions: 1284
 - `RmlUi.event_listener_process_event` (params: event_listener_handle:u64, event_handle:u64) → `Result<bool, Error>`
 - `RmlUi.event_stop_immediate_propagation` (params: event_handle:u64) → `Result<bool, Error>`
 - `RmlUi.event_stop_propagation` (params: event_handle:u64) → `Result<bool, Error>`
+- `RmlUi.get` (params: ) → `Result<T, Error>`
 - `RmlUi.get_context` (params: name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.get_version` (params: ) → `Result<Option<String>, Error>`
 - `RmlUi.is_ready` (params: ) → `Result<bool, Error>`
@@ -799,11 +865,23 @@ Total Functions: 1284
 - `RmlUi.register_event_type` (params: event_type:&str, interruptible:bool, bubbles:bool, default_phase:Option<i32>) → `Result<i32, Error>`
 - `RmlUi.remove_context` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.remove_context_by_name` (params: name:&str) → `Result<bool, Error>`
+- `RmlUi.remove_data_model` (params: context_handle:u64, name:&str) → `Result<(), Error>`
+- `RmlUi.set` (params: value:T) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlTextRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlLogRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlNotificationRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlIconRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlOptionRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlChoiceRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlStatusRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlSwatchRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: rows:&[RmlGridRow]) → `Result<(), Error>`
 - `RmlUi.set_debug_context` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.set_debug_context_by_name` (params: name:&str) → `Result<bool, Error>`
 - `RmlUi.set_mouse_cursor_alias` (params: rml_name:&str, recoil_name:&str) → `Result<bool, Error>`
 - `RmlUi.sol_lua_data_model___set_dirty` (params: data_model_handle:u64, property:&str) → `Result<bool, Error>`
 - `RmlUi.sol_lua_data_model_set_dirty` (params: data_model_handle:u64, property:&str) → `Result<bool, Error>`
+- `RmlUi.take_pointer_capture_delta` (params: context_handle:u64) → `Result<RmlPointerCaptureDelta, Error>`
 - `RmlUi.vector2f_new` (params: x:f32, y:f32) → `Result<(f32, f32), Error>`
 - `RmlUi.vector2i_new` (params: x:i32, y:i32) → `Result<(i32, i32), Error>`
 
@@ -894,9 +972,10 @@ Total Functions: 1284
 - `SystemControl.start` (params: cmd_args:&str, start_script:&str) → `Result<bool, Error>`
 - `SystemControl.yield` (params: ) → `Result<bool, Error>`
 
-## TeamControl (14 functions)
+## TeamControl (15 functions)
 
 - `TeamControl.add_team_resource` (params: team_id:i32, resource_type:&str, amount:f32) → `Result<bool, Error>`
+- `TeamControl.add_team_resource_excess_stats` (params: team_id:i32, resource_type:&str, amount:f32) → `Result<bool, Error>`
 - `TeamControl.assign_player_to_team` (params: player_id:i32, team_id:i32) → `Result<bool, Error>`
 - `TeamControl.game_over` (params: winning_ally_teams:&[i32]) → `Result<bool, Error>`
 - `TeamControl.kill_team` (params: team_id:i32) → `Result<bool, Error>`
@@ -911,7 +990,7 @@ Total Functions: 1284
 - `TeamControl.transfer_team_max_units` (params: from_team_id:i32, to_team_id:i32, amount:i32) → `Result<bool, Error>`
 - `TeamControl.use_team_resource` (params: team_id:i32, resource_type:&str, amount:f32) → `Result<bool, Error>`
 
-## Teams (19 functions)
+## Teams (21 functions)
 
 - `Teams.are_players_allied` (params: player_id1:i32, player_id2:i32) → `Result<bool, Error>`
 - `Teams.are_teams_allied` (params: team_id1:i32, team_id2:i32) → `Result<bool, Error>`
@@ -920,11 +999,13 @@ Total Functions: 1284
 - `Teams.get_ally_team_list` (params: ) → `Result<Vec<i32>, Error>`
 - `Teams.get_player_controlled_unit` (params: player_id:i32) → `Result<(i32, bool), Error>`
 - `Teams.get_player_info` (params: player_id:i32, get_player_opts:bool) → `Result<sys::PlayerInfo, Error>`
+- `Teams.get_player_info_owned` (params: player_id:i32, get_player_keys:bool) → `Result<PlayerInfo, Error>`
 - `Teams.get_player_list` (params: team_id:i32, active:bool) → `Result<Vec<i32>, Error>`
 - `Teams.get_player_list_in_ally_team` (params: ally_team_id:i32) → `Result<Vec<i32>, Error>`
 - `Teams.get_player_list_in_team` (params: team_id:i32) → `Result<Vec<i32>, Error>`
 - `Teams.get_team_ally_team_id` (params: team_id:i32) → `Result<i32, Error>`
 - `Teams.get_team_info` (params: team_id:i32, get_team_keys:bool) → `Result<sys::TeamInfo, Error>`
+- `Teams.get_team_info_owned` (params: team_id:i32, get_team_keys:bool) → `Result<TeamInfo, Error>`
 - `Teams.get_team_list` (params: ally_team_id:i32) → `Result<Vec<i32>, Error>`
 - `Teams.get_team_lua_ai` (params: team_id:i32) → `Result<Option<String>, Error>`
 - `Teams.get_team_max_units` (params: team_id:i32) → `Result<i32, Error>`
@@ -977,12 +1058,14 @@ Total Functions: 1284
 - `TerrainControl.set_tidal` (params: tidal:f32) → `Result<bool, Error>`
 - `TerrainControl.set_wind` (params: min_wind:f32, max_wind:f32) → `Result<bool, Error>`
 
-## Tracing (5 functions)
+## Tracing (7 functions)
 
 - `Tracing.trace_ray` (params: ray:sys::Ray) → `Result<(bool, i32, i32, sys::Float3, sys::Float3), Error>`
+- `Tracing.trace_ray_between_positions` (params: start:sys::Float3, end:sys::Float3, r#type:&str) → `Result<Vec<sys::TraceRayHit>, Error>`
 - `Tracing.trace_ray_features` (params: ray:sys::Ray) → `Result<(bool, i32, i32, sys::Float3, sys::Float3), Error>`
-- `Tracing.trace_ray_ground_between_positions` (params: start:sys::Float3, end:sys::Float3, test_water:bool) → `Result<(bool, sys::Float3, sys::Float3), Error>`
-- `Tracing.trace_ray_ground_in_direction` (params: start:sys::Float3, dir:sys::Float3, length:f32) → `Result<(bool, sys::Float3, sys::Float3), Error>`
+- `Tracing.trace_ray_ground_between_positions` (params: start:sys::Float3, end:sys::Float3, test_water:Option<bool>) → `Result<(bool, f32, sys::Float3, sys::Float3), Error>`
+- `Tracing.trace_ray_ground_in_direction` (params: start:sys::Float3, dir:sys::Float3, length:Option<f32>, test_water:Option<bool>) → `Result<(bool, f32, sys::Float3, sys::Float3), Error>`
+- `Tracing.trace_ray_in_direction` (params: pos:sys::Float3, dir:sys::Float3, max_length:Option<f32>, r#type:&str) → `Result<Vec<sys::TraceRayHit>, Error>`
 - `Tracing.trace_ray_units` (params: ray:sys::Ray) → `Result<(bool, i32, i32, sys::Float3, sys::Float3), Error>`
 
 ## UnitControl (90 functions)
@@ -1078,9 +1161,11 @@ Total Functions: 1284
 - `UnitControl.unit_weapon_hold_fire` (params: unit_id:i32, weapon_num:i32) → `Result<bool, Error>`
 - `UnitControl.use_unit_resource` (params: unit_id:i32, resource_type:&str, amount:f32) → `Result<bool, Error>`
 
-## UnitDefs (12 functions)
+## UnitDefs (21 functions)
 
-- `UnitDefs.get_unit_def_by_id` (params: unit_def_id:i32) → `Result<(bool, sys::UnitDefBasicInfo, sys::UnitDefCosts, sys::UnitDefPhysics, sys::UnitDefWeapons, sys::UnitDefBuildOptions, sys::UnitDefSensors, sys::UnitDefHealth), Error>`
+- `UnitDefs.get_unit_def_basic_info` (params: unit_def_id:i32) → `Result<Option<UnitDefBasicInfo>, Error>`
+- `UnitDefs.get_unit_def_by_id` (params: unit_def_id:i32) → `Result<(bool, sys::UnitDefBasicInfo, sys::UnitDefCosts, sys::UnitDefPhysics, sys::UnitDefWeapons, sys::UnitDefBuildOptions, sys::UnitDefSensors, sys::UnitDefHealth, sys::UnitDefClassify), Error>`
+- `UnitDefs.get_unit_def_classify` (params: unit_def_id:i32) → `Result<sys::UnitDefClassify, Error>`
 - `UnitDefs.get_unit_def_costs` (params: unit_def_id:i32) → `Result<sys::UnitDefCosts, Error>`
 - `UnitDefs.get_unit_def_count` (params: ) → `Result<u32, Error>`
 - `UnitDefs.get_unit_def_custom_param` (params: unit_def_id:i32, key:&str) → `Result<Option<String>, Error>`
@@ -1090,6 +1175,13 @@ Total Functions: 1284
 - `UnitDefs.get_unit_def_idby_name` (params: unit_def_name:&str) → `Result<i32, Error>`
 - `UnitDefs.get_unit_def_ids` (params: ) → `Result<Vec<i32>, Error>`
 - `UnitDefs.get_unit_def_name` (params: unit_def_id:i32) → `Result<Option<String>, Error>`
+- `UnitDefs.get_unit_def_param_bool` (params: unit_def_id:i32, key:&str) → `Result<bool, Error>`
+- `UnitDefs.get_unit_def_param_float` (params: unit_def_id:i32, key:&str) → `Result<f32, Error>`
+- `UnitDefs.get_unit_def_param_int` (params: unit_def_id:i32, key:&str) → `Result<i32, Error>`
+- `UnitDefs.get_unit_def_param_keys` (params: ) → `Result<Vec<sys::UnitDefParamKey>, Error>`
+- `UnitDefs.get_unit_def_param_string` (params: unit_def_id:i32, key:&str) → `Result<Option<String>, Error>`
+- `UnitDefs.get_unit_def_param_type` (params: key:&str) → `Result<i32, Error>`
+- `UnitDefs.get_unit_def_parameter_keys` (params: ) → `Result<Vec<UnitDefParamKey>, Error>`
 - `UnitDefs.get_unit_def_speed` (params: unit_def_id:i32) → `Result<f32, Error>`
 - `UnitDefs.valid_unit_def_id` (params: unit_def_id:i32) → `Result<bool, Error>`
 
@@ -1191,7 +1283,7 @@ Total Functions: 1284
 - `UnitsInfo.get_unit_self_dtime` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_sensor_radius` (params: unit_id:i32, r#type:&str) → `Result<sys::UnitSensorRadius, Error>`
 - `UnitsInfo.get_unit_shield_state` (params: unit_id:i32, weapon_num:i32) → `Result<(sys::UnitShieldState, bool), Error>`
-- `UnitsInfo.get_unit_states` (params: unit_id:i32) → `Result<sys::UnitStates, Error>`
+- `UnitsInfo.get_unit_states` (params: unit_id:i32, ret_table:Option<bool>, bin_state:Option<bool>, amt_state:Option<bool>) → `Result<sys::UnitStates, Error>`
 - `UnitsInfo.get_unit_stockpile` (params: unit_id:i32) → `Result<(sys::UnitStockpile, bool), Error>`
 - `UnitsInfo.get_unit_storage` (params: unit_id:i32) → `Result<sys::UnitStorage, Error>`
 - `UnitsInfo.get_unit_team` (params: unit_id:i32) → `Result<i32, Error>`
@@ -1322,7 +1414,7 @@ Total Functions: 1284
 - `UnsyncedCtrl.set_mini_map_rotation` (params: radians:f32) → `Result<(bool, i32), Error>`
 - `UnsyncedCtrl.set_mouse_cursor` (params: cursor_name:&str, scale:f32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_nano_projectile_params` (params: r:f32, v:f32, a:f32, rand_r:f32, rand_v:f32, rand_a:f32) → `Result<bool, Error>`
-- `UnsyncedCtrl.set_shock_front_factors` (params: min_area:f32, min_power:f32, dist_adj:f32, has_min_area:bool, has_min_power:bool, has_dist_adj:bool) → `Result<bool, Error>`
+- `UnsyncedCtrl.set_shock_front_factors` (params: min_area:Option<f32>, min_power:Option<f32>, dist_adj:Option<f32>) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_sky_box_texture` (params: tex_name:&str) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_sun_direction` (params: dir:sys::Float3, intensity:f32) → `Result<bool, Error>`
 - `UnsyncedCtrl.set_sun_lighting` (params: params:sys::SunLightingParams) → `Result<bool, Error>`
@@ -1349,7 +1441,7 @@ Total Functions: 1284
 - `UnsyncedCtrl.set_wmicon` (params: icon_file_name:&str, force_resolution:bool) → `Result<bool, Error>`
 - `UnsyncedCtrl.warp_mouse` (params: x:i32, y:i32) → `Result<bool, Error>`
 
-## UnsyncedRead (20 functions)
+## UnsyncedRead (21 functions)
 
 - `UnsyncedRead.get_active_cmd_desc` (params: cmd_index:i32) → `Result<(sys::ActiveCommandDescription, bool), Error>`
 - `UnsyncedRead.get_active_cmd_descs` (params: ) → `Result<Vec<sys::ActiveCommandDescription>, Error>`
@@ -1365,6 +1457,7 @@ Total Functions: 1284
 - `UnsyncedRead.get_last_message_positions` (params: ) → `Result<Vec<sys::Float3>, Error>`
 - `UnsyncedRead.get_nano_projectile_params` (params: ) → `Result<(f32, f32, f32, f32, f32, f32), Error>`
 - `UnsyncedRead.get_piece_projectile_name` (params: projectile_id:i32) → `Result<Option<String>, Error>`
+- `UnsyncedRead.get_prev_frame_sync_checksum` (params: ) → `Result<Option<String>, Error>`
 - `UnsyncedRead.get_team_damage_stats` (params: team_id:i32) → `Result<(f32, f32, bool), Error>`
 - `UnsyncedRead.get_unit_palette_index` (params: unit_id:i32) → `Result<(i32, bool), Error>`
 - `UnsyncedRead.is_unit_allied` (params: unit_id:i32) → `Result<bool, Error>`
@@ -1372,21 +1465,23 @@ Total Functions: 1284
 - `UnsyncedRead.solve_nurbscurve` (params: degree:i32, points:&[sys::Float4], knots:&[f32], segments:i32) → `Result<(Vec<sys::Float3>, bool), Error>`
 - `UnsyncedRead.unit_rendering` (params: ) → `UnitRendering<'_>`
 
-## Utils (6 functions)
+## Utils (7 functions)
 
 - `Utils.closest_build_pos` (params: team_id:i32, unit_def_id:i32, pos:sys::Float3, search_radius:f32, min_dist:i32, facing:i32) → `Result<sys::Float3, Error>`
 - `Utils.get_cegid` (params: ceg_name:&str) → `Result<i32, Error>`
+- `Utils.get_feature_def_dimensions` (params: feature_def_id:i32) → `Result<sys::UnitDefDimensions, Error>`
 - `Utils.get_unit_def_dimensions` (params: unit_def_id:i32) → `Result<sys::UnitDefDimensions, Error>`
 - `Utils.pos2_build_pos` (params: unit_def_id:i32, pos:sys::Float3, facing:i32) → `Result<sys::Float3, Error>`
 - `Utils.test_build_order` (params: unit_def_id:i32, pos:sys::Float3, facing:i32) → `Result<(i32, bool, i32), Error>`
 - `Utils.test_move_order` (params: unit_def_id:i32, pos:sys::Float3, dir:sys::Float3, test_terrain:bool, test_objects:bool, center_only:bool) → `Result<bool, Error>`
 
-## Vfs (49 functions)
+## Vfs (53 functions)
 
 - `Vfs.calculate_hash` (params: data:&[u8], hash_type:i32) → `Result<Option<String>, Error>`
 - `Vfs.compress_folder` (params: folder_path:&str, archive_type:&str, compressed_file_path:&str, include_folder:bool, mode:&str) → `Result<bool, Error>`
 - `Vfs.create_dir` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.dir_list` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<sys::DirEntry>, Error>`
+- `Vfs.dir_list_names` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<String>, Error>`
 - `Vfs.extract_mod_archive_file` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.file_exists` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.get_all_archives` (params: ) → `Result<Vec<String>, Error>`
@@ -1410,6 +1505,8 @@ Total Functions: 1284
 - `Vfs.has_archive` (params: archive_name:&str) → `Result<bool, Error>`
 - `Vfs.is_directory` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.list_dir` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<sys::DirEntry>, Error>`
+- `Vfs.list_dir_names` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<String>, Error>`
+- `Vfs.list_entries` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<DirectoryEntry>, Error>`
 - `Vfs.load_file` (params: path:&str, mode:&str) → `Result<Vec<u8>, Error>`
 - `Vfs.pack_f32` (params: values:&[f32]) → `Result<Vec<u8>, Error>`
 - `Vfs.pack_s16` (params: values:&[i16]) → `Result<Vec<u8>, Error>`
@@ -1420,6 +1517,7 @@ Total Functions: 1284
 - `Vfs.pack_u8` (params: values:&[u8]) → `Result<Vec<u8>, Error>`
 - `Vfs.read_file` (params: path:&str) → `Result<Vec<u8>, Error>`
 - `Vfs.read_file_as_string` (params: path:&str) → `Result<Option<String>, Error>`
+- `Vfs.scan_all_dirs` (params: ) → `Result<(), Error>`
 - `Vfs.set_map_square_texture` (params: tex_square_x:i32, tex_square_y:i32, texture_name:&str) → `Result<bool, Error>`
 - `Vfs.sub_dirs` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<String>, Error>`
 - `Vfs.unpack_f32` (params: data:&[u8], byte_offset:u32, count:u32) → `Result<Vec<f32>, Error>`

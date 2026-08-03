@@ -183,6 +183,7 @@ CR_REG_METADATA(CGame, (
 	// FIXME: atomic type deduction
 	CR_IGNORED(loadDone),
 	CR_IGNORED(gameOver),
+	CR_IGNORED(nativeInterfaceSystem),
 
 	CR_IGNORED(gameDrawMode),
 	CR_MEMBER(showFPS),

@@ -547,7 +547,9 @@ def main():
         "Spring.UseTeamResource": [("teamID", "integer"), ("resourceType", "string"), ("amount", "number")],
         "Spring.UseUnitResource": [("unitID", "integer"), ("resourceType", "string"), ("amount", "number")],
         "Spring.WarpMouse": [("x", "integer"), ("y", "integer")],
-        "Spring.TraceRayGroundInDirection": [("posX", "number"), ("posY", "number"), ("posZ", "number"), ("dirX", "number"), ("dirY", "number"), ("dirZ", "number"), ("testWater", "number?")],
+        "Spring.GetTeamUnitCount": [("teamID", "integer")],
+        "Spring.GetUnitBuildParams": [("unitID", "integer"), ("paramName", "string")],
+        "Spring.TraceRayGroundInDirection": [("posX", "number"), ("posY", "number"), ("posZ", "number"), ("dirX", "number"), ("dirY", "number"), ("dirZ", "number"), ("maxLength", "number?"), ("testWater", "boolean?")],
         "Spring.SolveNURBSCurve": [("degree", "integer"), ("controlPoints", "ControlPoint[]"), ("knots", "number[]"), ("segments", "integer")],
     }
 
@@ -606,6 +608,8 @@ def main():
                 f.write(f'- `{func["full_name"]}`\n')
 
             f.write('\n')
+
+    output_file.write_text(output_file.read_text(encoding='utf-8').rstrip() + '\n', encoding='utf-8')
 
     print(f"\nWrote {total} functions ({callout_count} callouts, {callin_count} callins) to {output_file}")
     print(f"Namespaces: {', '.join(sorted(by_namespace.keys()))}")

@@ -409,6 +409,7 @@ endif()
 	add_spring_test(${test_name} "${test_src}" "${test_libs}" "${test_flags}")
 	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/lib/)
 	add_dependencies(test_${test_name} springcontent.sdz)
+	set_tests_properties(test${test_name} PROPERTIES ENVIRONMENT "SPRING_ISOLATED=${CMAKE_BINARY_DIR}")
 
 ################################################################################
 ### ThreadPool

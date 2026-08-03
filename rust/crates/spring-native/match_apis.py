@@ -203,6 +203,21 @@ def compare_params(lua_params: List[Dict], rust_params: List[Dict]) -> Tuple[boo
 def compare_function_params(lua_func: Dict, rust_func: Dict) -> Tuple[bool, str]:
     if lua_func.get('name') in CALLBACK_SHAPE_EQUIVALENTS:
         return True, "callback shape equivalent"
+
+    # RequestPath accepts one Lua union (number|string).  The C ABI keeps the
+    # two representations explicit so bindgen can expose a typed optional
+    # string alongside the numeric path type.  Compare the union as one
+    # logical parameter while still checking every remaining argument.
+    if lua_func.get('name') == 'Spring.RequestPath':
+        lua_params = lua_func.get('params', [])
+        rust_params = rust_func.get('params', [])
+        if len(lua_params) >= 1 and len(rust_params) >= 2:
+            move_id = normalize_type(lua_params[0].get('type', ''))
+            move_def_id = normalize_param_type(rust_params[0])
+            move_def_name = normalize_param_type(rust_params[1])
+            if move_id in {'number|string', 'string|number', 'defref'} and move_def_id == 'int' and move_def_name == 'string':
+                return compare_params(lua_params[1:], rust_params[2:])
+
     return compare_params(lua_func.get('params', []), rust_func.get('params', []))
 
 
@@ -482,7 +497,7 @@ def main():
         for rust_func in sorted(unmatched_rust):
             f.write(f'- `{rust_func}`\n')
 
-        f.write(f'\n**Total Rust-only: {len(unmatched_rust)}**\n\n')
+        f.write(f'\n**Total Rust-only: {len(unmatched_rust)}**\n')
 
     todo_lines = ['Current API port TODO (one function per line; generated from api_comparison.md)']
     for lua_func, _, _, _, rust_meta in sorted(matched, key=lambda x: x[0]['name']):

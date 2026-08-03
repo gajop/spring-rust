@@ -84,7 +84,25 @@ TEST_CASE("ElementGetRect reports an element's absolute offset and border box")
 	document->Show();
 	context->Update();
 
-	RmlElementHandleQuery query = {.elementHandle = ToHandle(box)};
+	// Resolve the element through the native API so the test uses the same
+	// validated handle path as a native plugin. Passing the raw RmlUi pointer
+	// would correctly be rejected as an unregistered handle.
+	RmlContextHandleQuery contextQuery = {.contextHandle = ToHandle(context)};
+	RmlContextGetElementResult rootResult = {};
+	RMLUI_API.ContextGetRootElement(&contextQuery, &rootResult);
+	REQUIRE(rootResult.error == nullptr);
+	REQUIRE(rootResult.exists);
+
+	RmlElementGetByStringQuery elementQuery = {
+		.elementHandle = rootResult.elementHandle,
+		.value = "box",
+	};
+	RmlElementGetElementResult elementResult = {};
+	RMLUI_API.ElementGetElementById(&elementQuery, &elementResult);
+	REQUIRE(elementResult.error == nullptr);
+	REQUIRE(elementResult.exists);
+
+	RmlElementHandleQuery query = {.elementHandle = elementResult.elementHandle};
 	RmlElementGetRectResult result = {};
 	RMLUI_API.ElementGetRect(&query, &result);
 

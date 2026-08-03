@@ -232,10 +232,10 @@ struct SetDrawSelectionInfoResult { const Error* error; bool success; };
 
 struct SetShockFrontFactorsQuery {
 	float minArea;
-	float minPower;
-	float distAdj;
 	bool hasMinArea;
+	float minPower;
 	bool hasMinPower;
+	float distAdj;
 	bool hasDistAdj;
 };
 struct SetShockFrontFactorsResult { const Error* error; bool success; };

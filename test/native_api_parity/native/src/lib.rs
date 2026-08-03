@@ -213,6 +213,7 @@ mod sound_checks;
 mod support;
 mod system_control_checks;
 mod terrain_checks;
+mod tracing_checks;
 mod unit_checks;
 mod unsynced_read_checks;
 mod utils_checks;

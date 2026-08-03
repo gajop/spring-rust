@@ -872,7 +872,7 @@ impl NativeApiParity {
         let native = self
             .interface
             .units_info()
-            .get_unit_states(unit_id)
+            .get_unit_states(unit_id, None, None, None)
             .map_err(|err| format!("get_unit_states({unit_id}) failed: {err:?}"))?;
         self.same_i32_if_present(label, message, "firestate", native.fireState)?;
         self.same_i32_if_present(label, message, "movestate", native.moveState)?;
