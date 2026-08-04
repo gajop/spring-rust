@@ -6,6 +6,26 @@ use std::sync::Mutex;
 static RECORD_LOCK: Mutex<()> = Mutex::new(());
 
 impl NativeApiParity {
+    pub(crate) fn record_callin(&self, name: &str, arity: usize) {
+        if let Some(parent) = self.callin_trace_path.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+
+        let _record_guard = RECORD_LOCK.lock().expect("native callin recorder lock");
+        if let Ok(mut file) = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&self.callin_trace_path)
+        {
+            let row = serde_json::json!({
+                "context": "native_callin",
+                "name": name,
+                "arity": arity,
+            });
+            let _ = writeln!(file, "{row}");
+        }
+    }
+
     pub(crate) fn same_vec3(
         &self,
         label: &str,

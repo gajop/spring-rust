@@ -615,3 +615,5 @@ function GameFrame(frame)
 		end
 	end
 end
+
+VFS.Include("LuaUI/callin_ui_trace.lua")

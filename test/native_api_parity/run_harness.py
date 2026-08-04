@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import os
 import random
@@ -37,7 +38,18 @@ NATIVE_SO = HARNESS / "native" / "target" / "release" / "libnative_api_parity.so
 LUA_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "lua_functions.md"
 RUST_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "rust_functions.md"
 GAME_NAME = "Native API Parity 0.1"
-RESULT_STREAMS = ("synced_gadget.jsonl", "unsynced_gadget.jsonl", "widget.jsonl")
+RESULT_STREAMS = (
+    "synced_gadget.jsonl",
+    "unsynced_gadget.jsonl",
+    "widget.jsonl",
+)
+CALLIN_LUA_STREAM = "callin_lua.jsonl"
+CALLIN_NATIVE_STREAM = "callin_native.jsonl"
+
+# C++ documents these in the general Callins section, but the implementation
+# only invokes them for the synced LuaRules handle because their watch masks
+# are not initialized for LuaUI.
+SYNCED_GENERAL_CALLINS = {"Explosion", "ProjectileCreated", "ProjectileDestroyed"}
 NATIVE_ACCESSOR_TYPES = {
     "features": "Features",
     "game": "Game",
@@ -48,6 +60,17 @@ NATIVE_ACCESSOR_TYPES = {
 }
 API_TESTS = load_api_tests()
 KNOWN_ISSUES = load_known_issues()
+
+
+def documented_callin_names() -> tuple[set[str], set[str]]:
+    text = LUA_API_DOC.read_text(encoding="utf-8")
+    synced = set(
+        re.findall(r"- `SyncedCallins\.([A-Za-z0-9_]+)`", text)
+    )
+    unsynced = set(
+        re.findall(r"- `UnsyncedCallins\.([A-Za-z0-9_]+)`", text)
+    )
+    return synced, unsynced
 
 
 def coverage_metadata(test: dict) -> dict:
@@ -344,6 +367,18 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
                     print(json.dumps(row, sort_keys=True))
                 ok = False
 
+    native_callin_rows = load_jsonl(native_dir / CALLIN_NATIVE_STREAM)
+    native_lua_callin_rows = load_jsonl(native_dir / CALLIN_LUA_STREAM)
+    callin_trace = compare_callin_traces(native_lua_callin_rows, native_callin_rows)
+    if not callin_trace["matches"]:
+        print("mismatch: engine callin Lua/native trace")
+        for name in sorted(set(callin_trace["lua_counts"]) | set(callin_trace["native_counts"])):
+            lua_count = callin_trace["lua_counts"].get(name, 0)
+            native_count = callin_trace["native_counts"].get(name, 0)
+            if lua_count != native_count:
+                print(f"  {name}: lua={lua_count}, native={native_count}")
+        ok = False
+
     native_path = native_dir / "native.jsonl"
     native_jsonl_exists = native_path.exists()
     if not native_jsonl_exists:
@@ -369,11 +404,67 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
         "native_rows": native_rows,
         "native_failures": native_failures,
         "native_complete": native_complete,
+        "callin_trace": callin_trace,
     }
 
 
 def comparable_rows(rows: list[dict]) -> list[dict]:
     return [comparable_row(row) for row in rows]
+
+
+def comparable_callin_rows(rows: list[dict]) -> list[dict]:
+    """Compare the stable, semantic part of the Lua callin trace.
+
+    The fixture runs in separate Spring processes, and the callin list can be
+    delivered in a different order when rendering is active.  Argument object
+    IDs are intentionally represented only by their normalized Lua value kind;
+    source-level signature auditing handles the compact/native-vs-Lua field
+    mapping separately.
+    """
+    result = []
+    for row in rows:
+        if not row.get("name"):
+            continue
+        result.append(
+            {
+                "context": row.get("context"),
+                "name": row.get("name"),
+                "arity": row.get("arity"),
+                "args": row.get("args", []),
+            }
+        )
+    return sorted(result, key=lambda row: json.dumps(row, sort_keys=True))
+
+
+def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict:
+    """Compare event delivery counts for shared Lua/native engine callins."""
+    synced_names, unsynced_names = documented_callin_names()
+
+    def selected_lua_row(row: dict) -> bool:
+        name = str(row.get("name", ""))
+        context = str(row.get("context", ""))
+        # Prefer the full-read synced gadget for synced callins, the unsynced
+        # gadget for renderer/input callins, and the LuaUI handle for general
+        # Callins.  The same general callback can legitimately be delivered to
+        # both a gadget and a widget; the native event client receives one
+        # engine event, so comparing all Lua handles would double-count it.
+        if name in unsynced_names:
+            return context == "unsynced_gadget"
+        if name in synced_names or name in SYNCED_GENERAL_CALLINS:
+            return context == "synced_gadget"
+        return context == "lua_ui"
+
+    lua_counts = Counter(
+        str(row.get("name")) for row in lua_rows if row.get("name") and selected_lua_row(row)
+    )
+    native_counts = Counter(str(row.get("name")) for row in native_rows if row.get("name"))
+    return {
+        "matches": lua_counts == native_counts,
+        "lua_rows": len(lua_rows),
+        "native_rows": len(native_rows),
+        "lua_counts": dict(lua_counts),
+        "native_counts": dict(native_counts),
+    }
 
 
 def comparable_row(row: dict) -> dict:
@@ -1018,6 +1109,20 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
     else:
         for name in RESULT_STREAMS:
             lines.append(f"| `{name}` | {len(load_jsonl(lua_dir / name))} | n/a | n/a |")
+
+    if compare_info:
+        trace = compare_info["callin_trace"]
+        lua_trace_rows = len(load_jsonl(lua_dir / CALLIN_LUA_STREAM))
+        native_lua_trace_rows = len(load_jsonl(native_dir / CALLIN_LUA_STREAM))
+        native_trace_rows = len(load_jsonl(native_dir / CALLIN_NATIVE_STREAM))
+        lines.extend([
+            "",
+            "## Engine Callin Trace",
+            "",
+            f"- Lua trace rows: baseline `{lua_trace_rows}`, native run `{native_lua_trace_rows}`",
+            f"- Native trace rows: `{native_trace_rows}`",
+            f"- Shared event counts: `{'match' if trace['matches'] else 'MISMATCH'}`",
+        ])
 
     lines.extend([
         "",

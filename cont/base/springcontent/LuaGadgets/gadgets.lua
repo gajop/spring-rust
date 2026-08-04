@@ -997,6 +997,16 @@ function gadgetHandler:TeamDied(teamID)
   end
 end
 
+function gadgetHandler:ResourceExcess(excesses)
+  for _,g in r_ipairs(self.ResourceExcessList) do
+    if (g:ResourceExcess(excesses)) then
+      return true
+    end
+  end
+
+  return false
+end
+
 function gadgetHandler:TeamChanged(teamID)
   for _,g in r_ipairs(self.TeamChangedList) do
     g:TeamChanged(teamID)

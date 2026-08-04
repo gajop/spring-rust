@@ -781,6 +781,12 @@ function Fixture.create()
 	local unitDef = UnitDefs[unitDefID]
 	local weaponEntry = unitDef and unitDef.weapons and (unitDef.weapons[1] or unitDef.weapons[0])
 	local weaponDefID = weaponEntry and weaponEntry.weaponDef
+	if weaponDefID then
+		-- These callins are opt-in on the Lua side.  Register the same fixture
+		-- weapon before spawning it so Lua and native receive the same watched
+		-- projectile/explosion/target events.
+		Script.SetWatchWeapon(weaponDefID, true)
+	end
 	local projectileID = weaponDefID and Spring.SpawnProjectile(weaponDefID, {
 		pos = {baseX, 96, baseZ},
 		speed = {0, 0, 0},

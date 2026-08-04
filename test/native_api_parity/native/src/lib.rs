@@ -15,10 +15,16 @@ struct NativeApiParity {
     failures: u32,
     gfx_smoke_ran: bool,
     output_path: PathBuf,
+    callin_trace_path: PathBuf,
 }
 
 type CheckFn = fn(&mut NativeApiParity, &Value, &str) -> Result<(), String>;
 type SetFn = fn(&mut NativeApiParity, &Value) -> Result<(), String>;
+
+include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/generated_callin_trace.rs"
+));
 
 struct TestSpec {
     name: &'static str,
@@ -49,6 +55,10 @@ impl NativeModule for NativeApiParity {
                 .map(PathBuf::from)
                 .unwrap_or_else(|| PathBuf::from("native_api_parity"))
                 .join(format!("native-{}.jsonl", std::process::id())),
+            callin_trace_path: env::var_os("SPRING_NATIVE_PARITY_OUTPUT_DIR")
+                .map(PathBuf::from)
+                .unwrap_or_else(|| PathBuf::from("native_api_parity"))
+                .join("callin_native.jsonl"),
         }
     }
 
@@ -115,6 +125,7 @@ impl NativeModule for NativeApiParity {
     }
 
     fn draw_screen(&mut self) -> Result<(), Error> {
+        self.record_callin("DrawScreen", 0);
         if self.gfx_smoke_ran {
             return Ok(());
         }
@@ -194,6 +205,8 @@ impl NativeModule for NativeApiParity {
         }
         Ok(())
     }
+
+    generated_callin_trace_methods!();
 }
 
 fn native_parity_skip(name: &str) -> bool {

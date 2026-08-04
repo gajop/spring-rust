@@ -43,6 +43,7 @@ CALLIN_LIST = {
 	-- team callins
 	"TeamDied",
 	"TeamChanged",
+	"ResourceExcess",
 
 	-- unit callins
 	"UnitCreated",
