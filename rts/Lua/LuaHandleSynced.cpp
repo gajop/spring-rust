@@ -508,6 +508,7 @@ bool CSyncedLuaHandle::Init(std::string code, const std::string& file)
 		if (!AddEntriesToTable(L, "Spring",         LuaSyncedCtrl::PushEntries      )) KILL
 		if (!AddEntriesToTable(L, "Spring",         LuaSyncedRead::PushEntries      )) KILL
 		if (!AddEntriesToTable(L, "Spring",          LuaUICommand::PushEntries      )) KILL
+		if (!AddEntriesToTable(L, "debug",          LuaDebugExtra::PushEntries      )) KILL
 		if (!AddEntriesToTable(L, "Engine",        LuaConstEngine::PushEntries      )) KILL
 		if (!AddEntriesToTable(L, "Game",            LuaConstGame::PushEntries      )) KILL
 		if (!AddEntriesToTable(L, "CMD",              LuaConstCMD::PushEntries      )) KILL
