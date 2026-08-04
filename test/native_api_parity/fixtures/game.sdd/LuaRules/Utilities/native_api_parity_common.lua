@@ -13,7 +13,10 @@ local jsonEscapes = {
 }
 
 local function encodeString(value)
-	return "\"" .. value:gsub("[%z\1-\31\\\"]", function(char)
+	-- Lua strings are byte sequences.  Escape non-ASCII bytes as JSON unicode
+	-- escapes too; otherwise localized/tool-tip text can write invalid UTF-8
+	-- into the parity JSONL stream.
+	return "\"" .. value:gsub("[%z\1-\31\\\"\127-\255]", function(char)
 		return jsonEscapes[char] or string.format("\\u%04x", char:byte())
 	end) .. "\""
 end

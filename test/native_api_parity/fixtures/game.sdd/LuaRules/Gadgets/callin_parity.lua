@@ -35,23 +35,41 @@ local function normalize(value, depth)
 	return result
 end
 
+local function pack(...)
+	local result = { n = select("#", ...) }
+	for index = 1, result.n do
+		result[index] = select(index, ...)
+	end
+	return result
+end
+
+local function unpackn(values)
+	return unpack(values, 1, values.n)
+end
+
 local function forward(encoded)
 	if Script.LuaUI and Script.LuaUI.NativeApiParityResult then
 		Script.LuaUI.NativeApiParityResult(outputStream, encoded)
 	end
 end
 
-local function trace(name, ...)
-	local args = { ... }
+local function trace(name, results, ...)
+	local args = pack(...)
 	local normalized = {}
-	for index = 1, select("#", ...) do
+	for index = 1, args.n do
 		normalized[index] = normalize(args[index], 0)
+	end
+	local normalizedResults = {}
+	for index = 1, results.n do
+		normalizedResults[index] = normalize(results[index], 0)
 	end
 	local payload = {
 		context = synced and "synced_gadget" or "unsynced_gadget",
 		name = name,
-		arity = select("#", ...),
+		arity = args.n,
 		args = normalized,
+		resultArity = results.n,
+		results = normalizedResults,
 	}
 	local encoded = Common.encode(payload)
 	if synced then
@@ -62,16 +80,40 @@ local function trace(name, ...)
 end
 
 local function traceCallin(name, ...)
-	trace(name, ...)
-	if name == "AllowUnitCreation" then return true, true end
-	if name == "UnitPreDamaged" or name == "FeaturePreDamaged" then return nil, nil end
-	if name == "AllowWeaponTarget" then
-		local args = { ... }
-		return true, args[5] or 1.0
-	end
-	if name == "AllowWeaponTargetCheck" then return -1 end
-	local default = {
+	local args = pack(...)
+	local results
+	if name == "AllowUnitCreation" then
+		results = pack(true, true)
+	elseif name == "AllowWeaponTarget" then
+		results = pack(true, args[5] or 1.0)
+	elseif name == "UnitPreDamaged" or name == "FeaturePreDamaged" then
+		results = pack(args[4], 1.0)
+	elseif name == "MousePress" then
+		results = pack(Common.mode() ~= "native")
+	elseif name == "AllowWeaponTargetCheck" then
+		results = pack(-1)
+	elseif name == "DefaultCommand" or name == "GetTooltip" or name == "WorldTooltip" then
+		results = pack(nil)
+	else
+		local default = {
 		["AddConsoleLine"] = {false},
+		["AllowBuilderHoldFire"] = {true},
+		["AllowCommand"] = {true},
+		["AllowDirectUnitControl"] = {true},
+		["AllowFeatureBuildStep"] = {true},
+		["AllowFeatureCreation"] = {true},
+		["AllowResourceLevel"] = {true},
+		["AllowResourceTransfer"] = {true},
+		["AllowStartPosition"] = {true},
+		["AllowUnitBuildStep"] = {true},
+		["AllowUnitCaptureStep"] = {true},
+		["AllowUnitCloak"] = {true},
+		["AllowUnitDecloak"] = {true},
+		["AllowUnitKamikaze"] = {true},
+		["AllowUnitTransfer"] = {true},
+		["AllowUnitTransport"] = {true},
+		["AllowUnitTransportLoad"] = {true},
+		["AllowUnitTransportUnload"] = {true},
 		["AllowWeaponInterceptTarget"] = {true},
 		["CommandFallback"] = {false},
 		["CommandNotify"] = {false},
@@ -93,13 +135,17 @@ local function traceCallin(name, ...)
 		["MoveCtrlNotify"] = {false},
 		["ResourceExcess"] = {false},
 		["ShieldPreDamaged"] = {false},
+		["TerraformComplete"] = {false},
 		["TextEditing"] = {false},
 		["TextInput"] = {false},
 		["UnitFeatureCollision"] = {false},
 		["UnitUnitCollision"] = {false},
-	}
-	local values = default[name]
-	if values then return unpack(values) end
+		}
+		local values = default[name]
+		results = values and pack(unpack(values, 1, #values)) or pack()
+	end
+	trace(name, results, unpackn(args))
+	return unpackn(results)
 end
 
 if not synced then
@@ -112,150 +158,607 @@ if not synced then
 	end
 end
 
-function gadget:AllowBuilderHoldFire(...)
-	return traceCallin("AllowBuilderHoldFire", ...)
+-- General synced Callins and explicit SyncedCallins are defined only
+-- in the full-read LuaRules half; otherwise the unsynced half would
+-- register a second restricted callback for the same engine event.
+if synced then
+	function gadget:AllowBuilderHoldFire(...)
+		return traceCallin("AllowBuilderHoldFire", ...)
+	end
+
+	function gadget:AllowCommand(...)
+		return traceCallin("AllowCommand", ...)
+	end
+
+	function gadget:AllowDirectUnitControl(...)
+		return traceCallin("AllowDirectUnitControl", ...)
+	end
+
+	function gadget:AllowFeatureBuildStep(...)
+		return traceCallin("AllowFeatureBuildStep", ...)
+	end
+
+	function gadget:AllowFeatureCreation(...)
+		return traceCallin("AllowFeatureCreation", ...)
+	end
+
+	function gadget:AllowResourceLevel(...)
+		return traceCallin("AllowResourceLevel", ...)
+	end
+
+	function gadget:AllowResourceTransfer(...)
+		return traceCallin("AllowResourceTransfer", ...)
+	end
+
+	function gadget:AllowStartPosition(...)
+		return traceCallin("AllowStartPosition", ...)
+	end
+
+	function gadget:AllowUnitBuildStep(...)
+		return traceCallin("AllowUnitBuildStep", ...)
+	end
+
+	function gadget:AllowUnitCaptureStep(...)
+		return traceCallin("AllowUnitCaptureStep", ...)
+	end
+
+	function gadget:AllowUnitCloak(...)
+		return traceCallin("AllowUnitCloak", ...)
+	end
+
+	function gadget:AllowUnitCreation(...)
+		return traceCallin("AllowUnitCreation", ...)
+	end
+
+	function gadget:AllowUnitDecloak(...)
+		return traceCallin("AllowUnitDecloak", ...)
+	end
+
+	function gadget:AllowUnitKamikaze(...)
+		return traceCallin("AllowUnitKamikaze", ...)
+	end
+
+	function gadget:AllowUnitTransfer(...)
+		return traceCallin("AllowUnitTransfer", ...)
+	end
+
+	function gadget:AllowUnitTransport(...)
+		return traceCallin("AllowUnitTransport", ...)
+	end
+
+	function gadget:AllowUnitTransportLoad(...)
+		return traceCallin("AllowUnitTransportLoad", ...)
+	end
+
+	function gadget:AllowUnitTransportUnload(...)
+		return traceCallin("AllowUnitTransportUnload", ...)
+	end
+
+	function gadget:AllowWeaponInterceptTarget(...)
+		return traceCallin("AllowWeaponInterceptTarget", ...)
+	end
+
+	function gadget:AllowWeaponTarget(...)
+		return traceCallin("AllowWeaponTarget", ...)
+	end
+
+	function gadget:AllowWeaponTargetCheck(...)
+		return traceCallin("AllowWeaponTargetCheck", ...)
+	end
+
+	function gadget:CommandFallback(...)
+		return traceCallin("CommandFallback", ...)
+	end
+
+	function gadget:Explosion(...)
+		return traceCallin("Explosion", ...)
+	end
+
+	function gadget:FeatureCreated(...)
+		return traceCallin("FeatureCreated", ...)
+	end
+
+	function gadget:FeatureDamaged(...)
+		return traceCallin("FeatureDamaged", ...)
+	end
+
+	function gadget:FeatureDestroyed(...)
+		return traceCallin("FeatureDestroyed", ...)
+	end
+
+	function gadget:FeaturePreDamaged(...)
+		return traceCallin("FeaturePreDamaged", ...)
+	end
+
+	function gadget:GameFrame(...)
+		return traceCallin("GameFrame", ...)
+	end
+
+	function gadget:GameFramePost(...)
+		return traceCallin("GameFramePost", ...)
+	end
+
+	function gadget:GameID(...)
+		return traceCallin("GameID", ...)
+	end
+
+	function gadget:GameOver(...)
+		return traceCallin("GameOver", ...)
+	end
+
+	function gadget:GamePaused(...)
+		return traceCallin("GamePaused", ...)
+	end
+
+	function gadget:GamePreload(...)
+		return traceCallin("GamePreload", ...)
+	end
+
+	function gadget:GameStart(...)
+		return traceCallin("GameStart", ...)
+	end
+
+	function gadget:Load(...)
+		return traceCallin("Load", ...)
+	end
+
+	function gadget:MoveCtrlNotify(...)
+		return traceCallin("MoveCtrlNotify", ...)
+	end
+
+	function gadget:ProjectileCreated(...)
+		return traceCallin("ProjectileCreated", ...)
+	end
+
+	function gadget:ProjectileDestroyed(...)
+		return traceCallin("ProjectileDestroyed", ...)
+	end
+
+	function gadget:ResourceExcess(...)
+		return traceCallin("ResourceExcess", ...)
+	end
+
+	function gadget:ShieldPreDamaged(...)
+		return traceCallin("ShieldPreDamaged", ...)
+	end
+
+	function gadget:StockpileChanged(...)
+		return traceCallin("StockpileChanged", ...)
+	end
+
+	function gadget:TeamChanged(...)
+		return traceCallin("TeamChanged", ...)
+	end
+
+	function gadget:TeamDied(...)
+		return traceCallin("TeamDied", ...)
+	end
+
+	function gadget:TerraformComplete(...)
+		return traceCallin("TerraformComplete", ...)
+	end
+
+	function gadget:UnitArrivedAtGoal(...)
+		return traceCallin("UnitArrivedAtGoal", ...)
+	end
+
+	function gadget:UnitCloaked(...)
+		return traceCallin("UnitCloaked", ...)
+	end
+
+	function gadget:UnitCmdDone(...)
+		return traceCallin("UnitCmdDone", ...)
+	end
+
+	function gadget:UnitCommand(...)
+		return traceCallin("UnitCommand", ...)
+	end
+
+	function gadget:UnitConstructionDecayed(...)
+		return traceCallin("UnitConstructionDecayed", ...)
+	end
+
+	function gadget:UnitCreated(...)
+		return traceCallin("UnitCreated", ...)
+	end
+
+	function gadget:UnitDamaged(...)
+		return traceCallin("UnitDamaged", ...)
+	end
+
+	function gadget:UnitDecloaked(...)
+		return traceCallin("UnitDecloaked", ...)
+	end
+
+	function gadget:UnitDestroyed(...)
+		return traceCallin("UnitDestroyed", ...)
+	end
+
+	function gadget:UnitEnteredAir(...)
+		return traceCallin("UnitEnteredAir", ...)
+	end
+
+	function gadget:UnitEnteredLos(...)
+		return traceCallin("UnitEnteredLos", ...)
+	end
+
+	function gadget:UnitEnteredRadar(...)
+		return traceCallin("UnitEnteredRadar", ...)
+	end
+
+	function gadget:UnitEnteredUnderwater(...)
+		return traceCallin("UnitEnteredUnderwater", ...)
+	end
+
+	function gadget:UnitEnteredWater(...)
+		return traceCallin("UnitEnteredWater", ...)
+	end
+
+	function gadget:UnitExperience(...)
+		return traceCallin("UnitExperience", ...)
+	end
+
+	function gadget:UnitFeatureCollision(...)
+		return traceCallin("UnitFeatureCollision", ...)
+	end
+
+	function gadget:UnitFinished(...)
+		return traceCallin("UnitFinished", ...)
+	end
+
+	function gadget:UnitFromFactory(...)
+		return traceCallin("UnitFromFactory", ...)
+	end
+
+	function gadget:UnitGiven(...)
+		return traceCallin("UnitGiven", ...)
+	end
+
+	function gadget:UnitHarvestStorageFull(...)
+		return traceCallin("UnitHarvestStorageFull", ...)
+	end
+
+	function gadget:UnitIdle(...)
+		return traceCallin("UnitIdle", ...)
+	end
+
+	function gadget:UnitLeftAir(...)
+		return traceCallin("UnitLeftAir", ...)
+	end
+
+	function gadget:UnitLeftLos(...)
+		return traceCallin("UnitLeftLos", ...)
+	end
+
+	function gadget:UnitLeftRadar(...)
+		return traceCallin("UnitLeftRadar", ...)
+	end
+
+	function gadget:UnitLeftUnderwater(...)
+		return traceCallin("UnitLeftUnderwater", ...)
+	end
+
+	function gadget:UnitLeftWater(...)
+		return traceCallin("UnitLeftWater", ...)
+	end
+
+	function gadget:UnitLoaded(...)
+		return traceCallin("UnitLoaded", ...)
+	end
+
+	function gadget:UnitMoveFailed(...)
+		return traceCallin("UnitMoveFailed", ...)
+	end
+
+	function gadget:UnitPreDamaged(...)
+		return traceCallin("UnitPreDamaged", ...)
+	end
+
+	function gadget:UnitReverseBuilt(...)
+		return traceCallin("UnitReverseBuilt", ...)
+	end
+
+	function gadget:UnitSeismicPing(...)
+		return traceCallin("UnitSeismicPing", ...)
+	end
+
+	function gadget:UnitStunned(...)
+		return traceCallin("UnitStunned", ...)
+	end
+
+	function gadget:UnitTaken(...)
+		return traceCallin("UnitTaken", ...)
+	end
+
+	function gadget:UnitUnitCollision(...)
+		return traceCallin("UnitUnitCollision", ...)
+	end
+
+	function gadget:UnitUnloaded(...)
+		return traceCallin("UnitUnloaded", ...)
+	end
+
 end
 
-function gadget:AllowCommand(...)
-	return traceCallin("AllowCommand", ...)
+if not synced then
+	function gadget:ActiveCommandChanged(...)
+		return traceCallin("ActiveCommandChanged", ...)
 end
 
-function gadget:AllowDirectUnitControl(...)
-	return traceCallin("AllowDirectUnitControl", ...)
+	function gadget:AddConsoleLine(...)
+		return traceCallin("AddConsoleLine", ...)
 end
 
-function gadget:AllowFeatureBuildStep(...)
-	return traceCallin("AllowFeatureBuildStep", ...)
+	function gadget:CameraPositionChanged(...)
+		return traceCallin("CameraPositionChanged", ...)
 end
 
-function gadget:AllowFeatureCreation(...)
-	return traceCallin("AllowFeatureCreation", ...)
+	function gadget:CameraRotationChanged(...)
+		return traceCallin("CameraRotationChanged", ...)
 end
 
-function gadget:AllowResourceLevel(...)
-	return traceCallin("AllowResourceLevel", ...)
+	function gadget:CommandNotify(...)
+		return traceCallin("CommandNotify", ...)
 end
 
-function gadget:AllowResourceTransfer(...)
-	return traceCallin("AllowResourceTransfer", ...)
+	function gadget:DefaultCommand(...)
+		return traceCallin("DefaultCommand", ...)
 end
 
-function gadget:AllowStartPosition(...)
-	return traceCallin("AllowStartPosition", ...)
+	function gadget:DownloadFailed(...)
+		return traceCallin("DownloadFailed", ...)
 end
 
-function gadget:AllowUnitBuildStep(...)
-	return traceCallin("AllowUnitBuildStep", ...)
+	function gadget:DownloadFinished(...)
+		return traceCallin("DownloadFinished", ...)
 end
 
-function gadget:AllowUnitCaptureStep(...)
-	return traceCallin("AllowUnitCaptureStep", ...)
+	function gadget:DownloadProgress(...)
+		return traceCallin("DownloadProgress", ...)
 end
 
-function gadget:AllowUnitCloak(...)
-	return traceCallin("AllowUnitCloak", ...)
+	function gadget:DownloadQueued(...)
+		return traceCallin("DownloadQueued", ...)
 end
 
-function gadget:AllowUnitCreation(...)
-	return traceCallin("AllowUnitCreation", ...)
+	function gadget:DownloadStarted(...)
+		return traceCallin("DownloadStarted", ...)
 end
 
-function gadget:AllowUnitDecloak(...)
-	return traceCallin("AllowUnitDecloak", ...)
+	function gadget:DrawBuildSquare(...)
+		return traceCallin("DrawBuildSquare", ...)
 end
 
-function gadget:AllowUnitKamikaze(...)
-	return traceCallin("AllowUnitKamikaze", ...)
+	function gadget:DrawFeature(...)
+		return traceCallin("DrawFeature", ...)
 end
 
-function gadget:AllowUnitTransfer(...)
-	return traceCallin("AllowUnitTransfer", ...)
+	function gadget:DrawFeaturesPostDeferred(...)
+		return traceCallin("DrawFeaturesPostDeferred", ...)
 end
 
-function gadget:AllowUnitTransport(...)
-	return traceCallin("AllowUnitTransport", ...)
+	function gadget:DrawGenesis(...)
+		return traceCallin("DrawGenesis", ...)
 end
 
-function gadget:AllowUnitTransportLoad(...)
-	return traceCallin("AllowUnitTransportLoad", ...)
+	function gadget:DrawGroundDeferred(...)
+		return traceCallin("DrawGroundDeferred", ...)
 end
 
-function gadget:AllowUnitTransportUnload(...)
-	return traceCallin("AllowUnitTransportUnload", ...)
+	function gadget:DrawGroundPostDeferred(...)
+		return traceCallin("DrawGroundPostDeferred", ...)
 end
 
-function gadget:AllowWeaponInterceptTarget(...)
-	return traceCallin("AllowWeaponInterceptTarget", ...)
+	function gadget:DrawGroundPostForward(...)
+		return traceCallin("DrawGroundPostForward", ...)
 end
 
-function gadget:AllowWeaponTarget(...)
-	return traceCallin("AllowWeaponTarget", ...)
+	function gadget:DrawGroundPreDeferred(...)
+		return traceCallin("DrawGroundPreDeferred", ...)
 end
 
-function gadget:AllowWeaponTargetCheck(...)
-	return traceCallin("AllowWeaponTargetCheck", ...)
+	function gadget:DrawGroundPreForward(...)
+		return traceCallin("DrawGroundPreForward", ...)
 end
 
-function gadget:CommandFallback(...)
-	return traceCallin("CommandFallback", ...)
+	function gadget:DrawInMiniMap(...)
+		return traceCallin("DrawInMiniMap", ...)
 end
 
-function gadget:DrawFeature(...)
-	return traceCallin("DrawFeature", ...)
+	function gadget:DrawInMiniMapBackground(...)
+		return traceCallin("DrawInMiniMapBackground", ...)
 end
 
-function gadget:DrawMaterial(...)
-	return traceCallin("DrawMaterial", ...)
+	function gadget:DrawMaterial(...)
+		return traceCallin("DrawMaterial", ...)
 end
 
-function gadget:DrawProjectile(...)
-	return traceCallin("DrawProjectile", ...)
+	function gadget:DrawPreDecals(...)
+		return traceCallin("DrawPreDecals", ...)
 end
 
-function gadget:DrawShield(...)
-	return traceCallin("DrawShield", ...)
+	function gadget:DrawProjectile(...)
+		return traceCallin("DrawProjectile", ...)
 end
 
-function gadget:DrawUnit(...)
-	return traceCallin("DrawUnit", ...)
+	function gadget:DrawScreen(...)
+		return traceCallin("DrawScreen", ...)
 end
 
-function gadget:Explosion(...)
-	return traceCallin("Explosion", ...)
+	function gadget:DrawScreenEffects(...)
+		return traceCallin("DrawScreenEffects", ...)
 end
 
-function gadget:FeatureDamaged(...)
-	return traceCallin("FeatureDamaged", ...)
+	function gadget:DrawScreenPost(...)
+		return traceCallin("DrawScreenPost", ...)
 end
 
-function gadget:FeaturePreDamaged(...)
-	return traceCallin("FeaturePreDamaged", ...)
+	function gadget:DrawShadowFeaturesLua(...)
+		return traceCallin("DrawShadowFeaturesLua", ...)
 end
 
-function gadget:MoveCtrlNotify(...)
-	return traceCallin("MoveCtrlNotify", ...)
+	function gadget:DrawShadowPassTransparent(...)
+		return traceCallin("DrawShadowPassTransparent", ...)
 end
 
-function gadget:ProjectileCreated(...)
-	return traceCallin("ProjectileCreated", ...)
+	function gadget:DrawShadowUnitsLua(...)
+		return traceCallin("DrawShadowUnitsLua", ...)
 end
 
-function gadget:ProjectileDestroyed(...)
-	return traceCallin("ProjectileDestroyed", ...)
+	function gadget:DrawShield(...)
+		return traceCallin("DrawShield", ...)
 end
 
-function gadget:ResourceExcess(...)
-	return traceCallin("ResourceExcess", ...)
+	function gadget:DrawUnit(...)
+		return traceCallin("DrawUnit", ...)
 end
 
-function gadget:ShieldPreDamaged(...)
-	return traceCallin("ShieldPreDamaged", ...)
+	function gadget:DrawUnitsPostDeferred(...)
+		return traceCallin("DrawUnitsPostDeferred", ...)
 end
 
-function gadget:TerraformComplete(...)
-	return traceCallin("TerraformComplete", ...)
+	function gadget:DrawWaterPost(...)
+		return traceCallin("DrawWaterPost", ...)
 end
 
-function gadget:UnitPreDamaged(...)
-	return traceCallin("UnitPreDamaged", ...)
+	function gadget:DrawWorld(...)
+		return traceCallin("DrawWorld", ...)
+end
+
+	function gadget:DrawWorldPreParticles(...)
+		return traceCallin("DrawWorldPreParticles", ...)
+end
+
+	function gadget:DrawWorldPreUnit(...)
+		return traceCallin("DrawWorldPreUnit", ...)
+end
+
+	function gadget:DrawWorldReflection(...)
+		return traceCallin("DrawWorldReflection", ...)
+end
+
+	function gadget:DrawWorldRefraction(...)
+		return traceCallin("DrawWorldRefraction", ...)
+end
+
+	function gadget:DrawWorldShadow(...)
+		return traceCallin("DrawWorldShadow", ...)
+end
+
+	function gadget:FontsChanged(...)
+		return traceCallin("FontsChanged", ...)
+end
+
+	function gadget:GameProgress(...)
+		return traceCallin("GameProgress", ...)
+end
+
+	function gadget:GameSetup(...)
+		return traceCallin("GameSetup", ...)
+end
+
+	function gadget:GetTooltip(...)
+		return traceCallin("GetTooltip", ...)
+end
+
+	function gadget:GroupChanged(...)
+		return traceCallin("GroupChanged", ...)
+end
+
+	function gadget:IsAbove(...)
+		return traceCallin("IsAbove", ...)
+end
+
+	function gadget:KeyMapChanged(...)
+		return traceCallin("KeyMapChanged", ...)
+end
+
+	function gadget:KeyPress(...)
+		return traceCallin("KeyPress", ...)
+end
+
+	function gadget:KeyRelease(...)
+		return traceCallin("KeyRelease", ...)
+end
+
+	function gadget:MapDrawCmd(...)
+		return traceCallin("MapDrawCmd", ...)
+end
+
+	function gadget:MiniMapGeometryChanged(...)
+		return traceCallin("MiniMapGeometryChanged", ...)
+end
+
+	function gadget:MiniMapRotationChanged(...)
+		return traceCallin("MiniMapRotationChanged", ...)
+end
+
+	function gadget:MiniMapStateChanged(...)
+		return traceCallin("MiniMapStateChanged", ...)
+end
+
+	function gadget:MouseMove(...)
+		return traceCallin("MouseMove", ...)
+end
+
+	function gadget:MousePress(...)
+		return traceCallin("MousePress", ...)
+end
+
+	function gadget:MouseRelease(...)
+		return traceCallin("MouseRelease", ...)
+end
+
+	function gadget:MouseWheel(...)
+		return traceCallin("MouseWheel", ...)
+end
+
+	function gadget:PlayerAdded(...)
+		return traceCallin("PlayerAdded", ...)
+end
+
+	function gadget:PlayerChanged(...)
+		return traceCallin("PlayerChanged", ...)
+end
+
+	function gadget:PlayerRemoved(...)
+		return traceCallin("PlayerRemoved", ...)
+end
+
+	function gadget:RenderUnitDestroyed(...)
+		return traceCallin("RenderUnitDestroyed", ...)
+end
+
+	function gadget:Save(...)
+		return traceCallin("Save", ...)
+end
+
+	function gadget:SunChanged(...)
+		return traceCallin("SunChanged", ...)
+end
+
+	function gadget:TextEditing(...)
+		return traceCallin("TextEditing", ...)
+end
+
+	function gadget:TextInput(...)
+		return traceCallin("TextInput", ...)
+end
+
+	function gadget:UnsyncedHeightMapUpdate(...)
+		return traceCallin("UnsyncedHeightMapUpdate", ...)
+end
+
+	function gadget:Update(...)
+		return traceCallin("Update", ...)
+end
+
+	function gadget:ViewResize(...)
+		return traceCallin("ViewResize", ...)
+end
+
+	function gadget:WorldTooltip(...)
+		return traceCallin("WorldTooltip", ...)
+end
+
 end

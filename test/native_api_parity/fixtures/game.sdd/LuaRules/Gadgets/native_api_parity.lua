@@ -111,6 +111,15 @@ if not gadgetHandler:IsSyncedCode() then
 	end
 
 	function gadget:Initialize()
+		-- Keep camera-control comparisons independent of the wall-clock time
+		-- between the synced fixture notification and the first unsynced update.
+		-- Mode 1 applies a zero-duration SetCameraTarget immediately; the
+		-- default exponential transition would leave WorldToScreenCoords
+		-- dependent on each process's render scheduling.
+		Spring.SetConfigInt("CamTransitionMode", 1)
+		Spring.SetConfigInt("WindowedEdgeMove", 0, true)
+		Spring.SetConfigInt("FullscreenEdgeMove", 0, true)
+
 		-- Keep rendering-sensitive camera checks independent of the physical
 		-- pointer position of the process that launched the fixture.  WarpMouse
 		-- uses the same bottom-origin coordinates as the camera APIs under test.
@@ -143,6 +152,65 @@ if not gadgetHandler:IsSyncedCode() then
 				allyTeamID = allyTeamID,
 				groundDecalID = groundDecalID,
 			}
+			-- Exercise the renderer's opt-in Lua object callbacks with the same
+			-- objects that the native module sees.  These flags are intentionally
+			-- set from unsynced Lua: the corresponding controls do not exist in
+			-- synced Lua or LuaUI.
+			if Spring.UnitRendering then
+				Spring.UnitRendering.SetUnitLuaDraw(unitID, true)
+				Spring.UnitRendering.SetProjectileLuaDraw(projectileID, true)
+				if pieceProjectileID then
+					Spring.UnitRendering.SetProjectileLuaDraw(pieceProjectileID, true)
+				end
+			end
+			if Spring.FeatureRendering then
+				Spring.FeatureRendering.SetFeatureLuaDraw(featureID, true)
+			end
+			local unitX, unitY, unitZ = Spring.GetUnitPosition(unitID)
+			if unitX then
+				-- Keep the opt-in objects in the active frustum so DrawUnit and
+				-- DrawFeature are exercised by the rendering-enabled run.
+				Spring.SetCameraTarget(unitX, unitY, unitZ, 0)
+			end
+
+			-- LuaDebugExtra feeds these through the ordinary input pipeline while
+			-- keeping the test independent of the physical mouse and keyboard.
+			local viewSizeX, viewSizeY = Spring.GetViewGeometry()
+			if debug and debug.emulateMouseMove then
+				local mouseX = math.floor(viewSizeX * 0.5)
+				local mouseY = math.floor(viewSizeY * 0.5)
+				debug.emulateMousePress(1)
+				-- MouseMove is dispatched to the event handler only while a
+				-- consumer owns the button.  Exercise a real press -> move ->
+				-- release sequence.
+				debug.emulateMouseMove(mouseX, mouseY)
+				debug.emulateMouseRelease(1)
+				debug.emulateMouseWheel(1)
+				debug.emulateKeyPress(string.byte("a"))
+				debug.emulateKeyRelease(string.byte("a"))
+				debug.clearEmulatedInput()
+			end
+
+			-- Enter the engine's normal CEventHandler path with valid fixture
+			-- objects.  This is test infrastructure exposed only by the debug
+			-- library; it lets both Lua and native consumers observe the same
+			-- engine-constructed callin payloads deterministically.
+			if debug and debug.emulateNativeApiParityCallins then
+				debug.emulateNativeApiParityCallins(unitID, featureID, projectileID)
+			end
+
+			if unitX then
+				-- The deterministic input driver includes a wheel event.  Re-anchor
+				-- the camera after it so the camera conversion checks do not depend
+				-- on how much render time elapsed in either process.
+				Spring.SetCameraTarget(unitX, unitY, unitZ, 0)
+			end
+
+			-- These controls synchronously emit the corresponding GUI callins.
+			Spring.SetActiveCommand("move")
+			Spring.SetActiveCommand(nil)
+			Spring.SetMiniMapRotation(math.pi * 0.5)
+			Spring.SendCommands("minimap minimize 1", "minimap minimize 0")
 			if Script.LuaUI.NativeApiParityFixture then
 				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID)
 			end
@@ -184,6 +252,13 @@ if not gadgetHandler:IsSyncedCode() then
 			-- unavailable during gadget Initialize.  Retry once the first game
 			-- frame has been reached before deciding which decal tests can run.
 			ensureGroundDecal()
+			if fixtureIDs.unitID and Spring.UnitRendering then
+				Spring.UnitRendering.SetUnitLuaDraw(fixtureIDs.unitID, true)
+				Spring.UnitRendering.SetProjectileLuaDraw(fixtureIDs.projectileID, true)
+			end
+			if fixtureIDs.featureID and Spring.FeatureRendering then
+				Spring.FeatureRendering.SetFeatureLuaDraw(fixtureIDs.featureID, true)
+			end
 			sendInventory()
 			runGeneratedTests()
 		end
@@ -781,7 +856,13 @@ function Fixture.create()
 	local featureFacing = randInt(0, 3)
 	local featureID = Spring.CreateFeature("native_api_test_feature", featureInputX, 96, featureInputZ, featureFacing, teamID)
 	local unitDefID = Spring.GetUnitDefID(unitID)
+	local featureDefID = Spring.GetFeatureDefID(featureID)
 	local unitDef = UnitDefs[unitDefID]
+	-- These callbacks are deliberately gated by the Lua watch masks.  Register
+	-- the fixture definitions before the deterministic engine callin driver
+	-- runs, so Lua and native observe the same collision/movement events.
+	Script.SetWatchUnit(unitDefID, true)
+	Script.SetWatchFeature(featureDefID, true)
 	local weaponEntry = unitDef and unitDef.weapons and (unitDef.weapons[1] or unitDef.weapons[0])
 	local weaponDefID = weaponEntry and weaponEntry.weaponDef
 	if weaponDefID then
@@ -789,6 +870,7 @@ function Fixture.create()
 		-- weapon before spawning it so Lua and native receive the same watched
 		-- projectile/explosion/target events.
 		Script.SetWatchWeapon(weaponDefID, true)
+		Script.SetWatchExplosion(weaponDefID, true)
 	end
 	-- Piece projectiles use the special -1 watch slot.  Register it so the
 	-- callin fixture exercises the complete ProjectileCreated/Destroyed
@@ -1078,6 +1160,9 @@ function gadget:GameFrame(frame)
 	end
 	if frame == 1 then
 		persistentFixture = Fixture.create()
+		if debug and debug.emulateUnitMoveFailed then
+			debug.emulateUnitMoveFailed(persistentFixture.unitID)
+		end
 		SendToUnsynced(
 			"native_api_parity_fixture",
 			persistentFixture.unitID,

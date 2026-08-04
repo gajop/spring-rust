@@ -23,13 +23,43 @@ local function normalize(value, depth)
 	return result
 end
 
+local function pack(...)
+	local result = { n = select("#", ...) }
+	for index = 1, result.n do
+		result[index] = select(index, ...)
+	end
+	return result
+end
+
+local function unpackn(values)
+	return unpack(values, 1, values.n)
+end
+
 local function defaultResult(name)
 	if name == "AllowWeaponTargetCheck" then return -1 end
 	if name == "AllowWeaponTarget" then return true, 1.0 end
 	if name == "AllowUnitCreation" then return true, true end
+	if name == "DefaultCommand" or name == "GetTooltip" or name == "WorldTooltip" then return nil end
 	if name == "UnitPreDamaged" or name == "FeaturePreDamaged" then return nil, nil end
 	local defaults = {
 		["AddConsoleLine"] = {false},
+		["AllowBuilderHoldFire"] = {true},
+		["AllowCommand"] = {true},
+		["AllowDirectUnitControl"] = {true},
+		["AllowFeatureBuildStep"] = {true},
+		["AllowFeatureCreation"] = {true},
+		["AllowResourceLevel"] = {true},
+		["AllowResourceTransfer"] = {true},
+		["AllowStartPosition"] = {true},
+		["AllowUnitBuildStep"] = {true},
+		["AllowUnitCaptureStep"] = {true},
+		["AllowUnitCloak"] = {true},
+		["AllowUnitDecloak"] = {true},
+		["AllowUnitKamikaze"] = {true},
+		["AllowUnitTransfer"] = {true},
+		["AllowUnitTransport"] = {true},
+		["AllowUnitTransportLoad"] = {true},
+		["AllowUnitTransportUnload"] = {true},
 		["AllowWeaponInterceptTarget"] = {true},
 		["CommandFallback"] = {false},
 		["CommandNotify"] = {false},
@@ -51,6 +81,7 @@ local function defaultResult(name)
 		["MoveCtrlNotify"] = {false},
 		["ResourceExcess"] = {false},
 		["ShieldPreDamaged"] = {false},
+		["TerraformComplete"] = {false},
 		["TextEditing"] = {false},
 		["TextInput"] = {false},
 		["UnitFeatureCollision"] = {false},
@@ -60,807 +91,1933 @@ local function defaultResult(name)
 	if values then return unpack(values) end
 end
 
-local function trace(name, ...)
-	local args = { ... }
+local function trace(name, results, ...)
+	local args = pack(...)
 	local normalized = {}
-	for index = 1, select("#", ...) do
+	for index = 1, args.n do
 		normalized[index] = normalize(args[index], 0)
+	end
+	local normalizedResults = {}
+	for index = 1, results.n do
+		normalizedResults[index] = normalize(results[index], 0)
 	end
 	Common.appendJsonLine(Common.outputDir() .. "/callin_lua.jsonl", {
 		context = "lua_ui",
 		name = name,
-		arity = select("#", ...),
+		arity = args.n,
 		args = normalized,
+		resultArity = results.n,
+		results = normalizedResults,
 	})
 end
 
 local previous_ActiveCommandChanged = _G["ActiveCommandChanged"]
 _G["ActiveCommandChanged"] = function(...)
-	trace("ActiveCommandChanged", ...)
-	if previous_ActiveCommandChanged then return previous_ActiveCommandChanged(...) end
-	return defaultResult("ActiveCommandChanged")
+	local result
+	if previous_ActiveCommandChanged then
+		result = pack(previous_ActiveCommandChanged(...))
+	else
+		result = pack(defaultResult("ActiveCommandChanged"))
+	end
+	trace("ActiveCommandChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_AddConsoleLine = _G["AddConsoleLine"]
 _G["AddConsoleLine"] = function(...)
-	trace("AddConsoleLine", ...)
-	if previous_AddConsoleLine then return previous_AddConsoleLine(...) end
-	return defaultResult("AddConsoleLine")
+	local result
+	if previous_AddConsoleLine then
+		result = pack(previous_AddConsoleLine(...))
+	else
+		result = pack(defaultResult("AddConsoleLine"))
+	end
+	trace("AddConsoleLine", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowBuilderHoldFire = _G["AllowBuilderHoldFire"]
+_G["AllowBuilderHoldFire"] = function(...)
+	local result
+	if previous_AllowBuilderHoldFire then
+		result = pack(previous_AllowBuilderHoldFire(...))
+	else
+		result = pack(defaultResult("AllowBuilderHoldFire"))
+	end
+	trace("AllowBuilderHoldFire", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowCommand = _G["AllowCommand"]
+_G["AllowCommand"] = function(...)
+	local result
+	if previous_AllowCommand then
+		result = pack(previous_AllowCommand(...))
+	else
+		result = pack(defaultResult("AllowCommand"))
+	end
+	trace("AllowCommand", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowDirectUnitControl = _G["AllowDirectUnitControl"]
+_G["AllowDirectUnitControl"] = function(...)
+	local result
+	if previous_AllowDirectUnitControl then
+		result = pack(previous_AllowDirectUnitControl(...))
+	else
+		result = pack(defaultResult("AllowDirectUnitControl"))
+	end
+	trace("AllowDirectUnitControl", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowFeatureBuildStep = _G["AllowFeatureBuildStep"]
+_G["AllowFeatureBuildStep"] = function(...)
+	local result
+	if previous_AllowFeatureBuildStep then
+		result = pack(previous_AllowFeatureBuildStep(...))
+	else
+		result = pack(defaultResult("AllowFeatureBuildStep"))
+	end
+	trace("AllowFeatureBuildStep", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowFeatureCreation = _G["AllowFeatureCreation"]
+_G["AllowFeatureCreation"] = function(...)
+	local result
+	if previous_AllowFeatureCreation then
+		result = pack(previous_AllowFeatureCreation(...))
+	else
+		result = pack(defaultResult("AllowFeatureCreation"))
+	end
+	trace("AllowFeatureCreation", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowResourceLevel = _G["AllowResourceLevel"]
+_G["AllowResourceLevel"] = function(...)
+	local result
+	if previous_AllowResourceLevel then
+		result = pack(previous_AllowResourceLevel(...))
+	else
+		result = pack(defaultResult("AllowResourceLevel"))
+	end
+	trace("AllowResourceLevel", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowResourceTransfer = _G["AllowResourceTransfer"]
+_G["AllowResourceTransfer"] = function(...)
+	local result
+	if previous_AllowResourceTransfer then
+		result = pack(previous_AllowResourceTransfer(...))
+	else
+		result = pack(defaultResult("AllowResourceTransfer"))
+	end
+	trace("AllowResourceTransfer", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowStartPosition = _G["AllowStartPosition"]
+_G["AllowStartPosition"] = function(...)
+	local result
+	if previous_AllowStartPosition then
+		result = pack(previous_AllowStartPosition(...))
+	else
+		result = pack(defaultResult("AllowStartPosition"))
+	end
+	trace("AllowStartPosition", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitBuildStep = _G["AllowUnitBuildStep"]
+_G["AllowUnitBuildStep"] = function(...)
+	local result
+	if previous_AllowUnitBuildStep then
+		result = pack(previous_AllowUnitBuildStep(...))
+	else
+		result = pack(defaultResult("AllowUnitBuildStep"))
+	end
+	trace("AllowUnitBuildStep", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitCaptureStep = _G["AllowUnitCaptureStep"]
+_G["AllowUnitCaptureStep"] = function(...)
+	local result
+	if previous_AllowUnitCaptureStep then
+		result = pack(previous_AllowUnitCaptureStep(...))
+	else
+		result = pack(defaultResult("AllowUnitCaptureStep"))
+	end
+	trace("AllowUnitCaptureStep", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitCloak = _G["AllowUnitCloak"]
+_G["AllowUnitCloak"] = function(...)
+	local result
+	if previous_AllowUnitCloak then
+		result = pack(previous_AllowUnitCloak(...))
+	else
+		result = pack(defaultResult("AllowUnitCloak"))
+	end
+	trace("AllowUnitCloak", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitCreation = _G["AllowUnitCreation"]
+_G["AllowUnitCreation"] = function(...)
+	local result
+	if previous_AllowUnitCreation then
+		result = pack(previous_AllowUnitCreation(...))
+	else
+		result = pack(defaultResult("AllowUnitCreation"))
+	end
+	trace("AllowUnitCreation", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitKamikaze = _G["AllowUnitKamikaze"]
+_G["AllowUnitKamikaze"] = function(...)
+	local result
+	if previous_AllowUnitKamikaze then
+		result = pack(previous_AllowUnitKamikaze(...))
+	else
+		result = pack(defaultResult("AllowUnitKamikaze"))
+	end
+	trace("AllowUnitKamikaze", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitTransfer = _G["AllowUnitTransfer"]
+_G["AllowUnitTransfer"] = function(...)
+	local result
+	if previous_AllowUnitTransfer then
+		result = pack(previous_AllowUnitTransfer(...))
+	else
+		result = pack(defaultResult("AllowUnitTransfer"))
+	end
+	trace("AllowUnitTransfer", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitTransport = _G["AllowUnitTransport"]
+_G["AllowUnitTransport"] = function(...)
+	local result
+	if previous_AllowUnitTransport then
+		result = pack(previous_AllowUnitTransport(...))
+	else
+		result = pack(defaultResult("AllowUnitTransport"))
+	end
+	trace("AllowUnitTransport", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitTransportLoad = _G["AllowUnitTransportLoad"]
+_G["AllowUnitTransportLoad"] = function(...)
+	local result
+	if previous_AllowUnitTransportLoad then
+		result = pack(previous_AllowUnitTransportLoad(...))
+	else
+		result = pack(defaultResult("AllowUnitTransportLoad"))
+	end
+	trace("AllowUnitTransportLoad", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowUnitTransportUnload = _G["AllowUnitTransportUnload"]
+_G["AllowUnitTransportUnload"] = function(...)
+	local result
+	if previous_AllowUnitTransportUnload then
+		result = pack(previous_AllowUnitTransportUnload(...))
+	else
+		result = pack(defaultResult("AllowUnitTransportUnload"))
+	end
+	trace("AllowUnitTransportUnload", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowWeaponInterceptTarget = _G["AllowWeaponInterceptTarget"]
+_G["AllowWeaponInterceptTarget"] = function(...)
+	local result
+	if previous_AllowWeaponInterceptTarget then
+		result = pack(previous_AllowWeaponInterceptTarget(...))
+	else
+		result = pack(defaultResult("AllowWeaponInterceptTarget"))
+	end
+	trace("AllowWeaponInterceptTarget", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowWeaponTarget = _G["AllowWeaponTarget"]
+_G["AllowWeaponTarget"] = function(...)
+	local result
+	if previous_AllowWeaponTarget then
+		result = pack(previous_AllowWeaponTarget(...))
+	else
+		result = pack(defaultResult("AllowWeaponTarget"))
+	end
+	trace("AllowWeaponTarget", result, ...)
+	return unpackn(result)
+end
+
+local previous_AllowWeaponTargetCheck = _G["AllowWeaponTargetCheck"]
+_G["AllowWeaponTargetCheck"] = function(...)
+	local result
+	if previous_AllowWeaponTargetCheck then
+		result = pack(previous_AllowWeaponTargetCheck(...))
+	else
+		result = pack(defaultResult("AllowWeaponTargetCheck"))
+	end
+	trace("AllowWeaponTargetCheck", result, ...)
+	return unpackn(result)
 end
 
 local previous_CameraPositionChanged = _G["CameraPositionChanged"]
 _G["CameraPositionChanged"] = function(...)
-	trace("CameraPositionChanged", ...)
-	if previous_CameraPositionChanged then return previous_CameraPositionChanged(...) end
-	return defaultResult("CameraPositionChanged")
+	local result
+	if previous_CameraPositionChanged then
+		result = pack(previous_CameraPositionChanged(...))
+	else
+		result = pack(defaultResult("CameraPositionChanged"))
+	end
+	trace("CameraPositionChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_CameraRotationChanged = _G["CameraRotationChanged"]
 _G["CameraRotationChanged"] = function(...)
-	trace("CameraRotationChanged", ...)
-	if previous_CameraRotationChanged then return previous_CameraRotationChanged(...) end
-	return defaultResult("CameraRotationChanged")
+	local result
+	if previous_CameraRotationChanged then
+		result = pack(previous_CameraRotationChanged(...))
+	else
+		result = pack(defaultResult("CameraRotationChanged"))
+	end
+	trace("CameraRotationChanged", result, ...)
+	return unpackn(result)
+end
+
+local previous_CommandFallback = _G["CommandFallback"]
+_G["CommandFallback"] = function(...)
+	local result
+	if previous_CommandFallback then
+		result = pack(previous_CommandFallback(...))
+	else
+		result = pack(defaultResult("CommandFallback"))
+	end
+	trace("CommandFallback", result, ...)
+	return unpackn(result)
 end
 
 local previous_CommandNotify = _G["CommandNotify"]
 _G["CommandNotify"] = function(...)
-	trace("CommandNotify", ...)
-	if previous_CommandNotify then return previous_CommandNotify(...) end
-	return defaultResult("CommandNotify")
+	local result
+	if previous_CommandNotify then
+		result = pack(previous_CommandNotify(...))
+	else
+		result = pack(defaultResult("CommandNotify"))
+	end
+	trace("CommandNotify", result, ...)
+	return unpackn(result)
 end
 
 local previous_DefaultCommand = _G["DefaultCommand"]
 _G["DefaultCommand"] = function(...)
-	trace("DefaultCommand", ...)
-	if previous_DefaultCommand then return previous_DefaultCommand(...) end
-	return defaultResult("DefaultCommand")
+	local result
+	if previous_DefaultCommand then
+		result = pack(previous_DefaultCommand(...))
+	else
+		result = pack(defaultResult("DefaultCommand"))
+	end
+	trace("DefaultCommand", result, ...)
+	return unpackn(result)
 end
 
 local previous_DownloadFailed = _G["DownloadFailed"]
 _G["DownloadFailed"] = function(...)
-	trace("DownloadFailed", ...)
-	if previous_DownloadFailed then return previous_DownloadFailed(...) end
-	return defaultResult("DownloadFailed")
+	local result
+	if previous_DownloadFailed then
+		result = pack(previous_DownloadFailed(...))
+	else
+		result = pack(defaultResult("DownloadFailed"))
+	end
+	trace("DownloadFailed", result, ...)
+	return unpackn(result)
 end
 
 local previous_DownloadFinished = _G["DownloadFinished"]
 _G["DownloadFinished"] = function(...)
-	trace("DownloadFinished", ...)
-	if previous_DownloadFinished then return previous_DownloadFinished(...) end
-	return defaultResult("DownloadFinished")
+	local result
+	if previous_DownloadFinished then
+		result = pack(previous_DownloadFinished(...))
+	else
+		result = pack(defaultResult("DownloadFinished"))
+	end
+	trace("DownloadFinished", result, ...)
+	return unpackn(result)
 end
 
 local previous_DownloadProgress = _G["DownloadProgress"]
 _G["DownloadProgress"] = function(...)
-	trace("DownloadProgress", ...)
-	if previous_DownloadProgress then return previous_DownloadProgress(...) end
-	return defaultResult("DownloadProgress")
+	local result
+	if previous_DownloadProgress then
+		result = pack(previous_DownloadProgress(...))
+	else
+		result = pack(defaultResult("DownloadProgress"))
+	end
+	trace("DownloadProgress", result, ...)
+	return unpackn(result)
 end
 
 local previous_DownloadQueued = _G["DownloadQueued"]
 _G["DownloadQueued"] = function(...)
-	trace("DownloadQueued", ...)
-	if previous_DownloadQueued then return previous_DownloadQueued(...) end
-	return defaultResult("DownloadQueued")
+	local result
+	if previous_DownloadQueued then
+		result = pack(previous_DownloadQueued(...))
+	else
+		result = pack(defaultResult("DownloadQueued"))
+	end
+	trace("DownloadQueued", result, ...)
+	return unpackn(result)
 end
 
 local previous_DownloadStarted = _G["DownloadStarted"]
 _G["DownloadStarted"] = function(...)
-	trace("DownloadStarted", ...)
-	if previous_DownloadStarted then return previous_DownloadStarted(...) end
-	return defaultResult("DownloadStarted")
+	local result
+	if previous_DownloadStarted then
+		result = pack(previous_DownloadStarted(...))
+	else
+		result = pack(defaultResult("DownloadStarted"))
+	end
+	trace("DownloadStarted", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawBuildSquare = _G["DrawBuildSquare"]
 _G["DrawBuildSquare"] = function(...)
-	trace("DrawBuildSquare", ...)
-	if previous_DrawBuildSquare then return previous_DrawBuildSquare(...) end
-	return defaultResult("DrawBuildSquare")
+	local result
+	if previous_DrawBuildSquare then
+		result = pack(previous_DrawBuildSquare(...))
+	else
+		result = pack(defaultResult("DrawBuildSquare"))
+	end
+	trace("DrawBuildSquare", result, ...)
+	return unpackn(result)
+end
+
+local previous_DrawFeature = _G["DrawFeature"]
+_G["DrawFeature"] = function(...)
+	local result
+	if previous_DrawFeature then
+		result = pack(previous_DrawFeature(...))
+	else
+		result = pack(defaultResult("DrawFeature"))
+	end
+	trace("DrawFeature", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawFeaturesPostDeferred = _G["DrawFeaturesPostDeferred"]
 _G["DrawFeaturesPostDeferred"] = function(...)
-	trace("DrawFeaturesPostDeferred", ...)
-	if previous_DrawFeaturesPostDeferred then return previous_DrawFeaturesPostDeferred(...) end
-	return defaultResult("DrawFeaturesPostDeferred")
+	local result
+	if previous_DrawFeaturesPostDeferred then
+		result = pack(previous_DrawFeaturesPostDeferred(...))
+	else
+		result = pack(defaultResult("DrawFeaturesPostDeferred"))
+	end
+	trace("DrawFeaturesPostDeferred", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawGenesis = _G["DrawGenesis"]
 _G["DrawGenesis"] = function(...)
-	trace("DrawGenesis", ...)
-	if previous_DrawGenesis then return previous_DrawGenesis(...) end
-	return defaultResult("DrawGenesis")
+	local result
+	if previous_DrawGenesis then
+		result = pack(previous_DrawGenesis(...))
+	else
+		result = pack(defaultResult("DrawGenesis"))
+	end
+	trace("DrawGenesis", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawGroundDeferred = _G["DrawGroundDeferred"]
 _G["DrawGroundDeferred"] = function(...)
-	trace("DrawGroundDeferred", ...)
-	if previous_DrawGroundDeferred then return previous_DrawGroundDeferred(...) end
-	return defaultResult("DrawGroundDeferred")
+	local result
+	if previous_DrawGroundDeferred then
+		result = pack(previous_DrawGroundDeferred(...))
+	else
+		result = pack(defaultResult("DrawGroundDeferred"))
+	end
+	trace("DrawGroundDeferred", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawGroundPostDeferred = _G["DrawGroundPostDeferred"]
 _G["DrawGroundPostDeferred"] = function(...)
-	trace("DrawGroundPostDeferred", ...)
-	if previous_DrawGroundPostDeferred then return previous_DrawGroundPostDeferred(...) end
-	return defaultResult("DrawGroundPostDeferred")
+	local result
+	if previous_DrawGroundPostDeferred then
+		result = pack(previous_DrawGroundPostDeferred(...))
+	else
+		result = pack(defaultResult("DrawGroundPostDeferred"))
+	end
+	trace("DrawGroundPostDeferred", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawGroundPostForward = _G["DrawGroundPostForward"]
 _G["DrawGroundPostForward"] = function(...)
-	trace("DrawGroundPostForward", ...)
-	if previous_DrawGroundPostForward then return previous_DrawGroundPostForward(...) end
-	return defaultResult("DrawGroundPostForward")
+	local result
+	if previous_DrawGroundPostForward then
+		result = pack(previous_DrawGroundPostForward(...))
+	else
+		result = pack(defaultResult("DrawGroundPostForward"))
+	end
+	trace("DrawGroundPostForward", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawGroundPreDeferred = _G["DrawGroundPreDeferred"]
 _G["DrawGroundPreDeferred"] = function(...)
-	trace("DrawGroundPreDeferred", ...)
-	if previous_DrawGroundPreDeferred then return previous_DrawGroundPreDeferred(...) end
-	return defaultResult("DrawGroundPreDeferred")
+	local result
+	if previous_DrawGroundPreDeferred then
+		result = pack(previous_DrawGroundPreDeferred(...))
+	else
+		result = pack(defaultResult("DrawGroundPreDeferred"))
+	end
+	trace("DrawGroundPreDeferred", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawGroundPreForward = _G["DrawGroundPreForward"]
 _G["DrawGroundPreForward"] = function(...)
-	trace("DrawGroundPreForward", ...)
-	if previous_DrawGroundPreForward then return previous_DrawGroundPreForward(...) end
-	return defaultResult("DrawGroundPreForward")
+	local result
+	if previous_DrawGroundPreForward then
+		result = pack(previous_DrawGroundPreForward(...))
+	else
+		result = pack(defaultResult("DrawGroundPreForward"))
+	end
+	trace("DrawGroundPreForward", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawInMiniMap = _G["DrawInMiniMap"]
 _G["DrawInMiniMap"] = function(...)
-	trace("DrawInMiniMap", ...)
-	if previous_DrawInMiniMap then return previous_DrawInMiniMap(...) end
-	return defaultResult("DrawInMiniMap")
+	local result
+	if previous_DrawInMiniMap then
+		result = pack(previous_DrawInMiniMap(...))
+	else
+		result = pack(defaultResult("DrawInMiniMap"))
+	end
+	trace("DrawInMiniMap", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawInMiniMapBackground = _G["DrawInMiniMapBackground"]
 _G["DrawInMiniMapBackground"] = function(...)
-	trace("DrawInMiniMapBackground", ...)
-	if previous_DrawInMiniMapBackground then return previous_DrawInMiniMapBackground(...) end
-	return defaultResult("DrawInMiniMapBackground")
+	local result
+	if previous_DrawInMiniMapBackground then
+		result = pack(previous_DrawInMiniMapBackground(...))
+	else
+		result = pack(defaultResult("DrawInMiniMapBackground"))
+	end
+	trace("DrawInMiniMapBackground", result, ...)
+	return unpackn(result)
+end
+
+local previous_DrawMaterial = _G["DrawMaterial"]
+_G["DrawMaterial"] = function(...)
+	local result
+	if previous_DrawMaterial then
+		result = pack(previous_DrawMaterial(...))
+	else
+		result = pack(defaultResult("DrawMaterial"))
+	end
+	trace("DrawMaterial", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawPreDecals = _G["DrawPreDecals"]
 _G["DrawPreDecals"] = function(...)
-	trace("DrawPreDecals", ...)
-	if previous_DrawPreDecals then return previous_DrawPreDecals(...) end
-	return defaultResult("DrawPreDecals")
+	local result
+	if previous_DrawPreDecals then
+		result = pack(previous_DrawPreDecals(...))
+	else
+		result = pack(defaultResult("DrawPreDecals"))
+	end
+	trace("DrawPreDecals", result, ...)
+	return unpackn(result)
+end
+
+local previous_DrawProjectile = _G["DrawProjectile"]
+_G["DrawProjectile"] = function(...)
+	local result
+	if previous_DrawProjectile then
+		result = pack(previous_DrawProjectile(...))
+	else
+		result = pack(defaultResult("DrawProjectile"))
+	end
+	trace("DrawProjectile", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawScreen = _G["DrawScreen"]
 _G["DrawScreen"] = function(...)
-	trace("DrawScreen", ...)
-	if previous_DrawScreen then return previous_DrawScreen(...) end
-	return defaultResult("DrawScreen")
+	local result
+	if previous_DrawScreen then
+		result = pack(previous_DrawScreen(...))
+	else
+		result = pack(defaultResult("DrawScreen"))
+	end
+	trace("DrawScreen", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawScreenEffects = _G["DrawScreenEffects"]
 _G["DrawScreenEffects"] = function(...)
-	trace("DrawScreenEffects", ...)
-	if previous_DrawScreenEffects then return previous_DrawScreenEffects(...) end
-	return defaultResult("DrawScreenEffects")
+	local result
+	if previous_DrawScreenEffects then
+		result = pack(previous_DrawScreenEffects(...))
+	else
+		result = pack(defaultResult("DrawScreenEffects"))
+	end
+	trace("DrawScreenEffects", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawScreenPost = _G["DrawScreenPost"]
 _G["DrawScreenPost"] = function(...)
-	trace("DrawScreenPost", ...)
-	if previous_DrawScreenPost then return previous_DrawScreenPost(...) end
-	return defaultResult("DrawScreenPost")
+	local result
+	if previous_DrawScreenPost then
+		result = pack(previous_DrawScreenPost(...))
+	else
+		result = pack(defaultResult("DrawScreenPost"))
+	end
+	trace("DrawScreenPost", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawShadowFeaturesLua = _G["DrawShadowFeaturesLua"]
 _G["DrawShadowFeaturesLua"] = function(...)
-	trace("DrawShadowFeaturesLua", ...)
-	if previous_DrawShadowFeaturesLua then return previous_DrawShadowFeaturesLua(...) end
-	return defaultResult("DrawShadowFeaturesLua")
+	local result
+	if previous_DrawShadowFeaturesLua then
+		result = pack(previous_DrawShadowFeaturesLua(...))
+	else
+		result = pack(defaultResult("DrawShadowFeaturesLua"))
+	end
+	trace("DrawShadowFeaturesLua", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawShadowPassTransparent = _G["DrawShadowPassTransparent"]
 _G["DrawShadowPassTransparent"] = function(...)
-	trace("DrawShadowPassTransparent", ...)
-	if previous_DrawShadowPassTransparent then return previous_DrawShadowPassTransparent(...) end
-	return defaultResult("DrawShadowPassTransparent")
+	local result
+	if previous_DrawShadowPassTransparent then
+		result = pack(previous_DrawShadowPassTransparent(...))
+	else
+		result = pack(defaultResult("DrawShadowPassTransparent"))
+	end
+	trace("DrawShadowPassTransparent", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawShadowUnitsLua = _G["DrawShadowUnitsLua"]
 _G["DrawShadowUnitsLua"] = function(...)
-	trace("DrawShadowUnitsLua", ...)
-	if previous_DrawShadowUnitsLua then return previous_DrawShadowUnitsLua(...) end
-	return defaultResult("DrawShadowUnitsLua")
+	local result
+	if previous_DrawShadowUnitsLua then
+		result = pack(previous_DrawShadowUnitsLua(...))
+	else
+		result = pack(defaultResult("DrawShadowUnitsLua"))
+	end
+	trace("DrawShadowUnitsLua", result, ...)
+	return unpackn(result)
+end
+
+local previous_DrawShield = _G["DrawShield"]
+_G["DrawShield"] = function(...)
+	local result
+	if previous_DrawShield then
+		result = pack(previous_DrawShield(...))
+	else
+		result = pack(defaultResult("DrawShield"))
+	end
+	trace("DrawShield", result, ...)
+	return unpackn(result)
+end
+
+local previous_DrawUnit = _G["DrawUnit"]
+_G["DrawUnit"] = function(...)
+	local result
+	if previous_DrawUnit then
+		result = pack(previous_DrawUnit(...))
+	else
+		result = pack(defaultResult("DrawUnit"))
+	end
+	trace("DrawUnit", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawUnitsPostDeferred = _G["DrawUnitsPostDeferred"]
 _G["DrawUnitsPostDeferred"] = function(...)
-	trace("DrawUnitsPostDeferred", ...)
-	if previous_DrawUnitsPostDeferred then return previous_DrawUnitsPostDeferred(...) end
-	return defaultResult("DrawUnitsPostDeferred")
+	local result
+	if previous_DrawUnitsPostDeferred then
+		result = pack(previous_DrawUnitsPostDeferred(...))
+	else
+		result = pack(defaultResult("DrawUnitsPostDeferred"))
+	end
+	trace("DrawUnitsPostDeferred", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawWaterPost = _G["DrawWaterPost"]
 _G["DrawWaterPost"] = function(...)
-	trace("DrawWaterPost", ...)
-	if previous_DrawWaterPost then return previous_DrawWaterPost(...) end
-	return defaultResult("DrawWaterPost")
+	local result
+	if previous_DrawWaterPost then
+		result = pack(previous_DrawWaterPost(...))
+	else
+		result = pack(defaultResult("DrawWaterPost"))
+	end
+	trace("DrawWaterPost", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawWorld = _G["DrawWorld"]
 _G["DrawWorld"] = function(...)
-	trace("DrawWorld", ...)
-	if previous_DrawWorld then return previous_DrawWorld(...) end
-	return defaultResult("DrawWorld")
+	local result
+	if previous_DrawWorld then
+		result = pack(previous_DrawWorld(...))
+	else
+		result = pack(defaultResult("DrawWorld"))
+	end
+	trace("DrawWorld", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawWorldPreParticles = _G["DrawWorldPreParticles"]
 _G["DrawWorldPreParticles"] = function(...)
-	trace("DrawWorldPreParticles", ...)
-	if previous_DrawWorldPreParticles then return previous_DrawWorldPreParticles(...) end
-	return defaultResult("DrawWorldPreParticles")
+	local result
+	if previous_DrawWorldPreParticles then
+		result = pack(previous_DrawWorldPreParticles(...))
+	else
+		result = pack(defaultResult("DrawWorldPreParticles"))
+	end
+	trace("DrawWorldPreParticles", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawWorldPreUnit = _G["DrawWorldPreUnit"]
 _G["DrawWorldPreUnit"] = function(...)
-	trace("DrawWorldPreUnit", ...)
-	if previous_DrawWorldPreUnit then return previous_DrawWorldPreUnit(...) end
-	return defaultResult("DrawWorldPreUnit")
+	local result
+	if previous_DrawWorldPreUnit then
+		result = pack(previous_DrawWorldPreUnit(...))
+	else
+		result = pack(defaultResult("DrawWorldPreUnit"))
+	end
+	trace("DrawWorldPreUnit", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawWorldReflection = _G["DrawWorldReflection"]
 _G["DrawWorldReflection"] = function(...)
-	trace("DrawWorldReflection", ...)
-	if previous_DrawWorldReflection then return previous_DrawWorldReflection(...) end
-	return defaultResult("DrawWorldReflection")
+	local result
+	if previous_DrawWorldReflection then
+		result = pack(previous_DrawWorldReflection(...))
+	else
+		result = pack(defaultResult("DrawWorldReflection"))
+	end
+	trace("DrawWorldReflection", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawWorldRefraction = _G["DrawWorldRefraction"]
 _G["DrawWorldRefraction"] = function(...)
-	trace("DrawWorldRefraction", ...)
-	if previous_DrawWorldRefraction then return previous_DrawWorldRefraction(...) end
-	return defaultResult("DrawWorldRefraction")
+	local result
+	if previous_DrawWorldRefraction then
+		result = pack(previous_DrawWorldRefraction(...))
+	else
+		result = pack(defaultResult("DrawWorldRefraction"))
+	end
+	trace("DrawWorldRefraction", result, ...)
+	return unpackn(result)
 end
 
 local previous_DrawWorldShadow = _G["DrawWorldShadow"]
 _G["DrawWorldShadow"] = function(...)
-	trace("DrawWorldShadow", ...)
-	if previous_DrawWorldShadow then return previous_DrawWorldShadow(...) end
-	return defaultResult("DrawWorldShadow")
+	local result
+	if previous_DrawWorldShadow then
+		result = pack(previous_DrawWorldShadow(...))
+	else
+		result = pack(defaultResult("DrawWorldShadow"))
+	end
+	trace("DrawWorldShadow", result, ...)
+	return unpackn(result)
+end
+
+local previous_Explosion = _G["Explosion"]
+_G["Explosion"] = function(...)
+	local result
+	if previous_Explosion then
+		result = pack(previous_Explosion(...))
+	else
+		result = pack(defaultResult("Explosion"))
+	end
+	trace("Explosion", result, ...)
+	return unpackn(result)
 end
 
 local previous_FeatureCreated = _G["FeatureCreated"]
 _G["FeatureCreated"] = function(...)
-	trace("FeatureCreated", ...)
-	if previous_FeatureCreated then return previous_FeatureCreated(...) end
-	return defaultResult("FeatureCreated")
+	local result
+	if previous_FeatureCreated then
+		result = pack(previous_FeatureCreated(...))
+	else
+		result = pack(defaultResult("FeatureCreated"))
+	end
+	trace("FeatureCreated", result, ...)
+	return unpackn(result)
+end
+
+local previous_FeatureDamaged = _G["FeatureDamaged"]
+_G["FeatureDamaged"] = function(...)
+	local result
+	if previous_FeatureDamaged then
+		result = pack(previous_FeatureDamaged(...))
+	else
+		result = pack(defaultResult("FeatureDamaged"))
+	end
+	trace("FeatureDamaged", result, ...)
+	return unpackn(result)
 end
 
 local previous_FeatureDestroyed = _G["FeatureDestroyed"]
 _G["FeatureDestroyed"] = function(...)
-	trace("FeatureDestroyed", ...)
-	if previous_FeatureDestroyed then return previous_FeatureDestroyed(...) end
-	return defaultResult("FeatureDestroyed")
+	local result
+	if previous_FeatureDestroyed then
+		result = pack(previous_FeatureDestroyed(...))
+	else
+		result = pack(defaultResult("FeatureDestroyed"))
+	end
+	trace("FeatureDestroyed", result, ...)
+	return unpackn(result)
+end
+
+local previous_FeaturePreDamaged = _G["FeaturePreDamaged"]
+_G["FeaturePreDamaged"] = function(...)
+	local result
+	if previous_FeaturePreDamaged then
+		result = pack(previous_FeaturePreDamaged(...))
+	else
+		result = pack(defaultResult("FeaturePreDamaged"))
+	end
+	trace("FeaturePreDamaged", result, ...)
+	return unpackn(result)
 end
 
 local previous_FontsChanged = _G["FontsChanged"]
 _G["FontsChanged"] = function(...)
-	trace("FontsChanged", ...)
-	if previous_FontsChanged then return previous_FontsChanged(...) end
-	return defaultResult("FontsChanged")
+	local result
+	if previous_FontsChanged then
+		result = pack(previous_FontsChanged(...))
+	else
+		result = pack(defaultResult("FontsChanged"))
+	end
+	trace("FontsChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_GameFrame = _G["GameFrame"]
 _G["GameFrame"] = function(...)
-	trace("GameFrame", ...)
-	if previous_GameFrame then return previous_GameFrame(...) end
-	return defaultResult("GameFrame")
+	local result
+	if previous_GameFrame then
+		result = pack(previous_GameFrame(...))
+	else
+		result = pack(defaultResult("GameFrame"))
+	end
+	trace("GameFrame", result, ...)
+	return unpackn(result)
 end
 
 local previous_GameFramePost = _G["GameFramePost"]
 _G["GameFramePost"] = function(...)
-	trace("GameFramePost", ...)
-	if previous_GameFramePost then return previous_GameFramePost(...) end
-	return defaultResult("GameFramePost")
+	local result
+	if previous_GameFramePost then
+		result = pack(previous_GameFramePost(...))
+	else
+		result = pack(defaultResult("GameFramePost"))
+	end
+	trace("GameFramePost", result, ...)
+	return unpackn(result)
 end
 
 local previous_GameID = _G["GameID"]
 _G["GameID"] = function(...)
-	trace("GameID", ...)
-	if previous_GameID then return previous_GameID(...) end
-	return defaultResult("GameID")
+	local result
+	if previous_GameID then
+		result = pack(previous_GameID(...))
+	else
+		result = pack(defaultResult("GameID"))
+	end
+	trace("GameID", result, ...)
+	return unpackn(result)
 end
 
 local previous_GameOver = _G["GameOver"]
 _G["GameOver"] = function(...)
-	trace("GameOver", ...)
-	if previous_GameOver then return previous_GameOver(...) end
-	return defaultResult("GameOver")
+	local result
+	if previous_GameOver then
+		result = pack(previous_GameOver(...))
+	else
+		result = pack(defaultResult("GameOver"))
+	end
+	trace("GameOver", result, ...)
+	return unpackn(result)
 end
 
 local previous_GamePaused = _G["GamePaused"]
 _G["GamePaused"] = function(...)
-	trace("GamePaused", ...)
-	if previous_GamePaused then return previous_GamePaused(...) end
-	return defaultResult("GamePaused")
+	local result
+	if previous_GamePaused then
+		result = pack(previous_GamePaused(...))
+	else
+		result = pack(defaultResult("GamePaused"))
+	end
+	trace("GamePaused", result, ...)
+	return unpackn(result)
 end
 
 local previous_GamePreload = _G["GamePreload"]
 _G["GamePreload"] = function(...)
-	trace("GamePreload", ...)
-	if previous_GamePreload then return previous_GamePreload(...) end
-	return defaultResult("GamePreload")
+	local result
+	if previous_GamePreload then
+		result = pack(previous_GamePreload(...))
+	else
+		result = pack(defaultResult("GamePreload"))
+	end
+	trace("GamePreload", result, ...)
+	return unpackn(result)
 end
 
 local previous_GameProgress = _G["GameProgress"]
 _G["GameProgress"] = function(...)
-	trace("GameProgress", ...)
-	if previous_GameProgress then return previous_GameProgress(...) end
-	return defaultResult("GameProgress")
+	local result
+	if previous_GameProgress then
+		result = pack(previous_GameProgress(...))
+	else
+		result = pack(defaultResult("GameProgress"))
+	end
+	trace("GameProgress", result, ...)
+	return unpackn(result)
 end
 
 local previous_GameSetup = _G["GameSetup"]
 _G["GameSetup"] = function(...)
-	trace("GameSetup", ...)
-	if previous_GameSetup then return previous_GameSetup(...) end
-	return defaultResult("GameSetup")
+	local result
+	if previous_GameSetup then
+		result = pack(previous_GameSetup(...))
+	else
+		result = pack(defaultResult("GameSetup"))
+	end
+	trace("GameSetup", result, ...)
+	return unpackn(result)
 end
 
 local previous_GameStart = _G["GameStart"]
 _G["GameStart"] = function(...)
-	trace("GameStart", ...)
-	if previous_GameStart then return previous_GameStart(...) end
-	return defaultResult("GameStart")
+	local result
+	if previous_GameStart then
+		result = pack(previous_GameStart(...))
+	else
+		result = pack(defaultResult("GameStart"))
+	end
+	trace("GameStart", result, ...)
+	return unpackn(result)
 end
 
 local previous_GetTooltip = _G["GetTooltip"]
 _G["GetTooltip"] = function(...)
-	trace("GetTooltip", ...)
-	if previous_GetTooltip then return previous_GetTooltip(...) end
-	return defaultResult("GetTooltip")
+	local result
+	if previous_GetTooltip then
+		result = pack(previous_GetTooltip(...))
+	else
+		result = pack(defaultResult("GetTooltip"))
+	end
+	if result.n == 0 then
+		result = pack(nil)
+	end
+	trace("GetTooltip", result, ...)
+	return unpackn(result)
 end
 
 local previous_GroupChanged = _G["GroupChanged"]
 _G["GroupChanged"] = function(...)
-	trace("GroupChanged", ...)
-	if previous_GroupChanged then return previous_GroupChanged(...) end
-	return defaultResult("GroupChanged")
+	local result
+	if previous_GroupChanged then
+		result = pack(previous_GroupChanged(...))
+	else
+		result = pack(defaultResult("GroupChanged"))
+	end
+	trace("GroupChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_IsAbove = _G["IsAbove"]
 _G["IsAbove"] = function(...)
-	trace("IsAbove", ...)
-	if previous_IsAbove then return previous_IsAbove(...) end
-	return defaultResult("IsAbove")
+	local result
+	if previous_IsAbove then
+		result = pack(previous_IsAbove(...))
+	else
+		result = pack(defaultResult("IsAbove"))
+	end
+	trace("IsAbove", result, ...)
+	return unpackn(result)
 end
 
 local previous_KeyMapChanged = _G["KeyMapChanged"]
 _G["KeyMapChanged"] = function(...)
-	trace("KeyMapChanged", ...)
-	if previous_KeyMapChanged then return previous_KeyMapChanged(...) end
-	return defaultResult("KeyMapChanged")
+	local result
+	if previous_KeyMapChanged then
+		result = pack(previous_KeyMapChanged(...))
+	else
+		result = pack(defaultResult("KeyMapChanged"))
+	end
+	trace("KeyMapChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_KeyPress = _G["KeyPress"]
 _G["KeyPress"] = function(...)
-	trace("KeyPress", ...)
-	if previous_KeyPress then return previous_KeyPress(...) end
-	return defaultResult("KeyPress")
+	local result
+	if previous_KeyPress then
+		result = pack(previous_KeyPress(...))
+	else
+		result = pack(defaultResult("KeyPress"))
+	end
+	trace("KeyPress", result, ...)
+	return unpackn(result)
 end
 
 local previous_KeyRelease = _G["KeyRelease"]
 _G["KeyRelease"] = function(...)
-	trace("KeyRelease", ...)
-	if previous_KeyRelease then return previous_KeyRelease(...) end
-	return defaultResult("KeyRelease")
-end
-
-local previous_Load = _G["Load"]
-_G["Load"] = function(...)
-	trace("Load", ...)
-	if previous_Load then return previous_Load(...) end
-	return defaultResult("Load")
+	local result
+	if previous_KeyRelease then
+		result = pack(previous_KeyRelease(...))
+	else
+		result = pack(defaultResult("KeyRelease"))
+	end
+	trace("KeyRelease", result, ...)
+	return unpackn(result)
 end
 
 local previous_MapDrawCmd = _G["MapDrawCmd"]
 _G["MapDrawCmd"] = function(...)
-	trace("MapDrawCmd", ...)
-	if previous_MapDrawCmd then return previous_MapDrawCmd(...) end
-	return defaultResult("MapDrawCmd")
+	local result
+	if previous_MapDrawCmd then
+		result = pack(previous_MapDrawCmd(...))
+	else
+		result = pack(defaultResult("MapDrawCmd"))
+	end
+	trace("MapDrawCmd", result, ...)
+	return unpackn(result)
 end
 
 local previous_MiniMapGeometryChanged = _G["MiniMapGeometryChanged"]
 _G["MiniMapGeometryChanged"] = function(...)
-	trace("MiniMapGeometryChanged", ...)
-	if previous_MiniMapGeometryChanged then return previous_MiniMapGeometryChanged(...) end
-	return defaultResult("MiniMapGeometryChanged")
+	local result
+	if previous_MiniMapGeometryChanged then
+		result = pack(previous_MiniMapGeometryChanged(...))
+	else
+		result = pack(defaultResult("MiniMapGeometryChanged"))
+	end
+	trace("MiniMapGeometryChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_MiniMapRotationChanged = _G["MiniMapRotationChanged"]
 _G["MiniMapRotationChanged"] = function(...)
-	trace("MiniMapRotationChanged", ...)
-	if previous_MiniMapRotationChanged then return previous_MiniMapRotationChanged(...) end
-	return defaultResult("MiniMapRotationChanged")
+	local result
+	if previous_MiniMapRotationChanged then
+		result = pack(previous_MiniMapRotationChanged(...))
+	else
+		result = pack(defaultResult("MiniMapRotationChanged"))
+	end
+	trace("MiniMapRotationChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_MiniMapStateChanged = _G["MiniMapStateChanged"]
 _G["MiniMapStateChanged"] = function(...)
-	trace("MiniMapStateChanged", ...)
-	if previous_MiniMapStateChanged then return previous_MiniMapStateChanged(...) end
-	return defaultResult("MiniMapStateChanged")
+	local result
+	if previous_MiniMapStateChanged then
+		result = pack(previous_MiniMapStateChanged(...))
+	else
+		result = pack(defaultResult("MiniMapStateChanged"))
+	end
+	trace("MiniMapStateChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_MouseMove = _G["MouseMove"]
 _G["MouseMove"] = function(...)
-	trace("MouseMove", ...)
-	if previous_MouseMove then return previous_MouseMove(...) end
-	return defaultResult("MouseMove")
+	local result
+	if previous_MouseMove then
+		result = pack(previous_MouseMove(...))
+	else
+		result = pack(defaultResult("MouseMove"))
+	end
+	trace("MouseMove", result, ...)
+	return unpackn(result)
 end
 
 local previous_MousePress = _G["MousePress"]
 _G["MousePress"] = function(...)
-	trace("MousePress", ...)
-	if previous_MousePress then return previous_MousePress(...) end
-	return defaultResult("MousePress")
+	local result
+	if previous_MousePress then
+		result = pack(previous_MousePress(...))
+	else
+		result = pack(defaultResult("MousePress"))
+	end
+	trace("MousePress", result, ...)
+	return unpackn(result)
 end
 
 local previous_MouseRelease = _G["MouseRelease"]
 _G["MouseRelease"] = function(...)
-	trace("MouseRelease", ...)
-	if previous_MouseRelease then return previous_MouseRelease(...) end
-	return defaultResult("MouseRelease")
+	local result
+	if previous_MouseRelease then
+		result = pack(previous_MouseRelease(...))
+	else
+		result = pack(defaultResult("MouseRelease"))
+	end
+	trace("MouseRelease", result, ...)
+	return unpackn(result)
 end
 
 local previous_MouseWheel = _G["MouseWheel"]
 _G["MouseWheel"] = function(...)
-	trace("MouseWheel", ...)
-	if previous_MouseWheel then return previous_MouseWheel(...) end
-	return defaultResult("MouseWheel")
+	local result
+	if previous_MouseWheel then
+		result = pack(previous_MouseWheel(...))
+	else
+		result = pack(defaultResult("MouseWheel"))
+	end
+	trace("MouseWheel", result, ...)
+	return unpackn(result)
+end
+
+local previous_MoveCtrlNotify = _G["MoveCtrlNotify"]
+_G["MoveCtrlNotify"] = function(...)
+	local result
+	if previous_MoveCtrlNotify then
+		result = pack(previous_MoveCtrlNotify(...))
+	else
+		result = pack(defaultResult("MoveCtrlNotify"))
+	end
+	trace("MoveCtrlNotify", result, ...)
+	return unpackn(result)
 end
 
 local previous_PlayerAdded = _G["PlayerAdded"]
 _G["PlayerAdded"] = function(...)
-	trace("PlayerAdded", ...)
-	if previous_PlayerAdded then return previous_PlayerAdded(...) end
-	return defaultResult("PlayerAdded")
+	local result
+	if previous_PlayerAdded then
+		result = pack(previous_PlayerAdded(...))
+	else
+		result = pack(defaultResult("PlayerAdded"))
+	end
+	trace("PlayerAdded", result, ...)
+	return unpackn(result)
 end
 
 local previous_PlayerChanged = _G["PlayerChanged"]
 _G["PlayerChanged"] = function(...)
-	trace("PlayerChanged", ...)
-	if previous_PlayerChanged then return previous_PlayerChanged(...) end
-	return defaultResult("PlayerChanged")
+	local result
+	if previous_PlayerChanged then
+		result = pack(previous_PlayerChanged(...))
+	else
+		result = pack(defaultResult("PlayerChanged"))
+	end
+	trace("PlayerChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_PlayerRemoved = _G["PlayerRemoved"]
 _G["PlayerRemoved"] = function(...)
-	trace("PlayerRemoved", ...)
-	if previous_PlayerRemoved then return previous_PlayerRemoved(...) end
-	return defaultResult("PlayerRemoved")
+	local result
+	if previous_PlayerRemoved then
+		result = pack(previous_PlayerRemoved(...))
+	else
+		result = pack(defaultResult("PlayerRemoved"))
+	end
+	trace("PlayerRemoved", result, ...)
+	return unpackn(result)
+end
+
+local previous_ProjectileCreated = _G["ProjectileCreated"]
+_G["ProjectileCreated"] = function(...)
+	local result
+	if previous_ProjectileCreated then
+		result = pack(previous_ProjectileCreated(...))
+	else
+		result = pack(defaultResult("ProjectileCreated"))
+	end
+	trace("ProjectileCreated", result, ...)
+	return unpackn(result)
+end
+
+local previous_ProjectileDestroyed = _G["ProjectileDestroyed"]
+_G["ProjectileDestroyed"] = function(...)
+	local result
+	if previous_ProjectileDestroyed then
+		result = pack(previous_ProjectileDestroyed(...))
+	else
+		result = pack(defaultResult("ProjectileDestroyed"))
+	end
+	trace("ProjectileDestroyed", result, ...)
+	return unpackn(result)
 end
 
 local previous_RenderUnitDestroyed = _G["RenderUnitDestroyed"]
 _G["RenderUnitDestroyed"] = function(...)
-	trace("RenderUnitDestroyed", ...)
-	if previous_RenderUnitDestroyed then return previous_RenderUnitDestroyed(...) end
-	return defaultResult("RenderUnitDestroyed")
+	local result
+	if previous_RenderUnitDestroyed then
+		result = pack(previous_RenderUnitDestroyed(...))
+	else
+		result = pack(defaultResult("RenderUnitDestroyed"))
+	end
+	trace("RenderUnitDestroyed", result, ...)
+	return unpackn(result)
 end
 
-local previous_Save = _G["Save"]
-_G["Save"] = function(...)
-	trace("Save", ...)
-	if previous_Save then return previous_Save(...) end
-	return defaultResult("Save")
+local previous_ResourceExcess = _G["ResourceExcess"]
+_G["ResourceExcess"] = function(...)
+	local result
+	if previous_ResourceExcess then
+		result = pack(previous_ResourceExcess(...))
+	else
+		result = pack(defaultResult("ResourceExcess"))
+	end
+	trace("ResourceExcess", result, ...)
+	return unpackn(result)
 end
 
-local previous_Shutdown = _G["Shutdown"]
-_G["Shutdown"] = function(...)
-	trace("Shutdown", ...)
-	if previous_Shutdown then return previous_Shutdown(...) end
-	return defaultResult("Shutdown")
+local previous_ShieldPreDamaged = _G["ShieldPreDamaged"]
+_G["ShieldPreDamaged"] = function(...)
+	local result
+	if previous_ShieldPreDamaged then
+		result = pack(previous_ShieldPreDamaged(...))
+	else
+		result = pack(defaultResult("ShieldPreDamaged"))
+	end
+	trace("ShieldPreDamaged", result, ...)
+	return unpackn(result)
 end
 
 local previous_StockpileChanged = _G["StockpileChanged"]
 _G["StockpileChanged"] = function(...)
-	trace("StockpileChanged", ...)
-	if previous_StockpileChanged then return previous_StockpileChanged(...) end
-	return defaultResult("StockpileChanged")
+	local result
+	if previous_StockpileChanged then
+		result = pack(previous_StockpileChanged(...))
+	else
+		result = pack(defaultResult("StockpileChanged"))
+	end
+	trace("StockpileChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_SunChanged = _G["SunChanged"]
 _G["SunChanged"] = function(...)
-	trace("SunChanged", ...)
-	if previous_SunChanged then return previous_SunChanged(...) end
-	return defaultResult("SunChanged")
+	local result
+	if previous_SunChanged then
+		result = pack(previous_SunChanged(...))
+	else
+		result = pack(defaultResult("SunChanged"))
+	end
+	trace("SunChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_TeamChanged = _G["TeamChanged"]
 _G["TeamChanged"] = function(...)
-	trace("TeamChanged", ...)
-	if previous_TeamChanged then return previous_TeamChanged(...) end
-	return defaultResult("TeamChanged")
+	local result
+	if previous_TeamChanged then
+		result = pack(previous_TeamChanged(...))
+	else
+		result = pack(defaultResult("TeamChanged"))
+	end
+	trace("TeamChanged", result, ...)
+	return unpackn(result)
 end
 
 local previous_TeamDied = _G["TeamDied"]
 _G["TeamDied"] = function(...)
-	trace("TeamDied", ...)
-	if previous_TeamDied then return previous_TeamDied(...) end
-	return defaultResult("TeamDied")
+	local result
+	if previous_TeamDied then
+		result = pack(previous_TeamDied(...))
+	else
+		result = pack(defaultResult("TeamDied"))
+	end
+	trace("TeamDied", result, ...)
+	return unpackn(result)
+end
+
+local previous_TerraformComplete = _G["TerraformComplete"]
+_G["TerraformComplete"] = function(...)
+	local result
+	if previous_TerraformComplete then
+		result = pack(previous_TerraformComplete(...))
+	else
+		result = pack(defaultResult("TerraformComplete"))
+	end
+	trace("TerraformComplete", result, ...)
+	return unpackn(result)
 end
 
 local previous_TextEditing = _G["TextEditing"]
 _G["TextEditing"] = function(...)
-	trace("TextEditing", ...)
-	if previous_TextEditing then return previous_TextEditing(...) end
-	return defaultResult("TextEditing")
+	local result
+	if previous_TextEditing then
+		result = pack(previous_TextEditing(...))
+	else
+		result = pack(defaultResult("TextEditing"))
+	end
+	trace("TextEditing", result, ...)
+	return unpackn(result)
 end
 
 local previous_TextInput = _G["TextInput"]
 _G["TextInput"] = function(...)
-	trace("TextInput", ...)
-	if previous_TextInput then return previous_TextInput(...) end
-	return defaultResult("TextInput")
+	local result
+	if previous_TextInput then
+		result = pack(previous_TextInput(...))
+	else
+		result = pack(defaultResult("TextInput"))
+	end
+	trace("TextInput", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitArrivedAtGoal = _G["UnitArrivedAtGoal"]
 _G["UnitArrivedAtGoal"] = function(...)
-	trace("UnitArrivedAtGoal", ...)
-	if previous_UnitArrivedAtGoal then return previous_UnitArrivedAtGoal(...) end
-	return defaultResult("UnitArrivedAtGoal")
+	local result
+	if previous_UnitArrivedAtGoal then
+		result = pack(previous_UnitArrivedAtGoal(...))
+	else
+		result = pack(defaultResult("UnitArrivedAtGoal"))
+	end
+	trace("UnitArrivedAtGoal", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitCloaked = _G["UnitCloaked"]
 _G["UnitCloaked"] = function(...)
-	trace("UnitCloaked", ...)
-	if previous_UnitCloaked then return previous_UnitCloaked(...) end
-	return defaultResult("UnitCloaked")
+	local result
+	if previous_UnitCloaked then
+		result = pack(previous_UnitCloaked(...))
+	else
+		result = pack(defaultResult("UnitCloaked"))
+	end
+	trace("UnitCloaked", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitCmdDone = _G["UnitCmdDone"]
 _G["UnitCmdDone"] = function(...)
-	trace("UnitCmdDone", ...)
-	if previous_UnitCmdDone then return previous_UnitCmdDone(...) end
-	return defaultResult("UnitCmdDone")
+	local result
+	if previous_UnitCmdDone then
+		result = pack(previous_UnitCmdDone(...))
+	else
+		result = pack(defaultResult("UnitCmdDone"))
+	end
+	trace("UnitCmdDone", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitCommand = _G["UnitCommand"]
 _G["UnitCommand"] = function(...)
-	trace("UnitCommand", ...)
-	if previous_UnitCommand then return previous_UnitCommand(...) end
-	return defaultResult("UnitCommand")
+	local result
+	if previous_UnitCommand then
+		result = pack(previous_UnitCommand(...))
+	else
+		result = pack(defaultResult("UnitCommand"))
+	end
+	trace("UnitCommand", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitConstructionDecayed = _G["UnitConstructionDecayed"]
 _G["UnitConstructionDecayed"] = function(...)
-	trace("UnitConstructionDecayed", ...)
-	if previous_UnitConstructionDecayed then return previous_UnitConstructionDecayed(...) end
-	return defaultResult("UnitConstructionDecayed")
+	local result
+	if previous_UnitConstructionDecayed then
+		result = pack(previous_UnitConstructionDecayed(...))
+	else
+		result = pack(defaultResult("UnitConstructionDecayed"))
+	end
+	trace("UnitConstructionDecayed", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitCreated = _G["UnitCreated"]
 _G["UnitCreated"] = function(...)
-	trace("UnitCreated", ...)
-	if previous_UnitCreated then return previous_UnitCreated(...) end
-	return defaultResult("UnitCreated")
+	local result
+	if previous_UnitCreated then
+		result = pack(previous_UnitCreated(...))
+	else
+		result = pack(defaultResult("UnitCreated"))
+	end
+	trace("UnitCreated", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitDamaged = _G["UnitDamaged"]
 _G["UnitDamaged"] = function(...)
-	trace("UnitDamaged", ...)
-	if previous_UnitDamaged then return previous_UnitDamaged(...) end
-	return defaultResult("UnitDamaged")
+	local result
+	if previous_UnitDamaged then
+		result = pack(previous_UnitDamaged(...))
+	else
+		result = pack(defaultResult("UnitDamaged"))
+	end
+	trace("UnitDamaged", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitDecloaked = _G["UnitDecloaked"]
 _G["UnitDecloaked"] = function(...)
-	trace("UnitDecloaked", ...)
-	if previous_UnitDecloaked then return previous_UnitDecloaked(...) end
-	return defaultResult("UnitDecloaked")
+	local result
+	if previous_UnitDecloaked then
+		result = pack(previous_UnitDecloaked(...))
+	else
+		result = pack(defaultResult("UnitDecloaked"))
+	end
+	trace("UnitDecloaked", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitDestroyed = _G["UnitDestroyed"]
 _G["UnitDestroyed"] = function(...)
-	trace("UnitDestroyed", ...)
-	if previous_UnitDestroyed then return previous_UnitDestroyed(...) end
-	return defaultResult("UnitDestroyed")
+	local result
+	if previous_UnitDestroyed then
+		result = pack(previous_UnitDestroyed(...))
+	else
+		result = pack(defaultResult("UnitDestroyed"))
+	end
+	trace("UnitDestroyed", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitEnteredAir = _G["UnitEnteredAir"]
 _G["UnitEnteredAir"] = function(...)
-	trace("UnitEnteredAir", ...)
-	if previous_UnitEnteredAir then return previous_UnitEnteredAir(...) end
-	return defaultResult("UnitEnteredAir")
+	local result
+	if previous_UnitEnteredAir then
+		result = pack(previous_UnitEnteredAir(...))
+	else
+		result = pack(defaultResult("UnitEnteredAir"))
+	end
+	trace("UnitEnteredAir", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitEnteredLos = _G["UnitEnteredLos"]
 _G["UnitEnteredLos"] = function(...)
-	trace("UnitEnteredLos", ...)
-	if previous_UnitEnteredLos then return previous_UnitEnteredLos(...) end
-	return defaultResult("UnitEnteredLos")
+	local result
+	if previous_UnitEnteredLos then
+		result = pack(previous_UnitEnteredLos(...))
+	else
+		result = pack(defaultResult("UnitEnteredLos"))
+	end
+	trace("UnitEnteredLos", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitEnteredRadar = _G["UnitEnteredRadar"]
 _G["UnitEnteredRadar"] = function(...)
-	trace("UnitEnteredRadar", ...)
-	if previous_UnitEnteredRadar then return previous_UnitEnteredRadar(...) end
-	return defaultResult("UnitEnteredRadar")
+	local result
+	if previous_UnitEnteredRadar then
+		result = pack(previous_UnitEnteredRadar(...))
+	else
+		result = pack(defaultResult("UnitEnteredRadar"))
+	end
+	trace("UnitEnteredRadar", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitEnteredUnderwater = _G["UnitEnteredUnderwater"]
 _G["UnitEnteredUnderwater"] = function(...)
-	trace("UnitEnteredUnderwater", ...)
-	if previous_UnitEnteredUnderwater then return previous_UnitEnteredUnderwater(...) end
-	return defaultResult("UnitEnteredUnderwater")
+	local result
+	if previous_UnitEnteredUnderwater then
+		result = pack(previous_UnitEnteredUnderwater(...))
+	else
+		result = pack(defaultResult("UnitEnteredUnderwater"))
+	end
+	trace("UnitEnteredUnderwater", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitEnteredWater = _G["UnitEnteredWater"]
 _G["UnitEnteredWater"] = function(...)
-	trace("UnitEnteredWater", ...)
-	if previous_UnitEnteredWater then return previous_UnitEnteredWater(...) end
-	return defaultResult("UnitEnteredWater")
+	local result
+	if previous_UnitEnteredWater then
+		result = pack(previous_UnitEnteredWater(...))
+	else
+		result = pack(defaultResult("UnitEnteredWater"))
+	end
+	trace("UnitEnteredWater", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitExperience = _G["UnitExperience"]
 _G["UnitExperience"] = function(...)
-	trace("UnitExperience", ...)
-	if previous_UnitExperience then return previous_UnitExperience(...) end
-	return defaultResult("UnitExperience")
+	local result
+	if previous_UnitExperience then
+		result = pack(previous_UnitExperience(...))
+	else
+		result = pack(defaultResult("UnitExperience"))
+	end
+	trace("UnitExperience", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitFeatureCollision = _G["UnitFeatureCollision"]
 _G["UnitFeatureCollision"] = function(...)
-	trace("UnitFeatureCollision", ...)
-	if previous_UnitFeatureCollision then return previous_UnitFeatureCollision(...) end
-	return defaultResult("UnitFeatureCollision")
+	local result
+	if previous_UnitFeatureCollision then
+		result = pack(previous_UnitFeatureCollision(...))
+	else
+		result = pack(defaultResult("UnitFeatureCollision"))
+	end
+	trace("UnitFeatureCollision", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitFinished = _G["UnitFinished"]
 _G["UnitFinished"] = function(...)
-	trace("UnitFinished", ...)
-	if previous_UnitFinished then return previous_UnitFinished(...) end
-	return defaultResult("UnitFinished")
+	local result
+	if previous_UnitFinished then
+		result = pack(previous_UnitFinished(...))
+	else
+		result = pack(defaultResult("UnitFinished"))
+	end
+	trace("UnitFinished", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitFromFactory = _G["UnitFromFactory"]
 _G["UnitFromFactory"] = function(...)
-	trace("UnitFromFactory", ...)
-	if previous_UnitFromFactory then return previous_UnitFromFactory(...) end
-	return defaultResult("UnitFromFactory")
+	local result
+	if previous_UnitFromFactory then
+		result = pack(previous_UnitFromFactory(...))
+	else
+		result = pack(defaultResult("UnitFromFactory"))
+	end
+	trace("UnitFromFactory", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitGiven = _G["UnitGiven"]
 _G["UnitGiven"] = function(...)
-	trace("UnitGiven", ...)
-	if previous_UnitGiven then return previous_UnitGiven(...) end
-	return defaultResult("UnitGiven")
+	local result
+	if previous_UnitGiven then
+		result = pack(previous_UnitGiven(...))
+	else
+		result = pack(defaultResult("UnitGiven"))
+	end
+	trace("UnitGiven", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitHarvestStorageFull = _G["UnitHarvestStorageFull"]
 _G["UnitHarvestStorageFull"] = function(...)
-	trace("UnitHarvestStorageFull", ...)
-	if previous_UnitHarvestStorageFull then return previous_UnitHarvestStorageFull(...) end
-	return defaultResult("UnitHarvestStorageFull")
+	local result
+	if previous_UnitHarvestStorageFull then
+		result = pack(previous_UnitHarvestStorageFull(...))
+	else
+		result = pack(defaultResult("UnitHarvestStorageFull"))
+	end
+	trace("UnitHarvestStorageFull", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitIdle = _G["UnitIdle"]
 _G["UnitIdle"] = function(...)
-	trace("UnitIdle", ...)
-	if previous_UnitIdle then return previous_UnitIdle(...) end
-	return defaultResult("UnitIdle")
+	local result
+	if previous_UnitIdle then
+		result = pack(previous_UnitIdle(...))
+	else
+		result = pack(defaultResult("UnitIdle"))
+	end
+	trace("UnitIdle", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitLeftAir = _G["UnitLeftAir"]
 _G["UnitLeftAir"] = function(...)
-	trace("UnitLeftAir", ...)
-	if previous_UnitLeftAir then return previous_UnitLeftAir(...) end
-	return defaultResult("UnitLeftAir")
+	local result
+	if previous_UnitLeftAir then
+		result = pack(previous_UnitLeftAir(...))
+	else
+		result = pack(defaultResult("UnitLeftAir"))
+	end
+	trace("UnitLeftAir", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitLeftLos = _G["UnitLeftLos"]
 _G["UnitLeftLos"] = function(...)
-	trace("UnitLeftLos", ...)
-	if previous_UnitLeftLos then return previous_UnitLeftLos(...) end
-	return defaultResult("UnitLeftLos")
+	local result
+	if previous_UnitLeftLos then
+		result = pack(previous_UnitLeftLos(...))
+	else
+		result = pack(defaultResult("UnitLeftLos"))
+	end
+	trace("UnitLeftLos", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitLeftRadar = _G["UnitLeftRadar"]
 _G["UnitLeftRadar"] = function(...)
-	trace("UnitLeftRadar", ...)
-	if previous_UnitLeftRadar then return previous_UnitLeftRadar(...) end
-	return defaultResult("UnitLeftRadar")
+	local result
+	if previous_UnitLeftRadar then
+		result = pack(previous_UnitLeftRadar(...))
+	else
+		result = pack(defaultResult("UnitLeftRadar"))
+	end
+	trace("UnitLeftRadar", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitLeftUnderwater = _G["UnitLeftUnderwater"]
 _G["UnitLeftUnderwater"] = function(...)
-	trace("UnitLeftUnderwater", ...)
-	if previous_UnitLeftUnderwater then return previous_UnitLeftUnderwater(...) end
-	return defaultResult("UnitLeftUnderwater")
+	local result
+	if previous_UnitLeftUnderwater then
+		result = pack(previous_UnitLeftUnderwater(...))
+	else
+		result = pack(defaultResult("UnitLeftUnderwater"))
+	end
+	trace("UnitLeftUnderwater", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitLeftWater = _G["UnitLeftWater"]
 _G["UnitLeftWater"] = function(...)
-	trace("UnitLeftWater", ...)
-	if previous_UnitLeftWater then return previous_UnitLeftWater(...) end
-	return defaultResult("UnitLeftWater")
+	local result
+	if previous_UnitLeftWater then
+		result = pack(previous_UnitLeftWater(...))
+	else
+		result = pack(defaultResult("UnitLeftWater"))
+	end
+	trace("UnitLeftWater", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitLoaded = _G["UnitLoaded"]
 _G["UnitLoaded"] = function(...)
-	trace("UnitLoaded", ...)
-	if previous_UnitLoaded then return previous_UnitLoaded(...) end
-	return defaultResult("UnitLoaded")
+	local result
+	if previous_UnitLoaded then
+		result = pack(previous_UnitLoaded(...))
+	else
+		result = pack(defaultResult("UnitLoaded"))
+	end
+	trace("UnitLoaded", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitMoveFailed = _G["UnitMoveFailed"]
 _G["UnitMoveFailed"] = function(...)
-	trace("UnitMoveFailed", ...)
-	if previous_UnitMoveFailed then return previous_UnitMoveFailed(...) end
-	return defaultResult("UnitMoveFailed")
+	local result
+	if previous_UnitMoveFailed then
+		result = pack(previous_UnitMoveFailed(...))
+	else
+		result = pack(defaultResult("UnitMoveFailed"))
+	end
+	trace("UnitMoveFailed", result, ...)
+	return unpackn(result)
+end
+
+local previous_UnitPreDamaged = _G["UnitPreDamaged"]
+_G["UnitPreDamaged"] = function(...)
+	local result
+	if previous_UnitPreDamaged then
+		result = pack(previous_UnitPreDamaged(...))
+	else
+		result = pack(defaultResult("UnitPreDamaged"))
+	end
+	trace("UnitPreDamaged", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitReverseBuilt = _G["UnitReverseBuilt"]
 _G["UnitReverseBuilt"] = function(...)
-	trace("UnitReverseBuilt", ...)
-	if previous_UnitReverseBuilt then return previous_UnitReverseBuilt(...) end
-	return defaultResult("UnitReverseBuilt")
+	local result
+	if previous_UnitReverseBuilt then
+		result = pack(previous_UnitReverseBuilt(...))
+	else
+		result = pack(defaultResult("UnitReverseBuilt"))
+	end
+	trace("UnitReverseBuilt", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitSeismicPing = _G["UnitSeismicPing"]
 _G["UnitSeismicPing"] = function(...)
-	trace("UnitSeismicPing", ...)
-	if previous_UnitSeismicPing then return previous_UnitSeismicPing(...) end
-	return defaultResult("UnitSeismicPing")
+	local result
+	if previous_UnitSeismicPing then
+		result = pack(previous_UnitSeismicPing(...))
+	else
+		result = pack(defaultResult("UnitSeismicPing"))
+	end
+	trace("UnitSeismicPing", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitStunned = _G["UnitStunned"]
 _G["UnitStunned"] = function(...)
-	trace("UnitStunned", ...)
-	if previous_UnitStunned then return previous_UnitStunned(...) end
-	return defaultResult("UnitStunned")
+	local result
+	if previous_UnitStunned then
+		result = pack(previous_UnitStunned(...))
+	else
+		result = pack(defaultResult("UnitStunned"))
+	end
+	trace("UnitStunned", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitTaken = _G["UnitTaken"]
 _G["UnitTaken"] = function(...)
-	trace("UnitTaken", ...)
-	if previous_UnitTaken then return previous_UnitTaken(...) end
-	return defaultResult("UnitTaken")
+	local result
+	if previous_UnitTaken then
+		result = pack(previous_UnitTaken(...))
+	else
+		result = pack(defaultResult("UnitTaken"))
+	end
+	trace("UnitTaken", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitUnitCollision = _G["UnitUnitCollision"]
 _G["UnitUnitCollision"] = function(...)
-	trace("UnitUnitCollision", ...)
-	if previous_UnitUnitCollision then return previous_UnitUnitCollision(...) end
-	return defaultResult("UnitUnitCollision")
+	local result
+	if previous_UnitUnitCollision then
+		result = pack(previous_UnitUnitCollision(...))
+	else
+		result = pack(defaultResult("UnitUnitCollision"))
+	end
+	trace("UnitUnitCollision", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnitUnloaded = _G["UnitUnloaded"]
 _G["UnitUnloaded"] = function(...)
-	trace("UnitUnloaded", ...)
-	if previous_UnitUnloaded then return previous_UnitUnloaded(...) end
-	return defaultResult("UnitUnloaded")
+	local result
+	if previous_UnitUnloaded then
+		result = pack(previous_UnitUnloaded(...))
+	else
+		result = pack(defaultResult("UnitUnloaded"))
+	end
+	trace("UnitUnloaded", result, ...)
+	return unpackn(result)
 end
 
 local previous_UnsyncedHeightMapUpdate = _G["UnsyncedHeightMapUpdate"]
 _G["UnsyncedHeightMapUpdate"] = function(...)
-	trace("UnsyncedHeightMapUpdate", ...)
-	if previous_UnsyncedHeightMapUpdate then return previous_UnsyncedHeightMapUpdate(...) end
-	return defaultResult("UnsyncedHeightMapUpdate")
+	local result
+	if previous_UnsyncedHeightMapUpdate then
+		result = pack(previous_UnsyncedHeightMapUpdate(...))
+	else
+		result = pack(defaultResult("UnsyncedHeightMapUpdate"))
+	end
+	trace("UnsyncedHeightMapUpdate", result, ...)
+	return unpackn(result)
 end
 
 local previous_Update = _G["Update"]
 _G["Update"] = function(...)
-	trace("Update", ...)
-	if previous_Update then return previous_Update(...) end
-	return defaultResult("Update")
+	local result
+	if previous_Update then
+		result = pack(previous_Update(...))
+	else
+		result = pack(defaultResult("Update"))
+	end
+	trace("Update", result, ...)
+	return unpackn(result)
 end
 
 local previous_ViewResize = _G["ViewResize"]
 _G["ViewResize"] = function(...)
-	trace("ViewResize", ...)
-	if previous_ViewResize then return previous_ViewResize(...) end
-	return defaultResult("ViewResize")
+	local result
+	if previous_ViewResize then
+		result = pack(previous_ViewResize(...))
+	else
+		result = pack(defaultResult("ViewResize"))
+	end
+	trace("ViewResize", result, ...)
+	return unpackn(result)
 end
 
 local previous_WorldTooltip = _G["WorldTooltip"]
 _G["WorldTooltip"] = function(...)
-	trace("WorldTooltip", ...)
-	if previous_WorldTooltip then return previous_WorldTooltip(...) end
-	return defaultResult("WorldTooltip")
+	local result
+	if previous_WorldTooltip then
+		result = pack(previous_WorldTooltip(...))
+	else
+		result = pack(defaultResult("WorldTooltip"))
+	end
+	if result.n == 0 then
+		result = pack(nil)
+	end
+	trace("WorldTooltip", result, ...)
+	return unpackn(result)
+end
+
+-- These wrappers are installed after LuaUI's normal bootstrap.  Register
+-- them explicitly so CLuaUI adds the corresponding engine events.
+for _, name in ipairs({
+	"ActiveCommandChanged",
+	"AddConsoleLine",
+	"AllowBuilderHoldFire",
+	"AllowCommand",
+	"AllowDirectUnitControl",
+	"AllowFeatureBuildStep",
+	"AllowFeatureCreation",
+	"AllowResourceLevel",
+	"AllowResourceTransfer",
+	"AllowStartPosition",
+	"AllowUnitBuildStep",
+	"AllowUnitCaptureStep",
+	"AllowUnitCloak",
+	"AllowUnitCreation",
+	"AllowUnitKamikaze",
+	"AllowUnitTransfer",
+	"AllowUnitTransport",
+	"AllowUnitTransportLoad",
+	"AllowUnitTransportUnload",
+	"AllowWeaponInterceptTarget",
+	"AllowWeaponTarget",
+	"AllowWeaponTargetCheck",
+	"CameraPositionChanged",
+	"CameraRotationChanged",
+	"CommandFallback",
+	"CommandNotify",
+	"DefaultCommand",
+	"DownloadFailed",
+	"DownloadFinished",
+	"DownloadProgress",
+	"DownloadQueued",
+	"DownloadStarted",
+	"DrawBuildSquare",
+	"DrawFeature",
+	"DrawFeaturesPostDeferred",
+	"DrawGenesis",
+	"DrawGroundDeferred",
+	"DrawGroundPostDeferred",
+	"DrawGroundPostForward",
+	"DrawGroundPreDeferred",
+	"DrawGroundPreForward",
+	"DrawInMiniMap",
+	"DrawInMiniMapBackground",
+	"DrawMaterial",
+	"DrawPreDecals",
+	"DrawProjectile",
+	"DrawScreen",
+	"DrawScreenEffects",
+	"DrawScreenPost",
+	"DrawShadowFeaturesLua",
+	"DrawShadowPassTransparent",
+	"DrawShadowUnitsLua",
+	"DrawShield",
+	"DrawUnit",
+	"DrawUnitsPostDeferred",
+	"DrawWaterPost",
+	"DrawWorld",
+	"DrawWorldPreParticles",
+	"DrawWorldPreUnit",
+	"DrawWorldReflection",
+	"DrawWorldRefraction",
+	"DrawWorldShadow",
+	"Explosion",
+	"FeatureCreated",
+	"FeatureDamaged",
+	"FeatureDestroyed",
+	"FeaturePreDamaged",
+	"FontsChanged",
+	"GameFrame",
+	"GameFramePost",
+	"GameID",
+	"GameOver",
+	"GamePaused",
+	"GamePreload",
+	"GameProgress",
+	"GameSetup",
+	"GameStart",
+	"GetTooltip",
+	"GroupChanged",
+	"IsAbove",
+	"KeyMapChanged",
+	"KeyPress",
+	"KeyRelease",
+	"MapDrawCmd",
+	"MiniMapGeometryChanged",
+	"MiniMapRotationChanged",
+	"MiniMapStateChanged",
+	"MouseMove",
+	"MousePress",
+	"MouseRelease",
+	"MouseWheel",
+	"MoveCtrlNotify",
+	"PlayerAdded",
+	"PlayerChanged",
+	"PlayerRemoved",
+	"ProjectileCreated",
+	"ProjectileDestroyed",
+	"RenderUnitDestroyed",
+	"ResourceExcess",
+	"ShieldPreDamaged",
+	"StockpileChanged",
+	"SunChanged",
+	"TeamChanged",
+	"TeamDied",
+	"TerraformComplete",
+	"TextEditing",
+	"TextInput",
+	"UnitArrivedAtGoal",
+	"UnitCloaked",
+	"UnitCmdDone",
+	"UnitCommand",
+	"UnitConstructionDecayed",
+	"UnitCreated",
+	"UnitDamaged",
+	"UnitDecloaked",
+	"UnitDestroyed",
+	"UnitEnteredAir",
+	"UnitEnteredLos",
+	"UnitEnteredRadar",
+	"UnitEnteredUnderwater",
+	"UnitEnteredWater",
+	"UnitExperience",
+	"UnitFeatureCollision",
+	"UnitFinished",
+	"UnitFromFactory",
+	"UnitGiven",
+	"UnitHarvestStorageFull",
+	"UnitIdle",
+	"UnitLeftAir",
+	"UnitLeftLos",
+	"UnitLeftRadar",
+	"UnitLeftUnderwater",
+	"UnitLeftWater",
+	"UnitLoaded",
+	"UnitMoveFailed",
+	"UnitPreDamaged",
+	"UnitReverseBuilt",
+	"UnitSeismicPing",
+	"UnitStunned",
+	"UnitTaken",
+	"UnitUnitCollision",
+	"UnitUnloaded",
+	"UnsyncedHeightMapUpdate",
+	"Update",
+	"ViewResize",
+	"WorldTooltip",
+}) do
+	Script.UpdateCallIn(name)
 end

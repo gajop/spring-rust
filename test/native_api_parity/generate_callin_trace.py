@@ -18,16 +18,10 @@ ROOT = Path(__file__).resolve().parents[2]
 CALLBACKS = ROOT / "rust/crates/spring-native/src/callbacks.rs"
 NATIVE_EVENTS = ROOT / "rts/NativeInterface/NativeInterfaceEventClient.cpp"
 LUA_DOC = ROOT / "rust/crates/spring-native/lua_functions.md"
+EVENTS_DEF = ROOT / "rts/System/Events.def"
 RUST_OUT = ROOT / "test/native_api_parity/native/src/generated_callin_trace.rs"
 LUA_OUT = ROOT / "test/native_api_parity/fixtures/game.sdd/LuaRules/Gadgets/callin_parity.lua"
 LUA_UI_OUT = ROOT / "test/native_api_parity/fixtures/game.sdd/LuaUI/callin_ui_trace.lua"
-
-# These callbacks are documented in the general Callins section because their
-# C++ implementation is shared by Lua handles, but only the synced LuaRules
-# handle can receive them: the watch masks used by the implementation are not
-# initialized for LuaUI.
-SYNCED_GENERAL_CALLINS = {"Explosion", "ProjectileCreated", "ProjectileDestroyed"}
-
 
 def matching(text: str, start: int, opening: str, closing: str) -> int:
     depth = 0
@@ -81,6 +75,42 @@ def documented_callins() -> dict[str, set[str]]:
         prefix, _ = namespace.split(".", 1)
         result[prefix].add(name)
     return result
+
+
+def event_properties() -> dict[str, str]:
+    """Return the engine event property expression for each managed event."""
+    text = EVENTS_DEF.read_text(encoding="utf-8")
+    return {
+        name: properties
+        for name, properties in re.findall(
+            r"SETUP_EVENT\((\w+),\s*([^\n)]+)\)", text
+        )
+    }
+
+
+def managed_callin_contexts(documented: dict[str, set[str]]) -> tuple[set[str], set[str]]:
+    """Split general Callins according to Events.def's delivery bit.
+
+    The generated parity gadget is loaded into both halves of LuaRules.  A
+    synced-only definition must therefore be guarded so that the unsynced
+    half does not register a second, restricted copy of the same callback.
+    General unsynced callins are traced by the LuaUI wrapper instead, since
+    that is the public unsynced handle used by the engine.
+    """
+    properties = event_properties()
+    general = documented["Callins"]
+    managed = set(properties)
+    synced_general = {
+        name
+        for name in general & managed
+        if "UNSYNCED_BIT" not in properties[name]
+    }
+    unsynced_general = {
+        name
+        for name in general & managed
+        if "UNSYNCED_BIT" in properties[name]
+    }
+    return synced_general, unsynced_general
 
 
 def trait_methods() -> list[tuple[str, str, list[tuple[str, str]]]]:
@@ -168,6 +198,8 @@ def trace_statements(name: str, params: list[tuple[str, str]]) -> list[str]:
         lines.extend([
             "        if builder_id >= 0 {",
             "            trace_args.push(self.trace_i32(builder_id));",
+            "        } else {",
+            "            trace_args.push(self.trace_nil());",
             "        }",
         ])
     elif name == "unit_destroyed":
@@ -183,6 +215,8 @@ def trace_statements(name: str, params: list[tuple[str, str]]) -> list[str]:
         lines.append("        trace_args.push(self.trace_game_id(game_id));")
     elif name == "game_over":
         lines.append("        trace_args.push(self.trace_byte_table(winning_ally_teams));")
+    elif name == "command_notify":
+        lines.append("        trace_args.extend(self.trace_command_without_tag(&command));")
     elif name == "view_resize":
         lines.append("        trace_args.push(self.trace_geometry(&geometry));")
     elif name == "key_press":
@@ -312,12 +346,99 @@ def trace_statements(name: str, params: list[tuple[str, str]]) -> list[str]:
             "        trace_args.push(self.trace_str(message));",
             "        trace_args.push(self.trace_i32(level));",
         ])
+    elif name in {"load", "save"}:
+        lines.extend([
+            "        if archive.is_null() {",
+            "            trace_args.push(self.trace_nil());",
+            "        } else {",
+            "            trace_args.push(self.trace_opaque());",
+            "        }",
+        ])
     else:
         for param_name, param_type in params:
             lines.extend(_push(param_name, param_type))
 
-    lines.append(f'        self.record_callin_args("{next(symbol for symbol in native_symbols() if camel_to_snake(symbol) == name)}", trace_args);')
     return lines
+
+
+def result_trace_statements(name: str, signature: str) -> list[str]:
+    """Generate a normalized trace for the callback's actual Rust result."""
+    compact_signature = " ".join(signature.split())
+    match = re.search(r"-> Result<(.+), Error>$", compact_signature)
+    if match is None:
+        raise ValueError(f"could not parse callback result type: {signature}")
+
+    result_type = match.group(1).strip()
+    if result_type == "()":
+        return [
+            "        let trace_results = match &callback_result {",
+            "            Ok(()) => Vec::new(),",
+            "            Err(_) => vec![self.trace_error()],",
+            "        };",
+        ]
+
+    scalar_traces = {
+        "bool": "trace_bool",
+        "i32": "trace_i32",
+        "f32": "trace_f32",
+    }
+    if result_type in scalar_traces:
+        trace = scalar_traces[result_type]
+        return [
+            "        let trace_results = match &callback_result {",
+            f"            Ok(value) => vec![self.{trace}(*value)],",
+            "            Err(_) => vec![self.trace_error()],",
+            "        };",
+        ]
+
+    option_traces = {
+        "Option<i32>": "trace_optional_i32(*value)",
+        "Option<String>": "trace_optional_str(value.as_deref())",
+    }
+    if result_type in option_traces:
+        trace = option_traces[result_type]
+        return [
+            "        let trace_results = match &callback_result {",
+            f"            Ok(value) => vec![self.{trace}],",
+            "            Err(_) => vec![self.trace_error()],",
+            "        };",
+        ]
+
+    if result_type == "Option<bool>":
+        if name == "game_setup":
+            # The native ABI packs Lua's `(handled, ready)` pair into
+            # Option<bool>: None means the event was not handled and the
+            # input readiness is preserved; Some(value) means handled with
+            # the returned readiness value.
+            return [
+                "        let trace_results = match &callback_result {",
+                "            Ok(Some(value)) => vec![self.trace_bool(true), self.trace_bool(*value)],",
+                "            Ok(None) => vec![self.trace_bool(false), self.trace_bool(ready)],",
+                "            Err(_) => vec![self.trace_error()],",
+                "        };",
+            ]
+        return [
+            "        let trace_results = match &callback_result {",
+            "            Ok(value) => vec![self.trace_optional_bool(*value)],",
+            "            Err(_) => vec![self.trace_error()],",
+            "        };",
+        ]
+
+    tuple_traces = {
+        "(bool, bool)": ("trace_bool", "trace_bool"),
+        "(bool, f32)": ("trace_bool", "trace_f32"),
+        "(f32, f32)": ("trace_f32", "trace_f32"),
+    }
+    if result_type in tuple_traces:
+        first_trace, second_trace = tuple_traces[result_type]
+        return [
+            "        let trace_results = match &callback_result {",
+            f"            Ok((first, second)) => vec![self.{first_trace}(*first), self.{second_trace}(*second)],",
+            "            Err(_) => vec![self.trace_error()],",
+            "        };",
+        ]
+
+    raise ValueError(f"no callback result trace mapping for {result_type}")
 
 
 def method_item(name: str, signature: str, params: list[tuple[str, str]], text: str) -> str:
@@ -330,10 +451,28 @@ def method_item(name: str, signature: str, params: list[tuple[str, str]], text: 
     body = text[brace + 1 : end]
     callback_name = next(symbol for symbol in native_symbols() if camel_to_snake(symbol) == name)
     trace = "\n".join(trace_statements(name, params))
+    result_trace = "\n".join(result_trace_statements(name, signature))
+    if name == "mouse_press":
+        # The deterministic driver needs the native event client to become
+        # the CEventHandler mouse owner so MouseMove/MouseRelease can be
+        # exercised.  This override exists only in the generated test module;
+        # the production NativeModule default remains non-consuming.
+        body = "\n        Ok(true)\n"
+    elif name == "game_setup":
+        # The fixture's LuaUI handler accepts the setup event and keeps the
+        # player ready.  Exercise the corresponding native ABI path so the
+        # trace compares `(handled, ready)` rather than the trait's neutral
+        # no-handler default.
+        body = "\n        Ok(Some(true))\n"
     return (
         f"{signature} {{\n"
         f"{trace}\n"
+        "        let callback_result = {"
         f"{body}"
+        "        };\n"
+        f"{result_trace}\n"
+        f'        self.record_callin_args_result("{callback_name}", trace_args, trace_results);\n'
+        "        callback_result\n"
         "    }\n"
     )
 
@@ -361,6 +500,23 @@ def generate_rust() -> str:
 
 
 RETURN_DEFAULTS = {
+    "AllowBuilderHoldFire": "true",
+    "AllowCommand": "true",
+    "AllowDirectUnitControl": "true",
+    "AllowFeatureBuildStep": "true",
+    "AllowFeatureCreation": "true",
+    "AllowResourceLevel": "true",
+    "AllowResourceTransfer": "true",
+    "AllowStartPosition": "true",
+    "AllowUnitBuildStep": "true",
+    "AllowUnitCaptureStep": "true",
+    "AllowUnitCloak": "true",
+    "AllowUnitDecloak": "true",
+    "AllowUnitKamikaze": "true",
+    "AllowUnitTransfer": "true",
+    "AllowUnitTransport": "true",
+    "AllowUnitTransportLoad": "true",
+    "AllowUnitTransportUnload": "true",
     "CommandFallback": "false",
     "ResourceExcess": "false",
     "MoveCtrlNotify": "false",
@@ -392,14 +548,17 @@ RETURN_DEFAULTS = {
     "AllowUnitCreation": "true, true",
     "UnitPreDamaged": "nil, nil",
     "FeaturePreDamaged": "nil, nil",
+    "TerraformComplete": "false",
 }
 
 
 def generate_lua() -> str:
     documented = documented_callins()
-    shared = sorted(
-        (documented["SyncedCallins"] | documented["UnsyncedCallins"] | SYNCED_GENERAL_CALLINS)
-        & (native_symbols() - {"InitializeNativeModule"})
+    native = native_symbols() - {"InitializeNativeModule"}
+    synced_general, unsynced_general = managed_callin_contexts(documented)
+    synced = sorted((documented["SyncedCallins"] | synced_general) & native)
+    unsynced = sorted(
+        (documented["UnsyncedCallins"] | unsynced_general) & native
     )
     lines = [
         "-- @generated by test/native_api_parity/generate_callin_trace.py; do not edit.",
@@ -439,23 +598,41 @@ def generate_lua() -> str:
         "\treturn result",
         "end",
         "",
+        "local function pack(...)",
+        "\tlocal result = { n = select(\"#\", ...) }",
+        "\tfor index = 1, result.n do",
+        "\t\tresult[index] = select(index, ...)",
+        "\tend",
+        "\treturn result",
+        "end",
+        "",
+        "local function unpackn(values)",
+        "\treturn unpack(values, 1, values.n)",
+        "end",
+        "",
         "local function forward(encoded)",
         "\tif Script.LuaUI and Script.LuaUI.NativeApiParityResult then",
         "\t\tScript.LuaUI.NativeApiParityResult(outputStream, encoded)",
         "\tend",
         "end",
         "",
-        "local function trace(name, ...)",
-        "\tlocal args = { ... }",
+        "local function trace(name, results, ...)",
+        "\tlocal args = pack(...)",
         "\tlocal normalized = {}",
-        "\tfor index = 1, select(\"#\", ...) do",
+        "\tfor index = 1, args.n do",
         "\t\tnormalized[index] = normalize(args[index], 0)",
+        "\tend",
+        "\tlocal normalizedResults = {}",
+        "\tfor index = 1, results.n do",
+        "\t\tnormalizedResults[index] = normalize(results[index], 0)",
         "\tend",
         "\tlocal payload = {",
         "\t\tcontext = synced and \"synced_gadget\" or \"unsynced_gadget\",",
         "\t\tname = name,",
-        "\t\tarity = select(\"#\", ...),",
+        "\t\tarity = args.n,",
         "\t\targs = normalized,",
+        "\t\tresultArity = results.n,",
+        "\t\tresults = normalizedResults,",
         "\t}",
         "\tlocal encoded = Common.encode(payload)",
         "\tif synced then",
@@ -466,27 +643,39 @@ def generate_lua() -> str:
         "end",
         "",
         "local function traceCallin(name, ...)",
-        "\ttrace(name, ...)",
-        "\tif name == \"AllowUnitCreation\" then return true, true end",
-        "\tif name == \"UnitPreDamaged\" or name == \"FeaturePreDamaged\" then return nil, nil end",
+        "\tlocal args = pack(...)",
+        "\tlocal results",
+        "\tif name == \"AllowUnitCreation\" then",
+        "\t\tresults = pack(true, true)",
         # gadgetHandler starts with priority=1.0 and applies math.max() to
         # every gadget result, so a neutral result must remain numeric even
         # when the engine supplied no default priority.
-        "\tif name == \"AllowWeaponTarget\" then",
-        "\t\tlocal args = { ... }",
-        "\t\treturn true, args[5] or 1.0",
-        "\tend",
-        "\tif name == \"AllowWeaponTargetCheck\" then return -1 end",
-        "\tlocal default = {",
+        "\telseif name == \"AllowWeaponTarget\" then",
+        "\t\tresults = pack(true, args[5] or 1.0)",
+        "\telseif name == \"UnitPreDamaged\" or name == \"FeaturePreDamaged\" then",
+        "\t\tresults = pack(args[4], 1.0)",
+        # Let the native test process own the deterministic mouse sequence;
+        # the Lua-only baseline owns the same sequence through this gadget.
+        "\telseif name == \"MousePress\" then",
+        "\t\tresults = pack(Common.mode() ~= \"native\")",
+        "\telseif name == \"AllowWeaponTargetCheck\" then",
+        "\t\tresults = pack(-1)",
+        "\telseif name == \"DefaultCommand\" or name == \"GetTooltip\" or name == \"WorldTooltip\" then",
+        "\t\tresults = pack(nil)",
+        "\telse",
+        "\t\tlocal default = {",
     ]
     for name, value in sorted(RETURN_DEFAULTS.items()):
         if name in {"AllowUnitCreation", "UnitPreDamaged", "FeaturePreDamaged", "AllowWeaponTarget", "AllowWeaponTargetCheck"}:
             continue
         lines.append(f'\t\t["{name}"] = {{{value}}},')
     lines.extend([
-        "\t}",
-        "\tlocal values = default[name]",
-        "\tif values then return unpack(values) end",
+        "\t\t}",
+        "\t\tlocal values = default[name]",
+        "\t\tresults = values and pack(unpack(values, 1, #values)) or pack()",
+        "\tend",
+        "\ttrace(name, results, unpackn(args))",
+        "\treturn unpackn(results)",
         "end",
         "",
         "if not synced then",
@@ -499,25 +688,35 @@ def generate_lua() -> str:
         "\tend",
         "end",
         "",
+        "-- General synced Callins and explicit SyncedCallins are defined only",
+        "-- in the full-read LuaRules half; otherwise the unsynced half would",
+        "-- register a second restricted callback for the same engine event.",
+        "if synced then",
     ])
-    for name in shared:
+    for name in synced:
         lines.extend([
-            f"function gadget:{name}(...)",
-            f'\treturn traceCallin("{name}", ...)',
+            f"\tfunction gadget:{name}(...)",
+            f'\t\treturn traceCallin("{name}", ...)',
+            "\tend",
+            "",
+        ])
+    lines.extend(["end", "", "if not synced then"])
+    for name in unsynced:
+        lines.extend([
+            f"\tfunction gadget:{name}(...)",
+            f'\t\treturn traceCallin("{name}", ...)',
             "end",
             "",
         ])
+    lines.append("end")
     return "\n".join(lines)
 
 
 def generate_lua_ui() -> str:
     documented = documented_callins()
-    shared = set().union(*documented.values()) & (native_symbols() - {"InitializeNativeModule"})
+    native = native_symbols() - {"InitializeNativeModule"}
     ui_names = sorted(
-        shared
-        - documented["SyncedCallins"]
-        - documented["UnsyncedCallins"]
-        - SYNCED_GENERAL_CALLINS
+        (documented["Callins"] & native) - {"Load", "Save", "Shutdown"}
     )
     lines = [
         "-- @generated by test/native_api_parity/generate_callin_trace.py; do not edit.",
@@ -545,10 +744,23 @@ def generate_lua_ui() -> str:
         "\treturn result",
         "end",
         "",
+        "local function pack(...)",
+        "\tlocal result = { n = select(\"#\", ...) }",
+        "\tfor index = 1, result.n do",
+        "\t\tresult[index] = select(index, ...)",
+        "\tend",
+        "\treturn result",
+        "end",
+        "",
+        "local function unpackn(values)",
+        "\treturn unpack(values, 1, values.n)",
+        "end",
+        "",
         "local function defaultResult(name)",
         "\tif name == \"AllowWeaponTargetCheck\" then return -1 end",
         "\tif name == \"AllowWeaponTarget\" then return true, 1.0 end",
         "\tif name == \"AllowUnitCreation\" then return true, true end",
+        "\tif name == \"DefaultCommand\" or name == \"GetTooltip\" or name == \"WorldTooltip\" then return nil end",
         "\tif name == \"UnitPreDamaged\" or name == \"FeaturePreDamaged\" then return nil, nil end",
         "\tlocal defaults = {",
     ]
@@ -562,17 +774,23 @@ def generate_lua_ui() -> str:
         "\tif values then return unpack(values) end",
         "end",
         "",
-        "local function trace(name, ...)",
-        "\tlocal args = { ... }",
+        "local function trace(name, results, ...)",
+        "\tlocal args = pack(...)",
         "\tlocal normalized = {}",
-        "\tfor index = 1, select(\"#\", ...) do",
+        "\tfor index = 1, args.n do",
         "\t\tnormalized[index] = normalize(args[index], 0)",
+        "\tend",
+        "\tlocal normalizedResults = {}",
+        "\tfor index = 1, results.n do",
+        "\t\tnormalizedResults[index] = normalize(results[index], 0)",
         "\tend",
         "\tCommon.appendJsonLine(Common.outputDir() .. \"/callin_lua.jsonl\", {",
         "\t\tcontext = \"lua_ui\",",
         "\t\tname = name,",
-        "\t\tarity = select(\"#\", ...),",
+        "\t\tarity = args.n,",
         "\t\targs = normalized,",
+        "\t\tresultArity = results.n,",
+        "\t\tresults = normalizedResults,",
         "\t})",
         "end",
         "",
@@ -581,12 +799,41 @@ def generate_lua_ui() -> str:
         lines.extend([
             f'local previous_{name} = _G["{name}"]',
             f'_G["{name}"] = function(...)',
-            f'\ttrace("{name}", ...)',
-            f'\tif previous_{name} then return previous_{name}(...) end',
-            f'\treturn defaultResult("{name}")',
+            f'\tlocal result',
+            f'\tif previous_{name} then',
+            f'\t\tresult = pack(previous_{name}(...))',
+            "\telse",
+            f'\t\tresult = pack(defaultResult("{name}"))',
+            "\tend",
+        ])
+        if name in {"GetTooltip", "WorldTooltip"}:
+            # A Lua function with no explicit return is observed as nil by
+            # the engine's string callin adapters.  Preserve that one-value
+            # result in the trace even when the previous LuaUI function
+            # returned zero values.
+            lines.extend([
+                "\tif result.n == 0 then",
+                "\t\tresult = pack(nil)",
+                "\tend",
+            ])
+        lines.extend([
+            f'\ttrace("{name}", result, ...)',
+            "\treturn unpackn(result)",
             "end",
             "",
         ])
+    lines.extend([
+        "-- These wrappers are installed after LuaUI's normal bootstrap.  Register",
+        "-- them explicitly so CLuaUI adds the corresponding engine events.",
+        "for _, name in ipairs({",
+    ])
+    for name in ui_names:
+        lines.append(f'\t"{name}",')
+    lines.extend([
+        "}) do",
+        "\tScript.UpdateCallIn(name)",
+        "end",
+    ])
     return "\n".join(lines)
 
 

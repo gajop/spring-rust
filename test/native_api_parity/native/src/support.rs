@@ -46,6 +46,15 @@ impl NativeApiParity {
     }
 
     pub(crate) fn record_callin_args(&self, name: &str, args: Vec<Value>) {
+        self.record_callin_args_result(name, args, Vec::new());
+    }
+
+    pub(crate) fn record_callin_args_result(
+        &self,
+        name: &str,
+        args: Vec<Value>,
+        results: Vec<Value>,
+    ) {
         if let Some(parent) = self.callin_trace_path.parent() {
             let _ = fs::create_dir_all(parent);
         }
@@ -61,6 +70,8 @@ impl NativeApiParity {
                 "name": name,
                 "arity": args.len(),
                 "args": args,
+                "resultArity": results.len(),
+                "results": results,
             });
             let _ = writeln!(file, "{row}");
         }
@@ -130,6 +141,14 @@ impl NativeApiParity {
         value.map_or_else(|| self.trace_nil(), |value| self.trace_f32(value))
     }
 
+    pub(crate) fn trace_optional_bool(&self, value: Option<bool>) -> Value {
+        value.map_or_else(|| self.trace_nil(), |value| self.trace_bool(value))
+    }
+
+    pub(crate) fn trace_error(&self) -> Value {
+        serde_json::json!({"type": "error"})
+    }
+
     pub(crate) fn trace_optional_str(&self, value: Option<&str>) -> Value {
         value.map_or_else(|| self.trace_nil(), |value| self.trace_str(value))
     }
@@ -153,10 +172,33 @@ impl NativeApiParity {
                 .map(|(index, value)| (self.trace_i32(index as i32 + 1), value))
                 .collect::<Vec<_>>()
         };
+        // NativeCallinCommand.options is the compact public ABI bitfield;
+        // Lua's CommandOptions.coded retains the engine's historical option
+        // bits.  Reconstruct the Lua-facing numeric value for the semantic
+        // parity trace instead of comparing the two unrelated layouts.
+        let mut coded = 0u8;
+        if command.options & spring_native::constants::CMD_OPT_META as u8 != 0 {
+            coded |= 1 << 2;
+        }
+        if command.options & spring_native::constants::CMD_OPT_INTERNAL as u8 != 0 {
+            coded |= 1 << 3;
+        }
+        if command.options & spring_native::constants::CMD_OPT_RIGHT as u8 != 0 {
+            coded |= 1 << 4;
+        }
+        if command.options & spring_native::constants::CMD_OPT_SHIFT as u8 != 0 {
+            coded |= 1 << 5;
+        }
+        if command.options & spring_native::constants::CMD_OPT_CTRL as u8 != 0 {
+            coded |= 1 << 6;
+        }
+        if command.options & spring_native::constants::CMD_OPT_ALT as u8 != 0 {
+            coded |= 1 << 7;
+        }
         let options = self.trace_table(vec![
             (
                 self.trace_str("coded"),
-                self.trace_u8(command.options),
+                self.trace_u8(coded),
             ),
             (
                 self.trace_str("alt"),
@@ -189,6 +231,15 @@ impl NativeApiParity {
             options,
             self.trace_u32(command.tag),
         ]
+    }
+
+    pub(crate) fn trace_command_without_tag(
+        &self,
+        command: &spring_native::sys::NativeCallinCommand,
+    ) -> Vec<Value> {
+        let mut values = self.trace_command(command);
+        values.pop();
+        values
     }
 
     pub(crate) fn trace_actions(&self, actions: &[spring_native::KeyAction<'_>]) -> Value {

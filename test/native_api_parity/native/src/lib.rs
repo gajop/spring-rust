@@ -129,9 +129,10 @@ impl NativeModule for NativeApiParity {
     }
 
     fn draw_screen(&mut self, view_size_x: i32, view_size_y: i32) -> Result<(), Error> {
-        self.record_callin_args(
+        self.record_callin_args_result(
             "DrawScreen",
             vec![self.trace_i32(view_size_x), self.trace_i32(view_size_y)],
+            Vec::new(),
         );
         if self.gfx_smoke_ran {
             return Ok(());

@@ -39,6 +39,8 @@ NATIVE_SO = HARNESS / "native" / "target" / "release" / "libnative_api_parity.so
 LUA_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "lua_functions.md"
 RUST_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "rust_functions.md"
 CALLIN_SOURCE = ROOT / "rts" / "NativeInterface" / "NativeInterfaceEventClient.cpp"
+EVENTS_DEF = ROOT / "rts" / "System" / "Events.def"
+GADGET_ROUTER_SOURCE = ROOT / "cont" / "base" / "springcontent" / "LuaGadgets" / "gadgets.lua"
 GAME_NAME = "Native API Parity 0.1"
 RESULT_STREAMS = (
     "synced_gadget.jsonl",
@@ -48,10 +50,34 @@ RESULT_STREAMS = (
 CALLIN_LUA_STREAM = "callin_lua.jsonl"
 CALLIN_NATIVE_STREAM = "callin_native.jsonl"
 
-# C++ documents these in the general Callins section, but the implementation
-# only invokes them for the synced LuaRules handle because their watch masks
-# are not initialized for LuaUI.
-SYNCED_GENERAL_CALLINS = {"Explosion", "ProjectileCreated", "ProjectileDestroyed"}
+# The Lua and native symbols named Shutdown are separate lifecycle hooks: Lua
+# shuts down each Lua handle, while native shuts down the loaded module.  They
+# are documented under the same label but are not corresponding event payloads.
+LIFECYCLE_ONLY_CALLINS = {"Shutdown"}
+# The save/load lifecycle is routed through LuaRules' gadget handler; LuaUI
+# intentionally does not receive Save, and the full-read LuaRules handle is
+# the corresponding public surface for Load.
+LUA_RULES_ONLY_CALLINS = {"Load", "Save"}
+# These control callins are exposed by the stock LuaRules router, but this
+# engine delivers the control event to LuaUI rather than the unsynced gadget
+# handle. Keep selection based on observed engine routing, not just a method
+# name in the router.
+LUA_UI_CONTROL_CALLINS = {"GameSetup", "GetTooltip"}
+# Some general callins are delivered to both LuaRules and LuaUI, but the
+# LuaRules router deliberately adapts their payload before dispatching it.
+# Native receives the full event payload, which is the LuaUI-facing contract
+# for these callbacks.  Select that handle for value-level comparison.
+LUA_UI_NATIVE_SIGNATURE_CALLINS = {
+    "KeyPress",
+    "KeyRelease",
+    "DownloadQueued",
+    "DownloadStarted",
+    "DownloadProgress",
+    "DownloadFinished",
+    "DownloadFailed",
+    "ViewResize",
+    "DrawWorldPreParticles",
+}
 NATIVE_ACCESSOR_TYPES = {
     "features": "Features",
     "game": "Game",
@@ -84,6 +110,35 @@ def documented_callin_names() -> tuple[set[str], set[str], set[str]]:
         re.findall(r"- `UnsyncedCallins\.([A-Za-z0-9_]+)`", text)
     )
     return general, synced, unsynced
+
+
+def event_properties() -> dict[str, str]:
+    text = EVENTS_DEF.read_text(encoding="utf-8")
+    return {
+        name: properties
+        for name, properties in re.findall(
+            r"SETUP_EVENT\((\w+),\s*([^\n)]+)\)", text
+        )
+    }
+
+
+def general_callin_contexts(general_names: set[str]) -> tuple[set[str], set[str]]:
+    """Return managed general callins for synced and unsynced Lua handles."""
+    properties = event_properties()
+    managed = general_names & set(properties)
+    synced = {
+        name for name in managed if "UNSYNCED_BIT" not in properties[name]
+    }
+    unsynced = {
+        name for name in managed if "UNSYNCED_BIT" in properties[name]
+    }
+    return synced, unsynced
+
+
+def gadget_router_callins() -> set[str]:
+    """Return callins with an actual stock LuaRules gadget-router method."""
+    text = GADGET_ROUTER_SOURCE.read_text(encoding="utf-8")
+    return set(re.findall(r"^function gadgetHandler:(\w+)\(", text, re.MULTILINE))
 
 
 def native_event_callin_names() -> set[str]:
@@ -396,9 +451,14 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
                     print(json.dumps(row, sort_keys=True))
                 ok = False
 
+    # The Lua baseline is the authoritative Lua-side observation.  In the
+    # native run, a native event client can consume an event before Lua sees
+    # it, so comparing native-run Lua rows against native rows makes valid
+    # native ownership look like missing Lua coverage.  Compare the two
+    # independent consumers instead: baseline Lua versus native-run native.
+    lua_callin_rows = load_jsonl(lua_dir / CALLIN_LUA_STREAM)
     native_callin_rows = load_jsonl(native_dir / CALLIN_NATIVE_STREAM)
-    native_lua_callin_rows = load_jsonl(native_dir / CALLIN_LUA_STREAM)
-    callin_trace = compare_callin_traces(native_lua_callin_rows, native_callin_rows)
+    callin_trace = compare_callin_traces(lua_callin_rows, native_callin_rows)
     if not callin_trace["matches"]:
         print("mismatch: engine callin Lua/native trace")
         if not callin_trace["coverage_matches"]:
@@ -411,15 +471,28 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
                 print(f"  missing Lua fixture coverage: {name}")
             for name in callin_trace["missing_native_names"]:
                 print(f"  missing native fixture coverage: {name}")
-        for name in sorted(set(callin_trace["lua_counts"]) | set(callin_trace["native_counts"])):
-            lua_count = callin_trace["lua_counts"].get(name, 0)
-            native_count = callin_trace["native_counts"].get(name, 0)
-            if lua_count != native_count:
-                print(f"  {name}: lua={lua_count}, native={native_count}")
+        if not callin_trace["driver_markers_seen"]:
+            print("  deterministic callin driver markers were not found on both sides")
+        if not callin_trace["driver_coverage_matches"]:
+            print(
+                "  deterministic driver coverage: "
+                f"lua={callin_trace['driver_lua_rows']}, "
+                f"native={callin_trace['driver_native_rows']}"
+            )
+            for name in callin_trace["driver_lua_missing_names"]:
+                print(f"  missing Lua driver callback: {name}")
+            for name in callin_trace["driver_native_missing_names"]:
+                print(f"  missing native driver callback: {name}")
         for row in callin_trace.get("missing_arguments", [])[:10]:
             print(f"  missing native equivalent: {json.dumps(row, sort_keys=True)}")
         for row in callin_trace.get("unexpected_arguments", [])[:10]:
             print(f"  unexpected native event: {json.dumps(row, sort_keys=True)}")
+        for row in callin_trace.get("argument_mismatches", [])[:10]:
+            print(f"  argument mismatch: {json.dumps(row, sort_keys=True)}")
+        for row in callin_trace.get("result_mismatches", [])[:10]:
+            print(f"  result mismatch: {json.dumps(row, sort_keys=True)}")
+        for row in callin_trace.get("missing_results", [])[:10]:
+            print(f"  missing result trace: {json.dumps(row, sort_keys=True)}")
         ok = False
 
     native_path = native_dir / "native.jsonl"
@@ -482,8 +555,12 @@ def comparable_callin_rows(rows: list[dict]) -> list[dict]:
 def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict:
     """Compare shared engine-to-Lua/native callins, including argument values."""
     general_names, synced_names, unsynced_names = documented_callin_names()
+    synced_general_names, unsynced_general_names = general_callin_contexts(general_names)
+    gadget_router_names = gadget_router_callins()
     documented_names = general_names | synced_names | unsynced_names
-    expected_names = documented_names & native_event_callin_names()
+    expected_names = (
+        documented_names & native_event_callin_names()
+    ) - LIFECYCLE_ONLY_CALLINS
 
     def before_complete(rows: list[dict]) -> tuple[list[dict], bool]:
         for index, row in enumerate(rows):
@@ -493,6 +570,41 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
 
     lua_rows, lua_phase_seen = before_complete(lua_rows)
     native_rows, native_phase_seen = before_complete(native_rows)
+
+    def driver_window(rows: list[dict]) -> tuple[list[dict], bool]:
+        """Return callbacks between the deterministic driver markers.
+
+        The two Spring processes naturally produce different background
+        callbacks (render frames, console messages, and shutdown activity).
+        The parity driver brackets one deterministic sequence so arguments and
+        return values can be compared without treating process scheduling as an
+        API mismatch.
+        """
+        start = next(
+            (
+                index
+                for index, row in enumerate(rows)
+                if row.get("name") == "AddConsoleLine"
+                and (row.get("args") or [None])[0]
+                == "__native_api_parity_driver_start__"
+            ),
+            None,
+        )
+        if start is None:
+            return [], False
+        end = next(
+            (
+                index
+                for index, row in enumerate(rows[start + 1 :], start=start + 1)
+                if row.get("name") == "AddConsoleLine"
+                and (row.get("args") or [None])[0]
+                == "__native_api_parity_driver_end__"
+            ),
+            None,
+        )
+        if end is None:
+            return [], False
+        return rows[start + 1 : end], True
 
     def selected_lua_row(row: dict) -> bool:
         name = str(row.get("name", ""))
@@ -504,7 +616,38 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
         # engine event, so comparing all Lua handles would double-count it.
         if name in unsynced_names:
             return context == "unsynced_gadget"
-        if name in synced_names or name in SYNCED_GENERAL_CALLINS:
+        if name in synced_names:
+            return context == "synced_gadget"
+        if name in general_names:
+            if name in LUA_RULES_ONLY_CALLINS:
+                expected_context = (
+                    "synced_gadget" if name == "Load" else "unsynced_gadget"
+                )
+            elif name in LUA_UI_CONTROL_CALLINS:
+                expected_context = "lua_ui"
+            elif name in LUA_UI_NATIVE_SIGNATURE_CALLINS:
+                expected_context = "lua_ui"
+            elif name in gadget_router_names:
+                # Prefer the stock LuaRules dispatcher whenever it actually
+                # exposes the callback.  This preserves MouseMove/
+                # MouseRelease and other input callins that LuaUI may not see
+                # when a gadget owns the event.
+                expected_context = (
+                    "unsynced_gadget"
+                    if name in unsynced_general_names
+                    else "synced_gadget"
+                )
+            elif name in unsynced_general_names:
+                # The unsynced LuaRules router has no implementation for
+                # every documented callback; the direct LuaUI handle is the
+                # canonical public surface for those remaining callbacks.
+                expected_context = "lua_ui"
+            else:
+                # Keep documented callbacks whose stock gadget router has no
+                # dispatch method testable through CLuaUI.
+                expected_context = "lua_ui"
+            return context == expected_context
+        if name in synced_general_names:
             return context == "synced_gadget"
         return context == "lua_ui"
 
@@ -547,6 +690,13 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
             "name": str(row.get("name")),
             "arity": len(args) if isinstance(args, list) else row.get("arity", 0),
             "args": canonicalize_value(args),
+            "resultArity": (
+                len(row.get("results", []))
+                if isinstance(row.get("results", []), list)
+                else row.get("resultArity", 0)
+            ),
+            "results": canonicalize_value(row.get("results", [])),
+            "result_trace_present": "results" in row and "resultArity" in row,
         }
 
     def values_equal(left, right) -> bool:
@@ -571,39 +721,113 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
             )
         return left == right
 
-    lua_semantic_rows = [semantic_row(row) for row in selected_lua_rows]
-    native_semantic_rows = [semantic_row(row) for row in selected_native_rows]
-    remaining_native = list(native_semantic_rows)
+    lua_driver_rows, lua_driver_markers = driver_window(lua_rows)
+    native_driver_rows, native_driver_markers = driver_window(native_rows)
+    selected_lua_driver_rows = [
+        row for row in lua_driver_rows if row.get("name") and selected_lua_row(row)
+    ]
+    selected_native_driver_rows = [row for row in native_driver_rows if row.get("name")]
+
+    def driver_rows_once(rows: list[dict]) -> tuple[list[dict], dict[str, int]]:
+        """Collapse only the known IsAbove/GetTooltip re-entrant callback."""
+        counts = Counter(str(row.get("name")) for row in rows)
+        result = []
+        seen: set[str] = set()
+        for row in rows:
+            name = str(row.get("name"))
+            if name == "IsAbove" and name in seen:
+                continue
+            result.append(row)
+            seen.add(name)
+        return result, {name: count for name, count in counts.items() if count > 1}
+
+    selected_lua_driver_rows, lua_driver_duplicates = driver_rows_once(
+        selected_lua_driver_rows
+    )
+    selected_native_driver_rows, native_driver_duplicates = driver_rows_once(
+        selected_native_driver_rows
+    )
+    lua_driver_semantic = [semantic_row(row) for row in selected_lua_driver_rows]
+    native_driver_semantic = [semantic_row(row) for row in selected_native_driver_rows]
+    lua_driver_names = {row["name"] for row in lua_driver_semantic}
+    native_driver_names = {row["name"] for row in native_driver_semantic}
+    lua_driver_missing = sorted(expected_names - lua_driver_names)
+    native_driver_missing = sorted(expected_names - native_driver_names)
+    driver_coverage_matches = not lua_driver_missing and not native_driver_missing
+
+    lua_by_name = {row["name"]: row for row in lua_driver_semantic}
+    native_by_name = {row["name"]: row for row in native_driver_semantic}
     missing_arguments = []
-    for lua_row in lua_semantic_rows:
-        match_index = next(
-            (
-                index
-                for index, native_row in enumerate(remaining_native)
-                if native_row["name"] == lua_row["name"]
-                and native_row["arity"] == lua_row["arity"]
-                and values_equal(native_row["args"], lua_row["args"])
-            ),
-            None,
-        )
-        if match_index is None:
-            missing_arguments.append(lua_row)
-        else:
-            remaining_native.pop(match_index)
-    unexpected_arguments = remaining_native
-    argument_matches = not missing_arguments and not unexpected_arguments
+    unexpected_arguments = []
+    argument_mismatches = []
+    result_mismatches = []
+    missing_results = []
+    unexpected_results = []
+    for name in sorted(expected_names):
+        lua_row = lua_by_name.get(name)
+        native_row = native_by_name.get(name)
+        if lua_row is None:
+            missing_arguments.append({"name": name})
+            continue
+        if native_row is None:
+            unexpected_arguments.append({"name": name})
+            continue
+        if lua_row["arity"] != native_row["arity"] or not values_equal(
+            lua_row["args"], native_row["args"]
+        ):
+            argument_mismatches.append({"lua": lua_row, "native": native_row})
+        if not lua_row["result_trace_present"]:
+            missing_results.append({"side": "lua", "row": lua_row})
+        if not native_row["result_trace_present"]:
+            missing_results.append({"side": "native", "row": native_row})
+        if (
+            lua_row["resultArity"] != native_row["resultArity"]
+            or not values_equal(lua_row["results"], native_row["results"])
+        ):
+            result_mismatches.append({"lua": lua_row, "native": native_row})
+
+    unexpected_driver_names = sorted(
+        (lua_driver_names | native_driver_names) - expected_names
+    )
+    argument_matches = (
+        not missing_arguments
+        and not unexpected_arguments
+        and not argument_mismatches
+    )
+    result_trace_complete = not missing_results
+    result_matches = not result_mismatches and result_trace_complete
+    driver_process_complete = (
+        lua_driver_markers
+        and native_driver_markers
+        and driver_coverage_matches
+        and not unexpected_driver_names
+        and set(lua_driver_duplicates) <= {"IsAbove"}
+        and not native_driver_duplicates
+    )
     return {
         # A value-level match over only the callbacks that happened to fire is
         # not full parity.  Keep coverage in the gate so a green report cannot
         # silently mean “48 of 150 callbacks matched”.
         "matches": (
-            lua_counts == native_counts
+            driver_process_complete
             and argument_matches
+            and result_matches
             and lua_phase_seen
             and native_phase_seen
             and coverage_matches
         ),
         "argument_matches": argument_matches,
+        "result_matches": result_matches,
+        "result_trace_complete": result_trace_complete,
+        "driver_markers_seen": lua_driver_markers and native_driver_markers,
+        "driver_coverage_matches": driver_coverage_matches,
+        "driver_lua_rows": len(selected_lua_driver_rows),
+        "driver_native_rows": len(selected_native_driver_rows),
+        "driver_lua_missing_names": lua_driver_missing,
+        "driver_native_missing_names": native_driver_missing,
+        "driver_unexpected_names": unexpected_driver_names,
+        "lua_driver_duplicates": lua_driver_duplicates,
+        "native_driver_duplicates": native_driver_duplicates,
         "coverage_matches": coverage_matches,
         "expected_count": len(expected_names),
         "expected_names": sorted(expected_names),
@@ -625,6 +849,9 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
         "native_counts": dict(native_counts),
         "missing_arguments": missing_arguments,
         "unexpected_arguments": unexpected_arguments,
+        "argument_mismatches": argument_mismatches,
+        "result_mismatches": result_mismatches,
+        "missing_results": missing_results,
     }
 
 
@@ -1273,23 +1500,62 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
 
     if compare_info:
         trace = compare_info["callin_trace"]
-        lua_trace_rows = len(load_jsonl(lua_dir / CALLIN_LUA_STREAM))
-        native_lua_trace_rows = len(load_jsonl(native_dir / CALLIN_LUA_STREAM))
+        baseline_lua_trace_rows = len(load_jsonl(lua_dir / CALLIN_LUA_STREAM))
         native_trace_rows = len(load_jsonl(native_dir / CALLIN_NATIVE_STREAM))
         lines.extend([
             "",
             "## Engine Callin Trace",
             "",
-            f"- Lua trace rows: baseline `{lua_trace_rows}`, native run `{native_lua_trace_rows}`",
+            f"- Lua trace rows: baseline `{baseline_lua_trace_rows}`",
             f"- Native trace rows: `{native_trace_rows}`",
-            f"- Shared event counts: `{'match' if trace['lua_counts'] == trace['native_counts'] else 'MISMATCH'}`",
+            "- Process-wide callback counts: informational only (the two processes have different render/input lifetimes).",
+            f"- Deterministic driver callbacks: Lua `{trace['driver_lua_rows']}`, native `{trace['driver_native_rows']}`, expected `{trace['expected_count']}`",
+            f"- Deterministic driver markers: `{'present' if trace['driver_markers_seen'] else 'MISSING'}`",
             f"- Shared argument values: `{'match' if trace['argument_matches'] else 'MISMATCH'}`",
+            f"- Shared return values: `{'match' if trace['result_matches'] else 'MISMATCH'}`",
+            f"- Return-value trace coverage: `{'complete' if trace['result_trace_complete'] else 'INCOMPLETE'}`",
             f"- Expected shared callins: `{trace['expected_count']}`",
             f"- Lua callins covered: `{trace['lua_covered_count']}/{trace['expected_count']}`",
             f"- Native callins covered: `{trace['native_covered_count']}/{trace['expected_count']}`",
             f"- Callin coverage: `{'complete' if trace['coverage_matches'] else 'INCOMPLETE'}`",
             "- `Update` delta values are checked as numeric because separate processes have independent render clocks.",
         ])
+        if trace["lua_driver_duplicates"] or trace["native_driver_duplicates"]:
+            lines.extend([
+                "",
+                "### Deterministic driver duplicate callbacks",
+                "",
+                f"- Lua: `{trace['lua_driver_duplicates'] or 'none'}`",
+                f"- Native: `{trace['native_driver_duplicates'] or 'none'}`",
+                "- `IsAbove` is allowed once extra because the `GetTooltip` fixture query re-enters it.",
+            ])
+        if not trace["driver_coverage_matches"]:
+            lines.extend([
+                "",
+                "### Missing deterministic driver coverage",
+                "",
+                "The return-value gate remains unverified until every shared callback is",
+                "triggered inside the deterministic marker window on both sides.",
+                "",
+                "| Callback | Lua driver | Native driver |",
+                "| --- | --- | --- |",
+            ])
+            driver_missing_names = sorted(
+                set(trace["driver_lua_missing_names"])
+                | set(trace["driver_native_missing_names"])
+            )
+            for name in driver_missing_names:
+                lines.append(
+                    f"| `{name}` | "
+                    f"{'covered' if name not in trace['driver_lua_missing_names'] else 'MISSING'} | "
+                    f"{'covered' if name not in trace['driver_native_missing_names'] else 'MISSING'} |"
+                )
+        if trace["argument_mismatches"] or trace["result_mismatches"]:
+            lines.extend(["", "### Deterministic driver mismatches", ""])
+            for row in trace["argument_mismatches"][:20]:
+                lines.append(f"- Argument: `{row['lua']['name']}` — `{json.dumps(row, sort_keys=True)}`")
+            for row in trace["result_mismatches"][:20]:
+                lines.append(f"- Result: `{row['lua']['name']}` — `{json.dumps(row, sort_keys=True)}`")
         if not trace["coverage_matches"]:
             lines.extend([
                 "",
