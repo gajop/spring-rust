@@ -5,7 +5,11 @@
 #include <cstring>
 
 #include "Game/Game.h"
+#include "Game/Action.h"
 #include "Game/GameHelper.h"
+#include "Game/UI/KeySet.h"
+#include "Game/UI/MiniMap.h"
+#include "Rendering/GlobalRendering.h"
 #include "Lua/LuaConfig.h"
 #include "Lua/LuaMaterial.h"
 #include "Sim/Features/Feature.h"
@@ -21,8 +25,13 @@
 #include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Sim/Weapons/Weapon.h"
 #include "System/Log/ILog.h"
+#include "System/Input/KeyInput.h"
+#include "System/Platform/SDL1_keysym.h"
 #include "System/Platform/SharedLib.h"
 #include "System/Rectangle.h"
+
+#include <SDL_keyboard.h>
+#include <SDL_keycode.h>
 #ifdef SYNCCHECK
 #include "System/Sync/SyncChecker.h"
 #endif
@@ -349,7 +358,9 @@ void NativeInterfaceEventClient::GameFramePost(int gameFrame) {
 
 void NativeInterfaceEventClient::Update() {
 	if (m_UpdateFuncPtr) {
-		UpdateQuery query = {};
+		UpdateQuery query = {
+			.deltaSeconds = (game != nullptr) ? game->updateDeltaSeconds : 0.0f,
+		};
 		UpdateResult result = {};
 		m_UpdateFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -357,7 +368,10 @@ void NativeInterfaceEventClient::Update() {
 
 void NativeInterfaceEventClient::DrawScreen() {
 	if (m_DrawScreenFuncPtr) {
-		DrawScreenQuery query = {};
+		DrawScreenQuery query = {
+			.viewSizeX = (globalRendering != nullptr) ? globalRendering->viewSizeX : 0,
+			.viewSizeY = (globalRendering != nullptr) ? globalRendering->viewSizeY : 0,
+		};
 		DrawScreenResult result = {};
 		m_DrawScreenFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -388,14 +402,44 @@ DISPATCH_SIMPLE_CALLIN(DrawGroundDeferred)
 DISPATCH_SIMPLE_CALLIN(DrawGroundPostDeferred)
 DISPATCH_SIMPLE_CALLIN(DrawUnitsPostDeferred)
 DISPATCH_SIMPLE_CALLIN(DrawFeaturesPostDeferred)
-DISPATCH_SIMPLE_CALLIN(DrawScreenEffects)
-DISPATCH_SIMPLE_CALLIN(DrawScreenPost)
-DISPATCH_SIMPLE_CALLIN(DrawInMiniMap)
-DISPATCH_SIMPLE_CALLIN(DrawInMiniMapBackground)
 DISPATCH_SIMPLE_CALLIN(DrawShadowUnitsLua)
 DISPATCH_SIMPLE_CALLIN(DrawShadowFeaturesLua)
 
 #undef DISPATCH_SIMPLE_CALLIN
+
+#define DISPATCH_SCREEN_CALLIN(EventName)                                      \
+	void NativeInterfaceEventClient::EventName() {                               \
+		if (m_##EventName##FuncPtr) {                                               \
+			DrawScreenQuery query = {                                                  \
+				.viewSizeX = (globalRendering != nullptr) ? globalRendering->viewSizeX : 0, \
+				.viewSizeY = (globalRendering != nullptr) ? globalRendering->viewSizeY : 0, \
+			};                                                                         \
+			DrawScreenResult result = {};                                              \
+			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result);  \
+		}                                                                            \
+	}
+
+DISPATCH_SCREEN_CALLIN(DrawScreenEffects)
+DISPATCH_SCREEN_CALLIN(DrawScreenPost)
+
+#undef DISPATCH_SCREEN_CALLIN
+
+#define DISPATCH_MINIMAP_DRAW_CALLIN(EventName)                                \
+	void NativeInterfaceEventClient::EventName() {                               \
+		if (m_##EventName##FuncPtr) {                                               \
+			MiniMapDrawQuery query = {                                                 \
+				.sizeX = (minimap != nullptr) ? minimap->GetSizeX() : 0,                  \
+				.sizeY = (minimap != nullptr) ? minimap->GetSizeY() : 0,                  \
+			};                                                                         \
+			SimpleCallinResult result = {};                                            \
+			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result);  \
+		}                                                                            \
+	}
+
+DISPATCH_MINIMAP_DRAW_CALLIN(DrawInMiniMap)
+DISPATCH_MINIMAP_DRAW_CALLIN(DrawInMiniMapBackground)
+
+#undef DISPATCH_MINIMAP_DRAW_CALLIN
 
 bool NativeInterfaceEventClient::DrawUnit(const CUnit* unit) {
 	if (m_DrawUnitFuncPtr == nullptr)
@@ -596,6 +640,8 @@ void NativeInterfaceEventClient::UnitCreated(const CUnit* unit, const CUnit* bui
 	if (m_UnitCreatedFuncPtr) {
 		UnitCreatedQuery query = {
 			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
 			.builderID = builder != nullptr ? builder->id : -1
 		};
 		UnitCreatedResult result = {};
@@ -605,7 +651,11 @@ void NativeInterfaceEventClient::UnitCreated(const CUnit* unit, const CUnit* bui
 
 void NativeInterfaceEventClient::UnitFinished(const CUnit* unit) {
 	if (m_UnitFinishedFuncPtr) {
-		UnitFinishedQuery query = {.unitID = unit->id};
+		UnitFinishedQuery query = {
+			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+		};
 		UnitFinishedResult result = {};
 		m_UnitFinishedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -613,7 +663,11 @@ void NativeInterfaceEventClient::UnitFinished(const CUnit* unit) {
 
 void NativeInterfaceEventClient::UnitReverseBuilt(const CUnit* unit) {
 	if (m_UnitReverseBuiltFuncPtr) {
-		UnitReverseBuiltQuery query = {.unitID = unit->id};
+		UnitReverseBuiltQuery query = {
+			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+		};
 		UnitReverseBuiltResult result = {};
 		m_UnitReverseBuiltFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -623,6 +677,8 @@ void NativeInterfaceEventClient::UnitConstructionDecayed(const CUnit* unit, floa
 	if (m_UnitConstructionDecayedFuncPtr) {
 		UnitConstructionDecayedQuery query = {
 			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
 			.timeSinceLastBuild = timeSinceLastBuild,
 			.iterationPeriod = iterationPeriod,
 			.part = part
@@ -636,7 +692,10 @@ void NativeInterfaceEventClient::UnitFromFactory(const CUnit* unit, const CUnit*
 	if (m_UnitFromFactoryFuncPtr) {
 		UnitFromFactoryQuery query = {
 			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
 			.factoryID = factory->id,
+			.factoryDefID = (factory->unitDef != nullptr) ? factory->unitDef->id : -1,
 			.userOrders = userOrders
 		};
 		UnitFromFactoryResult result = {};
@@ -648,7 +707,12 @@ void NativeInterfaceEventClient::UnitDestroyed(const CUnit* unit, const CUnit* a
 	if (m_UnitDestroyedFuncPtr) {
 		UnitDestroyedQuery query = {
 			.unitID = unit->id,
-			.attackerID = attacker != nullptr ? attacker->id : -1
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+			.attackerID = attacker != nullptr ? attacker->id : -1,
+			.attackerDefID = (attacker != nullptr && attacker->unitDef != nullptr) ? attacker->unitDef->id : -1,
+			.attackerTeam = attacker != nullptr ? attacker->team : -1,
+			.weaponDefID = weaponDefID,
 		};
 		UnitDestroyedResult result = {};
 		m_UnitDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -659,6 +723,7 @@ void NativeInterfaceEventClient::UnitTaken(const CUnit* unit, int oldTeam, int n
 	if (m_UnitTakenFuncPtr) {
 		UnitTakenQuery query = {
 			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 			.oldTeam = oldTeam,
 			.newTeam = newTeam
 		};
@@ -671,6 +736,7 @@ void NativeInterfaceEventClient::UnitGiven(const CUnit* unit, int oldTeam, int n
 	if (m_UnitGivenFuncPtr) {
 		UnitGivenQuery query = {
 			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
 			.oldTeam = oldTeam,
 			.newTeam = newTeam
 		};
@@ -681,7 +747,11 @@ void NativeInterfaceEventClient::UnitGiven(const CUnit* unit, int oldTeam, int n
 
 void NativeInterfaceEventClient::UnitIdle(const CUnit* unit) {
 	if (m_UnitIdleFuncPtr) {
-		UnitIdleQuery query = {.unitID = unit->id};
+		UnitIdleQuery query = {
+			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+		};
 		UnitIdleResult result = {};
 		m_UnitIdleFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -938,7 +1008,11 @@ void NativeInterfaceEventClient::UnitDamaged(const CUnit* unit, const CUnit* att
 
 void NativeInterfaceEventClient::UnitHarvestStorageFull(const CUnit* unit) {
 	if (m_UnitHarvestStorageFullFuncPtr) {
-		UnitHarvestStorageFullQuery query = {.unitID = unit->id};
+		UnitHarvestStorageFullQuery query = {
+			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+		};
 		UnitHarvestStorageFullResult result = {};
 		m_UnitHarvestStorageFullFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -961,7 +1035,12 @@ void NativeInterfaceEventClient::UnitSeismicPing(const CUnit* unit, int allyTeam
 #define DISPATCH_UNIT_LOS_EVENT(EventName)                                      \
 	void NativeInterfaceEventClient::EventName(const CUnit* unit, int allyTeam) { \
 		if (m_##EventName##FuncPtr) {                                             \
-			UnitLosEventQuery query = {.unitID = unit->id, .allyTeam = allyTeam};   \
+			UnitLosEventQuery query = {                                               \
+				.unitID = unit->id,                                                       \
+				.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,       \
+				.unitTeam = unit->team,                                                  \
+				.allyTeam = allyTeam,                                                     \
+			};                                                                          \
 			UnitLosEventResult result = {};                                        \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
 		}                                                                          \
@@ -977,7 +1056,11 @@ DISPATCH_UNIT_LOS_EVENT(UnitLeftLos)
 #define DISPATCH_UNIT_MOVEMENT_CLASS_EVENT(EventName)                          \
 	void NativeInterfaceEventClient::EventName(const CUnit* unit) {              \
 		if (m_##EventName##FuncPtr) {                                             \
-			UnitMovementClassEventQuery query = {.unitID = unit->id};              \
+			UnitMovementClassEventQuery query = {                                    \
+				.unitID = unit->id,                                                       \
+				.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,       \
+				.unitTeam = unit->team,                                                  \
+			};                                                                          \
 			UnitMovementClassEventResult result = {};                             \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
 		}                                                                          \
@@ -996,6 +1079,8 @@ void NativeInterfaceEventClient::UnitStunned(const CUnit* unit, bool stunned) {
 	if (m_UnitStunnedFuncPtr) {
 		UnitStunnedQuery query = {
 			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
 			.stunned = stunned
 		};
 		UnitStunnedResult result = {};
@@ -1007,6 +1092,9 @@ void NativeInterfaceEventClient::UnitExperience(const CUnit* unit, float oldExpe
 	if (m_UnitExperienceFuncPtr) {
 		UnitExperienceQuery query = {
 			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+			.experience = unit->experience,
 			.oldExperience = oldExperience
 		};
 		UnitExperienceResult result = {};
@@ -1018,7 +1106,10 @@ void NativeInterfaceEventClient::UnitLoaded(const CUnit* unit, const CUnit* tran
 	if (m_UnitLoadedFuncPtr) {
 		UnitLoadedQuery query = {
 			.unitID = unit->id,
-			.transportID = transport->id
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+			.transportID = transport->id,
+			.transportTeam = transport->team,
 		};
 		UnitLoadedResult result = {};
 		m_UnitLoadedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1029,7 +1120,10 @@ void NativeInterfaceEventClient::UnitUnloaded(const CUnit* unit, const CUnit* tr
 	if (m_UnitUnloadedFuncPtr) {
 		UnitUnloadedQuery query = {
 			.unitID = unit->id,
-			.transportID = transport->id
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+			.transportID = transport->id,
+			.transportTeam = transport->team,
 		};
 		UnitUnloadedResult result = {};
 		m_UnitUnloadedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1038,7 +1132,11 @@ void NativeInterfaceEventClient::UnitUnloaded(const CUnit* unit, const CUnit* tr
 
 void NativeInterfaceEventClient::UnitCloaked(const CUnit* unit) {
 	if (m_UnitCloakedFuncPtr) {
-		UnitCloakEventQuery query = {.unitID = unit->id};
+		UnitCloakEventQuery query = {
+			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+		};
 		UnitCloakEventResult result = {};
 		m_UnitCloakedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -1046,7 +1144,11 @@ void NativeInterfaceEventClient::UnitCloaked(const CUnit* unit) {
 
 void NativeInterfaceEventClient::UnitDecloaked(const CUnit* unit) {
 	if (m_UnitDecloakedFuncPtr) {
-		UnitCloakEventQuery query = {.unitID = unit->id};
+		UnitCloakEventQuery query = {
+			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+		};
 		UnitCloakEventResult result = {};
 		m_UnitDecloakedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -1055,7 +1157,11 @@ void NativeInterfaceEventClient::UnitDecloaked(const CUnit* unit) {
 #define DISPATCH_UNIT_MOVE_EVENT(EventName)                                    \
 	void NativeInterfaceEventClient::EventName(const CUnit* unit) {              \
 		if (m_##EventName##FuncPtr) {                                             \
-			UnitMoveEventQuery query = {.unitID = unit->id};                       \
+			UnitMoveEventQuery query = {                                            \
+				.unitID = unit->id,                                                       \
+				.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,       \
+				.unitTeam = unit->team,                                                  \
+			};                                                                          \
 			UnitMoveEventResult result = {};                                      \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
 		}                                                                          \
@@ -1095,7 +1201,11 @@ bool NativeInterfaceEventClient::UnitFeatureCollision(const CUnit* collider, con
 
 void NativeInterfaceEventClient::RenderUnitDestroyed(const CUnit* unit) {
 	if (m_RenderUnitDestroyedFuncPtr) {
-		RenderUnitDestroyedQuery query = {.unitID = unit->id};
+		RenderUnitDestroyedQuery query = {
+			.unitID = unit->id,
+			.unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1,
+			.unitTeam = unit->team,
+		};
 		RenderUnitDestroyedResult result = {};
 		m_RenderUnitDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -1103,7 +1213,10 @@ void NativeInterfaceEventClient::RenderUnitDestroyed(const CUnit* unit) {
 
 void NativeInterfaceEventClient::FeatureCreated(const CFeature* feature) {
 	if (m_FeatureCreatedFuncPtr) {
-		FeatureCreatedQuery query = {.featureID = feature->id};
+		FeatureCreatedQuery query = {
+			.featureID = feature->id,
+			.allyTeamID = feature->allyteam,
+		};
 		FeatureCreatedResult result = {};
 		m_FeatureCreatedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -1111,7 +1224,10 @@ void NativeInterfaceEventClient::FeatureCreated(const CFeature* feature) {
 
 void NativeInterfaceEventClient::FeatureDestroyed(const CFeature* feature) {
 	if (m_FeatureDestroyedFuncPtr) {
-		FeatureDestroyedQuery query = {.featureID = feature->id};
+		FeatureDestroyedQuery query = {
+			.featureID = feature->id,
+			.allyTeamID = feature->allyteam,
+		};
 		FeatureDestroyedResult result = {};
 		m_FeatureDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -1310,7 +1426,7 @@ void NativeInterfaceEventClient::ProjectileCreated(const CProjectile* proj) {
 		const auto* weaponDef = (weaponProjectile != nullptr) ? weaponProjectile->GetWeaponDef() : nullptr;
 		ProjectileEventQuery query = {
 			.projectileID = proj->id,
-			.ownerID = proj->GetOwnerID(),
+			.ownerID = static_cast<int32_t>(proj->GetOwnerID()),
 			.weaponDefID = (weaponDef != nullptr) ? weaponDef->id : -1,
 		};
 		ProjectileEventResult result = {};
@@ -1324,7 +1440,7 @@ void NativeInterfaceEventClient::ProjectileDestroyed(const CProjectile* proj) {
 		const auto* weaponDef = (weaponProjectile != nullptr) ? weaponProjectile->GetWeaponDef() : nullptr;
 		ProjectileEventQuery query = {
 			.projectileID = proj->id,
-			.ownerID = proj->GetOwnerID(),
+			.ownerID = static_cast<int32_t>(proj->GetOwnerID()),
 			.weaponDefID = (weaponDef != nullptr) ? weaponDef->id : -1,
 		};
 		ProjectileEventResult result = {};
@@ -1357,9 +1473,9 @@ int NativeInterfaceEventClient::AllowWeaponTargetCheck(unsigned int attackerID, 
 		return -1;
 
 	AllowWeaponTargetCheckQuery query = {
-		.attackerID = attackerID,
+		.attackerID = static_cast<int32_t>(attackerID),
 		.attackerWeaponNum = static_cast<int32_t>(attackerWeaponNum + LUA_WEAPON_BASE_INDEX),
-		.attackerWeaponDefID = attackerWeaponDefID,
+		.attackerWeaponDefID = static_cast<int32_t>(attackerWeaponDefID),
 	};
 	IntCallinResult result = {.value = -1};
 	m_AllowWeaponTargetCheckFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -1372,10 +1488,10 @@ bool NativeInterfaceEventClient::AllowWeaponTarget(unsigned int attackerID, unsi
 
 	const int attackerWeaponNumber = static_cast<int>(attackerWeaponNum);
 	AllowWeaponTargetQuery query = {
-		.attackerID = attackerID,
-		.targetID = targetID,
+		.attackerID = static_cast<int32_t>(attackerID),
+		.targetID = static_cast<int32_t>(targetID),
 		.attackerWeaponNum = attackerWeaponNumber + LUA_WEAPON_BASE_INDEX * (attackerWeaponNumber >= 0),
-		.attackerWeaponDefID = attackerWeaponDefID,
+		.attackerWeaponDefID = static_cast<int32_t>(attackerWeaponDefID),
 		.hasTargetPriority = (targetPriority != nullptr),
 		.targetPriority = (targetPriority != nullptr) ? *targetPriority : 0.0f,
 	};
@@ -1572,7 +1688,31 @@ bool NativeInterfaceEventClient::KeyMapChanged() {
 
 bool NativeInterfaceEventClient::KeyPress(int keyCode, int scanCode, bool isRepeat) {
 	if (m_KeyPressFuncPtr) {
-		KeyPressQuery query = {.keyCode = keyCode, .scanCode = scanCode, .isRepeat = isRepeat};
+		const ActionList& actionList = (game != nullptr) ? game->GetLastActionList() : ActionList{};
+		std::vector<KeyAction> actions;
+		actions.reserve(actionList.size());
+		for (const Action& action : actionList) {
+			actions.push_back({
+				.command = action.command.c_str(),
+				.extra = action.extra.c_str(),
+				.boundWith = action.boundWith.c_str(),
+			});
+		}
+		const CKeySet keySet(keyCode);
+		const std::string label = keySet.GetString(true);
+		KeyPressQuery query = {
+			.keyCode = SDL21_keysyms(keyCode),
+			.alt = !!KeyInput::GetKeyModState(KMOD_ALT),
+			.ctrl = !!KeyInput::GetKeyModState(KMOD_CTRL),
+			.meta = !!KeyInput::GetKeyModState(KMOD_GUI),
+			.shift = !!KeyInput::GetKeyModState(KMOD_SHIFT),
+			.isRepeat = isRepeat,
+			.label = label.c_str(),
+			.utf32Char = 0,
+			.scanCode = scanCode,
+			.actionList = actions.data(),
+			.actionCount = static_cast<uint32_t>(actions.size()),
+		};
 		BoolCallinResult result = {.value = false};
 		m_KeyPressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		return result.value;
@@ -1582,7 +1722,30 @@ bool NativeInterfaceEventClient::KeyPress(int keyCode, int scanCode, bool isRepe
 
 bool NativeInterfaceEventClient::KeyRelease(int keyCode, int scanCode) {
 	if (m_KeyReleaseFuncPtr) {
-		KeyReleaseQuery query = {.keyCode = keyCode, .scanCode = scanCode};
+		const ActionList& actionList = (game != nullptr) ? game->GetLastActionList() : ActionList{};
+		std::vector<KeyAction> actions;
+		actions.reserve(actionList.size());
+		for (const Action& action : actionList) {
+			actions.push_back({
+				.command = action.command.c_str(),
+				.extra = action.extra.c_str(),
+				.boundWith = action.boundWith.c_str(),
+			});
+		}
+		const CKeySet keySet(keyCode);
+		const std::string label = keySet.GetString(true);
+		KeyReleaseQuery query = {
+			.keyCode = SDL21_keysyms(keyCode),
+			.alt = !!KeyInput::GetKeyModState(KMOD_ALT),
+			.ctrl = !!KeyInput::GetKeyModState(KMOD_CTRL),
+			.meta = !!KeyInput::GetKeyModState(KMOD_GUI),
+			.shift = !!KeyInput::GetKeyModState(KMOD_SHIFT),
+			.label = label.c_str(),
+			.utf32Char = 0,
+			.scanCode = scanCode,
+			.actionList = actions.data(),
+			.actionCount = static_cast<uint32_t>(actions.size()),
+		};
 		BoolCallinResult result = {.value = false};
 		m_KeyReleaseFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		return result.value;
@@ -1650,7 +1813,12 @@ bool NativeInterfaceEventClient::MouseWheel(bool up, float value) {
 
 bool NativeInterfaceEventClient::IsAbove(int x, int y) {
 	if (m_IsAboveFuncPtr) {
-		ScreenPositionQuery query = {.x = x, .y = y};
+		// Match CLuaHandle::IsAbove: callins receive view-relative x and
+		// bottom-origin y, not the renderer's top-origin screen coordinates.
+		ScreenPositionQuery query = {
+			.x = (globalRendering != nullptr) ? x - globalRendering->viewPosX : x,
+			.y = (globalRendering != nullptr) ? globalRendering->viewSizeY - y - 1 : y,
+		};
 		BoolCallinResult result = {.value = false};
 		m_IsAboveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		return result.value;
@@ -1660,7 +1828,12 @@ bool NativeInterfaceEventClient::IsAbove(int x, int y) {
 
 std::string NativeInterfaceEventClient::GetTooltip(int x, int y) {
 	if (m_GetTooltipFuncPtr) {
-		ScreenPositionQuery query = {.x = x, .y = y};
+		// Keep GetTooltip on the same coordinate contract as IsAbove and the
+		// Lua callin implementation.
+		ScreenPositionQuery query = {
+			.x = (globalRendering != nullptr) ? x - globalRendering->viewPosX : x,
+			.y = (globalRendering != nullptr) ? globalRendering->viewSizeY - y - 1 : y,
+		};
 		StringCallinResult result = {};
 		m_GetTooltipFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		return (result.value != nullptr) ? result.value : "";
@@ -1789,9 +1962,21 @@ void NativeInterfaceEventClient::MiniMapGeometryChanged(int2 newPos, int2 newDim
 }
 
 bool NativeInterfaceEventClient::GameSetup(const std::string& state, bool& ready, const std::vector<std::pair<int, std::string>>& playerStates) {
-	(void)playerStates;
 	if (m_GameSetupFuncPtr) {
-		GameSetupQuery query = {.state = state.c_str(), .ready = ready};
+		std::vector<GameSetupPlayerState> states;
+		states.reserve(playerStates.size());
+		for (const auto& [playerID, playerState] : playerStates) {
+			states.push_back({
+				.playerID = playerID,
+				.state = playerState.c_str(),
+			});
+		}
+		GameSetupQuery query = {
+			.state = state.c_str(),
+			.ready = ready,
+			.playerStates = states.data(),
+			.playerStateCount = static_cast<uint32_t>(states.size()),
+		};
 		GameSetupResult result = {.handled = false, .ready = ready};
 		m_GameSetupFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		if (result.handled)
@@ -1837,7 +2022,27 @@ bool NativeInterfaceEventClient::MapDrawCmd(int playerID, int type, const float3
 
 void NativeInterfaceEventClient::ViewResize() {
 	if (m_ViewResizeFuncPtr) {
-		ViewResizeQuery query = {};
+		const int winPosY_bl = (globalRendering != nullptr)
+			? globalRendering->screenSizeY - globalRendering->winSizeY - globalRendering->winPosY
+			: 0;
+		ViewResizeQuery query = {
+			.screenSizeX = (globalRendering != nullptr) ? globalRendering->screenSizeX : 0,
+			.screenSizeY = (globalRendering != nullptr) ? globalRendering->screenSizeY : 0,
+			.screenPosX = (globalRendering != nullptr) ? globalRendering->screenPosX : 0,
+			.screenPosY = (globalRendering != nullptr) ? globalRendering->screenPosY : 0,
+			.windowSizeX = (globalRendering != nullptr) ? globalRendering->winSizeX : 0,
+			.windowSizeY = (globalRendering != nullptr) ? globalRendering->winSizeY : 0,
+			.windowPosX = (globalRendering != nullptr) ? globalRendering->winPosX : 0,
+			.windowPosY = winPosY_bl,
+			.windowBorderTop = (globalRendering != nullptr) ? globalRendering->winBorder[0] : 0,
+			.windowBorderLeft = (globalRendering != nullptr) ? globalRendering->winBorder[1] : 0,
+			.windowBorderBottom = (globalRendering != nullptr) ? globalRendering->winBorder[2] : 0,
+			.windowBorderRight = (globalRendering != nullptr) ? globalRendering->winBorder[3] : 0,
+			.viewSizeX = (globalRendering != nullptr) ? globalRendering->viewSizeX : 0,
+			.viewSizeY = (globalRendering != nullptr) ? globalRendering->viewSizeY : 0,
+			.viewPosX = (globalRendering != nullptr) ? globalRendering->viewPosX : 0,
+			.viewPosY = (globalRendering != nullptr) ? globalRendering->viewPosY : 0,
+		};
 		ViewResizeResult result = {};
 		m_ViewResizeFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}

@@ -78,6 +78,7 @@ struct DownloadStartedResult {
 // Feature events
 struct FeatureCreatedQuery {
 	int32_t featureID;
+	int32_t allyTeamID;
 };
 
 struct FeatureCreatedResult {
@@ -86,6 +87,7 @@ struct FeatureCreatedResult {
 
 struct FeatureDestroyedQuery {
 	int32_t featureID;
+	int32_t allyTeamID;
 };
 
 struct FeatureDestroyedResult {
@@ -200,6 +202,8 @@ struct TeamDiedResult {
 // Unit events
 struct UnitCreatedQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 	int32_t builderID;  // -1 if none
 };
 
@@ -209,7 +213,12 @@ struct UnitCreatedResult {
 
 struct UnitDestroyedQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 	int32_t attackerID;  // -1 if none
+	int32_t attackerDefID;  // -1 if none or not available
+	int32_t attackerTeam;  // -1 if none or not available
+	int32_t weaponDefID;
 };
 
 struct UnitDestroyedResult {
@@ -218,6 +227,9 @@ struct UnitDestroyedResult {
 
 struct UnitExperienceQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
+	float experience;
 	float oldExperience;
 };
 
@@ -227,6 +239,8 @@ struct UnitExperienceResult {
 
 struct UnitFinishedQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 };
 
 struct UnitFinishedResult {
@@ -235,6 +249,8 @@ struct UnitFinishedResult {
 
 struct UnitReverseBuiltQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 };
 
 struct UnitReverseBuiltResult {
@@ -243,6 +259,8 @@ struct UnitReverseBuiltResult {
 
 struct UnitConstructionDecayedQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 	float timeSinceLastBuild;
 	float iterationPeriod;
 	float part;
@@ -254,7 +272,10 @@ struct UnitConstructionDecayedResult {
 
 struct UnitFromFactoryQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 	int32_t factoryID;
+	int32_t factoryDefID;
 	bool userOrders;
 };
 
@@ -264,6 +285,7 @@ struct UnitFromFactoryResult {
 
 struct UnitGivenQuery {
 	int32_t unitID;
+	int32_t unitDefID;
 	int32_t oldTeam;
 	int32_t newTeam;
 };
@@ -274,6 +296,8 @@ struct UnitGivenResult {
 
 struct UnitIdleQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 };
 
 struct UnitIdleResult {
@@ -282,6 +306,8 @@ struct UnitIdleResult {
 
 struct UnitHarvestStorageFullQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 };
 
 struct UnitHarvestStorageFullResult {
@@ -290,6 +316,8 @@ struct UnitHarvestStorageFullResult {
 
 struct UnitLosEventQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 	int32_t allyTeam;
 };
 
@@ -299,6 +327,8 @@ struct UnitLosEventResult {
 
 struct UnitMovementClassEventQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 };
 
 struct UnitMovementClassEventResult {
@@ -307,7 +337,10 @@ struct UnitMovementClassEventResult {
 
 struct UnitLoadedQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 	int32_t transportID;
+	int32_t transportTeam;
 };
 
 struct UnitLoadedResult {
@@ -316,6 +349,8 @@ struct UnitLoadedResult {
 
 struct UnitStunnedQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 	bool stunned;
 };
 
@@ -325,6 +360,7 @@ struct UnitStunnedResult {
 
 struct UnitTakenQuery {
 	int32_t unitID;
+	int32_t unitDefID;
 	int32_t oldTeam;
 	int32_t newTeam;
 };
@@ -335,7 +371,10 @@ struct UnitTakenResult {
 
 struct UnitUnloadedQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 	int32_t transportID;
+	int32_t transportTeam;
 };
 
 struct UnitUnloadedResult {
@@ -344,6 +383,8 @@ struct UnitUnloadedResult {
 
 struct UnitCloakEventQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 };
 
 struct UnitCloakEventResult {
@@ -352,6 +393,8 @@ struct UnitCloakEventResult {
 
 struct UnitMoveEventQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 };
 
 struct UnitMoveEventResult {
@@ -360,6 +403,8 @@ struct UnitMoveEventResult {
 
 struct RenderUnitDestroyedQuery {
 	int32_t unitID;
+	int32_t unitDefID;
+	int32_t unitTeam;
 };
 
 struct RenderUnitDestroyedResult {
@@ -394,7 +439,22 @@ struct LastMessagePositionResult {
 };
 
 struct ViewResizeQuery {
-	uint8_t _unused;
+	int32_t screenSizeX;
+	int32_t screenSizeY;
+	int32_t screenPosX;
+	int32_t screenPosY;
+	int32_t windowSizeX;
+	int32_t windowSizeY;
+	int32_t windowPosX;
+	int32_t windowPosY;
+	int32_t windowBorderTop;
+	int32_t windowBorderLeft;
+	int32_t windowBorderBottom;
+	int32_t windowBorderRight;
+	int32_t viewSizeX;
+	int32_t viewSizeY;
+	int32_t viewPosX;
+	int32_t viewPosY;
 };
 
 struct ViewResizeResult {
@@ -712,16 +772,16 @@ struct MoveCtrlNotifyQuery {
 };
 
 struct AllowWeaponTargetCheckQuery {
-	uint32_t attackerID;
+	int32_t attackerID;
 	int32_t attackerWeaponNum;
-	uint32_t attackerWeaponDefID;
+	int32_t attackerWeaponDefID;
 };
 
 struct AllowWeaponTargetQuery {
-	uint32_t attackerID;
-	uint32_t targetID;
+	int32_t attackerID;
+	int32_t targetID;
 	int32_t attackerWeaponNum;
-	uint32_t attackerWeaponDefID;
+	int32_t attackerWeaponDefID;
 	bool hasTargetPriority;
 	float targetPriority;
 };
@@ -746,13 +806,35 @@ struct ShieldPreDamagedQuery {
 
 struct KeyPressQuery {
 	int32_t keyCode;
-	int32_t scanCode;
+	bool alt;
+	bool ctrl;
+	bool meta;
+	bool shift;
 	bool isRepeat;
+	const char* label;
+	int32_t utf32Char;
+	int32_t scanCode;
+	const struct KeyAction* actionList;
+	uint32_t actionCount;
 };
 
 struct KeyReleaseQuery {
 	int32_t keyCode;
+	bool alt;
+	bool ctrl;
+	bool meta;
+	bool shift;
+	const char* label;
+	int32_t utf32Char;
 	int32_t scanCode;
+	const struct KeyAction* actionList;
+	uint32_t actionCount;
+};
+
+struct KeyAction {
+	const char* command;
+	const char* extra;
+	const char* boundWith;
 };
 
 struct TextInputQuery {
@@ -926,9 +1008,16 @@ struct StringCallinResult {
 	const char* value;
 };
 
+struct GameSetupPlayerState {
+	int32_t playerID;
+	const char* state;
+};
+
 struct GameSetupQuery {
 	const char* state;
 	bool ready;
+	const struct GameSetupPlayerState* playerStates;
+	uint32_t playerStateCount;
 };
 
 struct GameSetupResult {
@@ -977,7 +1066,7 @@ struct ShutdownResult {
 // Per-render-frame callin (unsynced). Fires once per drawn frame even while the
 // sim is paused — the native equivalent of widget:Update.
 struct UpdateQuery {
-	// No input parameters
+	float deltaSeconds;
 };
 
 struct UpdateResult {
@@ -988,7 +1077,13 @@ struct UpdateResult {
 // context is valid — the native equivalent of SpringBoard's delayGL. GfxApi
 // operations are only valid when called from here.
 struct DrawScreenQuery {
-	// No input parameters
+	int32_t viewSizeX;
+	int32_t viewSizeY;
+};
+
+struct MiniMapDrawQuery {
+	int32_t sizeX;
+	int32_t sizeY;
 };
 
 struct DrawScreenResult {
