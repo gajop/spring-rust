@@ -281,7 +281,7 @@ bool CUnsyncedLuaHandle::DrawFeature(const CFeature* feature)
 /*** For custom rendering of shields.
  *
  * @function UnsyncedCallins:DrawShield
- * @param featureID integer
+ * @param unitID integer
  * @param weaponID integer
  * @param drawMode number
  * @return boolean suppressEngineDraw
