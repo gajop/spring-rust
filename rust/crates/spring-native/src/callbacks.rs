@@ -514,9 +514,9 @@ pub trait NativeModule: Sized {
         unit_id: i32,
         unit_def_id: i32,
         unit_team: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
         weapon_def_id: i32,
     ) -> Result<(), Error> {
         let _ = (
@@ -545,13 +545,23 @@ pub trait NativeModule: Sized {
     }
 
     /// Called when a unit finishes construction.
-    fn unit_finished(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_finished(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
     /// Called while a unit is reverse-built.
-    fn unit_reverse_built(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_reverse_built(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
@@ -587,7 +597,14 @@ pub trait NativeModule: Sized {
         factory_def_id: i32,
         user_orders: bool,
     ) -> Result<(), Error> {
-        let _ = (unit_id, unit_def_id, unit_team, factory_id, factory_def_id, user_orders);
+        let _ = (
+            unit_id,
+            unit_def_id,
+            unit_team,
+            factory_id,
+            factory_def_id,
+            user_orders,
+        );
         Ok(())
     }
 
@@ -596,10 +613,10 @@ pub trait NativeModule: Sized {
         &mut self,
         unit_id: i32,
         unit_def_id: i32,
-        old_team: i32,
         new_team: i32,
+        old_team: i32,
     ) -> Result<(), Error> {
-        let _ = (unit_id, unit_def_id, old_team, new_team);
+        let _ = (unit_id, unit_def_id, new_team, old_team);
         Ok(())
     }
 
@@ -834,9 +851,9 @@ pub trait NativeModule: Sized {
         paralyzer: bool,
         weapon_def_id: i32,
         projectile_id: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
     ) -> Result<(), Error> {
         let _ = (
             unit_id,
@@ -879,73 +896,103 @@ pub trait NativeModule: Sized {
     fn unit_entered_radar(
         &mut self,
         unit_id: i32,
-        unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
+        unit_def_id: i32,
     ) -> Result<(), Error> {
-        let _ = (unit_id, unit_def_id, unit_team, ally_team);
+        let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
     }
 
     fn unit_entered_los(
         &mut self,
         unit_id: i32,
-        unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
+        unit_def_id: i32,
     ) -> Result<(), Error> {
-        let _ = (unit_id, unit_def_id, unit_team, ally_team);
+        let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
     }
 
     fn unit_left_radar(
         &mut self,
         unit_id: i32,
-        unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
+        unit_def_id: i32,
     ) -> Result<(), Error> {
-        let _ = (unit_id, unit_def_id, unit_team, ally_team);
+        let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
     }
 
     fn unit_left_los(
         &mut self,
         unit_id: i32,
-        unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
+        unit_def_id: i32,
     ) -> Result<(), Error> {
-        let _ = (unit_id, unit_def_id, unit_team, ally_team);
+        let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
     }
 
-    fn unit_entered_underwater(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_entered_underwater(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_entered_water(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_entered_water(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_entered_air(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_entered_air(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_left_underwater(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_left_underwater(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_left_water(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_left_water(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_left_air(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_left_air(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
@@ -959,7 +1006,13 @@ pub trait NativeModule: Sized {
         transport_id: i32,
         transport_team: i32,
     ) -> Result<(), Error> {
-        let _ = (unit_id, unit_def_id, unit_team, transport_id, transport_team);
+        let _ = (
+            unit_id,
+            unit_def_id,
+            unit_team,
+            transport_id,
+            transport_team,
+        );
         Ok(())
     }
 
@@ -996,16 +1049,32 @@ pub trait NativeModule: Sized {
         transport_id: i32,
         transport_team: i32,
     ) -> Result<(), Error> {
-        let _ = (unit_id, unit_def_id, unit_team, transport_id, transport_team);
+        let _ = (
+            unit_id,
+            unit_def_id,
+            unit_team,
+            transport_id,
+            transport_team,
+        );
         Ok(())
     }
 
-    fn unit_cloaked(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_cloaked(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_decloaked(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_decloaked(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
@@ -1015,12 +1084,22 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
-    fn unit_move_failed(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_move_failed(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_arrived_at_goal(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn unit_arrived_at_goal(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
@@ -1040,7 +1119,12 @@ pub trait NativeModule: Sized {
     }
 
     /// Called when a unit is destroyed (rendering-specific).
-    fn render_unit_destroyed(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+    fn render_unit_destroyed(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
@@ -1058,9 +1142,9 @@ pub trait NativeModule: Sized {
         damage: f32,
         weapon_def_id: i32,
         projectile_id: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
     ) -> Result<(), Error> {
         let _ = (
             feature_id,
@@ -1241,9 +1325,9 @@ pub trait NativeModule: Sized {
         paralyzer: bool,
         weapon_def_id: i32,
         projectile_id: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
         new_damage: f32,
         impulse_mult: f32,
     ) -> Result<(f32, f32), Error> {
@@ -1270,9 +1354,9 @@ pub trait NativeModule: Sized {
         damage: f32,
         weapon_def_id: i32,
         projectile_id: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
         new_damage: f32,
         impulse_mult: f32,
     ) -> Result<(f32, f32), Error> {
@@ -1418,16 +1502,7 @@ pub trait NativeModule: Sized {
         actions: &[KeyAction<'_>],
     ) -> Result<bool, Error> {
         let _ = (
-            key_code,
-            alt,
-            ctrl,
-            meta,
-            shift,
-            is_repeat,
-            label,
-            utf32_char,
-            scan_code,
-            actions,
+            key_code, alt, ctrl, meta, shift, is_repeat, label, utf32_char, scan_code, actions,
         );
         Ok(false)
     }
@@ -1445,15 +1520,7 @@ pub trait NativeModule: Sized {
         actions: &[KeyAction<'_>],
     ) -> Result<bool, Error> {
         let _ = (
-            key_code,
-            alt,
-            ctrl,
-            meta,
-            shift,
-            label,
-            utf32_char,
-            scan_code,
-            actions,
+            key_code, alt, ctrl, meta, shift, label, utf32_char, scan_code, actions,
         );
         Ok(false)
     }
@@ -1551,7 +1618,7 @@ pub trait NativeModule: Sized {
         &mut self,
         weapon_def_id: i32,
         pos: crate::sys::Float3,
-        owner_id: i32,
+        owner_id: Option<i32>,
         projectile_id: i32,
     ) -> Result<bool, Error> {
         let _ = (weapon_def_id, pos, owner_id, projectile_id);

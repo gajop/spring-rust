@@ -472,7 +472,7 @@ macro_rules! export_module {
                         (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                             let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                             let q = &*query;
-                            data.module().$method(q.unitID, q.unitDefID, q.unitTeam, q.allyTeam)
+                            data.module().$method(q.unitID, q.unitTeam, q.allyTeam, q.unitDefID)
                         });
                     }
                 }
@@ -1585,13 +1585,16 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
+                    let attacker_id = (q.attackerID >= 0).then_some(q.attackerID);
+                    let attacker_def_id = attacker_id.map(|_| q.attackerDefID);
+                    let attacker_team = attacker_id.map(|_| q.attackerTeam);
                     data.module().unit_destroyed(
                         q.unitID,
                         q.unitDefID,
                         q.unitTeam,
-                        q.attackerID,
-                        q.attackerDefID,
-                        q.attackerTeam,
+                        attacker_id,
+                        attacker_def_id,
+                        attacker_team,
                         q.weaponDefID,
                     )
                 });
@@ -1720,7 +1723,7 @@ macro_rules! export_module {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
                     data.module()
-                        .unit_given(q.unitID, q.unitDefID, q.oldTeam, q.newTeam)
+                        .unit_given(q.unitID, q.unitDefID, q.newTeam, q.oldTeam)
                 });
             }
         }
@@ -2011,6 +2014,9 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
+                    let attacker_id = (q.attackerID >= 0).then_some(q.attackerID);
+                    let attacker_def_id = attacker_id.map(|_| q.attackerDefID);
+                    let attacker_team = attacker_id.map(|_| q.attackerTeam);
                     data.module().unit_damaged(
                         q.unitID,
                         q.unitDefID,
@@ -2019,9 +2025,9 @@ macro_rules! export_module {
                         q.paralyzer,
                         q.weaponDefID,
                         q.projectileID,
-                        q.attackerID,
-                        q.attackerDefID,
-                        q.attackerTeam,
+                        attacker_id,
+                        attacker_def_id,
+                        attacker_team,
                     )
                 });
             }
@@ -2482,6 +2488,9 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
+                    let attacker_id = (q.attackerID >= 0).then_some(q.attackerID);
+                    let attacker_def_id = attacker_id.map(|_| q.attackerDefID);
+                    let attacker_team = attacker_id.map(|_| q.attackerTeam);
                     data.module().feature_damaged(
                         q.featureID,
                         q.featureDefID,
@@ -2489,9 +2498,9 @@ macro_rules! export_module {
                         q.damage,
                         q.weaponDefID,
                         q.projectileID,
-                        q.attackerID,
-                        q.attackerDefID,
-                        q.attackerTeam,
+                        attacker_id,
+                        attacker_def_id,
+                        attacker_team,
                     )
                 });
             }
@@ -2515,8 +2524,12 @@ macro_rules! export_module {
                     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                         let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                         let q = &*query;
-                        data.module()
-                            .explosion(q.weaponDefID, q.pos, q.ownerID, q.projectileID)
+                        data.module().explosion(
+                            q.weaponDefID,
+                            q.pos,
+                            (q.ownerID >= 0).then_some(q.ownerID),
+                            q.projectileID,
+                        )
                     }))
                     .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
                 finish_bool_callback!(result, callback_result);
@@ -2617,6 +2630,9 @@ macro_rules! export_module {
                 let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
+                    let attacker_id = (q.attackerID >= 0).then_some(q.attackerID);
+                    let attacker_def_id = attacker_id.map(|_| q.attackerDefID);
+                    let attacker_team = attacker_id.map(|_| q.attackerTeam);
                     data.module().unit_pre_damaged(
                         q.unitID,
                         q.unitDefID,
@@ -2625,9 +2641,9 @@ macro_rules! export_module {
                         q.paralyzer,
                         q.weaponDefID,
                         q.projectileID,
-                        q.attackerID,
-                        q.attackerDefID,
-                        q.attackerTeam,
+                        attacker_id,
+                        attacker_def_id,
+                        attacker_team,
                         (*result).newDamage,
                         (*result).impulseMult,
                     )
@@ -2661,6 +2677,9 @@ macro_rules! export_module {
                 let callback_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
+                    let attacker_id = (q.attackerID >= 0).then_some(q.attackerID);
+                    let attacker_def_id = attacker_id.map(|_| q.attackerDefID);
+                    let attacker_team = attacker_id.map(|_| q.attackerTeam);
                     data.module().feature_pre_damaged(
                         q.featureID,
                         q.featureDefID,
@@ -2668,9 +2687,9 @@ macro_rules! export_module {
                         q.damage,
                         q.weaponDefID,
                         q.projectileID,
-                        q.attackerID,
-                        q.attackerDefID,
-                        q.attackerTeam,
+                        attacker_id,
+                        attacker_def_id,
+                        attacker_team,
                         (*result).newDamage,
                         (*result).impulseMult,
                     )

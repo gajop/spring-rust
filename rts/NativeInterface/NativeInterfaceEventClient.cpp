@@ -45,6 +45,26 @@
 	}
 
 namespace {
+	struct LuaMousePosition {
+		int x;
+		int y;
+	};
+
+	LuaMousePosition ToLuaMousePosition(int x, int y)
+	{
+		// CMouseHandler and CEventHandler use renderer coordinates here:
+		// x is screen-relative and y is top-origin.  CLuaHandle converts
+		// both before invoking Lua callins, so native callbacks use the same
+		// view-relative, bottom-origin contract.
+		if (globalRendering == nullptr)
+			return {x, y};
+
+		return {
+			x - globalRendering->viewPosX,
+			globalRendering->viewSizeY - y - 1,
+		};
+	}
+
 	class ScopedNativeSyncedCode {
 	public:
 		ScopedNativeSyncedCode(bool synced)
@@ -1775,7 +1795,14 @@ bool NativeInterfaceEventClient::TextEditing(const std::string& utf8, unsigned i
 
 bool NativeInterfaceEventClient::MouseMove(int x, int y, int dx, int dy, int button) {
 	if (m_MouseMoveFuncPtr) {
-		MouseMoveQuery query = {.x = x, .y = y, .dx = dx, .dy = dy, .button = button};
+		const LuaMousePosition position = ToLuaMousePosition(x, y);
+		MouseMoveQuery query = {
+			.x = position.x,
+			.y = position.y,
+			.dx = dx,
+			.dy = -dy,
+			.button = button,
+		};
 		BoolCallinResult result = {.value = false};
 		m_MouseMoveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		return result.value;
@@ -1785,7 +1812,8 @@ bool NativeInterfaceEventClient::MouseMove(int x, int y, int dx, int dy, int but
 
 bool NativeInterfaceEventClient::MousePress(int x, int y, int button) {
 	if (m_MousePressFuncPtr) {
-		MousePressQuery query = {.x = x, .y = y, .button = button};
+		const LuaMousePosition position = ToLuaMousePosition(x, y);
+		MousePressQuery query = {.x = position.x, .y = position.y, .button = button};
 		BoolCallinResult result = {.value = false};
 		m_MousePressFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		return result.value;
@@ -1795,7 +1823,8 @@ bool NativeInterfaceEventClient::MousePress(int x, int y, int button) {
 
 void NativeInterfaceEventClient::MouseRelease(int x, int y, int button) {
 	if (m_MouseReleaseFuncPtr) {
-		MouseReleaseQuery query = {.x = x, .y = y, .button = button};
+		const LuaMousePosition position = ToLuaMousePosition(x, y);
+		MouseReleaseQuery query = {.x = position.x, .y = position.y, .button = button};
 		MouseReleaseResult result = {};
 		m_MouseReleaseFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -1813,12 +1842,8 @@ bool NativeInterfaceEventClient::MouseWheel(bool up, float value) {
 
 bool NativeInterfaceEventClient::IsAbove(int x, int y) {
 	if (m_IsAboveFuncPtr) {
-		// Match CLuaHandle::IsAbove: callins receive view-relative x and
-		// bottom-origin y, not the renderer's top-origin screen coordinates.
-		ScreenPositionQuery query = {
-			.x = (globalRendering != nullptr) ? x - globalRendering->viewPosX : x,
-			.y = (globalRendering != nullptr) ? globalRendering->viewSizeY - y - 1 : y,
-		};
+		const LuaMousePosition position = ToLuaMousePosition(x, y);
+		ScreenPositionQuery query = {.x = position.x, .y = position.y};
 		BoolCallinResult result = {.value = false};
 		m_IsAboveFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		return result.value;
@@ -1828,12 +1853,8 @@ bool NativeInterfaceEventClient::IsAbove(int x, int y) {
 
 std::string NativeInterfaceEventClient::GetTooltip(int x, int y) {
 	if (m_GetTooltipFuncPtr) {
-		// Keep GetTooltip on the same coordinate contract as IsAbove and the
-		// Lua callin implementation.
-		ScreenPositionQuery query = {
-			.x = (globalRendering != nullptr) ? x - globalRendering->viewPosX : x,
-			.y = (globalRendering != nullptr) ? globalRendering->viewSizeY - y - 1 : y,
-		};
+		const LuaMousePosition position = ToLuaMousePosition(x, y);
+		ScreenPositionQuery query = {.x = position.x, .y = position.y};
 		StringCallinResult result = {};
 		m_GetTooltipFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 		return (result.value != nullptr) ? result.value : "";
