@@ -11,7 +11,8 @@ See `api_surface_contract.md` for intentional-difference policy.
 | Lua `Callins` | 155 |
 | Lua `SyncedCallins` | 29 |
 | Lua `UnsyncedCallins` | 6 |
-| Lua documented entries | 190 |
+| Lua documented entries (namespace rows) | 190 |
+| Lua unique documented callin names | 156 |
 | Native C++ callback symbols | 161 |
 | Shared callback names | 150 |
 | Documented Lua names without native callback | 6 |
@@ -55,162 +56,163 @@ Every entry is classified below. Classification is a design decision, not eviden
 
 - None
 
-## Raw signature field-count audit
+## Semantic signature audit
 
-A differing count is a diagnostic signal, not automatically a bug:
-native queries may currently use compact IDs or pointer/count pairs where Lua
-receives expanded definition/team/object fields. Every difference still requires
-a source-level decision and, where applicable, a behavior test.
+The native query column is an ABI storage shape. `semantically_mapped` means the
+representation difference has an explicit source-level explanation; it does not
+replace the value-level runtime comparison. `same_arity_pending_runtime_check`
+still needs an executable callback test. Any `unresolved_representation_gap` is
+an implementation/documentation queue item, not an intentional omission.
 
-| Native callback | Lua params | Native query fields | Query struct | Status |
-| --- | ---: | ---: | --- | --- |
-| `ActiveCommandChanged` | 2 | 5 | `ActiveCommandChanged` | `field_count_differs` |
-| `AddConsoleLine` | 2 | 3 | `AddConsoleLine` | `field_count_differs` |
-| `AllowBuilderHoldFire` | 3 | 3 | `AllowBuilderHoldFire` | `same_raw_field_count` |
-| `AllowCommand` | 9 | 7 | `UnitCommand` | `field_count_differs` |
-| `AllowDirectUnitControl` | 4 | 4 | `AllowDirectUnitControl` | `same_raw_field_count` |
-| `AllowFeatureBuildStep` | 5 | 5 | `AllowFeatureBuildStep` | `same_raw_field_count` |
-| `AllowFeatureCreation` | 5 | 3 | `AllowFeatureCreation` | `field_count_differs` |
-| `AllowResourceLevel` | 3 | 3 | `AllowResourceLevel` | `same_raw_field_count` |
-| `AllowResourceTransfer` | 4 | 4 | `AllowResourceTransfer` | `same_raw_field_count` |
-| `AllowStartPosition` | 9 | 5 | `AllowStartPosition` | `field_count_differs` |
-| `AllowUnitBuildStep` | 5 | 5 | `AllowUnitBuildStep` | `same_raw_field_count` |
-| `AllowUnitCaptureStep` | 5 | 5 | `AllowUnitBuildStep` | `same_raw_field_count` |
-| `AllowUnitCloak` | 2 | 3 | `AllowUnitCloak` | `field_count_differs` |
-| `AllowUnitCreation` | 7 | 6 | `AllowUnitCreation` | `field_count_differs` |
-| `AllowUnitDecloak` | 3 | 5 | `AllowUnitDecloak` | `field_count_differs` |
-| `AllowUnitKamikaze` | 2 | 3 | `AllowUnitKamikaze` | `field_count_differs` |
-| `AllowUnitTransfer` | 5 | 5 | `AllowUnitTransfer` | `same_raw_field_count` |
-| `AllowUnitTransport` | 6 | 6 | `AllowUnitTransport` | `same_raw_field_count` |
-| `AllowUnitTransportLoad` | 9 | 3 | `AllowUnitTransportPosition` | `field_count_differs` |
-| `AllowUnitTransportUnload` | 9 | 3 | `AllowUnitTransportPosition` | `field_count_differs` |
-| `AllowWeaponInterceptTarget` | 3 | 3 | `AllowWeaponInterceptTarget` | `same_raw_field_count` |
-| `AllowWeaponTarget` | 5 | 6 | `AllowWeaponTarget` | `field_count_differs` |
-| `AllowWeaponTargetCheck` | 3 | 3 | `AllowWeaponTargetCheck` | `same_raw_field_count` |
-| `CameraPositionChanged` | 3 | 1 | `Float3Callin` | `field_count_differs` |
-| `CameraRotationChanged` | 3 | 1 | `Float3Callin` | `field_count_differs` |
-| `CommandFallback` | 7 | 4 | `CommandFallback` | `field_count_differs` |
-| `CommandNotify` | 3 | 1 | `CommandNotify` | `field_count_differs` |
-| `DefaultCommand` | 3 | 3 | `DefaultCommand` | `same_raw_field_count` |
-| `DownloadFailed` | 2 | 2 | `DownloadFailed` | `same_raw_field_count` |
-| `DownloadFinished` | 1 | 1 | `DownloadFinished` | `same_raw_field_count` |
-| `DownloadProgress` | 3 | 3 | `DownloadProgress` | `same_raw_field_count` |
-| `DownloadQueued` | 3 | 3 | `DownloadQueued` | `same_raw_field_count` |
-| `DownloadStarted` | 1 | 1 | `DownloadStarted` | `same_raw_field_count` |
-| `DrawBuildSquare` | 5 | 6 | `DrawBuildSquare` | `field_count_differs` |
-| `DrawFeature` | 2 | 2 | `DrawFeature` | `same_raw_field_count` |
-| `DrawFeaturesPostDeferred` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawGenesis` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawGroundDeferred` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawGroundPostDeferred` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawGroundPostForward` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawGroundPreDeferred` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawGroundPreForward` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawInMiniMap` | 2 | 2 | `MiniMapDraw` | `same_raw_field_count` |
-| `DrawInMiniMapBackground` | 2 | 2 | `MiniMapDraw` | `same_raw_field_count` |
-| `DrawMaterial` | 2 | 2 | `DrawMaterial` | `same_raw_field_count` |
-| `DrawPreDecals` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawProjectile` | 2 | 2 | `DrawProjectile` | `same_raw_field_count` |
-| `DrawScreen` | 2 | 2 | `DrawScreen` | `same_raw_field_count` |
-| `DrawScreenEffects` | 2 | 2 | `DrawScreen` | `same_raw_field_count` |
-| `DrawScreenPost` | 2 | 2 | `DrawScreen` | `same_raw_field_count` |
-| `DrawShadowFeaturesLua` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawShadowPassTransparent` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawShadowUnitsLua` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawShield` | 3 | 3 | `DrawShield` | `same_raw_field_count` |
-| `DrawUnit` | 2 | 2 | `DrawUnit` | `same_raw_field_count` |
-| `DrawUnitsPostDeferred` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawWaterPost` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawWorld` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawWorldPreParticles` | 4 | 4 | `DrawWorldPreParticles` | `same_raw_field_count` |
-| `DrawWorldPreUnit` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawWorldReflection` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawWorldRefraction` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `DrawWorldShadow` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `Explosion` | 6 | 4 | `Explosion` | `field_count_differs` |
-| `FeatureCreated` | 2 | 2 | `FeatureCreated` | `same_raw_field_count` |
-| `FeatureDamaged` | 9 | 9 | `FeatureDamaged` | `same_raw_field_count` |
-| `FeatureDestroyed` | 2 | 2 | `FeatureDestroyed` | `same_raw_field_count` |
-| `FeaturePreDamaged` | 9 | 9 | `FeatureDamaged` | `same_raw_field_count` |
-| `FontsChanged` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `GameFrame` | 1 | 1 | `GameFrame` | `same_raw_field_count` |
-| `GameFramePost` | 1 | 1 | `GameFramePost` | `same_raw_field_count` |
-| `GameID` | 1 | 2 | `GameID` | `field_count_differs` |
-| `GameOver` | 1 | 2 | `GameOverEvent` | `field_count_differs` |
-| `GamePaused` | 2 | 2 | `GamePaused` | `same_raw_field_count` |
-| `GamePreload` | 0 | 0 | `GamePreload` | `same_raw_field_count` |
-| `GameProgress` | 1 | 1 | `GameProgress` | `same_raw_field_count` |
-| `GameSetup` | 3 | 3 | `GameSetup` | `same_raw_field_count` |
-| `GameStart` | 0 | 0 | `GameStart` | `same_raw_field_count` |
-| `GetTooltip` | 2 | 2 | `ScreenPosition` | `same_raw_field_count` |
-| `GroupChanged` | 1 | 1 | `GroupChanged` | `same_raw_field_count` |
-| `IsAbove` | 2 | 2 | `ScreenPosition` | `same_raw_field_count` |
-| `KeyMapChanged` | 0 | 1 | `SimpleCallin` | `field_count_differs` |
-| `KeyPress` | 7 | 10 | `KeyPress` | `field_count_differs` |
-| `KeyRelease` | 6 | 9 | `KeyRelease` | `field_count_differs` |
-| `Load` | 1 | 1 | `ArchiveCallin` | `same_raw_field_count` |
-| `MapDrawCmd` | 8 | 8 | `MapDrawCmd` | `same_raw_field_count` |
-| `MiniMapGeometryChanged` | 8 | 8 | `MiniMapGeometryChanged` | `same_raw_field_count` |
-| `MiniMapRotationChanged` | 2 | 2 | `MiniMapRotationChanged` | `same_raw_field_count` |
-| `MiniMapStateChanged` | 2 | 3 | `MiniMapStateChanged` | `field_count_differs` |
-| `MouseMove` | 5 | 5 | `MouseMove` | `same_raw_field_count` |
-| `MousePress` | 3 | 3 | `MousePress` | `same_raw_field_count` |
-| `MouseRelease` | 3 | 3 | `MouseRelease` | `same_raw_field_count` |
-| `MouseWheel` | 2 | 2 | `MouseWheel` | `same_raw_field_count` |
-| `MoveCtrlNotify` | 4 | 4 | `MoveCtrlNotify` | `same_raw_field_count` |
-| `PlayerAdded` | 1 | 1 | `PlayerAdded` | `same_raw_field_count` |
-| `PlayerChanged` | 1 | 1 | `PlayerChanged` | `same_raw_field_count` |
-| `PlayerRemoved` | 2 | 2 | `PlayerRemoved` | `same_raw_field_count` |
-| `ProjectileCreated` | 3 | 3 | `ProjectileEvent` | `same_raw_field_count` |
-| `ProjectileDestroyed` | 3 | 3 | `ProjectileEvent` | `same_raw_field_count` |
-| `RenderUnitDestroyed` | 3 | 3 | `RenderUnitDestroyed` | `same_raw_field_count` |
-| `ResourceExcess` | 1 | 2 | `ResourceExcess` | `field_count_differs` |
-| `Save` | 1 | 1 | `ArchiveCallin` | `same_raw_field_count` |
-| `ShieldPreDamaged` | 13 | 9 | `ShieldPreDamaged` | `field_count_differs` |
-| `Shutdown` | 0 | 0 | `Shutdown` | `same_raw_field_count` |
-| `StockpileChanged` | 6 | 6 | `StockpileChanged` | `same_raw_field_count` |
-| `SunChanged` | 0 | 1 | `SunChanged` | `field_count_differs` |
-| `TeamChanged` | 1 | 1 | `TeamChanged` | `same_raw_field_count` |
-| `TeamDied` | 1 | 1 | `TeamDied` | `same_raw_field_count` |
-| `TerraformComplete` | 6 | 6 | `TerraformComplete` | `same_raw_field_count` |
-| `TextEditing` | 3 | 3 | `TextEditing` | `same_raw_field_count` |
-| `TextInput` | 1 | 1 | `TextInput` | `same_raw_field_count` |
-| `UnitArrivedAtGoal` | 3 | 3 | `UnitMoveEvent` | `same_raw_field_count` |
-| `UnitCloaked` | 3 | 3 | `UnitCloakEvent` | `same_raw_field_count` |
-| `UnitCmdDone` | 7 | 4 | `UnitCmdDone` | `field_count_differs` |
-| `UnitCommand` | 7 | 7 | `UnitCommand` | `same_raw_field_count` |
-| `UnitConstructionDecayed` | 6 | 6 | `UnitConstructionDecayed` | `same_raw_field_count` |
-| `UnitCreated` | 4 | 4 | `UnitCreated` | `same_raw_field_count` |
-| `UnitDamaged` | 10 | 10 | `UnitDamaged` | `same_raw_field_count` |
-| `UnitDecloaked` | 3 | 3 | `UnitCloakEvent` | `same_raw_field_count` |
-| `UnitDestroyed` | 7 | 7 | `UnitDestroyed` | `same_raw_field_count` |
-| `UnitEnteredAir` | 3 | 3 | `UnitMovementClassEvent` | `same_raw_field_count` |
-| `UnitEnteredLos` | 4 | 4 | `UnitLosEvent` | `same_raw_field_count` |
-| `UnitEnteredRadar` | 4 | 4 | `UnitLosEvent` | `same_raw_field_count` |
-| `UnitEnteredUnderwater` | 3 | 3 | `UnitMovementClassEvent` | `same_raw_field_count` |
-| `UnitEnteredWater` | 3 | 3 | `UnitMovementClassEvent` | `same_raw_field_count` |
-| `UnitExperience` | 5 | 5 | `UnitExperience` | `same_raw_field_count` |
-| `UnitFeatureCollision` | 2 | 2 | `UnitFeatureCollision` | `same_raw_field_count` |
-| `UnitFinished` | 3 | 3 | `UnitFinished` | `same_raw_field_count` |
-| `UnitFromFactory` | 6 | 6 | `UnitFromFactory` | `same_raw_field_count` |
-| `UnitGiven` | 4 | 4 | `UnitGiven` | `same_raw_field_count` |
-| `UnitHarvestStorageFull` | 3 | 3 | `UnitHarvestStorageFull` | `same_raw_field_count` |
-| `UnitIdle` | 3 | 3 | `UnitIdle` | `same_raw_field_count` |
-| `UnitLeftAir` | 3 | 3 | `UnitMovementClassEvent` | `same_raw_field_count` |
-| `UnitLeftLos` | 4 | 4 | `UnitLosEvent` | `same_raw_field_count` |
-| `UnitLeftRadar` | 4 | 4 | `UnitLosEvent` | `same_raw_field_count` |
-| `UnitLeftUnderwater` | 3 | 3 | `UnitMovementClassEvent` | `same_raw_field_count` |
-| `UnitLeftWater` | 3 | 3 | `UnitMovementClassEvent` | `same_raw_field_count` |
-| `UnitLoaded` | 5 | 5 | `UnitLoaded` | `same_raw_field_count` |
-| `UnitMoveFailed` | 3 | 3 | `UnitMoveEvent` | `same_raw_field_count` |
-| `UnitPreDamaged` | 10 | 10 | `UnitDamaged` | `same_raw_field_count` |
-| `UnitReverseBuilt` | 3 | 3 | `UnitReverseBuilt` | `same_raw_field_count` |
-| `UnitSeismicPing` | 7 | 5 | `UnitSeismicPing` | `field_count_differs` |
-| `UnitStunned` | 4 | 4 | `UnitStunned` | `same_raw_field_count` |
-| `UnitTaken` | 4 | 4 | `UnitTaken` | `same_raw_field_count` |
-| `UnitUnitCollision` | 2 | 2 | `UnitUnitCollision` | `same_raw_field_count` |
-| `UnitUnloaded` | 5 | 5 | `UnitUnloaded` | `same_raw_field_count` |
-| `UnsyncedHeightMapUpdate` | 0 | 4 | `RectChanged` | `field_count_differs` |
-| `Update` | 1 | 1 | `Update` | `same_raw_field_count` |
-| `ViewResize` | 2 | 16 | `ViewResize` | `field_count_differs` |
-| `WorldTooltip` | 4 | 4 | `WorldTooltip` | `same_raw_field_count` |
+| Native callback | Lua params | Native query fields | Query struct | Status | Notes |
+| --- | ---: | ---: | --- | --- | --- |
+| `ActiveCommandChanged` | 2 | 5 | `ActiveCommandChanged` | `semantically_mapped` | Lua receives cmdID/cmdType; native also carries name/action/tooltip for native consumers. |
+| `AddConsoleLine` | 2 | 3 | `AddConsoleLine` | `semantically_mapped` | Lua receives message/level; native section is an engine-side routing field. |
+| `AllowBuilderHoldFire` | 3 | 3 | `AllowBuilderHoldFire` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowCommand` | 9 | 7 | `UnitCommand` | `semantically_mapped` | NativeCallinCommand expands to Lua command ID, params, options, tag and timeout; native also carries ABI flags. |
+| `AllowDirectUnitControl` | 4 | 4 | `AllowDirectUnitControl` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowFeatureBuildStep` | 5 | 5 | `AllowFeatureBuildStep` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowFeatureCreation` | 5 | 3 | `AllowFeatureCreation` | `semantically_mapped` | Native Float3 position expands to Lua x,y,z. |
+| `AllowResourceLevel` | 3 | 3 | `AllowResourceLevel` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowResourceTransfer` | 4 | 4 | `AllowResourceTransfer` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowStartPosition` | 9 | 5 | `AllowStartPosition` | `semantically_mapped` | Native clamped/raw Float3 values expand to Lua coordinate arguments; player/ready fields retain their Lua meaning. |
+| `AllowUnitBuildStep` | 5 | 5 | `AllowUnitBuildStep` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowUnitCaptureStep` | 5 | 5 | `AllowUnitBuildStep` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowUnitCloak` | 2 | 3 | `AllowUnitCloak` | `semantically_mapped` | Native hasEnemy/enemyID presence storage; Lua receives enemyID or nil. |
+| `AllowUnitCreation` | 7 | 6 | `AllowUnitCreation` | `semantically_mapped` | Native buildPos Float3 and hasBuildInfo expand to Lua x,y,z and optional build information. |
+| `AllowUnitDecloak` | 3 | 5 | `AllowUnitDecloak` | `semantically_mapped` | Native hasObject/hasWeapon presence storage expands to Lua optional object/weapon values. |
+| `AllowUnitKamikaze` | 2 | 3 | `AllowUnitKamikaze` | `semantically_mapped` | Native allowed is an engine fallback/result input; Lua receives unitID and targetID. |
+| `AllowUnitTransfer` | 5 | 5 | `AllowUnitTransfer` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowUnitTransport` | 6 | 6 | `AllowUnitTransport` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowUnitTransportLoad` | 9 | 3 | `AllowUnitTransportPosition` | `semantically_mapped` | Native position Float3 expands to Lua x,y,z while the nested unit record expands to Lua unit fields. |
+| `AllowUnitTransportUnload` | 9 | 3 | `AllowUnitTransportPosition` | `semantically_mapped` | Native position Float3 expands to Lua x,y,z while the nested unit record expands to Lua unit fields. |
+| `AllowWeaponInterceptTarget` | 3 | 3 | `AllowWeaponInterceptTarget` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `AllowWeaponTarget` | 5 | 6 | `AllowWeaponTarget` | `semantically_mapped` | Native hasTargetPriority/targetPriority is optional-input storage; Lua receives targetPriority or nil semantics. |
+| `AllowWeaponTargetCheck` | 3 | 3 | `AllowWeaponTargetCheck` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `CameraPositionChanged` | 3 | 1 | `Float3Callin` | `semantically_mapped` | Native Float3 expands to Lua x,y,z. |
+| `CameraRotationChanged` | 3 | 1 | `Float3Callin` | `semantically_mapped` | Native Float3 expands to Lua x,y,z. |
+| `CommandFallback` | 7 | 4 | `CommandFallback` | `semantically_mapped` | NativeCallinCommand expands to Lua command params/options; the native query omits Lua-only callback routing fields. |
+| `CommandNotify` | 3 | 1 | `CommandNotify` | `semantically_mapped` | NativeCallinCommand expands to Lua command ID, params, options and tag. |
+| `DefaultCommand` | 3 | 3 | `DefaultCommand` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DownloadFailed` | 2 | 2 | `DownloadFailed` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DownloadFinished` | 1 | 1 | `DownloadFinished` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DownloadProgress` | 3 | 3 | `DownloadProgress` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DownloadQueued` | 3 | 3 | `DownloadQueued` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DownloadStarted` | 1 | 1 | `DownloadStarted` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawBuildSquare` | 5 | 6 | `DrawBuildSquare` | `semantically_mapped` | Native status pointer/count expands to Lua's status table. |
+| `DrawFeature` | 2 | 2 | `DrawFeature` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawFeaturesPostDeferred` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawGenesis` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawGroundDeferred` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawGroundPostDeferred` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawGroundPostForward` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawGroundPreDeferred` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawGroundPreForward` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawInMiniMap` | 2 | 2 | `MiniMapDraw` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawInMiniMapBackground` | 2 | 2 | `MiniMapDraw` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawMaterial` | 2 | 2 | `DrawMaterial` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawPreDecals` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawProjectile` | 2 | 2 | `DrawProjectile` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawScreen` | 2 | 2 | `DrawScreen` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawScreenEffects` | 2 | 2 | `DrawScreen` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawScreenPost` | 2 | 2 | `DrawScreen` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawShadowFeaturesLua` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawShadowPassTransparent` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawShadowUnitsLua` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawShield` | 3 | 3 | `DrawShield` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawUnit` | 2 | 2 | `DrawUnit` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawUnitsPostDeferred` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawWaterPost` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawWorld` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawWorldPreParticles` | 4 | 4 | `DrawWorldPreParticles` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `DrawWorldPreUnit` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawWorldReflection` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawWorldRefraction` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `DrawWorldShadow` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `Explosion` | 6 | 4 | `Explosion` | `semantically_mapped` | Native position Float3 expands to Lua x,y,z; optional owner is represented by a presence sentinel in the C query. |
+| `FeatureCreated` | 2 | 2 | `FeatureCreated` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `FeatureDamaged` | 9 | 9 | `FeatureDamaged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `FeatureDestroyed` | 2 | 2 | `FeatureDestroyed` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `FeaturePreDamaged` | 9 | 9 | `FeatureDamaged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `FontsChanged` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `GameFrame` | 1 | 1 | `GameFrame` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `GameFramePost` | 1 | 1 | `GameFramePost` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `GameID` | 1 | 2 | `GameID` | `semantically_mapped` | Native byte pointer/count expands to Lua's game ID string. |
+| `GameOver` | 1 | 2 | `GameOverEvent` | `semantically_mapped` | Native ally-team pointer/count expands to Lua's winning ally-team table. |
+| `GamePaused` | 2 | 2 | `GamePaused` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `GamePreload` | 0 | 0 | `GamePreload` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `GameProgress` | 1 | 1 | `GameProgress` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `GameSetup` | 3 | 3 | `GameSetup` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `GameStart` | 0 | 0 | `GameStart` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `GetTooltip` | 2 | 2 | `ScreenPosition` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `GroupChanged` | 1 | 1 | `GroupChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `IsAbove` | 2 | 2 | `ScreenPosition` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `KeyMapChanged` | 0 | 1 | `SimpleCallin` | `semantically_mapped` | Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments. |
+| `KeyPress` | 7 | 10 | `KeyPress` | `semantically_mapped` | Native modifier/action arrays and the key label are expanded into Lua's modifiers and actionList tables. |
+| `KeyRelease` | 6 | 9 | `KeyRelease` | `semantically_mapped` | Native modifier/action arrays and the key label are expanded into Lua's modifiers and actionList tables. |
+| `Load` | 1 | 1 | `ArchiveCallin` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MapDrawCmd` | 8 | 8 | `MapDrawCmd` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MiniMapGeometryChanged` | 8 | 8 | `MiniMapGeometryChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MiniMapRotationChanged` | 2 | 2 | `MiniMapRotationChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MiniMapStateChanged` | 3 | 3 | `MiniMapStateChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MouseMove` | 5 | 5 | `MouseMove` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MousePress` | 3 | 3 | `MousePress` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MouseRelease` | 3 | 3 | `MouseRelease` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MouseWheel` | 2 | 2 | `MouseWheel` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `MoveCtrlNotify` | 4 | 4 | `MoveCtrlNotify` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `PlayerAdded` | 1 | 1 | `PlayerAdded` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `PlayerChanged` | 1 | 1 | `PlayerChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `PlayerRemoved` | 2 | 2 | `PlayerRemoved` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `ProjectileCreated` | 3 | 3 | `ProjectileEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `ProjectileDestroyed` | 3 | 3 | `ProjectileEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `RenderUnitDestroyed` | 3 | 3 | `RenderUnitDestroyed` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `ResourceExcess` | 1 | 2 | `ResourceExcess` | `semantically_mapped` | Native pointer/count entries expand to Lua's resource-excess table. |
+| `Save` | 1 | 1 | `ArchiveCallin` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `ShieldPreDamaged` | 13 | 9 | `ShieldPreDamaged` | `semantically_mapped` | Native startPos/hitPos Float3 values expand to Lua coordinate arguments. |
+| `Shutdown` | 0 | 0 | `Shutdown` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `StockpileChanged` | 6 | 6 | `StockpileChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `SunChanged` | 0 | 1 | `SunChanged` | `semantically_mapped` | Native query retains the new sun state for native consumers; Lua receives no arguments. |
+| `TeamChanged` | 1 | 1 | `TeamChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `TeamDied` | 1 | 1 | `TeamDied` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `TerraformComplete` | 6 | 6 | `TerraformComplete` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `TextEditing` | 3 | 3 | `TextEditing` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `TextInput` | 1 | 1 | `TextInput` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitArrivedAtGoal` | 3 | 3 | `UnitMoveEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitCloaked` | 3 | 3 | `UnitCloakEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitCmdDone` | 7 | 4 | `UnitCmdDone` | `semantically_mapped` | NativeCallinCommand expands to Lua command params/options and tag. |
+| `UnitCommand` | 7 | 7 | `UnitCommand` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitConstructionDecayed` | 6 | 6 | `UnitConstructionDecayed` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitCreated` | 4 | 4 | `UnitCreated` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitDamaged` | 10 | 10 | `UnitDamaged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitDecloaked` | 3 | 3 | `UnitCloakEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitDestroyed` | 7 | 7 | `UnitDestroyed` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitEnteredAir` | 3 | 3 | `UnitMovementClassEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitEnteredLos` | 4 | 4 | `UnitLosEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitEnteredRadar` | 4 | 4 | `UnitLosEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitEnteredUnderwater` | 3 | 3 | `UnitMovementClassEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitEnteredWater` | 3 | 3 | `UnitMovementClassEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitExperience` | 5 | 5 | `UnitExperience` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitFeatureCollision` | 2 | 2 | `UnitFeatureCollision` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitFinished` | 3 | 3 | `UnitFinished` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitFromFactory` | 6 | 6 | `UnitFromFactory` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitGiven` | 4 | 4 | `UnitGiven` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitHarvestStorageFull` | 3 | 3 | `UnitHarvestStorageFull` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitIdle` | 3 | 3 | `UnitIdle` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitLeftAir` | 3 | 3 | `UnitMovementClassEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitLeftLos` | 4 | 4 | `UnitLosEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitLeftRadar` | 4 | 4 | `UnitLosEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitLeftUnderwater` | 3 | 3 | `UnitMovementClassEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitLeftWater` | 3 | 3 | `UnitMovementClassEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitLoaded` | 5 | 5 | `UnitLoaded` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitMoveFailed` | 3 | 3 | `UnitMoveEvent` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitPreDamaged` | 10 | 10 | `UnitDamaged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitReverseBuilt` | 3 | 3 | `UnitReverseBuilt` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitSeismicPing` | 7 | 5 | `UnitSeismicPing` | `semantically_mapped` | Native position Float3 expands to Lua x,y,z. |
+| `UnitStunned` | 4 | 4 | `UnitStunned` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitTaken` | 4 | 4 | `UnitTaken` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitUnitCollision` | 2 | 2 | `UnitUnitCollision` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnitUnloaded` | 5 | 5 | `UnitUnloaded` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `UnsyncedHeightMapUpdate` | 0 | 4 | `RectChanged` | `semantically_mapped` | Native rectangle is an engine notification payload; Lua's callin is invoked without arguments. |
+| `Update` | 1 | 1 | `Update` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `ViewResize` | 2 | 16 | `ViewResize` | `semantically_mapped` | Native geometry fields expand to Lua's single geometry table with named fields. |
+| `WorldTooltip` | 4 | 4 | `WorldTooltip` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |

@@ -38,6 +38,7 @@ NATIVE_CRATE = HARNESS / "native" / "Cargo.toml"
 NATIVE_SO = HARNESS / "native" / "target" / "release" / "libnative_api_parity.so"
 LUA_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "lua_functions.md"
 RUST_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "rust_functions.md"
+CALLIN_SOURCE = ROOT / "rts" / "NativeInterface" / "NativeInterfaceEventClient.cpp"
 GAME_NAME = "Native API Parity 0.1"
 RESULT_STREAMS = (
     "synced_gadget.jsonl",
@@ -63,15 +64,42 @@ API_TESTS = load_api_tests()
 KNOWN_ISSUES = load_known_issues()
 
 
-def documented_callin_names() -> tuple[set[str], set[str]]:
+def documented_callin_names() -> tuple[set[str], set[str], set[str]]:
+    """Return the three documented Lua callin namespaces.
+
+    The generated markdown intentionally keeps the namespace in each entry,
+    but the runtime callback name is only the suffix.  Keeping the three sets
+    separate lets the fixture choose the one Lua handle that corresponds to a
+    native event without double-counting a general callin delivered to both
+    LuaUI and LuaRules.
+    """
     text = LUA_API_DOC.read_text(encoding="utf-8")
+    general = set(
+        re.findall(r"- `Callins\.([A-Za-z0-9_]+)`", text)
+    )
     synced = set(
         re.findall(r"- `SyncedCallins\.([A-Za-z0-9_]+)`", text)
     )
     unsynced = set(
         re.findall(r"- `UnsyncedCallins\.([A-Za-z0-9_]+)`", text)
     )
-    return synced, unsynced
+    return general, synced, unsynced
+
+
+def native_event_callin_names() -> set[str]:
+    """Return callback symbols exposed by the engine event client.
+
+    This is deliberately read from the same LOAD_SYMBOL list that controls
+    the ABI, rather than copied into the test.  InitializeNativeModule is a
+    module lifecycle entry point, not an engine-to-Lua/native callin.
+    """
+    text = CALLIN_SOURCE.read_text(encoding="utf-8")
+    body = text.split("void NativeInterfaceEventClient::LoadSymbols()", 1)[1].split(
+        "void* NativeInterfaceEventClient::Initialize()", 1
+    )[0]
+    return set(re.findall(r"^\s*LOAD_SYMBOL\((\w+)\)", body, re.MULTILINE)) - {
+        "InitializeNativeModule"
+    }
 
 
 def coverage_metadata(test: dict) -> dict:
@@ -373,6 +401,16 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
     callin_trace = compare_callin_traces(native_lua_callin_rows, native_callin_rows)
     if not callin_trace["matches"]:
         print("mismatch: engine callin Lua/native trace")
+        if not callin_trace["coverage_matches"]:
+            print(
+                "  callin coverage: "
+                f"lua={callin_trace['lua_covered_count']}/{callin_trace['expected_count']}, "
+                f"native={callin_trace['native_covered_count']}/{callin_trace['expected_count']}"
+            )
+            for name in callin_trace["missing_lua_names"]:
+                print(f"  missing Lua fixture coverage: {name}")
+            for name in callin_trace["missing_native_names"]:
+                print(f"  missing native fixture coverage: {name}")
         for name in sorted(set(callin_trace["lua_counts"]) | set(callin_trace["native_counts"])):
             lua_count = callin_trace["lua_counts"].get(name, 0)
             native_count = callin_trace["native_counts"].get(name, 0)
@@ -443,7 +481,9 @@ def comparable_callin_rows(rows: list[dict]) -> list[dict]:
 
 def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict:
     """Compare shared engine-to-Lua/native callins, including argument values."""
-    synced_names, unsynced_names = documented_callin_names()
+    general_names, synced_names, unsynced_names = documented_callin_names()
+    documented_names = general_names | synced_names | unsynced_names
+    expected_names = documented_names & native_event_callin_names()
 
     def before_complete(rows: list[dict]) -> tuple[list[dict], bool]:
         for index, row in enumerate(rows):
@@ -474,6 +514,13 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
     selected_native_rows = [row for row in native_rows if row.get("name")]
     lua_counts = Counter(str(row.get("name")) for row in selected_lua_rows)
     native_counts = Counter(str(row.get("name")) for row in selected_native_rows)
+    lua_covered_names = set(lua_counts) & expected_names
+    native_covered_names = set(native_counts) & expected_names
+    missing_lua_names = sorted(expected_names - lua_covered_names)
+    missing_native_names = sorted(expected_names - native_covered_names)
+    unexpected_lua_names = sorted(set(lua_counts) - expected_names)
+    unexpected_native_names = sorted(set(native_counts) - expected_names)
+    coverage_matches = not missing_lua_names and not missing_native_names
 
     def canonicalize_value(value):
         # Lua's JSON writer prints an integer-valued number without a decimal
@@ -546,8 +593,28 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
     unexpected_arguments = remaining_native
     argument_matches = not missing_arguments and not unexpected_arguments
     return {
-        "matches": lua_counts == native_counts and argument_matches and lua_phase_seen and native_phase_seen,
+        # A value-level match over only the callbacks that happened to fire is
+        # not full parity.  Keep coverage in the gate so a green report cannot
+        # silently mean “48 of 150 callbacks matched”.
+        "matches": (
+            lua_counts == native_counts
+            and argument_matches
+            and lua_phase_seen
+            and native_phase_seen
+            and coverage_matches
+        ),
         "argument_matches": argument_matches,
+        "coverage_matches": coverage_matches,
+        "expected_count": len(expected_names),
+        "expected_names": sorted(expected_names),
+        "lua_covered_count": len(lua_covered_names),
+        "native_covered_count": len(native_covered_names),
+        "lua_covered_names": sorted(lua_covered_names),
+        "native_covered_names": sorted(native_covered_names),
+        "missing_lua_names": missing_lua_names,
+        "missing_native_names": missing_native_names,
+        "unexpected_lua_names": unexpected_lua_names,
+        "unexpected_native_names": unexpected_native_names,
         "lua_rows": len(lua_rows),
         "native_rows": len(native_rows),
         "lua_selected_rows": len(selected_lua_rows),
@@ -1217,8 +1284,32 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
             f"- Native trace rows: `{native_trace_rows}`",
             f"- Shared event counts: `{'match' if trace['lua_counts'] == trace['native_counts'] else 'MISMATCH'}`",
             f"- Shared argument values: `{'match' if trace['argument_matches'] else 'MISMATCH'}`",
+            f"- Expected shared callins: `{trace['expected_count']}`",
+            f"- Lua callins covered: `{trace['lua_covered_count']}/{trace['expected_count']}`",
+            f"- Native callins covered: `{trace['native_covered_count']}/{trace['expected_count']}`",
+            f"- Callin coverage: `{'complete' if trace['coverage_matches'] else 'INCOMPLETE'}`",
             "- `Update` delta values are checked as numeric because separate processes have independent render clocks.",
         ])
+        if not trace["coverage_matches"]:
+            lines.extend([
+                "",
+                "### Missing shared callin coverage",
+                "",
+                "The parity gate remains unverified until every documented shared callback has",
+                "been triggered in both the Lua baseline and native run.",
+                "",
+                "| Callback | Lua baseline | Native run |",
+                "| --- | --- | --- |",
+            ])
+            missing_names = sorted(
+                set(trace["missing_lua_names"]) | set(trace["missing_native_names"])
+            )
+            for name in missing_names:
+                lines.append(
+                    f"| `{name}` | "
+                    f"{'covered' if name not in trace['missing_lua_names'] else 'MISSING'} | "
+                    f"{'covered' if name not in trace['missing_native_names'] else 'MISSING'} |"
+                )
 
     lines.extend([
         "",

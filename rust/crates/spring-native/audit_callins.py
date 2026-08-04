@@ -2,9 +2,10 @@
 """Audit Lua callins against the engine-to-native callback interface.
 
 This is intentionally an inventory/signature audit, not a name-only parity
-claim. Lua callins may expose more context than the native query currently
-does, so query-field differences are reported for follow-up rather than
-silently treated as equivalent.
+claim. Lua callins and the native ABI often use different representations for
+the same semantic values (for example Float3 versus three Lua numbers). Those
+representations are recorded explicitly instead of being misreported as
+missing parameters.
 """
 
 from __future__ import annotations
@@ -44,6 +45,62 @@ NATIVE_ONLY_BY_DESIGN = {
     "LastMessagePosition": "Native event for message-position consumers; scripts expose Get/Set callouts instead.",
     "Pong": "Native network timing callback; no script call-in is registered.",
     "UnitMoved": "Native engine/rendering movement notification; no script call-in is registered.",
+}
+
+# A C query is an ABI storage shape, not the Lua callin signature.  Keep every
+# known arity difference here with the source-level reason it is equivalent.
+# Anything absent from this table remains an unresolved representation gap and
+# must be fixed or explicitly classified before the audit can be complete.
+SEMANTIC_SIGNATURE_NOTES = {
+    "ActiveCommandChanged": "Lua receives cmdID/cmdType; native also carries name/action/tooltip for native consumers.",
+    "AddConsoleLine": "Lua receives message/level; native section is an engine-side routing field.",
+    "AllowCommand": "NativeCallinCommand expands to Lua command ID, params, options, tag and timeout; native also carries ABI flags.",
+    "AllowFeatureCreation": "Native Float3 position expands to Lua x,y,z.",
+    "AllowStartPosition": "Native clamped/raw Float3 values expand to Lua coordinate arguments; player/ready fields retain their Lua meaning.",
+    "AllowUnitCloak": "Native hasEnemy/enemyID presence storage; Lua receives enemyID or nil.",
+    "AllowUnitCreation": "Native buildPos Float3 and hasBuildInfo expand to Lua x,y,z and optional build information.",
+    "AllowUnitDecloak": "Native hasObject/hasWeapon presence storage expands to Lua optional object/weapon values.",
+    "AllowUnitKamikaze": "Native allowed is an engine fallback/result input; Lua receives unitID and targetID.",
+    "AllowUnitTransportLoad": "Native position Float3 expands to Lua x,y,z while the nested unit record expands to Lua unit fields.",
+    "AllowUnitTransportUnload": "Native position Float3 expands to Lua x,y,z while the nested unit record expands to Lua unit fields.",
+    "AllowWeaponTarget": "Native hasTargetPriority/targetPriority is optional-input storage; Lua receives targetPriority or nil semantics.",
+    "CameraPositionChanged": "Native Float3 expands to Lua x,y,z.",
+    "CameraRotationChanged": "Native Float3 expands to Lua x,y,z.",
+    "CommandFallback": "NativeCallinCommand expands to Lua command params/options; the native query omits Lua-only callback routing fields.",
+    "CommandNotify": "NativeCallinCommand expands to Lua command ID, params, options and tag.",
+    "DrawBuildSquare": "Native status pointer/count expands to Lua's status table.",
+    "DrawFeaturesPostDeferred": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawGenesis": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawGroundDeferred": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawGroundPostDeferred": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawGroundPostForward": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawGroundPreDeferred": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawGroundPreForward": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawPreDecals": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawShadowFeaturesLua": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawShadowPassTransparent": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawShadowUnitsLua": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawUnitsPostDeferred": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawWaterPost": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawWorld": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawWorldPreUnit": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawWorldReflection": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawWorldRefraction": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "DrawWorldShadow": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "Explosion": "Native position Float3 expands to Lua x,y,z; optional owner is represented by a presence sentinel in the C query.",
+    "GameID": "Native byte pointer/count expands to Lua's game ID string.",
+    "GameOver": "Native ally-team pointer/count expands to Lua's winning ally-team table.",
+    "FontsChanged": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "KeyMapChanged": "Native SimpleCallinQuery contains only an ABI placeholder; Lua receives no arguments.",
+    "KeyPress": "Native modifier/action arrays and the key label are expanded into Lua's modifiers and actionList tables.",
+    "KeyRelease": "Native modifier/action arrays and the key label are expanded into Lua's modifiers and actionList tables.",
+    "ResourceExcess": "Native pointer/count entries expand to Lua's resource-excess table.",
+    "ShieldPreDamaged": "Native startPos/hitPos Float3 values expand to Lua coordinate arguments.",
+    "SunChanged": "Native query retains the new sun state for native consumers; Lua receives no arguments.",
+    "UnitCmdDone": "NativeCallinCommand expands to Lua command params/options and tag.",
+    "UnitSeismicPing": "Native position Float3 expands to Lua x,y,z.",
+    "UnsyncedHeightMapUpdate": "Native rectangle is an engine notification payload; Lua's callin is invoked without arguments.",
+    "ViewResize": "Native geometry fields expand to Lua's single geometry table with named fields.",
 }
 
 
@@ -206,11 +263,17 @@ def main() -> int:
         native_count = len(query_fields) if query_name else None
         if lua_count is None or native_count is None:
             status = "signature_source_missing"
+            note = "Lua source documentation or native query mapping is missing."
+        elif name in SEMANTIC_SIGNATURE_NOTES:
+            status = "semantically_mapped"
+            note = SEMANTIC_SIGNATURE_NOTES[name]
         elif lua_count == native_count:
-            status = "same_raw_field_count"
+            status = "same_arity_pending_runtime_check"
+            note = "Raw arity agrees; value-level parity still requires the executable harness."
         else:
-            status = "field_count_differs"
-        signature_rows.append((name, lua_count, native_count, query_name, status))
+            status = "unresolved_representation_gap"
+            note = "Raw field count differs and has no recorded semantic mapping."
+        signature_rows.append((name, lua_count, native_count, query_name, status, note))
 
     lines = [
         "# Engine Callin Surface Audit",
@@ -228,7 +291,8 @@ def main() -> int:
         lines.append(f"| Lua `{namespace}` | {len(documented.get(namespace, set()))} |")
     lines.extend(
         [
-            f"| Lua documented entries | {sum(len(values) for values in documented.values())} |",
+            f"| Lua documented entries (namespace rows) | {sum(len(values) for values in documented.values())} |",
+            f"| Lua unique documented callin names | {len(documented_names)} |",
             f"| Native C++ callback symbols | {len(native_event_symbols)} |",
             f"| Shared callback names | {len(matched_names)} |",
             f"| Documented Lua names without native callback | {len(lua_only_names)} |",
@@ -263,28 +327,30 @@ def main() -> int:
     lines.extend(
         [
             "",
-            "## Raw signature field-count audit",
+            "## Semantic signature audit",
             "",
-            "A differing count is a diagnostic signal, not automatically a bug:",
-            "native queries may currently use compact IDs or pointer/count pairs where Lua",
-            "receives expanded definition/team/object fields. Every difference still requires",
-            "a source-level decision and, where applicable, a behavior test.",
+            "The native query column is an ABI storage shape. `semantically_mapped` means the",
+            "representation difference has an explicit source-level explanation; it does not",
+            "replace the value-level runtime comparison. `same_arity_pending_runtime_check`",
+            "still needs an executable callback test. Any `unresolved_representation_gap` is",
+            "an implementation/documentation queue item, not an intentional omission.",
             "",
-            "| Native callback | Lua params | Native query fields | Query struct | Status |",
-            "| --- | ---: | ---: | --- | --- |",
+            "| Native callback | Lua params | Native query fields | Query struct | Status | Notes |",
+            "| --- | ---: | ---: | --- | --- | --- |",
         ]
     )
-    for name, lua_count, native_count, query_name, status in signature_rows:
+    for name, lua_count, native_count, query_name, status, note in signature_rows:
         lines.append(
             f"| `{name}` | {lua_count if lua_count is not None else 'n/a'} | "
             f"{native_count if native_count is not None else 'n/a'} | "
-            f"`{query_name or 'n/a'}` | `{status}` |"
+            f"`{query_name or 'n/a'}` | `{status}` | {note} |"
         )
 
     args.output.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(args.output)
     print(
-        f"Lua={sum(len(values) for values in documented.values())} "
+        f"Lua_entries={sum(len(values) for values in documented.values())} "
+        f"Lua_unique={len(documented_names)} "
         f"native={len(native_event_symbols)} shared={len(matched_names)} "
         f"lua_only_by_design={len(lua_only_by_design)} "
         f"native_only_by_design={len(native_only_by_design)} "

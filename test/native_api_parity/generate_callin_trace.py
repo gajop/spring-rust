@@ -174,9 +174,9 @@ def trace_statements(name: str, params: list[tuple[str, str]]) -> list[str]:
         for param_name, param_type in params[:3]:
             lines.extend(_push(param_name, param_type))
         lines.extend([
-            "        trace_args.push(if attacker_id < 0 { self.trace_nil() } else { self.trace_i32(attacker_id) });",
-            "        trace_args.push(if attacker_id < 0 || attacker_def_id < 0 { self.trace_nil() } else { self.trace_i32(attacker_def_id) });",
-            "        trace_args.push(if attacker_id < 0 || attacker_team < 0 { self.trace_nil() } else { self.trace_i32(attacker_team) });",
+            "        trace_args.push(attacker_id.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value)));",
+            "        trace_args.push(attacker_def_id.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value)));",
+            "        trace_args.push(attacker_team.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value)));",
             "        trace_args.push(self.trace_i32(weapon_def_id));",
         ])
     elif name == "game_id":

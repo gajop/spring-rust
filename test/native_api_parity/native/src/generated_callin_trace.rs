@@ -537,18 +537,18 @@ macro_rules! generated_callin_trace_methods {
         unit_id: i32,
         unit_def_id: i32,
         unit_team: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
         weapon_def_id: i32,
     ) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
-        trace_args.push(if attacker_id < 0 { self.trace_nil() } else { self.trace_i32(attacker_id) });
-        trace_args.push(if attacker_id < 0 || attacker_def_id < 0 { self.trace_nil() } else { self.trace_i32(attacker_def_id) });
-        trace_args.push(if attacker_id < 0 || attacker_team < 0 { self.trace_nil() } else { self.trace_i32(attacker_team) });
+        trace_args.push(attacker_id.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value)));
+        trace_args.push(attacker_def_id.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value)));
+        trace_args.push(attacker_team.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value)));
         trace_args.push(self.trace_i32(weapon_def_id));
         self.record_callin_args("UnitDestroyed", trace_args);
 
@@ -661,17 +661,17 @@ macro_rules! generated_callin_trace_methods {
         &mut self,
         unit_id: i32,
         unit_def_id: i32,
-        old_team: i32,
         new_team: i32,
+        old_team: i32,
     ) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
-        trace_args.push(self.trace_i32(old_team));
         trace_args.push(self.trace_i32(new_team));
+        trace_args.push(self.trace_i32(old_team));
         self.record_callin_args("UnitGiven", trace_args);
 
-        let _ = (unit_id, unit_def_id, old_team, new_team);
+        let _ = (unit_id, unit_def_id, new_team, old_team);
         Ok(())
         }
 
@@ -1021,9 +1021,9 @@ macro_rules! generated_callin_trace_methods {
         paralyzer: bool,
         weapon_def_id: i32,
         projectile_id: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
     ) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(unit_id));
@@ -1033,9 +1033,9 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_bool(paralyzer));
         trace_args.push(self.trace_i32(weapon_def_id));
         trace_args.push(self.trace_i32(projectile_id));
-        trace_args.push(self.trace_i32(attacker_id));
-        trace_args.push(self.trace_i32(attacker_def_id));
-        trace_args.push(self.trace_i32(attacker_team));
+        trace_args.push(self.trace_optional_i32(attacker_id));
+        trace_args.push(self.trace_optional_i32(attacker_def_id));
+        trace_args.push(self.trace_optional_i32(attacker_team));
         self.record_callin_args("UnitDamaged", trace_args);
 
         let _ = (
@@ -1092,72 +1092,72 @@ macro_rules! generated_callin_trace_methods {
     fn unit_entered_radar(
         &mut self,
         unit_id: i32,
-        unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
+        unit_def_id: i32,
     ) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(unit_id));
-        trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(ally_team));
+        trace_args.push(self.trace_i32(unit_def_id));
         self.record_callin_args("UnitEnteredRadar", trace_args);
 
-        let _ = (unit_id, unit_def_id, unit_team, ally_team);
+        let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
         }
 
     fn unit_entered_los(
         &mut self,
         unit_id: i32,
-        unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
+        unit_def_id: i32,
     ) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(unit_id));
-        trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(ally_team));
+        trace_args.push(self.trace_i32(unit_def_id));
         self.record_callin_args("UnitEnteredLos", trace_args);
 
-        let _ = (unit_id, unit_def_id, unit_team, ally_team);
+        let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
         }
 
     fn unit_left_radar(
         &mut self,
         unit_id: i32,
-        unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
+        unit_def_id: i32,
     ) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(unit_id));
-        trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(ally_team));
+        trace_args.push(self.trace_i32(unit_def_id));
         self.record_callin_args("UnitLeftRadar", trace_args);
 
-        let _ = (unit_id, unit_def_id, unit_team, ally_team);
+        let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
         }
 
     fn unit_left_los(
         &mut self,
         unit_id: i32,
-        unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
+        unit_def_id: i32,
     ) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(unit_id));
-        trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(ally_team));
+        trace_args.push(self.trace_i32(unit_def_id));
         self.record_callin_args("UnitLeftLos", trace_args);
 
-        let _ = (unit_id, unit_def_id, unit_team, ally_team);
+        let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
         }
 
@@ -1390,9 +1390,9 @@ macro_rules! generated_callin_trace_methods {
         damage: f32,
         weapon_def_id: i32,
         projectile_id: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
     ) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(feature_id));
@@ -1401,9 +1401,9 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_f32(damage));
         trace_args.push(self.trace_i32(weapon_def_id));
         trace_args.push(self.trace_i32(projectile_id));
-        trace_args.push(self.trace_i32(attacker_id));
-        trace_args.push(self.trace_i32(attacker_def_id));
-        trace_args.push(self.trace_i32(attacker_team));
+        trace_args.push(self.trace_optional_i32(attacker_id));
+        trace_args.push(self.trace_optional_i32(attacker_def_id));
+        trace_args.push(self.trace_optional_i32(attacker_team));
         self.record_callin_args("FeatureDamaged", trace_args);
 
         let _ = (
@@ -1673,9 +1673,9 @@ macro_rules! generated_callin_trace_methods {
         paralyzer: bool,
         weapon_def_id: i32,
         projectile_id: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
         new_damage: f32,
         impulse_mult: f32,
     ) -> Result<(f32, f32), Error> {
@@ -1687,9 +1687,9 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_bool(paralyzer));
         trace_args.push(self.trace_i32(weapon_def_id));
         trace_args.push(self.trace_i32(projectile_id));
-        trace_args.push(self.trace_i32(attacker_id));
-        trace_args.push(self.trace_i32(attacker_def_id));
-        trace_args.push(self.trace_i32(attacker_team));
+        trace_args.push(self.trace_optional_i32(attacker_id));
+        trace_args.push(self.trace_optional_i32(attacker_def_id));
+        trace_args.push(self.trace_optional_i32(attacker_team));
         self.record_callin_args("UnitPreDamaged", trace_args);
 
         let _ = (
@@ -1715,9 +1715,9 @@ macro_rules! generated_callin_trace_methods {
         damage: f32,
         weapon_def_id: i32,
         projectile_id: i32,
-        attacker_id: i32,
-        attacker_def_id: i32,
-        attacker_team: i32,
+        attacker_id: Option<i32>,
+        attacker_def_id: Option<i32>,
+        attacker_team: Option<i32>,
         new_damage: f32,
         impulse_mult: f32,
     ) -> Result<(f32, f32), Error> {
@@ -1728,9 +1728,9 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_f32(damage));
         trace_args.push(self.trace_i32(weapon_def_id));
         trace_args.push(self.trace_i32(projectile_id));
-        trace_args.push(self.trace_i32(attacker_id));
-        trace_args.push(self.trace_i32(attacker_def_id));
-        trace_args.push(self.trace_i32(attacker_team));
+        trace_args.push(self.trace_optional_i32(attacker_id));
+        trace_args.push(self.trace_optional_i32(attacker_def_id));
+        trace_args.push(self.trace_optional_i32(attacker_team));
         self.record_callin_args("FeaturePreDamaged", trace_args);
 
         let _ = (
@@ -2193,13 +2193,13 @@ macro_rules! generated_callin_trace_methods {
         &mut self,
         weapon_def_id: i32,
         pos: crate::sys::Float3,
-        owner_id: i32,
+        owner_id: Option<i32>,
         projectile_id: i32,
     ) -> Result<bool, Error> {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(weapon_def_id));
         trace_args.extend(self.trace_float3(&pos));
-        trace_args.push(self.trace_i32(owner_id));
+        trace_args.push(self.trace_optional_i32(owner_id));
         trace_args.push(self.trace_i32(projectile_id));
         self.record_callin_args("Explosion", trace_args);
 
