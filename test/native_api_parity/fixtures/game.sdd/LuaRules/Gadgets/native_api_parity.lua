@@ -252,6 +252,9 @@ local function send(name, payload)
 	payload.context = "synced_gadget"
 	local encoded = Common.encode(payload)
 	SendToUnsynced("native_api_parity_result", "synced_gadget", encoded)
+	if name == "complete" then
+		SendToUnsynced("native_api_callin_phase", "complete")
+	end
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(encoded)
 	end
@@ -787,6 +790,10 @@ function Fixture.create()
 		-- projectile/explosion/target events.
 		Script.SetWatchWeapon(weaponDefID, true)
 	end
+	-- Piece projectiles use the special -1 watch slot.  Register it so the
+	-- callin fixture exercises the complete ProjectileCreated/Destroyed
+	-- argument contract, including non-weapon projectiles.
+	Script.SetWatchProjectile(-1, true)
 	local projectileID = weaponDefID and Spring.SpawnProjectile(weaponDefID, {
 		pos = {baseX, 96, baseZ},
 		speed = {0, 0, 0},

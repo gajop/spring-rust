@@ -440,6 +440,15 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
     """Compare event delivery counts for shared Lua/native engine callins."""
     synced_names, unsynced_names = documented_callin_names()
 
+    def before_complete(rows: list[dict]) -> tuple[list[dict], bool]:
+        for index, row in enumerate(rows):
+            if row.get("context") == "callin_phase" and row.get("name") == "complete":
+                return rows[:index], True
+        return rows, False
+
+    lua_rows, lua_phase_seen = before_complete(lua_rows)
+    native_rows, native_phase_seen = before_complete(native_rows)
+
     def selected_lua_row(row: dict) -> bool:
         name = str(row.get("name", ""))
         context = str(row.get("context", ""))
@@ -462,6 +471,8 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
         "matches": lua_counts == native_counts,
         "lua_rows": len(lua_rows),
         "native_rows": len(native_rows),
+        "lua_phase_seen": lua_phase_seen,
+        "native_phase_seen": native_phase_seen,
         "lua_counts": dict(lua_counts),
         "native_counts": dict(native_counts),
     }

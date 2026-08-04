@@ -1088,15 +1088,25 @@ macro_rules! generated_callin_trace_methods {
         Ok(false)
         }
 
-    fn projectile_created(&mut self, projectile_id: i32) -> Result<(), Error> {
-        self.record_callin("ProjectileCreated", 1);
-        let _ = projectile_id;
+    fn projectile_created(
+        &mut self,
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    ) -> Result<(), Error> {
+        self.record_callin("ProjectileCreated", 3);
+        let _ = (projectile_id, owner_id, weapon_def_id);
         Ok(())
         }
 
-    fn projectile_destroyed(&mut self, projectile_id: i32) -> Result<(), Error> {
-        self.record_callin("ProjectileDestroyed", 1);
-        let _ = projectile_id;
+    fn projectile_destroyed(
+        &mut self,
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    ) -> Result<(), Error> {
+        self.record_callin("ProjectileDestroyed", 3);
+        let _ = (projectile_id, owner_id, weapon_def_id);
         Ok(())
         }
 

@@ -93,10 +93,14 @@ impl NativeModule for NativeApiParity {
             }
         };
 
+        if name == "complete" {
+            self.record_callin_phase("complete");
+        }
+
         // Diagnostic escape hatch for isolating engine-state corruption during
         // rendering runs.  Normal parity runs leave this unset; skipped
         // checks are still emitted so the harness can show the run shape.
-        if native_parity_skip(name) {
+        if name != "complete" && native_parity_skip(name) {
             self.record(name, "skip", "diagnostic skip");
             return Ok(());
         }

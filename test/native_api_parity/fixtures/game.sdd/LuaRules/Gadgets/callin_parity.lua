@@ -103,6 +103,8 @@ if not synced then
 	function gadget:RecvFromSynced(name, encoded)
 		if name == "native_api_callin_trace" then
 			forward(encoded)
+		elseif name == "native_api_callin_phase" then
+			forward(Common.encode({ context = "callin_phase", name = encoded }))
 		end
 	end
 end

@@ -275,6 +275,8 @@ def generate_lua() -> str:
         "\tfunction gadget:RecvFromSynced(name, encoded)",
         "\t\tif name == \"native_api_callin_trace\" then",
         "\t\t\tforward(encoded)",
+        "\t\telseif name == \"native_api_callin_phase\" then",
+        "\t\t\tforward(Common.encode({ context = \"callin_phase\", name = encoded }))",
         "\t\tend",
         "\tend",
         "end",
