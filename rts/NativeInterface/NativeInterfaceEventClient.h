@@ -376,6 +376,14 @@ public:
 	bool KeyMapChanged() override;
 	bool KeyPress(int keyCode, int scanCode, bool isRepeat) override;
 	bool KeyRelease(int keyCode, int scanCode) override;
+	// CGameInputReceiver gives native modules a first refusal before RmlUi.
+	// When that refusal returns false, the same event later reaches this event
+	// client through CEventHandler.  Consume the second dispatch so a module
+	// observes one logical key event, not two.
+	void SuppressNextKeyPress() { suppressNextKeyPress = true; }
+	void SuppressNextKeyRelease() { suppressNextKeyRelease = true; }
+	void CancelSuppressedKeyPress() { suppressNextKeyPress = false; }
+	void CancelSuppressedKeyRelease() { suppressNextKeyRelease = false; }
 	bool TextInput(const std::string& utf8) override;
 	bool TextEditing(const std::string& utf8, unsigned int start, unsigned int length) override;
 	bool MouseMove(int x, int y, int dx, int dy, int button) override;
@@ -517,6 +525,8 @@ private:
 	fptr::KeyMapChangedFuncPtr m_KeyMapChangedFuncPtr = nullptr;
 	fptr::KeyPressFuncPtr m_KeyPressFuncPtr = nullptr;
 	fptr::KeyReleaseFuncPtr m_KeyReleaseFuncPtr = nullptr;
+	bool suppressNextKeyPress = false;
+	bool suppressNextKeyRelease = false;
 	fptr::TextInputFuncPtr m_TextInputFuncPtr = nullptr;
 	fptr::TextEditingFuncPtr m_TextEditingFuncPtr = nullptr;
 	fptr::MouseMoveFuncPtr m_MouseMoveFuncPtr = nullptr;

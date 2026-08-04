@@ -283,11 +283,33 @@ void NativeInterfaceSystem::Update() {
 }
 
 bool NativeInterfaceSystem::KeyPress(int keyCode, int scanCode, bool isRepeat) {
-	return pImpl->eventClient && pImpl->eventClient->KeyPress(keyCode, scanCode, isRepeat);
+	if (!pImpl->eventClient)
+		return false;
+
+	const bool handled = pImpl->eventClient->KeyPress(keyCode, scanCode, isRepeat);
+	if (!handled)
+		pImpl->eventClient->SuppressNextKeyPress();
+	return handled;
 }
 
 bool NativeInterfaceSystem::KeyRelease(int keyCode, int scanCode) {
-	return pImpl->eventClient && pImpl->eventClient->KeyRelease(keyCode, scanCode);
+	if (!pImpl->eventClient)
+		return false;
+
+	const bool handled = pImpl->eventClient->KeyRelease(keyCode, scanCode);
+	if (!handled)
+		pImpl->eventClient->SuppressNextKeyRelease();
+	return handled;
+}
+
+void NativeInterfaceSystem::CancelKeyPressPreDispatch() {
+	if (pImpl->eventClient)
+		pImpl->eventClient->CancelSuppressedKeyPress();
+}
+
+void NativeInterfaceSystem::CancelKeyReleasePreDispatch() {
+	if (pImpl->eventClient)
+		pImpl->eventClient->CancelSuppressedKeyRelease();
 }
 
 void NativeInterfaceSystem::HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data) {

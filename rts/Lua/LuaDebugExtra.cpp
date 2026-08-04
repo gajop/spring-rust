@@ -6,16 +6,32 @@
 #include "LuaUtils.h"
 
 #include "Game/GameController.h"
+#include "Game/GameHelper.h"
 #include "Game/UI/KeyBindings.h"
 #include "Game/UI/KeyCodes.h"
 #include "Game/UI/ScanCodes.h"
 #include "Game/UI/MouseHandler.h"
+#include "Lua/LuaMaterial.h"
 #include "Rendering/GlobalRendering.h"
+#include "Sim/Features/FeatureHandler.h"
+#include "Sim/Misc/Resource.h"
+#include "Sim/Projectiles/ProjectileHandler.h"
+#include "Sim/Units/BuildInfo.h"
+#include "Sim/Units/UnitHandler.h"
+#include "Sim/Weapons/Weapon.h"
+#include "Sim/Weapons/WeaponDefHandler.h"
+#include "System/EventHandler.h"
 #include "System/Input/KeyInput.h"
 #include "System/Input/MouseInput.h"
 #include "System/Platform/SDL1_keysym.h"
+#include "System/Rectangle.h"
+#include "Net/Protocol/NetMessageTypes.h"
 
+#include <map>
 #include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <SDL_keyboard.h>
 #include <SDL_keycode.h>
@@ -46,6 +62,8 @@ bool LuaDebugExtra::PushEntries(lua_State* L)
 	LuaPushNamedCFunc(L, "emulateMouseRelease", EmulateMouseRelease);
 	LuaPushNamedCFunc(L, "emulateMouseMove",    EmulateMouseMove);
 	LuaPushNamedCFunc(L, "emulateMouseWheel",   EmulateMouseWheel);
+	LuaPushNamedCFunc(L, "emulateUnitMoveFailed", EmulateUnitMoveFailed);
+	LuaPushNamedCFunc(L, "emulateNativeApiParityCallins", EmulateNativeApiParityCallins);
 	LuaPushNamedCFunc(L, "clearEmulatedInput",  ClearEmulatedInputLua);
 
 	return true;
@@ -192,6 +210,281 @@ int LuaDebugExtra::EmulateMouseMove(lua_State* L)
 	const int2 prev = mouseInput->GetPos();
 	mouseInput->SetPos(int2(x, y));
 	mouse->MouseMove(x, y, x - prev.x, y - prev.y);
+
+	return 0;
+}
+
+
+/*** Exercise UnitMoveFailed from the synced Lua handle.
+ *
+ * @function debug.emulateUnitMoveFailed
+ * @param unitID integer
+ * @return nil
+ */
+int LuaDebugExtra::EmulateUnitMoveFailed(lua_State* L)
+{
+	const int unitID = luaL_checkint(L, 1);
+	CUnit* unit = unitHandler.GetUnit(unitID);
+
+	if (unit != nullptr)
+		eventHandler.UnitMoveFailed(unit);
+
+	return 0;
+}
+
+
+/*** Exercise the engine-to-Lua/native event surface with a deterministic fixture.
+ *
+ * This is test infrastructure, not a gameplay API.  It enters the same
+ * CEventHandler dispatch methods used by the engine so the Lua and native
+ * consumers observe identical C++-constructed payloads.  The object IDs are
+ * supplied by the parity fixture and are only used to provide valid object
+ * pointers for callbacks whose public contract contains an object ID.
+ *
+ * @function debug.emulateNativeApiParityCallins
+ * @param unitID integer
+ * @param featureID integer
+ * @param projectileID integer
+ * @return nil
+ */
+int LuaDebugExtra::EmulateNativeApiParityCallins(lua_State* L)
+{
+	const int unitID = luaL_checkint(L, 1);
+	const int featureID = luaL_checkint(L, 2);
+	const int projectileID = luaL_checkint(L, 3);
+
+	CUnit* unit = unitHandler.GetUnit(unitID);
+	CFeature* feature = featureHandler.GetFeature(featureID);
+	CProjectile* projectile = projectileHandler.GetProjectileBySyncedID(projectileID);
+
+	if (unit == nullptr || feature == nullptr || projectile == nullptr)
+		return 0;
+
+	eventHandler.AddConsoleLine("__native_api_parity_driver_start__", "NativeApiParity", 0);
+
+	CWeapon* weapon = unit->weapons.empty() ? nullptr : unit->weapons.front();
+	const WeaponDef* weaponDef = (weapon != nullptr) ? weapon->weaponDef : nullptr;
+	const int unitDefID = (unit->unitDef != nullptr) ? unit->unitDef->id : -1;
+	const int featureDefID = (feature->def != nullptr) ? feature->def->id : -1;
+	const int weaponDefID = (weaponDef != nullptr) ? weaponDef->id : -1;
+	const float3 position = unit->pos;
+	const float3 featurePosition = feature->pos;
+	const float3 direction = {0.0f, 1.0f, 0.0f};
+
+	// Synced callins.
+	eventHandler.GamePreload();
+	eventHandler.Load(nullptr);
+	eventHandler.GameStart();
+	eventHandler.GameOver(std::vector<unsigned char>{0});
+	eventHandler.GamePaused(0, true);
+	eventHandler.GameFrame(7);
+	eventHandler.GameFramePost(7);
+	const unsigned char gameID[16] = {
+		1, 2, 3, 4, 5, 6, 7, 8,
+		9, 10, 11, 12, 13, 14, 15, 16,
+	};
+	eventHandler.GameID(gameID, sizeof(gameID));
+
+	eventHandler.TeamDied(0);
+	eventHandler.TeamChanged(0);
+	eventHandler.ResourceExcess(std::map<int, SResourcePack>{{0, SResourcePack(1.5f, 2.5f)}});
+	eventHandler.PlayerChanged(0);
+	eventHandler.PlayerAdded(0);
+	eventHandler.PlayerRemoved(0, 2);
+
+	eventHandler.UnitCreated(unit, unit);
+	eventHandler.UnitFinished(unit);
+	eventHandler.UnitReverseBuilt(unit);
+	eventHandler.UnitConstructionDecayed(unit, 1.0f, 2.0f, 0.5f);
+	eventHandler.UnitFromFactory(unit, unit, true);
+	eventHandler.UnitDestroyed(unit, unit, weaponDefID);
+	eventHandler.UnitTaken(unit, 0, 1);
+	eventHandler.UnitGiven(unit, 1, 0);
+	eventHandler.RenderUnitDestroyed(unit);
+
+	eventHandler.UnitIdle(unit);
+	Command command(CMD_MOVE, SHIFT_KEY, position);
+	eventHandler.UnitCommand(unit, command, 0, true, true);
+	eventHandler.AllowCommand(unit, command, 0, true, false);
+	eventHandler.CommandFallback(unit, command);
+	eventHandler.UnitCmdDone(unit, command);
+	eventHandler.UnitDamaged(unit, unit, 12.0f, weaponDefID, projectile->id, false);
+	eventHandler.UnitStunned(unit, true);
+	eventHandler.UnitExperience(unit, 0.25f);
+	eventHandler.UnitHarvestStorageFull(unit);
+
+	eventHandler.UnitSeismicPing(unit, 0, position, 3.0f);
+	eventHandler.UnitEnteredRadar(unit, 0);
+	eventHandler.UnitEnteredLos(unit, 0);
+	eventHandler.UnitLeftRadar(unit, 0);
+	eventHandler.UnitLeftLos(unit, 0);
+
+	eventHandler.UnitEnteredUnderwater(unit);
+	eventHandler.UnitEnteredWater(unit);
+	eventHandler.UnitEnteredAir(unit);
+	eventHandler.UnitLeftUnderwater(unit);
+	eventHandler.UnitLeftWater(unit);
+	eventHandler.UnitLeftAir(unit);
+
+	eventHandler.UnitLoaded(unit, unit);
+	eventHandler.UnitUnloaded(unit, unit);
+	eventHandler.UnitMoveFailed(unit);
+	eventHandler.UnitCloaked(unit);
+	eventHandler.UnitDecloaked(unit);
+	eventHandler.UnitUnitCollision(unit, unit);
+	eventHandler.UnitFeatureCollision(unit, feature);
+	eventHandler.UnitArrivedAtGoal(unit);
+
+	eventHandler.FeatureCreated(feature);
+	eventHandler.FeatureDestroyed(feature);
+	eventHandler.FeatureDamaged(feature, unit, 7.0f, weaponDefID, projectile->id);
+	eventHandler.ProjectileCreated(projectile, 0);
+	eventHandler.ProjectileDestroyed(projectile, 0);
+
+	DamageArray damages(5.0f);
+	CExplosionParams explosionParams{
+		position,
+		direction,
+		damages,
+		weaponDef,
+		unit,
+		ExplosionHitObject{},
+		0.0f,
+		32.0f,
+		0.5f,
+		1.0f,
+		1.0f,
+		1.0f,
+		false,
+		false,
+		true,
+		static_cast<uint32_t>(projectile->id),
+	};
+	eventHandler.Explosion(weaponDefID, weaponDef, explosionParams);
+	eventHandler.StockpileChanged(unit, weapon, 1);
+
+	BuildInfo buildInfo(unit->unitDef, position, 0);
+	eventHandler.AllowUnitCreation(unit->unitDef, unit, &buildInfo);
+	eventHandler.AllowUnitTransfer(unit, 1, false);
+	eventHandler.AllowUnitBuildStep(unit, unit, 0.5f);
+	eventHandler.AllowUnitCaptureStep(unit, unit, 0.5f);
+	eventHandler.AllowUnitTransport(unit, unit);
+	eventHandler.AllowUnitTransportLoad(unit, unit, position, true);
+	eventHandler.AllowUnitTransportUnload(unit, unit, featurePosition, true);
+	eventHandler.AllowUnitCloak(unit, unit);
+	eventHandler.AllowUnitDecloak(unit, unit, weapon);
+	eventHandler.AllowUnitKamikaze(unit, unit, true);
+	eventHandler.AllowFeatureCreation(feature->def, 0, featurePosition);
+	eventHandler.AllowFeatureBuildStep(unit, feature, 0.5f);
+	eventHandler.AllowResourceLevel(0, "metal", 4.0f);
+	eventHandler.AllowResourceTransfer(0, 1, "metal", 2.0f);
+	eventHandler.AllowDirectUnitControl(0, unit);
+	eventHandler.AllowBuilderHoldFire(unit, 1);
+	eventHandler.AllowStartPosition(0, 0, 1, position, featurePosition);
+	eventHandler.TerraformComplete(unit, unit);
+	eventHandler.MoveCtrlNotify(unit, 3);
+
+	if (weaponDefID >= 0) {
+		eventHandler.AllowWeaponTargetCheck(unitID, 0, weaponDefID);
+		// LuaRules' AllowWeaponTarget dispatcher starts with the neutral
+		// priority of 1.0 and passes that value on to later event clients.
+		// Seed the deterministic cross-consumer trace with the value native
+		// receives after the Lua consumer has run.
+		float targetPriority = 1.0f;
+		eventHandler.AllowWeaponTarget(unitID, unitID, 0, weaponDefID, &targetPriority);
+	}
+	eventHandler.AllowWeaponInterceptTarget(unit, weapon, projectile);
+
+	float newDamage = 12.0f;
+	float impulseMult = 1.0f;
+	eventHandler.UnitPreDamaged(unit, unit, 12.0f, weaponDefID, projectile->id, false, &newDamage, &impulseMult);
+	newDamage = 7.0f;
+	impulseMult = 1.0f;
+	eventHandler.FeaturePreDamaged(feature, unit, 7.0f, weaponDefID, projectile->id, &newDamage, &impulseMult);
+	eventHandler.ShieldPreDamaged(projectile, weapon, unit, false, weapon, unit, position, featurePosition);
+
+	// Unsynced callins.
+	eventHandler.Save(nullptr);
+	eventHandler.UnsyncedHeightMapUpdate(SRectangle(1, 2, 3, 4));
+	eventHandler.Update();
+	eventHandler.KeyMapChanged();
+	eventHandler.KeyPress(SDLK_a, SDL_SCANCODE_A, false);
+	eventHandler.KeyRelease(SDLK_a, SDL_SCANCODE_A);
+	eventHandler.TextInput("native_api_parity");
+	eventHandler.TextEditing("native_api_parity", 1, 3);
+	eventHandler.MousePress(100, 200, 1);
+	eventHandler.MouseMove(100, 200, 3, -4, 1);
+	eventHandler.MouseRelease(100, 200, 1);
+	eventHandler.MouseWheel(true, 1.5f);
+	eventHandler.IsAbove(100, 200);
+	eventHandler.GetTooltip(100, 200);
+
+	int defaultCommand = CMD_MOVE;
+	eventHandler.DefaultCommand(unit, nullptr, defaultCommand);
+	SCommandDescription commandDescription;
+	commandDescription.id = CMD_MOVE;
+	commandDescription.type = CMDTYPE_ICON;
+	commandDescription.name = "move";
+	commandDescription.action = "move";
+	commandDescription.tooltip = "Native API parity";
+	eventHandler.ActiveCommandChanged(&commandDescription);
+	eventHandler.CameraRotationChanged(direction);
+	eventHandler.CameraPositionChanged(position);
+	eventHandler.MiniMapRotationChanged(1.0f, 0.5f);
+	eventHandler.MiniMapStateChanged(false, false, false);
+	eventHandler.MiniMapGeometryChanged(int2(1, 2), int2(3, 4), int2(5, 6), int2(7, 8));
+	eventHandler.CommandNotify(command);
+	eventHandler.AddConsoleLine("native_api_parity_callin", "NativeApiParity", 3);
+	eventHandler.GroupChanged(1);
+
+	bool ready = false;
+	eventHandler.GameSetup("parity", ready, {{0, "ready"}});
+	eventHandler.DownloadQueued(1, "native_api_parity", "sdd");
+	eventHandler.DownloadStarted(1);
+	eventHandler.DownloadProgress(1, 5, 10);
+	eventHandler.DownloadFinished(1);
+	eventHandler.DownloadFailed(1, 2);
+	const float3 groundPosition = {position.x, position.y, position.z};
+	eventHandler.WorldTooltip(nullptr, nullptr, &groundPosition);
+	const std::string label = "native_api_parity";
+	eventHandler.MapDrawCmd(0, MAPDRAW_POINT, &position, nullptr, &label);
+	eventHandler.SunChanged();
+	eventHandler.ViewResize();
+
+	eventHandler.DrawGenesis();
+	eventHandler.DrawWorld();
+	eventHandler.DrawWorldPreUnit();
+	eventHandler.DrawPreDecals();
+	eventHandler.DrawWorldPreParticles(true, false, true, false);
+	eventHandler.DrawWaterPost();
+	eventHandler.DrawWorldShadow();
+	eventHandler.DrawShadowUnitsLua();
+	eventHandler.DrawShadowFeaturesLua();
+	eventHandler.DrawShadowPassTransparent();
+	eventHandler.DrawWorldReflection();
+	eventHandler.DrawWorldRefraction();
+	eventHandler.DrawGroundPreForward();
+	eventHandler.DrawGroundPostForward();
+	eventHandler.DrawGroundPreDeferred();
+	eventHandler.DrawGroundDeferred();
+	eventHandler.DrawGroundPostDeferred();
+	eventHandler.DrawUnitsPostDeferred();
+	eventHandler.DrawFeaturesPostDeferred();
+	eventHandler.DrawScreenEffects();
+	eventHandler.DrawScreenPost();
+	eventHandler.DrawScreen();
+	eventHandler.DrawInMiniMap();
+	eventHandler.DrawInMiniMapBackground();
+	eventHandler.DrawBuildSquare(unitDefID, 10, 20, 1, std::vector<uint8_t>{0, 1, 2, 3});
+	eventHandler.FontsChanged();
+	eventHandler.GameProgress(7);
+	eventHandler.DrawUnit(unit);
+	eventHandler.DrawFeature(feature);
+	if (weapon != nullptr)
+		eventHandler.DrawShield(unit, weapon);
+	eventHandler.DrawProjectile(projectile);
+	eventHandler.DrawMaterial(&LuaMaterial::defMat);
+	eventHandler.AddConsoleLine("__native_api_parity_driver_end__", "NativeApiParity", 0);
 
 	return 0;
 }

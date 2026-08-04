@@ -32,6 +32,10 @@ public:
 	// focus traversal. Returning true consumes the event.
 	bool KeyPress(int keyCode, int scanCode, bool isRepeat);
 	bool KeyRelease(int keyCode, int scanCode);
+	// Clear the pending duplicate-dispatch guard when Rml/Lua consumes the
+	// event before it reaches the CEventHandler native client.
+	void CancelKeyPressPreDispatch();
+	void CancelKeyReleasePreDispatch();
 
 	// Special events (called from Lua)
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);

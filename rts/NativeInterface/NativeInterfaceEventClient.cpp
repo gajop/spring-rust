@@ -4,6 +4,7 @@
 
 #include <cstring>
 
+#include "NativeInterface/api/Constants.h"
 #include "Game/Game.h"
 #include "Game/Action.h"
 #include "Game/GameHelper.h"
@@ -45,6 +46,17 @@
 	}
 
 namespace {
+	// The public native command-option ABI uses a compact bit layout which is
+	// intentionally different from Command's internal simulation bitfield.
+	// Constants.h exposes these names to C and bindgen, not to the C++ engine
+	// build, so keep the C++ conversion beside the callin boundary explicit.
+	constexpr uint8_t NATIVE_CMD_OPT_INTERNAL = (1 << 0);
+	constexpr uint8_t NATIVE_CMD_OPT_RIGHT = (1 << 1);
+	constexpr uint8_t NATIVE_CMD_OPT_SHIFT = (1 << 2);
+	constexpr uint8_t NATIVE_CMD_OPT_CTRL = (1 << 3);
+	constexpr uint8_t NATIVE_CMD_OPT_ALT = (1 << 4);
+	constexpr uint8_t NATIVE_CMD_OPT_META = (1 << 5);
+
 	struct LuaMousePosition {
 		int x;
 		int y;
@@ -314,13 +326,32 @@ void NativeInterfaceEventClient::Shutdown() {
 
 static NativeCallinCommand ToNativeCallinCommand(const Command& command)
 {
+	const uint8_t engineOptions = command.GetOpts();
+	uint8_t nativeOptions = 0;
+
+	// Command's simulation bitfield intentionally uses a different layout from
+	// the public native-callin ABI.  Do not expose the engine-internal bit
+	// positions to native modules: CMD_OPT_* is the stable public layout.
+	if (engineOptions & INTERNAL_ORDER)
+		nativeOptions |= NATIVE_CMD_OPT_INTERNAL;
+	if (engineOptions & RIGHT_MOUSE_KEY)
+		nativeOptions |= NATIVE_CMD_OPT_RIGHT;
+	if (engineOptions & SHIFT_KEY)
+		nativeOptions |= NATIVE_CMD_OPT_SHIFT;
+	if (engineOptions & CONTROL_KEY)
+		nativeOptions |= NATIVE_CMD_OPT_CTRL;
+	if (engineOptions & ALT_KEY)
+		nativeOptions |= NATIVE_CMD_OPT_ALT;
+	if (engineOptions & META_KEY)
+		nativeOptions |= NATIVE_CMD_OPT_META;
+
 	return {
 		.id = command.GetID(),
 		.timeOut = command.GetTimeOut(),
 		.pageIndex = command.GetpageIndex(),
 		.numParams = command.GetNumParams(),
 		.tag = command.GetTag(),
-		.options = command.GetOpts(),
+		.options = nativeOptions,
 		.params = command.GetParams()
 	};
 }
@@ -1604,8 +1635,11 @@ bool NativeInterfaceEventClient::ShieldPreDamaged(const CProjectile* projectile,
 		.shieldWeaponNum = (shieldEmitter != nullptr) ? shieldEmitter->weaponNum + LUA_WEAPON_BASE_INDEX : -1,
 		.shieldCarrierID = (shieldCarrier != nullptr) ? shieldCarrier->id : -1,
 		.bounceProjectile = bounceProjectile,
-		.beamEmitterWeaponNum = (beamEmitter != nullptr) ? beamEmitter->weaponNum + LUA_WEAPON_BASE_INDEX : -1,
-		.beamEmitterUnitID = (beamCarrier != nullptr) ? beamCarrier->id : -1,
+		// Lua exposes these two fields only for beam/ lightning events.  A
+		// regular projectile has nil there even if the engine supplied stale or
+		// auxiliary beam pointers to the event dispatch.
+		.beamEmitterWeaponNum = (projectile == nullptr && beamEmitter != nullptr) ? beamEmitter->weaponNum + LUA_WEAPON_BASE_INDEX : -1,
+		.beamEmitterUnitID = (projectile == nullptr && beamCarrier != nullptr) ? beamCarrier->id : -1,
 		.startPos = {.x = startPos.x, .y = startPos.y, .z = startPos.z},
 		.hitPos = {.x = hitPos.x, .y = hitPos.y, .z = hitPos.z},
 	};
@@ -1707,6 +1741,11 @@ bool NativeInterfaceEventClient::KeyMapChanged() {
 }
 
 bool NativeInterfaceEventClient::KeyPress(int keyCode, int scanCode, bool isRepeat) {
+	if (suppressNextKeyPress) {
+		suppressNextKeyPress = false;
+		return false;
+	}
+
 	if (m_KeyPressFuncPtr) {
 		const ActionList& actionList = (game != nullptr) ? game->GetLastActionList() : ActionList{};
 		std::vector<KeyAction> actions;
@@ -1741,6 +1780,11 @@ bool NativeInterfaceEventClient::KeyPress(int keyCode, int scanCode, bool isRepe
 }
 
 bool NativeInterfaceEventClient::KeyRelease(int keyCode, int scanCode) {
+	if (suppressNextKeyRelease) {
+		suppressNextKeyRelease = false;
+		return false;
+	}
+
 	if (m_KeyReleaseFuncPtr) {
 		const ActionList& actionList = (game != nullptr) ? game->GetLastActionList() : ActionList{};
 		std::vector<KeyAction> actions;

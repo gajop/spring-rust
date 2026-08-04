@@ -27,6 +27,11 @@ CGameInputReceiver::~CGameInputReceiver() = default;
 
 bool CGameInputReceiver::KeyPressed(int keyCode, int scanCode, bool isRepeat)
 {
+	const auto cancelNativePreDispatch = [] {
+		if (NativeInterfaceSystem::s_instance != nullptr)
+			NativeInterfaceSystem::s_instance->CancelKeyPressPreDispatch();
+	};
+
 	if (!game->IsGameOver() && !isRepeat)
 		playerHandler.Player(gu->myPlayerNum)->currentStats.keyPresses++;
 
@@ -44,54 +49,79 @@ bool CGameInputReceiver::KeyPressed(int keyCode, int scanCode, bool isRepeat)
 	if (NativeInterfaceSystem::s_instance != nullptr && NativeInterfaceSystem::s_instance->KeyPress(keyCode, scanCode, isRepeat))
 		return false;
 
-	if (RmlGui::ProcessKeyPressed(keyCode, scanCode, isRepeat))
+	if (RmlGui::ProcessKeyPressed(keyCode, scanCode, isRepeat)) {
+		cancelNativePreDispatch();
 		return false;
+	}
 
-	if (gameTextInput.ConsumePressedKey(keyCode, scanCode, lastActionList))
+	if (gameTextInput.ConsumePressedKey(keyCode, scanCode, lastActionList)) {
+		cancelNativePreDispatch();
 		return false;
+	}
 
-	if (luaInputReceiver->KeyPressed(keyCode, scanCode, isRepeat))
+	if (luaInputReceiver->KeyPressed(keyCode, scanCode, isRepeat)) {
+		cancelNativePreDispatch();
 		return false;
+	}
 
 
 	// try the input receivers
 	for (CInputReceiver* recv: CInputReceiver::GetReceivers()) {
-		if (recv != nullptr && recv->KeyPressed(keyCode, scanCode, isRepeat))
+		if (recv != nullptr && recv->KeyPressed(keyCode, scanCode, isRepeat)) {
+			cancelNativePreDispatch();
 			return false;
+		}
 	}
 
-	return TryOnPressActions(isRepeat);
+	const bool handled = TryOnPressActions(isRepeat);
+	cancelNativePreDispatch();
+	return handled;
 }
 
 bool CGameInputReceiver::KeyReleased(int keyCode, int scanCode)
 {
+	const auto cancelNativePreDispatch = [] {
+		if (NativeInterfaceSystem::s_instance != nullptr)
+			NativeInterfaceSystem::s_instance->CancelKeyReleasePreDispatch();
+	};
+
 	if (NativeInterfaceSystem::s_instance != nullptr && NativeInterfaceSystem::s_instance->KeyRelease(keyCode, scanCode))
 		return false;
 
-	if (RmlGui::ProcessKeyReleased(keyCode, scanCode))
+	if (RmlGui::ProcessKeyReleased(keyCode, scanCode)) {
+		cancelNativePreDispatch();
 		return false;
+	}
 
-	if (gameTextInput.ConsumeReleasedKey(keyCode, scanCode))
+	if (gameTextInput.ConsumeReleasedKey(keyCode, scanCode)) {
+		cancelNativePreDispatch();
 		return false;
+	}
 
 	// update actionlist for lua consumer
 	lastActionList = keyBindings.GetActionList(keyCode, scanCode);
 
-	if (luaInputReceiver->KeyReleased(keyCode, scanCode))
+	if (luaInputReceiver->KeyReleased(keyCode, scanCode)) {
+		cancelNativePreDispatch();
 		return false;
+	}
 
 	// try the input receivers
 	for (CInputReceiver* recv: CInputReceiver::GetReceivers()) {
 		if (recv != nullptr && recv->KeyReleased(keyCode, scanCode)) {
+			cancelNativePreDispatch();
 			return false;
 		}
 	}
 
 	for (const Action& action: lastActionList) {
-		if (game->ActionReleased(action))
+		if (game->ActionReleased(action)) {
+			cancelNativePreDispatch();
 			return false;
+		}
 	}
 
+	cancelNativePreDispatch();
 	return false;
 }
 
