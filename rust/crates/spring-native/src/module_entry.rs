@@ -363,7 +363,8 @@ macro_rules! export_module {
                     unsafe {
                         (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                             let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                            data.module().$method((&*query).projectileID)
+                            let q = &*query;
+                            data.module().$method(q.projectileID, q.ownerID, q.weaponDefID)
                         });
                     }
                 }

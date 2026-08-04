@@ -11,6 +11,7 @@
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureDef.h"
 #include "Sim/Projectiles/Projectile.h"
+#include "Sim/Projectiles/WeaponProjectiles/WeaponProjectile.h"
 #include "Sim/Misc/Resource.h"
 #include "Sim/Objects/SolidObject.h"
 #include "Sim/Units/Unit.h"
@@ -1305,7 +1306,13 @@ void NativeInterfaceEventClient::FeatureMoved(const CFeature* feature, const flo
 
 void NativeInterfaceEventClient::ProjectileCreated(const CProjectile* proj) {
 	if (m_ProjectileCreatedFuncPtr) {
-		ProjectileEventQuery query = {.projectileID = proj->id};
+		const auto* weaponProjectile = proj->weapon ? static_cast<const CWeaponProjectile*>(proj) : nullptr;
+		const auto* weaponDef = (weaponProjectile != nullptr) ? weaponProjectile->GetWeaponDef() : nullptr;
+		ProjectileEventQuery query = {
+			.projectileID = proj->id,
+			.ownerID = proj->GetOwnerID(),
+			.weaponDefID = (weaponDef != nullptr) ? weaponDef->id : -1,
+		};
 		ProjectileEventResult result = {};
 		m_ProjectileCreatedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -1313,7 +1320,13 @@ void NativeInterfaceEventClient::ProjectileCreated(const CProjectile* proj) {
 
 void NativeInterfaceEventClient::ProjectileDestroyed(const CProjectile* proj) {
 	if (m_ProjectileDestroyedFuncPtr) {
-		ProjectileEventQuery query = {.projectileID = proj->id};
+		const auto* weaponProjectile = proj->weapon ? static_cast<const CWeaponProjectile*>(proj) : nullptr;
+		const auto* weaponDef = (weaponProjectile != nullptr) ? weaponProjectile->GetWeaponDef() : nullptr;
+		ProjectileEventQuery query = {
+			.projectileID = proj->id,
+			.ownerID = proj->GetOwnerID(),
+			.weaponDefID = (weaponDef != nullptr) ? weaponDef->id : -1,
+		};
 		ProjectileEventResult result = {};
 		m_ProjectileDestroyedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
 	}
@@ -1321,6 +1334,10 @@ void NativeInterfaceEventClient::ProjectileDestroyed(const CProjectile* proj) {
 
 bool NativeInterfaceEventClient::Explosion(int weaponID, const WeaponDef* weaponDef, const CExplosionParams& params) {
 	(void)weaponDef;
+	// Lua's CLuaHandle::Explosion does not dispatch piece-projectile
+	// explosions, which are represented by a negative weapon definition ID.
+	if (weaponID < 0)
+		return false;
 	if (m_ExplosionFuncPtr) {
 		ExplosionQuery query = {
 			.weaponDefID = weaponID,

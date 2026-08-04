@@ -161,8 +161,8 @@ a source-level decision and, where applicable, a behavior test.
 | `PlayerAdded` | 1 | 1 | `PlayerAdded` | `same_raw_field_count` |
 | `PlayerChanged` | 1 | 1 | `PlayerChanged` | `same_raw_field_count` |
 | `PlayerRemoved` | 2 | 2 | `PlayerRemoved` | `same_raw_field_count` |
-| `ProjectileCreated` | 3 | 1 | `ProjectileEvent` | `field_count_differs` |
-| `ProjectileDestroyed` | 3 | 1 | `ProjectileEvent` | `field_count_differs` |
+| `ProjectileCreated` | 3 | 3 | `ProjectileEvent` | `same_raw_field_count` |
+| `ProjectileDestroyed` | 3 | 3 | `ProjectileEvent` | `same_raw_field_count` |
 | `RenderUnitDestroyed` | 3 | 1 | `RenderUnitDestroyed` | `field_count_differs` |
 | `ResourceExcess` | 1 | 2 | `ResourceExcess` | `field_count_differs` |
 | `Save` | 1 | 1 | `ArchiveCallin` | `same_raw_field_count` |

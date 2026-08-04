@@ -1168,13 +1168,23 @@ pub trait NativeModule: Sized {
         Ok(false)
     }
 
-    fn projectile_created(&mut self, projectile_id: i32) -> Result<(), Error> {
-        let _ = projectile_id;
+    fn projectile_created(
+        &mut self,
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    ) -> Result<(), Error> {
+        let _ = (projectile_id, owner_id, weapon_def_id);
         Ok(())
     }
 
-    fn projectile_destroyed(&mut self, projectile_id: i32) -> Result<(), Error> {
-        let _ = projectile_id;
+    fn projectile_destroyed(
+        &mut self,
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    ) -> Result<(), Error> {
+        let _ = (projectile_id, owner_id, weapon_def_id);
         Ok(())
     }
 

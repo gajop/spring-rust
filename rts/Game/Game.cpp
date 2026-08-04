@@ -457,6 +457,13 @@ void CGame::Load(const std::string& mapFileName)
 		}
 	}
 
+	// Register native event clients before save-game loading or GamePreload so
+	// native modules observe the same lifecycle boundary as Lua handles.
+	if (!forcedQuit) {
+		nativeInterfaceSystem = std::make_unique<NativeInterfaceSystem>();
+		NativeInterfaceSystem::s_instance->Reload();
+	}
+
 	try {
 		LOG("[Game::%s][7] globalQuit=%d forcedQuit=%d", __func__, globalQuit.load(), forcedQuit);
 
@@ -515,9 +522,6 @@ void CGame::Load(const std::string& mapFileName)
 			forcedQuit = true;
 		}
 	}
-
-	nativeInterfaceSystem = std::make_unique<NativeInterfaceSystem>();
-	NativeInterfaceSystem::s_instance->Reload();
 
 	Watchdog::DeregisterThread(WDT_LOAD);
 	AddTimedJobs();

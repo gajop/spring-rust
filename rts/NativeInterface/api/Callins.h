@@ -377,6 +377,8 @@ struct FeatureMovedResult {
 
 struct ProjectileEventQuery {
 	int32_t projectileID;
+	int32_t ownerID;
+	int32_t weaponDefID;
 };
 
 struct ProjectileEventResult {
