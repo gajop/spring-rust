@@ -136,6 +136,7 @@
 //! See the [architecture documentation](../../../doc/rust_native_interface.md) for details.
 
 mod callbacks;
+pub use callbacks::{GameSetupPlayerState, KeyAction, ViewGeometry};
 mod camera;
 mod config;
 pub mod constants;

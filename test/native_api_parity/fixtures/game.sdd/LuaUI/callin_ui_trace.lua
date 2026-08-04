@@ -4,19 +4,22 @@
 
 local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 
+local function roundNumber(value)
+	return math.floor(value * 100000 + 0.5) / 100000
+end
+
 local function normalize(value, depth)
 	local valueType = type(value)
-	if valueType == "nil" then return "nil" end
-	if valueType == "number" then return "number" end
-	if valueType == "boolean" then return "boolean" end
-	if valueType == "string" then return "string" end
+	if valueType == "nil" then return { type = "nil" } end
+	if valueType == "number" then return roundNumber(value) end
+	if valueType == "boolean" or valueType == "string" then return value end
 	if valueType ~= "table" then return valueType end
-	if (depth or 0) >= 2 then return "table" end
+	if (depth or 0) >= 5 then return { type = "table" } end
 	local result = {}
 	for key, item in pairs(value) do
-		result[#result + 1] = { key = type(key), value = normalize(item, (depth or 0) + 1) }
+		result[#result + 1] = { key = normalize(key, (depth or 0) + 1), value = normalize(item, (depth or 0) + 1) }
 	end
-	table.sort(result, function(a, b) return a.key .. a.value < b.key .. b.value end)
+	table.sort(result, function(a, b) return Common.encode(a.key) .. Common.encode(a.value) < Common.encode(b.key) .. Common.encode(b.value) end)
 	return result
 end
 

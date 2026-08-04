@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 import json
+import math
 import os
 import random
 import re
@@ -377,6 +378,10 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
             native_count = callin_trace["native_counts"].get(name, 0)
             if lua_count != native_count:
                 print(f"  {name}: lua={lua_count}, native={native_count}")
+        for row in callin_trace.get("missing_arguments", [])[:10]:
+            print(f"  missing native equivalent: {json.dumps(row, sort_keys=True)}")
+        for row in callin_trace.get("unexpected_arguments", [])[:10]:
+            print(f"  unexpected native event: {json.dumps(row, sort_keys=True)}")
         ok = False
 
     native_path = native_dir / "native.jsonl"
@@ -437,7 +442,7 @@ def comparable_callin_rows(rows: list[dict]) -> list[dict]:
 
 
 def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict:
-    """Compare event delivery counts for shared Lua/native engine callins."""
+    """Compare shared engine-to-Lua/native callins, including argument values."""
     synced_names, unsynced_names = documented_callin_names()
 
     def before_complete(rows: list[dict]) -> tuple[list[dict], bool]:
@@ -463,18 +468,96 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
             return context == "synced_gadget"
         return context == "lua_ui"
 
-    lua_counts = Counter(
-        str(row.get("name")) for row in lua_rows if row.get("name") and selected_lua_row(row)
-    )
-    native_counts = Counter(str(row.get("name")) for row in native_rows if row.get("name"))
+    selected_lua_rows = [
+        row for row in lua_rows if row.get("name") and selected_lua_row(row)
+    ]
+    selected_native_rows = [row for row in native_rows if row.get("name")]
+    lua_counts = Counter(str(row.get("name")) for row in selected_lua_rows)
+    native_counts = Counter(str(row.get("name")) for row in selected_native_rows)
+
+    def canonicalize_value(value):
+        # Lua's JSON writer prints an integer-valued number without a decimal
+        # point, while serde_json may retain the native f32 as `123.0`.
+        # They are the same Lua number and must compare numerically.
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+        if isinstance(value, list):
+            return [canonicalize_value(item) for item in value]
+        if isinstance(value, dict):
+            return {key: canonicalize_value(item) for key, item in value.items()}
+        return value
+
+    def semantic_row(row: dict) -> dict:
+        args = row.get("args", [])
+        # Update is driven by the unsynchronised render clock.  Its contract is
+        # a numeric delta, while the exact value is necessarily different when
+        # the Lua baseline and native process are scheduled independently.
+        if row.get("name") == "Update":
+            args = ["number"]
+        return {
+            "name": str(row.get("name")),
+            "arity": len(args) if isinstance(args, list) else row.get("arity", 0),
+            "args": canonicalize_value(args),
+        }
+
+    def values_equal(left, right) -> bool:
+        if isinstance(left, bool) or isinstance(right, bool):
+            return left == right
+        if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+            # Lua's float-number build and the native trace serialize the same
+            # f32 with slightly different decimal spellings.  A relative
+            # tolerance of one f32 ulp at the observed magnitude keeps that
+            # representation noise out without hiding unit/pixel changes.
+            return math.isclose(float(left), float(right), rel_tol=1e-6, abs_tol=1e-5)
+        if type(left) is not type(right):
+            return False
+        if isinstance(left, list):
+            return len(left) == len(right) and all(
+                values_equal(item_left, item_right)
+                for item_left, item_right in zip(left, right)
+            )
+        if isinstance(left, dict):
+            return left.keys() == right.keys() and all(
+                values_equal(left[key], right[key]) for key in left
+            )
+        return left == right
+
+    lua_semantic_rows = [semantic_row(row) for row in selected_lua_rows]
+    native_semantic_rows = [semantic_row(row) for row in selected_native_rows]
+    remaining_native = list(native_semantic_rows)
+    missing_arguments = []
+    for lua_row in lua_semantic_rows:
+        match_index = next(
+            (
+                index
+                for index, native_row in enumerate(remaining_native)
+                if native_row["name"] == lua_row["name"]
+                and native_row["arity"] == lua_row["arity"]
+                and values_equal(native_row["args"], lua_row["args"])
+            ),
+            None,
+        )
+        if match_index is None:
+            missing_arguments.append(lua_row)
+        else:
+            remaining_native.pop(match_index)
+    unexpected_arguments = remaining_native
+    argument_matches = not missing_arguments and not unexpected_arguments
     return {
-        "matches": lua_counts == native_counts,
+        "matches": lua_counts == native_counts and argument_matches and lua_phase_seen and native_phase_seen,
+        "argument_matches": argument_matches,
         "lua_rows": len(lua_rows),
         "native_rows": len(native_rows),
+        "lua_selected_rows": len(selected_lua_rows),
+        "native_selected_rows": len(selected_native_rows),
         "lua_phase_seen": lua_phase_seen,
         "native_phase_seen": native_phase_seen,
         "lua_counts": dict(lua_counts),
         "native_counts": dict(native_counts),
+        "missing_arguments": missing_arguments,
+        "unexpected_arguments": unexpected_arguments,
     }
 
 
@@ -1132,7 +1215,9 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
             "",
             f"- Lua trace rows: baseline `{lua_trace_rows}`, native run `{native_lua_trace_rows}`",
             f"- Native trace rows: `{native_trace_rows}`",
-            f"- Shared event counts: `{'match' if trace['matches'] else 'MISMATCH'}`",
+            f"- Shared event counts: `{'match' if trace['lua_counts'] == trace['native_counts'] else 'MISMATCH'}`",
+            f"- Shared argument values: `{'match' if trace['argument_matches'] else 'MISMATCH'}`",
+            "- `Update` delta values are checked as numeric because separate processes have independent render clocks.",
         ])
 
     lines.extend([

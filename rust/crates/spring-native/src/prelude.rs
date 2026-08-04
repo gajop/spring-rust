@@ -16,7 +16,7 @@
 /// }
 /// ```
 pub use crate::{
-    callbacks::{ModuleData, NativeModule},
+    callbacks::{GameSetupPlayerState, KeyAction, ModuleData, NativeModule, ViewGeometry},
     constants,
     error::Error,
     interface::NativeInterfaceRef,

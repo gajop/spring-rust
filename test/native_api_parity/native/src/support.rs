@@ -1,6 +1,25 @@
 use super::*;
 use std::sync::Mutex;
 
+fn rounded_float(value: f32) -> f64 {
+    // Lua receives the engine's float values as doubles.  Rounding at the
+    // trace boundary removes representation noise while retaining enough
+    // precision to catch coordinate/sign/unit conversion mistakes.
+    // The engine's parity Lua build uses float Lua numbers, so perform the
+    // same quantization in f32 before formatting the resulting value with
+    // Lua's nine-significant-digit convention.
+    let rounded = (value * 100_000.0_f32 + 0.5_f32).floor()
+        / 100_000.0_f32;
+    if rounded == 0.0 {
+        return 0.0;
+    }
+    let integer_digits = rounded.abs().log10().floor() as i32 + 1;
+    let decimals = (9 - integer_digits).max(0) as usize;
+    format!("{:.*}", decimals, rounded)
+        .parse::<f64>()
+        .unwrap_or(rounded as f64)
+}
+
 // Native callbacks can be re-entered while a lifecycle call is being handled.
 // Serialize JSONL writes so a row cannot be interleaved with another callback.
 static RECORD_LOCK: Mutex<()> = Mutex::new(());
@@ -24,6 +43,247 @@ impl NativeApiParity {
             });
             let _ = writeln!(file, "{row}");
         }
+    }
+
+    pub(crate) fn record_callin_args(&self, name: &str, args: Vec<Value>) {
+        if let Some(parent) = self.callin_trace_path.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+
+        let _record_guard = RECORD_LOCK.lock().expect("native callin recorder lock");
+        if let Ok(mut file) = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&self.callin_trace_path)
+        {
+            let row = serde_json::json!({
+                "context": "native_callin",
+                "name": name,
+                "arity": args.len(),
+                "args": args,
+            });
+            let _ = writeln!(file, "{row}");
+        }
+    }
+
+    pub(crate) fn trace_nil(&self) -> Value {
+        serde_json::json!({"type": "nil"})
+    }
+
+    pub(crate) fn trace_i32(&self, value: i32) -> Value {
+        serde_json::json!(value)
+    }
+
+    pub(crate) fn trace_i64(&self, value: i64) -> Value {
+        serde_json::json!(value)
+    }
+
+    pub(crate) fn trace_u32(&self, value: u32) -> Value {
+        serde_json::json!(value)
+    }
+
+    pub(crate) fn trace_u8(&self, value: u8) -> Value {
+        serde_json::json!(value)
+    }
+
+    pub(crate) fn trace_bool(&self, value: bool) -> Value {
+        serde_json::json!(value)
+    }
+
+    pub(crate) fn trace_f32(&self, value: f32) -> Value {
+        serde_json::json!(rounded_float(value))
+    }
+
+    pub(crate) fn trace_str(&self, value: &str) -> Value {
+        serde_json::json!(value)
+    }
+
+    pub(crate) fn trace_table(&self, mut entries: Vec<(Value, Value)>) -> Value {
+        entries.sort_by_key(|(key, value)| {
+            format!(
+                "{}:{}",
+                serde_json::to_string(key).unwrap_or_default(),
+                serde_json::to_string(value).unwrap_or_default()
+            )
+        });
+        Value::Array(
+            entries
+                .into_iter()
+                .map(|(key, value)| serde_json::json!({"key": key, "value": value}))
+                .collect(),
+        )
+    }
+
+    pub(crate) fn trace_float3(&self, value: &spring_native::sys::Float3) -> Vec<Value> {
+        vec![
+            self.trace_f32(value.x),
+            self.trace_f32(value.y),
+            self.trace_f32(value.z),
+        ]
+    }
+
+    pub(crate) fn trace_optional_i32(&self, value: Option<i32>) -> Value {
+        value.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value))
+    }
+
+    pub(crate) fn trace_optional_f32(&self, value: Option<f32>) -> Value {
+        value.map_or_else(|| self.trace_nil(), |value| self.trace_f32(value))
+    }
+
+    pub(crate) fn trace_optional_str(&self, value: Option<&str>) -> Value {
+        value.map_or_else(|| self.trace_nil(), |value| self.trace_str(value))
+    }
+
+    pub(crate) fn trace_command(
+        &self,
+        command: &spring_native::sys::NativeCallinCommand,
+    ) -> Vec<Value> {
+        let params = if command.numParams == 0 || command.params.is_null() {
+            Vec::new()
+        } else {
+            // The engine guarantees that params points to numParams floats for
+            // every command callback.  Keep the null check above so a malformed
+            // third-party engine cannot make the parity recorder dereference a
+            // null pointer.
+            unsafe { std::slice::from_raw_parts(command.params, command.numParams as usize) }
+                .iter()
+                .copied()
+                .map(|value| self.trace_f32(value))
+                .enumerate()
+                .map(|(index, value)| (self.trace_i32(index as i32 + 1), value))
+                .collect::<Vec<_>>()
+        };
+        let options = self.trace_table(vec![
+            (
+                self.trace_str("coded"),
+                self.trace_u8(command.options),
+            ),
+            (
+                self.trace_str("alt"),
+                self.trace_bool(command.options & spring_native::constants::CMD_OPT_ALT as u8 != 0),
+            ),
+            (
+                self.trace_str("ctrl"),
+                self.trace_bool(command.options & spring_native::constants::CMD_OPT_CTRL as u8 != 0),
+            ),
+            (
+                self.trace_str("shift"),
+                self.trace_bool(command.options & spring_native::constants::CMD_OPT_SHIFT as u8 != 0),
+            ),
+            (
+                self.trace_str("right"),
+                self.trace_bool(command.options & spring_native::constants::CMD_OPT_RIGHT as u8 != 0),
+            ),
+            (
+                self.trace_str("meta"),
+                self.trace_bool(command.options & spring_native::constants::CMD_OPT_META as u8 != 0),
+            ),
+            (
+                self.trace_str("internal"),
+                self.trace_bool(command.options & spring_native::constants::CMD_OPT_INTERNAL as u8 != 0),
+            ),
+        ]);
+        vec![
+            self.trace_i32(command.id),
+            self.trace_table(params),
+            options,
+            self.trace_u32(command.tag),
+        ]
+    }
+
+    pub(crate) fn trace_actions(&self, actions: &[spring_native::KeyAction<'_>]) -> Value {
+        self.trace_table(
+            actions
+                .iter()
+                .enumerate()
+                .map(|(index, action)| {
+                    (
+                        self.trace_i32(index as i32 + 1),
+                        self.trace_table(vec![
+                            (self.trace_str("command"), self.trace_str(action.command)),
+                            (self.trace_str("extra"), self.trace_str(action.extra)),
+                            (self.trace_str("boundWith"), self.trace_str(action.bound_with)),
+                        ]),
+                    )
+                })
+                .collect(),
+        )
+    }
+
+    pub(crate) fn trace_game_setup_states(
+        &self,
+        states: &[spring_native::GameSetupPlayerState<'_>],
+    ) -> Value {
+        self.trace_table(
+            states
+                .iter()
+                .map(|state| (self.trace_i32(state.player_id), self.trace_str(state.state)))
+                .collect(),
+        )
+    }
+
+    pub(crate) fn trace_geometry(&self, geometry: &spring_native::ViewGeometry) -> Value {
+        self.trace_table(vec![
+            (self.trace_str("screenSizeX"), self.trace_i32(geometry.screen_size_x)),
+            (self.trace_str("screenSizeY"), self.trace_i32(geometry.screen_size_y)),
+            (self.trace_str("screenPosX"), self.trace_i32(geometry.screen_pos_x)),
+            (self.trace_str("screenPosY"), self.trace_i32(geometry.screen_pos_y)),
+            (self.trace_str("windowSizeX"), self.trace_i32(geometry.window_size_x)),
+            (self.trace_str("windowSizeY"), self.trace_i32(geometry.window_size_y)),
+            (self.trace_str("windowPosX"), self.trace_i32(geometry.window_pos_x)),
+            (self.trace_str("windowPosY"), self.trace_i32(geometry.window_pos_y)),
+            (self.trace_str("windowBorderTop"), self.trace_i32(geometry.window_border_top)),
+            (self.trace_str("windowBorderLeft"), self.trace_i32(geometry.window_border_left)),
+            (self.trace_str("windowBorderBottom"), self.trace_i32(geometry.window_border_bottom)),
+            (self.trace_str("windowBorderRight"), self.trace_i32(geometry.window_border_right)),
+            (self.trace_str("viewSizeX"), self.trace_i32(geometry.view_size_x)),
+            (self.trace_str("viewSizeY"), self.trace_i32(geometry.view_size_y)),
+            (self.trace_str("viewPosX"), self.trace_i32(geometry.view_pos_x)),
+            (self.trace_str("viewPosY"), self.trace_i32(geometry.view_pos_y)),
+        ])
+    }
+
+    pub(crate) fn trace_resource_excess(
+        &self,
+        entries: &[spring_native::sys::ResourceExcessEntry],
+    ) -> Value {
+        self.trace_table(
+            entries
+                .iter()
+                .map(|entry| {
+                    (
+                        self.trace_i32(entry.teamID),
+                        self.trace_table(vec![
+                            (self.trace_i32(1), self.trace_f32(entry.resources[0])),
+                            (self.trace_i32(2), self.trace_f32(entry.resources[1])),
+                        ]),
+                    )
+                })
+                .collect(),
+        )
+    }
+
+    pub(crate) fn trace_game_id(&self, game_id: &[u8]) -> Value {
+        self.trace_str(
+            &game_id
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>(),
+        )
+    }
+
+    pub(crate) fn trace_byte_table(&self, bytes: &[u8]) -> Value {
+        self.trace_table(
+            bytes
+                .iter()
+                .enumerate()
+                .map(|(index, byte)| (self.trace_i32(index as i32 + 1), self.trace_u8(*byte)))
+                .collect(),
+        )
+    }
+
+    pub(crate) fn trace_opaque(&self) -> Value {
+        self.trace_str("userdata")
     }
 
     pub(crate) fn record_callin_phase(&self, name: &str) {

@@ -1,5 +1,44 @@
 use crate::{error::Error, interface::NativeInterfaceRef};
 
+/// One action resolved for a keyboard event.
+///
+/// The strings borrow the engine-owned action list and are valid for the
+/// duration of the callback, matching the table entries Lua receives.
+#[derive(Debug, Clone, Copy)]
+pub struct KeyAction<'a> {
+    pub command: &'a str,
+    pub extra: &'a str,
+    pub bound_with: &'a str,
+}
+
+/// One player's readiness state passed to [`NativeModule::game_setup`].
+#[derive(Debug, Clone, Copy)]
+pub struct GameSetupPlayerState<'a> {
+    pub player_id: i32,
+    pub state: &'a str,
+}
+
+/// The geometry table passed to Lua's `ViewResize` callin.
+#[derive(Debug, Clone, Copy)]
+pub struct ViewGeometry {
+    pub screen_size_x: i32,
+    pub screen_size_y: i32,
+    pub screen_pos_x: i32,
+    pub screen_pos_y: i32,
+    pub window_size_x: i32,
+    pub window_size_y: i32,
+    pub window_pos_x: i32,
+    pub window_pos_y: i32,
+    pub window_border_top: i32,
+    pub window_border_left: i32,
+    pub window_border_bottom: i32,
+    pub window_border_right: i32,
+    pub view_size_x: i32,
+    pub view_size_y: i32,
+    pub view_pos_x: i32,
+    pub view_pos_y: i32,
+}
+
 /// Trait for native modules to implement Spring Engine callbacks.
 ///
 /// All methods have default implementations that do nothing, so modules only need
@@ -112,14 +151,14 @@ pub trait NativeModule: Sized {
     // ========================================================================
 
     /// Called when a feature is created.
-    fn feature_created(&mut self, feature_id: i32) -> Result<(), Error> {
-        let _ = feature_id;
+    fn feature_created(&mut self, feature_id: i32, ally_team_id: i32) -> Result<(), Error> {
+        let _ = (feature_id, ally_team_id);
         Ok(())
     }
 
     /// Called when a feature is destroyed.
-    fn feature_destroyed(&mut self, feature_id: i32) -> Result<(), Error> {
-        let _ = feature_id;
+    fn feature_destroyed(&mut self, feature_id: i32, ally_team_id: i32) -> Result<(), Error> {
+        let _ = (feature_id, ally_team_id);
         Ok(())
     }
 
@@ -170,14 +209,16 @@ pub trait NativeModule: Sized {
     /// Called once per drawn frame (unsynced). Fires even while the sim is
     /// paused — the native equivalent of `widget:Update`. Use for polling and
     /// deferred work that doesn't need a GL context.
-    fn update(&mut self) -> Result<(), Error> {
+    fn update(&mut self, delta_seconds: f32) -> Result<(), Error> {
+        let _ = delta_seconds;
         Ok(())
     }
 
     /// Called during the screen draw pass (unsynced) with a valid GL context —
     /// the native equivalent of SpringBoard's `delayGL`. GfxApi operations are
     /// only valid when issued from here.
-    fn draw_screen(&mut self) -> Result<(), Error> {
+    fn draw_screen(&mut self, view_size_x: i32, view_size_y: i32) -> Result<(), Error> {
+        let _ = (view_size_x, view_size_y);
         Ok(())
     }
 
@@ -261,19 +302,23 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
-    fn draw_screen_effects(&mut self) -> Result<(), Error> {
+    fn draw_screen_effects(&mut self, view_size_x: i32, view_size_y: i32) -> Result<(), Error> {
+        let _ = (view_size_x, view_size_y);
         Ok(())
     }
 
-    fn draw_screen_post(&mut self) -> Result<(), Error> {
+    fn draw_screen_post(&mut self, view_size_x: i32, view_size_y: i32) -> Result<(), Error> {
+        let _ = (view_size_x, view_size_y);
         Ok(())
     }
 
-    fn draw_in_minimap(&mut self) -> Result<(), Error> {
+    fn draw_in_minimap(&mut self, size_x: i32, size_y: i32) -> Result<(), Error> {
+        let _ = (size_x, size_y);
         Ok(())
     }
 
-    fn draw_in_minimap_background(&mut self) -> Result<(), Error> {
+    fn draw_in_minimap_background(&mut self, size_x: i32, size_y: i32) -> Result<(), Error> {
+        let _ = (size_x, size_y);
         Ok(())
     }
 
@@ -450,34 +495,64 @@ pub trait NativeModule: Sized {
     /// Called when a unit is created.
     ///
     /// `builder_id` is -1 if the unit was not built by another unit.
-    fn unit_created(&mut self, unit_id: i32, builder_id: i32) -> Result<(), Error> {
-        let _ = (unit_id, builder_id);
+    fn unit_created(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        builder_id: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, builder_id);
         Ok(())
     }
 
     /// Called when a unit is destroyed.
     ///
     /// `attacker_id` is -1 if there was no attacker.
-    fn unit_destroyed(&mut self, unit_id: i32, attacker_id: i32) -> Result<(), Error> {
-        let _ = (unit_id, attacker_id);
+    fn unit_destroyed(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        attacker_id: i32,
+        attacker_def_id: i32,
+        attacker_team: i32,
+        weapon_def_id: i32,
+    ) -> Result<(), Error> {
+        let _ = (
+            unit_id,
+            unit_def_id,
+            unit_team,
+            attacker_id,
+            attacker_def_id,
+            attacker_team,
+            weapon_def_id,
+        );
         Ok(())
     }
 
     /// Called when a unit gains experience.
-    fn unit_experience(&mut self, unit_id: i32, old_experience: f32) -> Result<(), Error> {
-        let _ = (unit_id, old_experience);
+    fn unit_experience(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        experience: f32,
+        old_experience: f32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, experience, old_experience);
         Ok(())
     }
 
     /// Called when a unit finishes construction.
-    fn unit_finished(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_finished(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
     /// Called while a unit is reverse-built.
-    fn unit_reverse_built(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_reverse_built(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
@@ -485,11 +560,20 @@ pub trait NativeModule: Sized {
     fn unit_construction_decayed(
         &mut self,
         unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
         time_since_last_build: f32,
         iteration_period: f32,
         part: f32,
     ) -> Result<(), Error> {
-        let _ = (unit_id, time_since_last_build, iteration_period, part);
+        let _ = (
+            unit_id,
+            unit_def_id,
+            unit_team,
+            time_since_last_build,
+            iteration_period,
+            part,
+        );
         Ok(())
     }
 
@@ -497,22 +581,31 @@ pub trait NativeModule: Sized {
     fn unit_from_factory(
         &mut self,
         unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
         factory_id: i32,
+        factory_def_id: i32,
         user_orders: bool,
     ) -> Result<(), Error> {
-        let _ = (unit_id, factory_id, user_orders);
+        let _ = (unit_id, unit_def_id, unit_team, factory_id, factory_def_id, user_orders);
         Ok(())
     }
 
     /// Called when a unit is given to another team.
-    fn unit_given(&mut self, unit_id: i32, old_team: i32, new_team: i32) -> Result<(), Error> {
-        let _ = (unit_id, old_team, new_team);
+    fn unit_given(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        old_team: i32,
+        new_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, old_team, new_team);
         Ok(())
     }
 
     /// Called when a unit becomes idle.
-    fn unit_idle(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_idle(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
@@ -761,8 +854,13 @@ pub trait NativeModule: Sized {
     }
 
     /// Called when a unit's harvest storage is full.
-    fn unit_harvest_storage_full(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_harvest_storage_full(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
@@ -778,102 +876,152 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
-    fn unit_entered_radar(&mut self, unit_id: i32, ally_team: i32) -> Result<(), Error> {
-        let _ = (unit_id, ally_team);
+    fn unit_entered_radar(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        ally_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, ally_team);
         Ok(())
     }
 
-    fn unit_entered_los(&mut self, unit_id: i32, ally_team: i32) -> Result<(), Error> {
-        let _ = (unit_id, ally_team);
+    fn unit_entered_los(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        ally_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, ally_team);
         Ok(())
     }
 
-    fn unit_left_radar(&mut self, unit_id: i32, ally_team: i32) -> Result<(), Error> {
-        let _ = (unit_id, ally_team);
+    fn unit_left_radar(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        ally_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, ally_team);
         Ok(())
     }
 
-    fn unit_left_los(&mut self, unit_id: i32, ally_team: i32) -> Result<(), Error> {
-        let _ = (unit_id, ally_team);
+    fn unit_left_los(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        ally_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, ally_team);
         Ok(())
     }
 
-    fn unit_entered_underwater(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_entered_underwater(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_entered_water(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_entered_water(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_entered_air(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_entered_air(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_left_underwater(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_left_underwater(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_left_water(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_left_water(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_left_air(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_left_air(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
     /// Called when a unit is loaded into a transport.
-    fn unit_loaded(&mut self, unit_id: i32, transport_id: i32) -> Result<(), Error> {
-        let _ = (unit_id, transport_id);
+    fn unit_loaded(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        transport_id: i32,
+        transport_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, transport_id, transport_team);
         Ok(())
     }
 
     /// Called when a unit is stunned or unstunned.
-    fn unit_stunned(&mut self, unit_id: i32, stunned: bool) -> Result<(), Error> {
-        let _ = (unit_id, stunned);
+    fn unit_stunned(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        stunned: bool,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, stunned);
         Ok(())
     }
 
     /// Called when a unit is captured by another team.
-    fn unit_taken(&mut self, unit_id: i32, old_team: i32, new_team: i32) -> Result<(), Error> {
-        let _ = (unit_id, old_team, new_team);
+    fn unit_taken(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        old_team: i32,
+        new_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, old_team, new_team);
         Ok(())
     }
 
     /// Called when a unit is unloaded from a transport.
-    fn unit_unloaded(&mut self, unit_id: i32, transport_id: i32) -> Result<(), Error> {
-        let _ = (unit_id, transport_id);
+    fn unit_unloaded(
+        &mut self,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        transport_id: i32,
+        transport_team: i32,
+    ) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team, transport_id, transport_team);
         Ok(())
     }
 
-    fn unit_cloaked(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_cloaked(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_decloaked(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_decloaked(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_moved(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_moved(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_move_failed(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_move_failed(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
-    fn unit_arrived_at_goal(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn unit_arrived_at_goal(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
@@ -892,8 +1040,8 @@ pub trait NativeModule: Sized {
     }
 
     /// Called when a unit is destroyed (rendering-specific).
-    fn render_unit_destroyed(&mut self, unit_id: i32) -> Result<(), Error> {
-        let _ = unit_id;
+    fn render_unit_destroyed(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
     }
 
@@ -1045,9 +1193,9 @@ pub trait NativeModule: Sized {
 
     fn allow_weapon_target_check(
         &mut self,
-        attacker_id: u32,
+        attacker_id: i32,
         attacker_weapon_num: i32,
-        attacker_weapon_def_id: u32,
+        attacker_weapon_def_id: i32,
     ) -> Result<i32, Error> {
         let _ = (attacker_id, attacker_weapon_num, attacker_weapon_def_id);
         Ok(-1)
@@ -1055,10 +1203,10 @@ pub trait NativeModule: Sized {
 
     fn allow_weapon_target(
         &mut self,
-        attacker_id: u32,
-        target_id: u32,
+        attacker_id: i32,
+        target_id: i32,
         attacker_weapon_num: i32,
-        attacker_weapon_def_id: u32,
+        attacker_weapon_def_id: i32,
         target_priority: Option<f32>,
     ) -> Result<(bool, f32), Error> {
         let _ = (
@@ -1193,7 +1341,8 @@ pub trait NativeModule: Sized {
         Ok(())
     }
 
-    fn view_resize(&mut self) -> Result<(), Error> {
+    fn view_resize(&mut self, geometry: ViewGeometry) -> Result<(), Error> {
+        let _ = geometry;
         Ok(())
     }
 
@@ -1255,13 +1404,57 @@ pub trait NativeModule: Sized {
         Ok(false)
     }
 
-    fn key_press(&mut self, key_code: i32, scan_code: i32, is_repeat: bool) -> Result<bool, Error> {
-        let _ = (key_code, scan_code, is_repeat);
+    fn key_press(
+        &mut self,
+        key_code: i32,
+        alt: bool,
+        ctrl: bool,
+        meta: bool,
+        shift: bool,
+        is_repeat: bool,
+        label: &str,
+        utf32_char: i32,
+        scan_code: i32,
+        actions: &[KeyAction<'_>],
+    ) -> Result<bool, Error> {
+        let _ = (
+            key_code,
+            alt,
+            ctrl,
+            meta,
+            shift,
+            is_repeat,
+            label,
+            utf32_char,
+            scan_code,
+            actions,
+        );
         Ok(false)
     }
 
-    fn key_release(&mut self, key_code: i32, scan_code: i32) -> Result<bool, Error> {
-        let _ = (key_code, scan_code);
+    fn key_release(
+        &mut self,
+        key_code: i32,
+        alt: bool,
+        ctrl: bool,
+        meta: bool,
+        shift: bool,
+        label: &str,
+        utf32_char: i32,
+        scan_code: i32,
+        actions: &[KeyAction<'_>],
+    ) -> Result<bool, Error> {
+        let _ = (
+            key_code,
+            alt,
+            ctrl,
+            meta,
+            shift,
+            label,
+            utf32_char,
+            scan_code,
+            actions,
+        );
         Ok(false)
     }
 
@@ -1391,8 +1584,13 @@ pub trait NativeModule: Sized {
         Ok(None)
     }
 
-    fn game_setup(&mut self, state: &str, ready: bool) -> Result<Option<bool>, Error> {
-        let _ = (state, ready);
+    fn game_setup(
+        &mut self,
+        state: &str,
+        ready: bool,
+        player_states: &[GameSetupPlayerState<'_>],
+    ) -> Result<Option<bool>, Error> {
+        let _ = (state, ready, player_states);
         Ok(None)
     }
 

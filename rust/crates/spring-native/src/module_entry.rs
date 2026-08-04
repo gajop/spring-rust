@@ -303,6 +303,114 @@ macro_rules! export_module {
             };
         }
 
+        macro_rules! export_update_callback {
+            ($name:ident, $method:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $crate::sys::UpdateQuery,
+                    result: *mut $crate::sys::UpdateResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            data.module().$method((&*query).deltaSeconds)
+                        });
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_screen_callback {
+            ($name:ident, $method:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $crate::sys::DrawScreenQuery,
+                    result: *mut $crate::sys::DrawScreenResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            let q = &*query;
+                            data.module().$method(q.viewSizeX, q.viewSizeY)
+                        });
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_minimap_draw_callback {
+            ($name:ident, $method:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $crate::sys::MiniMapDrawQuery,
+                    result: *mut $crate::sys::SimpleCallinResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            let q = &*query;
+                            data.module().$method(q.sizeX, q.sizeY)
+                        });
+                    }
+                }
+            };
+        }
+
+        macro_rules! export_view_resize_callback {
+            ($name:ident, $method:ident) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $crate::sys::ViewResizeQuery,
+                    result: *mut $crate::sys::ViewResizeResult,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            let q = &*query;
+                            data.module().$method($crate::ViewGeometry {
+                                screen_size_x: q.screenSizeX,
+                                screen_size_y: q.screenSizeY,
+                                screen_pos_x: q.screenPosX,
+                                screen_pos_y: q.screenPosY,
+                                window_size_x: q.windowSizeX,
+                                window_size_y: q.windowSizeY,
+                                window_pos_x: q.windowPosX,
+                                window_pos_y: q.windowPosY,
+                                window_border_top: q.windowBorderTop,
+                                window_border_left: q.windowBorderLeft,
+                                window_border_bottom: q.windowBorderBottom,
+                                window_border_right: q.windowBorderRight,
+                                view_size_x: q.viewSizeX,
+                                view_size_y: q.viewSizeY,
+                                view_pos_x: q.viewPosX,
+                                view_pos_y: q.viewPosY,
+                            })
+                        });
+                    }
+                }
+            };
+        }
+
         macro_rules! export_unit_id_callback {
             ($name:ident, $method:ident, $query:ty, $result:ty) => {
                 #[no_mangle]
@@ -325,6 +433,29 @@ macro_rules! export_module {
             };
         }
 
+        macro_rules! export_unit_context_callback {
+            ($name:ident, $method:ident, $query:ty, $result:ty) => {
+                #[no_mangle]
+                pub unsafe extern "C" fn $name(
+                    _interface: *const $crate::sys::NativeInterface,
+                    module_data: *mut c_void,
+                    query: *const $query,
+                    result: *mut $result,
+                ) {
+                    if module_data.is_null() || query.is_null() || result.is_null() {
+                        return;
+                    }
+                    unsafe {
+                        (*result).error = $crate::module_entry::catch_panic_ffi(|| {
+                            let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
+                            let q = &*query;
+                            data.module().$method(q.unitID, q.unitDefID, q.unitTeam)
+                        });
+                    }
+                }
+            };
+        }
+
         macro_rules! export_unit_los_callback {
             ($name:ident, $method:ident) => {
                 #[no_mangle]
@@ -341,7 +472,7 @@ macro_rules! export_module {
                         (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                             let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                             let q = &*query;
-                            data.module().$method(q.unitID, q.allyTeam)
+                            data.module().$method(q.unitID, q.unitDefID, q.unitTeam, q.allyTeam)
                         });
                     }
                 }
@@ -626,18 +757,8 @@ macro_rules! export_module {
                 // unloading the native shared object.
             }
         }
-        export_simple_callback!(
-            Update,
-            update,
-            $crate::sys::UpdateQuery,
-            $crate::sys::UpdateResult
-        );
-        export_simple_callback!(
-            DrawScreen,
-            draw_screen,
-            $crate::sys::DrawScreenQuery,
-            $crate::sys::DrawScreenResult
-        );
+        export_update_callback!(Update, update);
+        export_screen_callback!(DrawScreen, draw_screen);
         export_simple_callback!(
             DrawGenesis,
             draw_genesis,
@@ -759,30 +880,10 @@ macro_rules! export_module {
             $crate::sys::SimpleCallinQuery,
             $crate::sys::SimpleCallinResult
         );
-        export_simple_callback!(
-            DrawScreenEffects,
-            draw_screen_effects,
-            $crate::sys::SimpleCallinQuery,
-            $crate::sys::SimpleCallinResult
-        );
-        export_simple_callback!(
-            DrawScreenPost,
-            draw_screen_post,
-            $crate::sys::SimpleCallinQuery,
-            $crate::sys::SimpleCallinResult
-        );
-        export_simple_callback!(
-            DrawInMiniMap,
-            draw_in_minimap,
-            $crate::sys::SimpleCallinQuery,
-            $crate::sys::SimpleCallinResult
-        );
-        export_simple_callback!(
-            DrawInMiniMapBackground,
-            draw_in_minimap_background,
-            $crate::sys::SimpleCallinQuery,
-            $crate::sys::SimpleCallinResult
-        );
+        export_screen_callback!(DrawScreenEffects, draw_screen_effects);
+        export_screen_callback!(DrawScreenPost, draw_screen_post);
+        export_minimap_draw_callback!(DrawInMiniMap, draw_in_minimap);
+        export_minimap_draw_callback!(DrawInMiniMapBackground, draw_in_minimap_background);
 
         macro_rules! export_minimap_2_callback {
             ($name:ident, $method:ident, $query:ty, $field1:ident, $field2:ident) => {
@@ -1287,7 +1388,8 @@ macro_rules! export_module {
             unsafe {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                    data.module().feature_created((&*query).featureID)
+                    data.module()
+                        .feature_created((&*query).featureID, (&*query).allyTeamID)
                 });
             }
         }
@@ -1305,7 +1407,8 @@ macro_rules! export_module {
             unsafe {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                    data.module().feature_destroyed((&*query).featureID)
+                    data.module()
+                        .feature_destroyed((&*query).featureID, (&*query).allyTeamID)
                 });
             }
         }
@@ -1462,7 +1565,8 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module().unit_created(q.unitID, q.builderID)
+                    data.module()
+                        .unit_created(q.unitID, q.unitDefID, q.unitTeam, q.builderID)
                 });
             }
         }
@@ -1481,7 +1585,15 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module().unit_destroyed(q.unitID, q.attackerID)
+                    data.module().unit_destroyed(
+                        q.unitID,
+                        q.unitDefID,
+                        q.unitTeam,
+                        q.attackerID,
+                        q.attackerDefID,
+                        q.attackerTeam,
+                        q.weaponDefID,
+                    )
                 });
             }
         }
@@ -1500,7 +1612,13 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module().unit_experience(q.unitID, q.oldExperience)
+                    data.module().unit_experience(
+                        q.unitID,
+                        q.unitDefID,
+                        q.unitTeam,
+                        q.experience,
+                        q.oldExperience,
+                    )
                 });
             }
         }
@@ -1518,12 +1636,16 @@ macro_rules! export_module {
             unsafe {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                    data.module().unit_finished((&*query).unitID)
+                    data.module().unit_finished(
+                        (&*query).unitID,
+                        (&*query).unitDefID,
+                        (&*query).unitTeam,
+                    )
                 });
             }
         }
 
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitReverseBuilt,
             unit_reverse_built,
             $crate::sys::UnitReverseBuiltQuery,
@@ -1546,6 +1668,8 @@ macro_rules! export_module {
                     let q = &*query;
                     data.module().unit_construction_decayed(
                         q.unitID,
+                        q.unitDefID,
+                        q.unitTeam,
                         q.timeSinceLastBuild,
                         q.iterationPeriod,
                         q.part,
@@ -1569,7 +1693,14 @@ macro_rules! export_module {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
                     data.module()
-                        .unit_from_factory(q.unitID, q.factoryID, q.userOrders)
+                        .unit_from_factory(
+                            q.unitID,
+                            q.unitDefID,
+                            q.unitTeam,
+                            q.factoryID,
+                            q.factoryDefID,
+                            q.userOrders,
+                        )
                 });
             }
         }
@@ -1588,12 +1719,13 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module().unit_given(q.unitID, q.oldTeam, q.newTeam)
+                    data.module()
+                        .unit_given(q.unitID, q.unitDefID, q.oldTeam, q.newTeam)
                 });
             }
         }
 
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitIdle,
             unit_idle,
             $crate::sys::UnitIdleQuery,
@@ -1895,7 +2027,7 @@ macro_rules! export_module {
             }
         }
 
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitHarvestStorageFull,
             unit_harvest_storage_full,
             $crate::sys::UnitHarvestStorageFullQuery,
@@ -1930,37 +2062,37 @@ macro_rules! export_module {
         export_unit_los_callback!(UnitEnteredLos, unit_entered_los);
         export_unit_los_callback!(UnitLeftRadar, unit_left_radar);
         export_unit_los_callback!(UnitLeftLos, unit_left_los);
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitEnteredUnderwater,
             unit_entered_underwater,
             $crate::sys::UnitMovementClassEventQuery,
             $crate::sys::UnitMovementClassEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitEnteredWater,
             unit_entered_water,
             $crate::sys::UnitMovementClassEventQuery,
             $crate::sys::UnitMovementClassEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitEnteredAir,
             unit_entered_air,
             $crate::sys::UnitMovementClassEventQuery,
             $crate::sys::UnitMovementClassEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitLeftUnderwater,
             unit_left_underwater,
             $crate::sys::UnitMovementClassEventQuery,
             $crate::sys::UnitMovementClassEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitLeftWater,
             unit_left_water,
             $crate::sys::UnitMovementClassEventQuery,
             $crate::sys::UnitMovementClassEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitLeftAir,
             unit_left_air,
             $crate::sys::UnitMovementClassEventQuery,
@@ -1981,7 +2113,13 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module().unit_loaded(q.unitID, q.transportID)
+                    data.module().unit_loaded(
+                        q.unitID,
+                        q.unitDefID,
+                        q.unitTeam,
+                        q.transportID,
+                        q.transportTeam,
+                    )
                 });
             }
         }
@@ -2000,7 +2138,12 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module().unit_stunned(q.unitID, q.stunned)
+                    data.module().unit_stunned(
+                        q.unitID,
+                        q.unitDefID,
+                        q.unitTeam,
+                        q.stunned,
+                    )
                 });
             }
         }
@@ -2019,7 +2162,7 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module().unit_taken(q.unitID, q.oldTeam, q.newTeam)
+                    data.module().unit_taken(q.unitID, q.unitDefID, q.oldTeam, q.newTeam)
                 });
             }
         }
@@ -2038,36 +2181,42 @@ macro_rules! export_module {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module().unit_unloaded(q.unitID, q.transportID)
+                    data.module().unit_unloaded(
+                        q.unitID,
+                        q.unitDefID,
+                        q.unitTeam,
+                        q.transportID,
+                        q.transportTeam,
+                    )
                 });
             }
         }
 
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitCloaked,
             unit_cloaked,
             $crate::sys::UnitCloakEventQuery,
             $crate::sys::UnitCloakEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitDecloaked,
             unit_decloaked,
             $crate::sys::UnitCloakEventQuery,
             $crate::sys::UnitCloakEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitMoved,
             unit_moved,
             $crate::sys::UnitMoveEventQuery,
             $crate::sys::UnitMoveEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitMoveFailed,
             unit_move_failed,
             $crate::sys::UnitMoveEventQuery,
             $crate::sys::UnitMoveEventResult
         );
-        export_unit_id_callback!(
+        export_unit_context_callback!(
             UnitArrivedAtGoal,
             unit_arrived_at_goal,
             $crate::sys::UnitMoveEventQuery,
@@ -2133,7 +2282,11 @@ macro_rules! export_module {
             unsafe {
                 (*result).error = $crate::module_entry::catch_panic_ffi(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
-                    data.module().render_unit_destroyed((&*query).unitID)
+                    data.module().render_unit_destroyed(
+                        (&*query).unitID,
+                        (&*query).unitDefID,
+                        (&*query).unitTeam,
+                    )
                 });
             }
         }
@@ -2659,7 +2812,35 @@ macro_rules! export_module {
                     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                         let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                         let q = &*query;
-                        data.module().key_press(q.keyCode, q.scanCode, q.isRepeat)
+                        let label = $crate::cstr_to_str!(q.label)?;
+                        let actions = if q.actionCount == 0 {
+                            Vec::new()
+                        } else if q.actionList.is_null() {
+                            return Err($crate::Error::new(1, "Null key action list".to_string()));
+                        } else {
+                            std::slice::from_raw_parts(q.actionList, q.actionCount as usize)
+                                .iter()
+                                .map(|action| {
+                                    Ok($crate::KeyAction {
+                                        command: $crate::cstr_to_str!(action.command)?,
+                                        extra: $crate::cstr_to_str!(action.extra)?,
+                                        bound_with: $crate::cstr_to_str!(action.boundWith)?,
+                                    })
+                                })
+                                .collect::<Result<Vec<_>, $crate::Error>>()?
+                        };
+                        data.module().key_press(
+                            q.keyCode,
+                            q.alt,
+                            q.ctrl,
+                            q.meta,
+                            q.shift,
+                            q.isRepeat,
+                            label,
+                            q.utf32Char,
+                            q.scanCode,
+                            &actions,
+                        )
                     }))
                     .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
                 finish_bool_callback!(result, callback_result);
@@ -2681,7 +2862,34 @@ macro_rules! export_module {
                     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                         let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                         let q = &*query;
-                        data.module().key_release(q.keyCode, q.scanCode)
+                        let label = $crate::cstr_to_str!(q.label)?;
+                        let actions = if q.actionCount == 0 {
+                            Vec::new()
+                        } else if q.actionList.is_null() {
+                            return Err($crate::Error::new(1, "Null key action list".to_string()));
+                        } else {
+                            std::slice::from_raw_parts(q.actionList, q.actionCount as usize)
+                                .iter()
+                                .map(|action| {
+                                    Ok($crate::KeyAction {
+                                        command: $crate::cstr_to_str!(action.command)?,
+                                        extra: $crate::cstr_to_str!(action.extra)?,
+                                        bound_with: $crate::cstr_to_str!(action.boundWith)?,
+                                    })
+                                })
+                                .collect::<Result<Vec<_>, $crate::Error>>()?
+                        };
+                        data.module().key_release(
+                            q.keyCode,
+                            q.alt,
+                            q.ctrl,
+                            q.meta,
+                            q.shift,
+                            label,
+                            q.utf32Char,
+                            q.scanCode,
+                            &actions,
+                        )
                     }))
                     .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())));
                 finish_bool_callback!(result, callback_result);
@@ -3008,8 +3216,32 @@ macro_rules! export_module {
                 match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                     let data = &mut *(module_data as *mut $crate::ModuleData<$module_type>);
                     let q = &*query;
-                    data.module()
-                        .game_setup($crate::cstr_to_str!(q.state)?, q.ready)
+                    let player_states = if q.playerStateCount == 0 {
+                        Vec::new()
+                    } else if q.playerStates.is_null() {
+                        return Err($crate::Error::new(
+                            1,
+                            "Null GameSetup player state list".to_string(),
+                        ));
+                    } else {
+                        std::slice::from_raw_parts(
+                            q.playerStates,
+                            q.playerStateCount as usize,
+                        )
+                        .iter()
+                        .map(|player| {
+                            Ok($crate::GameSetupPlayerState {
+                                player_id: player.playerID,
+                                state: $crate::cstr_to_str!(player.state)?,
+                            })
+                        })
+                        .collect::<Result<Vec<_>, $crate::Error>>()?
+                    };
+                    data.module().game_setup(
+                        $crate::cstr_to_str!(q.state)?,
+                        q.ready,
+                        &player_states,
+                    )
                 }))
                 .unwrap_or_else(|_| Err($crate::Error::new(1, "Panic".to_string())))
                 {
@@ -3088,12 +3320,7 @@ macro_rules! export_module {
             }
         }
 
-        export_simple_callback!(
-            ViewResize,
-            view_resize,
-            $crate::sys::ViewResizeQuery,
-            $crate::sys::ViewResizeResult
-        );
+        export_view_resize_callback!(ViewResize, view_resize);
         export_simple_callback!(
             SunChanged,
             sun_changed,
