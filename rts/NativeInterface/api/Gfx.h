@@ -25,6 +25,7 @@ struct GfxFloatQuery { float value; };
 struct GfxStringQuery { const char* value; };
 
 struct GfxBoolResult { const Error* error; bool value; };
+struct GfxIntResult { const Error* error; int32_t value; };
 struct GfxUIntResult { const Error* error; uint32_t value; };
 struct GfxFloatResult { const Error* error; float value; };
 struct GfxStringResult { const Error* error; const char* value; };
@@ -172,6 +173,17 @@ struct GfxFBOAttachment {
 	uint32_t rboID;
 	bool useRBO;
 };
+struct GfxFBOAttachmentQuery {
+	uint32_t fboID;
+	uint32_t attachment;
+	const char* textureName;
+	uint32_t textureTarget;
+	int32_t mipLevel;
+	uint32_t rboID;
+	bool useRBO;
+};
+struct GfxFBODrawBuffersQuery { uint32_t fboID; const uint32_t* buffers; uint32_t bufferCount; };
+struct GfxFBOReadBufferQuery { uint32_t fboID; uint32_t buffer; };
 struct GfxFBOCreateQuery {
 	uint32_t target;
 	const GfxFBOAttachment* attachments;
@@ -204,6 +216,87 @@ struct GfxClearAttachmentFBOQuery { uint32_t target; uint32_t attachment; float 
 struct GfxVAOResult { const Error* error; uint32_t vaoID; uint32_t rawID; };
 struct GfxVBOQuery { uint32_t target; bool freqUpdated; };
 struct GfxVBOResult { const Error* error; uint32_t vboID; uint32_t rawID; uint32_t target; };
+struct GfxVBOAttributeOptions {
+	int32_t id;
+	uint32_t type;
+	int32_t size;
+	bool normalized;
+};
+struct GfxVBODefineQuery {
+	uint32_t vboID;
+	int32_t elementsCount;
+	bool elementArray;
+	uint32_t indexType;
+	bool useDefaultAttributes;
+	uint32_t defaultAttributeCount;
+	const GfxVBOAttributeOptions* attributes;
+	uint32_t attributeCount;
+};
+struct GfxVBOInfoQuery { uint32_t vboID; };
+struct GfxVBOInfoResult {
+	const Error* error;
+	uint32_t elementsCount;
+	uint32_t bufferSizeInBytes;
+	uint32_t gpuBufferSizeInBytes;
+	uint32_t elemSizeInBytes;
+	uint32_t attributesCount;
+	uint32_t primitiveRestartIndex;
+};
+struct GfxVBOUploadQuery {
+	uint32_t vboID;
+	const float* data;
+	uint32_t dataCount;
+	int32_t attributeIndex;
+	int32_t elementOffset;
+	int32_t dataStartIndex;
+	int32_t dataFinishIndex;
+};
+struct GfxVBOUploadResult { const Error* error; uint32_t bytesWritten; };
+struct GfxVBODownloadQuery {
+	uint32_t vboID;
+	int32_t attributeIndex;
+	int32_t elementOffset;
+	int32_t elementCount;
+	bool forceGPURead;
+};
+struct GfxVBODownloadResult { const Error* error; const float* values; uint32_t count; };
+struct GfxVBOInstanceDataQuery {
+	uint32_t vboID;
+	const uint32_t* ids;
+	uint32_t idCount;
+	int32_t attributeIndex;
+	int32_t teamID;
+	int32_t elementOffset;
+};
+struct GfxVBOCopyQuery { uint32_t sourceVBOID; uint32_t destinationVBOID; int32_t copySizeInBytes; };
+struct GfxVBOBindRangeQuery {
+	uint32_t vboID;
+	uint32_t bindingIndex;
+	int32_t elementOffset;
+	int32_t elementCount;
+	uint32_t target;
+	bool bind;
+};
+struct GfxVAOBufferQuery { uint32_t vaoID; uint32_t vboID; };
+struct GfxVAODrawArraysQuery {
+	uint32_t vaoID;
+	uint32_t mode;
+	int32_t vertexCount;
+	int32_t vertexFirst;
+	int32_t instanceCount;
+	int32_t instanceFirst;
+};
+struct GfxVAODrawElementsQuery {
+	uint32_t vaoID;
+	uint32_t mode;
+	int32_t drawCount;
+	int32_t baseIndex;
+	int32_t instanceCount;
+	int32_t baseVertex;
+	int32_t baseInstance;
+};
+struct GfxVAOSubmissionQuery { uint32_t vaoID; const uint32_t* ids; uint32_t idCount; };
+struct GfxVAORemoveSubmissionQuery { uint32_t vaoID; int32_t index; };
 struct GfxCreateTextureAtlasQuery { int32_t xsize; int32_t ysize; int32_t allocType; };
 struct GfxAtlasTextureQuery { const char* atlasName; const char* textureName; };
 struct GfxAtlasTextureResult { const Error* error; float x1; float x2; float y1; float y2; int32_t pageNum; };
@@ -417,6 +510,9 @@ struct GfxApi {
 	void (*DeleteRBO)(const GfxUIntQuery* query, GfxEmptyResult* result);
 	void (*GetRBOInfo)(const GfxRBOInfoQuery* query, GfxRBOInfoResult* result);
 	void (*CreateFBO)(const GfxFBOCreateQuery* query, GfxFBOResult* result);
+	void (*SetFBOAttachment)(const GfxFBOAttachmentQuery* query, GfxEmptyResult* result);
+	void (*SetFBODrawBuffers)(const GfxFBODrawBuffersQuery* query, GfxEmptyResult* result);
+	void (*SetFBOReadBuffer)(const GfxFBOReadBufferQuery* query, GfxEmptyResult* result);
 	void (*DeleteFBO)(const GfxUIntQuery* query, GfxEmptyResult* result);
 	void (*IsValidFBO)(const GfxFBOQuery* query, GfxFBOStatusResult* result);
 	void (*ActiveFBO)(const GfxActiveFBOQuery* query, GfxEmptyResult* result);
@@ -425,8 +521,36 @@ struct GfxApi {
 	void (*ClearAttachmentFBO)(const GfxClearAttachmentFBOQuery* query, GfxBoolResult* result);
 	void (*GetVAO)(const GfxEmptyQuery* query, GfxVAOResult* result);
 	void (*DeleteVAO)(const GfxUIntQuery* query, GfxEmptyResult* result);
+	void (*AttachVertexBufferVAO)(const GfxVAOBufferQuery* query, GfxEmptyResult* result);
+	void (*AttachInstanceBufferVAO)(const GfxVAOBufferQuery* query, GfxEmptyResult* result);
+	void (*AttachIndexBufferVAO)(const GfxVAOBufferQuery* query, GfxEmptyResult* result);
+	void (*DrawArraysVAO)(const GfxVAODrawArraysQuery* query, GfxEmptyResult* result);
+	void (*DrawElementsVAO)(const GfxVAODrawElementsQuery* query, GfxEmptyResult* result);
+	void (*ClearSubmissionVAO)(const GfxUIntQuery* query, GfxEmptyResult* result);
+	void (*AddUnitsToSubmissionVAO)(const GfxVAOSubmissionQuery* query, GfxUIntResult* result);
+	void (*AddFeaturesToSubmissionVAO)(const GfxVAOSubmissionQuery* query, GfxUIntResult* result);
+	void (*AddUnitDefsToSubmissionVAO)(const GfxVAOSubmissionQuery* query, GfxUIntResult* result);
+	void (*AddFeatureDefsToSubmissionVAO)(const GfxVAOSubmissionQuery* query, GfxUIntResult* result);
+	void (*RemoveFromSubmissionVAO)(const GfxVAORemoveSubmissionQuery* query, GfxEmptyResult* result);
+	void (*SubmitVAO)(const GfxUIntQuery* query, GfxEmptyResult* result);
 	void (*GetVBO)(const GfxVBOQuery* query, GfxVBOResult* result);
 	void (*DeleteVBO)(const GfxUIntQuery* query, GfxEmptyResult* result);
+	void (*DefineVBO)(const GfxVBODefineQuery* query, GfxEmptyResult* result);
+	void (*GetVBOInfo)(const GfxVBOInfoQuery* query, GfxVBOInfoResult* result);
+	void (*UploadVBO)(const GfxVBOUploadQuery* query, GfxVBOUploadResult* result);
+	void (*DownloadVBO)(const GfxVBODownloadQuery* query, GfxVBODownloadResult* result);
+	void (*ClearVBO)(const GfxUIntQuery* query, GfxEmptyResult* result);
+	void (*ModelsVBO)(const GfxUIntQuery* query, GfxUIntResult* result);
+	void (*InstanceDataFromUnitDefsVBO)(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result);
+	void (*InstanceDataFromFeatureDefsVBO)(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result);
+	void (*InstanceDataFromUnitsVBO)(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result);
+	void (*InstanceDataFromFeaturesVBO)(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result);
+	void (*MatrixDataFromProjectilesVBO)(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result);
+	void (*BindBufferRangeVBO)(const GfxVBOBindRangeQuery* query, GfxIntResult* result);
+	void (*UnbindBufferRangeVBO)(const GfxVBOBindRangeQuery* query, GfxIntResult* result);
+	void (*DumpDefinitionVBO)(const GfxUIntQuery* query, GfxEmptyResult* result);
+	void (*CopyToVBO)(const GfxVBOCopyQuery* query, GfxBoolResult* result);
+	void (*GetIDVBO)(const GfxUIntQuery* query, GfxUIntResult* result);
 	void (*RenderToTexture)(const GfxRenderToTextureQuery* query, GfxEmptyResult* result);
 	void (*CreateTextureAtlas)(const GfxCreateTextureAtlasQuery* query, GfxStringResult* result);
 	void (*FinalizeTextureAtlas)(const GfxTextureNameQuery* query, GfxBoolResult* result);

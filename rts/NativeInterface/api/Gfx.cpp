@@ -7,6 +7,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <stdexcept>
 #include <unordered_map>
 #include <vector>
 
@@ -14,6 +15,7 @@
 #include "Game/SyncedGameCommands.h"
 #include "Game/UnsyncedGameCommands.h"
 #include "Game/CameraHandler.h"
+#include "Game/GlobalUnsynced.h"
 #include "Game/UI/MiniMap.h"
 #include "Map/MapInfo.h"
 #include "Map/ReadMap.h"
@@ -25,6 +27,8 @@
 #include "Rendering/Env/WaterRendering.h"
 #include "Rendering/Fonts/CFontTexture.h"
 #include "Rendering/GL/FBO.h"
+#include "Rendering/GL/VAO.h"
+#include "Rendering/GL/VBO.h"
 #include "Rendering/GL/glExtra.h"
 #include "Rendering/GL/TexBind.h"
 #include "Rendering/GL/myGL.h"
@@ -33,10 +37,13 @@
 #include "Rendering/Common/ModelDrawerHelpers.h"
 #include "Rendering/Features/FeatureDrawer.h"
 #include "Rendering/Models/3DModel.hpp"
+#include "Rendering/Models/3DModelVAO.hpp"
 #include "Rendering/Models/3DModelMisc.hpp"
 #include "Rendering/Models/3DModelPiece.hpp"
 #include "Rendering/Models/LocalModel.hpp"
 #include "Rendering/Models/ModelsMemStorage.h"
+#include "Rendering/Models/VertexData.hpp"
+#include "Rendering/ModelsDataUploader.h"
 #include "Rendering/ShadowHandler.h"
 #include "Rendering/Textures/3DOTextureHandler.h"
 #include "Rendering/Textures/Bitmap.h"
@@ -63,6 +70,9 @@ SPRING_GL_CONSTANTS(SPRING_GL_VERIFY_ENTRY)
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Units/UnitDefHandler.h"
+#include "Sim/Projectiles/Projectile.h"
+#include "Sim/Projectiles/ProjectileHandler.h"
+#include "Sim/Projectiles/WeaponProjectiles/WeaponProjectile.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Weapons/WeaponDefHandler.h"
 #include "Rendering/Units/UnitDrawer.h"
@@ -137,6 +147,41 @@ struct NativeFBO {
 	GLsizei ysize = 0;
 };
 
+struct NativeVBOAttribute {
+	GLint id = 0;
+	GLenum type = GL_FLOAT;
+	GLint size = 4;
+	GLboolean normalized = GL_FALSE;
+	GLsizei pointer = 0;
+	GLsizei typeSizeInBytes = sizeof(float);
+	GLsizei strideSizeInBytes = 4 * sizeof(float);
+};
+
+struct NativeVBO {
+	std::unique_ptr<VBO> owned;
+	VBO* vbo = nullptr;
+	GLuint rawID = 0;
+	GLenum target = GL_ARRAY_BUFFER;
+	bool freqUpdated = false;
+	bool defined = false;
+	uint32_t elementsCount = 0;
+	uint32_t elemSizeInBytes = 0;
+	uint32_t bufferSizeInBytes = 0;
+	uint32_t primitiveRestartIndex = ~0u;
+	std::vector<NativeVBOAttribute> attributes;
+	std::vector<uint8_t> shadow;
+};
+
+struct NativeVAO {
+	std::unique_ptr<VAO> vao;
+	GLuint rawID = 0;
+	uint32_t vertexVBO = 0;
+	uint32_t instanceVBO = 0;
+	uint32_t indexVBO = 0;
+	uint32_t baseInstance = 0;
+	std::vector<SDrawElementsIndirectCommand> submissions;
+};
+
 static std::unordered_map<std::string, NativeTexture> nativeTextures;
 static std::unordered_map<std::string, size_t> nativeAtlasMap;
 static std::vector<CTextureAtlas> nativeAtlases;
@@ -145,9 +190,8 @@ static std::unordered_map<uint32_t, GLuint> nativeQueries;
 static std::unordered_map<uint32_t, NativeShaderProgram> nativeShaders;
 static std::unordered_map<uint32_t, NativeRBO> nativeRBOs;
 static std::unordered_map<uint32_t, NativeFBO> nativeFBOs;
-static std::unordered_map<uint32_t, GLuint> nativeVAOs;
-static std::unordered_map<uint32_t, GLuint> nativeVBOs;
-static std::unordered_map<uint32_t, GLenum> nativeVBOTargets;
+static std::unordered_map<uint32_t, NativeVAO> nativeVAOs;
+static std::unordered_map<uint32_t, NativeVBO> nativeVBOs;
 static std::unordered_map<uint32_t, std::shared_ptr<CglFont>> nativeFonts;
 static uint32_t nativeTextureCounter = 0;
 static uint32_t nativeAtlasCounter = 0;
@@ -167,6 +211,7 @@ static thread_local std::vector<GfxAtlasTextureEntry> atlasTextureEntries;
 static thread_local std::vector<std::string> activeUniformNames;
 static thread_local std::vector<std::string> activeUniformTypes;
 static thread_local std::vector<GfxActiveUniformEntry> activeUniformEntries;
+static thread_local std::vector<float> nativeVBODownloadResult;
 static std::string nativeShaderLog;
 
 static const char* UniformTypeString(GLenum type)
@@ -467,6 +512,18 @@ static NativeRBO* GetNativeRBO(uint32_t rboID)
 {
 	const auto it = nativeRBOs.find(rboID);
 	return (it != nativeRBOs.end()) ? &it->second : nullptr;
+}
+
+static NativeVBO* GetNativeVBO(uint32_t vboID)
+{
+	const auto it = nativeVBOs.find(vboID);
+	return (it != nativeVBOs.end()) ? &it->second : nullptr;
+}
+
+static NativeVAO* GetNativeVAO(uint32_t vaoID)
+{
+	const auto it = nativeVAOs.find(vaoID);
+	return (it != nativeVAOs.end()) ? &it->second : nullptr;
 }
 
 static bool DeleteNativeAtlas(const char* name)
@@ -2234,6 +2291,117 @@ static void CreateFBO(const GfxFBOCreateQuery* query, GfxFBOResult* result)
 	nativeFBOs[fboID] = fbo;
 }
 
+static bool AttachNativeFBOObject(NativeFBO& fbo, const GfxFBOAttachmentQuery& query)
+{
+	if (query.attachment == 0)
+		return false;
+
+	if (query.useRBO) {
+		NativeRBO* rbo = GetNativeRBO(query.rboID);
+		if (rbo == nullptr)
+			return false;
+
+		const GLenum target = query.textureTarget != 0 ? query.textureTarget : rbo->target;
+		glFramebufferRenderbufferEXT(fbo.target, query.attachment, target, rbo->id);
+		fbo.xsize = rbo->xsize;
+		fbo.ysize = rbo->ysize;
+		return true;
+	}
+
+	if (query.textureName == nullptr || query.textureName[0] == '\0') {
+		glFramebufferTexture2DEXT(fbo.target, query.attachment, GL_TEXTURE_2D, 0, 0);
+		glFramebufferRenderbufferEXT(fbo.target, query.attachment, GL_RENDERBUFFER_EXT, 0);
+		return true;
+	}
+
+	ResolvedTexture texture;
+	if (!ResolveTexture(query.textureName, texture))
+		return false;
+
+	const GLenum target = query.textureTarget != 0 ? query.textureTarget : texture.target;
+	switch (target) {
+		case GL_TEXTURE_1D:
+			glFramebufferTexture1DEXT(fbo.target, query.attachment, target, texture.id, query.mipLevel);
+			break;
+		case GL_TEXTURE_2D:
+			glFramebufferTexture2DEXT(fbo.target, query.attachment, target, texture.id, query.mipLevel);
+			break;
+		case GL_TEXTURE_2D_MULTISAMPLE:
+			glFramebufferTexture2DEXT(fbo.target, query.attachment, target, texture.id, 0);
+			break;
+		case GL_TEXTURE_2D_ARRAY:
+		case GL_TEXTURE_CUBE_MAP:
+		case GL_TEXTURE_3D:
+			if (!GLAD_GL_VERSION_3_2)
+				return false;
+			glFramebufferTexture(fbo.target, query.attachment, texture.id, query.mipLevel);
+			break;
+		default:
+			return false;
+	}
+
+	fbo.xsize = texture.xsize;
+	fbo.ysize = texture.ysize;
+	return true;
+}
+
+static void SetFBOAttachment(const GfxFBOAttachmentQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeFBO* fbo = GetNativeFBO(query->fboID);
+	if (fbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+
+	const GLenum bindTarget = GetFBOBindingEnum(fbo->target);
+	GLint currentFBO = 0;
+	glGetIntegerv(bindTarget, &currentFBO);
+	glBindFramebufferEXT(fbo->target, fbo->id);
+	const bool success = AttachNativeFBOObject(*fbo, *query);
+	glBindFramebufferEXT(fbo->target, currentFBO);
+	if (!success)
+		result->error = &INVALID_ARGUMENT_ERROR;
+}
+
+static void SetFBODrawBuffers(const GfxFBODrawBuffersQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeFBO* fbo = GetNativeFBO(query->fboID);
+	if (fbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	if (!GLAD_GL_ARB_draw_buffers || query->buffers == nullptr || query->bufferCount == 0 || query->bufferCount > 32) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const GLenum bindTarget = GetFBOBindingEnum(fbo->target);
+	GLint currentFBO = 0;
+	glGetIntegerv(bindTarget, &currentFBO);
+	glBindFramebufferEXT(fbo->target, fbo->id);
+	glDrawBuffers(query->bufferCount, query->buffers);
+	glBindFramebufferEXT(fbo->target, currentFBO);
+}
+
+static void SetFBOReadBuffer(const GfxFBOReadBufferQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeFBO* fbo = GetNativeFBO(query->fboID);
+	if (fbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+
+	const GLenum bindTarget = GetFBOBindingEnum(fbo->target);
+	GLint currentFBO = 0;
+	glGetIntegerv(bindTarget, &currentFBO);
+	glBindFramebufferEXT(fbo->target, fbo->id);
+	glReadBuffer(query->buffer);
+	glBindFramebufferEXT(fbo->target, currentFBO);
+}
+
 static void DeleteFBO(const GfxUIntQuery* query, GfxEmptyResult* result)
 {
 	result->error = nullptr;
@@ -2398,14 +2566,18 @@ static void GetVAO(const GfxEmptyQuery*, GfxVAOResult* result)
 	}
 
 	GLuint vao = 0;
-	glGenVertexArrays(1, &vao);
+	auto vaoObject = std::make_unique<VAO>();
+	vao = vaoObject->GetId();
 	if (vao == 0) {
 		result->error = &OPERATION_FAILED_ERROR;
 		return;
 	}
 
 	const uint32_t vaoID = ++nativeVAOCounter;
-	nativeVAOs[vaoID] = vao;
+	NativeVAO native;
+	native.vao = std::move(vaoObject);
+	native.rawID = vao;
+	nativeVAOs[vaoID] = std::move(native);
 	result->vaoID = vaoID;
 	result->rawID = vao;
 }
@@ -2417,7 +2589,6 @@ static void DeleteVAO(const GfxUIntQuery* query, GfxEmptyResult* result)
 	if (it == nativeVAOs.end())
 		return;
 
-	glDeleteVertexArrays(1, &it->second);
 	nativeVAOs.erase(it);
 }
 
@@ -2444,16 +2615,21 @@ static void GetVBO(const GfxVBOQuery* query, GfxVBOResult* result)
 			return;
 	}
 
-	GLuint vbo = 0;
-	glGenBuffers(1, &vbo);
+	auto vboObject = std::make_unique<VBO>(result->target, false);
+	const GLuint vbo = vboObject->GetId();
 	if (vbo == 0) {
 		result->error = &OPERATION_FAILED_ERROR;
 		return;
 	}
 
 	const uint32_t vboID = ++nativeVBOCounter;
-	nativeVBOs[vboID] = vbo;
-	nativeVBOTargets[vboID] = result->target;
+	NativeVBO native;
+	native.owned = std::move(vboObject);
+	native.vbo = native.owned.get();
+	native.rawID = vbo;
+	native.target = result->target;
+	native.freqUpdated = query->freqUpdated;
+	nativeVBOs[vboID] = std::move(native);
 	result->vboID = vboID;
 	result->rawID = vbo;
 }
@@ -2465,9 +2641,1141 @@ static void DeleteVBO(const GfxUIntQuery* query, GfxEmptyResult* result)
 	if (it == nativeVBOs.end())
 		return;
 
-	glDeleteBuffers(1, &it->second);
-	nativeVBOTargets.erase(query->value);
 	nativeVBOs.erase(it);
+}
+
+static bool IsNativeVBOTypeValid(GLenum target, GLenum type)
+{
+	if (target == GL_ARRAY_BUFFER) {
+		switch (type) {
+			case GL_BYTE:
+			case GL_UNSIGNED_BYTE:
+			case GL_SHORT:
+			case GL_UNSIGNED_SHORT:
+			case GL_INT:
+			case GL_UNSIGNED_INT:
+			case GL_FLOAT:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	if (target == GL_UNIFORM_BUFFER || target == GL_SHADER_STORAGE_BUFFER) {
+		switch (type) {
+			case GL_FLOAT_VEC4:
+			case GL_INT_VEC4:
+			case GL_UNSIGNED_INT_VEC4:
+			case GL_FLOAT_MAT4:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	return false;
+}
+
+static bool GetNativeVBOTypeLayout(GLenum target, GLenum type, GLint size, GLsizei& alignment, GLsizei& sizeInBytes)
+{
+	if (target == GL_ARRAY_BUFFER) {
+		switch (type) {
+			case GL_BYTE:
+			case GL_UNSIGNED_BYTE: alignment = 1; sizeInBytes = 1; break;
+			case GL_SHORT:
+			case GL_UNSIGNED_SHORT: alignment = 2; sizeInBytes = 2; break;
+			case GL_INT:
+			case GL_UNSIGNED_INT:
+			case GL_FLOAT: alignment = 4; sizeInBytes = 4; break;
+			default: return false;
+		}
+		sizeInBytes *= size;
+		return true;
+	}
+
+	if (target != GL_UNIFORM_BUFFER && target != GL_SHADER_STORAGE_BUFFER)
+		return false;
+
+	switch (type) {
+		case GL_FLOAT_VEC4:
+		case GL_INT_VEC4:
+		case GL_UNSIGNED_INT_VEC4:
+			alignment = 16;
+			sizeInBytes = 16;
+			break;
+		case GL_FLOAT_MAT4:
+			alignment = 16;
+			sizeInBytes = 64;
+			break;
+		default:
+			return false;
+	}
+
+	if (size > 1) {
+		alignment = 16;
+		sizeInBytes += (size - 1) * alignment;
+	}
+	return true;
+}
+
+static uint32_t AlignNativeVBO(uint32_t value, uint32_t alignment)
+{
+	return (value + alignment - 1u) / alignment * alignment;
+}
+
+static bool AddNativeVBOAttribute(NativeVBO& vbo, const GfxVBOAttributeOptions& option, uint32_t maxAttributes)
+{
+	if (option.id < 0 || static_cast<uint32_t>(option.id) >= maxAttributes)
+		return false;
+	if (std::any_of(vbo.attributes.begin(), vbo.attributes.end(), [&](const NativeVBOAttribute& attr) { return attr.id == option.id; }))
+		return false;
+
+	const GLenum type = option.type;
+	const GLint size = option.size;
+	if (!IsNativeVBOTypeValid(vbo.target, type))
+		return false;
+	if (size <= 0 || (vbo.target == GL_ARRAY_BUFFER && size > 4) || (vbo.target != GL_ARRAY_BUFFER && size > (1 << 12)))
+		return false;
+
+	GLsizei alignment = 0;
+	GLsizei sizeInBytes = 0;
+	if (!GetNativeVBOTypeLayout(vbo.target, type, size, alignment, sizeInBytes))
+		return false;
+
+	uint32_t nextPointer = vbo.elemSizeInBytes;
+	const uint32_t pointer = AlignNativeVBO(nextPointer, alignment);
+	vbo.elemSizeInBytes = pointer + sizeInBytes;
+	vbo.attributes.push_back({
+		.id = option.id,
+		.type = type,
+		.size = size,
+		.normalized = static_cast<GLboolean>(option.normalized ? GL_TRUE : GL_FALSE),
+		.pointer = static_cast<GLsizei>(pointer),
+		.typeSizeInBytes = sizeInBytes / size,
+		.strideSizeInBytes = sizeInBytes,
+	});
+	return true;
+}
+
+static void SetNativeModelVBOAttributes(NativeVBO& vbo)
+{
+	vbo.attributes.clear();
+	vbo.elemSizeInBytes = 0;
+	if (vbo.target == GL_ARRAY_BUFFER) {
+		vbo.attributes = {
+			{0, GL_FLOAT, 3, GL_FALSE, static_cast<GLsizei>(offsetof(SVertexData, pos)), sizeof(float), 3 * sizeof(float)},
+			{1, GL_FLOAT, 3, GL_FALSE, static_cast<GLsizei>(offsetof(SVertexData, normal)), sizeof(float), 3 * sizeof(float)},
+			{2, GL_FLOAT, 3, GL_FALSE, static_cast<GLsizei>(offsetof(SVertexData, sTangent)), sizeof(float), 3 * sizeof(float)},
+			{3, GL_FLOAT, 3, GL_FALSE, static_cast<GLsizei>(offsetof(SVertexData, tTangent)), sizeof(float), 3 * sizeof(float)},
+			{4, GL_FLOAT, 4, GL_FALSE, static_cast<GLsizei>(offsetof(SVertexData, texCoords)), sizeof(float), 4 * sizeof(float)},
+			{5, GL_UNSIGNED_INT, 3, GL_FALSE, static_cast<GLsizei>(offsetof(SVertexData, boneIDsLow)), sizeof(uint32_t), 3 * sizeof(uint32_t)},
+		};
+		vbo.elemSizeInBytes = sizeof(SVertexData);
+		vbo.elementsCount = S3DModelVAO::GetInstance().GetVertElemCount();
+	} else {
+		vbo.attributes = {
+			{0, GL_UNSIGNED_INT, 1, GL_FALSE, 0, sizeof(uint32_t), sizeof(uint32_t)},
+		};
+		vbo.elemSizeInBytes = sizeof(uint32_t);
+		vbo.elementsCount = S3DModelVAO::GetInstance().GetIndxElemCount();
+		vbo.primitiveRestartIndex = 0xffffff;
+	}
+	vbo.bufferSizeInBytes = static_cast<uint32_t>(vbo.vbo->GetSize());
+	vbo.shadow.clear();
+	vbo.defined = true;
+}
+
+static void DefineVBO(const GfxVBODefineQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (vbo == nullptr || vbo->defined || query->elementsCount <= 0) {
+		result->error = vbo == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	if (query->elementArray != (vbo->target == GL_ELEMENT_ARRAY_BUFFER)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	vbo->elementsCount = query->elementsCount;
+	vbo->attributes.clear();
+	vbo->elemSizeInBytes = 0;
+	vbo->primitiveRestartIndex = ~0u;
+
+	if (query->elementArray) {
+		GLsizei indexSize = 0;
+		switch (query->indexType != 0 ? query->indexType : GL_UNSIGNED_SHORT) {
+			case GL_UNSIGNED_BYTE: indexSize = sizeof(uint8_t); vbo->primitiveRestartIndex = 0xff; break;
+			case GL_UNSIGNED_SHORT: indexSize = sizeof(uint16_t); vbo->primitiveRestartIndex = 0xffff; break;
+			case GL_UNSIGNED_INT: indexSize = sizeof(uint32_t); vbo->primitiveRestartIndex = 0xffffff; break;
+			default: result->error = &INVALID_ARGUMENT_ERROR; return;
+		}
+		vbo->attributes.push_back({0, query->indexType != 0 ? query->indexType : GL_UNSIGNED_SHORT, 1, GL_FALSE, 0, indexSize, indexSize});
+		vbo->elemSizeInBytes = indexSize;
+	} else {
+		const uint32_t maxAttributes = vbo->target == GL_ARRAY_BUFFER ? 16u : ~0u;
+		if (query->useDefaultAttributes) {
+			if (query->defaultAttributeCount == 0 || query->defaultAttributeCount > maxAttributes) {
+				result->error = &INVALID_ARGUMENT_ERROR;
+				return;
+			}
+			for (uint32_t i = 0; i < query->defaultAttributeCount; ++i) {
+				const GfxVBOAttributeOptions option {
+					.id = static_cast<int32_t>(i),
+					.type = static_cast<uint32_t>(vbo->target == GL_ARRAY_BUFFER ? GL_FLOAT : GL_FLOAT_VEC4),
+					.size = vbo->target == GL_ARRAY_BUFFER ? 4 : 1,
+					.normalized = false,
+				};
+				if (!AddNativeVBOAttribute(*vbo, option, maxAttributes)) {
+					result->error = &INVALID_ARGUMENT_ERROR;
+					return;
+				}
+			}
+		} else {
+			if (query->attributes == nullptr || query->attributeCount == 0) {
+				result->error = &INVALID_ARGUMENT_ERROR;
+				return;
+			}
+			for (uint32_t i = 0; i < query->attributeCount; ++i) {
+				if (!AddNativeVBOAttribute(*vbo, query->attributes[i], maxAttributes)) {
+					result->error = &INVALID_ARGUMENT_ERROR;
+					return;
+				}
+			}
+			std::sort(vbo->attributes.begin(), vbo->attributes.end(), [](const auto& left, const auto& right) { return left.id < right.id; });
+		}
+	}
+
+	if (vbo->elemSizeInBytes == 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	vbo->bufferSizeInBytes = vbo->elemSizeInBytes * vbo->elementsCount;
+	if (vbo->target == GL_UNIFORM_BUFFER && vbo->bufferSizeInBytes > 0x4000u) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (vbo->bufferSizeInBytes > 0x1000000u) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	vbo->vbo->Bind(vbo->target);
+	vbo->vbo->New(vbo->bufferSizeInBytes, vbo->freqUpdated ? GL_STREAM_DRAW : GL_STATIC_DRAW);
+	vbo->vbo->Unbind();
+	vbo->shadow.assign(vbo->bufferSizeInBytes, 0);
+	vbo->defined = true;
+}
+
+static void GetVBOInfo(const GfxVBOInfoQuery* query, GfxVBOInfoResult* result)
+{
+	result->error = nullptr;
+	result->elementsCount = 0;
+	result->bufferSizeInBytes = 0;
+	result->gpuBufferSizeInBytes = 0;
+	result->elemSizeInBytes = 0;
+	result->attributesCount = 0;
+	result->primitiveRestartIndex = 0;
+
+	const NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (vbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	result->elementsCount = vbo->elementsCount;
+	result->bufferSizeInBytes = vbo->bufferSizeInBytes;
+	result->gpuBufferSizeInBytes = vbo->vbo != nullptr ? vbo->vbo->GetSize() : 0;
+	result->elemSizeInBytes = vbo->elemSizeInBytes;
+	result->attributesCount = vbo->attributes.size();
+	result->primitiveRestartIndex = vbo->primitiveRestartIndex;
+}
+
+static void ModelsVBO(const GfxUIntQuery* query, GfxUIntResult* result)
+{
+	result->error = nullptr;
+	result->value = 0;
+	NativeVBO* vbo = GetNativeVBO(query->value);
+	if (vbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	if (!S3DModelVAO::IsValid()) {
+		result->error = &OPERATION_FAILED_ERROR;
+		return;
+	}
+
+	vbo->owned.reset();
+	vbo->vbo = vbo->target == GL_ELEMENT_ARRAY_BUFFER ? S3DModelVAO::GetInstance().GetIndxVBO() : S3DModelVAO::GetInstance().GetVertVBO();
+	vbo->rawID = vbo->vbo->GetIdRaw();
+	SetNativeModelVBOAttributes(*vbo);
+	result->value = vbo->bufferSizeInBytes;
+}
+
+template<typename T>
+static bool WriteNativeVBOType(
+	NativeVBO& vbo,
+	const float* data,
+	size_t dataCount,
+	size_t& dataIndex,
+	NativeVBOAttribute const& attribute,
+	bool copyData,
+	uint8_t* destination,
+	size_t destinationSize,
+	size_t& bytesWritten
+)
+{
+	const size_t basicTypeSize = attribute.size * std::max<GLsizei>(1, attribute.typeSizeInBytes / 4);
+	const size_t outputSize = basicTypeSize * sizeof(T);
+	if (bytesWritten + outputSize > destinationSize)
+		return false;
+
+	if (copyData) {
+		if (dataIndex + basicTypeSize > dataCount)
+			return false;
+		for (size_t i = 0; i < basicTypeSize; ++i) {
+			const T value = static_cast<T>(data[dataIndex++]);
+			std::memcpy(destination + bytesWritten + i * sizeof(T), &value, sizeof(T));
+		}
+	}
+
+	bytesWritten += outputSize;
+	return true;
+}
+
+static bool WriteNativeVBOAttribute(
+	NativeVBO& vbo,
+	const float* data,
+	size_t dataCount,
+	size_t& dataIndex,
+	const NativeVBOAttribute& attribute,
+	int attributeIndex,
+	uint8_t* destination,
+	size_t destinationSize,
+	size_t& bytesWritten
+)
+{
+	const bool copyData = attributeIndex < 0 || attributeIndex == attribute.id;
+	switch (attribute.type) {
+		case GL_BYTE: return WriteNativeVBOType<int8_t>(vbo, data, dataCount, dataIndex, attribute, copyData, destination, destinationSize, bytesWritten);
+		case GL_UNSIGNED_BYTE: return WriteNativeVBOType<uint8_t>(vbo, data, dataCount, dataIndex, attribute, copyData, destination, destinationSize, bytesWritten);
+		case GL_SHORT: return WriteNativeVBOType<int16_t>(vbo, data, dataCount, dataIndex, attribute, copyData, destination, destinationSize, bytesWritten);
+		case GL_UNSIGNED_SHORT: return WriteNativeVBOType<uint16_t>(vbo, data, dataCount, dataIndex, attribute, copyData, destination, destinationSize, bytesWritten);
+		case GL_INT:
+		case GL_INT_VEC4: return WriteNativeVBOType<int32_t>(vbo, data, dataCount, dataIndex, attribute, copyData, destination, destinationSize, bytesWritten);
+		case GL_UNSIGNED_INT:
+		case GL_UNSIGNED_INT_VEC4: return WriteNativeVBOType<uint32_t>(vbo, data, dataCount, dataIndex, attribute, copyData, destination, destinationSize, bytesWritten);
+		case GL_FLOAT:
+		case GL_FLOAT_VEC4:
+		case GL_FLOAT_MAT4: return WriteNativeVBOType<float>(vbo, data, dataCount, dataIndex, attribute, copyData, destination, destinationSize, bytesWritten);
+		default: return false;
+	}
+}
+
+static void UploadVBO(const GfxVBOUploadQuery* query, GfxVBOUploadResult* result)
+{
+	result->error = nullptr;
+	result->bytesWritten = 0;
+	NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (vbo == nullptr || !vbo->defined || vbo->vbo == nullptr) {
+		result->error = vbo == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (query->data == nullptr || query->dataCount == 0) {
+		return;
+	}
+
+	const uint32_t elementOffset = std::max(query->elementOffset, 0);
+	if (elementOffset >= vbo->elementsCount || (query->attributeIndex >= 0 && std::none_of(vbo->attributes.begin(), vbo->attributes.end(), [&](const auto& attr) { return attr.id == query->attributeIndex; }))) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const uint32_t dataStart = std::max(query->dataStartIndex, 1);
+	const uint32_t dataFinish = query->dataFinishIndex > 0 ? query->dataFinishIndex : query->dataCount;
+	if (dataStart > dataFinish || dataFinish > query->dataCount) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const float* data = query->data + dataStart - 1;
+	const size_t dataCount = dataFinish - dataStart + 1;
+	const size_t bufferOffset = static_cast<size_t>(elementOffset) * vbo->elemSizeInBytes;
+	if (bufferOffset >= vbo->bufferSizeInBytes || vbo->shadow.size() < vbo->bufferSizeInBytes) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	size_t dataIndex = 0;
+	size_t bytesWritten = 0;
+	uint8_t* destination = vbo->shadow.data() + bufferOffset;
+	const size_t destinationSize = vbo->bufferSizeInBytes - bufferOffset;
+	while (dataIndex < dataCount) {
+		for (const NativeVBOAttribute& attribute : vbo->attributes) {
+			if (!WriteNativeVBOAttribute(*vbo, data, dataCount, dataIndex, attribute, query->attributeIndex, destination, destinationSize, bytesWritten)) {
+				dataIndex = dataCount;
+				break;
+			}
+		}
+	}
+
+	if (bytesWritten > 0) {
+		vbo->vbo->Bind(vbo->target);
+		vbo->vbo->SetBufferSubData(bufferOffset, bytesWritten, destination);
+		vbo->vbo->Unbind();
+	}
+	result->bytesWritten = bytesWritten;
+}
+
+template<typename T>
+static bool ReadNativeVBOType(
+	const NativeVBOAttribute& attribute,
+	const uint8_t* source,
+	size_t sourceSize,
+	bool copyData,
+	std::vector<float>& values,
+	size_t& bytesRead
+)
+{
+	const size_t basicTypeSize = attribute.size * std::max<GLsizei>(1, attribute.typeSizeInBytes / 4);
+	const size_t inputSize = basicTypeSize * sizeof(T);
+	if (bytesRead + inputSize > sourceSize)
+		return false;
+
+	if (copyData) {
+		for (size_t i = 0; i < basicTypeSize; ++i) {
+			T value;
+			std::memcpy(&value, source + bytesRead + i * sizeof(T), sizeof(T));
+			values.push_back(static_cast<float>(value));
+		}
+	}
+	bytesRead += inputSize;
+	return true;
+}
+
+static bool ReadNativeVBOAttribute(
+	const NativeVBOAttribute& attribute,
+	int attributeIndex,
+	const uint8_t* source,
+	size_t sourceSize,
+	std::vector<float>& values,
+	size_t& bytesRead
+)
+{
+	const bool copyData = attributeIndex < 0 || attributeIndex == attribute.id;
+	switch (attribute.type) {
+		case GL_BYTE: return ReadNativeVBOType<int8_t>(attribute, source, sourceSize, copyData, values, bytesRead);
+		case GL_UNSIGNED_BYTE: return ReadNativeVBOType<uint8_t>(attribute, source, sourceSize, copyData, values, bytesRead);
+		case GL_SHORT: return ReadNativeVBOType<int16_t>(attribute, source, sourceSize, copyData, values, bytesRead);
+		case GL_UNSIGNED_SHORT: return ReadNativeVBOType<uint16_t>(attribute, source, sourceSize, copyData, values, bytesRead);
+		case GL_INT:
+		case GL_INT_VEC4: return ReadNativeVBOType<int32_t>(attribute, source, sourceSize, copyData, values, bytesRead);
+		case GL_UNSIGNED_INT:
+		case GL_UNSIGNED_INT_VEC4: return ReadNativeVBOType<uint32_t>(attribute, source, sourceSize, copyData, values, bytesRead);
+		case GL_FLOAT:
+		case GL_FLOAT_VEC4:
+		case GL_FLOAT_MAT4: return ReadNativeVBOType<float>(attribute, source, sourceSize, copyData, values, bytesRead);
+		default: return false;
+	}
+}
+
+static void DownloadVBO(const GfxVBODownloadQuery* query, GfxVBODownloadResult* result)
+{
+	result->error = nullptr;
+	result->values = nullptr;
+	result->count = 0;
+	nativeVBODownloadResult.clear();
+
+	NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (vbo == nullptr || !vbo->defined || vbo->vbo == nullptr) {
+		result->error = vbo == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (query->attributeIndex >= 0 && std::none_of(vbo->attributes.begin(), vbo->attributes.end(), [&](const auto& attr) { return attr.id == query->attributeIndex; })) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const uint32_t elementOffset = std::max(query->elementOffset, 0);
+	const uint32_t elementCount = query->elementCount > 0 ? query->elementCount : vbo->elementsCount;
+	if (elementOffset + elementCount > vbo->elementsCount || vbo->elemSizeInBytes == 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const size_t bufferOffset = static_cast<size_t>(elementOffset) * vbo->elemSizeInBytes;
+	const size_t bufferSize = static_cast<size_t>(elementCount) * vbo->elemSizeInBytes;
+	const uint8_t* source = nullptr;
+	if (query->forceGPURead) {
+		vbo->vbo->Bind(vbo->target);
+		source = vbo->vbo->MapBuffer(bufferOffset, bufferSize, GL_MAP_READ_BIT);
+		if (source == nullptr) {
+			vbo->vbo->Unbind();
+			result->error = &OPERATION_FAILED_ERROR;
+			return;
+		}
+	} else {
+		if (vbo->shadow.size() < bufferOffset + bufferSize) {
+			result->error = &OPERATION_FAILED_ERROR;
+			return;
+		}
+		source = vbo->shadow.data() + bufferOffset;
+	}
+
+	nativeVBODownloadResult.reserve(static_cast<size_t>(elementCount) * vbo->attributes.size() * 4);
+	size_t bytesRead = 0;
+	for (uint32_t e = 0; e < elementCount; ++e) {
+		for (const NativeVBOAttribute& attribute : vbo->attributes) {
+			if (!ReadNativeVBOAttribute(attribute, query->attributeIndex, source, bufferSize, nativeVBODownloadResult, bytesRead)) {
+				if (query->forceGPURead) {
+					vbo->vbo->UnmapBuffer();
+					vbo->vbo->Unbind();
+				}
+				result->error = &OPERATION_FAILED_ERROR;
+				return;
+			}
+		}
+	}
+
+	if (query->forceGPURead) {
+		vbo->vbo->UnmapBuffer();
+		vbo->vbo->Unbind();
+	}
+	result->values = nativeVBODownloadResult.data();
+	result->count = nativeVBODownloadResult.size();
+}
+
+static void ClearVBO(const GfxUIntQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeVBO* vbo = GetNativeVBO(query->value);
+	if (vbo == nullptr || !vbo->defined || vbo->vbo == nullptr) {
+		result->error = vbo == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const uint8_t value = 0;
+	vbo->vbo->Bind(vbo->target);
+	glClearBufferData(vbo->target, GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE, &value);
+	vbo->vbo->Unbind();
+	// LuaVBOImpl::Clear updates GPU storage only; its CPU shadow remains
+	// unchanged and Download(..., false) reads that shadow.
+}
+
+static bool UploadNativeVBOBytes(NativeVBO& vbo, int attributeIndex, uint32_t elementOffset, const uint8_t* data, uint32_t elementCount, uint32_t& bytesWritten)
+{
+	bytesWritten = 0;
+	if (data == nullptr || elementCount == 0 || vbo.shadow.empty() || vbo.elemSizeInBytes == 0)
+		return elementCount == 0;
+	if (elementOffset + elementCount > vbo.elementsCount)
+		return false;
+
+	const auto attrIt = std::find_if(vbo.attributes.begin(), vbo.attributes.end(), [&](const auto& attr) { return attr.id == attributeIndex; });
+	if (attrIt == vbo.attributes.end())
+		return false;
+	const size_t attributeSize = static_cast<size_t>(attrIt->typeSizeInBytes) * attrIt->size;
+	if (attributeSize != sizeof(SInstanceData) && attributeSize != sizeof(float) * 16)
+		return false;
+
+	for (uint32_t i = 0; i < elementCount; ++i) {
+		const size_t destinationOffset = static_cast<size_t>(elementOffset + i) * vbo.elemSizeInBytes + attrIt->pointer;
+		if (destinationOffset + attributeSize > vbo.shadow.size())
+			return false;
+		std::memcpy(vbo.shadow.data() + destinationOffset, data + static_cast<size_t>(i) * attributeSize, attributeSize);
+	}
+
+	vbo.vbo->Bind(vbo.target);
+	vbo.vbo->SetBufferSubData(0, vbo.shadow.size(), vbo.shadow.data());
+	vbo.vbo->Unbind();
+	bytesWritten = elementCount * vbo.elemSizeInBytes;
+	return true;
+}
+
+template<typename TObj>
+static bool BuildNativeInstanceData(const TObj* object, uint16_t paletteIndex, SInstanceData& result)
+{
+	if (object == nullptr || object->model == nullptr)
+		return false;
+
+	const size_t transformOffset = transformsUploader.GetElemOffset(object);
+	if (transformOffset == static_cast<size_t>(~0u))
+		return false;
+
+	uint16_t objectPaletteIndex = paletteIndex;
+	if constexpr (std::is_same_v<TObj, CUnit> || std::is_same_v<TObj, CFeature>)
+		objectPaletteIndex = object->paletteIndex;
+
+	const uint16_t numPieces = static_cast<uint16_t>(object->model->numPieces);
+	const uint32_t uniformOffset = static_cast<uint32_t>(modelUniformsStorage.GetObjOffset(object));
+	const uint32_t bindPoseOffset = static_cast<uint32_t>(transformsUploader.GetElemOffset(object->model));
+	result = SInstanceData(static_cast<uint32_t>(transformOffset), objectPaletteIndex, numPieces, uniformOffset, bindPoseOffset);
+	return true;
+}
+
+static bool ValidateNativeInstanceAttribute(const NativeVBO& vbo, int attributeIndex)
+{
+	const auto it = std::find_if(vbo.attributes.begin(), vbo.attributes.end(), [&](const auto& attr) { return attr.id == attributeIndex; });
+	if (it == vbo.attributes.end())
+		return false;
+	return (it->type == GL_UNSIGNED_INT && it->typeSizeInBytes == sizeof(uint32_t) && it->size == 4) ||
+		(it->type == GL_UNSIGNED_INT_VEC4 && it->typeSizeInBytes == sizeof(uint32_t) * 4 && it->size == 1);
+}
+
+template<typename TObj, typename Lookup>
+static void InstanceDataFromObjectsVBO(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result, Lookup lookup)
+{
+	result->error = nullptr;
+	result->value = 0;
+	NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (vbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	if (!vbo->defined || !ValidateNativeInstanceAttribute(*vbo, query->attributeIndex) || query->elementOffset < 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (query->idCount == 0)
+		return;
+	if (query->ids == nullptr || static_cast<uint32_t>(query->elementOffset) + query->idCount > vbo->elementsCount) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<SInstanceData> instanceData(query->idCount);
+	const uint16_t paletteIndex = query->teamID >= 0 ? static_cast<uint16_t>(query->teamID) : static_cast<uint16_t>(gu != nullptr ? gu->myTeam : 0);
+	for (uint32_t i = 0; i < query->idCount; ++i) {
+		const TObj* object = lookup(query->ids[i]);
+		if (!BuildNativeInstanceData(object, paletteIndex, instanceData[i])) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+	}
+
+	uint32_t bytesWritten = 0;
+	if (!UploadNativeVBOBytes(*vbo, query->attributeIndex, query->elementOffset, reinterpret_cast<const uint8_t*>(instanceData.data()), query->idCount, bytesWritten)) {
+		result->error = &OPERATION_FAILED_ERROR;
+		return;
+	}
+	result->value = bytesWritten;
+}
+
+static void InstanceDataFromUnitDefsVBO(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result)
+{
+	InstanceDataFromObjectsVBO<UnitDef>(query, result, [](uint32_t id) { return unitDefHandler != nullptr ? unitDefHandler->GetUnitDefByID(id) : nullptr; });
+}
+
+static void InstanceDataFromFeatureDefsVBO(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result)
+{
+	InstanceDataFromObjectsVBO<FeatureDef>(query, result, [](uint32_t id) { return featureDefHandler != nullptr ? featureDefHandler->GetFeatureDefByID(id) : nullptr; });
+}
+
+static void InstanceDataFromUnitsVBO(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result)
+{
+	InstanceDataFromObjectsVBO<CUnit>(query, result, [](uint32_t id) { return unitHandler.GetUnit(id); });
+}
+
+static void InstanceDataFromFeaturesVBO(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result)
+{
+	InstanceDataFromObjectsVBO<CFeature>(query, result, [](uint32_t id) { return featureHandler.GetFeature(id); });
+}
+
+static void MatrixDataFromProjectilesVBO(const GfxVBOInstanceDataQuery* query, GfxUIntResult* result)
+{
+	result->error = nullptr;
+	result->value = 0;
+	NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (vbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	if (!vbo->defined || query->attributeIndex < 0 || query->elementOffset < 0 || query->ids == nullptr || query->idCount == 0 || static_cast<uint32_t>(query->elementOffset) + query->idCount > vbo->elementsCount) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const auto first = std::find_if(vbo->attributes.begin(), vbo->attributes.end(), [&](const auto& attr) { return attr.id == query->attributeIndex; });
+	if (first == vbo->attributes.end()) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (first->type == GL_FLOAT) {
+		for (int i = 0; i < 4; ++i) {
+			const auto it = std::find_if(vbo->attributes.begin(), vbo->attributes.end(), [&](const auto& attr) { return attr.id == query->attributeIndex + i; });
+			if (it == vbo->attributes.end() || it->type != GL_FLOAT || it->size != 4 || it->strideSizeInBytes != 16) {
+				result->error = &INVALID_ARGUMENT_ERROR;
+				return;
+			}
+		}
+	} else if (first->type != GL_FLOAT_VEC4 && first->type != GL_FLOAT_MAT4) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<float> matrices(static_cast<size_t>(query->idCount) * 16);
+	for (uint32_t i = 0; i < query->idCount; ++i) {
+		const CProjectile* projectile = projectileHandler.GetProjectileBySyncedID(query->ids[i]);
+		if (projectile == nullptr || projectileDrawer == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		const CWeaponProjectile* weaponProjectile = projectile->weapon ? static_cast<const CWeaponProjectile*>(projectile) : nullptr;
+		const bool doOffset = weaponProjectile != nullptr && weaponProjectile->GetProjectileType() == WEAPON_MISSILE_PROJECTILE;
+		const CMatrix44f matrix = projectileDrawer->CanDrawProjectile(projectile, -1) ? projectile->GetTransformMatrix(doOffset) : CMatrix44f::Zero();
+		std::memcpy(matrices.data() + static_cast<size_t>(i) * 16, &matrix, sizeof(CMatrix44f));
+	}
+
+	if (first->type == GL_FLOAT) {
+		for (uint32_t i = 0; i < query->idCount; ++i) {
+			for (int row = 0; row < 4; ++row) {
+				const auto it = std::find_if(vbo->attributes.begin(), vbo->attributes.end(), [&](const auto& attr) { return attr.id == query->attributeIndex + row; });
+				const size_t destinationOffset = static_cast<size_t>(query->elementOffset + i) * vbo->elemSizeInBytes + it->pointer;
+				std::memcpy(vbo->shadow.data() + destinationOffset, matrices.data() + static_cast<size_t>(i) * 16 + row * 4, sizeof(float) * 4);
+			}
+		}
+	} else {
+		for (uint32_t i = 0; i < query->idCount; ++i) {
+			const size_t destinationOffset = static_cast<size_t>(query->elementOffset + i) * vbo->elemSizeInBytes + first->pointer;
+			std::memcpy(vbo->shadow.data() + destinationOffset, matrices.data() + static_cast<size_t>(i) * 16, sizeof(float) * 16);
+		}
+	}
+
+	vbo->vbo->Bind(vbo->target);
+	vbo->vbo->SetBufferSubData(0, vbo->shadow.size(), vbo->shadow.data());
+	vbo->vbo->Unbind();
+	result->value = query->idCount * vbo->elemSizeInBytes;
+}
+
+static void BindBufferRangeVBO(const GfxVBOBindRangeQuery* query, GfxIntResult* result)
+{
+	result->error = nullptr;
+	result->value = -1;
+	NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (vbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	if (!vbo->defined || query->elementOffset < 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const uint32_t elementOffset = static_cast<uint32_t>(query->elementOffset);
+	const uint32_t elementCount = query->elementCount > 0 ? static_cast<uint32_t>(query->elementCount) : vbo->elementsCount;
+	if (elementOffset + elementCount > vbo->elementsCount || elementCount == 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const GLenum target = query->target != 0 ? query->target : vbo->target;
+	if (target != GL_UNIFORM_BUFFER && target != GL_SHADER_STORAGE_BUFFER) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	vbo->target = target;
+	const uint32_t bufferOffset = elementOffset * vbo->elemSizeInBytes;
+	const uint32_t bufferSize = static_cast<uint32_t>(vbo->vbo->GetSize()) - bufferOffset;
+	const bool success = query->bind ?
+		vbo->vbo->BindBufferRange(target, query->bindingIndex, bufferOffset, bufferSize) :
+		vbo->vbo->UnbindBufferRange(target, query->bindingIndex, bufferOffset, bufferSize);
+	if (!success) {
+		result->error = &OPERATION_FAILED_ERROR;
+		return;
+	}
+	result->value = static_cast<int32_t>(query->bindingIndex);
+}
+
+static void UnbindBufferRangeVBO(const GfxVBOBindRangeQuery* query, GfxIntResult* result)
+{
+	GfxVBOBindRangeQuery unbindQuery = *query;
+	unbindQuery.bind = false;
+	BindBufferRangeVBO(&unbindQuery, result);
+}
+
+static void DumpDefinitionVBO(const GfxUIntQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	const NativeVBO* vbo = GetNativeVBO(query->value);
+	if (vbo == nullptr || !vbo->defined || vbo->vbo == nullptr) {
+		result->error = vbo == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	LOG("Definition information on native VBO. OpenGL Buffer ID=%u:", vbo->rawID);
+	for (const auto& attribute : vbo->attributes) {
+		LOG("\tid=%d type=%u size=%d normalized=%d pointer=%d typeSizeInBytes=%d strideSizeInBytes=%d", attribute.id, attribute.type, attribute.size, attribute.normalized, attribute.pointer, attribute.typeSizeInBytes, attribute.strideSizeInBytes);
+	}
+	LOG("Count of elements=%u", vbo->elementsCount);
+	LOG("Size of one element=%u", vbo->elemSizeInBytes);
+	LOG("Total buffer size=%u", static_cast<uint32_t>(vbo->vbo->GetSize()));
+}
+
+static void CopyToVBO(const GfxVBOCopyQuery* query, GfxBoolResult* result)
+{
+	result->error = nullptr;
+	result->value = false;
+	NativeVBO* source = GetNativeVBO(query->sourceVBOID);
+	NativeVBO* destination = GetNativeVBO(query->destinationVBOID);
+	if (source == nullptr || destination == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	if (!source->defined || !destination->defined || source->vbo == nullptr || destination->vbo == nullptr || query->copySizeInBytes < 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const bool wasBound = source->vbo->bound;
+	if (!wasBound)
+		source->vbo->Bind(source->target);
+	result->value = source->vbo->CopyTo(*destination->vbo, static_cast<GLsizeiptr>(query->copySizeInBytes));
+	if (!wasBound)
+		source->vbo->Unbind();
+	// Match LuaVBOImpl::CopyTo: the GPU copy does not update the destination's
+	// CPU shadow. Callers that need the copied bytes must request a GPU read.
+}
+
+static void GetIDVBO(const GfxUIntQuery* query, GfxUIntResult* result)
+{
+	result->error = nullptr;
+	result->value = 0;
+	const NativeVBO* vbo = GetNativeVBO(query->value);
+	if (vbo == nullptr || !vbo->defined || vbo->vbo == nullptr) {
+		result->error = vbo == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = vbo->vbo->GetId();
+}
+
+static void AttachNativeVAOBuffer(const GfxVAOBufferQuery* query, GfxEmptyResult* result, uint32_t NativeVAO::*slot, GLenum requiredTarget)
+{
+	result->error = nullptr;
+	NativeVAO* vao = GetNativeVAO(query->vaoID);
+	NativeVBO* vbo = GetNativeVBO(query->vboID);
+	if (vao == nullptr || vbo == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	if (!vbo->defined || vbo->target != requiredTarget || (vao->*slot) != 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (slot == &NativeVAO::instanceVBO) {
+		NativeVBO* vertex = GetNativeVBO(vao->vertexVBO);
+		if (vertex != nullptr) {
+			for (const auto& vertexAttribute : vertex->attributes) {
+				if (std::any_of(vbo->attributes.begin(), vbo->attributes.end(), [&](const auto& instanceAttribute) { return instanceAttribute.id == vertexAttribute.id; })) {
+					result->error = &INVALID_ARGUMENT_ERROR;
+					return;
+				}
+			}
+		}
+	}
+	vao->*slot = query->vboID;
+}
+
+static void AttachVertexBufferVAO(const GfxVAOBufferQuery* query, GfxEmptyResult* result)
+{
+	AttachNativeVAOBuffer(query, result, &NativeVAO::vertexVBO, GL_ARRAY_BUFFER);
+}
+
+static void AttachInstanceBufferVAO(const GfxVAOBufferQuery* query, GfxEmptyResult* result)
+{
+	AttachNativeVAOBuffer(query, result, &NativeVAO::instanceVBO, GL_ARRAY_BUFFER);
+}
+
+static void AttachIndexBufferVAO(const GfxVAOBufferQuery* query, GfxEmptyResult* result)
+{
+	AttachNativeVAOBuffer(query, result, &NativeVAO::indexVBO, GL_ELEMENT_ARRAY_BUFFER);
+}
+
+static void ConfigureNativeVAO(NativeVAO& native)
+{
+	NativeVBO* vertex = GetNativeVBO(native.vertexVBO);
+	NativeVBO* instance = GetNativeVBO(native.instanceVBO);
+	NativeVBO* index = GetNativeVBO(native.indexVBO);
+
+	native.vao->Bind();
+	bool hasAttributes = false;
+	GLuint attributeMin = ~0u;
+	GLuint attributeMax = 0;
+	const auto configure = [&](NativeVBO* vbo, GLuint divisor) {
+		if (vbo == nullptr)
+			return;
+		vbo->vbo->Bind(GL_ARRAY_BUFFER);
+		for (const auto& attribute : vbo->attributes) {
+			glEnableVertexAttribArray(attribute.id);
+			if (attribute.type == GL_FLOAT || attribute.normalized != GL_FALSE)
+				glVertexAttribPointer(attribute.id, attribute.size, attribute.type, attribute.normalized, vbo->elemSizeInBytes, reinterpret_cast<const void*>(static_cast<uintptr_t>(attribute.pointer)));
+			else
+				glVertexAttribIPointer(attribute.id, attribute.size, attribute.type, vbo->elemSizeInBytes, reinterpret_cast<const void*>(static_cast<uintptr_t>(attribute.pointer)));
+			glVertexAttribDivisor(attribute.id, divisor);
+			attributeMin = std::min(attributeMin, static_cast<GLuint>(attribute.id));
+			attributeMax = std::max(attributeMax, static_cast<GLuint>(attribute.id));
+			hasAttributes = true;
+		}
+	};
+
+	configure(vertex, 0);
+	if (vertex != nullptr)
+		vertex->vbo->Unbind();
+	configure(instance, 1);
+	if (instance != nullptr)
+		instance->vbo->Unbind();
+	if (index != nullptr)
+		index->vbo->Bind(GL_ELEMENT_ARRAY_BUFFER);
+	native.vao->Unbind();
+	if (index != nullptr)
+		index->vbo->Unbind();
+
+	if (hasAttributes) {
+		for (GLuint attribute = attributeMin; attribute <= attributeMax; ++attribute) {
+			glVertexAttribDivisor(attribute, 0);
+			glDisableVertexAttribArray(attribute);
+		}
+	}
+}
+
+static void CheckNativeVAOPrimitive(GLenum mode)
+{
+	switch (mode) {
+		case GL_POINTS:
+		case GL_LINE_STRIP:
+		case GL_LINE_LOOP:
+		case GL_LINES:
+		case GL_LINE_STRIP_ADJACENCY:
+		case GL_LINES_ADJACENCY:
+		case GL_TRIANGLE_STRIP:
+		case GL_TRIANGLE_FAN:
+		case GL_TRIANGLES:
+		case GL_TRIANGLE_STRIP_ADJACENCY:
+		case GL_TRIANGLES_ADJACENCY:
+		case GL_PATCHES:
+			return;
+		default:
+			break;
+	}
+	throw std::runtime_error("invalid VAO primitive mode");
+}
+
+static bool PrepareNativeVAO(NativeVAO& vao, const NativeVBO* vertex, const NativeVBO* instance, const NativeVBO* index)
+{
+	if (vertex != nullptr && !vertex->defined)
+		return false;
+	if (instance != nullptr && !instance->defined)
+		return false;
+	if (index != nullptr && !index->defined)
+		return false;
+	ConfigureNativeVAO(vao);
+	return true;
+}
+
+static void DrawArraysVAO(const GfxVAODrawArraysQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeVAO* vao = GetNativeVAO(query->vaoID);
+	if (vao == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	NativeVBO* vertex = GetNativeVBO(vao->vertexVBO);
+	NativeVBO* instance = GetNativeVBO(vao->instanceVBO);
+	if (vertex == nullptr && query->vertexCount < 0) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const int32_t baseIndex = std::max(query->vertexFirst, 0);
+	const int32_t drawCount = query->vertexCount >= 0 ? query->vertexCount : static_cast<int32_t>(vertex->elementsCount) - baseIndex;
+	const int32_t instanceCount = std::max(query->instanceCount, 0);
+	const int32_t baseInstance = std::max(query->instanceFirst, 0);
+	if (drawCount <= 0 || (vertex != nullptr && baseIndex + drawCount > static_cast<int32_t>(vertex->elementsCount)) || (instanceCount > 0 && instance != nullptr && baseInstance + instanceCount > static_cast<int32_t>(instance->elementsCount)) || (instanceCount == 0 && baseInstance > 0)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	try {
+		CheckNativeVAOPrimitive(query->mode);
+	} catch (...) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (!PrepareNativeVAO(*vao, vertex, instance, nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	vao->vao->Bind();
+	if (instanceCount == 0)
+		glDrawArrays(query->mode, baseIndex, drawCount);
+	else if (baseInstance > 0)
+		glDrawArraysInstancedBaseInstance(query->mode, baseIndex, drawCount, instanceCount, baseInstance);
+	else
+		glDrawArraysInstanced(query->mode, baseIndex, drawCount, instanceCount);
+	vao->vao->Unbind();
+}
+
+static void DrawElementsVAO(const GfxVAODrawElementsQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeVAO* vao = GetNativeVAO(query->vaoID);
+	NativeVBO* index = vao != nullptr ? GetNativeVBO(vao->indexVBO) : nullptr;
+	NativeVBO* instance = vao != nullptr ? GetNativeVBO(vao->instanceVBO) : nullptr;
+	if (vao == nullptr || index == nullptr || index->attributes.empty()) {
+		result->error = vao == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const int32_t baseIndex = std::max(query->baseIndex, 0);
+	const int32_t drawCount = query->drawCount >= 0 ? query->drawCount : static_cast<int32_t>(index->elementsCount) - baseIndex;
+	const int32_t baseVertex = std::max(query->baseVertex, 0);
+	const int32_t instanceCount = std::max(query->instanceCount, 0);
+	const int32_t baseInstance = std::max(query->baseInstance, 0);
+	if (drawCount <= 0 || baseIndex + drawCount > static_cast<int32_t>(index->elementsCount) || (instanceCount > 0 && instance != nullptr && baseInstance + instanceCount > static_cast<int32_t>(instance->elementsCount)) || (instanceCount == 0 && baseInstance > 0)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	try {
+		CheckNativeVAOPrimitive(query->mode);
+	} catch (...) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	NativeVBO* vertex = GetNativeVBO(vao->vertexVBO);
+	if (!PrepareNativeVAO(*vao, vertex, instance, index)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const GLenum indexType = index->attributes.front().type;
+	const uintptr_t indexOffset = static_cast<uintptr_t>(baseIndex) * index->elemSizeInBytes;
+	glEnable(GL_PRIMITIVE_RESTART);
+	glPrimitiveRestartIndex(index->primitiveRestartIndex);
+	vao->vao->Bind();
+	if (instanceCount == 0) {
+		if (baseVertex == 0)
+			glDrawElements(query->mode, drawCount, indexType, reinterpret_cast<const void*>(indexOffset));
+		else
+			glDrawElementsBaseVertex(query->mode, drawCount, indexType, reinterpret_cast<const void*>(indexOffset), baseVertex);
+	} else if (baseInstance > 0) {
+		glDrawElementsInstancedBaseVertexBaseInstance(query->mode, drawCount, indexType, reinterpret_cast<const void*>(indexOffset), instanceCount, baseVertex, baseInstance);
+	} else if (baseVertex == 0) {
+		glDrawElementsInstanced(query->mode, drawCount, indexType, reinterpret_cast<const void*>(indexOffset), instanceCount);
+	} else {
+		glDrawElementsInstancedBaseVertex(query->mode, drawCount, indexType, reinterpret_cast<const void*>(indexOffset), instanceCount, baseVertex);
+	}
+	vao->vao->Unbind();
+	glDisable(GL_PRIMITIVE_RESTART);
+}
+
+template<typename TObj, typename Lookup>
+static void AddNativeSubmissionVBO(const GfxVAOSubmissionQuery* query, GfxUIntResult* result, Lookup lookup)
+{
+	result->error = nullptr;
+	result->value = 0;
+	NativeVAO* vao = GetNativeVAO(query->vaoID);
+	NativeVBO* index = vao != nullptr ? GetNativeVBO(vao->indexVBO) : nullptr;
+	if (vao == nullptr || index == nullptr) {
+		result->error = vao == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (!index->defined || (query->idCount > 0 && query->ids == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const uint32_t start = vao->submissions.size();
+	for (uint32_t i = 0; i < query->idCount; ++i) {
+		const TObj* object = lookup(query->ids[i]);
+		if (object == nullptr || object->model == nullptr) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		const SDrawElementsIndirectCommand command {
+			object->model->indxCount,
+			1u,
+			object->model->indxStart,
+			0u,
+			vao->baseInstance++,
+		};
+		if (command.firstIndex + command.indexCount > index->elementsCount) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		vao->submissions.push_back(command);
+	}
+	result->value = start;
+}
+
+static void ClearSubmissionVAO(const GfxUIntQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeVAO* vao = GetNativeVAO(query->value);
+	if (vao == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	vao->baseInstance = 0;
+	vao->submissions.clear();
+}
+
+static void AddUnitsToSubmissionVAO(const GfxVAOSubmissionQuery* query, GfxUIntResult* result)
+{
+	AddNativeSubmissionVBO<CUnit>(query, result, [](uint32_t id) { return unitHandler.GetUnit(id); });
+}
+
+static void AddFeaturesToSubmissionVAO(const GfxVAOSubmissionQuery* query, GfxUIntResult* result)
+{
+	AddNativeSubmissionVBO<CFeature>(query, result, [](uint32_t id) { return featureHandler.GetFeature(id); });
+}
+
+static void AddUnitDefsToSubmissionVAO(const GfxVAOSubmissionQuery* query, GfxUIntResult* result)
+{
+	AddNativeSubmissionVBO<UnitDef>(query, result, [](uint32_t id) { return unitDefHandler != nullptr ? unitDefHandler->GetUnitDefByID(id) : nullptr; });
+}
+
+static void AddFeatureDefsToSubmissionVAO(const GfxVAOSubmissionQuery* query, GfxUIntResult* result)
+{
+	AddNativeSubmissionVBO<FeatureDef>(query, result, [](uint32_t id) { return featureDefHandler != nullptr ? featureDefHandler->GetFeatureDefByID(id) : nullptr; });
+}
+
+static void RemoveFromSubmissionVAO(const GfxVAORemoveSubmissionQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeVAO* vao = GetNativeVAO(query->vaoID);
+	if (vao == nullptr) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+	if (query->index < 0 || static_cast<size_t>(query->index) >= vao->submissions.size()) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (static_cast<size_t>(query->index) != vao->submissions.size() - 1)
+		vao->submissions[query->index] = vao->submissions.back();
+	vao->submissions.pop_back();
+	for (uint32_t i = 0; i < vao->submissions.size(); ++i)
+		vao->submissions[i].baseInstance = i;
+	vao->baseInstance = vao->submissions.size();
+}
+
+static void SubmitVAO(const GfxUIntQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+	NativeVAO* vao = GetNativeVAO(query->value);
+	NativeVBO* index = vao != nullptr ? GetNativeVBO(vao->indexVBO) : nullptr;
+	if (vao == nullptr || index == nullptr) {
+		result->error = vao == nullptr ? &NOT_FOUND_ERROR : &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	if (!index->defined || !PrepareNativeVAO(*vao, GetNativeVBO(vao->vertexVBO), GetNativeVBO(vao->instanceVBO), index)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	glEnable(GL_PRIMITIVE_RESTART);
+	glPrimitiveRestartIndex(index->primitiveRestartIndex);
+	vao->vao->Bind();
+	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, vao->submissions.data(), vao->submissions.size(), sizeof(SDrawElementsIndirectCommand));
+	vao->vao->Unbind();
+	glDisable(GL_PRIMITIVE_RESTART);
 }
 
 static void RenderToTexture(const GfxRenderToTextureQuery* query, GfxEmptyResult* result)
@@ -4038,6 +5346,9 @@ const GfxApi GFX_API = {
 	.DeleteRBO = DeleteRBO,
 	.GetRBOInfo = GetRBOInfo,
 	.CreateFBO = CreateFBO,
+	.SetFBOAttachment = SetFBOAttachment,
+	.SetFBODrawBuffers = SetFBODrawBuffers,
+	.SetFBOReadBuffer = SetFBOReadBuffer,
 	.DeleteFBO = DeleteFBO,
 	.IsValidFBO = IsValidFBO,
 	.ActiveFBO = ActiveFBO,
@@ -4046,8 +5357,36 @@ const GfxApi GFX_API = {
 	.ClearAttachmentFBO = ClearAttachmentFBO,
 	.GetVAO = GetVAO,
 	.DeleteVAO = DeleteVAO,
+	.AttachVertexBufferVAO = AttachVertexBufferVAO,
+	.AttachInstanceBufferVAO = AttachInstanceBufferVAO,
+	.AttachIndexBufferVAO = AttachIndexBufferVAO,
+	.DrawArraysVAO = DrawArraysVAO,
+	.DrawElementsVAO = DrawElementsVAO,
+	.ClearSubmissionVAO = ClearSubmissionVAO,
+	.AddUnitsToSubmissionVAO = AddUnitsToSubmissionVAO,
+	.AddFeaturesToSubmissionVAO = AddFeaturesToSubmissionVAO,
+	.AddUnitDefsToSubmissionVAO = AddUnitDefsToSubmissionVAO,
+	.AddFeatureDefsToSubmissionVAO = AddFeatureDefsToSubmissionVAO,
+	.RemoveFromSubmissionVAO = RemoveFromSubmissionVAO,
+	.SubmitVAO = SubmitVAO,
 	.GetVBO = GetVBO,
 	.DeleteVBO = DeleteVBO,
+	.DefineVBO = DefineVBO,
+	.GetVBOInfo = GetVBOInfo,
+	.UploadVBO = UploadVBO,
+	.DownloadVBO = DownloadVBO,
+	.ClearVBO = ClearVBO,
+	.ModelsVBO = ModelsVBO,
+	.InstanceDataFromUnitDefsVBO = InstanceDataFromUnitDefsVBO,
+	.InstanceDataFromFeatureDefsVBO = InstanceDataFromFeatureDefsVBO,
+	.InstanceDataFromUnitsVBO = InstanceDataFromUnitsVBO,
+	.InstanceDataFromFeaturesVBO = InstanceDataFromFeaturesVBO,
+	.MatrixDataFromProjectilesVBO = MatrixDataFromProjectilesVBO,
+	.BindBufferRangeVBO = BindBufferRangeVBO,
+	.UnbindBufferRangeVBO = UnbindBufferRangeVBO,
+	.DumpDefinitionVBO = DumpDefinitionVBO,
+	.CopyToVBO = CopyToVBO,
+	.GetIDVBO = GetIDVBO,
 	.RenderToTexture = RenderToTexture,
 	.CreateTextureAtlas = CreateTextureAtlas,
 	.FinalizeTextureAtlas = FinalizeTextureAtlas,

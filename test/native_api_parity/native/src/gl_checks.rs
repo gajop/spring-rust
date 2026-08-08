@@ -1504,6 +1504,32 @@ impl NativeApiParity {
             ],
         );
 
+        gfx.set_fboattachment(
+            destination_fbo,
+            GL_COLOR_ATTACHMENT0,
+            &source_texture,
+            GL_TEXTURE_2D,
+            0,
+            0,
+            false,
+        )
+        .map_err(|error| format!("SetFBOAttachment(dynamic) failed: {error:?}"))?;
+        gfx.set_fbodraw_buffers(destination_fbo, &[GL_COLOR_ATTACHMENT0])
+            .map_err(|error| format!("SetFBODrawBuffers(dynamic) failed: {error:?}"))?;
+        gfx.set_fboread_buffer(destination_fbo, GL_COLOR_ATTACHMENT0)
+            .map_err(|error| format!("SetFBOReadBuffer(dynamic) failed: {error:?}"))?;
+        let (dynamic_valid, dynamic_status) = gfx
+            .is_valid_fbo(destination_fbo, GL_FRAMEBUFFER)
+            .map_err(|error| format!("IsValidFBO(dynamic) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "FBO.dynamic attachment keys",
+            vec![
+                serde_json::json!(dynamic_valid),
+                serde_json::json!(dynamic_status),
+            ],
+        );
+
         let (previous_fbo, has_previous) =
             gfx.raw_bind_fbo(false, source_fbo, GL_FRAMEBUFFER, 0)
                 .map_err(|error| format!("RawBindFBO(bind) failed: {error:?}"))?;
@@ -1810,6 +1836,474 @@ impl NativeApiParity {
         record_void(&mut actual, "gl.SwapBuffers");
 
         compare_result(message, actual, "gl.resource_handles")
+    }
+
+    pub(crate) fn check_gl_userdata(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let userdata_fixture = message
+            .get("userdataFixture")
+            .ok_or_else(|| "gl.userdata payload is missing userdataFixture".to_owned())?;
+        let fixture_i32 = |field: &str| {
+            userdata_fixture
+                .get(field)
+                .and_then(Value::as_i64)
+                .and_then(|value| i32::try_from(value).ok())
+                .ok_or_else(|| format!("gl.userdata fixture is missing integer field `{field}`"))
+        };
+        let unit_id = fixture_i32("unitID")? as u32;
+        let feature_id = fixture_i32("featureID")? as u32;
+        let unit_def_id = fixture_i32("unitDefID")? as u32;
+        let feature_def_id = fixture_i32("featureDefID")? as u32;
+        let team_id = fixture_i32("teamID")?;
+        let projectile_id = userdata_fixture
+            .get("projectileID")
+            .and_then(Value::as_i64)
+            .and_then(|id| i32::try_from(id).ok())
+            .map(|id| id as u32);
+        let mut actual = Map::new();
+
+        let attribute = |id: i32, type_: u32, size: i32| {
+            spring_native::sys::GfxVBOAttributeOptions {
+                id,
+                type_,
+                size,
+                normalized: false,
+            }
+        };
+        let record_download = |actual: &mut Map<String, Value>, name: &str, data: Vec<f32>| {
+            record(
+                actual,
+                name,
+                vec![Value::Array(data.into_iter().map(rounded).collect())],
+            );
+        };
+
+        let (vertex_vbo, _, _) = gfx
+            .get_vbo(GL_ARRAY_BUFFER, false)
+            .map_err(|error| format!("GetVBO(vertex) failed: {error:?}"))?;
+        let (instance_vbo, _, _) = gfx
+            .get_vbo(GL_ARRAY_BUFFER, false)
+            .map_err(|error| format!("GetVBO(instance) failed: {error:?}"))?;
+        let (copy_vbo, _, _) = gfx
+            .get_vbo(GL_ARRAY_BUFFER, false)
+            .map_err(|error| format!("GetVBO(copy) failed: {error:?}"))?;
+        let (index_vbo, _, _) = gfx
+            .get_vbo(GL_ELEMENT_ARRAY_BUFFER, false)
+            .map_err(|error| format!("GetVBO(index) failed: {error:?}"))?;
+        let (uniform_vbo, _, _) = gfx
+            .get_vbo(GL_UNIFORM_BUFFER, false)
+            .map_err(|error| format!("GetVBO(uniform) failed: {error:?}"))?;
+        let (engine_instance_vbo, _, _) = gfx
+            .get_vbo(GL_ARRAY_BUFFER, false)
+            .map_err(|error| format!("GetVBO(engine instance) failed: {error:?}"))?;
+        let (matrix_vbo, _, _) = gfx
+            .get_vbo(GL_UNIFORM_BUFFER, false)
+            .map_err(|error| format!("GetVBO(matrix) failed: {error:?}"))?;
+
+        let vertex_attributes = [
+            attribute(0, GL_FLOAT, 2),
+            attribute(1, GL_FLOAT, 4),
+        ];
+        let instance_attributes = [attribute(2, GL_FLOAT, 4)];
+        let engine_instance_attributes = [attribute(0, GL_UNSIGNED_INT, 4)];
+        let matrix_attributes = [attribute(0, GL_FLOAT_MAT4, 1)];
+        gfx.define_vbo(
+            vertex_vbo,
+            3,
+            false,
+            0,
+            false,
+            0,
+            &vertex_attributes,
+        )
+        .map_err(|error| format!("DefineVBO(vertex) failed: {error:?}"))?;
+        gfx.define_vbo(
+            copy_vbo,
+            3,
+            false,
+            0,
+            false,
+            0,
+            &vertex_attributes,
+        )
+        .map_err(|error| format!("DefineVBO(copy) failed: {error:?}"))?;
+        gfx.define_vbo(
+            instance_vbo,
+            2,
+            false,
+            0,
+            false,
+            0,
+            &instance_attributes,
+        )
+        .map_err(|error| format!("DefineVBO(instance) failed: {error:?}"))?;
+        gfx.define_vbo(
+            index_vbo,
+            3,
+            true,
+            GL_UNSIGNED_INT,
+            false,
+            0,
+            &[],
+        )
+        .map_err(|error| format!("DefineVBO(index) failed: {error:?}"))?;
+        gfx.define_vbo(uniform_vbo, 2, false, 0, true, 2, &[])
+            .map_err(|error| format!("DefineVBO(uniform) failed: {error:?}"))?;
+        gfx.define_vbo(
+            engine_instance_vbo,
+            1,
+            false,
+            0,
+            false,
+            0,
+            &engine_instance_attributes,
+        )
+        .map_err(|error| format!("DefineVBO(engine instance) failed: {error:?}"))?;
+        gfx.define_vbo(
+            matrix_vbo,
+            1,
+            false,
+            0,
+            false,
+            0,
+            &matrix_attributes,
+        )
+        .map_err(|error| format!("DefineVBO(matrix) failed: {error:?}"))?;
+        record_void(&mut actual, "VBO.Define");
+
+        let (elements, buffer_size, gpu_size, _, _, _) = gfx
+            .get_vboinfo(vertex_vbo)
+            .map_err(|error| format!("GetVBOInfo(vertex) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "VBO.GetBufferSize",
+            vec![
+                serde_json::json!(elements),
+                serde_json::json!(buffer_size),
+                serde_json::json!(gpu_size),
+            ],
+        );
+        record(
+            &mut actual,
+            "VBO.GetID",
+            vec![serde_json::json!(
+                gfx.get_idvbo(vertex_vbo)
+                    .map_err(|error| format!("GetIDVBO failed: {error:?}"))?
+                    > 0
+            )],
+        );
+
+        let full_data = [
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
+            7.0, 8.0, 9.0, 10.0, 11.0, 12.0,
+            13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
+        ];
+        record(
+            &mut actual,
+            "VBO.Upload",
+            vec![serde_json::json!(gfx
+                .upload_vbo(vertex_vbo, &full_data, -1, 0, 1, 0)
+                .map_err(|error| format!("UploadVBO(full) failed: {error:?}"))?)],
+        );
+        let attribute_data = [99.0, 20.0, 21.0, 22.0, 23.0, 88.0];
+        record(
+            &mut actual,
+            "VBO.Upload.attribute",
+            vec![serde_json::json!(gfx
+                .upload_vbo(vertex_vbo, &attribute_data, 1, 1, 2, 5)
+                .map_err(|error| format!("UploadVBO(attribute) failed: {error:?}"))?)],
+        );
+        record_download(
+            &mut actual,
+            "VBO.Download",
+            gfx.download_vbo(vertex_vbo, -1, 0, 3, false)
+                .map_err(|error| format!("DownloadVBO(full) failed: {error:?}"))?,
+        );
+        record_download(
+            &mut actual,
+            "VBO.Download.attribute",
+            gfx.download_vbo(vertex_vbo, 1, 1, 1, false)
+                .map_err(|error| format!("DownloadVBO(attribute) failed: {error:?}"))?,
+        );
+
+        record(
+            &mut actual,
+            "VBO.CopyTo",
+            vec![serde_json::json!(gfx
+                .copy_to_vbo(vertex_vbo, copy_vbo, gpu_size as i32)
+                .map_err(|error| format!("CopyToVBO failed: {error:?}"))?)],
+        );
+        record_download(
+            &mut actual,
+            "VBO.CopyTo.Download",
+            gfx.download_vbo(copy_vbo, -1, 0, 3, true)
+                .map_err(|error| format!("DownloadVBO(copy) failed: {error:?}"))?,
+        );
+        gfx.dump_definition_vbo(vertex_vbo)
+            .map_err(|error| format!("DumpDefinitionVBO failed: {error:?}"))?;
+        record_void(&mut actual, "VBO.DumpDefinition");
+        gfx.clear_vbo(vertex_vbo)
+            .map_err(|error| format!("ClearVBO failed: {error:?}"))?;
+        record_void(&mut actual, "VBO.Clear");
+        record_download(
+            &mut actual,
+            "VBO.Clear.Download",
+            gfx.download_vbo(vertex_vbo, -1, 0, 1, false)
+                .map_err(|error| format!("DownloadVBO(clear) failed: {error:?}"))?,
+        );
+
+        record(
+            &mut actual,
+            "VBO.BindBufferRange",
+            vec![serde_json::json!(gfx
+                .bind_buffer_range_vbo(uniform_vbo, 6, 0, 1, GL_UNIFORM_BUFFER, true)
+                .map_err(|error| format!("BindBufferRangeVBO failed: {error:?}"))?)],
+        );
+        record(
+            &mut actual,
+            "VBO.UnbindBufferRange",
+            vec![serde_json::json!(gfx
+                .unbind_buffer_range_vbo(uniform_vbo, 6, 0, 1, GL_UNIFORM_BUFFER, true)
+                .map_err(|error| format!("UnbindBufferRangeVBO failed: {error:?}"))?)],
+        );
+
+        let (model_vertex_vbo, _, _) = gfx
+            .get_vbo(GL_ARRAY_BUFFER, false)
+            .map_err(|error| format!("GetVBO(model vertex) failed: {error:?}"))?;
+        let (model_index_vbo, _, _) = gfx
+            .get_vbo(GL_ELEMENT_ARRAY_BUFFER, false)
+            .map_err(|error| format!("GetVBO(model index) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "VBO.ModelsVBO",
+            vec![
+                serde_json::json!(gfx
+                    .models_vbo(model_vertex_vbo)
+                    .map_err(|error| format!("ModelsVBO(vertex) failed: {error:?}"))?),
+                serde_json::json!(gfx
+                    .models_vbo(model_index_vbo)
+                    .map_err(|error| format!("ModelsVBO(index) failed: {error:?}"))?),
+            ],
+        );
+
+        let unit_def_ids = [unit_def_id];
+        let feature_def_ids = [feature_def_id];
+        let unit_ids = [unit_id];
+        let feature_ids = [feature_id];
+        let unit_def_single = gfx
+            .instance_data_from_unit_defs_vbo(
+                engine_instance_vbo,
+                &unit_def_ids,
+                0,
+                team_id,
+                0,
+            )
+            .map_err(|error| format!("InstanceDataFromUnitDefIDs(single) failed: {error:?}"))?;
+        let unit_def_table = gfx
+            .instance_data_from_unit_defs_vbo(
+                engine_instance_vbo,
+                &unit_def_ids,
+                0,
+                team_id,
+                0,
+            )
+            .map_err(|error| format!("InstanceDataFromUnitDefIDs(table) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "VBO.InstanceDataFromUnitDefIDs",
+            vec![serde_json::json!(unit_def_single), serde_json::json!(unit_def_table)],
+        );
+        record_download(
+            &mut actual,
+            "VBO.InstanceDataFromUnitDefIDs.Download",
+            gfx.download_vbo(engine_instance_vbo, 0, 0, 1, false)
+                .map_err(|error| format!("DownloadVBO(unit def instance) failed: {error:?}"))?,
+        );
+        let feature_def_single = gfx
+            .instance_data_from_feature_defs_vbo(
+                engine_instance_vbo,
+                &feature_def_ids,
+                0,
+                team_id,
+                0,
+            )
+            .map_err(|error| format!("InstanceDataFromFeatureDefIDs(single) failed: {error:?}"))?;
+        let feature_def_table = gfx
+            .instance_data_from_feature_defs_vbo(
+                engine_instance_vbo,
+                &feature_def_ids,
+                0,
+                team_id,
+                0,
+            )
+            .map_err(|error| format!("InstanceDataFromFeatureDefIDs(table) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "VBO.InstanceDataFromFeatureDefIDs",
+            vec![
+                serde_json::json!(feature_def_single),
+                serde_json::json!(feature_def_table),
+            ],
+        );
+        record_download(
+            &mut actual,
+            "VBO.InstanceDataFromFeatureDefIDs.Download",
+            gfx.download_vbo(engine_instance_vbo, 0, 0, 1, false)
+                .map_err(|error| format!("DownloadVBO(feature def instance) failed: {error:?}"))?,
+        );
+        let unit_single = gfx
+            .instance_data_from_units_vbo(engine_instance_vbo, &unit_ids, 0, -1, 0)
+            .map_err(|error| format!("InstanceDataFromUnitIDs(single) failed: {error:?}"))?;
+        let unit_table = gfx
+            .instance_data_from_units_vbo(engine_instance_vbo, &unit_ids, 0, -1, 0)
+            .map_err(|error| format!("InstanceDataFromUnitIDs(table) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "VBO.InstanceDataFromUnitIDs",
+            vec![serde_json::json!(unit_single), serde_json::json!(unit_table)],
+        );
+        record_download(
+            &mut actual,
+            "VBO.InstanceDataFromUnitIDs.Download",
+            gfx.download_vbo(engine_instance_vbo, 0, 0, 1, false)
+                .map_err(|error| format!("DownloadVBO(unit instance) failed: {error:?}"))?,
+        );
+        let feature_single = gfx
+            .instance_data_from_features_vbo(engine_instance_vbo, &feature_ids, 0, -1, 0)
+            .map_err(|error| format!("InstanceDataFromFeatureIDs(single) failed: {error:?}"))?;
+        let feature_table = gfx
+            .instance_data_from_features_vbo(engine_instance_vbo, &feature_ids, 0, -1, 0)
+            .map_err(|error| format!("InstanceDataFromFeatureIDs(table) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "VBO.InstanceDataFromFeatureIDs",
+            vec![
+                serde_json::json!(feature_single),
+                serde_json::json!(feature_table),
+            ],
+        );
+        record_download(
+            &mut actual,
+            "VBO.InstanceDataFromFeatureIDs.Download",
+            gfx.download_vbo(engine_instance_vbo, 0, 0, 1, false)
+                .map_err(|error| format!("DownloadVBO(feature instance) failed: {error:?}"))?,
+        );
+        record_download(
+            &mut actual,
+            "VBO.InstanceData.Download",
+            gfx.download_vbo(engine_instance_vbo, 0, 0, 1, false)
+                .map_err(|error| format!("DownloadVBO(instance) failed: {error:?}"))?,
+        );
+
+        if let Some(projectile_id) = projectile_id {
+            let projectile_ids = [projectile_id];
+            let matrix_single = gfx
+                .matrix_data_from_projectiles_vbo(matrix_vbo, &projectile_ids, 0, -1, 0)
+                .map_err(|error| format!("MatrixDataFromProjectileIDs(single) failed: {error:?}"))?;
+            let matrix_table = gfx
+                .matrix_data_from_projectiles_vbo(matrix_vbo, &projectile_ids, 0, -1, 0)
+                .map_err(|error| format!("MatrixDataFromProjectileIDs(table) failed: {error:?}"))?;
+            record(
+                &mut actual,
+                "VBO.MatrixDataFromProjectileIDs",
+                vec![serde_json::json!(matrix_single), serde_json::json!(matrix_table)],
+            );
+            record_download(
+                &mut actual,
+                "VBO.MatrixData.Download",
+                gfx.download_vbo(matrix_vbo, -1, 0, 1, false)
+                    .map_err(|error| format!("DownloadVBO(matrix) failed: {error:?}"))?,
+            );
+        }
+
+        let (draw_vao, _) = gfx
+            .get_vao()
+            .map_err(|error| format!("GetVAO(draw) failed: {error:?}"))?;
+        let (submission_vao, _) = gfx
+            .get_vao()
+            .map_err(|error| format!("GetVAO(submission) failed: {error:?}"))?;
+        gfx.attach_vertex_buffer_vao(draw_vao, vertex_vbo)
+            .map_err(|error| format!("AttachVertexBufferVAO failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.AttachVertexBuffer");
+        gfx.attach_instance_buffer_vao(draw_vao, instance_vbo)
+            .map_err(|error| format!("AttachInstanceBufferVAO failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.AttachInstanceBuffer");
+        gfx.attach_index_buffer_vao(draw_vao, index_vbo)
+            .map_err(|error| format!("AttachIndexBufferVAO failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.AttachIndexBuffer");
+        gfx.draw_arrays_vao(draw_vao, GL_TRIANGLES, 3, 0, 0, 0)
+            .map_err(|error| format!("DrawArraysVAO failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.DrawArrays");
+        gfx.draw_elements_vao(draw_vao, GL_TRIANGLES, 3, 0, 0, 0, 0)
+            .map_err(|error| format!("DrawElementsVAO failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.DrawElements");
+
+        gfx.attach_vertex_buffer_vao(submission_vao, model_vertex_vbo)
+            .map_err(|error| format!("AttachVertexBufferVAO(submission) failed: {error:?}"))?;
+        gfx.attach_index_buffer_vao(submission_vao, model_index_vbo)
+            .map_err(|error| format!("AttachIndexBufferVAO(submission) failed: {error:?}"))?;
+        gfx.clear_submission_vao(submission_vao)
+            .map_err(|error| format!("ClearSubmissionVAO failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.ClearSubmission");
+        record(
+            &mut actual,
+            "VAO.AddUnitsToSubmission",
+            vec![serde_json::json!(gfx
+                .add_units_to_submission_vao(submission_vao, &unit_ids)
+                .map_err(|error| format!("AddUnitsToSubmissionVAO failed: {error:?}"))?)],
+        );
+        record(
+            &mut actual,
+            "VAO.AddFeaturesToSubmission",
+            vec![serde_json::json!(gfx
+                .add_features_to_submission_vao(submission_vao, &feature_ids)
+                .map_err(|error| format!("AddFeaturesToSubmissionVAO failed: {error:?}"))?)],
+        );
+        record(
+            &mut actual,
+            "VAO.AddUnitDefsToSubmission",
+            vec![serde_json::json!(gfx
+                .add_unit_defs_to_submission_vao(submission_vao, &unit_def_ids)
+                .map_err(|error| format!("AddUnitDefsToSubmissionVAO failed: {error:?}"))?)],
+        );
+        record(
+            &mut actual,
+            "VAO.AddFeatureDefsToSubmission",
+            vec![serde_json::json!(gfx
+                .add_feature_defs_to_submission_vao(submission_vao, &feature_def_ids)
+                .map_err(|error| format!("AddFeatureDefsToSubmissionVAO failed: {error:?}"))?)],
+        );
+        gfx.remove_from_submission_vao(submission_vao, 1)
+            .map_err(|error| format!("RemoveFromSubmissionVAO failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.RemoveFromSubmission");
+        gfx.submit_vao(submission_vao)
+            .map_err(|error| format!("SubmitVAO failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.Submit");
+        gfx.clear_submission_vao(submission_vao)
+            .map_err(|error| format!("ClearSubmissionVAO(restore) failed: {error:?}"))?;
+
+        gfx.delete_vao(draw_vao)
+            .map_err(|error| format!("DeleteVAO(draw) failed: {error:?}"))?;
+        gfx.delete_vao(submission_vao)
+            .map_err(|error| format!("DeleteVAO(submission) failed: {error:?}"))?;
+        record_void(&mut actual, "VAO.Delete");
+        for (name, vbo_id) in [
+            ("vertex", vertex_vbo),
+            ("instance", instance_vbo),
+            ("copy", copy_vbo),
+            ("index", index_vbo),
+            ("uniform", uniform_vbo),
+            ("engine instance", engine_instance_vbo),
+            ("matrix", matrix_vbo),
+            ("model vertex", model_vertex_vbo),
+            ("model index", model_index_vbo),
+        ] {
+            gfx.delete_vbo(vbo_id)
+                .map_err(|error| format!("DeleteVBO({name}) failed: {error:?}"))?;
+        }
+        record_void(&mut actual, "VBO.Delete");
+
+        compare_result(message, actual, "gl.userdata")
     }
 
     pub(crate) fn check_gl_object_drawing(&self, message: &Value) -> Result<(), String> {

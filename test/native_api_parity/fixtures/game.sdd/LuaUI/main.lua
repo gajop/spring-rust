@@ -16,11 +16,13 @@ local ranGlListsQueries = false
 local ranGlAtlas = false
 local ranGlFbo = false
 local ranGlResourceHandles = false
+local ranGlUserdata = false
 local ranGlFonts = false
 local ranGlMiniMap = false
 local ranGlObjectDrawing = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
+local renderFixtureIDs
 
 local function record(name, payload)
 	payload.context = "widget"
@@ -1047,6 +1049,14 @@ local function runGlFboSurfaceApiTest()
 		n = 4,
 		values = { sourceValid, sourceStatus, destinationValid, destinationStatus },
 	}
+	destinationFbo.color0 = sourceTexture
+	destinationFbo.drawbuffers = { GL.COLOR_ATTACHMENT0 }
+	destinationFbo.readbuffer = GL.COLOR_ATTACHMENT0
+	local dynamicValid, dynamicStatus = gl.IsValidFBO(destinationFbo)
+	result["FBO.dynamic attachment keys"] = {
+		n = 2,
+		values = { dynamicValid, dynamicStatus },
+	}
 
 	local previousFbo = gl.RawBindFBO(sourceFbo)
 	result["gl.RawBindFBO"] = { n = 1, values = { previousFbo } }
@@ -1120,6 +1130,253 @@ local function runGlResourceHandleSurfaceApiTest()
 	local payload = { status = "pass", result = result, context = "widget" }
 	Common.setTestName(payload, "gl.resource_handles")
 	record("gl.resource_handles", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function runGlUserdataSurfaceApiTest()
+	if ranGlUserdata or not Common.enableRenderingTests() then
+		return
+	end
+	local ids = renderFixtureIDs
+	if ids == nil or ids.unitID == nil or ids.featureID == nil or ids.unitDefID == nil or ids.featureDefID == nil then
+		return
+	end
+	-- Engine transform/upload tables are populated after the first rendered
+	-- world update.  Run before the unsynced generated tests mutate the live
+	-- fixture, so the instance-data methods exercise the same live objects as
+	-- the later object-drawing test.
+	if Spring.GetGameFrame() < 2 then
+		return
+	end
+	-- The instance-data APIs intentionally address objects owned by the
+	-- renderer's model-drawer lists.  This fixture is created after renderer
+	-- initialization; verify that the IDs delivered from synced Lua are in
+	-- those lists before invoking the userdata methods.
+	local function contains(values, wanted)
+		for _, value in ipairs(values or {}) do
+			if value == wanted then
+				return true
+			end
+		end
+		return false
+	end
+	if not contains(Spring.GetRenderUnits(0xFF, false), ids.unitID)
+		or not contains(Spring.GetRenderFeatures(0xFF, false), ids.featureID)
+	then
+		error("gl.userdata fixture is not renderer-managed", 0)
+	end
+	ranGlUserdata = true
+
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+	local function values(name, fn)
+		glCall(result, name, fn)
+	end
+
+	-- Exercise both table-defined and element-array VBO layouts.  The data
+	-- paths below deliberately include an attribute-only upload and a
+	-- non-default source range so the native implementation cannot merely
+	-- validate handles and ignore the interleaved layout.
+	local vertexVbo = gl.GetVBO(GL.ARRAY_BUFFER, false)
+	local instanceVbo = gl.GetVBO(GL.ARRAY_BUFFER, false)
+	local copyVbo = gl.GetVBO(GL.ARRAY_BUFFER, false)
+	local indexVbo = gl.GetVBO(GL.ELEMENT_ARRAY_BUFFER, false)
+	local uniformVbo = gl.GetVBO(GL.UNIFORM_BUFFER, false)
+	local engineInstanceVbo = gl.GetVBO(GL.ARRAY_BUFFER, false)
+	local matrixVbo = gl.GetVBO(GL.UNIFORM_BUFFER, false)
+	if vertexVbo == nil or instanceVbo == nil or copyVbo == nil or indexVbo == nil or uniformVbo == nil or engineInstanceVbo == nil or matrixVbo == nil then
+		error("gl.GetVBO did not return all userdata handles", 0)
+	end
+
+	vertexVbo:Define(3, {
+		{ id = 0, type = GL.FLOAT, size = 2 },
+		{ id = 1, type = GL.FLOAT, size = 4 },
+	})
+	copyVbo:Define(3, {
+		{ id = 0, type = GL.FLOAT, size = 2 },
+		{ id = 1, type = GL.FLOAT, size = 4 },
+	})
+	instanceVbo:Define(2, { { id = 2, type = GL.FLOAT, size = 4 } })
+	indexVbo:Define(3, GL.UNSIGNED_INT)
+	uniformVbo:Define(2, 2)
+	engineInstanceVbo:Define(1, { { id = 0, type = GL.UNSIGNED_INT, size = 4 } })
+	matrixVbo:Define(1, { { id = 0, type = GL.FLOAT_MAT4, size = 1 } })
+	result["VBO.Define"] = { n = 0, values = {} }
+
+	values("VBO.GetBufferSize", function()
+		return vertexVbo:GetBufferSize()
+	end)
+	values("VBO.GetID", function()
+		return vertexVbo:GetID() > 0
+	end)
+	local fullData = {
+		1, 2, 3, 4, 5, 6,
+		7, 8, 9, 10, 11, 12,
+		13, 14, 15, 16, 17, 18,
+	}
+	values("VBO.Upload", function()
+		return vertexVbo:Upload(fullData)
+	end)
+	values("VBO.Upload.attribute", function()
+		return vertexVbo:Upload({ 99, 20, 21, 22, 23, 88 }, 1, 1, 2, 5)
+	end)
+	values("VBO.Download", function()
+		return vertexVbo:Download(-1, 0, 3, false)
+	end)
+	values("VBO.Download.attribute", function()
+		return vertexVbo:Download(1, 1, 1, false)
+	end)
+
+	values("VBO.CopyTo", function()
+		local _, _, gpuSize = vertexVbo:GetBufferSize()
+		return vertexVbo:CopyTo(copyVbo, gpuSize)
+	end)
+	values("VBO.CopyTo.Download", function()
+		return copyVbo:Download(-1, 0, 3, true)
+	end)
+	void("VBO.DumpDefinition", function() vertexVbo:DumpDefinition() end)
+	void("VBO.Clear", function() vertexVbo:Clear() end)
+	values("VBO.Clear.Download", function()
+		return vertexVbo:Download(-1, 0, 1, false)
+	end)
+
+	values("VBO.BindBufferRange", function()
+		return uniformVbo:BindBufferRange(6, 0, 1, GL.UNIFORM_BUFFER)
+	end)
+	values("VBO.UnbindBufferRange", function()
+		return uniformVbo:UnbindBufferRange(6, 0, 1, GL.UNIFORM_BUFFER)
+	end)
+
+	local modelVertexVbo = gl.GetVBO(GL.ARRAY_BUFFER, false)
+	local modelIndexVbo = gl.GetVBO(GL.ELEMENT_ARRAY_BUFFER, false)
+	if modelVertexVbo == nil or modelIndexVbo == nil then
+		error("gl.GetVBO did not return model VBO handles", 0)
+	end
+	values("VBO.ModelsVBO", function()
+		return modelVertexVbo:ModelsVBO(), modelIndexVbo:ModelsVBO()
+	end)
+
+	values("VBO.InstanceDataFromUnitDefIDs", function()
+		local single = engineInstanceVbo:InstanceDataFromUnitDefIDs(ids.unitDefID, 0, ids.teamID, 0)
+		local tableValue = engineInstanceVbo:InstanceDataFromUnitDefIDs({ ids.unitDefID }, 0, ids.teamID, 0)
+		return single, tableValue
+	end)
+	values("VBO.InstanceDataFromUnitDefIDs.Download", function()
+		return engineInstanceVbo:Download(0, 0, 1, false)
+	end)
+	values("VBO.InstanceDataFromFeatureDefIDs", function()
+		local single = engineInstanceVbo:InstanceDataFromFeatureDefIDs(ids.featureDefID, 0, ids.teamID, 0)
+		local tableValue = engineInstanceVbo:InstanceDataFromFeatureDefIDs({ ids.featureDefID }, 0, ids.teamID, 0)
+		return single, tableValue
+	end)
+	values("VBO.InstanceDataFromFeatureDefIDs.Download", function()
+		return engineInstanceVbo:Download(0, 0, 1, false)
+	end)
+	values("VBO.InstanceDataFromUnitIDs", function()
+		local single = engineInstanceVbo:InstanceDataFromUnitIDs(ids.unitID, 0, 0)
+		local tableValue = engineInstanceVbo:InstanceDataFromUnitIDs({ ids.unitID }, 0, 0)
+		return single, tableValue
+	end)
+	values("VBO.InstanceDataFromUnitIDs.Download", function()
+		return engineInstanceVbo:Download(0, 0, 1, false)
+	end)
+	values("VBO.InstanceDataFromFeatureIDs", function()
+		local single = engineInstanceVbo:InstanceDataFromFeatureIDs(ids.featureID, 0, 0)
+		local tableValue = engineInstanceVbo:InstanceDataFromFeatureIDs({ ids.featureID }, 0, 0)
+		return single, tableValue
+	end)
+	values("VBO.InstanceDataFromFeatureIDs.Download", function()
+		return engineInstanceVbo:Download(0, 0, 1, false)
+	end)
+	values("VBO.InstanceData.Download", function()
+		return engineInstanceVbo:Download(0, 0, 1, false)
+	end)
+
+	if ids.projectileID ~= nil then
+		values("VBO.MatrixDataFromProjectileIDs", function()
+			local single = matrixVbo:MatrixDataFromProjectileIDs(ids.projectileID, 0, 0)
+			local tableValue = matrixVbo:MatrixDataFromProjectileIDs({ ids.projectileID }, 0, 0)
+			return single, tableValue
+		end)
+		values("VBO.MatrixData.Download", function()
+			return matrixVbo:Download(-1, 0, 1, false)
+		end)
+	end
+
+	local drawVao = gl.GetVAO()
+	local submissionVao = gl.GetVAO()
+	if drawVao == nil or submissionVao == nil then
+		error("gl.GetVAO did not return all userdata handles", 0)
+	end
+	void("VAO.AttachVertexBuffer", function() drawVao:AttachVertexBuffer(vertexVbo) end)
+	void("VAO.AttachInstanceBuffer", function() drawVao:AttachInstanceBuffer(instanceVbo) end)
+	void("VAO.AttachIndexBuffer", function() drawVao:AttachIndexBuffer(indexVbo) end)
+	void("VAO.DrawArrays", function() drawVao:DrawArrays(GL.TRIANGLES, 3, 0, 0, 0) end)
+	void("VAO.DrawElements", function() drawVao:DrawElements(GL.TRIANGLES, 3, 0, 0, 0, 0) end)
+
+	submissionVao:AttachVertexBuffer(modelVertexVbo)
+	submissionVao:AttachIndexBuffer(modelIndexVbo)
+	void("VAO.ClearSubmission", function() submissionVao:ClearSubmission() end)
+	values("VAO.AddUnitsToSubmission", function()
+		return submissionVao:AddUnitsToSubmission(ids.unitID)
+	end)
+	values("VAO.AddFeaturesToSubmission", function()
+		return submissionVao:AddFeaturesToSubmission({ ids.featureID })
+	end)
+	values("VAO.AddUnitDefsToSubmission", function()
+		return submissionVao:AddUnitDefsToSubmission(ids.unitDefID)
+	end)
+	values("VAO.AddFeatureDefsToSubmission", function()
+		return submissionVao:AddFeatureDefsToSubmission({ ids.featureDefID })
+	end)
+	void("VAO.RemoveFromSubmission", function() submissionVao:RemoveFromSubmission(1) end)
+	void("VAO.Submit", function() submissionVao:Submit() end)
+	submissionVao:ClearSubmission()
+
+	void("VAO.Delete", function()
+		drawVao:Delete()
+		submissionVao:Delete()
+	end)
+	void("VBO.Delete", function()
+		vertexVbo:Delete()
+		instanceVbo:Delete()
+		copyVbo:Delete()
+		indexVbo:Delete()
+		uniformVbo:Delete()
+		engineInstanceVbo:Delete()
+		matrixVbo:Delete()
+		modelVertexVbo:Delete()
+		modelIndexVbo:Delete()
+	end)
+
+	local payload = {
+		status = "pass",
+		result = result,
+		context = "widget",
+		fixture = {
+			unitID = ids.unitID,
+			featureID = ids.featureID,
+			unitDefID = ids.unitDefID,
+			featureDefID = ids.featureDefID,
+			projectileID = ids.projectileID,
+			teamID = ids.teamID,
+		},
+		userdataFixture = {
+			unitID = ids.unitID,
+			featureID = ids.featureID,
+			unitDefID = ids.unitDefID,
+			featureDefID = ids.featureDefID,
+			projectileID = ids.projectileID,
+			teamID = ids.teamID,
+		},
+	}
+	Common.setTestName(payload, "gl.userdata")
+	record("gl.userdata", payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
 	end
@@ -2238,6 +2495,17 @@ function NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weap
 	ranGeneratedTests = false
 end
 
+function NativeApiParityRenderFixture(unitID, featureID, unitDefID, featureDefID, projectileID, teamID)
+	renderFixtureIDs = {
+		unitID = unitID,
+		featureID = featureID,
+		unitDefID = unitDefID,
+		featureDefID = featureDefID,
+		projectileID = projectileID,
+		teamID = teamID,
+	}
+end
+
 function GameSetup()
 	return true, true
 end
@@ -2252,6 +2520,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlAtlasSurfaceApiTest()
 	runGlFboSurfaceApiTest()
 	runGlResourceHandleSurfaceApiTest()
+	runGlUserdataSurfaceApiTest()
 	runGlFontSurfaceApiTest()
 	runGlMiniMapSurfaceApiTest()
 	runGlObjectDrawingSurfaceApiTest()

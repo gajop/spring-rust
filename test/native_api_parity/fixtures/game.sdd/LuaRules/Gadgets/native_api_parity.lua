@@ -441,6 +441,12 @@ if not gadgetHandler:IsSyncedCode() then
 				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID)
 			end
 			return
+		elseif name == "native_api_parity_render_fixture" then
+			local unitID, featureID, unitDefID, featureDefID, projectileID, teamID = ...
+			if Script.LuaUI.NativeApiParityRenderFixture then
+				Script.LuaUI.NativeApiParityRenderFixture(unitID, featureID, unitDefID, featureDefID, projectileID, teamID)
+			end
+			return
 		elseif name == "native_api_parity_result" then
 			local stream, encodedPayload = ...
 			forward(stream, encodedPayload)
@@ -1306,6 +1312,7 @@ end
 
 local TESTS = buildGeneratedTests(TEST_HOOKS)
 local persistentFixture
+local renderFixture
 local ranDeferredSyncedChecks = false
 local ranLuaScriptSurfaceTests = false
 
@@ -1459,11 +1466,31 @@ function gadget:GameFrame(frame)
 		end
 		runSyncedChecks()
 	end
+	if frame == 4 then
+		-- The renderer's model-drawer event clients are fully initialized by
+		-- this point. Keep a separate fixture for the VBO/VAO instance-data
+		-- surface; objects created during frame one can legitimately predate
+		-- those render-only allocations.
+		renderFixture = Fixture.create()
+		SendToUnsynced(
+			"native_api_parity_render_fixture",
+			renderFixture.unitID,
+			renderFixture.featureID,
+			renderFixture.unitDefID,
+			renderFixture.featureDefID,
+			renderFixture.projectileID,
+			renderFixture.teamID
+		)
+	end
 	if frame == 18 then
 		runDeferredSyncedChecks()
 	end
 	if frame == 20 and persistentFixture ~= nil then
 		Fixture.destroy(persistentFixture)
 		persistentFixture = nil
+	end
+	if frame == 20 and renderFixture ~= nil then
+		Fixture.destroy(renderFixture)
+		renderFixture = nil
 	end
 end

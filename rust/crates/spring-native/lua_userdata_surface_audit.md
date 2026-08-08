@@ -6,9 +6,9 @@ This is separate from the free-callout inventory in `lua_functions.md`; native m
 ## Summary
 
 - Inventory rows: 65
-- Matched rows: 31
+- Matched rows: 60
 - Matched but untested: 0
-- Unclassified gaps: 29
+- Unclassified gaps: 0
 - Native ABI missing for declared counterpart: 0
 
 A complete parity claim requires zero unclassified gaps and zero matched-but-untested rows. `by-design` lifecycle rows are explicit exceptions, not coverage omissions.
@@ -17,37 +17,37 @@ A complete parity claim requires zero unclassified gaps and zero matched-but-unt
 
 | Surface | Kind | Lua member | Lua signature | Native counterpart | Status |
 | --- | --- | --- | --- | --- | --- |
-| `VAO` | `method` | `AddFeatureDefsToSubmission` | featureDefIDs: number|number[] -> number submittedCount | — | **unclassified-gap** |
-| `VAO` | `method` | `AddFeaturesToSubmission` | featureIDs: number|number[] -> number submittedCount | — | **unclassified-gap** |
-| `VAO` | `method` | `AddUnitDefsToSubmission` | unitDefIDs: number|number[] -> number submittedCount | — | **unclassified-gap** |
-| `VAO` | `method` | `AddUnitsToSubmission` | unitIDs: number|number[] -> number submittedCount | — | **unclassified-gap** |
-| `VAO` | `method` | `AttachIndexBuffer` | vbo: VBO -> nil | — | **unclassified-gap** |
-| `VAO` | `method` | `AttachInstanceBuffer` | vbo: VBO -> nil | — | **unclassified-gap** |
-| `VAO` | `method` | `AttachVertexBuffer` | vbo: VBO -> nil | — | **unclassified-gap** |
-| `VAO` | `method` | `ClearSubmission` | undocumented | — | **unclassified-gap** |
+| `VAO` | `method` | `AddFeatureDefsToSubmission` | featureDefIDs: number|number[] -> number submittedCount | `Gfx.add_feature_defs_to_submission_vao` | **matched** |
+| `VAO` | `method` | `AddFeaturesToSubmission` | featureIDs: number|number[] -> number submittedCount | `Gfx.add_features_to_submission_vao` | **matched** |
+| `VAO` | `method` | `AddUnitDefsToSubmission` | unitDefIDs: number|number[] -> number submittedCount | `Gfx.add_unit_defs_to_submission_vao` | **matched** |
+| `VAO` | `method` | `AddUnitsToSubmission` | unitIDs: number|number[] -> number submittedCount | `Gfx.add_units_to_submission_vao` | **matched** |
+| `VAO` | `method` | `AttachIndexBuffer` | vbo: VBO -> nil | `Gfx.attach_index_buffer_vao` | **matched** |
+| `VAO` | `method` | `AttachInstanceBuffer` | vbo: VBO -> nil | `Gfx.attach_instance_buffer_vao` | **matched** |
+| `VAO` | `method` | `AttachVertexBuffer` | vbo: VBO -> nil | `Gfx.attach_vertex_buffer_vao` | **matched** |
+| `VAO` | `method` | `ClearSubmission` | undocumented | `Gfx.clear_submission_vao` | **matched** |
 | `VAO` | `method` | `Delete` |  -> nil | `Gfx.delete_vao` | **matched** |
-| `VAO` | `method` | `DrawArrays` | glEnum: number primitivesMode, vertexCount: number?, vertexFirst: number?, instanceCount: number?, instanceFirst: number? -> nil | — | **unclassified-gap** |
-| `VAO` | `method` | `DrawElements` | glEnum: number primitivesMode, drawCount: number?, baseIndex: number?, instanceCount: number?, baseVertex: number?, baseInstance: number? -> nil | — | **unclassified-gap** |
-| `VAO` | `method` | `RemoveFromSubmission` | index: number -> nil | — | **unclassified-gap** |
-| `VAO` | `method` | `Submit` |  -> nil | — | **unclassified-gap** |
+| `VAO` | `method` | `DrawArrays` | glEnum: number primitivesMode, vertexCount: number?, vertexFirst: number?, instanceCount: number?, instanceFirst: number? -> nil | `Gfx.draw_arrays_vao` | **matched** |
+| `VAO` | `method` | `DrawElements` | glEnum: number primitivesMode, drawCount: number?, baseIndex: number?, instanceCount: number?, baseVertex: number?, baseInstance: number? -> nil | `Gfx.draw_elements_vao` | **matched** |
+| `VAO` | `method` | `RemoveFromSubmission` | index: number -> nil | `Gfx.remove_from_submission_vao` | **matched** |
+| `VAO` | `method` | `Submit` |  -> nil | `Gfx.submit_vao` | **matched** |
 | `VAO` | `lifecycle` | `__gc` | metatable finalizer | — | **by-design** |
-| `VBO` | `method` | `BindBufferRange` | index: integer should be in the range between, elementOffset: integer?, elementCount: number?, target: number? glEnum -> integer bindingIndex when successful, -1 otherwise | — | **unclassified-gap** |
-| `VBO` | `method` | `Clear` | undocumented | — | **unclassified-gap** |
-| `VBO` | `method` | `CopyTo` | destVBO: VBO, copySizeInBytes: integer -> boolean success | — | **unclassified-gap** |
-| `VBO` | `method` | `Define` | size: number The maximum number of elements this VBO can have., attribs: number|VBOAttributeDef[] -> nil | — | **unclassified-gap** |
+| `VBO` | `method` | `BindBufferRange` | index: integer should be in the range between, elementOffset: integer?, elementCount: number?, target: number? glEnum -> integer bindingIndex when successful, -1 otherwise | `Gfx.bind_buffer_range_vbo` | **matched** |
+| `VBO` | `method` | `Clear` | undocumented | `Gfx.clear_vbo` | **matched** |
+| `VBO` | `method` | `CopyTo` | destVBO: VBO, copySizeInBytes: integer -> boolean success | `Gfx.copy_to_vbo` | **matched** |
+| `VBO` | `method` | `Define` | size: number The maximum number of elements this VBO can have., attribs: number|VBOAttributeDef[] -> nil | `Gfx.define_vbo` | **matched** |
 | `VBO` | `method` | `Delete` |  -> nil | `Gfx.delete_vbo` | **matched** |
-| `VBO` | `method` | `Download` | attributeIndex: integer? (Default: `-1`) when supplied with non-default value: only data, elementOffset: integer? (Default: `0`) download data starting from this element, elementCount: number? number of elements to download, forceGPURead: boolean? (Default: `false`) force downloading the data from GPU buffer as opposed -> number[] vboData | — | **unclassified-gap** |
-| `VBO` | `method` | `DumpDefinition` |  -> nil | — | **unclassified-gap** |
-| `VBO` | `method` | `GetBufferSize` |  -> number elementsCount; number bufferSizeInBytes; number size | — | **unclassified-gap** |
-| `VBO` | `method` | `GetID` |  -> integer bufferID | — | **unclassified-gap** |
-| `VBO` | `method` | `InstanceDataFromFeatureDefIDs` | featureDefIDs: number|number[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> [number,number,number,number] instanceData; integer elementOffset; integer attrID | — | **unclassified-gap** |
-| `VBO` | `method` | `InstanceDataFromFeatureIDs` | featureIDs: number|number[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> [number,number,number,number] instanceData; integer elementOffset; integer attrID | — | **unclassified-gap** |
-| `VBO` | `method` | `InstanceDataFromUnitDefIDs` | unitDefIDs: number|number[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> [number,number,number,number] instanceData; integer elementOffset; integer attrID | — | **unclassified-gap** |
-| `VBO` | `method` | `InstanceDataFromUnitIDs` | unitIDs: number|number[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> [number,number,number,number] instanceData; integer elementOffset; integer attrID | — | **unclassified-gap** |
-| `VBO` | `method` | `MatrixDataFromProjectileIDs` | projectileIDs: integer|integer[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> number[] matDataVec 4x4 matrix; integer elemOffset; integer|[integer,integer,integer,integer] attrID | — | **unclassified-gap** |
-| `VBO` | `method` | `ModelsVBO` |  -> nil|number buffer size in bytes | — | **unclassified-gap** |
-| `VBO` | `method` | `UnbindBufferRange` | index: integer, elementOffset: integer?, elementCount: number?, target: number? glEnum -> number bindingIndex when successful, -1 otherwise | — | **unclassified-gap** |
-| `VBO` | `method` | `Upload` | vboData: number[] Array of values to upload into the VBO., attributeIndex: integer? (Default: `-1`), elemOffset: integer? (Default: `0`) The index in destination VBO (on GPU) at which storing begins., luaStartIndex: integer? (Default: `1`) The index of `vboData` at which copying begins., luaFinishIndex: integer? (Default: `#vboData`) The index of `vboData` at which copying ends. -> number[] indexData; integer elemOffset; integer|[integer,integer,integer,integer] attrID | — | **unclassified-gap** |
+| `VBO` | `method` | `Download` | attributeIndex: integer? (Default: `-1`) when supplied with non-default value: only data, elementOffset: integer? (Default: `0`) download data starting from this element, elementCount: number? number of elements to download, forceGPURead: boolean? (Default: `false`) force downloading the data from GPU buffer as opposed -> number[] vboData | `Gfx.download_vbo` | **matched** |
+| `VBO` | `method` | `DumpDefinition` |  -> nil | `Gfx.dump_definition_vbo` | **matched** |
+| `VBO` | `method` | `GetBufferSize` |  -> number elementsCount; number bufferSizeInBytes; number size | `Gfx.get_vboinfo` | **matched** |
+| `VBO` | `method` | `GetID` |  -> integer bufferID | `Gfx.get_idvbo` | **matched** |
+| `VBO` | `method` | `InstanceDataFromFeatureDefIDs` | featureDefIDs: number|number[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> [number,number,number,number] instanceData; integer elementOffset; integer attrID | `Gfx.instance_data_from_feature_defs_vbo` | **matched** |
+| `VBO` | `method` | `InstanceDataFromFeatureIDs` | featureIDs: number|number[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> [number,number,number,number] instanceData; integer elementOffset; integer attrID | `Gfx.instance_data_from_features_vbo` | **matched** |
+| `VBO` | `method` | `InstanceDataFromUnitDefIDs` | unitDefIDs: number|number[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> [number,number,number,number] instanceData; integer elementOffset; integer attrID | `Gfx.instance_data_from_unit_defs_vbo` | **matched** |
+| `VBO` | `method` | `InstanceDataFromUnitIDs` | unitIDs: number|number[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> [number,number,number,number] instanceData; integer elementOffset; integer attrID | `Gfx.instance_data_from_units_vbo` | **matched** |
+| `VBO` | `method` | `MatrixDataFromProjectileIDs` | projectileIDs: integer|integer[], attrID: integer, teamIdOpt: integer?, elementOffset: integer? -> number[] matDataVec 4x4 matrix; integer elemOffset; integer|[integer,integer,integer,integer] attrID | `Gfx.matrix_data_from_projectiles_vbo` | **matched** |
+| `VBO` | `method` | `ModelsVBO` |  -> nil|number buffer size in bytes | `Gfx.models_vbo` | **matched** |
+| `VBO` | `method` | `UnbindBufferRange` | index: integer, elementOffset: integer?, elementCount: number?, target: number? glEnum -> number bindingIndex when successful, -1 otherwise | `Gfx.unbind_buffer_range_vbo` | **matched** |
+| `VBO` | `method` | `Upload` | vboData: number[] Array of values to upload into the VBO., attributeIndex: integer? (Default: `-1`), elemOffset: integer? (Default: `0`) The index in destination VBO (on GPU) at which storing begins., luaStartIndex: integer? (Default: `1`) The index of `vboData` at which copying begins., luaFinishIndex: integer? (Default: `#vboData`) The index of `vboData` at which copying ends. -> number[] indexData; integer elemOffset; integer|[integer,integer,integer,integer] attrID | `Gfx.upload_vbo` | **matched** |
 | `VBO` | `lifecycle` | `__gc` | metatable finalizer | — | **by-design** |
 | `LuaFont` | `method` | `Begin` | userDefinedBlending: boolean? When `true` doesn't set the gl.BlendFunc automatically. Defaults to `false`. | `Gfx.font_begin` | **matched** |
 | `LuaFont` | `method` | `BindTexture` | undocumented | `Gfx.font_bind_texture` | **matched** |
@@ -80,13 +80,12 @@ A complete parity claim requires zero unclassified gaps and zero matched-but-unt
 | `RBO` | `property` | `xsize` | property read | `Gfx.get_rboinfo.xsize` | **matched** |
 | `RBO` | `property` | `ysize` | property read | `Gfx.get_rboinfo.ysize` | **matched** |
 | `RBO` | `lifecycle` | `__gc` | metatable finalizer | — | **by-design** |
-| `FBO` | `property` | `dynamic attachment keys` | property read | — | **unclassified-gap** |
+| `FBO` | `property` | `dynamic attachment keys` | property read | `Gfx.set_fboattachment`, `Gfx.set_fbodraw_buffers`, `Gfx.set_fboread_buffer` | **matched** |
 | `FBO` | `lifecycle` | `__gc` | metatable finalizer | — | **by-design** |
 
 ## Explicit design boundaries
 
 - `FBO.__gc` — Native modules own explicit integer handles and call DeleteFBO; Rust has no Lua garbage collector boundary.
-- `FBO.dynamic attachment keys` — Lua FBO userdata stores arbitrary attachment fields through a Lua table; native uses typed CreateFBO attachment arrays and must expose equivalent typed operations.
 - `LuaFont.__gc` — Native modules own explicit integer font handles and call DeleteFont; Rust has no Lua garbage collector boundary.
 - `RBO.__gc` — Native modules own explicit integer handles and call DeleteRBO; Rust has no Lua garbage collector boundary.
 - `VAO.__gc` — Native modules own explicit integer handles and call DeleteVAO; Rust has no Lua garbage collector boundary.

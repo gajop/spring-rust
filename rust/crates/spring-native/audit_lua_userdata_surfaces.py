@@ -49,7 +49,35 @@ SURFACES = (
 # it is assigned a reason below.
 COUNTERPARTS: dict[tuple[str, str], tuple[str, ...]] = {
     ("VAO", "Delete"): ("Gfx.delete_vao",),
+    ("VAO", "AttachVertexBuffer"): ("Gfx.attach_vertex_buffer_vao",),
+    ("VAO", "AttachInstanceBuffer"): ("Gfx.attach_instance_buffer_vao",),
+    ("VAO", "AttachIndexBuffer"): ("Gfx.attach_index_buffer_vao",),
+    ("VAO", "DrawArrays"): ("Gfx.draw_arrays_vao",),
+    ("VAO", "DrawElements"): ("Gfx.draw_elements_vao",),
+    ("VAO", "ClearSubmission"): ("Gfx.clear_submission_vao",),
+    ("VAO", "AddUnitsToSubmission"): ("Gfx.add_units_to_submission_vao",),
+    ("VAO", "AddFeaturesToSubmission"): ("Gfx.add_features_to_submission_vao",),
+    ("VAO", "AddUnitDefsToSubmission"): ("Gfx.add_unit_defs_to_submission_vao",),
+    ("VAO", "AddFeatureDefsToSubmission"): ("Gfx.add_feature_defs_to_submission_vao",),
+    ("VAO", "RemoveFromSubmission"): ("Gfx.remove_from_submission_vao",),
+    ("VAO", "Submit"): ("Gfx.submit_vao",),
     ("VBO", "Delete"): ("Gfx.delete_vbo",),
+    ("VBO", "Define"): ("Gfx.define_vbo",),
+    ("VBO", "GetBufferSize"): ("Gfx.get_vboinfo",),
+    ("VBO", "Upload"): ("Gfx.upload_vbo",),
+    ("VBO", "Download"): ("Gfx.download_vbo",),
+    ("VBO", "Clear"): ("Gfx.clear_vbo",),
+    ("VBO", "ModelsVBO"): ("Gfx.models_vbo",),
+    ("VBO", "InstanceDataFromUnitDefIDs"): ("Gfx.instance_data_from_unit_defs_vbo",),
+    ("VBO", "InstanceDataFromFeatureDefIDs"): ("Gfx.instance_data_from_feature_defs_vbo",),
+    ("VBO", "InstanceDataFromUnitIDs"): ("Gfx.instance_data_from_units_vbo",),
+    ("VBO", "InstanceDataFromFeatureIDs"): ("Gfx.instance_data_from_features_vbo",),
+    ("VBO", "MatrixDataFromProjectileIDs"): ("Gfx.matrix_data_from_projectiles_vbo",),
+    ("VBO", "BindBufferRange"): ("Gfx.bind_buffer_range_vbo",),
+    ("VBO", "UnbindBufferRange"): ("Gfx.unbind_buffer_range_vbo",),
+    ("VBO", "DumpDefinition"): ("Gfx.dump_definition_vbo",),
+    ("VBO", "CopyTo"): ("Gfx.copy_to_vbo",),
+    ("VBO", "GetID"): ("Gfx.get_idvbo",),
     ("LuaFont", "Print"): ("Gfx.font_print",),
     ("LuaFont", "PrintWorld"): ("Gfx.font_print_world",),
     ("LuaFont", "Begin"): ("Gfx.font_begin",),
@@ -79,6 +107,11 @@ COUNTERPARTS: dict[tuple[str, str], tuple[str, ...]] = {
     ("LuaFont", "style"): ("Gfx.get_font_info.style",),
     ("LuaFont", "texturewidth"): ("Gfx.get_font_info.texture_width",),
     ("LuaFont", "textureheight"): ("Gfx.get_font_info.texture_height",),
+    ("FBO", "dynamic attachment keys"): (
+        "Gfx.set_fboattachment",
+        "Gfx.set_fbodraw_buffers",
+        "Gfx.set_fboread_buffer",
+    ),
 }
 
 
@@ -88,7 +121,6 @@ DESIGN_REASONS: dict[tuple[str, str], str] = {
     ("LuaFont", "__gc"): "Native modules own explicit integer font handles and call DeleteFont; Rust has no Lua garbage collector boundary.",
     ("RBO", "__gc"): "Native modules own explicit integer handles and call DeleteRBO; Rust has no Lua garbage collector boundary.",
     ("FBO", "__gc"): "Native modules own explicit integer handles and call DeleteFBO; Rust has no Lua garbage collector boundary.",
-    ("FBO", "dynamic attachment keys"): "Lua FBO userdata stores arbitrary attachment fields through a Lua table; native uses typed CreateFBO attachment arrays and must expose equivalent typed operations.",
 }
 
 
