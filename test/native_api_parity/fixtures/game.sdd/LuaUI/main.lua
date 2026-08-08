@@ -15,6 +15,7 @@ local ranGlTextureResources = false
 local ranGlListsQueries = false
 local ranGlAtlas = false
 local ranGlFbo = false
+local ranGlFonts = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -1080,6 +1081,97 @@ local function runGlFboSurfaceApiTest()
 	end
 end
 
+local function runGlFontSurfaceApiTest()
+	if ranGlFonts or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlFonts = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	void("gl.ResetState", gl.ResetState)
+	void("gl.Color", function()
+		gl.Color(0.31, 0.41, 0.51, 0.61)
+	end)
+	void("gl.BeginText", gl.BeginText)
+	void("gl.Text", function()
+		gl.Text("Native parity", 8, 8, 12, "")
+	end)
+	void("gl.EndText", gl.EndText)
+	glCall(result, "gl.GetTextWidth", function()
+		return gl.GetTextWidth("Native parity")
+	end)
+	glCall(result, "gl.GetTextHeight", function()
+		return gl.GetTextHeight("Native parity")
+	end)
+
+	local font = gl.LoadFont("fonts/FreeSansBold.otf", 12, 2, 15)
+	if font == nil then
+		error("gl.LoadFont did not return a font", 0)
+	end
+	result["gl.LoadFont"] = { n = 1, values = { true } }
+	glCall(result, "gl.LoadFont.info", function()
+		return font.path, font.family, font.style, font.size, font.height,
+			font.descender, font.outlinewidth, font.outlineweight,
+			font.texturewidth, font.textureheight
+	end)
+	glCall(result, "LuaFont.GetTextWidth", function()
+		return font:GetTextWidth("Native parity")
+	end)
+	glCall(result, "LuaFont.GetTextHeight", function()
+		return font:GetTextHeight("Native parity")
+	end)
+	glCall(result, "LuaFont.WrapText", function()
+		return font:WrapText("one two three four", 20, 100, 12)
+	end)
+	void("LuaFont.SetTextColor", function()
+		font:SetTextColor({ 0.11, 0.22, 0.33, 0.44 })
+	end)
+	void("LuaFont.SetOutlineColor", function()
+		font:SetOutlineColor(0.55, 0.66, 0.77, 0.88)
+	end)
+	void("LuaFont.SetAutoOutlineColor", function()
+		font:SetAutoOutlineColor(true)
+	end)
+	void("LuaFont.Begin", function()
+		font:Begin(false)
+	end)
+	void("LuaFont.Print", function()
+		font:Print("Native parity", 8, 8, 12, "")
+	end)
+	void("LuaFont.PrintWorld", function()
+		font:PrintWorld("Native parity", 0, 0, 0, 12, "")
+	end)
+	void("LuaFont.End", function()
+		font:End()
+	end)
+	void("LuaFont.SubmitBuffered", function()
+		font:SubmitBuffered(true, false)
+	end)
+	void("LuaFont.BindTexture", function()
+		font:BindTexture()
+	end)
+	void("gl.DeleteFont", function()
+		gl.DeleteFont(font)
+	end)
+
+	glCall(result, "gl.AddFallbackFont", function()
+		return gl.AddFallbackFont("fonts/FreeSansBold.otf")
+	end)
+	void("gl.ClearFallbackFonts", gl.ClearFallbackFonts)
+	void("gl.ResetState.restore", gl.ResetState)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.fonts")
+	record("gl.fonts", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
 local function runGlFixedImmediateSurfaceApiTest()
 	if ranGlFixedImmediate or not Common.enableRenderingTests() then
 		return
@@ -1911,6 +2003,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlListsQuerySurfaceApiTest()
 	runGlAtlasSurfaceApiTest()
 	runGlFboSurfaceApiTest()
+	runGlFontSurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 

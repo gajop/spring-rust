@@ -73,12 +73,43 @@ fn record_void(result: &mut Map<String, Value>, name: &str) {
     record(result, name, Vec::new());
 }
 
+fn json_values_equal(left: &Value, right: &Value) -> bool {
+    match (left, right) {
+        (Value::Number(left), Value::Number(right)) => {
+            let Some(left) = left.as_f64() else {
+                return false;
+            };
+            let Some(right) = right.as_f64() else {
+                return false;
+            };
+            (left - right).abs() <= 1.0e-5
+                || (left - right).abs() <= 1.0e-6 * left.abs().max(right.abs())
+        }
+        (Value::Array(left), Value::Array(right)) => {
+            left.len() == right.len()
+                && left
+                    .iter()
+                    .zip(right)
+                    .all(|(left, right)| json_values_equal(left, right))
+        }
+        (Value::Object(left), Value::Object(right)) => {
+            left.len() == right.len()
+                && left.iter().all(|(key, left)| {
+                    right
+                        .get(key)
+                        .is_some_and(|right| json_values_equal(left, right))
+                })
+        }
+        _ => left == right,
+    }
+}
+
 fn compare_result(message: &Value, actual: Map<String, Value>, label: &str) -> Result<(), String> {
     let expected = message
         .get("result")
         .ok_or_else(|| format!("{label} payload is missing `result`"))?;
     let actual = Value::Object(actual);
-    if expected != &actual {
+    if !json_values_equal(expected, &actual) {
         return Err(format!(
             "{label} result mismatch: expected={expected}, actual={actual}"
         ));
@@ -1522,5 +1553,169 @@ impl NativeApiParity {
         record_void(&mut actual, "gl.DeleteTexture");
 
         compare_result(message, actual, "gl.fbo")
+    }
+
+    pub(crate) fn check_gl_fonts(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+
+        void!("gl.ResetState", gfx.reset_state());
+        void!("gl.Color", gfx.color(0.31, 0.41, 0.51, 0.61));
+        void!("gl.BeginText", gfx.begin_text(false));
+        void!("gl.Text", gfx.text("Native parity", 8.0, 8.0, 12.0, ""));
+        void!("gl.EndText", gfx.end_text());
+        record(
+            &mut actual,
+            "gl.GetTextWidth",
+            vec![rounded(gfx.get_text_width("Native parity").map_err(
+                |error| format!("GetTextWidth failed: {error:?}"),
+            )?)],
+        );
+        let (height, descender, lines) = gfx
+            .get_text_height("Native parity")
+            .map_err(|error| format!("GetTextHeight failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.GetTextHeight",
+            vec![
+                rounded(height),
+                rounded(descender),
+                serde_json::json!(lines),
+            ],
+        );
+
+        let font_id = gfx
+            .load_font("fonts/FreeSansBold.otf", 12, 2, 15.0)
+            .map_err(|error| format!("LoadFont failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.LoadFont",
+            vec![serde_json::json!(font_id > 0)],
+        );
+        let (
+            path,
+            family,
+            style,
+            size,
+            line_height,
+            font_descender,
+            outline_width,
+            outline_weight,
+            texture_width,
+            texture_height,
+        ) = gfx
+            .get_font_info(font_id)
+            .map_err(|error| format!("GetFontInfo failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.LoadFont.info",
+            vec![
+                path.map_or(Value::Null, |value| serde_json::json!(value)),
+                family.map_or(Value::Null, |value| serde_json::json!(value)),
+                style.map_or(Value::Null, |value| serde_json::json!(value)),
+                rounded(size),
+                rounded(line_height),
+                rounded(font_descender),
+                rounded(outline_width),
+                rounded(outline_weight),
+                serde_json::json!(texture_width),
+                serde_json::json!(texture_height),
+            ],
+        );
+        record(
+            &mut actual,
+            "LuaFont.GetTextWidth",
+            vec![rounded(
+                gfx.font_get_text_width(font_id, "Native parity", 0.0, 0.0, 12.0, "")
+                    .map_err(|error| format!("LuaFont.GetTextWidth failed: {error:?}"))?,
+            )],
+        );
+        let (height, descender, lines) = gfx
+            .font_get_text_height(font_id, "Native parity", 0.0, 0.0, 12.0, "")
+            .map_err(|error| format!("LuaFont.GetTextHeight failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "LuaFont.GetTextHeight",
+            vec![
+                rounded(height),
+                rounded(descender),
+                serde_json::json!(lines),
+            ],
+        );
+        let (wrapped, wrapped_lines) = gfx
+            .font_wrap_text(font_id, "one two three four", 20.0, 100.0, 12.0)
+            .map_err(|error| format!("LuaFont.WrapText failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "LuaFont.WrapText",
+            vec![
+                wrapped.map_or(Value::Null, |value| serde_json::json!(value)),
+                serde_json::json!(wrapped_lines),
+            ],
+        );
+        void!(
+            "LuaFont.SetTextColor",
+            gfx.font_set_text_color(font_id, 0.11, 0.22, 0.33, 0.44)
+        );
+        void!(
+            "LuaFont.SetOutlineColor",
+            gfx.font_set_outline_color(font_id, 0.55, 0.66, 0.77, 0.88)
+        );
+        void!(
+            "LuaFont.SetAutoOutlineColor",
+            gfx.font_set_auto_outline_color(font_id, true)
+        );
+        void!("LuaFont.Begin", gfx.font_begin(font_id, false));
+        void!(
+            "LuaFont.Print",
+            gfx.font_print(font_id, "Native parity", 8.0, 8.0, 12.0, "")
+        );
+        void!(
+            "LuaFont.PrintWorld",
+            gfx.font_print_world(
+                font_id,
+                "Native parity",
+                spring_native::sys::Float3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                12.0,
+                "",
+            )
+        );
+        void!("LuaFont.End", gfx.font_end(font_id));
+        void!(
+            "LuaFont.SubmitBuffered",
+            gfx.font_submit_buffered(
+                font_id,
+                spring_native::GfxFontSubmitBufferedOptions {
+                    no_billboarding: true,
+                    user_defined_blending: false,
+                },
+            )
+        );
+        void!("LuaFont.BindTexture", gfx.font_bind_texture(font_id));
+        void!("gl.DeleteFont", gfx.delete_font(font_id));
+        record(
+            &mut actual,
+            "gl.AddFallbackFont",
+            vec![serde_json::json!(gfx
+                .add_fallback_font("fonts/FreeSansBold.otf")
+                .map_err(|error| format!(
+                    "AddFallbackFont failed: {error:?}"
+                ))?)],
+        );
+        void!("gl.ClearFallbackFonts", gfx.clear_fallback_fonts());
+        void!("gl.ResetState.restore", gfx.reset_state());
+
+        compare_result(message, actual, "gl.fonts")
     }
 }

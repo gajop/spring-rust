@@ -129,6 +129,8 @@ impl NativeModule for NativeApiParity {
             self.check_gl_atlas(&parsed)
         } else if name == "gl.fbo" {
             self.check_gl_fbo(&parsed)
+        } else if name == "gl.fonts" {
+            self.check_gl_fonts(&parsed)
         } else if name == "gl.fixed_immediate" {
             self.check_gl_fixed_immediate(&parsed)
         } else if let Some(test_name) = name.strip_prefix("set_native_") {
