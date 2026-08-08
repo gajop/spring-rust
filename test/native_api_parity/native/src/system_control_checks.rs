@@ -8,6 +8,33 @@ impl NativeApiParity {
         label: &str,
     ) -> Result<(), String> {
         match base_test_name(label) {
+            "call_as_team" => {
+                let team_id = i32_field(message, "teamID")?;
+                let marker = str_field(message, "marker")?;
+                let mut callback_called = false;
+                let mut callback_team = -1;
+                let success = self
+                    .interface
+                    .system_control()
+                    .call_as_team(team_id, || {
+                        callback_called = true;
+                        callback_team = team_id;
+                    })
+                    .map_err(|err| {
+                        format!("call_as_team({team_id}, {marker:?}) failed: {err:?}")
+                    })?;
+                if !success {
+                    return Err("call_as_team returned false".to_string());
+                }
+                if !callback_called {
+                    return Err("call_as_team did not invoke its callback".to_string());
+                }
+                self.same_bool_if_present(label, message, "callbackCalled", callback_called)?;
+                self.same_i32_if_present(label, message, "callbackTeam", callback_team)?;
+                self.same_i32_if_present(label, message, "returnCount", 2)?;
+                self.same_string_if_present(label, message, "returnMarker", marker)?;
+                self.same_bool_if_present(label, message, "returnFlag", true)
+            }
             "clear_watch_dog_timer" => self.same_i32_if_present(label, message, "returnCount", 0),
             "ping" => {
                 let tag = u32::try_from(i32_field(message, "tag")?)
@@ -180,6 +207,19 @@ impl NativeApiParity {
 
     pub(crate) fn set_system_control_value(&mut self, message: &Value) -> Result<(), String> {
         match base_test_name(test_name_field(message)?) {
+            "call_as_team" => {
+                let team_id = i32_field(message, "teamID")?;
+                let success = self
+                    .interface
+                    .system_control()
+                    .call_as_team(team_id, || {})
+                    .map_err(|err| format!("call_as_team({team_id}) failed: {err:?}"))?;
+                if success {
+                    Ok(())
+                } else {
+                    Err("call_as_team returned false".to_string())
+                }
+            }
             "clear_watch_dog_timer" => {
                 let success = self
                     .interface

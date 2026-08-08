@@ -102,9 +102,12 @@ impl NativeApiParity {
                     .get_ground_orig_height(f32_field(message, "x1")?, f32_field(message, "z1")?)
                     .map_err(|err| format!("get_ground_orig_height() failed: {err:?}"))?;
                 self.same_if_present(label, message, "postGroundOrigHeight", height)?;
-                let affected_height = terrain
-                    .get_ground_orig_height(880.0, 919.315979)
-                    .map_err(|err| format!("get_ground_orig_height(affected probe) failed: {err:?}"))?;
+                let affected_height =
+                    terrain
+                        .get_ground_orig_height(880.0, 919.315979)
+                        .map_err(|err| {
+                            format!("get_ground_orig_height(affected probe) failed: {err:?}")
+                        })?;
                 self.same_if_present(
                     label,
                     message,

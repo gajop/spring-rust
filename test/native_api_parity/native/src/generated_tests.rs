@@ -119,6 +119,14 @@ native_tests! {
     math_bit_xor { check = check_math_extra_value, set = set_noop, }
     math_bit_inv { check = check_math_extra_value, set = set_noop, }
     math_bit_bits { check = check_math_extra_value, set = set_noop, }
+    encoding_decode_base64 { check = check_encoding_value, set = set_noop, }
+    encoding_encode_base64_default_padding { check = check_encoding_value, set = set_noop, }
+    encoding_encode_base64_padded { check = check_encoding_value, set = set_noop, }
+    encoding_is_valid_base64 { check = check_encoding_value, set = set_noop, }
+    encoding_is_invalid_base64 { check = check_encoding_value, set = set_noop, }
+    encoding_decode_base64_url { check = check_encoding_value, set = set_noop, }
+    encoding_encode_base64_url { check = check_encoding_value, set = set_noop, }
+    encoding_is_valid_base64_url { check = check_encoding_value, set = set_noop, }
     get_local_player_id { check = check_player_value, set = set_noop, }
     get_local_team_id { check = check_player_value, set = set_noop, }
     get_local_ally_team_id { check = check_player_value, set = set_noop, }
@@ -126,6 +134,7 @@ native_tests! {
     get_player_roster_count { check = check_player_value, set = set_noop, }
     get_player_statistics { check = check_player_value, set = set_noop, }
     get_player_traffic_missing_packet { check = check_player_value, set = set_noop, }
+    call_as_team { check = check_system_control_value, set = set_system_control_value, }
     is_replay { check = check_system_control_value, set = set_noop, }
     get_game_name { check = check_system_control_value, set = set_noop, }
     get_menu_name { check = check_system_control_value, set = set_noop, }
@@ -182,6 +191,28 @@ native_tests! {
     vfs_get_map_square_texture_invalid { check = check_vfs_value, set = set_noop, }
     vfs_set_map_square_texture_invalid { check = check_vfs_value, set = set_noop, }
     vfs_set_map_square_texture_default { check = check_vfs_value, set = set_noop, }
+    vfs_pack_u8 { check = check_vfs_value, set = set_noop, }
+    vfs_pack_u16 { check = check_vfs_value, set = set_noop, }
+    vfs_pack_u32 { check = check_vfs_value, set = set_noop, }
+    vfs_pack_s8 { check = check_vfs_value, set = set_noop, }
+    vfs_pack_s16 { check = check_vfs_value, set = set_noop, }
+    vfs_pack_s32 { check = check_vfs_value, set = set_noop, }
+    vfs_pack_f32 { check = check_vfs_value, set = set_noop, }
+    vfs_unpack_u8 { check = check_vfs_value, set = set_noop, }
+    vfs_unpack_u16 { check = check_vfs_value, set = set_noop, }
+    vfs_unpack_u32 { check = check_vfs_value, set = set_noop, }
+    vfs_unpack_s8 { check = check_vfs_value, set = set_noop, }
+    vfs_unpack_s16 { check = check_vfs_value, set = set_noop, }
+    vfs_unpack_s32 { check = check_vfs_value, set = set_noop, }
+    vfs_unpack_f32 { check = check_vfs_value, set = set_noop, }
+    vfs_zlib_compress { check = check_vfs_value, set = set_noop, }
+    vfs_zlib_decompress { check = check_vfs_value, set = set_noop, }
+    vfs_calculate_hash_md5 { check = check_vfs_value, set = set_noop, }
+    vfs_calculate_hash_sha512 { check = check_vfs_value, set = set_noop, }
+    vfs_download_archive_invalid_category { check = check_vfs_value, set = set_noop, }
+    vfs_download_archive_missing_name { check = check_vfs_value, set = set_noop, }
+    vfs_abort_download_missing { check = check_vfs_value, set = set_noop, }
+    vfs_scan_all_dirs { check = check_vfs_value, set = set_noop, }
     get_prev_frame_sync_checksum { check = check_unsynced_read_value, set = set_noop, }
     get_box_selection_by_engine { check = check_unsynced_read_value, set = set_noop, }
     get_build_facing { check = check_unsynced_read_value, set = set_noop, }

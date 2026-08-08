@@ -107,6 +107,8 @@ impl NativeModule for NativeApiParity {
 
         let result = if name == "complete" {
             self.check_complete()
+        } else if name == "rml.global_context_document" {
+            self.check_rml_global_context_document(&parsed)
         } else if let Some(test_name) = name.strip_prefix("set_native_") {
             self.find(test_name)
                 .ok_or_else(|| format!("unknown native setter check `{name}`"))
@@ -248,6 +250,7 @@ mod core;
 mod defs_checks;
 mod display_checks;
 mod effects_path_checks;
+mod encoding_checks;
 mod feature_checks;
 mod feature_control_calls_checks;
 mod game_checks;
@@ -261,8 +264,8 @@ mod math_extra_checks;
 mod messages_checks;
 mod metal_checks;
 mod object_lifecycle_checks;
-mod parity_gap_checks;
 mod order_checks;
+mod parity_gap_checks;
 mod pieces_checks;
 mod platform_checks;
 mod player_checks;
@@ -271,8 +274,8 @@ mod profiling_checks;
 mod projectiles_checks;
 mod query_checks;
 mod remaining_synced_checks;
-mod render_control_checks;
 mod remaining_tail_checks;
+mod render_control_checks;
 mod rml_checks;
 mod rules_checks;
 mod selection_checks;

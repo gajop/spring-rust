@@ -88,6 +88,9 @@ NATIVE_ACCESSOR_TYPES = {
 }
 API_TESTS = load_api_tests()
 KNOWN_ISSUES = load_known_issues()
+SURFACE_TESTS_PATH = HARNESS / "surface_tests.json"
+SURFACE_TESTS = json.loads(SURFACE_TESTS_PATH.read_text(encoding="utf-8"))["tests"]
+SURFACE_TEST_BY_ID = {test["id"]: test for test in SURFACE_TESTS}
 
 
 def documented_callin_names() -> tuple[set[str], set[str], set[str]]:
@@ -371,6 +374,17 @@ def run_spring(args: argparse.Namespace, datadir: Path, script: Path, output_dir
     env = os.environ.copy()
     result_dir = output_dir / "write-dir" / "native_api_parity"
     result_dir.mkdir(parents=True, exist_ok=True)
+    if args.enable_rendering_tests:
+        # The installed settings file defaults to exclusive fullscreen.  The
+        # engine's `--window` flag cannot override that persisted value on
+        # this branch, so provide an isolated windowed config explicitly.
+        (output_dir / "write-dir" / "springsettings.cfg").write_text(
+            "Fullscreen=0\n"
+            "WindowBorderless=0\n"
+            "XResolutionWindowed=1280\n"
+            "YResolutionWindowed=720\n",
+            encoding="utf-8",
+        )
     data_dirs = [datadir, BASE_CONTENT]
     if ENGINE_INSTALL.is_dir():
         data_dirs.append(ENGINE_INSTALL)
@@ -393,6 +407,11 @@ def run_spring(args: argparse.Namespace, datadir: Path, script: Path, output_dir
         str(output_dir / "write-dir"),
         str(script),
     ]
+    if args.enable_rendering_tests:
+        # Rendering parity needs a real GL context, but it should not take
+        # over the user's desktop or switch the physical monitor into an
+        # exclusive mode while the harness is running unattended.
+        cmd.insert(1, "--window")
 
     with (output_dir / "spring.log").open("wb") as log:
         proc = subprocess.Popen(cmd, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
@@ -976,6 +995,27 @@ def read_lua_api_functions() -> set[str]:
     return set(re.findall(r"`Spring\.([A-Za-z_][A-Za-z0-9_]*)`", text))
 
 
+LUA_DOCUMENTED_SURFACE_NAMESPACES = (
+    "Global", "Spring", "RmlUi", "gl", "VFS", "Script",
+    "Encoding", "math", "debug", "table",
+)
+
+
+def read_lua_surface_functions() -> dict[str, set[str]]:
+    """Read documented callouts by their real Lua namespace."""
+    surfaces = {namespace: set() for namespace in LUA_DOCUMENTED_SURFACE_NAMESPACES}
+    if not LUA_API_DOC.exists():
+        return surfaces
+    text = LUA_API_DOC.read_text(encoding="utf-8", errors="replace")
+    pattern = re.compile(
+        r"^- `((Global|Spring|RmlUi|gl|VFS|Script|Encoding|math|debug|table)\.[A-Za-z_][A-Za-z0-9_.]*)`",
+        re.MULTILINE,
+    )
+    for full_name, namespace in pattern.findall(text):
+        surfaces[namespace].add(full_name)
+    return surfaces
+
+
 def read_rust_api_functions() -> set[str]:
     if not RUST_API_DOC.exists():
         return set()
@@ -997,6 +1037,11 @@ def recorded_test_ids(checked_names: set[str]) -> set[str]:
     }
 
 
+def surface_test_ids_from_names(names: set[str]) -> set[str]:
+    """Return surface checks whose explicit recorder row was observed."""
+    return {test_id for test_id in SURFACE_TEST_BY_ID if test_id in names}
+
+
 def tested_lua_functions(recorded_ids: set[str] | None = None) -> set[str]:
     functions = set()
     items = CHECK_COVERAGE.items()
@@ -1011,7 +1056,37 @@ def tested_lua_functions(recorded_ids: set[str] | None = None) -> set[str]:
     return functions
 
 
-def tested_rust_functions(recorded_ids: set[str] | None = None) -> set[str]:
+def tested_lua_surface_functions(
+    recorded_ids: set[str] | None = None,
+    surface_recorded_ids: set[str] | None = None,
+) -> set[str]:
+    """Return qualified Lua surface labels referenced by recorded checks."""
+    functions = set()
+    items = CHECK_COVERAGE.items()
+    if recorded_ids is not None:
+        items = ((name, coverage) for name, coverage in items if name in recorded_ids)
+    for _, coverage in items:
+        for key in ("lua_setter", "lua_getter"):
+            for name in markdown_api_names(coverage.get(key, "")):
+                if any(name.startswith(f"{namespace}.") for namespace in LUA_DOCUMENTED_SURFACE_NAMESPACES):
+                    functions.add(name)
+    for test_id, test in SURFACE_TEST_BY_ID.items():
+        if surface_recorded_ids is not None:
+            if test_id not in surface_recorded_ids:
+                continue
+        elif recorded_ids is not None and test_id not in recorded_ids:
+            continue
+        functions.update(
+            name for name in test.get("lua", [])
+            if any(name.startswith(f"{namespace}.") for namespace in LUA_DOCUMENTED_SURFACE_NAMESPACES)
+        )
+    return functions
+
+
+def tested_rust_functions(
+    recorded_ids: set[str] | None = None,
+    surface_recorded_ids: set[str] | None = None,
+) -> set[str]:
     functions = set()
     items = CHECK_COVERAGE.items()
     if recorded_ids is not None:
@@ -1029,6 +1104,13 @@ def tested_rust_functions(recorded_ids: set[str] | None = None) -> set[str]:
                     type_name = NATIVE_ACCESSOR_TYPES.get(accessor.group(1))
                     if type_name:
                         functions.add(f"{type_name}.{accessor.group(2)}")
+    for test_id, test in SURFACE_TEST_BY_ID.items():
+        if surface_recorded_ids is not None:
+            if test_id not in surface_recorded_ids:
+                continue
+        elif recorded_ids is not None and test_id not in recorded_ids:
+            continue
+        functions.update(test.get("native", []))
     return functions
 
 
@@ -1036,7 +1118,10 @@ def lua_api_labels(coverage: dict) -> list[str]:
     labels = []
     for key in ("lua_setter", "lua_getter"):
         for name in markdown_api_names(coverage.get(key, "")):
-            if re.fullmatch(r"Spring\.[A-Za-z_][A-Za-z0-9_]*", name):
+            if any(
+                re.fullmatch(rf"{namespace}\.[A-Za-z_][A-Za-z0-9_.]*", name)
+                for namespace in LUA_DOCUMENTED_SURFACE_NAMESPACES
+            ):
                 labels.append(name)
     return labels
 
@@ -1052,23 +1137,36 @@ def rust_api_labels(coverage: dict) -> list[str]:
     return labels
 
 
-def coverage_summary(checked_names: set[str] | None = None) -> dict:
+def coverage_summary(
+    checked_names: set[str] | None = None,
+    surface_recorded_ids: set[str] | None = None,
+) -> dict:
     lua_total = read_lua_api_functions() | known_issue_lua_functions("inventory_missing_docstring")
+    lua_surfaces = read_lua_surface_functions()
+    lua_surface_total = set().union(*lua_surfaces.values())
     rust_total = read_rust_api_functions()
     recorded_ids = recorded_test_ids(checked_names) if checked_names is not None else None
     lua_tested = tested_lua_functions(recorded_ids)
-    rust_tested = tested_rust_functions(recorded_ids)
+    lua_surface_tested = tested_lua_surface_functions(recorded_ids, surface_recorded_ids)
+    rust_tested = tested_rust_functions(recorded_ids, surface_recorded_ids)
     return {
         "lua_total": lua_total,
         "lua_tested": lua_tested,
         "lua_tested_known": lua_tested & lua_total,
         "lua_tested_unknown": lua_tested - lua_total,
         "lua_untested": lua_total - lua_tested,
+        "lua_surfaces": lua_surfaces,
+        "lua_surface_total": lua_surface_total,
+        "lua_surface_tested": lua_surface_tested,
+        "lua_surface_tested_known": lua_surface_tested & lua_surface_total,
+        "lua_surface_tested_unknown": lua_surface_tested - lua_surface_total,
+        "lua_surface_untested": lua_surface_total - lua_surface_tested,
         "rust_total": rust_total,
         "rust_tested": rust_tested,
         "rust_tested_known": rust_tested & rust_total,
         "rust_tested_unknown": rust_tested - rust_total,
         "rust_untested": rust_total - rust_tested,
+        "surface_tested_ids": surface_recorded_ids or set(),
     }
 
 
@@ -1137,6 +1235,30 @@ def read_recorded_ids_by_context(base_output: Path) -> dict[str, set[str]]:
                 continue
             context = str(row.get("context") or stream_context)
             recorded.setdefault(context, set()).add(test_id)
+    return recorded
+
+
+def read_surface_test_ids(base_output: Path) -> set[str]:
+    """Require both process Lua observations, plus native validation when matched."""
+    def run_names(run_name: str) -> set[str]:
+        run_dir = base_output / run_name
+        names = set()
+        for stream_name in RESULT_STREAMS:
+            names.update(row_test_name(row) for row in load_jsonl(run_dir / stream_name))
+        return names
+
+    lua_names = run_names("lua")
+    native_lua_names = run_names("native")
+    native_names = {
+        row_test_name(row)
+        for row in load_jsonl(base_output / "native" / "native.jsonl")
+    }
+    recorded = set()
+    for test_id, test in SURFACE_TEST_BY_ID.items():
+        if test_id not in lua_names or test_id not in native_lua_names:
+            continue
+        if test.get("mode") == "lua_only" or test_id in native_names:
+            recorded.add(test_id)
     return recorded
 
 
@@ -1347,12 +1469,23 @@ def write_coverage_details(
             f"| Native Rust | {len(summary['rust_total'])} | {len(summary['rust_tested_known'])} | "
             f"{pct(len(summary['rust_tested_known']), len(summary['rust_total']))} | {len(summary['rust_tested_unknown'])} |"
         ),
+    ]
+    for namespace in ("Global", "RmlUi", "gl", "VFS", "Script", "Encoding", "math", "debug", "table"):
+        total = summary["lua_surfaces"].get(namespace, set())
+        tested = summary["lua_surface_tested_known"] & total
+        unknown = summary["lua_surface_tested_unknown"] & summary["lua_surface_tested"]
+        unknown = {name for name in unknown if name.startswith(f"{namespace}.")}
+        lines.append(
+            f"| Lua `{namespace}.*` | {len(total)} | {len(tested)} | "
+            f"{pct(len(tested), len(total))} | {len(unknown)} |"
+        )
+    lines.extend([
         "",
         "## Context Summary",
         "",
         "| Context | Runtime Spring APIs | Spec Checks | Recorded Checks | Lua APIs Tested / Runtime | Known Mismatch Issues | Affected Runtime APIs | Native APIs Recorded |",
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
-    ]
+    ])
     for row in context_coverage(checked_names, inventory, recorded_by_context):
         lines.append(
             f"| `{row['context']}` | {row['runtime_lua']} | {row['spec_checks']} | {row['recorded_checks']} | "
@@ -1362,6 +1495,23 @@ def write_coverage_details(
         )
 
     lines.extend([
+        "## Additional Lua-facing Surface Checks",
+        "",
+        "| Check | Context | Mode | Status | Lua APIs | Native APIs | Reason |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ])
+    for test in SURFACE_TESTS:
+        test_id = test["id"]
+        lines.append(
+            f"| `{test_id}` | `{test.get('context', 'unknown')}` | `{test.get('mode', 'matched')}` | "
+            f"{'tested' if test_id in summary.get('surface_tested_ids', set()) else 'untested'} | "
+            f"{', '.join(f'`{name}`' for name in test.get('lua', [])) or 'n/a'} | "
+            f"{', '.join(f'`{name}`' for name in test.get('native', [])) or 'n/a'} | "
+            f"{test.get('reason', '')} |"
+        )
+
+    lines.extend([
+        "",
         "## Tested Checks",
         "",
         "| Check | Context | Kind | Requires | Params | Recorded | Lua APIs | Native APIs |",
@@ -1412,6 +1562,10 @@ def write_coverage_details(
     if summary["lua_tested_unknown"]:
         lines.extend(["", "## Tested Lua Names Missing From Inventory", ""])
         lines.extend(f"- `Spring.{name}`" for name in sorted(summary["lua_tested_unknown"]))
+
+    if summary["lua_surface_untested"]:
+        lines.extend(["", "## Untested Documented Lua Surface Functions", ""])
+        lines.extend(f"- `{name}`" for name in sorted(summary["lua_surface_untested"]))
 
     lines.extend([
         "",
@@ -1610,7 +1764,8 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         lines.append("| n/a | 0 | 0 |")
 
     checked_names = set(result_names(native_rows))
-    summary = coverage_summary(checked_names)
+    surface_recorded_ids = read_surface_test_ids(base_output)
+    summary = coverage_summary(checked_names, surface_recorded_ids)
     inventory = read_context_inventory(base_output)
     recorded_by_context = read_recorded_ids_by_context(base_output)
     coverage_details = write_coverage_details(base_output, summary, checked_names, inventory, recorded_by_context)
@@ -1632,6 +1787,15 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
             f"| Native Rust | {len(summary['rust_total'])} | {len(summary['rust_tested_known'])} | "
             f"{pct(len(summary['rust_tested_known']), len(summary['rust_total']))} |"
         ),
+    ])
+    for namespace in ("Global", "RmlUi", "gl", "VFS", "Script", "Encoding", "math", "debug", "table"):
+        total = summary["lua_surfaces"].get(namespace, set())
+        tested = summary["lua_surface_tested_known"] & total
+        lines.append(
+            f"| Lua `{namespace}.*` | {len(total)} | {len(tested)} | "
+            f"{pct(len(tested), len(total))} |"
+        )
+    lines.extend([
         "",
         "| Surface | Untested Functions | Unknown Tested Names |",
         "| --- | ---: | ---: |",

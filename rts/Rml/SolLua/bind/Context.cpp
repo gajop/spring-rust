@@ -33,6 +33,7 @@
 
 #include "../plugin/SolLuaDataModel.h"
 #include "../plugin/SolLuaDocument.h"
+#include "../plugin/SolLuaEventListener.h"
 #include "Rml/Backends/RmlUi_Backend.h"
 #include "sol2/sol.hpp"
 
@@ -352,6 +353,41 @@ sol::table openDataModel(Rml::Context& self, const Rml::String& name, sol::objec
 }
 }  // namespace datamodel
 
+namespace context
+{
+void addEventListener(Rml::Context& self, const Rml::String& event, sol::protected_function func, bool in_capture_phase = false)
+{
+	self.AddEventListener(event, new SolLuaEventListener(func, self.GetRootElement()), in_capture_phase);
+}
+
+void addEventListener(Rml::Context& self, const Rml::String& event, const Rml::String& code, sol::this_state s)
+{
+	auto state = sol::state_view{s};
+	self.AddEventListener(event, new SolLuaEventListener(state, code, self.GetRootElement()), false);
+}
+
+void addEventListener(Rml::Context& self, const Rml::String& event, const Rml::String& code, sol::this_state s, bool in_capture_phase)
+{
+	auto state = sol::state_view{s};
+	self.AddEventListener(event, new SolLuaEventListener(state, code, self.GetRootElement()), in_capture_phase);
+}
+
+void pullDocumentToFront(Rml::Context& self, SolLuaDocument& document)
+{
+	self.PullDocumentToFront(&document);
+}
+
+void pushDocumentToBack(Rml::Context& self, SolLuaDocument& document)
+{
+	self.PushDocumentToBack(&document);
+}
+
+void unfocusDocument(Rml::Context& self, SolLuaDocument& document)
+{
+	self.UnfocusDocument(&document);
+}
+}  // namespace context
+
 namespace element
 {
 auto getElementAtPoint1(Rml::Context& self, Rml::Vector2f point)
@@ -383,14 +419,19 @@ void bind_context(sol::table& namespace_table, SolLuaPlugin* slp)
 		"Context", sol::no_constructor,
 		// M
 		/***
-		 * Adds the inline Lua script, script, as an event listener to the context. element_context is an optional Element; if it is not None, then the script will be executed as if it was bound to that element.
+		 * Adds a Lua function or inline Lua script as an event listener to the
+		 * context.
 		 * @function RmlUi.Context:AddEventListener
 		 * @param event string
-		 * @param script RmlUi.Element
-		 * @param element_context boolean
+		 * @param listener function|string
 		 * @param in_capture_phase boolean
 		 */
-		"AddEventListener", &Rml::Context::AddEventListener,
+		"AddEventListener", sol::overload(
+			[](Rml::Context& s, const Rml::String& e, sol::protected_function f) { context::addEventListener(s, e, f, false); },
+			sol::resolve<void(Rml::Context&, const Rml::String&, sol::protected_function, bool)>(&context::addEventListener),
+			sol::resolve<void(Rml::Context&, const Rml::String&, const Rml::String&, sol::this_state)>(&context::addEventListener),
+			sol::resolve<void(Rml::Context&, const Rml::String&, const Rml::String&, sol::this_state, bool)>(&context::addEventListener)
+		),
 		/***
 		 * Creates a new document with the tag name of tag.
 		 * @function RmlUi.Context:CreateDocument
@@ -578,13 +619,14 @@ void bind_context(sol::table& namespace_table, SolLuaPlugin* slp)
 		 * @function RmlUi.Context:PullDocumentToFront
 		 * @param document RmlUi.Document
 		 */
-		"PullDocumentToFront", &Rml::Context::PullDocumentToFront,
+		"PullDocumentToFront", &context::pullDocumentToFront,
 		/***
 		 * Pushes the document to the back of the context.
 		 * @function RmlUi.Context:PushDocumentToBack
 		 * @param document RmlUi.Document
 		 */
-		"PushDocumentToBack",&Rml::Context::PushDocumentToBack, "UnfocusDocument", &Rml::Context::UnfocusDocument,
+		"PushDocumentToBack", &context::pushDocumentToBack,
+		"UnfocusDocument", &context::unfocusDocument,
 
 		// G+S
 		/*** @field RmlUi.Context.dimensions RmlUi.Vector2i */

@@ -254,6 +254,251 @@
         "textureName": {"type": "string", "fixed": ""}
       },
       "lua_runtime": {"call": "Spring.SetMapSquareTexture", "args": ["value.texSquareX", "value.texSquareY", "value.textureName"], "returns": ["success"]}
+    },
+    {
+      "id": "vfs_pack_u8",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.PackU8"]},
+      "native": {"set": [], "get": ["Vfs.pack_u8"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"values": {"type": "object", "fixed": [0, 1, 127, 255]}},
+      "lua_runtime": {"call": "VFS.PackU8", "args": ["value.values"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_pack_u16",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.PackU16"]},
+      "native": {"set": [], "get": ["Vfs.pack_u16"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"values": {"type": "object", "fixed": [0, 1, 256, 65535]}},
+      "lua_runtime": {"call": "VFS.PackU16", "args": ["value.values"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_pack_u32",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.PackU32"]},
+      "native": {"set": [], "get": ["Vfs.pack_u32"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"values": {"type": "object", "fixed": [0, 1, 65536, 16777215]}},
+      "lua_runtime": {"call": "VFS.PackU32", "args": ["value.values"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_pack_s8",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.PackS8"]},
+      "native": {"set": [], "get": ["Vfs.pack_s8"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"values": {"type": "object", "fixed": [-128, -1, 0, 127]}},
+      "lua_runtime": {"call": "VFS.PackS8", "args": ["value.values"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_pack_s16",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.PackS16"]},
+      "native": {"set": [], "get": ["Vfs.pack_s16"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"values": {"type": "object", "fixed": [-32768, -1, 0, 32767]}},
+      "lua_runtime": {"call": "VFS.PackS16", "args": ["value.values"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_pack_s32",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.PackS32"]},
+      "native": {"set": [], "get": ["Vfs.pack_s32"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"values": {"type": "object", "fixed": [-2147483648, -1, 0, 16777215]}},
+      "lua_runtime": {"call": "VFS.PackS32", "args": ["value.values"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_pack_f32",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.PackF32"]},
+      "native": {"set": [], "get": ["Vfs.pack_f32"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"values": {"type": "object", "fixed": [-1.25, 0, 3.5, 100.125]}},
+      "lua_runtime": {"call": "VFS.PackF32", "args": ["value.values"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_unpack_u8",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.UnpackU8"]},
+      "native": {"set": [], "get": ["Vfs.unpack_u8"]},
+      "compare": {"mode": "fields", "fields": ["values"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"source": {"type": "object", "fixed": [10, 20, 30, 40]}, "pos": {"type": "i32", "fixed": 2}, "count": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"locals": {"packed": {"call": "VFS.PackU8", "args": ["value.source"]}}, "call": "VFS.UnpackU8", "args": ["local.packed", "value.pos", "value.count"], "returns": [{"field": "values", "transform": "table_values"}]}
+    },
+    {
+      "id": "vfs_unpack_u16",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.UnpackU16"]},
+      "native": {"set": [], "get": ["Vfs.unpack_u16"]},
+      "compare": {"mode": "fields", "fields": ["values"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"source": {"type": "object", "fixed": [1000, 2000, 3000, 4000]}, "pos": {"type": "i32", "fixed": 3}, "count": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"locals": {"packed": {"call": "VFS.PackU16", "args": ["value.source"]}}, "call": "VFS.UnpackU16", "args": ["local.packed", "value.pos", "value.count"], "returns": [{"field": "values", "transform": "table_values"}]}
+    },
+    {
+      "id": "vfs_unpack_u32",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.UnpackU32"]},
+      "native": {"set": [], "get": ["Vfs.unpack_u32"]},
+      "compare": {"mode": "fields", "fields": ["values"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"source": {"type": "object", "fixed": [100000, 200000, 300000]}, "pos": {"type": "i32", "fixed": 5}, "count": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"locals": {"packed": {"call": "VFS.PackU32", "args": ["value.source"]}}, "call": "VFS.UnpackU32", "args": ["local.packed", "value.pos", "value.count"], "returns": [{"field": "values", "transform": "table_values"}]}
+    },
+    {
+      "id": "vfs_unpack_s8",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.UnpackS8"]},
+      "native": {"set": [], "get": ["Vfs.unpack_s8"]},
+      "compare": {"mode": "fields", "fields": ["values"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"source": {"type": "object", "fixed": [-40, -20, 20, 40]}, "pos": {"type": "i32", "fixed": 2}, "count": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"locals": {"packed": {"call": "VFS.PackS8", "args": ["value.source"]}}, "call": "VFS.UnpackS8", "args": ["local.packed", "value.pos", "value.count"], "returns": [{"field": "values", "transform": "table_values"}]}
+    },
+    {
+      "id": "vfs_unpack_s16",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.UnpackS16"]},
+      "native": {"set": [], "get": ["Vfs.unpack_s16"]},
+      "compare": {"mode": "fields", "fields": ["values"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"source": {"type": "object", "fixed": [-30000, -1000, 1000, 30000]}, "pos": {"type": "i32", "fixed": 3}, "count": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"locals": {"packed": {"call": "VFS.PackS16", "args": ["value.source"]}}, "call": "VFS.UnpackS16", "args": ["local.packed", "value.pos", "value.count"], "returns": [{"field": "values", "transform": "table_values"}]}
+    },
+    {
+      "id": "vfs_unpack_s32",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.UnpackS32"]},
+      "native": {"set": [], "get": ["Vfs.unpack_s32"]},
+      "compare": {"mode": "fields", "fields": ["values"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"source": {"type": "object", "fixed": [-300000, -1000, 1000, 300000]}, "pos": {"type": "i32", "fixed": 5}, "count": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"locals": {"packed": {"call": "VFS.PackS32", "args": ["value.source"]}}, "call": "VFS.UnpackS32", "args": ["local.packed", "value.pos", "value.count"], "returns": [{"field": "values", "transform": "table_values"}]}
+    },
+    {
+      "id": "vfs_unpack_f32",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.UnpackF32"]},
+      "native": {"set": [], "get": ["Vfs.unpack_f32"]},
+      "compare": {"mode": "fields", "fields": ["values"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"source": {"type": "object", "fixed": [1.5, 2.5, 3.5]}, "pos": {"type": "i32", "fixed": 5}, "count": {"type": "i32", "fixed": 2}},
+      "lua_runtime": {"locals": {"packed": {"call": "VFS.PackF32", "args": ["value.source"]}}, "call": "VFS.UnpackF32", "args": ["local.packed", "value.pos", "value.count"], "returns": [{"field": "values", "transform": "table_values"}]}
+    },
+    {
+      "id": "vfs_zlib_compress",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.ZlibCompress"]},
+      "native": {"set": [], "get": ["Vfs.zlib_compress"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"input": {"type": "string", "fixed": "Native API parity compression payload"}},
+      "lua_runtime": {"call": "VFS.ZlibCompress", "args": ["value.input"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_zlib_decompress",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.ZlibCompress", "VFS.ZlibDecompress"]},
+      "native": {"set": [], "get": ["Vfs.zlib_compress", "Vfs.zlib_decompress"]},
+      "compare": {"mode": "fields", "fields": ["hex"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"input": {"type": "string", "fixed": "Native API parity decompression payload"}},
+      "lua_runtime": {"locals": {"compressed": {"call": "VFS.ZlibCompress", "args": ["value.input"]}}, "call": "VFS.ZlibDecompress", "args": ["local.compressed"], "returns": [{"field": "hex", "transform": "string_hex"}]}
+    },
+    {
+      "id": "vfs_calculate_hash_md5",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.CalculateHash"]},
+      "native": {"set": [], "get": ["Vfs.calculate_hash"]},
+      "compare": {"mode": "fields", "fields": ["hash"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"input": {"type": "string", "fixed": "Native API parity hash payload"}, "hashType": {"type": "i32", "fixed": 0}},
+      "lua_runtime": {"call": "VFS.CalculateHash", "args": ["value.input", "value.hashType"], "returns": ["hash"]}
+    },
+    {
+      "id": "vfs_calculate_hash_sha512",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.CalculateHash"]},
+      "native": {"set": [], "get": ["Vfs.calculate_hash"]},
+      "compare": {"mode": "fields", "fields": ["hash"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"input": {"type": "string", "fixed": "Native API parity hash payload"}, "hashType": {"type": "i32", "fixed": 1}},
+      "lua_runtime": {"call": "VFS.CalculateHash", "args": ["value.input", "value.hashType"], "returns": ["hash"]}
+    },
+    {
+      "id": "vfs_download_archive_invalid_category",
+      "context": "widget",
+      "kind": "readonly",
+      "expect_error": true,
+      "lua": {"set": [], "get": ["VFS.DownloadArchive"]},
+      "native": {"set": [], "get": ["Vfs.download_archive"]},
+      "compare": {"mode": "fields", "fields": ["error"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"filename": {"type": "string", "fixed": "native_api_parity_missing_archive"}, "category": {"type": "string", "fixed": "invalid"}},
+      "lua_runtime": {"call": "VFS.DownloadArchive", "args": ["value.filename", "value.category"], "returns": []}
+    },
+    {
+      "id": "vfs_download_archive_missing_name",
+      "context": "widget",
+      "kind": "readonly",
+      "expect_error": true,
+      "lua": {"set": [], "get": ["VFS.DownloadArchive"]},
+      "native": {"set": [], "get": ["Vfs.download_archive"]},
+      "compare": {"mode": "fields", "fields": ["error"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"filename": {"type": "string", "fixed": ""}, "category": {"type": "string", "fixed": "map"}},
+      "lua_runtime": {"call": "VFS.DownloadArchive", "args": ["value.filename", "value.category"], "returns": []}
+    },
+    {
+      "id": "vfs_abort_download_missing",
+      "context": "widget",
+      "kind": "readonly",
+      "lua": {"set": [], "get": ["VFS.AbortDownload"]},
+      "native": {"set": [], "get": ["Vfs.abort_download"]},
+      "compare": {"mode": "fields", "fields": ["removed"]},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {"id": {"type": "i32", "fixed": -1}},
+      "lua_runtime": {"call": "VFS.AbortDownload", "args": ["value.id"], "returns": ["removed"]}
+    },
+    {
+      "id": "vfs_scan_all_dirs",
+      "context": "widget",
+      "kind": "readonly",
+      "single_case": true,
+      "lua": {"set": [], "get": ["VFS.ScanAllDirs"]},
+      "native": {"set": [], "get": ["Vfs.scan_all_dirs"]},
+      "compare": {"mode": "fields", "fields": []},
+      "rust": {"check": "check_vfs_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "VFS.ScanAllDirs", "args": [], "returns": []}
     }
   ]
 }

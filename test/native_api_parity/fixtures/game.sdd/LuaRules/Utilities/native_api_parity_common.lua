@@ -380,6 +380,24 @@ local function generatedReturnValue(returnSpec, returns)
 		value = type(value) == "number" and value >= 0
 	elseif returnSpec.transform == "string_len" then
 		value = type(value) == "string" and #value or 0
+	elseif returnSpec.transform == "string_hex" then
+		if type(value) == "string" then
+			local bytes = {}
+			for index = 1, #value do
+				bytes[#bytes + 1] = string.format("%02x", string.byte(value, index))
+			end
+			value = table.concat(bytes)
+		else
+			value = ""
+		end
+	elseif returnSpec.transform == "table_values" then
+		local values = {}
+		if type(value) == "table" then
+			for _, item in ipairs(value) do
+				values[#values + 1] = item
+			end
+		end
+		value = values
 	elseif returnSpec.transform == "nil_to_minus_one" then
 		if value == nil then
 			value = -1

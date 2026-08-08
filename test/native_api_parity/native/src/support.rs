@@ -8,8 +8,7 @@ fn rounded_float(value: f32) -> f64 {
     // The engine's parity Lua build uses float Lua numbers, so perform the
     // same quantization in f32 before formatting the resulting value with
     // Lua's nine-significant-digit convention.
-    let rounded = (value * 100_000.0_f32 + 0.5_f32).floor()
-        / 100_000.0_f32;
+    let rounded = (value * 100_000.0_f32 + 0.5_f32).floor() / 100_000.0_f32;
     if rounded == 0.0 {
         return 0.0;
     }
@@ -196,33 +195,40 @@ impl NativeApiParity {
             coded |= 1 << 7;
         }
         let options = self.trace_table(vec![
-            (
-                self.trace_str("coded"),
-                self.trace_u8(coded),
-            ),
+            (self.trace_str("coded"), self.trace_u8(coded)),
             (
                 self.trace_str("alt"),
                 self.trace_bool(command.options & spring_native::constants::CMD_OPT_ALT as u8 != 0),
             ),
             (
                 self.trace_str("ctrl"),
-                self.trace_bool(command.options & spring_native::constants::CMD_OPT_CTRL as u8 != 0),
+                self.trace_bool(
+                    command.options & spring_native::constants::CMD_OPT_CTRL as u8 != 0,
+                ),
             ),
             (
                 self.trace_str("shift"),
-                self.trace_bool(command.options & spring_native::constants::CMD_OPT_SHIFT as u8 != 0),
+                self.trace_bool(
+                    command.options & spring_native::constants::CMD_OPT_SHIFT as u8 != 0,
+                ),
             ),
             (
                 self.trace_str("right"),
-                self.trace_bool(command.options & spring_native::constants::CMD_OPT_RIGHT as u8 != 0),
+                self.trace_bool(
+                    command.options & spring_native::constants::CMD_OPT_RIGHT as u8 != 0,
+                ),
             ),
             (
                 self.trace_str("meta"),
-                self.trace_bool(command.options & spring_native::constants::CMD_OPT_META as u8 != 0),
+                self.trace_bool(
+                    command.options & spring_native::constants::CMD_OPT_META as u8 != 0,
+                ),
             ),
             (
                 self.trace_str("internal"),
-                self.trace_bool(command.options & spring_native::constants::CMD_OPT_INTERNAL as u8 != 0),
+                self.trace_bool(
+                    command.options & spring_native::constants::CMD_OPT_INTERNAL as u8 != 0,
+                ),
             ),
         ]);
         vec![
@@ -253,7 +259,10 @@ impl NativeApiParity {
                         self.trace_table(vec![
                             (self.trace_str("command"), self.trace_str(action.command)),
                             (self.trace_str("extra"), self.trace_str(action.extra)),
-                            (self.trace_str("boundWith"), self.trace_str(action.bound_with)),
+                            (
+                                self.trace_str("boundWith"),
+                                self.trace_str(action.bound_with),
+                            ),
                         ]),
                     )
                 })
@@ -275,22 +284,70 @@ impl NativeApiParity {
 
     pub(crate) fn trace_geometry(&self, geometry: &spring_native::ViewGeometry) -> Value {
         self.trace_table(vec![
-            (self.trace_str("screenSizeX"), self.trace_i32(geometry.screen_size_x)),
-            (self.trace_str("screenSizeY"), self.trace_i32(geometry.screen_size_y)),
-            (self.trace_str("screenPosX"), self.trace_i32(geometry.screen_pos_x)),
-            (self.trace_str("screenPosY"), self.trace_i32(geometry.screen_pos_y)),
-            (self.trace_str("windowSizeX"), self.trace_i32(geometry.window_size_x)),
-            (self.trace_str("windowSizeY"), self.trace_i32(geometry.window_size_y)),
-            (self.trace_str("windowPosX"), self.trace_i32(geometry.window_pos_x)),
-            (self.trace_str("windowPosY"), self.trace_i32(geometry.window_pos_y)),
-            (self.trace_str("windowBorderTop"), self.trace_i32(geometry.window_border_top)),
-            (self.trace_str("windowBorderLeft"), self.trace_i32(geometry.window_border_left)),
-            (self.trace_str("windowBorderBottom"), self.trace_i32(geometry.window_border_bottom)),
-            (self.trace_str("windowBorderRight"), self.trace_i32(geometry.window_border_right)),
-            (self.trace_str("viewSizeX"), self.trace_i32(geometry.view_size_x)),
-            (self.trace_str("viewSizeY"), self.trace_i32(geometry.view_size_y)),
-            (self.trace_str("viewPosX"), self.trace_i32(geometry.view_pos_x)),
-            (self.trace_str("viewPosY"), self.trace_i32(geometry.view_pos_y)),
+            (
+                self.trace_str("screenSizeX"),
+                self.trace_i32(geometry.screen_size_x),
+            ),
+            (
+                self.trace_str("screenSizeY"),
+                self.trace_i32(geometry.screen_size_y),
+            ),
+            (
+                self.trace_str("screenPosX"),
+                self.trace_i32(geometry.screen_pos_x),
+            ),
+            (
+                self.trace_str("screenPosY"),
+                self.trace_i32(geometry.screen_pos_y),
+            ),
+            (
+                self.trace_str("windowSizeX"),
+                self.trace_i32(geometry.window_size_x),
+            ),
+            (
+                self.trace_str("windowSizeY"),
+                self.trace_i32(geometry.window_size_y),
+            ),
+            (
+                self.trace_str("windowPosX"),
+                self.trace_i32(geometry.window_pos_x),
+            ),
+            (
+                self.trace_str("windowPosY"),
+                self.trace_i32(geometry.window_pos_y),
+            ),
+            (
+                self.trace_str("windowBorderTop"),
+                self.trace_i32(geometry.window_border_top),
+            ),
+            (
+                self.trace_str("windowBorderLeft"),
+                self.trace_i32(geometry.window_border_left),
+            ),
+            (
+                self.trace_str("windowBorderBottom"),
+                self.trace_i32(geometry.window_border_bottom),
+            ),
+            (
+                self.trace_str("windowBorderRight"),
+                self.trace_i32(geometry.window_border_right),
+            ),
+            (
+                self.trace_str("viewSizeX"),
+                self.trace_i32(geometry.view_size_x),
+            ),
+            (
+                self.trace_str("viewSizeY"),
+                self.trace_i32(geometry.view_size_y),
+            ),
+            (
+                self.trace_str("viewPosX"),
+                self.trace_i32(geometry.view_pos_x),
+            ),
+            (
+                self.trace_str("viewPosY"),
+                self.trace_i32(geometry.view_pos_y),
+            ),
         ])
     }
 

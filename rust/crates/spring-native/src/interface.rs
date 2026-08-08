@@ -1,17 +1,18 @@
 use std::ptr::NonNull;
 
 use crate::{
-    camera::Camera, config::Config, display::Display, feature_defs::FeatureDefs,
-    features::Features, game::Game, gfx::Gfx, ground_decals::GroundDecals, icons::Icons,
-    input::Input, lights::Lights, los::Los, markers::Markers, math_extra::MathExtra,
-    memory::Memory, messages::Messages, metal_map::MetalMap, move_ctrl::MoveCtrl,
-    path_finder::PathFinder, platform::Platform, player::Player, profiling::Profiling,
-    projectiles::Projectiles, rml_ui::RmlUi, rules_params::RulesParams, selection::Selection,
-    sound::Sound, synced_ctrl::SyncedCtrl, sys, system_control::SystemControl, teams::Teams,
-    terrain::Terrain, tracing::Tracing, unit_defs::UnitDefs, units_commands::UnitsCommands,
-    units_info::UnitsInfo, units_pieces::UnitsPieces, units_query::UnitsQuery,
-    units_weapons::UnitsWeapons, unsynced_ctrl::UnsyncedCtrl, unsynced_read::UnsyncedRead,
-    utils::Utils, vfs::Vfs, weapon_defs::WeaponDefs,
+    camera::Camera, config::Config, display::Display, encoding::Encoding,
+    feature_defs::FeatureDefs, features::Features, game::Game, gfx::Gfx,
+    ground_decals::GroundDecals, icons::Icons, input::Input, lights::Lights, los::Los,
+    markers::Markers, math_extra::MathExtra, memory::Memory, messages::Messages,
+    metal_map::MetalMap, move_ctrl::MoveCtrl, path_finder::PathFinder, platform::Platform,
+    player::Player, profiling::Profiling, projectiles::Projectiles, rml_ui::RmlUi,
+    rules_params::RulesParams, selection::Selection, sound::Sound, synced_ctrl::SyncedCtrl, sys,
+    system_control::SystemControl, teams::Teams, terrain::Terrain, tracing::Tracing,
+    unit_defs::UnitDefs, units_commands::UnitsCommands, units_info::UnitsInfo,
+    units_pieces::UnitsPieces, units_query::UnitsQuery, units_weapons::UnitsWeapons,
+    unsynced_ctrl::UnsyncedCtrl, unsynced_read::UnsyncedRead, utils::Utils, vfs::Vfs,
+    weapon_defs::WeaponDefs,
 };
 
 #[derive(Clone, Copy)]
@@ -34,6 +35,7 @@ pub struct NativeInterfaceRef {
     terrain_api: &'static sys::TerrainApi,
     player_api: &'static sys::PlayerApi,
     math_extra_api: &'static sys::MathExtraApi,
+    encoding_api: &'static sys::EncodingApi,
     metal_map_api: &'static sys::MetalMapApi,
     path_finder_api: &'static sys::PathFinderApi,
     platform_api: &'static sys::PlatformApi,
@@ -133,6 +135,10 @@ impl NativeInterfaceRef {
                 .mathExtra
                 .as_ref()
                 .expect("mathExtra API must be initialized"),
+            encoding_api: iface
+                .encoding
+                .as_ref()
+                .expect("encoding API must be initialized"),
             metal_map_api: iface
                 .metalMap
                 .as_ref()
@@ -292,6 +298,10 @@ impl NativeInterfaceRef {
 
     pub fn math_extra(&self) -> MathExtra<'_> {
         MathExtra::new(self.math_extra_api)
+    }
+
+    pub fn encoding(&self) -> Encoding<'_> {
+        Encoding::new(self.encoding_api)
     }
 
     pub fn metal_map(&self) -> MetalMap<'_> {

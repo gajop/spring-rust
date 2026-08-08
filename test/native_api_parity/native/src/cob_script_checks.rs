@@ -3,11 +3,7 @@ use crate::support::*;
 use std::ffi::CString;
 
 impl NativeApiParity {
-    pub(crate) fn check_cob_script(
-        &mut self,
-        message: &Value,
-        label: &str,
-    ) -> Result<(), String> {
+    pub(crate) fn check_cob_script(&mut self, message: &Value, label: &str) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let func_name = CString::new(str_field(message, "funcName")?)
             .map_err(|_| "funcName contains an embedded NUL".to_string())?;

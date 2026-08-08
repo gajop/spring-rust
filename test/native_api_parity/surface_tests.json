@@ -1,0 +1,290 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "script.get_name",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.GetName"],
+      "reason": "Lua-handle identity has no native-module equivalent."
+    },
+    {
+      "id": "script.get_synced",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.GetSynced"],
+      "reason": "Lua-handle execution state has no native-module equivalent."
+    },
+    {
+      "id": "script.permissions",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": [
+        "Script.GetFullCtrl",
+        "Script.GetFullRead",
+        "Script.GetCtrlTeam",
+        "Script.GetReadTeam",
+        "Script.GetReadAllyTeam",
+        "Script.GetSelectTeam"
+      ],
+      "reason": "Lua-handle permission state is owned by the embedded Lua handle."
+    },
+    {
+      "id": "script.get_global",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.GetGlobal"],
+      "reason": "The embedded Lua global table cannot be represented by the native ABI."
+    },
+    {
+      "id": "script.get_registry",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.GetRegistry"],
+      "reason": "The embedded Lua registry cannot be represented by the native ABI."
+    },
+    {
+      "id": "script.get_callin_list",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.GetCallInList"],
+      "reason": "Lua-handle callin registration state has no native-module equivalent."
+    },
+    {
+      "id": "script.version_checks",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.IsEngineMinVersion"],
+      "reason": "The Lua-handle compatibility helper is not a native API callout."
+    },
+    {
+      "id": "script.action_fallback",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.AddActionFallback", "Script.RemoveActionFallback"],
+      "reason": "Action fallback registration belongs to the Lua handle."
+    },
+    {
+      "id": "script.watch_unit",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.SetWatchUnit", "Script.GetWatchUnit"],
+      "reason": "Lua script watcher state belongs to the Lua handle."
+    },
+    {
+      "id": "script.watch_feature",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.SetWatchFeature", "Script.GetWatchFeature"],
+      "reason": "Lua script watcher state belongs to the Lua handle."
+    },
+    {
+      "id": "script.watch_weapon",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.SetWatchWeapon", "Script.GetWatchWeapon"],
+      "reason": "Lua script watcher state belongs to the Lua handle."
+    },
+    {
+      "id": "script.watch_explosion",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.SetWatchExplosion", "Script.GetWatchExplosion"],
+      "reason": "Lua script watcher state belongs to the Lua handle."
+    },
+    {
+      "id": "script.watch_projectile",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.SetWatchProjectile", "Script.GetWatchProjectile"],
+      "reason": "Lua script watcher state belongs to the Lua handle."
+    },
+    {
+      "id": "script.watch_allow_target",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.SetWatchAllowTarget", "Script.GetWatchAllowTarget"],
+      "reason": "Lua script watcher state belongs to the Lua handle."
+    },
+    {
+      "id": "script.update_callin",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.UpdateCallin"],
+      "reason": "Callin registration is state on an embedded Lua handle."
+    },
+    {
+      "id": "script.delay_by_frames",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.DelayByFrames"],
+      "reason": "Delayed Lua callbacks capture an embedded Lua state."
+    },
+    {
+      "id": "script.kill",
+      "context": "widget",
+      "mode": "lua_only",
+      "lua": ["Script.Kill"],
+      "reason": "Script.Kill terminates a Lua handle and has no native-module equivalent."
+    },
+    {
+      "id": "debug.input_injection",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": [
+        "debug.clearEmulatedInput",
+        "debug.emulateKeyPress",
+        "debug.emulateKeyRelease",
+        "debug.emulateMouseMove",
+        "debug.emulateMousePress",
+        "debug.emulateMouseRelease"
+      ],
+      "reason": "These are Lua-side test controls; native modules observe the resulting callbacks."
+    },
+    {
+      "id": "debug.mouse_wheel_injection",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["debug.emulateMouseWheel"],
+      "reason": "This source-registered debug helper is Lua-only and is not a public native callout."
+    },
+    {
+      "id": "debug.callin_driver",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["debug.emulateNativeApiParityCallins"],
+      "reason": "The deterministic engine callback driver is a Lua debug helper."
+    },
+    {
+      "id": "debug.unit_move_failed_driver",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["debug.emulateUnitMoveFailed"],
+      "reason": "The move-failed callback driver is a Lua debug helper."
+    },
+    {
+      "id": "table.new",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["table.new"],
+      "reason": "table.new is a Lua allocator/table-shape hint with no native ABI counterpart."
+    },
+    {
+      "id": "vfs.include",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["VFS.Include"],
+      "reason": "VFS.Include executes arbitrary Lua and cannot have a typed native equivalent."
+    },
+    {
+      "id": "rml.global_context_document",
+      "context": "widget",
+      "mode": "matched",
+      "lua": [
+        "RmlUi.AddTranslationString",
+        "RmlUi.ClearDocumentPathRequests",
+        "RmlUi.ClearTranslations",
+        "RmlUi.Context.ActivateTheme",
+        "RmlUi.Context.AddEventListener",
+        "RmlUi.Context.CreateDocument",
+        "RmlUi.Context.EnableMouseCursor",
+        "RmlUi.Context.GetDocument",
+        "RmlUi.Context.GetElementAtPoint",
+        "RmlUi.Context.IsMouseInteracting",
+        "RmlUi.Context.IsThemeActive",
+        "RmlUi.Context.LoadDocument",
+        "RmlUi.Context.OpenDataModel",
+        "RmlUi.Context.ProcessKeyDown",
+        "RmlUi.Context.ProcessKeyUp",
+        "RmlUi.Context.ProcessMouseButtonDown",
+        "RmlUi.Context.ProcessMouseButtonUp",
+        "RmlUi.Context.ProcessMouseLeave",
+        "RmlUi.Context.ProcessMouseMove",
+        "RmlUi.Context.ProcessMouseWheel",
+        "RmlUi.Context.ProcessTextInput",
+        "RmlUi.Context.PullDocumentToFront",
+        "RmlUi.Context.PushDocumentToBack",
+        "RmlUi.Context.RemoveDataModel",
+        "RmlUi.Context.Render",
+        "RmlUi.Context.UnloadAllDocuments",
+        "RmlUi.Context.UnloadDocument",
+        "RmlUi.Context.Update",
+        "RmlUi.CreateContext",
+        "RmlUi.Document.AppendToStyleSheet",
+        "RmlUi.Document.Close",
+        "RmlUi.Document.CreateElement",
+        "RmlUi.Document.CreateTextNode",
+        "RmlUi.Document.Hide",
+        "RmlUi.Document.LoadExternalScript",
+        "RmlUi.Document.LoadInlineScript",
+        "RmlUi.Document.PullToFront",
+        "RmlUi.Document.PushToBack",
+        "RmlUi.Document.ReloadStyleSheet",
+        "RmlUi.Document.Show",
+        "RmlUi.Document.UpdateDocument",
+        "RmlUi.GetContext",
+        "RmlUi.GetDocumentPathRequests",
+        "RmlUi.LoadFontFace",
+        "RmlUi.RegiserEventType",
+        "RmlUi.RemoveContext",
+        "RmlUi.SetDebugContext",
+        "RmlUi.SetMouseCursorAlias",
+        "RmlUi.Vector2f.new",
+        "RmlUi.Vector2i.new"
+      ],
+      "native": [
+        "RmlUi.add_translation_string",
+        "RmlUi.clear_document_path_requests",
+        "RmlUi.clear_translations",
+        "RmlUi.context_activate_theme",
+        "RmlUi.context_add_event_listener",
+        "RmlUi.context_create_document",
+        "RmlUi.context_enable_mouse_cursor",
+        "RmlUi.context_get_document",
+        "RmlUi.context_get_element_at_point",
+        "RmlUi.context_is_mouse_interacting",
+        "RmlUi.context_is_theme_active",
+        "RmlUi.context_load_document",
+        "RmlUi.context_open_data_model",
+        "RmlUi.context_process_key_down",
+        "RmlUi.context_process_key_up",
+        "RmlUi.context_process_mouse_button_down",
+        "RmlUi.context_process_mouse_button_up",
+        "RmlUi.context_process_mouse_leave",
+        "RmlUi.context_process_mouse_move",
+        "RmlUi.context_process_mouse_wheel",
+        "RmlUi.context_process_text_input",
+        "RmlUi.context_pull_document_to_front",
+        "RmlUi.context_push_document_to_back",
+        "RmlUi.context_remove_data_model",
+        "RmlUi.context_render",
+        "RmlUi.context_unload_all_documents",
+        "RmlUi.context_unload_document",
+        "RmlUi.context_update",
+        "RmlUi.create_context",
+        "RmlUi.document_append_to_style_sheet",
+        "RmlUi.document_close",
+        "RmlUi.document_create_element",
+        "RmlUi.document_create_text_node",
+        "RmlUi.document_hide",
+        "RmlUi.document_load_external_script",
+        "RmlUi.document_load_inline_script",
+        "RmlUi.document_pull_to_front",
+        "RmlUi.document_push_to_back",
+        "RmlUi.document_reload_style_sheet",
+        "RmlUi.document_show",
+        "RmlUi.document_update_document",
+        "RmlUi.get_context",
+        "RmlUi.get_document_path_requests",
+        "RmlUi.load_font_face",
+        "RmlUi.regiser_event_type",
+        "RmlUi.remove_context",
+        "RmlUi.set_debug_context",
+        "RmlUi.set_mouse_cursor_alias",
+        "RmlUi.vector2f_new",
+        "RmlUi.vector2i_new"
+      ],
+      "reason": "Functional parity test for the global, context, and document RmlUi callouts."
+    }
+  ]
+}

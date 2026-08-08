@@ -73,7 +73,7 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetPlayerStatistics"]},
       "native": {"set": [], "get": ["Player.get_player_statistics"]},
-      "compare": {"mode": "fields", "fields": ["mousePixels", "mouseClicks", "keyPresses", "unitCommands"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["mousePixels", "mouseClicks", "keyPresses", "unitCommands"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPlayerStatistics`", "native_getter": "`Player.get_player_statistics`", "fields": "`mousePixels`, `mouseClicks`, `keyPresses`, `unitCommands`"},
       "rust": {"check": "check_player_value", "set": "set_noop"},
       "params": {"playerID": {"type": "i32", "fixed": 0}},

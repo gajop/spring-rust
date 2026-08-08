@@ -14,6 +14,15 @@ from pathlib import Path
 from typing import List, Dict, Set
 from datetime import datetime, timedelta
 
+
+# These are the ordinary Lua-to-engine function tables discovered in the
+# checked-out engine.  Keep callins and object/proxy fields separate: they have
+# different invocation directions and cannot be compared as callouts.
+CALL_OUT_NAMESPACES = (
+    'Global', 'Spring', 'gl', 'RmlUi', 'VFS', 'Script',
+    'Encoding', 'math', 'debug', 'table',
+)
+
 def fetch_page(url: str, cache_file: Path, cache_days: int = 1) -> str:
     """Fetch a webpage and return its content, using cache if available."""
     # Check if cache exists and is fresh
@@ -62,7 +71,7 @@ def extract_lua_functions_from_markdown(content: str, infer_signatures: bool = T
     # First, collect parameter info from @function blocks
     func_blocks = []
     func_pattern = re.compile(
-        r'@function\s+((?:Spring|gl|RmlUi|VFS|Script)(?:[.:][A-Za-z_][A-Za-z0-9_]*)+)',
+        r'@function\s+((?:' + '|'.join(CALL_OUT_NAMESPACES) + r')(?:[.:][A-Za-z_][A-Za-z0-9_]*)+)',
         re.MULTILINE,
     )
     matches = list(func_pattern.finditer(content))
@@ -75,7 +84,9 @@ def extract_lua_functions_from_markdown(content: str, infer_signatures: bool = T
 
     params_by_name = {}
     param_regex = re.compile(r'@param\s+([^\s]+)\s+([^\n]+)')
-    sig_regex = re.compile(r'(?:Spring|gl|RmlUi|VFS|Script)(?:[.:][A-Za-z0-9_]+)+\(([^)]*)\)')
+    sig_regex = re.compile(
+        r'(?:' + '|'.join(CALL_OUT_NAMESPACES) + r')(?:[.:][A-Za-z0-9_]+)+\(([^)]*)\)'
+    )
 
     def clean_type(t: str) -> str:
         t = re.sub(r'<[^>]+>', '', t)
@@ -194,7 +205,7 @@ def extract_lua_functions_from_markdown(content: str, infer_signatures: bool = T
 
     # Scan signatures from code blocks / text
     sig_scan_pattern = re.compile(
-        r'\b((?:Spring|gl|RmlUi|VFS|Script)(?:[.:][A-Za-z0-9_]+)+)\(([^)]*)\)'
+        r'\b((?:' + '|'.join(CALL_OUT_NAMESPACES) + r')(?:[.:][A-Za-z0-9_]+)+)\(([^)]*)\)'
     )
     function_index = {}
     if infer_signatures:
@@ -298,21 +309,113 @@ def extract_callins(content: str) -> List[Dict]:
 
     return callins
 
+def collect_registered_functions(paths: List[Path], namespace: str) -> Set[str]:
+    """Collect functions registered in a named Lua table from C++ sources."""
+    registered = set()
+    register_regex = re.compile(r'REGISTER_(?:SCOPED_)?LUA_CFUNC\s*\((?:\s*[A-Za-z0-9_:]+\s*,)?\s*([A-Za-z][A-Za-z0-9_]*)\s*\)')
+    push_regex = re.compile(r'LuaPushNamedCFunc\(L,\s*"([A-Za-z][A-Za-z0-9_]*)"')
+    for path in paths:
+        try:
+            text = path.read_text(encoding='utf-8', errors='ignore')
+        except OSError:
+            continue
+        # Commented-out registrations are historical notes, not part of the
+        # active public table (for example VFS.MapArchive/UnmapArchive).
+        text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
+        text = re.sub(r'//[^\n]*', '', text)
+        for match in register_regex.finditer(text):
+            registered.add(f"{namespace}.{match.group(1)}")
+        for match in push_regex.finditer(text):
+            registered.add(f"{namespace}.{match.group(1)}")
+    return registered
+
+
 def collect_registered_spring_functions(project_root: Path) -> Set[str]:
     """Collect Spring.* functions actually registered by the local Lua bindings."""
-    registered = set()
     lua_dir = project_root / 'rts' / 'Lua'
     if not lua_dir.exists():
-        return registered
-
+        return set()
+    # Spring callouts are registered by REGISTER_LUA_CFUNC in the table
+    # providers.  Direct LuaPushNamedCFunc calls in LuaHandleSynced.cpp are
+    # globals (for example CallAsTeam and SendToUnsynced), not Spring.*
+    # entries; including them here hides a real documentation/registration
+    # mismatch.
     register_regex = re.compile(r'REGISTER_(?:SCOPED_)?LUA_CFUNC\s*\((?:\s*[A-Za-z0-9_:]+\s*,)?\s*([A-Za-z][A-Za-z0-9_]*)\s*\)')
+    registered = set()
     for path in lua_dir.glob('Lua*.cpp'):
         try:
             text = path.read_text(encoding='utf-8', errors='ignore')
         except OSError:
             continue
-        for match in register_regex.finditer(text):
-            registered.add(f"Spring.{match.group(1)}")
+        text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
+        text = re.sub(r'//[^\n]*', '', text)
+        registered.update(f'Spring.{match.group(1)}' for match in register_regex.finditer(text))
+    return registered
+
+
+def collect_registered_vfs_functions(project_root: Path) -> Set[str]:
+    """Collect active VFS.* registrations from all VFS table providers."""
+    lua_dir = project_root / 'rts' / 'Lua'
+    paths = [
+        lua_dir / 'LuaVFS.cpp',
+        lua_dir / 'LuaVFSDownload.cpp',
+        lua_dir / 'LuaArchive.cpp',
+    ]
+    return collect_registered_functions(paths, 'VFS')
+
+
+def collect_registered_extra_functions(project_root: Path) -> Dict[str, Set[str]]:
+    """Collect the small non-Spring function tables from their providers."""
+    lua_dir = project_root / 'rts' / 'Lua'
+    providers = {
+        'Encoding': [lua_dir / 'LuaEncoding.cpp'],
+        'math': [lua_dir / 'LuaMathExtra.cpp'],
+        'debug': [lua_dir / 'LuaDebugExtra.cpp'],
+        'table': [lua_dir / 'LuaTableExtra.cpp'],
+    }
+    return {
+        namespace: collect_registered_functions(paths, namespace)
+        for namespace, paths in providers.items()
+    }
+
+
+def collect_registered_global_functions(project_root: Path) -> Set[str]:
+    """Collect documented global helpers installed in the Lua global table.
+
+    The engine has a few deliberately un-namespaced helpers.  Keep this
+    inventory narrow and source-backed: only direct registrations in the
+    global-table setup blocks are considered, while Script/math/metatable
+    registrations remain owned by their respective surface audits.
+    """
+    lua_dir = project_root / 'rts' / 'Lua'
+    registered = set()
+    paths = [lua_dir / 'LuaHandleSynced.cpp', lua_dir / 'LuaUI.cpp']
+    direct_names = re.compile(r'LuaPushNamedCFunc\(L,\s*"([A-Za-z][A-Za-z0-9_]*)"')
+    global_push = re.compile(r'lua_pushvalue\(L,\s*LUA_GLOBALSINDEX\)')
+    named_table_push = re.compile(r'lua_getglobal\(L,\s*"([A-Za-z][A-Za-z0-9_]*)"\)')
+    one_pop = re.compile(r'lua_pop\(L,\s*1\)')
+    for path in paths:
+        try:
+            text = path.read_text(encoding='utf-8', errors='ignore')
+        except OSError:
+            continue
+        text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
+        text = re.sub(r'//[^\n]*', '', text)
+        # Track the table stack well enough to distinguish a direct global
+        # registration from the nested Script/math tables in these setup
+        # functions.  AddEntriesToTable restores the stack, so it does not
+        # need special handling here.
+        table_stack = []
+        for line in text.splitlines():
+            if global_push.search(line):
+                table_stack.append('Global')
+            table_match = named_table_push.search(line)
+            if table_match:
+                table_stack.append(table_match.group(1))
+            if table_stack and table_stack[-1] == 'Global':
+                registered.update(f'Global.{name}' for name in direct_names.findall(line))
+            if one_pop.search(line) and table_stack:
+                table_stack.pop()
     return registered
 
 def extract_source_doc_functions(project_root: Path) -> List[Dict]:
@@ -333,7 +436,13 @@ def extract_source_doc_functions(project_root: Path) -> List[Dict]:
             content = path.read_text(encoding='utf-8', errors='ignore')
         except OSError:
             continue
-        functions.extend(extract_lua_functions_from_markdown(content, infer_signatures=False))
+        # Parse one documentation comment at a time.  Feeding an entire C++
+        # file to the markdown extractor lets a source-only @function block
+        # accidentally consume @param tags from later functions in the file.
+        # That is especially damaging for Script.* because many of its
+        # implementations sit next to callout documentation.
+        for block in re.findall(r'/\*{2,}.*?\*/', content, flags=re.DOTALL):
+            functions.extend(extract_lua_functions_from_markdown(block, infer_signatures=False))
     return functions
 
 def extract_source_callins(project_root: Path) -> List[Dict]:
@@ -419,6 +528,30 @@ def main():
         if removed:
             print(f"Filtered {removed} stale Spring docs not present in local registrations")
 
+    registered_vfs = collect_registered_vfs_functions(project_root)
+    if registered_vfs:
+        before = len(callouts)
+        callouts = [
+            func for func in callouts
+            if func.get('namespace') != 'VFS' or func.get('full_name') in registered_vfs
+        ]
+        removed = before - len(callouts)
+        if removed:
+            print(f"Filtered {removed} stale VFS docs not present in local registrations")
+
+    registered_extra = collect_registered_extra_functions(project_root)
+    for namespace, registered in registered_extra.items():
+        if not registered:
+            continue
+        before = len(callouts)
+        callouts = [
+            func for func in callouts
+            if func.get('namespace') != namespace or func.get('full_name') in registered
+        ]
+        removed = before - len(callouts)
+        if removed:
+            print(f"Filtered {removed} stale {namespace} docs not present in local registrations")
+
     source_functions = extract_source_doc_functions(project_root)
     if source_functions:
         source_rml_names = {
@@ -439,9 +572,22 @@ def main():
         added = 0
         updated = 0
         for func in source_functions:
-            if func.get('namespace') not in ('Spring', 'RmlUi'):
+            # Script.* is a documented Lua-handle surface too.  It has no
+            # native counterpart, but source comments still need to enter the
+            # generated inventory so it can be signature-audited and tested.
+            if func.get('namespace') not in CALL_OUT_NAMESPACES:
                 continue
             if func.get('namespace') == 'Spring' and registered_spring and func.get('full_name') not in registered_spring:
+                continue
+            if func.get('namespace') == 'VFS' and registered_vfs and func.get('full_name') not in registered_vfs:
+                continue
+            if (
+                func.get('namespace') in registered_extra
+                and registered_extra[func.get('namespace')]
+                and func.get('full_name') not in registered_extra[func.get('namespace')]
+            ):
+                continue
+            if func.get('namespace') == 'Global' and func.get('full_name') not in collect_registered_global_functions(project_root):
                 continue
             existing = by_full_name.get(func['full_name'])
             if existing is None:
@@ -562,7 +708,7 @@ def main():
         "Spring.SetUnitPieceParent": [("unitID", "integer"), ("AlteredPiece", "integer"), ("ParentPiece", "integer")],
         "Spring.SetUnitPosition": [("unitID", "integer"), ("x", "number"), ("y", "number"), ("z", "number")],
         "Spring.SetUnitWeaponState": [("unitID", "integer"), ("weaponNum", "integer"), ("key", "string"), ("value", "number")],
-        "Spring.CallAsTeam": [("teamID", "integer"), ("func", "function"), ("args", "any[]")],
+        "Global.CallAsTeam": [("teamID", "integer"), ("func", "function"), ("args", "any[]")],
         "Spring.Echo": [("arg", "string"), ("rest", "string")],
         "Spring.MarkerErasePosition": [("x", "number"), ("y", "number"), ("z", "number"), ("unused", "number"), ("localOnly", "boolean?"), ("playerID", "integer?"), ("alwaysErase", "boolean?")],
         "Spring.SendCommands": [("command", "string"), ("rest", "string")],

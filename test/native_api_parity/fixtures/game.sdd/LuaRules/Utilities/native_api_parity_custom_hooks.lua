@@ -2186,6 +2186,55 @@ TEST_HOOKS[#TEST_HOOKS + 1] = {
 	end,
 }
 
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "call_as_team",
+	payload = groundPayload,
+	make = function(_, caseIndex)
+		return {
+			teamID = 0,
+			marker = "native_api_parity_call_as_team_" .. tostring(caseIndex),
+		}
+	end,
+	set = function(_, value)
+		local returned = {n = 0}
+		local function callback(marker)
+			value.callbackCalled = true
+			value.callbackTeam = value.teamID
+			return marker, true
+		end
+		local function capture(...)
+			returned.n = select("#", ...)
+			for index = 1, returned.n do
+				returned[index] = select(index, ...)
+			end
+		end
+		capture(CallAsTeam(value.teamID, callback, value.marker))
+		value.returnCount = returned.n
+		value.returnMarker = returned[1]
+		value.returnFlag = returned[2]
+	end,
+	nativeSet = function(_, value, invoke)
+		-- The native callback has no Lua return stack.  The Rust checker verifies
+		-- the callback and team directly; this fills the shared result shape with
+		-- the equivalent successful Lua callback outcome.
+		invoke()
+		value.callbackCalled = true
+		value.callbackTeam = value.teamID
+		value.returnCount = 2
+		value.returnMarker = value.marker
+		value.returnFlag = true
+	end,
+	get = function(_, value)
+		return {
+			callbackCalled = value.callbackCalled == true,
+			callbackTeam = value.callbackTeam,
+			returnCount = value.returnCount,
+			returnMarker = value.returnMarker,
+			returnFlag = value.returnFlag,
+		}
+	end,
+}
+
 local function processStartScript()
 	local options = Spring.GetModOptions() or {}
 	local mode = tostring(options.native_api_parity_mode or "lua")

@@ -4445,6 +4445,10 @@ int CLuaHandle::CallOutDelayByFrames(lua_State* L)
 	return 0;
 }
 
+/***
+ * @function Script.GetCallInList
+ * @return table callins keyed by name, with `unsynced` and `controller` flags
+ */
 int CLuaHandle::CallOutGetCallInList(lua_State* L)
 {
 	std::vector<std::string> eventList;

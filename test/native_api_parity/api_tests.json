@@ -15,6 +15,7 @@
     "api_tests/icons_01.json",
     "api_tests/render_controls_01.json",
     "api_tests/math_extra_01.json",
+    "api_tests/encoding_01.json",
     "api_tests/player_01.json",
     "api_tests/system_control_01.json",
     "api_tests/messages_01.json",

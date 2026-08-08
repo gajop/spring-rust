@@ -47,6 +47,14 @@ NATIVE_ONLY_BY_DESIGN = {
     "UnitMoved": "Native engine/rendering movement notification; no script call-in is registered.",
 }
 
+# Lua and native both expose a symbol named Shutdown, but these are lifecycle
+# hooks on different interfaces.  Lua shuts down an embedded Lua handle;
+# native shuts down the loaded module.  It is therefore neither a shared
+# engine event nor an unexplained missing callback.
+LIFECYCLE_ONLY_BY_DESIGN = {
+    "Shutdown": "Lua-handle and native-module lifecycle hooks share a label but have different owners and no event payload.",
+}
+
 # A C query is an ABI storage shape, not the Lua callin signature.  Keep every
 # known arity difference here with the source-level reason it is equivalent.
 # Anything absent from this table remains an unresolved representation gap and
@@ -235,6 +243,8 @@ def main() -> int:
     documented_names = set().union(*(set(values) for values in documented.values()))
     native_event_symbols = native_symbols - {"InitializeNativeModule"}
     matched_names = documented_names & native_event_symbols
+    lifecycle_names = matched_names & set(LIFECYCLE_ONLY_BY_DESIGN)
+    shared_names = matched_names - lifecycle_names
     lua_only_names = documented_names - native_event_symbols
     native_only_names = native_event_symbols - documented_names
     lua_only_by_design = set(lua_only_names) & set(LUA_ONLY_BY_DESIGN)
@@ -261,7 +271,10 @@ def main() -> int:
         query_fields = query_structs.get(query_name or "", [])
         lua_count = len(source["params"]) if source else None
         native_count = len(query_fields) if query_name else None
-        if lua_count is None or native_count is None:
+        if name in lifecycle_names:
+            status = "lifecycle_only_by_design"
+            note = LIFECYCLE_ONLY_BY_DESIGN[name]
+        elif lua_count is None or native_count is None:
             status = "signature_source_missing"
             note = "Lua source documentation or native query mapping is missing."
         elif name in SEMANTIC_SIGNATURE_NOTES:
@@ -294,7 +307,8 @@ def main() -> int:
             f"| Lua documented entries (namespace rows) | {sum(len(values) for values in documented.values())} |",
             f"| Lua unique documented callin names | {len(documented_names)} |",
             f"| Native C++ callback symbols | {len(native_event_symbols)} |",
-            f"| Shared callback names | {len(matched_names)} |",
+            f"| Shared callback names | {len(shared_names)} |",
+            f"| Lifecycle-only labels | {len(lifecycle_names)} |",
             f"| Documented Lua names without native callback | {len(lua_only_names)} |",
             f"| Native callback names without documented Lua callin | {len(native_only_names)} |",
             f"| Lua-only callins classified by design | {len(lua_only_by_design)} |",
@@ -303,12 +317,15 @@ def main() -> int:
             f"| Unclassified native-only names | {len(native_only_unclassified)} |",
             f"| Native callbacks without Rust trait method | {len(trait_missing)} |",
             "",
-            "## Lua names without native callback",
-            "",
-            "Every entry is classified below. Classification is a design decision, not evidence that its runtime behavior has already been tested.",
+            "Every entry below is classified explicitly. Classification is a design decision, not evidence that its runtime behavior has already been tested.",
             "",
         ]
     )
+    lines.extend(["## Lifecycle labels with separate Lua/native meanings", ""])
+    lines.extend(["| Name | Classification | Reason |", "| --- | --- | --- |"])
+    for name in sorted(lifecycle_names):
+        lines.append(f"| `{name}` | `lifecycle_only_by_design` | {LIFECYCLE_ONLY_BY_DESIGN[name]} |")
+    lines.extend(["", "## Lua names without native callback", ""])
     lines.extend(["| Name | Classification | Reason |", "| --- | --- | --- |"])
     for name in sorted(lua_only_names):
         if name in LUA_ONLY_BY_DESIGN:
@@ -351,7 +368,7 @@ def main() -> int:
     print(
         f"Lua_entries={sum(len(values) for values in documented.values())} "
         f"Lua_unique={len(documented_names)} "
-        f"native={len(native_event_symbols)} shared={len(matched_names)} "
+        f"native={len(native_event_symbols)} shared={len(shared_names)} "
         f"lua_only_by_design={len(lua_only_by_design)} "
         f"native_only_by_design={len(native_only_by_design)} "
         f"lua_only_unclassified={len(lua_only_unclassified)} "

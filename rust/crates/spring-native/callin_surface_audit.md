@@ -14,7 +14,8 @@ See `api_surface_contract.md` for intentional-difference policy.
 | Lua documented entries (namespace rows) | 190 |
 | Lua unique documented callin names | 156 |
 | Native C++ callback symbols | 161 |
-| Shared callback names | 150 |
+| Shared callback names | 149 |
+| Lifecycle-only labels | 1 |
 | Documented Lua names without native callback | 6 |
 | Native callback names without documented Lua callin | 11 |
 | Lua-only callins classified by design | 6 |
@@ -23,9 +24,15 @@ See `api_surface_contract.md` for intentional-difference policy.
 | Unclassified native-only names | 0 |
 | Native callbacks without Rust trait method | 0 |
 
-## Lua names without native callback
+Every entry below is classified explicitly. Classification is a design decision, not evidence that its runtime behavior has already been tested.
 
-Every entry is classified below. Classification is a design decision, not evidence that its runtime behavior has already been tested.
+## Lifecycle labels with separate Lua/native meanings
+
+| Name | Classification | Reason |
+| --- | --- | --- |
+| `Shutdown` | `lifecycle_only_by_design` | Lua-handle and native-module lifecycle hooks share a label but have different owners and no event payload. |
+
+## Lua names without native callback
 
 | Name | Classification | Reason |
 | --- | --- | --- |
@@ -169,7 +176,7 @@ an implementation/documentation queue item, not an intentional omission.
 | `ResourceExcess` | 1 | 2 | `ResourceExcess` | `semantically_mapped` | Native pointer/count entries expand to Lua's resource-excess table. |
 | `Save` | 1 | 1 | `ArchiveCallin` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
 | `ShieldPreDamaged` | 13 | 9 | `ShieldPreDamaged` | `semantically_mapped` | Native startPos/hitPos Float3 values expand to Lua coordinate arguments. |
-| `Shutdown` | 0 | 0 | `Shutdown` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
+| `Shutdown` | 0 | 0 | `Shutdown` | `lifecycle_only_by_design` | Lua-handle and native-module lifecycle hooks share a label but have different owners and no event payload. |
 | `StockpileChanged` | 6 | 6 | `StockpileChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |
 | `SunChanged` | 0 | 1 | `SunChanged` | `semantically_mapped` | Native query retains the new sun state for native consumers; Lua receives no arguments. |
 | `TeamChanged` | 1 | 1 | `TeamChanged` | `same_arity_pending_runtime_check` | Raw arity agrees; value-level parity still requires the executable harness. |

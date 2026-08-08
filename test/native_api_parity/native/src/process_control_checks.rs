@@ -74,11 +74,7 @@ impl NativeApiParity {
             "start" => {
                 let args = str_field(message, "cmdArgs")?;
                 let script = str_field(message, "startScript")?;
-                match self
-                    .interface
-                    .system_control()
-                    .start(args, script)
-                {
+                match self.interface.system_control().start(args, script) {
                     Ok(success) => Err(format!(
                         "start unexpectedly returned Ok({success}); Lua should return false"
                     )),

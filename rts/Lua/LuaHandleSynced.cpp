@@ -2055,6 +2055,13 @@ int CSyncedLuaHandle::SendToUnsynced(lua_State* L)
 }
 
 
+/***
+ * Register a synced chat/action command fallback.
+ * @function Script.AddActionFallback
+ * @param command string Command name, optionally followed by its argument syntax.
+ * @param help string Help text or fallback command handler description.
+ * @return boolean registered Whether the fallback was installed.
+ */
 int CSyncedLuaHandle::AddSyncedActionFallback(lua_State* L)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -2079,6 +2086,12 @@ int CSyncedLuaHandle::AddSyncedActionFallback(lua_State* L)
 }
 
 
+/***
+ * Remove a synced chat/action command fallback.
+ * @function Script.RemoveActionFallback
+ * @param command string Command name, optionally followed by its argument syntax.
+ * @return boolean removed Whether a fallback was present.
+ */
 int CSyncedLuaHandle::RemoveSyncedActionFallback(lua_State* L)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -2541,14 +2554,14 @@ string CSplitLuaHandle::LoadFile(const std::string& filename, const std::string&
 
 /*** Calls a function from given team's PoV. In particular this makes callouts obey that team's visibility rules.
  *
- * @function Spring.CallAsTeam
+ * @function Global.CallAsTeam
  * @param teamID integer Team ID.
  * @param func fun(...) The function to call.
  * @param ... any Arguments to pass to the function.
  * @return any ... The return values of the function.
  */
 /***
- * @function Spring.CallAsTeam
+ * @function Global.CallAsTeam
  * @param options CallAsTeamOptions Options.
  * @param func fun(...) The function to call.
  * @param ... any Arguments to pass to the function.

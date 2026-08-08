@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "id": "encoding_decode_base64",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Encoding.DecodeBase64"]},
+      "native": {"set": [], "get": ["Encoding.decode_base64"]},
+      "compare": {"mode": "fields", "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.DecodeBase64`", "native_getter": "`Encoding.decode_base64`", "fields": "`value`"},
+      "rust": {"check": "check_encoding_value", "set": "set_noop"},
+      "params": {"text": {"type": "string", "value": "SGVsbG8="}},
+      "lua_runtime": {"call": "Encoding.DecodeBase64", "args": ["value.text"], "returns": ["value"]}
+    },
+    {
+      "id": "encoding_encode_base64_default_padding",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Encoding.EncodeBase64"]},
+      "native": {"set": [], "get": ["Encoding.encode_base64"]},
+      "compare": {"mode": "fields", "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.EncodeBase64`", "native_getter": "`Encoding.encode_base64`", "fields": "`value`"},
+      "rust": {"check": "check_encoding_value", "set": "set_noop"},
+      "params": {"text": {"type": "string", "value": "Hello"}},
+      "lua_runtime": {"call": "Encoding.EncodeBase64", "args": ["value.text"], "returns": ["value"]}
+    },
+    {
+      "id": "encoding_encode_base64_padded",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Encoding.EncodeBase64"]},
+      "native": {"set": [], "get": ["Encoding.encode_base64"]},
+      "compare": {"mode": "fields", "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.EncodeBase64`", "native_getter": "`Encoding.encode_base64`", "fields": "`value`"},
+      "rust": {"check": "check_encoding_value", "set": "set_noop"},
+      "params": {"text": {"type": "string", "value": "Hello"}, "stripPadding": {"type": "bool", "fixed": false}},
+      "lua_runtime": {"call": "Encoding.EncodeBase64", "args": ["value.text", "value.stripPadding"], "returns": ["value"]}
+    },
+    {
+      "id": "encoding_is_valid_base64",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Encoding.IsValidBase64"]},
+      "native": {"set": [], "get": ["Encoding.is_valid_base64"]},
+      "compare": {"mode": "fields", "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.IsValidBase64`", "native_getter": "`Encoding.is_valid_base64`", "fields": "`value`"},
+      "rust": {"check": "check_encoding_value", "set": "set_noop"},
+      "params": {"text": {"type": "string", "value": "SGVsbG8="}},
+      "lua_runtime": {"call": "Encoding.IsValidBase64", "args": ["value.text"], "returns": ["value"]}
+    },
+    {
+      "id": "encoding_is_invalid_base64",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Encoding.IsValidBase64"]},
+      "native": {"set": [], "get": ["Encoding.is_valid_base64"]},
+      "compare": {"mode": "fields", "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.IsValidBase64`", "native_getter": "`Encoding.is_valid_base64`", "fields": "`value`"},
+      "rust": {"check": "check_encoding_value", "set": "set_noop"},
+      "params": {"text": {"type": "string", "value": "SGVsbG8*"}},
+      "lua_runtime": {"call": "Encoding.IsValidBase64", "args": ["value.text"], "returns": ["value"]}
+    },
+    {
+      "id": "encoding_decode_base64_url",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Encoding.DecodeBase64Url"]},
+      "native": {"set": [], "get": ["Encoding.decode_base64_url"]},
+      "compare": {"mode": "fields", "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.DecodeBase64Url`", "native_getter": "`Encoding.decode_base64_url`", "fields": "`value`"},
+      "rust": {"check": "check_encoding_value", "set": "set_noop"},
+      "params": {"text": {"type": "string", "value": "SGVsbG8"}},
+      "lua_runtime": {"call": "Encoding.DecodeBase64Url", "args": ["value.text"], "returns": ["value"]}
+    },
+    {
+      "id": "encoding_encode_base64_url",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Encoding.EncodeBase64Url"]},
+      "native": {"set": [], "get": ["Encoding.encode_base64_url"]},
+      "compare": {"mode": "fields", "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.EncodeBase64Url`", "native_getter": "`Encoding.encode_base64_url`", "fields": "`value`"},
+      "rust": {"check": "check_encoding_value", "set": "set_noop"},
+      "params": {"text": {"type": "string", "value": "Hello"}},
+      "lua_runtime": {"call": "Encoding.EncodeBase64Url", "args": ["value.text"], "returns": ["value"]}
+    },
+    {
+      "id": "encoding_is_valid_base64_url",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Encoding.IsValidBase64Url"]},
+      "native": {"set": [], "get": ["Encoding.is_valid_base64_url"]},
+      "compare": {"mode": "fields", "fields": ["value"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.IsValidBase64Url`", "native_getter": "`Encoding.is_valid_base64_url`", "fields": "`value`"},
+      "rust": {"check": "check_encoding_value", "set": "set_noop"},
+      "params": {"text": {"type": "string", "value": "SGVsbG8-_"}},
+      "lua_runtime": {"call": "Encoding.IsValidBase64Url", "args": ["value.text"], "returns": ["value"]}
+    }
+  ]
+}

@@ -4,6 +4,8 @@ local outputPath = Common.outputDir() .. "/widget.jsonl"
 local sentInventory = false
 local ranGeneratedTests = false
 local ranRmlUiTests = false
+local ranRmlSurfaceApiTest = false
+local ranScriptKillTest = false
 local fixtureIDs = {}
 
 local function record(name, payload)
@@ -116,11 +118,245 @@ local function runRmlCheck(name, fn)
 	})
 end
 
+local function normalizeRmlSurfaceValue(value)
+	local valueType = type(value)
+	if valueType == "nil" then
+		return { type = "nil" }
+	end
+	if valueType == "boolean" or valueType == "number" or valueType == "string" then
+		return value
+	end
+	if valueType == "table" then
+		return { type = "table", count = tableLength(value) }
+	end
+	-- RmlUi userdata contains process-local pointers.  The native side records
+	-- the same observable category and separately validates that the handle is
+	-- live before producing it.
+	return { type = valueType }
+end
+
+local function rmlSurfaceCall(results, apiName, fn, normalizer)
+	local values = { n = 0 }
+	local function capture(...)
+		values.n = select("#", ...)
+		for index = 1, values.n do
+			values[index] = select(index, ...)
+		end
+	end
+	local ok, err = pcall(function()
+		capture(fn())
+	end)
+	if not ok then
+		error(apiName .. ": " .. tostring(err), 0)
+	end
+	local normalized = {}
+	for index = 1, values.n do
+		normalized[index] = normalizer and normalizer(values[index]) or normalizeRmlSurfaceValue(values[index])
+	end
+	results[apiName] = { n = values.n, values = normalized }
+	return unpack(values, 1, values.n)
+end
+
+local function runRmlSurfaceApiTest()
+	if ranRmlSurfaceApiTest or not Common.enableRenderingTests() or RmlUi == nil then
+		return
+	end
+	ranRmlSurfaceApiTest = true
+	local testName = "rml.global_context_document"
+	local result = {}
+	local contextName = "native_api_parity_surface_global_context_document"
+
+	local context = rmlSurfaceCall(result, "RmlUi.CreateContext", function()
+		return RmlUi.CreateContext(contextName)
+	end)
+	if context == nil then
+		error("RmlUi.CreateContext returned nil", 0)
+	end
+	rmlSurfaceCall(result, "RmlUi.GetContext", function()
+		return RmlUi.GetContext(contextName)
+	end)
+	rmlSurfaceCall(result, "RmlUi.AddTranslationString", function()
+		return RmlUi.AddTranslationString("native_api_parity_surface_key", "surface translation")
+	end)
+	rmlSurfaceCall(result, "RmlUi.ClearTranslations", function()
+		return RmlUi.ClearTranslations()
+	end)
+	rmlSurfaceCall(result, "RmlUi.LoadFontFace", function()
+		return RmlUi.LoadFontFace("native_api_parity_missing_font.ttf", false)
+	end)
+	rmlSurfaceCall(result, "RmlUi.RegiserEventType", function()
+		return RmlUi.RegisterEventType("native_api_parity_surface_event", true, true)
+	end)
+	rmlSurfaceCall(result, "RmlUi.SetMouseCursorAlias", function()
+		return RmlUi.SetMouseCursorAlias("native-api-parity-surface", "Arrow")
+	end)
+	rmlSurfaceCall(result, "RmlUi.SetDebugContext", function()
+		return RmlUi.SetDebugContext(context)
+	end)
+	rmlSurfaceCall(result, "RmlUi.GetDocumentPathRequests", function()
+		return RmlUi.GetDocumentPathRequests("native-api-parity-surface.rml")
+	end)
+	rmlSurfaceCall(result, "RmlUi.ClearDocumentPathRequests", function()
+		return RmlUi.ClearDocumentPathRequests("native-api-parity-surface.rml")
+	end)
+	rmlSurfaceCall(result, "RmlUi.Vector2i.new", function()
+		return RmlUi.Vector2i.new(12, 34)
+	end, function(value)
+		return { type = "vector2i", x = value.x, y = value.y }
+	end)
+	rmlSurfaceCall(result, "RmlUi.Vector2f.new", function()
+		return RmlUi.Vector2f.new(12.5, 34.5)
+	end, function(value)
+		return { type = "vector2f", x = value.x, y = value.y }
+	end)
+
+	rmlSurfaceCall(result, "RmlUi.Context.AddEventListener", function()
+		return context:AddEventListener("click", "return true", false)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.EnableMouseCursor", function()
+		return context:EnableMouseCursor(false)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ActivateTheme", function()
+		return context:ActivateTheme("native-api-parity-surface-theme", false)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.IsThemeActive", function()
+		return context:IsThemeActive("native-api-parity-surface-theme")
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ProcessMouseMove", function()
+		return context:ProcessMouseMove(1, 1, 0)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ProcessMouseButtonDown", function()
+		return context:ProcessMouseButtonDown(0, 0)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ProcessMouseButtonUp", function()
+		return context:ProcessMouseButtonUp(0, 0)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ProcessMouseWheel", function()
+		return context:ProcessMouseWheel(RmlUi.Vector2f.new(0, 1), 0)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ProcessMouseLeave", function()
+		return context:ProcessMouseLeave()
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.IsMouseInteracting", function()
+		return context:IsMouseInteracting()
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ProcessKeyDown", function()
+		return context:ProcessKeyDown(65, 0)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ProcessKeyUp", function()
+		return context:ProcessKeyUp(65, 0)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.ProcessTextInput", function()
+		return context:ProcessTextInput("x")
+	end)
+
+	local document = rmlSurfaceCall(result, "RmlUi.Context.CreateDocument", function()
+		return context:CreateDocument()
+	end)
+	if document == nil then
+		error("Context:CreateDocument returned nil", 0)
+	end
+	document.id = "native-api-parity-surface-document"
+	rmlSurfaceCall(result, "RmlUi.Context.GetDocument", function()
+		return context:GetDocument("native-api-parity-surface-document")
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.LoadDocument", function()
+		return context:LoadDocument("native_api_parity_missing_surface_document.rml", {})
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.OpenDataModel", function()
+		return context:OpenDataModel("native_api_parity_surface_model", { value = "surface" })
+	end, function(value)
+		return { type = "data_model", fields = tableLength(value) }
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.GetElementAtPoint", function()
+		return context:GetElementAtPoint(RmlUi.Vector2f.new(1, 1))
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.PullDocumentToFront", function()
+		return context:PullDocumentToFront(document)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.PushDocumentToBack", function()
+		return context:PushDocumentToBack(document)
+	end)
+
+	rmlSurfaceCall(result, "RmlUi.Document.AppendToStyleSheet", function()
+		return document:AppendToStyleSheet("body { color: rgb(1, 2, 3); }")
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.CreateElement", function()
+		return document:CreateElement("div")
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.CreateTextNode", function()
+		return document:CreateTextNode("surface")
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.LoadInlineScript", function()
+		return document:LoadInlineScript("return true", "native-api-parity-surface", 1)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.LoadExternalScript", function()
+		return document:LoadExternalScript("native_api_parity_missing_surface.js")
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.ReloadStyleSheet", function()
+		return document:ReloadStyleSheet(false)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.Show", function()
+		return document:Show()
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.Hide", function()
+		return document:Hide()
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.PullToFront", function()
+		return document:PullToFront()
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.PushToBack", function()
+		return document:PushToBack()
+	end)
+	rmlSurfaceCall(result, "RmlUi.Document.UpdateDocument", function()
+		return document:UpdateDocument()
+	end)
+
+	-- Keep the remaining cleanup calls in the same order on both sides.
+	local closeDocument = context:CreateDocument()
+	if closeDocument == nil then
+		error("close document creation failed", 0)
+	end
+	rmlSurfaceCall(result, "RmlUi.Document.Close", function()
+		return closeDocument:Close()
+	end)
+	local unloadDocument = context:CreateDocument()
+	if unloadDocument == nil then
+		error("unload document creation failed", 0)
+	end
+	rmlSurfaceCall(result, "RmlUi.Context.UnloadDocument", function()
+		return context:UnloadDocument(unloadDocument)
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.RemoveDataModel", function()
+		return context:RemoveDataModel("native_api_parity_surface_model")
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.Update", function()
+		return context:Update()
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.Render", function()
+		return context:Render()
+	end)
+	rmlSurfaceCall(result, "RmlUi.Context.UnloadAllDocuments", function()
+		return context:UnloadAllDocuments()
+	end)
+	rmlSurfaceCall(result, "RmlUi.RemoveContext", function()
+		return RmlUi.RemoveContext(context)
+	end)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, testName)
+	record(testName, payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
 local function runRmlUiTests()
 	if ranRmlUiTests or not Common.enableRenderingTests() then
 		return
 	end
 	ranRmlUiTests = true
+	runRmlSurfaceApiTest()
 
 	runRmlCheck("lua_rml_available", function()
 		if RmlUi == nil then
@@ -613,6 +849,16 @@ function GameFrame(frame)
 		if processTest ~= "reload" and processTest ~= "restart" then
 			Spring.SendCommands("quitforce")
 		end
+	end
+	if frame == 19 and not ranScriptKillTest and Script and Script.Kill then
+		ranScriptKillTest = true
+		local ok, returnCount = pcall(function()
+			return select("#", Script.Kill("native_api_parity Script.Kill"))
+		end)
+		record("script.kill", {
+		called = ok,
+		returnCount = ok and returnCount or -1,
+	})
 	end
 end
 

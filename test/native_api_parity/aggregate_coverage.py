@@ -12,6 +12,7 @@ from run_harness import (
     pct,
     read_context_inventory,
     read_recorded_ids_by_context,
+    read_surface_test_ids,
     report_link,
     result_names,
     write_coverage_details,
@@ -61,14 +62,16 @@ def main() -> int:
         validate_run(run)
 
     all_checked_names: set[str] = set()
+    all_surface_test_ids: set[str] = set()
     recorded_by_context: dict[str, set[str]] = {}
     for run in [base_run, *process_runs]:
         native_rows = load_jsonl(run / "native" / "native.jsonl")
         all_checked_names.update(result_names(native_rows))
+        all_surface_test_ids.update(read_surface_test_ids(run))
         for context, test_ids in read_recorded_ids_by_context(run).items():
             recorded_by_context.setdefault(context, set()).update(test_ids)
 
-    summary = coverage_summary(all_checked_names)
+    summary = coverage_summary(all_checked_names, all_surface_test_ids)
     inventory = read_context_inventory(base_run)
     details = write_coverage_details(base_run, summary, all_checked_names, inventory, recorded_by_context)
     aggregate_details = base_run / "coverage_aggregate_details.md"

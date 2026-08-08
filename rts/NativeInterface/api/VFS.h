@@ -189,6 +189,15 @@ struct GetMapSquareTextureInfoResult { const Error* error; int32_t squareSize; i
 struct ScanAllDirsQuery { uint8_t _unused; };
 struct ScanAllDirsResult { const Error* error; };
 
+// Queue and cancel downloads through the same pr-downloader queue used by
+// Lua's VFS.DownloadArchive and VFS.AbortDownload.  These are appended to the
+// API so existing modules retain the layout of every earlier VFS entry.
+struct DownloadArchiveQuery { const char* filename; const char* category; };
+struct DownloadArchiveResult { const Error* error; };
+
+struct AbortDownloadQuery { int32_t id; };
+struct AbortDownloadResult { const Error* error; bool removed; };
+
 // API structure
 struct VFSApi {
 	void (*FileExists)(const FileExistsQuery* query, FileExistsResult* result);
@@ -242,6 +251,8 @@ struct VFSApi {
 	// NEW (no Lua equivalent) — see GetMapSquareTextureInfoResult above.
 	void (*GetMapSquareTextureInfo)(const GetMapSquareTextureInfoQuery* query, GetMapSquareTextureInfoResult* result);
 	void (*ScanAllDirs)(const ScanAllDirsQuery* query, ScanAllDirsResult* result);
+	void (*DownloadArchive)(const DownloadArchiveQuery* query, DownloadArchiveResult* result);
+	void (*AbortDownload)(const AbortDownloadQuery* query, AbortDownloadResult* result);
 };
 
 extern const VFSApi VFS_API;

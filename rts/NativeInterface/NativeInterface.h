@@ -11,6 +11,7 @@
 #include "NativeInterface/api/Callins.h"
 #include "NativeInterface/api/Config.h"
 #include "NativeInterface/api/Display.h"
+#include "NativeInterface/api/Encoding.h"
 #include "NativeInterface/api/FeatureDefs.h"
 #include "NativeInterface/api/Features.h"
 #include "NativeInterface/api/Game.h"
@@ -98,6 +99,7 @@ struct NativeInterface {
 	const SoundApi* soundApi;
 	const MessagesApi* messages;
 	const ConfigApi* config;
+	const EncodingApi* encoding;
 	const TracingApi* tracing;
 	const UtilsApi* utils;
 	const PlayerApi* player;

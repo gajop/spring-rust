@@ -8,9 +8,438 @@ use std::{
     },
 };
 
-use spring_native::RmlUi;
+use serde_json::{Map, Value};
+use spring_native::{RmlRegisterEventTypeOptions, RmlUi};
 
 impl NativeApiParity {
+    pub(crate) fn check_rml_global_context_document(&self, message: &Value) -> Result<(), String> {
+        let expected = message
+            .get("result")
+            .ok_or_else(|| "Rml surface payload is missing `result`".to_owned())?;
+        let rml = self.interface.rml_ui();
+        ensure(
+            rml.is_ready().map_err(format_error)?,
+            "RmlUi should be ready in rendering tests",
+        )?;
+
+        // The Lua surface records all calls and invokes the native module only
+        // after its cleanup calls. Replaying on that same context would compare
+        // against already-unloaded state, so use an independent context while
+        // keeping the operation order, arguments, and observable result shape
+        // identical.
+        let context_name = format!(
+            "native_api_parity_surface_global_context_document_native_{}",
+            std::process::id()
+        );
+        let (context, created) = rml.create_context(&context_name).map_err(format_error)?;
+        ensure(
+            created && context != 0,
+            "Rml surface native replay should create a context",
+        )?;
+
+        let replay = (|| -> Result<Map<String, Value>, String> {
+            let mut actual = Map::new();
+
+            let record = |actual: &mut Map<String, Value>, name: &str, values: Vec<Value>| {
+                actual.insert(
+                    name.to_owned(),
+                    serde_json::json!({
+                        "n": values.len(),
+                        "values": values,
+                    }),
+                );
+            };
+            let record_void = |actual: &mut Map<String, Value>, name: &str| {
+                record(actual, name, Vec::new());
+            };
+            let record_bool = |actual: &mut Map<String, Value>, name: &str, value: bool| {
+                record(actual, name, vec![serde_json::json!(value)]);
+            };
+            let record_userdata =
+                |actual: &mut Map<String, Value>, name: &str, handle: u64, exists: bool| {
+                    let value = if exists && handle != 0 {
+                        serde_json::json!({ "type": "userdata" })
+                    } else {
+                        serde_json::json!({ "type": "nil" })
+                    };
+                    record(actual, name, vec![value]);
+                };
+
+            record_userdata(&mut actual, "RmlUi.CreateContext", context, true);
+            let (got_context, context_exists) =
+                rml.get_context(&context_name).map_err(format_error)?;
+            record_userdata(&mut actual, "RmlUi.GetContext", got_context, context_exists);
+
+            record_bool(
+                &mut actual,
+                "RmlUi.AddTranslationString",
+                rml.add_translation_string("native_api_parity_surface_key", "surface translation")
+                    .map_err(format_error)?,
+            );
+            ensure(
+                rml.clear_translations().map_err(format_error)?,
+                "RmlUi.ClearTranslations should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.ClearTranslations");
+
+            record_bool(
+                &mut actual,
+                "RmlUi.LoadFontFace",
+                rml.load_font_face("native_api_parity_missing_font.ttf", false, None)
+                    .map_err(format_error)?,
+            );
+
+            let event_id = rml
+                .regiser_event_type(
+                    "native_api_parity_surface_event",
+                    RmlRegisterEventTypeOptions {
+                        interruptible: true,
+                        bubbles: true,
+                        default_phase: None,
+                    },
+                )
+                .map_err(format_error)?;
+            record(
+                &mut actual,
+                "RmlUi.RegiserEventType",
+                vec![serde_json::json!(event_id)],
+            );
+
+            ensure(
+                rml.set_mouse_cursor_alias("native-api-parity-surface", "Arrow")
+                    .map_err(format_error)?,
+                "RmlUi.SetMouseCursorAlias should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.SetMouseCursorAlias");
+            ensure(
+                rml.set_debug_context(context).map_err(format_error)?,
+                "RmlUi.SetDebugContext should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.SetDebugContext");
+
+            let paths = rml
+                .get_document_path_requests("native-api-parity-surface.rml")
+                .map_err(format_error)?;
+            record(
+                &mut actual,
+                "RmlUi.GetDocumentPathRequests",
+                vec![serde_json::json!({ "type": "table", "count": paths.len() })],
+            );
+            ensure(
+                rml.clear_document_path_requests("native-api-parity-surface.rml")
+                    .map_err(format_error)?,
+                "RmlUi.ClearDocumentPathRequests should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.ClearDocumentPathRequests");
+
+            let (x, y) = rml.vector2i_new(12, 34).map_err(format_error)?;
+            record(
+                &mut actual,
+                "RmlUi.Vector2i.new",
+                vec![serde_json::json!({ "type": "vector2i", "x": x, "y": y })],
+            );
+            let (x, y) = rml.vector2f_new(12.5, 34.5).map_err(format_error)?;
+            record(
+                &mut actual,
+                "RmlUi.Vector2f.new",
+                vec![serde_json::json!({ "type": "vector2f", "x": x, "y": y })],
+            );
+
+            let (_listener, attached) = rml
+                .context_add_event_listener(context, "click", false, || {})
+                .map_err(format_error)?;
+            ensure(attached, "RmlUi.Context.AddEventListener should attach")?;
+            record_void(&mut actual, "RmlUi.Context.AddEventListener");
+
+            ensure(
+                rml.context_enable_mouse_cursor(context, false)
+                    .map_err(format_error)?,
+                "RmlUi.Context.EnableMouseCursor should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Context.EnableMouseCursor");
+            ensure(
+                rml.context_activate_theme(context, "native-api-parity-surface-theme", false)
+                    .map_err(format_error)?,
+                "RmlUi.Context.ActivateTheme should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Context.ActivateTheme");
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.IsThemeActive",
+                rml.context_is_theme_active(context, "native-api-parity-surface-theme")
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.ProcessMouseMove",
+                rml.context_process_mouse_move(context, 1.0, 1.0, 0)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.ProcessMouseButtonDown",
+                rml.context_process_mouse_button_down(context, 0, 0)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.ProcessMouseButtonUp",
+                rml.context_process_mouse_button_up(context, 0, 0)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.ProcessMouseWheel",
+                rml.context_process_mouse_wheel(context, 0.0, 1.0, 0)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.ProcessMouseLeave",
+                rml.context_process_mouse_leave(context)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.IsMouseInteracting",
+                rml.context_is_mouse_interacting(context)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.ProcessKeyDown",
+                rml.context_process_key_down(context, 65, 0)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.ProcessKeyUp",
+                rml.context_process_key_up(context, 65, 0)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.ProcessTextInput",
+                rml.context_process_text_input(context, "x")
+                    .map_err(format_error)?,
+            );
+
+            let (document, document_created) = rml
+                .context_create_document(context, "body")
+                .map_err(format_error)?;
+            ensure(
+                document_created && document != 0,
+                "RmlUi.Context.CreateDocument should create a document",
+            )?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Context.CreateDocument",
+                document,
+                document_created,
+            );
+            ensure(
+                rml.element_set_id(document, "native-api-parity-surface-document")
+                    .map_err(format_error)?,
+                "surface document id should be set",
+            )?;
+            let (looked_up, document_exists) = rml
+                .context_get_document(context, "native-api-parity-surface-document")
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Context.GetDocument",
+                looked_up,
+                document_exists,
+            );
+            let (missing_document, missing_document_exists) = rml
+                .context_load_document(context, "native_api_parity_missing_surface_document.rml")
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Context.LoadDocument",
+                missing_document,
+                missing_document_exists,
+            );
+            let (data_model, data_model_opened) = rml
+                .context_open_data_model(context, "native_api_parity_surface_model")
+                .map_err(format_error)?;
+            ensure(
+                data_model_opened && data_model != 0,
+                "RmlUi.Context.OpenDataModel should open a data model",
+            )?;
+            record(
+                &mut actual,
+                "RmlUi.Context.OpenDataModel",
+                vec![serde_json::json!({ "type": "data_model", "fields": 1 })],
+            );
+            let (element, element_exists) = rml
+                .context_get_element_at_point(context, 1.0, 1.0, 0)
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Context.GetElementAtPoint",
+                element,
+                element_exists,
+            );
+            ensure(
+                rml.context_pull_document_to_front(context, document)
+                    .map_err(format_error)?,
+                "RmlUi.Context.PullDocumentToFront should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Context.PullDocumentToFront");
+            ensure(
+                rml.context_push_document_to_back(context, document)
+                    .map_err(format_error)?,
+                "RmlUi.Context.PushDocumentToBack should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Context.PushDocumentToBack");
+
+            ensure(
+                rml.document_append_to_style_sheet(document, "body { color: rgb(1, 2, 3); }")
+                    .map_err(format_error)?,
+                "RmlUi.Document.AppendToStyleSheet should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.AppendToStyleSheet");
+            let (element_ptr, element_created) = rml
+                .document_create_element(document, "div")
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Document.CreateElement",
+                element_ptr,
+                element_created,
+            );
+            let (text_ptr, text_created) = rml
+                .document_create_text_node(document, "surface")
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Document.CreateTextNode",
+                text_ptr,
+                text_created,
+            );
+            ensure(
+                rml.document_load_inline_script(
+                    document,
+                    "return true",
+                    "native-api-parity-surface",
+                    1,
+                )
+                .map_err(format_error)?,
+                "RmlUi.Document.LoadInlineScript should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.LoadInlineScript");
+            ensure(
+                rml.document_load_external_script(document, "native_api_parity_missing_surface.js")
+                    .map_err(format_error)?,
+                "RmlUi.Document.LoadExternalScript should return after a missing file",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.LoadExternalScript");
+            ensure(
+                rml.document_reload_style_sheet(document)
+                    .map_err(format_error)?,
+                "RmlUi.Document.ReloadStyleSheet should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.ReloadStyleSheet");
+            ensure(
+                rml.document_show(document, spring_native::RmlDocumentShowOptions::default())
+                    .map_err(format_error)?,
+                "RmlUi.Document.Show should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.Show");
+            ensure(
+                rml.document_hide(document).map_err(format_error)?,
+                "RmlUi.Document.Hide should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.Hide");
+            ensure(
+                rml.document_pull_to_front(document).map_err(format_error)?,
+                "RmlUi.Document.PullToFront should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.PullToFront");
+            ensure(
+                rml.document_push_to_back(document).map_err(format_error)?,
+                "RmlUi.Document.PushToBack should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.PushToBack");
+            ensure(
+                rml.document_update_document(document)
+                    .map_err(format_error)?,
+                "RmlUi.Document.UpdateDocument should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.UpdateDocument");
+
+            let (close_document, close_created) = rml
+                .context_create_document(context, "body")
+                .map_err(format_error)?;
+            ensure(
+                close_created && close_document != 0,
+                "close document should be created",
+            )?;
+            ensure(
+                rml.document_close(close_document).map_err(format_error)?,
+                "RmlUi.Document.Close should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Document.Close");
+
+            let (unload_document, unload_created) = rml
+                .context_create_document(context, "body")
+                .map_err(format_error)?;
+            ensure(
+                unload_created && unload_document != 0,
+                "unload document should be created",
+            )?;
+            ensure(
+                rml.context_unload_document(context, unload_document)
+                    .map_err(format_error)?,
+                "RmlUi.Context.UnloadDocument should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Context.UnloadDocument");
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.RemoveDataModel",
+                rml.context_remove_data_model(context, "native_api_parity_surface_model")
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.Update",
+                rml.context_update(context).map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Context.Render",
+                rml.context_render(context).map_err(format_error)?,
+            );
+            ensure(
+                rml.context_unload_all_documents(context)
+                    .map_err(format_error)?,
+                "RmlUi.Context.UnloadAllDocuments should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Context.UnloadAllDocuments");
+            ensure(
+                rml.remove_context(context).map_err(format_error)?,
+                "RmlUi.RemoveContext should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.RemoveContext");
+
+            Ok(actual)
+        })();
+
+        if replay.is_err() {
+            let _ = rml.context_unload_all_documents(context);
+            let _ = rml.remove_context(context);
+        }
+        let actual = replay?;
+        let actual = Value::Object(actual);
+        if expected != &actual {
+            return Err(format!(
+                "Rml surface result mismatch: expected={expected}, actual={actual}"
+            ));
+        }
+        Ok(())
+    }
+
     pub(crate) fn check_rml_context_document_lifecycle(&self) -> Result<(), String> {
         let rml = self.interface.rml_ui();
         ensure(

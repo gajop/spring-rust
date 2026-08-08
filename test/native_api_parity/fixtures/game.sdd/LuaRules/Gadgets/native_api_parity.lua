@@ -176,28 +176,48 @@ if not gadgetHandler:IsSyncedCode() then
 			-- LuaDebugExtra feeds these through the ordinary input pipeline while
 			-- keeping the test independent of the physical mouse and keyboard.
 			local viewSizeX, viewSizeY = Spring.GetViewGeometry()
-			if debug and debug.emulateMouseMove then
-				local mouseX = math.floor(viewSizeX * 0.5)
-				local mouseY = math.floor(viewSizeY * 0.5)
-				debug.emulateMousePress(1)
-				-- MouseMove is dispatched to the event handler only while a
-				-- consumer owns the button.  Exercise a real press -> move ->
-				-- release sequence.
-				debug.emulateMouseMove(mouseX, mouseY)
-				debug.emulateMouseRelease(1)
-				debug.emulateMouseWheel(1)
-				debug.emulateKeyPress(string.byte("a"))
-				debug.emulateKeyRelease(string.byte("a"))
-				debug.clearEmulatedInput()
+			local debugFunctions = {
+				"emulateMousePress",
+				"emulateMouseMove",
+				"emulateMouseRelease",
+				"emulateMouseWheel",
+				"emulateKeyPress",
+				"emulateKeyRelease",
+				"clearEmulatedInput",
+			}
+			for _, name in ipairs(debugFunctions) do
+				if not debug or type(debug[name]) ~= "function" then
+					error("missing debug Lua-only helper " .. name, 0)
+				end
 			end
+			local mouseX = math.floor(viewSizeX * 0.5)
+			local mouseY = math.floor(viewSizeY * 0.5)
+			debug.emulateMousePress(1)
+			-- MouseMove is dispatched to the event handler only while a
+			-- consumer owns the button.  Exercise a real press -> move ->
+			-- release sequence.
+			debug.emulateMouseMove(mouseX, mouseY)
+			debug.emulateMouseRelease(1)
+			debug.emulateMouseWheel(1)
+			record("debug.mouse_wheel_injection", { called = true })
+			debug.emulateKeyPress(string.byte("a"))
+			debug.emulateKeyRelease(string.byte("a"))
+			debug.clearEmulatedInput()
+			record("debug.input_injection", {
+				called = true,
+				mouseX = mouseX,
+				mouseY = mouseY,
+			})
 
 			-- Enter the engine's normal CEventHandler path with valid fixture
 			-- objects.  This is test infrastructure exposed only by the debug
 			-- library; it lets both Lua and native consumers observe the same
 			-- engine-constructed callin payloads deterministically.
-			if debug and debug.emulateNativeApiParityCallins then
-				debug.emulateNativeApiParityCallins(unitID, featureID, projectileID)
+			if not debug or type(debug.emulateNativeApiParityCallins) ~= "function" then
+				error("missing debug Lua-only helper emulateNativeApiParityCallins", 0)
 			end
+			debug.emulateNativeApiParityCallins(unitID, featureID, projectileID)
+			record("debug.callin_driver", { called = true })
 
 			if unitX then
 				-- The deterministic input driver includes a wheel event.  Re-anchor
@@ -285,6 +305,7 @@ end
 
 local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
+local LuaScriptSurfaceTests = VFS.Include("LuaRules/Utilities/lua_script_surface_tests.lua")
 local syncedParityOptions = Spring.GetModOptions() or {}
 local syncedProcessStage = tostring(syncedParityOptions.native_api_parity_process_stage or "initial")
 
@@ -333,6 +354,17 @@ local function send(name, payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(encoded)
 	end
+end
+
+-- Script.* is intentionally Lua-only: it operates on the embedded Lua
+-- handle, not on the native module ABI.  Keep its results in the shared Lua
+-- result stream so Lua-vs-native process runs still prove deterministic Lua
+-- behavior, but do not send these rows to the native checker as if they were
+-- native API requests.
+local function sendLuaOnly(name, payload)
+	Common.setTestName(payload, name)
+	payload.context = "synced_gadget"
+	SendToUnsynced("native_api_parity_result", "synced_gadget", Common.encode(payload))
 end
 
 local function sendInventory()
@@ -541,11 +573,11 @@ local function generatedMake(test)
 	end
 end
 
-local function generatedArg(spec, ids, value)
+local function generatedArg(spec, ids, value, locals)
 	if type(spec) == "table" then
 		local resolved = {}
 		for key, item in pairs(spec) do
-			resolved[key] = generatedArg(item, ids, value)
+			resolved[key] = generatedArg(item, ids, value, locals)
 		end
 		return resolved
 	end
@@ -562,6 +594,10 @@ local function generatedArg(spec, ids, value)
 	local valueKey = spec:match("^value%.(.+)$")
 	if valueKey then
 		return value[valueKey]
+	end
+	local localKey = spec:match("^local%.(.+)$")
+	if localKey then
+		return locals and locals[localKey]
 	end
 	return value[spec]
 end
@@ -645,6 +681,24 @@ local function generatedReturnValue(returnSpec, returns)
 		value = type(value) == "number" and value >= 0
 	elseif returnSpec.transform == "string_len" then
 		value = type(value) == "string" and #value or 0
+	elseif returnSpec.transform == "string_hex" then
+		if type(value) == "string" then
+			local bytes = {}
+			for index = 1, #value do
+				bytes[#bytes + 1] = string.format("%02x", string.byte(value, index))
+			end
+			value = table.concat(bytes)
+		else
+			value = ""
+		end
+	elseif returnSpec.transform == "table_values" then
+		local values = {}
+		if type(value) == "table" then
+			for _, item in ipairs(value) do
+				values[#values + 1] = item
+			end
+		end
+		value = values
 	elseif returnSpec.transform == "nil_to_minus_one" then
 		if value == nil then
 			value = -1
@@ -736,12 +790,24 @@ local function packReturns(...)
 end
 
 local function invokeGeneratedRuntime(runtime, ids, value)
+	local locals = {}
+	for name, localSpec in pairs(runtime.locals or {}) do
+		local func = resolveLuaFunction(localSpec.call)
+		local args = {}
+		local argCount = 0
+		for _, argSpec in ipairs(localSpec.args or {}) do
+			argCount = argCount + 1
+			args[argCount] = generatedArg(argSpec, ids, value, locals)
+		end
+		locals[name] = func(unpack(args, 1, argCount))
+	end
+
 	if runtime.table then
 		local tableValue = _G[runtime.table]
 		if type(tableValue) ~= "table" then
 			error("Lua API value is not a table: " .. tostring(runtime.table))
 		end
-		local key = generatedArg(runtime.key, ids, value)
+		local key = generatedArg(runtime.key, ids, value, locals)
 		if key ~= nil then
 			tableValue = tableValue[key]
 		end
@@ -753,7 +819,7 @@ local function invokeGeneratedRuntime(runtime, ids, value)
 	local argCount = 0
 	for _, argSpec in ipairs(runtime.args or {}) do
 		argCount = argCount + 1
-		args[argCount] = generatedArg(argSpec, ids, value)
+		args[argCount] = generatedArg(argSpec, ids, value, locals)
 	end
 	return packReturns(func(unpack(args, 1, argCount)))
 end
@@ -1034,6 +1100,7 @@ end
 local TESTS = buildGeneratedTests(TEST_HOOKS)
 local persistentFixture
 local ranDeferredSyncedChecks = false
+local ranLuaScriptSurfaceTests = false
 
 local function mergePayload(caseIndex, ids, test, value, readback)
 	local payload = test.payload(caseIndex, ids, readback)
@@ -1160,9 +1227,11 @@ function gadget:GameFrame(frame)
 	end
 	if frame == 1 then
 		persistentFixture = Fixture.create()
-		if debug and debug.emulateUnitMoveFailed then
-			debug.emulateUnitMoveFailed(persistentFixture.unitID)
+		if not debug or type(debug.emulateUnitMoveFailed) ~= "function" then
+			error("missing debug Lua-only helper emulateUnitMoveFailed", 0)
 		end
+		debug.emulateUnitMoveFailed(persistentFixture.unitID)
+		sendLuaOnly("debug.unit_move_failed_driver", { called = true })
 		SendToUnsynced(
 			"native_api_parity_fixture",
 			persistentFixture.unitID,
@@ -1177,6 +1246,10 @@ function gadget:GameFrame(frame)
 		)
 	end
 	if frame == 2 then
+		if not ranLuaScriptSurfaceTests and persistentFixture ~= nil then
+			ranLuaScriptSurfaceTests = true
+			LuaScriptSurfaceTests.run(sendLuaOnly, persistentFixture)
+		end
 		runSyncedChecks()
 	end
 	if frame == 18 then

@@ -1,74 +1,104 @@
 # Lua / Native API Surface Audit
 
 This report is generated from `lua_functions.md`, `rust_functions.md`, and the local Lua registration sites.
-It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi`, and `Script` surfaces.
+It distinguishes canonical Spring callouts from the separate `Global`, `gl`, `VFS`, `RmlUi`, `Script`, `Encoding`, `math`, `debug`, and `table` surfaces.
 
 ## Lua callout mapping
 
-| Lua namespace | Documented callouts | Deterministically mapped to native Rust | Unmapped |
-| --- | ---: | ---: | ---: |
-| `Spring` | 793 | 793 | 0 |
-| `RmlUi` | 101 | 101 | 0 |
-| `gl` | 179 | 179 | 0 |
-| `VFS` | 37 | 36 | 1 |
-| `Script` | 26 | 0 | 26 |
+| Lua namespace | Documented callouts | Mapped to native Rust | Lua-only by design | Unresolved |
+| --- | ---: | ---: | ---: | ---: |
+| `Global` | 1 | 1 | 0 | 0 |
+| `Spring` | 793 | 793 | 0 | 0 |
+| `RmlUi` | 101 | 101 | 0 | 0 |
+| `gl` | 179 | 179 | 0 | 0 |
+| `VFS` | 41 | 40 | 1 | 0 |
+| `Script` | 29 | 0 | 29 | 0 |
+| `Encoding` | 6 | 6 | 0 | 0 |
+| `math` | 14 | 14 | 0 | 0 |
+| `debug` | 8 | 0 | 8 | 0 |
+| `table` | 1 | 0 | 1 | 0 |
 
 `Spring` uses the same one-to-one matcher as `match_apis.py`; its 793 mapped callouts are the canonical parity set.
+`Global.CallAsTeam` is the actual `_G.CallAsTeam` registration; it is mapped explicitly to `SystemControl.call_as_team` and its callback/return-stack difference is recorded as a semantic boundary.
 `RmlUi` is mapped by userdata path (`Context.CreateDocument` → `context_create_document`).
 `gl` and `VFS` use case/acronym-insensitive names plus explicit aliases for `gl.Texture` and `gl.UniformArray`.
-`Script.*` has no corresponding Rust native module by design.
+`VFS.Include`, every documented `Script.*`, `debug.*`, and `table.new` callout are explicitly Lua-only by design; they are still required to have Lua-side signature and behavior tests.
+
+## Intentional Lua-only surfaces
+
+These are not name-matching failures. They have no native counterpart by contract, but remain part of the executable Lua-surface coverage gate.
+
+- `Script.AddActionFallback` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.DelayByFrames` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetCallInList` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetCtrlTeam` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetFullCtrl` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetFullRead` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetGlobal` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetName` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetReadAllyTeam` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetReadTeam` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetRegistry` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetSelectTeam` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetSynced` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetWatchAllowTarget` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetWatchExplosion` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetWatchFeature` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetWatchProjectile` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetWatchUnit` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.GetWatchWeapon` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.IsEngineMinVersion` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.Kill` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.RemoveActionFallback` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.SetWatchAllowTarget` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.SetWatchExplosion` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.SetWatchFeature` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.SetWatchProjectile` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.SetWatchUnit` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.SetWatchWeapon` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.UpdateCallin` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `VFS.Include` — Executes arbitrary Lua code and returns arbitrary Lua values; a typed native counterpart would not preserve the contract.
+- `debug.clearEmulatedInput` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
+- `debug.emulateKeyPress` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
+- `debug.emulateKeyRelease` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
+- `debug.emulateMouseMove` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
+- `debug.emulateMousePress` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
+- `debug.emulateMouseRelease` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
+- `debug.emulateNativeApiParityCallins` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
+- `debug.emulateUnitMoveFailed` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
+- `table.new` — Lua table allocation hint; it changes the embedded Lua allocator/table shape and has no native ABI counterpart.
 
 ## Unmapped documented Lua callouts
 
-### VFS (1)
-- `VFS.Include`
-
-### Script (26)
-- `Script.DelayByFrames`
-- `Script.GetCtrlTeam`
-- `Script.GetFullCtrl`
-- `Script.GetFullRead`
-- `Script.GetGlobal`
-- `Script.GetName`
-- `Script.GetReadAllyTeam`
-- `Script.GetReadTeam`
-- `Script.GetRegistry`
-- `Script.GetSelectTeam`
-- `Script.GetSynced`
-- `Script.GetWatchAllowTarget`
-- `Script.GetWatchExplosion`
-- `Script.GetWatchFeature`
-- `Script.GetWatchProjectile`
-- `Script.GetWatchUnit`
-- `Script.GetWatchWeapon`
-- `Script.IsEngineMinVersion`
-- `Script.Kill`
-- `Script.SetWatchAllowTarget`
-- `Script.SetWatchExplosion`
-- `Script.SetWatchFeature`
-- `Script.SetWatchProjectile`
-- `Script.SetWatchUnit`
-- `Script.SetWatchWeapon`
-- `Script.UpdateCallin`
-
 ## Rust inventory
 
-- Rust documentation rows: 1384
-- Unique `Module.method` labels: 1375
+- Rust documentation rows: 1392
+- Unique `Module.method` labels: 1383
 - The difference is nine overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
 
 | Classification | Unique labels |
 | --- | ---: |
+| Encoding counterpart | 6 |
 | Gfx native-only or undocumented Lua surface | 25 |
+| Global Lua counterpart (semantic boundary) | 1 |
 | RmlUi callout counterpart | 101 |
 | RmlUi native helper/property/data-model surface | 116 |
 | Spring counterpart | 793 |
-| VFS counterpart | 36 |
-| VFS native helper or undocumented Lua surface | 13 |
+| VFS counterpart | 40 |
+| VFS native helper or undocumented Lua surface | 11 |
 | gl counterpart or explicit overload | 180 |
-| native-only surface | 120 |
+| global math.* counterpart (non-Spring namespace) | 14 |
+| native-only surface | 105 |
 
 ## Rust labels by classification
+
+### Encoding counterpart (6)
+- `Encoding.decode_base64`
+- `Encoding.decode_base64_url`
+- `Encoding.encode_base64`
+- `Encoding.encode_base64_url`
+- `Encoding.is_valid_base64`
+- `Encoding.is_valid_base64_url`
 
 ### Gfx native-only or undocumented Lua surface (25)
 - `Gfx.delete_vao`
@@ -96,6 +126,9 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 - `Gfx.tex_rect`
 - `Gfx.uniform_subroutine`
 - `Gfx.upload_texture`
+
+### Global Lua counterpart (semantic boundary) (1)
+- `SystemControl.call_as_team`
 
 ### RmlUi callout counterpart (101)
 - `RmlUi.add_translation_string`
@@ -1113,10 +1146,12 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 - `Vfs.get_map_square_texture`
 - `Vfs.set_map_square_texture`
 
-### VFS counterpart (36)
+### VFS counterpart (40)
+- `Vfs.abort_download`
 - `Vfs.calculate_hash`
 - `Vfs.compress_folder`
 - `Vfs.dir_list`
+- `Vfs.download_archive`
 - `Vfs.file_exists`
 - `Vfs.get_all_archives`
 - `Vfs.get_archive_checksum`
@@ -1133,12 +1168,14 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 - `Vfs.get_name_from_rapid_tag`
 - `Vfs.has_archive`
 - `Vfs.load_file`
+- `Vfs.pack_f32`
 - `Vfs.pack_s16`
 - `Vfs.pack_s32`
 - `Vfs.pack_s8`
 - `Vfs.pack_u16`
 - `Vfs.pack_u32`
 - `Vfs.pack_u8`
+- `Vfs.scan_all_dirs`
 - `Vfs.sub_dirs`
 - `Vfs.unpack_f32`
 - `Vfs.unpack_s16`
@@ -1151,7 +1188,7 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 - `Vfs.zlib_compress`
 - `Vfs.zlib_decompress`
 
-### VFS native helper or undocumented Lua surface (13)
+### VFS native helper or undocumented Lua surface (11)
 - `Vfs.dir_list_names`
 - `Vfs.get_archives`
 - `Vfs.get_file_info`
@@ -1161,10 +1198,8 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 - `Vfs.list_dir`
 - `Vfs.list_dir_names`
 - `Vfs.list_entries`
-- `Vfs.pack_f32`
 - `Vfs.read_file`
 - `Vfs.read_file_as_string`
-- `Vfs.scan_all_dirs`
 
 ### gl counterpart or explicit overload (180)
 - `Gfx.active_fbo`
@@ -1348,7 +1383,23 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 - `Gfx.vertex`
 - `Gfx.viewport`
 
-### native-only surface (120)
+### global math.* counterpart (non-Spring namespace) (14)
+- `MathExtra.bit_and`
+- `MathExtra.bit_bits`
+- `MathExtra.bit_inv`
+- `MathExtra.bit_or`
+- `MathExtra.bit_xor`
+- `MathExtra.clamp`
+- `MathExtra.diag`
+- `MathExtra.erf`
+- `MathExtra.hypot`
+- `MathExtra.mix`
+- `MathExtra.normalize`
+- `MathExtra.round`
+- `MathExtra.sgn`
+- `MathExtra.smooth_step`
+
+### native-only surface (105)
 - `Config.get_config_parameters`
 - `FeatureDefs.get_feature_def_by_id`
 - `FeatureDefs.get_feature_def_count`
@@ -1374,20 +1425,6 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 - `Game.get_side_data_count`
 - `Game.get_side_data_owned`
 - `Lights.add_light_tracking_target`
-- `MathExtra.bit_and`
-- `MathExtra.bit_bits`
-- `MathExtra.bit_inv`
-- `MathExtra.bit_or`
-- `MathExtra.bit_xor`
-- `MathExtra.clamp`
-- `MathExtra.diag`
-- `MathExtra.erf`
-- `MathExtra.hypot`
-- `MathExtra.mix`
-- `MathExtra.normalize`
-- `MathExtra.round`
-- `MathExtra.sgn`
-- `MathExtra.smooth_step`
 - `Memory.free`
 - `Memory.free_float2_array`
 - `Memory.free_float3_array`
@@ -1415,7 +1452,6 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 - `SyncedCtrl.team`
 - `SyncedCtrl.terrain`
 - `SyncedCtrl.unit`
-- `SystemControl.call_as_team`
 - `Teams.get_player_info_owned`
 - `Teams.get_player_list_in_ally_team`
 - `Teams.get_player_list_in_team`
@@ -1475,3 +1511,17 @@ It distinguishes canonical Spring callouts from the separate `gl`, `VFS`, `RmlUi
 These names are registered by the current engine source but are not present in the generated `VFS` documentation section.
 They must be included before claiming complete VFS documentation coverage.
 - None
+
+## Local Script registrations absent from the generated Lua inventory
+
+These names are registered by the current engine source but are not present in the generated `Script` documentation section.
+They remain unresolved until documented and tested.
+- None
+
+## Local global registrations absent from the generated Lua inventory
+
+These direct `_G` registrations are separate from `Spring.*`; undocumented names remain unresolved until classified and tested.
+- `Global.SendToUnsynced`
+- `Global.loadstring`
+- `Global.next`
+- `Global.pairs`

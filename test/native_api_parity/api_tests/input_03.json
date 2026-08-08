@@ -86,7 +86,7 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetMouseStartPosition"]},
       "native": {"set": [], "get": ["Input.get_mouse_start_position"]},
-      "compare": {"mode": "fields", "fields": ["x", "y", "camPosX", "camPosY", "camPosZ", "dirX", "dirY", "dirZ"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["x", "y", "camPosX", "camPosY", "camPosZ", "dirX", "dirY", "dirZ"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetMouseStartPosition`", "native_getter": "`Input.get_mouse_start_position`", "fields": "`x`, `y`, `camPos*`, `dir*`"},
       "rust": {"check": "check_input_value", "set": "set_noop"},
       "params": {"button": {"type": "i32", "fixed": 1}},

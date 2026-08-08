@@ -13,6 +13,7 @@
 #include "Rendering/Textures/NamedTextures.h"
 #include "Rendering/GL/myGL.h"
 #include "Lua/LuaZip.h"
+#include "Lua/LuaVFSDownload.h"
 #include "System/Log/ILog.h"
 #include "System/StringUtil.h"
 #include "System/Sync/SHA512.hpp"
@@ -425,6 +426,31 @@ static void NativeScanAllDirs(const ScanAllDirsQuery* query, ScanAllDirsResult* 
 	if (!IsArchiveScannerReady()) { result->error = &NOT_READY_ERROR; return; }
 	archiveScanner->ScanAllDirs();
 	result->error = nullptr;
+}
+
+static void NativeDownloadArchive(const DownloadArchiveQuery* query, DownloadArchiveResult* result) {
+	result->error = nullptr;
+
+	if (query == nullptr || query->filename == nullptr || query->category == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::string errorMessage;
+	if (!LuaVFSDownload::QueueArchiveDownload(query->filename, query->category, &errorMessage))
+		result->error = MakeDynamicError(ERROR_INVALID_ARGUMENT, std::move(errorMessage));
+}
+
+static void NativeAbortDownload(const AbortDownloadQuery* query, AbortDownloadResult* result) {
+	result->error = nullptr;
+	result->removed = false;
+
+	if (query == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	result->removed = LuaVFSDownload::AbortQueuedDownload(query->id);
 }
 
 static void NativeGetGames(const GetGamesQuery* query, GetGamesResult* result) {
@@ -1117,4 +1143,6 @@ const VFSApi VFS_API = {
 	.SetMapSquareTexture = NativeSetMapSquareTexture,
 	.GetMapSquareTextureInfo = NativeGetMapSquareTextureInfo,
 	.ScanAllDirs = NativeScanAllDirs,
+	.DownloadArchive = NativeDownloadArchive,
+	.AbortDownload = NativeAbortDownload,
 };

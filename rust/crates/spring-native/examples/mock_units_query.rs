@@ -89,6 +89,7 @@ fn main() {
         rulesParams: empty_api!(sys::RulesParamsApi),
         rmlUi: empty_api!(sys::RmlUiApi),
         mathExtra: empty_api!(sys::MathExtraApi),
+        encoding: empty_api!(sys::EncodingApi),
         moveCtrl: empty_api!(sys::MoveCtrlApi),
         syncedCtrl: empty_api!(sys::SyncedCtrlApi),
         cameraApi: empty_api!(sys::CameraApi),

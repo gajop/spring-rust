@@ -5,6 +5,8 @@
 
 #include "System/EventClient.h"
 
+#include <string>
+
 struct lua_State;
 
 class LuaVFSDownload: public CEventClient {
@@ -18,6 +20,12 @@ public:
 	static void Free(bool stopDownloads = false);
 
 	static bool PushEntries(lua_State* L);
+
+	// Shared by the Lua and NativeInterface entry points.  Keeping validation,
+	// queue-id allocation, and event dispatch here prevents the two public
+	// surfaces from drifting apart.
+	static bool QueueArchiveDownload(const std::string& filename, const std::string& category, std::string* errorMessage = nullptr);
+	static bool AbortQueuedDownload(int id);
 
 
 	bool WantsEvent(const std::string& eventName) override {

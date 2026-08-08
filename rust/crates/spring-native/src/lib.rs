@@ -150,6 +150,7 @@ mod version {
 // Re-export version constants
 pub use version::{NATIVE_API_VERSION_MAJOR, NATIVE_API_VERSION_MINOR, NATIVE_API_VERSION_PATCH};
 mod display;
+mod encoding;
 mod error;
 mod feature_defs;
 mod features;
@@ -238,6 +239,7 @@ pub use callbacks::{ModuleData, NativeModule};
 pub use camera::Camera;
 pub use config::{Config, ConfigParameter, ConfigValueType};
 pub use display::Display;
+pub use encoding::Encoding;
 pub use error::Error;
 pub use feature_defs::{FeatureDefInfo, FeatureDefs};
 pub use features::Features;

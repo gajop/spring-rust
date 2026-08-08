@@ -139,6 +139,7 @@ public:
 		nativeInterface.soundApi = &SOUND_API;
 		nativeInterface.messages = &MESSAGES_API;
 		nativeInterface.config = &CONFIG_API;
+		nativeInterface.encoding = &ENCODING_API;
 		nativeInterface.tracing = &TRACING_API;
 		nativeInterface.utils = &UTILS_API;
 		nativeInterface.player = &PLAYER_API;

@@ -312,13 +312,31 @@ bool LuaVFSDownload::PushEntries(lua_State* L)
 	return true;
 }
 
+/***
+ * Queue an archive download through pr-downloader.
+ * @function VFS.DownloadArchive
+ * @param filename string Archive or rapid package name.
+ * @param category string One of `map`, `game`, or `engine`.
+ */
 int LuaVFSDownload::DownloadArchive(lua_State* L)
 {
 	const std::string& filename = luaL_checkstring(L, 1);
 	const std::string& categoryStr = luaL_checkstring(L, 2);
+	std::string errorMessage;
 
-	if (filename.empty())
-		return luaL_error(L, "Missing download archive name.");
+	if (!QueueArchiveDownload(filename, categoryStr, &errorMessage))
+		return luaL_error(L, "%s", errorMessage.c_str());
+
+	return 0;
+}
+
+bool LuaVFSDownload::QueueArchiveDownload(const std::string& filename, const std::string& categoryStr, std::string* errorMessage)
+{
+	if (filename.empty()) {
+		if (errorMessage != nullptr)
+			*errorMessage = "Missing download archive name.";
+		return false;
+	}
 
 	DownloadEnum::Category cat;
 	if (categoryStr == "map") {
@@ -328,21 +346,44 @@ int LuaVFSDownload::DownloadArchive(lua_State* L)
 	} else if (categoryStr == "engine") {
 		cat = DownloadEnum::CAT_ENGINE;
 	} else {
-		return luaL_error(L, "Category must be one of: map, game, engine.");
+		if (errorMessage != nullptr)
+			*errorMessage = "Category must be one of: map, game, engine.";
+		return false;
 	}
+
+	// Construct the singleton if this is the first caller.  The normal Lua
+	// startup path already does this, while a native module may call VFS before
+	// a Lua UI has requested the downloader.
+	(void)luaVFSDownload;
 
 	queueIDCount++;
 	downloadQueue.Push(DownloadItem(queueIDCount, filename, cat));
 	eventHandler.DownloadQueued(queueIDCount, filename, categoryStr);
-	return 0;
+	return true;
 }
 
+/***
+ * Abort a queued or active archive download.
+ * @function VFS.AbortDownload
+ * @param id integer Download queue identifier.
+ * @return boolean removed Whether a queued download was removed.
+ */
 int LuaVFSDownload::AbortDownload(lua_State* L)
 {
-	lua_pushboolean(L, downloadQueue.Remove(luaL_checkint(L, 1)));
+	lua_pushboolean(L, AbortQueuedDownload(luaL_checkint(L, 1)));
 	return 1;
 }
 
+bool LuaVFSDownload::AbortQueuedDownload(int id)
+{
+	(void)luaVFSDownload;
+	return downloadQueue.Remove(id);
+}
+
+/***
+ * Rescan all data directories for newly added archives.
+ * @function VFS.ScanAllDirs
+ */
 int LuaVFSDownload::ScanAllDirs(lua_State* L)
 {
 	archiveScanner->ScanAllDirs();

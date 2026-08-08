@@ -9,14 +9,14 @@
 - Unmatched: 0 (0.0%)
 
 **Rust API:**
-- Total: 1384 functions across 52 modules
-- Matched to Lua: 793 (57.3%)
-- Rust-only: 582 (42.1%)
+- Total: 1392 functions across 53 modules
+- Matched to Lua: 793 (57.0%)
+- Rust-only: 590 (42.4%)
 
 **Parameter comparison (matched functions):**
-- Parameter matches: 793
+- Parameter matches: 792
 - Count mismatches: 0
-- Type mismatches: 0
+- Type mismatches: 1
 
 ---
 
@@ -311,7 +311,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetSelectedUnitsCounts` → `Selection.Selection.get_selected_units_counts`
 - `Spring.GetSelectedUnitsSorted` → `Selection.Selection.get_selected_units_sorted`
 - `Spring.GetSelectionBox` → `Input.Input.get_selection_box`
-- `Spring.GetSideData` → `Game.Game.get_side_data`
+- `Spring.GetSideData` → `Game.Game.get_side_data` (param mismatch: p1 type int!=string)
 - `Spring.GetSmoothMeshHeight` → `Terrain.Terrain.get_smooth_mesh_height`
 - `Spring.GetSoundDevices` → `Sound.Sound.get_sound_devices`
 - `Spring.GetSoundEffectParams` → `Sound.Sound.get_sound_effect_params`
@@ -845,6 +845,12 @@ Functions in Lua API with no Rust equivalent:
 Functions in Rust API with no Lua equivalent:
 
 - `Config.Config.get_config_parameters`
+- `Encoding.Encoding.decode_base64`
+- `Encoding.Encoding.decode_base64_url`
+- `Encoding.Encoding.encode_base64`
+- `Encoding.Encoding.encode_base64_url`
+- `Encoding.Encoding.is_valid_base64`
+- `Encoding.Encoding.is_valid_base64_url`
 - `FeatureDefs.FeatureDefs.get_feature_def_by_id`
 - `FeatureDefs.FeatureDefs.get_feature_def_count`
 - `FeatureDefs.FeatureDefs.get_feature_def_custom_param`
@@ -1367,10 +1373,12 @@ Functions in Rust API with no Lua equivalent:
 - `UnsyncedRead.UnsyncedRead.get_game_seconds_interpolated`
 - `UnsyncedRead.UnsyncedRead.unit_rendering`
 - `Utils.Utils.get_feature_def_dimensions`
+- `Vfs.Vfs.abort_download`
 - `Vfs.Vfs.calculate_hash`
 - `Vfs.Vfs.compress_folder`
 - `Vfs.Vfs.dir_list`
 - `Vfs.Vfs.dir_list_names`
+- `Vfs.Vfs.download_archive`
 - `Vfs.Vfs.file_exists`
 - `Vfs.Vfs.get_all_archives`
 - `Vfs.Vfs.get_archive_checksum`
@@ -1427,4 +1435,4 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 582**
+**Total Rust-only: 590**

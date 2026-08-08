@@ -102,7 +102,9 @@ impl NativeApiParity {
             "destroy_unit" => {
                 let unit_id = self.create_temporary_unit(message, label)?;
                 if unit_id < 0 {
-                    return Err(format!("{label}: temporary unit creation returned {unit_id}"));
+                    return Err(format!(
+                        "{label}: temporary unit creation returned {unit_id}"
+                    ));
                 }
                 self.destroy_temporary_unit(unit_id, label)?;
                 let valid = self
@@ -115,7 +117,9 @@ impl NativeApiParity {
             "transfer_unit" => {
                 let unit_id = self.create_temporary_unit(message, label)?;
                 if unit_id < 0 {
-                    return Err(format!("{label}: temporary unit creation returned {unit_id}"));
+                    return Err(format!(
+                        "{label}: temporary unit creation returned {unit_id}"
+                    ));
                 }
                 let success = self
                     .interface
@@ -143,7 +147,9 @@ impl NativeApiParity {
             "destroy_feature" => {
                 let feature_id = self.create_temporary_feature(message, label)?;
                 if feature_id < 0 {
-                    return Err(format!("{label}: temporary feature creation returned {feature_id}"));
+                    return Err(format!(
+                        "{label}: temporary feature creation returned {feature_id}"
+                    ));
                 }
                 self.destroy_temporary_feature(feature_id, label)?;
                 let valid = self
@@ -156,7 +162,9 @@ impl NativeApiParity {
             "transfer_feature" => {
                 let feature_id = self.create_temporary_feature(message, label)?;
                 if feature_id < 0 {
-                    return Err(format!("{label}: temporary feature creation returned {feature_id}"));
+                    return Err(format!(
+                        "{label}: temporary feature creation returned {feature_id}"
+                    ));
                 }
                 self.interface
                     .synced_ctrl()
@@ -201,7 +209,9 @@ impl NativeApiParity {
                 let transporter_id = i32_field(message, "unitID")?;
                 let passenger_id = self.create_temporary_unit(message, label)?;
                 if passenger_id < 0 {
-                    return Err(format!("{label}: temporary passenger creation returned {passenger_id}"));
+                    return Err(format!(
+                        "{label}: temporary passenger creation returned {passenger_id}"
+                    ));
                 }
 
                 let synced_ctrl = self.interface.synced_ctrl();
@@ -224,8 +234,9 @@ impl NativeApiParity {
                                 "{label}: attach result={attached}, attached_state={actual_attached}"
                             ));
                         }
-                        unit.unit_detach(passenger_id)
-                            .map_err(|err| format!("{label}: cleanup unit_detach() failed: {err:?}"))?;
+                        unit.unit_detach(passenger_id).map_err(|err| {
+                            format!("{label}: cleanup unit_detach() failed: {err:?}")
+                        })?;
                     }
                     "unit_detach" => {
                         unit.unit_detach(passenger_id)
@@ -234,18 +245,24 @@ impl NativeApiParity {
                             .interface
                             .units_info()
                             .get_unit_transporter(passenger_id)
-                            .map_err(|err| format!("{label}: post-detach transporter query failed: {err:?}"))?
+                            .map_err(|err| {
+                                format!("{label}: post-detach transporter query failed: {err:?}")
+                            })?
                             < 0;
                         self.same_bool_if_present(label, message, "detached", detached)?;
                     }
                     "unit_detach_from_air" => {
                         unit.unit_detach_from_air(passenger_id, position(message)?)
-                            .map_err(|err| format!("{label}: unit_detach_from_air() failed: {err:?}"))?;
+                            .map_err(|err| {
+                                format!("{label}: unit_detach_from_air() failed: {err:?}")
+                            })?;
                         let detached = self
                             .interface
                             .units_info()
                             .get_unit_transporter(passenger_id)
-                            .map_err(|err| format!("{label}: post-detach transporter query failed: {err:?}"))?
+                            .map_err(|err| {
+                                format!("{label}: post-detach transporter query failed: {err:?}")
+                            })?
                             < 0;
                         self.same_bool_if_present(label, message, "detached", detached)?;
                     }

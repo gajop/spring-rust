@@ -38,14 +38,12 @@ impl NativeApiParity {
                 self.same_bool_if_present(label, message, "called", true)?;
                 self.same_i32_if_present(label, message, "returnCount", 0)
             }
-            "set_window_minimized" | "set_window_maximized" => {
-                self.same_bool_if_present(
-                    label,
-                    message,
-                    "result",
-                    bool_field(message, "expected")?,
-                )
-            }
+            "set_window_minimized" | "set_window_maximized" => self.same_bool_if_present(
+                label,
+                message,
+                "result",
+                bool_field(message, "expected")?,
+            ),
             "yield" => self.same_bool_if_present(label, message, "result", false),
             _ => Err(format!("unsupported remaining-tail check `{label}`")),
         }
@@ -63,8 +61,18 @@ impl NativeApiParity {
                 self.same_bool_if_present("get_factory_bugger_off", message, "perform", perform)?;
                 self.same_if_present("get_factory_bugger_off", message, "offset", offset)?;
                 self.same_if_present("get_factory_bugger_off", message, "radius", radius)?;
-                self.same_i32_if_present("get_factory_bugger_off", message, "relHeading", rel_heading)?;
-                self.same_bool_if_present("get_factory_bugger_off", message, "spherical", spherical)?;
+                self.same_i32_if_present(
+                    "get_factory_bugger_off",
+                    message,
+                    "relHeading",
+                    rel_heading,
+                )?;
+                self.same_bool_if_present(
+                    "get_factory_bugger_off",
+                    message,
+                    "spherical",
+                    spherical,
+                )?;
                 self.same_bool_if_present("get_factory_bugger_off", message, "forced", forced)
             }
             "set_factory_bugger_off" => {
@@ -85,9 +93,7 @@ impl NativeApiParity {
                             forced: bool_field(message, "forced")?,
                         },
                     )
-                    .map_err(|err| {
-                        format!("set_factory_bugger_off({unit_id}) failed: {err:?}")
-                    })?;
+                    .map_err(|err| format!("set_factory_bugger_off({unit_id}) failed: {err:?}"))?;
                 if returned != perform {
                     return Err(format!(
                         "set_factory_bugger_off returned {returned}, expected {perform}"
@@ -126,7 +132,9 @@ impl NativeApiParity {
             "set_window_geometry" => {
                 let display_index = i32_field(message, "displayIndex")? - 1;
                 if display_index < 0 {
-                    return Err("set_window_geometry requires a one-based Lua display index".to_string());
+                    return Err(
+                        "set_window_geometry requires a one-based Lua display index".to_string()
+                    );
                 }
                 let success = self
                     .interface

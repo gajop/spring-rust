@@ -138,8 +138,21 @@ namespace Rml::SolLua
 			return;
 
 		auto document = dynamic_cast<SolLuaDocument*>(m_element->GetOwnerDocument());
-		if (document == nullptr || !m_func.valid())
+		if (!m_func.valid())
 			return;
+
+		// Context listeners are attached to the context root, which has no owner
+		// document.  They still use the same event/script contract as element
+		// listeners; the document argument is simply nil in that case.
+		if (document == nullptr)
+		{
+			sol::protected_function func = m_func;
+			lua_State* state = func.lua_state();
+			auto result = func.call(event, m_element, sol::lua_nil);
+			if (!result.valid())
+				ErrorHandler(state, std::move(result));
+			return;
+		}
 
 		auto& env = document->GetLuaEnvironment();
 		const auto& ident = document->GetLuaEnvironmentIdentifier();

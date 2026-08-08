@@ -251,6 +251,21 @@ pub fn generate_math_extra(
     )
 }
 
+pub fn generate_encoding(
+	codegen: &CodeGenerator,
+	header: &Path,
+	include_dirs: &[PathBuf],
+) -> Result<String> {
+	codegen.generate_api(
+		header,
+		include_dirs,
+		ApiConfig {
+			api_struct: "EncodingApi",
+			wrapper_struct: "Encoding",
+		},
+	)
+}
+
 pub fn generate_metal_map(
     codegen: &CodeGenerator,
     header: &Path,

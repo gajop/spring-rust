@@ -80,9 +80,7 @@ impl NativeApiParity {
                     .unit()
                     .give_order_array_to_unit_array(&unit_ids, &native_commands, pairwise)
                     .map(|count| count > 0)
-                    .map_err(|err| {
-                        format!("give_order_array_to_unit_array() failed: {err:?}")
-                    })
+                    .map_err(|err| format!("give_order_array_to_unit_array() failed: {err:?}"))
             }
             _ => Err(format!("unsupported order variant `{name}`")),
         }
@@ -104,9 +102,7 @@ impl NativeApiParity {
             .get("testName")
             .and_then(Value::as_str)
             .ok_or_else(|| "missing string field `testName`".to_string())?;
-        let name = test_name
-            .strip_prefix("set_native_")
-            .unwrap_or(test_name);
+        let name = test_name.strip_prefix("set_native_").unwrap_or(test_name);
         let unit_id = i32_field(message, "unitID").unwrap_or_default();
         if !self.run_order_variant(name, unit_id)? {
             return Err(format!("native order variant `{name}` returned false"));

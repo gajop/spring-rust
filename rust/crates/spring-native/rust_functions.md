@@ -1,8 +1,8 @@
 # Rust API Functions
 
-Total APIs: 52
+Total APIs: 53
 
-Total Functions: 1384
+Total Functions: 1392
 
 ---
 
@@ -69,6 +69,15 @@ Total Functions: 1384
 - `EffectsControl.spawn_ceg` (params: ceg:sys::DefRef, pos:sys::Float3, dir:sys::Float3, radius:f32, damage:f32, dmg_mod:f32) → `Result<(bool, i32), Error>`
 - `EffectsControl.spawn_explosion` (params: pos:sys::Float3, dir:sys::Float3, explosion_params:sys::NativeExplosionParams) → `Result<bool, Error>`
 - `EffectsControl.spawn_sfx` (params: unit_id:i32, sfx_id:i32, pos:sys::Float3, dir:sys::Float3, radius:f32, damage:f32, absolute:bool) → `Result<bool, Error>`
+
+## Encoding (6 functions)
+
+- `Encoding.decode_base64` (params: text:&str) → `Result<Vec<u8>, Error>`
+- `Encoding.decode_base64_url` (params: text:&str) → `Result<Vec<u8>, Error>`
+- `Encoding.encode_base64` (params: text:&[u8], strip_padding:bool) → `Result<Option<String>, Error>`
+- `Encoding.encode_base64_url` (params: text:&[u8]) → `Result<Option<String>, Error>`
+- `Encoding.is_valid_base64` (params: text:&str) → `Result<bool, Error>`
+- `Encoding.is_valid_base64_url` (params: text:&str) → `Result<bool, Error>`
 
 ## FeatureControl (32 functions)
 
@@ -1477,13 +1486,15 @@ Total Functions: 1384
 - `Utils.test_build_order` (params: unit_def_id:i32, pos:sys::Float3, facing:i32) → `Result<(i32, bool, i32), Error>`
 - `Utils.test_move_order` (params: unit_def_id:i32, pos:sys::Float3, dir:sys::Float3, options:TestMoveOrderOptions) → `Result<bool, Error>`
 
-## Vfs (53 functions)
+## Vfs (55 functions)
 
+- `Vfs.abort_download` (params: id:i32) → `Result<bool, Error>`
 - `Vfs.calculate_hash` (params: data:&[u8], hash_type:i32) → `Result<Option<String>, Error>`
 - `Vfs.compress_folder` (params: folder_path:&str, archive_type:&str, compressed_file_path:&str, include_folder:bool, mode:&str) → `Result<bool, Error>`
 - `Vfs.create_dir` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.dir_list` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<sys::DirEntry>, Error>`
 - `Vfs.dir_list_names` (params: path:&str, pattern:&str, mode:&str, recursive:bool) → `Result<Vec<String>, Error>`
+- `Vfs.download_archive` (params: filename:&str, category:&str) → `Result<(), Error>`
 - `Vfs.extract_mod_archive_file` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.file_exists` (params: path:&str) → `Result<bool, Error>`
 - `Vfs.get_all_archives` (params: ) → `Result<Vec<String>, Error>`

@@ -2,6 +2,18 @@
   "version": 1,
   "tests": [
     {
+      "id": "call_as_team",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [],
+      "lua": {"set": ["Global.CallAsTeam"]},
+      "native": {"set": ["SystemControl.call_as_team"]},
+      "compare": {"mode": "fields", "fields": ["callbackCalled", "callbackTeam", "returnCount", "returnMarker", "returnFlag"]},
+      "report": {"lua_setter": "`Global.CallAsTeam`", "native_setter": "`SystemControl.call_as_team`", "fields": "callback execution, team, and Lua return shape"},
+      "rust": {"check": "check_system_control_value", "set": "set_system_control_value"},
+      "params": {}
+    },
+    {
       "id": "is_replay",
       "context": "unsynced_gadget",
       "kind": "readonly",
