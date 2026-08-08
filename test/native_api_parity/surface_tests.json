@@ -177,6 +177,44 @@
       "reason": "VFS.Include executes arbitrary Lua and cannot have a typed native equivalent."
     },
     {
+      "id": "vfs.archive_surface",
+      "context": "unsynced_gadget",
+      "mode": "matched",
+      "lua": [
+        "VFS.GetFileAbsolutePath",
+        "VFS.GetArchiveContainingFile",
+        "VFS.HasArchive",
+        "VFS.GetLoadedArchives",
+        "VFS.GetAllArchives",
+        "VFS.GetArchivePath",
+        "VFS.GetArchiveInfo",
+        "VFS.GetArchiveDependencies",
+        "VFS.GetArchiveReplaces",
+        "VFS.GetArchiveChecksum",
+        "VFS.GetNameFromRapidTag",
+        "VFS.GetAvailableAIs",
+        "VFS.UseArchive",
+        "VFS.CompressFolder"
+      ],
+      "native": [
+        "Vfs.get_file_absolute_path",
+        "Vfs.get_archive_containing_file",
+        "Vfs.has_archive",
+        "Vfs.get_loaded_archives",
+        "Vfs.get_all_archives",
+        "Vfs.get_archive_path",
+        "Vfs.get_archive_info",
+        "Vfs.get_archive_dependencies",
+        "Vfs.get_archive_replaces",
+        "Vfs.get_archive_checksum",
+        "Vfs.get_name_from_rapid_tag",
+        "Vfs.get_available_ais",
+        "Vfs.use_archive",
+        "Vfs.compress_folder"
+      ],
+      "reason": "End-to-end replay of the remaining archive discovery, metadata, AI inventory, temporary mapping, and folder compression callouts. Lua callback return values and CompressFolder's zero-result arity are recorded as ABI boundaries; the shared operation results and side effects are compared."
+    },
+    {
       "id": "rml.global_context_document",
       "context": "widget",
       "mode": "matched",

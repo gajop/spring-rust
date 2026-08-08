@@ -18,6 +18,15 @@ if not gadgetHandler:IsSyncedCode() then
 	local parityOptions = Spring.GetModOptions() or {}
 	local processTest = tostring(parityOptions.native_api_parity_process_test or "")
 	local processStage = tostring(parityOptions.native_api_parity_process_stage or "initial")
+	local selectedTestsOption = tostring(parityOptions.native_api_parity_tests or "")
+	local selectedTestPrefix = tonumber(parityOptions.native_api_parity_test_prefix or "")
+	local selectedTests = {}
+	for testName in string.gmatch(selectedTestsOption, "[^,]+") do
+		selectedTests[testName] = true
+	end
+	local function selectedSurfaceTest(testName)
+		return (selectedTestsOption == "" and selectedTestPrefix == nil) or selectedTests[testName] == true
+	end
 	local function unitPayload(caseIndex, ids, values)
 		values.case = caseIndex
 		values.unitID = ids.unitID
@@ -87,6 +96,199 @@ if not gadgetHandler:IsSyncedCode() then
 		payload.context = "unsynced_gadget"
 		Common.setTestName(payload, name)
 		forward("unsynced_gadget", Common.encode(payload))
+	end
+
+	local function sortedStrings(values)
+		local result = {}
+		for _, value in ipairs(values or {}) do
+			result[#result + 1] = value
+		end
+		table.sort(result)
+		return result
+	end
+
+	local function optionalSurfaceValue(value)
+		return {
+			present = value ~= nil,
+			value = value or "",
+		}
+	end
+
+	local function optionalSurfacePath(value)
+		local result = {
+			present = value ~= nil,
+			basename = "",
+		}
+		if value ~= nil then
+			result.basename = value:match("([^/]+)$") or value
+		end
+		return result
+	end
+
+	local function archiveInfoSurface(info)
+		local result = {}
+		for key, value in pairs(info or {}) do
+			result[#result + 1] = {
+				key = tostring(key),
+				valueType = type(value),
+				value = value,
+			}
+		end
+		table.sort(result, function(left, right)
+			return left.key < right.key
+		end)
+		return result
+	end
+
+	local function availableAIsSurface(ais)
+		local result = {}
+		for _, ai in ipairs(ais or {}) do
+			result[#result + 1] = {
+				shortName = ai.shortName or "",
+				version = ai.version or "",
+				isLuaAI = ai.isLuaAI == true,
+			}
+		end
+		table.sort(result, function(left, right)
+			if left.shortName ~= right.shortName then
+				return left.shortName < right.shortName
+			end
+			if left.version ~= right.version then
+				return left.version < right.version
+			end
+			return tostring(left.isLuaAI) < tostring(right.isLuaAI)
+		end)
+		return result
+	end
+
+	local function runVfsArchiveSurface()
+		if not selectedSurfaceTest("vfs.archive_surface") then
+			return
+		end
+
+		local testName = "vfs.archive_surface"
+		-- VFS archive lookups require the documented lowercase path form.  The
+		-- maphelper archive contains this file, so this is stable in both the
+		-- Lua baseline and the native replay.
+		local fileName = "mapoptions.lua"
+		-- VFS.ZIP_ONLY is the documented archive-only mode.  The individual
+		-- mode letters are `M`, `m`, `e`, and `b`; `z` is not a VFS mode.
+		local fileMode = "Mmeb"
+		local archiveName = VFS.GetArchiveContainingFile(fileName, fileMode)
+		if archiveName == nil then
+			error("VFS archive surface could not find mapoptions.lua in a zip archive", 0)
+		end
+
+		local archiveInfo = VFS.GetArchiveInfo(archiveName)
+		if archiveInfo == nil then
+			error("VFS archive surface could not read archive info", 0)
+		end
+		local dependencies = VFS.GetArchiveDependencies(archiveName)
+		local replaces = VFS.GetArchiveReplaces(archiveName)
+		if dependencies == nil or replaces == nil then
+			error("VFS archive surface could not read archive relationships", 0)
+		end
+
+		local singleChecksum, completeChecksum = VFS.GetArchiveChecksum(archiveName)
+		local absolutePath = VFS.GetFileAbsolutePath(fileName, fileMode)
+		local loadedArchives = sortedStrings(VFS.GetLoadedArchives())
+		local allArchives = sortedStrings(VFS.GetAllArchives())
+		local availableAIs = availableAIsSurface(VFS.GetAvailableAIs("", ""))
+		local rapidTagReturns = { VFS.GetNameFromRapidTag("native-api-parity-not-a-rapid-tag") }
+
+		-- Build a fresh archive in the fixture's isolated data directory to test
+		-- compression.  LuaRules cannot call VFS.ScanAllDirs (that entry is
+		-- installed only in LuaUI), so UseArchive uses the deterministic base
+		-- cursor archive, which is scanned but not mapped during this fixture.
+		local luaArchiveName = "native_api_parity_vfs_surface_lua.sdz"
+		local nativeArchiveName = "native_api_parity_vfs_surface_native.sdz"
+		local useArchiveName
+		for _, candidate in ipairs(allArchives) do
+			if string.find(string.lower(candidate), "cursors", 1, true) then
+				useArchiveName = candidate
+				break
+			end
+		end
+		if useArchiveName == nil then
+			error("VFS archive surface could not find the scanned cursor archive", 0)
+		end
+		local compressReturns = { pcall(
+			VFS.CompressFolder,
+			"LuaRules/Gadgets",
+			"zip",
+			luaArchiveName,
+			false,
+			"r"
+		) }
+		if not compressReturns[1] then
+			error("VFS archive surface compression failed: " .. tostring(compressReturns[2]), 0)
+		end
+		local compressedExists = VFS.FileExists(luaArchiveName)
+
+		local callbackVisible = false
+		local callbackFileExists = false
+		local useReturns = { pcall(VFS.UseArchive, useArchiveName, function()
+			for _, loadedArchive in ipairs(VFS.GetLoadedArchives()) do
+				if loadedArchive == useArchiveName then
+					callbackVisible = true
+					break
+				end
+			end
+			callbackFileExists = VFS.FileExists("anims/cursorattack_0.bmp")
+			return "callback-return"
+		end) }
+		if not useReturns[1] then
+			error("VFS archive surface UseArchive failed: " .. tostring(useReturns[2]), 0)
+		end
+		local postLoadedArchives = sortedStrings(VFS.GetLoadedArchives())
+
+		local payload = {
+			status = "pass",
+			context = "unsynced_gadget",
+			result = {
+				fileName = fileName,
+				fileMode = fileMode,
+				archiveName = archiveName,
+				fileAbsolutePath = optionalSurfacePath(absolutePath),
+				archiveContainingFile = optionalSurfaceValue(archiveName),
+				hasArchive = VFS.HasArchive(archiveName),
+				loadedArchives = loadedArchives,
+				allArchives = allArchives,
+				archivePath = optionalSurfacePath(VFS.GetArchivePath(archiveName)),
+				archiveInfo = archiveInfoSurface(archiveInfo),
+				archiveDependencies = sortedStrings(dependencies),
+				archiveReplaces = sortedStrings(replaces),
+				archiveChecksum = {
+					single = singleChecksum or "",
+					complete = completeChecksum or "",
+				},
+				rapidTag = optionalSurfaceValue(rapidTagReturns[1]),
+				availableAIs = availableAIs,
+				compress = {
+					archiveName = luaArchiveName,
+					exists = compressedExists,
+					-- Lua.CompressFolder returns no values on success; the native
+					-- ABI reports the same operation through Result<bool>.
+					luaReturnCount = #compressReturns - 1,
+				},
+				useArchive = {
+					archiveName = useArchiveName,
+					ok = true,
+					callbackVisible = callbackVisible,
+					callbackFileExists = callbackFileExists,
+					postLoadedArchives = postLoadedArchives,
+					-- Lua preserves arbitrary callback returns; the native callback
+					-- ABI intentionally exposes only the operation success flag.
+					luaReturnCount = #useReturns - 1,
+					luaReturnValue = useReturns[2] or "",
+				},
+				nativeArchiveName = nativeArchiveName,
+			},
+		}
+		record(testName, payload)
+		if Common.mode() == "native" then
+			Spring.InvokeNativeModule(Common.encode(payload))
+		end
 	end
 
 	local function runGeneratedTests()
@@ -212,12 +414,16 @@ if not gadgetHandler:IsSyncedCode() then
 			-- Enter the engine's normal CEventHandler path with valid fixture
 			-- objects.  This is test infrastructure exposed only by the debug
 			-- library; it lets both Lua and native consumers observe the same
-			-- engine-constructed callin payloads deterministically.
-			if not debug or type(debug.emulateNativeApiParityCallins) ~= "function" then
-				error("missing debug Lua-only helper emulateNativeApiParityCallins", 0)
+			-- engine-constructed callin payloads deterministically.  The driver
+			-- includes renderer-only callbacks (for example DrawWorldShadow),
+			-- which are unavailable in a headless engine.
+			if Common.enableRenderingTests() then
+				if not debug or type(debug.emulateNativeApiParityCallins) ~= "function" then
+					error("missing debug Lua-only helper emulateNativeApiParityCallins", 0)
+				end
+				debug.emulateNativeApiParityCallins(unitID, featureID, projectileID)
+				record("debug.callin_driver", { called = true })
 			end
-			debug.emulateNativeApiParityCallins(unitID, featureID, projectileID)
-			record("debug.callin_driver", { called = true })
 
 			if unitX then
 				-- The deterministic input driver includes a wheel event.  Re-anchor
@@ -281,6 +487,7 @@ if not gadgetHandler:IsSyncedCode() then
 			end
 			sendInventory()
 			runGeneratedTests()
+			runVfsArchiveSurface()
 		end
 		if frame == 20 then
 			sendInventory()

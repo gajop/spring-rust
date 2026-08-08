@@ -63,7 +63,354 @@ fn unpack_count(message: &Value) -> Result<u32, String> {
     Ok(count as u32)
 }
 
+fn surface_result<'a>(message: &'a Value) -> Result<&'a Value, String> {
+    message
+        .get("result")
+        .ok_or_else(|| "missing VFS archive surface result".to_string())
+}
+
+fn surface_field<'a>(result: &'a Value, field: &str) -> Result<&'a Value, String> {
+    result
+        .get(field)
+        .ok_or_else(|| format!("missing VFS archive surface field `{field}`"))
+}
+
+fn compare_surface_values(label: &str, expected: &Value, actual: &Value) -> Result<(), String> {
+    match (expected, actual) {
+        (Value::Number(expected), Value::Number(actual)) => {
+            let expected = expected
+                .as_f64()
+                .ok_or_else(|| format!("{label}: invalid expected number"))?;
+            let actual = actual
+                .as_f64()
+                .ok_or_else(|| format!("{label}: invalid native number"))?;
+            if (expected - actual).abs() > 0.0001 {
+                return Err(format!("{label}: native={actual}, lua={expected}"));
+            }
+        }
+        (Value::Array(expected), Value::Array(actual)) => {
+            if expected.len() != actual.len() {
+                return Err(format!(
+                    "{label}: native array length={}, lua array length={}",
+                    actual.len(),
+                    expected.len()
+                ));
+            }
+            for (index, (expected, actual)) in expected.iter().zip(actual).enumerate() {
+                compare_surface_values(&format!("{label}[{index}]"), expected, actual)?;
+            }
+        }
+        (Value::Object(expected), Value::Object(actual)) => {
+            if expected.len() != actual.len() {
+                return Err(format!(
+                    "{label}: native object fields={}, lua object fields={}",
+                    actual.len(),
+                    expected.len()
+                ));
+            }
+            for (key, expected) in expected {
+                let actual = actual
+                    .get(key)
+                    .ok_or_else(|| format!("{label}: native object is missing `{key}`"))?;
+                compare_surface_values(&format!("{label}.{key}"), expected, actual)?;
+            }
+        }
+        (expected, actual) if expected == actual => {}
+        (expected, actual) => {
+            return Err(format!("{label}: native={actual}, lua={expected}"));
+        }
+    }
+    Ok(())
+}
+
+fn optional_string_surface(value: Option<String>) -> Value {
+    match value {
+        Some(value) => serde_json::json!({ "present": true, "value": value }),
+        None => serde_json::json!({ "present": false, "value": "" }),
+    }
+}
+
+fn optional_path_surface(value: Option<String>) -> Value {
+    let mut surface = serde_json::json!({
+        "present": value.is_some(),
+        "basename": "",
+    });
+    if let Some(object) = surface.as_object_mut() {
+        let basename = value
+            .as_deref()
+            .and_then(|value| value.rsplit(['/', '\\']).next())
+            .unwrap_or("");
+        object.insert("basename".to_string(), Value::String(basename.to_string()));
+    }
+    surface
+}
+
+fn archive_info_surface(entries: &[spring_native::sys::ArchiveInfoEntry]) -> Result<Value, String> {
+    let mut result = Vec::with_capacity(entries.len());
+    for entry in entries {
+        let key = cstr_or_empty(entry.key)?;
+        let type_name = cstr_or_empty(entry.type_)?;
+        let (value_type, value) = match type_name.as_str() {
+            "string" => ("string", Value::String(cstr_or_empty(entry.stringValue)?)),
+            "integer" => ("number", serde_json::json!(entry.intValue)),
+            "float" => ("number", serde_json::json!(entry.floatValue)),
+            "bool" => ("boolean", Value::Bool(entry.boolValue)),
+            other => return Err(format!("unknown ArchiveInfoEntry type `{other}`")),
+        };
+        result.push(serde_json::json!({
+            "key": key,
+            "valueType": value_type,
+            "value": value,
+        }));
+    }
+    result.sort_by(|left, right| {
+        left.get("key")
+            .and_then(Value::as_str)
+            .cmp(&right.get("key").and_then(Value::as_str))
+    });
+    Ok(Value::Array(result))
+}
+
+fn available_ais_surface(entries: &[spring_native::sys::AIInfoEntry]) -> Result<Value, String> {
+    let mut result = Vec::with_capacity(entries.len());
+    for entry in entries {
+        result.push(serde_json::json!({
+            "shortName": cstr_or_empty(entry.shortName)?,
+            "version": cstr_or_empty(entry.version)?,
+            "isLuaAI": entry.isLuaAI,
+        }));
+    }
+    result.sort_by(|left, right| {
+        let left_key = (
+            left.get("shortName").and_then(Value::as_str).unwrap_or(""),
+            left.get("version").and_then(Value::as_str).unwrap_or(""),
+            left.get("isLuaAI")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+        );
+        let right_key = (
+            right.get("shortName").and_then(Value::as_str).unwrap_or(""),
+            right.get("version").and_then(Value::as_str).unwrap_or(""),
+            right
+                .get("isLuaAI")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+        );
+        left_key.cmp(&right_key)
+    });
+    Ok(Value::Array(result))
+}
+
 impl NativeApiParity {
+    pub(crate) fn check_vfs_archive_surface(&mut self, message: &Value) -> Result<(), String> {
+        let result = surface_result(message)?;
+        let file_name = str_field(result, "fileName")?;
+        let file_mode = str_field(result, "fileMode")?;
+        let archive_name = str_field(result, "archiveName")?;
+        let native_archive_name = str_field(result, "nativeArchiveName")?;
+        let use_archive_name = str_field(surface_field(result, "useArchive")?, "archiveName")?;
+        let vfs = self.interface.vfs();
+
+        let absolute_path = vfs
+            .get_file_absolute_path(file_name, file_mode)
+            .map_err(|err| format!("get_file_absolute_path() failed: {err:?}"))?;
+        compare_surface_values(
+            "fileAbsolutePath",
+            surface_field(result, "fileAbsolutePath")?,
+            &optional_path_surface(absolute_path),
+        )?;
+
+        let containing_file = vfs
+            .get_archive_containing_file(file_name, file_mode)
+            .map_err(|err| format!("get_archive_containing_file() failed: {err:?}"))?;
+        compare_surface_values(
+            "archiveContainingFile",
+            surface_field(result, "archiveContainingFile")?,
+            &optional_string_surface(containing_file),
+        )?;
+
+        let has_archive = vfs
+            .has_archive(archive_name)
+            .map_err(|err| format!("has_archive() failed: {err:?}"))?;
+        compare_surface_values(
+            "hasArchive",
+            surface_field(result, "hasArchive")?,
+            &serde_json::json!(has_archive),
+        )?;
+
+        let mut loaded_archives = vfs
+            .get_loaded_archives()
+            .map_err(|err| format!("get_loaded_archives() failed: {err:?}"))?;
+        loaded_archives.sort();
+        compare_surface_values(
+            "loadedArchives",
+            surface_field(result, "loadedArchives")?,
+            &serde_json::json!(loaded_archives),
+        )?;
+
+        let mut all_archives = vfs
+            .get_all_archives()
+            .map_err(|err| format!("get_all_archives() failed: {err:?}"))?;
+        all_archives.sort();
+        compare_surface_values(
+            "allArchives",
+            surface_field(result, "allArchives")?,
+            &serde_json::json!(all_archives),
+        )?;
+
+        let archive_path = vfs
+            .get_archive_path(archive_name)
+            .map_err(|err| format!("get_archive_path() failed: {err:?}"))?;
+        compare_surface_values(
+            "archivePath",
+            surface_field(result, "archivePath")?,
+            &optional_path_surface(archive_path),
+        )?;
+
+        let archive_info = vfs
+            .get_archive_info(archive_name)
+            .map_err(|err| format!("get_archive_info() failed: {err:?}"))?;
+        compare_surface_values(
+            "archiveInfo",
+            surface_field(result, "archiveInfo")?,
+            &archive_info_surface(&archive_info)?,
+        )?;
+
+        let mut dependencies = vfs
+            .get_archive_dependencies(archive_name)
+            .map_err(|err| format!("get_archive_dependencies() failed: {err:?}"))?;
+        dependencies.sort();
+        compare_surface_values(
+            "archiveDependencies",
+            surface_field(result, "archiveDependencies")?,
+            &serde_json::json!(dependencies),
+        )?;
+
+        let mut replaces = vfs
+            .get_archive_replaces(archive_name)
+            .map_err(|err| format!("get_archive_replaces() failed: {err:?}"))?;
+        replaces.sort();
+        compare_surface_values(
+            "archiveReplaces",
+            surface_field(result, "archiveReplaces")?,
+            &serde_json::json!(replaces),
+        )?;
+
+        let (single_checksum, complete_checksum) = vfs
+            .get_archive_checksum(archive_name)
+            .map_err(|err| format!("get_archive_checksum() failed: {err:?}"))?;
+        compare_surface_values(
+            "archiveChecksum",
+            surface_field(result, "archiveChecksum")?,
+            &serde_json::json!({
+                "single": single_checksum.unwrap_or_default(),
+                "complete": complete_checksum.unwrap_or_default(),
+            }),
+        )?;
+
+        let rapid_tag = vfs
+            .get_name_from_rapid_tag("native-api-parity-not-a-rapid-tag")
+            .map_err(|err| format!("get_name_from_rapid_tag() failed: {err:?}"))?;
+        compare_surface_values(
+            "rapidTag",
+            surface_field(result, "rapidTag")?,
+            &optional_string_surface(rapid_tag),
+        )?;
+
+        let available_ais = vfs
+            .get_available_ais("", "")
+            .map_err(|err| format!("get_available_ais() failed: {err:?}"))?;
+        compare_surface_values(
+            "availableAIs",
+            surface_field(result, "availableAIs")?,
+            &available_ais_surface(&available_ais)?,
+        )?;
+
+        let compressed = vfs
+            .compress_folder("LuaRules/Gadgets", "zip", native_archive_name, false, "r")
+            .map_err(|err| format!("compress_folder() failed: {err:?}"))?;
+        let compressed_exists = vfs
+            .file_exists(native_archive_name)
+            .map_err(|err| format!("file_exists(compressed archive) failed: {err:?}"))?;
+        let compress_result = surface_field(result, "compress")?;
+        compare_surface_values(
+            "compress.ok",
+            &serde_json::json!(true),
+            &serde_json::json!(compressed),
+        )?;
+        compare_surface_values(
+            "compress.exists",
+            &compress_result
+                .get("exists")
+                .cloned()
+                .ok_or_else(|| "missing compress.exists".to_string())?,
+            &serde_json::json!(compressed_exists),
+        )?;
+        let mut callback_visible = false;
+        let mut callback_file_exists = false;
+        let use_archive_available = vfs
+            .has_archive(use_archive_name)
+            .map_err(|err| format!("has_archive(use archive) failed: {err:?}"))?;
+        if !use_archive_available {
+            return Err(format!(
+                "use_archive archive is not present in the native archive scanner: {use_archive_name:?}"
+            ));
+        }
+        let callback_interface = self.interface;
+        let use_success = vfs
+            .use_archive(use_archive_name, || {
+                let callback_vfs = callback_interface.vfs();
+                callback_visible = callback_vfs
+                    .get_loaded_archives()
+                    .map(|archives| archives.iter().any(|archive| archive == use_archive_name))
+                    .unwrap_or(false);
+                callback_file_exists = callback_vfs
+                    .file_exists("anims/cursorattack_0.bmp")
+                    .unwrap_or(false);
+            })
+            .map_err(|err| format!("use_archive() failed: {err:?}"))?;
+        let mut post_loaded_archives = callback_interface
+            .vfs()
+            .get_loaded_archives()
+            .map_err(|err| format!("get_loaded_archives(after UseArchive) failed: {err:?}"))?;
+        post_loaded_archives.sort();
+        let use_result = surface_field(result, "useArchive")?;
+        compare_surface_values(
+            "useArchive.ok",
+            &use_result
+                .get("ok")
+                .cloned()
+                .ok_or_else(|| "missing useArchive.ok".to_string())?,
+            &serde_json::json!(use_success),
+        )?;
+        compare_surface_values(
+            "useArchive.callbackVisible",
+            &use_result
+                .get("callbackVisible")
+                .cloned()
+                .ok_or_else(|| "missing useArchive.callbackVisible".to_string())?,
+            &serde_json::json!(callback_visible),
+        )?;
+        compare_surface_values(
+            "useArchive.callbackFileExists",
+            &use_result
+                .get("callbackFileExists")
+                .cloned()
+                .ok_or_else(|| "missing useArchive.callbackFileExists".to_string())?,
+            &serde_json::json!(callback_file_exists),
+        )?;
+        compare_surface_values(
+            "useArchive.postLoadedArchives",
+            &use_result
+                .get("postLoadedArchives")
+                .cloned()
+                .ok_or_else(|| "missing useArchive.postLoadedArchives".to_string())?,
+            &serde_json::json!(post_loaded_archives),
+        )?;
+
+        Ok(())
+    }
+
     pub(crate) fn check_vfs_value(&mut self, message: &Value, label: &str) -> Result<(), String> {
         let test_name = base_test_name(label);
         match test_name {

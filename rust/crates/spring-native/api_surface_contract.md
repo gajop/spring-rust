@@ -92,6 +92,16 @@ and missing-download cancellation cases are covered by the parity fixture; a
 successful download is intentionally not part of the offline deterministic
 suite because it depends on external repositories.
 
+### `VFS.ScanAllDirs` context
+
+`VFS.ScanAllDirs` is registered by `LuaVFSDownload` in LuaUI/menu states, not
+by the `LuaVFS` table installed in LuaRules or LuaGaia. The native
+`Vfs.scan_all_dirs` operation is the same archive-scanner operation and is
+available to native modules, so this is a context-placement difference rather
+than a missing port. Its Lua and native signatures/results are tested in the
+widget surface; an unsynced-gadget test must not call the Lua symbol and treat
+its absence there as a parity failure.
+
 The shared integer-pack cases stay within the exact integer range of this
 engine's 32-bit Lua number type. Rust's `u32`/`i32` slices can represent a
 wider domain; that is a native type-domain difference, not evidence that Lua

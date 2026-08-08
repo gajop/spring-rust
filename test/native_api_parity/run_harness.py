@@ -200,6 +200,11 @@ def parse_args() -> argparse.Namespace:
         help="comma-separated parity test IDs to run (useful for focused diagnostics)",
     )
     parser.add_argument(
+        "--skip-callin-compare",
+        action="store_true",
+        help="skip the engine callin trace gate for a focused non-rendering diagnostic",
+    )
+    parser.add_argument(
         "--test-prefix",
         type=int,
         help="also run the first N generated synced tests (for focused diagnostics)",
@@ -439,11 +444,11 @@ def row_test_name(row: dict) -> str:
     return str(row.get("testName", row.get("name", "")))
 
 
-def compare(lua_dir: Path, native_dir: Path) -> bool:
-    return compare_details(lua_dir, native_dir)["ok"]
+def compare(lua_dir: Path, native_dir: Path, compare_callins: bool = True) -> bool:
+    return compare_details(lua_dir, native_dir, compare_callins)["ok"]
 
 
-def compare_details(lua_dir: Path, native_dir: Path) -> dict:
+def compare_details(lua_dir: Path, native_dir: Path, compare_callins: bool = True) -> dict:
     ok = True
     streams = []
     for name in RESULT_STREAMS:
@@ -478,7 +483,7 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
     lua_callin_rows = load_jsonl(lua_dir / CALLIN_LUA_STREAM)
     native_callin_rows = load_jsonl(native_dir / CALLIN_NATIVE_STREAM)
     callin_trace = compare_callin_traces(lua_callin_rows, native_callin_rows)
-    if not callin_trace["matches"]:
+    if not callin_trace["matches"] and compare_callins:
         print("mismatch: engine callin Lua/native trace")
         if not callin_trace["coverage_matches"]:
             print(
@@ -513,6 +518,7 @@ def compare_details(lua_dir: Path, native_dir: Path) -> dict:
         for row in callin_trace.get("missing_results", [])[:10]:
             print(f"  missing result trace: {json.dumps(row, sort_keys=True)}")
         ok = False
+    callin_trace["comparison_skipped"] = not compare_callins
 
     native_path = native_dir / "native.jsonl"
     native_jsonl_exists = native_path.exists()
@@ -1675,6 +1681,7 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
             f"- Native trace rows: `{native_trace_rows}`",
             "- Process-wide callback counts: informational only (the two processes have different render/input lifetimes).",
             f"- Deterministic driver callbacks: Lua `{trace['driver_lua_rows']}`, native `{trace['driver_native_rows']}`, expected `{trace['expected_count']}`",
+            f"- Comparison: `{'skipped by focused-run option' if trace.get('comparison_skipped') else 'enabled'}`",
             f"- Deterministic driver markers: `{'present' if trace['driver_markers_seen'] else 'MISSING'}`",
             f"- Shared argument values: `{'match' if trace['argument_matches'] else 'MISMATCH'}`",
             f"- Shared return values: `{'match' if trace['result_matches'] else 'MISMATCH'}`",
@@ -1963,7 +1970,9 @@ def main() -> int:
         if not runs:
             raise SystemExit(f"no harness runs found in {args.output_dir}")
         latest = runs[-1]
-        compare_info = compare_details(latest / "lua", latest / "native")
+        compare_info = compare_details(
+            latest / "lua", latest / "native", not args.skip_callin_compare
+        )
         write_report(latest, args, compare_info)
         return 0 if compare_info["ok"] else 1
 
@@ -1983,7 +1992,11 @@ def main() -> int:
     lua_dir = run_one(args, base_output, "lua", test_seed) if args.mode in ("lua", "both") else None
     native_dir = run_one(args, base_output, "native", test_seed) if args.mode in ("native", "both") else None
 
-    compare_info = compare_details(lua_dir, native_dir) if lua_dir and native_dir else None
+    compare_info = (
+        compare_details(lua_dir, native_dir, not args.skip_callin_compare)
+        if lua_dir and native_dir
+        else None
+    )
     write_report(base_output, args, compare_info)
 
     missing_required_surface_ids = sorted(
