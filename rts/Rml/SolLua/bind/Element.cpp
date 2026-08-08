@@ -95,17 +95,44 @@ namespace Rml::SolLua
 			return makeObjectFromVariant(attr, s);
 		}
 
-		auto getElementsByTagName(Rml::Element& self, const Rml::String& tag)
+		sol::as_table_t<Rml::ElementList> getElementsByTagName(Rml::Element& self, const Rml::String& tag)
 		{
 			Rml::ElementList result;
 			self.GetElementsByTagName(result, tag);
-			return result;
+			return sol::as_table(result);
 		}
 
-		auto getElementsByClassName(Rml::Element& self, const Rml::String& class_name)
+		sol::as_table_t<Rml::ElementList> getElementsByClassName(Rml::Element& self, const Rml::String& class_name)
 		{
 			Rml::ElementList result;
 			self.GetElementsByClassName(result, class_name);
+			return sol::as_table(result);
+		}
+
+		Rml::StringList getStringList(const sol::table& table)
+		{
+			Rml::StringList result;
+			for (const auto& [key, value] : table)
+			{
+				if (!key.is<int>() || !value.is<Rml::String>())
+					continue;
+
+				result.push_back(value.as<Rml::String>());
+			}
+			return result;
+		}
+
+		bool arePseudoClassesSet(Rml::Element& self, const sol::table& class_names)
+		{
+			return self.ArePseudoClassesSet(getStringList(class_names));
+		}
+
+		sol::table getActivePseudoClasses(Rml::Element& self, sol::this_state s)
+		{
+			sol::table result = sol::state_view(s).create_table();
+			int index = 1;
+			for (const auto& class_name : self.GetActivePseudoClasses())
+				result[index++] = class_name;
 			return result;
 		}
 
@@ -130,11 +157,11 @@ namespace Rml::SolLua
 			return soldocument;
 		}
 
-		auto getQuerySelectorAll(Rml::Element& self, const Rml::String& selector)
+		sol::as_table_t<Rml::ElementList> getQuerySelectorAll(Rml::Element& self, const Rml::String& selector)
 		{
 			Rml::ElementList result;
 			self.QuerySelectorAll(result, selector);
-			return result;
+			return sol::as_table(result);
 		}
 
 		Rml::Dictionary makeDictionaryFromTable(const sol::table& table)
@@ -546,16 +573,16 @@ namespace Rml::SolLua
 			 * @param class_names string[]
 			 * @return boolean
 			 */
-			"ArePseudoClassesSet", &Rml::Element::ArePseudoClassesSet,
+			"ArePseudoClassesSet", &functions::arePseudoClassesSet,
 			/***
 			 * @function RmlUi.Element:GetActivePseudoCLasses
 			 * @return string[]
 			 */
-			"GetActivePseudoClasses", &Rml::Element::GetActivePseudoClasses,
+			"GetActivePseudoClasses", &functions::getActivePseudoClasses,
 			/***
 			 * Is a screen-space point within this element?
 			 * @function RmlUi.Element:IsPointWithinElement
-			 * @param point RmlUi.Vector2i
+			 * @param point RmlUi.Vector2f
 			 * @return boolean
 			 */
 			"IsPointWithinElement", &Rml::Element::IsPointWithinElement,
