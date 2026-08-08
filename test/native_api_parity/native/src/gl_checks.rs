@@ -1346,4 +1346,181 @@ impl NativeApiParity {
 
         compare_result(message, actual, "gl.atlas")
     }
+
+    pub(crate) fn check_gl_fbo(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+
+        void!("gl.ResetState", gfx.reset_state());
+        let texture_params = spring_native::sys::GfxTextureParams {
+            target: GL_TEXTURE_2D,
+            format: GL_RGBA8,
+            minFilter: GL_LINEAR,
+            magFilter: GL_LINEAR,
+            wrapS: GL_CLAMP_TO_EDGE,
+            wrapT: GL_CLAMP_TO_EDGE,
+            wrapR: GL_CLAMP_TO_EDGE,
+            ..spring_native::sys::GfxTextureParams::default()
+        };
+        let source_texture = gfx
+            .create_texture(4, 4, 0, texture_params)
+            .map_err(|error| format!("CreateTexture(source) failed: {error:?}"))?
+            .ok_or_else(|| "CreateTexture(source) returned no name".to_owned())?;
+        let destination_texture = gfx
+            .create_texture(4, 4, 0, texture_params)
+            .map_err(|error| format!("CreateTexture(destination) failed: {error:?}"))?
+            .ok_or_else(|| "CreateTexture(destination) returned no name".to_owned())?;
+        let depth_rbo = gfx
+            .create_rbo(4, 4, GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 0)
+            .map_err(|error| format!("CreateRBO failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.CreateTexture",
+            vec![serde_json::json!(true)],
+        );
+        record(
+            &mut actual,
+            "gl.CreateRBO",
+            vec![serde_json::json!(depth_rbo > 0)],
+        );
+
+        let draw_buffers = [GL_COLOR_ATTACHMENT0];
+        let source_name = std::ffi::CString::new(source_texture.clone())
+            .map_err(|error| format!("source texture name is invalid: {error}"))?;
+        let source_attachments = [
+            spring_native::sys::GfxFBOAttachment {
+                attachment: GL_COLOR_ATTACHMENT0,
+                textureName: source_name.as_ptr(),
+                textureTarget: GL_TEXTURE_2D,
+                mipLevel: 0,
+                rboID: 0,
+                useRBO: false,
+            },
+            spring_native::sys::GfxFBOAttachment {
+                attachment: GL_DEPTH_ATTACHMENT,
+                textureName: std::ptr::null(),
+                textureTarget: 0,
+                mipLevel: 0,
+                rboID: depth_rbo,
+                useRBO: true,
+            },
+        ];
+        let destination_name = std::ffi::CString::new(destination_texture.clone())
+            .map_err(|error| format!("destination texture name is invalid: {error}"))?;
+        let destination_attachments = [spring_native::sys::GfxFBOAttachment {
+            attachment: GL_COLOR_ATTACHMENT0,
+            textureName: destination_name.as_ptr(),
+            textureTarget: GL_TEXTURE_2D,
+            mipLevel: 0,
+            rboID: 0,
+            useRBO: false,
+        }];
+        let (source_fbo, _) = gfx
+            .create_fbo(GL_FRAMEBUFFER, &source_attachments, &draw_buffers, 0)
+            .map_err(|error| format!("CreateFBO(source) failed: {error:?}"))?;
+        let (destination_fbo, _) = gfx
+            .create_fbo(GL_FRAMEBUFFER, &destination_attachments, &draw_buffers, 0)
+            .map_err(|error| format!("CreateFBO(destination) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.CreateFBO",
+            vec![serde_json::json!(source_fbo > 0 && destination_fbo > 0)],
+        );
+
+        let (source_valid, source_status) = gfx
+            .is_valid_fbo(source_fbo, GL_FRAMEBUFFER)
+            .map_err(|error| format!("IsValidFBO(source) failed: {error:?}"))?;
+        let (destination_valid, destination_status) = gfx
+            .is_valid_fbo(destination_fbo, GL_FRAMEBUFFER)
+            .map_err(|error| format!("IsValidFBO(destination) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.IsValidFBO",
+            vec![
+                serde_json::json!(source_valid),
+                serde_json::json!(source_status),
+                serde_json::json!(destination_valid),
+                serde_json::json!(destination_status),
+            ],
+        );
+
+        let (previous_fbo, has_previous) =
+            gfx.raw_bind_fbo(false, source_fbo, GL_FRAMEBUFFER, 0)
+                .map_err(|error| format!("RawBindFBO(bind) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.RawBindFBO",
+            vec![serde_json::json!(previous_fbo)],
+        );
+        gfx.raw_bind_fbo(true, 0, GL_FRAMEBUFFER, 0)
+            .map_err(|error| format!("RawBindFBO(restore) failed: {error:?}"))?;
+        record_void(&mut actual, "gl.RawBindFBO.restore");
+        let _ = has_previous;
+
+        let mut clear_result = None;
+        let mut callback_error = None;
+        gfx.active_fbo(source_fbo, GL_FRAMEBUFFER, true, || {
+            if let Err(error) = gfx.clear(GL_COLOR_BUFFER_BIT, [0.17, 0.27, 0.37, 0.47], 4) {
+                callback_error = Some(format!("Clear failed: {error:?}"));
+                return;
+            }
+            match gfx.clear_attachment_fbo(
+                GL_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT0,
+                [0.21, 0.31, 0.41, 0.51],
+                4,
+            ) {
+                Ok(value) => clear_result = Some(value),
+                Err(error) => {
+                    callback_error = Some(format!("ClearAttachmentFBO failed: {error:?}"))
+                }
+            }
+        })
+        .map_err(|error| format!("ActiveFBO failed: {error:?}"))?;
+        if let Some(error) = callback_error {
+            return Err(error);
+        }
+        record_void(&mut actual, "gl.ActiveFBO");
+        record(
+            &mut actual,
+            "gl.ClearAttachmentFBO",
+            vec![serde_json::json!(clear_result.unwrap_or(false))],
+        );
+
+        void!(
+            "gl.BlitFBO",
+            gfx.blit_fbo(
+                source_fbo,
+                destination_fbo,
+                0,
+                0,
+                4,
+                4,
+                0,
+                0,
+                4,
+                4,
+                GL_COLOR_BUFFER_BIT,
+                GL_NEAREST,
+            )
+        );
+        void!("gl.DeleteFBO", gfx.delete_fbo(source_fbo));
+        gfx.delete_fbo(destination_fbo)
+            .map_err(|error| format!("DeleteFBO(destination) failed: {error:?}"))?;
+        void!("gl.DeleteRBO", gfx.delete_rbo(depth_rbo));
+        gfx.delete_texture(&source_texture)
+            .map_err(|error| format!("DeleteTexture(source) failed: {error:?}"))?;
+        gfx.delete_texture(&destination_texture)
+            .map_err(|error| format!("DeleteTexture(destination) failed: {error:?}"))?;
+        record_void(&mut actual, "gl.DeleteTexture");
+
+        compare_result(message, actual, "gl.fbo")
+    }
 }

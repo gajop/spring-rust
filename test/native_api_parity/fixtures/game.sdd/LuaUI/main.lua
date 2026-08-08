@@ -14,6 +14,7 @@ local ranGlShaderUniforms = false
 local ranGlTextureResources = false
 local ranGlListsQueries = false
 local ranGlAtlas = false
+local ranGlFbo = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -981,6 +982,104 @@ local function runGlAtlasSurfaceApiTest()
 	end
 end
 
+local function runGlFboSurfaceApiTest()
+	if ranGlFbo or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlFbo = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	void("gl.ResetState", gl.ResetState)
+	local sourceTexture = gl.CreateTexture(4, 4, {
+		format = GL.RGBA8,
+		min_filter = GL.LINEAR,
+		mag_filter = GL.LINEAR,
+		wrap_s = GL.CLAMP_TO_EDGE,
+		wrap_t = GL.CLAMP_TO_EDGE,
+	})
+	local destinationTexture = gl.CreateTexture(4, 4, {
+		format = GL.RGBA8,
+		min_filter = GL.LINEAR,
+		mag_filter = GL.LINEAR,
+		wrap_s = GL.CLAMP_TO_EDGE,
+		wrap_t = GL.CLAMP_TO_EDGE,
+	})
+	if type(sourceTexture) ~= "string" or type(destinationTexture) ~= "string" then
+		error("FBO source textures were not created", 0)
+	end
+	local depthRbo = gl.CreateRBO(4, 4, { format = GL.DEPTH_COMPONENT24 })
+	if depthRbo == nil or not depthRbo.valid then
+		error("gl.CreateRBO did not return a valid RBO", 0)
+	end
+	result["gl.CreateTexture"] = { n = 1, values = { true } }
+	result["gl.CreateRBO"] = { n = 1, values = { true } }
+
+	local sourceFbo = gl.CreateFBO({
+		color0 = sourceTexture,
+		depth = depthRbo,
+		drawbuffers = { GL.COLOR_ATTACHMENT0 },
+	})
+	local destinationFbo = gl.CreateFBO({
+		color0 = destinationTexture,
+		drawbuffers = { GL.COLOR_ATTACHMENT0 },
+	})
+	if sourceFbo == nil or destinationFbo == nil then
+		error("gl.CreateFBO did not return FBOs", 0)
+	end
+	result["gl.CreateFBO"] = { n = 1, values = { true } }
+	local sourceValid, sourceStatus = gl.IsValidFBO(sourceFbo)
+	local destinationValid, destinationStatus = gl.IsValidFBO(destinationFbo)
+	result["gl.IsValidFBO"] = {
+		n = 4,
+		values = { sourceValid, sourceStatus, destinationValid, destinationStatus },
+	}
+
+	local previousFbo = gl.RawBindFBO(sourceFbo)
+	result["gl.RawBindFBO"] = { n = 1, values = { previousFbo } }
+	void("gl.RawBindFBO.restore", function()
+		gl.RawBindFBO(nil)
+	end)
+
+	local cleared
+	void("gl.ActiveFBO", function()
+		gl.ActiveFBO(sourceFbo, true, function()
+			gl.Clear(GL.COLOR_BUFFER_BIT, 0.17, 0.27, 0.37, 0.47)
+			cleared = gl.ClearAttachmentFBO(GL.FRAMEBUFFER, "color0", 0.21, 0.31, 0.41, 0.51)
+		end)
+	end)
+	result["gl.ClearAttachmentFBO"] = { n = 1, values = { cleared } }
+	void("gl.BlitFBO", function()
+		gl.BlitFBO(
+			sourceFbo, 0, 0, 4, 4,
+			destinationFbo, 0, 0, 4, 4,
+			GL.COLOR_BUFFER_BIT, GL.NEAREST
+		)
+	end)
+
+	void("gl.DeleteFBO", function()
+		gl.DeleteFBO(sourceFbo)
+		gl.DeleteFBO(destinationFbo)
+	end)
+	void("gl.DeleteRBO", function()
+		gl.DeleteRBO(depthRbo)
+	end)
+	void("gl.DeleteTexture", function()
+		gl.DeleteTexture(sourceTexture)
+		gl.DeleteTexture(destinationTexture)
+	end)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.fbo")
+	record("gl.fbo", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
 local function runGlFixedImmediateSurfaceApiTest()
 	if ranGlFixedImmediate or not Common.enableRenderingTests() then
 		return
@@ -1811,6 +1910,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlTextureResourceSurfaceApiTest()
 	runGlListsQuerySurfaceApiTest()
 	runGlAtlasSurfaceApiTest()
+	runGlFboSurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 

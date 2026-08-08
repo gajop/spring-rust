@@ -285,6 +285,38 @@
       "reason": "Rendering-context replay of user texture-atlas allocation, population, finalization, lookup and cleanup, plus engine/global atlas enumeration with sorted names and normalized process-local data."
     },
     {
+      "id": "gl.fbo",
+      "context": "widget",
+      "mode": "matched",
+      "lua": [
+        "gl.CreateTexture",
+        "gl.CreateRBO",
+        "gl.CreateFBO",
+        "gl.IsValidFBO",
+        "gl.RawBindFBO",
+        "gl.ActiveFBO",
+        "gl.ClearAttachmentFBO",
+        "gl.BlitFBO",
+        "gl.DeleteFBO",
+        "gl.DeleteRBO",
+        "gl.DeleteTexture"
+      ],
+      "native": [
+        "Gfx.create_texture",
+        "Gfx.create_rbo",
+        "Gfx.create_fbo",
+        "Gfx.is_valid_fbo",
+        "Gfx.raw_bind_fbo",
+        "Gfx.active_fbo",
+        "Gfx.clear_attachment_fbo",
+        "Gfx.blit_fbo",
+        "Gfx.delete_fbo",
+        "Gfx.delete_rbo",
+        "Gfx.delete_texture"
+      ],
+      "reason": "Rendering-context replay of color/depth renderbuffer setup, framebuffer validity, binding, scoped activation, attachment clearing, blitting and lifecycle cleanup."
+    },
+    {
       "id": "gl.fixed_immediate",
       "context": "widget",
       "mode": "matched",
