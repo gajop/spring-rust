@@ -2787,9 +2787,13 @@ static void GetGlobalTexCoords(const GfxStringQuery* query, GfxAtlasTextureResul
 		return;
 	}
 
+	// Lua's gl.GetGlobalTexCoords pushes startX, startY, endX, endY.
+	// GfxAtlasTextureResult uses x1, x2, y1, y2 for atlas lookups, so the
+	// fields are intentionally populated in Lua's global-coordinate order
+	// here to keep the native callout result equivalent to Lua.
 	result->x1 = texCoords->xstart;
-	result->x2 = texCoords->xend;
-	result->y1 = texCoords->ystart;
+	result->x2 = texCoords->ystart;
+	result->y1 = texCoords->xend;
 	result->y2 = texCoords->yend;
 }
 

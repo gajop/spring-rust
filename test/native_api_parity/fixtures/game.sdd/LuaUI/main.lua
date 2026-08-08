@@ -13,6 +13,7 @@ local ranGlImmediatePrimitives = false
 local ranGlShaderUniforms = false
 local ranGlTextureResources = false
 local ranGlListsQueries = false
+local ranGlAtlas = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -892,6 +893,94 @@ local function runGlListsQuerySurfaceApiTest()
 	end
 end
 
+local function normalizeAtlasEntries(textures)
+	local names = {}
+	for name in pairs(textures or {}) do
+		names[#names + 1] = name
+	end
+	table.sort(names)
+	local entries = {}
+	for _, name in ipairs(names) do
+		local coords = textures[name]
+		entries[#entries + 1] = {
+			name,
+			roundedGlValue(coords[1]),
+			roundedGlValue(coords[2]),
+			roundedGlValue(coords[3]),
+			roundedGlValue(coords[4]),
+		}
+	end
+	return entries
+end
+
+local function runGlAtlasSurfaceApiTest()
+	if ranGlAtlas or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlAtlas = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	void("gl.ResetState", gl.ResetState)
+	local textureName = gl.CreateTexture(4, 4, {
+		format = GL.RGBA8,
+		min_filter = GL.LINEAR,
+		mag_filter = GL.LINEAR,
+		wrap_s = GL.CLAMP_TO_EDGE,
+		wrap_t = GL.CLAMP_TO_EDGE,
+	})
+	if type(textureName) ~= "string" or textureName == "" then
+		error("atlas source texture was not created", 0)
+	end
+	local atlasName = gl.CreateTextureAtlas(256, 256, 0)
+	if type(atlasName) ~= "string" or atlasName == "" then
+		error("gl.CreateTextureAtlas did not return an atlas name", 0)
+	end
+	result["gl.CreateTexture"] = { n = 1, values = { true } }
+	result["gl.CreateTextureAtlas"] = { n = 1, values = { true } }
+	void("gl.AddAtlasTexture", function()
+		-- With no third argument Lua uses the source texture name as the
+		-- sub-atlas name, matching the native two-string surface exactly.
+		gl.AddAtlasTexture(atlasName, textureName)
+	end)
+	glCall(result, "gl.FinalizeTextureAtlas", function()
+		return gl.FinalizeTextureAtlas(atlasName)
+	end)
+	glCall(result, "gl.GetAtlasTexture", function()
+		return gl.GetAtlasTexture(atlasName, textureName)
+	end)
+	glCall(result, "gl.DeleteTextureAtlas", function()
+		return gl.DeleteTextureAtlas(atlasName)
+	end)
+	glCall(result, "gl.DeleteTexture", function()
+		return gl.DeleteTexture(textureName)
+	end)
+
+	glCall(result, "gl.GetEngineAtlasTextures", function()
+		return normalizeAtlasEntries(gl.GetEngineAtlasTextures("$explosions"))
+	end)
+	local globalNames = gl.GetGlobalTexNames() or {}
+	table.sort(globalNames)
+	result["gl.GetGlobalTexNames"] = { n = 1, values = { globalNames } }
+	if #globalNames > 0 then
+		glCall(result, "gl.GetGlobalTexCoords", function()
+			return gl.GetGlobalTexCoords(globalNames[1])
+		end)
+	else
+		result["gl.GetGlobalTexCoords"] = { n = 0, values = {} }
+	end
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.atlas")
+	record("gl.atlas", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
 local function runGlFixedImmediateSurfaceApiTest()
 	if ranGlFixedImmediate or not Common.enableRenderingTests() then
 		return
@@ -1721,6 +1810,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlShaderUniformSurfaceApiTest()
 	runGlTextureResourceSurfaceApiTest()
 	runGlListsQuerySurfaceApiTest()
+	runGlAtlasSurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 

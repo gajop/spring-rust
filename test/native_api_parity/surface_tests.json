@@ -255,6 +255,36 @@
       "reason": "Rendering-context replay of display-list compilation/call/lifecycle and occlusion-query execution/readback with process-local handles normalized."
     },
     {
+      "id": "gl.atlas",
+      "context": "widget",
+      "mode": "matched",
+      "lua": [
+        "gl.CreateTexture",
+        "gl.CreateTextureAtlas",
+        "gl.AddAtlasTexture",
+        "gl.FinalizeTextureAtlas",
+        "gl.GetAtlasTexture",
+        "gl.DeleteTextureAtlas",
+        "gl.DeleteTexture",
+        "gl.GetEngineAtlasTextures",
+        "gl.GetGlobalTexNames",
+        "gl.GetGlobalTexCoords"
+      ],
+      "native": [
+        "Gfx.create_texture",
+        "Gfx.create_texture_atlas",
+        "Gfx.add_atlas_texture",
+        "Gfx.finalize_texture_atlas",
+        "Gfx.get_atlas_texture",
+        "Gfx.delete_texture_atlas",
+        "Gfx.delete_texture",
+        "Gfx.get_engine_atlas_textures",
+        "Gfx.get_global_tex_names",
+        "Gfx.get_global_tex_coords"
+      ],
+      "reason": "Rendering-context replay of user texture-atlas allocation, population, finalization, lookup and cleanup, plus engine/global atlas enumeration with sorted names and normalized process-local data."
+    },
+    {
       "id": "gl.fixed_immediate",
       "context": "widget",
       "mode": "matched",

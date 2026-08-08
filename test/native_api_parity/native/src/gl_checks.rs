@@ -86,6 +86,35 @@ fn compare_result(message: &Value, actual: Map<String, Value>, label: &str) -> R
     Ok(())
 }
 
+fn atlas_entries_value(entries: &[spring_native::sys::GfxAtlasTextureEntry]) -> Value {
+    let mut normalized = entries
+        .iter()
+        .map(|entry| {
+            let name = if entry.name.is_null() {
+                String::new()
+            } else {
+                unsafe { CStr::from_ptr(entry.name).to_string_lossy().into_owned() }
+            };
+            (name, [entry.x1, entry.x2, entry.y1, entry.y2])
+        })
+        .collect::<Vec<_>>();
+    normalized.sort_by(|left, right| left.0.cmp(&right.0));
+    Value::Array(
+        normalized
+            .into_iter()
+            .map(|(name, coords)| {
+                serde_json::json!([
+                    name,
+                    rounded(coords[0]),
+                    rounded(coords[1]),
+                    rounded(coords[2]),
+                    rounded(coords[3]),
+                ])
+            })
+            .collect(),
+    )
+}
+
 fn value_result(
     floats: [f32; 4],
     count: u32,
@@ -1189,5 +1218,132 @@ impl NativeApiParity {
         void!("gl.DeleteQuery", gfx.delete_query(query_id));
 
         compare_result(message, actual, "gl.lists_queries")
+    }
+
+    pub(crate) fn check_gl_atlas(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+
+        void!("gl.ResetState", gfx.reset_state());
+        let texture_params = spring_native::sys::GfxTextureParams {
+            target: GL_TEXTURE_2D,
+            format: GL_RGBA8,
+            minFilter: GL_LINEAR,
+            magFilter: GL_LINEAR,
+            wrapS: GL_CLAMP_TO_EDGE,
+            wrapT: GL_CLAMP_TO_EDGE,
+            wrapR: GL_CLAMP_TO_EDGE,
+            ..spring_native::sys::GfxTextureParams::default()
+        };
+        let texture_name = gfx
+            .create_texture(4, 4, 0, texture_params)
+            .map_err(|error| format!("CreateTexture failed: {error:?}"))?
+            .ok_or_else(|| "CreateTexture returned no texture name".to_owned())?;
+        let atlas_name = gfx
+            .create_texture_atlas(256, 256, 0)
+            .map_err(|error| format!("CreateTextureAtlas failed: {error:?}"))?
+            .ok_or_else(|| "CreateTextureAtlas returned no atlas name".to_owned())?;
+        record(
+            &mut actual,
+            "gl.CreateTexture",
+            vec![serde_json::json!(true)],
+        );
+        record(
+            &mut actual,
+            "gl.CreateTextureAtlas",
+            vec![serde_json::json!(true)],
+        );
+        void!(
+            "gl.AddAtlasTexture",
+            gfx.add_atlas_texture(&atlas_name, &texture_name)
+        );
+        record(
+            &mut actual,
+            "gl.FinalizeTextureAtlas",
+            vec![serde_json::json!(gfx
+                .finalize_texture_atlas(&atlas_name)
+                .map_err(|error| format!(
+                "FinalizeTextureAtlas failed: {error:?}"
+            ))?)],
+        );
+        let (x1, x2, y1, y2, page) = gfx
+            .get_atlas_texture(&atlas_name, &texture_name)
+            .map_err(|error| format!("GetAtlasTexture failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.GetAtlasTexture",
+            vec![
+                rounded(x1),
+                rounded(x2),
+                rounded(y1),
+                rounded(y2),
+                serde_json::json!(page),
+            ],
+        );
+        record(
+            &mut actual,
+            "gl.DeleteTextureAtlas",
+            vec![serde_json::json!(gfx
+                .delete_texture_atlas(&atlas_name)
+                .map_err(|error| format!(
+                    "DeleteTextureAtlas failed: {error:?}"
+                ))?)],
+        );
+        record(
+            &mut actual,
+            "gl.DeleteTexture",
+            vec![serde_json::json!(gfx
+                .delete_texture(&texture_name)
+                .map_err(|error| format!(
+                    "DeleteTexture failed: {error:?}"
+                ))?)],
+        );
+
+        let engine_atlas = gfx
+            .get_engine_atlas_textures("$explosions")
+            .map_err(|error| format!("GetEngineAtlasTextures failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.GetEngineAtlasTextures",
+            vec![atlas_entries_value(&engine_atlas)],
+        );
+
+        let global_entries = gfx
+            .get_global_tex_names()
+            .map_err(|error| format!("GetGlobalTexNames failed: {error:?}"))?;
+        let mut global_names = global_entries
+            .iter()
+            .filter_map(|entry| {
+                (!entry.name.is_null())
+                    .then(|| unsafe { CStr::from_ptr(entry.name).to_string_lossy().into_owned() })
+            })
+            .collect::<Vec<_>>();
+        global_names.sort();
+        record(
+            &mut actual,
+            "gl.GetGlobalTexNames",
+            vec![serde_json::json!(global_names)],
+        );
+        if let Some(name) = global_names.first() {
+            let (x1, x2, y1, y2, _page) = gfx
+                .get_global_tex_coords(name)
+                .map_err(|error| format!("GetGlobalTexCoords failed: {error:?}"))?;
+            record(
+                &mut actual,
+                "gl.GetGlobalTexCoords",
+                values([x1, x2, y1, y2]),
+            );
+        } else {
+            record(&mut actual, "gl.GetGlobalTexCoords", Vec::new());
+        }
+
+        compare_result(message, actual, "gl.atlas")
     }
 }
