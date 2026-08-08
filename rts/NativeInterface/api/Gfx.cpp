@@ -287,7 +287,11 @@ static void SetBool(GfxValueResult* result, bool value)
 {
 	result->boolValue = value;
 	result->hasBool = true;
-	result->count = 1;
+	// Boolean query results are a single Lua boolean, not a float plus a
+	// boolean.  Keeping the float count at zero lets the generated native
+	// wrapper reproduce Lua's return arity and avoids exposing the cleared
+	// value slot as an extra result.
+	result->count = 0;
 }
 
 static uint32_t MatrixModeToPName(uint32_t mode)
