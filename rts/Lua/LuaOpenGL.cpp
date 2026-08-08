@@ -2109,7 +2109,7 @@ int LuaOpenGL::DrawGroundCircle(lua_State* L)
 
 
 /***
- * @function gl.DrawGroundCircle
+ * @function gl.DrawGroundQuad
  * @param x0 number
  * @param z0 number
  * @param x1 number
@@ -2118,7 +2118,7 @@ int LuaOpenGL::DrawGroundCircle(lua_State* L)
  * @param useTxcd boolean? (Default: `false`)
  */
 /***
- * @function gl.DrawGroundCircle
+ * @function gl.DrawGroundQuad
  * @param x0 number
  * @param z0 number
  * @param x1 number

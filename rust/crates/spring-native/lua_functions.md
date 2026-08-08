@@ -2,9 +2,9 @@
 
 Total Namespaces: 11
 
-Total Functions: 1364
+Total Functions: 1365
 
-Callouts (Plugin → Engine): 1174
+Callouts (Plugin → Engine): 1175
 Callins (Engine → Plugin): 190
 
 ---
@@ -1011,7 +1011,7 @@ Callins (Engine → Plugin): 190
 - `debug.emulateNativeApiParityCallins` (params: unitID:integer, featureID:integer, projectileID:integer)
 - `debug.emulateUnitMoveFailed` (params: unitID:integer)
 
-### gl (180 functions)
+### gl (181 functions)
 
 - `gl.ActiveFBO` (params: fbo:FBO, target:GL?, func:fun(...), ...:any)
 - `gl.ActiveShader` (params: shaderID:integer, func:function, ...:any)
@@ -1063,7 +1063,8 @@ Callins (Engine → Plugin): 190
 - `gl.DepthTest` (params: depthFunction:GL)
 - `gl.DispatchCompute` (params: numGroupX:integer?, numGroupY:integer, numGroupZ:integer, barriers:integer?)
 - `gl.DrawFuncAtUnit` (params: unitID:integer, useMidPos:boolean?, fun(...):func, ...:any)
-- `gl.DrawGroundCircle` (params: x0:number, z0:number, x1:number, z1:number, useNorm:nil, tu0:number, tv0:number, tu1:number, tv1:number)
+- `gl.DrawGroundCircle` (params: posX:number, posY:number, posZ:number, radius:number, resolution:integer, slope:number, gravity:number?, weaponDefID:integer?)
+- `gl.DrawGroundQuad` (params: x0:number, z0:number, x1:number, z1:number, useNorm:nil, tu0:number, tv0:number, tu1:number, tv1:number)
 - `gl.DrawListAtUnit` (params: unitID:integer, listIndex:integer, useMidPos:boolean?, scaleX:number?, scaleY:number?, scaleZ:number?, degrees:number?, rotX:number?, rotY:number?, rotZ:number?)
 - `gl.DrawMiniMap` (params: defaultTransform:boolean?)
 - `gl.EdgeFlag` (params: flag:boolean)
