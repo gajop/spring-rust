@@ -33,9 +33,9 @@ an intentional ABI boundary: Lua invokes an arbitrary Lua function and
 forwards its complete return stack, while native accepts a typed callback and
 returns a success flag. The parity fixture compares callback execution, team
 selection, return count, and the shared marker/flag result shape. The source
-inventory separately tracks other global helpers (`loadstring`, `pairs`,
-`next`, and `SendToUnsynced`) until their signatures and native ownership are
-audited.
+inventory also records the engine-installed `loadstring`, `pairs`, `next`, and
+`SendToUnsynced` helpers as runtime/callin boundaries; they are not missing
+native callouts.
 
 ### `VFS.Include`
 
@@ -45,8 +45,9 @@ native equivalent. It must still be tested as a Lua API (registration,
 argument behavior, return behavior, and error behavior), but it is excluded
 from Lua/native result equality.
 
-The audit keeps every other unmapped Lua callout unresolved until its source
-registration and native counterpart have been compared.
+The current source-backed audit has no unclassified documented-only or
+registered-only callout differences. Any future unmapped name must first be
+classified by the source-registration audit before it is accepted here.
 
 ### `RmlUi.EventListener` virtual methods
 
@@ -76,12 +77,19 @@ set is:
 `Script.Kill`, `Script.SetWatchAllowTarget`, `Script.SetWatchExplosion`,
 `Script.SetWatchFeature`, `Script.SetWatchProjectile`, `Script.SetWatchUnit`,
 `Script.SetWatchWeapon`, `Script.AddActionFallback`,
-`Script.RemoveActionFallback`, and `Script.UpdateCallin`.
+`Script.RemoveActionFallback`, `Script.PermitHelperAIs`, and
+`Script.UpdateCallIn`.
 
-`Script.GetCallInList` was found in the engine registration table without a
-generated documentation entry; it is now included in the local API inventory.
-The list is Lua-only by design, not exempt from Lua registration, signature,
-argument/error, and result tests.
+`Script.PermitHelperAIs` is installed by LuaRules and `Script.UpdateCallIn` is
+the exact runtime spelling. The generated inventory is filtered against active
+Script-table registrations so stale documentation aliases do not count as
+public APIs. The list is Lua-only by design, not exempt from Lua registration,
+signature, argument/error, and result tests.
+
+`Spring.InvokeNativeModule` is the inverse boundary: Lua sends a serialized
+message into the loaded native module. It is documented, source-registered,
+and smoke-tested, but has no native callout counterpart because the native
+module cannot meaningfully invoke itself through the same API.
 
 ### `VFS.DownloadArchive` and `VFS.AbortDownload`
 
@@ -106,6 +114,17 @@ The shared integer-pack cases stay within the exact integer range of this
 engine's 32-bit Lua number type. Rust's `u32`/`i32` slices can represent a
 wider domain; that is a native type-domain difference, not evidence that Lua
 can accept the same exact numeric inputs.
+
+### Process-local timing and profiler values
+
+The Lua and native parity processes have independent render clocks and
+process-local profiler registries. Timing values therefore use the manifest's
+explicit numeric tolerance or shape comparison. `GetProfilerRecordNames`
+returns the same engine-owned registry through both implementations, but the
+registry can contain a different number of records depending on which engine
+components have initialized in that process; its parity check consequently
+asserts the returned numeric shape rather than treating the process-local
+count as a semantic API mismatch.
 
 ### Lua-handle lifecycle and message callins
 
@@ -181,21 +200,26 @@ These categories are tracked separately from ordinary function callouts:
   omitted.
 - `gl.*` is the Lua OpenGL surface. Rust `Gfx` methods that map to it are
   checked separately from native-only typed helpers.
+- LuaFont, VAO, VBO, FBO, and RBO userdata registrations are audited in
+  `lua_userdata_surface_audit.md`; integer Rust handles are an intentional
+  ownership representation rather than missing Lua userdata types.
 
-## Deliberately unresolved until audited
+## Audit completion boundary
 
-The following categories are not yet classified as intentional differences:
+The source/signature classification is complete for the currently discovered
+function, userdata, and callin inventories:
 
-- Lua constant tables, definition proxies, and userdata metamethods;
-- native-only labels not listed in a source-backed confirmed category;
-- exact runtime parity tests for any newly bridged engine-to-native callins;
-- native-only `Gfx`/`Vfs` helpers until each has a source-level classification
-  and an executable native-interface test.
+- Lua constants and definition proxies are tracked as their own proxy surface;
+- userdata methods/properties are tracked by `audit_lua_userdata_surfaces.py`;
+- engine-to-Lua and engine-to-native callbacks are tracked by
+  `audit_callins.py`;
+- every Rust-only label is assigned a representation/integration/typed-
+  extension category in `api_surface_audit.md`.
 
-These remain `unresolved` in the audit until source registration, signatures,
-and executable behavior have been checked. A missing native callback may need
-to be ported; a native-only label may need Lua documentation; or the surface
-may eventually be added to this intentional list with a concrete reason.
+This classification does not waive runtime coverage: the parity aggregate must
+still drive matched surfaces to 100%, and native-only surfaces need their own
+native-interface tests where they are executable. A source or signature audit
+failure remains an implementation/documentation gap.
 
 ## Required audit statuses
 

@@ -250,6 +250,14 @@ impl NativeApiParity {
                     native.as_deref().unwrap_or(""),
                 )
             }
+            "get_game_seconds_interpolated" => {
+                let native = self
+                    .interface
+                    .unsynced_read()
+                    .get_game_seconds_interpolated()
+                    .map_err(|err| format!("get_game_seconds_interpolated() failed: {err:?}"))?;
+                self.same_if_present(label, message, "seconds", native)
+            }
             "solve_nurbscurve" => {
                 let control_points = float4_array_field(message, "controlPoints")?;
                 let knots = f32_array_field(message, "knots")?;

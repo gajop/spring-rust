@@ -106,6 +106,16 @@ def main() -> int:
                 f"{pct(len(summary['rust_tested_known']), len(summary['rust_total']))} | "
                 f"{len(summary['rust_tested_unknown'])} |"
             ),
+            (
+                f"| Native Rust counterparts | {len(summary['rust_counterpart'])} | "
+                f"{len(summary['rust_counterpart_tested'])} | "
+                f"{pct(len(summary['rust_counterpart_tested']), len(summary['rust_counterpart']))} | 0 |"
+            ),
+            (
+                f"| Native-only Rust surfaces | {len(summary['rust_native_only'])} | "
+                f"{len(summary['rust_native_only_tested'])} | "
+                f"{pct(len(summary['rust_native_only_tested']), len(summary['rust_native_only']))} | 0 |"
+            ),
             "",
             f"- Full details: {report_link(aggregate_details)}",
             "",
@@ -114,6 +124,8 @@ def main() -> int:
             f"- Untested Lua callouts: {len(summary['lua_untested'])}",
             f"- Tested Lua names missing from the documentation inventory: {len(summary['lua_tested_unknown'])}",
             f"- Untested Rust functions (including native-only surfaces): {len(summary['rust_untested'])}",
+            f"- Untested native counterparts: {len(summary['rust_counterpart_untested'])}",
+            f"- Untested native-only surfaces: {len(summary['rust_native_only_untested'])}",
             f"- Tested Rust labels missing from the documentation inventory: {len(summary['rust_tested_unknown'])}",
         ]
     )

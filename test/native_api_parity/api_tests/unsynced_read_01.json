@@ -365,6 +365,19 @@
       "params": {"sendMask": {"type": "bool", "fixed": false}},
       "lua_runtime": {"call": "Spring.GetRenderUnitsDrawFlagChanged", "args": ["value.sendMask"], "returns": [{"field": "unitIDs"}]},
       "order_insensitive_fields": ["unitIDs"]
+    },
+    {
+      "id": "get_game_seconds_interpolated",
+      "context": "unsynced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {"set": [], "get": ["Spring.GetGameSecondsInterpolated"]},
+      "native": {"set": [], "get": ["UnsyncedRead.get_game_seconds_interpolated"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["seconds"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetGameSecondsInterpolated`", "native_getter": "`UnsyncedRead.get_game_seconds_interpolated`", "fields": "`seconds`"},
+      "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
+      "params": {},
+      "lua_runtime": {"call": "Spring.GetGameSecondsInterpolated", "args": [], "returns": ["seconds"]}
     }
   ]
 }

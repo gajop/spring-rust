@@ -174,6 +174,11 @@ if not gadgetHandler:IsSyncedCode() then
 		-- VFS.ZIP_ONLY is the documented archive-only mode.  The individual
 		-- mode letters are `M`, `m`, `e`, and `b`; `z` is not a VFS mode.
 		local fileMode = "Mmeb"
+		local rawFileName = "LuaRules/Gadgets/native_api_parity.lua"
+		-- nil selects Lua's raw-first default; passing an empty string explicitly
+		-- would instead override that default.  The native wrapper represents the
+		-- same default with an empty mode string in its query.
+		local rawFileMode = nil
 		local archiveName = VFS.GetArchiveContainingFile(fileName, fileMode)
 		if archiveName == nil then
 			error("VFS archive surface could not find mapoptions.lua in a zip archive", 0)
@@ -195,6 +200,17 @@ if not gadgetHandler:IsSyncedCode() then
 		local allArchives = sortedStrings(VFS.GetAllArchives())
 		local availableAIs = availableAIsSurface(VFS.GetAvailableAIs("", ""))
 		local rapidTagReturns = { VFS.GetNameFromRapidTag("native-api-parity-not-a-rapid-tag") }
+		local rawData = VFS.LoadFile(rawFileName, rawFileMode)
+		if rawData == nil then
+			error("VFS archive surface could not load its raw fixture script", 0)
+		end
+		local rawDataBytes = {}
+		for index = 1, #rawData do
+			rawDataBytes[#rawDataBytes + 1] = string.format("%02x", string.byte(rawData, index))
+		end
+		local rawFileHex = table.concat(rawDataBytes)
+		local rawDirList = sortedStrings(VFS.DirList("LuaRules/Gadgets", "*.lua", rawFileMode, false))
+		local rawSubDirs = sortedStrings(VFS.SubDirs("LuaRules", "*", rawFileMode, false))
 
 		-- Build a fresh archive in the fixture's isolated data directory to test
 		-- compression.  LuaRules cannot call VFS.ScanAllDirs (that entry is
@@ -264,6 +280,13 @@ if not gadgetHandler:IsSyncedCode() then
 				},
 				rapidTag = optionalSurfaceValue(rapidTagReturns[1]),
 				availableAIs = availableAIs,
+				rawFile = {
+					name = rawFileName,
+					mode = rawFileMode or "",
+					hex = rawFileHex,
+					dirList = rawDirList,
+					subDirs = rawSubDirs,
+				},
 				compress = {
 					archiveName = luaArchiveName,
 					exists = compressedExists,

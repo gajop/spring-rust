@@ -1,4 +1,5 @@
 local M = {}
+local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 
 local function returnShape(call)
 	local result = { n = 0 }
@@ -97,6 +98,12 @@ function M.run(record, ids)
 		selectTeam = script.GetSelectTeam(),
 	})
 
+	local helperAIsEnabled = Spring.AreHelperAIsEnabled()
+	local permitHelperAIsReturnCount = select("#", script.PermitHelperAIs(helperAIsEnabled))
+	record("script.permit_helper_ais", {
+		returnCount = permitHelperAIsReturnCount,
+	})
+
 	local global = returnShape(script.GetGlobal)
 	record("script.get_global", {
 		returnCount = global.n,
@@ -139,6 +146,14 @@ function M.run(record, ids)
 		record("script.delay_callback", { marker = marker, callback = true })
 	end, "native_api_parity"))
 	record("script.delay_by_frames", { returnCount = delayReturnCount })
+
+	-- InvokeNativeModule is itself a Lua-only bridge surface. Exercise the
+	-- bridge explicitly with a harness-only probe; the native module accepts
+	-- this probe without treating it as an API parity getter/setter.
+	local invokeReturnCount = select("#", Spring.InvokeNativeModule(Common.encode({
+		testName = "spring.invoke_native_module",
+	})))
+	record("spring.invoke_native_module", { returnCount = invokeReturnCount })
 end
 
 return M

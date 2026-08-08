@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Iterable
 
 import match_apis
+import audit_lua_userdata_surfaces as userdata_audit
 
 
 # ``__file__`` is ``<repo>/rust/crates/spring-native/audit_api_surfaces.py``;
@@ -29,9 +30,77 @@ RUST_DOC = Path(__file__).with_name("rust_functions.md")
 
 LUA_ONLY_SURFACE_REASONS = {
     "VFS.Include": "Executes arbitrary Lua code and returns arbitrary Lua values; a typed native counterpart would not preserve the contract.",
+    "Spring.InvokeNativeModule": "Lua-to-native bridge entry point. Native modules receive this message through the ABI; a native module cannot expose an equivalent callout that invokes itself.",
+    "RmlUi.EventListener.OnAttach": "The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.",
+    "RmlUi.EventListener.OnDetach": "The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.",
+    "RmlUi.EventListener.ProcessEvent": "The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.",
 }
 
 EXTRA_LUA_SURFACE_NAMESPACES = ("Encoding", "math", "debug", "table")
+
+RML_LUA_ONLY_METHODS = {
+    "RmlUi.EventListener.OnAttach",
+    "RmlUi.EventListener.OnDetach",
+    "RmlUi.EventListener.ProcessEvent",
+}
+
+SPRING_SOURCE_FILES = (
+    "LuaSyncedRead.cpp",
+    "LuaSyncedCtrl.cpp",
+    "LuaUnsyncedRead.cpp",
+    "LuaUnsyncedCtrl.cpp",
+    "LuaUnitScript.cpp",
+    "LuaCob.cpp",
+    "LuaGaia.cpp",
+    "LuaMetalMap.cpp",
+    "LuaPathFinder.cpp",
+)
+GL_SOURCE_FILES = (
+    "LuaOpenGL.cpp",
+    "LuaShaders.cpp",
+    "LuaFBOs.cpp",
+    "LuaVAO.cpp",
+    "LuaVBO.cpp",
+    "LuaFonts.cpp",
+    "LuaRBOs.cpp",
+)
+VFS_SOURCE_FILES = ("LuaVFS.cpp", "LuaVFSDownload.cpp", "LuaArchive.cpp")
+SCRIPT_SOURCE_FILES = ("LuaHandle.cpp", "LuaHandleSynced.cpp", "LuaUI.cpp", "LuaRules.cpp")
+
+SOURCE_ONLY_REASONS = {
+    "Spring.SetUnitFuel": "Registered compatibility no-op retained by the Lua engine (`// FIXME: DELETE ME`); it is exercised by `unit_set_fuel` and deliberately has no public generated signature.",
+    "Spring.SetUnitTravel": "Registered compatibility no-op retained by the Lua engine (`// FIXME: DELETE ME`); it is exercised by `unit_set_travel` and deliberately has no public generated signature.",
+}
+
+GL_REGISTRATION_BOUNDARY_REASONS = {
+    "gl.Begin": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_begin`.",
+    "gl.BindTexture": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_bind_texture`.",
+    "gl.End": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_end`.",
+    "gl.Print": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_print`.",
+    "gl.PrintWorld": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_print_world`.",
+    "gl.SetAutoOutlineColor": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_set_auto_outline_color`.",
+    "gl.SetOutlineColor": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_set_outline_color`.",
+    "gl.SetTextColor": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_set_text_color`.",
+    "gl.SubmitBuffered": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_submit_buffered`.",
+    "gl.WrapText": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_wrap_text`.",
+}
+
+GLOBAL_REGISTRATION_REASONS = {
+    "Global.SendToUnsynced": "Engine-installed synced-to-unsynced Lua bridge; documented as `SyncedCallins.SendToUnsynced`, not as a native callout.",
+    "Global.loadstring": "Embedded Lua runtime helper replaced by the engine for controlled bytecode loading; native modules do not own the Lua global environment.",
+    "Global.next": "Embedded synced Lua runtime helper with deterministic table iteration; native modules use typed ABI collections instead.",
+    "Global.pairs": "Embedded synced Lua runtime helper with deterministic table iteration; native modules use typed ABI collections instead.",
+}
+
+NATIVE_ONLY_CATEGORY_REASONS = {
+    "native-only typed definition/proxy surface": "Rust exposes stable typed access to Lua definition proxy tables (`UnitDefs`, `FeatureDefs`, and `WeaponDefs`) instead of reproducing Lua's dynamic table/metatable representation.",
+    "native-only owned/FFI representation surface": "Rust-owned result copies, typed conversion helpers, and explicit memory-release operations adapt the C ABI lifetime/domain; they are not additional Lua callouts.",
+    "native-only graphics userdata/alias surface": "Native graphics uses integer handles and typed helper records for Lua userdata, plus explicit ABI aliases; the Lua userdata audit records the corresponding object methods separately.",
+    "native-only RmlUi helper/property surface": "These are typed RmlUi receiver, property, data-model, and event helpers behind the Lua binding rather than free Lua callouts.",
+    "native-only VFS helper/representation surface": "Native VFS exposes typed archive/file metadata, byte buffers, and offline-safe helpers that do not have one-to-one Lua function names.",
+    "native-only platform/integration surface": "These methods expose host, callback, tracing, or engine-integration capabilities owned by the native ABI; Lua reaches related behavior through different tables or callins.",
+    "native-only typed query/control extension": "The native ABI intentionally exposes richer records, narrower operations, or convenience splits where Lua uses a table, overload, proxy, or no public free callout.",
+}
 
 
 def method_name(function: dict) -> str:
@@ -100,7 +169,14 @@ def namespace_maps(
     maps: dict[str, dict[str, list[str]]] = {}
 
     spring = spring_matches(lua_functions, rust_functions)
-    maps["Spring"] = {name: [label] for name, label in spring.items()}
+    maps["Spring"] = {
+        str(function["name"]): (
+            [spring[str(function["name"])]]
+            if str(function["name"]) in spring
+            else []
+        )
+        for function in lua_functions.get("Spring", [])
+    }
 
     # CallAsTeam is installed in the Lua global table by LuaHandleSynced.cpp;
     # the old source comment incorrectly called it Spring.CallAsTeam.  Keep
@@ -120,7 +196,11 @@ def namespace_maps(
     for function in rust_by_module.get("RmlUi", []):
         rml_by_method[method_name(function)].append(rust_label("RmlUi", function))
     maps["RmlUi"] = {
-        str(function["name"]): rml_by_method.get(rml_expected(str(function["name"])), [])
+        str(function["name"]): (
+            []
+            if str(function["name"]) in RML_LUA_ONLY_METHODS
+            else rml_by_method.get(rml_expected(str(function["name"])), [])
+        )
         for function in lua_functions.get("RmlUi", [])
     }
 
@@ -274,6 +354,108 @@ def source_global_registered_names(paths: Iterable[Path]) -> set[str]:
     return names
 
 
+def source_registration_audit(lua_functions: dict[str, list[dict]]) -> list[dict[str, object]]:
+    """Compare active C++ registration sites with the generated inventories.
+
+    The generic registration macro is only safe when the surrounding table is
+    known.  Keep the provider lists explicit so Script helpers in LuaUI or
+    LuaHandleSynced cannot be mistaken for Spring callouts.
+    """
+    lua_dir = ROOT / "rts" / "Lua"
+    documented = {
+        namespace: {
+            str(function["name"]).split(".", 1)[1]
+            for function in lua_functions.get(namespace, [])
+            if "." in str(function["name"])
+        }
+        for namespace in ("Spring", "gl", "VFS", "Script")
+    }
+
+    spring_source = source_registered_names([lua_dir / name for name in SPRING_SOURCE_FILES])
+    # LuaUI owns this one Spring table entry; the other LuaUI registrations are
+    # Script/global helpers and must not enter the Spring inventory.
+    spring_source.add("SetShockFrontFactors")
+
+    gl_source = source_registered_names([lua_dir / name for name in GL_SOURCE_FILES])
+
+    vfs_source = source_registered_names([lua_dir / name for name in VFS_SOURCE_FILES])
+    script_source = source_script_registered_names([lua_dir / name for name in SCRIPT_SOURCE_FILES])
+    global_source = source_global_registered_names(
+        [lua_dir / "LuaHandleSynced.cpp", lua_dir / "LuaUI.cpp"]
+    )
+    # CallAsTeam is installed by pushing the global table directly, which is
+    # intentionally outside the line-oriented table-stack scanner above.
+    global_source.add("Global.CallAsTeam")
+
+    rows = [
+        {
+            "surface": "Spring",
+            "source": {f"Spring.{name}" for name in spring_source},
+            "documented": {f"Spring.{name}" for name in documented["Spring"]},
+            "accepted": set(SOURCE_ONLY_REASONS),
+        },
+        {
+            "surface": "gl + LuaFont registrations",
+            "source": {f"gl.{name}" for name in gl_source},
+            "documented": {f"gl.{name}" for name in documented["gl"]},
+            "accepted": set(GL_REGISTRATION_BOUNDARY_REASONS),
+        },
+        {
+            "surface": "VFS",
+            "source": {f"VFS.{name}" for name in vfs_source},
+            "documented": {f"VFS.{name}" for name in documented["VFS"]},
+            "accepted": set(),
+        },
+        {
+            "surface": "Script",
+            "source": {f"Script.{name}" for name in script_source},
+            "documented": {f"Script.{name}" for name in documented["Script"]},
+            "accepted": set(),
+        },
+        {
+            "surface": "Global",
+            "source": global_source,
+            "documented": {str(function["name"]) for function in lua_functions.get("Global", [])},
+            "accepted": set(GLOBAL_REGISTRATION_REASONS),
+        },
+    ]
+    for row in rows:
+        source = row["source"]
+        docs = row["documented"]
+        accepted = row["accepted"]
+        row["source_only"] = sorted(source - docs)
+        row["documented_only"] = sorted(docs - source)
+        row["unclassified_source_only"] = sorted((source - docs) - accepted)
+    return rows
+
+
+def userdata_native_labels() -> set[str]:
+    labels: set[str] = set()
+    for counterparts in userdata_audit.COUNTERPARTS.values():
+        for value in counterparts:
+            module, method, *_ = value.split(".")
+            labels.add(f"{module}.{method}")
+    return labels
+
+
+def native_only_category(module: str, label: str, userdata_labels: set[str]) -> str:
+    if label in userdata_labels:
+        return "native-only graphics userdata/alias surface"
+    if module in {"FeatureDefs", "UnitDefs", "WeaponDefs"}:
+        return "native-only typed definition/proxy surface"
+    if module in {"Memory", "Config"} or label.endswith("_owned") or "_owned" in label:
+        return "native-only owned/FFI representation surface"
+    if module == "RmlUi":
+        return "native-only RmlUi helper/property surface"
+    if module == "Vfs":
+        return "native-only VFS helper/representation surface"
+    if module in {"Platform", "SystemControl", "SyncedCtrl", "UnsyncedRead", "UnitRendering"}:
+        return "native-only platform/integration surface"
+    if module == "Gfx":
+        return "native-only graphics userdata/alias surface"
+    return "native-only typed query/control extension"
+
+
 def native_classification(
     lua_functions: dict[str, list[dict]], rust_functions: dict[str, list[dict]], maps: dict[str, dict[str, list[str]]]
 ) -> dict[str, list[str]]:
@@ -293,6 +475,7 @@ def native_classification(
         "Vfs.get_map_square_texture",
         "Vfs.set_map_square_texture",
     }
+    userdata_labels = userdata_native_labels()
 
     classified: dict[str, list[str]] = defaultdict(list)
     for module, functions in unique_rust_rows(rust_functions).items():
@@ -314,14 +497,12 @@ def native_classification(
                 category = "global math.* counterpart (non-Spring namespace)"
             elif label in derived_labels:
                 category = "Spring counterpart in Vfs module"
+            elif label in userdata_labels:
+                category = "native-only graphics userdata/alias surface"
             elif module == "RmlUi":
-                category = "RmlUi native helper/property/data-model surface"
-            elif module == "Gfx":
-                category = "Gfx native-only or undocumented Lua surface"
-            elif module == "Vfs":
-                category = "VFS native helper or undocumented Lua surface"
+                category = "native-only RmlUi helper/property surface"
             else:
-                category = "native-only surface"
+                category = native_only_category(module, label, userdata_labels)
             classified[category].append(label)
     return {category: sorted(labels) for category, labels in classified.items()}
 
@@ -347,30 +528,7 @@ def main() -> int:
         for module, functions in unique_rust_rows(rust_functions).items()
         for function in functions
     }
-    source_vfs = source_registered_names(
-        [ROOT / "rts/Lua/LuaVFS.cpp", ROOT / "rts/Lua/LuaVFSDownload.cpp", ROOT / "rts/Lua/LuaArchive.cpp"]
-    )
-    documented_vfs = {
-        str(function["name"]).split(".", 1)[1]
-        for function in lua_functions.get("VFS", [])
-    }
-    source_only_vfs = sorted(f"VFS.{name}" for name in source_vfs - documented_vfs)
-    source_script = source_script_registered_names(
-        [ROOT / "rts/Lua/LuaHandle.cpp", ROOT / "rts/Lua/LuaHandleSynced.cpp", ROOT / "rts/Lua/LuaUI.cpp"]
-    )
-    source_global = source_global_registered_names(
-        [ROOT / "rts/Lua/LuaHandleSynced.cpp", ROOT / "rts/Lua/LuaUI.cpp"]
-    )
-    documented_script = {
-        str(function["name"]).split(".", 1)[1]
-        for function in lua_functions.get("Script", [])
-    }
-    documented_script_casefold = {name.casefold() for name in documented_script}
-    source_only_script = sorted(
-        f"Script.{name}"
-        for name in source_script
-        if name.casefold() not in documented_script_casefold
-    )
+    source_audits = source_registration_audit(lua_functions)
 
     lines = [
         "# Lua / Native API Surface Audit",
@@ -434,6 +592,14 @@ def main() -> int:
     for category, labels in sorted(classifications.items()):
         lines.append(f"| {category} | {len(labels)} |")
 
+    lines.extend(["", "## Native-only classification policy", ""])
+    lines.append(
+        "A native-only label is not counted as a missing Lua API merely because Rust exposes it. It must fit one of these source-backed representation, integration, or typed-extension categories; the separate userdata and callin audits cover their corresponding Lua object/event surfaces."
+    )
+    lines.extend([""])
+    for category, reason in sorted(NATIVE_ONLY_CATEGORY_REASONS.items()):
+        lines.append(f"- `{category}` — {reason}")
+
     lines.extend(["", "## Rust labels by classification", ""])
     for category, labels in sorted(classifications.items()):
         lines.append(f"### {category} ({len(labels)})")
@@ -441,32 +607,64 @@ def main() -> int:
         lines.append("")
 
     lines.extend([
-        "## Local VFS registrations absent from the generated Lua inventory",
+        "## Signature audit policy",
         "",
-        "These names are registered by the current engine source but are not present in the generated `VFS` documentation section.",
-        "They must be included before claiming complete VFS documentation coverage.",
+        "The canonical `Spring.*` parameter audit is the one-to-one exact matcher used by `match_apis.py`; it reports parameter count/type mismatches separately from name mapping. Other surfaces use representation-aware policies because Lua userdata, optional tables, callbacks, and Lua overloads are not expressible as the same raw C ABI signature.",
+        "",
+        "| Surface | Lua inventory | Native mapped | Lua-only by design | Signature/behavior authority |",
+        "| --- | ---: | ---: | ---: | --- |",
+        f"| `Spring` | {len(lua_functions.get('Spring', []))} | {sum(bool(values) for values in maps['Spring'].values())} | {sum(name in lua_only_reasons for name in maps['Spring'])} | `match_apis.py` exact parameter audit plus runtime parity rows |",
+        f"| `gl` | {len(lua_functions.get('gl', []))} | {sum(bool(values) for values in maps['gl'].values())} | 0 | source registration + graphics surface tests; userdata handles audited separately |",
+        f"| `VFS` | {len(lua_functions.get('VFS', []))} | {sum(bool(values) for values in maps['VFS'].values())} | {sum(name in lua_only_reasons for name in maps['VFS'])} | source registration + VFS runtime parity; `VFS.Include` is explicit Lua-only |",
+        f"| `RmlUi` | {len(lua_functions.get('RmlUi', []))} | {sum(bool(values) for values in maps['RmlUi'].values())} | {sum(name in lua_only_reasons for name in maps['RmlUi'])} | SolLua source docs + receiver/property runtime surface tests |",
+        f"| `Script` | {len(lua_functions.get('Script', []))} | 0 | {sum(name in lua_only_reasons for name in maps['Script'])} | source registration/docs + Lua-only behavior surface tests |",
+        f"| `Global`, `Encoding`, `math` | {sum(len(lua_functions.get(ns, [])) for ns in ('Global', 'Encoding', 'math'))} | {sum(bool(values) for ns in ('Global', 'Encoding', 'math') for values in maps[ns].values())} | 0 | namespace-specific source/signature/runtime tests |",
+        "",
     ])
-    lines.extend(bullet_list(source_only_vfs) or ["- None"])
-    lines.append("")
+
     lines.extend([
-        "## Local Script registrations absent from the generated Lua inventory",
+        "## Source registration audit",
         "",
-        "These names are registered by the current engine source but are not present in the generated `Script` documentation section.",
-        "They remain unresolved until documented and tested.",
+        "This compares active C++ registration sites with the generated documentation. The provider list is explicit so Script or userdata registrations cannot be counted as free Spring/gl callouts.",
+        "",
+        "| Surface | Active registrations | Documented | Source-only accepted by design | Unclassified source-only | Documented-only |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
     ])
-    lines.extend(bullet_list(source_only_script) or ["- None"])
-    lines.append("")
-    documented_global = {
-        str(function["name"]) for function in lua_functions.get("Global", [])
-    }
-    source_only_global = sorted(source_global - documented_global)
+    for row in source_audits:
+        lines.append(
+            f"| `{row['surface']}` | {len(row['source'])} | {len(row['documented'])} | {len(row['accepted'] & set(row['source_only']))} | {len(row['unclassified_source_only'])} | {len(row['documented_only'])} |"
+        )
+    lines.extend(["", "### Accepted active registrations without generated docs", ""])
+    accepted_source_rows = []
+    for row in source_audits:
+        for name in row["source_only"]:
+            reason = (
+                SOURCE_ONLY_REASONS.get(name)
+                or GL_REGISTRATION_BOUNDARY_REASONS.get(name)
+                or GLOBAL_REGISTRATION_REASONS.get(name)
+            )
+            if reason:
+                accepted_source_rows.append(f"- `{name}` — {reason}")
+    lines.extend(accepted_source_rows or ["- None"])
+    lines.extend(["", "### Unclassified source/documentation registration differences", ""])
+    unresolved_source = False
+    for row in source_audits:
+        if row["unclassified_source_only"] or row["documented_only"]:
+            unresolved_source = True
+            lines.append(f"#### {row['surface']}")
+            lines.extend(bullet_list(row["unclassified_source_only"]) or ["- No source-only names"])
+            if row["documented_only"]:
+                lines.append("Documented-only:")
+                lines.extend(bullet_list(row["documented_only"]))
+            lines.append("")
+    if not unresolved_source:
+        lines.append("- None")
+
     lines.extend([
-        "## Local global registrations absent from the generated Lua inventory",
         "",
-        "These direct `_G` registrations are separate from `Spring.*`; undocumented names remain unresolved until classified and tested.",
+        "The accepted `gl.*` entries above are LuaFont userdata methods registered in the shared graphics binding; their object-level Rust counterparts are audited in `audit_lua_userdata_surfaces.py` rather than treated as free callouts.",
+        "The accepted `Global.*` entries are engine-installed Lua runtime/bridge functions. `Global.CallAsTeam` is documented, while `SendToUnsynced`, `loadstring`, `next`, and `pairs` are intentionally recorded as runtime or callin-boundary surfaces rather than native callouts.",
     ])
-    lines.extend(bullet_list(source_only_global) or ["- None"])
-    lines.append("")
 
     args.output.write_text("\n".join(lines), encoding="utf-8")
     print(args.output)
@@ -478,7 +676,7 @@ def main() -> int:
         )
     )
     print(f"Rust rows={rust_rows}, unique labels={len(rust_unique_labels)}")
-    return 0
+    return 0 if not unresolved_source else 1
 
 
 if __name__ == "__main__":

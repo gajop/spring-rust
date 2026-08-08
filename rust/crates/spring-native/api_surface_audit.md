@@ -8,17 +8,17 @@ It distinguishes canonical Spring callouts from the separate `Global`, `gl`, `VF
 | Lua namespace | Documented callouts | Mapped to native Rust | Lua-only by design | Unresolved |
 | --- | ---: | ---: | ---: | ---: |
 | `Global` | 1 | 1 | 0 | 0 |
-| `Spring` | 793 | 793 | 0 | 0 |
-| `RmlUi` | 101 | 101 | 0 | 0 |
-| `gl` | 181 | 181 | 0 | 0 |
+| `Spring` | 796 | 795 | 1 | 0 |
+| `RmlUi` | 101 | 98 | 3 | 0 |
+| `gl` | 185 | 185 | 0 | 0 |
 | `VFS` | 41 | 40 | 1 | 0 |
-| `Script` | 29 | 0 | 29 | 0 |
+| `Script` | 30 | 0 | 30 | 0 |
 | `Encoding` | 6 | 6 | 0 | 0 |
 | `math` | 14 | 14 | 0 | 0 |
 | `debug` | 8 | 0 | 8 | 0 |
 | `table` | 1 | 0 | 1 | 0 |
 
-`Spring` uses the same one-to-one matcher as `match_apis.py`; its 793 mapped callouts are the canonical parity set.
+`Spring` uses the same one-to-one matcher as `match_apis.py`; its 795 mapped callouts are the canonical parity set.
 `Global.CallAsTeam` is the actual `_G.CallAsTeam` registration; it is mapped explicitly to `SystemControl.call_as_team` and its callback/return-stack difference is recorded as a semantic boundary.
 `RmlUi` is mapped by userdata path (`Context.CreateDocument` → `context_create_document`).
 `gl` and `VFS` use case/acronym-insensitive names plus explicit aliases for `gl.Texture` and `gl.UniformArray`.
@@ -28,6 +28,9 @@ It distinguishes canonical Spring callouts from the separate `Global`, `gl`, `VF
 
 These are not name-matching failures. They have no native counterpart by contract, but remain part of the executable Lua-surface coverage gate.
 
+- `RmlUi.EventListener.OnAttach` — The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.
+- `RmlUi.EventListener.OnDetach` — The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.
+- `RmlUi.EventListener.ProcessEvent` — The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.
 - `Script.AddActionFallback` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.DelayByFrames` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.GetCallInList` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
@@ -49,6 +52,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Script.GetWatchWeapon` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.IsEngineMinVersion` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.Kill` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.PermitHelperAIs` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.RemoveActionFallback` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.SetWatchAllowTarget` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.SetWatchExplosion` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
@@ -56,7 +60,8 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Script.SetWatchProjectile` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.SetWatchUnit` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
 - `Script.SetWatchWeapon` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
-- `Script.UpdateCallin` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Script.UpdateCallIn` — Lua-handle introspection, lifecycle, watcher, and callin-registration state; native modules use a separate ABI and cannot expose the same handle state.
+- `Spring.InvokeNativeModule` — Lua-to-native bridge entry point. Native modules receive this message through the ABI; a native module cannot expose an equivalent callout that invokes itself.
 - `VFS.Include` — Executes arbitrary Lua code and returns arbitrary Lua values; a typed native counterpart would not preserve the contract.
 - `debug.clearEmulatedInput` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
 - `debug.emulateKeyPress` — Engine debug/test input injection; native modules receive the resulting event callbacks rather than owning this Lua-only test control table.
@@ -72,23 +77,38 @@ These are not name-matching failures. They have no native counterpart by contrac
 
 ## Rust inventory
 
-- Rust documentation rows: 1392
-- Unique `Module.method` labels: 1383
+- Rust documentation rows: 1424
+- Unique `Module.method` labels: 1415
 - The difference is nine overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
 
 | Classification | Unique labels |
 | --- | ---: |
 | Encoding counterpart | 6 |
-| Gfx native-only or undocumented Lua surface | 23 |
 | Global Lua counterpart (semantic boundary) | 1 |
-| RmlUi callout counterpart | 101 |
-| RmlUi native helper/property/data-model surface | 116 |
-| Spring counterpart | 793 |
+| RmlUi callout counterpart | 98 |
+| Spring counterpart | 795 |
 | VFS counterpart | 40 |
-| VFS native helper or undocumented Lua surface | 11 |
-| gl counterpart or explicit overload | 182 |
+| gl counterpart or explicit overload | 186 |
 | global math.* counterpart (non-Spring namespace) | 14 |
-| native-only surface | 105 |
+| native-only RmlUi helper/property surface | 119 |
+| native-only VFS helper/representation surface | 11 |
+| native-only graphics userdata/alias surface | 51 |
+| native-only owned/FFI representation surface | 17 |
+| native-only platform/integration surface | 12 |
+| native-only typed definition/proxy surface | 42 |
+| native-only typed query/control extension | 32 |
+
+## Native-only classification policy
+
+A native-only label is not counted as a missing Lua API merely because Rust exposes it. It must fit one of these source-backed representation, integration, or typed-extension categories; the separate userdata and callin audits cover their corresponding Lua object/event surfaces.
+
+- `native-only RmlUi helper/property surface` — These are typed RmlUi receiver, property, data-model, and event helpers behind the Lua binding rather than free Lua callouts.
+- `native-only VFS helper/representation surface` — Native VFS exposes typed archive/file metadata, byte buffers, and offline-safe helpers that do not have one-to-one Lua function names.
+- `native-only graphics userdata/alias surface` — Native graphics uses integer handles and typed helper records for Lua userdata, plus explicit ABI aliases; the Lua userdata audit records the corresponding object methods separately.
+- `native-only owned/FFI representation surface` — Rust-owned result copies, typed conversion helpers, and explicit memory-release operations adapt the C ABI lifetime/domain; they are not additional Lua callouts.
+- `native-only platform/integration surface` — These methods expose host, callback, tracing, or engine-integration capabilities owned by the native ABI; Lua reaches related behavior through different tables or callins.
+- `native-only typed definition/proxy surface` — Rust exposes stable typed access to Lua definition proxy tables (`UnitDefs`, `FeatureDefs`, and `WeaponDefs`) instead of reproducing Lua's dynamic table/metatable representation.
+- `native-only typed query/control extension` — The native ABI intentionally exposes richer records, narrower operations, or convenience splits where Lua uses a table, overload, proxy, or no public free callout.
 
 ## Rust labels by classification
 
@@ -100,35 +120,10 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Encoding.is_valid_base64`
 - `Encoding.is_valid_base64_url`
 
-### Gfx native-only or undocumented Lua surface (23)
-- `Gfx.delete_vao`
-- `Gfx.delete_vbo`
-- `Gfx.font_begin`
-- `Gfx.font_bind_texture`
-- `Gfx.font_end`
-- `Gfx.font_get_text_height`
-- `Gfx.font_get_text_width`
-- `Gfx.font_print`
-- `Gfx.font_print_world`
-- `Gfx.font_set_auto_outline_color`
-- `Gfx.font_set_outline_color`
-- `Gfx.font_set_text_color`
-- `Gfx.font_submit_buffered`
-- `Gfx.font_wrap_text`
-- `Gfx.get_console_commands`
-- `Gfx.get_engine_texture_names`
-- `Gfx.get_font_info`
-- `Gfx.get_subroutine_index`
-- `Gfx.set_feature_buffer_uniforms`
-- `Gfx.set_unit_buffer_uniforms`
-- `Gfx.text_env`
-- `Gfx.uniform_subroutine`
-- `Gfx.upload_texture`
-
 ### Global Lua counterpart (semantic boundary) (1)
 - `SystemControl.call_as_team`
 
-### RmlUi callout counterpart (101)
+### RmlUi callout counterpart (98)
 - `RmlUi.add_translation_string`
 - `RmlUi.clear_document_path_requests`
 - `RmlUi.clear_translations`
@@ -217,9 +212,6 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `RmlUi.element_tab_set_remove_tab`
 - `RmlUi.element_tab_set_set_panel`
 - `RmlUi.element_tab_set_set_tab`
-- `RmlUi.event_listener_on_attach`
-- `RmlUi.event_listener_on_detach`
-- `RmlUi.event_listener_process_event`
 - `RmlUi.get_context`
 - `RmlUi.get_document_path_requests`
 - `RmlUi.load_font_face`
@@ -231,125 +223,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `RmlUi.vector2f_new`
 - `RmlUi.vector2i_new`
 
-### RmlUi native helper/property/data-model surface (116)
-- `RmlUi.bind`
-- `RmlUi.bind_choice_rows`
-- `RmlUi.bind_grid_rows`
-- `RmlUi.bind_icon_rows`
-- `RmlUi.bind_log_rows`
-- `RmlUi.bind_notification_rows`
-- `RmlUi.bind_option_rows`
-- `RmlUi.bind_status_rows`
-- `RmlUi.bind_swatch_rows`
-- `RmlUi.bind_text_rows`
-- `RmlUi.context_create_data_model`
-- `RmlUi.context_get_density_independent_pixel_ratio`
-- `RmlUi.context_get_dimensions`
-- `RmlUi.context_get_focus_element`
-- `RmlUi.context_get_hover_element`
-- `RmlUi.context_get_name`
-- `RmlUi.context_get_root_element`
-- `RmlUi.context_pull_to_front`
-- `RmlUi.context_set_density_independent_pixel_ratio`
-- `RmlUi.context_set_dimensions`
-- `RmlUi.context_set_pointer_capture`
-- `RmlUi.context_take_pointer_capture_delta`
-- `RmlUi.create_data_model`
-- `RmlUi.data_model_bind_bool`
-- `RmlUi.data_model_bind_choice_rows`
-- `RmlUi.data_model_bind_color`
-- `RmlUi.data_model_bind_float`
-- `RmlUi.data_model_bind_grid_rows`
-- `RmlUi.data_model_bind_icon_rows`
-- `RmlUi.data_model_bind_int`
-- `RmlUi.data_model_bind_log_rows`
-- `RmlUi.data_model_bind_notification_rows`
-- `RmlUi.data_model_bind_option_rows`
-- `RmlUi.data_model_bind_percent`
-- `RmlUi.data_model_bind_pixels`
-- `RmlUi.data_model_bind_status_rows`
-- `RmlUi.data_model_bind_string`
-- `RmlUi.data_model_bind_swatch_rows`
-- `RmlUi.data_model_bind_text_rows`
-- `RmlUi.data_model_get_bool`
-- `RmlUi.data_model_get_color`
-- `RmlUi.data_model_get_float`
-- `RmlUi.data_model_get_int`
-- `RmlUi.data_model_get_percent`
-- `RmlUi.data_model_get_pixels`
-- `RmlUi.data_model_get_string`
-- `RmlUi.data_model_set_bool`
-- `RmlUi.data_model_set_choice_rows`
-- `RmlUi.data_model_set_color`
-- `RmlUi.data_model_set_float`
-- `RmlUi.data_model_set_grid_rows`
-- `RmlUi.data_model_set_icon_rows`
-- `RmlUi.data_model_set_int`
-- `RmlUi.data_model_set_log_rows`
-- `RmlUi.data_model_set_notification_rows`
-- `RmlUi.data_model_set_option_rows`
-- `RmlUi.data_model_set_percent`
-- `RmlUi.data_model_set_pixels`
-- `RmlUi.data_model_set_status_rows`
-- `RmlUi.data_model_set_string`
-- `RmlUi.data_model_set_swatch_rows`
-- `RmlUi.data_model_set_text_rows`
-- `RmlUi.document_get_context`
-- `RmlUi.document_get_title`
-- `RmlUi.document_get_url`
-- `RmlUi.document_is_modal`
-- `RmlUi.document_set_title`
-- `RmlUi.element_get_class_name`
-- `RmlUi.element_get_elements_by_class_name_count`
-- `RmlUi.element_get_elements_by_tag_name_count`
-- `RmlUi.element_get_id`
-- `RmlUi.element_get_inner_rml`
-- `RmlUi.element_get_rect`
-- `RmlUi.element_get_scroll_left`
-- `RmlUi.element_get_scroll_top`
-- `RmlUi.element_get_tag_name`
-- `RmlUi.element_query_selector_all_count`
-- `RmlUi.element_set_class_name`
-- `RmlUi.element_set_id`
-- `RmlUi.element_set_inner_rml`
-- `RmlUi.element_set_scroll_left`
-- `RmlUi.element_set_scroll_top`
-- `RmlUi.event_get_current`
-- `RmlUi.event_get_current_element`
-- `RmlUi.event_get_parameter_bool`
-- `RmlUi.event_get_parameter_float`
-- `RmlUi.event_get_parameter_int`
-- `RmlUi.event_get_parameter_string`
-- `RmlUi.event_get_parameter_type`
-- `RmlUi.event_get_phase`
-- `RmlUi.event_get_target_element`
-- `RmlUi.event_get_type`
-- `RmlUi.event_is_immediate_propagating`
-- `RmlUi.event_is_interruptible`
-- `RmlUi.event_is_propagating`
-- `RmlUi.event_stop_immediate_propagation`
-- `RmlUi.event_stop_propagation`
-- `RmlUi.get`
-- `RmlUi.get_version`
-- `RmlUi.is_ready`
-- `RmlUi.register_event_type`
-- `RmlUi.remove_context_by_name`
-- `RmlUi.remove_data_model`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set_debug_context_by_name`
-- `RmlUi.sol_lua_data_model_set_dirty`
-- `RmlUi.take_pointer_capture_delta`
-
-### Spring counterpart (793)
+### Spring counterpart (795)
 - `Camera.get_camera_direction`
 - `Camera.get_camera_fov`
 - `Camera.get_camera_names`
@@ -963,6 +837,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `UnitsInfo.get_unit_move_def_id`
 - `UnitsInfo.get_unit_nano_pieces`
 - `UnitsInfo.get_unit_neutral`
+- `UnitsInfo.get_unit_piece_collision_volume_data`
 - `UnitsInfo.get_unit_pos_error_params`
 - `UnitsInfo.get_unit_position`
 - `UnitsInfo.get_unit_radius`
@@ -1124,6 +999,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `UnsyncedRead.get_custom_palette_color`
 - `UnsyncedRead.get_draw_selection_info`
 - `UnsyncedRead.get_feature_palette_index`
+- `UnsyncedRead.get_game_seconds_interpolated`
 - `UnsyncedRead.get_last_message_positions`
 - `UnsyncedRead.get_nano_projectile_params`
 - `UnsyncedRead.get_piece_projectile_name`
@@ -1186,20 +1062,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Vfs.zlib_compress`
 - `Vfs.zlib_decompress`
 
-### VFS native helper or undocumented Lua surface (11)
-- `Vfs.dir_list_names`
-- `Vfs.get_archives`
-- `Vfs.get_file_info`
-- `Vfs.get_file_size`
-- `Vfs.get_map_square_texture_info`
-- `Vfs.is_directory`
-- `Vfs.list_dir`
-- `Vfs.list_dir_names`
-- `Vfs.list_entries`
-- `Vfs.read_file`
-- `Vfs.read_file_as_string`
-
-### gl counterpart or explicit overload (182)
+### gl counterpart or explicit overload (186)
 - `Gfx.active_fbo`
 - `Gfx.active_shader`
 - `Gfx.active_texture`
@@ -1291,6 +1154,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Gfx.get_shader_log`
 - `Gfx.get_shadow_map_params`
 - `Gfx.get_string`
+- `Gfx.get_subroutine_index`
 - `Gfx.get_sun`
 - `Gfx.get_text_height`
 - `Gfx.get_text_width`
@@ -1344,8 +1208,10 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Gfx.scale`
 - `Gfx.scissor`
 - `Gfx.secondary_color`
+- `Gfx.set_feature_buffer_uniforms`
 - `Gfx.set_geometry_shader_parameter`
 - `Gfx.set_tesselation_shader_parameter`
+- `Gfx.set_unit_buffer_uniforms`
 - `Gfx.shade_model`
 - `Gfx.shape`
 - `Gfx.slave_mini_map`
@@ -1369,6 +1235,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Gfx.uniform_array_int`
 - `Gfx.uniform_int`
 - `Gfx.uniform_matrix`
+- `Gfx.uniform_subroutine`
 - `Gfx.unit`
 - `Gfx.unit_mult_matrix`
 - `Gfx.unit_piece`
@@ -1399,8 +1266,227 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `MathExtra.sgn`
 - `MathExtra.smooth_step`
 
-### native-only surface (105)
+### native-only RmlUi helper/property surface (119)
+- `RmlUi.bind`
+- `RmlUi.bind_choice_rows`
+- `RmlUi.bind_grid_rows`
+- `RmlUi.bind_icon_rows`
+- `RmlUi.bind_log_rows`
+- `RmlUi.bind_notification_rows`
+- `RmlUi.bind_option_rows`
+- `RmlUi.bind_status_rows`
+- `RmlUi.bind_swatch_rows`
+- `RmlUi.bind_text_rows`
+- `RmlUi.context_create_data_model`
+- `RmlUi.context_get_density_independent_pixel_ratio`
+- `RmlUi.context_get_dimensions`
+- `RmlUi.context_get_focus_element`
+- `RmlUi.context_get_hover_element`
+- `RmlUi.context_get_name`
+- `RmlUi.context_get_root_element`
+- `RmlUi.context_pull_to_front`
+- `RmlUi.context_set_density_independent_pixel_ratio`
+- `RmlUi.context_set_dimensions`
+- `RmlUi.context_set_pointer_capture`
+- `RmlUi.context_take_pointer_capture_delta`
+- `RmlUi.create_data_model`
+- `RmlUi.data_model_bind_bool`
+- `RmlUi.data_model_bind_choice_rows`
+- `RmlUi.data_model_bind_color`
+- `RmlUi.data_model_bind_float`
+- `RmlUi.data_model_bind_grid_rows`
+- `RmlUi.data_model_bind_icon_rows`
+- `RmlUi.data_model_bind_int`
+- `RmlUi.data_model_bind_log_rows`
+- `RmlUi.data_model_bind_notification_rows`
+- `RmlUi.data_model_bind_option_rows`
+- `RmlUi.data_model_bind_percent`
+- `RmlUi.data_model_bind_pixels`
+- `RmlUi.data_model_bind_status_rows`
+- `RmlUi.data_model_bind_string`
+- `RmlUi.data_model_bind_swatch_rows`
+- `RmlUi.data_model_bind_text_rows`
+- `RmlUi.data_model_get_bool`
+- `RmlUi.data_model_get_color`
+- `RmlUi.data_model_get_float`
+- `RmlUi.data_model_get_int`
+- `RmlUi.data_model_get_percent`
+- `RmlUi.data_model_get_pixels`
+- `RmlUi.data_model_get_string`
+- `RmlUi.data_model_set_bool`
+- `RmlUi.data_model_set_choice_rows`
+- `RmlUi.data_model_set_color`
+- `RmlUi.data_model_set_float`
+- `RmlUi.data_model_set_grid_rows`
+- `RmlUi.data_model_set_icon_rows`
+- `RmlUi.data_model_set_int`
+- `RmlUi.data_model_set_log_rows`
+- `RmlUi.data_model_set_notification_rows`
+- `RmlUi.data_model_set_option_rows`
+- `RmlUi.data_model_set_percent`
+- `RmlUi.data_model_set_pixels`
+- `RmlUi.data_model_set_status_rows`
+- `RmlUi.data_model_set_string`
+- `RmlUi.data_model_set_swatch_rows`
+- `RmlUi.data_model_set_text_rows`
+- `RmlUi.document_get_context`
+- `RmlUi.document_get_title`
+- `RmlUi.document_get_url`
+- `RmlUi.document_is_modal`
+- `RmlUi.document_set_title`
+- `RmlUi.element_get_class_name`
+- `RmlUi.element_get_elements_by_class_name_count`
+- `RmlUi.element_get_elements_by_tag_name_count`
+- `RmlUi.element_get_id`
+- `RmlUi.element_get_inner_rml`
+- `RmlUi.element_get_rect`
+- `RmlUi.element_get_scroll_left`
+- `RmlUi.element_get_scroll_top`
+- `RmlUi.element_get_tag_name`
+- `RmlUi.element_query_selector_all_count`
+- `RmlUi.element_set_class_name`
+- `RmlUi.element_set_id`
+- `RmlUi.element_set_inner_rml`
+- `RmlUi.element_set_scroll_left`
+- `RmlUi.element_set_scroll_top`
+- `RmlUi.event_get_current`
+- `RmlUi.event_get_current_element`
+- `RmlUi.event_get_parameter_bool`
+- `RmlUi.event_get_parameter_float`
+- `RmlUi.event_get_parameter_int`
+- `RmlUi.event_get_parameter_string`
+- `RmlUi.event_get_parameter_type`
+- `RmlUi.event_get_phase`
+- `RmlUi.event_get_target_element`
+- `RmlUi.event_get_type`
+- `RmlUi.event_is_immediate_propagating`
+- `RmlUi.event_is_interruptible`
+- `RmlUi.event_is_propagating`
+- `RmlUi.event_listener_on_attach`
+- `RmlUi.event_listener_on_detach`
+- `RmlUi.event_listener_process_event`
+- `RmlUi.event_stop_immediate_propagation`
+- `RmlUi.event_stop_propagation`
+- `RmlUi.get`
+- `RmlUi.get_version`
+- `RmlUi.is_ready`
+- `RmlUi.register_event_type`
+- `RmlUi.remove_context_by_name`
+- `RmlUi.remove_data_model`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set`
+- `RmlUi.set_debug_context_by_name`
+- `RmlUi.sol_lua_data_model_set_dirty`
+- `RmlUi.take_pointer_capture_delta`
+
+### native-only VFS helper/representation surface (11)
+- `Vfs.dir_list_names`
+- `Vfs.get_archives`
+- `Vfs.get_file_info`
+- `Vfs.get_file_size`
+- `Vfs.get_map_square_texture_info`
+- `Vfs.is_directory`
+- `Vfs.list_dir`
+- `Vfs.list_dir_names`
+- `Vfs.list_entries`
+- `Vfs.read_file`
+- `Vfs.read_file_as_string`
+
+### native-only graphics userdata/alias surface (51)
+- `Gfx.add_feature_defs_to_submission_vao`
+- `Gfx.add_features_to_submission_vao`
+- `Gfx.add_unit_defs_to_submission_vao`
+- `Gfx.add_units_to_submission_vao`
+- `Gfx.attach_index_buffer_vao`
+- `Gfx.attach_instance_buffer_vao`
+- `Gfx.attach_vertex_buffer_vao`
+- `Gfx.bind_buffer_range_vbo`
+- `Gfx.clear_submission_vao`
+- `Gfx.clear_vbo`
+- `Gfx.copy_to_vbo`
+- `Gfx.define_vbo`
+- `Gfx.delete_vao`
+- `Gfx.delete_vbo`
+- `Gfx.download_vbo`
+- `Gfx.draw_arrays_vao`
+- `Gfx.draw_elements_vao`
+- `Gfx.dump_definition_vbo`
+- `Gfx.font_begin`
+- `Gfx.font_bind_texture`
+- `Gfx.font_end`
+- `Gfx.font_get_text_height`
+- `Gfx.font_get_text_width`
+- `Gfx.font_print`
+- `Gfx.font_print_world`
+- `Gfx.font_set_auto_outline_color`
+- `Gfx.font_set_outline_color`
+- `Gfx.font_set_text_color`
+- `Gfx.font_submit_buffered`
+- `Gfx.font_wrap_text`
+- `Gfx.get_console_commands`
+- `Gfx.get_engine_texture_names`
+- `Gfx.get_font_info`
+- `Gfx.get_idvbo`
+- `Gfx.get_rboinfo`
+- `Gfx.get_vboinfo`
+- `Gfx.instance_data_from_feature_defs_vbo`
+- `Gfx.instance_data_from_features_vbo`
+- `Gfx.instance_data_from_unit_defs_vbo`
+- `Gfx.instance_data_from_units_vbo`
+- `Gfx.matrix_data_from_projectiles_vbo`
+- `Gfx.models_vbo`
+- `Gfx.remove_from_submission_vao`
+- `Gfx.set_fboattachment`
+- `Gfx.set_fbodraw_buffers`
+- `Gfx.set_fboread_buffer`
+- `Gfx.submit_vao`
+- `Gfx.text_env`
+- `Gfx.unbind_buffer_range_vbo`
+- `Gfx.upload_texture`
+- `Gfx.upload_vbo`
+
+### native-only owned/FFI representation surface (17)
 - `Config.get_config_parameters`
+- `Game.get_game_map_info_owned`
+- `Game.get_game_mod_info_owned`
+- `Game.get_side_data_by_index_owned`
+- `Game.get_side_data_owned`
+- `Memory.free`
+- `Memory.free_float2_array`
+- `Memory.free_float3_array`
+- `Memory.free_float4_array`
+- `Memory.free_float_array`
+- `Memory.free_int32_array`
+- `Memory.free_int3_array`
+- `Memory.free_string_array`
+- `Memory.free_uint32_array`
+- `Player.get_player_roster_owned`
+- `Teams.get_player_info_owned`
+- `Teams.get_team_info_owned`
+
+### native-only platform/integration surface (12)
+- `Platform.get_architecture`
+- `Platform.is_headless`
+- `SyncedCtrl.cob_script`
+- `SyncedCtrl.effects`
+- `SyncedCtrl.feature`
+- `SyncedCtrl.game_config`
+- `SyncedCtrl.projectile`
+- `SyncedCtrl.team`
+- `SyncedCtrl.terrain`
+- `SyncedCtrl.unit`
+- `UnitRendering.get_frustum_planes`
+- `UnsyncedRead.unit_rendering`
+
+### native-only typed definition/proxy surface (42)
 - `FeatureDefs.get_feature_def_by_id`
 - `FeatureDefs.get_feature_def_count`
 - `FeatureDefs.get_feature_def_custom_param`
@@ -1412,57 +1498,6 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `FeatureDefs.get_feature_def_metal`
 - `FeatureDefs.get_feature_def_name`
 - `FeatureDefs.valid_feature_def_id`
-- `Features.get_feature_position_ext`
-- `Game.get_game_map_info`
-- `Game.get_game_map_info_owned`
-- `Game.get_game_mod_info`
-- `Game.get_game_mod_info_owned`
-- `Game.get_game_rules_info`
-- `Game.get_game_rules_resource_info`
-- `Game.get_game_setup_info`
-- `Game.get_side_data_by_index`
-- `Game.get_side_data_by_index_owned`
-- `Game.get_side_data_count`
-- `Game.get_side_data_owned`
-- `Lights.add_light_tracking_target`
-- `Memory.free`
-- `Memory.free_float2_array`
-- `Memory.free_float3_array`
-- `Memory.free_float4_array`
-- `Memory.free_float_array`
-- `Memory.free_int32_array`
-- `Memory.free_int3_array`
-- `Memory.free_string_array`
-- `Memory.free_uint32_array`
-- `Messages.get_console_entries`
-- `MoveCtrl.is_move_ctrl_enabled`
-- `MoveCtrl.move_ctrl`
-- `MoveCtrl.set_move_ctrl_gravity`
-- `PathFinder.delete_path`
-- `PathFinder.get_next_way_point`
-- `PathFinder.get_path_way_points`
-- `Platform.get_architecture`
-- `Platform.is_headless`
-- `Player.get_player_roster_owned`
-- `SyncedCtrl.cob_script`
-- `SyncedCtrl.effects`
-- `SyncedCtrl.feature`
-- `SyncedCtrl.game_config`
-- `SyncedCtrl.projectile`
-- `SyncedCtrl.team`
-- `SyncedCtrl.terrain`
-- `SyncedCtrl.unit`
-- `Teams.get_player_info_owned`
-- `Teams.get_player_list_in_ally_team`
-- `Teams.get_player_list_in_team`
-- `Teams.get_team_info_owned`
-- `Terrain.get_height_map_size`
-- `Tracing.trace_ray`
-- `Tracing.trace_ray_features`
-- `Tracing.trace_ray_units`
-- `UnitControl.set_unit_fuel`
-- `UnitControl.set_unit_heading`
-- `UnitControl.set_unit_travel`
 - `UnitDefs.get_unit_def_basic_info`
 - `UnitDefs.get_unit_def_by_id`
 - `UnitDefs.get_unit_def_classify`
@@ -1484,17 +1519,6 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `UnitDefs.get_unit_def_parameter_keys`
 - `UnitDefs.get_unit_def_speed`
 - `UnitDefs.valid_unit_def_id`
-- `UnitRendering.get_frustum_planes`
-- `UnitsCommands.get_command_params`
-- `UnitsCommands.get_unit_command_descriptions`
-- `UnitsInfo.get_unit_crashing`
-- `UnitsInfo.get_unit_piece_collision_volume_data`
-- `UnitsWeapons.get_unit_weapon_count`
-- `UnsyncedCtrl.get_water_texture`
-- `UnsyncedCtrl.set_water_texture`
-- `UnsyncedRead.get_game_seconds_interpolated`
-- `UnsyncedRead.unit_rendering`
-- `Utils.get_feature_def_dimensions`
 - `WeaponDefs.get_weapon_def_by_id`
 - `WeaponDefs.get_weapon_def_count`
 - `WeaponDefs.get_weapon_def_custom_param`
@@ -1506,22 +1530,87 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.valid_weapon_def_id`
 
-## Local VFS registrations absent from the generated Lua inventory
+### native-only typed query/control extension (32)
+- `Features.get_feature_position_ext`
+- `Game.get_game_map_info`
+- `Game.get_game_mod_info`
+- `Game.get_game_rules_info`
+- `Game.get_game_rules_resource_info`
+- `Game.get_game_setup_info`
+- `Game.get_side_data_by_index`
+- `Game.get_side_data_count`
+- `Lights.add_light_tracking_target`
+- `Messages.get_console_entries`
+- `MoveCtrl.is_move_ctrl_enabled`
+- `MoveCtrl.move_ctrl`
+- `MoveCtrl.set_move_ctrl_gravity`
+- `PathFinder.delete_path`
+- `PathFinder.get_next_way_point`
+- `PathFinder.get_path_way_points`
+- `Teams.get_player_list_in_ally_team`
+- `Teams.get_player_list_in_team`
+- `Terrain.get_height_map_size`
+- `Tracing.trace_ray`
+- `Tracing.trace_ray_features`
+- `Tracing.trace_ray_units`
+- `UnitControl.set_unit_fuel`
+- `UnitControl.set_unit_heading`
+- `UnitControl.set_unit_travel`
+- `UnitsCommands.get_command_params`
+- `UnitsCommands.get_unit_command_descriptions`
+- `UnitsInfo.get_unit_crashing`
+- `UnitsWeapons.get_unit_weapon_count`
+- `UnsyncedCtrl.get_water_texture`
+- `UnsyncedCtrl.set_water_texture`
+- `Utils.get_feature_def_dimensions`
 
-These names are registered by the current engine source but are not present in the generated `VFS` documentation section.
-They must be included before claiming complete VFS documentation coverage.
+## Signature audit policy
+
+The canonical `Spring.*` parameter audit is the one-to-one exact matcher used by `match_apis.py`; it reports parameter count/type mismatches separately from name mapping. Other surfaces use representation-aware policies because Lua userdata, optional tables, callbacks, and Lua overloads are not expressible as the same raw C ABI signature.
+
+| Surface | Lua inventory | Native mapped | Lua-only by design | Signature/behavior authority |
+| --- | ---: | ---: | ---: | --- |
+| `Spring` | 796 | 795 | 1 | `match_apis.py` exact parameter audit plus runtime parity rows |
+| `gl` | 185 | 185 | 0 | source registration + graphics surface tests; userdata handles audited separately |
+| `VFS` | 41 | 40 | 1 | source registration + VFS runtime parity; `VFS.Include` is explicit Lua-only |
+| `RmlUi` | 101 | 98 | 3 | SolLua source docs + receiver/property runtime surface tests |
+| `Script` | 30 | 0 | 30 | source registration/docs + Lua-only behavior surface tests |
+| `Global`, `Encoding`, `math` | 21 | 21 | 0 | namespace-specific source/signature/runtime tests |
+
+## Source registration audit
+
+This compares active C++ registration sites with the generated documentation. The provider list is explicit so Script or userdata registrations cannot be counted as free Spring/gl callouts.
+
+| Surface | Active registrations | Documented | Source-only accepted by design | Unclassified source-only | Documented-only |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `Spring` | 798 | 796 | 2 | 0 | 0 |
+| `gl + LuaFont registrations` | 195 | 185 | 10 | 0 | 0 |
+| `VFS` | 41 | 41 | 0 | 0 | 0 |
+| `Script` | 30 | 30 | 0 | 0 | 0 |
+| `Global` | 5 | 1 | 4 | 0 | 0 |
+
+### Accepted active registrations without generated docs
+
+- `Spring.SetUnitFuel` — Registered compatibility no-op retained by the Lua engine (`// FIXME: DELETE ME`); it is exercised by `unit_set_fuel` and deliberately has no public generated signature.
+- `Spring.SetUnitTravel` — Registered compatibility no-op retained by the Lua engine (`// FIXME: DELETE ME`); it is exercised by `unit_set_travel` and deliberately has no public generated signature.
+- `gl.Begin` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_begin`.
+- `gl.BindTexture` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_bind_texture`.
+- `gl.End` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_end`.
+- `gl.Print` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_print`.
+- `gl.PrintWorld` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_print_world`.
+- `gl.SetAutoOutlineColor` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_set_auto_outline_color`.
+- `gl.SetOutlineColor` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_set_outline_color`.
+- `gl.SetTextColor` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_set_text_color`.
+- `gl.SubmitBuffered` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_submit_buffered`.
+- `gl.WrapText` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_wrap_text`.
+- `Global.SendToUnsynced` — Engine-installed synced-to-unsynced Lua bridge; documented as `SyncedCallins.SendToUnsynced`, not as a native callout.
+- `Global.loadstring` — Embedded Lua runtime helper replaced by the engine for controlled bytecode loading; native modules do not own the Lua global environment.
+- `Global.next` — Embedded synced Lua runtime helper with deterministic table iteration; native modules use typed ABI collections instead.
+- `Global.pairs` — Embedded synced Lua runtime helper with deterministic table iteration; native modules use typed ABI collections instead.
+
+### Unclassified source/documentation registration differences
+
 - None
 
-## Local Script registrations absent from the generated Lua inventory
-
-These names are registered by the current engine source but are not present in the generated `Script` documentation section.
-They remain unresolved until documented and tested.
-- None
-
-## Local global registrations absent from the generated Lua inventory
-
-These direct `_G` registrations are separate from `Spring.*`; undocumented names remain unresolved until classified and tested.
-- `Global.SendToUnsynced`
-- `Global.loadstring`
-- `Global.next`
-- `Global.pairs`
+The accepted `gl.*` entries above are LuaFont userdata methods registered in the shared graphics binding; their object-level Rust counterparts are audited in `audit_lua_userdata_surfaces.py` rather than treated as free callouts.
+The accepted `Global.*` entries are engine-installed Lua runtime/bridge functions. `Global.CallAsTeam` is documented, while `SendToUnsynced`, `loadstring`, `next`, and `pairs` are intentionally recorded as runtime or callin-boundary surfaces rather than native callouts.

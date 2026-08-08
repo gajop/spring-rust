@@ -1148,6 +1148,24 @@ impl NativeApiParity {
             .map_err(|err| format!("get_unit_collision_volume_data({unit_id}) failed: {err:?}"))?;
         self.same_collision_volume(label, message, native)
     }
+    pub(crate) fn check_unit_piece_collision_volume_data(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
+        let unit_id = i32_field(message, "unitID")?;
+        let piece_num = i32_field(message, "pieceNum")?;
+        let native = self
+            .interface
+            .units_info()
+            .get_unit_piece_collision_volume_data(unit_id, piece_num)
+            .map_err(|err| {
+                format!(
+                    "get_unit_piece_collision_volume_data({unit_id}, {piece_num}) failed: {err:?}"
+                )
+            })?;
+        self.same_collision_volume(label, message, native)
+    }
     pub(crate) fn check_unit_travel(&mut self, message: &Value, label: &str) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
         let native = self

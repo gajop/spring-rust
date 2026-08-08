@@ -8,7 +8,7 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetProfilerRecordNames"]},
       "native": {"set": [], "get": ["Profiling.get_profiler_record_names"]},
-      "compare": {"mode": "fields", "fields": ["count"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["count"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetProfilerRecordNames`", "native_getter": "`Profiling.get_profiler_record_names`", "fields": "`count`"},
       "rust": {"check": "check_profiling_value", "set": "set_noop"},
       "params": {},

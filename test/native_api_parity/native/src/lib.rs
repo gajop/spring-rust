@@ -107,6 +107,11 @@ impl NativeModule for NativeApiParity {
 
         let result = if name == "complete" {
             self.check_complete()
+        } else if name == "spring.invoke_native_module" {
+            // This is an explicit smoke probe for Spring.InvokeNativeModule.
+            // The callout is the Lua-to-native transport, so there is no
+            // second native API operation to compare here.
+            Ok(())
         } else if name == "rml.global_context_document" {
             self.check_rml_global_context_document(&parsed)
         } else if name == "rml.element_form_event" {

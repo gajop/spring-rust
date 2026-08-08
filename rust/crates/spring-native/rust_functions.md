@@ -2,7 +2,7 @@
 
 Total APIs: 53
 
-Total Functions: 1392
+Total Functions: 1424
 
 ---
 
@@ -218,18 +218,26 @@ Total Functions: 1392
 - `GameConfig.set_radar_error_params` (params: ally_team_id:i32, ally_team_error_size:f32, base_error_size:f32, base_error_mult:f32) → `Result<bool, Error>`
 - `GameConfig.set_square_building_mask` (params: x:i32, z:i32, mask:u16) → `Result<bool, Error>`
 
-## Gfx (205 functions)
+## Gfx (237 functions)
 
 - `Gfx.active_fbo` (params: fbo_id:u32, target:u32, identities:bool, callback:F) → `Result<(), Error>`
 - `Gfx.active_shader` (params: shader_id:u32, callback:F) → `Result<(), Error>`
 - `Gfx.active_texture` (params: tex_num:i32) → `Result<(), Error>`
 - `Gfx.add_atlas_texture` (params: atlas_name:&str, texture_name:&str) → `Result<(), Error>`
 - `Gfx.add_fallback_font` (params: value:&str) → `Result<bool, Error>`
+- `Gfx.add_feature_defs_to_submission_vao` (params: vao_id:u32, ids:&[u32]) → `Result<u32, Error>`
+- `Gfx.add_features_to_submission_vao` (params: vao_id:u32, ids:&[u32]) → `Result<u32, Error>`
+- `Gfx.add_unit_defs_to_submission_vao` (params: vao_id:u32, ids:&[u32]) → `Result<u32, Error>`
+- `Gfx.add_units_to_submission_vao` (params: vao_id:u32, ids:&[u32]) → `Result<u32, Error>`
 - `Gfx.alpha_test` (params: enable:bool, func:u32, r#ref:f32) → `Result<(), Error>`
 - `Gfx.alpha_to_coverage` (params: value:bool) → `Result<(), Error>`
+- `Gfx.attach_index_buffer_vao` (params: vao_id:u32, vbo_id:u32) → `Result<(), Error>`
+- `Gfx.attach_instance_buffer_vao` (params: vao_id:u32, vbo_id:u32) → `Result<(), Error>`
+- `Gfx.attach_vertex_buffer_vao` (params: vao_id:u32, vbo_id:u32) → `Result<(), Error>`
 - `Gfx.begin_end` (params: primitive:u32, callback:F) → `Result<(), Error>`
 - `Gfx.begin_text` (params: value:bool) → `Result<(), Error>`
 - `Gfx.billboard` (params: ) → `Result<(), Error>`
+- `Gfx.bind_buffer_range_vbo` (params: vbo_id:u32, binding_index:u32, element_offset:i32, element_count:i32, target:u32, bind:bool) → `Result<i32, Error>`
 - `Gfx.bind_image_texture` (params: unit:u32, name:&str, level:i32, layer:i32, layered:bool, access:u32, format:u32) → `Result<(), Error>`
 - `Gfx.bind_texture` (params: name:&str, tex_num:i32, enable:bool) → `Result<bool, Error>`
 - `Gfx.blend_equation` (params: mode:u32) → `Result<(), Error>`
@@ -243,12 +251,15 @@ Total Functions: 1392
 - `Gfx.clear` (params: bits:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
 - `Gfx.clear_attachment_fbo` (params: target:u32, attachment:u32, values:[f32; 4], count:u32) → `Result<bool, Error>`
 - `Gfx.clear_fallback_fonts` (params: ) → `Result<(), Error>`
+- `Gfx.clear_submission_vao` (params: value:u32) → `Result<(), Error>`
+- `Gfx.clear_vbo` (params: value:u32) → `Result<(), Error>`
 - `Gfx.clip_distance` (params: index:u32, enable:bool) → `Result<(), Error>`
 - `Gfx.clip_plane` (params: plane:u32, equation:[f32; 4]) → `Result<(), Error>`
 - `Gfx.color` (params: r:f32, g:f32, b:f32, a:f32) → `Result<(), Error>`
 - `Gfx.color_mask` (params: options:GfxColorMaskOptions) → `Result<(), Error>`
 - `Gfx.config_mini_map` (params: px:i32, py:i32, sx:i32, sy:i32) → `Result<(), Error>`
 - `Gfx.copy_to_texture` (params: name:&str, xoff:i32, yoff:i32, x:i32, y:i32, width:i32, height:i32, target:u32, level:u32) → `Result<(), Error>`
+- `Gfx.copy_to_vbo` (params: source_vboid:u32, destination_vboid:u32, copy_size_in_bytes:i32) → `Result<bool, Error>`
 - `Gfx.create_fbo` (params: target:u32, attachments:&[sys::GfxFBOAttachment], draw_buffers:&[u32], read_buffer:u32) → `Result<(u32, u32), Error>`
 - `Gfx.create_list` (params: callback:F) → `Result<u32, Error>`
 - `Gfx.create_query` (params: ) → `Result<u32, Error>`
@@ -257,6 +268,7 @@ Total Functions: 1392
 - `Gfx.create_texture` (params: xsize:i32, ysize:i32, zsize:i32, params:sys::GfxTextureParams) → `Result<Option<String>, Error>`
 - `Gfx.create_texture_atlas` (params: xsize:i32, ysize:i32, alloc_type:i32) → `Result<Option<String>, Error>`
 - `Gfx.culling` (params: value:bool) → `Result<(), Error>`
+- `Gfx.define_vbo` (params: vbo_id:u32, elements_count:i32, element_array:bool, index_type:u32, use_default_attributes:bool, default_attribute_count:u32, attributes:&[sys::GfxVBOAttributeOptions]) → `Result<(), Error>`
 - `Gfx.delete_fbo` (params: value:u32) → `Result<(), Error>`
 - `Gfx.delete_font` (params: font_id:u32) → `Result<(), Error>`
 - `Gfx.delete_list` (params: value:u32) → `Result<(), Error>`
@@ -272,11 +284,15 @@ Total Functions: 1392
 - `Gfx.depth_mask` (params: value:bool) → `Result<(), Error>`
 - `Gfx.depth_test` (params: options:GfxDepthTestOptions) → `Result<(), Error>`
 - `Gfx.dispatch_compute` (params: num_group_x:u32, num_group_y:u32, num_group_z:u32, barriers:u32) → `Result<(), Error>`
+- `Gfx.download_vbo` (params: vbo_id:u32, attribute_index:i32, element_offset:i32, element_count:i32, force_gpuread:bool) → `Result<Vec<f32>, Error>`
+- `Gfx.draw_arrays_vao` (params: vao_id:u32, mode:u32, vertex_count:i32, vertex_first:i32, instance_count:i32, instance_first:i32) → `Result<(), Error>`
+- `Gfx.draw_elements_vao` (params: vao_id:u32, mode:u32, draw_count:i32, base_index:i32, instance_count:i32, base_vertex:i32, base_instance:i32) → `Result<(), Error>`
 - `Gfx.draw_func_at_unit` (params: unit_id:i32, use_mid_pos:bool, callback:F) → `Result<(), Error>`
 - `Gfx.draw_ground_circle` (params: pos:sys::Float3, radius:f32, resolution:i32, ballistic:bool, slope:f32, gravity:f32, weapon_def_id:i32) → `Result<(), Error>`
 - `Gfx.draw_ground_quad` (params: x0:f32, z0:f32, x1:f32, z1:f32, use_tex_coords:bool, tu0:f32, tv0:f32, tu1:f32, tv1:f32) → `Result<(), Error>`
 - `Gfx.draw_list_at_unit` (params: unit_id:i32, list_id:u32, use_mid_pos:bool, scale:sys::Float3, degrees:f32, rot:sys::Float3) → `Result<(), Error>`
 - `Gfx.draw_mini_map` (params: value:bool) → `Result<(), Error>`
+- `Gfx.dump_definition_vbo` (params: value:u32) → `Result<(), Error>`
 - `Gfx.edge_flag` (params: value:bool) → `Result<(), Error>`
 - `Gfx.end_text` (params: ) → `Result<(), Error>`
 - `Gfx.feature` (params: feature_id:i32, options:GfxFeatureDrawOptions) → `Result<(), Error>`
@@ -320,25 +336,32 @@ Total Functions: 1392
 - `Gfx.get_font_info` (params: font_id:u32) → `Result<(Option<String>, Option<String>, Option<String>, f32, f32, f32, f32, f32, i32, i32), Error>`
 - `Gfx.get_global_tex_coords` (params: value:&str) → `Result<(f32, f32, f32, f32, i32), Error>`
 - `Gfx.get_global_tex_names` (params: ) → `Result<Vec<sys::GfxAtlasTextureEntry>, Error>`
+- `Gfx.get_idvbo` (params: value:u32) → `Result<u32, Error>`
 - `Gfx.get_map_rendering` (params: key:&str, mode:&str) → `Result<([f32`
 - `Gfx.get_matrix_data` (params: mode:u32) → `Result<[f32`
 - `Gfx.get_number` (params: pname:u32, max_values:u32) → `Result<([f32`
 - `Gfx.get_query` (params: value:u32) → `Result<u32, Error>`
+- `Gfx.get_rboinfo` (params: rbo_id:u32) → `Result<(bool, u32, u32, i32, i32, i32), Error>`
 - `Gfx.get_screen_view_trans` (params: ) → `Result<(f32, f32, f32), Error>`
 - `Gfx.get_shader_log` (params: ) → `Result<Option<String>, Error>`
 - `Gfx.get_shadow_map_params` (params: ) → `Result<sys::Float4, Error>`
 - `Gfx.get_string` (params: pname:u32) → `Result<Option<String>, Error>`
-- `Gfx.get_subroutine_index` (params: shader_id:u32, shader_type:u32, name:&str) → `Result<(u32, bool), Error>`
+- `Gfx.get_subroutine_index` (params: shader_id:u32, shader_type:u32, name:&str) → `Result<(i32, bool), Error>`
 - `Gfx.get_sun` (params: key:&str, mode:&str) → `Result<([f32`
 - `Gfx.get_text_height` (params: value:&str) → `Result<(f32, f32, i32), Error>`
 - `Gfx.get_text_width` (params: value:&str) → `Result<f32, Error>`
 - `Gfx.get_uniform_location` (params: shader_id:u32, name:&str) → `Result<i32, Error>`
 - `Gfx.get_vao` (params: ) → `Result<(u32, u32), Error>`
 - `Gfx.get_vbo` (params: target:u32, freq_updated:bool) → `Result<(u32, u32, u32), Error>`
+- `Gfx.get_vboinfo` (params: vbo_id:u32) → `Result<(u32, u32, u32, u32, u32, u32), Error>`
 - `Gfx.get_view_range` (params: camera_type:i32) → `Result<(f32, f32, f32, f32), Error>`
 - `Gfx.get_view_sizes` (params: ) → `Result<(i32, i32), Error>`
 - `Gfx.get_water_rendering` (params: key:&str, mode:&str) → `Result<([f32`
 - `Gfx.has_extension` (params: value:&str) → `Result<bool, Error>`
+- `Gfx.instance_data_from_feature_defs_vbo` (params: vbo_id:u32, ids:&[u32], attribute_index:i32, team_id:i32, element_offset:i32) → `Result<u32, Error>`
+- `Gfx.instance_data_from_features_vbo` (params: vbo_id:u32, ids:&[u32], attribute_index:i32, team_id:i32, element_offset:i32) → `Result<u32, Error>`
+- `Gfx.instance_data_from_unit_defs_vbo` (params: vbo_id:u32, ids:&[u32], attribute_index:i32, team_id:i32, element_offset:i32) → `Result<u32, Error>`
+- `Gfx.instance_data_from_units_vbo` (params: vbo_id:u32, ids:&[u32], attribute_index:i32, team_id:i32, element_offset:i32) → `Result<u32, Error>`
 - `Gfx.is_valid_fbo` (params: fbo_id:u32, target:u32) → `Result<(bool, u32), Error>`
 - `Gfx.light` (params: light:i32, options:GfxLightOptions, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
 - `Gfx.lighting` (params: value:bool) → `Result<(), Error>`
@@ -349,8 +372,10 @@ Total Functions: 1392
 - `Gfx.load_matrix` (params: values:[f32; 16]) → `Result<(), Error>`
 - `Gfx.logic_op` (params: enable:bool, opcode:u32) → `Result<(), Error>`
 - `Gfx.material` (params: pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
+- `Gfx.matrix_data_from_projectiles_vbo` (params: vbo_id:u32, ids:&[u32], attribute_index:i32, team_id:i32, element_offset:i32) → `Result<u32, Error>`
 - `Gfx.matrix_mode` (params: mode:u32) → `Result<(), Error>`
 - `Gfx.memory_barrier` (params: barriers:u32) → `Result<(), Error>`
+- `Gfx.models_vbo` (params: value:u32) → `Result<u32, Error>`
 - `Gfx.mult_matrix` (params: values:[f32; 16]) → `Result<(), Error>`
 - `Gfx.multi_tex_coord` (params: tex_num:i32, s:f32, t:f32, r:f32, q:f32, count:u32) → `Result<(), Error>`
 - `Gfx.multi_tex_env` (params: tex_num:i32, target:u32, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
@@ -373,6 +398,7 @@ Total Functions: 1392
 - `Gfx.raw_bind_fbo` (params: bind_default:bool, fbo_id:u32, target:u32, raw_fbo_id:u32) → `Result<(u32, bool), Error>`
 - `Gfx.read_pixels` (params: x:i32, y:i32, width:i32, height:i32, format:u32) → `Result<(Vec<f32>, u32), Error>`
 - `Gfx.rect` (params: x1:f32, y1:f32, x2:f32, y2:f32) → `Result<(), Error>`
+- `Gfx.remove_from_submission_vao` (params: vao_id:u32, index:i32) → `Result<(), Error>`
 - `Gfx.render_to_texture` (params: name:&str, callback:F) → `Result<(), Error>`
 - `Gfx.reset_matrices` (params: ) → `Result<(), Error>`
 - `Gfx.reset_state` (params: ) → `Result<(), Error>`
@@ -382,6 +408,9 @@ Total Functions: 1392
 - `Gfx.scale` (params: x:f32, y:f32, z:f32) → `Result<(), Error>`
 - `Gfx.scissor` (params: x:i32, y:i32, width:i32, height:i32) → `Result<(), Error>`
 - `Gfx.secondary_color` (params: x:f32, y:f32, z:f32) → `Result<(), Error>`
+- `Gfx.set_fboattachment` (params: fbo_id:u32, attachment:u32, texture_name:&str, texture_target:u32, mip_level:i32, rbo_id:u32, use_rbo:bool) → `Result<(), Error>`
+- `Gfx.set_fbodraw_buffers` (params: fbo_id:u32, buffers:&[u32]) → `Result<(), Error>`
+- `Gfx.set_fboread_buffer` (params: fbo_id:u32, buffer:u32) → `Result<(), Error>`
 - `Gfx.set_feature_buffer_uniforms` (params: object_id:i32, values:&[f32], offset:u32) → `Result<u32, Error>`
 - `Gfx.set_geometry_shader_parameter` (params: shader_id:u32, param:u32, value:i32) → `Result<(), Error>`
 - `Gfx.set_tesselation_shader_parameter` (params: param:u32, value:i32, values:[f32; 4], value_count:u32, use_float_array:bool) → `Result<(), Error>`
@@ -396,6 +425,7 @@ Total Functions: 1392
 - `Gfx.stencil_op` (params: fail:u32, zfail:u32, zpass:u32) → `Result<(), Error>`
 - `Gfx.stencil_op_separate` (params: face:u32, fail:u32, zfail:u32, zpass:u32) → `Result<(), Error>`
 - `Gfx.stencil_test` (params: enable:bool) → `Result<(), Error>`
+- `Gfx.submit_vao` (params: value:u32) → `Result<(), Error>`
 - `Gfx.swap_buffers` (params: ) → `Result<(), Error>`
 - `Gfx.tex_coord` (params: x:f32, y:f32, z:f32, w:f32, count:u32) → `Result<(), Error>`
 - `Gfx.tex_env` (params: target:u32, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
@@ -405,6 +435,7 @@ Total Functions: 1392
 - `Gfx.text_env` (params: target:u32, pname:u32, values:[f32; 4], count:u32) → `Result<(), Error>`
 - `Gfx.texture_info` (params: name:&str) → `Result<(i32, i32, i32, u32, u32, u32), Error>`
 - `Gfx.translate` (params: x:f32, y:f32, z:f32) → `Result<(), Error>`
+- `Gfx.unbind_buffer_range_vbo` (params: vbo_id:u32, binding_index:u32, element_offset:i32, element_count:i32, target:u32, bind:bool) → `Result<i32, Error>`
 - `Gfx.uniform` (params: location:i32, values:[f32; 4], count:u32) → `Result<(), Error>`
 - `Gfx.uniform_array_float` (params: location:i32, values:&[f32]) → `Result<(), Error>`
 - `Gfx.uniform_array_int` (params: location:i32, values:&[i32]) → `Result<(), Error>`
@@ -422,6 +453,7 @@ Total Functions: 1392
 - `Gfx.unit_textures` (params: object_id:i32, push:bool) → `Result<(), Error>`
 - `Gfx.unsafe_state` (params: state:u32, reverse:bool, callback:F) → `Result<(), Error>`
 - `Gfx.upload_texture` (params: name:&str, target:u32, level:i32, xoff:i32, yoff:i32, zoff:i32, width:i32, height:i32, depth:i32, format:u32, pixel_type:u32, data:&[u8]) → `Result<(), Error>`
+- `Gfx.upload_vbo` (params: vbo_id:u32, data:&[f32], attribute_index:i32, element_offset:i32, data_start_index:i32, data_finish_index:i32) → `Result<u32, Error>`
 - `Gfx.use_shader` (params: shader_id:u32) → `Result<bool, Error>`
 - `Gfx.vertex` (params: x:f32, y:f32, z:f32, w:f32, count:u32) → `Result<(), Error>`
 - `Gfx.viewport` (params: x:i32, y:i32, width:i32, height:i32) → `Result<(), Error>`
@@ -795,13 +827,13 @@ Total Functions: 1392
 - `RmlUi.element_closest` (params: element_handle:u64, value:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.element_dispatch_event` (params: element_handle:u64, event:&str) → `Result<bool, Error>`
 - `RmlUi.element_focus` (params: element_handle:u64) → `Result<bool, Error>`
-- `RmlUi.element_form_control_input_get_selection` (params: element_handle:u64) → `Result<(i32, i32, bool), Error>`
+- `RmlUi.element_form_control_input_get_selection` (params: element_handle:u64) → `Result<(i32, i32, Option<String>, bool), Error>`
 - `RmlUi.element_form_control_input_select` (params: element_handle:u64) → `Result<bool, Error>`
 - `RmlUi.element_form_control_input_set_selection` (params: element_handle:u64, start:i32, end:i32) → `Result<bool, Error>`
 - `RmlUi.element_form_control_select_add` (params: element_handle:u64, element_ptr_handle:u64, before:i32) → `Result<bool, Error>`
 - `RmlUi.element_form_control_select_remove` (params: element_handle:u64, index:i32) → `Result<bool, Error>`
 - `RmlUi.element_form_control_select_remove_all` (params: element_handle:u64) → `Result<bool, Error>`
-- `RmlUi.element_form_control_text_area_get_selection` (params: element_handle:u64) → `Result<(i32, i32, bool), Error>`
+- `RmlUi.element_form_control_text_area_get_selection` (params: element_handle:u64) → `Result<(i32, i32, Option<String>, bool), Error>`
 - `RmlUi.element_form_control_text_area_select` (params: element_handle:u64) → `Result<bool, Error>`
 - `RmlUi.element_form_control_text_area_set_selection` (params: element_handle:u64, start:i32, end:i32) → `Result<bool, Error>`
 - `RmlUi.element_form_submit` (params: element_handle:u64, name:&str, value:&str) → `Result<bool, Error>`

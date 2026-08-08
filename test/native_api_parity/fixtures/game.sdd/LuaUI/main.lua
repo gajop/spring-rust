@@ -587,6 +587,13 @@ local function runGlShaderUniformSurfaceApiTest()
 	if ranGlShaderUniforms or not Common.enableRenderingTests() then
 		return
 	end
+	-- The object-buffer shader helpers address renderer-managed objects.  Wait
+	-- until the synced fixture has arrived and the first world update has
+	-- populated the model-uniform storage, so this surface is exercised rather
+	-- than silently skipped on the first draw.
+	if fixtureIDs.unitID == nil or fixtureIDs.featureID == nil or Spring.GetGameFrame() < 2 then
+		return
+	end
 	ranGlShaderUniforms = true
 	local result = {}
 	local function void(name, fn)
@@ -637,6 +644,12 @@ local function runGlShaderUniformSurfaceApiTest()
 	glCall(result, "gl.GetShaderLog", gl.GetShaderLog)
 	glCall(result, "gl.UseShader", function()
 		return gl.UseShader(shaderID)
+	end)
+	glCall(result, "gl.GetSubroutineIndex", function()
+		return gl.GetSubroutineIndex(shaderID, GL.VERTEX_SHADER, "native_api_parity_missing_subroutine")
+	end)
+	void("gl.UniformSubroutine", function()
+		gl.UniformSubroutine(GL.VERTEX_SHADER, 0)
 	end)
 	glCall(result, "gl.GetNumber.currentProgram", function()
 		local program = gl.GetNumber(0x8B8D, 1)
@@ -699,6 +712,12 @@ local function runGlShaderUniformSurfaceApiTest()
 	void("gl.SetTesselationShaderParameter", function()
 		gl.SetTesselationShaderParameter(0x8E72, 3)
 	end)
+	glCall(result, "gl.SetUnitBufferUniforms", function()
+		return gl.SetUnitBufferUniforms(fixtureIDs.unitID, { 1.25, 2.5, 3.75 }, 2)
+	end)
+	glCall(result, "gl.SetFeatureBufferUniforms", function()
+		return gl.SetFeatureBufferUniforms(fixtureIDs.featureID, { 4.5, 5.75 }, 1)
+	end)
 
 	glCall(result, "gl.GetEngineUniformBufferDef", function()
 		return gl.GetEngineUniformBufferDef(0)
@@ -715,7 +734,15 @@ local function runGlShaderUniformSurfaceApiTest()
 		return gl.UseShader(shaderID)
 	end)
 
-	local payload = { status = "pass", result = result, context = "widget" }
+	local payload = {
+		status = "pass",
+		result = result,
+		context = "widget",
+		fixture = {
+			unitID = fixtureIDs.unitID,
+			featureID = fixtureIDs.featureID,
+		},
+	}
 	Common.setTestName(payload, "gl.shader_uniforms")
 	record("gl.shader_uniforms", payload)
 	if Common.mode() == "native" then

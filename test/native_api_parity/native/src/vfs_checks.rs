@@ -209,6 +209,9 @@ impl NativeApiParity {
         let archive_name = str_field(result, "archiveName")?;
         let native_archive_name = str_field(result, "nativeArchiveName")?;
         let use_archive_name = str_field(surface_field(result, "useArchive")?, "archiveName")?;
+        let raw_file = surface_field(result, "rawFile")?;
+        let raw_file_name = str_field(raw_file, "name")?;
+        let raw_file_mode = str_field(raw_file, "mode")?;
         let vfs = self.interface.vfs();
 
         let absolute_path = vfs
@@ -324,6 +327,47 @@ impl NativeApiParity {
             "availableAIs",
             surface_field(result, "availableAIs")?,
             &available_ais_surface(&available_ais)?,
+        )?;
+
+        let raw_data = vfs
+            .load_file(raw_file_name, raw_file_mode)
+            .map_err(|err| format!("load_file() failed: {err:?}"))?;
+        compare_surface_values(
+            "rawFile.hex",
+            surface_field(raw_file, "hex")?,
+            &serde_json::json!(byte_hex(&raw_data)),
+        )?;
+
+        let mut raw_dir_list = vfs
+            .dir_list(
+                raw_file_name
+                    .rsplit_once('/')
+                    .map(|(path, _)| path)
+                    .unwrap_or(""),
+                "*.lua",
+                raw_file_mode,
+                false,
+            )
+            .map_err(|err| format!("dir_list() failed: {err:?}"))?
+            .iter()
+            .filter(|entry| !entry.isDirectory)
+            .map(|entry| cstr_or_empty(entry.name))
+            .collect::<Result<Vec<_>, _>>()?;
+        raw_dir_list.sort();
+        compare_surface_values(
+            "rawFile.dirList",
+            surface_field(raw_file, "dirList")?,
+            &serde_json::json!(raw_dir_list),
+        )?;
+
+        let mut raw_sub_dirs = vfs
+            .sub_dirs("LuaRules", "*", raw_file_mode, false)
+            .map_err(|err| format!("sub_dirs() failed: {err:?}"))?;
+        raw_sub_dirs.sort();
+        compare_surface_values(
+            "rawFile.subDirs",
+            surface_field(raw_file, "subDirs")?,
+            &serde_json::json!(raw_sub_dirs),
         )?;
 
         let compressed = vfs

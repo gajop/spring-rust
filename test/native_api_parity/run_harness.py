@@ -38,6 +38,7 @@ NATIVE_CRATE = HARNESS / "native" / "Cargo.toml"
 NATIVE_SO = HARNESS / "native" / "target" / "release" / "libnative_api_parity.so"
 LUA_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "lua_functions.md"
 RUST_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "rust_functions.md"
+API_SURFACE_AUDIT_DOC = ROOT / "rust" / "crates" / "spring-native" / "api_surface_audit.md"
 CALLIN_SOURCE = ROOT / "rts" / "NativeInterface" / "NativeInterfaceEventClient.cpp"
 EVENTS_DEF = ROOT / "rts" / "System" / "Events.def"
 GADGET_ROUTER_SOURCE = ROOT / "cont" / "base" / "springcontent" / "LuaGadgets" / "gadgets.lua"
@@ -1029,6 +1030,21 @@ def read_rust_api_functions() -> set[str]:
     return set(re.findall(r"^- `([A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*)`", text, re.MULTILINE))
 
 
+def read_native_only_functions() -> set[str]:
+    """Read the source-backed Rust-only classifications from the audit."""
+    if not API_SURFACE_AUDIT_DOC.exists():
+        return set()
+    native_only = set()
+    category = ""
+    for line in API_SURFACE_AUDIT_DOC.read_text(encoding="utf-8", errors="replace").splitlines():
+        if line.startswith("### "):
+            category = line[4:].split(" (", 1)[0]
+            continue
+        if category.startswith("native-only ") and line.startswith("- `"):
+            native_only.add(line[3:].split("`", 1)[0])
+    return native_only
+
+
 def markdown_api_names(value: str) -> list[str]:
     if not value or value == "n/a" or value.startswith("n/a "):
         return []
@@ -1048,7 +1064,11 @@ def surface_test_ids_from_names(names: set[str]) -> set[str]:
     return {test_id for test_id in SURFACE_TEST_BY_ID if test_id in names}
 
 
-def tested_lua_functions(recorded_ids: set[str] | None = None) -> set[str]:
+def tested_lua_functions(
+    recorded_ids: set[str] | None = None,
+    surface_recorded_ids: set[str] | None = None,
+) -> set[str]:
+    """Return recorded Spring.* callouts, including explicit surface checks."""
     functions = set()
     items = CHECK_COVERAGE.items()
     if recorded_ids is not None:
@@ -1059,6 +1079,16 @@ def tested_lua_functions(recorded_ids: set[str] | None = None) -> set[str]:
                 match = re.fullmatch(r"Spring\.([A-Za-z_][A-Za-z0-9_]*)", name)
                 if match:
                     functions.add(match.group(1))
+    for test_id, test in SURFACE_TEST_BY_ID.items():
+        if surface_recorded_ids is not None:
+            if test_id not in surface_recorded_ids:
+                continue
+        elif recorded_ids is not None and test_id not in recorded_ids:
+            continue
+        for name in test.get("lua", []):
+            match = re.fullmatch(r"Spring\.([A-Za-z_][A-Za-z0-9_]*)", str(name))
+            if match:
+                functions.add(match.group(1))
     return functions
 
 
@@ -1151,8 +1181,9 @@ def coverage_summary(
     lua_surfaces = read_lua_surface_functions()
     lua_surface_total = set().union(*lua_surfaces.values())
     rust_total = read_rust_api_functions()
+    rust_native_only = rust_total & read_native_only_functions()
     recorded_ids = recorded_test_ids(checked_names) if checked_names is not None else None
-    lua_tested = tested_lua_functions(recorded_ids)
+    lua_tested = tested_lua_functions(recorded_ids, surface_recorded_ids)
     lua_surface_tested = tested_lua_surface_functions(recorded_ids, surface_recorded_ids)
     rust_tested = tested_rust_functions(recorded_ids, surface_recorded_ids)
     return {
@@ -1172,6 +1203,12 @@ def coverage_summary(
         "rust_tested_known": rust_tested & rust_total,
         "rust_tested_unknown": rust_tested - rust_total,
         "rust_untested": rust_total - rust_tested,
+        "rust_native_only": rust_native_only,
+        "rust_native_only_tested": rust_tested & rust_native_only,
+        "rust_native_only_untested": rust_native_only - rust_tested,
+        "rust_counterpart": rust_total - rust_native_only,
+        "rust_counterpart_tested": rust_tested & (rust_total - rust_native_only),
+        "rust_counterpart_untested": (rust_total - rust_native_only) - rust_tested,
         "surface_tested_ids": surface_recorded_ids or set(),
     }
 
@@ -1483,6 +1520,16 @@ def write_coverage_details(
             f"| Native Rust | {len(summary['rust_total'])} | {len(summary['rust_tested_known'])} | "
             f"{pct(len(summary['rust_tested_known']), len(summary['rust_total']))} | {len(summary['rust_tested_unknown'])} |"
         ),
+        (
+            f"| Native Rust counterparts | {len(summary['rust_counterpart'])} | "
+            f"{len(summary['rust_counterpart_tested'])} | "
+            f"{pct(len(summary['rust_counterpart_tested']), len(summary['rust_counterpart']))} | 0 |"
+        ),
+        (
+            f"| Native-only Rust surfaces | {len(summary['rust_native_only'])} | "
+            f"{len(summary['rust_native_only_tested'])} | "
+            f"{pct(len(summary['rust_native_only_tested']), len(summary['rust_native_only']))} | 0 |"
+        ),
     ]
     for namespace in ("Global", "RmlUi", "gl", "VFS", "Script", "Encoding", "math", "debug", "table"):
         total = summary["lua_surfaces"].get(namespace, set())
@@ -1588,6 +1635,26 @@ def write_coverage_details(
     ])
     if summary["rust_untested"]:
         lines.extend(f"- `{name}`" for name in sorted(summary["rust_untested"]))
+    else:
+        lines.append("- none")
+
+    lines.extend([
+        "",
+        "## Untested Native Counterparts",
+        "",
+    ])
+    if summary["rust_counterpart_untested"]:
+        lines.extend(f"- `{name}`" for name in sorted(summary["rust_counterpart_untested"]))
+    else:
+        lines.append("- none")
+
+    lines.extend([
+        "",
+        "## Untested Native-only Surfaces",
+        "",
+    ])
+    if summary["rust_native_only_untested"]:
+        lines.extend(f"- `{name}`" for name in sorted(summary["rust_native_only_untested"]))
     else:
         lines.append("- none")
 
@@ -1803,6 +1870,16 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         (
             f"| Native Rust | {len(summary['rust_total'])} | {len(summary['rust_tested_known'])} | "
             f"{pct(len(summary['rust_tested_known']), len(summary['rust_total']))} |"
+        ),
+        (
+            f"| Native Rust counterparts | {len(summary['rust_counterpart'])} | "
+            f"{len(summary['rust_counterpart_tested'])} | "
+            f"{pct(len(summary['rust_counterpart_tested']), len(summary['rust_counterpart']))} |"
+        ),
+        (
+            f"| Native-only Rust surfaces | {len(summary['rust_native_only'])} | "
+            f"{len(summary['rust_native_only_tested'])} | "
+            f"{pct(len(summary['rust_native_only_tested']), len(summary['rust_native_only']))} |"
         ),
     ])
     if required_surface_ids:

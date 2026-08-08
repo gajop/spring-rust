@@ -842,6 +842,22 @@ impl NativeApiParity {
                 .use_shader(shader_id)
                 .map_err(|error| format!("UseShader failed: {error:?}"))?)],
         );
+        let (subroutine_index, _subroutine_available) = gfx
+            .get_subroutine_index(
+                shader_id,
+                GL_VERTEX_SHADER,
+                "native_api_parity_missing_subroutine",
+            )
+            .map_err(|error| format!("GetSubroutineIndex failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.GetSubroutineIndex",
+            vec![serde_json::json!(subroutine_index)],
+        );
+        void!(
+            "gl.UniformSubroutine",
+            gfx.uniform_subroutine(GL_VERTEX_SHADER, 0)
+        );
         let (current_program, current_program_count) = gfx
             .get_number(0x8B8D, 1)
             .map_err(|error| format!("GetNumber(CURRENT_PROGRAM) failed: {error:?}"))?;
@@ -944,6 +960,26 @@ impl NativeApiParity {
         void!(
             "gl.SetTesselationShaderParameter",
             gfx.set_tesselation_shader_parameter(0x8E72, 3, [0.0; 4], 0, false)
+        );
+        let unit_id = fixture_i32(message, "unitID")?;
+        let feature_id = fixture_i32(message, "featureID")?;
+        record(
+            &mut actual,
+            "gl.SetUnitBufferUniforms",
+            vec![serde_json::json!(gfx
+                .set_unit_buffer_uniforms(unit_id, &[1.25, 2.5, 3.75], 2)
+                .map_err(|error| format!(
+                    "SetUnitBufferUniforms failed: {error:?}"
+                ))?)],
+        );
+        record(
+            &mut actual,
+            "gl.SetFeatureBufferUniforms",
+            vec![serde_json::json!(gfx
+                .set_feature_buffer_uniforms(feature_id, &[4.5, 5.75], 1)
+                .map_err(|error| format!(
+                    "SetFeatureBufferUniforms failed: {error:?}"
+                ))?)],
         );
 
         match gfx
@@ -1434,8 +1470,16 @@ impl NativeApiParity {
             .get_rboinfo(depth_rbo)
             .map_err(|error| format!("GetRBOInfo failed: {error:?}"))?;
         record(&mut actual, "RBO.valid", vec![serde_json::json!(rbo_valid)]);
-        record(&mut actual, "RBO.target", vec![serde_json::json!(rbo_target)]);
-        record(&mut actual, "RBO.format", vec![serde_json::json!(rbo_format)]);
+        record(
+            &mut actual,
+            "RBO.target",
+            vec![serde_json::json!(rbo_target)],
+        );
+        record(
+            &mut actual,
+            "RBO.format",
+            vec![serde_json::json!(rbo_format)],
+        );
         record(&mut actual, "RBO.xsize", vec![serde_json::json!(rbo_xsize)]);
         record(&mut actual, "RBO.ysize", vec![serde_json::json!(rbo_ysize)]);
         record(
@@ -1862,14 +1906,13 @@ impl NativeApiParity {
             .map(|id| id as u32);
         let mut actual = Map::new();
 
-        let attribute = |id: i32, type_: u32, size: i32| {
-            spring_native::sys::GfxVBOAttributeOptions {
+        let attribute =
+            |id: i32, type_: u32, size: i32| spring_native::sys::GfxVBOAttributeOptions {
                 id,
                 type_,
                 size,
                 normalized: false,
-            }
-        };
+            };
         let record_download = |actual: &mut Map<String, Value>, name: &str, data: Vec<f32>| {
             record(
                 actual,
@@ -1900,53 +1943,18 @@ impl NativeApiParity {
             .get_vbo(GL_UNIFORM_BUFFER, false)
             .map_err(|error| format!("GetVBO(matrix) failed: {error:?}"))?;
 
-        let vertex_attributes = [
-            attribute(0, GL_FLOAT, 2),
-            attribute(1, GL_FLOAT, 4),
-        ];
+        let vertex_attributes = [attribute(0, GL_FLOAT, 2), attribute(1, GL_FLOAT, 4)];
         let instance_attributes = [attribute(2, GL_FLOAT, 4)];
         let engine_instance_attributes = [attribute(0, GL_UNSIGNED_INT, 4)];
         let matrix_attributes = [attribute(0, GL_FLOAT_MAT4, 1)];
-        gfx.define_vbo(
-            vertex_vbo,
-            3,
-            false,
-            0,
-            false,
-            0,
-            &vertex_attributes,
-        )
-        .map_err(|error| format!("DefineVBO(vertex) failed: {error:?}"))?;
-        gfx.define_vbo(
-            copy_vbo,
-            3,
-            false,
-            0,
-            false,
-            0,
-            &vertex_attributes,
-        )
-        .map_err(|error| format!("DefineVBO(copy) failed: {error:?}"))?;
-        gfx.define_vbo(
-            instance_vbo,
-            2,
-            false,
-            0,
-            false,
-            0,
-            &instance_attributes,
-        )
-        .map_err(|error| format!("DefineVBO(instance) failed: {error:?}"))?;
-        gfx.define_vbo(
-            index_vbo,
-            3,
-            true,
-            GL_UNSIGNED_INT,
-            false,
-            0,
-            &[],
-        )
-        .map_err(|error| format!("DefineVBO(index) failed: {error:?}"))?;
+        gfx.define_vbo(vertex_vbo, 3, false, 0, false, 0, &vertex_attributes)
+            .map_err(|error| format!("DefineVBO(vertex) failed: {error:?}"))?;
+        gfx.define_vbo(copy_vbo, 3, false, 0, false, 0, &vertex_attributes)
+            .map_err(|error| format!("DefineVBO(copy) failed: {error:?}"))?;
+        gfx.define_vbo(instance_vbo, 2, false, 0, false, 0, &instance_attributes)
+            .map_err(|error| format!("DefineVBO(instance) failed: {error:?}"))?;
+        gfx.define_vbo(index_vbo, 3, true, GL_UNSIGNED_INT, false, 0, &[])
+            .map_err(|error| format!("DefineVBO(index) failed: {error:?}"))?;
         gfx.define_vbo(uniform_vbo, 2, false, 0, true, 2, &[])
             .map_err(|error| format!("DefineVBO(uniform) failed: {error:?}"))?;
         gfx.define_vbo(
@@ -1959,16 +1967,8 @@ impl NativeApiParity {
             &engine_instance_attributes,
         )
         .map_err(|error| format!("DefineVBO(engine instance) failed: {error:?}"))?;
-        gfx.define_vbo(
-            matrix_vbo,
-            1,
-            false,
-            0,
-            false,
-            0,
-            &matrix_attributes,
-        )
-        .map_err(|error| format!("DefineVBO(matrix) failed: {error:?}"))?;
+        gfx.define_vbo(matrix_vbo, 1, false, 0, false, 0, &matrix_attributes)
+            .map_err(|error| format!("DefineVBO(matrix) failed: {error:?}"))?;
         record_void(&mut actual, "VBO.Define");
 
         let (elements, buffer_size, gpu_size, _, _, _) = gfx
@@ -1994,16 +1994,17 @@ impl NativeApiParity {
         );
 
         let full_data = [
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
-            7.0, 8.0, 9.0, 10.0, 11.0, 12.0,
-            13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0,
+            17.0, 18.0,
         ];
         record(
             &mut actual,
             "VBO.Upload",
             vec![serde_json::json!(gfx
                 .upload_vbo(vertex_vbo, &full_data, -1, 0, 1, 0)
-                .map_err(|error| format!("UploadVBO(full) failed: {error:?}"))?)],
+                .map_err(|error| format!(
+                    "UploadVBO(full) failed: {error:?}"
+                ))?)],
         );
         let attribute_data = [99.0, 20.0, 21.0, 22.0, 23.0, 88.0];
         record(
@@ -2011,7 +2012,9 @@ impl NativeApiParity {
             "VBO.Upload.attribute",
             vec![serde_json::json!(gfx
                 .upload_vbo(vertex_vbo, &attribute_data, 1, 1, 2, 5)
-                .map_err(|error| format!("UploadVBO(attribute) failed: {error:?}"))?)],
+                .map_err(|error| format!(
+                    "UploadVBO(attribute) failed: {error:?}"
+                ))?)],
         );
         record_download(
             &mut actual,
@@ -2057,14 +2060,18 @@ impl NativeApiParity {
             "VBO.BindBufferRange",
             vec![serde_json::json!(gfx
                 .bind_buffer_range_vbo(uniform_vbo, 6, 0, 1, GL_UNIFORM_BUFFER, true)
-                .map_err(|error| format!("BindBufferRangeVBO failed: {error:?}"))?)],
+                .map_err(|error| format!(
+                    "BindBufferRangeVBO failed: {error:?}"
+                ))?)],
         );
         record(
             &mut actual,
             "VBO.UnbindBufferRange",
             vec![serde_json::json!(gfx
                 .unbind_buffer_range_vbo(uniform_vbo, 6, 0, 1, GL_UNIFORM_BUFFER, true)
-                .map_err(|error| format!("UnbindBufferRangeVBO failed: {error:?}"))?)],
+                .map_err(|error| format!(
+                    "UnbindBufferRangeVBO failed: {error:?}"
+                ))?)],
         );
 
         let (model_vertex_vbo, _, _) = gfx
@@ -2091,27 +2098,18 @@ impl NativeApiParity {
         let unit_ids = [unit_id];
         let feature_ids = [feature_id];
         let unit_def_single = gfx
-            .instance_data_from_unit_defs_vbo(
-                engine_instance_vbo,
-                &unit_def_ids,
-                0,
-                team_id,
-                0,
-            )
+            .instance_data_from_unit_defs_vbo(engine_instance_vbo, &unit_def_ids, 0, team_id, 0)
             .map_err(|error| format!("InstanceDataFromUnitDefIDs(single) failed: {error:?}"))?;
         let unit_def_table = gfx
-            .instance_data_from_unit_defs_vbo(
-                engine_instance_vbo,
-                &unit_def_ids,
-                0,
-                team_id,
-                0,
-            )
+            .instance_data_from_unit_defs_vbo(engine_instance_vbo, &unit_def_ids, 0, team_id, 0)
             .map_err(|error| format!("InstanceDataFromUnitDefIDs(table) failed: {error:?}"))?;
         record(
             &mut actual,
             "VBO.InstanceDataFromUnitDefIDs",
-            vec![serde_json::json!(unit_def_single), serde_json::json!(unit_def_table)],
+            vec![
+                serde_json::json!(unit_def_single),
+                serde_json::json!(unit_def_table),
+            ],
         );
         record_download(
             &mut actual,
@@ -2160,7 +2158,10 @@ impl NativeApiParity {
         record(
             &mut actual,
             "VBO.InstanceDataFromUnitIDs",
-            vec![serde_json::json!(unit_single), serde_json::json!(unit_table)],
+            vec![
+                serde_json::json!(unit_single),
+                serde_json::json!(unit_table),
+            ],
         );
         record_download(
             &mut actual,
@@ -2199,14 +2200,19 @@ impl NativeApiParity {
             let projectile_ids = [projectile_id];
             let matrix_single = gfx
                 .matrix_data_from_projectiles_vbo(matrix_vbo, &projectile_ids, 0, -1, 0)
-                .map_err(|error| format!("MatrixDataFromProjectileIDs(single) failed: {error:?}"))?;
+                .map_err(|error| {
+                    format!("MatrixDataFromProjectileIDs(single) failed: {error:?}")
+                })?;
             let matrix_table = gfx
                 .matrix_data_from_projectiles_vbo(matrix_vbo, &projectile_ids, 0, -1, 0)
                 .map_err(|error| format!("MatrixDataFromProjectileIDs(table) failed: {error:?}"))?;
             record(
                 &mut actual,
                 "VBO.MatrixDataFromProjectileIDs",
-                vec![serde_json::json!(matrix_single), serde_json::json!(matrix_table)],
+                vec![
+                    serde_json::json!(matrix_single),
+                    serde_json::json!(matrix_table),
+                ],
             );
             record_download(
                 &mut actual,
@@ -2250,28 +2256,36 @@ impl NativeApiParity {
             "VAO.AddUnitsToSubmission",
             vec![serde_json::json!(gfx
                 .add_units_to_submission_vao(submission_vao, &unit_ids)
-                .map_err(|error| format!("AddUnitsToSubmissionVAO failed: {error:?}"))?)],
+                .map_err(|error| format!(
+                    "AddUnitsToSubmissionVAO failed: {error:?}"
+                ))?)],
         );
         record(
             &mut actual,
             "VAO.AddFeaturesToSubmission",
             vec![serde_json::json!(gfx
                 .add_features_to_submission_vao(submission_vao, &feature_ids)
-                .map_err(|error| format!("AddFeaturesToSubmissionVAO failed: {error:?}"))?)],
+                .map_err(|error| format!(
+                    "AddFeaturesToSubmissionVAO failed: {error:?}"
+                ))?)],
         );
         record(
             &mut actual,
             "VAO.AddUnitDefsToSubmission",
             vec![serde_json::json!(gfx
                 .add_unit_defs_to_submission_vao(submission_vao, &unit_def_ids)
-                .map_err(|error| format!("AddUnitDefsToSubmissionVAO failed: {error:?}"))?)],
+                .map_err(|error| format!(
+                    "AddUnitDefsToSubmissionVAO failed: {error:?}"
+                ))?)],
         );
         record(
             &mut actual,
             "VAO.AddFeatureDefsToSubmission",
             vec![serde_json::json!(gfx
                 .add_feature_defs_to_submission_vao(submission_vao, &feature_def_ids)
-                .map_err(|error| format!("AddFeatureDefsToSubmissionVAO failed: {error:?}"))?)],
+                .map_err(|error| format!(
+                    "AddFeatureDefsToSubmissionVAO failed: {error:?}"
+                ))?)],
         );
         gfx.remove_from_submission_vao(submission_vao, 1)
             .map_err(|error| format!("RemoveFromSubmissionVAO failed: {error:?}"))?;

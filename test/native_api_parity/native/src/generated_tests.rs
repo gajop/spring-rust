@@ -236,6 +236,7 @@ native_tests! {
     get_features_in_screen_rectangle { check = check_unsynced_read_value, set = set_noop, }
     get_render_units { check = check_units_query_list, set = set_noop, }
     get_render_units_draw_flag_changed { check = check_units_query_list, set = set_noop, }
+    get_game_seconds_interpolated { check = check_unsynced_read_value, set = set_noop, }
     get_unit_selection_volume_data { check = check_unsynced_render_data, set = set_noop, }
     get_feature_selection_volume_data { check = check_unsynced_render_data, set = set_noop, }
     get_unit_transform_matrix { check = check_unsynced_render_data, set = set_noop, }
@@ -332,6 +333,7 @@ native_tests! {
     get_unit_leaves_ghost { check = check_unit_leaves_ghost, set = set_noop, }
     get_unit_self_dtime { check = check_unit_self_dtime, set = set_noop, }
     get_unit_collision_volume_data { check = check_unit_collision_volume_data, set = set_noop, }
+    get_unit_piece_collision_volume_data { check = check_unit_piece_collision_volume_data, set = set_noop, }
     unit_add_experience { check = check_unit_experience, set = add_unit_experience, }
     get_unit_vectors { check = check_unit_vectors, set = set_noop, }
     unit_collision_volume_data { check = check_unit_collision_volume_data, set = set_unit_collision_volume_data, }

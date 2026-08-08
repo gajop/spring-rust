@@ -221,6 +221,19 @@
           "disabled"
         ]
       }
+    },
+    {
+      "id": "get_unit_piece_collision_volume_data",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["Spring.GetUnitPieceCollisionVolumeData"]},
+      "native": {"set": [], "get": ["UnitsInfo.get_unit_piece_collision_volume_data"]},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["scaleX", "scaleY", "scaleZ", "offsetX", "offsetY", "offsetZ", "volumeType", "testType", "primaryAxis", "disabled"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitPieceCollisionVolumeData`", "native_getter": "`UnitsInfo.get_unit_piece_collision_volume_data`", "fields": "collision-volume fields"},
+      "rust": {"check": "check_unit_piece_collision_volume_data", "set": "set_noop"},
+      "params": {"pieceNum": {"type": "i32", "fixed": 1}},
+      "lua_runtime": {"call": "Spring.GetUnitPieceCollisionVolumeData", "args": ["fixture.unitID", "value.pieceNum"], "returns": ["scaleX", "scaleY", "scaleZ", "offsetX", "offsetY", "offsetZ", "volumeType", "testType", "primaryAxis", "disabled"]}
     }
   ]
 }

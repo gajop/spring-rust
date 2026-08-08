@@ -157,6 +157,8 @@
         "gl.CreateShader",
         "gl.DeleteShader",
         "gl.UseShader",
+        "gl.GetSubroutineIndex",
+        "gl.UniformSubroutine",
         "gl.ActiveShader",
         "gl.GetActiveUniforms",
         "gl.GetUniformLocation",
@@ -169,12 +171,16 @@
         "gl.GetEngineModelUniformDataDef",
         "gl.GetEngineModelUniformDataSize",
         "gl.SetGeometryShaderParameter",
-        "gl.SetTesselationShaderParameter"
+        "gl.SetTesselationShaderParameter",
+        "gl.SetUnitBufferUniforms",
+        "gl.SetFeatureBufferUniforms"
       ],
       "native": [
         "Gfx.create_shader",
         "Gfx.delete_shader",
         "Gfx.use_shader",
+        "Gfx.get_subroutine_index",
+        "Gfx.uniform_subroutine",
         "Gfx.active_shader",
         "Gfx.get_active_uniforms",
         "Gfx.get_uniform_location",
@@ -188,7 +194,9 @@
         "Gfx.get_engine_model_uniform_data_def",
         "Gfx.get_engine_model_uniform_data_size",
         "Gfx.set_geometry_shader_parameter",
-        "Gfx.set_tesselation_shader_parameter"
+        "Gfx.set_tesselation_shader_parameter",
+        "Gfx.set_unit_buffer_uniforms",
+        "Gfx.set_feature_buffer_uniforms"
       ],
       "reason": "Rendering-context replay of shader creation, uniform reflection/upload, activation, engine definitions, and lifecycle operations with process-local handles normalized."
     },
@@ -676,6 +684,13 @@
       "reason": "Lua-handle permission state is owned by the embedded Lua handle."
     },
     {
+      "id": "script.permit_helper_ais",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Script.PermitHelperAIs"],
+      "reason": "LuaRules installs this compatibility control on the embedded Script table; native modules cannot mutate the LuaRules helper-AI permission through the same Lua-handle API."
+    },
+    {
       "id": "script.get_global",
       "context": "synced_gadget",
       "mode": "lua_only",
@@ -756,7 +771,7 @@
       "id": "script.update_callin",
       "context": "synced_gadget",
       "mode": "lua_only",
-      "lua": ["Script.UpdateCallin"],
+      "lua": ["Script.UpdateCallIn"],
       "reason": "Callin registration is state on an embedded Lua handle."
     },
     {
@@ -772,6 +787,13 @@
       "mode": "lua_only",
       "lua": ["Script.Kill"],
       "reason": "Script.Kill terminates a Lua handle and has no native-module equivalent."
+    },
+    {
+      "id": "spring.invoke_native_module",
+      "context": "synced_gadget",
+      "mode": "lua_only",
+      "lua": ["Spring.InvokeNativeModule"],
+      "reason": "This is the Lua-to-native bridge itself; the native side validates the harness probe, but there is no native-to-native counterpart to map."
     },
     {
       "id": "debug.input_injection",
@@ -855,6 +877,9 @@
         "Vfs.get_archive_checksum",
         "Vfs.get_name_from_rapid_tag",
         "Vfs.get_available_ais",
+        "Vfs.load_file",
+        "Vfs.dir_list",
+        "Vfs.sub_dirs",
         "Vfs.use_archive",
         "Vfs.compress_folder"
       ],

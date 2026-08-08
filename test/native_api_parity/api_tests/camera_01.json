@@ -77,7 +77,7 @@
       "compare": {"mode": "fields", "stream": "shape", "fields": ["x", "y", "z"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPixelDir`", "native_getter": "`Camera.get_pixel_dir`", "fields": "`x`, `y`, `z`"},
       "rust": {"check": "check_camera_value", "set": "set_noop"},
-      "params": {"screenX": {"type": "f32", "fixed": 320}, "screenY": {"type": "f32", "fixed": 240}},
+      "params": {"screenX": {"type": "f32", "fixed": 127}, "screenY": {"type": "f32", "fixed": 73}},
       "lua_runtime": {"call": "Spring.GetPixelDir", "args": ["value.screenX", "value.screenY"], "returns": ["x", "y", "z"]}
     },
     {
@@ -106,8 +106,8 @@
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.TraceScreenRay`", "native_getter": "`Camera.trace_screen_ray`", "fields": "`hitType`, `x`, `y`, `z`"},
       "rust": {"check": "check_camera_value", "set": "set_noop"},
       "params": {
-        "screenX": {"type": "f32", "fixed": 320},
-        "screenY": {"type": "f32", "fixed": 240},
+        "screenX": {"type": "f32", "fixed": 127},
+        "screenY": {"type": "f32", "fixed": 73},
         "onlyCoords": {"type": "bool", "fixed": true},
         "useMinimap": {"type": "bool", "fixed": false},
         "includeSky": {"type": "bool", "fixed": false},

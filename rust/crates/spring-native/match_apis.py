@@ -93,6 +93,16 @@ PARAMETER_LAYOUT_EQUIVALENTS = {
 # and the ground-target flag.  Defaults let the native caller represent each
 # Lua overload without changing the engine operation.
 OVERLOAD_EQUIVALENTS = {
+    # Lua documents three overloads under one Spring.GetSideData name:
+    # string -> one side, integer -> one indexed side, and no arguments ->
+    # the complete side array.  The native ABI makes those cases explicit as
+    # Game.get_side_data, Game.get_side_data_by_index, and
+    # Game.get_side_data_count.  The name-only inventory retains one Lua row,
+    # so compare the named overload against its string-native counterpart and
+    # record the complete split in the generated report below.
+    'Spring.GetSideData': [
+        ('sideName', 'string'),
+    ],
     'Spring.GetUnitWeaponHaveFreeLineOfFire': [
         ('unitID', 'int'),
         ('weaponNum', 'int'),
@@ -101,6 +111,16 @@ OVERLOAD_EQUIVALENTS = {
         ('targetPos', 'float3'),
         ('isGroundTarget', 'bool'),
     ],
+}
+
+SIGNATURE_NOTES = {
+    'Spring.GetSideData': (
+        '`Spring.GetSideData` has three Lua forms: no arguments, a string side '
+        'name, or an integer side index. They are represented by '
+        '`Game.get_side_data_count`, `Game.get_side_data`, and '
+        '`Game.get_side_data_by_index`; all three forms are exercised by the '
+        'native parity fixture.'
+    ),
 }
 
 
@@ -556,6 +576,13 @@ def main():
         f.write(f'- Parameter matches: {param_ok}\n')
         f.write(f'- Count mismatches: {count_mismatches}\n')
         f.write(f'- Type mismatches: {type_mismatches}\n\n')
+
+        if SIGNATURE_NOTES:
+            f.write('## Explicit signature mappings\n\n')
+            f.write('These entries intentionally expand one Lua callout into multiple native methods.\n\n')
+            for name, note in sorted(SIGNATURE_NOTES.items()):
+                f.write(f'- `{name}` — {note}\n')
+            f.write('\n')
 
         f.write('---\n\n')
 

@@ -2,9 +2,9 @@
 
 Total Namespaces: 11
 
-Total Functions: 1365
+Total Functions: 1373
 
-Callouts (Plugin → Engine): 1175
+Callouts (Plugin → Engine): 1183
 Callins (Engine → Plugin): 190
 
 ---
@@ -128,7 +128,7 @@ Callins (Engine → Plugin): 190
 - `RmlUi.Vector2f.new` (params: x:number, y:number)
 - `RmlUi.Vector2i.new` (params: x:integer, y:integer)
 
-### Script (29 functions)
+### Script (30 functions)
 
 - `Script.AddActionFallback` (params: command:string, help:string)
 - `Script.DelayByFrames` (params: frameDelay:integer, fun(...):func)
@@ -151,6 +151,7 @@ Callins (Engine → Plugin): 190
 - `Script.GetWatchWeapon` (params: weaponDefID:integer)
 - `Script.IsEngineMinVersion` (params: minMajorVer:integer, minMinorVer:integer?, minCommits:integer?)
 - `Script.Kill` (params: killMessage:string?)
+- `Script.PermitHelperAIs` (params: permit:boolean)
 - `Script.RemoveActionFallback` (params: command:string)
 - `Script.SetWatchAllowTarget` (params: weaponDefID:integer, watch:boolean)
 - `Script.SetWatchExplosion` (params: weaponDefID:integer, watch:boolean)
@@ -158,9 +159,9 @@ Callins (Engine → Plugin): 190
 - `Script.SetWatchProjectile` (params: weaponDefID:integer, watch:boolean)
 - `Script.SetWatchUnit` (params: unitDefID:integer, watch:boolean)
 - `Script.SetWatchWeapon` (params: weaponDefID:integer, watch:boolean)
-- `Script.UpdateCallin` (params: name:string)
+- `Script.UpdateCallIn` (params: name:string)
 
-### Spring (793 functions)
+### Spring (796 functions)
 
 - `Spring.AddFeatureDamage` (params: featureID:integer, damage:number, paralyze:number?, attackerID:integer?, weaponID:integer?, impulseX:number?, impulseY:number?, impulseZ:number?)
 - `Spring.AddGrass` (params: x:number, z:number, grassValue:integer?)
@@ -325,6 +326,7 @@ Callins (Engine → Plugin): 190
 - `Spring.GetGameRulesParam` (params: paramName:string)
 - `Spring.GetGameRulesParams` (params: )
 - `Spring.GetGameSeconds` (params: )
+- `Spring.GetGameSecondsInterpolated` (params: )
 - `Spring.GetGameSpeed` (params: )
 - `Spring.GetGameState` (params: maxLatency:number?)
 - `Spring.GetGatherMode` (params: )
@@ -545,6 +547,7 @@ Callins (Engine → Plugin): 190
 - `Spring.GetUnitNoSelect` (params: unitID:integer)
 - `Spring.GetUnitPaletteIndex` (params: unitID:integer)
 - `Spring.GetUnitPhysicalState` (params: unitID:integer)
+- `Spring.GetUnitPieceCollisionVolumeData` (params: unitID:integer, pieceNum:integer)
 - `Spring.GetUnitPieceDirection` (params: unitID:integer, pieceIndex:integer)
 - `Spring.GetUnitPieceInfo` (params: unitID:integer, pieceIndex:integer)
 - `Spring.GetUnitPieceList` (params: unitID:integer)
@@ -619,6 +622,7 @@ Callins (Engine → Plugin): 190
 - `Spring.HaveShadows` (params: )
 - `Spring.InitPathNodeCostsArray` (params: overlayIndex:integer, sizeX:integer, sizeZ:integer)
 - `Spring.InsertUnitCmdDesc` (params: unitID:integer, index:integer, cmdDesc:CommandDescription)
+- `Spring.InvokeNativeModule` (params: message:string)
 - `Spring.IsAABBInView` (params: minX:number, minY:number, minZ:number, maxX:number, maxY:number, maxZ:number)
 - `Spring.IsAboveMiniMap` (params: x:number, y:number)
 - `Spring.IsCheatingEnabled` (params: )
@@ -1011,7 +1015,7 @@ Callins (Engine → Plugin): 190
 - `debug.emulateNativeApiParityCallins` (params: unitID:integer, featureID:integer, projectileID:integer)
 - `debug.emulateUnitMoveFailed` (params: unitID:integer)
 
-### gl (181 functions)
+### gl (185 functions)
 
 - `gl.ActiveFBO` (params: fbo:FBO, target:GL?, func:fun(...), ...:any)
 - `gl.ActiveShader` (params: shaderID:integer, func:function, ...:any)
@@ -1103,6 +1107,7 @@ Callins (Engine → Plugin): 190
 - `gl.GetShaderLog` (params: )
 - `gl.GetShadowMapParams` (params: )
 - `gl.GetString` (params: pname:GL)
+- `gl.GetSubroutineIndex` (params: shaderID:integer, shaderType:integer, name:string)
 - `gl.GetSun` (params: param:"pos"|"dir"|"specularExponent"|"shadowDensity"|"diffuse"|"ambient"|"specular", mode:"ground"|"unit")
 - `gl.GetTextHeight` (params: text:string)
 - `gl.GetTextWidth` (params: text:string)
@@ -1156,8 +1161,10 @@ Callins (Engine → Plugin): 190
 - `gl.Scale` (params: x:number, y:number, z:number)
 - `gl.Scissor` (params: x:integer, y:integer, w:integer, h:integer)
 - `gl.SecondaryColor` (params: r:number, g:number, b:number)
+- `gl.SetFeatureBufferUniforms` (params: featureID:integer, values:number[], offset:integer?)
 - `gl.SetGeometryShaderParameter` (params: shaderID:integer, key:number, value:number)
 - `gl.SetTesselationShaderParameter` (params: param:integer, value:integer)
+- `gl.SetUnitBufferUniforms` (params: unitID:integer, values:number[], offset:integer?)
 - `gl.ShadeModel` (params: model:GL)
 - `gl.Shape` (params: type:GL, vertices:VertexData[])
 - `gl.SlaveMiniMap` (params: newMode:boolean)
@@ -1181,6 +1188,7 @@ Callins (Engine → Plugin): 190
 - `gl.UniformArray` (params: locationID:integer|string, type:UniformArrayType, uniforms:number[])
 - `gl.UniformInt` (params: locationID:integer|string, int1:integer, int2:integer?, int3:integer?, int4:integer?)
 - `gl.UniformMatrix` (params: locationID:integer|string, matrix:number[])
+- `gl.UniformSubroutine` (params: shaderType:integer, index:integer)
 - `gl.Unit` (params: unitID:integer, doRawDraw:boolean?, useLuaMat:integer?, noLuaCall:boolean?, fullModel:boolean?)
 - `gl.UnitMultMatrix` (params: unitID:integer)
 - `gl.UnitPiece` (params: unitID:integer, pieceID:integer)

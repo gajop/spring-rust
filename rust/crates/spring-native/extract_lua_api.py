@@ -364,6 +364,48 @@ def collect_registered_vfs_functions(project_root: Path) -> Set[str]:
     return collect_registered_functions(paths, 'VFS')
 
 
+def collect_registered_script_functions(project_root: Path) -> Set[str]:
+    """Collect active functions inserted into the embedded ``Script`` table.
+
+    The published docs can retain a stale spelling after a Lua-handle helper
+    is renamed (for example ``UpdateCallin`` → ``UpdateCallIn``).  Unlike the
+    ordinary table providers, Script is populated both by a newly-created
+    table and by later ``lua_getglobal`` mutations, so keep the two setup
+    forms explicit here.
+    """
+    lua_dir = project_root / 'rts' / 'Lua'
+    paths = [
+        lua_dir / 'LuaHandle.cpp',
+        lua_dir / 'LuaHandleSynced.cpp',
+        lua_dir / 'LuaRules.cpp',
+        lua_dir / 'LuaUI.cpp',
+    ]
+    registered: Set[str] = set()
+    direct_pattern = re.compile(
+        r'LuaPushNamedCFunc\(L,\s*"([A-Za-z][A-Za-z0-9_]*)"'
+    )
+    for path in paths:
+        try:
+            text = path.read_text(encoding='utf-8', errors='ignore')
+        except OSError:
+            continue
+        text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
+        text = re.sub(r'//[^\n]*', '', text)
+        blocks = re.findall(
+            r'LuaPushString\(L,\s*"Script"\);.*?lua_rawset\(L,\s*-3\);',
+            text,
+            flags=re.DOTALL,
+        )
+        blocks.extend(re.findall(
+            r'lua_getglobal\(L,\s*"Script"\);.*?lua_pop\(L,\s*1\)',
+            text,
+            flags=re.DOTALL,
+        ))
+        for block in blocks:
+            registered.update(f'Script.{name}' for name in direct_pattern.findall(block))
+    return registered
+
+
 def collect_registered_extra_functions(project_root: Path) -> Dict[str, Set[str]]:
     """Collect the small non-Spring function tables from their providers."""
     lua_dir = project_root / 'rts' / 'Lua'
@@ -559,6 +601,17 @@ def main():
         if removed:
             print(f"Filtered {removed} stale VFS docs not present in local registrations")
 
+    registered_script = collect_registered_script_functions(project_root)
+    if registered_script:
+        before = len(callouts)
+        callouts = [
+            func for func in callouts
+            if func.get('namespace') != 'Script' or func.get('full_name') in registered_script
+        ]
+        removed = before - len(callouts)
+        if removed:
+            print(f"Filtered {removed} stale Script docs not present in local registrations")
+
     registered_extra = collect_registered_extra_functions(project_root)
     for namespace, registered in registered_extra.items():
         if not registered:
@@ -611,6 +664,8 @@ def main():
             if func.get('namespace') == 'Spring' and registered_spring and func.get('full_name') not in registered_spring:
                 continue
             if func.get('namespace') == 'VFS' and registered_vfs and func.get('full_name') not in registered_vfs:
+                continue
+            if func.get('namespace') == 'Script' and registered_script and func.get('full_name') not in registered_script:
                 continue
             if (
                 func.get('namespace') in registered_extra

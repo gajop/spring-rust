@@ -3,20 +3,26 @@
 ## Summary Statistics
 
 **Lua API (Spring.* callouts only):**
-- Total: 793 functions
-- Matched (perfect 1.0): 793 (100.0%)
+- Total: 796 functions
+- Matched (perfect 1.0): 795 (99.9%)
 - Uncertain matches (<1.0): 0 (0.0%)
-- Unmatched: 0 (0.0%)
+- Unmatched: 1 (0.1%)
 
 **Rust API:**
-- Total: 1392 functions across 53 modules
-- Matched to Lua: 793 (57.0%)
-- Rust-only: 590 (42.4%)
+- Total: 1424 functions across 53 modules
+- Matched to Lua: 795 (55.8%)
+- Rust-only: 620 (43.5%)
 
 **Parameter comparison (matched functions):**
-- Parameter matches: 792
+- Parameter matches: 795
 - Count mismatches: 0
-- Type mismatches: 1
+- Type mismatches: 0
+
+## Explicit signature mappings
+
+These entries intentionally expand one Lua callout into multiple native methods.
+
+- `Spring.GetSideData` — `Spring.GetSideData` has three Lua forms: no arguments, a string side name, or an integer side index. They are represented by `Game.get_side_data_count`, `Game.get_side_data`, and `Game.get_side_data_by_index`; all three forms are exercised by the native parity fixture.
 
 ---
 
@@ -187,6 +193,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetGameRulesParam` → `RulesParams.RulesParams.get_game_rules_param`
 - `Spring.GetGameRulesParams` → `RulesParams.RulesParams.get_game_rules_params`
 - `Spring.GetGameSeconds` → `Game.Game.get_game_seconds`
+- `Spring.GetGameSecondsInterpolated` → `UnsyncedRead.UnsyncedRead.get_game_seconds_interpolated`
 - `Spring.GetGameSpeed` → `Display.Display.get_game_speed`
 - `Spring.GetGameState` → `SystemControl.SystemControl.get_game_state`
 - `Spring.GetGatherMode` → `SystemControl.SystemControl.get_gather_mode`
@@ -311,7 +318,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetSelectedUnitsCounts` → `Selection.Selection.get_selected_units_counts`
 - `Spring.GetSelectedUnitsSorted` → `Selection.Selection.get_selected_units_sorted`
 - `Spring.GetSelectionBox` → `Input.Input.get_selection_box`
-- `Spring.GetSideData` → `Game.Game.get_side_data` (param mismatch: p1 type int!=string)
+- `Spring.GetSideData` → `Game.Game.get_side_data`
 - `Spring.GetSmoothMeshHeight` → `Terrain.Terrain.get_smooth_mesh_height`
 - `Spring.GetSoundDevices` → `Sound.Sound.get_sound_devices`
 - `Spring.GetSoundEffectParams` → `Sound.Sound.get_sound_effect_params`
@@ -407,6 +414,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitNoSelect` → `UnitRendering.UnitRendering.get_unit_no_select`
 - `Spring.GetUnitPaletteIndex` → `UnsyncedRead.UnsyncedRead.get_unit_palette_index`
 - `Spring.GetUnitPhysicalState` → `UnitControl.UnitControl.get_unit_physical_state`
+- `Spring.GetUnitPieceCollisionVolumeData` → `UnitsInfo.UnitsInfo.get_unit_piece_collision_volume_data`
 - `Spring.GetUnitPieceDirection` → `UnitsPieces.UnitsPieces.get_unit_piece_direction`
 - `Spring.GetUnitPieceInfo` → `UnitsPieces.UnitsPieces.get_unit_piece_info`
 - `Spring.GetUnitPieceList` → `UnitsPieces.UnitsPieces.get_unit_piece_list`
@@ -818,7 +826,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.WorldToScreenCoords` → `Camera.Camera.world_to_screen_coords`
 - `Spring.Yield` → `SystemControl.SystemControl.yield`
 
-**Total: 793**
+**Total: 795**
 
 ---
 
@@ -835,8 +843,9 @@ Imperfect matches with <1.0 confidence (likely incorrect):
 
 Functions in Lua API with no Rust equivalent:
 
+- `Spring.InvokeNativeModule`
 
-**Total unmatched: 0**
+**Total unmatched: 1**
 
 ---
 
@@ -879,11 +888,19 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.active_texture`
 - `Gfx.Gfx.add_atlas_texture`
 - `Gfx.Gfx.add_fallback_font`
+- `Gfx.Gfx.add_feature_defs_to_submission_vao`
+- `Gfx.Gfx.add_features_to_submission_vao`
+- `Gfx.Gfx.add_unit_defs_to_submission_vao`
+- `Gfx.Gfx.add_units_to_submission_vao`
 - `Gfx.Gfx.alpha_test`
 - `Gfx.Gfx.alpha_to_coverage`
+- `Gfx.Gfx.attach_index_buffer_vao`
+- `Gfx.Gfx.attach_instance_buffer_vao`
+- `Gfx.Gfx.attach_vertex_buffer_vao`
 - `Gfx.Gfx.begin_end`
 - `Gfx.Gfx.begin_text`
 - `Gfx.Gfx.billboard`
+- `Gfx.Gfx.bind_buffer_range_vbo`
 - `Gfx.Gfx.bind_image_texture`
 - `Gfx.Gfx.bind_texture`
 - `Gfx.Gfx.blend_equation`
@@ -897,12 +914,15 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.clear`
 - `Gfx.Gfx.clear_attachment_fbo`
 - `Gfx.Gfx.clear_fallback_fonts`
+- `Gfx.Gfx.clear_submission_vao`
+- `Gfx.Gfx.clear_vbo`
 - `Gfx.Gfx.clip_distance`
 - `Gfx.Gfx.clip_plane`
 - `Gfx.Gfx.color`
 - `Gfx.Gfx.color_mask`
 - `Gfx.Gfx.config_mini_map`
 - `Gfx.Gfx.copy_to_texture`
+- `Gfx.Gfx.copy_to_vbo`
 - `Gfx.Gfx.create_fbo`
 - `Gfx.Gfx.create_list`
 - `Gfx.Gfx.create_query`
@@ -911,6 +931,7 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.create_texture`
 - `Gfx.Gfx.create_texture_atlas`
 - `Gfx.Gfx.culling`
+- `Gfx.Gfx.define_vbo`
 - `Gfx.Gfx.delete_fbo`
 - `Gfx.Gfx.delete_font`
 - `Gfx.Gfx.delete_list`
@@ -926,11 +947,15 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.depth_mask`
 - `Gfx.Gfx.depth_test`
 - `Gfx.Gfx.dispatch_compute`
+- `Gfx.Gfx.download_vbo`
+- `Gfx.Gfx.draw_arrays_vao`
+- `Gfx.Gfx.draw_elements_vao`
 - `Gfx.Gfx.draw_func_at_unit`
 - `Gfx.Gfx.draw_ground_circle`
 - `Gfx.Gfx.draw_ground_quad`
 - `Gfx.Gfx.draw_list_at_unit`
 - `Gfx.Gfx.draw_mini_map`
+- `Gfx.Gfx.dump_definition_vbo`
 - `Gfx.Gfx.edge_flag`
 - `Gfx.Gfx.end_text`
 - `Gfx.Gfx.feature`
@@ -974,10 +999,12 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.get_font_info`
 - `Gfx.Gfx.get_global_tex_coords`
 - `Gfx.Gfx.get_global_tex_names`
+- `Gfx.Gfx.get_idvbo`
 - `Gfx.Gfx.get_map_rendering`
 - `Gfx.Gfx.get_matrix_data`
 - `Gfx.Gfx.get_number`
 - `Gfx.Gfx.get_query`
+- `Gfx.Gfx.get_rboinfo`
 - `Gfx.Gfx.get_screen_view_trans`
 - `Gfx.Gfx.get_shader_log`
 - `Gfx.Gfx.get_shadow_map_params`
@@ -989,10 +1016,15 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.get_uniform_location`
 - `Gfx.Gfx.get_vao`
 - `Gfx.Gfx.get_vbo`
+- `Gfx.Gfx.get_vboinfo`
 - `Gfx.Gfx.get_view_range`
 - `Gfx.Gfx.get_view_sizes`
 - `Gfx.Gfx.get_water_rendering`
 - `Gfx.Gfx.has_extension`
+- `Gfx.Gfx.instance_data_from_feature_defs_vbo`
+- `Gfx.Gfx.instance_data_from_features_vbo`
+- `Gfx.Gfx.instance_data_from_unit_defs_vbo`
+- `Gfx.Gfx.instance_data_from_units_vbo`
 - `Gfx.Gfx.is_valid_fbo`
 - `Gfx.Gfx.light`
 - `Gfx.Gfx.lighting`
@@ -1003,8 +1035,10 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.load_matrix`
 - `Gfx.Gfx.logic_op`
 - `Gfx.Gfx.material`
+- `Gfx.Gfx.matrix_data_from_projectiles_vbo`
 - `Gfx.Gfx.matrix_mode`
 - `Gfx.Gfx.memory_barrier`
+- `Gfx.Gfx.models_vbo`
 - `Gfx.Gfx.mult_matrix`
 - `Gfx.Gfx.multi_tex_coord`
 - `Gfx.Gfx.multi_tex_env`
@@ -1027,6 +1061,7 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.raw_bind_fbo`
 - `Gfx.Gfx.read_pixels`
 - `Gfx.Gfx.rect`
+- `Gfx.Gfx.remove_from_submission_vao`
 - `Gfx.Gfx.render_to_texture`
 - `Gfx.Gfx.reset_matrices`
 - `Gfx.Gfx.reset_state`
@@ -1036,6 +1071,9 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.scale`
 - `Gfx.Gfx.scissor`
 - `Gfx.Gfx.secondary_color`
+- `Gfx.Gfx.set_fboattachment`
+- `Gfx.Gfx.set_fbodraw_buffers`
+- `Gfx.Gfx.set_fboread_buffer`
 - `Gfx.Gfx.set_feature_buffer_uniforms`
 - `Gfx.Gfx.set_geometry_shader_parameter`
 - `Gfx.Gfx.set_tesselation_shader_parameter`
@@ -1050,6 +1088,7 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.stencil_op`
 - `Gfx.Gfx.stencil_op_separate`
 - `Gfx.Gfx.stencil_test`
+- `Gfx.Gfx.submit_vao`
 - `Gfx.Gfx.swap_buffers`
 - `Gfx.Gfx.tex_coord`
 - `Gfx.Gfx.tex_env`
@@ -1059,6 +1098,7 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.text_env`
 - `Gfx.Gfx.texture_info`
 - `Gfx.Gfx.translate`
+- `Gfx.Gfx.unbind_buffer_range_vbo`
 - `Gfx.Gfx.uniform`
 - `Gfx.Gfx.uniform_array_float`
 - `Gfx.Gfx.uniform_array_int`
@@ -1076,6 +1116,7 @@ Functions in Rust API with no Lua equivalent:
 - `Gfx.Gfx.unit_textures`
 - `Gfx.Gfx.unsafe_state`
 - `Gfx.Gfx.upload_texture`
+- `Gfx.Gfx.upload_vbo`
 - `Gfx.Gfx.use_shader`
 - `Gfx.Gfx.vertex`
 - `Gfx.Gfx.viewport`
@@ -1366,11 +1407,9 @@ Functions in Rust API with no Lua equivalent:
 - `UnitsCommands.UnitsCommands.get_command_params`
 - `UnitsCommands.UnitsCommands.get_unit_command_descriptions`
 - `UnitsInfo.UnitsInfo.get_unit_crashing`
-- `UnitsInfo.UnitsInfo.get_unit_piece_collision_volume_data`
 - `UnitsWeapons.UnitsWeapons.get_unit_weapon_count`
 - `UnsyncedCtrl.UnsyncedCtrl.get_water_texture`
 - `UnsyncedCtrl.UnsyncedCtrl.set_water_texture`
-- `UnsyncedRead.UnsyncedRead.get_game_seconds_interpolated`
 - `UnsyncedRead.UnsyncedRead.unit_rendering`
 - `Utils.Utils.get_feature_def_dimensions`
 - `Vfs.Vfs.abort_download`
@@ -1435,4 +1474,4 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 590**
+**Total Rust-only: 620**
