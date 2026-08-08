@@ -1718,4 +1718,36 @@ impl NativeApiParity {
 
         compare_result(message, actual, "gl.fonts")
     }
+
+    pub(crate) fn check_gl_minimap(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let geometry = self
+            .interface
+            .display()
+            .get_mini_map_geometry()
+            .map_err(|error| format!("GetMiniMapGeometry failed: {error:?}"))?;
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+
+        void!(
+            "gl.ConfigMiniMap",
+            gfx.config_mini_map(geometry.posX, geometry.posY, geometry.sizeX, geometry.sizeY)
+        );
+        void!("gl.SlaveMiniMap", gfx.slave_mini_map(true));
+        void!("gl.DrawMiniMap", gfx.draw_mini_map(true));
+        void!("gl.DrawMiniMap.custom", gfx.draw_mini_map(false));
+        void!("gl.SlaveMiniMap.restore", gfx.slave_mini_map(false));
+        void!(
+            "gl.ConfigMiniMap.restore",
+            gfx.config_mini_map(geometry.posX, geometry.posY, geometry.sizeX, geometry.sizeY)
+        );
+
+        compare_result(message, actual, "gl.minimap")
+    }
 }

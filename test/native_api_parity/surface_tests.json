@@ -369,6 +369,22 @@
       "reason": "Rendering-context replay of default-font text calls, loaded-font metadata/metrics, font userdata methods, fallback-font management and process-local font lifecycle."
     },
     {
+      "id": "gl.minimap",
+      "context": "widget",
+      "mode": "matched",
+      "lua": [
+        "gl.ConfigMiniMap",
+        "gl.SlaveMiniMap",
+        "gl.DrawMiniMap"
+      ],
+      "native": [
+        "Gfx.config_mini_map",
+        "Gfx.slave_mini_map",
+        "Gfx.draw_mini_map"
+      ],
+      "reason": "Rendering-context replay of minimap geometry configuration, slave mode, and default/custom minimap drawing, with geometry restored afterward."
+    },
+    {
       "id": "gl.fixed_immediate",
       "context": "widget",
       "mode": "matched",

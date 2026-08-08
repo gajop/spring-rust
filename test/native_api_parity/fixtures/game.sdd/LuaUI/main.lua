@@ -16,6 +16,7 @@ local ranGlListsQueries = false
 local ranGlAtlas = false
 local ranGlFbo = false
 local ranGlFonts = false
+local ranGlMiniMap = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -1172,6 +1173,48 @@ local function runGlFontSurfaceApiTest()
 	end
 end
 
+local function runGlMiniMapSurfaceApiTest()
+	if ranGlMiniMap or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlMiniMap = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	local px, py, sx, sy = Spring.GetMiniMapGeometry()
+	if px == nil then
+		error("Spring.GetMiniMapGeometry returned no minimap", 0)
+	end
+	void("gl.ConfigMiniMap", function()
+		gl.ConfigMiniMap(px, py, sx, sy)
+	end)
+	void("gl.SlaveMiniMap", function()
+		gl.SlaveMiniMap(true)
+	end)
+	void("gl.DrawMiniMap", function()
+		gl.DrawMiniMap(true)
+	end)
+	void("gl.DrawMiniMap.custom", function()
+		gl.DrawMiniMap(false)
+	end)
+	void("gl.SlaveMiniMap.restore", function()
+		gl.SlaveMiniMap(false)
+	end)
+	void("gl.ConfigMiniMap.restore", function()
+		gl.ConfigMiniMap(px, py, sx, sy)
+	end)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.minimap")
+	record("gl.minimap", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
 local function runGlFixedImmediateSurfaceApiTest()
 	if ranGlFixedImmediate or not Common.enableRenderingTests() then
 		return
@@ -2004,6 +2047,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlAtlasSurfaceApiTest()
 	runGlFboSurfaceApiTest()
 	runGlFontSurfaceApiTest()
+	runGlMiniMapSurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 
