@@ -3541,17 +3541,19 @@ static void NativeElementFormControlInputSetSelection(const RmlElementFormContro
 
 static void NativeElementFormControlInputGetSelection(const RmlElementHandleQuery* query, RmlElementFormControlSelectionResult* result)
 {
+	static thread_local Rml::String selected;
 	result->error = nullptr;
 	result->start = 0;
 	result->end = 0;
+	result->text = nullptr;
 	result->success = false;
 	auto* input = dynamic_cast<Rml::ElementFormControlInput*>(FromElementHandle(query->elementHandle));
 	if (input == nullptr) {
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	Rml::String selected;
 	input->GetSelection(&result->start, &result->end, &selected);
+	result->text = selected.c_str();
 	result->success = true;
 }
 
@@ -3583,17 +3585,19 @@ static void NativeElementFormControlTextAreaSetSelection(const RmlElementFormCon
 
 static void NativeElementFormControlTextAreaGetSelection(const RmlElementHandleQuery* query, RmlElementFormControlSelectionResult* result)
 {
+	static thread_local Rml::String selected;
 	result->error = nullptr;
 	result->start = 0;
 	result->end = 0;
+	result->text = nullptr;
 	result->success = false;
 	auto* textarea = dynamic_cast<Rml::ElementFormControlTextArea*>(FromElementHandle(query->elementHandle));
 	if (textarea == nullptr) {
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	Rml::String selected;
 	textarea->GetSelection(&result->start, &result->end, &selected);
+	result->text = selected.c_str();
 	result->success = true;
 }
 

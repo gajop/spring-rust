@@ -129,7 +129,16 @@ struct RmlElementFormSubmitQuery { uint64_t elementHandle; const char* name; con
 struct RmlElementFormControlSelectAddQuery { uint64_t elementHandle; uint64_t elementPtrHandle; int32_t before; };
 struct RmlElementFormControlSelectRemoveQuery { uint64_t elementHandle; int32_t index; };
 struct RmlElementFormControlSelectionQuery { uint64_t elementHandle; int32_t start; int32_t end; };
-struct RmlElementFormControlSelectionResult { const Error* error; int32_t start; int32_t end; bool success; };
+// Lua's GetSelection returns the selected text as its third result. Keep that
+// value in the native result as well; callers must not have to reconstruct it
+// from byte offsets (which are character offsets in RmlUi's string model).
+struct RmlElementFormControlSelectionResult {
+	const Error* error;
+	int32_t start;
+	int32_t end;
+	const char* text;
+	bool success;
+};
 struct RmlElementTabSetIndexStringQuery { uint64_t elementHandle; int32_t index; const char* rml; };
 struct RmlElementTabSetIndexQuery { uint64_t elementHandle; int32_t index; };
 struct RmlVector2fNewQuery { float x; float y; };
