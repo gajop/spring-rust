@@ -385,6 +385,26 @@
       "reason": "Rendering-context replay of minimap geometry configuration, slave mode, and default/custom minimap drawing, with geometry restored afterward."
     },
     {
+      "id": "gl.resource_handles",
+      "context": "widget",
+      "mode": "matched",
+      "lua": [
+        "gl.GetVAO",
+        "gl.GetVBO",
+        "VAO.Delete",
+        "VBO.Delete",
+        "gl.SwapBuffers"
+      ],
+      "native": [
+        "Gfx.get_vao",
+        "Gfx.get_vbo",
+        "Gfx.delete_vao",
+        "Gfx.delete_vbo",
+        "Gfx.swap_buffers"
+      ],
+      "reason": "Rendering-context replay of VAO/VBO handle creation and destruction plus the documented buffer-swap call; opaque GL/userdata IDs are normalized to existence and target semantics."
+    },
+    {
       "id": "gl.object_drawing",
       "context": "widget",
       "mode": "matched",

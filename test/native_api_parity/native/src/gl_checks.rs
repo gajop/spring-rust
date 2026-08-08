@@ -1760,6 +1760,44 @@ impl NativeApiParity {
         compare_result(message, actual, "gl.minimap")
     }
 
+    pub(crate) fn check_gl_resource_handles(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        let (vao_id, vao_raw_id) = gfx
+            .get_vao()
+            .map_err(|error| format!("GetVAO failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.GetVAO",
+            vec![serde_json::json!(vao_id != 0 && vao_raw_id != 0)],
+        );
+
+        let (vbo_id, vbo_raw_id, vbo_target) = gfx
+            .get_vbo(GL_ARRAY_BUFFER, false)
+            .map_err(|error| format!("GetVBO failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.GetVBO",
+            vec![
+                serde_json::json!(vbo_id != 0 && vbo_raw_id != 0),
+                serde_json::json!(vbo_target),
+            ],
+        );
+
+        gfx.delete_vao(vao_id)
+            .map_err(|error| format!("VAO:Delete failed: {error:?}"))?;
+        record_void(&mut actual, "gl.GetVAO.Delete");
+        gfx.delete_vbo(vbo_id)
+            .map_err(|error| format!("VBO:Delete failed: {error:?}"))?;
+        record_void(&mut actual, "gl.GetVBO.Delete");
+        gfx.swap_buffers()
+            .map_err(|error| format!("SwapBuffers failed: {error:?}"))?;
+        record_void(&mut actual, "gl.SwapBuffers");
+
+        compare_result(message, actual, "gl.resource_handles")
+    }
+
     pub(crate) fn check_gl_object_drawing(&self, message: &Value) -> Result<(), String> {
         let gfx = self.interface.gfx();
         let unit_id = fixture_i32(message, "unitID")?;

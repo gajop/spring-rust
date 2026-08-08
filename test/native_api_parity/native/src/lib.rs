@@ -133,6 +133,8 @@ impl NativeModule for NativeApiParity {
             self.check_gl_fonts(&parsed)
         } else if name == "gl.minimap" {
             self.check_gl_minimap(&parsed)
+        } else if name == "gl.resource_handles" {
+            self.check_gl_resource_handles(&parsed)
         } else if name == "gl.object_drawing" {
             self.check_gl_object_drawing(&parsed)
         } else if name == "gl.fixed_immediate" {

@@ -15,6 +15,7 @@ local ranGlTextureResources = false
 local ranGlListsQueries = false
 local ranGlAtlas = false
 local ranGlFbo = false
+local ranGlResourceHandles = false
 local ranGlFonts = false
 local ranGlMiniMap = false
 local ranGlObjectDrawing = false
@@ -1078,6 +1079,41 @@ local function runGlFboSurfaceApiTest()
 	local payload = { status = "pass", result = result, context = "widget" }
 	Common.setTestName(payload, "gl.fbo")
 	record("gl.fbo", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function runGlResourceHandleSurfaceApiTest()
+	if ranGlResourceHandles or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlResourceHandles = true
+
+	local result = {}
+	local vao = gl.GetVAO()
+	result["gl.GetVAO"] = { n = 1, values = { vao ~= nil } }
+	if vao == nil then
+		error("gl.GetVAO did not return a VAO", 0)
+	end
+
+	local vbo = gl.GetVBO(GL.ARRAY_BUFFER, false)
+	result["gl.GetVBO"] = { n = 2, values = { vbo ~= nil, GL.ARRAY_BUFFER } }
+	if vbo == nil then
+		error("gl.GetVBO did not return a VBO", 0)
+	end
+
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+	void("gl.GetVAO.Delete", function() vao:Delete() end)
+	void("gl.GetVBO.Delete", function() vbo:Delete() end)
+	void("gl.SwapBuffers", gl.SwapBuffers)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.resource_handles")
+	record("gl.resource_handles", payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
 	end
@@ -2208,6 +2244,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlListsQuerySurfaceApiTest()
 	runGlAtlasSurfaceApiTest()
 	runGlFboSurfaceApiTest()
+	runGlResourceHandleSurfaceApiTest()
 	runGlFontSurfaceApiTest()
 	runGlMiniMapSurfaceApiTest()
 	runGlObjectDrawingSurfaceApiTest()
