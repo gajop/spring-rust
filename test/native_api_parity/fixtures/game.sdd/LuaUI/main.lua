@@ -5,6 +5,7 @@ local sentInventory = false
 local ranGeneratedTests = false
 local ranRmlUiTests = false
 local ranRmlSurfaceApiTest = false
+local ranRmlElementSurfaceApiTest = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -357,6 +358,234 @@ local function runRmlUiTests()
 	end
 	ranRmlUiTests = true
 	runRmlSurfaceApiTest()
+
+	local function runRmlElementSurfaceApiTest()
+		if ranRmlElementSurfaceApiTest then
+			return
+		end
+		ranRmlElementSurfaceApiTest = true
+
+		local testName = "rml.element_form_event"
+		local result = {}
+		local context = RmlUi.CreateContext("native_api_parity_surface_element_form")
+		if context == nil then
+			error("RmlUi.CreateContext for element surface returned nil", 0)
+		end
+		local document = context:CreateDocument()
+		if document == nil then
+			error("element surface document creation failed", 0)
+		end
+		document.inner_rml = [[
+			<form id="surface-form">
+				<div id="container" class="panel primary">
+					<span id="alpha" class="chip hot">A</span>
+					<button id="beta" class="chip">B</button>
+				</div>
+				<input id="input" value="abcdef" />
+				<textarea id="textarea">hello world</textarea>
+				<select id="select"><option value="one">One</option></select>
+				<tabset id="tabs"></tabset>
+			</form>
+		]]
+		document:UpdateDocument()
+
+		local container = expectElement("surface container", document:GetElementById("container"))
+		local alpha = expectElement("surface alpha", document:GetElementById("alpha"))
+		local beta = expectElement("surface beta", document:GetElementById("beta"))
+		local input = expectElement("surface input", document:GetElementById("input"))
+		local textarea = expectElement("surface textarea", document:GetElementById("textarea"))
+		local select = expectElement("surface select", document:GetElementById("select"))
+		local form = expectCast("surface form", RmlUi.Element.As.ElementForm(document:GetElementById("surface-form")))
+
+		rmlSurfaceCall(result, "RmlUi.Element.AddEventListener", function()
+			return beta:AddEventListener("click", function(event)
+				rmlSurfaceCall(result, "RmlUi.Element.ProcessDefaultAction", function()
+					return beta:ProcessDefaultAction(event)
+				end)
+			end)
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.AppendChild", function()
+			return container:AppendChild(document:CreateElement("p"))
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.ArePseudoCLassesSet", function()
+			return container:ArePseudoClassesSet({ "panel", "primary" })
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.Blur", function()
+			return alpha:Blur()
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.Click", function()
+			return beta:Click()
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.Clone", function()
+			return alpha:Clone()
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.Closest", function()
+			return alpha:Closest(".panel")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.DispatchEvent", function()
+			return beta:DispatchEvent("click")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.Focus", function()
+			return input:Focus()
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.GetActivePseudoCLasses", function()
+			return container:GetActivePseudoClasses()
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.GetAttribute", function()
+			return container:GetAttribute("class")
+		end)
+	rmlSurfaceCall(result, "RmlUi.Element.GetChild", function()
+			return container:GetChild(0)
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.GetElementById", function()
+			return document:GetElementById("alpha")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.GetElementsByClassName", function()
+			return container:GetElementsByClassName("chip")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.GetElementsByTagName", function()
+			return container:GetElementsByTagName("span")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.GetValue", function()
+			return input:GetValue()
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.HasAttribute", function()
+			return container:HasAttribute("class")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.HasChildNodes", function()
+			return container:HasChildNodes()
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.InsertBefore", function()
+			return container:InsertBefore(document:CreateElement("i"), beta)
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.IsClassSet", function()
+			return alpha:IsClassSet("chip")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.IsPointWithinElement", function()
+			return container:IsPointWithinElement(RmlUi.Vector2f.new(1.0, 1.0))
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.IsPseudoClassSet", function()
+			return alpha:IsPseudoClassSet("hover")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.IsVisible", function()
+			return container:IsVisible()
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.Matches", function()
+			return alpha:Matches("span.chip")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.QuerySelector", function()
+			return container:QuerySelector("#beta")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.QuerySelectorAll", function()
+			return container:QuerySelectorAll(".chip")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.RemoveAttribute", function()
+			return alpha:RemoveAttribute("class")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.RemoveChild", function()
+			return container:RemoveChild(beta)
+		end)
+		local replacement = document:CreateElement("em")
+		rmlSurfaceCall(result, "RmlUi.Element.ReplaceChild", function()
+			return container:ReplaceChild(replacement, alpha)
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.ScrollIntoView", function()
+			return container:ScrollIntoView(true)
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.SetAttribute", function()
+			return container:SetAttribute("data-surface", "native-api-parity")
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.SetClass", function()
+			return container:SetClass("selected", true)
+		end)
+		rmlSurfaceCall(result, "RmlUi.Element.SetPseudoClass", function()
+			return container:SetPseudoClass("hover", true)
+		end)
+
+		rmlSurfaceCall(result, "RmlUi.ElementForm.Submit", function()
+			return form:Submit("surface", "value")
+		end)
+
+		local inputControl = expectCast("surface input control", RmlUi.Element.As.ElementFormControlInput(input))
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlInput.SetSelection", function()
+			return inputControl:SetSelection(1, 4)
+		end)
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlInput.GetSelection", function()
+			return inputControl:GetSelection()
+		end)
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlInput.Select", function()
+			return inputControl:Select()
+		end)
+
+		local selectControl = expectCast("surface select control", RmlUi.Element.As.ElementFormControlSelect(select))
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlSelect.Add", function()
+			return selectControl:Add(document:CreateElement("option"))
+		end)
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlSelect.Remove", function()
+			return selectControl:Remove(1)
+		end)
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlSelect.RemoveAll", function()
+			return selectControl:RemoveAll()
+		end)
+
+		local textareaControl = expectCast("surface textarea control", RmlUi.Element.As.ElementFormControlTextArea(textarea))
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlTextArea.SetSelection", function()
+			return textareaControl:SetSelection(0, 5)
+		end)
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlTextArea.GetSelection", function()
+			return textareaControl:GetSelection()
+		end)
+		rmlSurfaceCall(result, "RmlUi.ElementFormControlTextArea.Select", function()
+			return textareaControl:Select()
+		end)
+
+		local tabSet = expectCast("surface tab set", RmlUi.Element.As.ElementTabSet(document:GetElementById("tabs")))
+		rmlSurfaceCall(result, "RmlUi.ElementTabSet.SetPanel", function()
+			return tabSet:SetPanel(0, "<div>panel</div>")
+		end)
+		rmlSurfaceCall(result, "RmlUi.ElementTabSet.SetTab", function()
+			return tabSet:SetTab(0, "Tab")
+		end)
+		rmlSurfaceCall(result, "RmlUi.ElementTabSet.RemoveTab", function()
+			return tabSet:RemoveTab(0)
+		end)
+
+		local model = context:OpenDataModel("native_api_parity_surface_element_model", { value = "surface" })
+		if model == nil then
+			error("surface data model creation failed", 0)
+		end
+		rmlSurfaceCall(result, "RmlUi.SolLuaDataModel.__SetDirty", function()
+			return model:__SetDirty("value")
+		end)
+
+		context:UnloadAllDocuments()
+		RmlUi.RemoveContext(context)
+
+		local payload = { status = "pass", result = result, context = "widget" }
+		Common.setTestName(payload, testName)
+		record(testName, payload)
+		if Common.mode() == "native" then
+			Spring.InvokeNativeModule(Common.encode(payload))
+		end
+
+		local listenerType = type(RmlUi.EventListener)
+		local canConstructListener = pcall(function()
+			return RmlUi.EventListener()
+		end)
+		if listenerType ~= "table" or canConstructListener then
+			error("RmlUi.EventListener should remain an abstract no-constructor type", 0)
+		end
+		local listenerPayload = {
+			status = "pass",
+			listenerType = listenerType,
+			constructible = canConstructListener,
+			context = "widget",
+		}
+		Common.setTestName(listenerPayload, "rml.event_listener_nonconstructible")
+		record("rml.event_listener_nonconstructible", listenerPayload)
+	end
+
+	runRmlElementSurfaceApiTest()
 
 	runRmlCheck("lua_rml_available", function()
 		if RmlUi == nil then

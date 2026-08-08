@@ -48,6 +48,16 @@ from Lua/native result equality.
 The audit keeps every other unmapped Lua callout unresolved until its source
 registration and native counterpart have been compared.
 
+### `RmlUi.EventListener` virtual methods
+
+`RmlUi.EventListener.OnAttach`, `OnDetach`, and `ProcessEvent` are registered
+on an abstract, non-constructible Lua base type. Lua has no factory for this
+type and no returned userdata on which those methods can be invoked; real Lua
+listeners use the function/string callback overloads on `Element` and
+`Context`. Native modules use the callback-registration ABI instead. These
+methods are therefore Lua-only by design, and the parity fixture verifies that
+the base type remains non-constructible.
+
 ### `Script.*`
 
 The documented `Script.*` functions are Lua-handle operations: they inspect or

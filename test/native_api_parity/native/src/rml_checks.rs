@@ -12,6 +12,466 @@ use serde_json::{Map, Value};
 use spring_native::{RmlRegisterEventTypeOptions, RmlUi};
 
 impl NativeApiParity {
+    pub(crate) fn check_rml_element_form_event(&self, message: &Value) -> Result<(), String> {
+        let expected = message
+            .get("result")
+            .ok_or_else(|| "Rml element surface payload is missing `result`".to_owned())?;
+        let rml = self.interface.rml_ui();
+        ensure(
+            rml.is_ready().map_err(format_error)?,
+            "RmlUi should be ready in rendering tests",
+        )?;
+
+        let context_name = format!(
+            "native_api_parity_surface_element_form_native_{}",
+            std::process::id()
+        );
+        let (context, created) = rml.create_context(&context_name).map_err(format_error)?;
+        ensure(
+            created && context != 0,
+            "Rml element surface native replay should create a context",
+        )?;
+
+        let replay = (|| -> Result<Map<String, Value>, String> {
+            let mut actual = Map::new();
+            let record = |actual: &mut Map<String, Value>, name: &str, values: Vec<Value>| {
+                actual.insert(
+                    name.to_owned(),
+                    serde_json::json!({
+                        "n": values.len(),
+                        "values": values,
+                    }),
+                );
+            };
+            let record_void = |actual: &mut Map<String, Value>, name: &str| {
+                record(actual, name, Vec::new());
+            };
+            let record_bool = |actual: &mut Map<String, Value>, name: &str, value: bool| {
+                record(actual, name, vec![serde_json::json!(value)]);
+            };
+            let record_userdata =
+                |actual: &mut Map<String, Value>, name: &str, handle: u64, exists: bool| {
+                    let value = if exists && handle != 0 {
+                        serde_json::json!({ "type": "userdata" })
+                    } else {
+                        serde_json::json!({ "type": "nil" })
+                    };
+                    record(actual, name, vec![value]);
+                };
+            let record_table_count = |actual: &mut Map<String, Value>, name: &str, count: usize| {
+                record(
+                    actual,
+                    name,
+                    vec![serde_json::json!({ "type": "table", "count": count })],
+                );
+            };
+
+            let (document, document_created) = rml
+                .context_create_document(context, "body")
+                .map_err(format_error)?;
+            ensure(
+                document_created && document != 0,
+                "Rml element surface document should be created",
+            )?;
+            let markup = r#"
+                <form id="surface-form">
+                    <div id="container" class="panel primary">
+                        <span id="alpha" class="chip hot">A</span>
+                        <button id="beta" class="chip">B</button>
+                    </div>
+                    <input id="input" value="abcdef" />
+                    <textarea id="textarea">hello world</textarea>
+                    <select id="select"><option value="one">One</option></select>
+                    <tabset id="tabs"></tabset>
+                </form>
+            "#;
+            ensure(
+                rml.element_set_inner_rml(document, markup)
+                    .map_err(format_error)?,
+                "Rml element surface markup should be assigned",
+            )?;
+            ensure(
+                rml.document_update_document(document)
+                    .map_err(format_error)?,
+                "Rml element surface document should update",
+            )?;
+
+            let handle = |id: &str| -> Result<u64, String> {
+                let (value, exists) = rml
+                    .element_get_element_by_id(document, id)
+                    .map_err(format_error)?;
+                ensure(exists && value != 0, &format!("missing Rml element `{id}`"))?;
+                Ok(value)
+            };
+            let container = handle("container")?;
+            let alpha = handle("alpha")?;
+            let beta = handle("beta")?;
+            let input = handle("input")?;
+            let textarea = handle("textarea")?;
+            let select = handle("select")?;
+            let form = handle("surface-form")?;
+            let tabs = handle("tabs")?;
+
+            let process_default_ok = Arc::new(Mutex::new(true));
+            let process_default_ok_callback = Arc::clone(&process_default_ok);
+            let callback_rml = rml;
+            let (_listener, listener_attached) = rml
+                .element_add_event_listener(beta, "click", false, move || {
+                    let current = callback_rml.event_get_current();
+                    if let Ok((event, _element, _document, exists)) = current {
+                        if !exists {
+                            *process_default_ok_callback.lock().unwrap() = false;
+                            return;
+                        }
+                        if callback_rml
+                            .element_process_default_action(beta, event)
+                            .is_err()
+                        {
+                            *process_default_ok_callback.lock().unwrap() = false;
+                        }
+                    } else {
+                        *process_default_ok_callback.lock().unwrap() = false;
+                    }
+                })
+                .map_err(format_error)?;
+            ensure(
+                listener_attached,
+                "Rml element event listener should attach",
+            )?;
+            record_void(&mut actual, "RmlUi.Element.AddEventListener");
+
+            let (appended, appended_ok) = rml
+                .document_create_element(document, "p")
+                .map_err(format_error)?;
+            ensure(
+                appended_ok && appended != 0,
+                "append element should be created",
+            )?;
+            let (appended_result, appended_result_ok) = rml
+                .element_append_child(container, appended)
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Element.AppendChild",
+                appended_result,
+                appended_result_ok,
+            );
+
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.ArePseudoCLassesSet",
+                rml.element_are_pseudo_classes_set(container, "panel primary")
+                    .map_err(format_error)?,
+            );
+            let _ = rml.element_blur(alpha).map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.Element.Blur");
+            let _ = rml.element_click(beta).map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.Element.Click");
+            let (clone, clone_ok) = rml.element_clone(alpha).map_err(format_error)?;
+            record_userdata(&mut actual, "RmlUi.Element.Clone", clone, clone_ok);
+            let (closest, closest_ok) =
+                rml.element_closest(alpha, ".panel").map_err(format_error)?;
+            record_userdata(&mut actual, "RmlUi.Element.Closest", closest, closest_ok);
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.DispatchEvent",
+                rml.element_dispatch_event(beta, "click")
+                    .map_err(format_error)?,
+            );
+            ensure(
+                *process_default_ok.lock().unwrap(),
+                "Rml element ProcessDefaultAction callback should succeed",
+            )?;
+            record_void(&mut actual, "RmlUi.Element.ProcessDefaultAction");
+            let _ = rml.element_focus(input).map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.Element.Focus");
+            record_table_count(
+                &mut actual,
+                "RmlUi.Element.GetActivePseudoCLasses",
+                rml.element_get_active_pseudo_classes(container)
+                    .map_err(format_error)?
+                    .len(),
+            );
+            let (attribute, attribute_exists) = rml
+                .element_get_attribute(container, "class")
+                .map_err(format_error)?;
+            record(
+                &mut actual,
+                "RmlUi.Element.GetAttribute",
+                vec![if attribute_exists {
+                    serde_json::json!(attribute)
+                } else {
+                    Value::Null
+                }],
+            );
+            let (child, child_exists) =
+                rml.element_get_child(container, 0).map_err(format_error)?;
+            record_userdata(&mut actual, "RmlUi.Element.GetChild", child, child_exists);
+            let (by_id, by_id_exists) = rml
+                .element_get_element_by_id(document, "alpha")
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Element.GetElementById",
+                by_id,
+                by_id_exists,
+            );
+            record_table_count(
+                &mut actual,
+                "RmlUi.Element.GetElementsByClassName",
+                rml.element_get_elements_by_class_name(container, "chip")
+                    .map_err(format_error)?
+                    .len(),
+            );
+            record_table_count(
+                &mut actual,
+                "RmlUi.Element.GetElementsByTagName",
+                rml.element_get_elements_by_tag_name(container, "span")
+                    .map_err(format_error)?
+                    .len(),
+            );
+            record(
+                &mut actual,
+                "RmlUi.Element.GetValue",
+                vec![serde_json::json!(rml
+                    .element_get_value(input)
+                    .map_err(format_error)?
+                    .unwrap_or_default())],
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.HasAttribute",
+                rml.element_has_attribute(container, "class")
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.HasChildNodes",
+                rml.element_has_child_nodes(container)
+                    .map_err(format_error)?,
+            );
+            let (inserted, inserted_ok) = rml
+                .document_create_element(document, "i")
+                .map_err(format_error)?;
+            ensure(
+                inserted_ok && inserted != 0,
+                "insert element should be created",
+            )?;
+            let (inserted_result, inserted_result_ok) = rml
+                .element_insert_before(container, inserted, beta)
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Element.InsertBefore",
+                inserted_result,
+                inserted_result_ok,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.IsClassSet",
+                rml.element_is_class_set(alpha, "chip")
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.IsPointWithinElement",
+                rml.element_is_point_within_element(container, 1.0, 1.0)
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.IsPseudoClassSet",
+                rml.element_is_pseudo_class_set(alpha, "hover")
+                    .map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.IsVisible",
+                rml.element_is_visible(container).map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
+                "RmlUi.Element.Matches",
+                rml.element_matches(alpha, "span.chip")
+                    .map_err(format_error)?,
+            );
+            let (query, query_ok) = rml
+                .element_query_selector(container, "#beta")
+                .map_err(format_error)?;
+            record_userdata(&mut actual, "RmlUi.Element.QuerySelector", query, query_ok);
+            record_table_count(
+                &mut actual,
+                "RmlUi.Element.QuerySelectorAll",
+                rml.element_query_selector_all(container, ".chip")
+                    .map_err(format_error)?
+                    .len(),
+            );
+            let _ = rml
+                .element_remove_attribute(alpha, "class")
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.Element.RemoveAttribute");
+            let (removed, removed_ok) = rml
+                .element_remove_child(container, beta)
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Element.RemoveChild",
+                removed,
+                removed_ok,
+            );
+            let (replacement, replacement_created) = rml
+                .document_create_element(document, "em")
+                .map_err(format_error)?;
+            ensure(
+                replacement_created && replacement != 0,
+                "replacement element should be created",
+            )?;
+            let (replaced, replaced_ok) = rml
+                .element_replace_child(container, replacement, alpha)
+                .map_err(format_error)?;
+            record_userdata(
+                &mut actual,
+                "RmlUi.Element.ReplaceChild",
+                replaced,
+                replaced_ok,
+            );
+            let _ = rml
+                .element_scroll_into_view(container, true)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.Element.ScrollIntoView");
+            let _ = rml
+                .element_set_attribute(container, "data-surface", "native-api-parity")
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.Element.SetAttribute");
+            let _ = rml
+                .element_set_class(container, "selected", true)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.Element.SetClass");
+            let _ = rml
+                .element_set_pseudo_class(container, "hover", true)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.Element.SetPseudoClass");
+
+            let _ = rml
+                .element_form_submit(form, "surface", "value")
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementForm.Submit");
+
+            let _ = rml
+                .element_form_control_input_set_selection(input, 1, 4)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementFormControlInput.SetSelection");
+            let (start, end, text, success) = rml
+                .element_form_control_input_get_selection(input)
+                .map_err(format_error)?;
+            ensure(success, "input selection should be available")?;
+            record(
+                &mut actual,
+                "RmlUi.ElementFormControlInput.GetSelection",
+                vec![
+                    serde_json::json!(start),
+                    serde_json::json!(end),
+                    serde_json::json!(text),
+                ],
+            );
+            let _ = rml
+                .element_form_control_input_select(input)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementFormControlInput.Select");
+
+            let (option, option_created) = rml
+                .document_create_element(document, "option")
+                .map_err(format_error)?;
+            ensure(
+                option_created && option != 0,
+                "select option should be created",
+            )?;
+            let added = rml
+                .element_form_control_select_add(select, option, -1)
+                .map_err(format_error)?;
+            record(
+                &mut actual,
+                "RmlUi.ElementFormControlSelect.Add",
+                vec![serde_json::json!(if added { 1 } else { 0 })],
+            );
+            let _ = rml
+                .element_form_control_select_remove(select, 1)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementFormControlSelect.Remove");
+            let _ = rml
+                .element_form_control_select_remove_all(select)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementFormControlSelect.RemoveAll");
+
+            let _ = rml
+                .element_form_control_text_area_set_selection(textarea, 0, 5)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementFormControlTextArea.SetSelection");
+            let (start, end, text, success) = rml
+                .element_form_control_text_area_get_selection(textarea)
+                .map_err(format_error)?;
+            ensure(success, "textarea selection should be available")?;
+            record(
+                &mut actual,
+                "RmlUi.ElementFormControlTextArea.GetSelection",
+                vec![
+                    serde_json::json!(start),
+                    serde_json::json!(end),
+                    serde_json::json!(text),
+                ],
+            );
+            let _ = rml
+                .element_form_control_text_area_select(textarea)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementFormControlTextArea.Select");
+
+            let _ = rml
+                .element_tab_set_set_panel(tabs, 0, "<div>panel</div>")
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementTabSet.SetPanel");
+            let _ = rml
+                .element_tab_set_set_tab(tabs, 0, "Tab")
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementTabSet.SetTab");
+            let _ = rml
+                .element_tab_set_remove_tab(tabs, 0)
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.ElementTabSet.RemoveTab");
+
+            let (model, model_opened) = rml
+                .context_open_data_model(context, "native_api_parity_surface_element_model")
+                .map_err(format_error)?;
+            ensure(model_opened && model != 0, "surface data model should open")?;
+            let _ = rml
+                .sol_lua_data_model_set_dirty(model, "value")
+                .map_err(format_error)?;
+            record_void(&mut actual, "RmlUi.SolLuaDataModel.__SetDirty");
+
+            ensure(
+                rml.context_unload_all_documents(context)
+                    .map_err(format_error)?,
+                "Rml element surface documents should unload",
+            )?;
+            ensure(
+                rml.remove_context(context).map_err(format_error)?,
+                "Rml element surface context should be removed",
+            )?;
+            Ok(actual)
+        })();
+
+        if replay.is_err() {
+            let _ = rml.context_unload_all_documents(context);
+            let _ = rml.remove_context(context);
+        }
+        let actual = Value::Object(replay?);
+        if expected != &actual {
+            return Err(format!(
+                "Rml element surface result mismatch: expected={expected}, actual={actual}"
+            ));
+        }
+        Ok(())
+    }
+
     pub(crate) fn check_rml_global_context_document(&self, message: &Value) -> Result<(), String> {
         let expected = message
             .get("result")
@@ -1213,7 +1673,7 @@ impl NativeApiParity {
                 "input selection",
                 rml.element_form_control_input_get_selection(input)
                     .map_err(format_error)?,
-                (1, 4, true),
+                (1, 4, Some("bcd".to_owned()), true),
             )?;
 
 			let textarea = expect_element(
@@ -1239,7 +1699,7 @@ impl NativeApiParity {
                 "textarea selection",
                 rml.element_form_control_text_area_get_selection(textarea)
                     .map_err(format_error)?,
-                (0, 5, true),
+                (0, 5, Some("hello".to_owned()), true),
             )?;
 
 			let select = append_new_element(rml, document, document, "select", Some("select"))?;

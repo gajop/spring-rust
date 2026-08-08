@@ -109,6 +109,8 @@ impl NativeModule for NativeApiParity {
             self.check_complete()
         } else if name == "rml.global_context_document" {
             self.check_rml_global_context_document(&parsed)
+        } else if name == "rml.element_form_event" {
+            self.check_rml_element_form_event(&parsed)
         } else if let Some(test_name) = name.strip_prefix("set_native_") {
             self.find(test_name)
                 .ok_or_else(|| format!("unknown native setter check `{name}`"))

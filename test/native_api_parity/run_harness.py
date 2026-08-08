@@ -1262,6 +1262,14 @@ def read_surface_test_ids(base_output: Path) -> set[str]:
     return recorded
 
 
+def requested_surface_test_ids(args: argparse.Namespace) -> set[str]:
+    """Return explicitly selected surface tests that must be observed."""
+    if not args.tests:
+        return set()
+    requested = {value.strip() for value in args.tests.split(",") if value.strip()}
+    return requested & set(SURFACE_TEST_BY_ID)
+
+
 def is_portable_readonly_test(test: dict) -> bool:
     return (
         test.get("kind") == "readonly"
@@ -1588,6 +1596,9 @@ def write_coverage_details(
 def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict | None) -> None:
     lua_dir = base_output / "lua"
     native_dir = base_output / "native"
+    surface_recorded_ids = read_surface_test_ids(base_output)
+    required_surface_ids = requested_surface_test_ids(args)
+    missing_required_surface_ids = sorted(required_surface_ids - surface_recorded_ids)
     case_count = read_report_option(lua_dir / "script.txt", "native_api_parity_cases") or "n/a"
     rendering_enabled = (
         read_report_option(lua_dir / "script.txt", "native_api_parity_enable_rendering_tests") == "1"
@@ -1596,7 +1607,7 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
     lines = [
         "# Native API Parity Report",
         "",
-        f"- Result: {'PASS' if (compare_info and compare_info['ok']) else 'PARTIAL/UNVERIFIED'}",
+        f"- Result: {'PASS' if (compare_info and compare_info['ok'] and not missing_required_surface_ids) else 'PARTIAL/UNVERIFIED'}",
         f"- Generated: {time.strftime('%Y-%m-%d %H:%M:%S %z')}",
         f"- Spring binary: {report_link(args.spring if rendering_enabled else args.spring_headless)}",
         f"- Rendering tests: `{'enabled' if rendering_enabled else 'disabled'}`",
@@ -1764,7 +1775,6 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         lines.append("| n/a | 0 | 0 |")
 
     checked_names = set(result_names(native_rows))
-    surface_recorded_ids = read_surface_test_ids(base_output)
     summary = coverage_summary(checked_names, surface_recorded_ids)
     inventory = read_context_inventory(base_output)
     recorded_by_context = read_recorded_ids_by_context(base_output)
@@ -1788,6 +1798,15 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
             f"{pct(len(summary['rust_tested_known']), len(summary['rust_total']))} |"
         ),
     ])
+    if required_surface_ids:
+        lines.extend([
+            "",
+            "## Requested Surface Coverage",
+            "",
+            f"- Required surface checks: `{len(required_surface_ids)}`",
+            f"- Observed surface checks: `{len(required_surface_ids) - len(missing_required_surface_ids)}`",
+            f"- Missing requested checks: `{', '.join(f'`{name}`' for name in missing_required_surface_ids) or 'none'}`",
+        ])
     for namespace in ("Global", "RmlUi", "gl", "VFS", "Script", "Encoding", "math", "debug", "table"):
         total = summary["lua_surfaces"].get(namespace, set())
         tested = summary["lua_surface_tested_known"] & total
@@ -1966,6 +1985,16 @@ def main() -> int:
 
     compare_info = compare_details(lua_dir, native_dir) if lua_dir and native_dir else None
     write_report(base_output, args, compare_info)
+
+    missing_required_surface_ids = sorted(
+        requested_surface_test_ids(args) - read_surface_test_ids(base_output)
+    )
+    if missing_required_surface_ids:
+        print(
+            "requested surface checks were not recorded: "
+            + ", ".join(missing_required_surface_ids)
+        )
+        return 1
 
     if compare_info and not compare_info["ok"]:
         return 1
