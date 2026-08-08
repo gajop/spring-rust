@@ -102,6 +102,38 @@
       "reason": "Rendering-context replay of state and matrix mutators, followed by a matrix readback, with cleanup on both sides."
     },
     {
+      "id": "gl.immediate_primitives",
+      "context": "widget",
+      "mode": "matched",
+      "lua": [
+        "gl.Clear",
+        "gl.BeginEnd",
+        "gl.Shape",
+        "gl.Rect",
+        "gl.TexRect",
+        "gl.Billboard",
+        "gl.PushPopMatrix",
+        "gl.UnsafeState",
+        "gl.Flush",
+        "gl.Finish",
+        "gl.GetNumber"
+      ],
+      "native": [
+        "Gfx.clear",
+        "Gfx.begin_end",
+        "Gfx.shape",
+        "Gfx.rect",
+        "Gfx.tex_rect",
+        "Gfx.billboard",
+        "Gfx.push_pop_matrix",
+        "Gfx.unsafe_state",
+        "Gfx.flush",
+        "Gfx.finish",
+        "Gfx.get_number"
+      ],
+      "reason": "Rendering-context replay of immediate-mode primitives, callback-scoped state, and current-attribute readback."
+    },
+    {
       "id": "gl.fixed_immediate",
       "context": "widget",
       "mode": "matched",

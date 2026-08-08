@@ -117,6 +117,8 @@ impl NativeModule for NativeApiParity {
             self.check_gl_state_queries(&parsed)
         } else if name == "gl.state_mutations" {
             self.check_gl_state_mutations(&parsed)
+        } else if name == "gl.immediate_primitives" {
+            self.check_gl_immediate_primitives(&parsed)
         } else if name == "gl.fixed_immediate" {
             self.check_gl_fixed_immediate(&parsed)
         } else if let Some(test_name) = name.strip_prefix("set_native_") {

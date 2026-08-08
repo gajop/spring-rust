@@ -9,6 +9,7 @@ local ranRmlElementSurfaceApiTest = false
 local ranGlStateQueries = false
 local ranGlStateMutations = false
 local ranGlFixedImmediate = false
+local ranGlImmediatePrimitives = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -481,6 +482,91 @@ local function runGlStateMutationSurfaceApiTest()
 	local payload = { status = "pass", result = result, context = "widget" }
 	Common.setTestName(payload, "gl.state_mutations")
 	record("gl.state_mutations", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function runGlImmediatePrimitivesSurfaceApiTest()
+	if ranGlImmediatePrimitives or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlImmediatePrimitives = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	void("gl.Clear", function()
+		gl.Clear(GL.COLOR_BUFFER_BIT, 0.1, 0.2, 0.3, 0.4)
+	end)
+	void("gl.BeginEnd", function()
+		gl.BeginEnd(GL.TRIANGLES, function()
+			gl.Color(0.2, 0.3, 0.4, 0.5)
+			gl.SecondaryColor(0.6, 0.7, 0.8)
+			gl.Normal(0, 1, 0)
+			gl.TexCoord(0.1, 0.2, 0.3, 0.4)
+			gl.MultiTexCoord(1, 0.2, 0.3, 0.4, 0.5)
+			gl.FogCoord(0.6)
+			gl.EdgeFlag(false)
+			gl.Vertex(0, 0, 0, 1)
+			gl.Vertex(1, 0, 0, 1)
+			gl.Vertex(0, 1, 0, 1)
+		end)
+	end)
+	void("gl.Shape", function()
+		gl.Shape(GL.TRIANGLES, {
+			{ v = { 0, 0, 0 }, n = { 0, 1, 0 }, t = { 0, 0 }, c = { 1, 0, 0, 1 } },
+			{ v = { 1, 0, 0 }, n = { 0, 1, 0 }, t = { 1, 0 }, c = { 0, 1, 0, 1 } },
+			{ v = { 0, 1, 0 }, n = { 0, 1, 0 }, t = { 0, 1 }, c = { 0, 0, 1, 1 } },
+		})
+	end)
+	void("gl.Rect", function() gl.Rect(-1, -1, 1, 1) end)
+	void("gl.TexRect", function() gl.TexRect(-1, -1, 1, 1, 0.1, 0.2, 0.9, 0.8) end)
+	void("gl.Billboard", gl.Billboard)
+	void("gl.PushPopMatrix", function()
+		gl.PushPopMatrix(GL.MODELVIEW, function()
+			gl.Translate(1, 2, 3)
+		end)
+	end)
+	void("gl.UnsafeState", function()
+		gl.UnsafeState(GL.BLEND, true, function() end)
+	end)
+	void("gl.Flush", gl.Flush)
+	void("gl.Finish", gl.Finish)
+
+	-- Read back the mutable current attributes after the immediate-mode calls;
+	-- this makes the comparison validate GL state rather than only void arity.
+	gl.Color(0.11, 0.22, 0.33, 0.44)
+	gl.Normal(0.55, 0.66, 0.77)
+	gl.TexCoord(0.12, 0.23, 0.34, 0.45)
+	gl.SecondaryColor(0.56, 0.67, 0.78)
+	gl.FogCoord(0.89)
+	gl.EdgeFlag(false)
+	glCall(result, "gl.GetNumber.currentColor", function()
+		return gl.GetNumber(0x0B00, 4)
+	end)
+	glCall(result, "gl.GetNumber.currentNormal", function()
+		return gl.GetNumber(0x0B02, 3)
+	end)
+	glCall(result, "gl.GetNumber.currentTexCoord", function()
+		return gl.GetNumber(0x0B03, 4)
+	end)
+	glCall(result, "gl.GetNumber.currentSecondaryColor", function()
+		return gl.GetNumber(0x8459, 4)
+	end)
+	glCall(result, "gl.GetNumber.currentFogCoord", function()
+		return gl.GetNumber(0x8453, 1)
+	end)
+	glCall(result, "gl.GetNumber.edgeFlag", function()
+		return gl.GetNumber(0x0B43, 1)
+	end)
+
+	void("gl.ResetState.restore", gl.ResetState)
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.immediate_primitives")
+	record("gl.immediate_primitives", payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
 	end
@@ -1311,6 +1397,7 @@ end
 function DrawScreen(viewSizeX, viewSizeY)
 	runGlStateSurfaceApiTest()
 	runGlStateMutationSurfaceApiTest()
+	runGlImmediatePrimitivesSurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 

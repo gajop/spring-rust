@@ -548,4 +548,142 @@ impl NativeApiParity {
         void!("gl.ResetState.restore", gfx.reset_state());
         compare_result(message, actual, "gl.fixed_immediate")
     }
+
+    pub(crate) fn check_gl_immediate_primitives(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+
+        void!(
+            "gl.Clear",
+            gfx.clear(GL_COLOR_BUFFER_BIT, [0.1, 0.2, 0.3, 0.4], 4)
+        );
+        void!(
+            "gl.BeginEnd",
+            gfx.begin_end(GL_TRIANGLES, || {
+                let _ = gfx.color(0.2, 0.3, 0.4, 0.5);
+                let _ = gfx.secondary_color(0.6, 0.7, 0.8);
+                let _ = gfx.normal(0.0, 1.0, 0.0);
+                let _ = gfx.tex_coord(0.1, 0.2, 0.3, 0.4, 4);
+                let _ = gfx.multi_tex_coord(1, 0.2, 0.3, 0.4, 0.5, 4);
+                let _ = gfx.fog_coord(0.6);
+                let _ = gfx.edge_flag(false);
+                let _ = gfx.vertex(0.0, 0.0, 0.0, 1.0, 4);
+                let _ = gfx.vertex(1.0, 0.0, 0.0, 1.0, 4);
+                let _ = gfx.vertex(0.0, 1.0, 0.0, 1.0, 4);
+            })
+        );
+
+        let vertices = [
+            spring_native::sys::GfxVertexData {
+                vertex: [0.0, 0.0, 0.0],
+                normal: [0.0, 1.0, 0.0],
+                texCoord: [0.0, 0.0],
+                color: [1.0, 0.0, 0.0, 1.0],
+                hasVertex: true,
+                hasNormal: true,
+                hasTexCoord: true,
+                hasColor: true,
+            },
+            spring_native::sys::GfxVertexData {
+                vertex: [1.0, 0.0, 0.0],
+                normal: [0.0, 1.0, 0.0],
+                texCoord: [1.0, 0.0],
+                color: [0.0, 1.0, 0.0, 1.0],
+                hasVertex: true,
+                hasNormal: true,
+                hasTexCoord: true,
+                hasColor: true,
+            },
+            spring_native::sys::GfxVertexData {
+                vertex: [0.0, 1.0, 0.0],
+                normal: [0.0, 1.0, 0.0],
+                texCoord: [0.0, 1.0],
+                color: [0.0, 0.0, 1.0, 1.0],
+                hasVertex: true,
+                hasNormal: true,
+                hasTexCoord: true,
+                hasColor: true,
+            },
+        ];
+        void!("gl.Shape", gfx.shape(GL_TRIANGLES, &vertices));
+        void!("gl.Rect", gfx.rect(-1.0, -1.0, 1.0, 1.0));
+        void!(
+            "gl.TexRect",
+            gfx.tex_rect(-1.0, -1.0, 1.0, 1.0, 0.1, 0.2, 0.9, 0.8)
+        );
+        void!("gl.Billboard", gfx.billboard());
+        void!(
+            "gl.PushPopMatrix",
+            gfx.push_pop_matrix(|| {
+                let _ = gfx.translate(1.0, 2.0, 3.0);
+            })
+        );
+        void!("gl.UnsafeState", gfx.unsafe_state(GL_BLEND, true, || {}));
+        void!("gl.Flush", gfx.flush());
+        void!("gl.Finish", gfx.finish());
+
+        gfx.color(0.11, 0.22, 0.33, 0.44)
+            .map_err(|error| format!("current color setup failed: {error:?}"))?;
+        gfx.normal(0.55, 0.66, 0.77)
+            .map_err(|error| format!("current normal setup failed: {error:?}"))?;
+        gfx.tex_coord(0.12, 0.23, 0.34, 0.45, 4)
+            .map_err(|error| format!("current texcoord setup failed: {error:?}"))?;
+        gfx.secondary_color(0.56, 0.67, 0.78)
+            .map_err(|error| format!("current secondary color setup failed: {error:?}"))?;
+        gfx.fog_coord(0.89)
+            .map_err(|error| format!("current fog coordinate setup failed: {error:?}"))?;
+        gfx.edge_flag(false)
+            .map_err(|error| format!("current edge flag setup failed: {error:?}"))?;
+
+        let read_number = |pname, count| {
+            gfx.get_number(pname, count)
+                .map_err(|error| format!("GetNumber({pname:#x}) failed: {error:?}"))
+        };
+        let (raw_values, count) = read_number(0x0B00, 4)?;
+        record(
+            &mut actual,
+            "gl.GetNumber.currentColor",
+            values(raw_values.into_iter().take(count as usize)),
+        );
+        let (raw_values, count) = read_number(0x0B02, 3)?;
+        record(
+            &mut actual,
+            "gl.GetNumber.currentNormal",
+            values(raw_values.into_iter().take(count as usize)),
+        );
+        let (raw_values, count) = read_number(0x0B03, 4)?;
+        record(
+            &mut actual,
+            "gl.GetNumber.currentTexCoord",
+            values(raw_values.into_iter().take(count as usize)),
+        );
+        let (raw_values, count) = read_number(0x8459, 4)?;
+        record(
+            &mut actual,
+            "gl.GetNumber.currentSecondaryColor",
+            values(raw_values.into_iter().take(count as usize)),
+        );
+        let (raw_values, count) = read_number(0x8453, 1)?;
+        record(
+            &mut actual,
+            "gl.GetNumber.currentFogCoord",
+            values(raw_values.into_iter().take(count as usize)),
+        );
+        let (raw_values, count) = read_number(0x0B43, 1)?;
+        record(
+            &mut actual,
+            "gl.GetNumber.edgeFlag",
+            values(raw_values.into_iter().take(count as usize)),
+        );
+
+        void!("gl.ResetState.restore", gfx.reset_state());
+        compare_result(message, actual, "gl.immediate_primitives")
+    }
 }
