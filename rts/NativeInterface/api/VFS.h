@@ -40,6 +40,7 @@ struct ArchiveInfoEntry {
 struct AIInfoEntry {
 	const char* shortName;
 	const char* version;
+	bool isLuaAI;
 };
 
 typedef void (*NativeVFSArchiveCallback)(void* userData);

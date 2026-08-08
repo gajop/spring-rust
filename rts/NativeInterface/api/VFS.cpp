@@ -699,7 +699,11 @@ static void NativeGetAvailableAIs(const GetAvailableAIsQuery* query, GetAvailabl
 	vfsHandler->FreeLock();
 
 	for (size_t i = 0; i < shortNames.size(); ++i) {
-		ais.push_back({ .shortName = shortNames[i].c_str(), .version = versions[i].c_str() });
+		ais.push_back({
+			.shortName = shortNames[i].c_str(),
+			.version = versions[i].c_str(),
+			.isLuaAI = (i < luaAIInfoItems.size()),
+		});
 	}
 
 	result->error = nullptr;
