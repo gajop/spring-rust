@@ -10,7 +10,7 @@ It distinguishes canonical Spring callouts from the separate `Global`, `gl`, `VF
 | `Global` | 1 | 1 | 0 | 0 |
 | `Spring` | 793 | 793 | 0 | 0 |
 | `RmlUi` | 101 | 101 | 0 | 0 |
-| `gl` | 179 | 179 | 0 | 0 |
+| `gl` | 180 | 180 | 0 | 0 |
 | `VFS` | 41 | 40 | 1 | 0 |
 | `Script` | 29 | 0 | 29 | 0 |
 | `Encoding` | 6 | 6 | 0 | 0 |
@@ -79,14 +79,14 @@ These are not name-matching failures. They have no native counterpart by contrac
 | Classification | Unique labels |
 | --- | ---: |
 | Encoding counterpart | 6 |
-| Gfx native-only or undocumented Lua surface | 25 |
+| Gfx native-only or undocumented Lua surface | 24 |
 | Global Lua counterpart (semantic boundary) | 1 |
 | RmlUi callout counterpart | 101 |
 | RmlUi native helper/property/data-model surface | 116 |
 | Spring counterpart | 793 |
 | VFS counterpart | 40 |
 | VFS native helper or undocumented Lua surface | 11 |
-| gl counterpart or explicit overload | 180 |
+| gl counterpart or explicit overload | 181 |
 | global math.* counterpart (non-Spring namespace) | 14 |
 | native-only surface | 105 |
 
@@ -100,7 +100,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Encoding.is_valid_base64`
 - `Encoding.is_valid_base64_url`
 
-### Gfx native-only or undocumented Lua surface (25)
+### Gfx native-only or undocumented Lua surface (24)
 - `Gfx.delete_vao`
 - `Gfx.delete_vbo`
 - `Gfx.draw_ground_quad`
@@ -122,8 +122,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Gfx.get_subroutine_index`
 - `Gfx.set_feature_buffer_uniforms`
 - `Gfx.set_unit_buffer_uniforms`
-- `Gfx.tex_env`
-- `Gfx.tex_rect`
+- `Gfx.text_env`
 - `Gfx.uniform_subroutine`
 - `Gfx.upload_texture`
 
@@ -1201,7 +1200,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Vfs.read_file`
 - `Vfs.read_file_as_string`
 
-### gl counterpart or explicit overload (180)
+### gl counterpart or explicit overload (181)
 - `Gfx.active_fbo`
 - `Gfx.active_shader`
 - `Gfx.active_texture`
@@ -1359,9 +1358,10 @@ These are not name-matching failures. They have no native counterpart by contrac
 - `Gfx.stencil_test`
 - `Gfx.swap_buffers`
 - `Gfx.tex_coord`
+- `Gfx.tex_env`
 - `Gfx.tex_gen`
+- `Gfx.tex_rect`
 - `Gfx.text`
-- `Gfx.text_env`
 - `Gfx.texture_info`
 - `Gfx.translate`
 - `Gfx.uniform`

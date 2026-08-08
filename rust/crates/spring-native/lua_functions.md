@@ -2,9 +2,9 @@
 
 Total Namespaces: 11
 
-Total Functions: 1363
+Total Functions: 1364
 
-Callouts (Plugin → Engine): 1173
+Callouts (Plugin → Engine): 1174
 Callins (Engine → Plugin): 190
 
 ---
@@ -1011,7 +1011,7 @@ Callins (Engine → Plugin): 190
 - `debug.emulateNativeApiParityCallins` (params: unitID:integer, featureID:integer, projectileID:integer)
 - `debug.emulateUnitMoveFailed` (params: unitID:integer)
 
-### gl (179 functions)
+### gl (180 functions)
 
 - `gl.ActiveFBO` (params: fbo:FBO, target:GL?, func:fun(...), ...:any)
 - `gl.ActiveShader` (params: shaderID:integer, func:function, ...:any)
@@ -1145,7 +1145,7 @@ Callins (Engine → Plugin): 190
 - `gl.PushPopMatrix` (params: func:fun(), ...:any)
 - `gl.RawBindFBO` (params: fbo:FBO, target:GL?)
 - `gl.ReadPixels` (params: x:integer, y:integer, w:integer, h:integer, format:GL?)
-- `gl.Rect` (params: x1:number, y1:number, x2:number, y2:number, s1:number, t1:number, s2:number, t2:number)
+- `gl.Rect` (params: x1:number, y1:number, x2:number, y2:number)
 - `gl.RenderToTexture` (params: texName:string, fun(...):function, ...:any)
 - `gl.ResetMatrices` (params: )
 - `gl.ResetState` (params: )
@@ -1169,9 +1169,10 @@ Callins (Engine → Plugin): 190
 - `gl.StencilTest` (params: enable:boolean)
 - `gl.SwapBuffers` (params: )
 - `gl.TexCoord` (params: s:number, t:number?, r:number?, q:number?)
+- `gl.TexEnv` (params: target:GL, pname:GL, r:number?, g:number?, b:number?, a:number?)
 - `gl.TexGen` (params: target:GL, pname:GL, r:number?, g:number?, b:number?, a:number?)
+- `gl.TexRect` (params: x1:number, y1:number, x2:number, y2:number, s1:number, t1:number, s2:number, t2:number)
 - `gl.Text` (params: text:string, x:number, y:number, size:number?, options:string?)
-- `gl.TextEnv` (params: target:GL, pname:GL, r:number?, g:number?, b:number?, a:number?)
 - `gl.Texture` (params: image:string)
 - `gl.TextureInfo` (params: texName:string)
 - `gl.Translate` (params: x:number, y:number, z:number)

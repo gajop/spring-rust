@@ -379,6 +379,26 @@ def collect_registered_extra_functions(project_root: Path) -> Dict[str, Set[str]
     }
 
 
+def collect_registered_gl_functions(project_root: Path) -> Set[str]:
+    """Collect active gl.* registrations from all OpenGL table providers.
+
+    The published docs can retain stale aliases after a function is renamed.
+    The local registration table is authoritative for the exposed gl surface;
+    this also catches functions whose documentation exists only in C++ source.
+    """
+    lua_dir = project_root / 'rts' / 'Lua'
+    paths = [
+        lua_dir / 'LuaOpenGL.cpp',
+        lua_dir / 'LuaShaders.cpp',
+        lua_dir / 'LuaFBOs.cpp',
+        lua_dir / 'LuaRBOs.cpp',
+        lua_dir / 'LuaVAO.cpp',
+        lua_dir / 'LuaVBO.cpp',
+        lua_dir / 'LuaFonts.cpp',
+    ]
+    return collect_registered_functions(paths, 'gl')
+
+
 def collect_registered_global_functions(project_root: Path) -> Set[str]:
     """Collect documented global helpers installed in the Lua global table.
 
@@ -552,6 +572,17 @@ def main():
         if removed:
             print(f"Filtered {removed} stale {namespace} docs not present in local registrations")
 
+    registered_gl = collect_registered_gl_functions(project_root)
+    if registered_gl:
+        before = len(callouts)
+        callouts = [
+            func for func in callouts
+            if func.get('namespace') != 'gl' or func.get('full_name') in registered_gl
+        ]
+        removed = before - len(callouts)
+        if removed:
+            print(f"Filtered {removed} stale gl docs not present in local registrations")
+
     source_functions = extract_source_doc_functions(project_root)
     if source_functions:
         source_rml_names = {
@@ -586,6 +617,8 @@ def main():
                 and registered_extra[func.get('namespace')]
                 and func.get('full_name') not in registered_extra[func.get('namespace')]
             ):
+                continue
+            if func.get('namespace') == 'gl' and registered_gl and func.get('full_name') not in registered_gl:
                 continue
             if func.get('namespace') == 'Global' and func.get('full_name') not in collect_registered_global_functions(project_root):
                 continue

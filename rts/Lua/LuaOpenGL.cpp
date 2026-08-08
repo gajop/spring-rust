@@ -2825,7 +2825,7 @@ int LuaOpenGL::Rect(lua_State* L)
 
 
 /***
- * @function gl.Rect
+ * @function gl.TexRect
  * @param x1 number
  * @param y1 number
  * @param x2 number
@@ -2834,7 +2834,7 @@ int LuaOpenGL::Rect(lua_State* L)
  * @param flipTCoords boolean?
  */
 /***
- * @function gl.Rect
+ * @function gl.TexRect
  * @param x1 number
  * @param y1 number
  * @param x2 number
@@ -4490,13 +4490,13 @@ int LuaOpenGL::ActiveTexture(lua_State* L)
 
 
 /***
- * @function gl.TextEnv
+ * @function gl.TexEnv
  * @param target GL
  * @param pname GL
  * @param value number
  */
 /***
- * @function gl.TextEnv
+ * @function gl.TexEnv
  * @param target GL
  * @param pname GL
  * @param r number? (Default: `0.0`)
