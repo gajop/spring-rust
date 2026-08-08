@@ -123,6 +123,8 @@ impl NativeModule for NativeApiParity {
             self.check_gl_shader_uniforms(&parsed)
         } else if name == "gl.texture_resources" {
             self.check_gl_texture_resources(&parsed)
+        } else if name == "gl.lists_queries" {
+            self.check_gl_lists_queries(&parsed)
         } else if name == "gl.fixed_immediate" {
             self.check_gl_fixed_immediate(&parsed)
         } else if let Some(test_name) = name.strip_prefix("set_native_") {

@@ -12,6 +12,7 @@ local ranGlFixedImmediate = false
 local ranGlImmediatePrimitives = false
 local ranGlShaderUniforms = false
 local ranGlTextureResources = false
+local ranGlListsQueries = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -725,7 +726,6 @@ local function runGlTextureResourceSurfaceApiTest()
 		result[name] = { n = 0, values = {} }
 	end
 
-	gl.ResetState()
 	local textureParams = {
 		format = GL.RGBA8,
 		min_filter = GL.LINEAR,
@@ -828,6 +828,65 @@ local function runGlTextureResourceSurfaceApiTest()
 	local payload = { status = "pass", result = result, context = "widget" }
 	Common.setTestName(payload, "gl.texture_resources")
 	record("gl.texture_resources", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function runGlListsQuerySurfaceApiTest()
+	if ranGlListsQueries or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlListsQueries = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	void("gl.ResetState", gl.ResetState)
+	local listIndex = gl.CreateList(function()
+		gl.BeginEnd(GL.TRIANGLES, function()
+			gl.Color(0.17, 0.27, 0.37, 0.47)
+			gl.Vertex(0, 0, 0)
+			gl.Vertex(1, 0, 0)
+			gl.Vertex(0, 1, 0)
+		end)
+	end)
+	if type(listIndex) ~= "number" or listIndex <= 0 then
+		error("gl.CreateList did not return a valid list index", 0)
+	end
+	result["gl.CreateList"] = { n = 1, values = { true } }
+	void("gl.CallList", function()
+		gl.CallList(listIndex)
+	end)
+	void("gl.DeleteList", function()
+		gl.DeleteList(listIndex)
+	end)
+
+	local query = gl.CreateQuery()
+	if query == nil then
+		error("gl.CreateQuery did not return a query", 0)
+	end
+	void("gl.RunQuery", function()
+		gl.RunQuery(query, function()
+			gl.BeginEnd(GL.TRIANGLES, function()
+				gl.Vertex(0, 0, 0)
+				gl.Vertex(1, 0, 0)
+				gl.Vertex(0, 1, 0)
+			end)
+		end)
+	end)
+	glCall(result, "gl.GetQuery", function()
+		return gl.GetQuery(query)
+	end)
+	void("gl.DeleteQuery", function()
+		gl.DeleteQuery(query)
+	end)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.lists_queries")
+	record("gl.lists_queries", payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
 	end
@@ -1661,6 +1720,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlImmediatePrimitivesSurfaceApiTest()
 	runGlShaderUniformSurfaceApiTest()
 	runGlTextureResourceSurfaceApiTest()
+	runGlListsQuerySurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 

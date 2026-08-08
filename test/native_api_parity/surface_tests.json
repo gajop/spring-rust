@@ -231,6 +231,30 @@
       "reason": "Rendering-context replay of texture creation, binding, parameter updates, readback, image binding, file output, and FBO-backed render-to-texture lifecycle with process-local handles normalized."
     },
     {
+      "id": "gl.lists_queries",
+      "context": "widget",
+      "mode": "matched",
+      "lua": [
+        "gl.CreateList",
+        "gl.CallList",
+        "gl.DeleteList",
+        "gl.CreateQuery",
+        "gl.RunQuery",
+        "gl.GetQuery",
+        "gl.DeleteQuery"
+      ],
+      "native": [
+        "Gfx.create_list",
+        "Gfx.call_list",
+        "Gfx.delete_list",
+        "Gfx.create_query",
+        "Gfx.run_query",
+        "Gfx.get_query",
+        "Gfx.delete_query"
+      ],
+      "reason": "Rendering-context replay of display-list compilation/call/lifecycle and occlusion-query execution/readback with process-local handles normalized."
+    },
+    {
       "id": "gl.fixed_immediate",
       "context": "widget",
       "mode": "matched",

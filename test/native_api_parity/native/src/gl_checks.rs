@@ -1124,4 +1124,70 @@ impl NativeApiParity {
 
         compare_result(message, actual, "gl.texture_resources")
     }
+
+    pub(crate) fn check_gl_lists_queries(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+
+        void!("gl.ResetState", gfx.reset_state());
+        let mut list_callback_error = None;
+        let list_id = gfx
+            .create_list(|| {
+                if let Err(error) = gfx.begin_end(GL_TRIANGLES, || {
+                    let _ = gfx.color(0.17, 0.27, 0.37, 0.47);
+                    let _ = gfx.vertex(0.0, 0.0, 0.0, 1.0, 4);
+                    let _ = gfx.vertex(1.0, 0.0, 0.0, 1.0, 4);
+                    let _ = gfx.vertex(0.0, 1.0, 0.0, 1.0, 4);
+                }) {
+                    list_callback_error = Some(format!("{error:?}"));
+                }
+            })
+            .map_err(|error| format!("CreateList failed: {error:?}"))?;
+        if let Some(error) = list_callback_error {
+            return Err(format!("CreateList callback failed: {error}"));
+        }
+        record(
+            &mut actual,
+            "gl.CreateList",
+            vec![serde_json::json!(list_id > 0)],
+        );
+        void!("gl.CallList", gfx.call_list(list_id));
+        void!("gl.DeleteList", gfx.delete_list(list_id));
+
+        let query_id = gfx
+            .create_query()
+            .map_err(|error| format!("CreateQuery failed: {error:?}"))?;
+        let mut query_callback_error = None;
+        gfx.run_query(query_id, || {
+            if let Err(error) = gfx.begin_end(GL_TRIANGLES, || {
+                let _ = gfx.vertex(0.0, 0.0, 0.0, 1.0, 4);
+                let _ = gfx.vertex(1.0, 0.0, 0.0, 1.0, 4);
+                let _ = gfx.vertex(0.0, 1.0, 0.0, 1.0, 4);
+            }) {
+                query_callback_error = Some(format!("{error:?}"));
+            }
+        })
+        .map_err(|error| format!("RunQuery failed: {error:?}"))?;
+        if let Some(error) = query_callback_error {
+            return Err(format!("RunQuery callback failed: {error}"));
+        }
+        record_void(&mut actual, "gl.RunQuery");
+        record(
+            &mut actual,
+            "gl.GetQuery",
+            vec![serde_json::json!(gfx
+                .get_query(query_id)
+                .map_err(|error| format!("GetQuery failed: {error:?}"))?)],
+        );
+        void!("gl.DeleteQuery", gfx.delete_query(query_id));
+
+        compare_result(message, actual, "gl.lists_queries")
+    }
 }
