@@ -867,13 +867,23 @@ static void PointParameter(const GfxPointParameterQuery* query, GfxEmptyResult* 
 static void ClipPlane(const GfxClipPlaneQuery* query, GfxEmptyResult* result)
 {
 	result->error = nullptr;
+	// Lua's public gl.ClipPlane API exposes the two Lua clip-plane indices,
+	// which are deliberately mapped to GL_CLIP_PLANE4 and GL_CLIP_PLANE5 so
+	// that the engine's internal planes are not overwritten.  Keep the native
+	// callout on the same contract and preserve Lua's enabling side effect.
+	if (query->plane < 1 || query->plane > 2) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	const GLenum plane = GL_CLIP_PLANE4 + query->plane - 1;
 	const GLdouble equation[4] = {
 		query->equation[0],
 		query->equation[1],
 		query->equation[2],
 		query->equation[3],
 	};
-	glClipPlane(query->plane, equation);
+	glClipPlane(plane, equation);
+	glEnable(plane);
 }
 
 static void ClipDistance(const GfxClipDistanceQuery* query, GfxEmptyResult* result)
