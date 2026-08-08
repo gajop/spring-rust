@@ -810,12 +810,25 @@ static void SwapBuffers(const GfxEmptyQuery*, GfxEmptyResult* result)
 static void ResetMatrices(const GfxEmptyQuery*, GfxEmptyResult* result)
 {
 	result->error = nullptr;
+
+	// LuaOpenGL::ResetScreenMatrices resets the texture stack and then
+	// restores the screen projection/view matrices used by DrawScreen. Native
+	// graphics calls are dispatched from the same draw callback, so resetting
+	// to three identity matrices here leaves object transforms in a different
+	// coordinate space from their Lua counterparts.
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	if (globalRendering != nullptr) {
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf(&globalRendering->screenProjMatrix.m[0]);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf(&globalRendering->screenViewMatrix.m[0]);
+	}
 }
 
 static void DepthTest(const GfxDepthTestQuery* query, GfxEmptyResult* result)
@@ -3525,12 +3538,14 @@ static void ObjectShape(const SolidObjectDef* def, const GfxObjectShapeQuery* qu
 
 static const LocalModelPiece* ObjectPiece(const CSolidObject* obj, int32_t pieceID, GfxEmptyResult* result)
 {
-	if (obj == nullptr || !obj->localModel.HasPiece(pieceID)) {
+	// Lua's public piece IDs are one-based; LocalModel stores zero-based
+	// indices.  Keep the native graphics surface on the same public contract.
+	if (obj == nullptr || pieceID <= 0 || !obj->localModel.HasPiece(pieceID - 1)) {
 		result->error = &NOT_FOUND_ERROR;
 		return nullptr;
 	}
 
-	const LocalModelPiece* lmp = obj->localModel.GetPiece(pieceID);
+	const LocalModelPiece* lmp = obj->localModel.GetPiece(pieceID - 1);
 	if (lmp == nullptr || lmp->original == nullptr) {
 		result->error = &NOT_FOUND_ERROR;
 		return nullptr;
