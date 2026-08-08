@@ -17,6 +17,7 @@ local ranGlAtlas = false
 local ranGlFbo = false
 local ranGlFonts = false
 local ranGlMiniMap = false
+local ranGlObjectDrawing = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -1215,6 +1216,167 @@ local function runGlMiniMapSurfaceApiTest()
 	end
 end
 
+local function runGlObjectDrawingSurfaceApiTest()
+	if ranGlObjectDrawing or not Common.enableRenderingTests() then
+		return
+	end
+	local ids = fixtureIDs
+	if ids.unitID == nil or ids.featureID == nil or ids.unitDefID == nil or ids.featureDefID == nil then
+		return
+	end
+	ranGlObjectDrawing = true
+
+	local pieceID = 0
+	local pieceMap = Spring.GetUnitPieceMap(ids.unitID) or {}
+	for _, candidate in pairs(pieceMap) do
+		pieceID = candidate
+		break
+	end
+
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+	local function matrix(name)
+		glCall(result, name, function()
+			return gl.GetMatrixData(GL.MODELVIEW)
+		end)
+	end
+	local function resetMatrices()
+		gl.ResetMatrices()
+	end
+
+	void("gl.Unit", function()
+		gl.Unit(ids.unitID, false, nil, true, true)
+	end)
+	void("gl.Unit.rawDraw", function()
+		gl.Unit(ids.unitID, true, nil, true, true)
+	end)
+	void("gl.UnitRaw", function()
+		gl.UnitRaw(ids.unitID, false, nil, true, true)
+	end)
+	void("gl.UnitRaw.rawDraw", function()
+		gl.UnitRaw(ids.unitID, true, nil, true, true)
+	end)
+	void("gl.Feature", function()
+		gl.Feature(ids.featureID, false, nil, true)
+	end)
+	void("gl.Feature.rawDraw", function()
+		gl.Feature(ids.featureID, true, nil, true)
+	end)
+	void("gl.FeatureRaw", function()
+		gl.FeatureRaw(ids.featureID, false, nil, true)
+	end)
+	void("gl.FeatureRaw.rawDraw", function()
+		gl.FeatureRaw(ids.featureID, true, nil, true)
+	end)
+	void("gl.UnitTextures.push", function() gl.UnitTextures(ids.unitID, true) end)
+	void("gl.UnitTextures.pop", function() gl.UnitTextures(ids.unitID, false) end)
+	void("gl.FeatureTextures.push", function() gl.FeatureTextures(ids.featureID, true) end)
+	void("gl.FeatureTextures.pop", function() gl.FeatureTextures(ids.featureID, false) end)
+	void("gl.UnitShape", function()
+		gl.UnitShape(ids.unitDefID, ids.teamID, true, false, true)
+	end)
+	void("gl.UnitShapeTextures.push", function() gl.UnitShapeTextures(ids.unitDefID, true) end)
+	void("gl.UnitShapeTextures.pop", function() gl.UnitShapeTextures(ids.unitDefID, false) end)
+	void("gl.FeatureShape", function()
+		gl.FeatureShape(ids.featureDefID, ids.teamID, true, false, true)
+	end)
+	void("gl.FeatureShapeTextures.push", function() gl.FeatureShapeTextures(ids.featureDefID, true) end)
+	void("gl.FeatureShapeTextures.pop", function() gl.FeatureShapeTextures(ids.featureDefID, false) end)
+
+	resetMatrices()
+	void("gl.UnitMultMatrix", function() gl.UnitMultMatrix(ids.unitID) end)
+	matrix("gl.UnitMultMatrix.matrix")
+	resetMatrices()
+	void("gl.UnitPiece", function() gl.UnitPiece(ids.unitID, pieceID) end)
+	resetMatrices()
+	void("gl.UnitPieceMatrix", function() gl.UnitPieceMatrix(ids.unitID, pieceID) end)
+	matrix("gl.UnitPieceMatrix.matrix")
+	resetMatrices()
+	void("gl.UnitPieceMultMatrix", function() gl.UnitPieceMultMatrix(ids.unitID, pieceID) end)
+	matrix("gl.UnitPieceMultMatrix.matrix")
+	void("gl.FeatureMultMatrix", function() gl.FeatureMultMatrix(ids.featureID) end)
+	matrix("gl.FeatureMultMatrix.matrix")
+	resetMatrices()
+	void("gl.FeaturePiece", function() gl.FeaturePiece(ids.featureID, pieceID) end)
+	resetMatrices()
+	void("gl.FeaturePieceMatrix", function() gl.FeaturePieceMatrix(ids.featureID, pieceID) end)
+	matrix("gl.FeaturePieceMatrix.matrix")
+	resetMatrices()
+	void("gl.FeaturePieceMultMatrix", function() gl.FeaturePieceMultMatrix(ids.featureID, pieceID) end)
+	matrix("gl.FeaturePieceMultMatrix.matrix")
+
+	void("gl.DrawGroundCircle", function()
+		gl.DrawGroundCircle(64, 0, 64, 12, 16)
+	end)
+	if ids.weaponDefID ~= nil then
+		void("gl.DrawGroundCircle.ballistic", function()
+			gl.DrawGroundCircle(64, 0, 64, 12, 16, 0.1, 0.5, ids.weaponDefID)
+		end)
+	end
+	void("gl.DrawGroundQuad", function()
+		gl.DrawGroundQuad(0, 0, 128, 128)
+	end)
+	void("gl.DrawGroundQuad.textured", function()
+		gl.DrawGroundQuad(0, 0, 128, 128, nil, 0.1, 0.2, 0.8, 0.9)
+	end)
+
+	local listIndex = gl.CreateList(function()
+		gl.BeginEnd(GL.TRIANGLES, function()
+			gl.Vertex(0, 0, 0)
+			gl.Vertex(1, 0, 0)
+			gl.Vertex(0, 1, 0)
+		end)
+	end)
+	if listIndex == nil then
+		error("gl.CreateList returned nil for object drawing", 0)
+	end
+	void("gl.DrawListAtUnit", function()
+		gl.DrawListAtUnit(ids.unitID, listIndex, true, 1, 1, 1, 0, 0, 1, 0)
+	end)
+	void("gl.DeleteList", function() gl.DeleteList(listIndex) end)
+
+	local callbackMatrix
+	void("gl.DrawFuncAtUnit", function()
+		gl.DrawFuncAtUnit(ids.unitID, true, function()
+			local values = captureGlValues(gl.GetMatrixData(GL.MODELVIEW))
+			callbackMatrix = {}
+			for index = 1, values.n do
+				callbackMatrix[index] = values[index]
+			end
+			gl.Color(0.21, 0.31, 0.41, 0.51)
+		end)
+	end)
+	local callbackValues = callbackMatrix or {}
+	result["gl.DrawFuncAtUnit.matrix"] = {
+		n = #callbackValues,
+		values = callbackValues,
+	}
+
+	resetMatrices()
+	local payload = {
+		status = "pass",
+		result = result,
+		context = "widget",
+		fixture = {
+			unitID = ids.unitID,
+			featureID = ids.featureID,
+			unitDefID = ids.unitDefID,
+			featureDefID = ids.featureDefID,
+			weaponDefID = ids.weaponDefID,
+			teamID = ids.teamID,
+			pieceID = pieceID,
+		},
+	}
+	Common.setTestName(payload, "gl.object_drawing")
+	record("gl.object_drawing", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
 local function runGlFixedImmediateSurfaceApiTest()
 	if ranGlFixedImmediate or not Common.enableRenderingTests() then
 		return
@@ -2048,6 +2210,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlFboSurfaceApiTest()
 	runGlFontSurfaceApiTest()
 	runGlMiniMapSurfaceApiTest()
+	runGlObjectDrawingSurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 

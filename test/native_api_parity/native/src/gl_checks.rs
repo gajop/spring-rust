@@ -146,6 +146,15 @@ fn atlas_entries_value(entries: &[spring_native::sys::GfxAtlasTextureEntry]) -> 
     )
 }
 
+fn fixture_i32(message: &Value, field: &str) -> Result<i32, String> {
+    message
+        .get("fixture")
+        .and_then(|fixture| fixture.get(field))
+        .and_then(Value::as_i64)
+        .and_then(|value| i32::try_from(value).ok())
+        .ok_or_else(|| format!("missing integer fixture field `{field}`"))
+}
+
 fn value_result(
     floats: [f32; 4],
     count: u32,
@@ -1749,5 +1758,261 @@ impl NativeApiParity {
         );
 
         compare_result(message, actual, "gl.minimap")
+    }
+
+    pub(crate) fn check_gl_object_drawing(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let unit_id = fixture_i32(message, "unitID")?;
+        let feature_id = fixture_i32(message, "featureID")?;
+        let unit_def_id = fixture_i32(message, "unitDefID")?;
+        let feature_def_id = fixture_i32(message, "featureDefID")?;
+        let team_id = fixture_i32(message, "teamID")?;
+        let piece_id = fixture_i32(message, "pieceID")?;
+        let weapon_def_id = fixture_i32(message, "weaponDefID").ok();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+        macro_rules! reset {
+            () => {{
+                gfx.reset_matrices()
+                    .map_err(|error| format!("gl.ResetMatrices failed: {error:?}"))?;
+            }};
+        }
+        macro_rules! matrix {
+            ($name:literal) => {{
+                record(
+                    &mut actual,
+                    $name,
+                    values(
+                        gfx.get_matrix_data(GL_MODELVIEW)
+                            .map_err(|error| format!("{} failed: {error:?}", $name))?,
+                    ),
+                );
+            }};
+        }
+
+        let unit_options = |apply_transform, do_raw_draw| spring_native::GfxUnitDrawOptions {
+            apply_transform,
+            do_raw_draw,
+            no_lua_call: true,
+            full_model: true,
+        };
+        let feature_options = |apply_transform, do_raw_draw| spring_native::GfxFeatureDrawOptions {
+            apply_transform,
+            do_raw_draw,
+            no_lua_call: true,
+        };
+        let shape_options = spring_native::GfxObjectShapeOptions {
+            raw_state: true,
+            to_screen: false,
+            opaque: true,
+        };
+
+        void!("gl.Unit", gfx.unit(unit_id, unit_options(true, false)));
+        void!(
+            "gl.Unit.rawDraw",
+            gfx.unit(unit_id, unit_options(true, true))
+        );
+        void!(
+            "gl.UnitRaw",
+            gfx.unit_raw(unit_id, unit_options(false, false))
+        );
+        void!(
+            "gl.UnitRaw.rawDraw",
+            gfx.unit_raw(unit_id, unit_options(false, true))
+        );
+        void!(
+            "gl.Feature",
+            gfx.feature(feature_id, feature_options(true, false))
+        );
+        void!(
+            "gl.Feature.rawDraw",
+            gfx.feature(feature_id, feature_options(true, true))
+        );
+        void!(
+            "gl.FeatureRaw",
+            gfx.feature_raw(feature_id, feature_options(false, false))
+        );
+        void!(
+            "gl.FeatureRaw.rawDraw",
+            gfx.feature_raw(feature_id, feature_options(false, true))
+        );
+        void!("gl.UnitTextures.push", gfx.unit_textures(unit_id, true));
+        void!("gl.UnitTextures.pop", gfx.unit_textures(unit_id, false));
+        void!(
+            "gl.FeatureTextures.push",
+            gfx.feature_textures(feature_id, true)
+        );
+        void!(
+            "gl.FeatureTextures.pop",
+            gfx.feature_textures(feature_id, false)
+        );
+        void!(
+            "gl.UnitShape",
+            gfx.unit_shape(unit_def_id, team_id, shape_options)
+        );
+        void!(
+            "gl.UnitShapeTextures.push",
+            gfx.unit_shape_textures(unit_def_id, true)
+        );
+        void!(
+            "gl.UnitShapeTextures.pop",
+            gfx.unit_shape_textures(unit_def_id, false)
+        );
+        void!(
+            "gl.FeatureShape",
+            gfx.feature_shape(feature_def_id, team_id, shape_options)
+        );
+        void!(
+            "gl.FeatureShapeTextures.push",
+            gfx.feature_shape_textures(feature_def_id, true)
+        );
+        void!(
+            "gl.FeatureShapeTextures.pop",
+            gfx.feature_shape_textures(feature_def_id, false)
+        );
+
+        reset!();
+        void!("gl.UnitMultMatrix", gfx.unit_mult_matrix(unit_id));
+        matrix!("gl.UnitMultMatrix.matrix");
+        reset!();
+        void!("gl.UnitPiece", gfx.unit_piece(unit_id, piece_id));
+        reset!();
+        void!(
+            "gl.UnitPieceMatrix",
+            gfx.unit_piece_matrix(unit_id, piece_id)
+        );
+        matrix!("gl.UnitPieceMatrix.matrix");
+        reset!();
+        void!(
+            "gl.UnitPieceMultMatrix",
+            gfx.unit_piece_mult_matrix(unit_id, piece_id)
+        );
+        matrix!("gl.UnitPieceMultMatrix.matrix");
+        reset!();
+        void!("gl.FeatureMultMatrix", gfx.feature_mult_matrix(feature_id));
+        matrix!("gl.FeatureMultMatrix.matrix");
+        reset!();
+        void!("gl.FeaturePiece", gfx.feature_piece(feature_id, piece_id));
+        reset!();
+        void!(
+            "gl.FeaturePieceMatrix",
+            gfx.feature_piece_matrix(feature_id, piece_id)
+        );
+        matrix!("gl.FeaturePieceMatrix.matrix");
+        reset!();
+        void!(
+            "gl.FeaturePieceMultMatrix",
+            gfx.feature_piece_mult_matrix(feature_id, piece_id)
+        );
+        matrix!("gl.FeaturePieceMultMatrix.matrix");
+
+        void!(
+            "gl.DrawGroundCircle",
+            gfx.draw_ground_circle(
+                spring_native::sys::Float3 {
+                    x: 64.0,
+                    y: 0.0,
+                    z: 64.0,
+                },
+                12.0,
+                16,
+                false,
+                0.0,
+                0.0,
+                0,
+            )
+        );
+        if let Some(weapon_def_id) = weapon_def_id {
+            void!(
+                "gl.DrawGroundCircle.ballistic",
+                gfx.draw_ground_circle(
+                    spring_native::sys::Float3 {
+                        x: 64.0,
+                        y: 0.0,
+                        z: 64.0,
+                    },
+                    12.0,
+                    16,
+                    true,
+                    0.1,
+                    0.5,
+                    weapon_def_id,
+                )
+            );
+        }
+        void!(
+            "gl.DrawGroundQuad",
+            gfx.draw_ground_quad(0.0, 0.0, 128.0, 128.0, false, 0.0, 0.0, 0.0, 0.0)
+        );
+        void!(
+            "gl.DrawGroundQuad.textured",
+            gfx.draw_ground_quad(0.0, 0.0, 128.0, 128.0, true, 0.1, 0.2, 0.8, 0.9)
+        );
+
+        let mut list_callback_error = None;
+        let list_id = gfx
+            .create_list(|| {
+                if let Err(error) = gfx.begin_end(GL_TRIANGLES, || {
+                    let _ = gfx.vertex(0.0, 0.0, 0.0, 1.0, 4);
+                    let _ = gfx.vertex(1.0, 0.0, 0.0, 1.0, 4);
+                    let _ = gfx.vertex(0.0, 1.0, 0.0, 1.0, 4);
+                }) {
+                    list_callback_error = Some(format!("{error:?}"));
+                }
+            })
+            .map_err(|error| format!("CreateList failed: {error:?}"))?;
+        if let Some(error) = list_callback_error {
+            return Err(format!("CreateList callback failed: {error}"));
+        }
+        void!(
+            "gl.DrawListAtUnit",
+            gfx.draw_list_at_unit(
+                unit_id,
+                list_id,
+                true,
+                spring_native::sys::Float3 {
+                    x: 1.0,
+                    y: 1.0,
+                    z: 1.0,
+                },
+                0.0,
+                spring_native::sys::Float3 {
+                    x: 0.0,
+                    y: 1.0,
+                    z: 0.0,
+                },
+            )
+        );
+        void!("gl.DeleteList", gfx.delete_list(list_id));
+
+        let mut callback_matrix = None;
+        let mut callback_error = None;
+        void!(
+            "gl.DrawFuncAtUnit",
+            gfx.draw_func_at_unit(unit_id, true, || {
+                match gfx.get_matrix_data(GL_MODELVIEW) {
+                    Ok(matrix) => callback_matrix = Some(values(matrix)),
+                    Err(error) => callback_error = Some(format!("{error:?}")),
+                }
+                let _ = gfx.color(0.21, 0.31, 0.41, 0.51);
+            })
+        );
+        if let Some(error) = callback_error {
+            return Err(format!("DrawFuncAtUnit callback failed: {error}"));
+        }
+        record(
+            &mut actual,
+            "gl.DrawFuncAtUnit.matrix",
+            callback_matrix.unwrap_or_default(),
+        );
+
+        reset!();
+        compare_result(message, actual, "gl.object_drawing")
     }
 }
