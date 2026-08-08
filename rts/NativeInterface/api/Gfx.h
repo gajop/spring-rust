@@ -97,7 +97,7 @@ struct GfxUniformArrayFloatQuery { int32_t location; const float* values; uint32
 struct GfxUniformArrayIntQuery { int32_t location; const int32_t* values; uint32_t count; };
 struct GfxUniformMatrixQuery { int32_t location; const float* values; uint32_t count; bool transpose; };
 struct GfxSubroutineIndexQuery { uint32_t shaderID; uint32_t shaderType; const char* name; };
-struct GfxSubroutineIndexResult { const Error* error; uint32_t index; bool success; };
+struct GfxSubroutineIndexResult { const Error* error; int32_t index; bool success; };
 struct GfxUniformSubroutineQuery { uint32_t shaderType; uint32_t index; };
 struct GfxGeometryShaderParameterQuery { uint32_t shaderID; uint32_t param; int32_t value; };
 struct GfxTesselationShaderParameterQuery { uint32_t param; int32_t value; float values[4]; uint32_t valueCount; bool useFloatArray; };

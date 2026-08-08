@@ -8081,6 +8081,11 @@ int LuaSyncedCtrl::RemoveUnitCmdDesc(lua_State* L)
 	return 0;
 }
 
+/***
+ *
+ * @function Spring.InvokeNativeModule
+ * @param message string
+ */
 int LuaSyncedCtrl::InvokeNativeModule(lua_State* L)
 {
 	size_t msgLen = 0;

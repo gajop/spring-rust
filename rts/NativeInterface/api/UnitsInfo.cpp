@@ -1425,9 +1425,21 @@ static void NativeGetUnitPieceCollisionVolumeData(const GetUnitPieceCollisionVol
 		return;
 	}
 
-	// Piece collision volumes would require script/model integration
-	// Return unit's main volume as fallback
-	const CollisionVolume& cv = unit->collisionVolume;
+	const LocalModel& localModel = unit->localModel;
+	if (query->pieceNum <= 0 || !localModel.HasPiece(query->pieceNum - 1)) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	const LocalModelPiece* piece = localModel.GetPiece(query->pieceNum - 1);
+	if (piece == nullptr) {
+		result->error = &INVALID_UNIT_ERROR;
+		return;
+	}
+
+	// Match LuaSyncedRead::GetUnitPieceCollisionVolumeData: the query returns
+	// the selected local model piece's collision volume, not the unit volume.
+	const CollisionVolume& cv = *piece->GetCollisionVolume();
 	result->volume.scaleX = cv.GetScales().x;
 	result->volume.scaleY = cv.GetScales().y;
 	result->volume.scaleZ = cv.GetScales().z;

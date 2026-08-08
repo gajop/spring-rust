@@ -707,7 +707,7 @@ bool CLuaHandle::HasCallIn(lua_State* L, const string& name) const
 
 
 /***
- * @function Script.UpdateCallin
+ * @function Script.UpdateCallIn
  * @param name string
  */
 bool CLuaHandle::UpdateCallIn(lua_State* L, const string& name)

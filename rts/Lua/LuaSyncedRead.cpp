@@ -5901,6 +5901,22 @@ int LuaSyncedRead::GetUnitCollisionVolumeData(lua_State* L)
 	return LuaUtils::PushColVolData(L, &unit->collisionVolume);
 }
 
+/***
+ *
+ * @function Spring.GetUnitPieceCollisionVolumeData
+ * @param unitID integer
+ * @param pieceNum integer
+ * @return number scaleX
+ * @return number scaleY
+ * @return number scaleZ
+ * @return number offsetX
+ * @return number offsetY
+ * @return number offsetZ
+ * @return integer volumeType
+ * @return integer testType
+ * @return integer primaryAxis
+ * @return boolean disabled
+ */
 int LuaSyncedRead::GetUnitPieceCollisionVolumeData(lua_State* L)
 {
 	return (PushPieceCollisionVolumeData(L, ParseInLosUnit(L, __func__, 1)));
