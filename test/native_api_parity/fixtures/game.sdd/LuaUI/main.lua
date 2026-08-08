@@ -11,6 +11,7 @@ local ranGlStateMutations = false
 local ranGlFixedImmediate = false
 local ranGlImmediatePrimitives = false
 local ranGlShaderUniforms = false
+local ranGlTextureResources = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -708,6 +709,125 @@ local function runGlShaderUniformSurfaceApiTest()
 	local payload = { status = "pass", result = result, context = "widget" }
 	Common.setTestName(payload, "gl.shader_uniforms")
 	record("gl.shader_uniforms", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function runGlTextureResourceSurfaceApiTest()
+	if ranGlTextureResources or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlTextureResources = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	gl.ResetState()
+	local textureParams = {
+		format = GL.RGBA8,
+		min_filter = GL.LINEAR,
+		mag_filter = GL.LINEAR,
+		wrap_s = GL.CLAMP_TO_EDGE,
+		wrap_t = GL.CLAMP_TO_EDGE,
+		wrap_r = GL.CLAMP_TO_EDGE,
+	}
+	local textureName = gl.CreateTexture(4, 4, textureParams)
+	if type(textureName) ~= "string" or textureName == "" then
+		error("gl.CreateTexture did not return a texture name", 0)
+	end
+	result["gl.CreateTexture"] = { n = 1, values = { true } }
+
+	local textureInfo = gl.TextureInfo(textureName)
+	if type(textureInfo) ~= "table" or textureInfo.xsize ~= 4 or textureInfo.ysize ~= 4 or textureInfo.zsize ~= 0 or textureInfo.id <= 0 then
+		error("gl.TextureInfo returned unexpected texture metadata", 0)
+	end
+	result["gl.TextureInfo"] = {
+		n = 1,
+		values = {{
+			xsize = textureInfo.xsize,
+			ysize = textureInfo.ysize,
+			zsize = textureInfo.zsize,
+			target = textureInfo.target,
+		}},
+	}
+	result["gl.TextureInfo.idValid"] = { n = 1, values = { textureInfo.id > 0 } }
+
+	glCall(result, "gl.Texture", function()
+		return gl.Texture(textureName)
+	end)
+	void("gl.ChangeTextureParams", function()
+		gl.ChangeTextureParams(textureName, {
+			min_filter = GL.NEAREST,
+			mag_filter = GL.NEAREST,
+			wrap_s = GL.CLAMP_TO_EDGE,
+			wrap_t = GL.CLAMP_TO_EDGE,
+			wrap_r = GL.CLAMP_TO_EDGE,
+		})
+	end)
+	glCall(result, "gl.GetNumber.textureBinding", function()
+		return gl.GetNumber(0x8069, 1) > 0
+	end)
+	glCall(result, "gl.Texture.disable", function()
+		return gl.Texture(false)
+	end)
+	void("gl.CopyToTexture", function()
+		gl.CopyToTexture(textureName, 0, 0, 0, 0, 1, 1, GL.TEXTURE_2D, 0)
+	end)
+	void("gl.GenerateMipmap", function()
+		gl.GenerateMipmap(textureName)
+	end)
+	void("gl.BindImageTexture", function()
+		gl.BindImageTexture(0, textureName, 0, 0, GL.READ_WRITE, GL.RGBA8)
+	end)
+
+	void("gl.Clear", function()
+		gl.Clear(GL.COLOR_BUFFER_BIT, 0.21, 0.31, 0.41, 0.51)
+	end)
+	glCall(result, "gl.ReadPixels", function()
+		return gl.ReadPixels(0, 0, 1, 1, GL.RGBA)
+	end)
+	glCall(result, "gl.SaveImage", function()
+		return gl.SaveImage(0, 0, 1, 1, "native_api_parity_texture.png", {
+			alpha = false,
+			yflip = false,
+			grayscale16bit = false,
+		})
+	end)
+
+	local fboTextureName = gl.CreateTexture(4, 4, {
+		format = GL.RGBA8,
+		min_filter = GL.LINEAR,
+		mag_filter = GL.LINEAR,
+		wrap_s = GL.CLAMP_TO_EDGE,
+		wrap_t = GL.CLAMP_TO_EDGE,
+		fbo = true,
+		fboDepth = true,
+	})
+	if type(fboTextureName) ~= "string" or fboTextureName == "" then
+		error("gl.CreateTexture(fbo) did not return a texture name", 0)
+	end
+	result["gl.CreateTexture.fbo"] = { n = 1, values = { true } }
+	void("gl.RenderToTexture", function()
+		gl.RenderToTexture(fboTextureName, function()
+			gl.Clear(GL.COLOR_BUFFER_BIT, 0.21, 0.31, 0.41, 0.51)
+		end)
+	end)
+	glCall(result, "gl.DeleteTextureFBO", function()
+		return gl.DeleteTextureFBO(fboTextureName)
+	end)
+	glCall(result, "gl.DeleteTexture.fbo", function()
+		return gl.DeleteTexture(fboTextureName)
+	end)
+	glCall(result, "gl.DeleteTexture", function()
+		return gl.DeleteTexture(textureName)
+	end)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.texture_resources")
+	record("gl.texture_resources", payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
 	end
@@ -1540,6 +1660,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlStateMutationSurfaceApiTest()
 	runGlImmediatePrimitivesSurfaceApiTest()
 	runGlShaderUniformSurfaceApiTest()
+	runGlTextureResourceSurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 

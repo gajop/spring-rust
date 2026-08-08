@@ -193,6 +193,44 @@
       "reason": "Rendering-context replay of shader creation, uniform reflection/upload, activation, engine definitions, and lifecycle operations with process-local handles normalized."
     },
     {
+      "id": "gl.texture_resources",
+      "context": "widget",
+      "mode": "matched",
+      "lua": [
+        "gl.CreateTexture",
+        "gl.TextureInfo",
+        "gl.Texture",
+        "gl.ChangeTextureParams",
+        "gl.GetNumber",
+        "gl.CopyToTexture",
+        "gl.GenerateMipmap",
+        "gl.BindImageTexture",
+        "gl.Clear",
+        "gl.ReadPixels",
+        "gl.SaveImage",
+        "gl.RenderToTexture",
+        "gl.DeleteTextureFBO",
+        "gl.DeleteTexture"
+      ],
+      "native": [
+        "Gfx.create_texture",
+        "Gfx.texture_info",
+        "Gfx.bind_texture",
+        "Gfx.change_texture_params",
+        "Gfx.get_number",
+        "Gfx.copy_to_texture",
+        "Gfx.generate_mipmap",
+        "Gfx.bind_image_texture",
+        "Gfx.clear",
+        "Gfx.read_pixels",
+        "Gfx.save_image",
+        "Gfx.render_to_texture",
+        "Gfx.delete_texture_fbo",
+        "Gfx.delete_texture"
+      ],
+      "reason": "Rendering-context replay of texture creation, binding, parameter updates, readback, image binding, file output, and FBO-backed render-to-texture lifecycle with process-local handles normalized."
+    },
+    {
       "id": "gl.fixed_immediate",
       "context": "widget",
       "mode": "matched",

@@ -934,4 +934,194 @@ impl NativeApiParity {
 
         compare_result(message, actual, "gl.shader_uniforms")
     }
+
+    pub(crate) fn check_gl_texture_resources(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+
+        let texture_params = spring_native::sys::GfxTextureParams {
+            target: GL_TEXTURE_2D,
+            format: GL_RGBA8,
+            minFilter: GL_LINEAR,
+            magFilter: GL_LINEAR,
+            wrapS: GL_CLAMP_TO_EDGE,
+            wrapT: GL_CLAMP_TO_EDGE,
+            wrapR: GL_CLAMP_TO_EDGE,
+            ..spring_native::sys::GfxTextureParams::default()
+        };
+        let texture_name = gfx
+            .create_texture(4, 4, 0, texture_params)
+            .map_err(|error| format!("CreateTexture failed: {error:?}"))?
+            .ok_or_else(|| "CreateTexture returned no texture name".to_owned())?;
+        record(
+            &mut actual,
+            "gl.CreateTexture",
+            vec![serde_json::json!(true)],
+        );
+
+        let (xsize, ysize, zsize, texture_id, target, _fbo) = gfx
+            .texture_info(&texture_name)
+            .map_err(|error| format!("TextureInfo failed: {error:?}"))?;
+        actual.insert(
+            "gl.TextureInfo".to_owned(),
+            serde_json::json!({
+                "n": 1,
+                "values": [{
+                    "xsize": xsize,
+                    "ysize": ysize,
+                    "zsize": zsize,
+                    "target": target,
+                }],
+            }),
+        );
+        record(
+            &mut actual,
+            "gl.TextureInfo.idValid",
+            vec![serde_json::json!(texture_id > 0)],
+        );
+
+        record(
+            &mut actual,
+            "gl.Texture",
+            vec![serde_json::json!(gfx
+                .bind_texture(&texture_name, -1, true)
+                .map_err(|error| format!(
+                    "Texture bind failed: {error:?}"
+                ))?)],
+        );
+        let changed_params = spring_native::sys::GfxTextureParams {
+            minFilter: GL_NEAREST,
+            magFilter: GL_NEAREST,
+            wrapS: GL_CLAMP_TO_EDGE,
+            wrapT: GL_CLAMP_TO_EDGE,
+            wrapR: GL_CLAMP_TO_EDGE,
+            ..spring_native::sys::GfxTextureParams::default()
+        };
+        void!(
+            "gl.ChangeTextureParams",
+            gfx.change_texture_params(&texture_name, changed_params)
+        );
+        let (binding, binding_count) = gfx
+            .get_number(0x8069, 1)
+            .map_err(|error| format!("GetNumber(TEXTURE_BINDING_2D) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.GetNumber.textureBinding",
+            vec![serde_json::json!(binding_count > 0 && binding[0] > 0.0)],
+        );
+        record(
+            &mut actual,
+            "gl.Texture.disable",
+            vec![serde_json::json!(gfx
+                .bind_texture(&texture_name, -1, false)
+                .map_err(|error| format!(
+                    "Texture disable failed: {error:?}"
+                ))?)],
+        );
+        void!(
+            "gl.CopyToTexture",
+            gfx.copy_to_texture(&texture_name, 0, 0, 0, 0, 1, 1, GL_TEXTURE_2D, 0)
+        );
+        void!("gl.GenerateMipmap", gfx.generate_mipmap(&texture_name));
+        void!(
+            "gl.BindImageTexture",
+            gfx.bind_image_texture(0, &texture_name, 0, 0, false, GL_READ_WRITE, GL_RGBA8)
+        );
+
+        void!(
+            "gl.Clear",
+            gfx.clear(GL_COLOR_BUFFER_BIT, [0.21, 0.31, 0.41, 0.51], 4)
+        );
+        let (pixels, _components) = gfx
+            .read_pixels(0, 0, 1, 1, GL_RGBA)
+            .map_err(|error| format!("ReadPixels failed: {error:?}"))?;
+        record(&mut actual, "gl.ReadPixels", values(pixels));
+        record(
+            &mut actual,
+            "gl.SaveImage",
+            vec![serde_json::json!(gfx
+                .save_image(
+                    0,
+                    0,
+                    1,
+                    1,
+                    "native_api_parity_texture.png",
+                    spring_native::GfxSaveImageOptions {
+                        alpha: false,
+                        yflip: false,
+                        grayscale16bit: false,
+                    },
+                    0,
+                )
+                .map_err(|error| format!("SaveImage failed: {error:?}"))?)],
+        );
+
+        let fbo_params = spring_native::sys::GfxTextureParams {
+            target: GL_TEXTURE_2D,
+            format: GL_RGBA8,
+            minFilter: GL_LINEAR,
+            magFilter: GL_LINEAR,
+            wrapS: GL_CLAMP_TO_EDGE,
+            wrapT: GL_CLAMP_TO_EDGE,
+            fbo: true,
+            fboDepth: true,
+            ..spring_native::sys::GfxTextureParams::default()
+        };
+        let fbo_texture_name = gfx
+            .create_texture(4, 4, 0, fbo_params)
+            .map_err(|error| format!("CreateTexture(fbo) failed: {error:?}"))?
+            .ok_or_else(|| "CreateTexture(fbo) returned no texture name".to_owned())?;
+        record(
+            &mut actual,
+            "gl.CreateTexture.fbo",
+            vec![serde_json::json!(true)],
+        );
+        let mut callback_error = None;
+        gfx.render_to_texture(&fbo_texture_name, || {
+            if let Err(error) = gfx.clear(GL_COLOR_BUFFER_BIT, [0.21, 0.31, 0.41, 0.51], 4) {
+                callback_error = Some(format!("{error:?}"));
+            }
+        })
+        .map_err(|error| format!("RenderToTexture failed: {error:?}"))?;
+        if let Some(error) = callback_error {
+            return Err(format!("RenderToTexture callback failed: {error}"));
+        }
+        record_void(&mut actual, "gl.RenderToTexture");
+        record(
+            &mut actual,
+            "gl.DeleteTextureFBO",
+            vec![serde_json::json!(gfx
+                .delete_texture_fbo(&fbo_texture_name)
+                .map_err(|error| format!(
+                    "DeleteTextureFBO failed: {error:?}"
+                ))?)],
+        );
+        record(
+            &mut actual,
+            "gl.DeleteTexture.fbo",
+            vec![serde_json::json!(gfx
+                .delete_texture(&fbo_texture_name)
+                .map_err(|error| format!(
+                    "DeleteTexture(fbo) failed: {error:?}"
+                ))?)],
+        );
+        record(
+            &mut actual,
+            "gl.DeleteTexture",
+            vec![serde_json::json!(gfx
+                .delete_texture(&texture_name)
+                .map_err(|error| format!(
+                    "DeleteTexture failed: {error:?}"
+                ))?)],
+        );
+
+        compare_result(message, actual, "gl.texture_resources")
+    }
 }
