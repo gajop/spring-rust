@@ -2137,6 +2137,29 @@ static void DeleteRBO(const GfxUIntQuery* query, GfxEmptyResult* result)
 	nativeRBOs.erase(it);
 }
 
+static void GetRBOInfo(const GfxRBOInfoQuery* query, GfxRBOInfoResult* result)
+{
+	result->error = nullptr;
+	result->valid = false;
+	result->target = 0;
+	result->format = 0;
+	result->xsize = 0;
+	result->ysize = 0;
+	result->samples = 0;
+
+	const auto it = nativeRBOs.find(query->rboID);
+	if (it == nativeRBOs.end())
+		return;
+
+	const NativeRBO& rbo = it->second;
+	result->valid = glIsRenderbufferEXT(rbo.id) == GL_TRUE;
+	result->target = rbo.target;
+	result->format = rbo.format;
+	result->xsize = rbo.xsize;
+	result->ysize = rbo.ysize;
+	result->samples = rbo.samples;
+}
+
 static void CreateFBO(const GfxFBOCreateQuery* query, GfxFBOResult* result)
 {
 	result->error = nullptr;
@@ -4013,6 +4036,7 @@ const GfxApi GFX_API = {
 	.ReadPixels = ReadPixels,
 	.CreateRBO = CreateRBO,
 	.DeleteRBO = DeleteRBO,
+	.GetRBOInfo = GetRBOInfo,
 	.CreateFBO = CreateFBO,
 	.DeleteFBO = DeleteFBO,
 	.IsValidFBO = IsValidFBO,

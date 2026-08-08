@@ -154,6 +154,16 @@ struct GfxBindImageTextureQuery { uint32_t unit; const char* name; int32_t level
 struct GfxReadPixelsQuery { int32_t x; int32_t y; int32_t width; int32_t height; uint32_t format; };
 struct GfxReadPixelsResult { const Error* error; const float* values; uint32_t count; uint32_t components; };
 struct GfxRBOCreateQuery { int32_t xsize; int32_t ysize; uint32_t target; uint32_t format; int32_t samples; };
+struct GfxRBOInfoQuery { uint32_t rboID; };
+struct GfxRBOInfoResult {
+	const Error* error;
+	bool valid;
+	uint32_t target;
+	uint32_t format;
+	int32_t xsize;
+	int32_t ysize;
+	int32_t samples;
+};
 struct GfxFBOAttachment {
 	uint32_t attachment;
 	const char* textureName;
@@ -405,6 +415,7 @@ struct GfxApi {
 	void (*ReadPixels)(const GfxReadPixelsQuery* query, GfxReadPixelsResult* result);
 	void (*CreateRBO)(const GfxRBOCreateQuery* query, GfxUIntResult* result);
 	void (*DeleteRBO)(const GfxUIntQuery* query, GfxEmptyResult* result);
+	void (*GetRBOInfo)(const GfxRBOInfoQuery* query, GfxRBOInfoResult* result);
 	void (*CreateFBO)(const GfxFBOCreateQuery* query, GfxFBOResult* result);
 	void (*DeleteFBO)(const GfxUIntQuery* query, GfxEmptyResult* result);
 	void (*IsValidFBO)(const GfxFBOQuery* query, GfxFBOStatusResult* result);

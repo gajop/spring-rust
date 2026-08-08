@@ -1430,6 +1430,19 @@ impl NativeApiParity {
             "gl.CreateRBO",
             vec![serde_json::json!(depth_rbo > 0)],
         );
+        let (rbo_valid, rbo_target, rbo_format, rbo_xsize, rbo_ysize, rbo_samples) = gfx
+            .get_rboinfo(depth_rbo)
+            .map_err(|error| format!("GetRBOInfo failed: {error:?}"))?;
+        record(&mut actual, "RBO.valid", vec![serde_json::json!(rbo_valid)]);
+        record(&mut actual, "RBO.target", vec![serde_json::json!(rbo_target)]);
+        record(&mut actual, "RBO.format", vec![serde_json::json!(rbo_format)]);
+        record(&mut actual, "RBO.xsize", vec![serde_json::json!(rbo_xsize)]);
+        record(&mut actual, "RBO.ysize", vec![serde_json::json!(rbo_ysize)]);
+        record(
+            &mut actual,
+            "RBO.samples",
+            vec![serde_json::json!(rbo_samples)],
+        );
 
         let draw_buffers = [GL_COLOR_ATTACHMENT0];
         let source_name = std::ffi::CString::new(source_texture.clone())
@@ -1630,6 +1643,7 @@ impl NativeApiParity {
                 family.map_or(Value::Null, |value| serde_json::json!(value)),
                 style.map_or(Value::Null, |value| serde_json::json!(value)),
                 rounded(size),
+                rounded(line_height),
                 rounded(line_height),
                 rounded(font_descender),
                 rounded(outline_width),

@@ -1021,6 +1021,12 @@ local function runGlFboSurfaceApiTest()
 	end
 	result["gl.CreateTexture"] = { n = 1, values = { true } }
 	result["gl.CreateRBO"] = { n = 1, values = { true } }
+	result["RBO.valid"] = { n = 1, values = { depthRbo.valid } }
+	result["RBO.target"] = { n = 1, values = { depthRbo.target } }
+	result["RBO.format"] = { n = 1, values = { depthRbo.format } }
+	result["RBO.xsize"] = { n = 1, values = { depthRbo.xsize } }
+	result["RBO.ysize"] = { n = 1, values = { depthRbo.ysize } }
+	result["RBO.samples"] = { n = 1, values = { depthRbo.samples } }
 
 	local sourceFbo = gl.CreateFBO({
 		color0 = sourceTexture,
@@ -1153,6 +1159,7 @@ local function runGlFontSurfaceApiTest()
 	result["gl.LoadFont"] = { n = 1, values = { true } }
 	glCall(result, "gl.LoadFont.info", function()
 		return font.path, font.family, font.style, font.size, font.height,
+			font.lineheight,
 			font.descender, font.outlinewidth, font.outlineweight,
 			font.texturewidth, font.textureheight
 	end)

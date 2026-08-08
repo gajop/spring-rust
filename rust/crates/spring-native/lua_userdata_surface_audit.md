@@ -6,10 +6,10 @@ This is separate from the free-callout inventory in `lua_functions.md`; native m
 ## Summary
 
 - Inventory rows: 65
-- Matched rows: 14
-- Matched but untested: 11
+- Matched rows: 31
+- Matched but untested: 0
 - Unclassified gaps: 29
-- Native ABI missing for declared counterpart: 6
+- Native ABI missing for declared counterpart: 0
 
 A complete parity claim requires zero unclassified gaps and zero matched-but-untested rows. `by-design` lifecycle rows are explicit exceptions, not coverage omissions.
 
@@ -61,24 +61,24 @@ A complete parity claim requires zero unclassified gaps and zero matched-but-unt
 | `LuaFont` | `method` | `SetTextColor` | color: table Four-component RGBA array (`{r, g, b, a}`), or pass `r`, `g`, `b`, and optional `a` as separate numbers (requires at least three numeric components after the font). | `Gfx.font_set_text_color` | **matched** |
 | `LuaFont` | `method` | `SubmitBuffered` | noBillboarding: boolean? When `false` sets 3d billboard mode. Defaults to `true`., userDefinedBlending: boolean? When `true` doesn't set the gl.BlendFunc automatically. Defaults to `false`. | `Gfx.font_submit_buffered` | **matched** |
 | `LuaFont` | `method` | `WrapText` | text: string, maxWidth: number, maxHeight: number? Defaults to an engine-defined maximum height., size: number? Defaults to the font's point size. -> string wrappedText; number lineCount | `Gfx.font_wrap_text` | **matched** |
-| `LuaFont` | `property` | `descender` | property read | `Gfx.get_font_info.descender` | **matched-but-untested** |
-| `LuaFont` | `property` | `family` | property read | `Gfx.get_font_info.family` | **matched-but-untested** |
-| `LuaFont` | `property` | `height` | property read | `Gfx.get_font_info.line_height` | **matched-but-untested** |
-| `LuaFont` | `property` | `lineheight` | property read | `Gfx.get_font_info.line_height` | **matched-but-untested** |
-| `LuaFont` | `property` | `outlineweight` | property read | `Gfx.get_font_info.outline_weight` | **matched-but-untested** |
-| `LuaFont` | `property` | `outlinewidth` | property read | `Gfx.get_font_info.outline_width` | **matched-but-untested** |
-| `LuaFont` | `property` | `path` | property read | `Gfx.get_font_info.path` | **matched-but-untested** |
-| `LuaFont` | `property` | `size` | property read | `Gfx.get_font_info.size` | **matched-but-untested** |
-| `LuaFont` | `property` | `style` | property read | `Gfx.get_font_info.style` | **matched-but-untested** |
-| `LuaFont` | `property` | `textureheight` | property read | `Gfx.get_font_info.texture_height` | **matched-but-untested** |
-| `LuaFont` | `property` | `texturewidth` | property read | `Gfx.get_font_info.texture_width` | **matched-but-untested** |
+| `LuaFont` | `property` | `descender` | property read | `Gfx.get_font_info.descender` | **matched** |
+| `LuaFont` | `property` | `family` | property read | `Gfx.get_font_info.family` | **matched** |
+| `LuaFont` | `property` | `height` | property read | `Gfx.get_font_info.line_height` | **matched** |
+| `LuaFont` | `property` | `lineheight` | property read | `Gfx.get_font_info.line_height` | **matched** |
+| `LuaFont` | `property` | `outlineweight` | property read | `Gfx.get_font_info.outline_weight` | **matched** |
+| `LuaFont` | `property` | `outlinewidth` | property read | `Gfx.get_font_info.outline_width` | **matched** |
+| `LuaFont` | `property` | `path` | property read | `Gfx.get_font_info.path` | **matched** |
+| `LuaFont` | `property` | `size` | property read | `Gfx.get_font_info.size` | **matched** |
+| `LuaFont` | `property` | `style` | property read | `Gfx.get_font_info.style` | **matched** |
+| `LuaFont` | `property` | `textureheight` | property read | `Gfx.get_font_info.texture_height` | **matched** |
+| `LuaFont` | `property` | `texturewidth` | property read | `Gfx.get_font_info.texture_width` | **matched** |
 | `LuaFont` | `lifecycle` | `__gc` | metatable finalizer | — | **by-design** |
-| `RBO` | `property` | `format` | property read | `Gfx.get_rbo_info.format` | **native-api-missing** |
-| `RBO` | `property` | `samples` | property read | `Gfx.get_rbo_info.samples` | **native-api-missing** |
-| `RBO` | `property` | `target` | property read | `Gfx.get_rbo_info.target` | **native-api-missing** |
-| `RBO` | `property` | `valid` | property read | `Gfx.get_rbo_info.valid` | **native-api-missing** |
-| `RBO` | `property` | `xsize` | property read | `Gfx.get_rbo_info.xsize` | **native-api-missing** |
-| `RBO` | `property` | `ysize` | property read | `Gfx.get_rbo_info.ysize` | **native-api-missing** |
+| `RBO` | `property` | `format` | property read | `Gfx.get_rboinfo.format` | **matched** |
+| `RBO` | `property` | `samples` | property read | `Gfx.get_rboinfo.samples` | **matched** |
+| `RBO` | `property` | `target` | property read | `Gfx.get_rboinfo.target` | **matched** |
+| `RBO` | `property` | `valid` | property read | `Gfx.get_rboinfo.valid` | **matched** |
+| `RBO` | `property` | `xsize` | property read | `Gfx.get_rboinfo.xsize` | **matched** |
+| `RBO` | `property` | `ysize` | property read | `Gfx.get_rboinfo.ysize` | **matched** |
 | `RBO` | `lifecycle` | `__gc` | metatable finalizer | — | **by-design** |
 | `FBO` | `property` | `dynamic attachment keys` | property read | — | **unclassified-gap** |
 | `FBO` | `lifecycle` | `__gc` | metatable finalizer | — | **by-design** |
