@@ -113,6 +113,10 @@ impl NativeModule for NativeApiParity {
             self.check_rml_element_form_event(&parsed)
         } else if name == "vfs.archive_surface" {
             self.check_vfs_archive_surface(&parsed)
+        } else if name == "gl.state_queries" {
+            self.check_gl_state_queries(&parsed)
+        } else if name == "gl.state_mutations" {
+            self.check_gl_state_mutations(&parsed)
         } else if let Some(test_name) = name.strip_prefix("set_native_") {
             self.find(test_name)
                 .ok_or_else(|| format!("unknown native setter check `{name}`"))
@@ -259,6 +263,7 @@ mod feature_checks;
 mod feature_control_calls_checks;
 mod game_checks;
 mod gfx_checks;
+mod gl_checks;
 mod ground_decal_checks;
 mod icons_checks;
 mod input_checks;

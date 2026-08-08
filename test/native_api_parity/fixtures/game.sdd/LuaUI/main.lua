@@ -6,6 +6,8 @@ local ranGeneratedTests = false
 local ranRmlUiTests = false
 local ranRmlSurfaceApiTest = false
 local ranRmlElementSurfaceApiTest = false
+local ranGlStateQueries = false
+local ranGlStateMutations = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -347,6 +349,137 @@ local function runRmlSurfaceApiTest()
 	local payload = { status = "pass", result = result, context = "widget" }
 	Common.setTestName(payload, testName)
 	record(testName, payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function roundedGlValue(value)
+	if type(value) == "number" then
+		if value > 1e30 then
+			return "inf"
+		elseif value < -1e30 then
+			return "-inf"
+		elseif value ~= value then
+			return "nan"
+		end
+		return math.floor(value * 100000 + 0.5) / 100000
+	end
+	return value
+end
+
+local function captureGlValues(...)
+	local values = { n = select("#", ...) }
+	for index = 1, values.n do
+		values[index] = roundedGlValue(select(index, ...))
+	end
+	return values
+end
+
+local function glCall(result, name, fn)
+	local values = captureGlValues(fn())
+	local normalized = {}
+	for index = 1, values.n do
+		normalized[index] = values[index]
+	end
+	result[name] = { n = values.n, values = normalized }
+end
+
+local function runGlStateSurfaceApiTest()
+	if ranGlStateQueries or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlStateQueries = true
+	if gl == nil then
+		error("gl table is not available in rendering parity test", 0)
+	end
+
+	local queryResult = {}
+	glCall(queryResult, "gl.HasExtension", function()
+		return gl.HasExtension("GL_NATIVE_API_PARITY_NOT_AN_EXTENSION")
+	end)
+	glCall(queryResult, "gl.GetNumber", function()
+		return gl.GetNumber(0x0BA2, 4)
+	end)
+	glCall(queryResult, "gl.GetString", function()
+		return gl.GetString(0x1F02)
+	end)
+	glCall(queryResult, "gl.GetViewSizes", gl.GetViewSizes)
+	glCall(queryResult, "gl.GetViewRange", function()
+		return gl.GetViewRange()
+	end)
+	glCall(queryResult, "gl.GetShadowMapParams", gl.GetShadowMapParams)
+	glCall(queryResult, "gl.GetAtmosphere", gl.GetAtmosphere)
+	glCall(queryResult, "gl.GetSun", gl.GetSun)
+	glCall(queryResult, "gl.GetWaterRendering", function()
+		return gl.GetWaterRendering("absorb")
+	end)
+	glCall(queryResult, "gl.GetMapRendering", function()
+		return gl.GetMapRendering("voidWater")
+	end)
+	glCall(queryResult, "gl.GetScreenViewTrans", gl.GetScreenViewTrans)
+
+	local payload = { status = "pass", result = queryResult, context = "widget" }
+	Common.setTestName(payload, "gl.state_queries")
+	record("gl.state_queries", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function runGlStateMutationSurfaceApiTest()
+	if ranGlStateMutations or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlStateMutations = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	void("gl.ResetState", gl.ResetState)
+	void("gl.ResetMatrices", gl.ResetMatrices)
+	void("gl.MatrixMode", function() gl.MatrixMode(GL.PROJECTION) end)
+	void("gl.LoadIdentity", gl.LoadIdentity)
+	void("gl.Translate", function() gl.Translate(1, 2, 3) end)
+	void("gl.Scale", function() gl.Scale(2, 3, 4) end)
+	void("gl.Rotate", function() gl.Rotate(15, 0, 1, 0) end)
+	void("gl.PushMatrix", gl.PushMatrix)
+	void("gl.PopMatrix", gl.PopMatrix)
+	void("gl.Ortho", function() gl.Ortho(-1, 1, -1, 1, 0.1, 100) end)
+	void("gl.Frustum", function() gl.Frustum(-0.1, 0.1, -0.1, 0.1, 0.1, 100) end)
+	void("gl.LoadMatrix", function()
+		gl.LoadMatrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+	end)
+	void("gl.MultMatrix", function()
+		gl.MultMatrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 1)
+	end)
+	glCall(result, "gl.GetMatrixData", function()
+		return gl.GetMatrixData(GL.PROJECTION)
+	end)
+	void("gl.MatrixMode.restore", function() gl.MatrixMode(GL.MODELVIEW) end)
+	void("gl.ResetMatrices.restore", gl.ResetMatrices)
+	void("gl.DepthTest", function() gl.DepthTest(GL.LEQUAL) end)
+	void("gl.DepthMask", function() gl.DepthMask(false) end)
+	void("gl.Culling", function() gl.Culling(true) end)
+	void("gl.Blending", function() gl.Blending(true) end)
+	void("gl.BlendFunc", function() gl.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA) end)
+	void("gl.BlendEquation", function() gl.BlendEquation(GL.FUNC_ADD) end)
+	void("gl.ColorMask", function() gl.ColorMask(true, false, true, false) end)
+	void("gl.AlphaToCoverage", function() gl.AlphaToCoverage(false, true) end)
+	void("gl.StencilTest", function() gl.StencilTest(false) end)
+	void("gl.Scissor", function() gl.Scissor(0, 0, 64, 64) end)
+	void("gl.Viewport", function() gl.Viewport(0, 0, 64, 64) end)
+	void("gl.LineWidth", function() gl.LineWidth(2) end)
+	void("gl.PointSize", function() gl.PointSize(3) end)
+	void("gl.Fog", function() gl.Fog(false) end)
+	void("gl.Lighting", function() gl.Lighting(false) end)
+	void("gl.ResetState.restore", gl.ResetState)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.state_mutations")
+	record("gl.state_mutations", payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
 	end
@@ -1055,6 +1188,11 @@ end
 
 function GameSetup()
 	return true, true
+end
+
+function DrawScreen(viewSizeX, viewSizeY)
+	runGlStateSurfaceApiTest()
+	runGlStateMutationSurfaceApiTest()
 end
 
 function Initialize()
