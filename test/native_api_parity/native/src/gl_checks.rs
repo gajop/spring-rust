@@ -1,6 +1,36 @@
 use super::*;
 use serde_json::{Map, Value};
 use spring_native::constants::*;
+use std::ffi::CStr;
+
+const PARITY_VERTEX_SHADER: &str = r#"#version 120
+uniform float u_scalar;
+uniform float u_floatArray[2];
+uniform vec2 u_vector;
+uniform int u_int;
+uniform int u_intArray[2];
+uniform mat4 u_matrix;
+void main() {
+    float offset = u_scalar + u_floatArray[0] + u_vector.x + float(u_int) +
+        float(u_intArray[0]) + u_matrix[0][0];
+    gl_Position = gl_Vertex + vec4(offset * 0.0001);
+}
+"#;
+
+const PARITY_FRAGMENT_SHADER: &str = r#"#version 120
+uniform float u_scalar;
+uniform float u_floatArray[2];
+uniform vec2 u_vector;
+uniform int u_int;
+uniform int u_intArray[2];
+uniform mat4 u_matrix;
+uniform vec4 u_color;
+void main() {
+    float offset = u_scalar + u_floatArray[1] + u_vector.y + float(u_int) +
+        float(u_intArray[1]) + u_matrix[1][1];
+    gl_FragColor = u_color + vec4(offset * 0.0001);
+}
+"#;
 
 fn rounded(value: f32) -> Value {
     // Lua's fixture deliberately represents non-finite values, and the
@@ -685,5 +715,223 @@ impl NativeApiParity {
 
         void!("gl.ResetState.restore", gfx.reset_state());
         compare_result(message, actual, "gl.immediate_primitives")
+    }
+
+    pub(crate) fn check_gl_shader_uniforms(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+        macro_rules! side_effect {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+            }};
+        }
+
+        let (shader_id, raw_shader_id) = gfx
+            .create_shader(
+                "",
+                PARITY_VERTEX_SHADER,
+                "",
+                "",
+                "",
+                PARITY_FRAGMENT_SHADER,
+                "",
+                spring_native::GfxCreateShaderOptions::default(),
+            )
+            .map_err(|error| format!("CreateShader failed: {error:?}"))?;
+        if shader_id == 0 || raw_shader_id == 0 {
+            return Err(format!(
+                "CreateShader returned invalid handles: shader={shader_id}, program={raw_shader_id}"
+            ));
+        }
+        record(
+            &mut actual,
+            "gl.CreateShader",
+            vec![serde_json::json!(true), serde_json::json!(true)],
+        );
+
+        let shader_log = gfx
+            .get_shader_log()
+            .map_err(|error| format!("GetShaderLog failed: {error:?}"))?
+            .unwrap_or_default();
+        record(
+            &mut actual,
+            "gl.GetShaderLog",
+            vec![serde_json::json!(shader_log)],
+        );
+
+        record(
+            &mut actual,
+            "gl.UseShader",
+            vec![serde_json::json!(gfx
+                .use_shader(shader_id)
+                .map_err(|error| format!("UseShader failed: {error:?}"))?)],
+        );
+        let (current_program, current_program_count) = gfx
+            .get_number(0x8B8D, 1)
+            .map_err(|error| format!("GetNumber(CURRENT_PROGRAM) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.GetNumber.currentProgram",
+            vec![serde_json::json!(
+                current_program_count > 0 && current_program[0] > 0.0
+            )],
+        );
+
+        let uniform_names = [
+            "u_scalar",
+            "u_floatArray",
+            "u_vector",
+            "u_int",
+            "u_intArray",
+            "u_matrix",
+            "u_color",
+        ];
+        let mut locations = std::collections::BTreeMap::new();
+        for name in uniform_names {
+            let location = gfx
+                .get_uniform_location(shader_id, name)
+                .map_err(|error| format!("GetUniformLocation({name}) failed: {error:?}"))?;
+            locations.insert(name, location);
+            record(
+                &mut actual,
+                &format!("gl.GetUniformLocation.{name}"),
+                vec![serde_json::json!(location)],
+            );
+        }
+
+        let mut active_uniforms = gfx
+            .get_active_uniforms(shader_id)
+            .map_err(|error| format!("GetActiveUniforms failed: {error:?}"))?
+            .into_iter()
+            .map(|uniform| {
+                let name = unsafe { CStr::from_ptr(uniform.name).to_string_lossy().into_owned() };
+                let type_name =
+                    unsafe { CStr::from_ptr(uniform.type_).to_string_lossy().into_owned() };
+                serde_json::json!([
+                    name,
+                    type_name,
+                    uniform.length,
+                    uniform.size,
+                    uniform.location
+                ])
+            })
+            .collect::<Vec<_>>();
+        active_uniforms.sort_by(|left, right| left[0].as_str().cmp(&right[0].as_str()));
+        record(
+            &mut actual,
+            "gl.GetActiveUniforms",
+            vec![Value::Array(active_uniforms)],
+        );
+
+        void!(
+            "gl.Uniform",
+            gfx.uniform(locations["u_scalar"], [1.25, 0.0, 0.0, 0.0], 1)
+        );
+        side_effect!(
+            "gl.Uniform.vector",
+            gfx.uniform(locations["u_vector"], [2.0, 3.0, 0.0, 0.0], 2)
+        );
+        side_effect!(
+            "gl.Uniform.color",
+            gfx.uniform(locations["u_color"], [0.1, 0.2, 0.3, 0.4], 4)
+        );
+        void!(
+            "gl.UniformInt",
+            gfx.uniform_int(locations["u_int"], [7, 0, 0, 0], 1)
+        );
+        void!(
+            "gl.UniformArray",
+            gfx.uniform_array_float(locations["u_floatArray"], &[1.5, 2.5])
+        );
+        side_effect!(
+            "gl.UniformArray.int",
+            gfx.uniform_array_int(locations["u_intArray"], &[3, 4])
+        );
+        void!(
+            "gl.UniformMatrix",
+            gfx.uniform_matrix(
+                locations["u_matrix"],
+                &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,],
+                false,
+            )
+        );
+        void!(
+            "gl.ActiveShader",
+            gfx.active_shader(shader_id, || {
+                let _ = gfx.uniform(locations["u_scalar"], [1.5, 0.0, 0.0, 0.0], 1);
+            })
+        );
+        void!(
+            "gl.SetGeometryShaderParameter",
+            gfx.set_geometry_shader_parameter(shader_id, 0x8DDC, GL_TRIANGLES as i32)
+        );
+        void!(
+            "gl.SetTesselationShaderParameter",
+            gfx.set_tesselation_shader_parameter(0x8E72, 3, [0.0; 4], 0, false)
+        );
+
+        match gfx
+            .get_engine_uniform_buffer_def(0)
+            .map_err(|error| format!("GetEngineUniformBufferDef failed: {error:?}"))?
+        {
+            Some(value) => record(
+                &mut actual,
+                "gl.GetEngineUniformBufferDef",
+                vec![serde_json::json!(value)],
+            ),
+            None => {}
+        }
+        let model_definition = gfx
+            .get_engine_model_uniform_data_def()
+            .map_err(|error| format!("GetEngineModelUniformDataDef failed: {error:?}"))?;
+        if let Some(value) = model_definition {
+            record(
+                &mut actual,
+                "gl.GetEngineModelUniformDataDef",
+                vec![serde_json::json!(value)],
+            );
+            let (elements, bytes) = gfx
+                .get_engine_model_uniform_data_size()
+                .map_err(|error| format!("GetEngineModelUniformDataSize failed: {error:?}"))?;
+            record(
+                &mut actual,
+                "gl.GetEngineModelUniformDataSize",
+                vec![serde_json::json!(elements), serde_json::json!(bytes)],
+            );
+        }
+
+        let restored = gfx
+            .use_shader(0)
+            .map_err(|error| format!("UseShader(0) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.UseShader.restore",
+            vec![serde_json::json!(restored)],
+        );
+        let deleted = gfx
+            .delete_shader(shader_id)
+            .map_err(|error| format!("DeleteShader failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.DeleteShader",
+            vec![serde_json::json!(deleted)],
+        );
+        let invalid = gfx
+            .use_shader(shader_id)
+            .map_err(|error| format!("UseShader(deleted) failed: {error:?}"))?;
+        record(
+            &mut actual,
+            "gl.UseShader.invalid",
+            vec![serde_json::json!(invalid)],
+        );
+
+        compare_result(message, actual, "gl.shader_uniforms")
     }
 }

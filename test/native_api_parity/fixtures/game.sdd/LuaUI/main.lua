@@ -10,6 +10,7 @@ local ranGlStateQueries = false
 local ranGlStateMutations = false
 local ranGlFixedImmediate = false
 local ranGlImmediatePrimitives = false
+local ranGlShaderUniforms = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -567,6 +568,146 @@ local function runGlImmediatePrimitivesSurfaceApiTest()
 	local payload = { status = "pass", result = result, context = "widget" }
 	Common.setTestName(payload, "gl.immediate_primitives")
 	record("gl.immediate_primitives", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function runGlShaderUniformSurfaceApiTest()
+	if ranGlShaderUniforms or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlShaderUniforms = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	local vertexShader = [[
+		#version 120
+		uniform float u_scalar;
+		uniform float u_floatArray[2];
+		uniform vec2 u_vector;
+		uniform int u_int;
+		uniform int u_intArray[2];
+		uniform mat4 u_matrix;
+		void main() {
+			float offset = u_scalar + u_vector.x + float(u_int) +
+				u_floatArray[0] + float(u_intArray[0]) + u_matrix[0][0];
+			gl_Position = gl_Vertex + vec4(offset * 0.0001);
+		}
+	]]
+	local fragmentShader = [[
+		#version 120
+		uniform float u_scalar;
+		uniform float u_floatArray[2];
+		uniform vec2 u_vector;
+		uniform int u_int;
+		uniform int u_intArray[2];
+		uniform mat4 u_matrix;
+		uniform vec4 u_color;
+		void main() {
+			float offset = u_scalar + u_vector.y + float(u_int) +
+				u_floatArray[1] + float(u_intArray[1]) + u_matrix[1][1];
+			gl_FragColor = u_color + vec4(offset * 0.0001);
+		}
+	]]
+
+	local shaderID, rawShaderID = gl.CreateShader({
+		vertex = vertexShader,
+		fragment = fragmentShader,
+	})
+	if shaderID == nil or rawShaderID == nil or shaderID <= 0 or rawShaderID <= 0 then
+		error("gl.CreateShader did not return valid handles", 0)
+	end
+	-- Shader and GL program handles are process-local; compare validity, not IDs.
+	result["gl.CreateShader"] = { n = 2, values = { true, true } }
+
+	glCall(result, "gl.GetShaderLog", gl.GetShaderLog)
+	glCall(result, "gl.UseShader", function()
+		return gl.UseShader(shaderID)
+	end)
+	glCall(result, "gl.GetNumber.currentProgram", function()
+		local program = gl.GetNumber(0x8B8D, 1)
+		return program > 0
+	end)
+
+	local locations = {}
+	for _, name in ipairs({ "u_scalar", "u_floatArray", "u_vector", "u_int", "u_intArray", "u_matrix", "u_color" }) do
+		local location = gl.GetUniformLocation(shaderID, name)
+		locations[name] = location
+		result["gl.GetUniformLocation." .. name] = {
+			n = 1,
+			values = { location },
+		}
+	end
+
+	local activeUniforms = gl.GetActiveUniforms(shaderID)
+	local normalizedUniforms = {}
+	for _, uniform in ipairs(activeUniforms or {}) do
+		normalizedUniforms[#normalizedUniforms + 1] = {
+			uniform.name,
+			uniform.type,
+			uniform.length,
+			uniform.size,
+			uniform.location,
+		}
+	end
+	table.sort(normalizedUniforms, function(left, right)
+		return left[1] < right[1]
+	end)
+	result["gl.GetActiveUniforms"] = { n = 1, values = { normalizedUniforms } }
+
+	void("gl.Uniform", function()
+		gl.Uniform(locations.u_scalar, 1.25)
+		gl.Uniform("u_vector", 2.0, 3.0)
+		gl.Uniform("u_color", 0.1, 0.2, 0.3, 0.4)
+	end)
+	void("gl.UniformInt", function()
+		gl.UniformInt("u_int", 7)
+	end)
+	void("gl.UniformArray", function()
+		gl.UniformArray("u_floatArray", 2, { 1.5, 2.5 })
+		gl.UniformArray("u_intArray", 1, { 3, 4 })
+	end)
+	void("gl.UniformMatrix", function()
+		gl.UniformMatrix("u_matrix",
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1)
+	end)
+	void("gl.ActiveShader", function()
+		gl.ActiveShader(shaderID, function()
+			gl.Uniform("u_scalar", 1.5)
+		end)
+	end)
+	void("gl.SetGeometryShaderParameter", function()
+		gl.SetGeometryShaderParameter(shaderID, 0x8DDC, GL.TRIANGLES)
+	end)
+	void("gl.SetTesselationShaderParameter", function()
+		gl.SetTesselationShaderParameter(0x8E72, 3)
+	end)
+
+	glCall(result, "gl.GetEngineUniformBufferDef", function()
+		return gl.GetEngineUniformBufferDef(0)
+	end)
+	glCall(result, "gl.GetEngineModelUniformDataDef", gl.GetEngineModelUniformDataDef)
+	glCall(result, "gl.GetEngineModelUniformDataSize", gl.GetEngineModelUniformDataSize)
+
+	glCall(result, "gl.UseShader.restore", function()
+		return gl.UseShader(0)
+	end)
+	local deleted = gl.DeleteShader(shaderID)
+	result["gl.DeleteShader"] = { n = 1, values = { deleted } }
+	glCall(result, "gl.UseShader.invalid", function()
+		return gl.UseShader(shaderID)
+	end)
+
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.shader_uniforms")
+	record("gl.shader_uniforms", payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
 	end
@@ -1398,6 +1539,7 @@ function DrawScreen(viewSizeX, viewSizeY)
 	runGlStateSurfaceApiTest()
 	runGlStateMutationSurfaceApiTest()
 	runGlImmediatePrimitivesSurfaceApiTest()
+	runGlShaderUniformSurfaceApiTest()
 	runGlFixedImmediateSurfaceApiTest()
 end
 
