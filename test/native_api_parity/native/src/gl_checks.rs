@@ -201,7 +201,6 @@ impl NativeApiParity {
                 record_void(&mut actual, $name);
             }};
         }
-
         void!("gl.ResetState", gfx.reset_state());
         void!("gl.ResetMatrices", gfx.reset_matrices());
         void!("gl.MatrixMode", gfx.matrix_mode(GL_PROJECTION));
@@ -268,5 +267,285 @@ impl NativeApiParity {
         void!("gl.ResetState.restore", gfx.reset_state());
 
         compare_result(message, actual, "gl.state_mutations")
+    }
+
+    pub(crate) fn check_gl_fixed_immediate(&self, message: &Value) -> Result<(), String> {
+        let gfx = self.interface.gfx();
+        let mut actual = Map::new();
+
+        macro_rules! void {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+                record_void(&mut actual, $name);
+            }};
+        }
+        macro_rules! side_effect {
+            ($name:literal, $call:expr) => {{
+                $call.map_err(|error| format!("{} failed: {error:?}", $name))?;
+            }};
+        }
+
+        // Keep this sequence in lockstep with runGlFixedImmediateSurfaceApiTest
+        // in the Lua fixture.  The native descriptors use explicit options for
+        // Lua's overloaded calls, but the resulting GL state must be identical.
+        void!("gl.ResetState", gfx.reset_state());
+        void!(
+            "gl.DepthTest",
+            gfx.depth_test(spring_native::GfxDepthTestOptions {
+                enable: true,
+                set_func: true,
+                func: GL_GREATER,
+            })
+        );
+        void!("gl.Culling", gfx.culling(true));
+        side_effect!(
+            "gl.BlendFunc",
+            gfx.blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        );
+        void!("gl.Blending", gfx.blending(true));
+        void!(
+            "gl.BlendFuncSeparate",
+            gfx.blend_func_separate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO)
+        );
+        void!(
+            "gl.BlendEquationSeparate",
+            gfx.blend_equation_separate(GL_FUNC_ADD, GL_FUNC_REVERSE_SUBTRACT)
+        );
+        void!(
+            "gl.ColorMask",
+            gfx.color_mask(spring_native::GfxColorMaskOptions {
+                red: true,
+                green: false,
+                blue: true,
+                alpha: false,
+            })
+        );
+        void!("gl.AlphaTest", gfx.alpha_test(true, GL_LESS, 0.25));
+        void!("gl.AlphaToCoverage", gfx.alpha_to_coverage(false));
+        void!("gl.DepthClamp", gfx.depth_clamp(true));
+        void!("gl.LogicOp", gfx.logic_op(true, GL_XOR));
+        void!("gl.ShadeModel", gfx.shade_model(GL_FLAT));
+        void!("gl.Scissor", gfx.scissor(4, 5, 64, 32));
+        void!("gl.LineStipple", gfx.line_stipple(2, 0xAAAA));
+        void!("gl.PointSprite", gfx.point_sprite(true));
+        void!(
+            "gl.PolygonMode",
+            gfx.polygon_mode(GL_FRONT_AND_BACK, GL_FILL)
+        );
+        void!("gl.PolygonOffset", gfx.polygon_offset(1.25, 2.5));
+        void!("gl.StencilTest", gfx.stencil_test(true));
+        void!("gl.StencilFunc", gfx.stencil_func(GL_LEQUAL, 1, 0xFF));
+        void!(
+            "gl.StencilFuncSeparate",
+            gfx.stencil_func_separate(GL_FRONT_AND_BACK, GL_GEQUAL, 2, 0x7F)
+        );
+        void!("gl.StencilMask", gfx.stencil_mask(0xF0));
+        void!(
+            "gl.StencilMaskSeparate",
+            gfx.stencil_mask_separate(GL_FRONT_AND_BACK, 0x0F)
+        );
+        void!(
+            "gl.StencilOp",
+            gfx.stencil_op(0x1E00, GL_REPLACE, GL_INVERT)
+        );
+        void!(
+            "gl.StencilOpSeparate",
+            gfx.stencil_op_separate(GL_FRONT_AND_BACK, 0x1E00, GL_ZERO, GL_REPLACE)
+        );
+        void!("gl.ClipDistance", gfx.clip_distance(0, true));
+        void!("gl.ClipPlane", gfx.clip_plane(1, [1.0, 0.0, 0.0, 0.0]));
+
+        // Lua PointParameter expands one six-argument call into four GL
+        // operations.  Exercise the same expansion through the native API.
+        void!(
+            "gl.PointParameter",
+            gfx.point_parameter(0x8129, 0.0, [0.5, 0.25, 0.125, 0.0], 3,)
+        );
+        side_effect!(
+            "gl.PointParameter.sizeMin",
+            gfx.point_parameter(0x8126, 1.0, [0.0; 4], 1)
+        );
+        side_effect!(
+            "gl.PointParameter.sizeMax",
+            gfx.point_parameter(0x8127, 64.0, [0.0; 4], 1)
+        );
+        side_effect!(
+            "gl.PointParameter.sizeFade",
+            gfx.point_parameter(0x8128, 8.0, [0.0; 4], 1)
+        );
+        void!(
+            "gl.Light",
+            gfx.light(
+                0,
+                spring_native::GfxLightOptions::default(),
+                GL_DIFFUSE,
+                [1.0, 0.5, 0.25, 1.0],
+                4,
+            )
+        );
+        void!(
+            "gl.Material",
+            gfx.material(GL_AMBIENT, [0.1, 0.2, 0.3, 1.0], 4)
+        );
+        void!(
+            "gl.TexEnv",
+            gfx.tex_env(
+                GL_TEXTURE_ENV,
+                GL_TEXTURE_ENV_COLOR,
+                [0.1, 0.2, 0.3, 0.4],
+                4
+            )
+        );
+        void!(
+            "gl.MultiTexEnv",
+            gfx.multi_tex_env(
+                1,
+                GL_TEXTURE_ENV,
+                GL_TEXTURE_ENV_MODE,
+                [GL_MODULATE as f32, 0.0, 0.0, 0.0],
+                1
+            )
+        );
+        void!(
+            "gl.TexGen",
+            gfx.tex_gen(
+                GL_S,
+                spring_native::GfxTexGenOptions::default(),
+                GL_TEXTURE_GEN_MODE,
+                [GL_OBJECT_LINEAR as f32, 0.0, 0.0, 0.0],
+                1,
+            )
+        );
+        void!(
+            "gl.MultiTexGen",
+            gfx.multi_tex_gen(
+                1,
+                GL_T,
+                spring_native::GfxMultiTexGenOptions::default(),
+                GL_TEXTURE_GEN_MODE,
+                [GL_EYE_LINEAR as f32, 0.0, 0.0, 0.0],
+                1,
+            )
+        );
+        void!("gl.PushAttrib", gfx.push_attrib(GL_ENABLE_BIT));
+        void!("gl.PopAttrib", gfx.pop_attrib());
+        void!("gl.MemoryBarrier", gfx.memory_barrier(0));
+        void!("gl.DispatchCompute", gfx.dispatch_compute(1, 1, 1, 0));
+        void!("gl.ActiveTexture", gfx.active_texture(1));
+        side_effect!(
+            "gl.ActiveTexture.TexEnv",
+            gfx.tex_env(
+                GL_TEXTURE_ENV,
+                GL_TEXTURE_ENV_MODE,
+                [GL_MODULATE as f32, 0.0, 0.0, 0.0],
+                1
+            )
+        );
+        side_effect!("gl.ActiveTexture.restore", gfx.active_texture(0));
+        void!(
+            "gl.ObjectLabel",
+            gfx.object_label(GL_TEXTURE, 0, "native-api-parity")
+        );
+        void!(
+            "gl.PushDebugGroup",
+            gfx.push_debug_group(1, "native-api-parity", false)
+        );
+        void!("gl.PopDebugGroup", gfx.pop_debug_group());
+
+        let fixed = |name: &str| {
+            gfx.get_fixed_state(name)
+                .map_err(|error| format!("GetFixedState({name}) failed: {error:?}"))
+        };
+        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("blending")?;
+        record(
+            &mut actual,
+            "gl.GetFixedState.blending",
+            std::iter::once(serde_json::json!(bools[0]))
+                .chain(
+                    ints.into_iter()
+                        .take(int_count as usize)
+                        .map(|v| serde_json::json!(v)),
+                )
+                .collect(),
+        );
+        if bool_count != 1 || float_count != 0 {
+            return Err("GetFixedState(blending) returned unexpected slots".to_owned());
+        }
+
+        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("depth")?;
+        record(
+            &mut actual,
+            "gl.GetFixedState.depth",
+            vec![
+                serde_json::json!(bools[0]),
+                serde_json::json!(bools[1]),
+                serde_json::json!(ints[0]),
+            ],
+        );
+        if bool_count != 2 || int_count != 1 || float_count != 0 {
+            return Err("GetFixedState(depth) returned unexpected slots".to_owned());
+        }
+
+        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("culling")?;
+        record(
+            &mut actual,
+            "gl.GetFixedState.culling",
+            vec![serde_json::json!(bools[0]), serde_json::json!(ints[0])],
+        );
+        if bool_count != 1 || int_count != 1 || float_count != 0 {
+            return Err("GetFixedState(culling) returned unexpected slots".to_owned());
+        }
+
+        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("colorMask")?;
+        record(
+            &mut actual,
+            "gl.GetFixedState.colorMask",
+            bools
+                .into_iter()
+                .take(bool_count as usize)
+                .map(|v| serde_json::json!(v))
+                .collect(),
+        );
+        if bool_count != 4 || int_count != 0 || float_count != 0 {
+            return Err("GetFixedState(colorMask) returned unexpected slots".to_owned());
+        }
+
+        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("alphaTest")?;
+        record(
+            &mut actual,
+            "gl.GetFixedState.alphaTest",
+            vec![
+                serde_json::json!(bools[0]),
+                serde_json::json!(ints[0]),
+                rounded(floats[0]),
+            ],
+        );
+        if bool_count != 1 || int_count != 1 || float_count != 1 {
+            return Err("GetFixedState(alphaTest) returned unexpected slots".to_owned());
+        }
+
+        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("lineWidth")?;
+        record(
+            &mut actual,
+            "gl.GetFixedState.lineWidth",
+            vec![rounded(floats[0])],
+        );
+        if bool_count != 0 || int_count != 0 || float_count != 1 {
+            return Err("GetFixedState(lineWidth) returned unexpected slots".to_owned());
+        }
+
+        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("pointSize")?;
+        record(
+            &mut actual,
+            "gl.GetFixedState.pointSize",
+            vec![serde_json::json!(bools[0]), rounded(floats[0])],
+        );
+        if bool_count != 1 || int_count != 0 || float_count != 1 {
+            return Err("GetFixedState(pointSize) returned unexpected slots".to_owned());
+        }
+
+        let _ = (ints, floats); // keep the closure destructuring explicit above
+        void!("gl.ResetState.restore", gfx.reset_state());
+        compare_result(message, actual, "gl.fixed_immediate")
     }
 }

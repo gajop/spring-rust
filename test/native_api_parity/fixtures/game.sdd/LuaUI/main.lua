@@ -8,6 +8,7 @@ local ranRmlSurfaceApiTest = false
 local ranRmlElementSurfaceApiTest = false
 local ranGlStateQueries = false
 local ranGlStateMutations = false
+local ranGlFixedImmediate = false
 local ranScriptKillTest = false
 local fixtureIDs = {}
 
@@ -480,6 +481,123 @@ local function runGlStateMutationSurfaceApiTest()
 	local payload = { status = "pass", result = result, context = "widget" }
 	Common.setTestName(payload, "gl.state_mutations")
 	record("gl.state_mutations", payload)
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(payload))
+	end
+end
+
+local function runGlFixedImmediateSurfaceApiTest()
+	if ranGlFixedImmediate or not Common.enableRenderingTests() then
+		return
+	end
+	ranGlFixedImmediate = true
+	local result = {}
+	local function void(name, fn)
+		fn()
+		result[name] = { n = 0, values = {} }
+	end
+
+	-- Exercise the overloaded Lua state callouts through the equivalent native
+	-- query shapes.  The fixed-state values are flattened so the comparison is
+	-- about the GL state, not Lua table key representation.
+	void("gl.ResetState", gl.ResetState)
+	void("gl.DepthTest", function() gl.DepthTest(GL.GREATER) end)
+	void("gl.Culling", function() gl.Culling(true) end)
+	void("gl.Blending", function() gl.Blending(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA) end)
+	void("gl.BlendFuncSeparate", function()
+		gl.BlendFuncSeparate(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ZERO)
+	end)
+	void("gl.BlendEquationSeparate", function()
+		gl.BlendEquationSeparate(GL.FUNC_ADD, GL.FUNC_REVERSE_SUBTRACT)
+	end)
+	void("gl.ColorMask", function() gl.ColorMask(true, false, true, false) end)
+	void("gl.AlphaTest", function() gl.AlphaTest(GL.LESS, 0.25) end)
+	void("gl.AlphaToCoverage", function() gl.AlphaToCoverage(false, true) end)
+	void("gl.DepthClamp", function() gl.DepthClamp(true) end)
+	void("gl.LogicOp", function() gl.LogicOp(GL.XOR) end)
+	void("gl.ShadeModel", function() gl.ShadeModel(GL.FLAT) end)
+	void("gl.Scissor", function() gl.Scissor(4, 5, 64, 32) end)
+	void("gl.LineStipple", function() gl.LineStipple(2, 0xAAAA) end)
+	void("gl.PointSprite", function() gl.PointSprite(true) end)
+	void("gl.PolygonMode", function() gl.PolygonMode(GL.FRONT_AND_BACK, GL.FILL) end)
+	void("gl.PolygonOffset", function() gl.PolygonOffset(1.25, 2.5) end)
+	void("gl.StencilTest", function() gl.StencilTest(true) end)
+	void("gl.StencilFunc", function() gl.StencilFunc(GL.LEQUAL, 1, 0xFF) end)
+	void("gl.StencilFuncSeparate", function()
+		gl.StencilFuncSeparate(GL.FRONT_AND_BACK, GL.GEQUAL, 2, 0x7F)
+	end)
+	void("gl.StencilMask", function() gl.StencilMask(0xF0) end)
+	void("gl.StencilMaskSeparate", function() gl.StencilMaskSeparate(GL.FRONT_AND_BACK, 0x0F) end)
+	void("gl.StencilOp", function() gl.StencilOp(GL.KEEP, GL.REPLACE, GL.INVERT) end)
+	void("gl.StencilOpSeparate", function()
+		gl.StencilOpSeparate(GL.FRONT_AND_BACK, GL.KEEP, GL.ZERO, GL.REPLACE)
+	end)
+	void("gl.ClipDistance", function() gl.ClipDistance(0, true) end)
+	void("gl.ClipPlane", function() gl.ClipPlane(1, 1, 0, 0, 0) end)
+	void("gl.PointParameter", function() gl.PointParameter(0.5, 0.25, 0.125, 1, 64, 8) end)
+	void("gl.Light", function() gl.Light(0, GL.DIFFUSE, 1, 0.5, 0.25, 1) end)
+	void("gl.Material", function()
+		gl.Material({ ambient = { 0.1, 0.2, 0.3, 1 } })
+	end)
+	void("gl.TexEnv", function()
+		gl.TexEnv(GL.TEXTURE_ENV, GL.TEXTURE_ENV_COLOR, 0.1, 0.2, 0.3, 0.4)
+	end)
+	void("gl.MultiTexEnv", function()
+		gl.MultiTexEnv(1, GL.TEXTURE_ENV, GL.TEXTURE_ENV_MODE, GL.MODULATE)
+	end)
+	void("gl.TexGen", function()
+		gl.TexGen(GL.S, GL.TEXTURE_GEN_MODE, GL.OBJECT_LINEAR)
+	end)
+	void("gl.MultiTexGen", function()
+		gl.MultiTexGen(1, GL.T, GL.TEXTURE_GEN_MODE, GL.EYE_LINEAR)
+	end)
+	void("gl.PushAttrib", function() gl.PushAttrib(GL.ENABLE_BIT) end)
+	void("gl.PopAttrib", gl.PopAttrib)
+	void("gl.MemoryBarrier", function() gl.MemoryBarrier(0) end)
+	void("gl.DispatchCompute", function() gl.DispatchCompute(1, 1, 1, 0) end)
+	void("gl.ActiveTexture", function()
+		gl.ActiveTexture(1, function()
+			gl.TexEnv(GL.TEXTURE_ENV, GL.TEXTURE_ENV_MODE, GL.MODULATE)
+		end)
+	end)
+	void("gl.ObjectLabel", function() gl.ObjectLabel(GL.TEXTURE, 0, "native-api-parity") end)
+	void("gl.PushDebugGroup", function() gl.PushDebugGroup(1, "native-api-parity") end)
+	void("gl.PopDebugGroup", gl.PopDebugGroup)
+
+	glCall(result, "gl.GetFixedState.blending", function()
+		local enabled, state = gl.GetFixedState("blending")
+		return enabled, state.GL_BLEND_SRC_RGB, state.GL_BLEND_SRC_ALPHA,
+			state.GL_BLEND_DST_RGB, state.GL_BLEND_DST_ALPHA,
+			state.GL_BLEND_EQUATION_RGB, state.GL_BLEND_EQUATION_ALPHA
+	end)
+	glCall(result, "gl.GetFixedState.depth", function()
+		local enabled, write, state = gl.GetFixedState("depth")
+		return enabled, write, state.GL_DEPTH_FUNC
+	end)
+	glCall(result, "gl.GetFixedState.culling", function()
+		local enabled, state = gl.GetFixedState("culling")
+		return enabled, state.GL_CULL_FACE_MODE
+	end)
+	glCall(result, "gl.GetFixedState.colorMask", function()
+		local state = gl.GetFixedState("colorMask")
+		return state.GL_COLOR_WRITEMASK_R, state.GL_COLOR_WRITEMASK_G,
+			state.GL_COLOR_WRITEMASK_B, state.GL_COLOR_WRITEMASK_A
+	end)
+	glCall(result, "gl.GetFixedState.alphaTest", function()
+		local enabled, state = gl.GetFixedState("alphaTest")
+		return enabled, state.GL_ALPHA_TEST_FUNC, state.GL_ALPHA_TEST_REF
+	end)
+	glCall(result, "gl.GetFixedState.lineWidth", function()
+		return gl.GetFixedState("lineWidth")
+	end)
+	glCall(result, "gl.GetFixedState.pointSize", function()
+		return gl.GetFixedState("pointSize")
+	end)
+
+	void("gl.ResetState.restore", gl.ResetState)
+	local payload = { status = "pass", result = result, context = "widget" }
+	Common.setTestName(payload, "gl.fixed_immediate")
+	record("gl.fixed_immediate", payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(Common.encode(payload))
 	end
@@ -1193,6 +1311,7 @@ end
 function DrawScreen(viewSizeX, viewSizeY)
 	runGlStateSurfaceApiTest()
 	runGlStateMutationSurfaceApiTest()
+	runGlFixedImmediateSurfaceApiTest()
 end
 
 function Initialize()
