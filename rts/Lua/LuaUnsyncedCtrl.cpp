@@ -4201,6 +4201,12 @@ int LuaUnsyncedCtrl::SetSunDirection(lua_State* L)
 	auto dir = float3(luaL_checkfloat(L, 1), luaL_checkfloat(L, 2), luaL_checkfloat(L, 3));
 	auto intensity = luaL_optfloat(L, 4, 1.0f); // seems broken atm, only toggles shadows off when set to 0
 	ISky::GetSky()->GetLight()->SetLightDir(float4(dir.SafeNormalize(), intensity));
+	sunLighting->SetUpdated();
+	// Notify listeners the sun changed so the ground/model shaders re-upload the
+	// new light direction (SMFRenderState::UpdateShaderSkyUniforms reads it from
+	// the sky light). Without this only the shading texture refreshes, leaving the
+	// lit terrain stale until an unrelated SetSunLighting fires the same event.
+	eventHandler.SunChanged();
 	return 0;
 }
 
