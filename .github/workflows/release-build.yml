@@ -38,21 +38,14 @@ jobs:
     needs: get-tag
     uses: ./.github/workflows/engine-build.yml
     with:
+      targets: '["amd64-linux","amd64-windows"]'
       cmake-options: '-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="-O3 -g -DNDEBUG" -DCMAKE_C_FLAGS_RELWITHDEBINFO="-O3 -g -DNDEBUG"'
-    secrets: inherit
-  build-engine-tracy:
-    needs: get-tag
-    uses: ./.github/workflows/engine-build.yml
-    with:
-      cmake-options: '-DTRACY_ENABLE=ON -DCMAKE_CXX_FLAGS_RELWITHDEBINFO="-O3 -g1 -DNDEBUG -fno-omit-frame-pointer" -DCMAKE_C_FLAGS_RELWITHDEBINFO="-O3 -g1 -DNDEBUG -fno-omit-frame-pointer"'
-      package-suffix: '-tracy'
-      split-debug-info: false
     secrets: inherit
   create-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [build-engine, build-engine-tracy, get-tag]
+    needs: [build-engine, get-tag]
     steps:
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
