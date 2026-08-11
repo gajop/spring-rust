@@ -224,8 +224,6 @@ bool LuaSyncedCtrl::PushEntries(lua_State* L)
 	REGISTER_LUA_CFUNC(SetUnitFlanking);
 	REGISTER_LUA_CFUNC(GetUnitPhysicalState);
 	REGISTER_LUA_CFUNC(SetUnitPhysicalStateBit);
-	REGISTER_LUA_CFUNC(SetUnitTravel);
-	REGISTER_LUA_CFUNC(SetUnitFuel);
 	REGISTER_LUA_CFUNC(SetUnitMoveGoal);
 	REGISTER_LUA_CFUNC(SetUnitLandGoal);
 	REGISTER_LUA_CFUNC(ClearUnitGoal);
@@ -308,9 +306,6 @@ bool LuaSyncedCtrl::PushEntries(lua_State* L)
 	REGISTER_LUA_CFUNC(SetProjectileIgnoreTrackingError);
 
 	REGISTER_LUA_CFUNC(SetProjectileGravity);
-	REGISTER_LUA_CFUNC(SetProjectileSpinAngle);
-	REGISTER_LUA_CFUNC(SetProjectileSpinSpeed);
-	REGISTER_LUA_CFUNC(SetProjectileSpinVec);
 	REGISTER_LUA_CFUNC(SetPieceProjectileParams);
 
 	REGISTER_LUA_CFUNC(SetProjectileCEG);
@@ -3567,11 +3562,6 @@ int LuaSyncedCtrl::GetUnitPhysicalState(lua_State* L)
 
 
 
-int LuaSyncedCtrl::SetUnitTravel(lua_State* L) { return 0; } // FIXME: DELETE ME
-int LuaSyncedCtrl::SetUnitFuel(lua_State* L) { return 0; } // FIXME: DELETE ME
-
-
-
 /***
  *
  * @function Spring.SetUnitNeutral
@@ -3738,8 +3728,8 @@ int LuaSyncedCtrl::SetUnitRadiusAndHeight(lua_State* L)
 		return 1;
 	}
 
-	const float newRadius = std::max(0.0f, luaL_optfloat(L, 2, unit->radius));
-	const float newHeight = std::max(0.0f, luaL_optfloat(L, 3, unit->height));
+	const float newRadius = std::max(1.0f, luaL_optfloat(L, 2, unit->radius));
+	const float newHeight = std::max(1.0f, luaL_optfloat(L, 3, unit->height));
 	const bool updateQuads = (newRadius != unit->radius);
 
 	if (updateQuads) {
@@ -4937,7 +4927,7 @@ int LuaSyncedCtrl::SetFeatureResources(lua_State* L)
 	feature->resources.metal  = std::clamp(luaL_checknumber(L, 2), 0.0f, feature->defResources.metal );
 	feature->resources.energy = std::clamp(luaL_checknumber(L, 3), 0.0f, feature->defResources.energy);
 
-	feature->reclaimTime = std::clamp(luaL_optnumber(L, 4, feature->reclaimTime), 0.0f, 1000000.0f);
+	feature->reclaimTime = std::clamp(luaL_optnumber(L, 4, feature->reclaimTime), 1.0f, 1000000.0f);
 	feature->reclaimLeft = std::clamp(luaL_optnumber(L, 5, feature->reclaimLeft), 0.0f,       1.0f);
 	return 0;
 }
@@ -5300,8 +5290,8 @@ int LuaSyncedCtrl::SetFeatureRadiusAndHeight(lua_State* L)
 		return 1;
 	}
 
-	const float newRadius = std::max(0.0f, luaL_optfloat(L, 2, feature->radius));
-	const float newHeight = std::max(0.0f, luaL_optfloat(L, 3, feature->height));
+	const float newRadius = std::max(1.0f, luaL_optfloat(L, 2, feature->radius));
+	const float newHeight = std::max(1.0f, luaL_optfloat(L, 3, feature->height));
 	const bool updateQuads = (newRadius != feature->radius);
 
 	if (updateQuads) {
@@ -5859,33 +5849,6 @@ int LuaSyncedCtrl::SetProjectileGravity(lua_State* L)
 	proj->mygravity = luaL_optfloat(L, 2, 0.0f);
 	return 0;
 }
-
-/***
- *
- * @function Spring.SetProjectileSpinAngle
- * @param projectileID integer
- * @param angle number
- */
-int LuaSyncedCtrl::SetProjectileSpinAngle(lua_State* L) { return 0; } // FIXME: DELETE ME
-
-/***
- *
- * @function Spring.SetProjectileSpinSpeed
- * @param projectileID integer
- * @param speed number
- */
-int LuaSyncedCtrl::SetProjectileSpinSpeed(lua_State* L) { return 0; } // FIXME: DELETE ME
-
-/***
- *
- * @function Spring.SetProjectileSpinVec
- * @param projectileID integer
- * @param x number
- * @param y number
- * @param z number
- */
-int LuaSyncedCtrl::SetProjectileSpinVec(lua_State* L) { return 0; } // FIXME: DELETE ME
-
 
 /*** Set piece projectile params
  *

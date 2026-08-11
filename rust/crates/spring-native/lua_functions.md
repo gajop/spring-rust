@@ -2,9 +2,9 @@
 
 Total Namespaces: 11
 
-Total Functions: 1373
+Total Functions: 1368
 
-Callouts (Plugin → Engine): 1183
+Callouts (Plugin → Engine): 1178
 Callins (Engine → Plugin): 190
 
 ---
@@ -161,7 +161,7 @@ Callins (Engine → Plugin): 190
 - `Script.SetWatchWeapon` (params: weaponDefID:integer, watch:boolean)
 - `Script.UpdateCallIn` (params: name:string)
 
-### Spring (796 functions)
+### Spring (791 functions)
 
 - `Spring.AddFeatureDamage` (params: featureID:integer, damage:number, paralyze:number?, attackerID:integer?, weaponID:integer?, impulseX:number?, impulseY:number?, impulseZ:number?)
 - `Spring.AddGrass` (params: x:number, z:number, grassValue:integer?)
@@ -510,7 +510,6 @@ Callins (Engine → Plugin): 190
 - `Spring.GetUnitExperience` (params: unitID:integer)
 - `Spring.GetUnitFeatureSeparation` (params: unitID:integer, featureID:integer, surfaceDist:boolean?)
 - `Spring.GetUnitFlanking` (params: unitID:integer)
-- `Spring.GetUnitFuel` (params: unitID:integer)
 - `Spring.GetUnitGroup` (params: unitID:integer)
 - `Spring.GetUnitHarvestStorage` (params: unitID:integer)
 - `Spring.GetUnitHeading` (params: unitID:integer, convertToRadians:boolean?)
@@ -578,7 +577,6 @@ Callins (Engine → Plugin): 190
 - `Spring.GetUnitTooltip` (params: unitID:integer)
 - `Spring.GetUnitTransformMatrix` (params: unitID:integer)
 - `Spring.GetUnitTransporter` (params: unitID:integer)
-- `Spring.GetUnitTravel` (params: unitID:integer)
 - `Spring.GetUnitVectors` (params: unitID:integer)
 - `Spring.GetUnitVelocity` (params: unitID:integer)
 - `Spring.GetUnitViewPosition` (params: unitID:integer, midPos:boolean?)
@@ -819,9 +817,6 @@ Callins (Engine → Plugin): 190
 - `Spring.SetProjectileIsIntercepted` (params: projectileID:integer, intercepted:boolean)
 - `Spring.SetProjectileMoveControl` (params: projectileID:integer, enable:boolean?)
 - `Spring.SetProjectilePosition` (params: projectileID:integer, posX:number?, posY:number?, posZ:number?)
-- `Spring.SetProjectileSpinAngle` (params: projectileID:integer, angle:number)
-- `Spring.SetProjectileSpinSpeed` (params: projectileID:integer, speed:number)
-- `Spring.SetProjectileSpinVec` (params: projectileID:integer, x:number, y:number, z:number)
 - `Spring.SetProjectileTarget` (params: projectileID:integer, target:ProjectileTargetRef)
 - `Spring.SetProjectileTimeToLive` (params: projectileID:integer, ttl:integer)
 - `Spring.SetProjectileUseAirLos` (params: projectileID:integer, useAirLos:boolean)

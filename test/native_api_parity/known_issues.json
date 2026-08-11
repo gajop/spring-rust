@@ -1,12 +1,4 @@
 {
   "version": 1,
-  "issues": [
-    {
-      "id": "lua_inventory_missing_obsolete_unit_controls",
-      "status": "inventory_missing_docstring",
-      "lua": ["Spring.SetUnitFuel", "Spring.SetUnitTravel"],
-      "native": ["UnitControl.set_unit_fuel", "UnitControl.set_unit_travel"],
-      "problem": "These registered LuaSyncedCtrl no-op compatibility callouts are absent from lua_functions.md; both Lua and native paths are still exercised and compared by unit_control_calls_02."
-    }
-  ]
+  "issues": []
 }

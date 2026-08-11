@@ -3,18 +3,18 @@
 ## Summary Statistics
 
 **Lua API (Spring.* callouts only):**
-- Total: 796 functions
-- Matched (perfect 1.0): 795 (99.9%)
+- Total: 791 functions
+- Matched (perfect 1.0): 790 (99.9%)
 - Uncertain matches (<1.0): 0 (0.0%)
 - Unmatched: 1 (0.1%)
 
 **Rust API:**
-- Total: 1424 functions across 53 modules
-- Matched to Lua: 795 (55.8%)
-- Rust-only: 620 (43.5%)
+- Total: 1417 functions across 53 modules
+- Matched to Lua: 790 (55.8%)
+- Rust-only: 618 (43.6%)
 
 **Parameter comparison (matched functions):**
-- Parameter matches: 795
+- Parameter matches: 790
 - Count mismatches: 0
 - Type mismatches: 0
 
@@ -377,7 +377,6 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitExperience` → `UnitsInfo.UnitsInfo.get_unit_experience`
 - `Spring.GetUnitFeatureSeparation` → `UnitControl.UnitControl.get_unit_feature_separation`
 - `Spring.GetUnitFlanking` → `UnitsInfo.UnitsInfo.get_unit_flanking`
-- `Spring.GetUnitFuel` → `UnitsInfo.UnitsInfo.get_unit_fuel`
 - `Spring.GetUnitGroup` → `Selection.Selection.get_unit_group`
 - `Spring.GetUnitHarvestStorage` → `UnitsInfo.UnitsInfo.get_unit_harvest_storage`
 - `Spring.GetUnitHeading` → `UnitsInfo.UnitsInfo.get_unit_heading`
@@ -445,7 +444,6 @@ Functions with perfect 1.0 confidence match:
 - `Spring.GetUnitTooltip` → `UnitsInfo.UnitsInfo.get_unit_tooltip`
 - `Spring.GetUnitTransformMatrix` → `UnitRendering.UnitRendering.get_unit_transform_matrix`
 - `Spring.GetUnitTransporter` → `UnitsInfo.UnitsInfo.get_unit_transporter`
-- `Spring.GetUnitTravel` → `UnitsInfo.UnitsInfo.get_unit_travel`
 - `Spring.GetUnitVectors` → `UnitsInfo.UnitsInfo.get_unit_vectors`
 - `Spring.GetUnitVelocity` → `UnitsInfo.UnitsInfo.get_unit_velocity`
 - `Spring.GetUnitViewPosition` → `UnitRendering.UnitRendering.get_unit_view_position`
@@ -685,9 +683,6 @@ Functions with perfect 1.0 confidence match:
 - `Spring.SetProjectileIsIntercepted` → `ProjectileControl.ProjectileControl.set_projectile_is_intercepted`
 - `Spring.SetProjectileMoveControl` → `ProjectileControl.ProjectileControl.set_projectile_move_control`
 - `Spring.SetProjectilePosition` → `ProjectileControl.ProjectileControl.set_projectile_position`
-- `Spring.SetProjectileSpinAngle` → `ProjectileControl.ProjectileControl.set_projectile_spin_angle`
-- `Spring.SetProjectileSpinSpeed` → `ProjectileControl.ProjectileControl.set_projectile_spin_speed`
-- `Spring.SetProjectileSpinVec` → `ProjectileControl.ProjectileControl.set_projectile_spin_vec`
 - `Spring.SetProjectileTarget` → `ProjectileControl.ProjectileControl.set_projectile_target`
 - `Spring.SetProjectileTimeToLive` → `ProjectileControl.ProjectileControl.set_projectile_time_to_live`
 - `Spring.SetProjectileUseAirLos` → `ProjectileControl.ProjectileControl.set_projectile_use_air_los`
@@ -826,7 +821,7 @@ Functions with perfect 1.0 confidence match:
 - `Spring.WorldToScreenCoords` → `Camera.Camera.world_to_screen_coords`
 - `Spring.Yield` → `SystemControl.SystemControl.yield`
 
-**Total: 795**
+**Total: 790**
 
 ---
 
@@ -1379,9 +1374,7 @@ Functions in Rust API with no Lua equivalent:
 - `Tracing.Tracing.trace_ray`
 - `Tracing.Tracing.trace_ray_features`
 - `Tracing.Tracing.trace_ray_units`
-- `UnitControl.UnitControl.set_unit_fuel`
 - `UnitControl.UnitControl.set_unit_heading`
-- `UnitControl.UnitControl.set_unit_travel`
 - `UnitDefs.UnitDefs.get_unit_def_basic_info`
 - `UnitDefs.UnitDefs.get_unit_def_by_id`
 - `UnitDefs.UnitDefs.get_unit_def_classify`
@@ -1474,4 +1467,4 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 620**
+**Total Rust-only: 618**

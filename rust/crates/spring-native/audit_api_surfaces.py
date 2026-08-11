@@ -67,10 +67,7 @@ GL_SOURCE_FILES = (
 VFS_SOURCE_FILES = ("LuaVFS.cpp", "LuaVFSDownload.cpp", "LuaArchive.cpp")
 SCRIPT_SOURCE_FILES = ("LuaHandle.cpp", "LuaHandleSynced.cpp", "LuaUI.cpp", "LuaRules.cpp")
 
-SOURCE_ONLY_REASONS = {
-    "Spring.SetUnitFuel": "Registered compatibility no-op retained by the Lua engine (`// FIXME: DELETE ME`); it is exercised by `unit_set_fuel` and deliberately has no public generated signature.",
-    "Spring.SetUnitTravel": "Registered compatibility no-op retained by the Lua engine (`// FIXME: DELETE ME`); it is exercised by `unit_set_travel` and deliberately has no public generated signature.",
-}
+SOURCE_ONLY_REASONS = {}
 
 GL_REGISTRATION_BOUNDARY_REASONS = {
     "gl.Begin": "LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_begin`.",

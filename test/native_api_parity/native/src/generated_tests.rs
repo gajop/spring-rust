@@ -344,8 +344,6 @@ native_tests! {
     unit_direction_after_set { check = check_unit_vectors, set = set_unit_direction, }
     get_team_units_counts { check = check_units_query_counts, set = set_noop, }
     unit_add_damage { check = check_unit_health, set = add_unit_damage, }
-    get_unit_travel { check = check_unit_travel, set = set_noop, }
-    get_unit_fuel { check = check_unit_fuel, set = set_noop, }
     get_unit_nearest_ally { check = check_units_query_i32, set = set_noop, }
     get_unit_nearest_enemy { check = check_units_query_i32, set = set_noop, }
     get_unit_no_draw { check = check_unit_render_flag, set = set_noop, }
@@ -642,8 +640,6 @@ native_tests! {
     unit_set_piece_matrix { check = check_unit_control_call, set = set_noop, }
     unit_set_piece_parent { check = check_unit_control_call, set = set_noop, }
     unit_set_nano_pieces { check = check_unit_control_call, set = set_noop, }
-    unit_set_travel { check = check_unit_control_call, set = set_noop, }
-    unit_set_fuel { check = check_unit_control_call, set = set_noop, }
     unit_set_land_goal_not_air { check = check_unit_control_call, set = set_noop, }
     feature_set_always_visible { check = check_feature_control_call, set = set_noop, }
     feature_set_use_air_los { check = check_feature_control_call, set = set_noop, }
@@ -695,9 +691,6 @@ native_tests! {
     projectile_set_use_air_los { check = check_projectile_control_call, set = set_noop, }
     projectile_set_move_control { check = check_projectile_control_call, set = set_noop, }
     projectile_set_ignore_tracking_error { check = check_projectile_control_call, set = set_noop, }
-    projectile_set_spin_angle { check = check_projectile_control_call, set = set_noop, }
-    projectile_set_spin_speed { check = check_projectile_control_call, set = set_noop, }
-    projectile_set_spin_vec { check = check_projectile_control_call, set = set_noop, }
     projectile_set_ceg { check = check_projectile_control_call, set = set_noop, }
     projectile_spawn { check = check_projectile_control_call, set = set_noop, }
     projectile_collision { check = check_projectile_control_call, set = set_projectile_control, }

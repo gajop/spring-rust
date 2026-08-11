@@ -151,17 +151,6 @@ struct UnitFlanking {
 	float mobility;
 };
 
-// Travel and fuel
-struct UnitTravel {
-	float travelPeriod;
-	float travelTime;
-};
-
-struct UnitFuel {
-	float fuel;
-	float maxFuel;
-};
-
 struct LastHitPiece {
 	const char* name;
 	int32_t pieceNum;
@@ -361,12 +350,6 @@ struct GetUnitShieldStateResult { const Error* error; UnitShieldState shield; bo
 struct GetUnitFlankingQuery { int32_t unitID; };
 struct GetUnitFlankingResult { const Error* error; UnitFlanking flanking; };
 
-struct GetUnitTravelQuery { int32_t unitID; };
-struct GetUnitTravelResult { const Error* error; UnitTravel travel; };
-
-struct GetUnitFuelQuery { int32_t unitID; };
-struct GetUnitFuelResult { const Error* error; UnitFuel fuel; };
-
 struct GetUnitLastAttackerQuery { int32_t unitID; };
 struct GetUnitLastAttackerResult { const Error* error; UnitLastAttacker attacker; bool hasAttacker; };
 
@@ -441,8 +424,6 @@ struct UnitsInfoApi {
 	void (*GetUnitSelfDTime)(const GetUnitSelfDTimeQuery* query, GetUnitSelfDTimeResult* result);
 	void (*GetUnitShieldState)(const GetUnitShieldStateQuery* query, GetUnitShieldStateResult* result);
 	void (*GetUnitFlanking)(const GetUnitFlankingQuery* query, GetUnitFlankingResult* result);
-	void (*GetUnitTravel)(const GetUnitTravelQuery* query, GetUnitTravelResult* result);
-	void (*GetUnitFuel)(const GetUnitFuelQuery* query, GetUnitFuelResult* result);
 	void (*GetUnitLastAttacker)(const GetUnitLastAttackerQuery* query, GetUnitLastAttackerResult* result);
 	void (*GetUnitLastAttackedPiece)(const GetUnitLastAttackedPieceQuery* query, GetUnitLastAttackedPieceResult* result);
 	void (*GetUnitLosState)(const GetUnitLosStateQuery* query, GetUnitLosStateResult* result);

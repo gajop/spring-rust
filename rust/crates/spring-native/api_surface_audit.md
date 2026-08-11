@@ -8,7 +8,7 @@ It distinguishes canonical Spring callouts from the separate `Global`, `gl`, `VF
 | Lua namespace | Documented callouts | Mapped to native Rust | Lua-only by design | Unresolved |
 | --- | ---: | ---: | ---: | ---: |
 | `Global` | 1 | 1 | 0 | 0 |
-| `Spring` | 796 | 795 | 1 | 0 |
+| `Spring` | 791 | 790 | 1 | 0 |
 | `RmlUi` | 101 | 98 | 3 | 0 |
 | `gl` | 185 | 185 | 0 | 0 |
 | `VFS` | 41 | 40 | 1 | 0 |
@@ -18,7 +18,7 @@ It distinguishes canonical Spring callouts from the separate `Global`, `gl`, `VF
 | `debug` | 8 | 0 | 8 | 0 |
 | `table` | 1 | 0 | 1 | 0 |
 
-`Spring` uses the same one-to-one matcher as `match_apis.py`; its 795 mapped callouts are the canonical parity set.
+`Spring` uses the same one-to-one matcher as `match_apis.py`; its 790 mapped callouts are the canonical parity set.
 `Global.CallAsTeam` is the actual `_G.CallAsTeam` registration; it is mapped explicitly to `SystemControl.call_as_team` and its callback/return-stack difference is recorded as a semantic boundary.
 `RmlUi` is mapped by userdata path (`Context.CreateDocument` → `context_create_document`).
 `gl` and `VFS` use case/acronym-insensitive names plus explicit aliases for `gl.Texture` and `gl.UniformArray`.
@@ -77,8 +77,8 @@ These are not name-matching failures. They have no native counterpart by contrac
 
 ## Rust inventory
 
-- Rust documentation rows: 1424
-- Unique `Module.method` labels: 1415
+- Rust documentation rows: 1417
+- Unique `Module.method` labels: 1408
 - The difference is nine overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
 
 | Classification | Unique labels |
@@ -86,7 +86,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 | Encoding counterpart | 6 |
 | Global Lua counterpart (semantic boundary) | 1 |
 | RmlUi callout counterpart | 98 |
-| Spring counterpart | 795 |
+| Spring counterpart | 790 |
 | VFS counterpart | 40 |
 | gl counterpart or explicit overload | 186 |
 | global math.* counterpart (non-Spring namespace) | 14 |
@@ -96,7 +96,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 | native-only owned/FFI representation surface | 17 |
 | native-only platform/integration surface | 12 |
 | native-only typed definition/proxy surface | 42 |
-| native-only typed query/control extension | 32 |
+| native-only typed query/control extension | 30 |
 
 ## Native-only classification policy
 
@@ -223,7 +223,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.vector2f_new`
 - `RmlUi.vector2i_new`
 
-### Spring counterpart (795)
+### Spring counterpart (790)
 - `Camera.get_camera_direction`
 - `Camera.get_camera_fov`
 - `Camera.get_camera_names`
@@ -513,9 +513,6 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `ProjectileControl.set_projectile_is_intercepted`
 - `ProjectileControl.set_projectile_move_control`
 - `ProjectileControl.set_projectile_position`
-- `ProjectileControl.set_projectile_spin_angle`
-- `ProjectileControl.set_projectile_spin_speed`
-- `ProjectileControl.set_projectile_spin_vec`
 - `ProjectileControl.set_projectile_target`
 - `ProjectileControl.set_projectile_time_to_live`
 - `ProjectileControl.set_projectile_use_air_los`
@@ -816,7 +813,6 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `UnitsInfo.get_unit_effective_build_range`
 - `UnitsInfo.get_unit_experience`
 - `UnitsInfo.get_unit_flanking`
-- `UnitsInfo.get_unit_fuel`
 - `UnitsInfo.get_unit_harvest_storage`
 - `UnitsInfo.get_unit_heading`
 - `UnitsInfo.get_unit_health`
@@ -853,7 +849,6 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `UnitsInfo.get_unit_team`
 - `UnitsInfo.get_unit_tooltip`
 - `UnitsInfo.get_unit_transporter`
-- `UnitsInfo.get_unit_travel`
 - `UnitsInfo.get_unit_vectors`
 - `UnitsInfo.get_unit_velocity`
 - `UnitsInfo.get_unit_worker_task`
@@ -1530,7 +1525,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.valid_weapon_def_id`
 
-### native-only typed query/control extension (32)
+### native-only typed query/control extension (30)
 - `Features.get_feature_position_ext`
 - `Game.get_game_map_info`
 - `Game.get_game_mod_info`
@@ -1553,9 +1548,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `Tracing.trace_ray`
 - `Tracing.trace_ray_features`
 - `Tracing.trace_ray_units`
-- `UnitControl.set_unit_fuel`
 - `UnitControl.set_unit_heading`
-- `UnitControl.set_unit_travel`
 - `UnitsCommands.get_command_params`
 - `UnitsCommands.get_unit_command_descriptions`
 - `UnitsInfo.get_unit_crashing`
@@ -1570,7 +1563,7 @@ The canonical `Spring.*` parameter audit is the one-to-one exact matcher used by
 
 | Surface | Lua inventory | Native mapped | Lua-only by design | Signature/behavior authority |
 | --- | ---: | ---: | ---: | --- |
-| `Spring` | 796 | 795 | 1 | `match_apis.py` exact parameter audit plus runtime parity rows |
+| `Spring` | 791 | 790 | 1 | `match_apis.py` exact parameter audit plus runtime parity rows |
 | `gl` | 185 | 185 | 0 | source registration + graphics surface tests; userdata handles audited separately |
 | `VFS` | 41 | 40 | 1 | source registration + VFS runtime parity; `VFS.Include` is explicit Lua-only |
 | `RmlUi` | 101 | 98 | 3 | SolLua source docs + receiver/property runtime surface tests |
@@ -1583,7 +1576,7 @@ This compares active C++ registration sites with the generated documentation. Th
 
 | Surface | Active registrations | Documented | Source-only accepted by design | Unclassified source-only | Documented-only |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `Spring` | 798 | 796 | 2 | 0 | 0 |
+| `Spring` | 791 | 791 | 0 | 0 | 0 |
 | `gl + LuaFont registrations` | 195 | 185 | 10 | 0 | 0 |
 | `VFS` | 41 | 41 | 0 | 0 | 0 |
 | `Script` | 30 | 30 | 0 | 0 | 0 |
@@ -1591,8 +1584,6 @@ This compares active C++ registration sites with the generated documentation. Th
 
 ### Accepted active registrations without generated docs
 
-- `Spring.SetUnitFuel` — Registered compatibility no-op retained by the Lua engine (`// FIXME: DELETE ME`); it is exercised by `unit_set_fuel` and deliberately has no public generated signature.
-- `Spring.SetUnitTravel` — Registered compatibility no-op retained by the Lua engine (`// FIXME: DELETE ME`); it is exercised by `unit_set_travel` and deliberately has no public generated signature.
 - `gl.Begin` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_begin`.
 - `gl.BindTexture` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_bind_texture`.
 - `gl.End` — LuaFont userdata method registered in the shared graphics binding; it is covered by the separate Lua userdata audit and `Gfx.font_end`.

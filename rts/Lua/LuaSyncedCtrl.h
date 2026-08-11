@@ -120,8 +120,6 @@ class LuaSyncedCtrl
 		static int SetUnitFlanking(lua_State* L);
 		static int SetUnitPhysicalStateBit(lua_State* L);
 		static int GetUnitPhysicalState(lua_State* L);
-		static int SetUnitTravel(lua_State* L);
-		static int SetUnitFuel(lua_State* L);
 		static int SetUnitMoveGoal(lua_State* L);
 		static int SetUnitLandGoal(lua_State* L);
 		static int ClearUnitGoal(lua_State* L);
@@ -204,9 +202,6 @@ class LuaSyncedCtrl
 		static int SetProjectileIgnoreTrackingError(lua_State* L);
 
 		static int SetProjectileGravity(lua_State* L);
-		static int SetProjectileSpinAngle(lua_State* L); // DEPRECATED
-		static int SetProjectileSpinSpeed(lua_State* L); // DEPRECATED
-		static int SetProjectileSpinVec(lua_State* L); // DEPRECATED
 		static int SetPieceProjectileParams(lua_State* L);
 		static int SetProjectileCEG(lua_State* L);
 

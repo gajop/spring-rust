@@ -5,17 +5,7 @@
 
 namespace {
 
-// LuaSyncedCtrl.cpp:3477 — LuaSyncedCtrl::SetUnitTravel
-static void NativeSetUnitTravel(const SetUnitTravelQuery* query, SetUnitTravelResult* result) {
-    result->error = nullptr;
-}
-
-// LuaSyncedCtrl.cpp:3478 — LuaSyncedCtrl::SetUnitFuel
-static void NativeSetUnitFuel(const SetUnitFuelQuery* query, SetUnitFuelResult* result) {
-    result->error = nullptr;
-}
-
-// LuaSyncedCtrl.cpp:7992 — LuaSyncedCtrl::InvokeNativeModule
+// LuaSyncedCtrl.cpp:8052 — LuaSyncedCtrl::InvokeNativeModule
 static void NativeInvokeNativeModule(const InvokeNativeModuleQuery* query, InvokeNativeModuleResult* result) {
     result->error = nullptr;
     // TODO: implement
@@ -24,7 +14,5 @@ static void NativeInvokeNativeModule(const InvokeNativeModuleQuery* query, Invok
 } // namespace
 
 const SyncedCtrlApi SYNCEDCTRL_API = {
-    .SetUnitTravel = NativeSetUnitTravel,
-    .SetUnitFuel = NativeSetUnitFuel,
     .InvokeNativeModule = NativeInvokeNativeModule,
 };

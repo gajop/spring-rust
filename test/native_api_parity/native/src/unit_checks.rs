@@ -28,26 +28,6 @@ impl NativeApiParity {
                     .map_err(|err| format!("get_unit_move_def_id({unit_id}) failed: {err:?}"))?;
                 self.same_i32_if_present(label, message, "moveDefID", native)
             }
-            "get_unit_travel" => {
-                let unit_id = i32_field(message, "unitID")?;
-                let native = self
-                    .interface
-                    .units_info()
-                    .get_unit_travel(unit_id)
-                    .map_err(|err| format!("get_unit_travel({unit_id}) failed: {err:?}"))?;
-                self.same_if_present(label, message, "travelPeriod", native.travelPeriod)?;
-                self.same_if_present(label, message, "travelTime", native.travelTime)
-            }
-            "get_unit_fuel" => {
-                let unit_id = i32_field(message, "unitID")?;
-                let native = self
-                    .interface
-                    .units_info()
-                    .get_unit_fuel(unit_id)
-                    .map_err(|err| format!("get_unit_fuel({unit_id}) failed: {err:?}"))?;
-                self.same_if_present(label, message, "fuel", native.fuel)?;
-                self.same_if_present(label, message, "maxFuel", native.maxFuel)
-            }
             "get_unit_move_type_data" => {
                 let unit_id = i32_field(message, "unitID")?;
                 let native = self
@@ -1165,26 +1145,6 @@ impl NativeApiParity {
                 )
             })?;
         self.same_collision_volume(label, message, native)
-    }
-    pub(crate) fn check_unit_travel(&mut self, message: &Value, label: &str) -> Result<(), String> {
-        let unit_id = i32_field(message, "unitID")?;
-        let native = self
-            .interface
-            .units_info()
-            .get_unit_travel(unit_id)
-            .map_err(|err| format!("get_unit_travel({unit_id}) failed: {err:?}"))?;
-        self.same_if_present(label, message, "travelPeriod", native.travelPeriod)?;
-        self.same_if_present(label, message, "travelTime", native.travelTime)
-    }
-    pub(crate) fn check_unit_fuel(&mut self, message: &Value, label: &str) -> Result<(), String> {
-        let unit_id = i32_field(message, "unitID")?;
-        let native = self
-            .interface
-            .units_info()
-            .get_unit_fuel(unit_id)
-            .map_err(|err| format!("get_unit_fuel({unit_id}) failed: {err:?}"))?;
-        self.same_if_present(label, message, "fuel", native.fuel)?;
-        self.same_if_present(label, message, "maxFuel", native.maxFuel)
     }
     pub(crate) fn check_unit_tooltip(
         &mut self,

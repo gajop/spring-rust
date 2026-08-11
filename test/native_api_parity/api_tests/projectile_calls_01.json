@@ -470,42 +470,6 @@
       "lua_runtime": {"call": "Spring.SetProjectileIgnoreTrackingError", "args": ["fixture.projectileID", "value.ignore"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "projectile_set_spin_angle",
-      "context": "synced_gadget",
-      "kind": "readonly",
-      "requires": ["projectile"],
-      "lua": {"set": [], "get": ["Spring.SetProjectileSpinAngle"]},
-      "native": {"set": [], "get": ["ProjectileControl.set_projectile_spin_angle"]},
-      "compare": {"mode": "fields", "fields": ["returnCount"]},
-      "rust": {"check": "check_projectile_control_call", "set": "set_noop"},
-      "params": {"angle": {"type": "f32", "fixed": 1.25}},
-      "lua_runtime": {"call": "Spring.SetProjectileSpinAngle", "args": ["fixture.projectileID", "value.angle"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
-    },
-    {
-      "id": "projectile_set_spin_speed",
-      "context": "synced_gadget",
-      "kind": "readonly",
-      "requires": ["projectile"],
-      "lua": {"set": [], "get": ["Spring.SetProjectileSpinSpeed"]},
-      "native": {"set": [], "get": ["ProjectileControl.set_projectile_spin_speed"]},
-      "compare": {"mode": "fields", "fields": ["returnCount"]},
-      "rust": {"check": "check_projectile_control_call", "set": "set_noop"},
-      "params": {"speed": {"type": "f32", "fixed": 3.5}},
-      "lua_runtime": {"call": "Spring.SetProjectileSpinSpeed", "args": ["fixture.projectileID", "value.speed"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
-    },
-    {
-      "id": "projectile_set_spin_vec",
-      "context": "synced_gadget",
-      "kind": "readonly",
-      "requires": ["projectile"],
-      "lua": {"set": [], "get": ["Spring.SetProjectileSpinVec"]},
-      "native": {"set": [], "get": ["ProjectileControl.set_projectile_spin_vec"]},
-      "compare": {"mode": "fields", "fields": ["returnCount"]},
-      "rust": {"check": "check_projectile_control_call", "set": "set_noop"},
-      "params": {"spin": {"type": "float3", "generator": "unit_orientation", "expands_to": ["spinX", "spinY", "spinZ"], "expands_from": ["frontX", "frontY", "frontZ"]}},
-      "lua_runtime": {"call": "Spring.SetProjectileSpinVec", "args": ["fixture.projectileID", "value.spinX", "value.spinY", "value.spinZ"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
-    },
-    {
       "id": "projectile_set_ceg",
       "context": "synced_gadget",
       "kind": "readonly",

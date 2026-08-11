@@ -291,38 +291,6 @@
       }
     },
     {
-      "id": "unit_set_travel",
-      "context": "synced_gadget",
-      "kind": "readonly",
-      "requires": ["unit"],
-      "lua": {"set": [], "get": ["Spring.SetUnitTravel"]},
-      "native": {"set": [], "get": ["UnitControl.set_unit_travel"]},
-      "compare": {"mode": "fields", "fields": ["returnCount"]},
-      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
-      "params": {},
-      "lua_runtime": {
-        "call": "Spring.SetUnitTravel",
-        "args": ["fixture.unitID"],
-        "returns": [{"field": "returnCount", "transform": "return_count"}]
-      }
-    },
-    {
-      "id": "unit_set_fuel",
-      "context": "synced_gadget",
-      "kind": "readonly",
-      "requires": ["unit"],
-      "lua": {"set": [], "get": ["Spring.SetUnitFuel"]},
-      "native": {"set": [], "get": ["UnitControl.set_unit_fuel"]},
-      "compare": {"mode": "fields", "fields": ["returnCount"]},
-      "rust": {"check": "check_unit_control_call", "set": "set_noop"},
-      "params": {},
-      "lua_runtime": {
-        "call": "Spring.SetUnitFuel",
-        "args": ["fixture.unitID"],
-        "returns": [{"field": "returnCount", "transform": "return_count"}]
-      }
-    },
-    {
       "id": "unit_set_land_goal_not_air",
       "context": "synced_gadget",
       "kind": "readonly",

@@ -14,16 +14,6 @@ extern "C" {
 // SyncedCtrl — auto-generated NativeInterface API
 // ==========================================================================
 
-struct SetUnitTravelQuery { uint8_t _unused; };
-struct SetUnitTravelResult {
-    const Error* error;
-};
-
-struct SetUnitFuelQuery { uint8_t _unused; };
-struct SetUnitFuelResult {
-    const Error* error;
-};
-
 struct InvokeNativeModuleQuery {
     const char* msg;
 };
@@ -32,8 +22,6 @@ struct InvokeNativeModuleResult {
 };
 
 struct SyncedCtrlApi {
-    void (*SetUnitTravel)(const SetUnitTravelQuery* query, SetUnitTravelResult* result);
-    void (*SetUnitFuel)(const SetUnitFuelQuery* query, SetUnitFuelResult* result);
     void (*InvokeNativeModule)(const InvokeNativeModuleQuery* query, InvokeNativeModuleResult* result);
 };
 

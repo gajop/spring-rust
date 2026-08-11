@@ -653,13 +653,15 @@ namespace Platform
 
 			#else
 
-			int pid;
-			if ((pid = fork()) < 0) {
-				LOG("[%s] error forking process", __func__);
-			} else if (pid != 0) {
-				// TODO: Maybe useful to return the subprocess ID (pid)?
+			const auto pid = fork();
+			if (pid != 0) {
+				if (pid < 0)
+					LOG("[%s] error forking process", __func__);
+
 				return execError;
 			}
+
+			// The child (pid == 0) falls through to execvp below.
 			#endif
 		}
 

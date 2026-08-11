@@ -2231,8 +2231,8 @@ static void NativeSetUnitRadiusAndHeight(const SetUnitRadiusAndHeightQuery* quer
 		return;
 	}
 
-	const float newRadius = std::max(0.0f, query->radius);
-	const float newHeight = std::max(0.0f, query->height);
+	const float newRadius = std::max(1.0f, query->radius);
+	const float newHeight = std::max(1.0f, query->height);
 
 	unit->SetRadiusAndHeight(newRadius, newHeight);
 	result->success = true;
@@ -2360,20 +2360,6 @@ static void NativeSetUnitStockpile(const SetUnitStockpileQuery* query, SetUnitSt
 		w->buildPercent = std::clamp(query->buildPercent, 0.0f, 1.0f);
 	}
 
-	result->success = true;
-}
-
-static void NativeSetUnitTravel(const SetUnitTravelQuery* query, SetUnitTravelResult* result)
-{
-	(void)query;
-	result->error = nullptr;
-	result->success = true;
-}
-
-static void NativeSetUnitFuel(const SetUnitFuelQuery* query, SetUnitFuelResult* result)
-{
-	(void)query;
-	result->error = nullptr;
 	result->success = true;
 }
 
@@ -3717,8 +3703,6 @@ static const UnitControlApi UNIT_CONTROL_API = {
 	.SetUnitLandGoal = NativeSetUnitLandGoal,
 	.ClearUnitGoal = NativeClearUnitGoal,
 	.SetUnitStockpile = NativeSetUnitStockpile,
-	.SetUnitTravel = NativeSetUnitTravel,
-	.SetUnitFuel = NativeSetUnitFuel,
 	.SetUnitDirection = NativeSetUnitDirection,
 	.UnitAttach = NativeUnitAttach,
 	.UnitDetach = NativeUnitDetach,
@@ -3977,7 +3961,7 @@ static void NativeSetFeatureResources(const SetFeatureResourcesQuery* query, Set
 	feature->defResources.energy = std::max(0.0f, query->featureDefEnergy);
 	feature->resources.metal = std::clamp(query->metal, 0.0f, feature->defResources.metal);
 	feature->resources.energy = std::clamp(query->energy, 0.0f, feature->defResources.energy);
-	feature->reclaimTime = std::clamp(query->reclaimTime, 0.0f, 1000000.0f);
+	feature->reclaimTime = std::clamp(query->reclaimTime, 1.0f, 1000000.0f);
 	feature->reclaimLeft = std::clamp(query->reclaimLeft, 0.0f, 1.0f);
 
 	result->success = true;
@@ -4411,8 +4395,8 @@ static void NativeSetFeatureRadiusAndHeight(const SetFeatureRadiusAndHeightQuery
 		return;
 	}
 
-	const float newRadius = std::max(0.0f, query->radius);
-	const float newHeight = std::max(0.0f, query->height);
+	const float newRadius = std::max(1.0f, query->radius);
+	const float newHeight = std::max(1.0f, query->height);
 	const bool updateQuads = (newRadius != feature->radius);
 
 	if (updateQuads)
@@ -5994,51 +5978,6 @@ static void NativeSetProjectileIgnoreTrackingError(const SetProjectileIgnoreTrac
 	result->success = true;
 }
 
-static void NativeSetProjectileSpinAngle(const SetProjectileSpinAngleQuery* query, SetProjectileSpinAngleResult* result)
-{
-	bufferPos = 0;
-	result->error = nullptr;
-	result->success = false;
-
-	if (!IsReady()) {
-		result->error = &NOT_READY_ERROR;
-		return;
-	}
-
-	// Spin angle handling would need proper projectile type check
-	result->success = true;
-}
-
-static void NativeSetProjectileSpinSpeed(const SetProjectileSpinSpeedQuery* query, SetProjectileSpinSpeedResult* result)
-{
-	bufferPos = 0;
-	result->error = nullptr;
-	result->success = false;
-
-	if (!IsReady()) {
-		result->error = &NOT_READY_ERROR;
-		return;
-	}
-
-	// Spin speed handling would need proper projectile type check
-	result->success = true;
-}
-
-static void NativeSetProjectileSpinVec(const SetProjectileSpinVecQuery* query, SetProjectileSpinVecResult* result)
-{
-	bufferPos = 0;
-	result->error = nullptr;
-	result->success = false;
-
-	if (!IsReady()) {
-		result->error = &NOT_READY_ERROR;
-		return;
-	}
-
-	// Spin vector handling would need proper projectile type check
-	result->success = true;
-}
-
 static void NativeSetPieceProjectileParams(const SetPieceProjectileParamsQuery* query, SetPieceProjectileParamsResult* result)
 {
 	bufferPos = 0;
@@ -6086,9 +6025,6 @@ static const ProjectileControlApi PROJECTILE_CONTROL_API = {
 	.SetProjectileUseAirLos = NativeSetProjectileUseAirLos,
 	.SetProjectileMoveControl = NativeSetProjectileMoveControl,
 	.SetProjectileIgnoreTrackingError = NativeSetProjectileIgnoreTrackingError,
-	.SetProjectileSpinAngle = NativeSetProjectileSpinAngle,
-	.SetProjectileSpinSpeed = NativeSetProjectileSpinSpeed,
-	.SetProjectileSpinVec = NativeSetProjectileSpinVec,
 	.SetPieceProjectileParams = NativeSetPieceProjectileParams
 };
 

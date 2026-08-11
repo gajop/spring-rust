@@ -378,45 +378,6 @@ impl NativeApiParity {
                 }
                 self.same_i32_if_present(label, message, "returnCount", 0)
             }
-            "projectile_set_spin_angle" => {
-                let result = self
-                    .interface
-                    .synced_ctrl()
-                    .projectile()
-                    .set_projectile_spin_angle(projectile_id, f32_field(message, "angle")?)
-                    .map_err(|err| format!("set_projectile_spin_angle() failed: {err:?}"))?;
-                if !result {
-                    return Err("set_projectile_spin_angle() returned false".to_owned());
-                }
-                self.same_i32_if_present(label, message, "returnCount", 0)
-            }
-            "projectile_set_spin_speed" => {
-                let result = self
-                    .interface
-                    .synced_ctrl()
-                    .projectile()
-                    .set_projectile_spin_speed(projectile_id, f32_field(message, "speed")?)
-                    .map_err(|err| format!("set_projectile_spin_speed() failed: {err:?}"))?;
-                if !result {
-                    return Err("set_projectile_spin_speed() returned false".to_owned());
-                }
-                self.same_i32_if_present(label, message, "returnCount", 0)
-            }
-            "projectile_set_spin_vec" => {
-                let result = self
-                    .interface
-                    .synced_ctrl()
-                    .projectile()
-                    .set_projectile_spin_vec(
-                        projectile_id,
-                        vec3_from_fields(message, "spinX", "spinY", "spinZ")?,
-                    )
-                    .map_err(|err| format!("set_projectile_spin_vec() failed: {err:?}"))?;
-                if !result {
-                    return Err("set_projectile_spin_vec() returned false".to_owned());
-                }
-                self.same_i32_if_present(label, message, "returnCount", 0)
-            }
             "projectile_set_ceg" => {
                 let native = self
                     .interface

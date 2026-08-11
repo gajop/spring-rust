@@ -2,7 +2,7 @@
 
 Total APIs: 53
 
-Total Functions: 1424
+Total Functions: 1417
 
 ---
 
@@ -666,7 +666,7 @@ Total Functions: 1424
 - `Profiling.get_timer_micros` (params: ) → `Result<u64, Error>`
 - `Profiling.get_vid_mem_usage` (params: ) → `Result<(f32, f32), Error>`
 
-## ProjectileControl (19 functions)
+## ProjectileControl (16 functions)
 
 - `ProjectileControl.delete_projectile` (params: projectile_id:i32) → `Result<bool, Error>`
 - `ProjectileControl.set_piece_projectile_params` (params: projectile_id:i32, expl_flags:i32, spin_angle:f32, spin_speed:f32, spin_vec:sys::Float3) → `Result<bool, Error>`
@@ -679,9 +679,6 @@ Total Functions: 1424
 - `ProjectileControl.set_projectile_is_intercepted` (params: projectile_id:i32, intercepted:bool) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_move_control` (params: projectile_id:i32, enable:bool) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_position` (params: projectile_id:i32, pos:sys::Float3) → `Result<bool, Error>`
-- `ProjectileControl.set_projectile_spin_angle` (params: projectile_id:i32, angle:f32) → `Result<bool, Error>`
-- `ProjectileControl.set_projectile_spin_speed` (params: projectile_id:i32, speed:f32) → `Result<bool, Error>`
-- `ProjectileControl.set_projectile_spin_vec` (params: projectile_id:i32, spin_vec:sys::Float3) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_target` (params: projectile_id:i32, target:sys::ProjectileTargetRef) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_time_to_live` (params: projectile_id:i32, time_to_live:i32) → `Result<bool, Error>`
 - `ProjectileControl.set_projectile_use_air_los` (params: projectile_id:i32, use_air_los:bool) → `Result<bool, Error>`
@@ -1111,7 +1108,7 @@ Total Functions: 1424
 - `Tracing.trace_ray_in_direction` (params: pos:sys::Float3, dir:sys::Float3, options:TraceRayInDirectionOptions, r#type:&str) → `Result<Vec<sys::TraceRayHit>, Error>`
 - `Tracing.trace_ray_units` (params: ray:sys::Ray) → `Result<(bool, i32, i32, sys::Float3, sys::Float3), Error>`
 
-## UnitControl (90 functions)
+## UnitControl (88 functions)
 
 - `UnitControl.add_object_decal` (params: unit_id:i32) → `Result<bool, Error>`
 - `UnitControl.add_unit_damage` (params: unit_id:i32, damage:f32, paralyze_time:f32, weapon_def_id:i32, attacker_id:i32, impulse:sys::Float3) → `Result<bool, Error>`
@@ -1149,7 +1146,6 @@ Total Functions: 1424
 - `UnitControl.set_unit_direction` (params: unit_id:i32, front_dir:sys::Float3, right_dir:sys::Float3) → `Result<bool, Error>`
 - `UnitControl.set_unit_experience` (params: unit_id:i32, experience:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_flanking` (params: unit_id:i32, r#type:&str, args:sys::Float3) → `Result<bool, Error>`
-- `UnitControl.set_unit_fuel` (params: ) → `Result<bool, Error>`
 - `UnitControl.set_unit_harvest_storage` (params: unit_id:i32, stored_metal:f32, max_stored_metal:f32, stored_energy:f32, max_stored_energy:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_heading` (params: unit_id:i32, heading:i32, use_smoothing:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_heading_and_up_dir` (params: unit_id:i32, heading:i32, up_dir:sys::Float3) → `Result<bool, Error>`
@@ -1189,7 +1185,6 @@ Total Functions: 1424
 - `UnitControl.set_unit_storage` (params: unit_id:i32, resource:&str, amount:f32) → `Result<bool, Error>`
 - `UnitControl.set_unit_target` (params: unit_id:i32, target:sys::UnitTargetRef, options:SetUnitTargetOptions, weapon_num:i32) → `Result<bool, Error>`
 - `UnitControl.set_unit_tooltip` (params: unit_id:i32, tooltip:&str) → `Result<bool, Error>`
-- `UnitControl.set_unit_travel` (params: ) → `Result<bool, Error>`
 - `UnitControl.set_unit_use_air_los` (params: unit_id:i32, use_air_los:bool) → `Result<bool, Error>`
 - `UnitControl.set_unit_use_weapons` (params: unit_id:i32, options:SetUnitUseWeaponsOptions) → `Result<bool, Error>`
 - `UnitControl.set_unit_velocity` (params: unit_id:i32, velocity:sys::Float3) → `Result<bool, Error>`
@@ -1275,7 +1270,7 @@ Total Functions: 1424
 - `UnitsCommands.give_order_array_to_unit_map` (params: unit_ids:&[i32], commands:&[sys::CommandFFI]) → `Result<i32, Error>`
 - `UnitsCommands.give_order_to_unit_map` (params: unit_ids:&[i32], cmd_id:i32, params:&[f32], options:u32, timeout:i32) → `Result<i32, Error>`
 
-## UnitsInfo (59 functions)
+## UnitsInfo (57 functions)
 
 - `UnitsInfo.clear_units_previous_draw_flag` (params: ) → `Result<bool, Error>`
 - `UnitsInfo.get_unit_ally_team` (params: unit_id:i32) → `Result<i32, Error>`
@@ -1295,7 +1290,6 @@ Total Functions: 1424
 - `UnitsInfo.get_unit_effective_build_range` (params: unit_id:i32, buildee_def_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_experience` (params: unit_id:i32) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_flanking` (params: unit_id:i32) → `Result<sys::UnitFlanking, Error>`
-- `UnitsInfo.get_unit_fuel` (params: unit_id:i32) → `Result<sys::UnitFuel, Error>`
 - `UnitsInfo.get_unit_harvest_storage` (params: unit_id:i32) → `Result<sys::UnitHarvestStorage, Error>`
 - `UnitsInfo.get_unit_heading` (params: unit_id:i32, convert_to_radians:bool) → `Result<f32, Error>`
 - `UnitsInfo.get_unit_health` (params: unit_id:i32) → `Result<sys::UnitHealth, Error>`
@@ -1332,7 +1326,6 @@ Total Functions: 1424
 - `UnitsInfo.get_unit_team` (params: unit_id:i32) → `Result<i32, Error>`
 - `UnitsInfo.get_unit_tooltip` (params: unit_id:i32) → `Result<Option<String>, Error>`
 - `UnitsInfo.get_unit_transporter` (params: unit_id:i32) → `Result<i32, Error>`
-- `UnitsInfo.get_unit_travel` (params: unit_id:i32) → `Result<sys::UnitTravel, Error>`
 - `UnitsInfo.get_unit_vectors` (params: unit_id:i32) → `Result<sys::UnitVectors, Error>`
 - `UnitsInfo.get_unit_velocity` (params: unit_id:i32) → `Result<sys::Float3, Error>`
 - `UnitsInfo.get_unit_worker_task` (params: unit_id:i32) → `Result<sys::UnitWorkerTask, Error>`

@@ -50,7 +50,7 @@ CR_REG_METADATA(CSolidObject,
 
 	CR_MEMBER(team),
 	CR_MEMBER(allyteam),
-	CR_MEMBER(paletteIndex),
+	CR_MEMBER(paletteIndex), // unsynced, but save it by design
 
 	CR_MEMBER(creationFrame),
 

@@ -308,12 +308,6 @@ impl NativeApiParity {
                 unit.set_unit_nano_pieces(unit_id, &pieces)
                     .map_err(|err| format!("set_unit_nano_pieces() failed: {err:?}"))?
             }
-            "unit_set_travel" => unit
-                .set_unit_travel()
-                .map_err(|err| format!("set_unit_travel() failed: {err:?}"))?,
-            "unit_set_fuel" => unit
-                .set_unit_fuel()
-                .map_err(|err| format!("set_unit_fuel() failed: {err:?}"))?,
             "unit_weapon_fire" => unit
                 // Lua weapon numbers are one-based; UnitControl's C ABI is
                 // explicitly zero-based.

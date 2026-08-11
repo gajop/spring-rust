@@ -408,12 +408,6 @@ struct SetUnitStockpileQuery {
 };
 struct SetUnitStockpileResult { const Error* error; bool success; };
 
-struct SetUnitTravelQuery { uint8_t _unused; };
-struct SetUnitTravelResult { const Error* error; bool success; };
-
-struct SetUnitFuelQuery { uint8_t _unused; };
-struct SetUnitFuelResult { const Error* error; bool success; };
-
 // Unit direction queries
 struct SetUnitDirectionQuery { int32_t unitID; Float3 frontDir; Float3 rightDir; };
 struct SetUnitDirectionResult { const Error* error; bool success; };
@@ -720,8 +714,6 @@ struct UnitControlApi {
 	void (*SetUnitLandGoal)(const SetUnitLandGoalQuery* query, SetUnitLandGoalResult* result);
 	void (*ClearUnitGoal)(const ClearUnitGoalQuery* query, ClearUnitGoalResult* result);
 	void (*SetUnitStockpile)(const SetUnitStockpileQuery* query, SetUnitStockpileResult* result);
-	void (*SetUnitTravel)(const SetUnitTravelQuery* query, SetUnitTravelResult* result);
-	void (*SetUnitFuel)(const SetUnitFuelQuery* query, SetUnitFuelResult* result);
 	void (*SetUnitDirection)(const SetUnitDirectionQuery* query, SetUnitDirectionResult* result);
 	void (*UnitAttach)(const UnitAttachQuery* query, UnitAttachResult* result);
 	void (*UnitDetach)(const UnitDetachQuery* query, UnitDetachResult* result);
@@ -1106,15 +1098,6 @@ struct SetProjectileMoveControlResult { const Error* error; bool success; };
 struct SetProjectileIgnoreTrackingErrorQuery { int32_t projectileID; bool ignore; };
 struct SetProjectileIgnoreTrackingErrorResult { const Error* error; bool success; };
 
-struct SetProjectileSpinAngleQuery { int32_t projectileID; float angle; };
-struct SetProjectileSpinAngleResult { const Error* error; bool success; };
-
-struct SetProjectileSpinSpeedQuery { int32_t projectileID; float speed; };
-struct SetProjectileSpinSpeedResult { const Error* error; bool success; };
-
-struct SetProjectileSpinVecQuery { int32_t projectileID; Float3 spinVec; };
-struct SetProjectileSpinVecResult { const Error* error; bool success; };
-
 // Set piece projectile params query
 struct SetPieceProjectileParamsQuery {
 	int32_t projectileID;
@@ -1141,9 +1124,6 @@ struct ProjectileControlApi {
 	void (*SetProjectileUseAirLos)(const SetProjectileUseAirLosQuery* query, SetProjectileUseAirLosResult* result);
 	void (*SetProjectileMoveControl)(const SetProjectileMoveControlQuery* query, SetProjectileMoveControlResult* result);
 	void (*SetProjectileIgnoreTrackingError)(const SetProjectileIgnoreTrackingErrorQuery* query, SetProjectileIgnoreTrackingErrorResult* result);
-	void (*SetProjectileSpinAngle)(const SetProjectileSpinAngleQuery* query, SetProjectileSpinAngleResult* result);
-	void (*SetProjectileSpinSpeed)(const SetProjectileSpinSpeedQuery* query, SetProjectileSpinSpeedResult* result);
-	void (*SetProjectileSpinVec)(const SetProjectileSpinVecQuery* query, SetProjectileSpinVecResult* result);
 	void (*SetPieceProjectileParams)(const SetPieceProjectileParamsQuery* query, SetPieceProjectileParamsResult* result);
 };
 

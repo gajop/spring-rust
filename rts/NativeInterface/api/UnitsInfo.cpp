@@ -1255,45 +1255,6 @@ static void NativeGetUnitFlanking(const GetUnitFlankingQuery* query, GetUnitFlan
 	result->flanking.mobility = unit->flankingBonusMobility;
 }
 
-static void NativeGetUnitTravel(const GetUnitTravelQuery* query, GetUnitTravelResult* result) {
-	bufferPos = 0;
-	result->error = nullptr;
-
-	if (!IsReady()) {
-		result->error = &NOT_READY_ERROR;
-		return;
-	}
-
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
-	if (unit == nullptr) {
-		result->error = &INVALID_UNIT_ERROR;
-		return;
-	}
-
-	result->travel.travelPeriod = 0.0f; // Not directly available
-	result->travel.travelTime = 0.0f;   // Not directly available
-}
-
-static void NativeGetUnitFuel(const GetUnitFuelQuery* query, GetUnitFuelResult* result) {
-	bufferPos = 0;
-	result->error = nullptr;
-
-	if (!IsReady()) {
-		result->error = &NOT_READY_ERROR;
-		return;
-	}
-
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
-	if (unit == nullptr || unit->unitDef == nullptr) {
-		result->error = &INVALID_UNIT_ERROR;
-		return;
-	}
-
-	// Fuel is not directly tracked in Spring - use 0 as it's not available
-	result->fuel.fuel = 0.0f;
-	result->fuel.maxFuel = 0.0f;
-}
-
 static void NativeGetUnitLastAttacker(const GetUnitLastAttackerQuery* query, GetUnitLastAttackerResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
@@ -1565,8 +1526,6 @@ const UnitsInfoApi UNITS_INFO_API = {
 	.GetUnitSelfDTime = NativeGetUnitSelfDTime,
 	.GetUnitShieldState = NativeGetUnitShieldState,
 	.GetUnitFlanking = NativeGetUnitFlanking,
-	.GetUnitTravel = NativeGetUnitTravel,
-	.GetUnitFuel = NativeGetUnitFuel,
 	.GetUnitLastAttacker = NativeGetUnitLastAttacker,
 	.GetUnitLastAttackedPiece = NativeGetUnitLastAttackedPiece,
 	.GetUnitLosState = NativeGetUnitLosState,

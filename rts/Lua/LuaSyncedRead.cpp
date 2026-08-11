@@ -268,8 +268,6 @@ bool LuaSyncedRead::PushEntries(lua_State* L)
 	REGISTER_LUA_CFUNC(GetUnitWeaponHaveFreeLineOfFire);
 	REGISTER_LUA_CFUNC(GetUnitWeaponCanFire);
 	REGISTER_LUA_CFUNC(GetUnitWeaponTarget);
-	REGISTER_LUA_CFUNC(GetUnitTravel);
-	REGISTER_LUA_CFUNC(GetUnitFuel);
 	REGISTER_LUA_CFUNC(GetUnitEstimatedPath);
 	REGISTER_LUA_CFUNC(GetUnitLastAttacker);
 	REGISTER_LUA_CFUNC(GetUnitLastAttackedPiece);
@@ -5817,24 +5815,6 @@ int LuaSyncedRead::GetUnitWeaponTarget(lua_State* L)
  *
  * @section misc
 ******************************************************************************/
-
-/***
- *
- * @function Spring.GetUnitTravel
- * @param unitID integer
- * @return number travelPeriod
- * @return number travelTime
- */
-int LuaSyncedRead::GetUnitTravel(lua_State* L) { lua_pushnumber(L, 0.0f); lua_pushnumber(L, 0.0f); return 2; } // FIXME: DELETE ME
-
-/***
- *
- * @function Spring.GetUnitFuel
- * @param unitID integer
- * @return number fuel
- */
-int LuaSyncedRead::GetUnitFuel(lua_State* L) { lua_pushnumber(L, 0.0f); return 1; } // FIXME: DELETE ME
-
 
 /***
  *
