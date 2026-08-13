@@ -9,9 +9,9 @@
 - Unmatched: 1 (0.1%)
 
 **Rust API:**
-- Total: 1421 functions across 53 modules
+- Total: 1422 functions across 53 modules
 - Matched to Lua: 790 (55.6%)
-- Rust-only: 621 (43.7%)
+- Rust-only: 622 (43.7%)
 
 **Parameter comparison (matched functions):**
 - Parameter matches: 790
@@ -1358,6 +1358,7 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.sol_lua_data_model___set_dirty`
 - `RmlUi.RmlUi.sol_lua_data_model_set_dirty`
 - `RmlUi.RmlUi.take_pointer_capture_delta`
+- `RmlUi.RmlUi.unbind`
 - `RmlUi.RmlUi.vector2f_new`
 - `RmlUi.RmlUi.vector2i_new`
 - `SyncedCtrl.SyncedCtrl.cob_script`
@@ -1470,4 +1471,4 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 621**
+**Total Rust-only: 622**

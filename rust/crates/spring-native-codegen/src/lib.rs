@@ -1137,7 +1137,10 @@ fn render_api(spec: &ApiSpec, config: &ApiConfig<'_>) -> Result<String> {
         // signature. They are implemented by the hand-written RmlUi wrapper,
         // which can expose the callback arguments as owned Rust values; the
         // generic FnMut() callback generator is intentionally not applicable.
-        if func.name == "DataModelBindEvent" {
+        if matches!(
+            func.name.as_str(),
+            "DataModelBindEvent" | "DataModelUnbindEvent"
+        ) {
             continue;
         }
         if let (Some(query), Some(result)) = (

@@ -761,17 +761,21 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	REQUIRE(rowsResult.success);
 
 	DataEventCapture eventCapture;
+	const uint8_t eventFieldTypes[] = {RML_FIELD_INT};
 	RmlDataModelBindEventQuery bindEvent = {
 		.dataModelHandle = createResult.dataModelHandle,
 		.name = "select",
 		.callback = CaptureDataEvent,
 		.userData = &eventCapture,
 		.destroyCallback = DestroyDataEvent,
+		.fieldTypes = eventFieldTypes,
+		.fieldCount = std::size(eventFieldTypes),
 	};
 	RmlDataModelBindEventResult eventResult = {};
 	RMLUI_API.DataModelBindEvent(&bindEvent, &eventResult);
 	REQUIRE(eventResult.error == nullptr);
 	REQUIRE(eventResult.success);
+	REQUIRE(eventResult.eventHandle != 0);
 	CHECK(eventCapture.destroyCount == 0);
 
 	RmlDataFieldDef styledFields[] = {
@@ -795,6 +799,7 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	document->SetInnerRML(R"RML(
 		<div data-model="runtime">
 			<div id="bound-rows"><div data-for="row : rows" data-if="row.visible" data-class-selected="row.selected" data-event-click="select(it_index)">{{ row.label }}</div></div>
+			<div id="wrong-arity" data-event-click="select()"></div>
 			<div id="bound-styled"><div data-for="row : styled" data-if="row.visible"><span data-style-background-color="row.colour" data-style-left="row.offset" data-style-width="row.progress"></span></div></div>
 		</div>
 	)RML");
@@ -839,8 +844,10 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 
 	context->Update();
 	Rml::Element* boundRows = document->GetElementById("bound-rows");
+	Rml::Element* wrongArity = document->GetElementById("wrong-arity");
 	Rml::Element* boundStyled = document->GetElementById("bound-styled");
 	REQUIRE(boundRows != nullptr);
+	REQUIRE(wrongArity != nullptr);
 	REQUIRE(boundStyled != nullptr);
 	REQUIRE(boundRows->GetNumChildren() == 6);
 	CHECK(boundRows->GetChild(0)->GetInnerRML() == "first");
@@ -858,6 +865,9 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	REQUIRE(styledElement->GetProperty(Rml::PropertyId::Width) != nullptr);
 	CHECK(styledElement->GetProperty(Rml::PropertyId::Width)->unit == Rml::Unit::PERCENT);
 	CHECK(styledElement->GetProperty(Rml::PropertyId::Width)->Get<float>() == Catch::Approx(35.0f));
+
+	wrongArity->DispatchEvent("click", Rml::Dictionary{});
+	CHECK(eventCapture.indexes.empty());
 
 	boundRows->GetChild(3)->DispatchEvent("click", Rml::Dictionary{});
 	REQUIRE(eventCapture.indexes.size() == 1);
@@ -898,6 +908,27 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	CHECK(eventCapture.indexes[1] == 1);
 	CHECK(eventCapture.targetElementHandles[1] == ToHandle(boundRows->GetChild(1)));
 
+	RmlDataModelEventHandleQuery unbindEvent = {
+		.eventHandle = eventResult.eventHandle,
+	};
+	RmlElementBoolResult unbindEventResult = {};
+	RMLUI_API.DataModelUnbindEvent(&unbindEvent, &unbindEventResult);
+	REQUIRE(unbindEventResult.error == nullptr);
+	REQUIRE(unbindEventResult.success);
+	CHECK(eventCapture.destroyCount == 1);
+	boundRows->GetChild(1)->DispatchEvent("click", Rml::Dictionary{});
+	CHECK(eventCapture.indexes.size() == 2);
+
+	eventResult = {};
+	RMLUI_API.DataModelBindEvent(&bindEvent, &eventResult);
+	REQUIRE(eventResult.error == nullptr);
+	REQUIRE(eventResult.success);
+	REQUIRE(eventResult.eventHandle != 0);
+	CHECK(eventCapture.destroyCount == 1);
+	boundRows->GetChild(1)->DispatchEvent("click", Rml::Dictionary{});
+	REQUIRE(eventCapture.indexes.size() == 3);
+	CHECK(eventCapture.indexes[2] == 1);
+
 	RmlContextStringQuery removeModel = {
 		.contextHandle = ToHandle(context),
 		.name = "runtime",
@@ -906,7 +937,7 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	RMLUI_API.ContextRemoveDataModel(&removeModel, &removeModelResult);
 	REQUIRE(removeModelResult.error == nullptr);
 	REQUIRE(removeModelResult.success);
-	CHECK(eventCapture.destroyCount == 1);
+	CHECK(eventCapture.destroyCount == 2);
 
 	REQUIRE(Rml::RemoveContext(context->GetName()));
 	Rml::Shutdown();

@@ -226,8 +226,13 @@ struct RmlDataModelBindEventQuery {
 	RmlDataEventCallback callback;
 	void* userData;
 	NativeCallback destroyCallback;
+	// Positional scalar schema for the callback arguments. The engine copies
+	// these types before returning from the bind call.
+	const uint8_t* fieldTypes;
+	uint64_t fieldCount;
 };
-struct RmlDataModelBindEventResult { const Error* error; bool success; };
+struct RmlDataModelBindEventResult { const Error* error; uint64_t eventHandle; bool success; };
+struct RmlDataModelEventHandleQuery { uint64_t eventHandle; };
 // A native-owned collection of text rows. The engine copies every row during
 // SetTextRows, so pointers are valid only for that call and never become part
 // of the data model's lifetime.
@@ -512,6 +517,7 @@ struct RmlUiApi {
 	void (*DataModelBindRows)(const RmlDataModelBindRowsQuery* query, RmlDataModelRowsResult* result);
 	void (*DataModelSetRows)(const RmlDataModelSetRowsQuery* query, RmlElementBoolResult* result);
 	void (*DataModelBindEvent)(const RmlDataModelBindEventQuery* query, RmlDataModelBindEventResult* result);
+	void (*DataModelUnbindEvent)(const RmlDataModelEventHandleQuery* query, RmlElementBoolResult* result);
 };
 
 extern const RmlUiApi RMLUI_API;

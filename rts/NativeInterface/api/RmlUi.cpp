@@ -285,6 +285,41 @@ struct NativeDataRows
 	std::unique_ptr<Rml::VariableDefinition> collectionDefinition;
 };
 
+struct NativeDataEventCallbackState
+{
+	NativeDataEventCallbackState(
+		RmlDataEventCallback callback_,
+		void* userData_,
+		NativeCallback destroyCallback_,
+		Rml::String name_,
+		std::vector<RmlDataFieldType> fieldTypes_
+	)
+		: callback(callback_)
+		, userData(userData_)
+		, destroyCallback(destroyCallback_)
+		, name(std::move(name_))
+		, fieldTypes(std::move(fieldTypes_))
+	{
+	}
+
+	~NativeDataEventCallbackState()
+	{
+		if (destroyCallback != nullptr)
+			destroyCallback(userData);
+	}
+
+	RmlDataEventCallback callback = nullptr;
+	void* userData = nullptr;
+	NativeCallback destroyCallback = nullptr;
+	Rml::String name;
+	std::vector<RmlDataFieldType> fieldTypes;
+};
+
+struct NativeDataEventDispatcher
+{
+	std::weak_ptr<NativeDataEventCallbackState> callbackState;
+};
+
 static NativeDataValue MakeNativeDataValue(RmlDataFieldType type)
 {
 	NativeDataValue value;
@@ -448,6 +483,8 @@ struct NativeDataModel
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataSwatchRows>> swatchRows;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataGridRows>> gridRows;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataRows>> rows;
+	std::unordered_map<uint64_t, std::shared_ptr<NativeDataEventCallbackState>> events;
+	std::unordered_map<Rml::String, std::shared_ptr<NativeDataEventDispatcher>> eventDispatchers;
 };
 
 struct NativeDataModelRecord
@@ -469,6 +506,7 @@ static std::unordered_map<uint64_t, uint64_t> nativeDataStatusRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataSwatchRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataGridRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataEventModels;
 static std::unordered_set<Rml::Context*> nativeTextRowTypes;
 static std::unordered_set<Rml::Context*> nativeLogRowTypes;
 static std::unordered_set<Rml::Context*> nativeNotificationRowTypes;
@@ -567,6 +605,8 @@ static void EraseNativeDataModelHandles(Rml::Context* context)
 					nativeDataGridRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->rows)
 					nativeDataRowsModels.erase(rowsHandle);
+				for (const auto& [eventHandle, _] : it->second.native->events)
+					nativeDataEventModels.erase(eventHandle);
 			}
 			it = nativeDataModels.erase(it);
 		} else {
@@ -614,6 +654,8 @@ static void EraseNativeDataModelHandles(Rml::Context* context, const Rml::String
 					nativeDataGridRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->rows)
 					nativeDataRowsModels.erase(rowsHandle);
+				for (const auto& [eventHandle, _] : it->second.native->events)
+					nativeDataEventModels.erase(eventHandle);
 			}
 			it = nativeDataModels.erase(it);
 		} else {
@@ -802,6 +844,22 @@ static NativeDataRows* GetNativeDataRows(uint64_t rowsHandle, NativeDataModel** 
 	if (outModel != nullptr)
 		*outModel = model;
 	return rowsIt->second.get();
+}
+
+static NativeDataEventCallbackState* GetNativeDataEvent(uint64_t eventHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataEventModels.find(eventHandle);
+	if (ownerIt == nativeDataEventModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto eventIt = model->events.find(eventHandle);
+	if (eventIt == model->events.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return eventIt->second.get();
 }
 
 
@@ -2172,67 +2230,147 @@ static bool CopyNativeDataValue(const Rml::Variant& source, RmlDataValue& target
 	return false;
 }
 
-struct NativeDataEventCallbackState
-{
-	NativeDataEventCallbackState(RmlDataEventCallback callback_, void* userData_, NativeCallback destroyCallback_)
-		: callback(callback_)
-		, userData(userData_)
-		, destroyCallback(destroyCallback_)
-	{
-	}
-
-	RmlDataEventCallback callback = nullptr;
-	void* userData = nullptr;
-	NativeCallback destroyCallback = nullptr;
-
-	~NativeDataEventCallbackState()
-	{
-		if (destroyCallback != nullptr)
-			destroyCallback(userData);
-	}
-};
-
 static void ReleaseNativeDataEventCallback(const RmlDataModelBindEventQuery* query)
 {
 	if (query->destroyCallback != nullptr)
 		query->destroyCallback(query->userData);
 }
 
+static void DispatchNativeDataEvent(
+	const std::shared_ptr<NativeDataEventCallbackState>& callbackState,
+	Rml::Event& event,
+	const Rml::VariantList& arguments
+)
+{
+	if (arguments.size() != callbackState->fieldTypes.size()) {
+		Rml::Log::Message(
+			Rml::Log::LT_WARNING,
+			"Native data event callback '%s' received %zu arguments, expected %zu.",
+			callbackState->name.c_str(),
+			arguments.size(),
+			callbackState->fieldTypes.size()
+		);
+		return;
+	}
+
+	std::vector<Rml::String> stringValues(arguments.size());
+	std::vector<RmlDataValue> values(arguments.size());
+	for (size_t index = 0; index < arguments.size(); ++index) {
+		if (!CopyNativeDataValue(arguments[index], values[index], stringValues[index])) {
+			Rml::Log::Message(
+				Rml::Log::LT_WARNING,
+				"Native data event callback '%s' received an unsupported argument at index %zu.",
+				callbackState->name.c_str(),
+				index
+			);
+			return;
+		}
+
+		const uint8_t expectedType = static_cast<uint8_t>(callbackState->fieldTypes[index]);
+		if (values[index].type != expectedType) {
+			Rml::Log::Message(
+				Rml::Log::LT_WARNING,
+				"Native data event callback '%s' received type %u at index %zu, expected type %u.",
+				callbackState->name.c_str(),
+				static_cast<unsigned int>(values[index].type),
+				index,
+				static_cast<unsigned int>(expectedType)
+			);
+			return;
+		}
+	}
+
+	const RmlDataEventArgs args = {
+		.eventHandle = ToHandle(&event),
+		.targetElementHandle = ToElementHandle(event.GetTargetElement()),
+		.values = values.empty() ? nullptr : values.data(),
+		.count = values.size(),
+	};
+	callbackState->callback(callbackState->userData, &args);
+}
+
 static void NativeDataModelBindEvent(const RmlDataModelBindEventQuery* query, RmlDataModelBindEventResult* result)
 {
 	result->error = nullptr;
+	result->eventHandle = 0;
 	result->success = false;
 	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
-	if (model == nullptr || query->name == nullptr || query->callback == nullptr) {
+	if (
+		model == nullptr ||
+		query->name == nullptr ||
+		query->callback == nullptr ||
+		(query->fieldCount != 0 && query->fieldTypes == nullptr)
+	) {
 		ReleaseNativeDataEventCallback(query);
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
 
-	auto callbackState = std::make_shared<NativeDataEventCallbackState>(query->callback, query->userData, query->destroyCallback);
-	const bool bound = model->constructor.BindEventCallback(
-		query->name,
-		[callbackState](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments) {
-			std::vector<Rml::String> stringValues(arguments.size());
-			std::vector<RmlDataValue> values(arguments.size());
-			for (size_t index = 0; index < arguments.size(); ++index) {
-				if (!CopyNativeDataValue(arguments[index], values[index], stringValues[index]))
-					return;
-			}
+	std::vector<RmlDataFieldType> fieldTypes;
+	fieldTypes.reserve(query->fieldCount);
+	for (uint64_t index = 0; index < query->fieldCount; ++index) {
+		const uint8_t type = query->fieldTypes[index];
+		if (type > RML_FIELD_PERCENT) {
+			ReleaseNativeDataEventCallback(query);
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		fieldTypes.push_back(static_cast<RmlDataFieldType>(type));
+	}
 
-			const RmlDataEventArgs args = {
-				.eventHandle = ToHandle(&event),
-				.targetElementHandle = ToElementHandle(event.GetTargetElement()),
-				.values = values.empty() ? nullptr : values.data(),
-				.count = values.size(),
-			};
-			callbackState->callback(callbackState->userData, &args);
-		});
-	if (!bound) {
+	std::shared_ptr<NativeDataEventDispatcher> dispatcher;
+	auto dispatcherIt = model->eventDispatchers.find(query->name);
+	if (dispatcherIt == model->eventDispatchers.end()) {
+		dispatcher = std::make_shared<NativeDataEventDispatcher>();
+		const bool bound = model->constructor.BindEventCallback(
+			query->name,
+			[dispatcher](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments) {
+				auto callbackState = dispatcher->callbackState.lock();
+				if (callbackState != nullptr)
+					DispatchNativeDataEvent(callbackState, event, arguments);
+			});
+		if (!bound) {
+			ReleaseNativeDataEventCallback(query);
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		model->eventDispatchers.emplace(query->name, dispatcher);
+	} else {
+		dispatcher = dispatcherIt->second;
+		if (!dispatcher->callbackState.expired()) {
+			ReleaseNativeDataEventCallback(query);
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+	}
+
+	auto callbackState = std::make_shared<NativeDataEventCallbackState>(
+		query->callback,
+		query->userData,
+		query->destroyCallback,
+		query->name,
+		std::move(fieldTypes)
+	);
+	dispatcher->callbackState = callbackState;
+	const uint64_t eventHandle = nextDataModelVariableHandle++;
+	model->events.emplace(eventHandle, callbackState);
+	nativeDataEventModels.emplace(eventHandle, query->dataModelHandle);
+	result->eventHandle = eventHandle;
+	result->success = true;
+}
+
+static void NativeDataModelUnbindEvent(const RmlDataModelEventHandleQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	if (GetNativeDataEvent(query->eventHandle, &model) == nullptr) {
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
 
+	nativeDataEventModels.erase(query->eventHandle);
+	model->events.erase(query->eventHandle);
 	result->success = true;
 }
 
@@ -4650,4 +4788,5 @@ const RmlUiApi RMLUI_API = {
 	.DataModelBindRows = NativeDataModelBindRows,
 	.DataModelSetRows = NativeDataModelSetRows,
 	.DataModelBindEvent = NativeDataModelBindEvent,
+	.DataModelUnbindEvent = NativeDataModelUnbindEvent,
 };

@@ -112,12 +112,14 @@ impl RmlValue {
 }
 
 /// A data-model event callback invocation with its borrowed native payload
-/// copied into Rust-owned values before the user callback runs.
+/// copied into Rust-owned values before the user callback runs. `None` keeps
+/// the original positional slot when the native type tag is unknown or a
+/// string payload is null.
 #[derive(Clone, Debug, PartialEq)]
 pub struct RmlDataEventArgs {
     pub event_handle: u64,
     pub target_element_handle: u64,
-    pub values: Vec<RmlValue>,
+    pub values: Vec<Option<RmlValue>>,
 }
 
 impl RmlDataEventArgs {
@@ -129,7 +131,7 @@ impl RmlDataEventArgs {
         };
         let values = native_values
             .iter()
-            .filter_map(|value| unsafe { RmlValue::from_native(value) })
+            .map(|value| unsafe { RmlValue::from_native(value) })
             .collect();
         Self {
             event_handle: args.eventHandle,
@@ -137,6 +139,13 @@ impl RmlDataEventArgs {
             values,
         }
     }
+}
+
+/// A registered data-model event callback. The callback remains active until
+/// [`RmlDataEvent::unbind`] or removal of its data model.
+pub struct RmlDataEvent<'api> {
+    ui: RmlUi<'api>,
+    handle: u64,
 }
 
 /// An engine-owned collection whose row schema is declared at runtime.
@@ -686,10 +695,20 @@ impl<'api> RmlDataModel<'api> {
         }
     }
 
-    /// Binds a data-event expression callback. RmlUi owns the callback until
-    /// this data model is destroyed; the callback arguments are copied into
+    /// Binds a data-event expression callback with a declared positional
+    /// schema. RmlUi owns the callback until the returned binding is unbound
+    /// or this data model is destroyed; callback arguments are copied into
     /// Rust-owned values for the duration of the invocation.
-    pub fn bind_event<F>(&self, name: &str, callback: F) -> Result<(), Error>
+    ///
+    /// RmlUi reports an arity or type mismatch when the event expression is
+    /// dispatched. Its registration API does not expose the RML expression,
+    /// so those arguments cannot be checked earlier.
+    pub fn bind_event<F>(
+        &self,
+        name: &str,
+        fields: &[RmlFieldType],
+        callback: F,
+    ) -> Result<RmlDataEvent<'api>, Error>
     where
         F: FnMut(RmlDataEventArgs) + 'static,
     {
@@ -717,6 +736,10 @@ impl<'api> RmlDataModel<'api> {
         }
 
         let name = CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
+        let native_fields = fields
+            .iter()
+            .map(|field_type| field_type.native_type())
+            .collect::<Vec<_>>();
         let callback = Box::into_raw(Box::new(callback));
         let query = sys::RmlDataModelBindEventQuery {
             dataModelHandle: self.handle,
@@ -724,6 +747,8 @@ impl<'api> RmlDataModel<'api> {
             callback: Some(trampoline::<F>),
             userData: callback as *mut c_void,
             destroyCallback: Some(destroy_callback::<F>),
+            fieldTypes: native_fields.as_ptr(),
+            fieldCount: native_fields.len() as u64,
         };
 
         unsafe {
@@ -735,8 +760,13 @@ impl<'api> RmlDataModel<'api> {
                 .expect("DataModelBindEvent function pointer must be initialized");
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();
-            Error::result_or(result.error, result.success)
-                .and_then(|success| require_success(success, "event bind"))
+            let (handle, success) =
+                Error::result_or(result.error, (result.eventHandle, result.success))?;
+            require_success(success, "event bind")?;
+            Ok(RmlDataEvent {
+                ui: self.ui,
+                handle,
+            })
         }
     }
 
@@ -841,6 +871,29 @@ impl<'api> RmlDataModel<'api> {
             handle,
             stable_count: StableRowCount::default(),
         })
+    }
+}
+
+impl<'api> RmlDataEvent<'api> {
+    /// Stops dispatching this callback and releases its callback data.
+    pub fn unbind(&self) -> Result<(), Error> {
+        let query = sys::RmlDataModelEventHandleQuery {
+            eventHandle: self.handle,
+        };
+        unsafe {
+            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
+            let func = self
+                .ui
+                .api
+                .DataModelUnbindEvent
+                .expect("DataModelUnbindEvent function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            require_success(
+                Error::result_or(result.error, result.success)?,
+                "event unbind",
+            )
+        }
     }
 }
 
@@ -1446,6 +1499,44 @@ impl<'api> RmlDataGridRows<'api> {
                 "grid-row set",
             )
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn event_argument_conversion_preserves_unknown_slots() {
+        let native_values = [
+            sys::RmlDataValue {
+                type_: 1,
+                intValue: 7,
+                ..Default::default()
+            },
+            sys::RmlDataValue {
+                type_: 255,
+                ..Default::default()
+            },
+            sys::RmlDataValue {
+                type_: 3,
+                stringValue: ptr::null(),
+                ..Default::default()
+            },
+        ];
+        let native_args = sys::RmlDataEventArgs {
+            eventHandle: 11,
+            targetElementHandle: 22,
+            values: native_values.as_ptr(),
+            count: native_values.len() as u64,
+        };
+
+        let args = unsafe { RmlDataEventArgs::from_native(&native_args) };
+
+        assert_eq!(args.values.len(), 3);
+        assert_eq!(args.values[0], Some(RmlValue::Int(7)));
+        assert_eq!(args.values[1], None);
+        assert_eq!(args.values[2], None);
     }
 }
 
