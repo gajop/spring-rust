@@ -1,6 +1,6 @@
 use std::{
     cell::Cell,
-    ffi::{CStr, CString},
+    ffi::{c_void, CStr, CString},
     marker::PhantomData,
     mem::MaybeUninit,
     os::raw::c_char,
@@ -85,6 +85,58 @@ pub enum RmlValue {
     Color(RmlColor),
     Pixels(RmlPixels),
     Percent(RmlPercent),
+}
+
+impl RmlValue {
+    unsafe fn from_native(value: &sys::RmlDataValue) -> Option<Self> {
+        match value.type_ {
+            0 => Some(Self::Bool(value.boolValue)),
+            1 => Some(Self::Int(value.intValue)),
+            2 => Some(Self::Float(value.floatValue)),
+            3 if !value.stringValue.is_null() => Some(Self::String(
+                unsafe { CStr::from_ptr(value.stringValue) }
+                    .to_string_lossy()
+                    .into_owned(),
+            )),
+            4 => Some(Self::Color(RmlColor {
+                red: value.red,
+                green: value.green,
+                blue: value.blue,
+                alpha: value.alpha,
+            })),
+            5 => Some(Self::Pixels(RmlPixels(value.floatValue))),
+            6 => Some(Self::Percent(RmlPercent(value.floatValue))),
+            _ => None,
+        }
+    }
+}
+
+/// A data-model event callback invocation with its borrowed native payload
+/// copied into Rust-owned values before the user callback runs.
+#[derive(Clone, Debug, PartialEq)]
+pub struct RmlDataEventArgs {
+    pub event_handle: u64,
+    pub target_element_handle: u64,
+    pub values: Vec<RmlValue>,
+}
+
+impl RmlDataEventArgs {
+    unsafe fn from_native(args: &sys::RmlDataEventArgs) -> Self {
+        let native_values = if args.values.is_null() || args.count == 0 {
+            &[]
+        } else {
+            unsafe { slice::from_raw_parts(args.values, args.count as usize) }
+        };
+        let values = native_values
+            .iter()
+            .filter_map(|value| unsafe { RmlValue::from_native(value) })
+            .collect();
+        Self {
+            event_handle: args.eventHandle,
+            target_element_handle: args.targetElementHandle,
+            values,
+        }
+    }
 }
 
 /// An engine-owned collection whose row schema is declared at runtime.
@@ -631,6 +683,60 @@ impl<'api> RmlDataModel<'api> {
                 handle,
                 field_count: fields.len(),
             })
+        }
+    }
+
+    /// Binds a data-event expression callback. RmlUi owns the callback until
+    /// this data model is destroyed; the callback arguments are copied into
+    /// Rust-owned values for the duration of the invocation.
+    pub fn bind_event<F>(&self, name: &str, callback: F) -> Result<(), Error>
+    where
+        F: FnMut(RmlDataEventArgs) + 'static,
+    {
+        unsafe extern "C" fn trampoline<F>(
+            user_data: *mut c_void,
+            args: *const sys::RmlDataEventArgs,
+        ) where
+            F: FnMut(RmlDataEventArgs) + 'static,
+        {
+            if user_data.is_null() || args.is_null() {
+                return;
+            }
+            let callback = unsafe { &mut *(user_data as *mut F) };
+            let args = unsafe { RmlDataEventArgs::from_native(&*args) };
+            callback(args);
+        }
+
+        unsafe extern "C" fn destroy_callback<F>(user_data: *mut c_void)
+        where
+            F: FnMut(RmlDataEventArgs) + 'static,
+        {
+            if !user_data.is_null() {
+                drop(unsafe { Box::from_raw(user_data as *mut F) });
+            }
+        }
+
+        let name = CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
+        let callback = Box::into_raw(Box::new(callback));
+        let query = sys::RmlDataModelBindEventQuery {
+            dataModelHandle: self.handle,
+            name: name.as_ptr(),
+            callback: Some(trampoline::<F>),
+            userData: callback as *mut c_void,
+            destroyCallback: Some(destroy_callback::<F>),
+        };
+
+        unsafe {
+            let mut result = MaybeUninit::<sys::RmlDataModelBindEventResult>::zeroed();
+            let func = self
+                .ui
+                .api
+                .DataModelBindEvent
+                .expect("DataModelBindEvent function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, result.success)
+                .and_then(|success| require_success(success, "event bind"))
         }
     }
 

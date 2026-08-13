@@ -101,6 +101,31 @@ void SetTextRows(uint64_t rowsHandle, const LogRows& rows)
 	REQUIRE(result.error == nullptr);
 	REQUIRE(result.success);
 }
+
+struct DataEventCapture
+{
+	std::vector<int32_t> indexes;
+	std::vector<uint64_t> eventHandles;
+	std::vector<uint64_t> targetElementHandles;
+	int destroyCount = 0;
+};
+
+void CaptureDataEvent(void* userData, const RmlDataEventArgs* args)
+{
+	auto& capture = *static_cast<DataEventCapture*>(userData);
+	REQUIRE(args != nullptr);
+	REQUIRE(args->values != nullptr);
+	REQUIRE(args->count == 1);
+	REQUIRE(args->values[0].type == RML_FIELD_INT);
+	capture.indexes.push_back(args->values[0].intValue);
+	capture.eventHandles.push_back(args->eventHandle);
+	capture.targetElementHandles.push_back(args->targetElementHandle);
+}
+
+void DestroyDataEvent(void* userData)
+{
+	++static_cast<DataEventCapture*>(userData)->destroyCount;
+}
 }
 
 // The native API translation unit links against the RmlUi backend. Typed data
@@ -735,6 +760,20 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	REQUIRE(rowsResult.error == nullptr);
 	REQUIRE(rowsResult.success);
 
+	DataEventCapture eventCapture;
+	RmlDataModelBindEventQuery bindEvent = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "select",
+		.callback = CaptureDataEvent,
+		.userData = &eventCapture,
+		.destroyCallback = DestroyDataEvent,
+	};
+	RmlDataModelBindEventResult eventResult = {};
+	RMLUI_API.DataModelBindEvent(&bindEvent, &eventResult);
+	REQUIRE(eventResult.error == nullptr);
+	REQUIRE(eventResult.success);
+	CHECK(eventCapture.destroyCount == 0);
+
 	RmlDataFieldDef styledFields[] = {
 		{.name = "colour", .type = RML_FIELD_COLOR},
 		{.name = "offset", .type = RML_FIELD_PIXELS},
@@ -753,12 +792,12 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 
 	Rml::ElementDocument* document = context->CreateDocument();
 	REQUIRE(document != nullptr);
-	document->SetInnerRML(R"(
+	document->SetInnerRML(R"RML(
 		<div data-model="runtime">
-			<div id="bound-rows"><div data-for="row : rows" data-if="row.visible" data-class-selected="row.selected">{{ row.label }}</div></div>
+			<div id="bound-rows"><div data-for="row : rows" data-if="row.visible" data-class-selected="row.selected" data-event-click="select(it_index)">{{ row.label }}</div></div>
 			<div id="bound-styled"><div data-for="row : styled" data-if="row.visible"><span data-style-background-color="row.colour" data-style-left="row.offset" data-style-width="row.progress"></span></div></div>
 		</div>
-	)");
+	)RML");
 	document->Show();
 
 	RmlDataValue fiveRows[] = {
@@ -820,6 +859,12 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	CHECK(styledElement->GetProperty(Rml::PropertyId::Width)->unit == Rml::Unit::PERCENT);
 	CHECK(styledElement->GetProperty(Rml::PropertyId::Width)->Get<float>() == Catch::Approx(35.0f));
 
+	boundRows->GetChild(3)->DispatchEvent("click", Rml::Dictionary{});
+	REQUIRE(eventCapture.indexes.size() == 1);
+	CHECK(eventCapture.indexes[0] == 3);
+	CHECK(eventCapture.eventHandles[0] != 0);
+	CHECK(eventCapture.targetElementHandles[0] == ToHandle(boundRows->GetChild(3)));
+
 	RmlDataValue twoRows[] = {
 		{.type = RML_FIELD_STRING, .stringValue = "replacement"},
 		{.type = RML_FIELD_BOOL, .boolValue = false},
@@ -847,6 +892,21 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	CHECK_FALSE(boundRows->GetChild(2)->IsVisible());
 	CHECK_FALSE(boundRows->GetChild(3)->IsVisible());
 	CHECK_FALSE(boundRows->GetChild(4)->IsVisible());
+
+	boundRows->GetChild(1)->DispatchEvent("click", Rml::Dictionary{});
+	REQUIRE(eventCapture.indexes.size() == 2);
+	CHECK(eventCapture.indexes[1] == 1);
+	CHECK(eventCapture.targetElementHandles[1] == ToHandle(boundRows->GetChild(1)));
+
+	RmlContextStringQuery removeModel = {
+		.contextHandle = ToHandle(context),
+		.name = "runtime",
+	};
+	RmlContextBoolResult removeModelResult = {};
+	RMLUI_API.ContextRemoveDataModel(&removeModel, &removeModelResult);
+	REQUIRE(removeModelResult.error == nullptr);
+	REQUIRE(removeModelResult.success);
+	CHECK(eventCapture.destroyCount == 1);
 
 	REQUIRE(Rml::RemoveContext(context->GetName()));
 	Rml::Shutdown();

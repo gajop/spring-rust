@@ -211,6 +211,23 @@ struct RmlDataModelSetRowsQuery {
 	const RmlDataValue* values;
 	uint64_t rowCount;
 };
+// Arguments delivered to a data-model event callback. Pointers are valid only
+// while the callback is running.
+struct RmlDataEventArgs {
+	uint64_t eventHandle;
+	uint64_t targetElementHandle;
+	const RmlDataValue* values;
+	uint64_t count;
+};
+typedef void (*RmlDataEventCallback)(void* userData, const RmlDataEventArgs* args);
+struct RmlDataModelBindEventQuery {
+	uint64_t dataModelHandle;
+	const char* name;
+	RmlDataEventCallback callback;
+	void* userData;
+	NativeCallback destroyCallback;
+};
+struct RmlDataModelBindEventResult { const Error* error; bool success; };
 // A native-owned collection of text rows. The engine copies every row during
 // SetTextRows, so pointers are valid only for that call and never become part
 // of the data model's lifetime.
@@ -494,6 +511,7 @@ struct RmlUiApi {
 	void (*ClearDocumentPathRequests)(const RmlClearDocumentPathRequestsQuery* query, RmlClearDocumentPathRequestsResult* result);
 	void (*DataModelBindRows)(const RmlDataModelBindRowsQuery* query, RmlDataModelRowsResult* result);
 	void (*DataModelSetRows)(const RmlDataModelSetRowsQuery* query, RmlElementBoolResult* result);
+	void (*DataModelBindEvent)(const RmlDataModelBindEventQuery* query, RmlDataModelBindEventResult* result);
 };
 
 extern const RmlUiApi RMLUI_API;

@@ -78,9 +78,9 @@ These are not name-matching failures. They have no native counterpart by contrac
 
 ## Rust inventory
 
-- Rust documentation rows: 1420
-- Unique `Module.method` labels: 1410
-- The difference is ten overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
+- Rust documentation rows: 1421
+- Unique `Module.method` labels: 1411
+- The difference is nine overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
 
 | Classification | Unique labels |
 | --- | ---: |
@@ -91,7 +91,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 | VFS counterpart | 40 |
 | gl counterpart or explicit overload | 186 |
 | global math.* counterpart (non-Spring namespace) | 14 |
-| native-only RmlUi helper/property surface | 123 |
+| native-only RmlUi helper/property surface | 124 |
 | native-only VFS helper/representation surface | 11 |
 | native-only graphics userdata/alias surface | 51 |
 | native-only owned/FFI representation surface | 17 |
@@ -1261,9 +1261,10 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `MathExtra.sgn`
 - `MathExtra.smooth_step`
 
-### native-only RmlUi helper/property surface (123)
+### native-only RmlUi helper/property surface (124)
 - `RmlUi.bind`
 - `RmlUi.bind_choice_rows`
+- `RmlUi.bind_event`
 - `RmlUi.bind_grid_rows`
 - `RmlUi.bind_icon_rows`
 - `RmlUi.bind_log_rows`

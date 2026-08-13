@@ -2077,6 +2077,165 @@ static void NativeDataModelSetRows(const RmlDataModelSetRowsQuery* query, RmlEle
 	result->success = true;
 }
 
+static bool CopyNativeDataValue(const Rml::Variant& source, RmlDataValue& target, Rml::String& stringValue)
+{
+	target = {};
+	switch (source.GetType()) {
+		case Rml::Variant::BOOL:
+			target.type = RML_FIELD_BOOL;
+			target.boolValue = source.GetReference<bool>();
+			return true;
+		case Rml::Variant::BYTE:
+			target.type = RML_FIELD_INT;
+			target.intValue = source.GetReference<Rml::byte>();
+			return true;
+		case Rml::Variant::CHAR:
+			target.type = RML_FIELD_INT;
+			target.intValue = source.GetReference<char>();
+			return true;
+		case Rml::Variant::INT:
+			target.type = RML_FIELD_INT;
+			target.intValue = source.GetReference<int>();
+			return true;
+		case Rml::Variant::INT64: {
+			const int64_t value = source.GetReference<int64_t>();
+			if (value < std::numeric_limits<int32_t>::min() || value > std::numeric_limits<int32_t>::max())
+				return false;
+			target.type = RML_FIELD_INT;
+			target.intValue = static_cast<int32_t>(value);
+			return true;
+		}
+		case Rml::Variant::UINT: {
+			const unsigned int value = source.GetReference<unsigned int>();
+			if (value > static_cast<unsigned int>(std::numeric_limits<int32_t>::max()))
+				return false;
+			target.type = RML_FIELD_INT;
+			target.intValue = static_cast<int32_t>(value);
+			return true;
+		}
+		case Rml::Variant::UINT64: {
+			const uint64_t value = source.GetReference<uint64_t>();
+			if (value > static_cast<uint64_t>(std::numeric_limits<int32_t>::max()))
+				return false;
+			target.type = RML_FIELD_INT;
+			target.intValue = static_cast<int32_t>(value);
+			return true;
+		}
+		case Rml::Variant::FLOAT:
+			target.type = RML_FIELD_FLOAT;
+			target.floatValue = source.GetReference<float>();
+			return true;
+		case Rml::Variant::DOUBLE:
+			target.type = RML_FIELD_FLOAT;
+			target.floatValue = static_cast<float>(source.GetReference<double>());
+			return true;
+		case Rml::Variant::STRING:
+			stringValue = source.GetReference<Rml::String>();
+			target.type = RML_FIELD_STRING;
+			target.stringValue = stringValue.c_str();
+			return true;
+		case Rml::Variant::COLOURB: {
+			const Rml::Colourb& colour = source.GetReference<Rml::Colourb>();
+			target.type = RML_FIELD_COLOR;
+			target.red = colour.red;
+			target.green = colour.green;
+			target.blue = colour.blue;
+			target.alpha = colour.alpha;
+			return true;
+		}
+		case Rml::Variant::COLOURF: {
+			const Rml::Colourf& colour = source.GetReference<Rml::Colourf>();
+			target.type = RML_FIELD_COLOR;
+			target.red = static_cast<uint8_t>(std::clamp(colour.red * 255.0f, 0.0f, 255.0f));
+			target.green = static_cast<uint8_t>(std::clamp(colour.green * 255.0f, 0.0f, 255.0f));
+			target.blue = static_cast<uint8_t>(std::clamp(colour.blue * 255.0f, 0.0f, 255.0f));
+			target.alpha = static_cast<uint8_t>(std::clamp(colour.alpha * 255.0f, 0.0f, 255.0f));
+			return true;
+		}
+		case Rml::Variant::NONE:
+		case Rml::Variant::VECTOR2:
+		case Rml::Variant::VECTOR3:
+		case Rml::Variant::VECTOR4:
+		case Rml::Variant::SCRIPTINTERFACE:
+		case Rml::Variant::TRANSFORMPTR:
+		case Rml::Variant::TRANSITIONLIST:
+		case Rml::Variant::ANIMATIONLIST:
+		case Rml::Variant::DECORATORSPTR:
+		case Rml::Variant::FILTERSPTR:
+		case Rml::Variant::FONTEFFECTSPTR:
+		case Rml::Variant::COLORSTOPLIST:
+		case Rml::Variant::BOXSHADOWLIST:
+		case Rml::Variant::VOIDPTR:
+			return false;
+	}
+
+	return false;
+}
+
+struct NativeDataEventCallbackState
+{
+	NativeDataEventCallbackState(RmlDataEventCallback callback_, void* userData_, NativeCallback destroyCallback_)
+		: callback(callback_)
+		, userData(userData_)
+		, destroyCallback(destroyCallback_)
+	{
+	}
+
+	RmlDataEventCallback callback = nullptr;
+	void* userData = nullptr;
+	NativeCallback destroyCallback = nullptr;
+
+	~NativeDataEventCallbackState()
+	{
+		if (destroyCallback != nullptr)
+			destroyCallback(userData);
+	}
+};
+
+static void ReleaseNativeDataEventCallback(const RmlDataModelBindEventQuery* query)
+{
+	if (query->destroyCallback != nullptr)
+		query->destroyCallback(query->userData);
+}
+
+static void NativeDataModelBindEvent(const RmlDataModelBindEventQuery* query, RmlDataModelBindEventResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || query->callback == nullptr) {
+		ReleaseNativeDataEventCallback(query);
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto callbackState = std::make_shared<NativeDataEventCallbackState>(query->callback, query->userData, query->destroyCallback);
+	const bool bound = model->constructor.BindEventCallback(
+		query->name,
+		[callbackState](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments) {
+			std::vector<Rml::String> stringValues(arguments.size());
+			std::vector<RmlDataValue> values(arguments.size());
+			for (size_t index = 0; index < arguments.size(); ++index) {
+				if (!CopyNativeDataValue(arguments[index], values[index], stringValues[index]))
+					return;
+			}
+
+			const RmlDataEventArgs args = {
+				.eventHandle = ToHandle(&event),
+				.targetElementHandle = ToElementHandle(event.GetTargetElement()),
+				.values = values.empty() ? nullptr : values.data(),
+				.count = values.size(),
+			};
+			callbackState->callback(callbackState->userData, &args);
+		});
+	if (!bound) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	result->success = true;
+}
+
 static void NativeDataModelSetBool(const RmlDataModelVariableBoolQuery* query, RmlElementBoolResult* result)
 {
 	result->error = nullptr;
@@ -4490,4 +4649,5 @@ const RmlUiApi RMLUI_API = {
 	.ClearDocumentPathRequests = NativeClearDocumentPathRequests,
 	.DataModelBindRows = NativeDataModelBindRows,
 	.DataModelSetRows = NativeDataModelSetRows,
+	.DataModelBindEvent = NativeDataModelBindEvent,
 };

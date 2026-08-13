@@ -2,7 +2,7 @@
 
 Total APIs: 53
 
-Total Functions: 1420
+Total Functions: 1421
 
 ---
 
@@ -705,11 +705,12 @@ Total Functions: 1420
 - `Projectiles.get_projectiles_in_rectangle` (params: min_x:f32, min_z:f32, max_x:f32, max_z:f32, options:GetProjectilesInRectangleOptions) → `Result<Vec<i32>, Error>`
 - `Projectiles.get_projectiles_in_sphere` (params: center:sys::Float3, radius:f32, options:GetProjectilesInSphereOptions) → `Result<Vec<i32>, Error>`
 
-## RmlUi (220 functions)
+## RmlUi (221 functions)
 
 - `RmlUi.add_translation_string` (params: key:&str, translation:&str) → `Result<bool, Error>`
 - `RmlUi.bind` (params: name:&str, initial:T) → `Result<RmlDataVariable<'api, T>, Error>`
 - `RmlUi.bind_choice_rows` (params: name:&str) → `Result<RmlDataChoiceRows<'api>, Error>`
+- `RmlUi.bind_event` (params: name:&str, callback:F) → `Result<(), Error>`
 - `RmlUi.bind_grid_rows` (params: name:&str) → `Result<RmlDataGridRows<'api>, Error>`
 - `RmlUi.bind_icon_rows` (params: name:&str) → `Result<RmlDataIconRows<'api>, Error>`
 - `RmlUi.bind_log_rows` (params: name:&str) → `Result<RmlDataLogRows<'api>, Error>`

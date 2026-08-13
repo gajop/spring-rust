@@ -263,12 +263,12 @@ pub use player::{Player, RosterEntry};
 pub use profiling::Profiling;
 pub use projectiles::Projectiles;
 pub use rml_ui::{
-    RmlChoiceRow, RmlColor, RmlDataChoiceRows, RmlDataGridRows, RmlDataIconRows, RmlDataLogRows,
-    RmlDataModel, RmlDataNotificationRows, RmlDataOptionRows, RmlDataRows, RmlDataStatusRows,
-    RmlDataSwatchRows, RmlDataTextRows, RmlDataValue, RmlDataVariable, RmlFieldType, RmlGridRow,
-    RmlIconRow, RmlLogRow, RmlLogSeverity, RmlNotificationRow, RmlOptionRow, RmlPercent, RmlPixels,
-    RmlPointerCaptureDelta, RmlPointerCaptureStatus, RmlStatusRow, RmlSwatchRow, RmlTextRow, RmlUi,
-    RmlValue,
+    RmlChoiceRow, RmlColor, RmlDataChoiceRows, RmlDataEventArgs, RmlDataGridRows, RmlDataIconRows,
+    RmlDataLogRows, RmlDataModel, RmlDataNotificationRows, RmlDataOptionRows, RmlDataRows,
+    RmlDataStatusRows, RmlDataSwatchRows, RmlDataTextRows, RmlDataValue, RmlDataVariable,
+    RmlFieldType, RmlGridRow, RmlIconRow, RmlLogRow, RmlLogSeverity, RmlNotificationRow,
+    RmlOptionRow, RmlPercent, RmlPixels, RmlPointerCaptureDelta, RmlPointerCaptureStatus,
+    RmlStatusRow, RmlSwatchRow, RmlTextRow, RmlUi, RmlValue,
 };
 pub use rules_params::{RulesParamValue, RulesParams};
 pub use selection::Selection;

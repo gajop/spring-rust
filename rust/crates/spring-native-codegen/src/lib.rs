@@ -1133,6 +1133,13 @@ fn render_api(spec: &ApiSpec, config: &ApiConfig<'_>) -> Result<String> {
 
     out.push_str(&format!("impl<'a> {}<'a> {{\n", config.wrapper_struct));
     for func in &spec.api.functions {
+        // Data-model event callbacks have a typed two-argument C callback
+        // signature. They are implemented by the hand-written RmlUi wrapper,
+        // which can expose the callback arguments as owned Rust values; the
+        // generic FnMut() callback generator is intentionally not applicable.
+        if func.name == "DataModelBindEvent" {
+            continue;
+        }
         if let (Some(query), Some(result)) = (
             spec.structs.get(&func.query),
             spec.structs.get(&func.result),
