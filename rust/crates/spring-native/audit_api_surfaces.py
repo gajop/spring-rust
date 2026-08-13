@@ -34,6 +34,7 @@ LUA_ONLY_SURFACE_REASONS = {
     "RmlUi.EventListener.OnAttach": "The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.",
     "RmlUi.EventListener.OnDetach": "The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.",
     "RmlUi.EventListener.ProcessEvent": "The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.",
+    "RmlUi.Context.Update": "The native ABI omits this manual driver because RmlGui::Update owns per-frame updates for native RmlUi contexts; the legacy Lua operation remains a Lua-only surface.",
 }
 
 EXTRA_LUA_SURFACE_NAMESPACES = ("Encoding", "math", "debug", "table")
@@ -42,6 +43,7 @@ RML_LUA_ONLY_METHODS = {
     "RmlUi.EventListener.OnAttach",
     "RmlUi.EventListener.OnDetach",
     "RmlUi.EventListener.ProcessEvent",
+    "RmlUi.Context.Update",
 }
 
 SPRING_SOURCE_FILES = (

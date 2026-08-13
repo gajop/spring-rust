@@ -863,11 +863,6 @@ impl NativeApiParity {
             );
             record_bool(
                 &mut actual,
-                "RmlUi.Context.Update",
-                rml.context_update(context).map_err(format_error)?,
-            );
-            record_bool(
-                &mut actual,
                 "RmlUi.Context.Render",
                 rml.context_render(context).map_err(format_error)?,
             );
@@ -1158,10 +1153,6 @@ impl NativeApiParity {
             ensure(
                 rml.document_close(close_document).map_err(format_error)?,
                 "document_close should succeed",
-            )?;
-            ensure(
-                rml.context_update(context).map_err(format_error)?,
-                "context_update after close should succeed",
             )?;
             ensure_eq(
                 "context_get_document(close) after close",

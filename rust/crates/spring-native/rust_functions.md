@@ -2,7 +2,7 @@
 
 Total APIs: 53
 
-Total Functions: 1417
+Total Functions: 1416
 
 ---
 
@@ -705,7 +705,7 @@ Total Functions: 1417
 - `Projectiles.get_projectiles_in_rectangle` (params: min_x:f32, min_z:f32, max_x:f32, max_z:f32, options:GetProjectilesInRectangleOptions) → `Result<Vec<i32>, Error>`
 - `Projectiles.get_projectiles_in_sphere` (params: center:sys::Float3, radius:f32, options:GetProjectilesInSphereOptions) → `Result<Vec<i32>, Error>`
 
-## RmlUi (217 functions)
+## RmlUi (216 functions)
 
 - `RmlUi.add_translation_string` (params: key:&str, translation:&str) → `Result<bool, Error>`
 - `RmlUi.bind` (params: name:&str, initial:T) → `Result<RmlDataVariable<'api, T>, Error>`
@@ -756,7 +756,6 @@ Total Functions: 1417
 - `RmlUi.context_take_pointer_capture_delta` (params: context_handle:u64) → `Result<(i32, i32, i32), Error>`
 - `RmlUi.context_unload_all_documents` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.context_unload_document` (params: context_handle:u64, document_handle:u64) → `Result<bool, Error>`
-- `RmlUi.context_update` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.create_context` (params: name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.create_data_model` (params: context_handle:u64, name:&str) → `Result<RmlDataModel<'a>, Error>`
 - `RmlUi.data_model_bind_bool` (params: data_model_handle:u64, name:&str, initial_value:bool) → `Result<(u64, bool), Error>`

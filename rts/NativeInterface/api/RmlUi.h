@@ -280,7 +280,6 @@ struct RmlUiApi {
 	void (*ContextRender)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextUnloadAllDocuments)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextUnloadDocument)(const RmlContextDocumentQuery* query, RmlContextBoolResult* result);
-	void (*ContextUpdate)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextOpenDataModel)(const RmlContextOpenDataModelQuery* query, RmlContextOpenDataModelResult* result);
 	void (*ContextCreateDataModel)(const RmlContextCreateDataModelQuery* query, RmlContextOpenDataModelResult* result);
 	void (*ContextRemoveDataModel)(const RmlContextStringQuery* query, RmlContextBoolResult* result);

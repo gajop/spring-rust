@@ -59,6 +59,13 @@ listeners use the function/string callback overloads on `Element` and
 methods are therefore Lua-only by design, and the parity fixture verifies that
 the base type remains non-constructible.
 
+### `RmlUi.Context.Update`
+
+The Lua binding retains `Context:Update()` as a legacy/manual operation, but the
+native ABI deliberately omits `context_update`. `RmlGui::Update()` owns the
+per-frame update of every engine-registered context, including native contexts;
+exposing a second native driver would advance animations and transitions twice.
+
 ### `Script.*`
 
 The documented `Script.*` functions are Lua-handle operations: they inspect or

@@ -877,9 +877,14 @@ bool processContextEvent(Rml::Context* context, const SDL_Event& event)
 				auto x = event.window.data1;
 				auto y = event.window.data2;
 
-				state->render_interface.SetViewport(x, y);
-				state->winX = x;
-				state->winY = y;
+				if (state->winX != x || state->winY != y) {
+					state->render_interface.SetViewport(x, y);
+					state->winX = x;
+					state->winY = y;
+
+					for (Rml::Context* context : state->contexts)
+						context->SetDimensions({x, y});
+				}
 			}
 		} break;
 

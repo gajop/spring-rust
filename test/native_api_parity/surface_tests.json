@@ -969,7 +969,6 @@
         "RmlUi.context_render",
         "RmlUi.context_unload_all_documents",
         "RmlUi.context_unload_document",
-        "RmlUi.context_update",
         "RmlUi.create_context",
         "RmlUi.document_append_to_style_sheet",
         "RmlUi.document_close",

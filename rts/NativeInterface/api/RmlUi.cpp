@@ -1057,18 +1057,6 @@ static void NativeContextUnloadDocument(const RmlContextDocumentQuery* query, Rm
 	result->success = true;
 }
 
-static void NativeContextUpdate(const RmlContextHandleQuery* query, RmlContextBoolResult* result)
-{
-	result->error = nullptr;
-	result->success = false;
-	Rml::Context* context = FromHandle(query->contextHandle);
-	if (context == nullptr) {
-		result->error = &INVALID_ARGUMENT_ERROR;
-		return;
-	}
-	result->success = context->Update();
-}
-
 static void NativeContextRemoveDataModel(const RmlContextStringQuery* query, RmlContextBoolResult* result)
 {
 	result->error = nullptr;
@@ -3996,7 +3984,6 @@ const RmlUiApi RMLUI_API = {
 	.ContextRender = NativeContextRender,
 	.ContextUnloadAllDocuments = NativeContextUnloadAllDocuments,
 	.ContextUnloadDocument = NativeContextUnloadDocument,
-	.ContextUpdate = NativeContextUpdate,
 	.ContextOpenDataModel = NativeContextOpenDataModel,
 	.ContextCreateDataModel = NativeContextCreateDataModel,
 	.ContextRemoveDataModel = NativeContextRemoveDataModel,

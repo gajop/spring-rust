@@ -9,7 +9,7 @@ It distinguishes canonical Spring callouts from the separate `Global`, `gl`, `VF
 | --- | ---: | ---: | ---: | ---: |
 | `Global` | 1 | 1 | 0 | 0 |
 | `Spring` | 791 | 790 | 1 | 0 |
-| `RmlUi` | 101 | 98 | 3 | 0 |
+| `RmlUi` | 101 | 97 | 4 | 0 |
 | `gl` | 185 | 185 | 0 | 0 |
 | `VFS` | 41 | 40 | 1 | 0 |
 | `Script` | 30 | 0 | 30 | 0 |
@@ -28,6 +28,7 @@ It distinguishes canonical Spring callouts from the separate `Global`, `gl`, `VF
 
 These are not name-matching failures. They have no native counterpart by contract, but remain part of the executable Lua-surface coverage gate.
 
+- `RmlUi.Context.Update` — The native ABI omits this manual driver because RmlGui::Update owns per-frame updates for native RmlUi contexts; the legacy Lua operation remains a Lua-only surface.
 - `RmlUi.EventListener.OnAttach` — The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.
 - `RmlUi.EventListener.OnDetach` — The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.
 - `RmlUi.EventListener.ProcessEvent` — The Lua binding exposes an abstract, non-constructible base type; real listeners use callback functions or strings on Context/Element, while native modules use callback-registration ABI values.
@@ -77,15 +78,15 @@ These are not name-matching failures. They have no native counterpart by contrac
 
 ## Rust inventory
 
-- Rust documentation rows: 1417
-- Unique `Module.method` labels: 1408
+- Rust documentation rows: 1416
+- Unique `Module.method` labels: 1407
 - The difference is nine overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
 
 | Classification | Unique labels |
 | --- | ---: |
 | Encoding counterpart | 6 |
 | Global Lua counterpart (semantic boundary) | 1 |
-| RmlUi callout counterpart | 98 |
+| RmlUi callout counterpart | 97 |
 | Spring counterpart | 790 |
 | VFS counterpart | 40 |
 | gl counterpart or explicit overload | 186 |
@@ -123,7 +124,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 ### Global Lua counterpart (semantic boundary) (1)
 - `SystemControl.call_as_team`
 
-### RmlUi callout counterpart (98)
+### RmlUi callout counterpart (97)
 - `RmlUi.add_translation_string`
 - `RmlUi.clear_document_path_requests`
 - `RmlUi.clear_translations`
@@ -151,7 +152,6 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.context_render`
 - `RmlUi.context_unload_all_documents`
 - `RmlUi.context_unload_document`
-- `RmlUi.context_update`
 - `RmlUi.create_context`
 - `RmlUi.document_append_to_style_sheet`
 - `RmlUi.document_close`
@@ -1566,7 +1566,7 @@ The canonical `Spring.*` parameter audit is the one-to-one exact matcher used by
 | `Spring` | 791 | 790 | 1 | `match_apis.py` exact parameter audit plus runtime parity rows |
 | `gl` | 185 | 185 | 0 | source registration + graphics surface tests; userdata handles audited separately |
 | `VFS` | 41 | 40 | 1 | source registration + VFS runtime parity; `VFS.Include` is explicit Lua-only |
-| `RmlUi` | 101 | 98 | 3 | SolLua source docs + receiver/property runtime surface tests |
+| `RmlUi` | 101 | 97 | 4 | SolLua source docs + receiver/property runtime surface tests |
 | `Script` | 30 | 0 | 30 | source registration/docs + Lua-only behavior surface tests |
 | `Global`, `Encoding`, `math` | 21 | 21 | 0 | namespace-specific source/signature/runtime tests |
 
