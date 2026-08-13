@@ -75,7 +75,19 @@ static T* FromHandle(uint64_t handle)
 
 static Rml::Context* FromHandle(uint64_t handle)
 {
-	return reinterpret_cast<Rml::Context*>(static_cast<uintptr_t>(handle));
+	if (handle == 0 || !RmlGui::IsInitialized())
+		return nullptr;
+
+	// Contexts do not expose observer pointers. Resolve the opaque handle by
+	// comparing it with the currently-owned contexts without ever dereferencing
+	// the caller's possibly stale pointer.
+	for (int index = 0; index < Rml::GetNumContexts(); ++index) {
+		Rml::Context* context = Rml::GetContext(index);
+		if (ToHandle(context) == handle)
+			return context;
+	}
+
+	return nullptr;
 }
 
 static uint64_t nextElementPtrHandle = 1;

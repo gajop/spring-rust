@@ -71,6 +71,11 @@ TEST_CASE("Native document handles reject documents destroyed with their context
 	// to the freed ElementDocument.
 	REQUIRE(Rml::RemoveContext(context->GetName()));
 
+	RmlRemoveContextQuery staleRemoveQuery = {.contextHandle = ToHandle(context)};
+	RmlRemoveContextResult staleRemoveResult = {};
+	RMLUI_API.RemoveContext(&staleRemoveQuery, &staleRemoveResult);
+	CHECK_FALSE(staleRemoveResult.success);
+
 	RmlDocumentHandleQuery closeQuery = {.documentHandle = createResult.documentHandle};
 	RmlDocumentBoolResult closeResult = {};
 	RMLUI_API.DocumentClose(&closeQuery, &closeResult);

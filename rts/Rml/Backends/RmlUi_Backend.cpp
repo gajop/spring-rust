@@ -36,6 +36,7 @@
 #include <functional>
 #include <ranges>
 #include <tracy/Tracy.hpp>
+#include <unordered_map>
 
 #include "Game/Game.h"
 #include "Game/UI/MouseHandler.h"
@@ -101,7 +102,7 @@ public:
 	VFSFileInterface file_interface;
 
 	std::vector<Rml::Context*> contexts;
-	std::unordered_set<Rml::Context*> contexts_to_remove;
+	std::unordered_map<Rml::Context*, Rml::String> contexts_to_remove;
 
 	Rml::Context* debug_host_context = nullptr;
 	Rml::Context* debug_context = nullptr;
@@ -464,6 +465,7 @@ void RmlGui::OnContextCreate(Rml::Context* context)
 
 void RmlGui::OnContextDestroy(Rml::Context* context)
 {
+	state->contexts_to_remove.erase(context);
 	if (context == state->debug_context) {
 		state->debug_context = nullptr;
 	}
@@ -582,7 +584,31 @@ void RmlGui::MarkContextForRemoval(Rml::Context *context) {
 		return;
 	}
 
-	state->contexts_to_remove.insert(context);
+	// A native module may call this with a stale raw handle after an immediate
+	// reload teardown. Confirm ownership before reading the context name.
+	if (std::ranges::find(state->contexts, context) == state->contexts.end()) {
+		return;
+	}
+
+	// Keep the name while the context is known to be alive. The queue can be
+	// drained after RmlUi has destroyed the context, so it must never read the
+	// name back through the queued pointer.
+	state->contexts_to_remove.insert_or_assign(context, context->GetName());
+}
+
+static void RemoveContextImmediatelyByName(const Rml::String& name, Rml::Context* expectedContext)
+{
+	if (!RmlInitialized()) {
+		return;
+	}
+
+	Rml::Context* context = Rml::GetContext(name);
+	if (context == nullptr || (expectedContext != nullptr && context != expectedContext)) {
+		return;
+	}
+
+	RmlGui::ClearDebugContext(context);
+	Rml::RemoveContext(name);
 }
 
 void RmlGui::RemoveContextImmediately(Rml::Context* context)
@@ -591,10 +617,14 @@ void RmlGui::RemoveContextImmediately(Rml::Context* context)
 		return;
 	}
 
+	if (std::ranges::find(state->contexts, context) == state->contexts.end()) {
+		state->contexts_to_remove.erase(context);
+		return;
+	}
+
 	state->contexts_to_remove.erase(context);
-	ClearDebugContext(context);
 	const Rml::String name = context->GetName();
-	Rml::RemoveContext(name);
+	RemoveContextImmediatelyByName(name, context);
 }
 
 void RmlGui::Update()
@@ -624,8 +654,8 @@ void RmlGui::Update()
 	if unlikely(!state->contexts_to_remove.empty()) {
 		auto contexts_to_remove = std::move(state->contexts_to_remove);
 		state->contexts_to_remove.clear();
-		for (const auto& context : contexts_to_remove) {
-			RemoveContextImmediately(context);
+		for (const auto& [context, name] : contexts_to_remove) {
+			RemoveContextImmediatelyByName(name, context);
 		}
 	}
 
