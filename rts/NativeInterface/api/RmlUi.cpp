@@ -322,8 +322,6 @@ static Rml::ElementPtr TakeElementPtr(uint64_t handle)
 	return element;
 }
 
-static Rml::ElementDocument* FromDocumentHandle(uint64_t handle) { return FromHandle<Rml::ElementDocument>(handle); }
-
 // Null if the element behind this handle has been destroyed since it was handed
 // out, rather than a pointer into freed memory.
 static Rml::Element* FromElementHandle(uint64_t handle)
@@ -343,6 +341,15 @@ static Rml::Element* FromElementHandle(uint64_t handle)
 	liveElements.erase(it);
 	return nullptr;
 }
+
+// Documents are elements too, so resolve their handles through the same
+// observer-backed lookup. Native modules can outlive the contexts and
+// documents they created during a hot reload.
+static Rml::ElementDocument* FromDocumentHandle(uint64_t handle)
+{
+	return rmlui_dynamic_cast<Rml::ElementDocument*>(FromElementHandle(handle));
+}
+
 static Rml::Event* FromEventHandle(uint64_t handle) { return FromHandle<Rml::Event>(handle); }
 static Rml::EventListener* FromEventListenerHandle(uint64_t handle) { return FromHandle<Rml::EventListener>(handle); }
 
