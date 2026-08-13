@@ -701,6 +701,157 @@ TEST_CASE("Native RmlUi data-model values stay typed and engine-owned")
 	Rml::Shutdown();
 }
 
+TEST_CASE("Native runtime data rows resolve fields and retain their high-water count")
+{
+	NullRenderInterface renderInterface;
+	Rml::SetSystemInterface(&silentSystemInterface);
+	Rml::SetRenderInterface(&renderInterface);
+	REQUIRE(Rml::Initialise());
+
+	Rml::Context* context = Rml::CreateContext("native-runtime-data-rows", {1024, 768});
+	REQUIRE(context != nullptr);
+
+	RmlContextCreateDataModelQuery createQuery = {
+		.contextHandle = ToHandle(context),
+		.name = "runtime",
+	};
+	RmlContextOpenDataModelResult createResult = {};
+	RMLUI_API.ContextCreateDataModel(&createQuery, &createResult);
+	REQUIRE(createResult.error == nullptr);
+	REQUIRE(createResult.success);
+
+	RmlDataFieldDef rowFields[] = {
+		{.name = "label", .type = RML_FIELD_STRING},
+		{.name = "selected", .type = RML_FIELD_BOOL},
+	};
+	RmlDataModelBindRowsQuery bindRows = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "rows",
+		.fields = rowFields,
+		.fieldCount = std::size(rowFields),
+	};
+	RmlDataModelRowsResult rowsResult = {};
+	RMLUI_API.DataModelBindRows(&bindRows, &rowsResult);
+	REQUIRE(rowsResult.error == nullptr);
+	REQUIRE(rowsResult.success);
+
+	RmlDataFieldDef styledFields[] = {
+		{.name = "colour", .type = RML_FIELD_COLOR},
+		{.name = "offset", .type = RML_FIELD_PIXELS},
+		{.name = "progress", .type = RML_FIELD_PERCENT},
+	};
+	RmlDataModelBindRowsQuery bindStyledRows = {
+		.dataModelHandle = createResult.dataModelHandle,
+		.name = "styled",
+		.fields = styledFields,
+		.fieldCount = std::size(styledFields),
+	};
+	RmlDataModelRowsResult styledRowsResult = {};
+	RMLUI_API.DataModelBindRows(&bindStyledRows, &styledRowsResult);
+	REQUIRE(styledRowsResult.error == nullptr);
+	REQUIRE(styledRowsResult.success);
+
+	Rml::ElementDocument* document = context->CreateDocument();
+	REQUIRE(document != nullptr);
+	document->SetInnerRML(R"(
+		<div data-model="runtime">
+			<div id="bound-rows"><div data-for="row : rows" data-if="row.visible" data-class-selected="row.selected">{{ row.label }}</div></div>
+			<div id="bound-styled"><div data-for="row : styled" data-if="row.visible"><span data-style-background-color="row.colour" data-style-left="row.offset" data-style-width="row.progress"></span></div></div>
+		</div>
+	)");
+	document->Show();
+
+	RmlDataValue fiveRows[] = {
+		{.type = RML_FIELD_STRING, .stringValue = "first"},
+		{.type = RML_FIELD_BOOL, .boolValue = true},
+		{.type = RML_FIELD_STRING, .stringValue = "second"},
+		{.type = RML_FIELD_BOOL, .boolValue = false},
+		{.type = RML_FIELD_STRING, .stringValue = "third"},
+		{.type = RML_FIELD_BOOL, .boolValue = false},
+		{.type = RML_FIELD_STRING, .stringValue = "fourth"},
+		{.type = RML_FIELD_BOOL, .boolValue = true},
+		{.type = RML_FIELD_STRING, .stringValue = "fifth"},
+		{.type = RML_FIELD_BOOL, .boolValue = false},
+	};
+	RmlDataModelSetRowsQuery setFiveRows = {
+		.rowsHandle = rowsResult.rowsHandle,
+		.values = fiveRows,
+		.rowCount = 5,
+	};
+	RmlElementBoolResult setFiveRowsResult = {};
+	RMLUI_API.DataModelSetRows(&setFiveRows, &setFiveRowsResult);
+	REQUIRE(setFiveRowsResult.error == nullptr);
+	REQUIRE(setFiveRowsResult.success);
+
+	RmlDataValue styledValues[] = {
+		{.type = RML_FIELD_COLOR, .red = 16, .green = 64, .blue = 192, .alpha = 255},
+		{.type = RML_FIELD_PIXELS, .floatValue = 12.5f},
+		{.type = RML_FIELD_PERCENT, .floatValue = 35.0f},
+	};
+	RmlDataModelSetRowsQuery setStyledRows = {
+		.rowsHandle = styledRowsResult.rowsHandle,
+		.values = styledValues,
+		.rowCount = 1,
+	};
+	RmlElementBoolResult setStyledRowsResult = {};
+	RMLUI_API.DataModelSetRows(&setStyledRows, &setStyledRowsResult);
+	REQUIRE(setStyledRowsResult.error == nullptr);
+	REQUIRE(setStyledRowsResult.success);
+
+	context->Update();
+	Rml::Element* boundRows = document->GetElementById("bound-rows");
+	Rml::Element* boundStyled = document->GetElementById("bound-styled");
+	REQUIRE(boundRows != nullptr);
+	REQUIRE(boundStyled != nullptr);
+	REQUIRE(boundRows->GetNumChildren() == 6);
+	CHECK(boundRows->GetChild(0)->GetInnerRML() == "first");
+	CHECK(boundRows->GetChild(0)->IsClassSet("selected"));
+	CHECK(boundRows->GetChild(1)->GetInnerRML() == "second");
+	CHECK_FALSE(boundRows->GetChild(1)->IsClassSet("selected"));
+	CHECK(boundRows->GetChild(4)->GetInnerRML() == "fifth");
+	REQUIRE(boundStyled->GetNumChildren() == 2);
+	Rml::Element* styledElement = boundStyled->GetChild(0)->GetChild(0);
+	REQUIRE(styledElement != nullptr);
+	CHECK(styledElement->GetProperty<Rml::Colourb>("background-color") == Rml::Colourb(16, 64, 192, 255));
+	REQUIRE(styledElement->GetProperty(Rml::PropertyId::Left) != nullptr);
+	CHECK(styledElement->GetProperty(Rml::PropertyId::Left)->unit == Rml::Unit::PX);
+	CHECK(styledElement->GetProperty(Rml::PropertyId::Left)->Get<float>() == Catch::Approx(12.5f));
+	REQUIRE(styledElement->GetProperty(Rml::PropertyId::Width) != nullptr);
+	CHECK(styledElement->GetProperty(Rml::PropertyId::Width)->unit == Rml::Unit::PERCENT);
+	CHECK(styledElement->GetProperty(Rml::PropertyId::Width)->Get<float>() == Catch::Approx(35.0f));
+
+	RmlDataValue twoRows[] = {
+		{.type = RML_FIELD_STRING, .stringValue = "replacement"},
+		{.type = RML_FIELD_BOOL, .boolValue = false},
+		{.type = RML_FIELD_STRING, .stringValue = "last visible"},
+		{.type = RML_FIELD_BOOL, .boolValue = true},
+	};
+	RmlDataModelSetRowsQuery setTwoRows = {
+		.rowsHandle = rowsResult.rowsHandle,
+		.values = twoRows,
+		.rowCount = 2,
+	};
+	RmlElementBoolResult setTwoRowsResult = {};
+	RMLUI_API.DataModelSetRows(&setTwoRows, &setTwoRowsResult);
+	REQUIRE(setTwoRowsResult.error == nullptr);
+	REQUIRE(setTwoRowsResult.success);
+	context->Update();
+
+	// The engine owns the data-for padding: after five rows, assigning two
+	// leaves five addressable rows, with the final three explicitly invisible.
+	REQUIRE(boundRows->GetNumChildren() == 6);
+	CHECK(boundRows->GetChild(0)->GetInnerRML() == "replacement");
+	CHECK_FALSE(boundRows->GetChild(0)->IsClassSet("selected"));
+	CHECK(boundRows->GetChild(1)->GetInnerRML() == "last visible");
+	CHECK(boundRows->GetChild(1)->IsClassSet("selected"));
+	CHECK_FALSE(boundRows->GetChild(2)->IsVisible());
+	CHECK_FALSE(boundRows->GetChild(3)->IsVisible());
+	CHECK_FALSE(boundRows->GetChild(4)->IsVisible());
+
+	REQUIRE(Rml::RemoveContext(context->GetName()));
+	Rml::Shutdown();
+}
+
 TEST_CASE("Native text rows avoid reparsing equivalent console markup", "[.][benchmark]")
 {
 	constexpr std::array<size_t, 3> rowCounts = {12, 200, 500};

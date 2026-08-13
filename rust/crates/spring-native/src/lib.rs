@@ -264,10 +264,11 @@ pub use profiling::Profiling;
 pub use projectiles::Projectiles;
 pub use rml_ui::{
     RmlChoiceRow, RmlColor, RmlDataChoiceRows, RmlDataGridRows, RmlDataIconRows, RmlDataLogRows,
-    RmlDataModel, RmlDataNotificationRows, RmlDataOptionRows, RmlDataStatusRows, RmlDataSwatchRows,
-    RmlDataTextRows, RmlDataValue, RmlDataVariable, RmlGridRow, RmlIconRow, RmlLogRow,
-    RmlLogSeverity, RmlNotificationRow, RmlOptionRow, RmlPercent, RmlPixels,
+    RmlDataModel, RmlDataNotificationRows, RmlDataOptionRows, RmlDataRows, RmlDataStatusRows,
+    RmlDataSwatchRows, RmlDataTextRows, RmlDataValue, RmlDataVariable, RmlFieldType, RmlGridRow,
+    RmlIconRow, RmlLogRow, RmlLogSeverity, RmlNotificationRow, RmlOptionRow, RmlPercent, RmlPixels,
     RmlPointerCaptureDelta, RmlPointerCaptureStatus, RmlStatusRow, RmlSwatchRow, RmlTextRow, RmlUi,
+    RmlValue,
 };
 pub use rules_params::{RulesParamValue, RulesParams};
 pub use selection::Selection;

@@ -175,6 +175,42 @@ struct RmlDataModelBindIntQuery { uint64_t dataModelHandle; const char* name; in
 struct RmlDataModelBindFloatQuery { uint64_t dataModelHandle; const char* name; float initialValue; };
 struct RmlDataModelBindStringQuery { uint64_t dataModelHandle; const char* name; const char* initialValue; };
 struct RmlDataModelBindResult { const Error* error; uint64_t variableHandle; bool success; };
+// Runtime-defined row fields use the same scalar types as the typed bindings
+// above. The engine copies the complete row-major value buffer, including
+// strings, before the call returns.
+enum RmlDataFieldType : uint8_t {
+	RML_FIELD_BOOL = 0,
+	RML_FIELD_INT = 1,
+	RML_FIELD_FLOAT = 2,
+	RML_FIELD_STRING = 3,
+	RML_FIELD_COLOR = 4,
+	RML_FIELD_PIXELS = 5,
+	RML_FIELD_PERCENT = 6,
+};
+struct RmlDataFieldDef { const char* name; uint8_t type; };
+struct RmlDataValue {
+	uint8_t type;
+	bool boolValue;
+	int32_t intValue;
+	float floatValue; // also carries pixels / percent
+	const char* stringValue;
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
+	uint8_t alpha;
+};
+struct RmlDataModelBindRowsQuery {
+	uint64_t dataModelHandle;
+	const char* name;
+	const RmlDataFieldDef* fields;
+	uint64_t fieldCount;
+};
+struct RmlDataModelRowsResult { const Error* error; uint64_t rowsHandle; bool success; };
+struct RmlDataModelSetRowsQuery {
+	uint64_t rowsHandle;
+	const RmlDataValue* values;
+	uint64_t rowCount;
+};
 // A native-owned collection of text rows. The engine copies every row during
 // SetTextRows, so pointers are valid only for that call and never become part
 // of the data model's lifetime.
@@ -456,6 +492,8 @@ struct RmlUiApi {
 	// table retain the offsets of every pre-existing function pointer.
 	void (*GetDocumentPathRequests)(const RmlGetDocumentPathRequestsQuery* query, RmlGetDocumentPathRequestsResult* result);
 	void (*ClearDocumentPathRequests)(const RmlClearDocumentPathRequestsQuery* query, RmlClearDocumentPathRequestsResult* result);
+	void (*DataModelBindRows)(const RmlDataModelBindRowsQuery* query, RmlDataModelRowsResult* result);
+	void (*DataModelSetRows)(const RmlDataModelSetRowsQuery* query, RmlElementBoolResult* result);
 };
 
 extern const RmlUiApi RMLUI_API;

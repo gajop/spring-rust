@@ -9,9 +9,9 @@
 - Unmatched: 1 (0.1%)
 
 **Rust API:**
-- Total: 1416 functions across 53 modules
-- Matched to Lua: 790 (55.8%)
-- Rust-only: 617 (43.6%)
+- Total: 1420 functions across 53 modules
+- Matched to Lua: 790 (55.6%)
+- Rust-only: 620 (43.7%)
 
 **Parameter comparison (matched functions):**
 - Parameter matches: 790
@@ -1157,6 +1157,7 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.bind_log_rows`
 - `RmlUi.RmlUi.bind_notification_rows`
 - `RmlUi.RmlUi.bind_option_rows`
+- `RmlUi.RmlUi.bind_rows`
 - `RmlUi.RmlUi.bind_status_rows`
 - `RmlUi.RmlUi.bind_swatch_rows`
 - `RmlUi.RmlUi.bind_text_rows`
@@ -1212,6 +1213,7 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.data_model_bind_option_rows`
 - `RmlUi.RmlUi.data_model_bind_percent`
 - `RmlUi.RmlUi.data_model_bind_pixels`
+- `RmlUi.RmlUi.data_model_bind_rows`
 - `RmlUi.RmlUi.data_model_bind_status_rows`
 - `RmlUi.RmlUi.data_model_bind_string`
 - `RmlUi.RmlUi.data_model_bind_swatch_rows`
@@ -1235,6 +1237,7 @@ Functions in Rust API with no Lua equivalent:
 - `RmlUi.RmlUi.data_model_set_option_rows`
 - `RmlUi.RmlUi.data_model_set_percent`
 - `RmlUi.RmlUi.data_model_set_pixels`
+- `RmlUi.RmlUi.data_model_set_rows`
 - `RmlUi.RmlUi.data_model_set_status_rows`
 - `RmlUi.RmlUi.data_model_set_string`
 - `RmlUi.RmlUi.data_model_set_swatch_rows`
@@ -1466,4 +1469,4 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 617**
+**Total Rust-only: 620**

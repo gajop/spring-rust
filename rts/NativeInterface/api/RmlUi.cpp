@@ -16,7 +16,9 @@
 #include <RmlUi/Core/Elements/ElementFormControlTextArea.h>
 #include <RmlUi/Core/Elements/ElementTabSet.h>
 
+#include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <unordered_map>
@@ -253,6 +255,177 @@ struct NativeDataGridRows
 	std::vector<NativeDataGridRow> rows;
 };
 
+struct NativeDataField
+{
+	Rml::String name;
+	RmlDataFieldType type;
+};
+
+struct NativeDataValue
+{
+	RmlDataFieldType type = RML_FIELD_BOOL;
+	bool boolValue = false;
+	int32_t intValue = 0;
+	float floatValue = 0.0f;
+	Rml::String stringValue;
+	uint8_t red = 0;
+	uint8_t green = 0;
+	uint8_t blue = 0;
+	uint8_t alpha = 0;
+};
+
+using NativeDataRow = std::vector<NativeDataValue>;
+
+struct NativeDataRows
+{
+	Rml::String name;
+	std::vector<NativeDataField> fields;
+	std::vector<NativeDataRow> rows;
+	std::unique_ptr<Rml::VariableDefinition> rowDefinition;
+	std::unique_ptr<Rml::VariableDefinition> collectionDefinition;
+};
+
+static NativeDataValue MakeNativeDataValue(RmlDataFieldType type)
+{
+	NativeDataValue value;
+	value.type = type;
+	return value;
+}
+
+static NativeDataRow MakeNativeDataRow(const std::vector<NativeDataField>& fields)
+{
+	NativeDataRow row;
+	row.reserve(fields.size());
+	for (const NativeDataField& field : fields)
+		row.push_back(MakeNativeDataValue(field.type));
+	return row;
+}
+
+class NativeDataValueDefinition final : public Rml::VariableDefinition
+{
+public:
+	explicit NativeDataValueDefinition(RmlDataFieldType type)
+		: VariableDefinition(Rml::DataVariableType::Scalar)
+		, type(type)
+	{}
+
+	bool Get(void* ptr, Rml::Variant& value) override
+	{
+		if (ptr == nullptr)
+			return false;
+
+		const NativeDataValue& nativeValue = *static_cast<const NativeDataValue*>(ptr);
+		switch (type) {
+			case RML_FIELD_BOOL:
+				value = nativeValue.boolValue;
+				return true;
+			case RML_FIELD_INT:
+				value = nativeValue.intValue;
+				return true;
+			case RML_FIELD_FLOAT:
+				value = nativeValue.floatValue;
+				return true;
+			case RML_FIELD_STRING:
+				value = nativeValue.stringValue;
+				return true;
+			case RML_FIELD_COLOR:
+				value = Rml::ToString(Rml::Colourb(nativeValue.red, nativeValue.green, nativeValue.blue, nativeValue.alpha));
+				return true;
+			case RML_FIELD_PIXELS:
+				value = Rml::ToString(nativeValue.floatValue) + "px";
+				return true;
+			case RML_FIELD_PERCENT:
+				value = Rml::ToString(nativeValue.floatValue) + "%";
+				return true;
+		}
+
+		return false;
+	}
+
+private:
+	RmlDataFieldType type;
+};
+
+class NativeDataRowDefinition final : public Rml::VariableDefinition
+{
+public:
+	explicit NativeDataRowDefinition(const std::vector<NativeDataField>& fields)
+		: VariableDefinition(Rml::DataVariableType::Struct)
+	{
+		fieldNames.reserve(fields.size());
+		fieldIndexes.reserve(fields.size());
+		fieldDefinitions.reserve(fields.size());
+		for (size_t index = 0; index < fields.size(); ++index) {
+			fieldNames.push_back(fields[index].name);
+			fieldIndexes.emplace(fields[index].name, index);
+			fieldDefinitions.push_back(std::make_unique<NativeDataValueDefinition>(fields[index].type));
+		}
+	}
+
+	Rml::DataVariable Child(void* ptr, const Rml::DataAddressEntry& address) override
+	{
+		if (ptr == nullptr || address.name.empty())
+			return {};
+
+		const auto fieldIt = fieldIndexes.find(address.name);
+		if (fieldIt == fieldIndexes.end())
+			return {};
+
+		NativeDataRow* row = static_cast<NativeDataRow*>(ptr);
+		const size_t fieldIndex = fieldIt->second;
+		if (fieldIndex >= row->size())
+			return {};
+
+		return Rml::DataVariable(fieldDefinitions[fieldIndex].get(), &(*row)[fieldIndex]);
+	}
+
+	Rml::StringList ReflectMemberNames() override
+	{
+		return fieldNames;
+	}
+
+private:
+	Rml::StringList fieldNames;
+	std::unordered_map<Rml::String, size_t> fieldIndexes;
+	std::vector<std::unique_ptr<NativeDataValueDefinition>> fieldDefinitions;
+};
+
+class NativeDataRowsDefinition final : public Rml::VariableDefinition
+{
+public:
+	explicit NativeDataRowsDefinition(Rml::VariableDefinition* rowDefinition)
+		: VariableDefinition(Rml::DataVariableType::Array)
+		, rowDefinition(rowDefinition)
+	{}
+
+	int Size(void* ptr) override
+	{
+		if (ptr == nullptr)
+			return 0;
+		return static_cast<int>(static_cast<NativeDataRows*>(ptr)->rows.size());
+	}
+
+	Rml::DataVariable Child(void* ptr, const Rml::DataAddressEntry& address) override
+	{
+		if (ptr == nullptr)
+			return {};
+
+		NativeDataRows* rows = static_cast<NativeDataRows*>(ptr);
+		const int index = address.index;
+		const int rowCount = static_cast<int>(rows->rows.size());
+		if (index < 0 || index >= rowCount) {
+			if (address.name == "size")
+				return Rml::MakeLiteralIntVariable(rowCount);
+			return {};
+		}
+
+		return Rml::DataVariable(rowDefinition, &rows->rows[index]);
+	}
+
+private:
+	Rml::VariableDefinition* rowDefinition;
+};
+
 struct NativeDataModel
 {
 	NativeDataModel(Rml::DataModelConstructor constructor, Rml::Context* context)
@@ -274,6 +447,7 @@ struct NativeDataModel
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataStatusRows>> statusRows;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataSwatchRows>> swatchRows;
 	std::unordered_map<uint64_t, std::unique_ptr<NativeDataGridRows>> gridRows;
+	std::unordered_map<uint64_t, std::unique_ptr<NativeDataRows>> rows;
 };
 
 struct NativeDataModelRecord
@@ -294,6 +468,7 @@ static std::unordered_map<uint64_t, uint64_t> nativeDataChoiceRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataStatusRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataSwatchRowsModels;
 static std::unordered_map<uint64_t, uint64_t> nativeDataGridRowsModels;
+static std::unordered_map<uint64_t, uint64_t> nativeDataRowsModels;
 static std::unordered_set<Rml::Context*> nativeTextRowTypes;
 static std::unordered_set<Rml::Context*> nativeLogRowTypes;
 static std::unordered_set<Rml::Context*> nativeNotificationRowTypes;
@@ -390,6 +565,8 @@ static void EraseNativeDataModelHandles(Rml::Context* context)
 					nativeDataSwatchRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->gridRows)
 					nativeDataGridRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->rows)
+					nativeDataRowsModels.erase(rowsHandle);
 			}
 			it = nativeDataModels.erase(it);
 		} else {
@@ -435,6 +612,8 @@ static void EraseNativeDataModelHandles(Rml::Context* context, const Rml::String
 					nativeDataSwatchRowsModels.erase(rowsHandle);
 				for (const auto& [rowsHandle, _] : it->second.native->gridRows)
 					nativeDataGridRowsModels.erase(rowsHandle);
+				for (const auto& [rowsHandle, _] : it->second.native->rows)
+					nativeDataRowsModels.erase(rowsHandle);
 			}
 			it = nativeDataModels.erase(it);
 		} else {
@@ -603,6 +782,22 @@ static NativeDataGridRows* GetNativeDataGridRows(uint64_t rowsHandle, NativeData
 		return nullptr;
 	auto rowsIt = model->gridRows.find(rowsHandle);
 	if (rowsIt == model->gridRows.end())
+		return nullptr;
+	if (outModel != nullptr)
+		*outModel = model;
+	return rowsIt->second.get();
+}
+
+static NativeDataRows* GetNativeDataRows(uint64_t rowsHandle, NativeDataModel** outModel = nullptr)
+{
+	auto ownerIt = nativeDataRowsModels.find(rowsHandle);
+	if (ownerIt == nativeDataRowsModels.end())
+		return nullptr;
+	NativeDataModel* model = GetNativeDataModel(ownerIt->second);
+	if (model == nullptr)
+		return nullptr;
+	auto rowsIt = model->rows.find(rowsHandle);
+	if (rowsIt == model->rows.end())
 		return nullptr;
 	if (outModel != nullptr)
 		*outModel = model;
@@ -1741,6 +1936,144 @@ static void NativeDataModelBindGridRows(const RmlDataModelBindGridRowsQuery* que
 	model->gridRows.emplace(rowsHandle, std::move(rows));
 	nativeDataGridRowsModels.emplace(rowsHandle, query->dataModelHandle);
 	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static bool IsValidNativeDataFieldType(uint8_t type)
+{
+	return type <= static_cast<uint8_t>(RML_FIELD_PERCENT);
+}
+
+static void NativeDataModelBindRows(const RmlDataModelBindRowsQuery* query, RmlDataModelRowsResult* result)
+{
+	result->error = nullptr;
+	result->rowsHandle = 0;
+	result->success = false;
+	NativeDataModel* model = GetNativeDataModel(query->dataModelHandle);
+	if (model == nullptr || query->name == nullptr || query->fields == nullptr || query->fieldCount == 0
+		|| query->fieldCount > static_cast<uint64_t>(std::numeric_limits<size_t>::max() - 1)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	auto rows = std::make_unique<NativeDataRows>();
+	rows->name = query->name;
+	rows->fields.reserve(static_cast<size_t>(query->fieldCount) + 1);
+	std::unordered_set<Rml::String> fieldNames;
+	fieldNames.reserve(static_cast<size_t>(query->fieldCount) + 1);
+	for (size_t index = 0; index < static_cast<size_t>(query->fieldCount); ++index) {
+		const RmlDataFieldDef& field = query->fields[index];
+		if (field.name == nullptr || field.name[0] == '\0' || !IsValidNativeDataFieldType(field.type)
+			|| Rml::String(field.name) == "visible" || !fieldNames.emplace(field.name).second) {
+			result->error = &INVALID_ARGUMENT_ERROR;
+			return;
+		}
+		rows->fields.push_back({
+			.name = field.name,
+			.type = static_cast<RmlDataFieldType>(field.type),
+		});
+	}
+
+	// RmlUi's data-for view needs a stable row count when a later update is
+	// shorter. This implementation detail is engine-owned and never crosses
+	// the row-schema ABI.
+	rows->fields.push_back({.name = "visible", .type = RML_FIELD_BOOL});
+	rows->rowDefinition = std::make_unique<NativeDataRowDefinition>(rows->fields);
+	rows->collectionDefinition = std::make_unique<NativeDataRowsDefinition>(rows->rowDefinition.get());
+	if (!model->constructor.BindCustomDataVariable(
+		rows->name,
+		Rml::DataVariable(rows->collectionDefinition.get(), rows.get()))) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const uint64_t rowsHandle = nextDataModelVariableHandle++;
+	model->rows.emplace(rowsHandle, std::move(rows));
+	nativeDataRowsModels.emplace(rowsHandle, query->dataModelHandle);
+	result->rowsHandle = rowsHandle;
+	result->success = true;
+}
+
+static bool CopyNativeDataValue(const RmlDataValue& source, RmlDataFieldType expectedType, NativeDataValue& target)
+{
+	if (source.type != static_cast<uint8_t>(expectedType))
+		return false;
+
+	target = MakeNativeDataValue(expectedType);
+	switch (expectedType) {
+		case RML_FIELD_BOOL:
+			target.boolValue = source.boolValue;
+			return true;
+		case RML_FIELD_INT:
+			target.intValue = source.intValue;
+			return true;
+		case RML_FIELD_FLOAT:
+			target.floatValue = source.floatValue;
+			return true;
+		case RML_FIELD_STRING:
+			if (source.stringValue == nullptr)
+				return false;
+			target.stringValue = source.stringValue;
+			return true;
+		case RML_FIELD_COLOR:
+			target.red = source.red;
+			target.green = source.green;
+			target.blue = source.blue;
+			target.alpha = source.alpha;
+			return true;
+		case RML_FIELD_PIXELS:
+		case RML_FIELD_PERCENT:
+			target.floatValue = source.floatValue;
+			return true;
+	}
+
+	return false;
+}
+
+static void NativeDataModelSetRows(const RmlDataModelSetRowsQuery* query, RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	NativeDataModel* model = nullptr;
+	NativeDataRows* rows = GetNativeDataRows(query->rowsHandle, &model);
+	if (rows == nullptr || (query->rowCount != 0 && query->values == nullptr)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const size_t fieldCount = rows->fields.size() - 1;
+	if (query->rowCount > static_cast<uint64_t>(std::numeric_limits<size_t>::max())
+		|| query->rowCount > static_cast<uint64_t>(std::numeric_limits<size_t>::max() / fieldCount)) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	const size_t rowCount = static_cast<size_t>(query->rowCount);
+	const size_t highWaterCount = std::max(rows->rows.size(), rowCount);
+	if (highWaterCount > rows->rows.max_size()) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	std::vector<NativeDataRow> copiedRows;
+	copiedRows.reserve(highWaterCount);
+	for (size_t rowIndex = 0; rowIndex < highWaterCount; ++rowIndex) {
+		NativeDataRow row = MakeNativeDataRow(rows->fields);
+		if (rowIndex < rowCount) {
+			for (size_t fieldIndex = 0; fieldIndex < fieldCount; ++fieldIndex) {
+				const RmlDataValue& source = query->values[rowIndex * fieldCount + fieldIndex];
+				if (!CopyNativeDataValue(source, rows->fields[fieldIndex].type, row[fieldIndex])) {
+					result->error = &INVALID_ARGUMENT_ERROR;
+					return;
+				}
+			}
+			row[fieldCount].boolValue = true;
+		}
+		copiedRows.push_back(std::move(row));
+	}
+
+	rows->rows = std::move(copiedRows);
+	model->handle.DirtyVariable(rows->name);
 	result->success = true;
 }
 
@@ -3945,6 +4278,7 @@ void ClearAllContexts(ContextRemover removeContext)
 
 	nativeContextNames.clear();
 	nativeDataModels.clear();
+	nativeDataRowsModels.clear();
 	nativeTextRowTypes.clear();
 	nativeNotificationRowTypes.clear();
 	nativeIconRowTypes.clear();
@@ -4154,4 +4488,6 @@ const RmlUiApi RMLUI_API = {
 	.ContextTakePointerCaptureDelta = NativeContextTakePointerCaptureDelta,
 	.GetDocumentPathRequests = NativeGetDocumentPathRequests,
 	.ClearDocumentPathRequests = NativeClearDocumentPathRequests,
+	.DataModelBindRows = NativeDataModelBindRows,
+	.DataModelSetRows = NativeDataModelSetRows,
 };

@@ -78,9 +78,9 @@ These are not name-matching failures. They have no native counterpart by contrac
 
 ## Rust inventory
 
-- Rust documentation rows: 1416
-- Unique `Module.method` labels: 1407
-- The difference is nine overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
+- Rust documentation rows: 1420
+- Unique `Module.method` labels: 1410
+- The difference is ten overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
 
 | Classification | Unique labels |
 | --- | ---: |
@@ -91,7 +91,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 | VFS counterpart | 40 |
 | gl counterpart or explicit overload | 186 |
 | global math.* counterpart (non-Spring namespace) | 14 |
-| native-only RmlUi helper/property surface | 119 |
+| native-only RmlUi helper/property surface | 123 |
 | native-only VFS helper/representation surface | 11 |
 | native-only graphics userdata/alias surface | 51 |
 | native-only owned/FFI representation surface | 17 |
@@ -1261,7 +1261,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `MathExtra.sgn`
 - `MathExtra.smooth_step`
 
-### native-only RmlUi helper/property surface (119)
+### native-only RmlUi helper/property surface (123)
 - `RmlUi.bind`
 - `RmlUi.bind_choice_rows`
 - `RmlUi.bind_grid_rows`
@@ -1269,6 +1269,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.bind_log_rows`
 - `RmlUi.bind_notification_rows`
 - `RmlUi.bind_option_rows`
+- `RmlUi.bind_rows`
 - `RmlUi.bind_status_rows`
 - `RmlUi.bind_swatch_rows`
 - `RmlUi.bind_text_rows`
@@ -1297,6 +1298,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.data_model_bind_option_rows`
 - `RmlUi.data_model_bind_percent`
 - `RmlUi.data_model_bind_pixels`
+- `RmlUi.data_model_bind_rows`
 - `RmlUi.data_model_bind_status_rows`
 - `RmlUi.data_model_bind_string`
 - `RmlUi.data_model_bind_swatch_rows`
@@ -1320,6 +1322,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.data_model_set_option_rows`
 - `RmlUi.data_model_set_percent`
 - `RmlUi.data_model_set_pixels`
+- `RmlUi.data_model_set_rows`
 - `RmlUi.data_model_set_status_rows`
 - `RmlUi.data_model_set_string`
 - `RmlUi.data_model_set_swatch_rows`
@@ -1368,6 +1371,7 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.register_event_type`
 - `RmlUi.remove_context_by_name`
 - `RmlUi.remove_data_model`
+- `RmlUi.set`
 - `RmlUi.set`
 - `RmlUi.set`
 - `RmlUi.set`

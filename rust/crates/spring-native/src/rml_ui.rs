@@ -3,6 +3,7 @@ use std::{
     ffi::{CStr, CString},
     marker::PhantomData,
     mem::MaybeUninit,
+    os::raw::c_char,
     ptr,
     rc::Rc,
     slice,
@@ -45,6 +46,52 @@ pub enum RmlPointerCaptureStatus {
 pub struct RmlDataModel<'api> {
     ui: RmlUi<'api>,
     handle: u64,
+}
+
+/// Scalar types supported by a runtime-defined RmlUi row schema.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RmlFieldType {
+    Bool,
+    Int,
+    Float,
+    String,
+    Color,
+    Pixels,
+    Percent,
+}
+
+impl RmlFieldType {
+    fn native_type(self) -> u8 {
+        match self {
+            Self::Bool => 0,
+            Self::Int => 1,
+            Self::Float => 2,
+            Self::String => 3,
+            Self::Color => 4,
+            Self::Pixels => 5,
+            Self::Percent => 6,
+        }
+    }
+}
+
+/// A value in a runtime-defined RmlUi row. The engine copies strings and
+/// scalar values during [`RmlDataRows::set`].
+#[derive(Clone, Debug, PartialEq)]
+pub enum RmlValue {
+    Bool(bool),
+    Int(i32),
+    Float(f32),
+    String(String),
+    Color(RmlColor),
+    Pixels(RmlPixels),
+    Percent(RmlPercent),
+}
+
+/// An engine-owned collection whose row schema is declared at runtime.
+pub struct RmlDataRows<'api> {
+    ui: RmlUi<'api>,
+    handle: u64,
+    field_count: usize,
 }
 
 /// A typed, engine-owned field in an [`RmlDataModel`].
@@ -530,6 +577,63 @@ impl<'api> RmlDataModel<'api> {
         })
     }
 
+    /// Adds an engine-owned collection with a schema chosen at runtime.
+    ///
+    /// The schema is fixed for the lifetime of the returned collection. Its
+    /// values are supplied row-major through [`RmlDataRows::set`]. RmlUi adds
+    /// an internal `visible` field to every row for its data-for lifecycle;
+    /// that field is not part of this schema or the values passed by callers.
+    pub fn bind_rows(
+        &self,
+        name: &str,
+        fields: &[(&str, RmlFieldType)],
+    ) -> Result<RmlDataRows<'api>, Error> {
+        if fields.is_empty() {
+            return Err(Error::invalid_argument("fields"));
+        }
+
+        let name = CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
+        let field_names = fields
+            .iter()
+            .map(|(field_name, _)| {
+                CString::new(*field_name).map_err(|_| Error::invalid_argument("field name"))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        let native_fields = fields
+            .iter()
+            .zip(&field_names)
+            .map(|((_, field_type), field_name)| sys::RmlDataFieldDef {
+                name: field_name.as_ptr(),
+                type_: field_type.native_type(),
+            })
+            .collect::<Vec<_>>();
+        let query = sys::RmlDataModelBindRowsQuery {
+            dataModelHandle: self.handle,
+            name: name.as_ptr(),
+            fields: native_fields.as_ptr(),
+            fieldCount: native_fields.len() as u64,
+        };
+
+        unsafe {
+            let mut result = MaybeUninit::<sys::RmlDataModelRowsResult>::zeroed();
+            let func = self
+                .ui
+                .api
+                .DataModelBindRows
+                .expect("DataModelBindRows function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            let (handle, success) =
+                Error::result_or(result.error, (result.rowsHandle, result.success))?;
+            require_success(success, "rows bind")?;
+            Ok(RmlDataRows {
+                ui: self.ui,
+                handle,
+                field_count: fields.len(),
+            })
+        }
+    }
+
     /// Adds a native-owned collection for fixed-shape text rows.
     pub fn bind_text_rows(&self, name: &str) -> Result<RmlDataTextRows<'api>, Error> {
         let (handle, success) = self.ui.data_model_bind_text_rows(self.handle, name)?;
@@ -644,6 +748,103 @@ impl<'api, T: RmlDataValue> RmlDataVariable<'api, T> {
     /// form controls.
     pub fn get(&self) -> Result<T, Error> {
         T::get(&self.ui, self.handle)
+    }
+}
+
+impl RmlValue {
+    fn to_native(&self, string_value: *const c_char) -> sys::RmlDataValue {
+        let mut native = sys::RmlDataValue {
+            type_: 0,
+            boolValue: false,
+            intValue: 0,
+            floatValue: 0.0,
+            stringValue: ptr::null(),
+            red: 0,
+            green: 0,
+            blue: 0,
+            alpha: 0,
+        };
+        match self {
+            Self::Bool(item) => {
+                native.type_ = RmlFieldType::Bool.native_type();
+                native.boolValue = *item;
+            }
+            Self::Int(item) => {
+                native.type_ = RmlFieldType::Int.native_type();
+                native.intValue = *item;
+            }
+            Self::Float(item) => {
+                native.type_ = RmlFieldType::Float.native_type();
+                native.floatValue = *item;
+            }
+            Self::String(_) => {
+                native.type_ = RmlFieldType::String.native_type();
+                native.stringValue = string_value;
+            }
+            Self::Color(item) => {
+                native.type_ = RmlFieldType::Color.native_type();
+                native.red = item.red;
+                native.green = item.green;
+                native.blue = item.blue;
+                native.alpha = item.alpha;
+            }
+            Self::Pixels(item) => {
+                native.type_ = RmlFieldType::Pixels.native_type();
+                native.floatValue = item.0;
+            }
+            Self::Percent(item) => {
+                native.type_ = RmlFieldType::Percent.native_type();
+                native.floatValue = item.0;
+            }
+        }
+        native
+    }
+}
+
+impl<'api> RmlDataRows<'api> {
+    /// Replaces the assigned rows. Values are row-major and their length must
+    /// be a multiple of the schema's field count. The engine copies all
+    /// values, including strings, before this call returns.
+    pub fn set(&self, values: &[RmlValue]) -> Result<(), Error> {
+        if values.len() % self.field_count != 0 {
+            return Err(Error::invalid_argument("values"));
+        }
+
+        let strings = values
+            .iter()
+            .map(|value| match value {
+                RmlValue::String(value) => CString::new(value.as_str())
+                    .map(Some)
+                    .map_err(|_| Error::invalid_argument("string value")),
+                _ => Ok(None),
+            })
+            .collect::<Result<Vec<Option<CString>>, _>>()?;
+        let native_values = values
+            .iter()
+            .zip(&strings)
+            .map(|(value, string)| {
+                value.to_native(string.as_ref().map_or(ptr::null(), |value| value.as_ptr()))
+            })
+            .collect::<Vec<_>>();
+        let query = sys::RmlDataModelSetRowsQuery {
+            rowsHandle: self.handle,
+            values: native_values
+                .first()
+                .map_or(ptr::null(), |value| value as *const _),
+            rowCount: (values.len() / self.field_count) as u64,
+        };
+
+        unsafe {
+            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
+            let func = self
+                .ui
+                .api
+                .DataModelSetRows
+                .expect("DataModelSetRows function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            require_success(Error::result_or(result.error, result.success)?, "rows set")
+        }
     }
 }
 
