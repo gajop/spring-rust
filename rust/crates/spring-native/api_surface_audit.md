@@ -78,9 +78,9 @@ These are not name-matching failures. They have no native counterpart by contrac
 
 ## Rust inventory
 
-- Rust documentation rows: 1422
-- Unique `Module.method` labels: 1412
-- The difference is nine overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.
+- Rust documentation rows: 1390
+- Unique `Module.method` labels: 1388
+- Some Rust methods share a `Module.method` label in this source-derived report; coverage by label must not be mistaken for overload coverage.
 
 | Classification | Unique labels |
 | --- | ---: |
@@ -91,7 +91,7 @@ These are not name-matching failures. They have no native counterpart by contrac
 | VFS counterpart | 40 |
 | gl counterpart or explicit overload | 186 |
 | global math.* counterpart (non-Spring namespace) | 14 |
-| native-only RmlUi helper/property surface | 125 |
+| native-only RmlUi helper/property surface | 93 |
 | native-only VFS helper/representation surface | 11 |
 | native-only graphics userdata/alias surface | 51 |
 | native-only owned/FFI representation surface | 17 |
@@ -1261,19 +1261,10 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `MathExtra.sgn`
 - `MathExtra.smooth_step`
 
-### native-only RmlUi helper/property surface (125)
+### native-only RmlUi helper/property surface (93)
 - `RmlUi.bind`
-- `RmlUi.bind_choice_rows`
 - `RmlUi.bind_event`
-- `RmlUi.bind_grid_rows`
-- `RmlUi.bind_icon_rows`
-- `RmlUi.bind_log_rows`
-- `RmlUi.bind_notification_rows`
-- `RmlUi.bind_option_rows`
 - `RmlUi.bind_rows`
-- `RmlUi.bind_status_rows`
-- `RmlUi.bind_swatch_rows`
-- `RmlUi.bind_text_rows`
 - `RmlUi.context_create_data_model`
 - `RmlUi.context_get_density_independent_pixel_ratio`
 - `RmlUi.context_get_dimensions`
@@ -1288,22 +1279,13 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.context_take_pointer_capture_delta`
 - `RmlUi.create_data_model`
 - `RmlUi.data_model_bind_bool`
-- `RmlUi.data_model_bind_choice_rows`
 - `RmlUi.data_model_bind_color`
 - `RmlUi.data_model_bind_float`
-- `RmlUi.data_model_bind_grid_rows`
-- `RmlUi.data_model_bind_icon_rows`
 - `RmlUi.data_model_bind_int`
-- `RmlUi.data_model_bind_log_rows`
-- `RmlUi.data_model_bind_notification_rows`
-- `RmlUi.data_model_bind_option_rows`
 - `RmlUi.data_model_bind_percent`
 - `RmlUi.data_model_bind_pixels`
 - `RmlUi.data_model_bind_rows`
-- `RmlUi.data_model_bind_status_rows`
 - `RmlUi.data_model_bind_string`
-- `RmlUi.data_model_bind_swatch_rows`
-- `RmlUi.data_model_bind_text_rows`
 - `RmlUi.data_model_get_bool`
 - `RmlUi.data_model_get_color`
 - `RmlUi.data_model_get_float`
@@ -1312,22 +1294,13 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.data_model_get_pixels`
 - `RmlUi.data_model_get_string`
 - `RmlUi.data_model_set_bool`
-- `RmlUi.data_model_set_choice_rows`
 - `RmlUi.data_model_set_color`
 - `RmlUi.data_model_set_float`
-- `RmlUi.data_model_set_grid_rows`
-- `RmlUi.data_model_set_icon_rows`
 - `RmlUi.data_model_set_int`
-- `RmlUi.data_model_set_log_rows`
-- `RmlUi.data_model_set_notification_rows`
-- `RmlUi.data_model_set_option_rows`
 - `RmlUi.data_model_set_percent`
 - `RmlUi.data_model_set_pixels`
 - `RmlUi.data_model_set_rows`
-- `RmlUi.data_model_set_status_rows`
 - `RmlUi.data_model_set_string`
-- `RmlUi.data_model_set_swatch_rows`
-- `RmlUi.data_model_set_text_rows`
 - `RmlUi.document_get_context`
 - `RmlUi.document_get_title`
 - `RmlUi.document_get_url`
@@ -1367,26 +1340,21 @@ A native-only label is not counted as a missing Lua API merely because Rust expo
 - `RmlUi.event_stop_immediate_propagation`
 - `RmlUi.event_stop_propagation`
 - `RmlUi.get`
+- `RmlUi.get`
 - `RmlUi.get_version`
+- `RmlUi.is_empty`
 - `RmlUi.is_ready`
+- `RmlUi.len`
 - `RmlUi.register_event_type`
 - `RmlUi.remove_context_by_name`
 - `RmlUi.remove_data_model`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
-- `RmlUi.set`
 - `RmlUi.set`
 - `RmlUi.set`
 - `RmlUi.set_debug_context_by_name`
 - `RmlUi.sol_lua_data_model_set_dirty`
 - `RmlUi.take_pointer_capture_delta`
 - `RmlUi.unbind`
+- `RmlUi.values`
 
 ### native-only VFS helper/representation surface (11)
 - `Vfs.dir_list_names`

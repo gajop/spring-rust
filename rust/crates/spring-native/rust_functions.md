@@ -2,7 +2,7 @@
 
 Total APIs: 53
 
-Total Functions: 1422
+Total Functions: 1390
 
 ---
 
@@ -705,21 +705,12 @@ Total Functions: 1422
 - `Projectiles.get_projectiles_in_rectangle` (params: min_x:f32, min_z:f32, max_x:f32, max_z:f32, options:GetProjectilesInRectangleOptions) → `Result<Vec<i32>, Error>`
 - `Projectiles.get_projectiles_in_sphere` (params: center:sys::Float3, radius:f32, options:GetProjectilesInSphereOptions) → `Result<Vec<i32>, Error>`
 
-## RmlUi (222 functions)
+## RmlUi (190 functions)
 
 - `RmlUi.add_translation_string` (params: key:&str, translation:&str) → `Result<bool, Error>`
 - `RmlUi.bind` (params: name:&str, initial:T) → `Result<RmlDataVariable<'api, T>, Error>`
-- `RmlUi.bind_choice_rows` (params: name:&str) → `Result<RmlDataChoiceRows<'api>, Error>`
 - `RmlUi.bind_event` (params: name:&str, fields:&[RmlFieldType], callback:F) → `Result<RmlDataEvent<'api>, Error>`
-- `RmlUi.bind_grid_rows` (params: name:&str) → `Result<RmlDataGridRows<'api>, Error>`
-- `RmlUi.bind_icon_rows` (params: name:&str) → `Result<RmlDataIconRows<'api>, Error>`
-- `RmlUi.bind_log_rows` (params: name:&str) → `Result<RmlDataLogRows<'api>, Error>`
-- `RmlUi.bind_notification_rows` (params: name:&str) → `Result<RmlDataNotificationRows<'api>, Error>`
-- `RmlUi.bind_option_rows` (params: name:&str) → `Result<RmlDataOptionRows<'api>, Error>`
 - `RmlUi.bind_rows` (params: name:&str, fields:&[(&str, RmlFieldType)]) → `Result<RmlDataRows<'api>, Error>`
-- `RmlUi.bind_status_rows` (params: name:&str) → `Result<RmlDataStatusRows<'api>, Error>`
-- `RmlUi.bind_swatch_rows` (params: name:&str) → `Result<RmlDataSwatchRows<'api>, Error>`
-- `RmlUi.bind_text_rows` (params: name:&str) → `Result<RmlDataTextRows<'api>, Error>`
 - `RmlUi.clear_document_path_requests` (params: document_path:&str) → `Result<bool, Error>`
 - `RmlUi.clear_translations` (params: ) → `Result<bool, Error>`
 - `RmlUi.context_activate_theme` (params: context_handle:u64, name:&str, value:bool) → `Result<bool, Error>`
@@ -761,22 +752,13 @@ Total Functions: 1422
 - `RmlUi.create_context` (params: name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.create_data_model` (params: context_handle:u64, name:&str) → `Result<RmlDataModel<'a>, Error>`
 - `RmlUi.data_model_bind_bool` (params: data_model_handle:u64, name:&str, initial_value:bool) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_choice_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.data_model_bind_color` (params: data_model_handle:u64, name:&str, red:u8, green:u8, blue:u8, alpha:u8) → `Result<(u64, bool), Error>`
 - `RmlUi.data_model_bind_float` (params: data_model_handle:u64, name:&str, initial_value:f32) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_grid_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_icon_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.data_model_bind_int` (params: data_model_handle:u64, name:&str, initial_value:i32) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_log_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_notification_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_option_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.data_model_bind_percent` (params: data_model_handle:u64, name:&str, initial_value:f32) → `Result<(u64, bool), Error>`
 - `RmlUi.data_model_bind_pixels` (params: data_model_handle:u64, name:&str, initial_value:f32) → `Result<(u64, bool), Error>`
 - `RmlUi.data_model_bind_rows` (params: data_model_handle:u64, name:&str, fields:&sys::RmlDataFieldDef, field_count:u64) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_status_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.data_model_bind_string` (params: data_model_handle:u64, name:&str, initial_value:&str) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_swatch_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
-- `RmlUi.data_model_bind_text_rows` (params: data_model_handle:u64, name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.data_model_get_bool` (params: variable_handle:u64) → `Result<(bool, bool), Error>`
 - `RmlUi.data_model_get_color` (params: variable_handle:u64) → `Result<(u8, u8, u8, u8, bool), Error>`
 - `RmlUi.data_model_get_float` (params: variable_handle:u64) → `Result<(f32, bool), Error>`
@@ -785,22 +767,13 @@ Total Functions: 1422
 - `RmlUi.data_model_get_pixels` (params: variable_handle:u64) → `Result<(f32, bool), Error>`
 - `RmlUi.data_model_get_string` (params: variable_handle:u64) → `Result<(Option<String>, bool), Error>`
 - `RmlUi.data_model_set_bool` (params: variable_handle:u64, value:bool) → `Result<bool, Error>`
-- `RmlUi.data_model_set_choice_rows` (params: rows_handle:u64, rows:&sys::RmlDataChoiceRow, count:u64) → `Result<bool, Error>`
 - `RmlUi.data_model_set_color` (params: variable_handle:u64, red:u8, green:u8, blue:u8, alpha:u8) → `Result<bool, Error>`
 - `RmlUi.data_model_set_float` (params: variable_handle:u64, value:f32) → `Result<bool, Error>`
-- `RmlUi.data_model_set_grid_rows` (params: rows_handle:u64, rows:&sys::RmlDataGridRow, count:u64) → `Result<bool, Error>`
-- `RmlUi.data_model_set_icon_rows` (params: rows_handle:u64, rows:&sys::RmlDataIconRow, count:u64) → `Result<bool, Error>`
 - `RmlUi.data_model_set_int` (params: variable_handle:u64, value:i32) → `Result<bool, Error>`
-- `RmlUi.data_model_set_log_rows` (params: rows_handle:u64, rows:&sys::RmlDataLogRow, count:u64) → `Result<bool, Error>`
-- `RmlUi.data_model_set_notification_rows` (params: rows_handle:u64, rows:&sys::RmlDataNotificationRow, count:u64) → `Result<bool, Error>`
-- `RmlUi.data_model_set_option_rows` (params: rows_handle:u64, rows:&sys::RmlDataOptionRow, count:u64) → `Result<bool, Error>`
 - `RmlUi.data_model_set_percent` (params: variable_handle:u64, value:f32) → `Result<bool, Error>`
 - `RmlUi.data_model_set_pixels` (params: variable_handle:u64, value:f32) → `Result<bool, Error>`
 - `RmlUi.data_model_set_rows` (params: rows_handle:u64, values:&sys::RmlDataValue, row_count:u64) → `Result<bool, Error>`
-- `RmlUi.data_model_set_status_rows` (params: rows_handle:u64, rows:&sys::RmlDataStatusRow, count:u64) → `Result<bool, Error>`
 - `RmlUi.data_model_set_string` (params: variable_handle:u64, value:&str) → `Result<bool, Error>`
-- `RmlUi.data_model_set_swatch_rows` (params: rows_handle:u64, rows:&sys::RmlDataSwatchRow, count:u64) → `Result<bool, Error>`
-- `RmlUi.data_model_set_text_rows` (params: rows_handle:u64, rows:&sys::RmlDataTextRow, count:u64) → `Result<bool, Error>`
 - `RmlUi.document_append_to_style_sheet` (params: document_handle:u64, value:&str) → `Result<bool, Error>`
 - `RmlUi.document_close` (params: document_handle:u64) → `Result<bool, Error>`
 - `RmlUi.document_create_element` (params: document_handle:u64, tag_name:&str) → `Result<(u64, bool), Error>`
@@ -898,11 +871,14 @@ Total Functions: 1422
 - `RmlUi.event_listener_process_event` (params: event_listener_handle:u64, event_handle:u64) → `Result<bool, Error>`
 - `RmlUi.event_stop_immediate_propagation` (params: event_handle:u64) → `Result<bool, Error>`
 - `RmlUi.event_stop_propagation` (params: event_handle:u64) → `Result<bool, Error>`
+- `RmlUi.get` (params: index:usize) → `Option<Option<RmlValue>>`
 - `RmlUi.get` (params: ) → `Result<T, Error>`
 - `RmlUi.get_context` (params: name:&str) → `Result<(u64, bool), Error>`
 - `RmlUi.get_document_path_requests` (params: document_path:&str) → `Result<Vec<String>, Error>`
 - `RmlUi.get_version` (params: ) → `Result<Option<String>, Error>`
+- `RmlUi.is_empty` (params: ) → `bool`
 - `RmlUi.is_ready` (params: ) → `Result<bool, Error>`
+- `RmlUi.len` (params: ) → `usize`
 - `RmlUi.load_font_face` (params: file_path:&str, fallback:bool, weight:Option<i32>) → `Result<bool, Error>`
 - `RmlUi.regiser_event_type` (params: event_type:&str, options:RmlRegisterEventTypeOptions) → `Result<i32, Error>`
 - `RmlUi.register_event_type` (params: event_type:&str, options:RmlRegisterEventTypeOptions) → `Result<i32, Error>`
@@ -910,16 +886,7 @@ Total Functions: 1422
 - `RmlUi.remove_context_by_name` (params: name:&str) → `Result<bool, Error>`
 - `RmlUi.remove_data_model` (params: context_handle:u64, name:&str) → `Result<(), Error>`
 - `RmlUi.set` (params: value:T) → `Result<(), Error>`
-- `RmlUi.set` (params: values:&[RmlValue]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlTextRow]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlLogRow]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlNotificationRow]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlIconRow]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlOptionRow]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlChoiceRow]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlStatusRow]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlSwatchRow]) → `Result<(), Error>`
-- `RmlUi.set` (params: rows:&[RmlGridRow]) → `Result<(), Error>`
+- `RmlUi.set` (params: values:&[RmlValueRef<'_>]) → `Result<(), Error>`
 - `RmlUi.set_debug_context` (params: context_handle:u64) → `Result<bool, Error>`
 - `RmlUi.set_debug_context_by_name` (params: name:&str) → `Result<bool, Error>`
 - `RmlUi.set_mouse_cursor_alias` (params: rml_name:&str, recoil_name:&str) → `Result<bool, Error>`
@@ -927,6 +894,7 @@ Total Functions: 1422
 - `RmlUi.sol_lua_data_model_set_dirty` (params: data_model_handle:u64, property:&str) → `Result<bool, Error>`
 - `RmlUi.take_pointer_capture_delta` (params: context_handle:u64) → `Result<RmlPointerCaptureDelta, Error>`
 - `RmlUi.unbind` (params: ) → `Result<(), Error>`
+- `RmlUi.values` (params: ) → `impl Iterator<Item = Option<RmlValue>> + '_`
 - `RmlUi.vector2f_new` (params: x:f32, y:f32) → `Result<(f32, f32), Error>`
 - `RmlUi.vector2i_new` (params: x:i32, y:i32) → `Result<(i32, i32), Error>`
 

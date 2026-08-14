@@ -583,7 +583,7 @@ def main() -> int:
         "",
         f"- Rust documentation rows: {rust_rows}",
         f"- Unique `Module.method` labels: {len(rust_unique_labels)}",
-        "- The difference is nine overloaded `RmlUi.set` rows that share one label; coverage by label must not be mistaken for overload coverage.",
+        "- Some Rust methods share a `Module.method` label in this source-derived report; coverage by label must not be mistaken for overload coverage.",
         "",
         "| Classification | Unique labels |",
         "| --- | ---: |",

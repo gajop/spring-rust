@@ -131,56 +131,61 @@ Rml::String NotificationMarkup(unsigned revision)
 
 struct NotificationRows {
 	std::vector<std::string> text;
-	std::vector<RmlDataNotificationRow> rows;
+	std::vector<RmlDataValue> values;
 
 	NotificationRows(unsigned revision)
 	{
 		text.reserve(6);
-		rows.reserve(3);
+		values.reserve(15);
 		for (size_t index = 0; index < 3; ++index) {
 			const bool warning = (index + revision) % 3 == 0;
 			const bool hasProgress = (index + revision) % 2 == 0;
 			text.emplace_back("Notification " + std::to_string(index) + " revision " + std::to_string(revision));
 			text.emplace_back("Nested native notification content " + std::to_string(index));
-			rows.push_back({
-				.title = text[text.size() - 2].c_str(),
-				.body = text.back().c_str(),
-				.warning = warning,
-				.hasProgress = hasProgress,
-				.progress = hasProgress ? 25.0f + static_cast<float>(index) * 20.0f + static_cast<float>(revision) : 0.0f,
+			values.push_back({.type = RML_FIELD_STRING, .stringValue = text[text.size() - 2].c_str()});
+			values.push_back({.type = RML_FIELD_STRING, .stringValue = text.back().c_str()});
+			values.push_back({.type = RML_FIELD_BOOL, .boolValue = warning});
+			values.push_back({.type = RML_FIELD_BOOL, .boolValue = hasProgress});
+			values.push_back({
+				.type = RML_FIELD_PERCENT,
+				.floatValue = hasProgress ? 25.0f + static_cast<float>(index) * 20.0f + static_cast<float>(revision) : 0.0f,
 			});
 		}
 	}
+
+	bool warning(size_t index) const { return values[index * 5 + 2].boolValue; }
+	bool has_progress(size_t index) const { return values[index * 5 + 3].boolValue; }
+	float progress(size_t index) const { return values[index * 5 + 4].floatValue; }
 };
 
 void SetNotificationRows(uint64_t rowsHandle, const NotificationRows& rows)
 {
-	RmlDataModelSetNotificationRowsQuery query = {
+	RmlDataModelSetRowsQuery query = {
 		.rowsHandle = rowsHandle,
-		.rows = rows.rows.data(),
-		.count = rows.rows.size(),
+		.values = rows.values.data(),
+		.rowCount = rows.values.size() / 5,
 	};
 	RmlElementBoolResult result = {};
-	RMLUI_API.DataModelSetNotificationRows(&query, &result);
+	RMLUI_API.DataModelSetRows(&query, &result);
 	REQUIRE(result.error == nullptr);
 	REQUIRE(result.success);
 }
 
 void SyncNotificationStyles(Rml::Element* root, const NotificationRows& rows)
 {
-	for (size_t index = 0; index < rows.rows.size(); ++index) {
+	for (size_t index = 0; index < 3; ++index) {
 		Rml::Element* row = root->GetChild(index);
 		REQUIRE(row != nullptr);
 		Rml::Element* title = row->GetChild(0);
 		Rml::Element* progress = row->GetChild(2);
 		REQUIRE(title != nullptr);
 		REQUIRE(progress != nullptr);
-		title->SetClass("warning", rows.rows[index].warning);
-		progress->SetClass("hidden", !rows.rows[index].hasProgress);
-		if (rows.rows[index].hasProgress) {
+		title->SetClass("warning", rows.warning(index));
+		progress->SetClass("hidden", !rows.has_progress(index));
+		if (rows.has_progress(index)) {
 			Rml::Element* fill = progress->GetChild(0);
 			REQUIRE(fill != nullptr);
-			fill->SetAttribute("style", "width: " + std::to_string(static_cast<int>(rows.rows[index].progress)) + "%;");
+			fill->SetAttribute("style", "width: " + std::to_string(static_cast<int>(rows.progress(index))) + "%;");
 		}
 	}
 }
@@ -285,9 +290,21 @@ TEST_CASE("Native notification rows update nested cards with their required styl
 	REQUIRE(innerRoot != nullptr);
 
 	const uint64_t model = CreateModel(context, "native_notifications");
-	RmlDataModelBindNotificationRowsQuery bindQuery = {.dataModelHandle = model, .name = "notifications"};
-	RmlDataModelNotificationRowsResult bindResult = {};
-	RMLUI_API.DataModelBindNotificationRows(&bindQuery, &bindResult);
+	RmlDataFieldDef fields[] = {
+		{.name = "title", .type = RML_FIELD_STRING},
+		{.name = "body", .type = RML_FIELD_STRING},
+		{.name = "warning", .type = RML_FIELD_BOOL},
+		{.name = "has_progress", .type = RML_FIELD_BOOL},
+		{.name = "progress", .type = RML_FIELD_PERCENT},
+	};
+	RmlDataModelBindRowsQuery bindQuery = {
+		.dataModelHandle = model,
+		.name = "notifications",
+		.fields = fields,
+		.fieldCount = std::size(fields),
+	};
+	RmlDataModelRowsResult bindResult = {};
+	RMLUI_API.DataModelBindRows(&bindQuery, &bindResult);
 	REQUIRE(bindResult.error == nullptr);
 	REQUIRE(bindResult.success);
 	Rml::ElementDocument* boundDocument = context->LoadDocumentFromMemory(
@@ -300,7 +317,7 @@ TEST_CASE("Native notification rows update nested cards with their required styl
 	context->Update();
 	Rml::Element* boundRoot = boundDocument->GetElementById("bound-notifications");
 	REQUIRE(boundRoot != nullptr);
-	REQUIRE(boundRoot->GetNumChildren() == firstRows.rows.size() + 1);
+	REQUIRE(boundRoot->GetNumChildren() == 4);
 	SyncNotificationStyles(boundRoot, firstRows);
 
 	bool secondInner = true;

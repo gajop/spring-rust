@@ -1,12 +1,9 @@
 use std::{
-    cell::Cell,
     ffi::{c_void, CStr, CString},
     marker::PhantomData,
     mem::MaybeUninit,
     os::raw::c_char,
-    ptr,
-    rc::Rc,
-    slice,
+    ptr, slice,
 };
 
 use crate::{error::Error, sys};
@@ -74,8 +71,10 @@ impl RmlFieldType {
     }
 }
 
-/// A value in a runtime-defined RmlUi row. The engine copies strings and
-/// scalar values during [`RmlDataRows::set`].
+/// An owned value produced when reading a RmlUi data-model event argument.
+///
+/// Row writes use [`RmlValueRef`] so string inputs can be borrowed instead of
+/// cloned before crossing the native boundary.
 #[derive(Clone, Debug, PartialEq)]
 pub enum RmlValue {
     Bool(bool),
@@ -111,33 +110,121 @@ impl RmlValue {
     }
 }
 
-/// A data-model event callback invocation with its borrowed native payload
-/// copied into Rust-owned values before the user callback runs. `None` keeps
-/// the original positional slot when the native type tag is unknown or a
-/// string payload is null.
-#[derive(Clone, Debug, PartialEq)]
-pub struct RmlDataEventArgs {
-    pub event_handle: u64,
-    pub target_element_handle: u64,
-    pub values: Vec<Option<RmlValue>>,
+/// A borrowed scalar value used when writing runtime-defined rows.
+///
+/// The engine copies every value during [`RmlDataRows::set`], so string slices
+/// only need to live until that call returns. This keeps per-frame row updates
+/// from cloning strings into temporary Rust-owned values first.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum RmlValueRef<'a> {
+    Bool(bool),
+    Int(i32),
+    Float(f32),
+    String(&'a str),
+    Color(RmlColor),
+    Pixels(RmlPixels),
+    Percent(RmlPercent),
 }
 
-impl RmlDataEventArgs {
-    unsafe fn from_native(args: &sys::RmlDataEventArgs) -> Self {
+impl RmlValueRef<'_> {
+    fn to_native(&self, string_value: *const c_char) -> sys::RmlDataValue {
+        let mut native = sys::RmlDataValue {
+            type_: 0,
+            boolValue: false,
+            intValue: 0,
+            floatValue: 0.0,
+            stringValue: ptr::null(),
+            red: 0,
+            green: 0,
+            blue: 0,
+            alpha: 0,
+        };
+        match self {
+            Self::Bool(item) => {
+                native.type_ = RmlFieldType::Bool.native_type();
+                native.boolValue = *item;
+            }
+            Self::Int(item) => {
+                native.type_ = RmlFieldType::Int.native_type();
+                native.intValue = *item;
+            }
+            Self::Float(item) => {
+                native.type_ = RmlFieldType::Float.native_type();
+                native.floatValue = *item;
+            }
+            Self::String(_) => {
+                native.type_ = RmlFieldType::String.native_type();
+                native.stringValue = string_value;
+            }
+            Self::Color(item) => {
+                native.type_ = RmlFieldType::Color.native_type();
+                native.red = item.red;
+                native.green = item.green;
+                native.blue = item.blue;
+                native.alpha = item.alpha;
+            }
+            Self::Pixels(item) => {
+                native.type_ = RmlFieldType::Pixels.native_type();
+                native.floatValue = item.0;
+            }
+            Self::Percent(item) => {
+                native.type_ = RmlFieldType::Percent.native_type();
+                native.floatValue = item.0;
+            }
+        }
+        native
+    }
+}
+
+/// A data-model event callback invocation borrowing the native payload.
+///
+/// The native values are valid only while the callback is running. Calling
+/// [`values`](Self::values) converts individual slots on demand; dispatch does
+/// not allocate a `Vec`, and unknown or null values remain positional `None`
+/// entries in the iterator.
+pub struct RmlDataEventArgs<'a> {
+    pub event_handle: u64,
+    pub target_element_handle: u64,
+    native_values: &'a [sys::RmlDataValue],
+}
+
+impl<'a> RmlDataEventArgs<'a> {
+    unsafe fn from_native(args: &'a sys::RmlDataEventArgs) -> Self {
         let native_values = if args.values.is_null() || args.count == 0 {
             &[]
         } else {
             unsafe { slice::from_raw_parts(args.values, args.count as usize) }
         };
-        let values = native_values
-            .iter()
-            .map(|value| unsafe { RmlValue::from_native(value) })
-            .collect();
         Self {
             event_handle: args.eventHandle,
             target_element_handle: args.targetElementHandle,
-            values,
+            native_values,
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.native_values.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.native_values.is_empty()
+    }
+
+    /// Converts one positional argument, preserving the distinction between
+    /// an out-of-range index and an unsupported/null value via the outer and
+    /// inner `Option` respectively.
+    pub fn get(&self, index: usize) -> Option<Option<RmlValue>> {
+        self.native_values
+            .get(index)
+            .map(|value| unsafe { RmlValue::from_native(value) })
+    }
+
+    /// Iterates over converted positional arguments without allocating a
+    /// collection. A string is copied only if the callback actually reads it.
+    pub fn values(&self) -> impl Iterator<Item = Option<RmlValue>> + '_ {
+        self.native_values
+            .iter()
+            .map(|value| unsafe { RmlValue::from_native(value) })
     }
 }
 
@@ -166,130 +253,6 @@ pub struct RmlDataVariable<'api, T: RmlDataValue> {
     _value: PhantomData<T>,
 }
 
-/// One typed row in an engine-owned RmlUi text collection.
-///
-/// Its `String` is copied into engine storage when assigned; it is never
-/// serialized or retained by the FFI boundary.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RmlTextRow {
-    pub text: String,
-    pub muted: bool,
-    pub visible: bool,
-}
-
-/// An engine-owned collection of [`RmlTextRow`] values.
-///
-/// This is deliberately a distinct type from scalar variables: RmlUi renders
-/// it through `data-for`, and replacements are copied atomically by the engine.
-pub struct RmlDataTextRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-    stable_count: StableRowCount,
-}
-
-/// Semantic severity of a console-log row.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum RmlLogSeverity {
-    Info,
-    Warning,
-    Error,
-}
-
-/// One typed line in an engine-owned console-log collection.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RmlLogRow {
-    pub text: String,
-    pub severity: RmlLogSeverity,
-    pub selected: bool,
-}
-
-/// An engine-owned collection of [`RmlLogRow`] values.
-pub struct RmlDataLogRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-    stable_count: StableRowCount,
-}
-
-/// One typed toast notification row in an engine-owned RmlUi collection.
-///
-/// The optional progress bar is expressed structurally, rather than as a
-/// sentinel numeric value or generated RML.
-#[derive(Clone, Debug, PartialEq)]
-pub struct RmlNotificationRow {
-    pub title: String,
-    pub body: String,
-    pub warning: bool,
-    pub progress: Option<f32>,
-}
-
-/// An engine-owned collection of [`RmlNotificationRow`] values.
-pub struct RmlDataNotificationRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-}
-
-/// One typed row for an icon-bearing control.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RmlIconRow {
-    pub label: String,
-    pub icon: String,
-    pub tooltip: String,
-    pub pressed: bool,
-    pub disabled: bool,
-}
-
-/// An engine-owned collection of [`RmlIconRow`] values.
-pub struct RmlDataIconRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-    stable_count: StableRowCount,
-}
-
-/// One typed option in an engine-owned RmlUi select collection.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RmlOptionRow {
-    pub value: String,
-    pub label: String,
-}
-
-/// An engine-owned collection of [`RmlOptionRow`] values.
-pub struct RmlDataOptionRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-    stable_count: StableRowCount,
-}
-
-/// One typed row in a selectable label/detail list.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RmlChoiceRow {
-    pub label: String,
-    pub detail: String,
-    pub selected: bool,
-    pub highlighted: bool,
-}
-
-/// An engine-owned collection of selectable label/detail rows.
-pub struct RmlDataChoiceRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-    stable_count: StableRowCount,
-}
-
-/// One labelled boolean status, rendered as presentation rather than input.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RmlStatusRow {
-    pub label: String,
-    pub positive: bool,
-}
-
-/// An engine-owned collection of labelled status rows.
-#[derive(Clone)]
-pub struct RmlDataStatusRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-    stable_count: Rc<StableRowCount>,
-}
-
 /// An RGBA colour carried over the RmlUi bridge as four channels, rather than
 /// as a CSS string.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -309,59 +272,6 @@ pub struct RmlPixels(pub f32);
 /// the percent unit when RmlUi reads a style binding.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RmlPercent(pub f32);
-
-/// One labelled row with a native colour swatch and optional actions.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RmlSwatchRow {
-    pub label: String,
-    pub color: RmlColor,
-    pub actions_enabled: bool,
-}
-
-/// An engine-owned collection of [`RmlSwatchRow`] values.
-pub struct RmlDataSwatchRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-    stable_count: StableRowCount,
-}
-
-/// One typed image-grid row. Presentation state stays scalar and structured,
-/// so callers never construct a cell's markup or style attributes.
-#[derive(Clone, Debug, PartialEq)]
-pub struct RmlGridRow {
-    pub label: String,
-    pub image: String,
-    pub cell_size: RmlPixels,
-    pub has_image: bool,
-    pub native_image: bool,
-    pub selected: bool,
-    pub folder: bool,
-    /// A layout-only trailing cell. This absorbs flex slack without asking
-    /// callers to manufacture a second kind of RML node.
-    pub filler: bool,
-}
-
-/// An engine-owned collection of [`RmlGridRow`] values.
-pub struct RmlDataGridRows<'api> {
-    ui: RmlUi<'api>,
-    handle: u64,
-    stable_count: StableRowCount,
-}
-
-/// RmlUi updates dependent row bindings before it removes rows from a
-/// `data-for` view. The bridge therefore retains the largest assigned length
-/// and marks empty-label padding rows invisible in the native layer, keeping
-/// that renderer detail out of UI components and dialogs.
-#[derive(Default)]
-struct StableRowCount(Cell<usize>);
-
-impl StableRowCount {
-    fn update(&self, requested: usize) -> usize {
-        let count = self.0.get().max(requested);
-        self.0.set(count);
-        count
-    }
-}
 
 mod data_value_sealed {
     use super::{RmlColor, RmlPercent, RmlPixels};
@@ -697,8 +607,8 @@ impl<'api> RmlDataModel<'api> {
 
     /// Binds a data-event expression callback with a declared positional
     /// schema. RmlUi owns the callback until the returned binding is unbound
-    /// or this data model is destroyed; callback arguments are copied into
-    /// Rust-owned values for the duration of the invocation.
+    /// or this data model is destroyed. Callback arguments borrow the native
+    /// payload for the duration of the invocation.
     ///
     /// RmlUi reports an arity or type mismatch when the event expression is
     /// dispatched. Its registration API does not expose the RML expression,
@@ -710,13 +620,13 @@ impl<'api> RmlDataModel<'api> {
         callback: F,
     ) -> Result<RmlDataEvent<'api>, Error>
     where
-        F: FnMut(RmlDataEventArgs) + 'static,
+        F: for<'event> FnMut(RmlDataEventArgs<'event>) + 'static,
     {
         unsafe extern "C" fn trampoline<F>(
             user_data: *mut c_void,
             args: *const sys::RmlDataEventArgs,
         ) where
-            F: FnMut(RmlDataEventArgs) + 'static,
+            F: for<'event> FnMut(RmlDataEventArgs<'event>) + 'static,
         {
             if user_data.is_null() || args.is_null() {
                 return;
@@ -728,7 +638,7 @@ impl<'api> RmlDataModel<'api> {
 
         unsafe extern "C" fn destroy_callback<F>(user_data: *mut c_void)
         where
-            F: FnMut(RmlDataEventArgs) + 'static,
+            F: for<'event> FnMut(RmlDataEventArgs<'event>) + 'static,
         {
             if !user_data.is_null() {
                 drop(unsafe { Box::from_raw(user_data as *mut F) });
@@ -769,109 +679,6 @@ impl<'api> RmlDataModel<'api> {
             })
         }
     }
-
-    /// Adds a native-owned collection for fixed-shape text rows.
-    pub fn bind_text_rows(&self, name: &str) -> Result<RmlDataTextRows<'api>, Error> {
-        let (handle, success) = self.ui.data_model_bind_text_rows(self.handle, name)?;
-        require_success(success, "text-row bind")?;
-        Ok(RmlDataTextRows {
-            ui: self.ui,
-            handle,
-            stable_count: StableRowCount::default(),
-        })
-    }
-
-    /// Adds a native-owned collection for semantic console-log rows.
-    pub fn bind_log_rows(&self, name: &str) -> Result<RmlDataLogRows<'api>, Error> {
-        let (handle, success) = self.ui.data_model_bind_log_rows(self.handle, name)?;
-        require_success(success, "log-row bind")?;
-        Ok(RmlDataLogRows {
-            ui: self.ui,
-            handle,
-            stable_count: StableRowCount::default(),
-        })
-    }
-
-    /// Adds a native-owned collection for fixed-shape toast notifications.
-    pub fn bind_notification_rows(
-        &self,
-        name: &str,
-    ) -> Result<RmlDataNotificationRows<'api>, Error> {
-        let (handle, success) = self
-            .ui
-            .data_model_bind_notification_rows(self.handle, name)?;
-        require_success(success, "notification-row bind")?;
-        Ok(RmlDataNotificationRows {
-            ui: self.ui,
-            handle,
-        })
-    }
-
-    /// Adds a native-owned collection for icon-bearing controls.
-    pub fn bind_icon_rows(&self, name: &str) -> Result<RmlDataIconRows<'api>, Error> {
-        let (handle, success) = self.ui.data_model_bind_icon_rows(self.handle, name)?;
-        require_success(success, "icon-row bind")?;
-        Ok(RmlDataIconRows {
-            ui: self.ui,
-            handle,
-            stable_count: StableRowCount::default(),
-        })
-    }
-
-    /// Adds a native-owned collection for select options.
-    pub fn bind_option_rows(&self, name: &str) -> Result<RmlDataOptionRows<'api>, Error> {
-        let (handle, success) = self.ui.data_model_bind_option_rows(self.handle, name)?;
-        require_success(success, "option-row bind")?;
-        Ok(RmlDataOptionRows {
-            ui: self.ui,
-            handle,
-            stable_count: StableRowCount::default(),
-        })
-    }
-
-    /// Adds a native-owned collection for selectable label/detail rows.
-    pub fn bind_choice_rows(&self, name: &str) -> Result<RmlDataChoiceRows<'api>, Error> {
-        let (handle, success) = self.ui.data_model_bind_choice_rows(self.handle, name)?;
-        require_success(success, "choice-row bind")?;
-        Ok(RmlDataChoiceRows {
-            ui: self.ui,
-            handle,
-            stable_count: StableRowCount::default(),
-        })
-    }
-
-    /// Adds a native-owned collection of labelled boolean status rows.
-    pub fn bind_status_rows(&self, name: &str) -> Result<RmlDataStatusRows<'api>, Error> {
-        let (handle, success) = self.ui.data_model_bind_status_rows(self.handle, name)?;
-        require_success(success, "status-row bind")?;
-        Ok(RmlDataStatusRows {
-            ui: self.ui,
-            handle,
-            stable_count: Rc::new(StableRowCount::default()),
-        })
-    }
-
-    /// Adds a native-owned collection for labelled colour-swatch rows.
-    pub fn bind_swatch_rows(&self, name: &str) -> Result<RmlDataSwatchRows<'api>, Error> {
-        let (handle, success) = self.ui.data_model_bind_swatch_rows(self.handle, name)?;
-        require_success(success, "swatch-row bind")?;
-        Ok(RmlDataSwatchRows {
-            ui: self.ui,
-            handle,
-            stable_count: StableRowCount::default(),
-        })
-    }
-
-    /// Adds a native-owned collection for image-grid cells.
-    pub fn bind_grid_rows(&self, name: &str) -> Result<RmlDataGridRows<'api>, Error> {
-        let (handle, success) = self.ui.data_model_bind_grid_rows(self.handle, name)?;
-        require_success(success, "grid-row bind")?;
-        Ok(RmlDataGridRows {
-            ui: self.ui,
-            handle,
-            stable_count: StableRowCount::default(),
-        })
-    }
 }
 
 impl<'api> RmlDataEvent<'api> {
@@ -910,61 +717,11 @@ impl<'api, T: RmlDataValue> RmlDataVariable<'api, T> {
     }
 }
 
-impl RmlValue {
-    fn to_native(&self, string_value: *const c_char) -> sys::RmlDataValue {
-        let mut native = sys::RmlDataValue {
-            type_: 0,
-            boolValue: false,
-            intValue: 0,
-            floatValue: 0.0,
-            stringValue: ptr::null(),
-            red: 0,
-            green: 0,
-            blue: 0,
-            alpha: 0,
-        };
-        match self {
-            Self::Bool(item) => {
-                native.type_ = RmlFieldType::Bool.native_type();
-                native.boolValue = *item;
-            }
-            Self::Int(item) => {
-                native.type_ = RmlFieldType::Int.native_type();
-                native.intValue = *item;
-            }
-            Self::Float(item) => {
-                native.type_ = RmlFieldType::Float.native_type();
-                native.floatValue = *item;
-            }
-            Self::String(_) => {
-                native.type_ = RmlFieldType::String.native_type();
-                native.stringValue = string_value;
-            }
-            Self::Color(item) => {
-                native.type_ = RmlFieldType::Color.native_type();
-                native.red = item.red;
-                native.green = item.green;
-                native.blue = item.blue;
-                native.alpha = item.alpha;
-            }
-            Self::Pixels(item) => {
-                native.type_ = RmlFieldType::Pixels.native_type();
-                native.floatValue = item.0;
-            }
-            Self::Percent(item) => {
-                native.type_ = RmlFieldType::Percent.native_type();
-                native.floatValue = item.0;
-            }
-        }
-        native
-    }
-}
-
 impl<'api> RmlDataRows<'api> {
     /// Replaces the assigned rows. Values are row-major and their length must
     /// be a multiple of the schema's field count. The engine copies all
     /// values, including strings, before this call returns.
-    pub fn set(&self, values: &[RmlValue]) -> Result<(), Error> {
+    pub fn set(&self, values: &[RmlValueRef<'_>]) -> Result<(), Error> {
         if values.len() % self.field_count != 0 {
             return Err(Error::invalid_argument("values"));
         }
@@ -972,7 +729,7 @@ impl<'api> RmlDataRows<'api> {
         let strings = values
             .iter()
             .map(|value| match value {
-                RmlValue::String(value) => CString::new(value.as_str())
+                RmlValueRef::String(value) => CString::new(*value)
                     .map(Some)
                     .map_err(|_| Error::invalid_argument("string value")),
                 _ => Ok(None),
@@ -1003,501 +760,6 @@ impl<'api> RmlDataRows<'api> {
             func(&query, result.as_mut_ptr());
             let result = result.assume_init();
             require_success(Error::result_or(result.error, result.success)?, "rows set")
-        }
-    }
-}
-
-impl<'api> RmlDataTextRows<'api> {
-    /// Replaces the complete collection through a borrowed, C-compatible row
-    /// slice. The engine copies it before this call returns, including an empty
-    /// slice, so no Rust allocation crosses the call boundary.
-    pub fn set(&self, rows: &[RmlTextRow]) -> Result<(), Error> {
-        let count = self.stable_count.update(rows.len());
-        let mut padded_rows = rows.to_vec();
-        padded_rows.resize_with(count, || RmlTextRow {
-            text: String::new(),
-            muted: false,
-            visible: false,
-        });
-        let strings = padded_rows
-            .iter()
-            .map(|row| CString::new(row.text.as_str()).map_err(|_| Error::invalid_argument("text")))
-            .collect::<Result<Vec<_>, _>>()?;
-        let native_rows = padded_rows
-            .iter()
-            .zip(&strings)
-            .map(|(row, text)| sys::RmlDataTextRow {
-                text: text.as_ptr(),
-                muted: row.muted,
-                visible: row.visible,
-            })
-            .collect::<Vec<_>>();
-        let query = sys::RmlDataModelSetTextRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetTextRows
-                .expect("DataModelSetTextRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "text-row set",
-            )
-        }
-    }
-}
-
-impl<'api> RmlDataLogRows<'api> {
-    /// Replaces semantic log rows atomically in engine-owned storage. Shorter
-    /// later updates retain hidden tail rows for RmlUi's `data-for` lifecycle.
-    pub fn set(&self, rows: &[RmlLogRow]) -> Result<(), Error> {
-        let count = self.stable_count.update(rows.len());
-        let mut padded_rows = rows.to_vec();
-        padded_rows.resize_with(count, || RmlLogRow {
-            text: String::new(),
-            severity: RmlLogSeverity::Info,
-            selected: false,
-        });
-        let strings = padded_rows
-            .iter()
-            .map(|row| CString::new(row.text.as_str()).map_err(|_| Error::invalid_argument("text")))
-            .collect::<Result<Vec<_>, _>>()?;
-        let native_rows = padded_rows
-            .iter()
-            .zip(&strings)
-            .map(|(row, text)| sys::RmlDataLogRow {
-                text: text.as_ptr(),
-                severity: match row.severity {
-                    RmlLogSeverity::Info => 0,
-                    RmlLogSeverity::Warning => 1,
-                    RmlLogSeverity::Error => 2,
-                },
-                selected: row.selected,
-            })
-            .collect::<Vec<_>>();
-        let query = sys::RmlDataModelSetLogRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetLogRows
-                .expect("DataModelSetLogRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "log-row set",
-            )
-        }
-    }
-}
-
-impl<'api> RmlDataNotificationRows<'api> {
-    /// Replaces the complete notification collection. The engine copies both
-    /// strings and the scalar fields before this call returns.
-    pub fn set(&self, rows: &[RmlNotificationRow]) -> Result<(), Error> {
-        let strings = rows
-            .iter()
-            .map(|row| {
-                Ok::<_, Error>((
-                    CString::new(row.title.as_str())
-                        .map_err(|_| Error::invalid_argument("title"))?,
-                    CString::new(row.body.as_str()).map_err(|_| Error::invalid_argument("body"))?,
-                ))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let native_rows = rows
-            .iter()
-            .zip(&strings)
-            .map(|(row, (title, body))| sys::RmlDataNotificationRow {
-                title: title.as_ptr(),
-                body: body.as_ptr(),
-                warning: row.warning,
-                hasProgress: row.progress.is_some(),
-                progress: row.progress.unwrap_or_default(),
-            })
-            .collect::<Vec<_>>();
-        let query = sys::RmlDataModelSetNotificationRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetNotificationRows
-                .expect("DataModelSetNotificationRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "notification-row set",
-            )
-        }
-    }
-}
-
-impl<'api> RmlDataIconRows<'api> {
-    /// Replaces the complete collection. The engine copies every string before
-    /// this call returns; no Rust allocation crosses the data model boundary.
-    /// Shorter updates retain invisible native padding rows internally.
-    pub fn set(&self, rows: &[RmlIconRow]) -> Result<(), Error> {
-        let count = self.stable_count.update(rows.len());
-        let strings = rows
-            .iter()
-            .map(|row| {
-                Ok::<_, Error>((
-                    CString::new(row.label.as_str())
-                        .map_err(|_| Error::invalid_argument("label"))?,
-                    CString::new(row.icon.as_str()).map_err(|_| Error::invalid_argument("icon"))?,
-                    CString::new(row.tooltip.as_str())
-                        .map_err(|_| Error::invalid_argument("tooltip"))?,
-                ))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let mut native_rows = rows
-            .iter()
-            .zip(&strings)
-            .map(|(row, (label, icon, tooltip))| sys::RmlDataIconRow {
-                label: label.as_ptr(),
-                icon: icon.as_ptr(),
-                tooltip: tooltip.as_ptr(),
-                pressed: row.pressed,
-                disabled: row.disabled,
-            })
-            .collect::<Vec<_>>();
-        let empty = CStr::from_bytes_with_nul(b"\0").expect("static empty C string");
-        native_rows.resize_with(count, || sys::RmlDataIconRow {
-            label: empty.as_ptr(),
-            icon: empty.as_ptr(),
-            tooltip: empty.as_ptr(),
-            pressed: false,
-            disabled: false,
-        });
-        let query = sys::RmlDataModelSetIconRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetIconRows
-                .expect("DataModelSetIconRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "icon-row set",
-            )
-        }
-    }
-}
-
-impl<'api> RmlDataOptionRows<'api> {
-    /// Replaces the complete option collection. Values and labels are copied by
-    /// the engine before this call returns. Shorter updates retain invisible
-    /// native padding rows internally.
-    pub fn set(&self, rows: &[RmlOptionRow]) -> Result<(), Error> {
-        let count = self.stable_count.update(rows.len());
-        let strings = rows
-            .iter()
-            .map(|row| {
-                Ok::<_, Error>((
-                    CString::new(row.value.as_str())
-                        .map_err(|_| Error::invalid_argument("value"))?,
-                    CString::new(row.label.as_str())
-                        .map_err(|_| Error::invalid_argument("label"))?,
-                ))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let mut native_rows = rows
-            .iter()
-            .zip(&strings)
-            .map(|(_, (value, label))| sys::RmlDataOptionRow {
-                value: value.as_ptr(),
-                label: label.as_ptr(),
-            })
-            .collect::<Vec<_>>();
-        let empty = CStr::from_bytes_with_nul(b"\0").expect("static empty C string");
-        native_rows.resize_with(count, || sys::RmlDataOptionRow {
-            value: empty.as_ptr(),
-            label: empty.as_ptr(),
-        });
-        let query = sys::RmlDataModelSetOptionRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetOptionRows
-                .expect("DataModelSetOptionRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "option-row set",
-            )
-        }
-    }
-}
-
-impl<'api> RmlDataChoiceRows<'api> {
-    /// Replaces the label/detail choices atomically in engine-owned storage.
-    pub fn set(&self, rows: &[RmlChoiceRow]) -> Result<(), Error> {
-        let count = self.stable_count.update(rows.len());
-        let mut padded_rows = rows.to_vec();
-        padded_rows.resize_with(count, || RmlChoiceRow {
-            label: String::new(),
-            detail: String::new(),
-            selected: false,
-            highlighted: false,
-        });
-        let labels = padded_rows
-            .iter()
-            .map(|row| {
-                CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label"))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let details = padded_rows
-            .iter()
-            .map(|row| {
-                CString::new(row.detail.as_str()).map_err(|_| Error::invalid_argument("detail"))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let native_rows = padded_rows
-            .iter()
-            .zip(&labels)
-            .zip(&details)
-            .map(|((row, label), detail)| sys::RmlDataChoiceRow {
-                label: label.as_ptr(),
-                detail: detail.as_ptr(),
-                selected: row.selected,
-                highlighted: row.highlighted,
-            })
-            .collect::<Vec<_>>();
-        let query = sys::RmlDataModelSetChoiceRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetChoiceRows
-                .expect("DataModelSetChoiceRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "choice-row set",
-            )
-        }
-    }
-}
-
-impl<'api> RmlDataStatusRows<'api> {
-    /// Replaces the labelled statuses atomically in engine-owned storage.
-    pub fn set(&self, rows: &[RmlStatusRow]) -> Result<(), Error> {
-        let count = self.stable_count.update(rows.len());
-        let mut padded_rows = rows.to_vec();
-        padded_rows.resize_with(count, || RmlStatusRow {
-            label: String::new(),
-            positive: false,
-        });
-        let labels = padded_rows
-            .iter()
-            .map(|row| {
-                CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label"))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let native_rows = padded_rows
-            .iter()
-            .zip(&labels)
-            .map(|(row, label)| sys::RmlDataStatusRow {
-                label: label.as_ptr(),
-                positive: row.positive,
-            })
-            .collect::<Vec<_>>();
-        let query = sys::RmlDataModelSetStatusRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetStatusRows
-                .expect("DataModelSetStatusRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "status-row set",
-            )
-        }
-    }
-}
-
-impl<'api> RmlDataSwatchRows<'api> {
-    /// Replaces colour-swatch rows atomically. The engine copies the labels
-    /// and RGBA channels before this call returns, and retains invisible tail
-    /// rows when a later update is shorter.
-    pub fn set(&self, rows: &[RmlSwatchRow]) -> Result<(), Error> {
-        let count = self.stable_count.update(rows.len());
-        let mut padded_rows = rows.to_vec();
-        padded_rows.resize_with(count, || RmlSwatchRow {
-            label: String::new(),
-            color: RmlColor {
-                red: 0,
-                green: 0,
-                blue: 0,
-                alpha: 0,
-            },
-            actions_enabled: false,
-        });
-        let labels = padded_rows
-            .iter()
-            .map(|row| {
-                CString::new(row.label.as_str()).map_err(|_| Error::invalid_argument("label"))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let native_rows = padded_rows
-            .iter()
-            .zip(&labels)
-            .map(|(row, label)| sys::RmlDataSwatchRow {
-                label: label.as_ptr(),
-                red: row.color.red,
-                green: row.color.green,
-                blue: row.color.blue,
-                alpha: row.color.alpha,
-                actionsEnabled: row.actions_enabled,
-            })
-            .collect::<Vec<_>>();
-        let query = sys::RmlDataModelSetSwatchRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetSwatchRows
-                .expect("DataModelSetSwatchRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "swatch-row set",
-            )
-        }
-    }
-}
-
-impl<'api> RmlDataGridRows<'api> {
-    /// Replaces image-grid cells atomically. The engine copies labels, image
-    /// paths, and every display flag before this call returns; a shorter later
-    /// collection retains invisible tail rows for RmlUi's `data-for` lifecycle.
-    pub fn set(&self, rows: &[RmlGridRow]) -> Result<(), Error> {
-        let count = self.stable_count.update(rows.len());
-        let mut padded_rows = rows.to_vec();
-        padded_rows.resize_with(count, || RmlGridRow {
-            label: String::new(),
-            image: String::new(),
-            cell_size: RmlPixels(0.0),
-            has_image: false,
-            native_image: false,
-            selected: false,
-            folder: false,
-            filler: false,
-        });
-        let strings = padded_rows
-            .iter()
-            .map(|row| {
-                Ok::<_, Error>((
-                    CString::new(row.label.as_str())
-                        .map_err(|_| Error::invalid_argument("label"))?,
-                    CString::new(row.image.as_str())
-                        .map_err(|_| Error::invalid_argument("image"))?,
-                ))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let native_rows = padded_rows
-            .iter()
-            .zip(&strings)
-            .map(|(row, (label, image))| sys::RmlDataGridRow {
-                label: label.as_ptr(),
-                image: image.as_ptr(),
-                cellSize: row.cell_size.0,
-                hasImage: row.has_image,
-                nativeImage: row.native_image,
-                selected: row.selected,
-                folder: row.folder,
-                filler: row.filler,
-            })
-            .collect::<Vec<_>>();
-        let query = sys::RmlDataModelSetGridRowsQuery {
-            rowsHandle: self.handle,
-            rows: native_rows
-                .first()
-                .map_or(ptr::null(), |row| row as *const _),
-            count: native_rows.len() as u64,
-        };
-        unsafe {
-            let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
-            let func = self
-                .ui
-                .api
-                .DataModelSetGridRows
-                .expect("DataModelSetGridRows function pointer must be initialized");
-            func(&query, result.as_mut_ptr());
-            let result = result.assume_init();
-            require_success(
-                Error::result_or(result.error, result.success)?,
-                "grid-row set",
-            )
         }
     }
 }
@@ -1533,10 +795,14 @@ mod tests {
 
         let args = unsafe { RmlDataEventArgs::from_native(&native_args) };
 
-        assert_eq!(args.values.len(), 3);
-        assert_eq!(args.values[0], Some(RmlValue::Int(7)));
-        assert_eq!(args.values[1], None);
-        assert_eq!(args.values[2], None);
+        assert_eq!(args.len(), 3);
+        assert_eq!(args.get(0), Some(Some(RmlValue::Int(7))));
+        assert_eq!(args.get(1), Some(None));
+        assert_eq!(args.get(2), Some(None));
+        assert_eq!(args.get(3), None);
+
+        let values = args.values().collect::<Vec<_>>();
+        assert_eq!(values, [Some(RmlValue::Int(7)), None, None]);
     }
 }
 
