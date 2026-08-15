@@ -386,6 +386,21 @@ pub fn generate_input(
     )
 }
 
+pub fn generate_debug_input(
+    codegen: &CodeGenerator,
+    header: &Path,
+    include_dirs: &[PathBuf],
+) -> Result<String> {
+    codegen.generate_api(
+        header,
+        include_dirs,
+        ApiConfig {
+            api_struct: "DebugInputApi",
+            wrapper_struct: "DebugInput",
+        },
+    )
+}
+
 pub fn generate_display(
     codegen: &CodeGenerator,
     header: &Path,

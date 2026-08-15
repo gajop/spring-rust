@@ -10,6 +10,7 @@
 #include "NativeInterface/api/Camera.h"
 #include "NativeInterface/api/Callins.h"
 #include "NativeInterface/api/Config.h"
+#include "NativeInterface/api/DebugInput.h"
 #include "NativeInterface/api/Display.h"
 #include "NativeInterface/api/Encoding.h"
 #include "NativeInterface/api/FeatureDefs.h"
@@ -112,6 +113,7 @@ struct NativeInterface {
 	const SystemControlApi* systemControl;
 	const ProfilingApi* profiling;
 	const GfxApi* gfx;
+	const DebugInputApi* debugInput;
 };
 
 #ifdef __cplusplus

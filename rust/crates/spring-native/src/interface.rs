@@ -1,7 +1,7 @@
 use std::ptr::NonNull;
 
 use crate::{
-    camera::Camera, config::Config, display::Display, encoding::Encoding,
+    camera::Camera, config::Config, debug_input::DebugInput, display::Display, encoding::Encoding,
     feature_defs::FeatureDefs, features::Features, game::Game, gfx::Gfx,
     ground_decals::GroundDecals, icons::Icons, input::Input, lights::Lights, los::Los,
     markers::Markers, math_extra::MathExtra, memory::Memory, messages::Messages,
@@ -45,6 +45,7 @@ pub struct NativeInterfaceRef {
     synced_ctrl_api: &'static sys::SyncedCtrlApi,
     camera_api: &'static sys::CameraApi,
     input_api: &'static sys::InputApi,
+    debug_input_api: &'static sys::DebugInputApi,
     display_api: &'static sys::DisplayApi,
     selection_api: &'static sys::SelectionApi,
     vfs_api: &'static sys::VFSApi,
@@ -169,6 +170,10 @@ impl NativeInterfaceRef {
                 .as_ref()
                 .expect("cameraApi must be initialized"),
             input_api: iface.input.as_ref().expect("input API must be initialized"),
+            debug_input_api: iface
+                .debugInput
+                .as_ref()
+                .expect("debugInput API must be initialized"),
             display_api: iface
                 .display
                 .as_ref()
@@ -338,6 +343,10 @@ impl NativeInterfaceRef {
 
     pub fn input(&self) -> Input<'_> {
         Input::new(self.input_api)
+    }
+
+    pub fn debug_input(&self) -> DebugInput<'_> {
+        DebugInput::new(self.debug_input_api)
     }
 
     pub fn display(&self) -> Display<'_> {

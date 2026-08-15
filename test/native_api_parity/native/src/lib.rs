@@ -146,6 +146,10 @@ impl NativeModule for NativeApiParity {
             self.check_gl_object_drawing(&parsed)
         } else if name == "gl.fixed_immediate" {
             self.check_gl_fixed_immediate(&parsed)
+        } else if name == "debug_input.key_readback" {
+            self.check_debug_input_key_readback(&parsed)
+        } else if name == "debug_input.mouse_readback" {
+            self.check_debug_input_mouse_readback(&parsed)
         } else if let Some(test_name) = name.strip_prefix("set_native_") {
             self.find(test_name)
                 .ok_or_else(|| format!("unknown native setter check `{name}`"))
@@ -284,6 +288,7 @@ mod commands_checks;
 mod config_checks;
 mod control_calls_checks;
 mod core;
+mod debug_input_checks;
 mod defs_checks;
 mod display_checks;
 mod effects_path_checks;

@@ -43,6 +43,7 @@ make_global_var(sources_engine_Game
 		"${CMAKE_CURRENT_SOURCE_DIR}/PreGame.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/Camera.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/Config.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/DebugInput.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/Display.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/Encoding.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/api/FeatureDefs.cpp"

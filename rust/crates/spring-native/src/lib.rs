@@ -140,6 +140,7 @@ pub use callbacks::{GameSetupPlayerState, KeyAction, ViewGeometry};
 mod camera;
 mod config;
 pub mod constants;
+mod debug_input;
 pub mod module_entry;
 
 // Include build-time generated version constants

@@ -124,6 +124,7 @@ public:
 		nativeInterface.syncedCtrl = &SYNCED_CTRL_API;
 		nativeInterface.cameraApi = &CAMERA_API;
 		nativeInterface.input = &INPUT_API;
+		nativeInterface.debugInput = &DEBUG_INPUT_API;
 		nativeInterface.display = &DISPLAY_API;
 		nativeInterface.selection = &SELECTION_API;
 		nativeInterface.vfs = &VFS_API;

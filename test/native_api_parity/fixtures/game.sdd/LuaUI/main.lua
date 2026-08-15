@@ -48,6 +48,57 @@ local function runGeneratedTests()
 	end, fixtureIDs)
 end
 
+local function runDebugInputReadbackTests()
+	-- SDL1.2 SDLK_F1; keep this outside the ASCII range so a raw SDL2
+	-- keycode accidentally passed through cannot satisfy the readback.
+	local keyCode = 282
+	local mouseX = 321
+	local mouseY = 123
+
+	if Common.mode() ~= "native" then
+		if not debug or type(debug.emulateKeyPress) ~= "function"
+			or type(debug.emulateKeyRelease) ~= "function"
+			or type(debug.emulateMouseMove) ~= "function"
+			or type(debug.clearEmulatedInput) ~= "function"
+		then
+			error("missing Lua debug input helpers", 0)
+		end
+
+		debug.emulateKeyPress(keyCode)
+		local pressed = Spring.GetKeyState(keyCode)
+		debug.emulateKeyRelease(keyCode)
+		debug.clearEmulatedInput()
+		if not pressed then
+			error("Lua debug key readback did not observe the emulated press", 0)
+		end
+
+		debug.emulateMouseMove(mouseX, mouseY)
+		local readbackX, readbackY = Spring.GetMouseState()
+		debug.clearEmulatedInput()
+		if readbackX ~= mouseX or readbackY ~= mouseY then
+			error("Lua debug mouse readback did not match the emulated position", 0)
+		end
+	end
+
+	local keyPayload = {
+		name = "debug_input.key_readback",
+		status = "pass",
+		keyCode = keyCode,
+	}
+	local mousePayload = {
+		name = "debug_input.mouse_readback",
+		status = "pass",
+		x = mouseX,
+		y = mouseY,
+	}
+	if Common.mode() == "native" then
+		Spring.InvokeNativeModule(Common.encode(keyPayload))
+		Spring.InvokeNativeModule(Common.encode(mousePayload))
+	end
+	record("debug_input.key_readback", keyPayload)
+	record("debug_input.mouse_readback", mousePayload)
+end
+
 local function assertEqual(label, actual, expected)
 	if actual ~= expected then
 		error(label .. ": actual=" .. tostring(actual) .. ", expected=" .. tostring(expected), 0)
@@ -2566,6 +2617,7 @@ function GameFrame(frame)
 		recordInventory()
 		runRmlUiTests()
 		runGeneratedTests()
+		runDebugInputReadbackTests()
 		record("game_frame", { value = Spring.GetGameFrame() })
 		record("visible_units", { count = #(Spring.GetVisibleUnits() or {}) })
 	elseif frame == 20 then

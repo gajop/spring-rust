@@ -112,6 +112,7 @@ fn main() {
         systemControl: empty_api!(sys::SystemControlApi),
         profiling: empty_api!(sys::ProfilingApi),
         gfx: empty_api!(sys::GfxApi),
+        debugInput: empty_api!(sys::DebugInputApi),
     };
 
     let iface = unsafe { NativeInterfaceRef::from_ptr(&native_interface) }.expect("interface ptr");
