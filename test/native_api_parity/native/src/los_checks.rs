@@ -2,6 +2,55 @@ use super::*;
 use crate::support::*;
 
 impl NativeApiParity {
+    pub(crate) fn check_multi_ally_visibility(&mut self, message: &Value) -> Result<(), String> {
+        let observer_ally_team_id = i32_field(message, "observerAllyTeamID")?;
+        for (id_field, state_field) in [
+            ("allyUnitID", "ally"),
+            ("enemyLosUnitID", "enemyLos"),
+            ("enemyRadarUnitID", "enemyRadar"),
+            ("enemyHiddenUnitID", "enemyHidden"),
+        ] {
+            let unit_id = i32_field(message, id_field)?;
+            let expected = message
+                .get(state_field)
+                .ok_or_else(|| format!("missing visibility object `{state_field}`"))?;
+            let native = self
+                .interface
+                .units_info()
+                .get_unit_los_state(unit_id, observer_ally_team_id, false)
+                .map_err(|err| {
+                    format!(
+                        "get_unit_los_state({unit_id}, {observer_ally_team_id}, false) failed: {err:?}"
+                    )
+                })?;
+            self.same_i32_if_present(
+                &format!("multi_ally_visibility.{state_field}"),
+                expected,
+                "rawMask",
+                i32::from(native.rawMask),
+            )?;
+            self.same_bool_if_present(
+                &format!("multi_ally_visibility.{state_field}"),
+                expected,
+                "los",
+                native.los,
+            )?;
+            self.same_bool_if_present(
+                &format!("multi_ally_visibility.{state_field}"),
+                expected,
+                "radar",
+                native.radar,
+            )?;
+            self.same_bool_if_present(
+                &format!("multi_ally_visibility.{state_field}"),
+                expected,
+                "typed",
+                native.typed,
+            )?;
+        }
+        Ok(())
+    }
+
     pub(crate) fn check_los_bool(&mut self, message: &Value, label: &str) -> Result<(), String> {
         let test_name = base_test_name(label);
         let unit_id = i32_field(message, "unitID")?;

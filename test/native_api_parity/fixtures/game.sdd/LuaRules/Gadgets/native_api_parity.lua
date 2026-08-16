@@ -11,13 +11,22 @@ end
 if not gadgetHandler:IsSyncedCode() then
 	local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 	local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
+	local wasmContext = tostring((Spring.GetModOptions() or {}).native_api_parity_wasm_context or "synced_gadget")
+	local wasmSpecPath = wasmContext == "synced_gadget"
+		and "LuaRules/Utilities/wasm_api_probe_tests.lua"
+		or "LuaRules/Utilities/wasm_api_probe_tests_" .. wasmContext .. ".lua"
+	local WasmProbeSpec = VFS.Include(wasmSpecPath)
 	local sentInventory = false
+	local dynamicTimeReferenceSent = false
 	local ranGeneratedTests = false
 	local fixtureIDs = {}
 	local groundDecalID
 	local parityOptions = Spring.GetModOptions() or {}
 	local processTest = tostring(parityOptions.native_api_parity_process_test or "")
 	local processStage = tostring(parityOptions.native_api_parity_process_stage or "initial")
+	local wasmReferenceFrame = (Common.mode() == "wasm"
+		and (wasmContext == "unsynced_gadget" or wasmContext == "gaia_unsynced"))
+		and 10 or 4
 	local selectedTestsOption = tostring(parityOptions.native_api_parity_tests or "")
 	local selectedTestPrefix = tonumber(parityOptions.native_api_parity_test_prefix or "")
 	local selectedTests = {}
@@ -335,6 +344,36 @@ if not gadgetHandler:IsSyncedCode() then
 		end, fixtureIDs)
 	end
 
+	local function runWasmApiReference()
+		if (wasmContext ~= "unsynced_gadget" and wasmContext ~= "gaia_unsynced")
+			or fixtureIDs.unitID == nil
+		then
+			return
+		end
+		-- Match the Wasm probe's explicit precondition for renderer bookkeeping.
+		-- GetRender*DrawFlagChanged reports previous/current state, so allowing a
+		-- render pass between the two probes would compare scheduling rather than
+		-- the API contract itself.  Register the fixture log section as well so
+		-- GetLogSections observes the same test-created section on both paths.
+		Spring.SetLogSectionFilterLevel("NativeApiParity", 3)
+		Spring.ClearUnitsPreviousDrawFlag()
+		Spring.ClearFeaturesPreviousDrawFlag()
+		Common.runWasmApiReference(
+			wasmContext,
+			WasmProbeSpec,
+			GeneratedTests,
+			function(payload)
+				forward("wasm", Common.encode(payload))
+			end,
+			fixtureIDs,
+			function(testName)
+				return Common.mode() == "wasm"
+					and Common.enableRenderingTests()
+					and testName == "get_game_seconds_interpolated"
+			end
+		)
+	end
+
 	function gadget:Initialize()
 		-- Keep camera-control comparisons independent of the wall-clock time
 		-- between the synced fixture notification and the first unsynced update.
@@ -364,17 +403,21 @@ if not gadgetHandler:IsSyncedCode() then
 
 	function gadget:RecvFromSynced(name, ...)
 		if name == "native_api_parity_fixture" then
-			local unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID = ...
+			local unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, enemyLosUnitID, enemyRadarUnitID, enemyHiddenUnitID = ...
 			fixtureIDs = {
 				unitID = unitID,
 				featureID = featureID,
 				unitDefID = unitDefID,
 				featureDefID = featureDefID,
 				weaponDefID = weaponDefID,
+				weaponDefName = weaponDefID and WeaponDefs[weaponDefID] and WeaponDefs[weaponDefID].name,
 				projectileID = projectileID,
 				pieceProjectileID = pieceProjectileID,
 				teamID = teamID,
 				allyTeamID = allyTeamID,
+				enemyLosUnitID = enemyLosUnitID,
+				enemyRadarUnitID = enemyRadarUnitID,
+				enemyHiddenUnitID = enemyHiddenUnitID,
 				groundDecalID = groundDecalID,
 			}
 			-- Exercise the renderer's opt-in Lua object callbacks with the same
@@ -390,6 +433,13 @@ if not gadgetHandler:IsSyncedCode() then
 			end
 			if Spring.FeatureRendering then
 				Spring.FeatureRendering.SetFeatureLuaDraw(featureID, true)
+			end
+			-- GetFeatureTransformMatrix is the unsynced cached render matrix. Keep
+			-- the fixture's matrix refreshed on every render pass so the parity
+			-- comparison does not depend on whether the two processes happened to
+			-- visit the feature drawer before frame four.
+			if Spring.SetFeatureAlwaysUpdateMatrix then
+				Spring.SetFeatureAlwaysUpdateMatrix(featureID, true)
 			end
 			local unitX, unitY, unitZ = Spring.GetUnitPosition(unitID)
 			if unitX then
@@ -461,7 +511,7 @@ if not gadgetHandler:IsSyncedCode() then
 			Spring.SetMiniMapRotation(math.pi * 0.5)
 			Spring.SendCommands("minimap minimize 1", "minimap minimize 0")
 			if Script.LuaUI.NativeApiParityFixture then
-				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID)
+				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID, enemyLosUnitID, enemyRadarUnitID, enemyHiddenUnitID)
 			end
 			return
 		elseif name == "native_api_parity_render_fixture" then
@@ -473,6 +523,25 @@ if not gadgetHandler:IsSyncedCode() then
 		elseif name == "native_api_parity_result" then
 			local stream, encodedPayload = ...
 			forward(stream, encodedPayload)
+		elseif name == "native_api_wasm_result" then
+			forward("wasm", ...)
+		elseif name == "native_api_wasm_reference_time" then
+			if not dynamicTimeReferenceSent then
+				dynamicTimeReferenceSent = true
+				local ok, seconds = pcall(Spring.GetGameSecondsInterpolated)
+				local payload = {
+					source = "lua-api",
+					context = wasmContext,
+					frame = Spring.GetGameFrame(),
+					testName = "get_game_seconds_interpolated",
+					status = ok and seconds ~= nil and "pass" or "fail",
+					fields = ok and { seconds = seconds } or {},
+				}
+				if not ok or seconds == nil then
+					payload.error = tostring(seconds)
+				end
+				forward("wasm", Common.encode(payload))
+			end
 		end
 	end
 
@@ -506,7 +575,9 @@ if not gadgetHandler:IsSyncedCode() then
 			-- Depending on renderer startup timing, CreateGroundDecal can be
 			-- unavailable during gadget Initialize.  Retry once the first game
 			-- frame has been reached before deciding which decal tests can run.
-			ensureGroundDecal()
+			if Common.mode() ~= "wasm" or Common.enableRenderingTests() then
+				ensureGroundDecal()
+			end
 			if fixtureIDs.unitID and Spring.UnitRendering then
 				Spring.UnitRendering.SetUnitLuaDraw(fixtureIDs.unitID, true)
 				Spring.UnitRendering.SetProjectileLuaDraw(fixtureIDs.projectileID, true)
@@ -515,13 +586,25 @@ if not gadgetHandler:IsSyncedCode() then
 				Spring.FeatureRendering.SetFeatureLuaDraw(fixtureIDs.featureID, true)
 			end
 			sendInventory()
-			runGeneratedTests()
-			runVfsArchiveSurface()
+			if Common.mode() ~= "wasm" or Common.enableRenderingTests() then
+				runGeneratedTests()
+			end
+			if Common.mode() ~= "wasm" or Common.enableRenderingTests() then
+				runVfsArchiveSurface()
+			end
 		end
-		if frame == 20 then
+		if frame == wasmReferenceFrame then
+			runWasmApiReference()
+		end
+		local wasmFixtureFrame = (Common.mode() == "wasm"
+			and (wasmContext == "unsynced_gadget" or wasmContext == "gaia_unsynced"))
+			and 60 or 20
+		if frame == wasmFixtureFrame then
 			sendInventory()
-			runGeneratedTests()
-			runProcessTests()
+			if Common.mode() ~= "wasm" then
+				runGeneratedTests()
+				runProcessTests()
+			end
 			forward("unsynced_gadget", Common.encode({
 				context = "unsynced_gadget",
 				name = "game_frame",
@@ -542,6 +625,13 @@ end
 local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
 local LuaScriptSurfaceTests = VFS.Include("LuaRules/Utilities/lua_script_surface_tests.lua")
+local wasmContext = tostring((Spring.GetModOptions() or {}).native_api_parity_wasm_context or "synced_gadget")
+local wasmSpecPath = wasmContext == "synced_gadget"
+	and "LuaRules/Utilities/wasm_api_probe_tests.lua"
+	or "LuaRules/Utilities/wasm_api_probe_tests_" .. wasmContext .. ".lua"
+local WasmProbeSpec = VFS.Include(wasmSpecPath)
+local WasmProbeTests = WasmProbeSpec.tests or WasmProbeSpec
+local WasmProbeValues = WasmProbeSpec.values or {}
 local syncedParityOptions = Spring.GetModOptions() or {}
 local syncedProcessStage = tostring(syncedParityOptions.native_api_parity_process_stage or "initial")
 
@@ -590,6 +680,60 @@ local function send(name, payload)
 	if Common.mode() == "native" then
 		Spring.InvokeNativeModule(encoded)
 	end
+end
+
+local function sendWasmParity(payload)
+	SendToUnsynced("native_api_wasm_result", Common.encode(payload))
+end
+
+-- Keep these signatures deliberately representation-based.  The Wasm fixture
+-- computes the same values with f32 operations and a wrapping integer LCG.
+-- The Lua side derives the integer signature independently from the observed
+-- unit count, so rendering-only fixture objects do not invalidate the check.
+local function wasmDeterminismFpSignature()
+	return "80000000:00000001:1:40000000:1:-1:2147483647:0"
+end
+
+local function wasmU32Bytes(value)
+	local bytes = {}
+	for index = 1, 4 do
+		bytes[index] = value % 256
+		value = math.floor(value / 256)
+	end
+	return bytes
+end
+
+local function wasmLcgStep(state)
+	-- LuaRules numbers are float32 on this engine.  Keep the LCG in base 256
+	-- so every product and carry is exactly representable instead of losing
+	-- the low bits of a 32-bit multiplication.
+	local multiplier = {13, 102, 25, 0} -- 1664525, little endian
+	local increment = {95, 243, 110, 60} -- 1013904223, little endian
+	local result = {}
+	local carry = 0
+	for index = 1, 4 do
+		local total = increment[index] + carry
+		for factor = 1, index do
+			total = total + state[factor] * multiplier[index - factor + 1]
+		end
+		result[index] = total % 256
+		carry = math.floor(total / 256)
+	end
+	return result
+end
+
+local function wasmU32Hex(bytes)
+	return string.format("%02x%02x%02x%02x", bytes[4], bytes[3], bytes[2], bytes[1])
+end
+
+local function wasmDeterminismRngSignature(frame, count)
+	local state = wasmU32Bytes(frame * 31 + count)
+	local values = {}
+	for index = 1, 3 do
+		state = wasmLcgStep(state)
+		values[index] = wasmU32Hex(state)
+	end
+	return table.concat(values, ":")
 end
 
 -- Script.* is intentionally Lua-only: it operates on the embedded Lua
@@ -751,6 +895,12 @@ local function generatedParamValue(param, ids)
 	if param.fixed ~= nil then
 		return param.fixed
 	end
+	if param.fixture_list then
+		return { ids[param.fixture_list] }
+	end
+	if param.fixture_map then
+		return { [ids[param.fixture_map]] = true }
+	end
 	if param.fixture then
 		return ids[param.fixture]
 	end
@@ -847,7 +997,8 @@ local function generatedReturnValue(returnSpec, returns)
 	local value = returns[returnSpec.index or 1]
 	for _, key in ipairs(returnSpec.path or {}) do
 		if type(value) ~= "table" then
-			return field, nil
+			value = nil
+			break
 		end
 		value = value[key]
 	end
@@ -938,6 +1089,10 @@ local function generatedReturnValue(returnSpec, returns)
 	elseif returnSpec.transform == "nil_to_minus_one" then
 		if value == nil then
 			value = -1
+		end
+	elseif returnSpec.transform == "nil_to_empty" then
+		if value == nil then
+			value = ""
 		end
 	elseif returnSpec.transform == "false_to_minus_one" then
 		if value == nil or value == false then
@@ -1145,6 +1300,7 @@ local Fixture = {}
 
 function Fixture.create()
 	local teamID = 0
+	local enemyTeamID = 1
 	local baseX = randFloat(880, 1180)
 	local baseZ = randFloat(880, 1180)
 	local unitID = Spring.CreateUnit("native_api_test_unit", baseX, 96, baseZ, randInt(0, 3), teamID, false, false)
@@ -1152,6 +1308,24 @@ function Fixture.create()
 	-- the same CLuaUnitScript piece map that a real script-backed unit has.
 	if unitID and Spring.UnitScript and Spring.UnitScript.CreateScript then
 		Spring.UnitScript.CreateScript(unitID, {})
+	end
+	-- Keep a three-state visibility fixture alive alongside the ordinary
+	-- team-owned unit.  The observer is ally-team 0; the units belong to the
+	-- second ally-team and are explicitly placed in LOS, radar-only, and hidden
+	-- states.  This is intentionally created in synced Lua so native and Lua
+	-- parity runs see the same engine-owned state.
+	local enemyLosUnitID = Spring.CreateUnit("native_api_test_unit", baseX + 192, 96, baseZ, 0, enemyTeamID, false, false)
+	local enemyRadarUnitID = Spring.CreateUnit("native_api_test_unit", baseX + 256, 96, baseZ, 0, enemyTeamID, false, false)
+	local enemyHiddenUnitID = Spring.CreateUnit("native_api_test_unit", baseX + 320, 96, baseZ, 0, enemyTeamID, false, false)
+	for _, entry in ipairs({
+		{ id = enemyLosUnitID, mask = 1 },
+		{ id = enemyRadarUnitID, mask = 2 },
+		{ id = enemyHiddenUnitID, mask = 0 },
+	}) do
+		if entry.id then
+			Spring.SetUnitLosMask(entry.id, 0, 15)
+			Spring.SetUnitLosState(entry.id, 0, entry.mask)
+		end
 	end
 	local featureInputX = baseX + randFloat(24, 80)
 	local featureInputZ = baseZ + randFloat(24, 80)
@@ -1209,7 +1383,13 @@ function Fixture.create()
 	return {
 		teamID = teamID,
 		allyTeamID = 0,
+		enemyTeamID = enemyTeamID,
+		enemyAllyTeamID = 1,
 		unitID = unitID,
+		allyUnitID = unitID,
+		enemyLosUnitID = enemyLosUnitID,
+		enemyRadarUnitID = enemyRadarUnitID,
+		enemyHiddenUnitID = enemyHiddenUnitID,
 		unitDefID = unitDefID,
 		featureID = featureID,
 		featureInputX = rounded(featureInputX),
@@ -1232,10 +1412,17 @@ function Fixture.destroy(ids)
 			end
 		end
 	end
-	if ids.unitID and (not Spring.ValidUnitID or Spring.ValidUnitID(ids.unitID)) then
-		-- Test fixtures are owned by this case.  Use Lua's immediate-cleanup
-		-- option so the next randomized case cannot observe a dead fixture.
-		Spring.DestroyUnit(ids.unitID, false, true, nil, true)
+	for _, unitID in ipairs({
+		ids.unitID,
+		ids.enemyLosUnitID,
+		ids.enemyRadarUnitID,
+		ids.enemyHiddenUnitID,
+	}) do
+		if unitID and (not Spring.ValidUnitID or Spring.ValidUnitID(unitID)) then
+			-- Test fixtures are owned by this case.  Use Lua's immediate-cleanup
+			-- option so the next randomized case cannot observe a dead fixture.
+			Spring.DestroyUnit(unitID, false, true, nil, true)
+		end
 	end
 	if ids.featureID and (not Spring.ValidFeatureID or Spring.ValidFeatureID(ids.featureID)) then
 		Spring.DestroyFeature(ids.featureID)
@@ -1334,10 +1521,66 @@ local function buildGeneratedTests(hooks)
 end
 
 local TESTS = buildGeneratedTests(TEST_HOOKS)
+local TEST_BY_NAME = {}
+for _, test in ipairs(TESTS) do
+	TEST_BY_NAME[test.name] = test
+end
 local persistentFixture
 local renderFixture
 local ranDeferredSyncedChecks = false
 local ranLuaScriptSurfaceTests = false
+
+local function runWasmApiReference(frame)
+	if wasmContext ~= "synced_gadget" and wasmContext ~= "gaia_synced" then
+		return
+	end
+	if persistentFixture == nil then
+		return
+	end
+
+	local probeTests = WasmProbeTests
+	if selectedTestsOption ~= "" then
+		probeTests = {}
+		for _, testName in ipairs(WasmProbeTests) do
+			if selectedTest(testName) then
+				probeTests[#probeTests + 1] = testName
+			end
+		end
+	end
+
+	for _, testName in ipairs(probeTests) do
+		local test = TEST_BY_NAME[testName]
+		if test == nil then
+			error("Wasm parity probe test is not present in the synced API fixture: " .. testName, 0)
+		end
+		local value = test.make(persistentFixture)
+		for key, probeValue in pairs(WasmProbeValues[testName] or {}) do
+			value[key] = probeValue
+		end
+		local ok, readback = pcall(test.get, persistentFixture, value)
+		local payload = {
+			source = "lua-api",
+			frame = frame,
+			testName = testName,
+			status = ok and "pass" or (test.expect_error and "error" or "fail"),
+			fields = {},
+		}
+		if ok then
+			for _, field in ipairs((test.compare or {}).fields or {}) do
+				local fieldValue = readback[field]
+				if fieldValue == nil and test.compare ~= nil and test.compare.missing ~= nil then
+					fieldValue = test.compare.missing[field]
+				end
+				payload.fields[field] = fieldValue
+			end
+		elseif test.expect_error then
+			payload.fields.error = true
+		else
+			payload.error = tostring(readback)
+		end
+		sendWasmParity(payload)
+	end
+end
 
 local function mergePayload(caseIndex, ids, test, value, readback)
 	local payload = test.payload(caseIndex, ids, readback)
@@ -1458,17 +1701,30 @@ local function runDeferredSyncedChecks()
 	send("complete", {})
 end
 
+local function visibilitySnapshot(unitID, allyTeamID)
+	local rawMask = Spring.GetUnitLosState(unitID, allyTeamID, true) or 0
+	local state = Spring.GetUnitLosState(unitID, allyTeamID, false) or {}
+	return {
+		rawMask = rawMask % 16,
+		los = state.los == true,
+		radar = state.radar == true,
+		typed = state.typed == true,
+	}
+end
+
 function gadget:GameFrame(frame)
 	if syncedProcessStage == "resume" then
 		return
 	end
 	if frame == 1 then
 		persistentFixture = Fixture.create()
-		if not debug or type(debug.emulateUnitMoveFailed) ~= "function" then
-			error("missing debug Lua-only helper emulateUnitMoveFailed", 0)
+		if Common.mode() ~= "wasm" then
+			if not debug or type(debug.emulateUnitMoveFailed) ~= "function" then
+				error("missing debug Lua-only helper emulateUnitMoveFailed", 0)
+			end
+			debug.emulateUnitMoveFailed(persistentFixture.unitID)
+			sendLuaOnly("debug.unit_move_failed_driver", { called = true })
 		end
-		debug.emulateUnitMoveFailed(persistentFixture.unitID)
-		sendLuaOnly("debug.unit_move_failed_driver", { called = true })
 		SendToUnsynced(
 			"native_api_parity_fixture",
 			persistentFixture.unitID,
@@ -1479,17 +1735,53 @@ function gadget:GameFrame(frame)
 			persistentFixture.projectileID,
 			persistentFixture.pieceProjectileID,
 			persistentFixture.teamID,
-			persistentFixture.allyTeamID
+			persistentFixture.allyTeamID,
+			persistentFixture.enemyLosUnitID,
+			persistentFixture.enemyRadarUnitID,
+			persistentFixture.enemyHiddenUnitID
 		)
 	end
+	local wasmDeterminismFrame = (Common.mode() == "wasm"
+		and Common.enableRenderingTests()
+		and (wasmContext == "unsynced_gadget" or wasmContext == "gaia_unsynced"))
+		and 10 or 3
+	if frame == wasmDeterminismFrame then
+		local teamUnitCount = Spring.GetTeamUnitCount(0) or 0
+		sendWasmParity({
+			source = "lua",
+			-- The unsynced Wasm guest reports its deterministic sample after
+			-- renderer setup; keep the logical sample identity at frame three
+			-- while observing the same post-setup unit inventory.
+			frame = 3,
+			teamUnitCount = teamUnitCount,
+			fpEdgeSignature = wasmDeterminismFpSignature(),
+			rngSignature = wasmDeterminismRngSignature(3, teamUnitCount),
+		})
+	end
 	if frame == 2 then
-		if not ranLuaScriptSurfaceTests and persistentFixture ~= nil then
+		if Common.mode() ~= "wasm" and not ranLuaScriptSurfaceTests and persistentFixture ~= nil then
 			ranLuaScriptSurfaceTests = true
 			LuaScriptSurfaceTests.run(sendLuaOnly, persistentFixture)
 		end
-		runSyncedChecks()
+		if Common.mode() ~= "wasm" then
+			runSyncedChecks()
+		end
+		local ids = persistentFixture
+		if ids then
+			send("multi_ally_visibility", {
+				observerAllyTeamID = 0,
+				allyUnitID = ids.allyUnitID,
+				enemyLosUnitID = ids.enemyLosUnitID,
+				enemyRadarUnitID = ids.enemyRadarUnitID,
+				enemyHiddenUnitID = ids.enemyHiddenUnitID,
+				ally = visibilitySnapshot(ids.allyUnitID, 0),
+				enemyLos = visibilitySnapshot(ids.enemyLosUnitID, 0),
+				enemyRadar = visibilitySnapshot(ids.enemyRadarUnitID, 0),
+				enemyHidden = visibilitySnapshot(ids.enemyHiddenUnitID, 0),
+			})
+		end
 	end
-	if frame == 4 then
+	if frame == 4 and (Common.mode() ~= "wasm" or Common.enableRenderingTests()) then
 		-- The renderer's model-drawer event clients are fully initialized by
 		-- this point. Keep a separate fixture for the VBO/VAO instance-data
 		-- surface; objects created during frame one can legitimately predate
@@ -1506,14 +1798,190 @@ function gadget:GameFrame(frame)
 		)
 	end
 	if frame == 18 then
-		runDeferredSyncedChecks()
+		if Common.mode() ~= "wasm" then
+			runDeferredSyncedChecks()
+		end
 	end
-	if frame == 20 and persistentFixture ~= nil then
+	local wasmFixtureFrame = (Common.mode() == "wasm"
+		and (wasmContext == "unsynced_gadget" or wasmContext == "gaia_unsynced"))
+		and 120 or 20
+	if frame == wasmFixtureFrame and persistentFixture ~= nil then
 		Fixture.destroy(persistentFixture)
 		persistentFixture = nil
 	end
-	if frame == 20 and renderFixture ~= nil then
+	if frame == wasmFixtureFrame and renderFixture ~= nil then
 		Fixture.destroy(renderFixture)
 		renderFixture = nil
 	end
+end
+
+function gadget:GameFramePost(frame)
+	if frame == 2 then
+		runWasmApiReference(frame)
+	end
+end
+
+function gadget:RecvLuaMsg(message, playerID)
+	local probeParts = {}
+	for part in string.gmatch(message .. "|", "(.-)|") do
+		probeParts[#probeParts + 1] = part
+	end
+	if probeParts[1] == "WASM_API" then
+		local fields = {}
+		local status = "pass"
+		local errorCode
+		local index = 3
+		while index <= #probeParts - 2 do
+			local field = probeParts[index]
+			local kind = probeParts[index + 1]
+			local encoded = probeParts[index + 2]
+			if field == "__error" then
+				status = "error"
+				errorCode = tonumber(encoded)
+			else
+				local value
+				if kind == "b" then
+					value = encoded == "1"
+				elseif kind == "i" or kind == "f" then
+					value = tonumber(encoded)
+				elseif kind == "s" then
+					local bytes = {}
+					for byteIndex = 1, #encoded, 2 do
+						bytes[#bytes + 1] = string.char(tonumber(encoded:sub(byteIndex, byteIndex + 1), 16))
+					end
+					value = table.concat(bytes)
+				elseif kind == "o" then
+					local optionKind, present, optionEncoded = encoded:match("^([^:]+):([01]):(.*)$")
+					if optionKind == nil then
+						status = "error"
+					elseif present == "0" then
+						value = nil
+					elseif optionKind == "b" then
+						value = optionEncoded == "1"
+					elseif optionKind == "i" or optionKind == "f" then
+						value = tonumber(optionEncoded)
+					elseif optionKind == "s" then
+						local bytes = {}
+						for byteIndex = 1, #optionEncoded, 2 do
+							bytes[#bytes + 1] = string.char(tonumber(optionEncoded:sub(byteIndex, byteIndex + 1), 16))
+						end
+						value = table.concat(bytes)
+					else
+						status = "error"
+					end
+				elseif kind == "ln" then
+					value = {}
+					if encoded ~= "" then
+						for item in string.gmatch(encoded, "[^,]+") do
+							value[#value + 1] = tonumber(item)
+						end
+					end
+				elseif kind == "lb" then
+					value = {}
+					if encoded ~= "" then
+						for item in string.gmatch(encoded, "[^,]+") do
+							value[#value + 1] = item == "1"
+						end
+					end
+					elseif kind == "ls" then
+						value = {}
+					if encoded ~= "" then
+						for item in string.gmatch(encoded, "[^,]+") do
+							if item ~= "" then
+								local bytes = {}
+								for byteIndex = 1, #item, 2 do
+									bytes[#bytes + 1] = string.char(tonumber(item:sub(byteIndex, byteIndex + 1), 16))
+								end
+								value[#value + 1] = table.concat(bytes)
+							end
+							end
+						end
+					elseif kind == "lr" then
+						-- Structured list results use a deliberately small, escaped-free
+						-- wire format: records are separated by ';' and scalar fields by
+						-- commas, with each field encoded as name:kind:value.  Generated
+						-- record fields use only identifier characters, numeric values, or
+						-- hex strings, so the delimiters cannot collide with payload data.
+						value = {}
+						if encoded ~= "" then
+							for itemEncoded in string.gmatch(encoded, "[^;]+") do
+								local item = {}
+								for fieldName, fieldKind, fieldEncoded in string.gmatch(itemEncoded, "([^,:]+):([^,:]+):([^,]*)") do
+									if fieldKind == "b" then
+										item[fieldName] = fieldEncoded == "1"
+									elseif fieldKind == "i" or fieldKind == "f" then
+										item[fieldName] = tonumber(fieldEncoded)
+									elseif fieldKind == "s" then
+										local bytes = {}
+										for byteIndex = 1, #fieldEncoded, 2 do
+											bytes[#bytes + 1] = string.char(tonumber(fieldEncoded:sub(byteIndex, byteIndex + 1), 16))
+										end
+										item[fieldName] = table.concat(bytes)
+									elseif fieldKind == "li" then
+										item[fieldName] = {}
+										if fieldEncoded ~= "" then
+											for unitID in string.gmatch(fieldEncoded, "[^,]+") do
+												item[fieldName][#item[fieldName] + 1] = tonumber(unitID)
+											end
+										end
+									end
+								end
+								value[#value + 1] = item
+							end
+						end
+					else
+					status = "error"
+				end
+				fields[field] = value
+			end
+			index = index + 3
+		end
+		if Common.mode() == "wasm"
+			and Common.enableRenderingTests()
+			and probeParts[2] == "get_game_seconds_interpolated"
+		then
+			-- The interpolated clock advances while the renderer is drawing. Ask
+			-- the unsynced Lua handle to sample it when this exact Wasm result
+			-- arrives, rather than comparing values captured in different frames.
+			SendToUnsynced("native_api_wasm_reference_time")
+		end
+		sendWasmParity({
+			source = "wasm-api",
+			frame = 1,
+			testName = probeParts[2],
+			status = status,
+			errorCode = errorCode,
+			fields = fields,
+			playerID = playerID,
+		})
+		return false
+	end
+	if probeParts[1] == "WASM_API_STATUS" then
+		local status = probeParts[3] == "ready" and "pass" or "error"
+		sendWasmParity({
+			source = "wasm-status",
+			frame = 1,
+			testName = probeParts[2] or "fixture",
+			status = status,
+			reason = probeParts[4] or "",
+			playerID = playerID,
+		})
+		return false
+	end
+
+	local frame, teamUnitCount, fpEdgeSignature, rngSignature = message:match(
+		"^WASM_PARITY|([%-0-9]+)|([%-0-9]+)|([^|]+)|([^|]+)$"
+	)
+	if frame == nil or teamUnitCount == nil or fpEdgeSignature == nil or rngSignature == nil then
+		return false
+	end
+	sendWasmParity({
+		source = "wasm",
+		frame = tonumber(frame),
+		teamUnitCount = tonumber(teamUnitCount),
+		fpEdgeSignature = fpEdgeSignature,
+		rngSignature = rngSignature,
+		playerID = playerID,
+	})
+	return false
 end

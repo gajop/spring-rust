@@ -151,6 +151,8 @@ struct RmlElementDispatchEventQuery { uint64_t elementHandle; const char* event;
 struct RmlEventListenerCallbackQuery { uint64_t elementHandle; const char* event; bool inCapturePhase; NativeCallback callback; void* userData; NativeCallback destroyCallback; };
 struct RmlEventListenerCallbackResult { const Error* error; uint64_t eventListenerHandle; bool success; };
 struct RmlContextEventListenerCallbackQuery { uint64_t contextHandle; const char* event; bool inCapturePhase; NativeCallback callback; void* userData; NativeCallback destroyCallback; };
+struct RmlContextEventListenerRemoveQuery { uint64_t contextHandle; uint64_t eventListenerHandle; const char* event; bool inCapturePhase; };
+struct RmlElementEventListenerRemoveQuery { uint64_t elementHandle; uint64_t eventListenerHandle; const char* event; bool inCapturePhase; };
 struct RmlEventListenerHandleQuery { uint64_t eventListenerHandle; };
 struct RmlEventListenerElementQuery { uint64_t eventListenerHandle; uint64_t elementHandle; };
 struct RmlEventListenerEventQuery { uint64_t eventListenerHandle; uint64_t eventHandle; };
@@ -277,6 +279,7 @@ struct RmlUiApi {
 	void (*ContextLoadDocument)(const RmlContextLoadDocumentQuery* query, RmlContextLoadDocumentResult* result);
 	void (*ContextGetDocument)(const RmlContextGetDocumentQuery* query, RmlContextGetDocumentResult* result);
 	void (*ContextAddEventListener)(const RmlContextEventListenerCallbackQuery* query, RmlEventListenerCallbackResult* result);
+	void (*ContextUpdate)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextRender)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextUnloadAllDocuments)(const RmlContextHandleQuery* query, RmlContextBoolResult* result);
 	void (*ContextUnloadDocument)(const RmlContextDocumentQuery* query, RmlContextBoolResult* result);
@@ -440,6 +443,8 @@ struct RmlUiApi {
 	void (*DataModelSetRows)(const RmlDataModelSetRowsQuery* query, RmlElementBoolResult* result);
 	void (*DataModelBindEvent)(const RmlDataModelBindEventQuery* query, RmlDataModelBindEventResult* result);
 	void (*DataModelUnbindEvent)(const RmlDataModelEventHandleQuery* query, RmlElementBoolResult* result);
+	void (*ContextRemoveEventListener)(const RmlContextEventListenerRemoveQuery* query, RmlElementBoolResult* result);
+	void (*ElementRemoveEventListener)(const RmlElementEventListenerRemoveQuery* query, RmlElementBoolResult* result);
 };
 
 extern const RmlUiApi RMLUI_API;

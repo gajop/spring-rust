@@ -24,7 +24,7 @@ struct RosterEntry {
 	bool isSpec;
 	bool isActive;
 	float pingTime; // seconds, matching Spring.GetPlayerRoster
-	uint32_t cpuUsage;
+	float cpuUsage; // normalized load, matching CPlayer and Spring.GetPlayerRoster
 	const char* country;
 	int32_t rank;
 };

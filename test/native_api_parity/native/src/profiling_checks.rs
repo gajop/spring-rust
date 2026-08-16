@@ -105,8 +105,11 @@ impl NativeApiParity {
                     .profiling()
                     .get_vid_mem_usage()
                     .map_err(|err| format!("get_vid_mem_usage() failed: {err:?}"))?;
-                self.same_if_present(label, message, "usedMB", used)?;
-                self.same_if_present(label, message, "availableMB", available)
+                // GPU allocations belong to each renderer process, so the
+                // cross-process parity contract is numeric shape/finiteness,
+                // not an identical absolute counter value.
+                self.same_numeric_shape_if_present(label, message, "usedMB", used)?;
+                self.same_numeric_shape_if_present(label, message, "availableMB", available)
             }
             "get_synced_gc_info" | "get_synced_gc_info_fixed_available" => {
                 let collect = bool_field(message, "collect")?;

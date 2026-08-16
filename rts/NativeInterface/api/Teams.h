@@ -67,7 +67,7 @@ struct PlayerInfo {
 	int32_t teamID;
 	int32_t allyTeamID;
 	float pingTime; // seconds, matching Spring.GetPlayerInfo
-	uint32_t cpuUsage;
+	float cpuUsage; // normalized load, matching CPlayer and Spring.GetPlayerInfo
 	const char* country;
 	int32_t rank;
 	bool hasSkirmishAIsInTeam;
@@ -77,8 +77,11 @@ struct PlayerInfo {
 
 // AllyTeam info
 struct AllyTeamInfo {
-	const char** keys;
-	const char** values;
+	// The key/value arrays are parallel and share count.  Explicitly describe
+	// both arrays so generators can produce owned string lists without ever
+	// transporting a native pointer.
+	RECOIL_WASM_LIST("string", "count") const char** keys;
+	RECOIL_WASM_LIST("string", "count") const char** values;
 	uint32_t count;
 };
 

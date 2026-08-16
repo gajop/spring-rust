@@ -1,0 +1,197 @@
+# Run the synced Component Model fixture on every supported engine platform.
+# The engine artifacts come from Build Engine v2 for the selected commit; the
+# guest component is rebuilt on each runner so the host/runtime boundary is
+# exercised natively on Linux, arm64 Linux, and Windows.
+name: Wasm cross-platform parity
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Engine commit SHA to test (blank uses the selected ref)"
+        type: string
+        default: ""
+
+permissions:
+  actions: read
+  contents: read
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+      run_id: ${{ steps.engine-run.outputs.run_id }}
+      platforms: ${{ steps.platforms.outputs.json }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Define target platforms
+        id: platforms
+        run: |
+          json=$(jq -c -n '[
+            {"platform":"amd64-linux","runs-on":"ubuntu-latest","bin-suffix":""},
+            {"platform":"arm64-linux","runs-on":"ubuntu-24.04-arm","bin-suffix":""},
+            {"platform":"amd64-windows","runs-on":"windows-latest","bin-suffix":".exe"}
+          ]')
+          echo "json=$json" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve target commit
+        id: resolve
+        env:
+          INPUT_COMMIT: ${{ inputs.commit }}
+          REPO: ${{ github.repository }}
+          DEFAULT_SHA: ${{ github.sha }}
+        run: |
+          target="${INPUT_COMMIT:-$DEFAULT_SHA}"
+          full_sha=$(gh api "repos/$REPO/commits/$target" --jq '.sha')
+          echo "Resolved target commit: $full_sha"
+          echo "sha=$full_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Find Build Engine v2 run for this commit
+        id: engine-run
+        env:
+          REPO: ${{ github.repository }}
+          TARGET_SHA: ${{ steps.resolve.outputs.sha }}
+        run: |
+          run_id=$(gh api \
+            "repos/$REPO/actions/workflows/engine-build.yml/runs?head_sha=$TARGET_SHA&status=success" \
+            --jq '.workflow_runs[0].id')
+          if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
+            echo "::error::No successful Build Engine v2 run found for $TARGET_SHA."
+            echo "::error::Run engine-build.yml for that commit first."
+            exit 1
+          fi
+          echo "Using Build Engine v2 run $run_id"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+
+  parity:
+    needs: setup
+    runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.platforms) }}
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.setup.outputs.sha }}
+          submodules: recursive
+
+      - name: Download engine artifact (${{ matrix.platform }})
+        uses: actions/download-artifact@v4
+        with:
+          pattern: engine-artifacts-${{ matrix.platform }}*
+          run-id: ${{ needs.setup.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: engine-artifact
+          merge-multiple: true
+
+      - name: Extract install tree
+        run: |
+          mkdir -p install
+          sevenzip=$(command -v 7z || command -v 7zz || command -v 7za || true)
+          if [ -z "$sevenzip" ]; then
+            echo "::error::no 7-Zip binary (7z/7zz/7za) found on runner"
+            exit 1
+          fi
+          archive=$(find engine-artifact -type f -name 'recoil_*_${{ matrix.platform }}*.7z' -print -quit)
+          if [ -z "$archive" ]; then
+            echo "::error::engine artifact for ${{ matrix.platform }} was not found"
+            find engine-artifact -maxdepth 2 -type f -print
+            exit 1
+          fi
+          "$sevenzip" x "$archive" -oinstall
+
+      - name: Install Rust and the Wasm target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Run synced Wasm Component parity
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          engine="./install/spring-headless${{ matrix.bin-suffix }}"
+          python test/native_api_parity/run_harness.py \
+            --spring "$engine" \
+            --spring-headless "$engine" \
+            --mode wasm \
+            --cases 3 \
+            --timeout 180 \
+            --output-dir "test/native_api_parity/out-ci-wasm-${{ matrix.platform }}"
+
+      - name: Upload Wasm parity report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-parity-${{ matrix.platform }}-${{ needs.setup.outputs.sha }}
+          path: test/native_api_parity/out-ci-wasm-${{ matrix.platform }}
+          retention-days: 30
+          if-no-files-found: ignore
+
+  cross-platform-check:
+    if: ${{ !cancelled() }}
+    needs: [setup, parity]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TESTED_SHA: ${{ needs.setup.outputs.sha }}
+      PLATFORMS_JSON: ${{ needs.setup.outputs.platforms }}
+    steps:
+      - name: Download Wasm parity reports
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wasm-parity-*-${{ env.TESTED_SHA }}
+          path: artifacts
+
+      - name: Compare synced Wasm observations
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          platforms = [item["platform"] for item in json.loads(os.environ["PLATFORMS_JSON"])]
+          values = {}
+          for platform in platforms:
+              matches = sorted(Path("artifacts").glob(
+                  f"wasm-parity-{platform}-{os.environ['TESTED_SHA']}/**/wasm/wasm.jsonl"
+              ))
+              if not matches:
+                  raise SystemExit(f"missing Wasm parity stream for {platform}")
+              rows = []
+              for line in matches[-1].read_text(encoding="utf-8").splitlines():
+                  if not line.strip():
+                      continue
+                  row = json.loads(line)
+                  rows.append({
+                      "source": row.get("source"),
+                      "frame": row.get("frame"),
+                      "teamUnitCount": row.get("teamUnitCount"),
+                      "fpEdgeSignature": row.get("fpEdgeSignature"),
+                      "rngSignature": row.get("rngSignature"),
+                  })
+              values[platform] = sorted(rows, key=lambda row: json.dumps(row, sort_keys=True))
+              print(platform, json.dumps(values[platform], sort_keys=True))
+
+          expected = next(iter(values.values()))
+          for platform, rows in values.items():
+              if rows != expected:
+                  raise SystemExit(f"cross-platform Wasm observation mismatch on {platform}")
+          print(f"Wasm synced observation matches across {len(values)} platforms")
+          PY
+
+      - name: Assert every platform job succeeded
+        if: ${{ needs.parity.result != 'success' }}
+        run: |
+          echo "::error::Wasm parity matrix result is '${{ needs.parity.result }}'"
+          exit 1

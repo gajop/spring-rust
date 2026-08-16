@@ -1,0 +1,6 @@
+# SHA-256 digests for the Wasmtime C API release artifacts used by the CMake
+# dependency resolver.  Keep these values tied to wasmtime.version.
+wasmtime-v42.0.1-x86_64-linux-c-api.tar.xz 2097a47351918a446b26c7e65f487278f63bc947591b71897db547cd90c05082
+wasmtime-v42.0.1-aarch64-linux-c-api.tar.xz 654bc0763027c10b81d613c42dd356ae453694598f5e33d9203ce5382cbbd576
+wasmtime-v42.0.1-x86_64-windows-c-api.zip 60fd99c6dc84738d66c9de0030ed902fb5ed8596c58932f3d2de024b2e3e73b4
+wasmtime-v42.0.1-aarch64-windows-c-api.zip 607a6809da353ac075f6c03ee8f79d0b220cea0ab0940ee2ee8fd5b673041316

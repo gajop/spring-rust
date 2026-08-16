@@ -121,6 +121,7 @@
 #include "System/SpringExitCode.h"
 #include "System/SpringMath.h"
 #include "System/FileSystem/FileSystem.h"
+#include "System/FileSystem/VFSModes.h"
 #include "System/LoadSave/LoadSaveHandler.h"
 #include "System/LoadSave/DemoRecorder.h"
 #include "System/Log/ILog.h"
@@ -462,6 +463,20 @@ void CGame::Load(const std::string& mapFileName)
 	if (!forcedQuit) {
 		nativeInterfaceSystem = std::make_unique<NativeInterfaceSystem>();
 		NativeInterfaceSystem::s_instance->Reload();
+
+		// Rules modules come from the game VFS and Gaia modules from the map VFS,
+		// matching the corresponding Lua loader namespaces. Both manifests are
+		// optional; if present, their declarations and module bytes are validated
+		// before GamePreload so synced identity is fixed before simulation starts.
+		std::string wasmError;
+		if (!nativeInterfaceSystem->LoadWasmManifest(
+				"LuaRules/wasm/manifest.txt", SPRING_VFS_MOD, wasmError) ||
+			!nativeInterfaceSystem->LoadWasmManifest(
+				"LuaGaia/wasm/manifest.txt", SPRING_VFS_MAP, wasmError)) {
+			contentErrors.emplace_back(wasmError);
+			nativeInterfaceSystem->UnloadAllWasmModules();
+			forcedQuit = true;
+		}
 	}
 
 	try {

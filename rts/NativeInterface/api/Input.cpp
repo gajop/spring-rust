@@ -202,7 +202,11 @@ static void NativeGetKeyState(const GetKeyStateQuery* query, GetKeyStateResult* 
 	bufferPos = 0;
 
 	result->error = nullptr;
-	result->pressed = KeyInput::IsKeyPressed(query->keyCode);
+	// Native input exposes the same SDL 1.2-compatible key-symbol namespace as
+	// Spring.GetKeyState and DebugInput.EmulateKey.  KeyInput stores SDL 2
+	// keycodes internally, so normalize at this boundary instead of making
+	// callers know about the implementation's private representation.
+	result->pressed = KeyInput::IsKeyPressed(SDL12_keysyms(query->keyCode));
 }
 
 static void NativeGetPressedKeys(const GetPressedKeysQuery* query, GetPressedKeysResult* result)

@@ -396,6 +396,7 @@ static void NativeGetAllyTeamStartBox(const GetAllyTeamStartBoxQuery* query, Get
 
 static void NativeGetTeamStartPosition(const GetTeamStartPositionQuery* query, GetTeamStartPositionResult* result) {
 	bufferPos = 0;
+	result->valid = false;
 	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
 	if (!teamHandler.IsValidTeam(query->teamID)) { result->error = &INVALID_TEAM; return; }
 
@@ -407,6 +408,7 @@ static void NativeGetTeamStartPosition(const GetTeamStartPositionQuery* query, G
 	result->position.x = pos.x;
 	result->position.y = pos.y;
 	result->position.z = pos.z;
+	result->valid = team->HasValidStartPos();
 }
 
 static void NativeGetMapStartPositions(const GetMapStartPositionsQuery* query, GetMapStartPositionsResult* result) {

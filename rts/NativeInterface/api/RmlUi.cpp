@@ -97,6 +97,7 @@ static uint64_t nextDataModelHandle = 1;
 static uint64_t nextDataModelVariableHandle = 1;
 static std::unordered_map<uint64_t, Rml::ElementPtr> ownedElementPtrs;
 static std::unordered_set<Rml::String> nativeContextNames;
+static std::unordered_set<uint64_t> liveEventListeners;
 
 enum class NativeDataValueType { Bool, Int, Float, String, Color, Pixels, Percent };
 
@@ -415,7 +416,12 @@ static Rml::ElementDocument* FromDocumentHandle(uint64_t handle)
 }
 
 static Rml::Event* FromEventHandle(uint64_t handle) { return FromHandle<Rml::Event>(handle); }
-static Rml::EventListener* FromEventListenerHandle(uint64_t handle) { return FromHandle<Rml::EventListener>(handle); }
+static Rml::EventListener* FromEventListenerHandle(uint64_t handle)
+{
+	if (handle == 0 || !liveEventListeners.contains(handle))
+		return nullptr;
+	return FromHandle<Rml::EventListener>(handle);
+}
 
 static void EraseNativeDataModelHandles(Rml::Context* context)
 {
@@ -543,6 +549,7 @@ public:
 
 	void OnDetach(Rml::Element*) override
 	{
+		liveEventListeners.erase(ToHandle(this));
 		if (destroyCallback != nullptr) {
 			destroyCallback(userData);
 		}
@@ -915,9 +922,37 @@ static void NativeContextAddEventListener(const RmlContextEventListenerCallbackQ
 	}
 
 	auto* listener = new NativeRmlEventListener(query->callback, query->userData, query->destroyCallback, context->GetRootElement());
+	liveEventListeners.insert(ToHandle(listener));
 	context->AddEventListener(query->event, listener, query->inCapturePhase);
 	result->eventListenerHandle = ToHandle(listener);
 	result->success = true;
+}
+
+static void NativeContextRemoveEventListener(const RmlContextEventListenerRemoveQuery* query,
+	RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	Rml::Context* context = FromHandle(query->contextHandle);
+	Rml::EventListener* listener = FromEventListenerHandle(query->eventListenerHandle);
+	if (context == nullptr || listener == nullptr || query->event == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	context->RemoveEventListener(query->event, listener, query->inCapturePhase);
+	result->success = true;
+}
+
+static void NativeContextUpdate(const RmlContextHandleQuery* query, RmlContextBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	Rml::Context* context = FromHandle(query->contextHandle);
+	if (context == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->success = context->Update();
 }
 
 static void NativeContextRender(const RmlContextHandleQuery* query, RmlContextBoolResult* result)
@@ -2406,8 +2441,24 @@ static void NativeElementAddEventListener(const RmlEventListenerCallbackQuery* q
 	}
 
 	auto* listener = new NativeRmlEventListener(query->callback, query->userData, query->destroyCallback, element);
+	liveEventListeners.insert(ToHandle(listener));
 	element->AddEventListener(query->event, listener, query->inCapturePhase);
 	result->eventListenerHandle = ToHandle(listener);
+	result->success = true;
+}
+
+static void NativeElementRemoveEventListener(const RmlElementEventListenerRemoveQuery* query,
+	RmlElementBoolResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	Rml::Element* element = FromElementHandle(query->elementHandle);
+	Rml::EventListener* listener = FromEventListenerHandle(query->eventListenerHandle);
+	if (element == nullptr || listener == nullptr || query->event == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	element->RemoveEventListener(query->event, listener, query->inCapturePhase);
 	result->success = true;
 }
 
@@ -3577,6 +3628,7 @@ const RmlUiApi RMLUI_API = {
 	.ContextLoadDocument = NativeContextLoadDocument,
 	.ContextGetDocument = NativeContextGetDocument,
 	.ContextAddEventListener = NativeContextAddEventListener,
+	.ContextUpdate = NativeContextUpdate,
 	.ContextRender = NativeContextRender,
 	.ContextUnloadAllDocuments = NativeContextUnloadAllDocuments,
 	.ContextUnloadDocument = NativeContextUnloadDocument,
@@ -3736,4 +3788,6 @@ const RmlUiApi RMLUI_API = {
 	.DataModelSetRows = NativeDataModelSetRows,
 	.DataModelBindEvent = NativeDataModelBindEvent,
 	.DataModelUnbindEvent = NativeDataModelUnbindEvent,
+	.ContextRemoveEventListener = NativeContextRemoveEventListener,
+	.ElementRemoveEventListener = NativeElementRemoveEventListener,
 };

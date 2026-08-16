@@ -127,7 +127,14 @@ fn main() {
     println!("units in rect: {:?}", units_in_rect);
 
     let separation = units
-        .get_unit_separation(10, 20, true, false)
+        .get_unit_separation(
+            10,
+            20,
+            spring_native::GetUnitSeparationOptions {
+                positional: true,
+                check_map: false,
+            },
+        )
         .expect("separation query");
     println!("unit separation = {}", separation);
 

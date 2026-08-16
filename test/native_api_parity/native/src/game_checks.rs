@@ -464,12 +464,13 @@ impl NativeApiParity {
         label: &str,
     ) -> Result<(), String> {
         let team_id = i32_field(message, "teamID")?;
-        let native = self
+        let (native, valid) = self
             .interface
             .game()
             .get_team_start_position(team_id)
             .map_err(|err| format!("get_team_start_position({team_id}) failed: {err:?}"))?;
-        self.same_vec3(label, native, message)
+        self.same_vec3(label, native, message)?;
+        self.same_bool_if_present(label, message, "valid", valid)
     }
     pub(crate) fn check_map_start_positions(
         &mut self,

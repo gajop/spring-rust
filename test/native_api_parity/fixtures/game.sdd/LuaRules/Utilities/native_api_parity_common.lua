@@ -201,6 +201,12 @@ local function generatedParamValue(param, ids)
 	if param.fixed ~= nil then
 		return param.fixed
 	end
+	if param.fixture_list then
+		return { ids[param.fixture_list] }
+	end
+	if param.fixture_map then
+		return { [ids[param.fixture_map]] = true }
+	end
 	if param.fixture then
 		return ids[param.fixture]
 	end
@@ -696,6 +702,51 @@ function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNativ
 				end
 			end
 			end
+		end
+	end
+end
+
+-- Run the deterministic, read-only subset used as the Lua reference for a
+-- Component Model probe.  This deliberately shares the canonical generated
+-- argument/result lowering with the ordinary parity fixture; the only
+-- difference is the compact field-only transport consumed by the Wasm
+-- comparator.
+function M.runWasmApiReference(context, probeSpec, generatedTests, emit, fixtureIDs, shouldDefer)
+	local ids = M.fixtureIDs(fixtureIDs)
+	ids.context = context
+	local metadataByID = {}
+	for _, metadata in ipairs(generatedTests) do
+		metadataByID[metadata.id] = metadata
+	end
+	local tests = probeSpec.tests or probeSpec
+	local values = probeSpec.values or {}
+	for _, testName in ipairs(tests) do
+		if shouldDefer == nil or not shouldDefer(testName) then
+			local metadata = metadataByID[testName]
+			if metadata == nil then
+				error("Wasm parity probe test is not present in the " .. context .. " API fixture: " .. testName, 0)
+			end
+			local value = generatedMake(metadata, ids)
+			for key, probeValue in pairs(values[testName] or {}) do
+				value[key] = probeValue
+			end
+			local ok, readback = pcall(generatedGet, metadata, ids, value)
+			local payload = {
+				source = "lua-api",
+				context = context,
+				frame = Spring.GetGameFrame and Spring.GetGameFrame() or 0,
+				testName = testName,
+				status = ok and "pass" or "fail",
+				fields = {},
+			}
+			if ok then
+				for _, field in ipairs((metadata.compare or {}).fields or {}) do
+					payload.fields[field] = readback[field]
+				end
+			else
+				payload.error = tostring(readback)
+			end
+			emit(payload)
 		end
 	end
 end

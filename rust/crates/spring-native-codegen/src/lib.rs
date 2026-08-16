@@ -6,6 +6,19 @@ use std::{
     path::{Path, PathBuf},
 };
 
+pub mod annotations;
+pub mod callins;
+pub mod lua_loader;
+pub mod manifest;
+pub mod model;
+pub mod render_callins;
+pub mod render_host;
+pub mod render_signatures;
+pub mod render_wasm_sdk;
+pub mod render_wit;
+
+pub use model::{ApiModel, ApiModule, Environment, FunctionModel, LoweringStatus, SemanticType};
+
 pub struct ApiConfig<'a> {
     pub api_struct: &'a str,
     pub wrapper_struct: &'a str,
@@ -824,12 +837,22 @@ pub fn generate_unit_rendering(
 
 pub struct CodeGenerator {
     clang: Clang,
+    lua_loaders: lua_loader::LuaLoaderMatrix,
 }
 
 impl CodeGenerator {
     pub fn new() -> Result<Self> {
         let clang = Clang::new().map_err(|error| anyhow!(error))?;
-        Ok(Self { clang })
+        Ok(Self {
+            clang,
+            lua_loaders: lua_loader::LuaLoaderMatrix::default(),
+        })
+    }
+
+    pub fn with_repository_root(root: &Path) -> Result<Self> {
+        let clang = Clang::new().map_err(|error| anyhow!(error))?;
+        let lua_loaders = lua_loader::LuaLoaderMatrix::from_repository(root)?;
+        Ok(Self { clang, lua_loaders })
     }
 
     fn generate_api(
@@ -841,11 +864,32 @@ impl CodeGenerator {
         let spec = parse_api(&self.clang, header, include_dirs, config.api_struct)?;
         render_api(&spec, &config)
     }
+
+    /// Build the transport-neutral semantic model for one NativeInterface
+    /// header.  Native generation continues to use the legacy renderer above;
+    /// this entry point is shared by the Wasm/WIT/signature generators.
+    pub fn semantic_module(
+        &self,
+        header: &Path,
+        include_dirs: &[PathBuf],
+        api_struct: &str,
+        module_name: &str,
+    ) -> Result<ApiModule> {
+        let spec = parse_api(&self.clang, header, include_dirs, api_struct)?;
+        Ok(model::from_legacy_spec(
+            &spec,
+            module_name,
+            header,
+            &self.lua_loaders,
+        ))
+    }
 }
 
 #[derive(Debug, Clone)]
 struct ApiSpec {
     structs: HashMap<String, StructDef>,
+    all_structs: HashMap<String, StructDef>,
+    enums: HashMap<String, EnumDef>,
     api: ApiDef,
 }
 
@@ -856,14 +900,22 @@ struct StructDef {
 }
 
 #[derive(Debug, Clone)]
+struct EnumDef {
+    name: String,
+    variants: std::collections::BTreeMap<String, i64>,
+}
+
+#[derive(Debug, Clone)]
 struct FieldDef {
     name: String,
     ty: CType,
+    annotations: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
 enum CType {
     Primitive(Primitive),
+    Enum(String),
     Record(String),
     Pointer {
         pointee: Box<CType>,
@@ -886,6 +938,7 @@ enum Primitive {
     I8,
     I16,
     I32,
+    I64,
     U32,
     U16,
     U8,
@@ -902,6 +955,7 @@ impl Primitive {
             Primitive::I8 => "i8",
             Primitive::I16 => "i16",
             Primitive::I32 => "i32",
+            Primitive::I64 => "i64",
             Primitive::U32 => "u32",
             Primitive::U16 => "u16",
             Primitive::U8 => "u8",
@@ -934,7 +988,11 @@ fn parse_api(
 ) -> Result<ApiSpec> {
     let index = Index::new(clang, false, false);
     let mut parser = index.parser(header);
-    let mut args = vec!["-xc++".to_string(), "-std=c++17".to_string()];
+    let mut args = vec![
+        "-xc++".to_string(),
+        "-std=c++17".to_string(),
+        "-DRECOIL_WASM_CODEGEN".to_string(),
+    ];
     for dir in include_dirs {
         args.push(format!("-I{}", dir.display()));
     }
@@ -944,16 +1002,37 @@ fn parse_api(
         .with_context(|| format!("failed to parse {}", header.display()))?;
 
     let mut structs = HashMap::new();
+    let mut all_structs = HashMap::new();
+    let mut enums = HashMap::new();
     let mut api = None;
-    visit_entity(tu.get_entity(), api_struct, &mut structs, &mut api);
-    let api = api.context(format!("{} not found", api_struct))?;
-    Ok(ApiSpec { structs, api })
+    visit_entity(
+        tu.get_entity(),
+        api_struct,
+        &mut structs,
+        &mut all_structs,
+        &mut enums,
+        &mut api,
+    );
+    let api = match api_struct {
+        "" => ApiDef {
+            functions: Vec::new(),
+        },
+        _ => api.context(format!("{} not found", api_struct))?,
+    };
+    Ok(ApiSpec {
+        structs,
+        all_structs,
+        enums,
+        api,
+    })
 }
 
 fn visit_entity(
     entity: Entity,
     api_name: &str,
     structs: &mut HashMap<String, StructDef>,
+    all_structs: &mut HashMap<String, StructDef>,
+    enums: &mut HashMap<String, EnumDef>,
     api: &mut Option<ApiDef>,
 ) {
     if entity.get_kind() == EntityKind::StructDecl {
@@ -961,15 +1040,36 @@ fn visit_entity(
             if entity.is_definition() {
                 if name == api_name {
                     *api = Some(parse_api_struct(entity));
-                } else if is_query_struct(&name) {
-                    structs.insert(name.clone(), parse_struct(entity));
+                } else {
+                    let definition = parse_struct(entity);
+                    if is_query_struct(&name) {
+                        structs.insert(name.clone(), definition.clone());
+                    }
+                    all_structs.insert(name.clone(), definition);
                 }
             }
         }
     }
 
+    if entity.get_kind() == EntityKind::EnumDecl {
+        if let Some(name) = entity.get_name() {
+            let mut variants = std::collections::BTreeMap::new();
+            entity.visit_children(|child, _| {
+                if child.get_kind() == EntityKind::EnumConstantDecl {
+                    if let (Some(variant), Some((signed, _))) =
+                        (child.get_name(), child.get_enum_constant_value())
+                    {
+                        variants.insert(variant, signed);
+                    }
+                }
+                clang::EntityVisitResult::Continue
+            });
+            enums.insert(name.clone(), EnumDef { name, variants });
+        }
+    }
+
     entity.visit_children(|child, _| {
-        visit_entity(child, api_name, structs, api);
+        visit_entity(child, api_name, structs, all_structs, enums, api);
         clang::EntityVisitResult::Continue
     });
 }
@@ -988,9 +1088,19 @@ fn parse_struct(entity: Entity) -> StructDef {
     entity.visit_children(|child, _| {
         if child.get_kind() == EntityKind::FieldDecl {
             if let (Some(field_name), Some(field_type)) = (child.get_name(), child.get_type()) {
+                let mut annotations = Vec::new();
+                child.visit_children(|attribute, _| {
+                    if attribute.get_kind() == EntityKind::AnnotateAttr {
+                        if let Some(annotation) = attribute.get_display_name() {
+                            annotations.push(annotation);
+                        }
+                    }
+                    clang::EntityVisitResult::Continue
+                });
                 fields.push(FieldDef {
                     name: field_name,
                     ty: classify_type(field_type),
+                    annotations,
                 });
             }
         }
@@ -1061,6 +1171,8 @@ fn classify_type(ty: Type) -> CType {
             classify_type(canonical)
         }
         TypeKind::Int => CType::Primitive(Primitive::I32),
+        TypeKind::Long => CType::Primitive(Primitive::I64),
+        TypeKind::LongLong => CType::Primitive(Primitive::I64),
         TypeKind::Short => CType::Primitive(Primitive::I16),
         TypeKind::SChar => CType::Primitive(Primitive::I8),
         TypeKind::UInt => CType::Primitive(Primitive::U32),
@@ -1076,6 +1188,14 @@ fn classify_type(ty: Type) -> CType {
             if let Some(decl) = ty.get_declaration() {
                 if let Some(name) = decl.get_name() {
                     return CType::Record(name);
+                }
+            }
+            CType::Unknown(ty.get_display_name())
+        }
+        TypeKind::Enum => {
+            if let Some(decl) = ty.get_declaration() {
+                if let Some(name) = decl.get_name() {
+                    return CType::Enum(name);
                 }
             }
             CType::Unknown(ty.get_display_name())
@@ -1104,6 +1224,9 @@ fn primitive_from_name(name: &str) -> Option<Primitive> {
         "int8_t" | "signed char" => Some(Primitive::I8),
         "int16_t" | "short" => Some(Primitive::I16),
         "int32_t" | "int" => Some(Primitive::I32),
+        "int64_t" | "long" | "long long" | "signed long" | "signed long long" => {
+            Some(Primitive::I64)
+        }
         "uint32_t" | "unsigned int" => Some(Primitive::U32),
         "uint16_t" | "unsigned short" => Some(Primitive::U16),
         "uint8_t" | "unsigned char" => Some(Primitive::U8),
@@ -1152,23 +1275,30 @@ fn render_api(spec: &ApiSpec, config: &ApiConfig<'_>) -> Result<String> {
         // signature. They are implemented by the hand-written RmlUi wrapper,
         // which can expose the callback arguments as owned Rust values; the
         // generic FnMut() callback generator is intentionally not applicable.
-        if matches!(
-            func.name.as_str(),
-            "DataModelBindEvent" | "DataModelUnbindEvent"
-        ) {
+        if is_explicit_native_exclusion(config.wrapper_struct, &func.name) {
             continue;
         }
-        if let (Some(query), Some(result)) = (
-            spec.structs.get(&func.query),
-            spec.structs.get(&func.result),
-        ) {
-            let method = render_method(func, query, result)?;
-            out.push_str(&method);
-            out.push('\n');
-        }
+        let query = spec
+            .structs
+            .get(&func.query)
+            .with_context(|| format!("missing query struct {}", func.query))?;
+        let result = spec
+            .structs
+            .get(&func.result)
+            .with_context(|| format!("missing result struct {}", func.result))?;
+        let method = render_method(func, query, result)?;
+        out.push_str(&method);
+        out.push('\n');
     }
     out.push_str("}\n");
     Ok(out)
+}
+
+fn is_explicit_native_exclusion(wrapper_struct: &str, function: &str) -> bool {
+    matches!(
+        (wrapper_struct, function),
+        ("RmlUi", "DataModelBindEvent") | ("RmlUi", "DataModelUnbindEvent")
+    )
 }
 
 fn render_options(options: &StructDef) -> Result<String> {
@@ -2029,6 +2159,7 @@ fn build_return(result: &StructDef) -> Result<ReturnKind> {
 fn return_field_type(ty: &CType) -> Option<ReturnFieldType> {
     match ty {
         CType::Primitive(p) => Some(ReturnFieldType::Plain(TypeRef::Primitive(p.rust_type()))),
+        CType::Enum(name) => Some(ReturnFieldType::Plain(TypeRef::Struct(name.clone()))),
         CType::Record(name) => Some(ReturnFieldType::Plain(TypeRef::Struct(name.clone()))),
         CType::Pointer { pointee, is_const } => {
             if *is_const {
@@ -2041,6 +2172,7 @@ fn return_field_type(ty: &CType) -> Option<ReturnFieldType> {
         CType::Array { element, length } => {
             let elem_type = match &**element {
                 CType::Primitive(p) => p.rust_type().to_string(),
+                CType::Enum(name) => name.clone(),
                 CType::Record(name) => name.clone(),
                 _ => return None,
             };
@@ -2056,6 +2188,7 @@ fn return_field_type(ty: &CType) -> Option<ReturnFieldType> {
 fn rust_type_from_c(ty: &CType) -> Option<TypeRef> {
     match ty {
         CType::Primitive(p) => Some(TypeRef::Primitive(p.rust_type())),
+        CType::Enum(name) => Some(TypeRef::Struct(name.clone())),
         CType::Record(name) => Some(TypeRef::Struct(name.clone())),
         _ => None,
     }
@@ -2064,6 +2197,7 @@ fn rust_type_from_c(ty: &CType) -> Option<TypeRef> {
 fn rust_type_from_pointer(ty: &CType) -> Option<TypeRef> {
     match ty {
         CType::Primitive(p) => Some(TypeRef::Primitive(p.rust_type())),
+        CType::Enum(name) => Some(TypeRef::Struct(name.clone())),
         CType::Record(name) => Some(TypeRef::Struct(name.clone())),
         _ => None,
     }
@@ -2245,5 +2379,72 @@ pub fn extract_api_version(common_header: &Path) -> Result<(u32, u32, u32)> {
             "Could not find NATIVE_API_CURRENT_VERSION in {}",
             common_header.display()
         ))
+    }
+}
+
+#[cfg(test)]
+mod semantic_codegen_tests {
+    use super::*;
+    use crate::model::SemanticType;
+    use std::fs;
+
+    #[test]
+    fn synthetic_header_covers_all_phase_zero_shapes() {
+        let path = std::env::temp_dir().join(format!(
+            "recoil-wasm-semantic-{}-{}.h",
+            std::process::id(),
+            std::thread::current().name().unwrap_or("test")
+        ));
+        fs::write(
+            &path,
+            r#"
+#include <stdint.h>
+struct NestedRecord { int32_t value; };
+struct ResourceHandle { uint64_t value; };
+enum SyntheticKind { SYNTHETIC_A = 1, SYNTHETIC_B = 2 };
+typedef void (*SyntheticCallback)(int32_t);
+struct SyntheticQuery {
+    const char* label;
+    const int32_t* values;
+    uint32_t valueCount;
+    int32_t optionalValue;
+    bool hasOptionalValue;
+    NestedRecord nested;
+    SyntheticKind kind;
+    float fixed[3];
+    ResourceHandle resource;
+    SyntheticCallback callback;
+};
+struct SyntheticResult { const char* message; };
+struct SyntheticApi {
+    void (*Sample)(const SyntheticQuery*, SyntheticResult*);
+};
+"#,
+        )
+        .unwrap();
+
+        let generator = CodeGenerator::new().unwrap();
+        let module = generator
+            .semantic_module(&path, &[], "SyntheticApi", "synthetic")
+            .unwrap();
+        let function = &module.functions[0];
+
+        assert!(matches!(function.inputs[0].ty, SemanticType::String));
+        assert!(matches!(function.inputs[1].ty, SemanticType::List { .. }));
+        assert!(matches!(function.inputs[2].ty, SemanticType::Option { .. }));
+        assert!(matches!(function.inputs[3].ty, SemanticType::Record { .. }));
+        assert!(matches!(function.inputs[4].ty, SemanticType::Enum { .. }));
+        assert!(matches!(
+            function.inputs[5].ty,
+            SemanticType::FixedArray { .. }
+        ));
+        assert!(matches!(function.inputs[6].ty, SemanticType::Handle { .. }));
+        assert!(matches!(
+            function.inputs[7].ty,
+            SemanticType::Callback { .. }
+        ));
+        assert!(matches!(function.outputs[0].ty, SemanticType::String));
+
+        let _ = fs::remove_file(path);
     }
 }

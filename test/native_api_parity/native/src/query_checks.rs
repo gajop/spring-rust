@@ -168,7 +168,10 @@ impl NativeApiParity {
             }
             _ => return Err(format!("unsupported units query list check `{label}`")),
         };
-        if test_name == "get_team_units_by_defs" {
+        if matches!(
+            test_name,
+            "get_team_units_by_defs" | "get_render_units" | "get_render_units_draw_flag_changed"
+        ) {
             return self.same_i32_set_if_present(label, message, "unitIDs", &native);
         }
         self.same_i32_list_if_present(label, message, "unitIDs", &native)
@@ -612,8 +615,12 @@ impl NativeApiParity {
         self.same_bool_if_present(label, message, "spectator", native.isSpec)?;
         self.same_i32_if_present(label, message, "teamID", native.teamID)?;
         self.same_i32_if_present(label, message, "allyTeamID", native.allyTeamID)?;
-        self.same_if_present(label, message, "pingTime", native.pingTime)?;
-        self.same_u32_if_present(label, message, "cpuUsage", native.cpuUsage)?;
+        // Ping and CPU load are process-local observations. The Lua and native
+        // sides run in different engine processes, so parity here is the
+        // numeric shape/finiteness contract declared by the fixture rather
+        // than an exact value comparison.
+        self.same_numeric_shape_if_present(label, message, "pingTime", native.pingTime)?;
+        self.same_numeric_shape_if_present(label, message, "cpuUsage", native.cpuUsage)?;
         self.same_string_if_present(label, message, "country", &cstr_or_empty(native.country)?)?;
         self.same_i32_if_present(label, message, "rank", native.rank)?;
         self.same_bool_if_present(

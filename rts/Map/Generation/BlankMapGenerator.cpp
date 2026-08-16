@@ -20,6 +20,9 @@
 #include <vector>
 #include <algorithm>
 #include <cstring> // strcpy,memset
+#include <filesystem>
+#include <fstream>
+#include <limits>
 #include <sstream>
 
 namespace {
@@ -39,6 +42,28 @@ std::string EscapeLuaString(const std::string& input)
 	escaped += '\"';
 
 	return escaped;
+}
+
+void AddExternalFile(CVirtualArchive* archive, const std::string& logicalName,
+	const std::string& sourcePath)
+{
+	if (sourcePath.empty())
+		return;
+
+	std::ifstream input(sourcePath, std::ios::binary);
+	if (!input)
+		throw content_error("Error generating map: cannot read " + sourcePath);
+
+	const auto fileSize = std::filesystem::file_size(sourcePath);
+	if (fileSize > std::numeric_limits<std::size_t>::max())
+		throw content_error("Error generating map: file is too large " + sourcePath);
+
+	CVirtualFile* file = archive->GetFilePtr(archive->AddFile(logicalName));
+	file->buffer.resize(static_cast<std::size_t>(fileSize));
+	if (!file->buffer.empty())
+		input.read(reinterpret_cast<char*>(file->buffer.data()), static_cast<std::streamsize>(file->buffer.size()));
+	if (!input && !file->buffer.empty())
+		throw content_error("Error generating map: cannot read complete file " + sourcePath);
 }
 
 } // namespace
@@ -114,6 +139,18 @@ void CBlankMapGenerator::Generate()
 	GenerateSMF(archive->GetFilePtr(archive->AddFile("maps/generated.smf")));
 	GenerateMapInfo(archive->GetFilePtr(archive->AddFile("mapinfo.lua")));
 	GenerateSMT(archive->GetFilePtr(archive->AddFile("maps/generated.smt")));
+
+	// The parity harness uses these two opt-in map options to put a Gaia
+	// manifest and Component bytes into the generated map archive.  Keeping
+	// the injection generic and opt-in lets the ordinary blank-map path remain
+	// self-contained while exercising the real map-VFS manifest loader.
+	const auto& mapOpts = setup->GetMapOptionsCont();
+	const std::string* gaiaManifest = Recoil::map_try_get(mapOpts, "blank_map_gaia_manifest");
+	const std::string* gaiaModule = Recoil::map_try_get(mapOpts, "blank_map_gaia_module");
+	if (gaiaManifest != nullptr && gaiaModule != nullptr) {
+		AddExternalFile(archive, "LuaGaia/wasm/manifest.txt", *gaiaManifest);
+		AddExternalFile(archive, "LuaGaia/wasm/parity.wasm", *gaiaModule);
+	}
 
 	// add archive to VFS
 	archiveScanner->ScanArchive(setup->mapName + "." + virtualArchiveFactory->GetDefaultExtension());

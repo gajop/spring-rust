@@ -36,7 +36,12 @@
         "check": "check_gaia_team_id",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetGaiaTeamID",
+        "args": [],
+        "returns": ["teamID"]
+      }
     },
     {
       "id": "get_ally_team_start_box",

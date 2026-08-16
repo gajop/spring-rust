@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include "CommonTypes.h"
 
+// @see rts/Lua/LuaUnsyncedCtrl.cpp
+
 #ifdef __cplusplus
 extern "C" {
 #endif

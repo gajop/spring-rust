@@ -8,16 +8,20 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <utility>
 
 #include "NativeInterface.h"
 #include "NativeInterfaceEventClient.h"
+#include "NativeInterfaceWasmAdapter.h"
 #include "NativeModulePath.h"
 #include "NativeInterface/api/RmlUi.h"
+#include "WasmInterface/WasmInterfaceSystem.h"
 
 #include "Rml/Backends/RmlUi_Backend.h"
 
 #include "System/EventHandler.h"
 #include "System/FileSystem/FileHandler.h"
+#include "System/FileSystem/VFSHandler.h"
 #include "System/FileSystem/VFSModes.h"
 #include "System/Log/ILog.h"
 #include "System/Platform/SharedLib.h"
@@ -94,8 +98,10 @@ namespace {
 class NativeInterfaceSystem::Impl {
 public:
 	NativeInterface nativeInterface;
+	NativeInterfaceWasmAdapter wasmAdapter{&nativeInterface};
 	std::unique_ptr<SharedLib> sharedLib;
 	std::unique_ptr<NativeInterfaceEventClient> eventClient;
+	std::unique_ptr<WasmInterfaceSystem> wasmSystem;
 
 	Impl() {
 		// Initialize all API pointers
@@ -144,6 +150,7 @@ public:
 		nativeInterface.tracing = &TRACING_API;
 		nativeInterface.utils = &UTILS_API;
 		nativeInterface.player = &PLAYER_API;
+		wasmSystem = std::make_unique<WasmInterfaceSystem>(&wasmAdapter);
 	}
 
 	~Impl() {
@@ -227,9 +234,21 @@ public:
 		}
 
 		// Create event client, load symbols, and register with event handler
-		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, sharedLib.get());
+		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, sharedLib.get(), wasmSystem.get());
 		eventClient->LoadSymbols();
 		eventClient->Initialize();
+		eventHandler.AddClient(eventClient.get());
+	}
+
+	void EnsureWasmEventClient() {
+		if (eventClient)
+			return;
+
+		// Keep a managed event client alive even when no legacy native DLL is
+		// installed. This lets Wasm-only content receive the same engine event
+		// stream without changing the native module loading contract.
+		eventClient = std::make_unique<NativeInterfaceEventClient>(
+			&nativeInterface, nullptr, wasmSystem.get());
 		eventHandler.AddClient(eventClient.get());
 	}
 
@@ -243,18 +262,22 @@ public:
 
 	void ReloadNow() {
 		const auto source = ResolveNativeModuleSource();
-		if (!source.has_value())
+		if (!source.has_value()) {
+			EnsureWasmEventClient();
 			return;
+		}
 
 		LoadDLL(*source);
+		if (!eventClient)
+			EnsureWasmEventClient();
 	}
 
 	void Update() {
-		if (!reloadRequested)
-			return;
-
-		reloadRequested = false;
-		ReloadNow();
+		if (reloadRequested) {
+			reloadRequested = false;
+			ReloadNow();
+		}
+		wasmSystem->Update();
 	}
 
 	bool reloadRequested = false;
@@ -322,4 +345,105 @@ void NativeInterfaceSystem::HandleLuaMsg(int playerID, int script, int mode, con
 void NativeInterfaceSystem::HandleLuaCall(const char* msg, size_t msgLength, bool synced) {
 	if (pImpl->eventClient)
 		pImpl->eventClient->HandleLuaCall(msg, msgLength, synced);
+}
+
+bool NativeInterfaceSystem::LoadWasmModule(WasmModuleDescriptor descriptor, std::string& error) {
+	return pImpl->wasmSystem->LoadModule(std::move(descriptor), error);
+}
+
+bool NativeInterfaceSystem::LoadWasmManifest(std::string_view manifestPath,
+	std::string_view vfsModes, std::string& error)
+{
+	const std::string path(manifestPath);
+	const std::string modes(vfsModes);
+	CVFSHandler::Section section = CVFSHandler::Section::Error;
+	for (const char mode : modes) {
+		section = CVFSHandler::GetModeSection(mode);
+		if (section != CVFSHandler::Section::Error)
+			break;
+	}
+	if (vfsHandler != nullptr && section != CVFSHandler::Section::Error) {
+		std::vector<std::string> archiveNames = vfsHandler->GetAllArchiveNames(section);
+		std::sort(archiveNames.begin(), archiveNames.end());
+		archiveNames.erase(std::unique(archiveNames.begin(), archiveNames.end()), archiveNames.end());
+		std::vector<WasmManifestSource> sources;
+		for (const auto& archive : archiveNames) {
+			const int fileExists = vfsHandler->FileExistsInArchive(archive, path, section);
+			if (fileExists < 0)
+				continue;
+			if (fileExists == 0)
+				continue;
+			std::vector<std::uint8_t> bytes;
+			const int loadCode = vfsHandler->LoadFileFromArchive(archive, path, bytes, section);
+			if (loadCode != 1) {
+				error = "could not read Wasm manifest " + path + " from archive " + archive;
+				return false;
+			}
+			sources.push_back({archive, std::string(bytes.begin(), bytes.end())});
+		}
+		if (!sources.empty()) {
+			const bool loaded = pImpl->wasmSystem->LoadManifests(sources,
+				[section](std::string_view archive, std::string_view modulePath,
+					std::vector<std::uint8_t>& bytes, std::string& providerError) {
+					const std::string archiveName(archive);
+					const std::string path(modulePath);
+					if (vfsHandler == nullptr) {
+						providerError = "Wasm VFS is unavailable";
+						return false;
+					}
+					const int loadCode = vfsHandler->LoadFileFromArchive(archiveName, path, bytes, section);
+					if (loadCode != 1) {
+						providerError = "Wasm module does not exist in archive " + archiveName + ": " + path;
+						return false;
+					}
+					return true;
+				}, error);
+			if (!loaded)
+				error = "failed to load Wasm manifests from " + path + ": " + error;
+			return loaded;
+		}
+	}
+
+	// Preserve the legacy single-source behavior for raw development files and
+	// VFS implementations that do not expose archive enumeration.
+	CFileHandler manifestFile(path, modes);
+	if (!manifestFile.FileExists())
+		return true;
+	std::string manifest;
+	if (!manifestFile.LoadStringData(manifest)) {
+		error = "could not read Wasm manifest: " + path;
+		return false;
+	}
+	const bool loaded = pImpl->wasmSystem->LoadManifest(manifest,
+		[modes](std::string_view modulePath, std::vector<std::uint8_t>& bytes,
+			std::string& providerError) {
+			const std::string modulePathString(modulePath);
+			CFileHandler moduleFile(modulePathString, modes);
+			if (!moduleFile.FileExists()) {
+				providerError = "Wasm module does not exist in the selected content: " + modulePathString;
+				return false;
+			}
+			std::string data;
+			if (!moduleFile.LoadStringData(data)) {
+				providerError = "could not read Wasm module: " + modulePathString;
+				return false;
+			}
+			bytes.assign(data.begin(), data.end());
+			return true;
+		}, error);
+	if (!loaded)
+		error = "failed to load Wasm manifest " + path + ": " + error;
+	return loaded;
+}
+
+bool NativeInterfaceSystem::UnloadWasmModule(const std::string& moduleName) {
+	return pImpl->wasmSystem->UnloadModule(moduleName);
+}
+
+void NativeInterfaceSystem::UnloadAllWasmModules() {
+	pImpl->wasmSystem->UnloadAll();
+}
+
+WasmInterfaceSystem* NativeInterfaceSystem::GetWasmInterfaceSystem() {
+	return pImpl->wasmSystem.get();
 }

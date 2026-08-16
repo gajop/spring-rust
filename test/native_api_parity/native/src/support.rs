@@ -442,6 +442,23 @@ impl NativeApiParity {
         }
         Ok(())
     }
+    pub(crate) fn same_numeric_shape_if_present(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        native: f32,
+    ) -> Result<(), String> {
+        if message.get(field).is_some() {
+            let lua = f32_field(message, field)?;
+            if !lua.is_finite() || !native.is_finite() {
+                return Err(format!(
+                    "{label}.{field}: expected finite numeric values, native={native}, lua={lua}"
+                ));
+            }
+        }
+        Ok(())
+    }
     pub(crate) fn same_bool_if_present(
         &self,
         label: &str,
@@ -466,21 +483,6 @@ impl NativeApiParity {
     ) -> Result<(), String> {
         if message.get(field).is_some() {
             let lua = i32_field(message, field)?;
-            if native != lua {
-                return Err(format!("{label}.{field}: native={native}, lua={lua}"));
-            }
-        }
-        Ok(())
-    }
-    pub(crate) fn same_u32_if_present(
-        &self,
-        label: &str,
-        message: &Value,
-        field: &str,
-        native: u32,
-    ) -> Result<(), String> {
-        if message.get(field).is_some() {
-            let lua = u32_field(message, field)?;
             if native != lua {
                 return Err(format!("{label}.{field}: native={native}, lua={lua}"));
             }

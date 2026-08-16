@@ -16,7 +16,7 @@ extern "C" {
 
 // File info
 struct FileInfo {
-	const char* name;
+	RECOIL_WASM_STRING const char* name;
 	uint32_t size;
 	uint32_t mode;  // File mode (permissions)
 	bool isDirectory;

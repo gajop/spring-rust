@@ -1,3 +1,9 @@
 [workspace]
-members = ["crates/spring-native-sys", "crates/spring-native"]
+members = [
+    "crates/spring-native-sys",
+    "crates/spring-native-codegen",
+    "crates/spring-api-codegen",
+    "crates/spring-native",
+    "crates/spring-wasm",
+]
 resolver = "2"

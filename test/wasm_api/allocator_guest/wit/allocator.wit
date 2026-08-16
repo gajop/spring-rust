@@ -1,0 +1,16 @@
+package recoil:spring-api@1.0.0;
+
+interface units-query {
+  get-bytes: func() -> list<u8>;
+}
+
+interface allocator-fixture {
+  probe: func() -> list<u8>;
+  trap: func() -> list<u8>;
+  burn-fuel: func() -> list<u8>;
+}
+
+world rules-synced {
+  import units-query;
+  export allocator-fixture;
+}

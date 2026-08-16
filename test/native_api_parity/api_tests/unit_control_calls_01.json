@@ -248,7 +248,7 @@
       "native": {"set": [], "get": ["UnitControl.unit_weapon_fire"]},
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_unit_control_call", "set": "set_noop"},
-      "params": {"weaponNum": {"type": "i32", "fixed": 1}},
+      "params": {"weaponNum": {"type": "i32", "fixed": 1, "native_transform": "lua_one_based"}},
       "lua_runtime": {"call": "Spring.UnitWeaponFire", "args": ["fixture.unitID", "value.weaponNum"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
@@ -258,7 +258,7 @@
       "native": {"set": [], "get": ["UnitControl.unit_weapon_hold_fire"]},
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_unit_control_call", "set": "set_noop"},
-      "params": {"weaponNum": {"type": "i32", "fixed": 1}},
+      "params": {"weaponNum": {"type": "i32", "fixed": 1, "native_transform": "lua_one_based"}},
       "lua_runtime": {"call": "Spring.UnitWeaponHoldFire", "args": ["fixture.unitID", "value.weaponNum"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {

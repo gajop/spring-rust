@@ -395,7 +395,8 @@ static void NativeGetPlayerListInAllyTeam(const GetPlayerListInAllyTeamQuery* qu
 
 	for (int p = 0; p < playerHandler.ActivePlayers(); p++) {
 		const CPlayer* player = playerHandler.Player(p);
-		if (player != nullptr && player->active && teamHandler.AllyTeam(player->team) == query->allyTeamID) {
+		if (player != nullptr && player->active &&
+			(query->allyTeamID < 0 || teamHandler.AllyTeam(player->team) == query->allyTeamID)) {
 			if (bufferPos + sizeof(int32_t) > sizeof(scratchBuffer)) break;
 			players[count++] = p;
 			bufferPos += sizeof(int32_t);

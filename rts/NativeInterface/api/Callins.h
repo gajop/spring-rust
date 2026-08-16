@@ -494,7 +494,7 @@ struct NativeCallinCommand {
 	uint32_t numParams;
 	uint32_t tag;
 	uint8_t options;
-	const float* params;
+	RECOIL_WASM_LIST("f32", "numParams") const float* params;
 };
 
 struct UnitCommandQuery {

@@ -6,7 +6,11 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
+
+struct WasmModuleDescriptor;
+class WasmInterfaceSystem;
 
 /**
  * NativeInterfaceSystem - Manager for native module integration
@@ -40,6 +44,18 @@ public:
 	// Special events (called from Lua)
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
 	void HandleLuaCall(const char* msg, size_t msgLength, bool synced);
+
+	// Wasm module lifecycle is explicit so game/map discovery can feed the same
+	// instance registry without exposing runtime internals to CGame.
+	bool LoadWasmModule(WasmModuleDescriptor descriptor, std::string& error);
+	// Load an optional content-relative manifest through the selected VFS
+	// namespace. Missing manifests are intentional; malformed manifests or
+	// modules fail closed.
+	bool LoadWasmManifest(std::string_view manifestPath, std::string_view vfsModes,
+		std::string& error);
+	bool UnloadWasmModule(const std::string& moduleName);
+	void UnloadAllWasmModules();
+	WasmInterfaceSystem* GetWasmInterfaceSystem();
 
 public:
 	static NativeInterfaceSystem* s_instance;

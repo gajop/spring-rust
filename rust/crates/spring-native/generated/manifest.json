@@ -1,0 +1,282 @@
+{
+  "format": "recoil.spring-native.snapshot.v1",
+  "generator": "spring-api-codegen",
+  "source_out": "rust/target/debug/build/spring-native-*/out",
+  "files": [
+    {
+      "name": "camera_generated.rs",
+      "sha256": "c8227372580d939e7408a4236c2cf66c013f98407d6734125cdf463ad7815d55",
+      "bytes": 8598
+    },
+    {
+      "name": "cob_script_generated.rs",
+      "sha256": "046fead7961a98355dca9b94b69c4ac0ab340e6a3443f2abe5bc41773bb8eb37",
+      "bytes": 1960
+    },
+    {
+      "name": "config_generated.rs",
+      "sha256": "49a8f804e2a0755174bdd2e2e8127f0dac7de5d4f38eda6b2eefc385087c46d4",
+      "bytes": 8520
+    },
+    {
+      "name": "debug_input_generated.rs",
+      "sha256": "07791f0c2e25fc7d0eed0bcc7b08cfc888318dc53d84b99f3202c2b97aee8418",
+      "bytes": 4448
+    },
+    {
+      "name": "display_generated.rs",
+      "sha256": "2c7c72340bd0dbf90532aff3135b49db5e1cb78a3529350874e8284089598552",
+      "bytes": 15285
+    },
+    {
+      "name": "effects_control_generated.rs",
+      "sha256": "e9b87118f483a08d147766f5a446d59e228740c95c477e9682e72f3378e0fa0c",
+      "bytes": 2421
+    },
+    {
+      "name": "encoding_generated.rs",
+      "sha256": "fac229686f34b1b9fa0d048290e40b24070e8f4f8034671388be844ca5a66bd7",
+      "bytes": 5212
+    },
+    {
+      "name": "feature_control_generated.rs",
+      "sha256": "7d216617b1103791e6e8b1046452fb8faa27a5f01ecef72139308039a56342eb",
+      "bytes": 25031
+    },
+    {
+      "name": "feature_defs_generated.rs",
+      "sha256": "607fbe2158a463923e6c2943aee7dcc14703163d62f973c90acb4a5b4f8ae10e",
+      "bytes": 8004
+    },
+    {
+      "name": "features_generated.rs",
+      "sha256": "19afc08c256ca4042e43113462106f61f1eb67234baddb4b04c09406c056086d",
+      "bytes": 26279
+    },
+    {
+      "name": "game_config_generated.rs",
+      "sha256": "be93e7ab295555cfebb712fdf1643435e3ed97016c82288f83943ec3b2cb1bf5",
+      "bytes": 4526
+    },
+    {
+      "name": "game_generated.rs",
+      "sha256": "b5f0673a1aa200b6dafce90826c7a288f9c611d330e27a382be17602da443f29",
+      "bytes": 21892
+    },
+    {
+      "name": "gfx_generated.rs",
+      "sha256": "09b5f3f8a5578e77b6ecee9bbfca7969e75f0bc896bcb5970127c1158dab144c",
+      "bytes": 170674
+    },
+    {
+      "name": "ground_decals_generated.rs",
+      "sha256": "dbd7e13f5af26a0c01daf788699199c7fa190fe3054eecceca895f04ed5b722f",
+      "bytes": 25653
+    },
+    {
+      "name": "icons_generated.rs",
+      "sha256": "f75177ad51bee58b662d04441061d4dbb0d686e94e8fcbcf3d36eed8c25afb4e",
+      "bytes": 4872
+    },
+    {
+      "name": "input_generated.rs",
+      "sha256": "a860b647dca6e8123d14430a68f1862db0ae01ac420551331c692cd1aedd9ec7",
+      "bytes": 17075
+    },
+    {
+      "name": "lights_generated.rs",
+      "sha256": "746dd4351d01dc5316b73c345e0accaab8d4a73c7355a0bcaff5d01c13fad4c8",
+      "bytes": 5015
+    },
+    {
+      "name": "los_generated.rs",
+      "sha256": "97cfe1aa8d71fef16c9f52e5eac458d200475fc13877a76c193c78be3c814cb9",
+      "bytes": 6547
+    },
+    {
+      "name": "markers_generated.rs",
+      "sha256": "d2b8b5c12da6f88eb894ec252c2fba584d058dc1cd230664476b667babb9bb21",
+      "bytes": 4867
+    },
+    {
+      "name": "math_extra_generated.rs",
+      "sha256": "9a35cb75ffdea99834fede4106cade827706c044cdf57cd4b04ee3783d81e46f",
+      "bytes": 7844
+    },
+    {
+      "name": "memory_generated.rs",
+      "sha256": "6cb97f684a354e063448e54789419c431d3e4411ff69e7a7fee1333af9f2e3b2",
+      "bytes": 5309
+    },
+    {
+      "name": "messages_generated.rs",
+      "sha256": "5e9be63eab3f3d41ce5feb9729a7d651068269f9bc6a1a868e9469156df15141",
+      "bytes": 15399
+    },
+    {
+      "name": "metal_map_generated.rs",
+      "sha256": "e9e4cccd63f1d7d670897374f730d4ccbe4d4e2d92d3acfb2c6039dd64959d6f",
+      "bytes": 2470
+    },
+    {
+      "name": "move_ctrl_generated.rs",
+      "sha256": "79be3e46198beeefff906039069053a2efbf5fc11a24e6dbd99e7de793c5fa2b",
+      "bytes": 3853
+    },
+    {
+      "name": "path_finder_generated.rs",
+      "sha256": "8201364bea5b78a3245504b7878125281aff7f3fc4eb35c501cbfc8665e3811c",
+      "bytes": 7989
+    },
+    {
+      "name": "platform_generated.rs",
+      "sha256": "860ddc7cc1583406dc1ed3e45ac5d9371d18eaac53cd9403b13e80cfa8f9398e",
+      "bytes": 1387
+    },
+    {
+      "name": "player_generated.rs",
+      "sha256": "858df60d632ccf4f8ff72390be400b39ede06f59eb50abdf93217df86e4908d4",
+      "bytes": 4961
+    },
+    {
+      "name": "profiling_generated.rs",
+      "sha256": "b917e51b3eecf386840bf5a510332d75ba2ed48ec5794ed40dfa9c52f444252e",
+      "bytes": 8031
+    },
+    {
+      "name": "projectile_control_generated.rs",
+      "sha256": "da6aaa0d01bdc773125740f55083c14faf30eb969ba2469dc1eee7f7bba951c5",
+      "bytes": 11641
+    },
+    {
+      "name": "projectiles_generated.rs",
+      "sha256": "27963baa149c4f3b4602d758acb76ef9a915bfac38fec14c23f8865321666565",
+      "bytes": 14045
+    },
+    {
+      "name": "rml_ui_generated.rs",
+      "sha256": "15d71268ff191145707071f832f27437e0cfc6a105a947ebf39c4b67e1949c64",
+      "bytes": 142838
+    },
+    {
+      "name": "rules_params_generated.rs",
+      "sha256": "7530ca5eeb4f2ade6176c8917c545492e1243d879702601bc2a0d8c75a225381",
+      "bytes": 15366
+    },
+    {
+      "name": "selection_generated.rs",
+      "sha256": "11d61873379981ae66d02ebab035a83deef9a90d5bb76552c7870fc33e1e0443",
+      "bytes": 11249
+    },
+    {
+      "name": "sound_generated.rs",
+      "sha256": "ecbea0620c376c1dad8cb8083018943006bfbb984ea1799326b42d212a94f67c",
+      "bytes": 7945
+    },
+    {
+      "name": "synced_ctrl_generated.rs",
+      "sha256": "fb6beb5d8b9d7c5947367c29cd68adf2a993c562371eddf1e0d207855f5dda15",
+      "bytes": 28
+    },
+    {
+      "name": "system_control_generated.rs",
+      "sha256": "be487b49e7bbec45a434025e2282754ac5cfc8bfc1d625ef24d9fdba24a1f7f9",
+      "bytes": 16654
+    },
+    {
+      "name": "team_control_generated.rs",
+      "sha256": "930a5bff860cd33c8aa1c3cb2718adaf8ff5321b42437f5c27e70a61307c7439",
+      "bytes": 11286
+    },
+    {
+      "name": "teams_generated.rs",
+      "sha256": "a0500982bd8416a7068514f7afc366c5ae87a2a38ba5c8f98dc7ee6e4ff18d34",
+      "bytes": 14406
+    },
+    {
+      "name": "terrain_control_generated.rs",
+      "sha256": "812bc85152f1bfd5225c4e696f84e11e0d3d1b0dedfa4b1f070bdd8f41c1ee10",
+      "bytes": 18131
+    },
+    {
+      "name": "terrain_generated.rs",
+      "sha256": "a47d882076374ac622d50d235559e6f3d10a0ef2c755e04efc82b1ba44ce0951",
+      "bytes": 9432
+    },
+    {
+      "name": "tracing_generated.rs",
+      "sha256": "724700c1193e2d9f18ef0810bc89da3f6c4fcd03e6688b00e6bc7998648a1d9b",
+      "bytes": 8095
+    },
+    {
+      "name": "unit_control_generated.rs",
+      "sha256": "42a432b901a204ee07ce717c57841d06eb682ac2ea19b8baa064e209396c4613",
+      "bytes": 68514
+    },
+    {
+      "name": "unit_defs_generated.rs",
+      "sha256": "590d8937d6a01cde68285fa93240b49abc127bb46c4dff548e1f722509c795a0",
+      "bytes": 15219
+    },
+    {
+      "name": "unit_rendering_generated.rs",
+      "sha256": "094c92d0b70a93056f4d964fc856c8fead5bf385f43400f96e3665a3028df3f3",
+      "bytes": 19227
+    },
+    {
+      "name": "units_commands_generated.rs",
+      "sha256": "c054f89006c55d9a0ea0c5ba9a57a738979c9fc122da2d3362be1ac9629c5692",
+      "bytes": 13442
+    },
+    {
+      "name": "units_info_generated.rs",
+      "sha256": "67286c3a799f6105e931f06bd978ec4eb12bcf18330b52e91ea3dda2de24a87a",
+      "bytes": 37617
+    },
+    {
+      "name": "units_pieces_generated.rs",
+      "sha256": "414418f3ab12eaace455ee32ec422eb3a401d89dde1163ecd36693bbd18c9978",
+      "bytes": 17488
+    },
+    {
+      "name": "units_query_generated.rs",
+      "sha256": "214d25cc8d08d98daa78b2b5b9e35accfd9c438f2aa240ed4cda1ae235a68bfd",
+      "bytes": 19293
+    },
+    {
+      "name": "units_weapons_generated.rs",
+      "sha256": "05dbe4510c75c220c7694264d31720e4e719a4279fbcb825bb231ac54c8e08a2",
+      "bytes": 9556
+    },
+    {
+      "name": "unsynced_ctrl_generated.rs",
+      "sha256": "dc9a4110067cba098a60318cbae87e27243fb891b645eabcd02dfd6476a18907",
+      "bytes": 59185
+    },
+    {
+      "name": "unsynced_read_generated.rs",
+      "sha256": "a8a3ae43254fd580ae794b74c1945a7c3f779813a5f019d7a66a100ee12b6f01",
+      "bytes": 14735
+    },
+    {
+      "name": "utils_generated.rs",
+      "sha256": "e07429410c53dabf24c4b6893d8c748c40efb3459956b3e00ce00302c6bf5169",
+      "bytes": 5571
+    },
+    {
+      "name": "version.rs",
+      "sha256": "2e62c4fd2079a8b8265805aeb15f859b02e1d18d39df180e52ac8b5132f20bca",
+      "bytes": 545
+    },
+    {
+      "name": "vfs_generated.rs",
+      "sha256": "f2064420121e2c876074d2c76bac8e6abf45399e932f353d1c65bc3c79983986",
+      "bytes": 51858
+    },
+    {
+      "name": "weapon_defs_generated.rs",
+      "sha256": "0d99dde217afb354624a5ba8a343b04a984beaee27198906d17cf8961bbfcf96",
+      "bytes": 7894
+    }
+  ]
+}

@@ -2557,7 +2557,7 @@ function NativeApiParityResult(stream, encodedPayload)
 	file:close()
 end
 
-function NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID)
+function NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID, enemyLosUnitID, enemyRadarUnitID, enemyHiddenUnitID)
 	fixtureIDs = {
 		unitID = unitID,
 		featureID = featureID,
@@ -2568,6 +2568,9 @@ function NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weap
 		pieceProjectileID = pieceProjectileID,
 		teamID = teamID,
 		allyTeamID = allyTeamID,
+		enemyLosUnitID = enemyLosUnitID,
+		enemyRadarUnitID = enemyRadarUnitID,
+		enemyHiddenUnitID = enemyHiddenUnitID,
 		groundDecalID = groundDecalID,
 	}
 	ranGeneratedTests = false
@@ -2614,6 +2617,9 @@ end
 
 function GameFrame(frame)
 	if frame == 4 then
+		if Common.mode() == "wasm" and not Common.enableRenderingTests() then
+			return
+		end
 		recordInventory()
 		runRmlUiTests()
 		runGeneratedTests()
@@ -2621,6 +2627,10 @@ function GameFrame(frame)
 		record("game_frame", { value = Spring.GetGameFrame() })
 		record("visible_units", { count = #(Spring.GetVisibleUnits() or {}) })
 	elseif frame == 20 then
+		if Common.mode() == "wasm" and not Common.enableRenderingTests() then
+			Spring.SendCommands("quitforce")
+			return
+		end
 		runGeneratedTests()
 		local options = Spring.GetModOptions() or {}
 		local processTest = tostring(options.native_api_parity_process_test or "")

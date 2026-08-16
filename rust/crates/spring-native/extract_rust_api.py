@@ -18,7 +18,9 @@ def extract_functions_from_file(filepath: Path) -> List[Dict]:
 
     # Pattern to match public functions
     # pub fn function_name(&self, param: Type, ...) -> Result<ReturnType, Error>
-    pattern = r'pub\s+fn\s+(?:r#)?([a-z_][a-z0-9_]*)\s*(?:<[^>]+>)?\s*\(([^)]*)\)\s*(?:->\s*([^{;]+))?'
+    # Stop the return type at the function body rather than at a semicolon:
+    # fixed-array types such as `[f32; 16]` legitimately contain one.
+    pattern = r'pub\s+fn\s+(?:r#)?([a-z_][a-z0-9_]*)\s*(?:<[^>]+>)?\s*\(([^)]*)\)\s*(?:->\s*([^{}]+?))?\s*\{'
 
     for match in re.finditer(pattern, content):
         func_name = match.group(1)
@@ -27,8 +29,7 @@ def extract_functions_from_file(filepath: Path) -> List[Dict]:
 
         params = []
         if param_str.strip():
-            # Split top-level commas (simplistic but fine for our generated signatures)
-            raw_params = [p.strip() for p in param_str.split(',') if p.strip()]
+            raw_params = split_top_level_commas(param_str)
             for p in raw_params:
                 # skip self receivers
                 if p in ('&self', 'self', '&mut self'):
@@ -47,6 +48,29 @@ def extract_functions_from_file(filepath: Path) -> List[Dict]:
         })
 
     return functions
+
+
+def split_top_level_commas(value: str) -> List[str]:
+    """Split a Rust parameter list without breaking generic/array types."""
+    parts = []
+    start = 0
+    depth = 0
+    pairs = {'(': ')', '<': '>', '[': ']', '{': '}'}
+    closers = set(pairs.values())
+    for index, character in enumerate(value):
+        if character in pairs:
+            depth += 1
+        elif character in closers and depth:
+            depth -= 1
+        elif character == ',' and depth == 0:
+            part = value[start:index].strip()
+            if part:
+                parts.append(part)
+            start = index + 1
+    tail = value[start:].strip()
+    if tail:
+        parts.append(tail)
+    return parts
 
 def extract_struct_methods(out_dir: Path) -> Dict[str, List[Dict]]:
     """Extract methods from all generated API files."""

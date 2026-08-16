@@ -25,6 +25,7 @@
           "keys"
         ]
       },
+      "order_insensitive_fields": ["keys"],
       "report": {
         "lua_setter": "n/a",
         "native_setter": "n/a",
@@ -73,6 +74,7 @@
           "keys"
         ]
       },
+      "order_insensitive_fields": ["keys"],
       "report": {
         "lua_setter": "n/a",
         "native_setter": "n/a",

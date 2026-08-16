@@ -7,3 +7,8 @@
 *.sh text eol=lf
 *.py text eol=lf
 
+# Generated bindings are large and mechanically reproducible. Keep the public
+# WIT surface readable because it is the artifact humans review for API drift.
+rts/wasm/generated/**                    linguist-generated=true -diff
+rust/crates/spring-native/generated/**   linguist-generated=true -diff
+rts/wasm/generated/wit/**                linguist-generated=true diff

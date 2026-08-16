@@ -131,6 +131,7 @@ add_subdirectory(Menu)
 add_subdirectory(Map)
 add_subdirectory(Net)
 add_subdirectory(Sim)
+add_subdirectory(WasmInterface)
 #add_subdirectory(System) # this is already added in ../
 
 make_global_var(engineSources
@@ -144,6 +145,7 @@ make_global_var(engineSources
 		${sources_engine_Menu}
 		${sources_engine_System}
 		${sources_engine_ExternalAI}
+		${sources_engine_WasmInterface}
 	)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp/include) #FIXME: hack for rts/Rendering/Models/IModelParser.cpp
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/fastgltf/include)

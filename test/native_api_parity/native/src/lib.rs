@@ -150,6 +150,8 @@ impl NativeModule for NativeApiParity {
             self.check_debug_input_key_readback(&parsed)
         } else if name == "debug_input.mouse_readback" {
             self.check_debug_input_mouse_readback(&parsed)
+        } else if name == "multi_ally_visibility" {
+            self.check_multi_ally_visibility(&parsed)
         } else if let Some(test_name) = name.strip_prefix("set_native_") {
             self.find(test_name)
                 .ok_or_else(|| format!("unknown native setter check `{name}`"))

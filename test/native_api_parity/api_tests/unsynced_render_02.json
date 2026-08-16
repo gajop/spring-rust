@@ -47,7 +47,7 @@
       "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.GetFeatureTransformMatrix"]},
       "native": {"set": [], "get": ["Features.get_feature_transform_matrix"]},
-      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16"]},
+      "compare": {"mode": "fields", "stream": "shape", "epsilon": 0.05, "fields": ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12", "m13", "m14", "m15", "m16"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureTransformMatrix`", "native_getter": "`Features.get_feature_transform_matrix`", "fields": "`m1` ... `m16`"},
       "rust": {"check": "check_unsynced_render_data", "set": "set_noop"},
       "params": {},

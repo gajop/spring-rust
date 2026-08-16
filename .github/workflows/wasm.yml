@@ -1,0 +1,148 @@
+name: Wasm API
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/wasm.yml"
+      - "rts/NativeInterface/**"
+      - "rts/WasmInterface/**"
+      - "rts/wasm/**"
+      - "CMakeLists.txt"
+      - "rts/CMakeLists.txt"
+      - "rts/Game/**"
+      - "rust/**"
+      - "test/CMakeLists.txt"
+      - "test/wasm_api/**"
+      - "test/native_api_parity/**"
+      - "docker-build-v2/**"
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/wasm.yml"
+      - "rts/NativeInterface/**"
+      - "rts/WasmInterface/**"
+      - "rts/wasm/**"
+      - "CMakeLists.txt"
+      - "rts/CMakeLists.txt"
+      - "rts/Game/**"
+      - "rust/**"
+      - "test/CMakeLists.txt"
+      - "test/wasm_api/**"
+      - "test/native_api_parity/**"
+      - "docker-build-v2/**"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Install Wasm target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev
+
+      - name: Locate libclang
+        run: echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib" >> "$GITHUB_ENV"
+
+      - name: Check Rust formatting
+        run: cargo fmt --manifest-path rust/Cargo.toml --all --check
+
+      - name: Test Rust workspace
+        run: cargo test --manifest-path rust/Cargo.toml --workspace
+
+      - name: Check generated Wasm artifacts
+        run: python3 rts/wasm/verify_codegen.py
+
+      - name: Check native generated snapshot
+        run: |
+          SPRING_NATIVE_REGENERATE=1 cargo build --manifest-path rust/Cargo.toml -p spring-native --lib
+          python3 rust/crates/spring-native-codegen/snapshot_native.py --root . --check
+
+      - name: Check parity generated artifacts
+        run: |
+          python3 test/native_api_parity/generate_from_spec.py
+          python3 test/wasm_api/parity_guest/generate_probe.py
+          git diff --exit-code -- \
+            test/native_api_parity/native/src/generated_tests.rs \
+            test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/generated_api_tests.lua \
+            test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/wasm_api_probe_tests.lua \
+            test/wasm_api/parity_guest/wit/parity.wit \
+            test/wasm_api/parity_guest/src/probe_generated.rs \
+            test/wasm_api/parity_guest/probe_manifest.json
+
+      - name: Build engine and Wasm tests with ASAN
+        run: ./docker-build-v2/build.sh linux -DUSE_ASAN=ON
+
+      - name: Run engine tests
+        run: ./docker-build-v2/build.sh --compile linux -t check
+
+      - name: Test Wasm guest fixture
+        run: |
+          cargo fmt --manifest-path test/wasm_api/guest/Cargo.toml --all --check
+          cargo fmt --manifest-path test/wasm_api/parity_guest/Cargo.toml --all --check
+          cargo fmt --manifest-path test/wasm_api/value_guest/Cargo.toml --all --check
+          cargo fmt --manifest-path test/wasm_api/allocator_guest/Cargo.toml --all --check
+          cargo test --manifest-path test/wasm_api/guest/Cargo.toml
+          cargo test --manifest-path test/wasm_api/parity_guest/Cargo.toml
+          cargo test --manifest-path test/wasm_api/value_guest/Cargo.toml
+          cargo test --manifest-path test/wasm_api/allocator_guest/Cargo.toml
+
+      - name: Build and verify Component value fixture
+        run: |
+          cargo build --manifest-path test/wasm_api/value_guest/Cargo.toml \
+            --target wasm32-unknown-unknown --release
+          cargo run --manifest-path test/wasm_api/value_guest/Cargo.toml \
+            --bin componentize -- \
+            test/wasm_api/value_guest/target/wasm32-unknown-unknown/release/recoil_wasm_value_guest.wasm \
+            /tmp/recoil_wasm_value_guest.component.wasm
+          python3 test/wasm_api/embed_component.py \
+            /tmp/recoil_wasm_value_guest.component.wasm \
+            /tmp/ComponentValueFixture.h \
+            kComponentValueFixture \
+            'the Rust wit-bindgen variant/resource fixture'
+          cmp /tmp/ComponentValueFixture.h test/engine/WasmInterface/ComponentValueFixture.h
+
+      - name: Build and verify hostile allocator fixture
+        run: |
+          cargo build --manifest-path test/wasm_api/allocator_guest/Cargo.toml \
+            --target wasm32-unknown-unknown --release
+          cargo run --manifest-path test/wasm_api/allocator_guest/Cargo.toml \
+            --bin componentize -- \
+            test/wasm_api/allocator_guest/target/wasm32-unknown-unknown/release/recoil_wasm_allocator_guest.wasm \
+            /tmp/recoil_wasm_allocator_guest.component.wasm
+          python3 test/wasm_api/embed_component.py \
+            /tmp/recoil_wasm_allocator_guest.component.wasm \
+            /tmp/ComponentAllocatorFixture.h \
+            kComponentAllocatorFixture \
+            'the hostile canonical allocator fixture'
+          cmp /tmp/ComponentAllocatorFixture.h test/engine/WasmInterface/ComponentAllocatorFixture.h
+
+      - name: Run native parity fixture
+        run: |
+          python3 test/native_api_parity/run_harness.py \
+            --mode both \
+            --cases 3 \
+            --timeout 180 \
+            --skip-callin-compare \
+            --output-dir test/native_api_parity/out-ci-native
+
+      - name: Run Wasm parity fixture
+        run: |
+          python3 test/native_api_parity/run_harness.py \
+            --mode wasm \
+            --cases 3 \
+            --timeout 180 \
+            --output-dir test/native_api_parity/out-ci-wasm

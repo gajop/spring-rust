@@ -61,7 +61,13 @@ pub struct ViewGeometry {
 ///         Ok(())
 ///     }
 ///
-///     fn unit_created(&mut self, unit_id: i32, builder_id: i32) -> Result<(), Error> {
+///     fn unit_created(
+///         &mut self,
+///         unit_id: i32,
+///         _unit_def_id: i32,
+///         _unit_team: i32,
+///         builder_id: i32,
+///     ) -> Result<(), Error> {
 ///         println!("Unit {} created by {}", unit_id, builder_id);
 ///         Ok(())
 ///     }
@@ -91,10 +97,19 @@ pub trait NativeModule: Sized {
     ///         }
     ///     }
     ///
-    ///     fn unit_created(&mut self, unit_id: i32, builder_id: i32) -> Result<(), Error> {
+    ///     fn unit_created(
+    ///         &mut self,
+    ///         unit_id: i32,
+    ///         _unit_def_id: i32,
+    ///         _unit_team: i32,
+    ///         builder_id: i32,
+    ///     ) -> Result<(), Error> {
     ///         // Access Spring APIs via self.interface
     ///         let units_info = self.interface.units_info();
-    ///         let pos = units_info.get_unit_position(unit_id, false, false)?;
+    ///         let pos = units_info.get_unit_position(
+    ///             unit_id,
+    ///             spring_native::GetUnitPositionOptions::default(),
+    ///         )?;
     ///         println!("Unit at ({}, {}, {})", pos.x, pos.y, pos.z);
     ///         Ok(())
     ///     }

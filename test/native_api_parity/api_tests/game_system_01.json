@@ -36,7 +36,12 @@
         "check": "check_game_frame",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetGameFrame",
+        "args": [],
+        "returns": ["frame"]
+      }
     },
     {
       "id": "game_seconds",
@@ -73,7 +78,12 @@
         "check": "check_game_seconds",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetGameSeconds",
+        "args": [],
+        "returns": ["seconds"]
+      }
     },
     {
       "id": "heading_from_facing",

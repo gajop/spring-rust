@@ -11,7 +11,15 @@
       "compare": {"mode": "fields", "fields": ["inLosOrRadar", "inLos", "inRadar", "inJammer"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPositionLosState`", "native_getter": "`Los.get_position_los_state`", "fields": "`inLosOrRadar`, `inLos`, `inRadar`, `inJammer`"},
       "rust": {"check": "check_position_los_state", "set": "set_noop"},
-      "params": {"allyTeamID": {"type": "i32", "fixture": "allyTeamID"}}
+      "params": {
+        "point": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
+        "allyTeamID": {"type": "i32", "fixture": "allyTeamID"}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetPositionLosState",
+        "args": ["value.x", "value.y", "value.z", "fixture.allyTeamID"],
+        "returns": ["inLosOrRadar", "inLos", "inRadar", "inJammer"]
+      }
     },
     {
       "id": "radar_error_params",
@@ -85,7 +93,17 @@
       "compare": {"mode": "fields", "fields": ["hasTask", "cmdID", "hasTarget", "targetID"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitWorkerTask`", "native_getter": "`UnitsInfo.get_unit_worker_task`", "fields": "`hasTask`, `cmdID`, `hasTarget`, `targetID`"},
       "rust": {"check": "check_unit_worker_task", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitWorkerTask",
+        "args": ["fixture.unitID"],
+        "returns": [
+          {"field": "hasTask", "index": 1, "transform": "truthy"},
+          {"field": "cmdID", "index": 1},
+          {"field": "hasTarget", "index": 2, "transform": "truthy"},
+          {"field": "targetID", "index": 2}
+        ]
+      }
     },
     {
       "id": "get_ally_team_info",
@@ -97,7 +115,15 @@
       "compare": {"mode": "fields", "fields": ["count", "keys"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetAllyTeamInfo`", "native_getter": "`Teams.get_ally_team_info`", "fields": "`count`, `keys`"},
       "rust": {"check": "check_ally_team_info", "set": "set_noop"},
-      "params": {"allyTeamID": {"type": "i32", "fixture": "allyTeamID"}}
+      "params": {"allyTeamID": {"type": "i32", "fixture": "allyTeamID"}},
+      "lua_runtime": {
+        "call": "Spring.GetAllyTeamInfo",
+        "args": ["fixture.allyTeamID"],
+        "returns": [
+          {"field": "keys", "index": 1, "transform": "table_keys"},
+          {"field": "count", "index": 1, "transform": "table_count"}
+        ]
+      }
     },
     {
       "id": "get_unit_def_dimensions",
@@ -109,7 +135,12 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["height", "radius", "midx", "minx", "maxx", "midy", "miny", "maxy", "midz", "minz", "maxz"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitDefDimensions`", "native_getter": "`Utils.get_unit_def_dimensions`", "fields": "`height`, `radius`, `midx`, `minx`, `maxx`, `midy`, `miny`, `maxy`, `midz`, `minz`, `maxz`"},
       "rust": {"check": "check_unit_def_dimensions", "set": "set_noop"},
-      "params": {"unitDefID": {"type": "i32", "fixture": "unitDefID"}}
+      "params": {"unitDefID": {"type": "i32", "fixture": "unitDefID"}},
+      "lua_runtime": {
+        "call": "Spring.GetUnitDefDimensions",
+        "args": ["fixture.unitDefID"],
+        "returns": ["height", "radius", "midx", "minx", "maxx", "midy", "miny", "maxy", "midz", "minz", "maxz"]
+      }
     },
     {
       "id": "map_square_terrain_type",
@@ -135,7 +166,15 @@
       "compare": {"mode": "fields", "fields": ["hasUnit", "unitIDResult"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetPlayerControlledUnit`", "native_getter": "`Teams.get_player_controlled_unit`", "fields": "`hasUnit`, `unitIDResult`"},
       "rust": {"check": "check_player_controlled_unit", "set": "set_noop"},
-      "params": {"playerID": {"type": "i32", "fixed": 0}}
+      "params": {"playerID": {"type": "i32", "fixed": 0}},
+      "lua_runtime": {
+        "call": "Spring.GetPlayerControlledUnit",
+        "args": ["value.playerID"],
+        "returns": [
+          {"field": "hasUnit", "index": 1, "transform": "truthy"},
+          {"field": "unitIDResult", "index": 1}
+        ]
+      }
     },
     {
       "id": "get_team_lua_ai",
@@ -147,7 +186,15 @@
       "compare": {"mode": "fields", "fields": ["hasLuaAI", "luaAI"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetTeamLuaAI`", "native_getter": "`Teams.get_team_lua_ai`", "fields": "`hasLuaAI`, `luaAI`"},
       "rust": {"check": "check_team_lua_ai", "set": "set_noop"},
-      "params": {"teamID": {"type": "i32", "fixture": "teamID"}}
+      "params": {"teamID": {"type": "i32", "fixture": "teamID"}},
+      "lua_runtime": {
+        "call": "Spring.GetTeamLuaAI",
+        "args": ["fixture.teamID"],
+        "returns": [
+          {"field": "hasLuaAI", "index": 1, "transform": "truthy"},
+          {"field": "luaAI", "index": 1}
+        ]
+      }
     },
     {
       "id": "get_unit_cmd_descs",
@@ -159,7 +206,12 @@
       "compare": {"mode": "fields", "fields": ["count"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitCmdDescs`", "native_getter": "`UnitsCommands.get_unit_cmd_descs`", "fields": "`count`"},
       "rust": {"check": "check_unit_commands_table_count", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitCmdDescs",
+        "args": ["fixture.unitID"],
+        "returns": [{"field": "count", "index": 1, "transform": "table_count"}]
+      }
     },
     {
       "id": "unit_harvest_storage",
@@ -188,7 +240,14 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["x", "y", "z"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitArrayCentroid`", "native_getter": "`UnitsQuery.get_unit_array_centroid`", "fields": "`x`, `y`, `z`"},
       "rust": {"check": "check_unit_centroid", "set": "set_noop"},
-      "params": {}
+      "params": {
+        "unitIDs": {"type": "object", "fixture_list": "unitID"}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitArrayCentroid",
+        "args": ["value.unitIDs"],
+        "returns": ["x", "y", "z"]
+      }
     },
     {
       "id": "get_unit_map_centroid",
@@ -200,7 +259,14 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["x", "y", "z"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitMapCentroid`", "native_getter": "`UnitsQuery.get_unit_map_centroid`", "fields": "`x`, `y`, `z`"},
       "rust": {"check": "check_unit_centroid", "set": "set_noop"},
-      "params": {}
+      "params": {
+        "unitMap": {"type": "object", "fixture_map": "unitID"}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetUnitMapCentroid",
+        "args": ["value.unitMap"],
+        "returns": ["x", "y", "z"]
+      }
     },
     {
       "id": "get_unit_tooltip",
@@ -212,7 +278,12 @@
       "compare": {"mode": "fields", "fields": ["tooltip"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitTooltip`", "native_getter": "`UnitsInfo.get_unit_tooltip`", "fields": "`tooltip`"},
       "rust": {"check": "check_unit_tooltip", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitTooltip",
+        "args": ["fixture.unitID"],
+        "returns": ["tooltip"]
+      }
     },
     {
       "id": "unit_physical_state_bit",
@@ -257,11 +328,11 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetSideData"]},
       "native": {"set": [], "get": ["Game.get_side_data"]},
-      "compare": {"mode": "fields", "fields": ["normalizedSideName", "caseName", "startUnit"]},
+      "compare": {"mode": "fields", "fields": ["normalizedSideName", "caseName", "startUnit"], "missing": {"normalizedSideName": "arm"}},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSideData`", "native_getter": "`Game.get_side_data`", "fields": "`normalizedSideName`, `caseName`, `startUnit`"},
       "rust": {"check": "check_side_data", "set": "set_noop"},
       "params": {"sideName": {"type": "string", "fixed": "arm"}},
-      "lua_runtime": {"call": "Spring.GetSideData", "args": ["value.sideName"], "returns": ["startUnit", "caseName"]}
+      "lua_runtime": {"call": "Spring.GetSideData", "args": ["value.sideName"], "returns": [{"field": "normalizedSideName", "index": 1, "path": ["sideName"]}, {"field": "startUnit", "index": 1}, {"field": "caseName", "index": 2}]}
     },
     {
       "id": "side_data_by_index",
@@ -273,7 +344,7 @@
       "compare": {"mode": "fields", "fields": ["normalizedSideName", "caseName", "startUnit"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSideData`", "native_getter": "`Game.get_side_data_by_index`", "fields": "`normalizedSideName`, `caseName`, `startUnit`"},
       "rust": {"check": "check_side_data_by_index", "set": "set_noop"},
-      "params": {"sideIndex": {"type": "i32", "fixed": 1}},
+      "params": {"sideIndex": {"type": "i32", "fixed": 1, "native_transform": "lua_one_based"}},
       "lua_runtime": {"call": "Spring.GetSideData", "args": ["value.sideIndex"], "returns": ["normalizedSideName", "startUnit", "caseName"]}
     },
     {
@@ -311,7 +382,19 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["x", "y", "z"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.ClosestBuildPos`", "native_getter": "`Utils.closest_build_pos`", "fields": "`x`, `y`, `z`"},
       "rust": {"check": "check_utils_vec3", "set": "set_noop"},
-      "params": {}
+      "params": {
+        "teamID": {"type": "i32", "fixture": "teamID"},
+        "unitDefID": {"type": "i32", "fixture": "unitDefID"},
+        "pos": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"], "expands_from": ["x", "y", "z"]},
+        "searchRadius": {"type": "f32", "fixed": 0},
+        "minDistance": {"type": "i32", "fixed": 0},
+        "facing": {"type": "i32", "fixed": 0}
+      },
+      "lua_runtime": {
+        "call": "Spring.ClosestBuildPos",
+        "args": ["value.teamID", "value.unitDefID", "value.x", "value.y", "value.z", "value.searchRadius", "value.minDistance", "value.facing"],
+        "returns": ["x", "y", "z"]
+      }
     },
     {
       "id": "test_build_order",
@@ -323,7 +406,20 @@
       "compare": {"mode": "fields", "fields": ["status", "canBuild", "featureID"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.TestBuildOrder`", "native_getter": "`Utils.test_build_order`", "fields": "`status`, `canBuild`, `featureID`"},
       "rust": {"check": "check_test_build_order", "set": "set_noop"},
-      "params": {}
+      "params": {
+        "unitDefID": {"type": "i32", "fixture": "unitDefID"},
+        "point": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
+        "facing": {"type": "i32", "fixed": 0}
+      },
+      "lua_runtime": {
+        "call": "Spring.TestBuildOrder",
+        "args": ["fixture.unitDefID", "value.x", "value.y", "value.z", "value.facing"],
+        "returns": [
+          {"field": "status", "index": 1},
+          {"field": "canBuild", "index": 1, "transform": "build_status_can_build"},
+          {"field": "featureID", "index": 2}
+        ]
+      }
     },
     {
       "id": "unit_rotation",
@@ -376,7 +472,12 @@
       "compare": {"mode": "fields", "fields": ["groups"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetTeamUnitsSorted`", "native_getter": "`UnitsQuery.get_team_units_sorted`", "fields": "`groups`"},
       "rust": {"check": "check_team_units_sorted", "set": "set_noop"},
-      "params": {"teamID": {"type": "i32", "fixture": "teamID"}}
+      "params": {"teamID": {"type": "i32", "fixture": "teamID"}},
+      "lua_runtime": {
+        "call": "Spring.GetTeamUnitsSorted",
+        "args": ["fixture.teamID"],
+        "returns": [{"field": "groups", "transform": "unit_def_unit_groups"}]
+      }
     },
     {
       "id": "unit_buildee_radius",
@@ -412,7 +513,12 @@
       "compare": {"mode": "fields", "fields": ["isBlocking", "isSolidObjectCollidable", "isProjectileCollidable", "isRaySegmentCollidable", "crushable", "blockEnemyPushing", "blockHeightChanges"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureBlocking`", "native_getter": "`Features.get_feature_blocking`", "fields": "`isBlocking`, `isSolidObjectCollidable`, `isProjectileCollidable`, `isRaySegmentCollidable`, `crushable`, `blockEnemyPushing`, `blockHeightChanges`"},
       "rust": {"check": "check_feature_blocking", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetFeatureBlocking",
+        "args": ["fixture.featureID"],
+        "returns": ["isBlocking", "isSolidObjectCollidable", "isProjectileCollidable", "isRaySegmentCollidable", "crushable", "blockEnemyPushing", "blockHeightChanges"]
+      }
     },
     {
       "id": "unit_stockpile_fixed_shape",
@@ -464,7 +570,7 @@
       "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.GetUnitIsTransporting"]},
       "native": {"set": [], "get": ["UnitsInfo.get_unit_is_transporting"]},
-      "compare": {"mode": "fields", "fields": ["isTransporting", "unitIDs"]},
+      "compare": {"mode": "fields", "fields": ["isTransporting", "unitIDs"], "missing": {"unitIDs": []}},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitIsTransporting`", "native_getter": "`UnitsInfo.get_unit_is_transporting`", "fields": "`isTransporting`, `unitIDs`"},
       "rust": {"check": "check_unit_is_transporting_fixed", "set": "set_noop"},
       "params": {},
@@ -528,8 +634,8 @@
         "args": ["fixture.unitID"],
         "returns": [
           {"field": "wasHit", "index": 1, "transform": "truthy"},
-          {"field": "pieceName", "index": 1},
-          {"field": "frame", "index": 2}
+          {"field": "pieceName", "index": 1, "transform": "nil_to_empty"},
+          {"field": "frame", "index": 2, "transform": "nil_to_minus_one"}
         ]
       }
     },
@@ -549,8 +655,8 @@
         "args": ["fixture.featureID"],
         "returns": [
           {"field": "wasHit", "index": 1, "transform": "truthy"},
-          {"field": "pieceName", "index": 1},
-          {"field": "frame", "index": 2}
+          {"field": "pieceName", "index": 1, "transform": "nil_to_empty"},
+          {"field": "frame", "index": 2, "transform": "nil_to_minus_one"}
         ]
       }
     },
@@ -651,11 +757,11 @@
         "args": ["value.teamID"],
         "returns": [
           {"field": "hasAI", "index": 1, "transform": "truthy"},
-          {"field": "skirmishAIID", "index": 1},
-          {"field": "name", "index": 2},
-          {"field": "hostingPlayerID", "index": 3},
-          {"field": "shortName", "index": 4},
-          {"field": "version", "index": 5},
+          {"field": "skirmishAIID", "index": 1, "when": {"field": "hasAI", "truthy": true}},
+          {"field": "name", "index": 2, "when": {"field": "hasAI", "truthy": true}},
+          {"field": "hostingPlayerID", "index": 3, "when": {"field": "hasAI", "truthy": true}},
+          {"field": "shortName", "index": 4, "when": {"field": "hasAI", "truthy": true}},
+          {"field": "version", "index": 5, "when": {"field": "hasAI", "truthy": true}},
           {"field": "optionCount", "index": 6, "transform": "table_count"}
         ]
       }

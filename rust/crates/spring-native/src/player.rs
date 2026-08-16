@@ -12,7 +12,7 @@ pub struct RosterEntry {
     pub is_spectator: bool,
     pub is_active: bool,
     pub ping_time: f32,
-    pub cpu_usage: u32,
+    pub cpu_usage: f32,
     pub country: String,
     pub rank: i32,
 }

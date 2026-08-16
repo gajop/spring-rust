@@ -36,6 +36,48 @@ DEFAULT_SPRING_HEADLESS = ENGINE_INSTALL / "spring-headless"
 GAME_FIXTURE = HARNESS / "fixtures" / "game.sdd"
 NATIVE_CRATE = HARNESS / "native" / "Cargo.toml"
 NATIVE_SO = HARNESS / "native" / "target" / "release" / "libnative_api_parity.so"
+LSAN_SUPPRESSION = HARNESS / "lsan.supp"
+WASM_PARITY_CRATE = ROOT / "test" / "wasm_api" / "parity_guest" / "Cargo.toml"
+WASM_PARITY_CORE = (
+    ROOT
+    / "test"
+    / "wasm_api"
+    / "parity_guest"
+    / "target"
+    / "wasm32-unknown-unknown"
+    / "release"
+    / "recoil_wasm_parity_guest.wasm"
+)
+WASM_PARITY_MODULE = (
+    ROOT
+    / "test"
+    / "wasm_api"
+    / "parity_guest"
+    / "target"
+    / "recoil_wasm_parity_guest.component.wasm"
+)
+WASM_PROBE_GENERATOR = ROOT / "test" / "wasm_api" / "parity_guest" / "generate_probe.py"
+WASM_CONTEXTS = ("synced_gadget", "unsynced_gadget", "gaia_synced", "gaia_unsynced")
+WASM_CONTEXT_MODULES = {
+	"synced_gadget": WASM_PARITY_MODULE,
+	"unsynced_gadget": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.unsynced_gadget.component.wasm",
+	"gaia_synced": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.gaia_synced.component.wasm",
+	"gaia_unsynced": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.gaia_unsynced.component.wasm",
+}
+WASM_CONTEXT_MANIFESTS = {
+	context: ROOT / "test" / "wasm_api" / "parity_guest" / f"probe_manifest_{context}.json"
+	for context in WASM_CONTEXTS
+}
+WASM_CONTEXT_MAP_MANIFESTS = {
+	context: ROOT / "test" / "wasm_api" / "parity_guest" / f"map_manifest_{context}.txt"
+	for context in WASM_CONTEXTS
+}
+WASM_ENVIRONMENT_NAMES = {
+	"synced_gadget": "rules-synced",
+	"unsynced_gadget": "rules-unsynced",
+	"gaia_synced": "gaia-synced",
+	"gaia_unsynced": "gaia-unsynced",
+}
 LUA_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "lua_functions.md"
 RUST_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "rust_functions.md"
 API_SURFACE_AUDIT_DOC = ROOT / "rust" / "crates" / "spring-native" / "api_surface_audit.md"
@@ -50,6 +92,9 @@ RESULT_STREAMS = (
 )
 CALLIN_LUA_STREAM = "callin_lua.jsonl"
 CALLIN_NATIVE_STREAM = "callin_native.jsonl"
+WASM_PARITY_STREAM = "wasm.jsonl"
+WASM_PROBE_MANIFEST = ROOT / "test" / "wasm_api" / "parity_guest" / "probe_manifest.json"
+WASM_VACUITY_THRESHOLD = 0.05
 
 # The Lua and native symbols named Shutdown are separate lifecycle hooks: Lua
 # shuts down each Lua handle, while native shuts down the loaded module.  They
@@ -210,7 +255,11 @@ def parse_args() -> argparse.Namespace:
         type=int,
         help="also run the first N generated synced tests (for focused diagnostics)",
     )
-    parser.add_argument("--mode", choices=("lua", "native", "both", "compare"), default="both")
+    parser.add_argument(
+        "--mode",
+        choices=("lua", "native", "wasm", "both", "compare"),
+        default="both",
+    )
     parser.add_argument(
         "--load-native-module-for-lua",
         action="store_true",
@@ -225,6 +274,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--keep-workdir", action="store_true")
     parser.add_argument("--skip-native-build", action="store_true")
+    parser.add_argument("--skip-wasm-build", action="store_true")
+    parser.add_argument(
+        "--wasm-context",
+        choices=WASM_CONTEXTS,
+        default="synced_gadget",
+        help="Wasm execution environment used by --mode wasm",
+    )
     return parser.parse_args()
 
 
@@ -237,6 +293,89 @@ def ensure_native_built(skip: bool) -> None:
         cwd=ROOT,
         check=True,
     )
+
+
+def ensure_wasm_built(skip: bool) -> None:
+    if skip:
+        missing = [path for path in WASM_CONTEXT_MODULES.values() if not path.is_file()]
+        missing += [
+            path for context, path in WASM_CONTEXT_MANIFESTS.items()
+            if context != "synced_gadget" and not path.is_file()
+        ]
+        missing += [
+            path for context, path in WASM_CONTEXT_MAP_MANIFESTS.items()
+            if context.startswith("gaia_") and not path.is_file()
+        ]
+        if missing:
+            raise RuntimeError("missing Wasm parity components: " + ", ".join(map(str, missing)))
+        return
+
+    installed_targets = subprocess.run(
+        ["rustup", "target", "list", "--installed"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    if "wasm32-unknown-unknown" not in installed_targets:
+        subprocess.run(["rustup", "target", "add", "wasm32-unknown-unknown"], cwd=ROOT, check=True)
+    for context in ("unsynced_gadget", "gaia_synced", "gaia_unsynced", "synced_gadget"):
+        generator_args = ["python3", str(WASM_PROBE_GENERATOR), "--context", context]
+        if context == "synced_gadget":
+            generator_args.extend(
+                ["--lua-output", str(GAME_FIXTURE / "LuaRules/Utilities/wasm_api_probe_tests.lua")]
+            )
+        else:
+            generator_args.extend(
+                [
+                    "--lua-output",
+                    str(GAME_FIXTURE / f"LuaRules/Utilities/wasm_api_probe_tests_{context}.lua"),
+                ]
+            )
+        generator_args.extend(["--manifest-output", str(WASM_CONTEXT_MANIFESTS[context])])
+        if context == "synced_gadget":
+            # Keep the historical default manifest as the checked-in/current
+            # probe description used by focused tooling.
+            generator_args[-1:] = [str(WASM_PROBE_MANIFEST)]
+        subprocess.run(generator_args, cwd=ROOT, check=True)
+        subprocess.run(
+            [
+                "cargo",
+                "build",
+                "--manifest-path",
+                str(WASM_PARITY_CRATE),
+                "--target",
+                "wasm32-unknown-unknown",
+                "--release",
+            ],
+            cwd=ROOT,
+            check=True,
+        )
+        component = WASM_CONTEXT_MODULES[context]
+        component.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run(
+            [
+                "cargo",
+                "run",
+                "--manifest-path",
+                str(WASM_PARITY_CRATE),
+                "--bin",
+                "componentize",
+                "--release",
+                "--",
+                str(WASM_PARITY_CORE),
+                str(component),
+            ],
+            cwd=ROOT,
+            check=True,
+        )
+        if not component.is_file():
+            raise RuntimeError(f"Wasm parity component was not produced: {component}")
+        if context.startswith("gaia_"):
+            WASM_CONTEXT_MAP_MANIFESTS[context].write_text(
+                f"module(parity, LuaGaia/wasm/parity.wasm, {WASM_ENVIRONMENT_NAMES[context]}, 0)\n",
+                encoding="utf-8",
+            )
 
 
 def link_or_copy(src: Path, dst: Path) -> None:
@@ -252,14 +391,30 @@ def link_or_copy(src: Path, dst: Path) -> None:
             shutil.copy2(src, dst)
 
 
-def prepare_datadir(workdir: Path, map_arg: str | None) -> tuple[Path, str | None]:
+def prepare_datadir(
+    workdir: Path,
+    map_arg: str | None,
+    wasm_module: Path | None = None,
+    wasm_context: str = "synced_gadget",
+) -> tuple[Path, str | None]:
     datadir = workdir / "data"
     games = datadir / "games"
     maps = datadir / "maps"
     games.mkdir(parents=True)
     maps.mkdir(parents=True)
 
-    link_or_copy(GAME_FIXTURE, games / "native_api_parity.sdd")
+    game_destination = games / "native_api_parity.sdd"
+    if wasm_module is None or wasm_context.startswith("gaia_"):
+        link_or_copy(GAME_FIXTURE, game_destination)
+    else:
+        shutil.copytree(GAME_FIXTURE, game_destination, symlinks=True)
+        wasm_directory = game_destination / "LuaRules" / "wasm"
+        wasm_directory.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(wasm_module, wasm_directory / "parity.wasm")
+        (wasm_directory / "manifest.txt").write_text(
+            f"module(parity, LuaRules/wasm/parity.wasm, {WASM_ENVIRONMENT_NAMES[wasm_context]}, 0)\n",
+            encoding="utf-8",
+        )
     for archive_name in ("springcontent", "maphelper", "bitmaps", "cursors"):
         link_or_copy(BASE_CONTENT / archive_name, games / f"{archive_name}.sdd")
 
@@ -296,11 +451,23 @@ def write_script(
     use_blank_map: bool,
     args: argparse.Namespace,
     test_seed: int,
+    wasm_context: str,
+    wasm_module: Path | None,
 ) -> None:
     init_blank = "1" if use_blank_map else "0"
     host_port = random.SystemRandom().randint(20_000, 50_000)
+    # The parity fixture is the test harness.  Its Lua handles perform the
+    # assertions and issue the in-engine quit command; the launcher only
+    # waits for that natural exit.  Keep LuaUI enabled because it is the
+    # result bridge for unsynced gadget and Gaia probes, but its expensive
+    # ordinary parity/UI cases are gated by native_api_parity_mode=wasm.
     map_options = ""
     if use_blank_map:
+        gaia_options = ""
+        if wasm_module is not None and wasm_context.startswith("gaia_"):
+            gaia_options = f"""
+        blank_map_gaia_manifest={WASM_CONTEXT_MAP_MANIFESTS[wasm_context]};
+        blank_map_gaia_module={wasm_module};"""
         map_options = f"""
     [MAPOPTIONS]
     {{
@@ -310,6 +477,7 @@ def write_script(
         blank_map_color_r=64;
         blank_map_color_g=128;
         blank_map_color_b=64;
+{gaia_options}
     }}
 """
 
@@ -331,14 +499,14 @@ def write_script(
     GameStartDelay=0;
     MaxSpeed=1;
     MinSpeed=1;
-    NumPlayers=1;
-    NumTeams=1;
-    NumAllyTeams=1;
+    NumPlayers=2;
+    NumTeams=2;
+    NumAllyTeams=2;
 
     [MODOPTIONS]
     {{
         LuaRules=1;
-        LuaGaia=0;
+        LuaGaia=1;
         native_api_parity_mode={run_mode};
         native_api_parity_output_dir={output_dir};
         native_api_parity_seed={test_seed};
@@ -348,6 +516,7 @@ def write_script(
         native_api_parity_enable_rendering_tests={1 if args.enable_rendering_tests else 0};
         native_api_parity_process_test={args.process_test or ''};
         native_api_parity_process_stage=initial;
+        native_api_parity_wasm_context={wasm_context};
     }}
 {map_options}
 
@@ -358,6 +527,13 @@ def write_script(
         Team=0;
     }}
 
+    [PLAYER1]
+    {{
+        Name=NativeApiParityEnemy;
+        Spectator=0;
+        Team=1;
+    }}
+
     [TEAM0]
     {{
         TeamLeader=0;
@@ -366,7 +542,20 @@ def write_script(
         Side=Arm;
     }}
 
+    [TEAM1]
+    {{
+        TeamLeader=1;
+        AllyTeam=1;
+        RGBColor=1 0 0;
+        Side=Arm;
+    }}
+
     [ALLYTEAM0]
+    {{
+        NumAllies=0;
+    }}
+
+    [ALLYTEAM1]
     {{
         NumAllies=0;
     }}
@@ -376,11 +565,22 @@ def write_script(
     )
 
 
-def run_spring(args: argparse.Namespace, datadir: Path, script: Path, output_dir: Path, run_mode: str) -> int:
+def run_spring(
+    args: argparse.Namespace,
+    datadir: Path,
+    script: Path,
+    output_dir: Path,
+    run_mode: str,
+    wasm_context: str = "synced_gadget",
+) -> int:
     env = os.environ.copy()
     result_dir = output_dir / "write-dir" / "native_api_parity"
     result_dir.mkdir(parents=True, exist_ok=True)
-    if args.enable_rendering_tests:
+    needs_graphics = args.enable_rendering_tests or wasm_context in {
+        "unsynced_gadget",
+        "gaia_unsynced",
+    }
+    if needs_graphics:
         # The installed settings file defaults to exclusive fullscreen.  The
         # engine's `--window` flag cannot override that persisted value on
         # this branch, so provide an isolated windowed config explicitly.
@@ -399,13 +599,23 @@ def run_spring(args: argparse.Namespace, datadir: Path, script: Path, output_dir
     env["SPRING_DATADIR"] = os.pathsep.join(str(path) for path in data_dirs)
     env["SPRING_ISOLATED"] = str(datadir)
     env["SPRING_NATIVE_PARITY_OUTPUT_DIR"] = str(result_dir)
+    if needs_graphics and LSAN_SUPPRESSION.is_file():
+        # Keep LeakSanitizer enabled for ASAN rendering runs while ignoring
+        # only the documented third-party/process-lifetime shutdown stacks.
+        # Preserve a caller-provided suppression file and all other options.
+        lsan_options = env.get("LSAN_OPTIONS", "")
+        if "suppressions=" not in lsan_options:
+            suppression_option = f"suppressions={LSAN_SUPPRESSION}"
+            env["LSAN_OPTIONS"] = (
+                f"{lsan_options}:{suppression_option}" if lsan_options else suppression_option
+            )
 
     if run_mode == "native" or (run_mode == "lua" and args.load_native_module_for_lua):
         env["SPRING_NATIVE_MODULE"] = str(NATIVE_SO)
     else:
         env["SPRING_NATIVE_MODULE"] = ""
 
-    spring_binary = selected_spring_binary(args)
+    spring_binary = args.spring if needs_graphics else args.spring_headless
     cmd = [
         str(spring_binary),
         "--nocolor",
@@ -413,10 +623,13 @@ def run_spring(args: argparse.Namespace, datadir: Path, script: Path, output_dir
         str(output_dir / "write-dir"),
         str(script),
     ]
-    if args.enable_rendering_tests:
-        # Rendering parity needs a real GL context, but it should not take
-        # over the user's desktop or switch the physical monitor into an
-        # exclusive mode while the harness is running unattended.
+    if needs_graphics:
+        # Unsynced/Gaia-unsynced callins are driven by the normal graphics
+        # update loop.  This is still an unattended harness run: no SDL
+        # events are injected and the fixture quits itself at its completion
+        # frame.  The window is isolated and windowed so it cannot take over
+        # the user's desktop or switch the physical monitor into exclusive
+        # mode.
         cmd.insert(1, "--window")
 
     with (output_dir / "spring.log").open("wb") as log:
@@ -550,6 +763,219 @@ def compare_details(lua_dir: Path, native_dir: Path, compare_callins: bool = Tru
     }
 
 
+def compare_wasm_details(
+    lua_dir: Path, wasm_dir: Path, wasm_context: str = "synced_gadget"
+) -> dict:
+    """Compare the Component Model fixture's host observation to Lua.
+
+    The fixture deliberately uses the same synced query on both sides: Lua
+    records the reference value, while the Wasm component obtains it through
+    the generated units-query import and reports it through the normal
+    LuaRules message boundary.  The stable semantic fields include explicit
+    floating-point edge-case and deterministic RNG signatures; the player ID
+    is an engine transport detail.
+    """
+    lua_rows = load_jsonl(lua_dir / WASM_PARITY_STREAM)
+    wasm_rows = load_jsonl(wasm_dir / WASM_PARITY_STREAM)
+
+    def semantic(rows: list[dict], source: str) -> list[dict]:
+        return sorted(
+            [
+                {
+                    "source": source,
+                    "frame": row.get("frame"),
+                    "teamUnitCount": row.get("teamUnitCount"),
+                    "fpEdgeSignature": row.get("fpEdgeSignature"),
+                    "rngSignature": row.get("rngSignature"),
+                }
+                for row in rows
+                if row.get("source") == source
+            ],
+            key=lambda row: json.dumps(row, sort_keys=True),
+        )
+
+    expected = semantic(lua_rows, "lua")
+    observed = semantic(wasm_rows, "wasm")
+    reference_in_wasm = semantic(wasm_rows, "lua")
+    expected_observation = [{**row, "source": "wasm"} for row in expected]
+    deterministic_ok = bool(expected) and expected == reference_in_wasm and expected_observation == observed
+    if not expected:
+        print(f"missing Lua Wasm-parity reference rows: {lua_dir / WASM_PARITY_STREAM}")
+    if not observed:
+        print(f"missing Wasm observation rows: {wasm_dir / WASM_PARITY_STREAM}")
+    if expected != reference_in_wasm:
+        print("Wasm run did not reproduce the Lua reference rows")
+    if expected_observation != observed:
+        print("Wasm host observation does not match the Lua reference")
+
+    manifest_path = (
+        WASM_PROBE_MANIFEST
+        if wasm_context == "synced_gadget"
+        else WASM_CONTEXT_MANIFESTS[wasm_context]
+    )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    expected_ids = set(manifest["tests"])
+    lua_api_rows = {
+        str(row.get("testName")): row
+        for row in lua_rows
+        if row.get("source") == "lua-api" and row.get("testName")
+    }
+    wasm_api_rows = {
+        str(row.get("testName")): row
+        for row in wasm_rows
+        if row.get("source") == "wasm-api" and row.get("testName")
+    }
+    wasm_status_rows = [
+        row for row in wasm_rows if row.get("source") == "wasm-status"
+    ]
+    fixture_status_rows = [
+        row for row in wasm_status_rows if row.get("testName") == "fixture"
+    ]
+    fixture_status_ok = (
+        len(fixture_status_rows) == 1
+        and fixture_status_rows[0].get("status") == "pass"
+    )
+    if not fixture_status_ok:
+        print(
+            "Wasm probe did not report exactly one successful real-fixture discovery: "
+            f"{json.dumps(fixture_status_rows, sort_keys=True)}"
+        )
+
+    def values_match(test_id: str, expected_value, actual_value) -> bool:
+        if isinstance(expected_value, bool) or isinstance(actual_value, bool):
+            return expected_value == actual_value
+        if isinstance(expected_value, (int, float)) and isinstance(actual_value, (int, float)):
+            test = API_TEST_BY_ID.get(test_id, {})
+            epsilon = float(test.get("compare", {}).get("epsilon", 0.00001))
+            return math.isclose(float(expected_value), float(actual_value), rel_tol=0.0, abs_tol=epsilon)
+        return expected_value == actual_value
+
+    api_missing_lua = sorted(expected_ids - set(lua_api_rows))
+    api_missing_wasm = sorted(expected_ids - set(wasm_api_rows))
+    api_unexpected_lua = sorted(set(lua_api_rows) - expected_ids)
+    api_unexpected_wasm = sorted(set(wasm_api_rows) - expected_ids)
+    api_mismatches = []
+    api_error_matches = []
+    for test_id in sorted(expected_ids & set(lua_api_rows) & set(wasm_api_rows)):
+        expected_row = lua_api_rows[test_id]
+        actual_row = wasm_api_rows[test_id]
+        if expected_row.get("status") != "pass" or actual_row.get("status") != "pass":
+            if (
+                expected_row.get("status") == "error"
+                and actual_row.get("status") == "error"
+                and expected_row.get("fields", {}).get("error") is True
+            ):
+                api_error_matches.append(test_id)
+                continue
+            api_mismatches.append({"testName": test_id, "expected": expected_row, "actual": actual_row})
+            continue
+        expected_fields = expected_row.get("fields", {})
+        actual_fields = actual_row.get("fields", {})
+        order_insensitive_fields = set(
+            API_TEST_BY_ID.get(test_id, {}).get("order_insensitive_fields", [])
+        )
+
+        def comparable_field(field: str, value):
+            if field in order_insensitive_fields and isinstance(value, list):
+                return sorted(value, key=lambda item: json.dumps(item, sort_keys=True))
+            test = API_TEST_BY_ID.get(test_id, {})
+            compare = test.get("compare", {})
+            if compare.get("stream") == "shape":
+                if isinstance(value, bool):
+                    return "boolean"
+                if isinstance(value, (int, float)):
+                    return "number"
+                if value is None:
+                    return "nil"
+                return type(value).__name__
+            return value
+
+        if set(expected_fields) != set(actual_fields) or any(
+            not values_match(
+                test_id,
+                comparable_field(field, expected_fields.get(field)),
+                comparable_field(field, actual_fields.get(field)),
+            )
+            for field in set(expected_fields) | set(actual_fields)
+        ):
+            api_mismatches.append({"testName": test_id, "expected": expected_row, "actual": actual_row})
+
+    vacuous_ids = sorted(
+        test_id
+        for test_id, row in wasm_api_rows.items()
+        if row.get("status") != "pass"
+    )
+    vacuous_fraction = len(vacuous_ids) / max(len(expected_ids), 1)
+    vacuity_ok = vacuous_fraction <= WASM_VACUITY_THRESHOLD
+    if not vacuity_ok:
+        print(
+            "Wasm probe vacuity exceeds threshold: "
+            f"{len(vacuous_ids)}/{len(expected_ids)} = {vacuous_fraction:.2%} "
+            f"> {WASM_VACUITY_THRESHOLD:.2%}"
+        )
+        for test_id in vacuous_ids[:20]:
+            print(f"  vacuous Wasm result: {test_id}")
+
+    api_ok = fixture_status_ok and vacuity_ok and not (
+        api_missing_lua
+        or api_missing_wasm
+        or api_unexpected_lua
+        or api_unexpected_wasm
+        or api_mismatches
+    )
+    ok = deterministic_ok and api_ok
+    if not api_ok:
+        print(
+            "Wasm typed API probe mismatch: "
+            f"expected={len(expected_ids)}, lua={len(lua_api_rows)}, wasm={len(wasm_api_rows)}"
+        )
+        for test_id in api_missing_lua:
+            print(f"  missing Lua probe reference: {test_id}")
+        for test_id in api_missing_wasm:
+            print(f"  missing Wasm probe result: {test_id}")
+        for mismatch in api_mismatches[:10]:
+            print(f"  probe mismatch: {json.dumps(mismatch, sort_keys=True)}")
+
+    return {
+        "kind": "wasm",
+        "wasm_context": wasm_context,
+        "ok": ok,
+        "streams": [
+            {
+                "name": WASM_PARITY_STREAM,
+                "lua_rows": len(lua_rows),
+                "native_rows": len(wasm_rows),
+                "matches": ok,
+            }
+        ],
+        "lua_rows": [],
+        "native_rows": [],
+        "native_failures": [],
+        "native_complete": True,
+        "callin_trace": None,
+        "expected": expected,
+        "observed": observed,
+        "deterministic_ok": deterministic_ok,
+        "api_expected_count": len(expected_ids),
+        "api_lua_count": len(lua_api_rows),
+        "api_wasm_count": len(wasm_api_rows),
+        "api_ok": api_ok,
+        "fixture_status_ok": fixture_status_ok,
+        "fixture_status_rows": fixture_status_rows,
+        "vacuity_threshold": WASM_VACUITY_THRESHOLD,
+        "vacuous_count": len(vacuous_ids),
+        "vacuous_fraction": vacuous_fraction,
+        "vacuous_ids": vacuous_ids,
+        "vacuity_ok": vacuity_ok,
+        "api_error_matches": api_error_matches,
+        "api_missing_lua": api_missing_lua,
+        "api_missing_wasm": api_missing_wasm,
+        "api_unexpected_lua": api_unexpected_lua,
+        "api_unexpected_wasm": api_unexpected_wasm,
+        "api_mismatches": api_mismatches,
+    }
+
+
 def comparable_rows(rows: list[dict]) -> list[dict]:
     return [comparable_row(row) for row in rows]
 
@@ -602,17 +1028,19 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
 
         The two Spring processes naturally produce different background
         callbacks (render frames, console messages, and shutdown activity).
-        The parity driver brackets one deterministic sequence so arguments and
-        return values can be compared without treating process scheduling as an
-        API mismatch.
+        The parity driver brackets one deterministic sequence with unique
+        GameFrame integer sentinels.  Console callins are deliberately not
+        used as delimiters because parity result logging also emits them and
+        the engine may decorate or coalesce console messages.
         """
+        start_value = -1001
+        end_value = -1002
         start = next(
             (
                 index
                 for index, row in enumerate(rows)
-                if row.get("name") == "AddConsoleLine"
-                and (row.get("args") or [None])[0]
-                == "__native_api_parity_driver_start__"
+                if row.get("name") == "GameFrame"
+                and (row.get("args") or [None])[0] == start_value
             ),
             None,
         )
@@ -622,9 +1050,8 @@ def compare_callin_traces(lua_rows: list[dict], native_rows: list[dict]) -> dict
             (
                 index
                 for index, row in enumerate(rows[start + 1 :], start=start + 1)
-                if row.get("name") == "AddConsoleLine"
-                and (row.get("args") or [None])[0]
-                == "__native_api_parity_driver_end__"
+                if row.get("name") == "GameFrame"
+                and (row.get("args") or [None])[0] == end_value
             ),
             None,
         )
@@ -1667,8 +2094,10 @@ def write_coverage_details(
 
 
 def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict | None) -> None:
-    lua_dir = base_output / "lua"
-    native_dir = base_output / "native"
+    # --mode wasm is a single in-engine harness run.  That directory contains
+    # both source="lua-api" reference rows and source="wasm-api" observations.
+    lua_dir = base_output / ("wasm" if args.mode == "wasm" else "lua")
+    comparison_dir = base_output / ("wasm" if args.mode == "wasm" else "native")
     surface_recorded_ids = read_surface_test_ids(base_output)
     required_surface_ids = requested_surface_test_ids(args)
     missing_required_surface_ids = sorted(required_surface_ids - surface_recorded_ids)
@@ -1677,12 +2106,16 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         read_report_option(lua_dir / "script.txt", "native_api_parity_enable_rendering_tests") == "1"
         or args.enable_rendering_tests
     )
+    uses_graphics = rendering_enabled or args.wasm_context in {
+        "unsynced_gadget",
+        "gaia_unsynced",
+    }
     lines = [
         "# Native API Parity Report",
         "",
         f"- Result: {'PASS' if (compare_info and compare_info['ok'] and not missing_required_surface_ids) else 'PARTIAL/UNVERIFIED'}",
         f"- Generated: {time.strftime('%Y-%m-%d %H:%M:%S %z')}",
-        f"- Spring binary: {report_link(args.spring if rendering_enabled else args.spring_headless)}",
+        f"- Spring binary: {report_link(args.spring if uses_graphics else args.spring_headless)}",
         f"- Rendering tests: `{'enabled' if rendering_enabled else 'disabled'}`",
         f"- Mode: `{args.mode}`",
         f"- Test seed: `{read_report_option(lua_dir / 'script.txt', 'native_api_parity_seed') or 'n/a'}`",
@@ -1694,7 +2127,11 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         "",
     ]
 
-    for label, run_dir in (("Lua baseline", lua_dir), ("Native comparison", native_dir)):
+    if args.mode == "wasm":
+        run_sections = (("In-engine Lua reference + Wasm harness", lua_dir),)
+    else:
+        run_sections = (("Lua baseline", lua_dir), ("Native comparison", comparison_dir))
+    for label, run_dir in run_sections:
         if not run_dir.is_dir():
             continue
         log = run_dir / "spring.log"
@@ -1733,13 +2170,41 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
                 f"{'yes' if stream['matches'] else 'NO'} |"
             )
     else:
-        for name in RESULT_STREAMS:
+        stream_names = [WASM_PARITY_STREAM] if args.mode == "wasm" else RESULT_STREAMS
+        for name in stream_names:
             lines.append(f"| `{name}` | {len(load_jsonl(lua_dir / name))} | n/a | n/a |")
 
-    if compare_info:
+    if compare_info and compare_info.get("kind") == "wasm":
+        lines.extend([
+            "",
+            "## Wasm Typed API Probe",
+            "",
+            f"- Deterministic Component observation: `{'pass' if compare_info['deterministic_ok'] else 'FAIL'}`",
+            f"- Generated {compare_info['wasm_context']} read-only probes: `{compare_info['api_expected_count']}`",
+            f"- Lua reference rows: `{compare_info['api_lua_count']}`",
+            f"- Wasm result rows: `{compare_info['api_wasm_count']}`",
+            f"- Fixture discovery: `{'pass' if compare_info['fixture_status_ok'] else 'FAIL'}`",
+            f"- Vacuous Wasm rows: `{compare_info['vacuous_count']}/{compare_info['api_expected_count']}` "
+            f"({compare_info['vacuous_fraction']:.2%}; threshold {compare_info['vacuity_threshold']:.2%})",
+            f"- Typed API result parity: `{'pass' if compare_info['api_ok'] else 'FAIL'}`",
+        ])
+        if compare_info["api_missing_lua"] or compare_info["api_missing_wasm"]:
+            lines.extend([
+                "",
+                "### Missing typed probe rows",
+                "",
+                f"- Lua: `{', '.join(compare_info['api_missing_lua']) or 'none'}`",
+                f"- Wasm: `{', '.join(compare_info['api_missing_wasm']) or 'none'}`",
+            ])
+        if compare_info["api_mismatches"]:
+            lines.extend(["", "### Typed probe mismatches", ""])
+            for mismatch in compare_info["api_mismatches"][:20]:
+                lines.append(f"- `{mismatch['testName']}`: `{json.dumps(mismatch, sort_keys=True)}`")
+
+    if compare_info and compare_info.get("kind") != "wasm":
         trace = compare_info["callin_trace"]
         baseline_lua_trace_rows = len(load_jsonl(lua_dir / CALLIN_LUA_STREAM))
-        native_trace_rows = len(load_jsonl(native_dir / CALLIN_NATIVE_STREAM))
+        native_trace_rows = len(load_jsonl(comparison_dir / CALLIN_NATIVE_STREAM))
         lines.extend([
             "",
             "## Engine Callin Trace",
@@ -1824,7 +2289,13 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         "| --- | ---: | ---: |",
     ])
 
-    native_rows = compare_info["native_rows"] if compare_info else load_jsonl(native_dir / "native.jsonl")
+    native_rows = (
+        []
+        if args.mode == "wasm"
+        else compare_info["native_rows"]
+        if compare_info
+        else load_jsonl(comparison_dir / "native.jsonl")
+    )
     if native_rows:
         native_counts: dict[str, dict[str, int]] = {}
         native_failures = []
@@ -1976,7 +2447,7 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         "",
         f"- {report_link(coverage_details)}",
     ])
-    for run_dir in (lua_dir, native_dir):
+    for run_dir in (lua_dir, comparison_dir):
         if not run_dir.is_dir():
             continue
         for path in sorted(run_dir.glob("*.jsonl")):
@@ -1985,7 +2456,14 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
     (base_output / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def run_one(args: argparse.Namespace, base_output: Path, run_mode: str, test_seed: int) -> Path:
+def run_one(
+    args: argparse.Namespace,
+    base_output: Path,
+    run_mode: str,
+    test_seed: int,
+    wasm_module: Path | None = None,
+    wasm_context: str = "synced_gadget",
+) -> Path:
     run_output = base_output / run_mode
     run_output.mkdir(parents=True, exist_ok=True)
     result_dir = run_output / "write-dir" / "native_api_parity"
@@ -1993,14 +2471,24 @@ def run_one(args: argparse.Namespace, base_output: Path, run_mode: str, test_see
 
     with tempfile.TemporaryDirectory(prefix="native-api-parity-", dir=base_output) as tmp:
         workdir = Path(tmp)
-        datadir, map_name = prepare_datadir(workdir, args.map)
+        datadir, map_name = prepare_datadir(workdir, args.map, wasm_module, wasm_context)
         use_blank_map = map_name is None
         if use_blank_map:
             map_name = blank_map_name(args, run_mode)
         script = run_output / "script.txt"
-        write_script(script, map_name, "native_api_parity", run_mode, use_blank_map, args, test_seed)
+        write_script(
+            script,
+            map_name,
+            "native_api_parity",
+            run_mode,
+            use_blank_map,
+            args,
+            test_seed,
+            wasm_context,
+            wasm_module,
+        )
 
-        exit_code = run_spring(args, datadir, script, run_output, run_mode)
+        exit_code = run_spring(args, datadir, script, run_output, run_mode, wasm_context)
         for result_file in result_dir.glob("*.jsonl"):
             shutil.copy2(result_file, run_output / result_file.name)
         if run_mode == "native":
@@ -2037,8 +2525,15 @@ def main() -> int:
 
     if args.mode in ("native", "both"):
         ensure_native_built(args.skip_native_build)
+    if args.mode == "wasm":
+        ensure_wasm_built(args.skip_wasm_build)
 
     if args.mode == "compare":
+        if not args.output_dir.is_dir():
+            raise SystemExit(
+                f"comparison output directory does not exist: {args.output_dir}; "
+                "run with --mode both or --mode wasm first"
+            )
         runs = sorted(
             path
             for path in args.output_dir.iterdir()
@@ -2066,14 +2561,40 @@ def main() -> int:
     base_output = args.output_dir / timestamp
     base_output.mkdir(parents=True, exist_ok=True)
 
-    lua_dir = run_one(args, base_output, "lua", test_seed) if args.mode in ("lua", "both") else None
-    native_dir = run_one(args, base_output, "native", test_seed) if args.mode in ("native", "both") else None
+    lua_dir = None
+    native_dir = None
+    wasm_dir = None
+    if args.mode == "wasm":
+        # The Wasm fixture records the Lua API reference and the Wasm
+        # observation in the same Spring process.  A second Lua-only boot is
+        # redundant for this gate and used to double the startup/render cost.
+        wasm_dir = run_one(
+            args,
+            base_output,
+            "wasm",
+            test_seed,
+            WASM_CONTEXT_MODULES[args.wasm_context],
+            args.wasm_context,
+        )
+        lua_dir = wasm_dir
+    else:
+        lua_dir = (
+            run_one(args, base_output, "lua", test_seed, wasm_context=args.wasm_context)
+            if args.mode in ("lua", "both")
+            else None
+        )
+        native_dir = (
+            run_one(args, base_output, "native", test_seed)
+            if args.mode in ("native", "both")
+            else None
+        )
 
-    compare_info = (
-        compare_details(lua_dir, native_dir, not args.skip_callin_compare)
-        if lua_dir and native_dir
-        else None
-    )
+    if lua_dir and native_dir:
+        compare_info = compare_details(lua_dir, native_dir, not args.skip_callin_compare)
+    elif lua_dir and wasm_dir:
+        compare_info = compare_wasm_details(lua_dir, wasm_dir, args.wasm_context)
+    else:
+        compare_info = None
     write_report(base_output, args, compare_info)
 
     missing_required_surface_ids = sorted(

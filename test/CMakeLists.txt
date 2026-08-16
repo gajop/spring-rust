@@ -95,6 +95,65 @@ macro (add_spring_test target sources libraries flags)
 endmacro()
 
 ################################################################################
+### Wasm interface policy/resource/runtime tests
+	file(GLOB wasm_host_adapter_sources CONFIGURE_DEPENDS
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmHostAdapter*.cpp")
+	set(test_name WasmInterface)
+	set(test_src
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmInterface.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmInterfaceSystem.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmModuleManifest.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmHostAdapter.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmEnvironment.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModule.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmResources.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModuleManifest.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystem.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmDispatch.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
+			"${ENGINE_SOURCE_DIR}/NativeInterface/NativeInterfaceWasmAdapter.cpp"
+			${wasm_host_adapter_sources}
+			"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
+			${test_List_sources}
+			${test_Catch_main}
+		)
+	set(test_libs recoil-wasmtime)
+	add_spring_test(${test_name} "${test_src}" "${test_libs}" "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
+	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
+
+	# Keep each hostile canonical-allocator scenario in its own process.
+	# Wasmtime's native trap machinery is process-global, and these tests
+	# deliberately trap or exhaust fuel from a guest allocator while lowering a
+	# host result; isolating them avoids coupling that signal boundary to
+	# unrelated test stores.
+	set(test_name WasmAllocator)
+	set(test_src
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmAllocator.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmEnvironment.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModule.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmResources.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
+			"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
+			${test_List_sources}
+			${test_Catch_main}
+		)
+	set(test_libs recoil-wasmtime)
+	add_executable(test_${test_name} ${test_src})
+	target_link_libraries(test_${test_name} ${test_libs} ${test_common_libraries})
+	set_target_properties(test_${test_name} PROPERTIES
+		COMPILE_FLAGS "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
+	add_dependencies(tests test_${test_name})
+	add_dependencies(check test_${test_name})
+	add_dependencies(install-tests test_${test_name})
+	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
+	add_test(NAME testWasmAllocatorReentry COMMAND test_${test_name}
+		"Wasm canonical allocator cannot re-enter a Spring import")
+	add_test(NAME testWasmAllocatorTrap COMMAND test_${test_name}
+		"Wasm canonical allocator trap faults the Component call")
+	add_test(NAME testWasmAllocatorFuel COMMAND test_${test_name}
+		"Wasm canonical allocator burns fuel under the Component guard")
+
+################################################################################
 ### UDPListener
 # disabled for travis: https://springrts.com/mantis/view.php?id=5014
 if(NOT DEFINED ENV{CI})
@@ -604,6 +663,26 @@ endif()
 			PROPERTIES COMPILE_OPTIONS "-fno-var-tracking-assignments"
 		)
 	endif()
+
+################################################################################
+### RmlNativeCallbackLifetime
+	set(test_name RmlNativeCallbackLifetime)
+	set(test_src
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/TestNativeCallbackLifetime.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/RmlNativeApiBackendStub.cpp"
+			"${ENGINE_SOURCE_DIR}/NativeInterface/api/RmlUi.cpp"
+			"${ENGINE_SOURCE_DIR}/System/Misc/SpringTime.cpp"
+			${sources_engine_System_Threading}
+			${test_Common_sources}
+		)
+	set(test_libs
+			rmlui_core
+			lua
+			smmalloc
+		)
+	add_spring_test(${test_name} "${test_src}" "${test_libs}" "-DNOT_USING_CREG -DBUILDING_AI")
+	target_link_libraries(test_${test_name} SDL2::SDL2 ${FREETYPE_LIBRARY_RELEASE} PNG::PNG ZLIB::ZLIB)
+	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/lib/)
 
 ################################################################################
 ### RmlSolLuaPluginShutdown

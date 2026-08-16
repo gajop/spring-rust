@@ -87,7 +87,12 @@
         "check": "check_game_wind",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetWind",
+        "args": [],
+        "returns": [{"field": "windStrength", "index": 4}]
+      }
     },
     {
       "id": "get_vector_from_heading",
@@ -186,6 +191,14 @@
           "type": "string",
           "fixed": "native_api_parity_cases"
         }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetModOption",
+        "args": ["value.key"],
+        "returns": [
+          {"field": "value", "index": 1},
+          {"field": "exists", "index": 1, "transform": "truthy"}
+        ]
       }
     },
     {
@@ -229,6 +242,14 @@
           "type": "string",
           "fixed": "blank_map_height"
         }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetMapOption",
+        "args": ["value.key"],
+        "returns": [
+          {"field": "value", "index": 1},
+          {"field": "exists", "index": 1, "transform": "truthy"}
+        ]
       }
     }
   ]

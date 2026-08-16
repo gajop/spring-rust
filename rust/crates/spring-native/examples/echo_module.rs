@@ -51,7 +51,13 @@ impl NativeModule for EchoModule {
     }
 
     /// Called when a unit is created
-    fn unit_created(&mut self, unit_id: i32, builder_id: i32) -> Result<(), Error> {
+    fn unit_created(
+        &mut self,
+        unit_id: i32,
+        _unit_def_id: i32,
+        _unit_team: i32,
+        builder_id: i32,
+    ) -> Result<(), Error> {
         self.unit_count += 1;
 
         if builder_id >= 0 {
@@ -68,7 +74,13 @@ impl NativeModule for EchoModule {
 
         // Example: Query unit information using the Spring API
         let units_info = self.interface.units_info();
-        if let Ok(pos) = units_info.get_unit_position(unit_id, false, false) {
+        if let Ok(pos) = units_info.get_unit_position(
+            unit_id,
+            spring_native::GetUnitPositionOptions {
+                mid_pos: false,
+                aim_pos: false,
+            },
+        ) {
             println!(
                 "[EchoModule] Unit #{} position: ({:.1}, {:.1}, {:.1})",
                 unit_id, pos.x, pos.y, pos.z
@@ -86,10 +98,19 @@ impl NativeModule for EchoModule {
     }
 
     /// Called when a unit is destroyed
-    fn unit_destroyed(&mut self, unit_id: i32, attacker_id: i32) -> Result<(), Error> {
+    fn unit_destroyed(
+        &mut self,
+        unit_id: i32,
+        _unit_def_id: i32,
+        _unit_team: i32,
+        attacker_id: Option<i32>,
+        _attacker_def_id: Option<i32>,
+        _attacker_team: Option<i32>,
+        _weapon_def_id: i32,
+    ) -> Result<(), Error> {
         self.unit_count = self.unit_count.saturating_sub(1);
 
-        if attacker_id >= 0 {
+        if let Some(attacker_id) = attacker_id {
             println!(
                 "[EchoModule] Unit #{} destroyed by #{} (remaining: {})",
                 unit_id, attacker_id, self.unit_count
@@ -105,7 +126,12 @@ impl NativeModule for EchoModule {
     }
 
     /// Called when a unit finishes construction
-    fn unit_finished(&mut self, unit_id: i32) -> Result<(), Error> {
+    fn unit_finished(
+        &mut self,
+        unit_id: i32,
+        _unit_def_id: i32,
+        _unit_team: i32,
+    ) -> Result<(), Error> {
         println!("[EchoModule] Unit #{} construction complete!", unit_id);
         Ok(())
     }

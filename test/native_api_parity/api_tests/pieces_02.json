@@ -178,11 +178,11 @@
       "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.GetUnitPieceInfo"]},
       "native": {"set": [], "get": ["UnitsPieces.get_unit_piece_info"]},
-      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists", "pieceName", "parent", "children", "isEmpty", "minX", "minY", "minZ", "maxX", "maxY", "maxZ", "offsetX", "offsetY", "offsetZ", "emitDirX", "emitDirY", "emitDirZ"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitPieceInfo`", "native_getter": "`UnitsPieces.get_unit_piece_info`", "fields": "`exists`, `pieceName`, `parent`, `children`, `isEmpty`, bounds, offset, emitDir"},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists", "pieceName", "parent", "children", "isEmpty", "minX", "minY", "minZ", "maxX", "maxY", "maxZ", "offsetX", "offsetY", "offsetZ"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitPieceInfo`", "native_getter": "`UnitsPieces.get_unit_piece_info`", "fields": "`exists`, `pieceName`, `parent`, `children`, `isEmpty`, bounds, offset"},
       "rust": {"check": "check_pieces_info", "set": "set_noop"},
       "params": {"pieceNum": {"type": "i32", "fixed": 1}},
-      "lua_runtime": {"call": "Spring.GetUnitPieceInfo", "args": ["fixture.unitID", "value.pieceNum"], "returns": [{"field": "exists", "transform": "truthy"}, {"field": "pieceName", "path": ["name"]}, {"field": "parent", "path": ["parent"]}, {"field": "children", "path": ["children"]}, {"field": "isEmpty", "path": ["isEmpty"]}, {"field": "minX", "path": ["min", 1]}, {"field": "minY", "path": ["min", 2]}, {"field": "minZ", "path": ["min", 3]}, {"field": "maxX", "path": ["max", 1]}, {"field": "maxY", "path": ["max", 2]}, {"field": "maxZ", "path": ["max", 3]}, {"field": "offsetX", "path": ["offset", 1]}, {"field": "offsetY", "path": ["offset", 2]}, {"field": "offsetZ", "path": ["offset", 3]}, {"field": "emitDirX", "path": ["emitDir", 1]}, {"field": "emitDirY", "path": ["emitDir", 2]}, {"field": "emitDirZ", "path": ["emitDir", 3]}]}
+      "lua_runtime": {"call": "Spring.GetUnitPieceInfo", "args": ["fixture.unitID", "value.pieceNum"], "returns": [{"field": "exists", "transform": "truthy"}, {"field": "pieceName", "path": ["name"]}, {"field": "parent", "path": ["parent"]}, {"field": "children", "path": ["children"]}, {"field": "isEmpty", "path": ["isEmpty"]}, {"field": "minX", "path": ["min", 1]}, {"field": "minY", "path": ["min", 2]}, {"field": "minZ", "path": ["min", 3]}, {"field": "maxX", "path": ["max", 1]}, {"field": "maxY", "path": ["max", 2]}, {"field": "maxZ", "path": ["max", 3]}, {"field": "offsetX", "path": ["offset", 1]}, {"field": "offsetY", "path": ["offset", 2]}, {"field": "offsetZ", "path": ["offset", 3]}]}
     },
     {
       "id": "get_feature_piece_info",
@@ -191,11 +191,11 @@
       "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.GetFeaturePieceInfo"]},
       "native": {"set": [], "get": ["UnitsPieces.get_feature_piece_info"]},
-      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists", "pieceName", "parent", "children", "isEmpty", "minX", "minY", "minZ", "maxX", "maxY", "maxZ", "offsetX", "offsetY", "offsetZ", "emitDirX", "emitDirY", "emitDirZ"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeaturePieceInfo`", "native_getter": "`UnitsPieces.get_feature_piece_info`", "fields": "`exists`, `pieceName`, `parent`, `children`, `isEmpty`, bounds, offset, emitDir"},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["exists", "pieceName", "parent", "children", "isEmpty", "minX", "minY", "minZ", "maxX", "maxY", "maxZ", "offsetX", "offsetY", "offsetZ"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeaturePieceInfo`", "native_getter": "`UnitsPieces.get_feature_piece_info`", "fields": "`exists`, `pieceName`, `parent`, `children`, `isEmpty`, bounds, offset"},
       "rust": {"check": "check_pieces_info", "set": "set_noop"},
       "params": {"pieceNum": {"type": "i32", "fixed": 1}},
-      "lua_runtime": {"call": "Spring.GetFeaturePieceInfo", "args": ["fixture.featureID", "value.pieceNum"], "returns": [{"field": "exists", "transform": "truthy"}, {"field": "pieceName", "path": ["name"]}, {"field": "parent", "path": ["parent"]}, {"field": "children", "path": ["children"]}, {"field": "isEmpty", "path": ["isEmpty"]}, {"field": "minX", "path": ["min", 1]}, {"field": "minY", "path": ["min", 2]}, {"field": "minZ", "path": ["min", 3]}, {"field": "maxX", "path": ["max", 1]}, {"field": "maxY", "path": ["max", 2]}, {"field": "maxZ", "path": ["max", 3]}, {"field": "offsetX", "path": ["offset", 1]}, {"field": "offsetY", "path": ["offset", 2]}, {"field": "offsetZ", "path": ["offset", 3]}, {"field": "emitDirX", "path": ["emitDir", 1]}, {"field": "emitDirY", "path": ["emitDir", 2]}, {"field": "emitDirZ", "path": ["emitDir", 3]}]}
+      "lua_runtime": {"call": "Spring.GetFeaturePieceInfo", "args": ["fixture.featureID", "value.pieceNum"], "returns": [{"field": "exists", "transform": "truthy"}, {"field": "pieceName", "path": ["name"]}, {"field": "parent", "path": ["parent"]}, {"field": "children", "path": ["children"]}, {"field": "isEmpty", "path": ["isEmpty"]}, {"field": "minX", "path": ["min", 1]}, {"field": "minY", "path": ["min", 2]}, {"field": "minZ", "path": ["min", 3]}, {"field": "maxX", "path": ["max", 1]}, {"field": "maxY", "path": ["max", 2]}, {"field": "maxZ", "path": ["max", 3]}, {"field": "offsetX", "path": ["offset", 1]}, {"field": "offsetY", "path": ["offset", 2]}, {"field": "offsetZ", "path": ["offset", 3]}]}
     },
     {
       "id": "get_unit_script_piece",

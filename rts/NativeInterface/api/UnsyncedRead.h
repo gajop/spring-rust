@@ -9,7 +9,7 @@ extern "C" {
 
 // ============================================================================
 // Unsynced Read API
-// @see rts/Lua/LuaUnsyncedRead.cpp
+// @see rts/Lua/LuaUnsyncedRead.cpp, rts/Lua/LuaSyncedRead.cpp
 //
 // Client-side property queries (rendering, UI state, view information)
 // These functions query client-specific state that is not synchronized

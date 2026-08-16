@@ -277,7 +277,8 @@
           },
           {
             "field": "cmdDescIndex",
-            "index": 1,
+            "index": 2,
+            "path": ["cmdIndex"],
             "transform": "nil_to_minus_one"
           }
         ]

@@ -1,0 +1,12 @@
+[package]
+name = "spring-api-codegen"
+version = "0.1.0"
+edition = "2021"
+description = "Shared semantic Spring API/code generation facade"
+license = "GPL-2.0-or-later"
+
+[lib]
+name = "spring_api_codegen"
+
+[dependencies]
+spring-native-codegen = { path = "../spring-native-codegen" }

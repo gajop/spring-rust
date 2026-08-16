@@ -278,10 +278,10 @@ struct NativeCommandDescription {
 };
 
 // Command Description queries
-struct EditUnitCmdDescQuery { int32_t unitID; uint32_t cmdDescIndex; const NativeCommandDescription* cmdDesc; };
+struct EditUnitCmdDescQuery { int32_t unitID; uint32_t cmdDescIndex; RECOIL_WASM_RECORD("NativeCommandDescription") const NativeCommandDescription* cmdDesc; };
 struct EditUnitCmdDescResult { const Error* error; bool success; };
 
-struct InsertUnitCmdDescQuery { int32_t unitID; int32_t cmdDescIndex; const NativeCommandDescription* cmdDesc; };  // -1 for append
+struct InsertUnitCmdDescQuery { int32_t unitID; int32_t cmdDescIndex; RECOIL_WASM_RECORD("NativeCommandDescription") const NativeCommandDescription* cmdDesc; };  // -1 for append
 struct InsertUnitCmdDescResult { const Error* error; bool success; };
 
 struct RemoveUnitCmdDescQuery { int32_t unitID; int32_t cmdDescIndex; };  // -1 for last

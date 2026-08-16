@@ -312,7 +312,7 @@
     },
     {
       "id": "get_units_in_screen_rectangle",
-      "context": "unsynced_gadget",
+      "context": "widget",
       "kind": "readonly",
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetUnitsInScreenRectangle"]},

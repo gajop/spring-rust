@@ -68,6 +68,7 @@
       "lua_runtime": {
         "table": "WeaponDefs",
         "key": "fixture.weaponDefID",
+        "args": ["fixture.weaponDefName"],
         "returns": [
           {"field": "defName", "path": ["name"]},
           {"field": "weaponDefID", "path": ["id"]}

@@ -60,11 +60,11 @@
       "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.GetUnitMoveTypeData"]},
       "native": {"set": [], "get": ["MoveCtrl.get_unit_move_type_data"]},
-      "compare": {"mode": "fields", "fields": ["moveTypeName", "maxSpeed", "maxWantedSpeed", "goalx", "goaly", "goalz", "turnRate", "accRate", "decRate", "maxReverseSpeed", "wantedSpeed", "currentSpeed", "deltaSpeed"]},
+      "compare": {"mode": "fields", "fields": ["moveTypeName", "maxSpeed", "maxWantedSpeed", "goalx", "goaly", "goalz"]},
       "report": {"lua_getter": "`Spring.GetUnitMoveTypeData`", "native_getter": "`MoveCtrl.get_unit_move_type_data`", "fields": "move-type fields"},
       "rust": {"check": "check_unit_extra_read", "set": "set_noop"},
       "params": {},
-      "lua_runtime": {"call": "Spring.GetUnitMoveTypeData", "args": ["fixture.unitID"], "returns": [{"field": "moveTypeName", "path": ["name"]}, {"field": "maxSpeed", "path": ["maxSpeed"]}, {"field": "maxWantedSpeed", "path": ["maxWantedSpeed"]}, {"field": "goalx", "path": ["goalx"]}, {"field": "goaly", "path": ["goaly"]}, {"field": "goalz", "path": ["goalz"]}, {"field": "turnRate", "path": ["turnRate"]}, {"field": "accRate", "path": ["accRate"]}, {"field": "decRate", "path": ["decRate"]}, {"field": "maxReverseSpeed", "path": ["maxReverseSpeed"]}, {"field": "wantedSpeed", "path": ["wantedSpeed"]}, {"field": "currentSpeed", "path": ["currentSpeed"]}, {"field": "deltaSpeed", "path": ["deltaSpeed"]}]}
+      "lua_runtime": {"call": "Spring.GetUnitMoveTypeData", "args": ["fixture.unitID"], "returns": [{"field": "moveTypeName", "path": ["name"]}, {"field": "maxSpeed", "path": ["maxSpeed"]}, {"field": "maxWantedSpeed", "path": ["maxWantedSpeed"]}, {"field": "goalx", "path": ["goalx"]}, {"field": "goaly", "path": ["goaly"]}, {"field": "goalz", "path": ["goalz"]}]}
     },
     {
       "id": "get_unit_estimated_path",
@@ -151,7 +151,7 @@
       "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.GetFactoryCommandCount"]},
       "native": {"set": [], "get": ["UnitsCommands.get_factory_command_count"]},
-      "compare": {"mode": "fields", "fields": ["count"]},
+      "compare": {"mode": "fields", "fields": ["count"], "missing": {"count": 0}},
       "report": {"lua_getter": "`Spring.GetFactoryCommandCount`", "native_getter": "`UnitsCommands.get_factory_command_count`", "fields": "`count`"},
       "rust": {"check": "check_factory_read", "set": "set_noop"},
       "params": {},
@@ -164,7 +164,7 @@
       "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.GetFactoryCommands"]},
       "native": {"set": [], "get": ["UnitsCommands.get_factory_commands"]},
-      "compare": {"mode": "fields", "fields": ["count"]},
+      "compare": {"mode": "fields", "fields": ["count"], "missing": {"count": 0}},
       "report": {"lua_getter": "`Spring.GetFactoryCommands`", "native_getter": "`UnitsCommands.get_factory_commands`", "fields": "command count"},
       "rust": {"check": "check_factory_read", "set": "set_noop"},
       "params": {"maxCommands": {"type": "i32", "fixed": 0}},

@@ -213,7 +213,10 @@ struct GetAllyTeamStartBoxQuery { int32_t allyTeamID; };
 struct GetAllyTeamStartBoxResult { const Error* error; StartBox box; bool exists; };
 
 struct GetTeamStartPositionQuery { int32_t teamID; };
-struct GetTeamStartPositionResult { const Error* error; Float3 position; };
+// Lua's GetTeamStartPosition returns the validity bit alongside the
+// position.  Keep it in the native result so the Wasm and native semantic
+// surfaces do not have to infer validity from coordinates.
+struct GetTeamStartPositionResult { const Error* error; Float3 position; bool valid; };
 
 struct GetMapStartPositionsQuery { uint8_t _unused; };
 struct GetMapStartPositionsResult { const Error* error; StartPosition* positions; uint32_t count; };

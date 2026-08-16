@@ -1,3 +1,4 @@
+use spring_api_codegen as spring_native_codegen;
 use std::{env, fs, path::PathBuf};
 
 fn main() {
@@ -12,6 +13,30 @@ fn main() {
     let include_dir = project_root.join("rts/NativeInterface/api");
     let include_root = project_root.join("rts");
     let includes = vec![include_dir.clone(), include_root.clone()];
+
+    // Normal module builds consume the committed deterministic snapshot. A
+    // maintainer/CI regeneration explicitly opts into libclang with
+    // SPRING_NATIVE_REGENERATE=1, keeping downstream builds independent of a
+    // host libclang installation.
+    let snapshot_dir = manifest_dir.join("generated");
+    if env::var_os("SPRING_NATIVE_REGENERATE").is_none()
+        && snapshot_dir.join("manifest.json").exists()
+    {
+        let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+        for entry in fs::read_dir(&snapshot_dir).expect("read native snapshot") {
+            let entry = entry.expect("native snapshot entry");
+            if matches!(
+                entry.file_name().to_str(),
+                Some("manifest.json" | "README.md")
+            ) {
+                continue;
+            }
+            fs::copy(entry.path(), out_dir.join(entry.file_name()))
+                .unwrap_or_else(|error| panic!("copy native snapshot: {error}"));
+        }
+        println!("cargo:rerun-if-changed={}", snapshot_dir.display());
+        return;
+    }
 
     // Define all API headers
     let api_headers = [

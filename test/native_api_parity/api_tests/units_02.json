@@ -38,7 +38,12 @@
         "check": "check_unit_def_id",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitDefID",
+        "args": ["fixture.unitID"],
+        "returns": ["defID"]
+      }
     },
     {
       "id": "unit_team",
@@ -77,7 +82,12 @@
         "check": "check_unit_team",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitTeam",
+        "args": ["fixture.unitID"],
+        "returns": ["teamID"]
+      }
     },
     {
       "id": "unit_ally_team",
@@ -116,7 +126,12 @@
         "check": "check_unit_ally_team",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitAllyTeam",
+        "args": ["fixture.unitID"],
+        "returns": ["allyTeamID"]
+      }
     },
     {
       "id": "unit_is_dead",
@@ -155,7 +170,12 @@
         "check": "check_unit_is_dead",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitIsDead",
+        "args": ["fixture.unitID"],
+        "returns": ["isDead"]
+      }
     },
     {
       "id": "unit_is_stunned",
@@ -194,7 +214,12 @@
         "check": "check_unit_is_stunned",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitIsStunned",
+        "args": ["fixture.unitID"],
+        "returns": ["stunned"]
+      }
     },
     {
       "id": "unit_height",
@@ -233,7 +258,12 @@
         "check": "check_unit_height",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitHeight",
+        "args": ["fixture.unitID"],
+        "returns": ["height"]
+      }
     },
     {
       "id": "unit_radius",
@@ -272,7 +302,12 @@
         "check": "check_unit_radius",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitRadius",
+        "args": ["fixture.unitID"],
+        "returns": ["radius"]
+      }
     },
     {
       "id": "unit_base_position",
@@ -312,7 +347,12 @@
         "check": "check_unit_base_position",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitBasePosition",
+        "args": ["fixture.unitID"],
+        "returns": ["x", {"field": "z", "index": 3}]
+      }
     },
     {
       "id": "unit_direction",
@@ -353,7 +393,12 @@
         "check": "check_unit_direction",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitDirection",
+        "args": ["fixture.unitID"],
+        "returns": ["x", "y", "z"]
+      }
     },
     {
       "id": "unit_heading",
@@ -392,7 +437,12 @@
         "check": "check_unit_heading",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetUnitHeading",
+        "args": ["fixture.unitID"],
+        "returns": ["heading"]
+      }
     },
     {
       "id": "unit_velocity",

@@ -274,10 +274,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
-name = "spring-native"
+name = "spring-api-codegen"
 version = "0.1.0"
 dependencies = [
  "spring-native-codegen",
+]
+
+[[package]]
+name = "spring-native"
+version = "0.1.0"
+dependencies = [
+ "spring-api-codegen",
  "spring-native-sys",
 ]
 
@@ -289,6 +296,8 @@ dependencies = [
  "clang",
  "heck",
  "regex",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

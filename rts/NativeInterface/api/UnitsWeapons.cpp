@@ -227,9 +227,14 @@ static void NativeGetUnitWeaponTryTarget(const GetUnitWeaponTryTargetQuery* quer
 	}
 
 	SWeaponTarget target;
+	target.isUserTarget = query->options.userTarget;
 	if (query->options.isGroundTarget) {
 		target.type = Target_Pos;
-		target.groundPos = float3(query->targetPos.x, query->targetPos.y, query->targetPos.z);
+		// Match Spring.GetUnitWeaponTryTarget's null-unit overload.  That
+		// overload deliberately uses a position-only target with the
+		// constructor's zero groundPos; the explicit coordinates are only
+		// supplied to the target test by the Lua call path.
+		target.groundPos = ZeroVector;
 	} else if (query->targetID >= 0) {
 		target.type = Target_Unit;
 		target.unit = unitHandler.GetUnit(query->targetID);

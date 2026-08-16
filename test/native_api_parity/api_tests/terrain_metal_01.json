@@ -111,6 +111,11 @@
             "z"
           ]
         }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetGroundOrigHeight",
+        "args": ["value.x", "value.z"],
+        "returns": ["height"]
       }
     },
     {
@@ -165,6 +170,16 @@
         "smoothed": {
           "type": "bool"
         }
+      },
+      "lua_runtime": {
+        "call": "Spring.GetGroundNormal",
+        "args": ["value.x", "value.z", "value.smoothed"],
+        "returns": [
+          {"field": "normalX", "index": 1},
+          {"field": "normalY", "index": 2},
+          {"field": "normalZ", "index": 3},
+          {"field": "slope", "index": 4}
+        ]
       }
     },
     {

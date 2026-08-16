@@ -863,6 +863,11 @@ impl NativeApiParity {
             );
             record_bool(
                 &mut actual,
+                "RmlUi.Context.Update",
+                rml.context_update(context).map_err(format_error)?,
+            );
+            record_bool(
+                &mut actual,
                 "RmlUi.Context.Render",
                 rml.context_render(context).map_err(format_error)?,
             );

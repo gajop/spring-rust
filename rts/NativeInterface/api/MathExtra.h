@@ -39,7 +39,7 @@ struct ErfResult { const Error* error; float result; };
 struct SmoothStepQuery { float edge0; float edge1; float x; };
 struct SmoothStepResult { const Error* error; float value; };
 
-struct NormalizeQuery { Float3* vec; };  // Modifies vec in place
+struct NormalizeQuery { RECOIL_WASM_RECORD("Float3") Float3* vec; };  // Modifies vec in place
 struct NormalizeResult { const Error* error; float length; };
 
 struct BitOrQuery { uint32_t a; uint32_t b; };

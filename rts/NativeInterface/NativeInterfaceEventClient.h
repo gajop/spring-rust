@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "NativeInterface.h"
@@ -21,6 +22,8 @@ struct Command;
 struct SCommandDescription;
 struct SRectangle;
 class SharedLib;
+class WasmInterfaceSystem;
+struct WasmValue;
 
 /**
  * Function pointer types for native module callbacks (using Query/Result pattern)
@@ -219,7 +222,8 @@ namespace fptr {
  */
 class NativeInterfaceEventClient : public CEventClient {
 public:
-	NativeInterfaceEventClient(NativeInterface* nativeInterface, SharedLib* sharedLib);
+	NativeInterfaceEventClient(NativeInterface* nativeInterface, SharedLib* sharedLib,
+		WasmInterfaceSystem* wasmSystem = nullptr);
 
 	// Load symbols from DLL
 	void LoadSymbols();
@@ -418,8 +422,22 @@ public:
 	void HandleLuaCall(const char* msg, size_t msgLength, bool synced);
 
 private:
+	// Serialize an already-constructed native query through the generated
+	// semantic record writers and fan it out to the synced or unsynced Wasm
+	// gadget worlds. Opaque/manual query shapes must be explicitly represented
+	// by the generated serializer or rejected by the code-generation gate.
+	bool DispatchWasmCallin(std::string_view name, const void* query, bool synced,
+		WasmValue* result = nullptr);
+	bool DispatchWasmBoolCallin(std::string_view name, const void* query, bool synced,
+		bool& result);
+	bool DispatchWasmStringCallin(std::string_view name, const void* query, bool synced,
+		std::string& result);
+	bool DispatchWasmIntegerCallin(std::string_view name, const void* query, bool synced,
+		int& result);
+
 	NativeInterface* m_nativeInterface;
 	SharedLib* m_sharedLib;
+	WasmInterfaceSystem* m_wasmSystem = nullptr;
 	void* m_moduleData = nullptr;
 	bool m_initialized = false;
 

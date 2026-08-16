@@ -24,7 +24,7 @@
       "compare": {"mode": "fields", "fields": ["value"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Encoding.EncodeBase64`", "native_getter": "`Encoding.encode_base64`", "fields": "`value`"},
       "rust": {"check": "check_encoding_value", "set": "set_noop"},
-      "params": {"text": {"type": "string", "value": "Hello"}},
+      "params": {"text": {"type": "string", "value": "Hello"}, "stripPadding": {"type": "bool", "fixed": true}},
       "lua_runtime": {"call": "Encoding.EncodeBase64", "args": ["value.text"], "returns": ["value"]}
     },
     {

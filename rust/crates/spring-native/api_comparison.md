@@ -9,9 +9,9 @@
 - Unmatched: 1 (0.1%)
 
 **Rust API:**
-- Total: 1389 functions across 53 modules
-- Matched to Lua: 790 (56.9%)
-- Rust-only: 597 (43.0%)
+- Total: 1390 functions across 53 modules
+- Matched to Lua: 790 (56.8%)
+- Rust-only: 598 (43.0%)
 
 **Parameter comparison (matched functions):**
 - Parameter matches: 790
@@ -1151,6 +1151,7 @@ Functions in Rust API with no Lua equivalent:
 - `Player.Player.get_player_roster_owned`
 - `RmlUi.RmlUi.add_translation_string`
 - `RmlUi.RmlUi.bind`
+- `RmlUi.RmlUi.bind_event`
 - `RmlUi.RmlUi.bind_rows`
 - `RmlUi.RmlUi.clear_document_path_requests`
 - `RmlUi.RmlUi.clear_translations`
@@ -1446,4 +1447,4 @@ Functions in Rust API with no Lua equivalent:
 - `WeaponDefs.WeaponDefs.get_weapon_def_range`
 - `WeaponDefs.WeaponDefs.valid_weapon_def_id`
 
-**Total Rust-only: 597**
+**Total Rust-only: 598**

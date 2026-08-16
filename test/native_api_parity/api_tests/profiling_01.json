@@ -120,7 +120,7 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetVidMemUsage"]},
       "native": {"set": [], "get": ["Profiling.get_vid_mem_usage"]},
-      "compare": {"mode": "fields", "stream": "shape", "epsilon": 1.0, "fields": ["usedMB", "availableMB"]},
+      "compare": {"mode": "fields", "stream": "shape", "fields": ["usedMB", "availableMB"]},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetVidMemUsage`", "native_getter": "`Profiling.get_vid_mem_usage`", "fields": "`usedMB`, `availableMB`"},
       "rust": {"check": "check_profiling_value", "set": "set_noop"},
       "params": {},

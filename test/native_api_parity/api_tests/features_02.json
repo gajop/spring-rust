@@ -102,7 +102,12 @@
         "check": "check_feature_height",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetFeatureHeight",
+        "args": ["fixture.featureID"],
+        "returns": ["height"]
+      }
     },
     {
       "id": "feature_radius",
@@ -141,7 +146,12 @@
         "check": "check_feature_radius",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetFeatureRadius",
+        "args": ["fixture.featureID"],
+        "returns": ["radius"]
+      }
     },
     {
       "id": "feature_heading",
@@ -180,7 +190,12 @@
         "check": "check_feature_heading",
         "set": "set_noop"
       },
-      "params": {}
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetFeatureHeading",
+        "args": ["fixture.featureID"],
+        "returns": ["heading"]
+      }
     },
     {
       "id": "feature_velocity",

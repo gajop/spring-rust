@@ -17,8 +17,12 @@ extern "C" {
 
 // Selection count by unit def
 struct SelectionCounts {
-	int32_t* unitDefIDs;
-	uint32_t* counts;
+	// Both arrays are parallel and have uniqueCount entries.  The relationship
+	// is not recoverable from C field order, so keep it explicit for every
+	// transport generated from this header.  The Wasm adapter copies both
+	// arrays into owned Component values; it never exposes these pointers.
+	RECOIL_WASM_LIST("i32", "uniqueCount") int32_t* unitDefIDs;
+	RECOIL_WASM_LIST("u32", "uniqueCount") uint32_t* counts;
 	uint32_t uniqueCount;
 };
 

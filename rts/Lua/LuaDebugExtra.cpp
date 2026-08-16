@@ -260,7 +260,13 @@ int LuaDebugExtra::EmulateNativeApiParityCallins(lua_State* L)
 	if (unit == nullptr || feature == nullptr || projectile == nullptr)
 		return 0;
 
-	eventHandler.AddConsoleLine("__native_api_parity_driver_start__", "NativeApiParity", 0);
+	// AddConsoleLine is intentionally not used as a delimiter here: console
+	// output is also produced by the parity module itself and the engine may
+	// decorate or coalesce those messages.  GameFrame has a stable integer
+	// payload, so these test-only sentinels remain unambiguous in both traces.
+	constexpr int parityDriverStart = -1001;
+	constexpr int parityDriverEnd = -1002;
+	eventHandler.GameFrame(parityDriverStart);
 
 	CWeapon* weapon = unit->weapons.empty() ? nullptr : unit->weapons.front();
 	const WeaponDef* weaponDef = (weapon != nullptr) ? weapon->weaponDef : nullptr;
@@ -484,7 +490,7 @@ int LuaDebugExtra::EmulateNativeApiParityCallins(lua_State* L)
 		eventHandler.DrawShield(unit, weapon);
 	eventHandler.DrawProjectile(projectile);
 	eventHandler.DrawMaterial(&LuaMaterial::defMat);
-	eventHandler.AddConsoleLine("__native_api_parity_driver_end__", "NativeApiParity", 0);
+	eventHandler.GameFrame(parityDriverEnd);
 
 	return 0;
 }

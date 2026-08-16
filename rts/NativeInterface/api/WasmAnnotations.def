@@ -1,0 +1,45 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
+# Canonical exceptions for semantic API generation.
+#
+# The generator fails in strict mode when a shape is not represented here or
+# can be lowered automatically.  Keep this list narrow: it is an audit trail,
+# not a way to silence unknown declarations.
+#
+# MANUAL(module, function, reason)
+# EXCLUDE(module, function, reason)
+
+MANUAL(rml_ui, DataModelBindEvent, synchronous guest callback and host resource)
+MANUAL(rml_ui, DataModelUnbindEvent, synchronous guest callback and host resource)
+MANUAL(math_extra, Normalize, mutating record input must be returned as owned output)
+MANUAL(units_commands, GetCommandParams, nested command record requires owned pointer adapter)
+MANUAL(unit_control, EditUnitCmdDesc, nested command description requires owned pointer adapter)
+MANUAL(unit_control, InsertUnitCmdDesc, nested command description requires owned pointer adapter)
+MANUAL(vfs, UseArchive, scoped VFS callback)
+MANUAL(cob_script, CallCOBScript, reviewed mutating variable-size result)
+MANUAL(gfx, CreateTexture, reviewed mutating variable-size result)
+MANUAL(gfx, CreateTextureAtlas, reviewed mutating variable-size result)
+MANUAL(gfx, ActiveFBO, opaque renderer state requires a reviewed adapter)
+MANUAL(gfx, ActiveShader, opaque renderer state requires a reviewed adapter)
+MANUAL(gfx, BeginEnd, renderer state machine requires a reviewed adapter)
+MANUAL(gfx, CreateList, renderer callback requires a reviewed adapter)
+MANUAL(gfx, DrawFuncAtUnit, renderer callback requires a reviewed adapter)
+MANUAL(gfx, PushPopMatrix, renderer state machine requires a reviewed adapter)
+MANUAL(gfx, RenderToTexture, renderer resource/callback requires a reviewed adapter)
+MANUAL(gfx, RunQuery, renderer callback requires a reviewed adapter)
+MANUAL(gfx, UnsafeState, intentionally opaque renderer state requires a reviewed adapter)
+MANUAL(system_control, CallAsTeam, scoped simulation context requires a reviewed adapter)
+MANUAL(rml_ui, ContextAddEventListener, synchronous callback and host resource)
+MANUAL(rml_ui, ElementAddEventListener, synchronous callback and host resource)
+MANUAL(terrain_control, SetHeightMapFunc, host callback requires a reviewed adapter)
+MANUAL(terrain_control, SetOriginalHeightMapFunc, host callback requires a reviewed adapter)
+MANUAL(terrain_control, SetSmoothMeshFunc, host callback requires a reviewed adapter)
+EXCLUDE(memory, FreeFloat2Array, native pointer-management API is never exposed to Wasm)
+EXCLUDE(memory, FreeFloat3Array, native pointer-management API is never exposed to Wasm)
+EXCLUDE(memory, FreeFloat4Array, native pointer-management API is never exposed to Wasm)
+EXCLUDE(memory, FreeFloatArray, native pointer-management API is never exposed to Wasm)
+EXCLUDE(memory, Free, native pointer-management API is never exposed to Wasm)
+EXCLUDE(memory, FreeInt32Array, native pointer-management API is never exposed to Wasm)
+EXCLUDE(memory, FreeInt3Array, native pointer-management API is never exposed to Wasm)
+EXCLUDE(memory, FreeStringArray, native pointer-management API is never exposed to Wasm)
+EXCLUDE(memory, FreeUInt32Array, native pointer-management API is never exposed to Wasm)

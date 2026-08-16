@@ -12,4 +12,4 @@ spring-native-sys = { path = "../spring-native-sys" }
 once_cell = "1.19"
 
 [build-dependencies]
-spring-native-codegen = { path = "../spring-native-codegen" }
+spring-api-codegen = { path = "../spring-api-codegen" }

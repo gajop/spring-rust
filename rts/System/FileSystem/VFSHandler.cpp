@@ -403,7 +403,7 @@ void CVFSHandler::SwapArchiveSections(Section src, Section dst)
 
 
 
-std::string CVFSHandler::GetNormalizedPath(const std::string& rawPath)
+std::string CVFSHandler::GetNormalizedPath(const std::string& rawPath) const
 {
 	return FileSystem::GetNormalizedPath(StringToLower(rawPath));
 }
@@ -456,6 +456,32 @@ int CVFSHandler::LoadFile(const std::string& filePath, std::vector<std::uint8_t>
 	return (fileData.ar->GetFile(normalizedPath, buffer));
 }
 
+int CVFSHandler::FileExistsInArchive(const std::string& archiveName,
+	const std::string& filePath, Section section) const
+{
+	if (archiveName.empty())
+		return -1;
+	const std::string archivePath = GetArchivePath(archiveName);
+	std::lock_guard<decltype(vfsMutex)> lck(vfsMutex);
+	const auto iter = archives[section].find(archivePath);
+	if (iter == archives[section].end() || iter->second == nullptr)
+		return -1;
+	return iter->second->FileExists(GetNormalizedPath(filePath)) ? 1 : 0;
+}
+
+int CVFSHandler::LoadFileFromArchive(const std::string& archiveName,
+	const std::string& filePath, std::vector<std::uint8_t>& buffer, Section section) const
+{
+	if (archiveName.empty())
+		return -1;
+	const std::string archivePath = GetArchivePath(archiveName);
+	std::lock_guard<decltype(vfsMutex)> lck(vfsMutex);
+	const auto iter = archives[section].find(archivePath);
+	if (iter == archives[section].end() || iter->second == nullptr)
+		return -1;
+	return iter->second->GetFile(filePath, buffer) ? 1 : 0;
+}
+
 int CVFSHandler::FileExists(const std::string& filePath, Section section)
 {
 	LOG_L(L_DEBUG, "[%s::%s<this=%p>(filePath=\"%s\", section=%d)]", vfsName, __func__, this, filePath.c_str(), section);
@@ -500,15 +526,21 @@ std::string CVFSHandler::GetFileArchiveName(const std::string& filePath, Section
 	return archiveName;
 }
 
-std::vector<std::string> CVFSHandler::GetAllArchiveNames() const
+std::vector<std::string> CVFSHandler::GetAllArchiveNames(Section section) const
 {
 	std::lock_guard<decltype(vfsMutex)> lck(vfsMutex);
 
 	std::vector<std::string> ret;
-	ret.reserve(archives[Section::Mod].size() + archives[Section::Map].size() + archives[Section::Base].size() + archives[Section::Menu].size());
+	const Section firstSection = (section == Section::Error) ? Section::Mod : section;
+	const Section lastSection = (section == Section::Error) ? Section::Menu : section;
+	if (firstSection >= Section::Count || lastSection >= Section::Count)
+		return ret;
 
-	for (int section = Section::Mod; section <= Section::Menu; section++) {
-		for (const auto& archive: archives[section]) {
+	for (int current = firstSection; current <= lastSection; ++current)
+		ret.reserve(ret.size() + archives[current].size());
+
+	for (int current = firstSection; current <= lastSection; current++) {
+		for (const auto& archive: archives[current]) {
 			const auto& archiveFile = archive.second->GetArchiveFile();
 			const auto& baseName = FileSystem::GetFilename(archiveFile);
 			const auto& archiveName = archiveScanner->NameFromArchive(baseName);
@@ -630,4 +662,3 @@ std::vector<std::string> CVFSHandler::GetDirsInDir(const std::string& rawDir, bo
 
 	return dirs;
 }
-

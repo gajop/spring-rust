@@ -51,8 +51,10 @@ struct CommandDescription {
 struct FactoryQueueInfo {
 	uint32_t totalCount;      // Total units in queue
 	uint32_t currentCount;    // Currently being built
-	int32_t* unitDefIDs;
-	uint32_t* counts;
+	// These are parallel arrays with uniqueCount entries.  Mark the ownership
+	// and count relationship explicitly; Wasm receives owned lists only.
+	RECOIL_WASM_LIST("i32", "uniqueCount") int32_t* unitDefIDs;
+	RECOIL_WASM_LIST("u32", "uniqueCount") uint32_t* counts;
 	uint32_t uniqueCount;
 };
 
@@ -107,7 +109,7 @@ struct GetUnitCmdDescsResult { const Error* error; CommandDescription* cmdDescs;
 struct FindUnitCmdDescQuery { int32_t unitID; int32_t cmdID; };
 struct FindUnitCmdDescResult { const Error* error; int32_t cmdIndex; bool found; };
 
-struct GetCommandParamsQuery { const CommandFFI* command; };
+struct GetCommandParamsQuery { RECOIL_WASM_RECORD("CommandFFI") const CommandFFI* command; };
 struct GetCommandParamsResult { const Error* error; float* params; uint32_t count; };
 
 struct GiveOrderQuery { int32_t cmdID; float* params; uint32_t paramCount; uint32_t options; int32_t timeout; };

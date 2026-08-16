@@ -1,0 +1,25 @@
+# Third-party process-lifetime allocations made while Spring initializes its
+# OpenGL driver. These frames are owned by the proprietary NVIDIA driver,
+# outside Spring's ownership. Keep this intentionally narrow: an allocation
+# whose stack reaches editor or engine code still fails LeakSanitizer.
+leak:libnvidia-glcore.so
+
+# NVIDIA registers with the session bus during driver initialization. The
+# resulting libdbus allocations are owned by that process-lifetime setup and
+# have no teardown API available to the engine.
+leak:dbus_bus_register
+
+# TODO(engine-leak): FreeType keeps its process-global font services/cache alive
+# until process exit. Remove these rules when the engine owns and tears down
+# that cache; this is unrelated to the Wasm implementation.
+leak:tt_services
+leak:ft_mem_alloc
+leak:FT_New_Memory
+
+# TODO(engine-leak): SDL's loopback-audio bookkeeping is allocated by the
+# OpenAL sound thread and remains process-lifetime state after the engine's
+# cleanup call. These rules are restricted to the two known Spring call sites
+# that create/destroy that third-party state; remove them when that lifetime is
+# fixed. This is unrelated to the Wasm implementation.
+leak:CSound::OpenSdlDevice
+leak:CSound::Cleanup
