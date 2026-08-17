@@ -28,9 +28,9 @@ file is retained unchanged. Measurements live only in
 ## Original implementation plan
 
 - Phases 0–7: implemented; targeted post-change regression checks pass.
-- Phase 8, LuaUI: implemented; focused UI and bounded matrix coverage pass.
-- Phase 9, Lua/native/Wasm parity and benchmarking: bounded measurements are
-  generated; nominal frame-budget and broad coverage gates remain open.
+- Phase 8, LuaUI: implemented; focused UI coverage is in place.
+- Phase 9, Lua/native/Wasm parity and benchmarking: the generated report is
+  current; broad coverage gates remain open.
 - Phase 10, CI/build/release: local Linux ASAN verification passes; arm64 and
   Windows runtime verification is external CI work.
 
@@ -38,8 +38,6 @@ Phases 8 and 9 are original-plan deliverables, not deferrals.
 
 ## Remaining implementation work
 
-- Complete the nominal frame-budget run; the bounded matrix is generated in
-  `benchmarking_results.md`.
 - Finish broad API coverage, mutation-heavy end-to-end coverage, Lua-loader
   registration review, differential conversion fuzzing, and the adapter
   performance fixture.

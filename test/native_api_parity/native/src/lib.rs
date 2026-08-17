@@ -148,8 +148,17 @@ impl NativeModule for NativeApiParity {
         };
 
         if name == "benchmark" {
-            if let Err(err) = self.run_benchmarks() {
-                self.record("benchmark", "fail", &err);
+            match self.run_benchmarks() {
+                Ok(()) => {
+                    if let Err(err) = self
+                        .interface
+                        .messages()
+                        .send_lua_rules_msg("NATIVE_BENCH|{\"test\":\"complete\"}")
+                    {
+                        self.record("benchmark_signal", "fail", &format!("{err:?}"));
+                    }
+                }
+                Err(err) => self.record("benchmark", "fail", &err),
             }
             return Ok(());
         }
@@ -391,6 +400,10 @@ impl NativeApiParity {
 
     fn benchmark_heightmap(&self, scale: f64) -> Result<(), String> {
         let interface = self.interface;
+        let terrain_height = interface
+            .terrain()
+            .get_ground_height(8.0, 8.0)
+            .map_err(|err| format!("get_ground_height for benchmark: {err:?}"))?;
         for (name, nominal_size, nominal_invocations) in [
             ("hm_callback_empty", 0usize, 10_000usize),
             ("hm_brush_small", 32usize, 1_000usize),
@@ -448,7 +461,7 @@ impl NativeApiParity {
                 "scale": scale,
                 "nominalSize": nominal_size,
                 "nominalInvocations": nominal_invocations,
-                "measurement": "Native callback-scoped terrain edit",
+                "measurement": "Native callback boundary with zero terraform; terrain rebuild excluded",
             }))?;
         }
         let invocations = scaled_terrain_count(1_000, scale);
@@ -459,7 +472,7 @@ impl NativeApiParity {
                 interface
                     .synced_ctrl()
                     .terrain()
-                    .level_height_map(8.0, 8.0, 248.0, 248.0, 0.0)
+                    .level_height_map(8.0, 8.0, 248.0, 248.0, terrain_height)
                     .map_err(|err| format!("hm_region_op failed: {err:?}"))?;
             }
             samples.push(start.elapsed().as_secs_f64() * 1000.0 / invocations as f64);
@@ -476,7 +489,7 @@ impl NativeApiParity {
             "innerNs": 0.0,
             "scale": scale,
             "nominalInvocations": 1_000,
-            "measurement": "Native region terrain edit",
+            "measurement": "Native region boundary with unchanged height; terrain rebuild excluded",
         }))
     }
 

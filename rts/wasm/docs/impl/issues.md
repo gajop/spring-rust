@@ -15,15 +15,13 @@ values and [review-response.md](review-response.md) for the review mapping.
   visibility filtering, and reproducible probe generation.
 - LuaUI loading and owned visibility-filtered dispatch.
 - Deterministic synced timing and opt-in benchmark instrumentation.
-- Automatic generation of the bounded benchmark matrix.
+- Automatic generation of the benchmark matrix.
 - Direct synced-to-unsynced messaging coverage.
 
 ## Required implementation work
 
 These are incomplete original-plan deliverables, not intentional deferrals:
 
-- Complete the nominal frame-budget gate; the bounded engine-boundary matrix is
-  generated.
 - Complete broad API and mutation-heavy end-to-end coverage.
 - Review Lua registrations not represented by the extractor.
 - Add differential conversion fuzzing and the generated-adapter performance

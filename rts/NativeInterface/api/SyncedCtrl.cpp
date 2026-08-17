@@ -4739,8 +4739,10 @@ static void NativeAddHeightMap(const AddHeightMapQuery* query, AddHeightMapResul
 
 	if (x >= 0 && x <= mapDims.mapx && z >= 0 && z <= mapDims.mapy) {
 		const int idx = z * mapDims.mapxp1 + x;
-		readMap->AddHeight(idx, query->height);
-		TrackHeightMapEdit(x, z);
+		if (query->height != 0.0f) {
+			readMap->AddHeight(idx, query->height);
+			TrackHeightMapEdit(x, z);
+		}
 		result->success = true;
 	}
 }
@@ -4768,8 +4770,10 @@ static void NativeSetHeightMap(const SetHeightMapQuery* query, SetHeightMapResul
 		const int idx = z * mapDims.mapxp1 + x;
 		const float oldHeight = readMap->GetCornerHeightMapSynced()[idx];
 		const float height = oldHeight + (query->height - oldHeight) * query->terraform;
-		readMap->SetHeight(idx, height);
-		TrackHeightMapEdit(x, z);
+		if (height != oldHeight) {
+			readMap->SetHeight(idx, height);
+			TrackHeightMapEdit(x, z);
+		}
 		result->success = true;
 	}
 }
@@ -5109,13 +5113,20 @@ static void NativeLevelHeightMap(const LevelHeightMapQuery* query, LevelHeightMa
 	const int x2 = std::clamp(static_cast<int>(fx2 / SQUARE_SIZE), 0, mapDims.mapx);
 	const int z2 = std::clamp(static_cast<int>(fz2 / SQUARE_SIZE), 0, mapDims.mapy);
 
+	bool changed = false;
 	for (int z = z1; z <= z2; z++) {
 		for (int x = x1; x <= x2; x++) {
-			readMap->SetHeight((z * mapDims.mapxp1) + x, query->height);
+			const int index = (z * mapDims.mapxp1) + x;
+			if (readMap->GetCornerHeightMapSynced()[index] == query->height)
+				continue;
+
+			readMap->SetHeight(index, query->height);
+			changed = true;
 		}
 	}
 
-	mapDamage->RecalcArea(x1, x2, z1, z2);
+	if (changed)
+		mapDamage->RecalcArea(x1, x2, z1, z2);
 	result->success = true;
 }
 

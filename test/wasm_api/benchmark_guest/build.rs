@@ -167,15 +167,12 @@ fn main() {
         "  import messages;\n",
         "  import messages;\n  import profiling;\n  import rules-params;\n",
     );
-	let callin_exports = if benchmark_callin_variant == "unimplemented" {
-		"  export callback-1: func(user-data: u32);\n}"
-	} else {
-		"  export callins-rules-synced;\n  export callback-1: func(user-data: u32);\n}"
-	};
-	base = base.replace(
-		"  export callins-rules-synced;\n}",
-		callin_exports,
-	);
+    let callin_exports = if benchmark_callin_variant == "unimplemented" {
+        "  export callback-1: func(user-data: u32);\n}"
+    } else {
+        "  export callins-rules-synced;\n  export callback-1: func(user-data: u32);\n}"
+    };
+    base = base.replace("  export callins-rules-synced;\n}", callin_exports);
     let output = format!("package recoil:spring-api@1.0.0;\n\n{profiling}\n{rules_params}\n{base}");
     let wit_dir = manifest.join("wit");
     fs::create_dir_all(&wit_dir).expect("create benchmark WIT directory");

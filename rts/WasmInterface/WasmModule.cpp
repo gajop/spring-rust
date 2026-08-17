@@ -1073,7 +1073,11 @@ bool LowerComponentValue(const WasmValue& value, const wasmtime_component_valtyp
 				}
 			}
 			output.kind = WASMTIME_COMPONENT_LIST;
-			wasmtime_component_vallist_new(&output.of.list, elements.size(), elements.data());
+			wasmtime_component_vallist_new_uninit(&output.of.list, elements.size());
+			for (std::size_t index = 0; index < elements.size(); ++index) {
+				output.of.list.data[index] = elements[index];
+				elements[index] = {};
+			}
 			wasmtime_component_valtype_delete(&elementType);
 			return true;
 		}
@@ -1114,7 +1118,12 @@ bool LowerComponentValue(const WasmValue& value, const wasmtime_component_valtyp
 				wasmtime_component_valtype_delete(&fieldType);
 			}
 			output.kind = WASMTIME_COMPONENT_RECORD;
-			wasmtime_component_valrecord_new(&output.of.record, fields.size(), fields.data());
+			wasmtime_component_valrecord_new_uninit(&output.of.record, fields.size());
+			for (std::size_t index = 0; index < fields.size(); ++index) {
+				output.of.record.data[index] = fields[index];
+				fields[index].name = {};
+				fields[index].val = {};
+			}
 			return true;
 		}
 		case WASMTIME_COMPONENT_VALTYPE_TUPLE: {
@@ -1144,7 +1153,11 @@ bool LowerComponentValue(const WasmValue& value, const wasmtime_component_valtyp
 				wasmtime_component_valtype_delete(&elementType);
 			}
 			output.kind = WASMTIME_COMPONENT_TUPLE;
-			wasmtime_component_valtuple_new(&output.of.tuple, values.size(), values.data());
+			wasmtime_component_valtuple_new_uninit(&output.of.tuple, values.size());
+			for (std::size_t index = 0; index < values.size(); ++index) {
+				output.of.tuple.data[index] = values[index];
+				values[index] = {};
+			}
 			return true;
 		}
 		case WASMTIME_COMPONENT_VALTYPE_OPTION: {
@@ -1213,7 +1226,11 @@ bool LowerComponentValue(const WasmValue& value, const wasmtime_component_valtyp
 				names.push_back(nameValue);
 			}
 			output.kind = WASMTIME_COMPONENT_FLAGS;
-			wasmtime_component_valflags_new(&output.of.flags, names.size(), names.data());
+			wasmtime_component_valflags_new_uninit(&output.of.flags, names.size());
+			for (std::size_t index = 0; index < names.size(); ++index) {
+				output.of.flags.data[index] = names[index];
+				names[index] = {};
+			}
 			return true;
 		}
 		case WASMTIME_COMPONENT_VALTYPE_RESULT: {

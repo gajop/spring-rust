@@ -164,11 +164,19 @@ TESTS = (
     "wl_compute",
 )
 
-# These are deliberately bounded defaults for the unattended suite.  They
-# preserve real work in every profile while keeping a complete release run
-# short enough to use during development.  Pass --scale to override all
-# profiles when comparing runs on a particular machine.
+# The default suite is the documented, scale-1 experiment.  The explicit
+# bounded suite is available for iteration on machines where terrain rebuilds
+# or render startup make the nominal run impractical; its scale is preserved
+# in the generated table and is never presented as the nominal result.
 SUITE_PROFILES = (
+	("callins", "--callins", 1.0, 180),
+	("callouts", "--callouts", 1.0, 120),
+	("heightmap", "--heightmap", 1.0, 120),
+	("workloads", "--workloads", 1.0, 300),
+	("memory", "--memory", 1.0, 180),
+	("draw", "--draw", 1.0, 180),
+)
+BOUNDED_SUITE_PROFILES = (
 	("callins", "--callins", 0.1, 20),
 	("callouts", "--callouts", 0.1, 20),
 	("heightmap", "--heightmap", 0.01, 20),
@@ -258,6 +266,13 @@ def build_wasm(component: Path = BENCHMARK_COMPONENT, context: str = "synced_gad
     )
     if not component.is_file():
         raise RuntimeError(f"Wasm benchmark component was not produced: {component}")
+    # Context generation reuses the parity guest's build inputs, but the
+    # checked-in probe sources are the canonical synced context.  Restore
+    # those inputs after a context-specific benchmark build so a UI or
+    # unsynced run cannot leave the reproducibility gate comparing against
+    # its temporary projection.
+    if context != "synced_gadget":
+        prepare_benchmark_context("synced_gadget")
 
 
 def write_build_stamp(
@@ -314,12 +329,9 @@ def check_build_stamp(
         )
 
 
-def make_args(seed: int, timeout: int) -> argparse.Namespace:
+def make_args(seed: int, timeout: int, benchmark_case: str) -> argparse.Namespace:
     return argparse.Namespace(
         blank_map_seed=seed,
-        # Keep the generated map small: the path estimator's memory grows
-        # superlinearly with map dimensions. The benchmark fixture packs its
-        # deterministic units into this bounded footprint.
         blank_map_x=32,
         blank_map_y=32,
         blank_map_height=96,
@@ -368,7 +380,7 @@ def run_backend(
                 "\n".join(manifest_lines) + "\n", encoding="utf-8"
             )
         script = backend_output / "script.txt"
-        harness_args = make_args(seed, timeout)
+        harness_args = make_args(seed, timeout, benchmark_case)
         write_script(
             script,
             blank_map_name(harness_args, "benchmark"),
@@ -534,6 +546,21 @@ def format_metric(metric: tuple[float, str] | None) -> str:
     return f"{value:.3f} {unit}"
 
 
+def spread_metric(row: dict, test: str) -> tuple[float, str] | None:
+    if "spreadNs" in row:
+        value = float(row["spreadNs"])
+        return (value / 1_000_000.0, "ms") if test.startswith("wl_") else (value, "ns")
+    if "spreadMs" in row:
+        return float(row["spreadMs"]), "ms"
+    return None
+
+
+def format_timed_metric(row: dict, test: str) -> str:
+    value = format_metric(numeric_metric(row, test))
+    spread = format_metric(spread_metric(row, test))
+    return value if spread == "—" else f"{value} ± {spread}"
+
+
 def format_memory_metric(row: dict, test: str) -> str:
     if row.get("status") == "unavailable":
         return "—"
@@ -661,7 +688,7 @@ def render_report(summaries: list[dict]) -> str:
                 values = [format_memory_metric(rows[backend], test) for backend in BACKENDS]
             else:
                 values = [
-                    format_metric(numeric_metric(rows[backend], test))
+                    format_timed_metric(rows[backend], test)
                     for backend in BACKENDS
                 ]
             lines.append(
@@ -698,7 +725,8 @@ def run_suite(args: argparse.Namespace) -> int:
 
     suite_root = args.output_root / f"suite-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}"
     summaries = []
-    for profile, flag, default_scale, default_timeout in SUITE_PROFILES:
+    profiles = BOUNDED_SUITE_PROFILES if args.bounded_suite else SUITE_PROFILES
+    for profile, flag, default_scale, default_timeout in profiles:
         scale = args.scale if args.scale is not None else default_scale
         timeout = args.timeout if args.timeout is not None else default_timeout
         summary_path = suite_root / f"{profile}.json"
@@ -744,7 +772,12 @@ def main() -> int:
     parser.add_argument(
         "--suite",
         action="store_true",
-        help="run all bounded profiles and regenerate one consolidated report",
+        help="run all nominal profiles and regenerate one consolidated report",
+    )
+    parser.add_argument(
+        "--bounded-suite",
+        action="store_true",
+        help="use reduced real workloads for development instead of the nominal suite",
     )
     parser.add_argument(
         "--summary-json",
@@ -807,6 +840,8 @@ def main() -> int:
     parser.add_argument("--skip-build", action="store_true")
     args = parser.parse_args()
 
+    if args.bounded_suite and not args.suite:
+        raise RuntimeError("--bounded-suite requires --suite")
     if args.suite:
         return run_suite(args)
 

@@ -6298,13 +6298,20 @@ int LuaSyncedCtrl::LevelHeightMap(lua_State* L)
 	int x1, x2, z1, z2;
 	ParseMapParams(L, __func__, height, x1, z1, x2, z2);
 
+	bool changed = false;
 	for (int z = z1; z <= z2; z++) {
 		for (int x = x1; x <= x2; x++) {
-			readMap->SetHeight((z * mapDims.mapxp1) + x, height);
+			const int index = (z * mapDims.mapxp1) + x;
+			if (readMap->GetCornerHeightMapSynced()[index] == height)
+				continue;
+
+			readMap->SetHeight(index, height);
+			changed = true;
 		}
 	}
 
-	mapDamage->RecalcArea(x1, x2, z1, z2);
+	if (changed)
+		mapDamage->RecalcArea(x1, x2, z1, z2);
 	return 0;
 }
 
@@ -6437,15 +6444,17 @@ int LuaSyncedCtrl::AddHeightMap(lua_State* L)
 
 	const int index = (z * mapDims.mapxp1) + x;
 	const float oldHeight = readMap->GetCornerHeightMapSynced()[index];
-	heightMapAmountChanged += math::fabsf(h);
+	if (h != 0.0f) {
+		heightMapAmountChanged += math::fabsf(h);
 
-	// update RecalcArea()
-	if (x < heightMapx1) { heightMapx1 = x; }
-	if (x > heightMapx2) { heightMapx2 = x; }
-	if (z < heightMapz1) { heightMapz1 = z; }
-	if (z > heightMapz2) { heightMapz2 = z; }
+		// update RecalcArea()
+		if (x < heightMapx1) { heightMapx1 = x; }
+		if (x > heightMapx2) { heightMapx2 = x; }
+		if (z < heightMapz1) { heightMapz1 = z; }
+		if (z > heightMapz2) { heightMapz2 = z; }
 
-	readMap->AddHeight(index, h);
+		readMap->AddHeight(index, h);
+	}
 	// push the new height
 	lua_pushnumber(L, oldHeight + h);
 	return 1;
@@ -6497,15 +6506,17 @@ int LuaSyncedCtrl::SetHeightMap(lua_State* L)
 	}
 
 	const float heightDiff = (height - oldHeight);
-	heightMapAmountChanged += math::fabsf(heightDiff);
+	if (heightDiff != 0.0f) {
+		heightMapAmountChanged += math::fabsf(heightDiff);
 
-	// update RecalcArea()
-	if (x < heightMapx1) { heightMapx1 = x; }
-	if (x > heightMapx2) { heightMapx2 = x; }
-	if (z < heightMapz1) { heightMapz1 = z; }
-	if (z > heightMapz2) { heightMapz2 = z; }
+		// update RecalcArea()
+		if (x < heightMapx1) { heightMapx1 = x; }
+		if (x > heightMapx2) { heightMapx2 = x; }
+		if (z < heightMapz1) { heightMapz1 = z; }
+		if (z > heightMapz2) { heightMapz2 = z; }
 
-	readMap->SetHeight(index, height);
+		readMap->SetHeight(index, height);
+	}
 	lua_pushnumber(L, heightDiff);
 	return 1;
 }

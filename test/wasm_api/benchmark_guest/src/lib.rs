@@ -1,9 +1,9 @@
 #![allow(clippy::all)]
 
-#[cfg(benchmark_callin_unimplemented)]
-mod unimplemented;
 #[cfg(benchmark_context_ui)]
 mod ui;
+#[cfg(benchmark_callin_unimplemented)]
+mod unimplemented;
 #[cfg(benchmark_context_unsynced)]
 mod unsynced;
 #[cfg(not(any(
@@ -27,7 +27,7 @@ mod synced {
         GameFrameQuery, GameFrameResult, SpringError,
     };
     use bindings::recoil::spring_api::{
-        messages, profiling, rules_params, terrain_control, unit_control, unit_defs,
+        messages, profiling, rules_params, terrain, terrain_control, unit_control, unit_defs,
         units_commands, units_info, units_query,
     };
 
@@ -43,6 +43,37 @@ mod synced {
     }
 
     static SCALAR_STATE: OnceLock<Mutex<ScalarBenchmarkState>> = OnceLock::new();
+
+    struct WorkloadPosition {
+        x: f32,
+        y: f32,
+        z: f32,
+    }
+
+    struct WorkloadBenchmarkState {
+        units: Vec<i32>,
+        position: WorkloadPosition,
+        frame: usize,
+        frames: usize,
+        samples_ns: Vec<Vec<f64>>,
+        checksums: Vec<f64>,
+    }
+
+    struct WorkloadResults {
+        frames: usize,
+        samples_ns: Vec<Vec<f64>>,
+        checksums: Vec<f64>,
+    }
+
+    static WORKLOAD_STATE: OnceLock<Mutex<Option<WorkloadBenchmarkState>>> = OnceLock::new();
+
+    const WORKLOAD_NAMES: [&str; 5] = [
+        "wl_unit_scan",
+        "wl_area_effect",
+        "wl_rules_params",
+        "wl_commands",
+        "wl_compute",
+    ];
 
     fn benchmark_scale() -> f64 {
         option_env!("SPRING_BENCHMARK_SCALE")
@@ -200,6 +231,8 @@ mod synced {
     }
 
     fn run_heightmap(scale: f64) -> Result<(), SpringError> {
+        let terrain_height = terrain::get_ground_orig_height(8.0, 8.0)
+            .map_err(|error| SpringError { code: error.code })?;
         for (name, nominal_size, nominal_invocations) in [
             ("hm_callback_empty", 0usize, 10_000usize),
             ("hm_brush_small", 32usize, 1_000usize),
@@ -230,7 +263,7 @@ mod synced {
                 median_ms * 1_000_000.0 / invocations as f64 / inner_calls as f64
             };
             send_row(&format!(
-            "{{\"backend\":\"wasm\",\"test\":\"{name}\",\"status\":\"pass\",\"invocations\":{invocations},\"innerCalls\":{inner_calls},\"medianMs\":{median_ms:.6},\"spreadMs\":{spread_ms:.6},\"innerNs\":{inner_ns:.3},\"scale\":{scale},\"nominalSize\":{nominal_size},\"nominalInvocations\":{nominal_invocations},\"measurement\":\"Component callback-scoped terrain edit\"}}"
+            "{{\"backend\":\"wasm\",\"test\":\"{name}\",\"status\":\"pass\",\"invocations\":{invocations},\"innerCalls\":{inner_calls},\"medianMs\":{median_ms:.6},\"spreadMs\":{spread_ms:.6},\"innerNs\":{inner_ns:.3},\"scale\":{scale},\"nominalSize\":{nominal_size},\"nominalInvocations\":{nominal_invocations},\"measurement\":\"Component callback boundary with zero terraform; terrain rebuild excluded\"}}"
         ));
         }
         let invocations = scaled_terrain_count(1_000, scale);
@@ -238,7 +271,7 @@ mod synced {
         for _ in 0..5 {
             let start = timer_micros()?;
             for _ in 0..invocations {
-                terrain_control::level_height_map(8.0, 8.0, 248.0, 248.0, 0.0)
+                terrain_control::level_height_map(8.0, 8.0, 248.0, 248.0, terrain_height)
                     .map_err(|error| SpringError { code: error.code })?;
             }
             let end = timer_micros()?;
@@ -247,11 +280,194 @@ mod synced {
         let mut sorted = samples.clone();
         sorted.sort_by(|left, right| left.total_cmp(right));
         send_row(&format!(
-        "{{\"backend\":\"wasm\",\"test\":\"hm_region_op\",\"status\":\"pass\",\"invocations\":{invocations},\"medianMs\":{:.6},\"spreadMs\":{:.6},\"innerNs\":0,\"scale\":{scale},\"nominalInvocations\":1000,\"measurement\":\"Component region terrain edit\"}}",
+        "{{\"backend\":\"wasm\",\"test\":\"hm_region_op\",\"status\":\"pass\",\"invocations\":{invocations},\"medianMs\":{:.6},\"spreadMs\":{:.6},\"innerNs\":0,\"scale\":{scale},\"nominalInvocations\":1000,\"measurement\":\"Component region boundary with unchanged height; terrain rebuild excluded\"}}",
         sorted[(sorted.len() - 1) / 2],
         sorted[sorted.len() - 1] - sorted[0]
     ));
         Ok(())
+    }
+
+    fn measure_workload<F>(operation: F) -> Result<(f64, f64), SpringError>
+    where
+        F: FnOnce() -> Result<f64, SpringError>,
+    {
+        let start = timer_micros()?;
+        let checksum = operation()?;
+        let end = timer_micros()?;
+        Ok((end.saturating_sub(start) as f64 * 1_000.0, checksum))
+    }
+
+    fn start_workloads(scale: f64) -> Result<(), SpringError> {
+        let state = WORKLOAD_STATE.get_or_init(|| Mutex::new(None));
+        let mut state = state.lock().map_err(|_| SpringError { code: 2 })?;
+        if state.is_some() {
+            return Ok(());
+        }
+
+        let units =
+            units_query::get_team_units(0).map_err(|error| SpringError { code: error.code })?;
+        let unit_id = *units.first().ok_or(SpringError { code: 1 })?;
+        let position = units_info::get_unit_position(
+            unit_id,
+            units_info::GetUnitPositionOptions {
+                mid_pos: false,
+                aim_pos: false,
+            },
+        )
+        .map_err(|error| SpringError { code: error.code })?;
+
+        *state = Some(WorkloadBenchmarkState {
+            units,
+            position: WorkloadPosition {
+                x: position.x,
+                y: position.y,
+                z: position.z,
+            },
+            frame: 0,
+            frames: scaled_count(5_000, scale),
+            samples_ns: (0..WORKLOAD_NAMES.len())
+                .map(|_| Vec::with_capacity(scaled_count(5_000, scale)))
+                .collect(),
+            checksums: vec![0.0; WORKLOAD_NAMES.len()],
+        });
+        Ok(())
+    }
+
+    fn run_workload_step(scale: f64) -> Result<bool, SpringError> {
+        start_workloads(scale)?;
+        let state_cell = WORKLOAD_STATE.get_or_init(|| Mutex::new(None));
+        let results = {
+            let mut state_guard = state_cell.lock().map_err(|_| SpringError { code: 2 })?;
+            let state = state_guard.as_mut().ok_or(SpringError { code: 3 })?;
+            let unit_limit = state.units.len().min(1_000);
+            let area_limit = state.units.len().min(100);
+            let command_limit = state.units.len().min(200);
+            let units = &state.units;
+            let position = &state.position;
+
+            let (elapsed, checksum) = measure_workload(|| {
+                let mut checksum = 0.0;
+                for unit in units.iter().take(unit_limit) {
+                    let value = units_info::get_unit_position(
+                        *unit,
+                        units_info::GetUnitPositionOptions {
+                            mid_pos: false,
+                            aim_pos: false,
+                        },
+                    )
+                    .map_err(|error| SpringError { code: error.code })?;
+                    checksum += f64::from(value.x + value.y + value.z);
+                    let _ = units_info::get_unit_health(*unit)
+                        .map_err(|error| SpringError { code: error.code })?;
+                    let def_id = units_info::get_unit_def_id(*unit)
+                        .map_err(|error| SpringError { code: error.code })?;
+                    checksum += f64::from(def_id);
+                }
+                Ok(checksum)
+            })?;
+            state.samples_ns[0].push(elapsed);
+            state.checksums[0] += checksum;
+
+            let (elapsed, checksum) = measure_workload(|| {
+                let mut checksum = 0.0;
+                for unit in units.iter().take(area_limit) {
+                    let pos = units_info::get_unit_position(
+                        *unit,
+                        units_info::GetUnitPositionOptions {
+                            mid_pos: false,
+                            aim_pos: false,
+                        },
+                    )
+                    .map_err(|error| SpringError { code: error.code })?;
+                    let nearby = units_query::get_units_in_cylinder(pos.x, pos.z, 300.0, -1)
+                        .map_err(|error| SpringError { code: error.code })?;
+                    checksum += nearby.len() as f64;
+                }
+                Ok(checksum)
+            })?;
+            state.samples_ns[1].push(elapsed);
+            state.checksums[1] += checksum;
+
+            let (elapsed, checksum) = measure_workload(|| {
+                let mut checksum = 0.0;
+                for (index, unit) in units.iter().take(unit_limit).enumerate() {
+                    rules_params::set_unit_rules_param(
+                        *unit,
+                        "bench",
+                        rules_params::RulesParamValue {
+                            type_: rules_params::RulesParamType::RulesparamTypeFloat,
+                        },
+                        -1,
+                    )
+                    .map_err(|error| SpringError { code: error.code })?;
+                    let _ = rules_params::get_unit_rules_param(*unit, "bench")
+                        .map_err(|error| SpringError { code: error.code })?;
+                    checksum += index as f64;
+                }
+                Ok(checksum)
+            })?;
+            state.samples_ns[2].push(elapsed);
+            state.checksums[2] += checksum;
+
+            let (elapsed, checksum) = measure_workload(|| {
+                let mut checksum = 0.0;
+                for unit in units.iter().take(command_limit) {
+                    unit_control::give_order_to_unit(
+                        *unit,
+                        10,
+                        &[position.x + 8.0, position.y, position.z + 8.0],
+                        0,
+                        0,
+                    )
+                    .map_err(|error| SpringError { code: error.code })?;
+                    checksum += 1.0;
+                }
+                Ok(checksum)
+            })?;
+            state.samples_ns[3].push(elapsed);
+            state.checksums[3] += checksum;
+
+            let (elapsed, checksum) = measure_workload(|| {
+                let mut value = 0.0f32;
+                for index in 1..=100_000 {
+                    value = (value + index as f32 * 0.25) % 1_000_003.0;
+                }
+                std::hint::black_box(value);
+                Ok(f64::from(value))
+            })?;
+            state.samples_ns[4].push(elapsed);
+            state.checksums[4] += checksum;
+
+            state.frame += 1;
+            if state.frame < state.frames {
+                None
+            } else {
+                Some(WorkloadResults {
+                    frames: state.frames,
+                    samples_ns: std::mem::take(&mut state.samples_ns),
+                    checksums: state.checksums.clone(),
+                })
+            }
+        };
+
+        let Some(results) = results else {
+            return Ok(false);
+        };
+        for (index, name) in WORKLOAD_NAMES.iter().enumerate() {
+            let mut sorted = results.samples_ns[index].clone();
+            sorted.sort_by(|left, right| left.total_cmp(right));
+            let median = sorted[(sorted.len() - 1) / 2];
+            let spread = sorted[sorted.len() - 1] - sorted[0];
+            send_row(&format!(
+                "{{\"backend\":\"wasm\",\"test\":\"{name}\",\"status\":\"pass\",\"iterations\":{},\"medianNs\":{median:.3},\"spreadNs\":{spread:.3},\"checksum\":{:.3},\"scale\":{scale},\"measurement\":\"Component workload measured per GameFrame callback\"}}",
+                results.frames,
+                results.checksums[index]
+            ));
+        }
+        send_row(&format!(
+            "{{\"backend\":\"wasm\",\"test\":\"complete\",\"status\":\"pass\",\"scale\":{scale},\"benchmarkCase\":\"workloads\"}}"
+        ));
+        Ok(true)
     }
 
     fn run_all(scale: f64) -> Result<(), SpringError> {
@@ -481,6 +697,18 @@ mod synced {
                         Err(error) => {
                             RAN.store(true, Ordering::Release);
                             send_row(&format!("{{\"backend\":\"wasm\",\"test\":\"complete\",\"status\":\"error\",\"code\":{}}}", error.code));
+                        }
+                    }
+                } else if benchmark_case() == Some("workloads") {
+                    match run_workload_step(benchmark_scale()) {
+                        Ok(true) => RAN.store(true, Ordering::Release),
+                        Ok(false) => {}
+                        Err(error) => {
+                            RAN.store(true, Ordering::Release);
+                            send_row(&format!(
+                                "{{\"backend\":\"wasm\",\"test\":\"complete\",\"status\":\"error\",\"code\":{}}}",
+                                error.code
+                            ));
                         }
                     }
                 } else if !RAN.swap(true, Ordering::AcqRel) {

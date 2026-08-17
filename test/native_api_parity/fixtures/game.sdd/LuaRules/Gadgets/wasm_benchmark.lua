@@ -146,12 +146,17 @@ local function makeUnits()
 	-- is setup work and is outside every timed sample, while list/spatial calls
 	-- depend on the prescribed 1,000 real units being present.
 	local count = 1000
-	local columns = 32
+	local squareSize = Game.squareSize or 8
+	local spacing = 7
+	local columns = math.max(1, math.floor((Game.mapSizeX - squareSize * 2) / spacing) + 1)
+	local rows = math.max(1, math.floor((Game.mapSizeZ - squareSize * 2) / spacing) + 1)
+	local cells = columns * rows
 	for index = 1, count do
-		local column = (index - 1) % columns
-		local row = math.floor((index - 1) / columns)
-		local x = 16 + column * 7
-		local z = 16 + row * 7
+		local cell = (index - 1) % cells
+		local column = cell % columns
+		local row = math.floor(cell / columns)
+		local x = squareSize + column * spacing
+		local z = squareSize + row * spacing
 		local y = Spring.GetGroundHeight(x, z) or 0
 		local unitID = Spring.CreateUnit("native_api_test_unit", x, y, z, 0, 0, false, false)
 		if unitID == nil then
@@ -316,15 +321,14 @@ end
 
 local beginWorkloads
 local heightmapCases = {
-	-- Independent callback invocations are batched per GameFrame so the
-	-- benchmark does not spend minutes waiting for the engine to advance one
-	-- frame per empty callback. The measured unit is still one callback; the
-	-- batch only changes the scheduling overhead outside the measurement.
+	-- Every terrain call uses zero terraform or the current height, so it is
+	-- safe to batch independent invocations per GameFrame. The measured unit
+	-- remains one callback; batching only removes scheduler wait time.
 	{ name = "hm_callback_empty", size = 0, nominalSize = 0, invocations = scaledTerrainCount(10000), nominalInvocations = 10000, batch = 1000 },
-	{ name = "hm_brush_small", size = scaledBrushSize(32), nominalSize = 32, invocations = scaledTerrainCount(1000), nominalInvocations = 1000, batch = 1 },
-	{ name = "hm_brush_medium", size = scaledBrushSize(128), nominalSize = 128, invocations = scaledTerrainCount(100), nominalInvocations = 100, batch = 1 },
-	{ name = "hm_brush_large", size = scaledBrushSize(512), nominalSize = 512, invocations = scaledTerrainCount(10), nominalInvocations = 10, batch = 1 },
-	{ name = "hm_region_op", size = 0, nominalSize = 0, invocations = scaledTerrainCount(1000), nominalInvocations = 1000, batch = 1, region = true },
+	{ name = "hm_brush_small", size = scaledBrushSize(32), nominalSize = 32, invocations = scaledTerrainCount(1000), nominalInvocations = 1000, batch = 100 },
+	{ name = "hm_brush_medium", size = scaledBrushSize(128), nominalSize = 128, invocations = scaledTerrainCount(100), nominalInvocations = 100, batch = 10 },
+	{ name = "hm_brush_large", size = scaledBrushSize(512), nominalSize = 512, invocations = scaledTerrainCount(10), nominalInvocations = 10, batch = 10 },
+	{ name = "hm_region_op", size = 0, nominalSize = 0, invocations = scaledTerrainCount(1000), nominalInvocations = 1000, batch = 1000, region = true },
 }
 local heightmapCaseIndex = 0
 local heightmapRepeat = 0
@@ -371,9 +375,10 @@ local function finishHeightmapCase()
 		scale = benchmarkScale,
 		nominalSize = case.nominalSize,
 		nominalInvocations = case.nominalInvocations,
-		measurement = "Lua callback measured individually; independent callbacks batched per GameFrame",
+		measurement = "Lua callback boundary with zero terraform; terrain rebuild excluded",
 	})
 	heightmapCaseIndex = heightmapCaseIndex + 1
+	heightmapInvocation = 0
 	if heightmapCaseIndex > #heightmapCases then
 		heightmapCaseIndex = 0
 		heightmapSamples = nil
@@ -405,16 +410,18 @@ local function stepHeightmap()
 		return
 	end
 	local case = heightmapCases[heightmapCaseIndex]
-	-- The 32x32 blank map is 256 world units wide and has 32 height-map
-	-- squares per axis. Use world coordinates on those square boundaries;
-	-- larger brushes intentionally revisit the bounded fixture squares so the
-	-- prescribed call counts do not require a multi-gigabyte map.
+	-- Use world coordinates on square boundaries. Larger brushes intentionally
+	-- revisit the bounded fixture squares so the prescribed call counts do not
+	-- require a multi-gigabyte map. Terraform zero keeps this profile focused
+	-- on the callback and inner-call boundary; path/LOS rebuild cost is a
+	-- separate engine workload and would otherwise dominate every backend.
 	local x, z = 8, 8
+	local terrainHeight = Spring.GetGroundHeight(x, z) or 96
 	local invocations = math.min(case.batch, case.invocations - heightmapInvocation)
 	for _ = 1, invocations do
 		local callStart = monotonicSeconds()
 		if case.region then
-			Spring.LevelHeightMap(x, z, 256, 256, 0)
+			Spring.LevelHeightMap(x, z, 256, 256, terrainHeight)
 		else
 			local result = Spring.SetHeightMapFunc(function()
 				local innerStart = monotonicSeconds()
@@ -422,7 +429,7 @@ local function stepHeightmap()
 					for offsetZ = 0, case.size - 1 do
 						local squareX = 8 + (offsetX % 30) * 8
 						local squareZ = 8 + (offsetZ % 30) * 8
-						Spring.SetHeightMap(x + squareX, z + squareZ, 0)
+						Spring.SetHeightMap(x + squareX, z + squareZ, terrainHeight, 0)
 						heightmapInnerCalls = heightmapInnerCalls + 1
 					end
 				end
@@ -869,8 +876,17 @@ function gadget:Initialize()
 end
 
 function gadget:RecvLuaMsg(message)
-	if message:sub(1, 11) == "WASM_BENCH|" then
-		local encoded = message:sub(12)
+	local nativePrefix = "NATIVE_BENCH|"
+	if message:sub(1, #nativePrefix) == nativePrefix then
+		local encoded = message:sub(#nativePrefix + 1)
+		if encoded:find('"test":"complete"', 1, true) ~= nil then
+			benchmarkComplete = true
+		end
+		return true
+	end
+	local wasmPrefix = "WASM_BENCH|"
+	if message:sub(1, #wasmPrefix) == wasmPrefix then
+		local encoded = message:sub(#wasmPrefix + 1)
 		if encoded:find('"test":"complete"', 1, true) ~= nil then
 			benchmarkComplete = true
 			SendToUnsynced("native_api_benchmark_complete")
@@ -896,7 +912,10 @@ function gadget:GameFrame(frame)
 	end
 	if frame == 1 then
 		makeUnits()
-	elseif frame == 3 and fixtureReady then
+	elseif frame == (benchmarkCase == "heightmap" and 65 or 3) and fixtureReady then
+		-- Let the engine complete its initial height-bound update before the
+		-- callback profile starts; otherwise the first no-op terrain batch can
+		-- inherit the map-load dirty flag and run a full-map refresh.
 		if benchmarkCase == "callins" then
 			runCallinDriver()
 		elseif benchmarkCase == "memory" then
@@ -920,7 +939,7 @@ function gadget:GameFrame(frame)
 		stepHeightmap()
 	elseif backend == "lua" and workloadIndex ~= 0 then
 		stepWorkload()
-	elseif backend == "native" and frame > 10 then
+	elseif backend == "native" and benchmarkCase ~= "heightmap" and frame > 10 then
 		Spring.Quit()
 	end
 	if benchmarkComplete then

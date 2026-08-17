@@ -57,9 +57,7 @@ fn run_draw() -> Result<(), SpringError> {
             gfx::begin_end(1, 1, 0).map_err(|error| SpringError { code: error.code })?;
         }
         let elapsed = timer_micros()?.saturating_sub(start);
-        callout_samples.push(
-            elapsed as f64 * 1000.0 / (callout_vertices * DRAW_BATCHES) as f64,
-        );
+        callout_samples.push(elapsed as f64 * 1000.0 / (callout_vertices * DRAW_BATCHES) as f64);
     }
     callout_samples.sort_by(|left, right| left.total_cmp(right));
     let callout_median = callout_samples[(callout_samples.len() - 1) / 2];
