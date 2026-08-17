@@ -419,8 +419,10 @@ local function generatedReturnValue(returnSpec, returns)
 		if type(value) == "table" then
 			for _, units in pairs(value) do
 				if type(units) == "table" then
-					for _, unitID in ipairs(units) do
-						unitIDs[#unitIDs + 1] = unitID
+						for key, unitID in pairs(units) do
+							if type(key) == "number" and type(unitID) == "number" then
+								unitIDs[#unitIDs + 1] = unitID
+						end
 					end
 				end
 			end
@@ -433,8 +435,10 @@ local function generatedReturnValue(returnSpec, returns)
 			for unitDefID, units in pairs(value) do
 				if unitDefID ~= "n" and type(units) == "table" then
 					local unitIDs = {}
-					for _, unitID in ipairs(units) do
-						unitIDs[#unitIDs + 1] = unitID
+						for key, unitID in pairs(units) do
+							if type(key) == "number" and type(unitID) == "number" then
+								unitIDs[#unitIDs + 1] = unitID
+						end
 					end
 					table.sort(unitIDs)
 					groups[#groups + 1] = {
@@ -706,11 +710,32 @@ function M.runPortableReadOnlyTests(context, generatedTests, record, invokeNativ
 	end
 end
 
--- Run the deterministic, read-only subset used as the Lua reference for a
--- Component Model probe.  This deliberately shares the canonical generated
--- argument/result lowering with the ordinary parity fixture; the only
--- difference is the compact field-only transport consumed by the Wasm
--- comparator.
+local function invokeGeneratedSetter(runtime, ids, value)
+	local setters = runtime and runtime.set
+	if setters == nil then
+		return
+	end
+	if setters.call ~= nil then
+		setters = { setters }
+	end
+	for _, setter in ipairs(setters) do
+		local func = resolveLuaFunction(setter.call)
+		local args = {}
+		local argCount = 0
+		for _, argSpec in ipairs(setter.args or {}) do
+			argCount = argCount + 1
+			args[argCount] = generatedArg(argSpec, ids, value)
+		end
+		func(unpack(args, 1, argCount))
+	end
+end
+
+-- Run the deterministic subset used as the Lua reference for a Component
+-- Model probe.  Readonly rows are ordinary reads; portable setter/getter rows
+-- perform the same setter sequence before the readback.  This deliberately
+-- shares the canonical generated argument/result lowering with the ordinary
+-- parity fixture; the only difference is the compact field-only transport
+-- consumed by the Wasm comparator.
 function M.runWasmApiReference(context, probeSpec, generatedTests, emit, fixtureIDs, shouldDefer)
 	local ids = M.fixtureIDs(fixtureIDs)
 	ids.context = context
@@ -730,7 +755,12 @@ function M.runWasmApiReference(context, probeSpec, generatedTests, emit, fixture
 			for key, probeValue in pairs(values[testName] or {}) do
 				value[key] = probeValue
 			end
-			local ok, readback = pcall(generatedGet, metadata, ids, value)
+			local ok, readback = pcall(function()
+				if metadata.kind == "setter_getter" then
+					invokeGeneratedSetter(metadata.lua_runtime, ids, value)
+				end
+				return generatedGet(metadata, ids, value)
+			end)
 			local payload = {
 				source = "lua-api",
 				context = context,
@@ -847,7 +877,11 @@ end
 
 function M.mode()
 	local opts = Spring.GetModOptions() or {}
-	return opts.native_api_parity_mode or "lua"
+	local mode = opts.native_api_parity_mode or "lua"
+	if mode == "wasm_reference" or mode == "wasm_guest" then
+		return "wasm"
+	end
+	return mode
 end
 
 function M.enableRenderingTests()

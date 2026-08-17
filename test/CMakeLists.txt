@@ -112,6 +112,7 @@ endmacro()
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmDispatch.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
 			"${ENGINE_SOURCE_DIR}/NativeInterface/NativeInterfaceWasmAdapter.cpp"
+			"${ENGINE_SOURCE_DIR}/NativeInterface/WasmUiVisibility.cpp"
 			${wasm_host_adapter_sources}
 			"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
 			${test_List_sources}
@@ -120,6 +121,13 @@ endmacro()
 	set(test_libs recoil-wasmtime)
 	add_spring_test(${test_name} "${test_src}" "${test_libs}" "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
 	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
+	# Keep the frame-budget benchmark independently runnable in a non-ASAN
+	# build.  The normal check target intentionally uses ASAN, where allocator
+	# instrumentation makes timing gates informational; this target is the
+	# explicit performance gate used by CI after a release build.
+	add_custom_target(wasm-performance
+		${CMAKE_CTEST_COMMAND} --output-on-failure -R testWasmInterface
+		DEPENDS test_${test_name})
 
 	# Keep each hostile canonical-allocator scenario in its own process.
 	# Wasmtime's native trap machinery is process-global, and these tests

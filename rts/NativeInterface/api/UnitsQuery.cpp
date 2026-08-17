@@ -1,5 +1,7 @@
 #include "UnitsQuery.h"
 
+#include "NativeInterface/WasmUiVisibility.h"
+
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Units/UnitDefHandler.h"
@@ -87,7 +89,8 @@ static void NativeValidUnitID(const ValidUnitIDQuery* query, ValidUnitIDResult* 
 		result->error = &NOT_READY_ERROR;
 		return;
 	}
-	result->valid = (unitHandler.GetUnit(query->unitID) != nullptr);
+	result->valid = (WasmUiVisibility::FindUnit(query->unitID,
+		WasmUiVisibility::UnitAccess::Visible) != nullptr);
 }
 
 // Get all units
@@ -109,7 +112,8 @@ static void NativeGetAllUnits(const GetAllUnitsQuery* query, GetAllUnitsResult* 
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	for (const CUnit* unit : unitHandler.GetActiveUnits()) {
-		if (unit != nullptr && count < maxUnits) {
+		if (unit != nullptr && WasmUiVisibility::UnitPasses(unit,
+			WasmUiVisibility::UnitAccess::Visible) && count < maxUnits) {
 			units[count++] = unit->id;
 		}
 	}
@@ -142,8 +146,11 @@ static void NativeGetTeamUnits(const GetTeamUnitsQuery* query, GetTeamUnitsResul
 	uint32_t count = 0;
 	const size_t maxUnits = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
+	const bool allied = !WasmUiVisibility::Active() ||
+		(WasmUiVisibility::ReadTeam() >= 0 &&
+		teamHandler.AlliedTeams(query->teamID, WasmUiVisibility::ReadTeam()));
 	for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
-		if (unit != nullptr && count < maxUnits) {
+		if (unit != nullptr && (allied || WasmUiVisibility::IsUnitVisible(unit)) && count < maxUnits) {
 			units[count++] = unit->id;
 		}
 	}
@@ -169,11 +176,17 @@ static void NativeGetTeamUnitsSorted(const GetTeamUnitsSortedQuery* query, GetTe
 		result->error = &INVALID_TEAM_ERROR;
 		return;
 	}
+	const bool allied = !WasmUiVisibility::Active() ||
+		(WasmUiVisibility::ReadTeam() >= 0 &&
+		teamHandler.AlliedTeams(query->teamID, WasmUiVisibility::ReadTeam()));
 
 	size_t groupCapacity = 0;
 	for (unsigned int i = 0, n = unitDefHandler->NumUnitDefs(); i < n; ++i) {
 		const auto& unitsByDef = unitHandler.GetUnitsByTeamAndDef(query->teamID, i + 1);
-		if (!unitsByDef.empty())
+		if (!unitsByDef.empty() && (!WasmUiVisibility::Active() || allied ||
+			std::any_of(unitsByDef.begin(), unitsByDef.end(), [](const CUnit* unit) {
+				return WasmUiVisibility::IsUnitVisible(unit);
+			})))
 			groupCapacity++;
 	}
 
@@ -200,7 +213,13 @@ static void NativeGetTeamUnitsSorted(const GetTeamUnitsSortedQuery* query, GetTe
 			return;
 		}
 
-		const size_t bytes = unitsByDef.size() * sizeof(int32_t);
+		const size_t visibleCount = allied ? unitsByDef.size() : std::count_if(
+			unitsByDef.begin(), unitsByDef.end(), [](const CUnit* unit) {
+				return WasmUiVisibility::IsUnitVisible(unit);
+			});
+		if (visibleCount == 0)
+			continue;
+		const size_t bytes = visibleCount * sizeof(int32_t);
 		if (bufferPos + bytes > sizeof(scratchBuffer)) {
 			result->error = &BUFFER_OVERFLOW_ERROR;
 			return;
@@ -209,6 +228,8 @@ static void NativeGetTeamUnitsSorted(const GetTeamUnitsSortedQuery* query, GetTe
 		int32_t* units = reinterpret_cast<int32_t*>(scratchBuffer + bufferPos);
 		uint32_t unitCount = 0;
 		for (const CUnit* unit: unitsByDef) {
+			if (!allied && !WasmUiVisibility::IsUnitVisible(unit))
+				continue;
 			units[unitCount++] = unit->id;
 		}
 		bufferPos += bytes;
@@ -238,11 +259,14 @@ static void NativeGetTeamUnitsCounts(const GetTeamUnitsCountsQuery* query, GetTe
 		result->error = &INVALID_TEAM_ERROR;
 		return;
 	}
+	const bool allied = !WasmUiVisibility::Active() ||
+		(WasmUiVisibility::ReadTeam() >= 0 &&
+		teamHandler.AlliedTeams(query->teamID, WasmUiVisibility::ReadTeam()));
 
 	// Count units by def
 	std::unordered_map<int32_t, uint32_t> defCounts;
 	for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
-		if (unit != nullptr) {
+		if (unit != nullptr && (allied || WasmUiVisibility::IsUnitVisible(unit))) {
 			defCounts[unit->unitDef->id]++;
 		}
 	}
@@ -281,6 +305,9 @@ static void NativeGetTeamUnitsByDefs(const GetTeamUnitsByDefsQuery* query, GetTe
 		result->error = &INVALID_TEAM_ERROR;
 		return;
 	}
+	const bool allied = !WasmUiVisibility::Active() ||
+		(WasmUiVisibility::ReadTeam() >= 0 &&
+		teamHandler.AlliedTeams(query->teamID, WasmUiVisibility::ReadTeam()));
 
 	std::vector<int32_t> requestedDefs(query->unitDefIDs, query->unitDefIDs + query->defCount);
 	std::sort(requestedDefs.begin(), requestedDefs.end());
@@ -293,7 +320,8 @@ static void NativeGetTeamUnitsByDefs(const GetTeamUnitsByDefsQuery* query, GetTe
 
 	for (const int32_t unitDefID: requestedDefs) {
 		for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
-			if (unit != nullptr && unit->unitDef->id == unitDefID && count < maxUnits) {
+			if (unit != nullptr && (allied || WasmUiVisibility::IsUnitVisible(unit)) &&
+				unit->unitDef->id == unitDefID && count < maxUnits) {
 				units[count++] = unit->id;
 			}
 		}
@@ -319,10 +347,14 @@ static void NativeGetTeamUnitDefCount(const GetTeamUnitDefCountQuery* query, Get
 		result->error = &INVALID_TEAM_ERROR;
 		return;
 	}
+	const bool allied = !WasmUiVisibility::Active() ||
+		(WasmUiVisibility::ReadTeam() >= 0 &&
+		teamHandler.AlliedTeams(query->teamID, WasmUiVisibility::ReadTeam()));
 
 	uint32_t count = 0;
 	for (const CUnit* unit : unitHandler.GetUnitsByTeam(query->teamID)) {
-		if (unit != nullptr && unit->unitDef->id == query->unitDefID) {
+		if (unit != nullptr && (allied || WasmUiVisibility::IsUnitTyped(unit)) &&
+			unit->unitDef->id == query->unitDefID) {
 			count++;
 		}
 	}
@@ -345,8 +377,15 @@ static void NativeGetTeamUnitCount(const GetTeamUnitCountQuery* query, GetTeamUn
 		result->error = &INVALID_TEAM_ERROR;
 		return;
 	}
+	const bool allied = !WasmUiVisibility::Active() ||
+		(WasmUiVisibility::ReadTeam() >= 0 &&
+		teamHandler.AlliedTeams(query->teamID, WasmUiVisibility::ReadTeam()));
 
-	result->count = unitHandler.NumUnitsByTeam(query->teamID);
+	result->count = allied ? unitHandler.NumUnitsByTeam(query->teamID) : std::count_if(
+		unitHandler.GetUnitsByTeam(query->teamID).begin(),
+		unitHandler.GetUnitsByTeam(query->teamID).end(), [](const CUnit* unit) {
+			return WasmUiVisibility::IsUnitVisible(unit);
+		});
 }
 
 // Spatial queries
@@ -374,7 +413,9 @@ static void NativeGetUnitsInRectangle(const GetUnitsInRectangleQuery* query, Get
 	quadField.GetUnitsExact(qfq, mins, maxs);
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
-			if (UnitMatchesAllegiance(unit, query->allegiance) && count < maxUnits) {
+			if (UnitMatchesAllegiance(unit, query->allegiance) &&
+				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible) &&
+				count < maxUnits) {
 				units[count++] = unit->id;
 			}
 		}
@@ -409,7 +450,8 @@ static void NativeGetUnitsInBox(const GetUnitsInBoxQuery* query, GetUnitsInBoxRe
 	quadField.GetUnitsExact(qfq, mins, maxs);
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
-			if (UnitMatchesAllegiance(unit, query->allegiance)) {
+			if (UnitMatchesAllegiance(unit, query->allegiance) &&
+				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible)) {
 				const float3& pos = unit->pos;
 				if (pos.x >= mins.x && pos.x <= maxs.x &&
 					pos.y >= mins.y && pos.y <= maxs.y &&
@@ -445,6 +487,7 @@ static void NativeGetUnitsInPlanes(const GetUnitsInPlanesQuery* query, GetUnitsI
 
 	for (const CUnit* unit : unitHandler.GetActiveUnits()) {
 		if (UnitMatchesAllegiance(unit, query->allegiance) &&
+			WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible) &&
 			UnitInPlanes(unit, query->planes) && count < maxUnits) {
 			units[count++] = unit->id;
 		}
@@ -479,7 +522,8 @@ static void NativeGetUnitsInSphere(const GetUnitsInSphereQuery* query, GetUnitsI
 	quadField.GetUnitsExact(qfq, center, query->radius);
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
-			if (UnitMatchesAllegiance(unit, query->allegiance)) {
+			if (UnitMatchesAllegiance(unit, query->allegiance) &&
+				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible)) {
 				const float distSq = unit->pos.SqDistance(center);
 				if (distSq <= radiusSq && count < maxUnits) {
 					units[count++] = unit->id;
@@ -517,7 +561,8 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 	quadField.GetUnitsExact(qfq, center, query->radius);
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
-			if (UnitMatchesAllegiance(unit, query->allegiance)) {
+			if (UnitMatchesAllegiance(unit, query->allegiance) &&
+				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible)) {
 				const float3& pos = unit->pos;
 				const float dx = pos.x - center.x;
 				const float dz = pos.z - center.z;
@@ -557,7 +602,7 @@ static void NativeGetUnitArrayCentroid(const GetUnitArrayCentroidQuery* query, G
 	uint32_t validCount = 0;
 
 	for (uint32_t i = 0; i < query->count; i++) {
-		const CUnit* unit = unitHandler.GetUnit(query->unitIDs[i]);
+		const CUnit* unit = WasmUiVisibility::FindUnit(query->unitIDs[i]);
 		if (unit != nullptr) {
 			centroid += unit->midPos;
 			validCount++;
@@ -595,14 +640,14 @@ static void NativeGetUnitNearestAlly(const GetUnitNearestAllyQuery* query, GetUn
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
 	}
 
 	const CUnit* target = CGameHelper::GetClosestFriendlyUnit(unit, unit->pos, query->range, unit->allyteam);
-	if (target != nullptr) {
+	if (target != nullptr && WasmUiVisibility::IsUnitVisible(target)) {
 		result->unitID = target->id;
 	}
 }
@@ -618,7 +663,7 @@ static void NativeGetUnitNearestEnemy(const GetUnitNearestEnemyQuery* query, Get
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -627,7 +672,7 @@ static void NativeGetUnitNearestEnemy(const GetUnitNearestEnemyQuery* query, Get
 	const CUnit* target = query->options.useLOS
 		? CGameHelper::GetClosestEnemyUnit(unit, unit->pos, query->range, unit->allyteam)
 		: CGameHelper::GetClosestEnemyUnitNoLosTest(unit, unit->pos, query->range, unit->allyteam, query->options.sphereDistTest, query->options.checkSightDist);
-	if (target != nullptr) {
+	if (target != nullptr && WasmUiVisibility::IsUnitVisible(target)) {
 		result->unitID = target->id;
 	}
 }
@@ -647,6 +692,10 @@ static void NativeGetClosestEnemyUnit(const GetClosestEnemyUnitQuery* query, Get
 		result->error = &INVALID_ALLYTEAM_ERROR;
 		return;
 	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
+		result->error = &INVALID_ALLYTEAM_ERROR;
+		return;
+	}
 
 	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
 	const CUnit* unit =
@@ -654,7 +703,7 @@ static void NativeGetClosestEnemyUnit(const GetClosestEnemyUnitQuery* query, Get
 			? CGameHelper::GetClosestEnemyUnit(nullptr, pos, query->range, query->allyTeamID)
 			: CGameHelper::GetClosestEnemyUnitNoLosTest(nullptr, pos, query->range, query->allyTeamID, query->options.sphereDistTest, query->options.checkSightDist);
 
-	if (unit != nullptr)
+	if (unit != nullptr && WasmUiVisibility::IsUnitVisible(unit))
 		result->unitID = unit->id;
 }
 
@@ -670,10 +719,11 @@ static void NativeGetUnitSeparation(const GetUnitSeparationQuery* query, GetUnit
 		return;
 	}
 
-	const CUnit* unit1 = unitHandler.GetUnit(query->unitID1);
-	const CUnit* unit2 = unitHandler.GetUnit(query->unitID2);
+	const CUnit* unit1 = WasmUiVisibility::FindUnit(query->unitID1);
+	const CUnit* unit2 = WasmUiVisibility::FindUnit(query->unitID2);
 
-	if (unit1 == nullptr || unit2 == nullptr) {
+	if (unit1 == nullptr || unit2 == nullptr ||
+		!WasmUiVisibility::IsUnitInLos(unit1) || !WasmUiVisibility::IsUnitInLos(unit2)) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
 	}
@@ -711,7 +761,7 @@ static void NativeGetRenderUnits(const GetRenderUnitsQuery* query, GetRenderUnit
 	for (const CUnit* unit : renderUnits) {
 		if (count >= maxCount)
 			break;
-		if ((unit->drawFlag & query->drawMask) == 0)
+		if (!WasmUiVisibility::IsUnitVisible(unit) || (unit->drawFlag & query->drawMask) == 0)
 			continue;
 
 		out[count++] = unit->id;
@@ -744,7 +794,7 @@ static void NativeGetRenderUnitsDrawFlagChanged(const GetRenderUnitsDrawFlagChan
 		if (count >= maxCount)
 			break;
 
-		if (u->previousDrawFlag == u->drawFlag)
+		if (!WasmUiVisibility::IsUnitVisible(u) || u->previousDrawFlag == u->drawFlag)
 			continue;
 
 		out[count++] = u->id;

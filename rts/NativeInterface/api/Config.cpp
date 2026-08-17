@@ -274,8 +274,10 @@ static void NativeSetLogSectionFilterLevel(const SetLogSectionFilterLevelQuery* 
 		return;
 	}
 
-	// Log section filtering - simplified implementation
-	// Would call log.SetSectionFilterLevel(section, level);
+	// Match Spring.SetLogSectionFilterLevel: runtime-created sections must be
+	// interned before their filter level is applied, otherwise GetLogSections
+	// cannot observe the same section through the native/Wasm path.
+	log_frontend_register_runtime_section(query->level, query->section);
 	result->error = nullptr;
 	result->success = true;
 }

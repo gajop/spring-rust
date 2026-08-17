@@ -903,12 +903,6 @@ interface callins-gaia-unsynced {
   archive-callin: func(query: simple-callin-query) -> result<_, spring-error>;
 
   /// aggregation: ignore
-  load: func(query: simple-callin-query) -> result<_, spring-error>;
-
-  /// aggregation: ignore
-  save: func(query: simple-callin-query) -> result<_, spring-error>;
-
-  /// aggregation: ignore
   collect-garbage: func(query: collect-garbage-query) -> result<_, spring-error>;
 
   /// aggregation: or-true
@@ -1064,6 +1058,9 @@ interface callins-gaia-unsynced {
   /// aggregation: ignore
   last-message-position: func(query: last-message-position-query) -> result<_, spring-error>;
 
+  /// aggregation: ignore
+  load: func(query: simple-callin-query) -> result<_, spring-error>;
+
   /// aggregation: or-true
   map-draw-cmd: func(query: map-draw-cmd-query) -> result<bool-callin-result, spring-error>;
 
@@ -1132,6 +1129,9 @@ interface callins-gaia-unsynced {
 
   /// aggregation: or-true
   resource-excess: func(query: resource-excess-query) -> result<bool-callin-result, spring-error>;
+
+  /// aggregation: ignore
+  save: func(query: simple-callin-query) -> result<_, spring-error>;
 
   /// aggregation: or-true
   screen-position: func(query: screen-position-query) -> result<bool-callin-result, spring-error>;

@@ -1,5 +1,7 @@
 #include "Features.h"
 
+#include "NativeInterface/WasmUiVisibility.h"
+
 #include "Sim/Features/Feature.h"
 #include "Sim/Features/FeatureDef.h"
 #include "Sim/Units/UnitDef.h"
@@ -66,7 +68,7 @@ static void NativeValidFeatureID(const ValidFeatureIDQuery* query, ValidFeatureI
 		result->error = &NOT_READY_ERROR;
 		return;
 	}
-	result->valid = featureHandler.GetFeature(query->featureID) != nullptr;
+	result->valid = WasmUiVisibility::FindFeature(query->featureID) != nullptr;
 }
 
 // Get all features
@@ -88,7 +90,8 @@ static void NativeGetAllFeatures(const GetAllFeaturesQuery* query, GetAllFeature
 	const size_t maxFeatures = (sizeof(scratchBuffer) - bufferPos) / sizeof(int32_t);
 
 	for (const auto featureID : featureHandler.GetActiveFeatureIDs()) {
-		if (count < maxFeatures) {
+		if (WasmUiVisibility::IsFeatureVisible(WasmUiVisibility::FindFeature(featureID)) &&
+			count < maxFeatures) {
 			features[count++] = featureID;
 		}
 	}
@@ -123,7 +126,8 @@ static void NativeGetFeaturesInRectangle(const GetFeaturesInRectangleQuery* quer
 	quadField.GetFeaturesExact(qfq, mins, maxs);
 	if (qfq.features != nullptr) {
 		for (const CFeature* feature : *(qfq.features)) {
-			if (feature != nullptr && count < maxFeatures) {
+			if (feature != nullptr && WasmUiVisibility::IsFeatureVisible(feature) &&
+				count < maxFeatures) {
 				features[count++] = feature->id;
 			}
 		}
@@ -158,7 +162,7 @@ static void NativeGetFeaturesInSphere(const GetFeaturesInSphereQuery* query, Get
 	quadField.GetFeaturesExact(qfq, pos, query->radius);
 	if (qfq.features != nullptr) {
 		for (const CFeature* feature : *(qfq.features)) {
-			if (feature != nullptr) {
+			if (feature != nullptr && WasmUiVisibility::IsFeatureVisible(feature)) {
 				const float distSq = feature->pos.SqDistance(pos);
 				if (distSq <= radiusSq && count < maxFeatures) {
 					features[count++] = feature->id;
@@ -197,7 +201,7 @@ static void NativeGetFeaturesInCylinder(const GetFeaturesInCylinderQuery* query,
 	quadField.GetFeaturesExact(qfq, pos, query->radius);
 	if (qfq.features != nullptr) {
 		for (const CFeature* feature : *(qfq.features)) {
-			if (feature != nullptr) {
+			if (feature != nullptr && WasmUiVisibility::IsFeatureVisible(feature)) {
 				const float3& fpos = feature->pos;
 				const float dx = fpos.x - pos.x;
 				const float dz = fpos.z - pos.z;
@@ -228,7 +232,7 @@ static void NativeGetFeatureDefID(const GetFeatureDefIDQuery* query, GetFeatureD
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -248,7 +252,7 @@ static void NativeGetFeatureTeam(const GetFeatureTeamQuery* query, GetFeatureTea
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -268,7 +272,7 @@ static void NativeGetFeatureAllyTeam(const GetFeatureAllyTeamQuery* query, GetFe
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -288,7 +292,7 @@ static void NativeGetFeatureHealth(const GetFeatureHealthQuery* query, GetFeatur
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -312,7 +316,7 @@ static void NativeGetFeatureHeight(const GetFeatureHeightQuery* query, GetFeatur
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -332,7 +336,7 @@ static void NativeGetFeatureRadius(const GetFeatureRadiusQuery* query, GetFeatur
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -352,7 +356,7 @@ static void NativeGetFeatureMass(const GetFeatureMassQuery* query, GetFeatureMas
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -375,7 +379,7 @@ static void NativeGetFeaturePosition(const GetFeaturePositionQuery* query, GetFe
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -397,7 +401,7 @@ static void NativeGetFeaturePositionExt(const GetFeaturePositionExtQuery* query,
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -425,8 +429,8 @@ static void NativeGetFeatureSeparation(const GetFeatureSeparationQuery* query, G
 		return;
 	}
 
-	const CFeature* feature1 = featureHandler.GetFeature(query->featureID1);
-	const CFeature* feature2 = featureHandler.GetFeature(query->featureID2);
+	const CFeature* feature1 = WasmUiVisibility::FindFeature(query->featureID1);
+	const CFeature* feature2 = WasmUiVisibility::FindFeature(query->featureID2);
 
 	if (feature1 == nullptr || feature2 == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
@@ -455,7 +459,7 @@ static void NativeGetFeatureDirection(const GetFeatureDirectionQuery* query, Get
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -480,7 +484,7 @@ static void NativeGetFeatureVelocity(const GetFeatureVelocityQuery* query, GetFe
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -502,7 +506,7 @@ static void NativeGetFeatureHeading(const GetFeatureHeadingQuery* query, GetFeat
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -524,7 +528,7 @@ static void NativeGetFeatureRotation(const GetFeatureRotationQuery* query, GetFe
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -548,7 +552,7 @@ static void NativeGetFeatureResources(const GetFeatureResourcesQuery* query, Get
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -573,7 +577,7 @@ static void NativeGetFeatureBlocking(const GetFeatureBlockingQuery* query, GetFe
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -600,7 +604,7 @@ static void NativeGetFeatureNoSelect(const GetFeatureNoSelectQuery* query, GetFe
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -621,7 +625,7 @@ static void NativeGetFeatureResurrect(const GetFeatureResurrectQuery* query, Get
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -650,7 +654,7 @@ static void NativeGetFeatureLastAttackedPiece(const GetFeatureLastAttackedPieceQ
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -678,7 +682,7 @@ static void NativeGetFeatureCollisionVolumeData(const GetFeatureCollisionVolumeD
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -707,7 +711,7 @@ static void NativeGetFeaturePieceCollisionVolumeData(const GetFeaturePieceCollis
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -764,7 +768,7 @@ static void NativeGetFeatureNoDraw(const GetFeatureNoDrawQuery* query, GetFeatur
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -784,7 +788,7 @@ static void NativeGetFeatureLuaDraw(const GetFeatureLuaDrawQuery* query, GetFeat
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -804,7 +808,7 @@ static void NativeGetFeatureEngineDrawMask(const GetFeatureEngineDrawMaskQuery* 
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -824,7 +828,7 @@ static void NativeGetFeatureDrawFlag(const GetFeatureDrawFlagQuery* query, GetFe
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -844,7 +848,7 @@ static void NativeGetFeatureAlwaysUpdateMatrix(const GetFeatureAlwaysUpdateMatri
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -863,7 +867,7 @@ static void NativeGetFeatureTransformMatrix(const GetFeatureTransformMatrixQuery
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -891,7 +895,7 @@ static void NativeGetFeatureSelectionVolumeData(const GetFeatureSelectionVolumeD
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -917,7 +921,7 @@ static void NativeGetFeatureFireTime(const GetFeatureFireTimeQuery* query, GetFe
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -937,7 +941,7 @@ static void NativeGetFeatureSmokeTime(const GetFeatureSmokeTimeQuery* query, Get
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;
@@ -969,7 +973,8 @@ static void NativeGetRenderFeatures(const GetRenderFeaturesQuery* query, GetRend
 	for (const CFeature* feature : features) {
 		if (count >= maxCount)
 			break;
-		if ((feature->drawFlag & query->drawMask) == 0)
+		if (!WasmUiVisibility::IsFeatureVisible(feature) ||
+			(feature->drawFlag & query->drawMask) == 0)
 			continue;
 
 		out[count++] = feature->id;
@@ -1006,7 +1011,7 @@ static void NativeGetRenderFeaturesDrawFlagChanged(const GetRenderFeaturesDrawFl
 		if (count >= maxCount)
 			break;
 
-		if (f->previousDrawFlag == f->drawFlag)
+		if (!WasmUiVisibility::IsFeatureVisible(f) || f->previousDrawFlag == f->drawFlag)
 			continue;
 
 		out[count++] = f->id;

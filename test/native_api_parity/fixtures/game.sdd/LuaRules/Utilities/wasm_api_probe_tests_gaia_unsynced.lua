@@ -19,6 +19,12 @@ return {
 
 		"get_log_sections",
 
+		"config_int",
+
+		"config_float",
+
+		"config_string",
+
 		"get_local_player_id",
 
 		"get_local_team_id",
@@ -85,6 +91,8 @@ return {
 
 		"get_frustum_planes",
 
+		"nano_projectile_params",
+
 		"is_unit_selected",
 
 		"is_unit_in_view",
@@ -111,6 +119,24 @@ return {
 
 		"get_unit_icon",
 
+		"box_selection_by_engine",
+
+		"build_facing",
+
+		"build_spacing",
+
+		"draw_selection_info",
+
+		"last_message_position_count",
+
+		"sdl_start_text_input",
+
+		"sdl_stop_text_input",
+
+		"sdl_set_text_input_rect",
+
+		"set_video_capturing_time_offset",
+
 		"set_log_section_filter_level",
 
 		"garbage_collect_ctrl",
@@ -130,6 +156,18 @@ return {
 		"get_unit_always_update_matrix",
 
 		"get_unit_draw_flag",
+
+		"unit_no_draw",
+
+		"unit_no_select",
+
+		"unit_no_minimap",
+
+		"unit_no_group",
+
+		"unit_engine_draw_mask",
+
+		"unit_always_update_matrix",
 
 		"get_unit_view_position",
 
@@ -154,6 +192,18 @@ return {
 		"get_replay_file_path",
 
 		"get_replay_recording_file_path",
+
+		"custom_palette_color",
+
+		"unit_palette_index",
+
+		"feature_palette_index",
+
+		"feature_no_draw",
+
+		"feature_engine_draw_mask",
+
+		"feature_always_update_matrix",
 
 		"clear_features_previous_draw_flag",
 
@@ -201,6 +251,27 @@ return {
 			defaultValue = "",
 			hasDefault = false,
 		},
+		["config_int"] = {
+			key = "native_api_parity_config_int",
+			value = 30,
+			defaultValue = 0,
+			hasDefault = false,
+			useOverlay = true,
+		},
+		["config_float"] = {
+			key = "native_api_parity_config_float",
+			value = 5.5,
+			defaultValue = 0,
+			hasDefault = false,
+			useOverlay = true,
+		},
+		["config_string"] = {
+			key = "native_api_parity_config_string",
+			value = "native-api-parity",
+			defaultValue = "",
+			hasDefault = false,
+			useOverlay = true,
+		},
 		["get_player_roster_count"] = {
 			sortMode = 0,
 			showPathingPlayers = false,
@@ -231,6 +302,14 @@ return {
 		["get_cmd_desc_index_missing"] = {
 			cmdID = -999999,
 		},
+		["nano_projectile_params"] = {
+			rotVal = 0.0,
+			rotVel = 0.0,
+			rotAcc = 0.0,
+			rotValRng = 15.0,
+			rotVelRng = 7.5,
+			rotAccRng = 4.0,
+		},
 		["get_visible_units"] = {
 			radius = 0,
 			includeIcons = true,
@@ -253,6 +332,32 @@ return {
 		["get_render_units_draw_flag_changed"] = {
 			sendMask = false,
 		},
+		["box_selection_by_engine"] = {
+			enabled = false,
+		},
+		["build_facing"] = {
+			facing = 0,
+		},
+		["build_spacing"] = {
+			spacing = 4,
+		},
+		["draw_selection_info"] = {
+			draw = false,
+		},
+		["last_message_position_count"] = {
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["sdl_set_text_input_rect"] = {
+			x = 0,
+			y = 0,
+			w = 32,
+			h = 32,
+		},
+		["set_video_capturing_time_offset"] = {
+			timeOffset = 0.25,
+		},
 		["set_log_section_filter_level"] = {
 			section = "NativeApiParity",
 			level = 3,
@@ -266,6 +371,24 @@ return {
 			maxLoopRunTime = 0,
 			baseRunTimeMult = 1,
 			baseMemLoadMult = 1,
+		},
+		["unit_no_draw"] = {
+			noDraw = false,
+		},
+		["unit_no_select"] = {
+			noSelect = false,
+		},
+		["unit_no_minimap"] = {
+			noMinimap = false,
+		},
+		["unit_no_group"] = {
+			noGroup = false,
+		},
+		["unit_engine_draw_mask"] = {
+			mask = 3,
+		},
+		["unit_always_update_matrix"] = {
+			update = false,
 		},
 		["get_unit_view_position"] = {
 			midPos = false,
@@ -282,6 +405,27 @@ return {
 		},
 		["get_render_features_draw_flag_changed"] = {
 			sendMask = false,
+		},
+		["custom_palette_color"] = {
+			index = 4,
+			r = 0.2,
+			g = 0.4,
+			b = 0.8,
+		},
+		["unit_palette_index"] = {
+			customIndex = 4,
+		},
+		["feature_palette_index"] = {
+			customIndex = 5,
+		},
+		["feature_no_draw"] = {
+			noDraw = true,
+		},
+		["feature_engine_draw_mask"] = {
+			mask = 3,
+		},
+		["feature_always_update_matrix"] = {
+			update = true,
 		},
 		["set_share_level"] = {
 			resource = "metal",

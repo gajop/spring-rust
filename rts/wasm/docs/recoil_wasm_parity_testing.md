@@ -108,10 +108,9 @@ Add parity cases for:
 
 Check degraded/fuzzed values, not only success/failure.
 
-This is useful for existing Lua/native parity even before LuaUI Wasm is enabled.
 The current Wasm archive fixture covers the component callout/callin
-observation path; LuaUI visibility parity remains intentionally deferred to
-Phase 9.
+observation path. LuaUI visibility parity is implemented in Phase 8 and its
+runtime comparison is part of the full Phase 9 parity gate.
 
 ## 7. Execution-environment parity
 
@@ -121,7 +120,7 @@ Compare Wasm against the matching Lua role:
 - Rules unsynced ↔ LuaRules unsynced;
 - Gaia synced ↔ LuaGaia synced;
 - Gaia unsynced ↔ LuaGaia unsynced;
-- UI ↔ LuaUI once implemented.
+- UI ↔ LuaUI through the enabled UI world and the widget parity fixture.
 
 Do not compare a Gaia/Rules module to widget visibility semantics.
 

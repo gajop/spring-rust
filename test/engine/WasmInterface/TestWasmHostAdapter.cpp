@@ -45,6 +45,31 @@ namespace {
 			result->values[index] = static_cast<float>(index) + 0.5f;
 	}
 
+	void FakeGetCommandParams(const GetCommandParamsQuery* query,
+		GetCommandParamsResult* result)
+	{
+		REQUIRE(query != nullptr);
+		REQUIRE(query->command != nullptr);
+		CHECK(query->command->cmdID == 42);
+		CHECK(query->command->options == 3);
+		CHECK(query->command->paramCount == 2);
+		CHECK(query->command->params[0] == Catch::Approx(1.5f));
+		CHECK(query->command->params[1] == Catch::Approx(2.5f));
+		static float values[] = {9.0f, 10.0f};
+		result->params = values;
+		result->count = 2;
+	}
+
+	void FakeNormalize(const NormalizeQuery* query, NormalizeResult* result)
+	{
+		REQUIRE(query != nullptr);
+		REQUIRE(query->vec != nullptr);
+		query->vec->x = 0.6f;
+		query->vec->y = 0.8f;
+		query->vec->z = 0.0f;
+		result->length = 5.0f;
+	}
+
 	bool cobCallSeen = false;
 	void FakeCallCOBScript(const CallCOBScriptQuery* query, CallCOBScriptResult* result)
 	{
@@ -143,6 +168,70 @@ TEST_CASE("generated Wasm adapter lowers strings, options and fixed arrays")
 	REQUIRE(matrix->size() == 16);
 	CHECK(std::get<double>((*matrix)[0].storage) == Catch::Approx(0.5));
 	CHECK(std::get<double>((*matrix)[15].storage) == Catch::Approx(15.5));
+}
+
+TEST_CASE("reviewed manual adapters lower representative native shapes")
+{
+	UnitsCommandsApi unitsCommands{};
+	unitsCommands.GetCommandParams = FakeGetCommandParams;
+	MathExtraApi mathExtra{};
+	mathExtra.Normalize = FakeNormalize;
+	NativeInterface native{};
+	native.unitsCommands = &unitsCommands;
+	native.mathExtra = &mathExtra;
+	NativeInterfaceWasmAdapter adapter(&native);
+
+	WasmValue result;
+	std::string error;
+	CHECK(adapter.Callout("units_commands", "GetCommandParams", {
+		WasmValue::Record({
+			{"cmdID", WasmValue::I64(42)},
+			{"options", WasmValue::U64(3)},
+			{"tag", WasmValue::I64(7)},
+			{"aiCommandID", WasmValue::I64(8)},
+			{"timeOut", WasmValue::F64(0.25)},
+			{"params", WasmValue::List({WasmValue::F64(1.5), WasmValue::F64(2.5)})},
+		})
+	}, result, error));
+	CHECK(error.empty());
+	const auto* commandParams = std::get_if<WasmValueList>(&result.storage);
+	REQUIRE(commandParams != nullptr);
+	REQUIRE(commandParams->size() == 2);
+	CHECK(std::get<double>((*commandParams)[0].storage) == Catch::Approx(9.0));
+	CHECK(std::get<double>((*commandParams)[1].storage) == Catch::Approx(10.0));
+
+	error.clear();
+	result = WasmValue::Unit();
+	CHECK(adapter.Callout("math_extra", "Normalize", {
+		WasmValue::Record({
+			{"x", WasmValue::F64(3.0)},
+			{"y", WasmValue::F64(4.0)},
+			{"z", WasmValue::F64(0.0)},
+		})
+	}, result, error));
+	CHECK(error.empty());
+	const auto* normalized = std::get_if<WasmValueRecord>(&result.storage);
+	REQUIRE(normalized != nullptr);
+	CHECK(std::get<double>(normalized->at("length").storage) == Catch::Approx(5.0));
+	const auto* normalizedVector = std::get_if<WasmValueRecord>(
+		&normalized->at("vec").storage);
+	REQUIRE(normalizedVector != nullptr);
+	CHECK(std::get<double>(normalizedVector->at("x").storage) == Catch::Approx(0.6));
+	CHECK(std::get<double>(normalizedVector->at("y").storage) == Catch::Approx(0.8));
+
+	error.clear();
+	result = WasmValue::Unit();
+	CHECK_FALSE(adapter.Callout("units_commands", "GetCommandParams", {
+		WasmValue::Record({
+			{"cmdID", WasmValue::I64(42)},
+			{"options", WasmValue::U64(3)},
+			{"tag", WasmValue::I64(7)},
+			{"aiCommandID", WasmValue::I64(8)},
+			{"timeOut", WasmValue::F64(0.25)},
+			{"params", WasmValue::String("not-a-list")},
+		})
+	}, result, error));
+	CHECK(error.find("list") != std::string::npos);
 }
 
 TEST_CASE("generated Wasm adapter serializes native callin queries")

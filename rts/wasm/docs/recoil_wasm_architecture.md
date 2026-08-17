@@ -85,7 +85,8 @@ Initial environments mirror the in-game Lua roles:
 - LuaRules unsynced;
 - LuaGaia synced;
 - LuaGaia unsynced;
-- LuaUI later, after its restricted-read semantics are implemented.
+- LuaUI after the gadget environments, with its restricted-read semantics
+  implemented before the final parity gate.
 
 Synced and unsynced Wasm are separate instances and do not share mutable guest state.
 
@@ -194,7 +195,7 @@ See [Parity & Testing](recoil_wasm_parity_testing.md).
 In scope:
 
 - in-game LuaRules/LuaGaia equivalents;
-- later LuaUI equivalent;
+- LuaUI-equivalent role with restricted visibility semantics;
 - full generated Spring API appropriate to those environments;
 - Rust native/Wasm source parity;
 - RmlUi and Gfx;

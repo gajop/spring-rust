@@ -1,5 +1,7 @@
 #include "Projectiles.h"
 
+#include "NativeInterface/WasmUiVisibility.h"
+
 #include "Sim/Projectiles/Projectile.h"
 #include "Sim/Projectiles/ProjectileHandler.h"
 #include "Sim/Projectiles/WeaponProjectiles/WeaponProjectile.h"
@@ -57,6 +59,7 @@ static void NativeGetProjectilesInRectangle(const GetProjectilesInRectangleQuery
 		for (const CProjectile* proj : *(qfq.projectiles)) {
 			if (proj != nullptr) {
 				if (!proj->synced) continue;
+				if (!WasmUiVisibility::IsProjectileVisible(proj)) continue;
 				if (proj->weapon && query->options.excludeWeaponProjectiles) continue;
 				if (proj->piece && query->options.excludePieceProjectiles) continue;
 				if (count < maxProjectiles) {
@@ -97,6 +100,7 @@ static void NativeGetProjectilesInSphere(const GetProjectilesInSphereQuery* quer
 		for (const CProjectile* proj : *(qfq.projectiles)) {
 			if (proj != nullptr) {
 				if (!proj->synced) continue;
+				if (!WasmUiVisibility::IsProjectileVisible(proj)) continue;
 				if (proj->weapon && query->options.excludeWeaponProjectiles) continue;
 				if (proj->piece && query->options.excludePieceProjectiles) continue;
 
@@ -127,7 +131,7 @@ static void NativeGetProjectilePosition(const GetProjectilePositionQuery* query,
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -151,7 +155,7 @@ static void NativeGetProjectileDirection(const GetProjectileDirectionQuery* quer
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -176,7 +180,7 @@ static void NativeGetProjectileVelocity(const GetProjectileVelocityQuery* query,
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -201,7 +205,7 @@ static void NativeGetProjectileGravity(const GetProjectileGravityQuery* query, G
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -226,7 +230,7 @@ static void NativeGetPieceProjectileParams(const GetPieceProjectileParamsQuery* 
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -275,7 +279,7 @@ static void NativeGetProjectileTarget(const GetProjectileTargetQuery* query, Get
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -286,21 +290,26 @@ static void NativeGetProjectileTarget(const GetProjectileTargetQuery* query, Get
 		return; // Not a weapon projectile
 	}
 
-	result->target.targetPos.x = wProj->GetTargetPos().x;
-	result->target.targetPos.y = wProj->GetTargetPos().y;
-	result->target.targetPos.z = wProj->GetTargetPos().z;
-
 	const CWorldObject* target = wProj->GetTargetObject();
 	if (target == nullptr) {
 		result->target.targetType = 'g';
 		result->target.targetID = -1;
+		result->target.targetPos.x = wProj->GetTargetPos().x;
+		result->target.targetPos.y = wProj->GetTargetPos().y;
+		result->target.targetPos.z = wProj->GetTargetPos().z;
 	} else if (dynamic_cast<const CUnit*>(target) != nullptr) {
+		if (!WasmUiVisibility::IsUnitVisible(static_cast<const CUnit*>(target)))
+			return;
 		result->target.targetType = 'u';
 		result->target.targetID = target->id;
 	} else if (dynamic_cast<const CFeature*>(target) != nullptr) {
+		if (!WasmUiVisibility::IsFeatureVisible(static_cast<const CFeature*>(target)))
+			return;
 		result->target.targetType = 'f';
 		result->target.targetID = target->id;
 	} else if (dynamic_cast<const CWeaponProjectile*>(target) != nullptr) {
+		if (!WasmUiVisibility::IsProjectileVisible(static_cast<const CProjectile*>(target)))
+			return;
 		result->target.targetType = 'p';
 		result->target.targetID = target->id;
 	}
@@ -318,7 +327,7 @@ static void NativeGetProjectileIsIntercepted(const GetProjectileIsInterceptedQue
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -341,7 +350,7 @@ static void NativeGetProjectileTimeToLive(const GetProjectileTimeToLiveQuery* qu
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -365,7 +374,7 @@ static void NativeGetProjectileOwnerID(const GetProjectileOwnerIDQuery* query, G
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -385,7 +394,7 @@ static void NativeGetProjectileTeamID(const GetProjectileTeamIDQuery* query, Get
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -405,7 +414,7 @@ static void NativeGetProjectileAllyTeamID(const GetProjectileAllyTeamIDQuery* qu
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -427,7 +436,7 @@ static void NativeGetProjectileType(const GetProjectileTypeQuery* query, GetProj
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -448,7 +457,7 @@ static void NativeGetProjectileDefID(const GetProjectileDefIDQuery* query, GetPr
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -487,7 +496,7 @@ static void NativeGetProjectileDamages(const GetProjectileDamagesQuery* query, G
 		return;
 	}
 
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr) {
 		result->error = &INVALID_PROJECTILE_ERROR;
 		return;
@@ -551,6 +560,8 @@ static void NativeGetAllProjectiles(const GetAllProjectilesQuery* query, GetAllP
 
 	for (const CProjectile* proj : projectiles) {
 		if (proj == nullptr)
+			continue;
+		if (!WasmUiVisibility::IsProjectileVisible(proj))
 			continue;
 		if (proj->weapon && query->options.excludeWeaponProjectiles)
 			continue;

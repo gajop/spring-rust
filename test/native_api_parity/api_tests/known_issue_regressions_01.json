@@ -731,13 +731,13 @@
         "args": ["value.cmdIndex"],
         "returns": [
           {"field": "hasCommand", "transform": "truthy"},
-          {"field": "id", "path": ["id"]},
-          {"field": "type", "path": ["type"]},
-          {"field": "name", "path": ["name"]},
-          {"field": "queueing", "path": ["queueing"]},
-          {"field": "hidden", "path": ["hidden"]},
-          {"field": "disabled", "path": ["disabled"]},
-          {"field": "paramCount", "path": ["params"], "transform": "table_count"}
+          {"field": "id", "path": ["id"], "when": {"field": "hasCommand", "truthy": true}},
+          {"field": "type", "path": ["type"], "when": {"field": "hasCommand", "truthy": true}},
+          {"field": "name", "path": ["name"], "when": {"field": "hasCommand", "truthy": true}},
+          {"field": "queueing", "path": ["queueing"], "when": {"field": "hasCommand", "truthy": true}},
+          {"field": "hidden", "path": ["hidden"], "when": {"field": "hasCommand", "truthy": true}},
+          {"field": "disabled", "path": ["disabled"], "when": {"field": "hasCommand", "truthy": true}},
+          {"field": "paramCount", "path": ["params"], "transform": "table_count", "when": {"field": "hasCommand", "truthy": true}}
         ]
       }
     },

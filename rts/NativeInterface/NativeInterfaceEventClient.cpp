@@ -34,8 +34,10 @@
 #include "System/Platform/SDL1_keysym.h"
 #include "System/Platform/SharedLib.h"
 #include "System/Rectangle.h"
+#include "System/float3.h"
 #include "WasmInterface/WasmEnvironment.h"
 #include "WasmInterface/WasmInterfaceSystem.h"
+#include "NativeInterface/WasmUiVisibility.h"
 #include "wasm/generated/WasmHostAdapter.h"
 
 #include <SDL_keyboard.h>
@@ -115,6 +117,19 @@ namespace {
 		return nullptr;
 	}
 
+	WasmValue* FindWasmField(WasmValueRecord& record, std::string_view name)
+	{
+		auto iter = record.find(std::string(name));
+		if (iter != record.end())
+			return &iter->second;
+		const std::string witName = ToWitFieldName(name);
+		for (auto& [fieldName, fieldValue] : record) {
+			if (fieldName == witName)
+				return &fieldValue;
+		}
+		return nullptr;
+	}
+
 	bool ReadWasmBoolField(const WasmValueRecord& record, std::string_view name, bool& value)
 	{
 		const WasmValue* field = FindWasmField(record, name);
@@ -161,6 +176,271 @@ namespace {
 	const WasmValueRecord* WasmResultRecord(const WasmValue& value)
 	{
 		return std::get_if<WasmValueRecord>(&value.storage);
+	}
+
+	bool SetWasmIntField(WasmValueRecord& record, std::string_view name, int value)
+	{
+		WasmValue* field = FindWasmField(record, name);
+		if (field == nullptr)
+			return false;
+		field->storage = static_cast<std::int64_t>(value);
+		return true;
+	}
+
+	void RedactAttacker(WasmValueRecord& record)
+	{
+		int attackerID = -1;
+		if (!ReadWasmIntField(record, "attackerID", attackerID) || attackerID < 0)
+			return;
+
+		const CUnit* attacker = WasmUiVisibility::FindUnit(
+			attackerID, WasmUiVisibility::UnitAccess::Visible);
+		if (attacker == nullptr) {
+			SetWasmIntField(record, "attackerID", -1);
+			SetWasmIntField(record, "attackerDefID", -1);
+			SetWasmIntField(record, "attackerTeam", -1);
+			return;
+		}
+		if (!WasmUiVisibility::IsUnitTyped(attacker))
+			SetWasmIntField(record, "attackerDefID", -1);
+		else if (const UnitDef* def = WasmUiVisibility::EffectiveUnitDef(attacker))
+			SetWasmIntField(record, "attackerDefID", def->id);
+	}
+
+	// The native event client has full-read access so that it can continue to
+	// serve native modules. Wasm UI modules must receive the same filtered
+	// event stream as CLuaUI; this copy is made after native serialization and
+	// before the value enters the UI world.
+	bool SanitizeUiCallin(std::string_view name, WasmValue& value)
+	{
+		// NativeInterface dispatches legacy callin aliases by their source
+		// spelling, while the generated inventory aggregates them under one
+		// canonical query. Apply the visibility rule to both spellings.
+		if (name == "UnitEnteredLos" || name == "UnitEnteredRadar" ||
+			name == "UnitLeftLos" || name == "UnitLeftRadar")
+			name = "UnitLosEvent";
+		else if (name == "UnitCloaked" || name == "UnitDecloaked")
+			name = "UnitCloakEvent";
+		else if (name == "UnitEnteredAir" || name == "UnitEnteredUnderwater" ||
+			name == "UnitEnteredWater" || name == "UnitLeftAir" ||
+			name == "UnitLeftUnderwater" || name == "UnitLeftWater")
+			name = "UnitMovementClassEvent";
+		else if (name == "UnitArrivedAtGoal" || name == "UnitMoveFailed" ||
+			name == "UnitMoved")
+			name = "UnitMoveEvent";
+
+		auto* record = std::get_if<WasmValueRecord>(&value.storage);
+		if (record == nullptr)
+			return true;
+
+		auto unitTeamVisible = [&]() {
+			int team = -1;
+			return ReadWasmIntField(*record, "unitTeam", team) &&
+				WasmUiVisibility::IsTeamVisible(team);
+		};
+		auto eitherTeamVisible = [&](std::string_view first, std::string_view second) {
+			int firstTeam = -1;
+			int secondTeam = -1;
+			const bool haveFirst = ReadWasmIntField(*record, first, firstTeam);
+			const bool haveSecond = ReadWasmIntField(*record, second, secondTeam);
+			return (haveFirst && WasmUiVisibility::IsTeamVisible(firstTeam)) ||
+				(haveSecond && WasmUiVisibility::IsTeamVisible(secondTeam));
+		};
+		auto visibleUnit = [&](std::string_view field) {
+			int unitID = -1;
+			return ReadWasmIntField(*record, field, unitID) && unitID >= 0 &&
+				WasmUiVisibility::FindUnit(unitID, WasmUiVisibility::UnitAccess::Visible) != nullptr;
+		};
+		auto visiblePosition = [&]() {
+			const WasmValue* positionValue = FindWasmField(*record, "pos");
+			const auto* position = positionValue == nullptr ? nullptr :
+				std::get_if<WasmValueRecord>(&positionValue->storage);
+			if (position == nullptr)
+				return false;
+			float x = 0.0f;
+			float y = 0.0f;
+			float z = 0.0f;
+			return ReadWasmFloatField(*position, "x", x) &&
+				ReadWasmFloatField(*position, "y", y) &&
+				ReadWasmFloatField(*position, "z", z) &&
+				WasmUiVisibility::IsPositionVisible(float3{x, y, z});
+		};
+
+		if (name == "DefaultCommand") {
+			int unitID = -1;
+			int featureID = -1;
+			if (ReadWasmIntField(*record, "unitID", unitID) && unitID >= 0 && !visibleUnit("unitID"))
+				return false;
+			if (ReadWasmIntField(*record, "featureID", featureID) && featureID >= 0 &&
+				WasmUiVisibility::FindFeature(featureID) == nullptr)
+				return false;
+			return true;
+		}
+
+		if (name == "WorldTooltip") {
+			int kind = 0;
+			ReadWasmIntField(*record, "kind", kind);
+			if (kind == 1)
+				return visibleUnit("unitID");
+			if (kind == 2) {
+				int featureID = -1;
+				return ReadWasmIntField(*record, "featureID", featureID) &&
+					WasmUiVisibility::FindFeature(featureID) != nullptr;
+			}
+			if (kind == 0) {
+				int unitID = -1;
+				int featureID = -1;
+				const bool unitOK = !ReadWasmIntField(*record, "unitID", unitID) ||
+					unitID < 0 || visibleUnit("unitID");
+				const bool featureOK = !ReadWasmIntField(*record, "featureID", featureID) ||
+					featureID < 0 || WasmUiVisibility::FindFeature(featureID) != nullptr;
+				return unitOK && featureOK;
+			}
+			return true;
+		}
+
+		if (name == "FeatureCreated" || name == "FeatureDestroyed") {
+			int allyTeam = -1;
+			if (!ReadWasmIntField(*record, "allyTeamID", allyTeam))
+				return false;
+			return allyTeam < 0 || WasmUiVisibility::IsAllyTeamVisible(allyTeam);
+		}
+
+		if (name == "FeatureMoved" || name == "FeatureDamaged") {
+			int featureID = -1;
+			if (!ReadWasmIntField(*record, "featureID", featureID))
+				return false;
+			const CFeature* feature = WasmUiVisibility::FindFeature(featureID);
+			if (feature == nullptr ||
+				(feature->allyteam >= 0 && !WasmUiVisibility::IsAllyTeamVisible(feature->allyteam)))
+				return false;
+			if (name == "FeatureDamaged")
+				RedactAttacker(*record);
+			return true;
+		}
+
+		if (name == "ProjectileCreated" || name == "ProjectileDestroyed" ||
+			name == "ProjectileEvent") {
+			int ownerID = -1;
+			if (!ReadWasmIntField(*record, "ownerID", ownerID) || ownerID < 0)
+				return true;
+			return WasmUiVisibility::FindUnit(ownerID, WasmUiVisibility::UnitAccess::Ally) != nullptr;
+		}
+
+		if (name == "Explosion") {
+			if (!WasmUiVisibility::FullRead() && !visiblePosition())
+				return false;
+			int ownerID = -1;
+			if (ReadWasmIntField(*record, "ownerID", ownerID) && ownerID >= 0 &&
+				WasmUiVisibility::FindUnit(ownerID, WasmUiVisibility::UnitAccess::Visible) == nullptr)
+				SetWasmIntField(*record, "ownerID", -1);
+			int projectileID = -1;
+			if (ReadWasmIntField(*record, "projectileID", projectileID) && projectileID >= 0 &&
+				WasmUiVisibility::FindProjectile(projectileID) == nullptr)
+				SetWasmIntField(*record, "projectileID", -1);
+			return true;
+		}
+
+		if (name == "UnitLosEvent") {
+			int allyTeam = -1;
+			if (!ReadWasmIntField(*record, "allyTeam", allyTeam) ||
+				!WasmUiVisibility::IsAllyTeamVisible(allyTeam))
+				return false;
+			if (!WasmUiVisibility::FullRead()) {
+				SetWasmIntField(*record, "allyTeam", -1);
+				SetWasmIntField(*record, "unitDefID", -1);
+			}
+			return true;
+		}
+
+		if (name == "UnitSeismicPing") {
+			int unitID = -1;
+			int allyTeam = -1;
+			if (!ReadWasmIntField(*record, "unitID", unitID) ||
+				!ReadWasmIntField(*record, "allyTeam", allyTeam) ||
+				!WasmUiVisibility::IsAllyTeamVisible(allyTeam))
+				return false;
+			if (!WasmUiVisibility::FullRead()) {
+				// LuaUI receives radar pings for its ally team, including pings
+				// emitted by enemy units.  It suppresses a ping only when the
+				// source unit is already in LOS, and omits the source identity
+				// for the non-full-read form.
+				const CUnit* unit = WasmUiVisibility::FindUnit(
+					unitID, WasmUiVisibility::UnitAccess::Visible);
+				if (unit != nullptr && WasmUiVisibility::IsUnitInLos(unit))
+					return false;
+				SetWasmIntField(*record, "allyTeam", -1);
+				SetWasmIntField(*record, "unitID", -1);
+				SetWasmIntField(*record, "unitDefID", -1);
+			}
+			return true;
+		}
+
+		if (name == "UnitLoaded" || name == "UnitUnloaded")
+			return eitherTeamVisible("unitTeam", "transportTeam");
+
+		if (name == "UnitTaken") {
+			int team = -1;
+			return ReadWasmIntField(*record, "oldTeam", team) &&
+				WasmUiVisibility::IsTeamVisible(team);
+		}
+		if (name == "UnitGiven") {
+			int team = -1;
+			return ReadWasmIntField(*record, "newTeam", team) &&
+				WasmUiVisibility::IsTeamVisible(team);
+		}
+
+		if (name == "UnitFinished" || name == "UnitReverseBuilt" ||
+			name == "UnitConstructionDecayed" || name == "UnitIdle" ||
+			name == "UnitCommand" || name == "UnitCmdDone" ||
+			name == "UnitStunned" || name == "UnitExperience" ||
+			name == "UnitHarvestStorageFull" || name == "UnitMovementClassEvent" ||
+			name == "UnitCloakEvent" || name == "UnitMoveEvent" ||
+			name == "StockpileChanged")
+			return unitTeamVisible();
+
+		if (name == "UnitDestroyed" || name == "UnitDamaged") {
+			if (!unitTeamVisible())
+				return false;
+			RedactAttacker(*record);
+			return true;
+		}
+
+		if (name == "UnitCreated") {
+			if (!unitTeamVisible())
+				return false;
+			int builderID = -1;
+			if (ReadWasmIntField(*record, "builderID", builderID) && builderID >= 0 &&
+				!visibleUnit("builderID"))
+				SetWasmIntField(*record, "builderID", -1);
+			return true;
+		}
+
+		if (name == "UnitFromFactory") {
+			if (!unitTeamVisible())
+				return false;
+			int factoryID = -1;
+			if (ReadWasmIntField(*record, "factoryID", factoryID) && factoryID >= 0 &&
+				!visibleUnit("factoryID")) {
+				SetWasmIntField(*record, "factoryID", -1);
+				SetWasmIntField(*record, "factoryDefID", -1);
+			}
+			return true;
+		}
+
+		if (name == "RenderUnitDestroyed")
+			return unitTeamVisible();
+
+		if (name == "UnitUnitCollision")
+			return visibleUnit("colliderID") && visibleUnit("collideeID");
+		if (name == "UnitFeatureCollision") {
+			int featureID = -1;
+			return visibleUnit("colliderID") &&
+				ReadWasmIntField(*record, "collideeID", featureID) &&
+				WasmUiVisibility::FindFeature(featureID) != nullptr;
+		}
+
+		return true;
 	}
 
 	class ScopedNativeSyncedCode {
@@ -215,14 +495,32 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 		return false;
 	}
 
-	const std::vector<WasmEnvironment> environments = synced
+	// UI is an unsynced environment, but LuaUI also receives lifecycle events
+	// that are dispatched from the engine's synced path (for example
+	// GameStart). Give it an owned, visibility-filtered copy of the query;
+	// the generated callin environment mask remains authoritative.
+	std::vector<WasmInterfaceSystem::CallinInvocation> invocations;
+	for (const WasmEnvironment environment : synced
 		? std::vector<WasmEnvironment>{WasmEnvironment::RulesSynced,
 			WasmEnvironment::GaiaSynced}
 		: std::vector<WasmEnvironment>{WasmEnvironment::RulesUnsynced,
-			WasmEnvironment::GaiaUnsynced};
+			WasmEnvironment::GaiaUnsynced}) {
+		invocations.push_back({environment, {value}});
+	}
+	{
+		WasmUiVisibility::ScopedContext uiContext(true);
+		WasmValue uiValue = value;
+		// EventHandler discards return values from unsynced Lua clients for
+		// these synced control callins.  Keep dispatching the UI callback for
+		// parity, but do not let it influence the simulation result.
+		const bool uiContributesResult = name != "Explosion" &&
+			name != "UnitUnitCollision" && name != "UnitFeatureCollision";
+		if (SanitizeUiCallin(name, uiValue))
+			invocations.push_back({WasmEnvironment::UI, {std::move(uiValue)}, uiContributesResult});
+	}
 	WasmValue aggregate;
 	std::string error;
-	if (!m_wasmSystem->DispatchCallin(name, {value}, environments, aggregate, error)) {
+	if (!m_wasmSystem->DispatchCallin(name, invocations, aggregate, error)) {
 		if (!error.empty())
 			LOG_L(L_ERROR, "Wasm callin %s failed: %s", std::string(name).c_str(), error.c_str());
 		return false;

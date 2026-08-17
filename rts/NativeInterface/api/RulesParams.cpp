@@ -1,5 +1,7 @@
 #include "RulesParams.h"
 
+#include "NativeInterface/WasmUiVisibility.h"
+
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Features/Feature.h"
@@ -9,6 +11,8 @@
 #include "Sim/Misc/GlobalSynced.h"
 #include "Game/Players/Player.h"
 #include "Game/Players/PlayerHandler.h"
+#include "Game/Game.h"
+#include "Game/GlobalUnsynced.h"
 #include "Lua/LuaHandleSynced.h"
 #include "Lua/LuaRulesParams.h"
 #include <cstring>
@@ -54,8 +58,13 @@ static const char* CopyString(const std::string& str) {
 	return ptr;
 }
 
+static void ResetParamValue(RulesParamValue& value) {
+	value.type = RULESPARAM_TYPE_BOOL;
+	value.boolValue = false;
+}
+
 // Helper to convert LuaRulesParams::Param to RulesParamValue
-static void ConvertParam(const LuaRulesParams::Param& param, RulesParamValue& outValue) {
+static bool ConvertParam(const LuaRulesParams::Param& param, RulesParamValue& outValue) {
 	if (std::holds_alternative<bool>(param.value)) {
 		outValue.type = RULESPARAM_TYPE_BOOL;
 		outValue.boolValue = std::get<bool>(param.value);
@@ -65,12 +74,78 @@ static void ConvertParam(const LuaRulesParams::Param& param, RulesParamValue& ou
 	} else if (std::holds_alternative<std::string>(param.value)) {
 		outValue.type = RULESPARAM_TYPE_STRING;
 		outValue.stringValue = CopyString(std::get<std::string>(param.value));
+		return outValue.stringValue != nullptr;
 	}
+	return true;
+}
+
+static int TeamRulesParamMask(int teamID) {
+	if (!WasmUiVisibility::Active() || WasmUiVisibility::FullRead() ||
+		(game != nullptr && game->IsGameOver()) ||
+		(WasmUiVisibility::ReadAllyTeam() >= 0 &&
+			teamHandler.AllyTeam(teamID) == WasmUiVisibility::ReadAllyTeam()))
+		return RULESPARAMLOS_PRIVATE_MASK;
+
+	if (WasmUiVisibility::ReadTeam() >= 0 &&
+		teamHandler.AlliedTeams(teamID, WasmUiVisibility::ReadTeam()))
+		return RULESPARAMLOS_ALLIED_MASK;
+
+	return RULESPARAMLOS_PUBLIC_MASK;
+}
+
+static int PlayerRulesParamMask(int playerID) {
+	if (!WasmUiVisibility::Active() || WasmUiVisibility::FullRead() ||
+		(game != nullptr && game->IsGameOver()) ||
+		playerID == WasmUiVisibility::ReadPlayer())
+		return RULESPARAMLOS_PRIVATE_MASK;
+
+	return RULESPARAMLOS_PUBLIC_MASK;
+}
+
+template<typename Params>
+static size_t CountVisibleParams(const Params& params, int allowedMask) {
+	size_t count = 0;
+	for (const auto& pair : params) {
+		if (WasmUiVisibility::RulesParamVisible(pair.second.los, allowedMask))
+			++count;
+	}
+	return count;
+}
+
+template<typename Params>
+static bool WriteVisibleParamNames(const Params& params, int allowedMask,
+	const char**& names, uint32_t& count, const Error*& error) {
+	const size_t visibleCount = CountVisibleParams(params, allowedMask);
+	if (visibleCount == 0)
+		return true;
+
+	names = AllocateArray<const char*>(visibleCount);
+	if (names == nullptr) {
+		error = &BUFFER_OVERFLOW_ERROR;
+		return false;
+	}
+
+	uint32_t index = 0;
+	for (const auto& pair : params) {
+		if (!WasmUiVisibility::RulesParamVisible(pair.second.los, allowedMask))
+			continue;
+		names[index] = CopyString(pair.first);
+		if (names[index] == nullptr) {
+			error = &BUFFER_OVERFLOW_ERROR;
+			count = index;
+			return false;
+		}
+		++index;
+	}
+
+	count = index;
+	return true;
 }
 
 static void NativeGetGameRulesParam(const GetGameRulesParamQuery* query, GetGameRulesParamResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	ResetParamValue(result->value);
 	result->exists = false;
 	result->los = 0;
 
@@ -81,8 +156,12 @@ static void NativeGetGameRulesParam(const GetGameRulesParamQuery* query, GetGame
 
 	const LuaRulesParams::Params& params = CSplitLuaHandle::GetGameParams();
 	auto it = params.find(query->paramName);
-	if (it != params.end()) {
-		ConvertParam(it->second, result->value);
+	if (it != params.end() && WasmUiVisibility::RulesParamVisible(it->second.los,
+		RULESPARAMLOS_PRIVATE_MASK)) {
+		if (!ConvertParam(it->second, result->value)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
 		result->los = it->second.los;
 		result->exists = true;
 	}
@@ -104,29 +183,14 @@ static void NativeGetGameRulesParams(const GetGameRulesParamsQuery* query, GetGa
 		return;
 	}
 
-	result->names = AllocateArray<const char*>(params.size());
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	uint32_t idx = 0;
-	for (const auto& pair : params) {
-		result->names[idx] = CopyString(pair.first);
-		if (result->names[idx] == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = idx;
-			return;
-		}
-		idx++;
-	}
-
-	result->count = idx;
+	WriteVisibleParamNames(params, RULESPARAMLOS_PRIVATE_MASK, result->names,
+		result->count, result->error);
 }
 
 static void NativeGetTeamRulesParam(const GetTeamRulesParamQuery* query, GetTeamRulesParamResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	ResetParamValue(result->value);
 	result->exists = false;
 	result->los = 0;
 
@@ -142,8 +206,13 @@ static void NativeGetTeamRulesParam(const GetTeamRulesParamQuery* query, GetTeam
 	}
 
 	auto it = team->modParams.find(query->paramName);
-	if (it != team->modParams.end()) {
-		ConvertParam(it->second, result->value);
+	const int allowedMask = TeamRulesParamMask(query->teamID);
+	if (it != team->modParams.end() && WasmUiVisibility::RulesParamVisible(it->second.los,
+		allowedMask)) {
+		if (!ConvertParam(it->second, result->value)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
 		result->los = it->second.los;
 		result->exists = true;
 	}
@@ -170,29 +239,14 @@ static void NativeGetTeamRulesParams(const GetTeamRulesParamsQuery* query, GetTe
 		return;
 	}
 
-	result->names = AllocateArray<const char*>(team->modParams.size());
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	uint32_t idx = 0;
-	for (const auto& pair : team->modParams) {
-		result->names[idx] = CopyString(pair.first);
-		if (result->names[idx] == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = idx;
-			return;
-		}
-		idx++;
-	}
-
-	result->count = idx;
+	WriteVisibleParamNames(team->modParams, TeamRulesParamMask(query->teamID),
+		result->names, result->count, result->error);
 }
 
 static void NativeGetPlayerRulesParam(const GetPlayerRulesParamQuery* query, GetPlayerRulesParamResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	ResetParamValue(result->value);
 	result->exists = false;
 	result->los = 0;
 
@@ -208,8 +262,13 @@ static void NativeGetPlayerRulesParam(const GetPlayerRulesParamQuery* query, Get
 	}
 
 	auto it = player->modParams.find(query->paramName);
-	if (it != player->modParams.end()) {
-		ConvertParam(it->second, result->value);
+	const int allowedMask = PlayerRulesParamMask(query->playerID);
+	if (it != player->modParams.end() && WasmUiVisibility::RulesParamVisible(it->second.los,
+		allowedMask)) {
+		if (!ConvertParam(it->second, result->value)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
 		result->los = it->second.los;
 		result->exists = true;
 	}
@@ -236,29 +295,14 @@ static void NativeGetPlayerRulesParams(const GetPlayerRulesParamsQuery* query, G
 		return;
 	}
 
-	result->names = AllocateArray<const char*>(player->modParams.size());
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	uint32_t idx = 0;
-	for (const auto& pair : player->modParams) {
-		result->names[idx] = CopyString(pair.first);
-		if (result->names[idx] == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = idx;
-			return;
-		}
-		idx++;
-	}
-
-	result->count = idx;
+	WriteVisibleParamNames(player->modParams, PlayerRulesParamMask(query->playerID),
+		result->names, result->count, result->error);
 }
 
 static void NativeGetUnitRulesParam(const GetUnitRulesParamQuery* query, GetUnitRulesParamResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	ResetParamValue(result->value);
 	result->exists = false;
 	result->los = 0;
 
@@ -267,15 +311,19 @@ static void NativeGetUnitRulesParam(const GetUnitRulesParamQuery* query, GetUnit
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_ID_ERROR;
 		return;
 	}
 
 	auto it = unit->modParams.find(query->paramName);
-	if (it != unit->modParams.end()) {
-		ConvertParam(it->second, result->value);
+	if (it != unit->modParams.end() && WasmUiVisibility::RulesParamVisible(it->second.los,
+		WasmUiVisibility::UnitRulesParamMask(unit))) {
+		if (!ConvertParam(it->second, result->value)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
 		result->los = it->second.los;
 		result->exists = true;
 	}
@@ -292,7 +340,7 @@ static void NativeGetUnitRulesParams(const GetUnitRulesParamsQuery* query, GetUn
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_ID_ERROR;
 		return;
@@ -302,29 +350,14 @@ static void NativeGetUnitRulesParams(const GetUnitRulesParamsQuery* query, GetUn
 		return;
 	}
 
-	result->names = AllocateArray<const char*>(unit->modParams.size());
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	uint32_t idx = 0;
-	for (const auto& pair : unit->modParams) {
-		result->names[idx] = CopyString(pair.first);
-		if (result->names[idx] == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = idx;
-			return;
-		}
-		idx++;
-	}
-
-	result->count = idx;
+	WriteVisibleParamNames(unit->modParams, WasmUiVisibility::UnitRulesParamMask(unit),
+		result->names, result->count, result->error);
 }
 
 static void NativeGetFeatureRulesParam(const GetFeatureRulesParamQuery* query, GetFeatureRulesParamResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
+	ResetParamValue(result->value);
 	result->exists = false;
 	result->los = 0;
 
@@ -333,15 +366,19 @@ static void NativeGetFeatureRulesParam(const GetFeatureRulesParamQuery* query, G
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_ID_ERROR;
 		return;
 	}
 
 	auto it = feature->modParams.find(query->paramName);
-	if (it != feature->modParams.end()) {
-		ConvertParam(it->second, result->value);
+	if (it != feature->modParams.end() && WasmUiVisibility::RulesParamVisible(it->second.los,
+		WasmUiVisibility::FeatureRulesParamMask(feature))) {
+		if (!ConvertParam(it->second, result->value)) {
+			result->error = &BUFFER_OVERFLOW_ERROR;
+			return;
+		}
 		result->los = it->second.los;
 		result->exists = true;
 	}
@@ -358,7 +395,7 @@ static void NativeGetFeatureRulesParams(const GetFeatureRulesParamsQuery* query,
 		return;
 	}
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_ID_ERROR;
 		return;
@@ -368,24 +405,8 @@ static void NativeGetFeatureRulesParams(const GetFeatureRulesParamsQuery* query,
 		return;
 	}
 
-	result->names = AllocateArray<const char*>(feature->modParams.size());
-	if (result->names == nullptr) {
-		result->error = &BUFFER_OVERFLOW_ERROR;
-		return;
-	}
-
-	uint32_t idx = 0;
-	for (const auto& pair : feature->modParams) {
-		result->names[idx] = CopyString(pair.first);
-		if (result->names[idx] == nullptr) {
-			result->error = &BUFFER_OVERFLOW_ERROR;
-			result->count = idx;
-			return;
-		}
-		idx++;
-	}
-
-	result->count = idx;
+	WriteVisibleParamNames(feature->modParams, WasmUiVisibility::FeatureRulesParamMask(feature),
+		result->names, result->count, result->error);
 }
 
 static void NativeSetGameRulesParam(const SetGameRulesParamQuery* query, SetGameRulesParamResult* result) {

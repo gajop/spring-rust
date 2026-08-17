@@ -47,6 +47,8 @@ return {
 
 		"get_map_start_positions",
 
+		"global_los",
+
 		"math_hypot",
 
 		"math_diag",
@@ -211,6 +213,8 @@ return {
 
 		"get_unit_cost_table",
 
+		"unit_metal_extraction",
+
 		"get_unit_states",
 
 		"get_unit_sensor_radius",
@@ -225,7 +229,15 @@ return {
 
 		"get_unit_piece_collision_volume_data",
 
+		"unit_add_experience",
+
 		"get_unit_vectors",
+
+		"unit_radius_after_set",
+
+		"unit_height_after_set",
+
+		"unit_sensor_radius",
 
 		"get_team_units_counts",
 
@@ -385,6 +397,8 @@ return {
 
 		"unit_stockpile_fixed_shape",
 
+		"unit_storage_fixed_getter",
+
 		"unit_is_transporting_fixed_shape",
 
 		"unit_pos_error_params_fixed_shape",
@@ -423,6 +437,10 @@ return {
 
 		"get_feature_collision_volume_data",
 
+		"feature_radius_after_set",
+
+		"feature_height_after_set",
+
 		"ground_orig_height",
 
 		"ground_normal",
@@ -450,6 +468,14 @@ return {
 		"get_metal_amount",
 
 		"get_metal_extraction",
+
+		"metal_amount",
+
+		"wind",
+
+		"terrain_type_data",
+
+		"set_tidal",
 
 		"is_unit_in_los",
 
@@ -567,6 +593,10 @@ return {
 
 		"get_team_resource_stats",
 
+		"ally_team_start_box",
+
+		"team_start_position",
+
 		"get_team_damage_stats",
 
 		"get_team_stats_history",
@@ -625,6 +655,32 @@ return {
 
 		"projectile_damage_explosion_speed",
 
+		"projectile_position_after_set",
+
+		"projectile_velocity_after_set",
+
+		"projectile_gravity_after_set",
+
+		"projectile_intercepted_after_set",
+
+		"projectile_ttl_after_set",
+
+		"projectile_damage_after_set",
+
+		"projectile_collision",
+
+		"projectile_delete",
+
+		"add_team_resource_excess_stats",
+
+		"set_ally",
+
+		"assign_player_to_team",
+
+		"set_cheating_enabled",
+
+		"set_god_mode",
+
 		"get_piece_projectile_name",
 
 		"get_cobscript_id_non_cob",
@@ -649,6 +705,9 @@ return {
 		},
 		["get_map_option"] = {
 			key = "blank_map_height",
+		},
+		["global_los"] = {
+			enabled = false,
 		},
 		["math_hypot"] = {
 			x = 16.5,
@@ -903,6 +962,10 @@ return {
 			positional = true,
 			checkMap = false,
 		},
+		["unit_metal_extraction"] = {
+			depth = 1.05,
+			range = 144.0,
+		},
 		["get_unit_sensor_radius"] = {
 			sensorType = "los",
 		},
@@ -911,6 +974,22 @@ return {
 		},
 		["get_unit_piece_collision_volume_data"] = {
 			pieceNum = 1,
+		},
+		["unit_add_experience"] = {
+			baseline = 1.0,
+			deltaExperience = 0.5,
+		},
+		["unit_radius_after_set"] = {
+			radius = 44.0,
+			height = 64.0,
+		},
+		["unit_height_after_set"] = {
+			radius = 44.0,
+			height = 64.0,
+		},
+		["unit_sensor_radius"] = {
+			sensorType = "los",
+			radius = 288,
 		},
 		["get_unit_nearest_ally"] = {
 			range = 4096,
@@ -1104,6 +1183,10 @@ return {
 			z = 1024.0,
 			facing = 0,
 		},
+		["unit_storage_fixed_getter"] = {
+			resource = "metal",
+			amount = 525.0,
+		},
 		["get_feature_separation"] = {
 			positional = false,
 		},
@@ -1124,6 +1207,14 @@ return {
 			z = 1024,
 			radius = 99999,
 			height = 99999,
+		},
+		["feature_radius_after_set"] = {
+			radius = 44.0,
+			height = 64.0,
+		},
+		["feature_height_after_set"] = {
+			radius = 44.0,
+			height = 64.0,
 		},
 		["ground_orig_height"] = {
 			x = 1024.0,
@@ -1177,6 +1268,27 @@ return {
 		["get_metal_extraction"] = {
 			x = 7,
 			z = 7,
+		},
+		["metal_amount"] = {
+			x = 7,
+			z = 7,
+			amount = 2.5,
+		},
+		["wind"] = {
+			windStrength = 10.5,
+		},
+		["terrain_type_data"] = {
+			terrainTypeIndex = 0,
+			terrainTypeName = "native_api_parity_terrain",
+			hardness = 1.75,
+			tankSpeed = 1.25,
+			kbotSpeed = 1.25,
+			hoverSpeed = 1.25,
+			shipSpeed = 1.25,
+			receiveTracks = false,
+		},
+		["set_tidal"] = {
+			tidalStrength = 2.55,
 		},
 		["is_pos_in_los"] = {
 			y = 96,
@@ -1236,6 +1348,17 @@ return {
 			teamID = 0,
 			resource = "metal",
 		},
+		["ally_team_start_box"] = {
+			xMin = 350.0,
+			zMin = 350.0,
+			xMax = 1400.0,
+			zMax = 1400.0,
+		},
+		["team_start_position"] = {
+			x = 1000.0,
+			y = 96,
+			z = 1000.0,
+		},
 		["get_team_stats_history"] = {
 			startIndex = 1,
 			endIndex = 1,
@@ -1281,6 +1404,51 @@ return {
 		},
 		["projectile_damage_explosion_speed"] = {
 			tag = "explosionSpeed",
+		},
+		["projectile_position_after_set"] = {
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["projectile_velocity_after_set"] = {
+			x = 1.0,
+			y = 0.0,
+			z = 0.0,
+		},
+		["projectile_gravity_after_set"] = {
+			gravity = -0.125,
+		},
+		["projectile_intercepted_after_set"] = {
+			intercepted = true,
+		},
+		["projectile_ttl_after_set"] = {
+			ttl = 777,
+		},
+		["projectile_damage_after_set"] = {
+			tag = "impulseFactor",
+			damageValue = 4.25,
+		},
+		["add_team_resource_excess_stats"] = {
+			resource = "metal",
+			amount = 3,
+		},
+		["set_ally"] = {
+			firstAllyTeamID = 0,
+			secondAllyTeamID = 0,
+			allied = true,
+			teamID1 = 0,
+			teamID2 = 0,
+		},
+		["assign_player_to_team"] = {
+			playerID = 0,
+			teamID = 0,
+		},
+		["set_cheating_enabled"] = {
+			enabled = true,
+		},
+		["set_god_mode"] = {
+			controlAllies = true,
+			controlEnemies = false,
 		},
 		["get_cobscript_id_non_cob"] = {
 			funcName = "NativeApiParityMissingCobFunction",

@@ -52,6 +52,14 @@ public:
 	bool DispatchCallin(std::string_view name, const std::vector<WasmValue>& arguments,
 		const std::vector<WasmEnvironment>& environments, WasmValue& result,
 		std::string& error);
+	struct CallinInvocation {
+		WasmEnvironment environment;
+		std::vector<WasmValue> arguments;
+		bool contributesResult = true;
+	};
+	bool DispatchCallin(std::string_view name,
+		const std::vector<CallinInvocation>& invocations, WasmValue& result,
+		std::string& error);
 
 	std::size_t ModuleCount() const;
 	const WasmRuntime& Runtime() const { return *runtime; }

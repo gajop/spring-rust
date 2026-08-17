@@ -22,6 +22,7 @@ use callin::{GameFrameQuery, GameFrameResult, Guest, SpringError, UpdateQuery, U
 
 pub struct Fixture {
     pub unit_id: i32,
+    pub extractor_unit_id: i32,
     pub feature_id: i32,
     pub projectile_id: i32,
     pub unit_def_id: i32,
@@ -44,18 +45,30 @@ fn discover_fixture() -> Result<Fixture, String> {
     // visible and all typed ID APIs are valid.
     let fixture_unit_def_id = unit_defs::get_unit_def_id_by_name("native_api_test_unit")
         .map_err(|error| format!("get-unit-def-id-by-name:{}", error.code))?;
+    let extractor_unit_def_id = unit_defs::get_unit_def_id_by_name("native_api_test_extractor")
+        .map_err(|error| format!("get-extractor-unit-def-id-by-name:{}", error.code))?;
     let unit_ids = probe_context::fixture_unit_ids()?;
     let mut unit = None;
+    let mut extractor_unit = None;
     let mut unit_candidates = Vec::new();
     for candidate_id in unit_ids {
-        let candidate_def_id = units_info::get_unit_def_id(candidate_id)
-            .map_err(|error| format!("get-unit-def-id:{}", error.code))?;
+        // LuaUI can enumerate radar-visible units whose definition is still
+        // intentionally redacted.  Match Lua's `Spring.GetUnitDefID`/nil
+        // behaviour by skipping those candidates rather than turning one
+        // opaque enemy handle into a terminal fixture-discovery error.
+        let candidate_def_id = match units_info::get_unit_def_id(candidate_id) {
+            Ok(def_id) => def_id,
+            Err(_) => continue,
+        };
         unit_candidates.push((candidate_id, candidate_def_id));
+        if candidate_def_id == extractor_unit_def_id && extractor_unit.is_none() {
+            extractor_unit = Some(candidate_id);
+        }
         if candidate_def_id == fixture_unit_def_id
+            && unit.is_none()
             && probe_context::unit_candidate_is_primary(candidate_id)
         {
             unit = Some((candidate_id, candidate_def_id));
-            break;
         }
     }
     let (unit_id, unit_def_id) =
@@ -71,8 +84,10 @@ fn discover_fixture() -> Result<Fixture, String> {
     let feature_ids = probe_context::fixture_feature_ids()?;
     let mut feature = None;
     for candidate_id in feature_ids {
-        let candidate_def_id = features::get_feature_def_id(candidate_id)
-            .map_err(|error| format!("get-feature-def-id:{}", error.code))?;
+        let candidate_def_id = match features::get_feature_def_id(candidate_id) {
+            Ok(def_id) => def_id,
+            Err(_) => continue,
+        };
         if candidate_def_id == fixture_feature_def_id
             && probe_context::feature_candidate_is_primary(candidate_id)
         {
@@ -101,18 +116,24 @@ fn discover_fixture() -> Result<Fixture, String> {
 
     let mut weapon_projectile = None;
     let mut piece_projectile = None;
+    let mut projectile_candidates = Vec::new();
     for candidate_id in projectile_ids {
-        let owner_id = projectiles::get_projectile_owner_id(candidate_id)
-            .map_err(|error| format!("get-projectile-owner-id:{}", error.code))?;
+        let owner_id = match projectiles::get_projectile_owner_id(candidate_id) {
+            Ok(owner_id) => owner_id,
+            Err(_) => continue,
+        };
+        projectile_candidates.push((candidate_id, owner_id));
         if owner_id != unit_id {
             continue;
         }
-        let projectile_type = projectiles::get_projectile_type(candidate_id)
-            .map_err(|error| format!("get-projectile-type:{}", error.code))?;
+        let projectile_type = match projectiles::get_projectile_type(candidate_id) {
+            Ok(projectile_type) => projectile_type,
+            Err(_) => continue,
+        };
         if projectile_type.weapon && weapon_projectile.is_none() {
-            let candidate_def_id = projectiles::get_projectile_def_id(candidate_id)
-                .map_err(|error| format!("get-projectile-def-id:{}", error.code))?;
-            weapon_projectile = Some((candidate_id, candidate_def_id));
+            if let Ok(candidate_def_id) = projectiles::get_projectile_def_id(candidate_id) {
+                weapon_projectile = Some((candidate_id, candidate_def_id));
+            }
         }
         if projectile_type.piece && piece_projectile.is_none() {
             piece_projectile = Some(candidate_id);
@@ -121,10 +142,22 @@ fn discover_fixture() -> Result<Fixture, String> {
             break;
         }
     }
-    let (projectile_id, weapon_def_id) = weapon_projectile
-        .ok_or_else(|| "native-api-test-weapon-projectile-not-found".to_string())?;
+    let (projectile_id, weapon_def_id) = weapon_projectile.ok_or_else(|| {
+        format!(
+            "native-api-test-weapon-projectile-not-found:unit={unit_id}:candidates={projectile_candidates:?}"
+        )
+    })?;
+    let extractor_unit_id = extractor_unit.ok_or_else(|| {
+        format!(
+            "native-api-test-extractor-unit-not-found:def={extractor_unit_def_id}:candidates={unit_candidates:?}"
+        )
+    })?;
     let piece_projectile_id =
-        piece_projectile.ok_or_else(|| "native-api-test-piece-projectile-not-found".to_string())?;
+        piece_projectile.ok_or_else(|| {
+            format!(
+                "native-api-test-piece-projectile-not-found:unit={unit_id}:candidates={projectile_candidates:?}"
+            )
+        })?;
 
     let ground_position = units_info::get_unit_position(
         unit_id,
@@ -140,6 +173,7 @@ fn discover_fixture() -> Result<Fixture, String> {
 
     Ok(Fixture {
         unit_id,
+        extractor_unit_id,
         feature_id,
         projectile_id,
         unit_def_id,
@@ -164,6 +198,7 @@ struct ParityGuest;
 
 static PROBE_RAN: AtomicBool = AtomicBool::new(false);
 static DETERMINISM_SENT: AtomicBool = AtomicBool::new(false);
+static LATEST_GAME_FRAME: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(-1);
 
 fn deterministic_fp_signature() -> String {
     let signed_zero = (-0.0f32).to_bits();
@@ -212,19 +247,19 @@ fn send_fixture_status(status: &str, detail: &str) {
     let _ = messages::send_lua_rules_msg(&message);
 }
 
-fn run_generated_probe() {
+fn run_generated_probe(current_frame: i32) {
     if PROBE_RAN.load(Ordering::Acquire) {
         return;
     }
     let fixture = match discover_fixture() {
         Ok(fixture) => fixture,
         Err(reason) => {
-            // Unsynced Update may be delivered before the synced gadget's
-            // CreateUnit/CreateFeature hand-off.  Keep discovery retryable in
-            // that environment; recording the first empty inventory as a
-            // terminal result would turn a scheduling race into a vacuous
-            // parity failure.
-            if probe_context::WAIT_FOR_UNSYNCED_FIXTURE {
+            // Component callbacks can run before the synced fixture's
+            // projectile has entered the query-visible list. Keep the
+            // discovery boundary retryable for the first few simulation
+            // frames; recording that scheduling race as a terminal result
+            // would turn a valid fixture into a vacuous parity failure.
+            if current_frame < 5 || probe_context::WAIT_FOR_UNSYNCED_FIXTURE {
                 return;
             }
             send_fixture_status("error", &reason);
@@ -238,7 +273,7 @@ fn run_generated_probe() {
         return;
     }
     if let Err(reason) = probe_context::prepare_probe() {
-        if probe_context::WAIT_FOR_UNSYNCED_FIXTURE {
+        if current_frame < 5 || probe_context::WAIT_FOR_UNSYNCED_FIXTURE {
             return;
         }
         send_fixture_status("error", &reason);
@@ -246,8 +281,9 @@ fn run_generated_probe() {
         return;
     }
     let fixture_detail = format!(
-        "unit={};feature={};projectile={};piece={};team={};ally={};player={}",
+        "unit={};extractor={};feature={};projectile={};piece={};team={};ally={};player={}",
         fixture.unit_id,
+        fixture.extractor_unit_id,
         fixture.feature_id,
         fixture.projectile_id,
         fixture.piece_projectile_id,
@@ -264,6 +300,7 @@ fn run_generated_probe() {
 
 impl Guest for ParityGuest {
     fn game_frame(query: GameFrameQuery) -> Result<GameFrameResult, SpringError> {
+        LATEST_GAME_FRAME.store(query.game_frame, Ordering::Release);
         // Unsynced Update is the first callback that is guaranteed to run
         // after the synced fixture has crossed into the render-side handle.
         // Native GameFrame dispatch can precede that hand-off, so sampling
@@ -281,25 +318,32 @@ impl Guest for ParityGuest {
         // Waiting for that same post-frame gives the native queries a fully
         // populated world; frame 1 can still be before feature/projectile
         // registration has become visible to the native read surfaces.
-        if !probe_context::WAIT_FOR_UNSYNCED_FIXTURE && query.game_frame == 2 {
-            run_generated_probe();
+        if !probe_context::WAIT_FOR_UNSYNCED_FIXTURE && (2..=5).contains(&query.game_frame) {
+            run_generated_probe(query.game_frame);
         }
         Ok(GameFrameResult { unused: 0 })
     }
 
     fn update(_query: UpdateQuery) -> Result<UpdateResult, SpringError> {
-        if probe_context::WAIT_FOR_UNSYNCED_FIXTURE
-            // Update is render-rate driven and can run several times during
-            // the first simulation frame. An update-count threshold is not a
-            // fixture-readiness boundary; use the authoritative game frame
-            // so render startup cannot observe objects before the Lua setup at
-            // frame four has completed.
-            && game::get_game_frame(0)
-                .ok()
-                .map(|frame| frame.low16 | (frame.high16 << 16))
-                .is_some_and(|frame| frame >= 10)
-        {
-            run_generated_probe();
+        if probe_context::WAIT_FOR_UNSYNCED_FIXTURE {
+            // Unsynced gadgets do not receive the synced GameFrame callin.
+            // Read the same authoritative frame through the game callout so
+            // the fixture gate does not wait forever or require a broader
+            // callin environment mask.
+            if let Ok(frame) = game::get_game_frame(0u8) {
+                let current_frame = ((frame.high16 << 16) | frame.low16) as i32;
+                LATEST_GAME_FRAME.store(current_frame, Ordering::Release);
+            }
+        }
+        let probe_gate = probe_context::WAIT_FOR_UNSYNCED_FIXTURE
+            && LATEST_GAME_FRAME.load(Ordering::Acquire) >= 10;
+        // Update is render-rate driven and can run several times during the
+        // first simulation frame. An update-count threshold is not a
+        // fixture-readiness boundary; use the authoritative game frame so
+        // render startup cannot observe objects before Lua setup completes.
+        if probe_gate {
+            let frame = LATEST_GAME_FRAME.load(Ordering::Acquire);
+            run_generated_probe(frame as i32);
             if PROBE_RAN.load(Ordering::Acquire) && !DETERMINISM_SENT.swap(true, Ordering::AcqRel) {
                 send_determinism(3)?;
             }

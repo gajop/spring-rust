@@ -165,7 +165,7 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 		if (left->Descriptor().order != right->Descriptor().order)
 			return left->Descriptor().order < right->Descriptor().order;
 		if (left->Descriptor().archive != right->Descriptor().archive)
-			return left->Descriptor().archive < right->Descriptor().archive;
+		return left->Descriptor().archive < right->Descriptor().archive;
 		return left->Descriptor().name < right->Descriptor().name;
 	});
 	return true;
@@ -234,6 +234,7 @@ bool WasmInterfaceSystem::LoadManifests(const std::vector<WasmManifestSource>& s
 		descriptor.source = declaration.path;
 		descriptor.environment = declaration.environment;
 		descriptor.order = declaration.order;
+		descriptor.interfaceVersion = declaration.interfaceVersion;
 		descriptor.bytes = std::move(bytes);
 		descriptor.archive = declaration.archive;
 		if (!LoadModule(std::move(descriptor), error)) {
@@ -425,6 +426,17 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 	const std::vector<WasmEnvironment>& environments, WasmValue& result,
 	std::string& error)
 {
+	std::vector<CallinInvocation> invocations;
+	invocations.reserve(environments.size());
+	for (const WasmEnvironment environment : environments)
+		invocations.push_back({environment, arguments});
+	return DispatchCallin(name, invocations, result, error);
+}
+
+bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
+	const std::vector<CallinInvocation>& invocations, WasmValue& result,
+	std::string& error)
+{
 	result = WasmValue::Unit();
 	const auto* descriptor = FindCallin(name);
 	if (descriptor == nullptr) {
@@ -432,11 +444,20 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 		return false;
 	}
 	bool haveResult = false;
-	for (const WasmEnvironment environment : environments) {
+	for (const CallinInvocation& invocation : invocations) {
+		const WasmEnvironment environment = invocation.environment;
+		const std::uint32_t environmentBit = 1u << static_cast<std::uint32_t>(environment);
+		// Fan-out callers intentionally provide the candidate environments for
+		// an engine event.  The canonical callin inventory is the final filter;
+		// an event that is not meaningful in one candidate environment must not
+		// turn an otherwise valid dispatch into an error.
+		if ((descriptor->environmentMask & environmentBit) == 0)
+			continue;
 		WasmValue environmentResult;
-		if (!DispatchCallin(name, arguments, environment, environmentResult, error))
+		if (!DispatchCallin(name, invocation.arguments, environment, environmentResult, error))
 			return false;
-		if (environmentResult.IsUnit() || descriptor->aggregation == "ignore")
+		if (!invocation.contributesResult || environmentResult.IsUnit() ||
+			descriptor->aggregation == "ignore")
 			continue;
 
 		if (descriptor->aggregation == "or-true") {
@@ -487,8 +508,8 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 
 		error = "unknown Wasm callin aggregation rule: " +
 			std::string(descriptor->aggregation);
-		for (const WasmEnvironment environment : environments)
-			FaultSyncedModules(environment, error);
+		for (const CallinInvocation& invocation : invocations)
+			FaultSyncedModules(invocation.environment, error);
 		return false;
 	}
 	return true;
@@ -509,7 +530,8 @@ std::vector<std::string> WasmInterfaceSystem::SyncedConfiguration() const
 			WasmEnvironmentMatrix::Name(module->Descriptor().environment) + "|" +
 			std::to_string(module->Descriptor().order) + "|" + module->Descriptor().archive + "|" +
 			module->Identity().sha512 + "|" +
-			runtime->ConfigurationIdentity());
+			runtime->ConfigurationIdentity() + "|interface=" +
+			module->Descriptor().interfaceVersion);
 	}
 	return result;
 }

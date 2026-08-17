@@ -3,6 +3,7 @@
 #include "WasmModule.h"
 
 #include <algorithm>
+#include <charconv>
 #include <cctype>
 #include <limits>
 #include <utility>
@@ -14,6 +15,87 @@
 #endif
 
 namespace {
+
+// Lua strings are byte sequences, while the Component Model string type is
+// UTF-8. Preserve the engine's byte-for-byte Lua contract at the boundary by
+// representing every native byte as the corresponding U+0000..U+00FF scalar.
+// This keeps colour/control bytes in tooltips and console text valid for
+// Wasmtime without silently replacing or dropping them.
+std::string EncodeComponentString(std::string_view value)
+{
+	std::string result;
+	result.reserve(value.size());
+	for (const unsigned char byte : value) {
+		if (byte < 0x80) {
+			result.push_back(static_cast<char>(byte));
+		} else if (byte < 0xC0) {
+			result.push_back(static_cast<char>(0xC2));
+			result.push_back(static_cast<char>(byte));
+		} else {
+			result.push_back(static_cast<char>(0xC3));
+			result.push_back(static_cast<char>(byte - 0x40));
+		}
+	}
+	return result;
+}
+
+std::string DecodeComponentString(std::string_view value)
+{
+	std::string result;
+	result.reserve(value.size());
+	for (std::size_t index = 0; index < value.size();) {
+		const unsigned char first = static_cast<unsigned char>(value[index]);
+		if (first < 0x80) {
+			result.push_back(static_cast<char>(first));
+			++index;
+			continue;
+		}
+
+		std::uint32_t codePoint = 0;
+		std::size_t length = 0;
+		if (first >= 0xC2 && first <= 0xDF) {
+			length = 2;
+			codePoint = first & 0x1F;
+		} else if (first >= 0xE0 && first <= 0xEF) {
+			length = 3;
+			codePoint = first & 0x0F;
+		} else if (first >= 0xF0 && first <= 0xF4) {
+			length = 4;
+			codePoint = first & 0x07;
+		}
+
+		if (length == 0 || index + length > value.size()) {
+			result.push_back(static_cast<char>(first));
+			++index;
+			continue;
+		}
+		bool valid = true;
+		for (std::size_t offset = 1; offset < length; ++offset) {
+			const unsigned char continuation = static_cast<unsigned char>(value[index + offset]);
+			if ((continuation & 0xC0) != 0x80) {
+				valid = false;
+				break;
+			}
+			codePoint = (codePoint << 6) | (continuation & 0x3F);
+		}
+		if (!valid || (length == 2 && codePoint < 0x80) ||
+			(length == 3 && codePoint < 0x800) ||
+			(length == 4 && codePoint < 0x10000) ||
+			(codePoint >= 0xD800 && codePoint <= 0xDFFF) ||
+			codePoint > 0x10FFFF) {
+			result.push_back(static_cast<char>(first));
+			++index;
+			continue;
+		}
+
+		if (codePoint <= 0xFF)
+			result.push_back(static_cast<char>(codePoint));
+		else
+			result.append(value, index, length);
+		index += length;
+	}
+	return result;
+}
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 std::string WasmtimeErrorMessage(wasmtime_error_t* error)
@@ -40,6 +122,30 @@ std::string WasmTrapMessage(wasm_trap_t* trap)
 	return result;
 }
 #endif
+
+bool ParseNativeApiError(std::string_view error, std::int32_t& code)
+{
+	constexpr std::string_view prefix = "native API error ";
+	if (error.size() <= prefix.size() || error.substr(0, prefix.size()) != prefix)
+		return false;
+
+	std::string_view numeric = error.substr(prefix.size());
+	if (const std::size_t separator = numeric.find(':'); separator != std::string_view::npos)
+		numeric = numeric.substr(0, separator);
+	if (numeric.empty())
+		return false;
+
+	std::int64_t parsed = 0;
+	const auto [end, status] = std::from_chars(
+		numeric.data(), numeric.data() + numeric.size(), parsed);
+	if (status != std::errc{} || end != numeric.data() + numeric.size() ||
+		parsed < std::numeric_limits<std::int32_t>::min() ||
+		parsed > std::numeric_limits<std::int32_t>::max())
+		return false;
+
+	code = static_cast<std::int32_t>(parsed);
+	return true;
+}
 
 bool IsComponent(const std::vector<std::uint8_t>& bytes)
 {
@@ -446,7 +552,8 @@ bool LiftComponentValue(const wasmtime_component_val_t& value, WasmModule* modul
 			output = WasmValue::U64(value.of.character);
 			return true;
 		case WASMTIME_COMPONENT_STRING:
-			output = WasmValue::String(std::string(value.of.string.data, value.of.string.size));
+			output = WasmValue::String(DecodeComponentString(
+				std::string_view(value.of.string.data, value.of.string.size)));
 			return true;
 		case WASMTIME_COMPONENT_LIST: {
 			WasmValueList list;
@@ -886,7 +993,8 @@ bool LowerComponentValue(const WasmValue& value, const wasmtime_component_valtyp
 			const auto* string = std::get_if<std::string>(&value.storage);
 			if (string == nullptr) { error = "component argument is not a string"; return false; }
 			output.kind = WASMTIME_COMPONENT_STRING;
-			wasm_name_new(&output.of.string, string->size(), string->data());
+			const std::string componentString = EncodeComponentString(*string);
+			wasm_name_new(&output.of.string, componentString.size(), componentString.data());
 			return true;
 		}
 		case WASMTIME_COMPONENT_VALTYPE_LIST: {
@@ -1289,9 +1397,16 @@ bool RegisterComponentItem(wasmtime_component_linker_instance_t* linkerInstance,
 					}
 				} deferredImportGuard{function->module, importCheckpoint};
 				WasmValue result;
+				std::int32_t nativeErrorCode = 0;
+				bool nativeError = false;
 				if (!function->module->InvokeCallout(function->moduleName,
 					function->functionName, values, result, error, true))
-					return ComponentHostError(error);
+				{
+					if (!ParseNativeApiError(error, nativeErrorCode))
+						return ComponentHostError(error);
+					nativeError = true;
+					error.clear();
+				}
 				if (type == nullptr)
 					return ComponentHostError("component host result type is unavailable");
 				wasmtime_component_valtype_t resultType{};
@@ -1318,25 +1433,48 @@ bool RegisterComponentItem(wasmtime_component_linker_instance_t* linkerInstance,
 				// success/error semantics.
 				WasmValue componentResult = std::move(result);
 				if (resultType.kind == WASMTIME_COMPONENT_VALTYPE_RESULT) {
-					wasmtime_component_valtype_t payloadType{};
-					const bool hasPayload = wasmtime_component_result_type_ok(
-						resultType.of.result, &payloadType);
-					if (hasPayload)
-						wasmtime_component_valtype_delete(&payloadType);
-					if (hasPayload) {
+					if (nativeError) {
+						wasmtime_component_valtype_t errorType{};
+						const bool hasError = wasmtime_component_result_type_err(
+							resultType.of.result, &errorType);
+						if (hasError)
+							wasmtime_component_valtype_delete(&errorType);
+						if (!hasError) {
+							wasmtime_component_valtype_delete(&resultType);
+							return ComponentHostError(
+								"native API error was returned for a result without an error type");
+						}
 						componentResult = WasmValue::Record({
-							{"ok", WasmValue::Bool(true)},
-							{"value", std::move(componentResult)},
+							{"ok", WasmValue::Bool(false)},
+							{"value", WasmValue::Record({
+								{"code", WasmValue::I64(nativeErrorCode)},
+							})},
 						});
-					} else if (!componentResult.IsUnit()) {
-						wasmtime_component_valtype_delete(&resultType);
-						return ComponentHostError(
-							"component host returned a payload for a unit result");
 					} else {
-						componentResult = WasmValue::Record({
-							{"ok", WasmValue::Bool(true)},
-						});
+						wasmtime_component_valtype_t payloadType{};
+						const bool hasPayload = wasmtime_component_result_type_ok(
+							resultType.of.result, &payloadType);
+						if (hasPayload)
+							wasmtime_component_valtype_delete(&payloadType);
+						if (hasPayload) {
+							componentResult = WasmValue::Record({
+								{"ok", WasmValue::Bool(true)},
+								{"value", std::move(componentResult)},
+							});
+						} else if (!componentResult.IsUnit()) {
+							wasmtime_component_valtype_delete(&resultType);
+							return ComponentHostError(
+								"component host returned a payload for a unit result");
+						} else {
+							componentResult = WasmValue::Record({
+								{"ok", WasmValue::Bool(true)},
+							});
+						}
 					}
+				} else if (nativeError) {
+					wasmtime_component_valtype_delete(&resultType);
+					return ComponentHostError(
+						"native API error was returned for a non-result component function");
 				}
 				std::vector<WasmHandle> pendingTransfers;
 				const bool success = LowerComponentValue(componentResult, resultType,
@@ -1505,7 +1643,8 @@ bool WasmModule::Initialize(std::string& error)
 	cleanupCallbacks.clear();
 	faultReason.clear();
 	const WasmValidationResult validation = runtime.ValidateModule(
-		descriptor.bytes, descriptor.environment, WasmEnvironmentMatrix::Name(descriptor.environment));
+		descriptor.bytes, descriptor.environment, WasmEnvironmentMatrix::Name(descriptor.environment),
+		descriptor.interfaceVersion);
 	if (!validation.valid) {
 		error = validation.error;
 		Fault(error);

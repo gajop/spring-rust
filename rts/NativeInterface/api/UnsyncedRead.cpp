@@ -1,4 +1,6 @@
 #include "UnsyncedRead.h"
+
+#include "NativeInterface/WasmUiVisibility.h"
 #include <cstring>
 #include <cstdio>
 #include <algorithm>
@@ -298,7 +300,7 @@ static void NativeGetUnitNoDraw(const GetUnitNoDrawQuery* query, GetUnitNoDrawRe
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -318,7 +320,7 @@ static void NativeGetUnitLuaDraw(const GetUnitLuaDrawQuery* query, GetUnitLuaDra
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -338,7 +340,7 @@ static void NativeGetUnitEngineDrawMask(const GetUnitEngineDrawMaskQuery* query,
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -358,7 +360,7 @@ static void NativeGetUnitAlwaysUpdateMatrix(const GetUnitAlwaysUpdateMatrixQuery
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -378,7 +380,7 @@ static void NativeGetUnitDrawFlag(const GetUnitDrawFlagQuery* query, GetUnitDraw
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -398,7 +400,7 @@ static void NativeGetUnitNoSelect(const GetUnitNoSelectQuery* query, GetUnitNoSe
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -418,7 +420,7 @@ static void NativeGetUnitNoMinimap(const GetUnitNoMinimapQuery* query, GetUnitNo
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -438,7 +440,7 @@ static void NativeGetUnitNoGroup(const GetUnitNoGroupQuery* query, GetUnitNoGrou
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -458,7 +460,7 @@ static void NativeGetUnitViewPosition(const GetUnitViewPositionQuery* query, Get
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -486,7 +488,7 @@ static void NativeGetUnitTransformMatrix(const GetUnitTransformMatrixQuery* quer
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -517,7 +519,7 @@ static void NativeGetUnitSelectionVolumeData(const GetUnitSelectionVolumeDataQue
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -557,7 +559,7 @@ static void NativeGetUnitIconData(const GetUnitIconDataQuery* query, GetUnitIcon
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1062,7 +1064,7 @@ static void NativeIsUnitVisible(const IsUnitVisibleQuery* query, IsUnitVisibleRe
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1099,7 +1101,7 @@ static void NativeIsUnitInView(const IsUnitInViewQuery* query, IsUnitInViewResul
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1119,7 +1121,7 @@ static void NativeIsUnitIcon(const IsUnitIconQuery* query, IsUnitIconResult* res
 		return;
 	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1257,7 +1259,7 @@ static void NativeGetPieceProjectileName(const GetPieceProjectileNameQuery* quer
 	// Spring.GetPieceProjectileName is a synced Lua callout and receives the
 	// projectile's synced ID.  The native API is exposed through UnsyncedRead,
 	// but its lookup must still follow that Lua contract.
-	const CProjectile* proj = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	const CProjectile* proj = WasmUiVisibility::FindProjectile(query->projectileID);
 	if (proj == nullptr || !proj->piece) {
 		result->error = nullptr;
 		result->name = "";
@@ -1380,7 +1382,7 @@ static void NativeIsUnitSelected(const IsUnitSelectedQuery* query, IsUnitSelecte
 	result->error = nullptr;
 	result->selected = false;
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1395,7 +1397,7 @@ static void NativeIsUnitAllied(const IsUnitAlliedQuery* query, IsUnitAlliedResul
 	result->error = nullptr;
 	result->allied = false;
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1435,7 +1437,7 @@ static void NativeGetUnitPaletteIndex(const GetUnitPaletteIndexQuery* query, Get
 	result->customIndex = -1;
 	result->usingCustomColor = false;
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1454,7 +1456,7 @@ static void NativeGetFeaturePaletteIndex(const GetFeaturePaletteIndexQuery* quer
 	result->customIndex = -1;
 	result->usingCustomColor = false;
 
-	const CFeature* feature = featureHandler.GetFeature(query->featureID);
+	const CFeature* feature = WasmUiVisibility::FindFeature(query->featureID);
 	if (feature == nullptr) {
 		result->error = &INVALID_FEATURE_ERROR;
 		return;

@@ -10,8 +10,8 @@ TEST_CASE("Wasm module manifests parse deterministic declarations")
 {
 	const std::string text = R"(
 # game-side declaration
-module(game-rules, LuaRules/wasm/game.wasm, rules-synced, 2)
-module(map-gaia, LuaGaia/wasm/map.wasm, gaia-unsynced, 0)
+	module(game-rules, LuaRules/wasm/game.wasm, rules-synced, 2)
+	module(map-gaia, LuaGaia/wasm/map.wasm, gaia-unsynced, 0, 1.0.0)
       )";
 	std::vector<WasmModuleDeclaration> declarations;
 	std::string error;
@@ -22,6 +22,8 @@ module(map-gaia, LuaGaia/wasm/map.wasm, gaia-unsynced, 0)
 	CHECK(declarations[0].environment == WasmEnvironment::RulesSynced);
 	CHECK(declarations[0].order == 2);
 	CHECK(declarations[1].environment == WasmEnvironment::GaiaUnsynced);
+	CHECK(declarations[0].interfaceVersion == "1.0.0");
+	CHECK(declarations[1].interfaceVersion == "1.0.0");
 }
 
 TEST_CASE("Wasm module manifests reject malformed and duplicate declarations")
@@ -39,7 +41,31 @@ TEST_CASE("Wasm module manifests reject malformed and duplicate declarations")
 		"module(a|unsafe, a.wasm, rules-synced, 0)\n", declarations, error));
 	CHECK_FALSE(WasmModuleManifest::Parse(
 		"module(a, ./inside.wasm, rules-synced, 0)\n", declarations, error));
+	CHECK_FALSE(WasmModuleManifest::Parse(
+		"module(a, a.wasm, rules-synced, 0, 1.0)\n", declarations, error));
+	CHECK_FALSE(WasmModuleManifest::Parse(
+		"module(a, a.wasm, rules-synced, 0, 1.0.0-alpha)\n", declarations, error));
 	CHECK_FALSE(error.empty());
+}
+
+TEST_CASE("Wasm module manifests reject every host-path escape spelling")
+{
+	const std::vector<std::string> paths = {
+		"/absolute.wasm",
+		"\\absolute.wasm",
+		"C:/absolute.wasm",
+		"modules/../outside.wasm",
+		"modules//inside.wasm",
+		"modules/./inside.wasm",
+		"modules\\inside.wasm",
+	};
+	for (const auto& path : paths) {
+		std::vector<WasmModuleDeclaration> declarations;
+		std::string error;
+		CHECK_FALSE(WasmModuleManifest::Parse(
+			"module(a, " + path + ", rules-synced, 0)\n", declarations, error));
+		CHECK(error.find("outside the content archive") != std::string::npos);
+	}
 }
 
 TEST_CASE("Wasm module manifests bound declaration count")

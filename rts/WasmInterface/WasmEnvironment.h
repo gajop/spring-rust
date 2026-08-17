@@ -34,8 +34,8 @@ public:
 	static const char* Name(WasmEnvironment environment);
 	static bool Parse(std::string_view name, WasmEnvironment& environment);
 
-	// UI remains described by the generated model but is intentionally disabled
-	// until its Lua visibility/LOS semantics pass parity.
+	// UI is enabled only through the UI-specific host visibility context. It
+	// must not be treated as an unrestricted unsynced gadget world.
 	static bool IsRuntimeEnabled(WasmEnvironment environment);
 
 	// Return whether a generated C/WIT API module belongs in this world.

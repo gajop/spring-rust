@@ -1128,7 +1128,7 @@ mod tests {
             true,
         );
         assert!(read_environments.contains(&Environment::RulesUnsynced));
-        assert!(!read_environments.contains(&Environment::Ui));
+        assert!(read_environments.contains(&Environment::Ui));
     }
 
     #[test]

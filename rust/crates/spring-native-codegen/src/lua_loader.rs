@@ -202,10 +202,11 @@ impl LuaLoaderMatrix {
             result.retain(|environment| environment.is_synced());
         }
         if visibility_sensitive {
-            // LuaUI has materially different LOS/ally/typed read semantics.  Its
-            // Wasm world remains descriptive for now, but never inherits the full
-            // gadget read adapter by accident.
-            result.remove(&Environment::Ui);
+            // Visibility-sensitive reads are part of LuaUI's API surface too.
+            // Keep them in the UI world, where the engine-side adapter applies
+            // the LuaUI read-team/full-read/LOS policy.  This flag is metadata
+            // for that policy; it must not silently turn a real Lua loader
+            // registration into a missing Wasm import.
         }
         result
     }
@@ -216,11 +217,13 @@ impl LuaLoaderMatrix {
         module: &str,
         function: &str,
     ) -> BTreeSet<Environment> {
-        // UnitRendering is added by CLuaRules::AddUnsyncedCode, not by the
-        // ordinary LuaUI loader.  It therefore follows the two gadget draw
-        // environments only.
+        // The native surface groups LuaUnsyncedRead's rendering queries under
+        // UnitRendering, while LuaUI registers the complete
+        // LuaUnsyncedRead::PushEntries table too.  Keep the module's scope
+        // aligned with that loader registration; the UI visibility context
+        // applies the role-specific filtering at dispatch time.
         if module == "unit_rendering" {
-            return BTreeSet::from([Environment::RulesUnsynced, Environment::GaiaUnsynced]);
+            return unsynced_and_ui();
         }
 
         // RmlUi is part of the current in-game unsynced/UI path.  It is not a
@@ -464,8 +467,56 @@ mod tests {
         );
         assert_eq!(
             active_command,
-            BTreeSet::from([Environment::RulesUnsynced, Environment::GaiaUnsynced])
+            BTreeSet::from([
+                Environment::RulesUnsynced,
+                Environment::GaiaUnsynced,
+                Environment::Ui,
+            ])
         );
+
+        for (header, module, function) in [
+            (
+                "rts/NativeInterface/api/UnitsQuery.h",
+                "units_query",
+                "GetAllUnits",
+            ),
+            (
+                "rts/NativeInterface/api/UnitsInfo.h",
+                "units_info",
+                "GetUnitDefID",
+            ),
+            (
+                "rts/NativeInterface/api/Features.h",
+                "features",
+                "GetFeatureDefID",
+            ),
+            (
+                "rts/NativeInterface/api/Projectiles.h",
+                "projectiles",
+                "GetAllProjectiles",
+            ),
+        ] {
+            let environments = matrix.environments_for_function(
+                &root.join(header),
+                module,
+                function,
+                false,
+                true,
+            );
+            assert!(
+                environments.contains(&Environment::Ui),
+                "{module}::{function} must be available to LuaUI: {environments:?}"
+            );
+        }
+
+        let create_unit = matrix.environments_for_function(
+            &root.join("rts/NativeInterface/api/SyncedCtrl.h"),
+            "unit_control",
+            "CreateUnit",
+            true,
+            false,
+        );
+        assert!(!create_unit.contains(&Environment::Ui));
 
         let file_path = matrix.environments_for_function(
             &root.join("rts/NativeInterface/api/VFS.h"),

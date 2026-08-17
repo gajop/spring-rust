@@ -19,6 +19,9 @@ struct WasmModuleDescriptor {
 	std::string source;
 	WasmEnvironment environment = WasmEnvironment::RulesSynced;
 	std::uint32_t order = 0;
+	// Component interface version declared by the content package.  A missing
+	// manifest field is normalized to the current host version by the parser.
+	std::string interfaceVersion = std::string(RECOIL_WASM_INTERFACE_VERSION_NUMBER);
 	std::vector<std::uint8_t> bytes;
 	// Content archive that declared the module. Empty means the declaration
 	// came from the legacy single-source API.

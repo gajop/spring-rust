@@ -58,17 +58,17 @@ TEST_CASE("Wasm interface system keeps multiple instances deterministic")
 		.bytes = MinimalCoreModule(),
 	}, error));
 	CHECK(system.ModuleCount() == 3);
-	CHECK_FALSE(system.LoadModule({
+	REQUIRE(system.LoadModule({
 		.name = "ui-module",
 		.source = "ui.wasm",
 		.environment = WasmEnvironment::UI,
 		.bytes = MinimalCoreModule(),
 	}, error));
-	CHECK(system.ModuleCount() == 3);
+	CHECK(system.ModuleCount() == 4);
 
 	CHECK(system.UnloadModule("earlier"));
 	CHECK_FALSE(system.UnloadModule("earlier"));
-	CHECK(system.ModuleCount() == 2);
+	CHECK(system.ModuleCount() == 3);
 	system.UnloadAll();
 	CHECK(system.ModuleCount() == 0);
 }

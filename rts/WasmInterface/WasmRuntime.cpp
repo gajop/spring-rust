@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <limits>
 #include <sstream>
+#include <span>
 #include <utility>
 
 #include "System/Sync/SHA512.hpp"
@@ -151,6 +152,74 @@ namespace {
 	{
 		return bytes.size() >= 8 && bytes[4] == 0x0d && bytes[5] == 0x00 &&
 			bytes[6] == 0x01 && bytes[7] == 0x00;
+	}
+
+	struct ComponentBinaryReader {
+		std::span<const std::uint8_t> bytes;
+		std::size_t offset = 0;
+
+		bool ReadByte(std::uint8_t& value)
+		{
+			if (offset >= bytes.size())
+				return false;
+			value = bytes[offset++];
+			return true;
+		}
+
+		bool ReadLeb(std::uint64_t& value)
+		{
+			value = 0;
+			for (unsigned shift = 0; shift < 64; shift += 7) {
+				std::uint8_t byte = 0;
+				if (!ReadByte(byte))
+					return false;
+				if (shift == 63 && byte > 1)
+					return false;
+				value |= static_cast<std::uint64_t>(byte & 0x7f) << shift;
+				if ((byte & 0x80) == 0)
+					return true;
+			}
+			return false;
+		}
+	};
+
+	bool ValidateComponentBinaryNesting(std::span<const std::uint8_t> bytes,
+		std::uint32_t maximum, std::string& error)
+	{
+		std::vector<std::pair<std::span<const std::uint8_t>, std::uint32_t>> pending;
+		pending.emplace_back(bytes, 0);
+		while (!pending.empty()) {
+			const auto [component, depth] = pending.back();
+			pending.pop_back();
+			if (component.size() < 8 || component[0] != 0x00 || component[1] != 'a' ||
+				component[2] != 's' || component[3] != 'm' || component[4] != 0x0d ||
+				component[5] != 0x00 || component[6] != 0x01 || component[7] != 0x00) {
+				error = "invalid nested Wasm Component Model binary";
+				return false;
+			}
+
+			ComponentBinaryReader reader{component, 8};
+			while (reader.offset < component.size()) {
+				std::uint8_t sectionID = 0;
+				std::uint64_t sectionSize = 0;
+				if (!reader.ReadByte(sectionID) || !reader.ReadLeb(sectionSize) ||
+					sectionSize > component.size() - reader.offset) {
+					error = "invalid nested Wasm Component Model section";
+					return false;
+				}
+				const auto payload = component.subspan(reader.offset,
+					static_cast<std::size_t>(sectionSize));
+				reader.offset += static_cast<std::size_t>(sectionSize);
+				if (sectionID != 4)
+					continue;
+				if (depth >= maximum) {
+					error = "Wasm Component Model nesting exceeds configured maximum";
+					return false;
+				}
+				pending.emplace_back(payload, depth + 1);
+			}
+		}
+		return true;
 	}
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -414,6 +483,10 @@ namespace {
 			error = "invalid Wasm Component Model binary: " + WasmtimeErrorMessage(compileError);
 			return false;
 		}
+		if (!ValidateComponentBinaryNesting(bytes, config.maxComponentNesting, error)) {
+			wasmtime_component_delete(component);
+			return false;
+		}
 		auto* type = wasmtime_component_type(component);
 		if (type == nullptr) {
 			wasmtime_component_delete(component);
@@ -553,7 +626,8 @@ void* WasmRuntime::BackendEngine() const
 }
 
 WasmValidationResult WasmRuntime::ValidateModule(const std::vector<std::uint8_t>& bytes,
-	WasmEnvironment environment, std::string_view requestedWorld) const
+	WasmEnvironment environment, std::string_view requestedWorld,
+	std::string_view requestedInterfaceVersion) const
 {
 	WasmValidationResult result;
 	result.identity.byteSize = bytes.size();
@@ -569,6 +643,12 @@ WasmValidationResult WasmRuntime::ValidateModule(const std::vector<std::uint8_t>
 	}
 	if (requestedWorld != WasmEnvironmentMatrix::Name(environment)) {
 		result.error = "module world does not match its execution environment";
+		return result;
+	}
+	if (requestedInterfaceVersion != RECOIL_WASM_INTERFACE_VERSION_NUMBER) {
+		result.error = "unsupported Wasm interface version: " +
+			std::string(requestedInterfaceVersion) +
+			" (host supports " + std::string(RECOIL_WASM_INTERFACE_VERSION_NUMBER) + ")";
 		return result;
 	}
 	if (bytes.size() < 8 || bytes[0] != 0x00 || bytes[1] != 'a' || bytes[2] != 's' || bytes[3] != 'm') {

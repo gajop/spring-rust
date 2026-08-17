@@ -22,14 +22,19 @@ DEFERRED
 TODO-ENGINE
     Separate engine or third-party teardown work, outside Wasm scope.
 
+UNVERIFIED-EXTERNAL
+    Implemented and locally checked, but platform/CI execution is unavailable
+    on this host.
+
 Current snapshot
 ----------------
 
-The non-deferred implementation and the Linux validation path are complete.
-The required ASAN Docker build, full CTest suite, Rust/codegen checks, native
-and Wasm parity runs, and rendering/callin checks all pass. VERIFY below is
-reserved for platform execution that this x86_64 host cannot perform; it does
-not identify unfinished Wasm code.
+The core runtime, generator, visibility layer, all five environments, and
+parity harness are implemented. Phases 0–9 have passed their local gates,
+including UI runtime parity, the five-context Wasm matrix, rendering parity,
+the non-ASAN frame-budget gate, and the final ASAN build/CTest run. Phase 10
+has its local implementation and Linux build gates complete; platform/CI
+execution remains host-limited validation, not a design deferral.
 
 Phase 0 — baseline generator/tests       DONE
 -----------------------------------------
@@ -63,8 +68,9 @@ Phase 2 — Wasmtime/Component proof       DONE
   NaN canonicalization is enabled and included in runtime identity.
 * Production Component callable imports are checked against generated callout
   inventory. Named Component type exports are accepted as non-callable types.
-* The ASAN CTest run passes all 713 `test_WasmInterface` assertions and the
-  isolated allocator re-entry, trap, and fuel tests.
+* The ASAN CTest run passes 38/38 registered tests; `test_WasmInterface`
+  passes 774 assertions in 35 cases, and the isolated allocator re-entry,
+  trap, and fuel tests pass 5, 5, and 6 assertions.
 * Component resource transfer validates all pending fields before committing
   ownership; the focused fixture covers valid, invalid, stale, and
   post-failure resource use.
@@ -72,8 +78,8 @@ Phase 2 — Wasmtime/Component proof       DONE
 Phase 3 — WIT/callouts/worlds          DONE
 --------------------------------------
 
-* Rules/Gaia synced and unsynced worlds are generated from the canonical
-  model. The UI world is described but disabled by the original design.
+* Rules/Gaia synced and unsynced worlds, plus the UI world, are generated from
+  the canonical model. UI runtime loading is enabled in Phase 8.
 * All generated and reviewed manual callouts are represented in the registry;
   manual entries reach explicit native fallback code.
 * Environment capability checks run before instantiation and at registration.
@@ -123,31 +129,37 @@ Phase 7 — sandbox/sync                  DONE
   arm64/Windows executions remain CI-only because of the host/image limits
   recorded below.
 
-Phase 8 — Lua/native/Wasm parity       DONE
+Phase 8 — LuaUI environment            DONE
 --------------------------------------
+
+* LuaUI loads an optional LuaUI/wasm/manifest.txt and dispatches the UI world.
+* UI host callins receive an owned, visibility-filtered copy under the local
+  player/team/ally-team context, including degraded attacker and LOS/radar
+  fields.
+* The UI probe is generated from the widget metadata: 56 selected rows account
+  for all 66 widget rows. Seven mutating order calls, two expected-error rows,
+  and one rendering-only control are explicit exclusions.
+* UI WIT, Rust bindings, probe source, and component compile successfully.
+* The scripted UI runtime comparison passes 56/56 typed rows with zero vacuous
+  rows, and the rendering parity run covers the widget stream and UI callins.
+* UI visibility, degraded-value, local-context, and callin filtering checks
+  pass in the generated fixture and the full rendering harness.
+
+Phase 9 — Full Lua/native/Wasm parity DONE
+-------------------------------------
 
 * Native/Wasm normalized signatures, the archive-loaded Wasm fixture, the
   observation stream, and the parity harness are implemented.
-* Final native/Lua headless parity passes with streams 636/636, 180/180, and
-  71/71. Rendering parity passes with streams 638/638, 285/285, and 101/101.
-* The rendering run covers all 149 deterministic callbacks on both sides with
-  matching arguments and returns, plus all Gfx/Rml checks.
-* Final Wasm parity passes synced 314/314, unsynced 81/81, and rendering
-  unsynced 81/81 typed probes. All runs report zero vacuous rows and pass
-  fixture discovery and deterministic Component observations.
-* The final runs use only the scripted fixture and automatic quit path; no
-  mouse, keyboard, or ad-hoc process control is part of the gate.
+* The five-context matrix is wired: Rules synced/unsynced, Gaia
+  synced/unsynced, and UI.
+* Final typed probes pass with zero vacuous rows: 106 unsynced gadget, 342
+  synced gadget, 342 Gaia synced, 106 Gaia unsynced, and 56 UI rows.
+* Rendering-enabled Lua/native parity passes with synced 1,854/1,854,
+  unsynced 841/841, widget 231/231, all 149 deterministic callins covered on
+  both sides, and all Gfx/RmlUi checks passing.
+* This phase is an original-plan deliverable and is not DEFERRED.
 
-Phase 9 — LuaUI environment           DEFERRED
--------------------------------------
-
-* LuaUI Wasm runtime loading remains disabled by the original design.
-* The design requires LuaUI local-player visibility, LOS/radar,
-  degraded-value semantics, UI callins, and LuaUI↔Wasm RmlUi parity before
-  enabling this environment. This is an intentional future phase, not an
-  unfinished Phase 0–8 implementation item.
-
-Phase 10 — CI/build/release            VERIFY
+Phase 10 — CI/build/release            UNVERIFIED-EXTERNAL
 ---------------------------------------
 
 * CMake wiring, Wasmtime acquisition, generator/snapshot checks, Rust guests,
@@ -158,33 +170,33 @@ Phase 10 — CI/build/release            VERIFY
   supplied image.
 * The x86_64 host cannot execute the arm64 Docker image; native arm64 CI is the
   appropriate execution gate.
-* The Linux ASAN CTest and static verification pass. The committed workflow
-  files provide the remaining arm64/Windows synced parity matrix; those jobs
-  are CI-only validation, not missing local implementation.
+* The exact Linux ASAN build and full CTest pass, and the non-ASAN RELEASE
+  `wasm-performance` target passes the frame-derived budgets.
+* The committed workflow files provide the arm64/Windows synced parity matrix.
+  Those external jobs are not executable on this host; this is validation
+  pending for committed platform code, not missing local implementation.
 
 Verification record
 -------------------
 
 Observed in the current pass:
 
-* `./docker-build-v2/build.sh linux -DUSE_ASAN=ON` — PASS.
-* `./docker-build-v2/build.sh --compile linux -t check` — 38/38 CTest entries
-  PASS.
-* `cargo fmt --manifest-path rust/Cargo.toml --all --check` and
-  `cargo test --manifest-path rust/Cargo.toml --workspace` — PASS.
-* `python3 rts/wasm/verify_codegen.py` — PASS; 55 modules, 1,353 functions,
-  zero unsupported functions, and reproducible generated probe output.
-* `python3 rust/crates/spring-native-codegen/snapshot_native.py --check` and
-  Python syntax checks — PASS.
-* Native/Lua and Wasm parity reports listed under Phase 8 — PASS.
-* Windows engine-headless cross-build/package with tests disabled — PASS.
+* verify_codegen.py — PASS after UI integration; 55 modules, 1,353 functions,
+  zero unsupported functions, and reproducible probes for all five contexts.
+* All five parity guest components compile, including the UI component.
+* Python syntax checks and generated-artifact diff checks — PASS.
+* The exact ASAN Docker build and full CTest pass after the final UI/probe
+  changes.
+* Native/Lua parity, all five Wasm contexts, rendering parity, and the
+  non-ASAN performance gate pass after the final generated artifacts.
+* Windows engine-headless cross-build/package with tests disabled — PASS in the
+  earlier platform pass.
 * arm64 runtime and Windows runtime/ASAN CTest — not executable on this host;
   CI-only.
 
 Explicit design deferrals
 -------------------------
 
-* LuaUI runtime loading and its role-specific parity work.
 * WASI/general operating-system imports.
 * Content-supplied AOT deserialization.
 * Native opaque archive pointers in Wasm payloads.
@@ -202,17 +214,13 @@ issues, outside the Wasm implementation; remove them when ownership is fixed.
 Remaining-work estimate
 -----------------------
 
-For the non-deferred local scope, there is no remaining implementation work.
-The only follow-up validation is external platform execution, not another
-1,000-function handwritten implementation:
+No required local implementation or test work remains. The arm64/Windows CI
+jobs are the only remaining validation actions because their execution
+environments are unavailable on this host.
 
-1. Run the committed cross-platform workflow on its arm64 Linux and Windows
-   runners when engine artifacts are available.
-2. Address the separate FreeType and SDL/OpenAL teardown TODOs in the engine.
-
-There is no remaining non-deferred Wasm implementation task in this worktree.
-Spring runtime validation was performed through the existing scripted harness;
-no interactive input or ad-hoc process control was used.
+The separate FreeType and SDL/OpenAL teardown entries remain engine TODOs.
+No interactive input was used; no Spring process was launched during this
+bookkeeping pass.
 
 AI disclosure
 -------------

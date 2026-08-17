@@ -16,11 +16,11 @@ The initial model follows the existing Lua roles.
 | Rules unsynced | No | LuaRules unsynced half |
 | Gaia synced | Yes | LuaGaia synced half |
 | Gaia unsynced | No | LuaGaia unsynced half |
-| UI | No | LuaUI |
+| UI | No | LuaUI, with local-player visibility semantics |
 
-First milestone: the four Rules/Gaia environments.
-
-LuaUI remains a target, but is enabled later because it has role-specific restricted-read/LOS semantics that the gadget environments do not.
+The first implementation stage covered the four Rules/Gaia environments.
+Phase 8 then enables the UI environment with its role-specific restricted-read
+and LOS semantics before the Phase 9 parity gate.
 
 Out of scope:
 
@@ -61,7 +61,7 @@ For map-shipped game logic, LuaGaia is the precedent: map content already has a 
 
 LuaUI is the one in-game role whose read semantics differ materially from Rules/Gaia.
 
-Do not enable the UI environment by reusing full-read gadget adapters.
+Do not implement the UI environment by reusing full-read gadget adapters.
 
 Before enabling it:
 
@@ -70,7 +70,11 @@ Before enabling it:
 3. extend the parity fixture to multiple ally teams and LOS/radar states;
 4. pass Lua ↔ Wasm parity for those cases.
 
-Until then, the WIT/model can describe the UI world, but runtime loading remains disabled.
+The UI world is now runtime-enabled through LuaUI/wasm/manifest.txt.
+Its host dispatch uses an owned, visibility-filtered payload and a LuaUI
+visibility context; the generated UI parity component exercises the widget
+surface. The final scripted runtime result remains a Phase 9 verification
+gate, rather than an original-design deferral.
 
 ## Module discovery
 

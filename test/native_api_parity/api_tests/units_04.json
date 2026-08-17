@@ -461,14 +461,14 @@
         "set": {
           "call": "Spring.SetUnitMetalExtraction",
           "args": [
-            "fixture.unitID",
+            "fixture.extractorUnitID",
             "value.depth",
             "value.range"
           ]
         },
         "call": "Spring.GetUnitMetalExtraction",
         "args": [
-          "fixture.unitID"
+          "fixture.extractorUnitID"
         ],
         "returns": [
           "metalExtraction"

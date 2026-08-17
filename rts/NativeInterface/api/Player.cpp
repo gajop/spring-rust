@@ -1,5 +1,7 @@
 #include "Player.h"
 
+#include "NativeInterface/WasmUiVisibility.h"
+
 #include <cstdlib>
 #include <cstring>
 

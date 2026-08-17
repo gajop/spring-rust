@@ -41,6 +41,7 @@ CONTEXT_SOURCE = {
     "unsynced_gadget": "unsynced_gadget",
     "gaia_synced": "synced_gadget",
     "gaia_unsynced": "unsynced_gadget",
+    "ui": "widget",
 }
 
 CONTEXT_WORLD = {
@@ -48,6 +49,7 @@ CONTEXT_WORLD = {
     "unsynced_gadget": "rules-unsynced",
     "gaia_synced": "gaia-synced",
     "gaia_unsynced": "gaia-unsynced",
+    "ui": "ui",
 }
 
 
@@ -58,6 +60,8 @@ MODULE_BY_NATIVE_CLASS = {
     "UnitsCommands": "units_commands",
     "UnitsPieces": "units_pieces",
     "Teams": "teams",
+    "Input": "input",
+    "Selection": "selection",
     "Features": "features",
     "Projectiles": "projectiles",
     "Los": "los",
@@ -72,6 +76,7 @@ MODULE_BY_NATIVE_CLASS = {
     "MetalMap": "metal_map",
     "PathFinder": "path_finder",
     "Platform": "platform",
+    "SystemControl": "system_control",
     "RulesParams": "rules_params",
     "MoveCtrl": "move_ctrl",
     "Messages": "messages",
@@ -90,6 +95,7 @@ MODULE_BY_NATIVE_CLASS = {
     "GameConfig": "game_config",
     "CobScript": "cob_script",
     "UnsyncedRead": "unsynced_read",
+    "UnsyncedCtrl": "unsynced_ctrl",
     "UnitRendering": "unit_rendering",
 }
 
@@ -209,6 +215,7 @@ RUST_KEYWORDS = {
 
 FIXTURE_FIELDS = {
     "unitID": "unit_id",
+    "extractorUnitID": "extractor_unit_id",
     "featureID": "feature_id",
     "projectileID": "projectile_id",
     "pieceProjectileID": "piece_projectile_id",
@@ -534,6 +541,15 @@ def output_index_for_field(
         if output["type"].get("kind") == "record":
             if record_path(output["type"], desired, records) is not None:
                 return index
+            # Flattened vector fields such as camPosX and dirZ identify the
+            # containing output by the prefix before their final axis.
+            flattened = snake(desired)
+            axis = flattened[-1:] if flattened and flattened[-1] in "xyzw" else ""
+            prefix = flattened[:-1].rstrip("_") if axis else ""
+            if axis and prefix == snake(output["name"]):
+                record_info = records.get(output["type"].get("name"), {})
+                if records_field(record_info, axis) is not None:
+                    return index
     if explicit_index is not None:
         return explicit_index - 1
     if 0 <= return_index < len(outputs):
@@ -620,6 +636,10 @@ def projection_record_path(
         resolved_path = ["counts"]
     elif record_name == "AllyTeamInfo" and field_name == "count":
         resolved_path = ["keys"]
+    elif record_name == "SelectionCounts" and field_name == "defCount":
+        # Lua returns the number of distinct definition keys as the second
+        # result; the native record retains those keys explicitly.
+        resolved_path = ["unitDefIDs"]
     elif record_name == "ProjectileTarget" and field_name in {
         "targetX",
         "targetY",
@@ -633,6 +653,16 @@ def projection_record_path(
         resolved_path = ["targetPos", field_name[-1].lower()]
     elif record_name == "WindData" and field_name == "windStrength":
         resolved_path = ["current"]
+
+    # Lua flattens named camera/direction vectors returned by input APIs into
+    # fields such as camPosX and dirZ, while the semantic ABI keeps each
+    # vector as a Float2/Float3 record.
+    if record_name in {"Float2", "Float3"}:
+        flattened = snake(field_name)
+        axis = flattened[-1:] if flattened and flattened[-1] in "xyzw" else ""
+        base = flattened[:-1].rstrip("_") if axis else ""
+        if axis and base in {"cam_pos", "camera_pos", "dir", "direction", "position"}:
+            resolved_path = [axis]
 
     return record_path(
         type_info,
@@ -658,7 +688,9 @@ def output_projection(
     for post_runtime in runtime.get("post", []):
         returns.extend(post_runtime.get("returns", []))
     if not returns:
-        return None
+        # A no-return native operation is still a useful parity row when the
+        # Lua contract also has no return values (for example VFS.ScanAllDirs).
+        return [] if not test.get("compare", {}).get("fields") else None
     outputs = function["outputs"]
     projected = []
     for return_index, return_info in enumerate(returns):
@@ -721,6 +753,20 @@ def output_projection(
             expression = f"value.{rust_identifier(output['name'])}"
         type_info = output["type"]
         optional = False
+
+        # Some Lua APIs return several scalar values while the native
+        # semantic model represents the same values as one list. Project the
+        # requested positional element instead of serializing the whole list
+        # once for every flattened Lua field.
+        if (
+            len(outputs) == 1
+            and type_info.get("kind") in {"list", "fixed-array"}
+            and len(returns) > 1
+            and not path
+            and explicit_index is None
+        ):
+            type_info = type_info["element"]
+            expression = f"{expression}.get({return_index}).copied().unwrap_or_default()"
 
         if type_info.get("kind") == "record":
             resolved = projection_record_path(
@@ -827,6 +873,7 @@ def output_projection(
                     "unit_def_counts",
                     "unit_def_unit_groups",
                     "start_positions",
+                    "nested_unit_ids",
                 }:
                     return None
             elif type_info.get("kind") == "bytes":
@@ -880,12 +927,24 @@ def output_projection(
             type_info = {"kind": "scalar", "name": "i32"}
             expression = expression
         elif transform == "return_count":
-            # Lua control calls in this parity surface return no values.  The
-            # native counterparts report a success boolean, so the semantic
-            # comparison field is the Lua result arity rather than that
-            # implementation detail.
+            # A control-only Lua call has no return values, while a
+            # setter/getter row uses this transform for the getter's Lua
+            # arity.  The native model keeps the getter's individual outputs,
+            # so its output count is the independent source for the latter.
             type_info = {"kind": "scalar", "name": "u32"}
-            expression = "0u32"
+            setter = runtime.get("set")
+            setter_call = None
+            if isinstance(setter, dict):
+                setter_call = setter.get("call")
+            elif isinstance(setter, list) and len(setter) == 1 and isinstance(setter[0], dict):
+                setter_call = setter[0].get("call")
+            getter_call = runtime.get("call")
+            getter_has_distinct_call = (
+                setter_call is not None
+                and getter_call is not None
+                and setter_call != getter_call
+            )
+            expression = f"{len(outputs)}u32" if getter_has_distinct_call else "0u32"
         elif transform not in {None, "return_count"}:
             return None
 
@@ -906,7 +965,7 @@ def supported_output(test: dict, function: dict, records: dict[str, dict]) -> st
     if not all(type_supported_by_probe(output["type"], records) for output in function["outputs"]):
         return None
     projection = output_projection(test, function, records)
-    return "projected" if projection else None
+    return "projected" if projection is not None else None
 
 
 def load_tests() -> list[dict]:
@@ -1058,6 +1117,27 @@ def candidate_expression(
         return None, str(arg), arg, "int"
     if isinstance(arg, float):
         return None, repr(arg), arg, "float"
+    if isinstance(arg, list):
+        rendered = []
+        for item in arg:
+            candidate = candidate_expression(item, test, deterministic_values)
+            if candidate[1] is None:
+                return None, None, None, None
+            rendered.append(candidate[1])
+        return None, "vec![" + ", ".join(rendered) + "]", arg, "local"
+    if isinstance(arg, dict):
+        # Lua map spellings are lowered to the native list-of-IDs semantic
+        # input for selection controls. The affected comparisons are
+        # order-insensitive, so the metadata iteration order is sufficient.
+        rendered = []
+        for key, enabled in arg.items():
+            if enabled is not True:
+                continue
+            candidate = candidate_expression(key, test, deterministic_values)
+            if candidate[1] is None:
+                return None, None, None, None
+            rendered.append(candidate[1])
+        return None, "vec![" + ", ".join(rendered) + "]", arg, "local"
     if not isinstance(arg, str):
         return None, None, None, None
     if arg == "nil":
@@ -1343,10 +1423,10 @@ def candidate_to_type(
         element = {"kind": "scalar", "name": "u8"} if kind == "bytes" else type_info["element"]
         if isinstance(raw, str) and element.get("kind") == "scalar" and element.get("name") == "u8":
             return f"({expression}).as_bytes().to_vec()"
-        if isinstance(raw, list):
-            return rust_typed_expression(raw, type_info, module, records)
         if declared_type == "local" or expression.startswith("local_"):
             return expression
+        if isinstance(raw, list):
+            return rust_typed_expression(raw, type_info, module, records)
         scalar = candidate_to_type(candidate, element, module, records, string_borrowed=False)
         if scalar is None:
             return None
@@ -1456,7 +1536,10 @@ def build_input_expression(
         element = {"kind": "scalar", "name": "u8"} if kind == "bytes" else type_info["element"]
         collected = []
         for index, candidate in enumerate(candidates):
-            if index in used or candidate[0] is None or snake(candidate[0]) in {snake(key) for key in future_keys}:
+            if index in used or (
+                candidate[0] is not None
+                and snake(candidate[0]) in {snake(key) for key in future_keys}
+            ):
                 continue
             expression = candidate_to_type(candidate, element, module, records)
             if expression is not None:
@@ -1604,32 +1687,135 @@ def select_tests(
     context: str = "synced_gadget",
     include_rendering: bool = False,
 ) -> list[tuple[dict, str, str, dict, list[str]]]:
+    selected, _coverage = select_tests_with_coverage(
+        functions, records, context, include_rendering
+    )
+    return selected
+
+
+SELECTION_EXCLUSION_REASONS = {
+    "deferred",
+    "unsupported_kind",
+    "native_only",
+    "expect_error",
+    "rendering_disabled",
+    "no_lua_runtime",
+    "no_native_function",
+    "mutating_getter_or_unsupported",
+    "unresolved_setter",
+    "unsupported_output",
+    "unresolved_args",
+}
+
+
+def select_tests_with_coverage(
+    functions: dict[tuple[str, str], dict],
+    records: dict[str, dict],
+    context: str = "synced_gadget",
+    include_rendering: bool = False,
+) -> tuple[
+    list[tuple[dict, str, str, dict, list[str]]],
+    dict,
+]:
+    """Select portable probes and account for every canonical test row.
+
+    A Wasm probe is intentionally smaller than the full Lua/native fixture:
+    custom hooks, error-only tests, rendering-only tests, and rows without a
+    generated semantic counterpart cannot be emitted into this one typed WIT
+    world.  The important property is that those rows are visible in the
+    generated manifest with a reason.  A future API row therefore cannot
+    disappear merely because a new selector branch forgot to handle it.
+    """
     source_context = CONTEXT_SOURCE[context]
-    selected = []
+    selected: list[tuple[dict, str, str, dict, list[str]]] = []
+    entries = []
+    seen_ids: set[str] = set()
     for test in load_tests():
+        test_id = test.get("id")
+        if not test_id or test_id in seen_ids:
+            raise ValueError(f"duplicate or missing canonical parity test id: {test_id!r}")
+        seen_ids.add(test_id)
         if test.get("context") != source_context:
             continue
-        if test.get("kind") != "readonly" or test.get("deferred"):
-            continue
-        if test.get("native_only") or test.get("expect_error"):
-            continue
-        if (test.get("requires_rendering") and not include_rendering) or test.get("lua_runtime") is None:
-            continue
-        native = native_function(test, functions)
-        if native is None:
-            continue
-        module, function_name, function = native
-        if function.get("mutating") or function.get("status") == "unsupported":
-            continue
-        output_family = supported_output(test, function, records)
-        if output_family is None:
-            continue
-        returns = test["lua_runtime"].get("returns", [])
-        arguments = probe_arguments(test, function, records, module)
-        if arguments is None:
-            continue
-        selected.append((test, module, function_name, function, arguments))
-    return selected
+        reason = None
+        selected_entry = None
+
+        # The Wasm probe deliberately excludes custom/native-only/error-only
+        # rows, but it must cover both readonly APIs and portable
+        # setter/getter APIs.  Mutability belongs to the setter operation; the
+        # getter selected below must itself remain a read operation.
+        if test.get("deferred"):
+            reason = "deferred"
+        elif test.get("kind") not in {"readonly", "setter_getter"}:
+            reason = "unsupported_kind"
+        elif test.get("native_only"):
+            reason = "native_only"
+        elif test.get("expect_error"):
+            reason = "expect_error"
+        elif test.get("requires_rendering") and not include_rendering:
+            reason = "rendering_disabled"
+        elif test.get("lua_runtime") is None:
+            reason = "no_lua_runtime"
+        else:
+            native = native_function(test, functions)
+            if native is None:
+                reason = "no_native_function"
+            else:
+                module, function_name, function = native
+                if function.get("mutating") or function.get("status") == "unsupported":
+                    reason = "mutating_getter_or_unsupported"
+                elif (
+                    test.get("kind") == "setter_getter"
+                    and wasm_set_operations(test, functions, records) is None
+                ):
+                    # Resolve this even though render_rust() repeats the
+                    # lookup.  A failed lookup is an explicit
+                    # non-portable/custom row, not a silently vacuous Wasm
+                    # result.
+                    reason = "unresolved_setter"
+                elif supported_output(test, function, records) is None:
+                    reason = "unsupported_output"
+                else:
+                    arguments = probe_arguments(test, function, records, module)
+                    if arguments is None:
+                        reason = "unresolved_args"
+                    else:
+                        selected_entry = (test, module, function_name, function, arguments)
+
+        if selected_entry is not None:
+            selected.append(selected_entry)
+            reason = "selected"
+        if reason not in SELECTION_EXCLUSION_REASONS and reason != "selected":
+            raise ValueError(f"unclassified Wasm probe selection result for {test_id}: {reason}")
+        entries.append({"id": test_id, "kind": test.get("kind"), "status": reason})
+
+    context_entries = [entry for entry in entries if entry["id"] in seen_ids]
+    excluded = {
+        reason: [entry["id"] for entry in context_entries if entry["status"] == reason]
+        for reason in sorted(SELECTION_EXCLUSION_REASONS)
+        if any(entry["status"] == reason for entry in context_entries)
+    }
+    coverage = {
+        "source_context": source_context,
+        "source_test_count": len(context_entries),
+        "selected_count": len(selected),
+        "selected_kind_counts": {
+            kind: sum(
+                entry["status"] == "selected" and entry["kind"] == kind
+                for entry in context_entries
+            )
+            for kind in ("readonly", "setter_getter")
+        },
+        "selected_ids": [entry["id"] for entry in context_entries if entry["status"] == "selected"],
+        "excluded": excluded,
+    }
+    if coverage["source_test_count"] != coverage["selected_count"] + sum(
+        len(ids) for ids in excluded.values()
+    ):
+        raise ValueError(
+            f"Wasm probe coverage does not account for every {source_context} test"
+        )
+    return selected, coverage
 
 
 def render_type_record(record: dict) -> list[str]:
@@ -1648,8 +1834,12 @@ def render_wit(
 ) -> str:
     world = CONTEXT_WORLD[context]
     by_module: dict[str, list[dict]] = {}
-    for _, module, _, function, _ in selected:
+    for test, module, _, function, _ in selected:
         by_module.setdefault(module, []).append(function)
+        for setter_module, _setter_name, setter_function, _setter_arguments in wasm_set_operations(
+            test, functions, records
+        ) or []:
+            by_module.setdefault(setter_module, []).append(setter_function)
 
     setup = {
         ("messages", "SendLuaRulesMsg"),
@@ -1742,7 +1932,11 @@ def render_wit(
                 for input_info in function["inputs"]
             )
             outputs = function["outputs"]
-            if len(outputs) == 1:
+            if len(outputs) == 0:
+                # WIT's `_` result means a successful unit value.  There is
+                # no named `unit` type in WIT.
+                result_type = "_"
+            elif len(outputs) == 1:
                 result_type = wit_type(outputs[0]["type"])
             else:
                 result_type = f"{kebab(function['name'])}-value"
@@ -1911,6 +2105,59 @@ def runtime_call_target(
     return (module, snake(function_name), function) if function is not None else None
 
 
+def runtime_set_specs(test: dict) -> list[dict]:
+    """Return the canonical Lua setter sequence in normalized list form."""
+    setter = test.get("lua_runtime", {}).get("set")
+    if setter is None:
+        return []
+    if isinstance(setter, dict):
+        return [setter]
+    if isinstance(setter, list) and all(isinstance(item, dict) for item in setter):
+        return setter
+    return []
+
+
+def wasm_set_operations(
+    test: dict,
+    functions: dict[tuple[str, str], dict],
+    records: dict[str, dict],
+) -> list[tuple[str, str, dict, list[str]]] | None:
+    """Resolve a parity setter sequence to generated NativeInterface calls.
+
+    The parity spec describes the Lua operation and the native operation
+    independently.  Wasm must use the native semantic operation, but it uses
+    the same deterministic argument descriptions as the Lua reference.  A
+    sequence is rejected unless both descriptions have the same arity and
+    every setter has a generated model entry.
+    """
+    native_setters = test.get("native", {}).get("set", [])
+    if not native_setters:
+        return []
+    if not isinstance(native_setters, list):
+        return None
+    lua_setters = runtime_set_specs(test)
+    if len(native_setters) != len(lua_setters):
+        return None
+
+    operations = []
+    for native_name, lua_spec in zip(native_setters, lua_setters):
+        target = runtime_call_target(native_name, functions)
+        if target is None:
+            return None
+        module, function_name, function = target
+        arguments = probe_arguments(
+            test,
+            function,
+            records,
+            module,
+            arg_specs=lua_spec.get("args", []),
+        )
+        if arguments is None:
+            return None
+        operations.append((module, function_name, function, arguments))
+    return operations
+
+
 def record_list_types(
     selected: list[tuple[dict, str, str, dict, list[str]]],
     records: dict[str, dict],
@@ -1978,7 +2225,7 @@ def render_record_list_helper(module: str, record_name: str, record: dict) -> li
             expression = f"value.{rust_identifier(name)}"
             type_info = field["type"]
             if type_info["kind"] == "string":
-                value = f'{expression}.bytes().map(|byte| format!("{{byte:02x}}")).collect::<String>()'
+                value = f'encode_string_bytes(&{expression})'
                 fragments.append(f'format!("{name}:s:{{}}", {value})')
             elif type_info["name"] == "bool":
                 fragments.append(f'format!("{name}:b:{{}}", if {expression} {{ "1" }} else {{ "0" }})')
@@ -2038,13 +2285,27 @@ def render_rust(
     lines = [
         "// @generated by generate_probe.py; do not edit.",
         "",
+        "fn encode_string_bytes(value: &str) -> String {",
+        "    let mut encoded = String::new();",
+        "    for character in value.chars() {",
+        "        let code_point = character as u32;",
+        "        if code_point <= 0xff {",
+        "            encoded.push_str(&format!(\"{code_point:02x}\"));",
+        "        } else {",
+        "            let mut buffer = [0u8; 4];",
+        "            encoded.extend(character.encode_utf8(&mut buffer).bytes().map(|byte| format!(\"{byte:02x}\")));",
+        "        }",
+        "    }",
+        "    encoded",
+        "}",
+        "",
         "fn encode_string(field: &str, value: &str) -> String {",
-        "    let hex: String = value.bytes().map(|byte| format!(\"{byte:02x}\")).collect();",
+        "    let hex = encode_string_bytes(value);",
         "    format!(\"{field}|s|{hex}\")",
         "}",
         "",
         "fn encode_string_list(field: &str, values: &[String]) -> String {",
-        "    let encoded = values.iter().map(|value| value.bytes().map(|byte| format!(\"{byte:02x}\")).collect::<String>()).collect::<Vec<_>>().join(\",\");",
+        "    let encoded = values.iter().map(|value| encode_string_bytes(value)).collect::<Vec<_>>().join(\",\");",
         "    format!(\"{field}|ls|{encoded}\")",
         "}",
         "",
@@ -2138,7 +2399,7 @@ def render_rust(
             "fn encode_optional_string(field: &str, value: Option<&str>) -> String {",
             '    match value {',
             '        Some(value) => {',
-            '            let encoded: String = value.bytes().map(|byte| format!("{byte:02x}")).collect();',
+            '            let encoded = encode_string_bytes(value);',
             '            format!("{field}|o|s:1:{encoded}")',
             '        }',
             '        None => format!("{field}|o|s:0:"),',
@@ -2155,6 +2416,26 @@ def render_rust(
         test_id = test["id"]
         probe_name = f"probe_{snake(test_id)}"
         lines.extend([f"fn {probe_name}(fixture: &super::Fixture) -> String {{"])
+        # Setter/getter parity is a real two-step operation.  Call the
+        # generated NativeInterface setter(s) first, and only then perform the
+        # getter whose result is projected below.  A setter error is reported
+        # as a real probe error rather than allowing the getter's default
+        # value to make the row look like a successful read.
+        for setter_module, setter_name, setter_function, setter_arguments in (
+            wasm_set_operations(test, functions, records) or []
+        ):
+            lines.append(
+                f"    match crate::bindings::recoil::spring_api::{setter_module}::{setter_name}("
+                + ", ".join(
+                    rendered_call_arguments(setter_function, setter_arguments, records)
+                )
+                + ") {"
+            )
+            lines.append("        Ok(_) => {},")
+            lines.append(
+                f'        Err(error) => return format!("WASM_API|{test_id}|__error|i|{{}}", error.code),'
+            )
+            lines.append("    }")
         for local_name, local_spec in test.get("lua_runtime", {}).get("locals", {}).items():
             target = runtime_call_target(local_spec.get("call", ""), functions, module)
             if target is None:
@@ -2202,7 +2483,7 @@ def render_rust(
         lines.append(
             "            let"
             + (" mut" if has_conditional else "")
-            + " output_fields = vec!["
+            + " output_fields: Vec<String> = vec!["
             + ", ".join(encode_projection(projection, module) for projection in unconditional)
             + "];"
         )
@@ -2313,14 +2594,45 @@ def render_bindings(context: str) -> str:
 
 
 def render_context(context: str) -> str:
-    wait_for_fixture = context in {"unsynced_gadget", "gaia_unsynced"}
+    wait_for_fixture = context in {"unsynced_gadget", "gaia_unsynced", "ui"}
     lines = [
         "// @generated by generate_probe.py; do not edit.",
         "",
         f"pub(crate) const WAIT_FOR_UNSYNCED_FIXTURE: bool = {str(wait_for_fixture).lower()};",
         "",
     ]
-    if wait_for_fixture:
+    if context == "ui":
+        lines.extend(
+            [
+                "pub(crate) fn prepare_probe() -> Result<(), String> {",
+                "    Ok(())",
+                "}",
+                "",
+                "pub(crate) fn fixture_unit_ids() -> Result<Vec<i32>, String> {",
+                "    crate::bindings::recoil::spring_api::units_query::get_all_units(0)",
+                '        .map_err(|error| format!("get-all-units:{}", error.code))',
+                "}",
+                "",
+                "pub(crate) fn fixture_feature_ids() -> Result<Vec<i32>, String> {",
+                "    crate::bindings::recoil::spring_api::features::get_all_features(0)",
+                '        .map_err(|error| format!("get-all-features:{}", error.code))',
+                "}",
+                "",
+                "pub(crate) fn unit_candidate_is_primary(_unit_id: i32) -> bool {",
+                "    true",
+                "}",
+                "",
+                "pub(crate) fn feature_candidate_is_primary(_feature_id: i32) -> bool {",
+                "    true",
+                "}",
+                "",
+                "pub(crate) fn fixture_ready(_unit_id: i32, _feature_id: i32) -> bool {",
+                "    true",
+                "}",
+                "",
+            ]
+        )
+    elif wait_for_fixture:
         lines.extend(
             [
                 "pub(crate) fn prepare_probe() -> Result<(), String> {",
@@ -2430,7 +2742,9 @@ def main() -> None:
     args = parser.parse_args()
 
     functions, records, _ = load_model(args.model.resolve())
-    selected = select_tests(functions, records, args.context, args.include_rendering)
+    selected, coverage = select_tests_with_coverage(
+        functions, records, args.context, args.include_rendering
+    )
     if not selected:
         raise SystemExit("the Wasm parity probe selected no tests")
     output_root = args.output_root.resolve()
@@ -2466,10 +2780,11 @@ def main() -> None:
     manifest_path.write_text(
         json.dumps(
             {
-                "version": 1,
+                "version": 2,
                 "context": args.context,
                 "source_context": CONTEXT_SOURCE[args.context],
                 "tests": ids,
+                "coverage": coverage,
             },
             indent=2,
         )

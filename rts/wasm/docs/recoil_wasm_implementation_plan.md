@@ -339,26 +339,9 @@ Integrate synced Wasm into the cross-platform sync-test matrix.
 
 Deliverable: Rules/Gaia synced Wasm passes repeated cross-platform lockstep tests.
 
-## Phase 8 — Full Lua/native/Wasm parity gates
+## Phase 8 — LuaUI environment
 
-Implement normalized Lua signature export.
-
-Require:
-
-- native ↔ Wasm signatures;
-- Lua ↔ native ↔ Wasm signatures;
-- runtime parity for applicable APIs;
-- explicit exclusions only.
-
-Add `--mode wasm` or equivalent to the existing parity harness.
-
-Reuse the Phase-0 multi-ally fixture.
-
-Deliverable: parity is a CI gate, not a generated report.
-
-## Phase 9 — LuaUI environment
-
-Implement the UI-specific role only after gadget environments are stable.
+Implement the UI-specific role after the gadget environments are stable.
 
 Reuse the engine visibility semantics used by LuaUI/Lua synced read code.
 
@@ -371,9 +354,28 @@ Cover:
 - UI-specific callins;
 - RmlUi integration.
 
-Enable the UI world only after multi-ally Lua ↔ Wasm parity passes.
+Enable the UI world and its runtime loading after the multi-ally visibility,
+LOS/radar, degraded-value, callin, and RmlUi checks are implemented.
 
 Deliverable: LuaUI-equivalent Wasm environment.
+
+## Phase 9 — Full Lua/native/Wasm parity gates
+
+Implement normalized Lua signature export.
+
+Require:
+
+- native ↔ Wasm signatures;
+- Lua ↔ native ↔ Wasm signatures;
+- runtime parity for applicable APIs;
+- explicit exclusions only.
+
+Add `--mode wasm` or equivalent to the existing parity harness.
+
+Reuse the Phase-0 multi-ally fixture and include the enabled LuaUI
+environment in the final parity matrix.
+
+Deliverable: parity is a CI gate, not a generated report.
 
 ## Phase 10 — CI/build/release integration
 
@@ -420,8 +422,8 @@ flowchart LR
     P4 --> P5["5 Engine runtime"]
     P5 --> P6["6 Full API"]
     P6 --> P7["7 Sync/sandbox"]
-    P7 --> P8["8 Parity"]
-    P8 --> P9["9 LuaUI"]
+    P7 --> P8["8 LuaUI"]
+    P8 --> P9["9 Parity"]
     P9 --> P10["10 Release"]
 ```
 

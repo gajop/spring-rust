@@ -1,5 +1,7 @@
 #include "LOS.h"
 
+#include "NativeInterface/WasmUiVisibility.h"
+
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Misc/LosHandler.h"
@@ -31,6 +33,10 @@ static void NativeGetPositionLosState(const GetPositionLosStateQuery* query, Get
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
 
 	const float3 position(query->pos.x, query->pos.y, query->pos.z);
 	result->error = nullptr;
@@ -48,6 +54,10 @@ static void NativeIsPosInLos(const IsPosInLosQuery* query, IsPosInLosResult* res
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
 
 	const float3 position(query->pos.x, query->pos.y, query->pos.z);
 	result->error = nullptr;
@@ -59,6 +69,10 @@ static void NativeIsPosInRadar(const IsPosInRadarQuery* query, IsPosInRadarResul
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}
@@ -76,6 +90,10 @@ static void NativeIsPosInAirLos(const IsPosInAirLosQuery* query, IsPosInAirLosRe
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
 
 	const float3 position(query->pos.x, query->pos.y, query->pos.z);
 	result->error = nullptr;
@@ -90,8 +108,12 @@ static void NativeIsUnitInLos(const IsUnitInLosQuery* query, IsUnitInLosResult* 
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Typed);
 	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
 
 	result->error = nullptr;
@@ -106,8 +128,12 @@ static void NativeIsUnitInAirLos(const IsUnitInAirLosQuery* query, IsUnitInAirLo
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Typed);
 	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
 
 	result->error = nullptr;
@@ -122,8 +148,12 @@ static void NativeIsUnitInRadar(const IsUnitInRadarQuery* query, IsUnitInRadarRe
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Typed);
 	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
 
 	result->error = nullptr;
@@ -138,8 +168,12 @@ static void NativeIsUnitInJammer(const IsUnitInJammerQuery* query, IsUnitInJamme
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
 
-	const CUnit* unit = unitHandler.GetUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Typed);
 	if (unit == nullptr) { result->error = &INVALID_UNIT_ERROR; return; }
 
 	result->error = nullptr;
@@ -151,6 +185,10 @@ static void NativeGetRadarErrorParams(const GetRadarErrorParamsQuery* query, Get
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
 
 	if (!teamHandler.IsValidAllyTeam(query->allyTeamID)) {
+		result->error = &INVALID_ALLY_TEAM_ERROR;
+		return;
+	}
+	if (!WasmUiVisibility::IsLosPerspectiveAllowed(query->allyTeamID)) {
 		result->error = &INVALID_ALLY_TEAM_ERROR;
 		return;
 	}

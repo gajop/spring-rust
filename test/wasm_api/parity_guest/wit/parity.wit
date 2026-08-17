@@ -19,6 +19,12 @@ interface encoding {
   is-valid-base64-url: func(text: string) -> result<bool, spring-error>;
 }
 
+interface feature-control {
+  record spring-error { code: s32 }
+
+  set-feature-radius-and-height: func(feature-id: s32, radius: f32, height: f32) -> result<bool, spring-error>;
+}
+
 interface feature-defs {
   record spring-error { code: s32 }
 
@@ -241,6 +247,18 @@ interface game {
   is-no-cost-enabled: func(unused: u8) -> result<bool, spring-error>;
 }
 
+interface game-config {
+  record spring-error { code: s32 }
+
+  record set-god-mode-options {
+    control-allies: bool,
+    control-enemies: bool,
+  }
+
+  set-cheating-enabled: func(enabled: bool) -> result<bool, spring-error>;
+  set-god-mode: func(options: set-god-mode-options) -> result<bool, spring-error>;
+}
+
 interface los {
   record spring-error { code: s32 }
 
@@ -314,6 +332,7 @@ interface metal-map {
   get-metal-amount: func(x: s32, z: s32) -> result<f32, spring-error>;
   get-metal-extraction: func(x: s32, z: s32) -> result<f32, spring-error>;
   get-metal-map-size: func(unused: u8) -> result<get-metal-map-size-value, spring-error>;
+  set-metal-amount: func(x: s32, z: s32, amount: f32) -> result<_, spring-error>;
 }
 
 interface move-ctrl {
@@ -358,6 +377,25 @@ interface move-ctrl {
 
   get-unit-estimated-path: func(unit-id: s32) -> result<get-unit-estimated-path-value, spring-error>;
   get-unit-move-type-data: func(unit-id: s32) -> result<move-type-data, spring-error>;
+}
+
+interface projectile-control {
+  record spring-error { code: s32 }
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  delete-projectile: func(projectile-id: s32) -> result<bool, spring-error>;
+  set-projectile-collision: func(projectile-id: s32) -> result<bool, spring-error>;
+  set-projectile-damages: func(projectile-id: s32, unused: s32, damage-key: string, damage-value: f32) -> result<bool, spring-error>;
+  set-projectile-gravity: func(projectile-id: s32, gravity: f32) -> result<bool, spring-error>;
+  set-projectile-is-intercepted: func(projectile-id: s32, intercepted: bool) -> result<bool, spring-error>;
+  set-projectile-position: func(projectile-id: s32, pos: float3) -> result<bool, spring-error>;
+  set-projectile-time-to-live: func(projectile-id: s32, time-to-live: s32) -> result<bool, spring-error>;
+  set-projectile-velocity: func(projectile-id: s32, velocity: float3) -> result<bool, spring-error>;
 }
 
 interface projectiles {
@@ -449,6 +487,23 @@ interface projectiles {
   get-projectile-velocity: func(projectile-id: s32) -> result<float3, spring-error>;
   get-projectiles-in-rectangle: func(min-x: f32, min-z: f32, max-x: f32, max-z: f32, options: get-projectiles-in-rectangle-options) -> result<list<s32>, spring-error>;
   get-projectiles-in-sphere: func(center: float3, radius: f32, options: get-projectiles-in-sphere-options) -> result<list<s32>, spring-error>;
+}
+
+interface team-control {
+  record spring-error { code: s32 }
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  add-team-resource-excess-stats: func(team-id: s32, resource-type: string, amount: f32) -> result<bool, spring-error>;
+  assign-player-to-team: func(player-id: s32, team-id: s32) -> result<bool, spring-error>;
+  set-ally: func(first-ally-team-id: s32, second-ally-team-id: s32, allied: bool) -> result<bool, spring-error>;
+  set-ally-team-start-box: func(ally-team-id: s32, min-x: f32, min-z: f32, max-x: f32, max-z: f32) -> result<bool, spring-error>;
+  set-global-los: func(ally-team-id: s32, enabled: bool) -> result<bool, spring-error>;
+  set-team-start-position: func(team-id: s32, pos: float3) -> result<bool, spring-error>;
 }
 
 interface teams {
@@ -644,6 +699,14 @@ interface terrain {
   is-pos-in-map: func(x: f32, z: f32) -> result<is-pos-in-map-value, spring-error>;
 }
 
+interface terrain-control {
+  record spring-error { code: s32 }
+
+  set-terrain-type-data: func(type-index: s32, tank-speed: f32, kbot-speed: f32, hover-speed: f32, ship-speed: f32, hardness: f32, receive-tracks: bool, name: string) -> result<bool, spring-error>;
+  set-tidal: func(tidal: f32) -> result<bool, spring-error>;
+  set-wind: func(min-wind: f32, max-wind: f32) -> result<bool, spring-error>;
+}
+
 interface tracing {
   record spring-error { code: s32 }
 
@@ -695,8 +758,14 @@ interface tracing {
 interface unit-control {
   record spring-error { code: s32 }
 
+  add-unit-experience: func(unit-id: s32, experience: f32) -> result<bool, spring-error>;
   get-unit-feature-separation: func(unit-id: s32, feature-id: s32, ignore-y: bool) -> result<f32, spring-error>;
   get-unit-leaves-ghost: func(unit-id: s32) -> result<bool, spring-error>;
+  set-unit-experience: func(unit-id: s32, experience: f32) -> result<bool, spring-error>;
+  set-unit-metal-extraction: func(unit-id: s32, depth: f32, range: f32) -> result<bool, spring-error>;
+  set-unit-radius-and-height: func(unit-id: s32, radius: f32, height: f32) -> result<bool, spring-error>;
+  set-unit-sensor-radius: func(unit-id: s32, sensor-type: string, radius: s32) -> result<s32, spring-error>;
+  set-unit-storage: func(unit-id: s32, %resource: string, amount: f32) -> result<bool, spring-error>;
 }
 
 interface unit-defs {
@@ -977,6 +1046,11 @@ interface units-info {
     build-percent: f32,
   }
 
+  record unit-storage {
+    metal-storage: f32,
+    energy-storage: f32,
+  }
+
   record unit-vectors {
     front-dir: float3,
     up-dir: float3,
@@ -1000,6 +1074,7 @@ interface units-info {
   get-unit-def-id: func(unit-id: s32) -> result<s32, spring-error>;
   get-unit-direction: func(unit-id: s32) -> result<float3, spring-error>;
   get-unit-effective-build-range: func(unit-id: s32, buildee-def-id: s32) -> result<f32, spring-error>;
+  get-unit-experience: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-flanking: func(unit-id: s32) -> result<unit-flanking, spring-error>;
   get-unit-heading: func(unit-id: s32, convert-to-radians: bool) -> result<f32, spring-error>;
   get-unit-height: func(unit-id: s32) -> result<f32, spring-error>;
@@ -1013,6 +1088,7 @@ interface units-info {
   get-unit-is-transporting: func(unit-id: s32) -> result<get-unit-is-transporting-value, spring-error>;
   get-unit-last-attacked-piece: func(unit-id: s32) -> result<last-hit-piece, spring-error>;
   get-unit-last-attacker: func(unit-id: s32) -> result<option<unit-last-attacker>, spring-error>;
+  get-unit-metal-extraction: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-move-def-id: func(unit-id: s32) -> result<s32, spring-error>;
   get-unit-nano-pieces: func(unit-id: s32) -> result<list<s32>, spring-error>;
   get-unit-piece-collision-volume-data: func(unit-id: s32, piece-num: s32) -> result<collision-volume-data, spring-error>;
@@ -1025,6 +1101,7 @@ interface units-info {
   get-unit-shield-state: func(unit-id: s32, weapon-num: s32) -> result<option<unit-shield-state>, spring-error>;
   get-unit-states: func(unit-id: s32, options: unit-states-options) -> result<unit-states, spring-error>;
   get-unit-stockpile: func(unit-id: s32) -> result<option<unit-stockpile>, spring-error>;
+  get-unit-storage: func(unit-id: s32) -> result<unit-storage, spring-error>;
   get-unit-team: func(unit-id: s32) -> result<s32, spring-error>;
   get-unit-tooltip: func(unit-id: s32) -> result<string, spring-error>;
   get-unit-transporter: func(unit-id: s32) -> result<s32, spring-error>;
@@ -1404,17 +1481,22 @@ interface callins-rules-synced {
 world rules-synced {
   import cob-script;
   import encoding;
+  import feature-control;
   import feature-defs;
   import features;
   import game;
+  import game-config;
   import los;
   import math-extra;
   import messages;
   import metal-map;
   import move-ctrl;
+  import projectile-control;
   import projectiles;
+  import team-control;
   import teams;
   import terrain;
+  import terrain-control;
   import tracing;
   import unit-control;
   import unit-defs;

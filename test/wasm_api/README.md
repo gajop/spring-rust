@@ -29,8 +29,11 @@ wasmtime wast test/wasm_api/runtime_spike.wast
 
 In-engine archive discovery uses optional `LuaRules/wasm/manifest.txt` from the
 game VFS and `LuaGaia/wasm/manifest.txt` from the map VFS. Each manifest uses
-the tested `module(name, path, environment, order)` format. The runtime test
-also embeds `value_guest`, a real `wit-bindgen` Component fixture that exercises
+the tested `module(name, path, environment, order[, interface-version])`
+format; packages should write the explicit `1.0.0` interface version. Omitting
+the fifth field is retained only for compatibility with early manifests and
+means the current host interface. The runtime test also embeds `value_guest`,
+a real `wit-bindgen` Component fixture that exercises
 variant payloads, unit variant cases, and owned resource creation/transfer/drop.
 Its checked-in C++ bytes are regenerated with:
 

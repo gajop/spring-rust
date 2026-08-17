@@ -50,6 +50,28 @@ namespace {
 		}
 		return name.front() != '.' && name.back() != '.';
 	}
+
+	bool IsInterfaceVersion(std::string_view version)
+	{
+		// Keep the package format deliberately strict.  The runtime currently
+		// exposes one semver-like Component interface, so accepting a range or a
+		// partially specified version would make synced compatibility ambiguous.
+		if (version.size() > 32 || version.empty())
+			return false;
+		unsigned components = 0;
+		unsigned digits = 0;
+		for (const unsigned char character : version) {
+			if (std::isdigit(character)) {
+				if (++digits > 9)
+					return false;
+				continue;
+			}
+			if (character != '.' || digits == 0 || ++components > 2)
+				return false;
+			digits = 0;
+		}
+		return components == 2 && digits != 0;
+	}
 }
 
 bool WasmModuleManifest::Parse(std::string_view text,
@@ -72,7 +94,7 @@ bool WasmModuleManifest::Parse(std::string_view text,
 		if (!line.empty() && line.front() != '#') {
 			if (line.rfind("module(", 0) != 0 || line.back() != ')') {
 				error = "manifest line " + std::to_string(lineNumber) +
-					" must use module(name, path, environment, order)";
+					" must use module(name, path, environment, order[, interface-version])";
 				return false;
 			}
 			const std::string body = line.substr(7, line.size() - 8);
@@ -87,7 +109,7 @@ bool WasmModuleManifest::Parse(std::string_view text,
 					break;
 				fieldStart = fieldEnd + 1;
 			}
-			if (fields.size() != 4 || !IsSafeModuleName(fields[0]) || fields[1].empty() ||
+			if ((fields.size() != 4 && fields.size() != 5) || !IsSafeModuleName(fields[0]) || fields[1].empty() ||
 				fields[2].empty() || fields[3].empty()) {
 				error = "manifest line " + std::to_string(lineNumber) +
 					" has the wrong number of non-empty fields";
@@ -112,6 +134,12 @@ bool WasmModuleManifest::Parse(std::string_view text,
 					" has an invalid module order";
 				return false;
 			}
+			const std::string interfaceVersion = fields.size() == 5 ? fields[4] : "1.0.0";
+			if (!IsInterfaceVersion(interfaceVersion)) {
+				error = "manifest line " + std::to_string(lineNumber) +
+					" has an invalid interface version";
+				return false;
+			}
 			if (std::any_of(declarations.begin(), declarations.end(), [&fields](const auto& declaration) {
 				return declaration.name == fields[0];
 			})) {
@@ -123,7 +151,8 @@ bool WasmModuleManifest::Parse(std::string_view text,
 					" Wasm modules";
 				return false;
 			}
-			declarations.push_back({fields[0], fields[1], environment, order, {}});
+			declarations.push_back({fields[0], fields[1], environment, order,
+				interfaceVersion, {}});
 		}
 		if (lineEnd == std::string_view::npos)
 			break;

@@ -146,3 +146,17 @@ jobs:
             --cases 3 \
             --timeout 180 \
             --output-dir test/native_api_parity/out-ci-wasm
+
+  performance:
+    runs-on: ubuntu-24.04
+    needs: check
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Build the non-ASAN performance configuration
+        run: ./docker-build-v2/build.sh linux -DUSE_ASAN=OFF -DCMAKE_BUILD_TYPE=RELEASE
+
+      - name: Enforce Wasm frame-budget benchmark
+        run: ./docker-build-v2/build.sh --compile linux -t wasm-performance

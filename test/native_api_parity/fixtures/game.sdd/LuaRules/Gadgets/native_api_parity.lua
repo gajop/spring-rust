@@ -24,6 +24,7 @@ if not gadgetHandler:IsSyncedCode() then
 	local parityOptions = Spring.GetModOptions() or {}
 	local processTest = tostring(parityOptions.native_api_parity_process_test or "")
 	local processStage = tostring(parityOptions.native_api_parity_process_stage or "initial")
+	local wasmRole = tostring(parityOptions.native_api_parity_wasm_role or "combined")
 	local wasmReferenceFrame = (Common.mode() == "wasm"
 		and (wasmContext == "unsynced_gadget" or wasmContext == "gaia_unsynced"))
 		and 10 or 4
@@ -345,6 +346,9 @@ if not gadgetHandler:IsSyncedCode() then
 	end
 
 	local function runWasmApiReference()
+		if wasmRole == "guest" then
+			return
+		end
 		if (wasmContext ~= "unsynced_gadget" and wasmContext ~= "gaia_unsynced")
 			or fixtureIDs.unitID == nil
 		then
@@ -510,13 +514,14 @@ if not gadgetHandler:IsSyncedCode() then
 			Spring.SetActiveCommand(nil)
 			Spring.SetMiniMapRotation(math.pi * 0.5)
 			Spring.SendCommands("minimap minimize 1", "minimap minimize 0")
-			if Script.LuaUI.NativeApiParityFixture then
+			local hasLuaUIFixture = Script.LuaUI("NativeApiParityFixture")
+			if hasLuaUIFixture then
 				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID, enemyLosUnitID, enemyRadarUnitID, enemyHiddenUnitID)
 			end
 			return
 		elseif name == "native_api_parity_render_fixture" then
 			local unitID, featureID, unitDefID, featureDefID, projectileID, teamID = ...
-			if Script.LuaUI.NativeApiParityRenderFixture then
+			if Script.LuaUI("NativeApiParityRenderFixture") then
 				Script.LuaUI.NativeApiParityRenderFixture(unitID, featureID, unitDefID, featureDefID, projectileID, teamID)
 			end
 			return
@@ -632,8 +637,9 @@ local wasmSpecPath = wasmContext == "synced_gadget"
 local WasmProbeSpec = VFS.Include(wasmSpecPath)
 local WasmProbeTests = WasmProbeSpec.tests or WasmProbeSpec
 local WasmProbeValues = WasmProbeSpec.values or {}
-local syncedParityOptions = Spring.GetModOptions() or {}
-local syncedProcessStage = tostring(syncedParityOptions.native_api_parity_process_stage or "initial")
+	local syncedParityOptions = Spring.GetModOptions() or {}
+	local syncedProcessStage = tostring(syncedParityOptions.native_api_parity_process_stage or "initial")
+	local syncedWasmRole = tostring(syncedParityOptions.native_api_parity_wasm_role or "combined")
 
 local function options()
 	return Spring.GetModOptions() or {}
@@ -1105,8 +1111,10 @@ local function generatedReturnValue(returnSpec, returns)
 		if type(value) == "table" then
 			for _, units in pairs(value) do
 				if type(units) == "table" then
-					for _, unitID in ipairs(units) do
+				for key, unitID in pairs(units) do
+					if type(key) == "number" and type(unitID) == "number" then
 						unitIDs[#unitIDs + 1] = unitID
+					end
 					end
 				end
 			end
@@ -1119,8 +1127,10 @@ local function generatedReturnValue(returnSpec, returns)
 			for unitDefID, units in pairs(value) do
 				if unitDefID ~= "n" and type(units) == "table" then
 					local unitIDs = {}
-					for _, unitID in ipairs(units) do
+				for key, unitID in pairs(units) do
+					if type(key) == "number" and type(unitID) == "number" then
 						unitIDs[#unitIDs + 1] = unitID
+					end
 					end
 					table.sort(unitIDs)
 					groups[#groups + 1] = {
@@ -1304,6 +1314,7 @@ function Fixture.create()
 	local baseX = randFloat(880, 1180)
 	local baseZ = randFloat(880, 1180)
 	local unitID = Spring.CreateUnit("native_api_test_unit", baseX, 96, baseZ, randInt(0, 3), teamID, false, false)
+	local extractorUnitID = Spring.CreateUnit("native_api_test_extractor", baseX + 64, 96, baseZ - 64, 0, teamID, false, false)
 	-- Lua unit scripts are created lazily.  The piece/script parity checks need
 	-- the same CLuaUnitScript piece map that a real script-backed unit has.
 	if unitID and Spring.UnitScript and Spring.UnitScript.CreateScript then
@@ -1386,6 +1397,7 @@ function Fixture.create()
 		enemyTeamID = enemyTeamID,
 		enemyAllyTeamID = 1,
 		unitID = unitID,
+		extractorUnitID = extractorUnitID,
 		allyUnitID = unitID,
 		enemyLosUnitID = enemyLosUnitID,
 		enemyRadarUnitID = enemyRadarUnitID,
@@ -1414,6 +1426,7 @@ function Fixture.destroy(ids)
 	end
 	for _, unitID in ipairs({
 		ids.unitID,
+		ids.extractorUnitID,
 		ids.enemyLosUnitID,
 		ids.enemyRadarUnitID,
 		ids.enemyHiddenUnitID,
@@ -1531,6 +1544,9 @@ local ranDeferredSyncedChecks = false
 local ranLuaScriptSurfaceTests = false
 
 local function runWasmApiReference(frame)
+	if syncedWasmRole == "guest" then
+		return
+	end
 	if wasmContext ~= "synced_gadget" and wasmContext ~= "gaia_synced" then
 		return
 	end
@@ -1557,7 +1573,12 @@ local function runWasmApiReference(frame)
 		for key, probeValue in pairs(WasmProbeValues[testName] or {}) do
 			value[key] = probeValue
 		end
-		local ok, readback = pcall(test.get, persistentFixture, value)
+		local ok, readback = pcall(function()
+			if test.kind == "setter_getter" then
+				test.set(persistentFixture, value)
+			end
+			return test.get(persistentFixture, value)
+		end)
 		local payload = {
 			source = "lua-api",
 			frame = frame,
@@ -1947,7 +1968,7 @@ function gadget:RecvLuaMsg(message, playerID)
 		end
 		sendWasmParity({
 			source = "wasm-api",
-			frame = 1,
+			frame = Spring.GetGameFrame and Spring.GetGameFrame() or 0,
 			testName = probeParts[2],
 			status = status,
 			errorCode = errorCode,
@@ -1960,7 +1981,7 @@ function gadget:RecvLuaMsg(message, playerID)
 		local status = probeParts[3] == "ready" and "pass" or "error"
 		sendWasmParity({
 			source = "wasm-status",
-			frame = 1,
+			frame = Spring.GetGameFrame and Spring.GetGameFrame() or 0,
 			testName = probeParts[2] or "fixture",
 			status = status,
 			reason = probeParts[4] or "",

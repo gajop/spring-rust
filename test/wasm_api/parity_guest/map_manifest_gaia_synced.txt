@@ -1,1 +1,1 @@
-module(parity, LuaGaia/wasm/parity.wasm, gaia-synced, 0)
+module(parity, LuaGaia/wasm/parity.wasm, gaia-synced, 0, 1.0.0)

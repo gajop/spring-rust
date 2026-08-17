@@ -1,5 +1,12 @@
 local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
+local parityOptions = Spring.GetModOptions() or {}
+local wasmContext = tostring(parityOptions.native_api_parity_wasm_context or "synced_gadget")
+local wasmRole = tostring(parityOptions.native_api_parity_wasm_role or "combined")
+local WasmProbeSpec
+if wasmContext == "ui" then
+	WasmProbeSpec = VFS.Include("LuaRules/Utilities/wasm_api_probe_tests_ui.lua")
+end
 local outputPath = Common.outputDir() .. "/widget.jsonl"
 local sentInventory = false
 local ranGeneratedTests = false
@@ -21,6 +28,7 @@ local ranGlFonts = false
 local ranGlMiniMap = false
 local ranGlObjectDrawing = false
 local ranScriptKillTest = false
+local ranWasmApiReference = false
 local fixtureIDs = {}
 local renderFixtureIDs
 
@@ -46,6 +54,24 @@ local function runGeneratedTests()
 	Common.runPortableReadOnlyTests("widget", GeneratedTests, record, function(encoded)
 		Spring.InvokeNativeModule(encoded)
 	end, fixtureIDs)
+end
+
+local function runWasmApiReference()
+	if ranWasmApiReference or wasmRole == "guest" or Common.mode() ~= "wasm" or wasmContext ~= "ui"
+		or WasmProbeSpec == nil or fixtureIDs.unitID == nil
+	then
+		return
+	end
+	ranWasmApiReference = true
+	Common.runWasmApiReference(
+		"ui",
+		WasmProbeSpec,
+		GeneratedTests,
+		function(payload)
+			Common.appendJsonLine(Common.outputDir() .. "/wasm.jsonl", payload)
+		end,
+		fixtureIDs
+	)
 end
 
 local function runDebugInputReadbackTests()
@@ -2616,7 +2642,9 @@ function Initialize()
 end
 
 function GameFrame(frame)
-	if frame == 4 then
+	if frame == 10 and wasmRole ~= "guest" and Common.mode() == "wasm" and wasmContext == "ui" then
+		runWasmApiReference()
+	elseif frame == 4 then
 		if Common.mode() == "wasm" and not Common.enableRenderingTests() then
 			return
 		end

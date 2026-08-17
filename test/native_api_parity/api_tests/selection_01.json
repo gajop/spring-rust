@@ -51,7 +51,7 @@
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetSelectedUnitsCounts`", "native_getter": "`Selection.get_selected_units_counts`", "fields": "`defCount`"},
       "rust": {"check": "check_selection_value", "set": "set_noop"},
       "params": {},
-      "lua_runtime": {"call": "Spring.GetSelectedUnitsCounts", "args": [], "returns": [{"field": "defCount", "index": 2}]}
+      "lua_runtime": {"call": "Spring.GetSelectedUnitsCounts", "args": [], "returns": [{"field": "defCount", "index": 2, "transform": "table_count"}]}
     },
     {
       "id": "get_selected_group",

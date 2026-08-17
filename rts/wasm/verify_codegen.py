@@ -20,6 +20,7 @@ PROBE_CONTEXTS = (
     "unsynced_gadget",
     "gaia_synced",
     "gaia_unsynced",
+    "ui",
 )
 PROBE_ARTIFACTS = (
     "wit/parity.wit",

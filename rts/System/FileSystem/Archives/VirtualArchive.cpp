@@ -5,6 +5,7 @@
 #include "System/FileSystem/DataDirsAccess.h"
 #include "System/FileSystem/FileQueryFlags.h"
 #include "System/Log/ILog.h"
+#include "System/StringUtil.h"
 
 #include "zlib.h"
 #include "minizip/zip.h"
@@ -119,7 +120,10 @@ IArchive::SFileInfo CVirtualArchive::FileInfo(uint32_t fid) const
 
 uint32_t CVirtualArchive::AddFile(const std::string& name)
 {
-	lcNameIndex[name] = files.size();
+	// Archive paths are case-insensitive throughout VFS.  Keep the index in
+	// the same normalized form as IArchive::FindFile; generated virtual
+	// archives may add paths such as LuaGaia/... after construction.
+	lcNameIndex[StringToLower(name)] = files.size();
 	files.emplace_back(files.size(), name);
 
 	return (files.size() - 1);
@@ -152,4 +156,3 @@ void CVirtualFile::WriteZip(void* zf) const
 	zipWriteInFileInZip(zip, buffer.data(), buffer.size());
 	zipCloseFileInZip(zip);
 }
-

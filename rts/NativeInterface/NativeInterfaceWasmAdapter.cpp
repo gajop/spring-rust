@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "generated/WasmHostAdapter.h"
+#include "WasmUiVisibility.h"
 #include "WasmInterface/WasmModule.h"
 
 namespace {
@@ -670,6 +671,10 @@ bool NativeInterfaceWasmAdapter::CalloutImpl(WasmModule* owner, std::string_view
 		error = "NativeInterface Wasm adapter has no host interface";
 		return false;
 	}
+
+	const bool uiEnvironment = owner != nullptr &&
+		owner->Descriptor().environment == WasmEnvironment::UI;
+	WasmUiVisibility::ScopedContext uiContext(uiEnvironment);
 
 	// CreateContext may return an already-existing context.  Only claim a
 	// context that this instance is about to create; a Wasm module must not

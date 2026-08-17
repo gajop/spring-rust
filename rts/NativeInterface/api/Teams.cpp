@@ -1,5 +1,7 @@
 #include "Teams.h"
 
+#include "NativeInterface/WasmUiVisibility.h"
+
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -149,6 +151,7 @@ static void NativeGetTeamResources(const GetTeamResourcesQuery* query, GetTeamRe
 
 	const CTeam* team = teamHandler.Team(query->teamID);
 	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
+	if (!WasmUiVisibility::IsTeamVisible(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	result->error = nullptr;
 	std::memset(&result->resources, 0, sizeof(result->resources));
@@ -188,6 +191,7 @@ static void NativeGetTeamUnitStats(const GetTeamUnitStatsQuery* query, GetTeamUn
 
 	const CTeam* team = teamHandler.Team(query->teamID);
 	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
+	if (!WasmUiVisibility::IsTeamVisible(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	result->error = nullptr;
 	const TeamStatistics& stats = team->GetCurrentStats();
@@ -206,6 +210,7 @@ static void NativeGetTeamResourceStats(const GetTeamResourceStatsQuery* query, G
 
 	const CTeam* team = teamHandler.Team(query->teamID);
 	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
+	if (!WasmUiVisibility::IsTeamVisible(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	const TeamStatistics& stats = team->GetCurrentStats();
 	result->error = nullptr;
@@ -239,6 +244,7 @@ static void NativeGetTeamStatsHistory(const GetTeamStatsHistoryQuery* query, Get
 
 	const CTeam* team = teamHandler.Team(query->teamID);
 	if (team == nullptr) { result->error = &INVALID_TEAM_ERROR; return; }
+	if (!WasmUiVisibility::IsTeamVisible(query->teamID)) { result->error = &INVALID_TEAM_ERROR; return; }
 
 	const auto& history = team->statHistory;
 	const int statCount = static_cast<int>(history.size());
@@ -320,6 +326,10 @@ static void NativeGetAllyTeamInfo(const GetAllyTeamInfoQuery* query, GetAllyTeam
 static void NativeAreTeamsAllied(const AreTeamsAlliedQuery* query, AreTeamsAlliedResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!teamHandler.IsValidTeam(query->teamID1) || !teamHandler.IsValidTeam(query->teamID2)) {
+		result->error = &INVALID_TEAM_ERROR;
+		return;
+	}
 
 	result->error = nullptr;
 	result->allied = teamHandler.AlliedTeams(query->teamID1, query->teamID2);
@@ -328,6 +338,10 @@ static void NativeAreTeamsAllied(const AreTeamsAlliedQuery* query, AreTeamsAllie
 static void NativeArePlayersAllied(const ArePlayersAlliedQuery* query, ArePlayersAlliedResult* result) {
 	bufferPos = 0;
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
+	if (!playerHandler.IsValidPlayer(query->playerID1) || !playerHandler.IsValidPlayer(query->playerID2)) {
+		result->error = &INVALID_PLAYER_ERROR;
+		return;
+	}
 
 	const CPlayer* player1 = playerHandler.Player(query->playerID1);
 	const CPlayer* player2 = playerHandler.Player(query->playerID2);
@@ -442,6 +456,8 @@ static void NativeGetPlayerControlledUnit(const GetPlayerControlledUnitQuery* qu
 	if (player == nullptr) { result->error = &INVALID_PLAYER_ERROR; return; }
 
 	const CUnit* controllee = player->fpsController.GetControllee();
+	if (controllee != nullptr && !WasmUiVisibility::IsUnitAlly(controllee))
+		controllee = nullptr;
 
 	result->error = nullptr;
 	result->unitID = (controllee != nullptr) ? controllee->id : -1;
@@ -473,18 +489,20 @@ static void NativeGetAIInfo(const GetAIInfoQuery* query, GetAIInfoResult* result
 	if (aiData == nullptr)
 		return;
 
+	const bool exposeUnsyncedInfo = !WasmUiVisibility::Active() ||
+		WasmUiVisibility::FullRead() || skirmishAIHandler.IsLocalSkirmishAI(skirmishAIID);
 	result->info.skirmishAIID = static_cast<int32_t>(skirmishAIID);
 	result->info.name = CopyString(aiData->name);
 	result->info.hostingPlayerID = aiData->hostPlayer;
-	result->info.shortName = CopyString(aiData->shortName);
-	result->info.version = CopyString(aiData->version);
+	result->info.shortName = exposeUnsyncedInfo ? CopyString(aiData->shortName) : "UNKNOWN";
+	result->info.version = exposeUnsyncedInfo ? CopyString(aiData->version) : "UNKNOWN";
 
 	if (result->info.name == nullptr || result->info.shortName == nullptr || result->info.version == nullptr) {
 		result->error = &BUFFER_OVERFLOW_ERROR;
 		return;
 	}
 
-	if (!aiData->options.empty()) {
+	if (exposeUnsyncedInfo && !aiData->options.empty()) {
 		result->info.options = AllocateArray<AIOption>(aiData->options.size());
 		if (result->info.options == nullptr) {
 			result->error = &BUFFER_OVERFLOW_ERROR;

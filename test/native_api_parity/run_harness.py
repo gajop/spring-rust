@@ -57,12 +57,13 @@ WASM_PARITY_MODULE = (
     / "recoil_wasm_parity_guest.component.wasm"
 )
 WASM_PROBE_GENERATOR = ROOT / "test" / "wasm_api" / "parity_guest" / "generate_probe.py"
-WASM_CONTEXTS = ("synced_gadget", "unsynced_gadget", "gaia_synced", "gaia_unsynced")
+WASM_CONTEXTS = ("synced_gadget", "unsynced_gadget", "gaia_synced", "gaia_unsynced", "ui")
 WASM_CONTEXT_MODULES = {
 	"synced_gadget": WASM_PARITY_MODULE,
 	"unsynced_gadget": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.unsynced_gadget.component.wasm",
 	"gaia_synced": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.gaia_synced.component.wasm",
 	"gaia_unsynced": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.gaia_unsynced.component.wasm",
+	"ui": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.ui.component.wasm",
 }
 WASM_CONTEXT_MANIFESTS = {
 	context: ROOT / "test" / "wasm_api" / "parity_guest" / f"probe_manifest_{context}.json"
@@ -77,6 +78,7 @@ WASM_ENVIRONMENT_NAMES = {
 	"unsynced_gadget": "rules-unsynced",
 	"gaia_synced": "gaia-synced",
 	"gaia_unsynced": "gaia-unsynced",
+	"ui": "ui",
 }
 LUA_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "lua_functions.md"
 RUST_API_DOC = ROOT / "rust" / "crates" / "spring-native" / "rust_functions.md"
@@ -95,6 +97,15 @@ CALLIN_NATIVE_STREAM = "callin_native.jsonl"
 WASM_PARITY_STREAM = "wasm.jsonl"
 WASM_PROBE_MANIFEST = ROOT / "test" / "wasm_api" / "parity_guest" / "probe_manifest.json"
 WASM_VACUITY_THRESHOLD = 0.05
+
+# Gaia parity injects these two map options only to tell the blank-map
+# generator which manifest and component to load.  They are harness controls,
+# not public map options: Spring.GetMapOptions already hides them, while the
+# native Game.get_map_options view sees the raw map-generator options.
+GAIA_HARNESS_MAP_OPTION_KEYS = frozenset({
+    "blank_map_gaia_manifest",
+    "blank_map_gaia_module",
+})
 
 # The Lua and native symbols named Shutdown are separate lifecycle hooks: Lua
 # shuts down each Lua handle, while native shuts down the loaded module.  They
@@ -319,7 +330,7 @@ def ensure_wasm_built(skip: bool) -> None:
     ).stdout.splitlines()
     if "wasm32-unknown-unknown" not in installed_targets:
         subprocess.run(["rustup", "target", "add", "wasm32-unknown-unknown"], cwd=ROOT, check=True)
-    for context in ("unsynced_gadget", "gaia_synced", "gaia_unsynced", "synced_gadget"):
+    for context in ("unsynced_gadget", "gaia_synced", "gaia_unsynced", "ui", "synced_gadget"):
         generator_args = ["python3", str(WASM_PROBE_GENERATOR), "--context", context]
         if context == "synced_gadget":
             generator_args.extend(
@@ -373,7 +384,7 @@ def ensure_wasm_built(skip: bool) -> None:
             raise RuntimeError(f"Wasm parity component was not produced: {component}")
         if context.startswith("gaia_"):
             WASM_CONTEXT_MAP_MANIFESTS[context].write_text(
-                f"module(parity, LuaGaia/wasm/parity.wasm, {WASM_ENVIRONMENT_NAMES[context]}, 0)\n",
+                f"module(parity, LuaGaia/wasm/parity.wasm, {WASM_ENVIRONMENT_NAMES[context]}, 0, 1.0.0)\n",
                 encoding="utf-8",
             )
 
@@ -408,11 +419,12 @@ def prepare_datadir(
         link_or_copy(GAME_FIXTURE, game_destination)
     else:
         shutil.copytree(GAME_FIXTURE, game_destination, symlinks=True)
-        wasm_directory = game_destination / "LuaRules" / "wasm"
+        wasm_owner = "LuaUI" if wasm_context == "ui" else "LuaRules"
+        wasm_directory = game_destination / wasm_owner / "wasm"
         wasm_directory.mkdir(parents=True, exist_ok=True)
         shutil.copy2(wasm_module, wasm_directory / "parity.wasm")
         (wasm_directory / "manifest.txt").write_text(
-            f"module(parity, LuaRules/wasm/parity.wasm, {WASM_ENVIRONMENT_NAMES[wasm_context]}, 0)\n",
+            f"module(parity, {wasm_owner}/wasm/parity.wasm, {WASM_ENVIRONMENT_NAMES[wasm_context]}, 0, 1.0.0)\n",
             encoding="utf-8",
         )
     for archive_name in ("springcontent", "maphelper", "bitmaps", "cursors"):
@@ -453,6 +465,7 @@ def write_script(
     test_seed: int,
     wasm_context: str,
     wasm_module: Path | None,
+    wasm_role: str = "combined",
 ) -> None:
     init_blank = "1" if use_blank_map else "0"
     host_port = random.SystemRandom().randint(20_000, 50_000)
@@ -517,6 +530,7 @@ def write_script(
         native_api_parity_process_test={args.process_test or ''};
         native_api_parity_process_stage=initial;
         native_api_parity_wasm_context={wasm_context};
+        native_api_parity_wasm_role={wasm_role};
     }}
 {map_options}
 
@@ -579,6 +593,7 @@ def run_spring(
     needs_graphics = args.enable_rendering_tests or wasm_context in {
         "unsynced_gadget",
         "gaia_unsynced",
+        "ui",
     }
     if needs_graphics:
         # The installed settings file defaults to exclusive fullscreen.  The
@@ -815,6 +830,34 @@ def compare_wasm_details(
     )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     expected_ids = set(manifest["tests"])
+    coverage = manifest.get("coverage", {})
+    if not isinstance(coverage, dict):
+        coverage = {}
+    source_context = manifest.get("source_context")
+    source_ids = {
+        test["id"] for test in API_TESTS if test.get("context") == source_context
+    }
+    selected_ids = coverage.get("selected_ids", [])
+    excluded_by_reason = coverage.get("excluded", {})
+    excluded_ids = [test_id for ids in excluded_by_reason.values() for test_id in ids]
+    covered_ids = set(selected_ids) | set(excluded_ids)
+    coverage_ok = (
+        manifest.get("version", 0) >= 2
+        and coverage.get("source_test_count") == len(source_ids)
+        and coverage.get("selected_count") == len(expected_ids)
+        and set(selected_ids) == expected_ids
+        and len(selected_ids) == len(set(selected_ids))
+        and len(excluded_ids) == len(set(excluded_ids))
+        and covered_ids == source_ids
+        and not (set(selected_ids) & set(excluded_ids))
+    )
+    if not coverage_ok:
+        print(
+            "Wasm probe manifest does not account for the complete canonical "
+            f"{source_context} selection: "
+            f"source={len(source_ids)}, selected={len(selected_ids)}, "
+            f"excluded={len(excluded_ids)}"
+        )
     lua_api_rows = {
         str(row.get("testName")): row
         for row in lua_rows
@@ -825,6 +868,21 @@ def compare_wasm_details(
         for row in wasm_rows
         if row.get("source") == "wasm-api" and row.get("testName")
     }
+
+    def normalize_wasm_api_row(test_id: str, row: dict) -> dict:
+        if wasm_context not in {"gaia_synced", "gaia_unsynced"} or test_id != "get_map_options":
+            return row
+        fields = row.get("fields")
+        if not isinstance(fields, dict) or not isinstance(fields.get("keys"), list):
+            return row
+        normalized_fields = dict(fields)
+        normalized_fields["keys"] = [
+            key for key in fields["keys"] if key not in GAIA_HARNESS_MAP_OPTION_KEYS
+        ]
+        normalized_row = dict(row)
+        normalized_row["fields"] = normalized_fields
+        return normalized_row
+
     wasm_status_rows = [
         row for row in wasm_rows if row.get("source") == "wasm-status"
     ]
@@ -858,7 +916,7 @@ def compare_wasm_details(
     api_error_matches = []
     for test_id in sorted(expected_ids & set(lua_api_rows) & set(wasm_api_rows)):
         expected_row = lua_api_rows[test_id]
-        actual_row = wasm_api_rows[test_id]
+        actual_row = normalize_wasm_api_row(test_id, wasm_api_rows[test_id])
         if expected_row.get("status") != "pass" or actual_row.get("status") != "pass":
             if (
                 expected_row.get("status") == "error"
@@ -916,7 +974,7 @@ def compare_wasm_details(
         for test_id in vacuous_ids[:20]:
             print(f"  vacuous Wasm result: {test_id}")
 
-    api_ok = fixture_status_ok and vacuity_ok and not (
+    api_ok = coverage_ok and fixture_status_ok and vacuity_ok and not (
         api_missing_lua
         or api_missing_wasm
         or api_unexpected_lua
@@ -960,6 +1018,11 @@ def compare_wasm_details(
         "api_lua_count": len(lua_api_rows),
         "api_wasm_count": len(wasm_api_rows),
         "api_ok": api_ok,
+        "coverage_ok": coverage_ok,
+        "coverage_source_count": len(source_ids),
+        "coverage_selected_count": len(selected_ids),
+        "coverage_excluded_count": len(excluded_ids),
+        "coverage_excluded": excluded_by_reason,
         "fixture_status_ok": fixture_status_ok,
         "fixture_status_rows": fixture_status_rows,
         "vacuity_threshold": WASM_VACUITY_THRESHOLD,
@@ -2094,10 +2157,12 @@ def write_coverage_details(
 
 
 def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict | None) -> None:
-    # --mode wasm is a single in-engine harness run.  That directory contains
-    # both source="lua-api" reference rows and source="wasm-api" observations.
-    lua_dir = base_output / ("wasm" if args.mode == "wasm" else "lua")
-    comparison_dir = base_output / ("wasm" if args.mode == "wasm" else "native")
+    # --mode wasm uses two isolated in-engine harness runs.  That directory
+    # contains source="lua-api" reference and source="wasm-api" observation
+    # runs.  The two runs are separate because setter probes mutate engine
+    # state and must not be applied twice to one world.
+    lua_dir = base_output / ("wasm_reference" if args.mode == "wasm" else "lua")
+    comparison_dir = base_output / ("wasm_guest" if args.mode == "wasm" else "native")
     surface_recorded_ids = read_surface_test_ids(base_output)
     required_surface_ids = requested_surface_test_ids(args)
     missing_required_surface_ids = sorted(required_surface_ids - surface_recorded_ids)
@@ -2128,7 +2193,10 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
     ]
 
     if args.mode == "wasm":
-        run_sections = (("In-engine Lua reference + Wasm harness", lua_dir),)
+        run_sections = (
+            ("Lua Wasm reference", lua_dir),
+            ("Wasm guest", comparison_dir),
+        )
     else:
         run_sections = (("Lua baseline", lua_dir), ("Native comparison", comparison_dir))
     for label, run_dir in run_sections:
@@ -2463,6 +2531,7 @@ def run_one(
     test_seed: int,
     wasm_module: Path | None = None,
     wasm_context: str = "synced_gadget",
+    wasm_role: str = "combined",
 ) -> Path:
     run_output = base_output / run_mode
     run_output.mkdir(parents=True, exist_ok=True)
@@ -2486,6 +2555,7 @@ def run_one(
             test_seed,
             wasm_context,
             wasm_module,
+            wasm_role,
         )
 
         exit_code = run_spring(args, datadir, script, run_output, run_mode, wasm_context)
@@ -2565,18 +2635,30 @@ def main() -> int:
     native_dir = None
     wasm_dir = None
     if args.mode == "wasm":
-        # The Wasm fixture records the Lua API reference and the Wasm
-        # observation in the same Spring process.  A second Lua-only boot is
-        # redundant for this gate and used to double the startup/render cost.
+        # Setter/getter probes intentionally mutate global engine state.  Run
+        # the Lua reference and Wasm guest in isolated scripted processes so
+        # the second side cannot observe the first side's mutations (for
+        # example an additive resource setter would otherwise be applied
+        # twice).  Both processes use the fixture's automatic quit path.
+        reference_dir = run_one(
+            args,
+            base_output,
+            "wasm_reference",
+            test_seed,
+            None,
+            args.wasm_context,
+            "reference",
+        )
         wasm_dir = run_one(
             args,
             base_output,
-            "wasm",
+            "wasm_guest",
             test_seed,
             WASM_CONTEXT_MODULES[args.wasm_context],
             args.wasm_context,
+            "guest",
         )
-        lua_dir = wasm_dir
+        lua_dir = reference_dir
     else:
         lua_dir = (
             run_one(args, base_output, "lua", test_seed, wasm_context=args.wasm_context)

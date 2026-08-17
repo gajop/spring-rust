@@ -12,7 +12,12 @@
 // A deliberately small, archive-friendly declaration format.  The engine's
 // VFS layer can provide the bytes later without changing this metadata parser:
 //
-//   module(name, path, rules-synced, 0)
+//   module(name, path, rules-synced, 0, 1.0.0)
+//
+// The fifth field is optional for compatibility with early development
+// manifests; omission means the current host interface version.  Content
+// packages should write it explicitly so an incompatible package fails with a
+// useful version diagnostic instead of reaching Component instantiation.
 //
 // `path` is content-relative and is never treated as a host-OS capability.
 struct WasmModuleDeclaration {
@@ -20,6 +25,7 @@ struct WasmModuleDeclaration {
 	std::string path;
 	WasmEnvironment environment = WasmEnvironment::RulesSynced;
 	std::uint32_t order = 0;
+	std::string interfaceVersion = "1.0.0";
 	// Filled by the multi-archive loader; the text format itself stays
 	// content-relative and does not trust archive paths from module authors.
 	std::string archive;

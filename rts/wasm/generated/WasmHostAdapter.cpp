@@ -68,11 +68,11 @@ NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,
 	std::string& error)
 {
 	if (module == "units_query") return DispatchNativeCalloutModule_units_query(nativeInterface, function, arguments, result, error);
-	if (module == "units_query_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced") return DispatchNativeCalloutModule_units_query(nativeInterface, function, arguments, result, error);
-	if (module == "units_query_rules_unsynced_gaia_unsynced") return DispatchNativeCalloutModule_units_query(nativeInterface, function, arguments, result, error);
+	if (module == "units_query_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_units_query(nativeInterface, function, arguments, result, error);
+	if (module == "units_query_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_units_query(nativeInterface, function, arguments, result, error);
 	if (module == "units_info") return DispatchNativeCalloutModule_units_info(nativeInterface, function, arguments, result, error);
-	if (module == "units_info_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced") return DispatchNativeCalloutModule_units_info(nativeInterface, function, arguments, result, error);
-	if (module == "units_info_rules_unsynced_gaia_unsynced") return DispatchNativeCalloutModule_units_info(nativeInterface, function, arguments, result, error);
+	if (module == "units_info_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_units_info(nativeInterface, function, arguments, result, error);
+	if (module == "units_info_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_units_info(nativeInterface, function, arguments, result, error);
 	if (module == "units_weapons") return DispatchNativeCalloutModule_units_weapons(nativeInterface, function, arguments, result, error);
 	if (module == "units_weapons") return DispatchNativeCalloutModule_units_weapons(nativeInterface, function, arguments, result, error);
 	if (module == "units_commands") return DispatchNativeCalloutModule_units_commands(nativeInterface, function, arguments, result, error);
@@ -83,8 +83,8 @@ NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,
 	if (module == "teams") return DispatchNativeCalloutModule_teams(nativeInterface, function, arguments, result, error);
 	if (module == "teams") return DispatchNativeCalloutModule_teams(nativeInterface, function, arguments, result, error);
 	if (module == "features") return DispatchNativeCalloutModule_features(nativeInterface, function, arguments, result, error);
-	if (module == "features_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced") return DispatchNativeCalloutModule_features(nativeInterface, function, arguments, result, error);
-	if (module == "features_rules_unsynced_gaia_unsynced") return DispatchNativeCalloutModule_features(nativeInterface, function, arguments, result, error);
+	if (module == "features_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_features(nativeInterface, function, arguments, result, error);
+	if (module == "features_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_features(nativeInterface, function, arguments, result, error);
 	if (module == "projectiles") return DispatchNativeCalloutModule_projectiles(nativeInterface, function, arguments, result, error);
 	if (module == "projectiles") return DispatchNativeCalloutModule_projectiles(nativeInterface, function, arguments, result, error);
 	if (module == "los") return DispatchNativeCalloutModule_los(nativeInterface, function, arguments, result, error);
@@ -114,7 +114,7 @@ NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,
 	if (module == "platform") return DispatchNativeCalloutModule_platform(nativeInterface, function, arguments, result, error);
 	if (module == "platform") return DispatchNativeCalloutModule_platform(nativeInterface, function, arguments, result, error);
 	if (module == "rules_params") return DispatchNativeCalloutModule_rules_params(nativeInterface, function, arguments, result, error);
-	if (module == "rules_params_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced") return DispatchNativeCalloutModule_rules_params(nativeInterface, function, arguments, result, error);
+	if (module == "rules_params_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_rules_params(nativeInterface, function, arguments, result, error);
 	if (module == "rules_params_rules_synced_gaia_synced") return DispatchNativeCalloutModule_rules_params(nativeInterface, function, arguments, result, error);
 	if (module == "move_ctrl") return DispatchNativeCalloutModule_move_ctrl(nativeInterface, function, arguments, result, error);
 	if (module == "move_ctrl_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_move_ctrl(nativeInterface, function, arguments, result, error);
@@ -172,8 +172,8 @@ NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,
 	if (module == "vfs_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_vfs(nativeInterface, function, arguments, result, error);
 	if (module == "vfs_ui") return DispatchNativeCalloutModule_vfs(nativeInterface, function, arguments, result, error);
 	if (module == "unsynced_read") return DispatchNativeCalloutModule_unsynced_read(nativeInterface, function, arguments, result, error);
-	if (module == "unsynced_read_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced") return DispatchNativeCalloutModule_unsynced_read(nativeInterface, function, arguments, result, error);
-	if (module == "unsynced_read_rules_unsynced_gaia_unsynced") return DispatchNativeCalloutModule_unsynced_read(nativeInterface, function, arguments, result, error);
+	if (module == "unsynced_read_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_unsynced_read(nativeInterface, function, arguments, result, error);
+	if (module == "unsynced_read_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_unsynced_read(nativeInterface, function, arguments, result, error);
 	if (module == "team_control") return DispatchNativeCalloutModule_team_control(nativeInterface, function, arguments, result, error);
 	if (module == "team_control") return DispatchNativeCalloutModule_team_control(nativeInterface, function, arguments, result, error);
 	if (module == "unit_control") return DispatchNativeCalloutModule_unit_control(nativeInterface, function, arguments, result, error);
@@ -320,18 +320,6 @@ bool SerializeCallinQuery(std::string_view name, const void* query,
 		return true;
 	}
 	if (name == "ArchiveCallin") {
-		if (query == nullptr) { error = "null native callin query"; return false; }
-		const SimpleCallinQuery notification{};
-		result = detail::Write_SimpleCallinQuery(notification);
-		return true;
-	}
-	if (name == "Load") {
-		if (query == nullptr) { error = "null native callin query"; return false; }
-		const SimpleCallinQuery notification{};
-		result = detail::Write_SimpleCallinQuery(notification);
-		return true;
-	}
-	if (name == "Save") {
 		if (query == nullptr) { error = "null native callin query"; return false; }
 		const SimpleCallinQuery notification{};
 		result = detail::Write_SimpleCallinQuery(notification);
@@ -597,6 +585,12 @@ bool SerializeCallinQuery(std::string_view name, const void* query,
 		result = detail::Write_LastMessagePositionQuery(*static_cast<const LastMessagePositionQuery*>(query));
 		return true;
 	}
+	if (name == "Load") {
+		if (query == nullptr) { error = "null native callin query"; return false; }
+		const SimpleCallinQuery notification{};
+		result = detail::Write_SimpleCallinQuery(notification);
+		return true;
+	}
 	if (name == "MapDrawCmd") {
 		if (query == nullptr) { error = "null native callin query"; return false; }
 		result = detail::Write_MapDrawCmdQuery(*static_cast<const MapDrawCmdQuery*>(query));
@@ -710,6 +704,12 @@ bool SerializeCallinQuery(std::string_view name, const void* query,
 	if (name == "ResourceExcess") {
 		if (query == nullptr) { error = "null native callin query"; return false; }
 		result = detail::Write_ResourceExcessQuery(*static_cast<const ResourceExcessQuery*>(query));
+		return true;
+	}
+	if (name == "Save") {
+		if (query == nullptr) { error = "null native callin query"; return false; }
+		const SimpleCallinQuery notification{};
+		result = detail::Write_SimpleCallinQuery(notification);
 		return true;
 	}
 	if (name == "ScreenPosition") {

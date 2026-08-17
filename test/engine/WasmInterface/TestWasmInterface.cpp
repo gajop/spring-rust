@@ -20,6 +20,28 @@
 #include "WasmInterface/WasmRuntime.h"
 
 namespace {
+	std::vector<std::uint8_t> WrapNestedComponent(const std::vector<std::uint8_t>& child)
+	{
+		// Component section 4 contains a complete nested component.  Keeping the
+		// encoder here makes the boundary fixture independent of a host-side
+		// wasm-tools installation and lets the validator see real recursive type
+		// structure rather than merely a max-depth setting.
+		std::vector<std::uint8_t> result = {
+			0x00, 'a', 's', 'm', 0x0d, 0x00, 0x01, 0x00, 0x04,
+		};
+		std::size_t size = child.size();
+		while (true) {
+			std::uint8_t byte = static_cast<std::uint8_t>(size & 0x7f);
+			size >>= 7;
+			if (size != 0)
+				byte |= 0x80;
+			result.push_back(byte);
+			if (size == 0)
+				break;
+		}
+		result.insert(result.end(), child.begin(), child.end());
+		return result;
+	}
 
 #if defined(__SANITIZE_ADDRESS__)
 constexpr bool kBuildUsesAsan = true;
@@ -47,7 +69,11 @@ TEST_CASE("Wasm environments keep synced and unsynced worlds separate")
 	CHECK_FALSE(WasmEnvironmentMatrix::Policy(environment).synced);
 	CHECK(WasmEnvironmentMatrix::HasModule(environment, "unsynced_read"));
 	CHECK_FALSE(WasmEnvironmentMatrix::HasModule(environment, "synced_ctrl"));
-	CHECK_FALSE(WasmEnvironmentMatrix::IsRuntimeEnabled(WasmEnvironment::UI));
+	CHECK(WasmEnvironmentMatrix::IsRuntimeEnabled(WasmEnvironment::UI));
+	CHECK_FALSE(WasmEnvironmentMatrix::Policy(WasmEnvironment::UI).synced);
+	CHECK_FALSE(WasmEnvironmentMatrix::Policy(WasmEnvironment::UI).permitsSimulationMutation);
+	CHECK(WasmEnvironmentMatrix::HasModule(WasmEnvironment::UI, "units_info"));
+	CHECK(WasmEnvironmentMatrix::HasModule(WasmEnvironment::UI, "unit_control"));
 }
 
 TEST_CASE("Wasm resources reject foreign and stale handles")
@@ -131,6 +157,40 @@ TEST_CASE("Wasm module cleanup runs before backend teardown")
 	CHECK(cleanupOrder == std::vector<int>{2, 1});
 }
 
+TEST_CASE("Wasm fault cleanup is isolated across multiple instances")
+{
+	const std::vector<std::uint8_t> validCore = {
+		0x00, 'a', 's', 'm', 0x01, 0x00, 0x00, 0x00,
+	};
+	WasmRuntime runtime;
+	WasmModule first(10, {
+		.name = "fault-first",
+		.source = "fault-first.wasm",
+		.environment = WasmEnvironment::RulesUnsynced,
+		.bytes = validCore,
+	}, runtime);
+	WasmModule second(11, {
+		.name = "fault-second",
+		.source = "fault-second.wasm",
+		.environment = WasmEnvironment::RulesUnsynced,
+		.bytes = validCore,
+	}, runtime);
+	std::string error;
+	REQUIRE(first.Initialize(error));
+	REQUIRE(second.Initialize(error));
+	std::vector<int> cleanup;
+	REQUIRE(first.RegisterCleanup([&cleanup]() { cleanup.push_back(1); }));
+	REQUIRE(second.RegisterCleanup([&cleanup]() { cleanup.push_back(2); }));
+	first.Fault("synthetic unsynced trap");
+	CHECK(first.State() == WasmModuleState::Faulted);
+	CHECK(second.State() == WasmModuleState::Running);
+	first.Shutdown();
+	CHECK(cleanup == std::vector<int>{1});
+	CHECK(second.State() == WasmModuleState::Running);
+	second.Shutdown();
+	CHECK(cleanup == std::vector<int>{1, 2});
+}
+
 TEST_CASE("Wasm validation fails closed for invalid and oversized inputs")
 {
 	WasmRuntimeConfig config;
@@ -140,7 +200,7 @@ TEST_CASE("Wasm validation fails closed for invalid and oversized inputs")
 	const std::vector<std::uint8_t> validCore = {0x00, 'a', 's', 'm', 0x01, 0x00, 0x00, 0x00};
 	CHECK(runtime.ValidateModule(validCore, WasmEnvironment::RulesSynced, "rules-synced").valid);
 	CHECK_FALSE(runtime.ValidateModule({}, WasmEnvironment::RulesSynced, "rules-synced").valid);
-	CHECK_FALSE(runtime.ValidateModule(validCore, WasmEnvironment::UI, "ui").valid);
+	CHECK(runtime.ValidateModule(validCore, WasmEnvironment::UI, "ui").valid);
 
 	const std::vector<std::uint8_t> oversized(9, 0);
 	CHECK_FALSE(runtime.ValidateModule(oversized, WasmEnvironment::RulesSynced, "rules-synced").valid);
@@ -163,6 +223,14 @@ TEST_CASE("Wasm validation fails closed for invalid and oversized inputs")
 		WasmEnvironment::RulesSynced, "rules-synced");
 	CHECK_FALSE(nestingResult.valid);
 	CHECK(nestingResult.error.find("nesting exceeds configured maximum") != std::string::npos);
+	const auto pathologicalComponent = WrapNestedComponent(WrapNestedComponent(validComponent));
+	WasmRuntimeConfig pathologicalConfig;
+	pathologicalConfig.maxComponentNesting = 1;
+	WasmRuntime pathologicalRuntime(pathologicalConfig);
+	const auto pathologicalResult = pathologicalRuntime.ValidateModule(pathologicalComponent,
+		WasmEnvironment::RulesSynced, "rules-synced");
+	CHECK_FALSE(pathologicalResult.valid);
+	CHECK(pathologicalResult.error.find("nesting exceeds configured maximum") != std::string::npos);
 	std::vector<std::uint8_t> incompatibleVersion = validComponent;
 	const std::string componentVersion = "@1.0.0";
 	const auto versionBegin = std::search(incompatibleVersion.begin(), incompatibleVersion.end(),
@@ -171,6 +239,10 @@ TEST_CASE("Wasm validation fails closed for invalid and oversized inputs")
 	*(versionBegin + 1) = '2';
 	CHECK_FALSE(componentRuntime.ValidateModule(incompatibleVersion,
 		WasmEnvironment::RulesSynced, "rules-synced").valid);
+	const auto incompatibleInterface = componentRuntime.ValidateModule(validComponent,
+		WasmEnvironment::RulesSynced, "rules-synced", "2.0.0");
+	CHECK_FALSE(incompatibleInterface.valid);
+	CHECK(incompatibleInterface.error.find("interface version") != std::string::npos);
 	std::vector<std::uint8_t> deniedComponent = validComponent;
 	const std::string deniedPrefix = "recoil:";
 	const auto deniedPrefixBegin = std::search(deniedComponent.begin(), deniedComponent.end(),
@@ -245,6 +317,11 @@ TEST_CASE("Wasm validation fails closed for invalid and oversized inputs")
 	};
 	CHECK_FALSE(policyRuntime.ValidateModule(oneExport, WasmEnvironment::RulesSynced, "rules-synced").valid);
 	CHECK_FALSE(policyRuntime.CanDeserializeAot("module", "runtime"));
+	WasmRuntimeConfig aotConfig;
+	aotConfig.allowAotDeserialization = true;
+	WasmRuntime aotRuntime(aotConfig);
+	CHECK_FALSE(aotRuntime.CanDeserializeAot("valid-hash", "matching-runtime"));
+	CHECK_FALSE(aotRuntime.CanDeserializeAot("tampered-hash", "matching-runtime"));
 	CHECK(componentRuntime.ConfigurationIdentity().find("wasmtime=42.0.1") != std::string::npos);
 	CHECK(componentRuntime.ConfigurationIdentity().find("nan-canonicalization=1") != std::string::npos);
 	CHECK(componentRuntime.ConfigurationIdentity() != policyRuntime.ConfigurationIdentity());

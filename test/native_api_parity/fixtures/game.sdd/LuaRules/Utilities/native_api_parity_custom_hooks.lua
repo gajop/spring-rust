@@ -1113,7 +1113,14 @@ TEST_HOOKS[#TEST_HOOKS + 1] = {
 		local groups = {}
 		for unitDefID, unitIDs in pairs(unitsByDef) do
 			if type(unitDefID) == "number" and type(unitIDs) == "table" then
-				groups[#groups + 1] = { unitDefID = unitDefID, unitIDs = unitIDs }
+				local compactIDs = {}
+				for key, unitID in pairs(unitIDs) do
+					if type(key) == "number" and type(unitID) == "number" then
+						compactIDs[#compactIDs + 1] = unitID
+					end
+				end
+				table.sort(compactIDs)
+				groups[#groups + 1] = { unitDefID = unitDefID, unitIDs = compactIDs }
 			end
 		end
 		table.sort(groups, function(a, b) return a.unitDefID < b.unitDefID end)

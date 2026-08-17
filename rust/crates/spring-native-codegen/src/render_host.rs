@@ -230,7 +230,10 @@ pub fn render_native_adapter(model: &ApiModel) -> String {
         if !simple_record(record, &records, &mut Vec::new()) {
             continue;
         }
-        let notification_only = callin.name == "ArchiveCallin";
+        let notification_only = callin
+            .flags
+            .iter()
+            .any(|flag| flag == "archive-notification");
         serializable_callins.push((callin.name.clone(), callin.query.clone(), notification_only));
         for alias in &callin.aliases {
             serializable_callins.push((alias.clone(), callin.query.clone(), notification_only));
@@ -478,7 +481,10 @@ pub fn render_native_adapter_common(model: &ApiModel) -> String {
         if !simple_record(record, &records, &mut Vec::new()) {
             continue;
         }
-        let notification_only = callin.name == "ArchiveCallin";
+        let notification_only = callin
+            .flags
+            .iter()
+            .any(|flag| flag == "archive-notification");
         let mut names = vec![callin.name.as_str()];
         names.extend(callin.aliases.iter().map(String::as_str));
         for name in names {

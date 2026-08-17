@@ -7,7 +7,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -19,7 +20,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -269,9 +271,8 @@
       "gaia-unsynced"
     ],
     "aggregation": "ignore",
-    "aliases": [
-      "Load",
-      "Save"
+    "flags": [
+      "archive-notification"
     ]
   },
   {
@@ -282,7 +283,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -306,7 +308,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -318,7 +321,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "first"
   },
@@ -330,7 +334,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -342,7 +347,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -354,7 +360,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -366,7 +373,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -378,7 +386,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -390,7 +399,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -406,7 +416,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -442,7 +453,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -470,7 +482,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -511,7 +524,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -523,7 +537,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -535,7 +550,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -547,7 +563,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -559,7 +576,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -571,7 +589,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -595,7 +614,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -611,7 +631,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -623,7 +644,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -635,7 +657,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -647,7 +670,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -659,7 +683,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -671,7 +696,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -705,7 +731,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -717,7 +744,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -765,7 +793,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -777,7 +806,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -789,7 +819,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -801,9 +832,26 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
+  },
+  {
+    "name": "Load",
+    "query": "SimpleCallinQuery",
+    "result": "ArchiveCallinResult",
+    "environments": [
+      "rules-synced",
+      "rules-unsynced",
+      "gaia-synced",
+      "gaia-unsynced",
+      "ui"
+    ],
+    "aggregation": "ignore",
+    "flags": [
+      "archive-notification"
+    ]
   },
   {
     "name": "MapDrawCmd",
@@ -813,7 +861,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -825,7 +874,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -841,7 +891,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -853,7 +904,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -865,7 +917,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -877,7 +930,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -889,7 +943,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -901,7 +956,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -913,7 +969,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -937,7 +994,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -949,7 +1007,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -961,7 +1020,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -984,7 +1044,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -1000,7 +1061,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -1015,7 +1077,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1032,6 +1095,21 @@
     "aggregation": "or-true"
   },
   {
+    "name": "Save",
+    "query": "SimpleCallinQuery",
+    "result": "ArchiveCallinResult",
+    "environments": [
+      "rules-synced",
+      "rules-unsynced",
+      "gaia-synced",
+      "gaia-unsynced"
+    ],
+    "aggregation": "ignore",
+    "flags": [
+      "archive-notification"
+    ]
+  },
+  {
     "name": "ScreenPosition",
     "query": "ScreenPositionQuery",
     "result": "BoolCallinResult",
@@ -1039,7 +1117,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true",
     "aliases": [
@@ -1054,7 +1133,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "first-non-empty",
     "aliases": [
@@ -1081,7 +1161,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1093,7 +1174,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -1126,7 +1208,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1138,7 +1221,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1150,7 +1234,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1162,7 +1247,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1186,7 +1272,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -1198,7 +1285,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -1210,7 +1298,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -1226,7 +1315,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1238,7 +1328,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1250,7 +1341,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1262,7 +1354,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1274,7 +1367,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1286,7 +1380,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1298,7 +1393,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1310,7 +1406,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -1322,7 +1419,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1334,7 +1432,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1346,7 +1445,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1358,7 +1458,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1370,7 +1471,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1382,7 +1484,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1394,7 +1497,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -1412,7 +1516,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -1429,7 +1534,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore",
     "aliases": [
@@ -1461,7 +1567,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1473,7 +1580,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1485,7 +1593,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1497,7 +1606,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1509,7 +1619,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "or-true"
   },
@@ -1521,7 +1632,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },
@@ -1544,7 +1656,8 @@
       "rules-synced",
       "rules-unsynced",
       "gaia-synced",
-      "gaia-unsynced"
+      "gaia-unsynced",
+      "ui"
     ],
     "aggregation": "ignore"
   },

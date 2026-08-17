@@ -12,7 +12,7 @@ namespace {
 		{WasmEnvironment::RulesUnsynced, "rules-unsynced", false, true, false},
 		{WasmEnvironment::GaiaSynced, "gaia-synced", true, true, true},
 		{WasmEnvironment::GaiaUnsynced, "gaia-unsynced", false, true, false},
-		{WasmEnvironment::UI, "ui", false, false, false},
+		{WasmEnvironment::UI, "ui", false, true, false},
 	};
 	constexpr WasmEnvironmentPolicy INVALID_POLICY = {
 		WasmEnvironment::UI, "invalid", false, false, false,

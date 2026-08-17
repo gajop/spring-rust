@@ -16,6 +16,7 @@ inline constexpr std::string_view RECOIL_WASMTIME_VERSION = "42.0.1";
 inline constexpr std::string_view RECOIL_WASM_INTERFACE_PREFIX =
 	"recoil:spring-api/";
 inline constexpr std::string_view RECOIL_WASM_INTERFACE_VERSION = "@1.0.0";
+inline constexpr std::string_view RECOIL_WASM_INTERFACE_VERSION_NUMBER = "1.0.0";
 
 enum class WasmRuntimeBackend : std::uint8_t {
 	Unavailable,
@@ -73,7 +74,8 @@ public:
 	bool IsAvailable() const { return backend != WasmRuntimeBackend::Unavailable; }
 
 	WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
-		WasmEnvironment environment, std::string_view requestedWorld) const;
+		WasmEnvironment environment, std::string_view requestedWorld,
+		std::string_view requestedInterfaceVersion = RECOIL_WASM_INTERFACE_VERSION_NUMBER) const;
 	// Stable text identity for the runtime feature/limit profile.  Synced
 	// module configuration includes this alongside the module hash.
 	std::string ConfigurationIdentity() const;

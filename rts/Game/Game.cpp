@@ -472,7 +472,9 @@ void CGame::Load(const std::string& mapFileName)
 		if (!nativeInterfaceSystem->LoadWasmManifest(
 				"LuaRules/wasm/manifest.txt", SPRING_VFS_MOD, wasmError) ||
 			!nativeInterfaceSystem->LoadWasmManifest(
-				"LuaGaia/wasm/manifest.txt", SPRING_VFS_MAP, wasmError)) {
+				"LuaGaia/wasm/manifest.txt", SPRING_VFS_MAP, wasmError) ||
+			!nativeInterfaceSystem->LoadWasmManifest(
+				"LuaUI/wasm/manifest.txt", SPRING_VFS_MOD, wasmError)) {
 			contentErrors.emplace_back(wasmError);
 			nativeInterfaceSystem->UnloadAllWasmModules();
 			forcedQuit = true;
