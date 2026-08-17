@@ -52,6 +52,7 @@
 #include "System/ScopedFPUSettings.h"
 #include "System/StringUtil.h"
 #include "System/Log/ILog.h"
+#include "System/BenchmarkCallins.h"
 #include "System/Input/KeyInput.h"
 #include "System/Platform/SDL1_keysym.h"
 
@@ -68,6 +69,7 @@
 #include <tracy/TracyLua.hpp>
 
 #include <algorithm>
+#include <cstring>
 #include <string>
 
 
@@ -360,6 +362,26 @@ int CLuaHandle::RunCallInTraceback(
 	bool popErrorFunc
 ) {
 	RECOIL_DETAILED_TRACY_ZONE;
+	const char* benchmarkName = hs != nullptr ? hs->GetString() : "";
+	if (strcmp(benchmarkName, "GameFrame") == 0)
+		benchmarkName = spring::benchmark_callins::GameFrameTestName().data();
+	else if (strcmp(benchmarkName, "Update") == 0)
+		benchmarkName = "callin_update";
+	else if (strcmp(benchmarkName, "DrawWorld") == 0)
+		benchmarkName = "callin_drawworld";
+	else if (strcmp(benchmarkName, "UnitCreated") == 0)
+		benchmarkName = "callin_unitcreated";
+	else if (strcmp(benchmarkName, "UnitPreDamaged") == 0)
+		benchmarkName = "callin_unitpredamaged";
+	else if (strcmp(benchmarkName, "AllowUnitCreation") == 0)
+		benchmarkName = "callin_allowunitcreation";
+	// DrawWorld is delivered to both LuaRules and LuaUI.  The UI draw profile
+	// measures the UI handle, so exclude the synced LuaRules invocation from
+	// that one profile while retaining the normal recorder behavior elsewhere.
+	const bool skipRulesDraw = spring::benchmark_callins::IsCase("draw") &&
+		strcmp(benchmarkName, "callin_drawworld") == 0 && this != luaUI;
+	const auto benchmarkToken = skipRulesDraw ? spring::benchmark_callins::Token{} :
+		spring::benchmark_callins::Begin("lua", benchmarkName);
 	// do not signal floating point exceptions in user Lua code
 	ScopedDisableFpuExceptions fe;
 
@@ -486,6 +508,7 @@ int CLuaHandle::RunCallInTraceback(
 	// TODO: use closure so we do not need to copy args
 	ScopedLuaCall call(this, L, (hs != nullptr)? hs->GetString(): "LUS::?", inArgs, outArgs, errFuncIndex, popErrorFunc);
 	call.CheckFixStack(*ts);
+	spring::benchmark_callins::End(benchmarkToken);
 
 	return (call.GetError());
 }
@@ -872,6 +895,21 @@ void CLuaHandle::GameFrame(int frameNum)
 	const LuaUtils::ScopedDebugTraceBack traceBack(L);
 
 	static const LuaHashString cmdStr(__func__);
+	if (spring::benchmark_callins::IsCase("callins") &&
+		spring::benchmark_callins::IsVariant("unimplemented") &&
+		GetHandleSynced(L)) {
+		// The benchmark's unimplemented variant deliberately has no GameFrame
+		// function in the fixture.  Keep the lookup itself inside the measured
+		// region: this is the Lua equivalent of the native/Wasm missing-export
+		// check, rather than a guest-side empty callback.
+		const auto benchmarkToken = spring::benchmark_callins::Begin(
+			"lua", "callin_unimplemented");
+		const bool hasCallin = cmdStr.GetGlobalFunc(L);
+		if (hasCallin)
+			lua_pop(L, 1);
+		spring::benchmark_callins::End(benchmarkToken);
+		return;
+	}
 
 	if (!cmdStr.GetGlobalFunc(L))
 		return;

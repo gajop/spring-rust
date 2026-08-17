@@ -319,6 +319,7 @@ interface messages {
   record spring-error { code: s32 }
 
   send-lua-rules-msg: func(message: string) -> result<bool, spring-error>;
+  send-to-unsynced: func(message: string) -> result<bool, spring-error>;
 }
 
 interface metal-map {

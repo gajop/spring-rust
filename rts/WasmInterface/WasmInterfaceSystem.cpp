@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cctype>
 #include <iterator>
+#include <limits>
+#include <utility>
 
 #include "System/Log/ILog.h"
 #include "wasm/generated/WasmCallinRegistry.h"
@@ -120,8 +122,68 @@ namespace {
 	}
 }
 
-WasmInterfaceSystem::WasmInterfaceSystem(WasmHostAdapter* hostAdapter)
-	: runtime(std::make_unique<WasmRuntime>())
+bool WasmInterfaceSystem::AggregateCallinResult(std::string_view aggregation,
+	const WasmValue& value, bool& haveResult, WasmValue& result, std::string& error)
+{
+	if (aggregation == "or-true") {
+		bool moduleValue = false;
+		if (!ReadBooleanResult(value, moduleValue, error))
+			return false;
+		bool aggregateValue = false;
+		if (haveResult && !ReadBooleanResult(result, aggregateValue, error))
+			return false;
+		result = WasmValue::Record({
+			{"value", WasmValue::Bool(aggregateValue || moduleValue)},
+		});
+		haveResult = true;
+		return true;
+	}
+
+	if (aggregation == "and-false") {
+		bool moduleValue = true;
+		if (!ReadBooleanResult(value, moduleValue, error))
+			return false;
+		bool aggregateValue = true;
+		if (haveResult && !ReadBooleanResult(result, aggregateValue, error))
+			return false;
+		result = WasmValue::Record({
+			{"value", WasmValue::Bool(aggregateValue && moduleValue)},
+		});
+		haveResult = true;
+		return true;
+	}
+
+	if (aggregation == "first") {
+		if (!haveResult)
+			result = value;
+		haveResult = true;
+		return true;
+	}
+
+	if (aggregation == "first-non-empty") {
+		std::string moduleValue;
+		if (!ReadStringResult(value, moduleValue, error))
+			return false;
+		if (!haveResult) {
+			result = value;
+		} else if (!moduleValue.empty()) {
+			std::string aggregateValue;
+			if (!ReadStringResult(result, aggregateValue, error))
+				return false;
+			if (aggregateValue.empty())
+				result = value;
+		}
+		haveResult = true;
+		return true;
+	}
+
+	error = "unknown Wasm callin aggregation rule: " + std::string(aggregation);
+	return false;
+}
+
+WasmInterfaceSystem::WasmInterfaceSystem(WasmHostAdapter* hostAdapter,
+	WasmRuntimeConfig runtimeConfig)
+	: runtime(std::make_unique<WasmRuntime>(std::move(runtimeConfig)))
 	, hostAdapter(hostAdapter)
 {
 	LOG("Wasm interface system initialized (policy backend: %s)",
@@ -304,7 +366,10 @@ bool WasmInterfaceSystem::DispatchCallin(const WasmCallinEvent& event,
 		return false;
 	}
 	WasmCallinEvent canonicalEvent = event;
-	canonicalEvent.name = descriptor->canonical;
+	// The generated WIT surface preserves aliases as distinct exports.  Use the
+	// source callin name at the guest boundary; `canonical` remains the shared
+	// query/result/aggregation description for host-side dispatch.
+	canonicalEvent.name = descriptor->name;
 	for (const auto& module : modules) {
 		if (module->Descriptor().environment != environment)
 			continue;
@@ -343,7 +408,7 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 	}
 	const std::string exportPath = "recoil:spring-api/callins-" +
 		ToWitName(WasmEnvironmentMatrix::Name(environment)) + "@1.0.0/" +
-		ToWitName(descriptor->canonical);
+		ToWitName(descriptor->name);
 	bool haveResult = false;
 	for (const auto& module : modules) {
 		if (module->Descriptor().environment != environment)
@@ -365,58 +430,11 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 		if (descriptor->aggregation == "ignore")
 			continue;
 
-		if (descriptor->aggregation == "or-true") {
-			bool moduleValue = false;
-			if (!ReadBooleanResult(payload, moduleValue, error)) {
-				if (WasmEnvironmentMatrix::Policy(environment).synced)
-					module->Fault(error);
-				return false;
-			}
-			bool aggregateValue = false;
-			if (haveResult && !ReadBooleanResult(result, aggregateValue, error)) {
-				FaultSyncedModules(environment, error);
-				return false;
-			}
-			result = WasmValue::Record({
-				{"value", WasmValue::Bool(aggregateValue || moduleValue)},
-			});
-			haveResult = true;
-			continue;
+		if (!AggregateCallinResult(descriptor->aggregation, payload, haveResult, result, error)) {
+			if (WasmEnvironmentMatrix::Policy(environment).synced)
+				module->Fault(error);
+			return false;
 		}
-
-		if (descriptor->aggregation == "first") {
-			if (!haveResult)
-				result = payload;
-			haveResult = true;
-			continue;
-		}
-
-		if (descriptor->aggregation == "first-non-empty") {
-			std::string moduleValue;
-			if (!ReadStringResult(payload, moduleValue, error)) {
-				if (WasmEnvironmentMatrix::Policy(environment).synced)
-					module->Fault(error);
-				return false;
-			}
-			if (!haveResult) {
-				result = payload;
-			} else if (!moduleValue.empty()) {
-				std::string aggregateValue;
-				if (!ReadStringResult(result, aggregateValue, error)) {
-					FaultSyncedModules(environment, error);
-					return false;
-				}
-				if (aggregateValue.empty())
-					result = payload;
-			}
-			haveResult = true;
-			continue;
-		}
-
-		error = "unknown Wasm callin aggregation rule: " +
-			std::string(descriptor->aggregation);
-		FaultSyncedModules(environment, error);
-		return false;
 	}
 	return true;
 }
@@ -460,59 +478,33 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 			descriptor->aggregation == "ignore")
 			continue;
 
-		if (descriptor->aggregation == "or-true") {
-			bool environmentValue = false;
-			if (!ReadBooleanResult(environmentResult, environmentValue, error)) {
-				FaultSyncedModules(environment, error);
-				return false;
-			}
-			bool aggregateValue = false;
-			if (haveResult && !ReadBooleanResult(result, aggregateValue, error)) {
-				FaultSyncedModules(environment, error);
-				return false;
-			}
-			result = WasmValue::Record({
-				{"value", WasmValue::Bool(aggregateValue || environmentValue)},
-			});
-			haveResult = true;
-			continue;
+		if (!AggregateCallinResult(descriptor->aggregation, environmentResult,
+			haveResult, result, error)) {
+			for (const CallinInvocation& candidate : invocations)
+				FaultSyncedModules(candidate.environment, error);
+			return false;
 		}
-
-		if (descriptor->aggregation == "first") {
-			if (!haveResult)
-				result = environmentResult;
-			haveResult = true;
-			continue;
-		}
-
-		if (descriptor->aggregation == "first-non-empty") {
-			std::string environmentValue;
-			if (!ReadStringResult(environmentResult, environmentValue, error)) {
-				FaultSyncedModules(environment, error);
-				return false;
-			}
-			if (!haveResult) {
-				result = environmentResult;
-			} else if (!environmentValue.empty()) {
-				std::string aggregateValue;
-				if (!ReadStringResult(result, aggregateValue, error)) {
-					FaultSyncedModules(environment, error);
-					return false;
-				}
-				if (aggregateValue.empty())
-					result = environmentResult;
-			}
-			haveResult = true;
-			continue;
-		}
-
-		error = "unknown Wasm callin aggregation rule: " +
-			std::string(descriptor->aggregation);
-		for (const CallinInvocation& invocation : invocations)
-			FaultSyncedModules(invocation.environment, error);
-		return false;
 	}
 	return true;
+}
+
+bool WasmInterfaceSystem::DispatchSyncedMessage(std::string_view message,
+	std::string& error)
+{
+	if (message.size() > std::numeric_limits<std::uint32_t>::max()) {
+		error = "synced Wasm message exceeds the 32-bit length limit";
+		return false;
+	}
+
+	WasmValue result;
+	return DispatchCallin("RecvFromSynced", {
+		WasmValue::Record({
+			{"message", WasmValue::String(std::string(message))},
+			{"messageLength", WasmValue::U64(message.size())},
+		}),
+	},
+		{WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced},
+		result, error);
 }
 
 std::size_t WasmInterfaceSystem::ModuleCount() const

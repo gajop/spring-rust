@@ -842,11 +842,9 @@ pub struct CodeGenerator {
 
 impl CodeGenerator {
     pub fn new() -> Result<Self> {
-        let clang = Clang::new().map_err(|error| anyhow!(error))?;
-        Ok(Self {
-            clang,
-            lua_loaders: lua_loader::LuaLoaderMatrix::default(),
-        })
+        Err(anyhow!(
+            "repository root is required for API generation; use CodeGenerator::with_repository_root"
+        ))
     }
 
     pub fn with_repository_root(root: &Path) -> Result<Self> {
@@ -2423,7 +2421,8 @@ struct SyntheticApi {
         )
         .unwrap();
 
-        let generator = CodeGenerator::new().unwrap();
+        let repository_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../..");
+        let generator = CodeGenerator::with_repository_root(&repository_root).unwrap();
         let module = generator
             .semantic_module(&path, &[], "SyntheticApi", "synthetic")
             .unwrap();

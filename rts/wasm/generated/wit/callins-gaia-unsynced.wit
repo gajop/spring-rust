@@ -19,145 +19,6 @@ interface callins-gaia-unsynced {
     level: s32,
   }
 
-  record allow-builder-hold-fire-query {
-    unit-id: s32,
-    unit-def-id: s32,
-    action: s32,
-  }
-
-  record allow-direct-unit-control-query {
-    unit-id: s32,
-    unit-def-id: s32,
-    unit-team: s32,
-    player-id: s32,
-  }
-
-  record allow-feature-build-step-query {
-    builder-id: s32,
-    builder-team: s32,
-    feature-id: s32,
-    feature-def-id: s32,
-    part: f32,
-  }
-
-  record allow-feature-creation-query {
-    feature-def-id: s32,
-    team-id: s32,
-    position: float3,
-  }
-
-  record allow-resource-level-query {
-    team-id: s32,
-    %type: string,
-    level: f32,
-  }
-
-  record allow-resource-transfer-query {
-    old-team: s32,
-    new-team: s32,
-    %type: string,
-    amount: f32,
-  }
-
-  record allow-start-position-query {
-    player-id: s32,
-    team-id: s32,
-    ready-state: u8,
-    clamped-pos: float3,
-    raw-pick-pos: float3,
-  }
-
-  record allow-unit-build-step-query {
-    builder-id: s32,
-    builder-team: s32,
-    unit-id: s32,
-    unit-def-id: s32,
-    part: f32,
-  }
-
-  record allow-unit-cloak-query {
-    unit-id: s32,
-    has-enemy: bool,
-    enemy-id: s32,
-  }
-
-  record allow-unit-creation-query {
-    unit-def-id: s32,
-    builder-id: s32,
-    builder-team: s32,
-    has-build-info: bool,
-    build-pos: float3,
-    build-facing: s32,
-  }
-
-  record allow-unit-creation-result {
-    allow: bool,
-    drop-order: bool,
-  }
-
-  record allow-unit-decloak-query {
-    unit-id: s32,
-    has-object: bool,
-    object-id: s32,
-    has-weapon: bool,
-    weapon-num: s32,
-  }
-
-  record allow-unit-kamikaze-query {
-    unit-id: s32,
-    target-id: s32,
-    allowed: bool,
-  }
-
-  record allow-unit-transfer-query {
-    unit-id: s32,
-    unit-def-id: s32,
-    old-team: s32,
-    new-team: s32,
-    capture: bool,
-  }
-
-  record allow-unit-transport-position-query {
-    units: allow-unit-transport-query,
-    position: float3,
-    allowed: bool,
-  }
-
-  record allow-unit-transport-query {
-    transporter-id: s32,
-    transporter-def-id: s32,
-    transporter-team: s32,
-    transportee-id: s32,
-    transportee-def-id: s32,
-    transportee-team: s32,
-  }
-
-  record allow-weapon-intercept-target-query {
-    interceptor-unit-id: s32,
-    interceptor-weapon-id: s32,
-    interceptor-target-id: s32,
-  }
-
-  record allow-weapon-target-check-query {
-    attacker-id: s32,
-    attacker-weapon-num: s32,
-    attacker-weapon-def-id: s32,
-  }
-
-  record allow-weapon-target-query {
-    attacker-id: s32,
-    target-id: s32,
-    attacker-weapon-num: s32,
-    attacker-weapon-def-id: s32,
-    has-target-priority: bool,
-    target-priority: f32,
-  }
-
-  record allow-weapon-target-result {
-    allowed: bool,
-    target-priority: f32,
-  }
-
   record bool-callin-result {
     value: bool,
   }
@@ -389,10 +250,6 @@ interface callins-gaia-unsynced {
     module-version-patch: u32,
   }
 
-  record int-callin-result {
-    value: s32,
-  }
-
   record key-action {
     command: string,
     extra: string,
@@ -538,6 +395,11 @@ interface callins-gaia-unsynced {
     z1: s32,
     x2: s32,
     z2: s32,
+  }
+
+  record recv-from-synced-query {
+    message: string,
+    message-length: u32,
   }
 
   record render-unit-destroyed-query {
@@ -833,72 +695,6 @@ interface callins-gaia-unsynced {
   /// aggregation: or-true
   add-console-line: func(query: add-console-line-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
-  allow-builder-hold-fire: func(query: allow-builder-hold-fire-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-command: func(query: unit-command-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-direct-unit-control: func(query: allow-direct-unit-control-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-feature-build-step: func(query: allow-feature-build-step-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-feature-creation: func(query: allow-feature-creation-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-resource-level: func(query: allow-resource-level-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-resource-transfer: func(query: allow-resource-transfer-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-start-position: func(query: allow-start-position-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-build-step: func(query: allow-unit-build-step-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-capture-step: func(query: allow-unit-build-step-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-cloak: func(query: allow-unit-cloak-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: first
-  allow-unit-creation: func(query: allow-unit-creation-query) -> result<allow-unit-creation-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-decloak: func(query: allow-unit-decloak-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-kamikaze: func(query: allow-unit-kamikaze-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-transfer: func(query: allow-unit-transfer-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-transport: func(query: allow-unit-transport-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-transport-position: func(query: allow-unit-transport-position-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-transport-load: func(query: allow-unit-transport-position-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-unit-transport-unload: func(query: allow-unit-transport-position-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: or-true
-  allow-weapon-intercept-target: func(query: allow-weapon-intercept-target-query) -> result<bool-callin-result, spring-error>;
-
-  /// aggregation: first
-  allow-weapon-target: func(query: allow-weapon-target-query) -> result<allow-weapon-target-result, spring-error>;
-
-  /// aggregation: first
-  allow-weapon-target-check: func(query: allow-weapon-target-check-query) -> result<int-callin-result, spring-error>;
-
   /// aggregation: ignore
   archive-callin: func(query: simple-callin-query) -> result<_, spring-error>;
 
@@ -1123,6 +919,9 @@ interface callins-gaia-unsynced {
 
   /// aggregation: ignore
   unsynced-height-map-update: func(query: rect-changed-query) -> result<_, spring-error>;
+
+  /// aggregation: ignore
+  recv-from-synced: func(query: recv-from-synced-query) -> result<_, spring-error>;
 
   /// aggregation: ignore
   render-unit-destroyed: func(query: render-unit-destroyed-query) -> result<_, spring-error>;

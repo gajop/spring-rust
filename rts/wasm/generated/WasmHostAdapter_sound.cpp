@@ -12,7 +12,7 @@ bool Read_GetSoundDevicesQuery(const WasmValue& input, GetSoundDevicesQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_GetSoundDevicesQuery(const WasmValue& input, GetSoundDevicesQuery& out
 WasmValue Write_GetSoundDevicesQuery(const GetSoundDevicesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -61,7 +61,7 @@ bool Read_GetSoundEffectParamsQuery(const WasmValue& input, GetSoundEffectParams
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -70,7 +70,7 @@ bool Read_GetSoundEffectParamsQuery(const WasmValue& input, GetSoundEffectParams
 WasmValue Write_GetSoundEffectParamsQuery(const GetSoundEffectParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -95,7 +95,7 @@ bool Read_GetSoundStreamTimeQuery(const WasmValue& input, GetSoundStreamTimeQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -104,7 +104,7 @@ bool Read_GetSoundStreamTimeQuery(const WasmValue& input, GetSoundStreamTimeQuer
 WasmValue Write_GetSoundStreamTimeQuery(const GetSoundStreamTimeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -129,7 +129,7 @@ bool Read_LoadSoundDefQuery(const WasmValue& input, LoadSoundDefQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_soundName = FindRecordField(*record, "soundName", error);
+	const auto* value_soundName = FindRecordField(*record, "sound-name", error);
 	if (value_soundName == nullptr) return false;
 	auto& stored_string_output_soundName = storage.Make<std::string>();
 	if (!ReadString(*value_soundName, stored_string_output_soundName, error)) { return false; }
@@ -140,7 +140,7 @@ bool Read_LoadSoundDefQuery(const WasmValue& input, LoadSoundDefQuery& output, N
 WasmValue Write_LoadSoundDefQuery(const LoadSoundDefQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("soundName", WasmValue::String((value.soundName == nullptr) ? std::string{} : std::string(value.soundName)));
+	fields.emplace("sound-name", WasmValue::String((value.soundName == nullptr) ? std::string{} : std::string(value.soundName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -165,7 +165,7 @@ bool Read_PauseSoundStreamQuery(const WasmValue& input, PauseSoundStreamQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -174,7 +174,7 @@ bool Read_PauseSoundStreamQuery(const WasmValue& input, PauseSoundStreamQuery& o
 WasmValue Write_PauseSoundStreamQuery(const PauseSoundStreamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -199,7 +199,7 @@ bool Read_PlaySoundFileQuery(const WasmValue& input, PlaySoundFileQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_soundFile = FindRecordField(*record, "soundFile", error);
+	const auto* value_soundFile = FindRecordField(*record, "sound-file", error);
 	if (value_soundFile == nullptr) return false;
 	auto& stored_string_output_soundFile = storage.Make<std::string>();
 	if (!ReadString(*value_soundFile, stored_string_output_soundFile, error)) { return false; }
@@ -222,7 +222,7 @@ bool Read_PlaySoundFileQuery(const WasmValue& input, PlaySoundFileQuery& output,
 WasmValue Write_PlaySoundFileQuery(const PlaySoundFileQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("soundFile", WasmValue::String((value.soundFile == nullptr) ? std::string{} : std::string(value.soundFile)));
+	fields.emplace("sound-file", WasmValue::String((value.soundFile == nullptr) ? std::string{} : std::string(value.soundFile)));
 	fields.emplace("volume", WriteScalar(value.volume));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("velocity", Write_Float3(value.velocity));
@@ -251,7 +251,7 @@ bool Read_PlaySoundStreamQuery(const WasmValue& input, PlaySoundStreamQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_oggFile = FindRecordField(*record, "oggFile", error);
+	const auto* value_oggFile = FindRecordField(*record, "ogg-file", error);
 	if (value_oggFile == nullptr) return false;
 	auto& stored_string_output_oggFile = storage.Make<std::string>();
 	if (!ReadString(*value_oggFile, stored_string_output_oggFile, error)) { return false; }
@@ -268,7 +268,7 @@ bool Read_PlaySoundStreamQuery(const WasmValue& input, PlaySoundStreamQuery& out
 WasmValue Write_PlaySoundStreamQuery(const PlaySoundStreamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("oggFile", WasmValue::String((value.oggFile == nullptr) ? std::string{} : std::string(value.oggFile)));
+	fields.emplace("ogg-file", WasmValue::String((value.oggFile == nullptr) ? std::string{} : std::string(value.oggFile)));
 	fields.emplace("volume", WriteScalar(value.volume));
 	fields.emplace("enqueue", WriteScalar(value.enqueue));
 	return WasmValue::Record(std::move(fields));
@@ -295,7 +295,7 @@ bool Read_PreloadSoundItemQuery(const WasmValue& input, PreloadSoundItemQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_soundName = FindRecordField(*record, "soundName", error);
+	const auto* value_soundName = FindRecordField(*record, "sound-name", error);
 	if (value_soundName == nullptr) return false;
 	auto& stored_string_output_soundName = storage.Make<std::string>();
 	if (!ReadString(*value_soundName, stored_string_output_soundName, error)) { return false; }
@@ -306,7 +306,7 @@ bool Read_PreloadSoundItemQuery(const WasmValue& input, PreloadSoundItemQuery& o
 WasmValue Write_PreloadSoundItemQuery(const PreloadSoundItemQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("soundName", WasmValue::String((value.soundName == nullptr) ? std::string{} : std::string(value.soundName)));
+	fields.emplace("sound-name", WasmValue::String((value.soundName == nullptr) ? std::string{} : std::string(value.soundName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -399,7 +399,7 @@ bool Read_StopSoundStreamQuery(const WasmValue& input, StopSoundStreamQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -408,7 +408,7 @@ bool Read_StopSoundStreamQuery(const WasmValue& input, StopSoundStreamQuery& out
 WasmValue Write_StopSoundStreamQuery(const StopSoundStreamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -439,7 +439,7 @@ NativeCalloutDispatch Dispatch_sound_GetSoundDevices(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetSoundDevicesQuery query{};
 	GetSoundDevicesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->soundApi->GetSoundDevices(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.devices, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -452,7 +452,7 @@ NativeCalloutDispatch Dispatch_sound_GetSoundEffectParams(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetSoundEffectParamsQuery query{};
 	GetSoundEffectParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->soundApi->GetSoundEffectParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -465,7 +465,7 @@ NativeCalloutDispatch Dispatch_sound_GetSoundStreamTime(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetSoundStreamTimeQuery query{};
 	GetSoundStreamTimeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->soundApi->GetSoundStreamTime(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.time);
@@ -478,7 +478,7 @@ NativeCalloutDispatch Dispatch_sound_LoadSoundDef(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	LoadSoundDefQuery query{};
 	LoadSoundDefResult nativeResult{};
-	const WasmValue* value_soundName = FindArgument(arguments, 0u, 0u, 1u, 1u, "soundName", error);
+	const WasmValue* value_soundName = FindArgument(arguments, 0u, 0u, 1u, 1u, "sound-name", error);
 	if (value_soundName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_soundName = storage.Make<std::string>();
 	if (!ReadString(*value_soundName, stored_string_query_soundName, error)) { return NativeCalloutDispatch::handled; }
@@ -495,7 +495,7 @@ NativeCalloutDispatch Dispatch_sound_PauseSoundStream(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	PauseSoundStreamQuery query{};
 	PauseSoundStreamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->soundApi->PauseSoundStream(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -508,7 +508,7 @@ NativeCalloutDispatch Dispatch_sound_PlaySoundFile(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	PlaySoundFileQuery query{};
 	PlaySoundFileResult nativeResult{};
-	const WasmValue* value_soundFile = FindArgument(arguments, 0u, 0u, 5u, 5u, "soundFile", error);
+	const WasmValue* value_soundFile = FindArgument(arguments, 0u, 0u, 5u, 5u, "sound-file", error);
 	if (value_soundFile == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_soundFile = storage.Make<std::string>();
 	if (!ReadString(*value_soundFile, stored_string_query_soundFile, error)) { return NativeCalloutDispatch::handled; }
@@ -529,7 +529,7 @@ NativeCalloutDispatch Dispatch_sound_PlaySoundStream(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	PlaySoundStreamQuery query{};
 	PlaySoundStreamResult nativeResult{};
-	const WasmValue* value_oggFile = FindArgument(arguments, 0u, 0u, 3u, 3u, "oggFile", error);
+	const WasmValue* value_oggFile = FindArgument(arguments, 0u, 0u, 3u, 3u, "ogg-file", error);
 	if (value_oggFile == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_oggFile = storage.Make<std::string>();
 	if (!ReadString(*value_oggFile, stored_string_query_oggFile, error)) { return NativeCalloutDispatch::handled; }
@@ -548,7 +548,7 @@ NativeCalloutDispatch Dispatch_sound_PreloadSoundItem(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	PreloadSoundItemQuery query{};
 	PreloadSoundItemResult nativeResult{};
-	const WasmValue* value_soundName = FindArgument(arguments, 0u, 0u, 1u, 1u, "soundName", error);
+	const WasmValue* value_soundName = FindArgument(arguments, 0u, 0u, 1u, 1u, "sound-name", error);
 	if (value_soundName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_soundName = storage.Make<std::string>();
 	if (!ReadString(*value_soundName, stored_string_query_soundName, error)) { return NativeCalloutDispatch::handled; }
@@ -591,7 +591,7 @@ NativeCalloutDispatch Dispatch_sound_StopSoundStream(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	StopSoundStreamQuery query{};
 	StopSoundStreamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->soundApi->StopSoundStream(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

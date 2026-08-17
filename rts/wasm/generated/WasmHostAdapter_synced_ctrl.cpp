@@ -12,19 +12,19 @@ bool Read_AddFeatureDamageQuery(const WasmValue& input, AddFeatureDamageQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_damage = FindRecordField(*record, "damage", error);
 	if (value_damage == nullptr) return false;
 	if (!ReadScalar(*value_damage, output.damage, error)) { return false; }
-	const auto* value_paralyzeTime = FindRecordField(*record, "paralyzeTime", error);
+	const auto* value_paralyzeTime = FindRecordField(*record, "paralyze-time", error);
 	if (value_paralyzeTime == nullptr) return false;
 	if (!ReadScalar(*value_paralyzeTime, output.paralyzeTime, error)) { return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
-	const auto* value_attackerID = FindRecordField(*record, "attackerID", error);
+	const auto* value_attackerID = FindRecordField(*record, "attacker-id", error);
 	if (value_attackerID == nullptr) return false;
 	if (!ReadScalar(*value_attackerID, output.attackerID, error)) { return false; }
 	const auto* value_impulse = FindRecordField(*record, "impulse", error);
@@ -36,11 +36,11 @@ bool Read_AddFeatureDamageQuery(const WasmValue& input, AddFeatureDamageQuery& o
 WasmValue Write_AddFeatureDamageQuery(const AddFeatureDamageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("damage", WriteScalar(value.damage));
-	fields.emplace("paralyzeTime", WriteScalar(value.paralyzeTime));
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
-	fields.emplace("attackerID", WriteScalar(value.attackerID));
+	fields.emplace("paralyze-time", WriteScalar(value.paralyzeTime));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
+	fields.emplace("attacker-id", WriteScalar(value.attackerID));
 	fields.emplace("impulse", Write_Float3(value.impulse));
 	return WasmValue::Record(std::move(fields));
 }
@@ -72,7 +72,7 @@ bool Read_AddGrassQuery(const WasmValue& input, AddGrassQuery& output, NativeCal
 	const auto* value_z = FindRecordField(*record, "z", error);
 	if (value_z == nullptr) return false;
 	if (!ReadScalar(*value_z, output.z, error)) { return false; }
-	const auto* value_grassValue = FindRecordField(*record, "grassValue", error);
+	const auto* value_grassValue = FindRecordField(*record, "grass-value", error);
 	if (value_grassValue == nullptr) return false;
 	if (!ReadScalar(*value_grassValue, output.grassValue, error)) { return false; }
 	return true;
@@ -83,7 +83,7 @@ WasmValue Write_AddGrassQuery(const AddGrassQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("z", WriteScalar(value.z));
-	fields.emplace("grassValue", WriteScalar(value.grassValue));
+	fields.emplace("grass-value", WriteScalar(value.grassValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -150,7 +150,7 @@ bool Read_AddObjectDecalQuery(const WasmValue& input, AddObjectDecalQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -159,7 +159,7 @@ bool Read_AddObjectDecalQuery(const WasmValue& input, AddObjectDecalQuery& outpu
 WasmValue Write_AddObjectDecalQuery(const AddObjectDecalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -268,10 +268,10 @@ bool Read_AddTeamResourceExcessStatsQuery(const WasmValue& input, AddTeamResourc
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_resourceType = FindRecordField(*record, "resourceType", error);
+	const auto* value_resourceType = FindRecordField(*record, "resource-type", error);
 	if (value_resourceType == nullptr) return false;
 	auto& stored_string_output_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_output_resourceType, error)) { return false; }
@@ -285,8 +285,8 @@ bool Read_AddTeamResourceExcessStatsQuery(const WasmValue& input, AddTeamResourc
 WasmValue Write_AddTeamResourceExcessStatsQuery(const AddTeamResourceExcessStatsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("resourceType", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("resource-type", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
 }
@@ -312,10 +312,10 @@ bool Read_AddTeamResourceQuery(const WasmValue& input, AddTeamResourceQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_resourceType = FindRecordField(*record, "resourceType", error);
+	const auto* value_resourceType = FindRecordField(*record, "resource-type", error);
 	if (value_resourceType == nullptr) return false;
 	auto& stored_string_output_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_output_resourceType, error)) { return false; }
@@ -329,8 +329,8 @@ bool Read_AddTeamResourceQuery(const WasmValue& input, AddTeamResourceQuery& out
 WasmValue Write_AddTeamResourceQuery(const AddTeamResourceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("resourceType", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("resource-type", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
 }
@@ -356,19 +356,19 @@ bool Read_AddUnitDamageQuery(const WasmValue& input, AddUnitDamageQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_damage = FindRecordField(*record, "damage", error);
 	if (value_damage == nullptr) return false;
 	if (!ReadScalar(*value_damage, output.damage, error)) { return false; }
-	const auto* value_paralyzeTime = FindRecordField(*record, "paralyzeTime", error);
+	const auto* value_paralyzeTime = FindRecordField(*record, "paralyze-time", error);
 	if (value_paralyzeTime == nullptr) return false;
 	if (!ReadScalar(*value_paralyzeTime, output.paralyzeTime, error)) { return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
-	const auto* value_attackerID = FindRecordField(*record, "attackerID", error);
+	const auto* value_attackerID = FindRecordField(*record, "attacker-id", error);
 	if (value_attackerID == nullptr) return false;
 	if (!ReadScalar(*value_attackerID, output.attackerID, error)) { return false; }
 	const auto* value_impulse = FindRecordField(*record, "impulse", error);
@@ -380,11 +380,11 @@ bool Read_AddUnitDamageQuery(const WasmValue& input, AddUnitDamageQuery& output,
 WasmValue Write_AddUnitDamageQuery(const AddUnitDamageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("damage", WriteScalar(value.damage));
-	fields.emplace("paralyzeTime", WriteScalar(value.paralyzeTime));
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
-	fields.emplace("attackerID", WriteScalar(value.attackerID));
+	fields.emplace("paralyze-time", WriteScalar(value.paralyzeTime));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
+	fields.emplace("attacker-id", WriteScalar(value.attackerID));
 	fields.emplace("impulse", Write_Float3(value.impulse));
 	return WasmValue::Record(std::move(fields));
 }
@@ -410,7 +410,7 @@ bool Read_AddUnitExperienceQuery(const WasmValue& input, AddUnitExperienceQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_experience = FindRecordField(*record, "experience", error);
@@ -422,7 +422,7 @@ bool Read_AddUnitExperienceQuery(const WasmValue& input, AddUnitExperienceQuery&
 WasmValue Write_AddUnitExperienceQuery(const AddUnitExperienceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("experience", WriteScalar(value.experience));
 	return WasmValue::Record(std::move(fields));
 }
@@ -448,13 +448,13 @@ bool Read_AddUnitImpulseQuery(const WasmValue& input, AddUnitImpulseQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_impulse = FindRecordField(*record, "impulse", error);
 	if (value_impulse == nullptr) return false;
 	if (!Read_Float3(*value_impulse, output.impulse, storage, error)) { return false; }
-	const auto* value_decayRate = FindRecordField(*record, "decayRate", error);
+	const auto* value_decayRate = FindRecordField(*record, "decay-rate", error);
 	if (value_decayRate == nullptr) return false;
 	if (!ReadScalar(*value_decayRate, output.decayRate, error)) { return false; }
 	return true;
@@ -463,9 +463,9 @@ bool Read_AddUnitImpulseQuery(const WasmValue& input, AddUnitImpulseQuery& outpu
 WasmValue Write_AddUnitImpulseQuery(const AddUnitImpulseQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("impulse", Write_Float3(value.impulse));
-	fields.emplace("decayRate", WriteScalar(value.decayRate));
+	fields.emplace("decay-rate", WriteScalar(value.decayRate));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -490,10 +490,10 @@ bool Read_AddUnitResourceQuery(const WasmValue& input, AddUnitResourceQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_resourceType = FindRecordField(*record, "resourceType", error);
+	const auto* value_resourceType = FindRecordField(*record, "resource-type", error);
 	if (value_resourceType == nullptr) return false;
 	auto& stored_string_output_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_output_resourceType, error)) { return false; }
@@ -507,8 +507,8 @@ bool Read_AddUnitResourceQuery(const WasmValue& input, AddUnitResourceQuery& out
 WasmValue Write_AddUnitResourceQuery(const AddUnitResourceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("resourceType", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("resource-type", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
 }
@@ -534,10 +534,10 @@ bool Read_AddUnitSeismicPingQuery(const WasmValue& input, AddUnitSeismicPingQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_pingSize = FindRecordField(*record, "pingSize", error);
+	const auto* value_pingSize = FindRecordField(*record, "ping-size", error);
 	if (value_pingSize == nullptr) return false;
 	if (!ReadScalar(*value_pingSize, output.pingSize, error)) { return false; }
 	return true;
@@ -546,8 +546,8 @@ bool Read_AddUnitSeismicPingQuery(const WasmValue& input, AddUnitSeismicPingQuer
 WasmValue Write_AddUnitSeismicPingQuery(const AddUnitSeismicPingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("pingSize", WriteScalar(value.pingSize));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("ping-size", WriteScalar(value.pingSize));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -722,10 +722,10 @@ bool Read_AssignPlayerToTeamQuery(const WasmValue& input, AssignPlayerToTeamQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -734,8 +734,8 @@ bool Read_AssignPlayerToTeamQuery(const WasmValue& input, AssignPlayerToTeamQuer
 WasmValue Write_AssignPlayerToTeamQuery(const AssignPlayerToTeamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -766,7 +766,7 @@ bool Read_BuggerOffOptions(const WasmValue& input, BuggerOffOptions& output, Nat
 	const auto* value_forced = FindRecordField(*record, "forced", error);
 	if (value_forced == nullptr) return false;
 	if (!ReadScalar(*value_forced, output.forced, error)) { return false; }
-	const auto* value_excludeUnitID = FindRecordField(*record, "excludeUnitID", error);
+	const auto* value_excludeUnitID = FindRecordField(*record, "exclude-unit-id", error);
 	if (value_excludeUnitID == nullptr) return false;
 	if (!ReadScalar(*value_excludeUnitID, output.excludeUnitID, error)) { return false; }
 	return true;
@@ -777,7 +777,7 @@ WasmValue Write_BuggerOffOptions(const BuggerOffOptions& value)
 	WasmValueRecord fields;
 	fields.emplace("spherical", WriteScalar(value.spherical));
 	fields.emplace("forced", WriteScalar(value.forced));
-	fields.emplace("excludeUnitID", WriteScalar(value.excludeUnitID));
+	fields.emplace("exclude-unit-id", WriteScalar(value.excludeUnitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -791,13 +791,13 @@ bool Read_BuggerOffQuery(const WasmValue& input, BuggerOffQuery& output, NativeC
 	const auto* value_radius = FindRecordField(*record, "radius", error);
 	if (value_radius == nullptr) return false;
 	if (!ReadScalar(*value_radius, output.radius, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
 	if (value_options == nullptr) return false;
 	if (!Read_BuggerOffOptions(*value_options, output.options, storage, error)) { return false; }
-	const auto* value_excludeUnitDefIDs = FindRecordField(*record, "excludeUnitDefIDs", error);
+	const auto* value_excludeUnitDefIDs = FindRecordField(*record, "exclude-unit-def-i-ds", error);
 	if (value_excludeUnitDefIDs == nullptr) return false;
 	const auto* list_excludeUnitDefIDs = std::get_if<WasmValueList>(&(*value_excludeUnitDefIDs).storage);
 	if (list_excludeUnitDefIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -818,9 +818,9 @@ WasmValue Write_BuggerOffQuery(const BuggerOffQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("radius", WriteScalar(value.radius));
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("options", Write_BuggerOffOptions(value.options));
-	fields.emplace("excludeUnitDefIDs", WriteNativeList(value.excludeUnitDefIDs, value.excludeUnitDefCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("exclude-unit-def-i-ds", WriteNativeList(value.excludeUnitDefIDs, value.excludeUnitDefCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -845,13 +845,13 @@ bool Read_CallCOBScriptQuery(const WasmValue& input, CallCOBScriptQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_func = FindRecordField(*record, "func", error);
 	if (value_func == nullptr) return false;
 	if (!Read_CobFunctionRef(*value_func, output.func, storage, error)) { return false; }
-	const auto* value_retArgs = FindRecordField(*record, "retArgs", error);
+	const auto* value_retArgs = FindRecordField(*record, "ret-args", error);
 	if (value_retArgs == nullptr) return false;
 	if (!ReadScalar(*value_retArgs, output.retArgs, error)) { return false; }
 	const auto* value_args = FindRecordField(*record, "args", error);
@@ -873,9 +873,9 @@ bool Read_CallCOBScriptQuery(const WasmValue& input, CallCOBScriptQuery& output,
 WasmValue Write_CallCOBScriptQuery(const CallCOBScriptQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("func", Write_CobFunctionRef(value.func));
-	fields.emplace("retArgs", WriteScalar(value.retArgs));
+	fields.emplace("ret-args", WriteScalar(value.retArgs));
 	fields.emplace("args", WriteNativeList(value.args, value.argCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -884,10 +884,10 @@ bool Read_CallCOBScriptResult(const WasmValue& input, CallCOBScriptResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_retCode = FindRecordField(*record, "retCode", error);
+	const auto* value_retCode = FindRecordField(*record, "ret-code", error);
 	if (value_retCode == nullptr) return false;
 	if (!ReadScalar(*value_retCode, output.retCode, error)) { return false; }
-	const auto* value_retValues = FindRecordField(*record, "retValues", error);
+	const auto* value_retValues = FindRecordField(*record, "ret-values", error);
 	if (value_retValues == nullptr) return false;
 	const auto* list_retValues = std::get_if<WasmValueList>(&(*value_retValues).storage);
 	if (list_retValues == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -906,8 +906,8 @@ bool Read_CallCOBScriptResult(const WasmValue& input, CallCOBScriptResult& outpu
 WasmValue Write_CallCOBScriptResult(const CallCOBScriptResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("retCode", WriteScalar(value.retCode));
-	fields.emplace("retValues", WriteNativeList(value.retValues, value.retCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("ret-code", WriteScalar(value.retCode));
+	fields.emplace("ret-values", WriteNativeList(value.retValues, value.retCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -915,10 +915,10 @@ bool Read_ClearUnitGoalQuery(const WasmValue& input, ClearUnitGoalQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_cancelRaw = FindRecordField(*record, "cancelRaw", error);
+	const auto* value_cancelRaw = FindRecordField(*record, "cancel-raw", error);
 	if (value_cancelRaw == nullptr) return false;
 	if (!ReadScalar(*value_cancelRaw, output.cancelRaw, error)) { return false; }
 	return true;
@@ -927,8 +927,8 @@ bool Read_ClearUnitGoalQuery(const WasmValue& input, ClearUnitGoalQuery& output,
 WasmValue Write_ClearUnitGoalQuery(const ClearUnitGoalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("cancelRaw", WriteScalar(value.cancelRaw));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("cancel-raw", WriteScalar(value.cancelRaw));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -976,7 +976,7 @@ bool Read_CreateFeatureQuery(const WasmValue& input, CreateFeatureQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDef = FindRecordField(*record, "featureDef", error);
+	const auto* value_featureDef = FindRecordField(*record, "feature-def", error);
 	if (value_featureDef == nullptr) return false;
 	if (!Read_DefRef(*value_featureDef, output.featureDef, storage, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -985,10 +985,10 @@ bool Read_CreateFeatureQuery(const WasmValue& input, CreateFeatureQuery& output,
 	const auto* value_facing = FindRecordField(*record, "facing", error);
 	if (value_facing == nullptr) return false;
 	if (!ReadScalar(*value_facing, output.facing, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -997,11 +997,11 @@ bool Read_CreateFeatureQuery(const WasmValue& input, CreateFeatureQuery& output,
 WasmValue Write_CreateFeatureQuery(const CreateFeatureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDef", Write_DefRef(value.featureDef));
+	fields.emplace("feature-def", Write_DefRef(value.featureDef));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("facing", WriteScalar(value.facing));
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1009,7 +1009,7 @@ bool Read_CreateFeatureResult(const WasmValue& input, CreateFeatureResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1018,7 +1018,7 @@ bool Read_CreateFeatureResult(const WasmValue& input, CreateFeatureResult& outpu
 WasmValue Write_CreateFeatureResult(const CreateFeatureResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1026,13 +1026,13 @@ bool Read_CreateFeatureWreckQuery(const WasmValue& input, CreateFeatureWreckQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_wreckLevel = FindRecordField(*record, "wreckLevel", error);
+	const auto* value_wreckLevel = FindRecordField(*record, "wreck-level", error);
 	if (value_wreckLevel == nullptr) return false;
 	if (!ReadScalar(*value_wreckLevel, output.wreckLevel, error)) { return false; }
-	const auto* value_doSmoke = FindRecordField(*record, "doSmoke", error);
+	const auto* value_doSmoke = FindRecordField(*record, "do-smoke", error);
 	if (value_doSmoke == nullptr) return false;
 	if (!ReadScalar(*value_doSmoke, output.doSmoke, error)) { return false; }
 	return true;
@@ -1041,9 +1041,9 @@ bool Read_CreateFeatureWreckQuery(const WasmValue& input, CreateFeatureWreckQuer
 WasmValue Write_CreateFeatureWreckQuery(const CreateFeatureWreckQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("wreckLevel", WriteScalar(value.wreckLevel));
-	fields.emplace("doSmoke", WriteScalar(value.doSmoke));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("wreck-level", WriteScalar(value.wreckLevel));
+	fields.emplace("do-smoke", WriteScalar(value.doSmoke));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1051,7 +1051,7 @@ bool Read_CreateFeatureWreckResult(const WasmValue& input, CreateFeatureWreckRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1060,7 +1060,7 @@ bool Read_CreateFeatureWreckResult(const WasmValue& input, CreateFeatureWreckRes
 WasmValue Write_CreateFeatureWreckResult(const CreateFeatureWreckResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1071,13 +1071,13 @@ bool Read_CreateUnitOptions(const WasmValue& input, CreateUnitOptions& output, N
 	const auto* value_build = FindRecordField(*record, "build", error);
 	if (value_build == nullptr) return false;
 	if (!ReadScalar(*value_build, output.build, error)) { return false; }
-	const auto* value_flattenGround = FindRecordField(*record, "flattenGround", error);
+	const auto* value_flattenGround = FindRecordField(*record, "flatten-ground", error);
 	if (value_flattenGround == nullptr) return false;
 	if (!ReadScalar(*value_flattenGround, output.flattenGround, error)) { return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_builderID = FindRecordField(*record, "builderID", error);
+	const auto* value_builderID = FindRecordField(*record, "builder-id", error);
 	if (value_builderID == nullptr) return false;
 	if (!ReadScalar(*value_builderID, output.builderID, error)) { return false; }
 	return true;
@@ -1087,9 +1087,9 @@ WasmValue Write_CreateUnitOptions(const CreateUnitOptions& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("build", WriteScalar(value.build));
-	fields.emplace("flattenGround", WriteScalar(value.flattenGround));
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("builderID", WriteScalar(value.builderID));
+	fields.emplace("flatten-ground", WriteScalar(value.flattenGround));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("builder-id", WriteScalar(value.builderID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1097,7 +1097,7 @@ bool Read_CreateUnitQuery(const WasmValue& input, CreateUnitQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDef = FindRecordField(*record, "unitDef", error);
+	const auto* value_unitDef = FindRecordField(*record, "unit-def", error);
 	if (value_unitDef == nullptr) return false;
 	if (!Read_DefRef(*value_unitDef, output.unitDef, storage, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -1106,7 +1106,7 @@ bool Read_CreateUnitQuery(const WasmValue& input, CreateUnitQuery& output, Nativ
 	const auto* value_facing = FindRecordField(*record, "facing", error);
 	if (value_facing == nullptr) return false;
 	if (!ReadScalar(*value_facing, output.facing, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -1118,10 +1118,10 @@ bool Read_CreateUnitQuery(const WasmValue& input, CreateUnitQuery& output, Nativ
 WasmValue Write_CreateUnitQuery(const CreateUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDef", Write_DefRef(value.unitDef));
+	fields.emplace("unit-def", Write_DefRef(value.unitDef));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("facing", WriteScalar(value.facing));
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("options", Write_CreateUnitOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1130,7 +1130,7 @@ bool Read_CreateUnitResult(const WasmValue& input, CreateUnitResult& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -1139,7 +1139,7 @@ bool Read_CreateUnitResult(const WasmValue& input, CreateUnitResult& output, Nat
 WasmValue Write_CreateUnitResult(const CreateUnitResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1147,13 +1147,13 @@ bool Read_CreateUnitWreckQuery(const WasmValue& input, CreateUnitWreckQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_wreckLevel = FindRecordField(*record, "wreckLevel", error);
+	const auto* value_wreckLevel = FindRecordField(*record, "wreck-level", error);
 	if (value_wreckLevel == nullptr) return false;
 	if (!ReadScalar(*value_wreckLevel, output.wreckLevel, error)) { return false; }
-	const auto* value_doSmoke = FindRecordField(*record, "doSmoke", error);
+	const auto* value_doSmoke = FindRecordField(*record, "do-smoke", error);
 	if (value_doSmoke == nullptr) return false;
 	if (!ReadScalar(*value_doSmoke, output.doSmoke, error)) { return false; }
 	return true;
@@ -1162,9 +1162,9 @@ bool Read_CreateUnitWreckQuery(const WasmValue& input, CreateUnitWreckQuery& out
 WasmValue Write_CreateUnitWreckQuery(const CreateUnitWreckQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("wreckLevel", WriteScalar(value.wreckLevel));
-	fields.emplace("doSmoke", WriteScalar(value.doSmoke));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("wreck-level", WriteScalar(value.wreckLevel));
+	fields.emplace("do-smoke", WriteScalar(value.doSmoke));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1172,7 +1172,7 @@ bool Read_CreateUnitWreckResult(const WasmValue& input, CreateUnitWreckResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1181,7 +1181,7 @@ bool Read_CreateUnitWreckResult(const WasmValue& input, CreateUnitWreckResult& o
 WasmValue Write_CreateUnitWreckResult(const CreateUnitWreckResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1189,7 +1189,7 @@ bool Read_DeleteProjectileQuery(const WasmValue& input, DeleteProjectileQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -1198,7 +1198,7 @@ bool Read_DeleteProjectileQuery(const WasmValue& input, DeleteProjectileQuery& o
 WasmValue Write_DeleteProjectileQuery(const DeleteProjectileQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1223,7 +1223,7 @@ bool Read_DestroyFeatureQuery(const WasmValue& input, DestroyFeatureQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1232,7 +1232,7 @@ bool Read_DestroyFeatureQuery(const WasmValue& input, DestroyFeatureQuery& outpu
 WasmValue Write_DestroyFeatureQuery(const DestroyFeatureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1263,10 +1263,10 @@ bool Read_DestroyUnitOptions(const WasmValue& input, DestroyUnitOptions& output,
 	const auto* value_reclaimed = FindRecordField(*record, "reclaimed", error);
 	if (value_reclaimed == nullptr) return false;
 	if (!ReadScalar(*value_reclaimed, output.reclaimed, error)) { return false; }
-	const auto* value_attackerID = FindRecordField(*record, "attackerID", error);
+	const auto* value_attackerID = FindRecordField(*record, "attacker-id", error);
 	if (value_attackerID == nullptr) return false;
 	if (!ReadScalar(*value_attackerID, output.attackerID, error)) { return false; }
-	const auto* value_recycleID = FindRecordField(*record, "recycleID", error);
+	const auto* value_recycleID = FindRecordField(*record, "recycle-id", error);
 	if (value_recycleID == nullptr) return false;
 	if (!ReadScalar(*value_recycleID, output.recycleID, error)) { return false; }
 	return true;
@@ -1277,8 +1277,8 @@ WasmValue Write_DestroyUnitOptions(const DestroyUnitOptions& value)
 	WasmValueRecord fields;
 	fields.emplace("selfd", WriteScalar(value.selfd));
 	fields.emplace("reclaimed", WriteScalar(value.reclaimed));
-	fields.emplace("attackerID", WriteScalar(value.attackerID));
-	fields.emplace("recycleID", WriteScalar(value.recycleID));
+	fields.emplace("attacker-id", WriteScalar(value.attackerID));
+	fields.emplace("recycle-id", WriteScalar(value.recycleID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1286,7 +1286,7 @@ bool Read_DestroyUnitQuery(const WasmValue& input, DestroyUnitQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -1298,7 +1298,7 @@ bool Read_DestroyUnitQuery(const WasmValue& input, DestroyUnitQuery& output, Nat
 WasmValue Write_DestroyUnitQuery(const DestroyUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("options", Write_DestroyUnitOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1341,7 +1341,7 @@ bool Read_ForceUnitCollisionUpdateQuery(const WasmValue& input, ForceUnitCollisi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -1350,7 +1350,7 @@ bool Read_ForceUnitCollisionUpdateQuery(const WasmValue& input, ForceUnitCollisi
 WasmValue Write_ForceUnitCollisionUpdateQuery(const ForceUnitCollisionUpdateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1375,7 +1375,7 @@ bool Read_GameOverQuery(const WasmValue& input, GameOverQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_winningAllyTeams = FindRecordField(*record, "winningAllyTeams", error);
+	const auto* value_winningAllyTeams = FindRecordField(*record, "winning-ally-teams", error);
 	if (value_winningAllyTeams == nullptr) return false;
 	const auto* list_winningAllyTeams = std::get_if<WasmValueList>(&(*value_winningAllyTeams).storage);
 	if (list_winningAllyTeams == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -1394,7 +1394,7 @@ bool Read_GameOverQuery(const WasmValue& input, GameOverQuery& output, NativeCal
 WasmValue Write_GameOverQuery(const GameOverQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("winningAllyTeams", WriteNativeList(value.winningAllyTeams, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("winning-ally-teams", WriteNativeList(value.winningAllyTeams, value.count, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1419,10 +1419,10 @@ bool Read_GetCOBScriptIDQuery(const WasmValue& input, GetCOBScriptIDQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_funcName = FindRecordField(*record, "funcName", error);
+	const auto* value_funcName = FindRecordField(*record, "func-name", error);
 	if (value_funcName == nullptr) return false;
 	auto& stored_string_output_funcName = storage.Make<std::string>();
 	if (!ReadString(*value_funcName, stored_string_output_funcName, error)) { return false; }
@@ -1433,8 +1433,8 @@ bool Read_GetCOBScriptIDQuery(const WasmValue& input, GetCOBScriptIDQuery& outpu
 WasmValue Write_GetCOBScriptIDQuery(const GetCOBScriptIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("funcName", WasmValue::String((value.funcName == nullptr) ? std::string{} : std::string(value.funcName)));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("func-name", WasmValue::String((value.funcName == nullptr) ? std::string{} : std::string(value.funcName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1442,7 +1442,7 @@ bool Read_GetCOBScriptIDResult(const WasmValue& input, GetCOBScriptIDResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_funcID = FindRecordField(*record, "funcID", error);
+	const auto* value_funcID = FindRecordField(*record, "func-id", error);
 	if (value_funcID == nullptr) return false;
 	if (!ReadScalar(*value_funcID, output.funcID, error)) { return false; }
 	return true;
@@ -1451,7 +1451,7 @@ bool Read_GetCOBScriptIDResult(const WasmValue& input, GetCOBScriptIDResult& out
 WasmValue Write_GetCOBScriptIDResult(const GetCOBScriptIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("funcID", WriteScalar(value.funcID));
+	fields.emplace("func-id", WriteScalar(value.funcID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1459,13 +1459,13 @@ bool Read_GetUnitFeatureSeparationQuery(const WasmValue& input, GetUnitFeatureSe
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_ignoreY = FindRecordField(*record, "ignoreY", error);
+	const auto* value_ignoreY = FindRecordField(*record, "ignore-y", error);
 	if (value_ignoreY == nullptr) return false;
 	if (!ReadScalar(*value_ignoreY, output.ignoreY, error)) { return false; }
 	return true;
@@ -1474,9 +1474,9 @@ bool Read_GetUnitFeatureSeparationQuery(const WasmValue& input, GetUnitFeatureSe
 WasmValue Write_GetUnitFeatureSeparationQuery(const GetUnitFeatureSeparationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("ignoreY", WriteScalar(value.ignoreY));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("ignore-y", WriteScalar(value.ignoreY));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1501,7 +1501,7 @@ bool Read_GetUnitLeavesGhostQuery(const WasmValue& input, GetUnitLeavesGhostQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -1510,7 +1510,7 @@ bool Read_GetUnitLeavesGhostQuery(const WasmValue& input, GetUnitLeavesGhostQuer
 WasmValue Write_GetUnitLeavesGhostQuery(const GetUnitLeavesGhostQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1518,7 +1518,7 @@ bool Read_GetUnitLeavesGhostResult(const WasmValue& input, GetUnitLeavesGhostRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_leavesGhost = FindRecordField(*record, "leavesGhost", error);
+	const auto* value_leavesGhost = FindRecordField(*record, "leaves-ghost", error);
 	if (value_leavesGhost == nullptr) return false;
 	if (!ReadScalar(*value_leavesGhost, output.leavesGhost, error)) { return false; }
 	return true;
@@ -1527,7 +1527,7 @@ bool Read_GetUnitLeavesGhostResult(const WasmValue& input, GetUnitLeavesGhostRes
 WasmValue Write_GetUnitLeavesGhostResult(const GetUnitLeavesGhostResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("leavesGhost", WriteScalar(value.leavesGhost));
+	fields.emplace("leaves-ghost", WriteScalar(value.leavesGhost));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1535,7 +1535,7 @@ bool Read_GetUnitPhysicalStateQuery(const WasmValue& input, GetUnitPhysicalState
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -1544,7 +1544,7 @@ bool Read_GetUnitPhysicalStateQuery(const WasmValue& input, GetUnitPhysicalState
 WasmValue Write_GetUnitPhysicalStateQuery(const GetUnitPhysicalStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1552,7 +1552,7 @@ bool Read_GetUnitPhysicalStateResult(const WasmValue& input, GetUnitPhysicalStat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_physicalState = FindRecordField(*record, "physicalState", error);
+	const auto* value_physicalState = FindRecordField(*record, "physical-state", error);
 	if (value_physicalState == nullptr) return false;
 	if (!ReadScalar(*value_physicalState, output.physicalState, error)) { return false; }
 	return true;
@@ -1561,7 +1561,7 @@ bool Read_GetUnitPhysicalStateResult(const WasmValue& input, GetUnitPhysicalStat
 WasmValue Write_GetUnitPhysicalStateResult(const GetUnitPhysicalStateResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("physicalState", WriteScalar(value.physicalState));
+	fields.emplace("physical-state", WriteScalar(value.physicalState));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1569,7 +1569,7 @@ bool Read_GiveOrderArrayToUnitArrayQuery(const WasmValue& input, GiveOrderArrayT
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -1604,7 +1604,7 @@ bool Read_GiveOrderArrayToUnitArrayQuery(const WasmValue& input, GiveOrderArrayT
 WasmValue Write_GiveOrderArrayToUnitArrayQuery(const GiveOrderArrayToUnitArrayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.unitCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.unitCount, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("commands", WriteNativeList(value.commands, value.commandCount, [](const auto& value) { return Write_NativeCommand(value); }));
 	fields.emplace("pairwise", WriteScalar(value.pairwise));
 	return WasmValue::Record(std::move(fields));
@@ -1614,7 +1614,7 @@ bool Read_GiveOrderArrayToUnitArrayResult(const WasmValue& input, GiveOrderArray
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitsOrdered = FindRecordField(*record, "unitsOrdered", error);
+	const auto* value_unitsOrdered = FindRecordField(*record, "units-ordered", error);
 	if (value_unitsOrdered == nullptr) return false;
 	if (!ReadScalar(*value_unitsOrdered, output.unitsOrdered, error)) { return false; }
 	return true;
@@ -1623,7 +1623,7 @@ bool Read_GiveOrderArrayToUnitArrayResult(const WasmValue& input, GiveOrderArray
 WasmValue Write_GiveOrderArrayToUnitArrayResult(const GiveOrderArrayToUnitArrayResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitsOrdered", WriteScalar(value.unitsOrdered));
+	fields.emplace("units-ordered", WriteScalar(value.unitsOrdered));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1631,7 +1631,7 @@ bool Read_GiveOrderArrayToUnitQuery(const WasmValue& input, GiveOrderArrayToUnit
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_commands = FindRecordField(*record, "commands", error);
@@ -1653,7 +1653,7 @@ bool Read_GiveOrderArrayToUnitQuery(const WasmValue& input, GiveOrderArrayToUnit
 WasmValue Write_GiveOrderArrayToUnitQuery(const GiveOrderArrayToUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("commands", WriteNativeList(value.commands, value.commandCount, [](const auto& value) { return Write_NativeCommand(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1679,7 +1679,7 @@ bool Read_GiveOrderToUnitArrayQuery(const WasmValue& input, GiveOrderToUnitArray
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -1692,7 +1692,7 @@ bool Read_GiveOrderToUnitArrayQuery(const WasmValue& input, GiveOrderToUnitArray
 	}
 	output.unitIDs = native_unitIDs.data();
 	if (!AssignCount(list_unitIDs->size(), output.count, error)) { return false; }
-	const auto* value_cmdID = FindRecordField(*record, "cmdID", error);
+	const auto* value_cmdID = FindRecordField(*record, "cmd-id", error);
 	if (value_cmdID == nullptr) return false;
 	if (!ReadScalar(*value_cmdID, output.cmdID, error)) { return false; }
 	const auto* value_params = FindRecordField(*record, "params", error);
@@ -1720,8 +1720,8 @@ bool Read_GiveOrderToUnitArrayQuery(const WasmValue& input, GiveOrderToUnitArray
 WasmValue Write_GiveOrderToUnitArrayQuery(const GiveOrderToUnitArrayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("cmdID", WriteScalar(value.cmdID));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("cmd-id", WriteScalar(value.cmdID));
 	fields.emplace("params", WriteNativeList(value.params, value.paramCount, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("options", WriteScalar(value.options));
 	fields.emplace("timeout", WriteScalar(value.timeout));
@@ -1749,10 +1749,10 @@ bool Read_GiveOrderToUnitQuery(const WasmValue& input, GiveOrderToUnitQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_cmdID = FindRecordField(*record, "cmdID", error);
+	const auto* value_cmdID = FindRecordField(*record, "cmd-id", error);
 	if (value_cmdID == nullptr) return false;
 	if (!ReadScalar(*value_cmdID, output.cmdID, error)) { return false; }
 	const auto* value_params = FindRecordField(*record, "params", error);
@@ -1780,8 +1780,8 @@ bool Read_GiveOrderToUnitQuery(const WasmValue& input, GiveOrderToUnitQuery& out
 WasmValue Write_GiveOrderToUnitQuery(const GiveOrderToUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("cmdID", WriteScalar(value.cmdID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("cmd-id", WriteScalar(value.cmdID));
 	fields.emplace("params", WriteNativeList(value.params, value.paramCount, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("options", WriteScalar(value.options));
 	fields.emplace("timeout", WriteScalar(value.timeout));
@@ -1826,7 +1826,7 @@ bool Read_KillTeamQuery(const WasmValue& input, KillTeamQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -1835,7 +1835,7 @@ bool Read_KillTeamQuery(const WasmValue& input, KillTeamQuery& output, NativeCal
 WasmValue Write_KillTeamQuery(const KillTeamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2010,7 +2010,7 @@ bool Read_NativeCommand(const WasmValue& input, NativeCommand& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cmdID = FindRecordField(*record, "cmdID", error);
+	const auto* value_cmdID = FindRecordField(*record, "cmd-id", error);
 	if (value_cmdID == nullptr) return false;
 	if (!ReadScalar(*value_cmdID, output.cmdID, error)) { return false; }
 	const auto* value_params = FindRecordField(*record, "params", error);
@@ -2038,7 +2038,7 @@ bool Read_NativeCommand(const WasmValue& input, NativeCommand& output, NativeCal
 WasmValue Write_NativeCommand(const NativeCommand& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cmdID", WriteScalar(value.cmdID));
+	fields.emplace("cmd-id", WriteScalar(value.cmdID));
 	fields.emplace("params", WriteNativeList(value.params, value.paramCount, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("options", WriteScalar(value.options));
 	fields.emplace("timeout", WriteScalar(value.timeout));
@@ -2064,10 +2064,10 @@ bool Read_NativeCommandDescription(const WasmValue& input, NativeCommandDescript
 	const auto* value_disabled = FindRecordField(*record, "disabled", error);
 	if (value_disabled == nullptr) return false;
 	if (!ReadScalar(*value_disabled, output.disabled, error)) { return false; }
-	const auto* value_showUnique = FindRecordField(*record, "showUnique", error);
+	const auto* value_showUnique = FindRecordField(*record, "show-unique", error);
 	if (value_showUnique == nullptr) return false;
 	if (!ReadScalar(*value_showUnique, output.showUnique, error)) { return false; }
-	const auto* value_onlyTexture = FindRecordField(*record, "onlyTexture", error);
+	const auto* value_onlyTexture = FindRecordField(*record, "only-texture", error);
 	if (value_onlyTexture == nullptr) return false;
 	if (!ReadScalar(*value_onlyTexture, output.onlyTexture, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -2124,8 +2124,8 @@ WasmValue Write_NativeCommandDescription(const NativeCommandDescription& value)
 	fields.emplace("queueing", WriteScalar(value.queueing));
 	fields.emplace("hidden", WriteScalar(value.hidden));
 	fields.emplace("disabled", WriteScalar(value.disabled));
-	fields.emplace("showUnique", WriteScalar(value.showUnique));
-	fields.emplace("onlyTexture", WriteScalar(value.onlyTexture));
+	fields.emplace("show-unique", WriteScalar(value.showUnique));
+	fields.emplace("only-texture", WriteScalar(value.onlyTexture));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("action", WasmValue::String((value.action == nullptr) ? std::string{} : std::string(value.action)));
 	fields.emplace("iconname", WasmValue::String((value.iconname == nullptr) ? std::string{} : std::string(value.iconname)));
@@ -2139,7 +2139,7 @@ bool Read_RebuildSmoothMeshQuery(const WasmValue& input, RebuildSmoothMeshQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -2148,7 +2148,7 @@ bool Read_RebuildSmoothMeshQuery(const WasmValue& input, RebuildSmoothMeshQuery&
 WasmValue Write_RebuildSmoothMeshQuery(const RebuildSmoothMeshQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2211,7 +2211,7 @@ bool Read_RemoveObjectDecalQuery(const WasmValue& input, RemoveObjectDecalQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -2220,7 +2220,7 @@ bool Read_RemoveObjectDecalQuery(const WasmValue& input, RemoveObjectDecalQuery&
 WasmValue Write_RemoveObjectDecalQuery(const RemoveObjectDecalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2245,10 +2245,10 @@ bool Read_RemoveUnitCmdDescQuery(const WasmValue& input, RemoveUnitCmdDescQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_cmdDescIndex = FindRecordField(*record, "cmdDescIndex", error);
+	const auto* value_cmdDescIndex = FindRecordField(*record, "cmd-desc-index", error);
 	if (value_cmdDescIndex == nullptr) return false;
 	if (!ReadScalar(*value_cmdDescIndex, output.cmdDescIndex, error)) { return false; }
 	return true;
@@ -2257,8 +2257,8 @@ bool Read_RemoveUnitCmdDescQuery(const WasmValue& input, RemoveUnitCmdDescQuery&
 WasmValue Write_RemoveUnitCmdDescQuery(const RemoveUnitCmdDescQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("cmdDescIndex", WriteScalar(value.cmdDescIndex));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("cmd-desc-index", WriteScalar(value.cmdDescIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2295,7 +2295,7 @@ bool Read_RevertHeightMapQuery(const WasmValue& input, RevertHeightMapQuery& out
 	const auto* value_z2 = FindRecordField(*record, "z2", error);
 	if (value_z2 == nullptr) return false;
 	if (!ReadScalar(*value_z2, output.z2, error)) { return false; }
-	const auto* value_origFactor = FindRecordField(*record, "origFactor", error);
+	const auto* value_origFactor = FindRecordField(*record, "orig-factor", error);
 	if (value_origFactor == nullptr) return false;
 	if (!ReadScalar(*value_origFactor, output.origFactor, error)) { return false; }
 	return true;
@@ -2308,7 +2308,7 @@ WasmValue Write_RevertHeightMapQuery(const RevertHeightMapQuery& value)
 	fields.emplace("z1", WriteScalar(value.z1));
 	fields.emplace("x2", WriteScalar(value.x2));
 	fields.emplace("z2", WriteScalar(value.z2));
-	fields.emplace("origFactor", WriteScalar(value.origFactor));
+	fields.emplace("orig-factor", WriteScalar(value.origFactor));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2345,7 +2345,7 @@ bool Read_RevertOriginalHeightMapQuery(const WasmValue& input, RevertOriginalHei
 	const auto* value_z2 = FindRecordField(*record, "z2", error);
 	if (value_z2 == nullptr) return false;
 	if (!ReadScalar(*value_z2, output.z2, error)) { return false; }
-	const auto* value_origFactor = FindRecordField(*record, "origFactor", error);
+	const auto* value_origFactor = FindRecordField(*record, "orig-factor", error);
 	if (value_origFactor == nullptr) return false;
 	if (!ReadScalar(*value_origFactor, output.origFactor, error)) { return false; }
 	return true;
@@ -2358,7 +2358,7 @@ WasmValue Write_RevertOriginalHeightMapQuery(const RevertOriginalHeightMapQuery&
 	fields.emplace("z1", WriteScalar(value.z1));
 	fields.emplace("x2", WriteScalar(value.x2));
 	fields.emplace("z2", WriteScalar(value.z2));
-	fields.emplace("origFactor", WriteScalar(value.origFactor));
+	fields.emplace("orig-factor", WriteScalar(value.origFactor));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2395,7 +2395,7 @@ bool Read_RevertSmoothMeshQuery(const WasmValue& input, RevertSmoothMeshQuery& o
 	const auto* value_z2 = FindRecordField(*record, "z2", error);
 	if (value_z2 == nullptr) return false;
 	if (!ReadScalar(*value_z2, output.z2, error)) { return false; }
-	const auto* value_origFactor = FindRecordField(*record, "origFactor", error);
+	const auto* value_origFactor = FindRecordField(*record, "orig-factor", error);
 	if (value_origFactor == nullptr) return false;
 	if (!ReadScalar(*value_origFactor, output.origFactor, error)) { return false; }
 	return true;
@@ -2408,7 +2408,7 @@ WasmValue Write_RevertSmoothMeshQuery(const RevertSmoothMeshQuery& value)
 	fields.emplace("z1", WriteScalar(value.z1));
 	fields.emplace("x2", WriteScalar(value.x2));
 	fields.emplace("z2", WriteScalar(value.z2));
-	fields.emplace("origFactor", WriteScalar(value.origFactor));
+	fields.emplace("orig-factor", WriteScalar(value.origFactor));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2433,10 +2433,10 @@ bool Read_SetAllyQuery(const WasmValue& input, SetAllyQuery& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_firstAllyTeamID = FindRecordField(*record, "firstAllyTeamID", error);
+	const auto* value_firstAllyTeamID = FindRecordField(*record, "first-ally-team-id", error);
 	if (value_firstAllyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_firstAllyTeamID, output.firstAllyTeamID, error)) { return false; }
-	const auto* value_secondAllyTeamID = FindRecordField(*record, "secondAllyTeamID", error);
+	const auto* value_secondAllyTeamID = FindRecordField(*record, "second-ally-team-id", error);
 	if (value_secondAllyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_secondAllyTeamID, output.secondAllyTeamID, error)) { return false; }
 	const auto* value_allied = FindRecordField(*record, "allied", error);
@@ -2448,8 +2448,8 @@ bool Read_SetAllyQuery(const WasmValue& input, SetAllyQuery& output, NativeCallS
 WasmValue Write_SetAllyQuery(const SetAllyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("firstAllyTeamID", WriteScalar(value.firstAllyTeamID));
-	fields.emplace("secondAllyTeamID", WriteScalar(value.secondAllyTeamID));
+	fields.emplace("first-ally-team-id", WriteScalar(value.firstAllyTeamID));
+	fields.emplace("second-ally-team-id", WriteScalar(value.secondAllyTeamID));
 	fields.emplace("allied", WriteScalar(value.allied));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2475,19 +2475,19 @@ bool Read_SetAllyTeamStartBoxQuery(const WasmValue& input, SetAllyTeamStartBoxQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
-	const auto* value_minX = FindRecordField(*record, "minX", error);
+	const auto* value_minX = FindRecordField(*record, "min-x", error);
 	if (value_minX == nullptr) return false;
 	if (!ReadScalar(*value_minX, output.minX, error)) { return false; }
-	const auto* value_minZ = FindRecordField(*record, "minZ", error);
+	const auto* value_minZ = FindRecordField(*record, "min-z", error);
 	if (value_minZ == nullptr) return false;
 	if (!ReadScalar(*value_minZ, output.minZ, error)) { return false; }
-	const auto* value_maxX = FindRecordField(*record, "maxX", error);
+	const auto* value_maxX = FindRecordField(*record, "max-x", error);
 	if (value_maxX == nullptr) return false;
 	if (!ReadScalar(*value_maxX, output.maxX, error)) { return false; }
-	const auto* value_maxZ = FindRecordField(*record, "maxZ", error);
+	const auto* value_maxZ = FindRecordField(*record, "max-z", error);
 	if (value_maxZ == nullptr) return false;
 	if (!ReadScalar(*value_maxZ, output.maxZ, error)) { return false; }
 	return true;
@@ -2496,11 +2496,11 @@ bool Read_SetAllyTeamStartBoxQuery(const WasmValue& input, SetAllyTeamStartBoxQu
 WasmValue Write_SetAllyTeamStartBoxQuery(const SetAllyTeamStartBoxQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
-	fields.emplace("minX", WriteScalar(value.minX));
-	fields.emplace("minZ", WriteScalar(value.minZ));
-	fields.emplace("maxX", WriteScalar(value.maxX));
-	fields.emplace("maxZ", WriteScalar(value.maxZ));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
+	fields.emplace("min-x", WriteScalar(value.minX));
+	fields.emplace("min-z", WriteScalar(value.minZ));
+	fields.emplace("max-x", WriteScalar(value.maxX));
+	fields.emplace("max-z", WriteScalar(value.maxZ));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2559,16 +2559,16 @@ bool Read_SetExperienceGradeQuery(const WasmValue& input, SetExperienceGradeQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_expGrade = FindRecordField(*record, "expGrade", error);
+	const auto* value_expGrade = FindRecordField(*record, "exp-grade", error);
 	if (value_expGrade == nullptr) return false;
 	if (!ReadScalar(*value_expGrade, output.expGrade, error)) { return false; }
-	const auto* value_expPowerScale = FindRecordField(*record, "expPowerScale", error);
+	const auto* value_expPowerScale = FindRecordField(*record, "exp-power-scale", error);
 	if (value_expPowerScale == nullptr) return false;
 	if (!ReadScalar(*value_expPowerScale, output.expPowerScale, error)) { return false; }
-	const auto* value_expHealthScale = FindRecordField(*record, "expHealthScale", error);
+	const auto* value_expHealthScale = FindRecordField(*record, "exp-health-scale", error);
 	if (value_expHealthScale == nullptr) return false;
 	if (!ReadScalar(*value_expHealthScale, output.expHealthScale, error)) { return false; }
-	const auto* value_expReloadScale = FindRecordField(*record, "expReloadScale", error);
+	const auto* value_expReloadScale = FindRecordField(*record, "exp-reload-scale", error);
 	if (value_expReloadScale == nullptr) return false;
 	if (!ReadScalar(*value_expReloadScale, output.expReloadScale, error)) { return false; }
 	return true;
@@ -2577,10 +2577,10 @@ bool Read_SetExperienceGradeQuery(const WasmValue& input, SetExperienceGradeQuer
 WasmValue Write_SetExperienceGradeQuery(const SetExperienceGradeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("expGrade", WriteScalar(value.expGrade));
-	fields.emplace("expPowerScale", WriteScalar(value.expPowerScale));
-	fields.emplace("expHealthScale", WriteScalar(value.expHealthScale));
-	fields.emplace("expReloadScale", WriteScalar(value.expReloadScale));
+	fields.emplace("exp-grade", WriteScalar(value.expGrade));
+	fields.emplace("exp-power-scale", WriteScalar(value.expPowerScale));
+	fields.emplace("exp-health-scale", WriteScalar(value.expHealthScale));
+	fields.emplace("exp-reload-scale", WriteScalar(value.expReloadScale));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2614,7 +2614,7 @@ bool Read_SetFactoryBuggerOffOptions(const WasmValue& input, SetFactoryBuggerOff
 	const auto* value_radius = FindRecordField(*record, "radius", error);
 	if (value_radius == nullptr) return false;
 	if (!ReadScalar(*value_radius, output.radius, error)) { return false; }
-	const auto* value_relHeading = FindRecordField(*record, "relHeading", error);
+	const auto* value_relHeading = FindRecordField(*record, "rel-heading", error);
 	if (value_relHeading == nullptr) return false;
 	if (!ReadScalar(*value_relHeading, output.relHeading, error)) { return false; }
 	const auto* value_spherical = FindRecordField(*record, "spherical", error);
@@ -2632,7 +2632,7 @@ WasmValue Write_SetFactoryBuggerOffOptions(const SetFactoryBuggerOffOptions& val
 	fields.emplace("perform", WriteScalar(value.perform));
 	fields.emplace("offset", WriteScalar(value.offset));
 	fields.emplace("radius", WriteScalar(value.radius));
-	fields.emplace("relHeading", WriteScalar(value.relHeading));
+	fields.emplace("rel-heading", WriteScalar(value.relHeading));
 	fields.emplace("spherical", WriteScalar(value.spherical));
 	fields.emplace("forced", WriteScalar(value.forced));
 	return WasmValue::Record(std::move(fields));
@@ -2642,7 +2642,7 @@ bool Read_SetFactoryBuggerOffQuery(const WasmValue& input, SetFactoryBuggerOffQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -2654,7 +2654,7 @@ bool Read_SetFactoryBuggerOffQuery(const WasmValue& input, SetFactoryBuggerOffQu
 WasmValue Write_SetFactoryBuggerOffQuery(const SetFactoryBuggerOffQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("options", Write_SetFactoryBuggerOffOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2680,10 +2680,10 @@ bool Read_SetFeatureAlwaysVisibleQuery(const WasmValue& input, SetFeatureAlwaysV
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_alwaysVisible = FindRecordField(*record, "alwaysVisible", error);
+	const auto* value_alwaysVisible = FindRecordField(*record, "always-visible", error);
 	if (value_alwaysVisible == nullptr) return false;
 	if (!ReadScalar(*value_alwaysVisible, output.alwaysVisible, error)) { return false; }
 	return true;
@@ -2692,8 +2692,8 @@ bool Read_SetFeatureAlwaysVisibleQuery(const WasmValue& input, SetFeatureAlwaysV
 WasmValue Write_SetFeatureAlwaysVisibleQuery(const SetFeatureAlwaysVisibleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("alwaysVisible", WriteScalar(value.alwaysVisible));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("always-visible", WriteScalar(value.alwaysVisible));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2721,22 +2721,22 @@ bool Read_SetFeatureBlockingOptions(const WasmValue& input, SetFeatureBlockingOp
 	const auto* value_blocking = FindRecordField(*record, "blocking", error);
 	if (value_blocking == nullptr) return false;
 	if (!ReadScalar(*value_blocking, output.blocking, error)) { return false; }
-	const auto* value_solidObjects = FindRecordField(*record, "solidObjects", error);
+	const auto* value_solidObjects = FindRecordField(*record, "solid-objects", error);
 	if (value_solidObjects == nullptr) return false;
 	if (!ReadScalar(*value_solidObjects, output.solidObjects, error)) { return false; }
 	const auto* value_projectiles = FindRecordField(*record, "projectiles", error);
 	if (value_projectiles == nullptr) return false;
 	if (!ReadScalar(*value_projectiles, output.projectiles, error)) { return false; }
-	const auto* value_quadMapRays = FindRecordField(*record, "quadMapRays", error);
+	const auto* value_quadMapRays = FindRecordField(*record, "quad-map-rays", error);
 	if (value_quadMapRays == nullptr) return false;
 	if (!ReadScalar(*value_quadMapRays, output.quadMapRays, error)) { return false; }
 	const auto* value_crushable = FindRecordField(*record, "crushable", error);
 	if (value_crushable == nullptr) return false;
 	if (!ReadScalar(*value_crushable, output.crushable, error)) { return false; }
-	const auto* value_blockEnemyPushing = FindRecordField(*record, "blockEnemyPushing", error);
+	const auto* value_blockEnemyPushing = FindRecordField(*record, "block-enemy-pushing", error);
 	if (value_blockEnemyPushing == nullptr) return false;
 	if (!ReadScalar(*value_blockEnemyPushing, output.blockEnemyPushing, error)) { return false; }
-	const auto* value_blockHeightChanges = FindRecordField(*record, "blockHeightChanges", error);
+	const auto* value_blockHeightChanges = FindRecordField(*record, "block-height-changes", error);
 	if (value_blockHeightChanges == nullptr) return false;
 	if (!ReadScalar(*value_blockHeightChanges, output.blockHeightChanges, error)) { return false; }
 	return true;
@@ -2746,12 +2746,12 @@ WasmValue Write_SetFeatureBlockingOptions(const SetFeatureBlockingOptions& value
 {
 	WasmValueRecord fields;
 	fields.emplace("blocking", WriteScalar(value.blocking));
-	fields.emplace("solidObjects", WriteScalar(value.solidObjects));
+	fields.emplace("solid-objects", WriteScalar(value.solidObjects));
 	fields.emplace("projectiles", WriteScalar(value.projectiles));
-	fields.emplace("quadMapRays", WriteScalar(value.quadMapRays));
+	fields.emplace("quad-map-rays", WriteScalar(value.quadMapRays));
 	fields.emplace("crushable", WriteScalar(value.crushable));
-	fields.emplace("blockEnemyPushing", WriteScalar(value.blockEnemyPushing));
-	fields.emplace("blockHeightChanges", WriteScalar(value.blockHeightChanges));
+	fields.emplace("block-enemy-pushing", WriteScalar(value.blockEnemyPushing));
+	fields.emplace("block-height-changes", WriteScalar(value.blockHeightChanges));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2759,7 +2759,7 @@ bool Read_SetFeatureBlockingQuery(const WasmValue& input, SetFeatureBlockingQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -2771,7 +2771,7 @@ bool Read_SetFeatureBlockingQuery(const WasmValue& input, SetFeatureBlockingQuer
 WasmValue Write_SetFeatureBlockingQuery(const SetFeatureBlockingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("options", Write_SetFeatureBlockingOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2797,7 +2797,7 @@ bool Read_SetFeatureCollisionVolumeDataQuery(const WasmValue& input, SetFeatureC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_scales = FindRecordField(*record, "scales", error);
@@ -2806,13 +2806,13 @@ bool Read_SetFeatureCollisionVolumeDataQuery(const WasmValue& input, SetFeatureC
 	const auto* value_offsets = FindRecordField(*record, "offsets", error);
 	if (value_offsets == nullptr) return false;
 	if (!Read_Float3(*value_offsets, output.offsets, storage, error)) { return false; }
-	const auto* value_volumeType = FindRecordField(*record, "volumeType", error);
+	const auto* value_volumeType = FindRecordField(*record, "volume-type", error);
 	if (value_volumeType == nullptr) return false;
 	if (!ReadScalar(*value_volumeType, output.volumeType, error)) { return false; }
-	const auto* value_testType = FindRecordField(*record, "testType", error);
+	const auto* value_testType = FindRecordField(*record, "test-type", error);
 	if (value_testType == nullptr) return false;
 	if (!ReadScalar(*value_testType, output.testType, error)) { return false; }
-	const auto* value_primaryAxis = FindRecordField(*record, "primaryAxis", error);
+	const auto* value_primaryAxis = FindRecordField(*record, "primary-axis", error);
 	if (value_primaryAxis == nullptr) return false;
 	if (!ReadScalar(*value_primaryAxis, output.primaryAxis, error)) { return false; }
 	return true;
@@ -2821,12 +2821,12 @@ bool Read_SetFeatureCollisionVolumeDataQuery(const WasmValue& input, SetFeatureC
 WasmValue Write_SetFeatureCollisionVolumeDataQuery(const SetFeatureCollisionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("scales", Write_Float3(value.scales));
 	fields.emplace("offsets", Write_Float3(value.offsets));
-	fields.emplace("volumeType", WriteScalar(value.volumeType));
-	fields.emplace("testType", WriteScalar(value.testType));
-	fields.emplace("primaryAxis", WriteScalar(value.primaryAxis));
+	fields.emplace("volume-type", WriteScalar(value.volumeType));
+	fields.emplace("test-type", WriteScalar(value.testType));
+	fields.emplace("primary-axis", WriteScalar(value.primaryAxis));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2851,13 +2851,13 @@ bool Read_SetFeatureDirectionQuery(const WasmValue& input, SetFeatureDirectionQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_frontDir = FindRecordField(*record, "frontDir", error);
+	const auto* value_frontDir = FindRecordField(*record, "front-dir", error);
 	if (value_frontDir == nullptr) return false;
 	if (!Read_Float3(*value_frontDir, output.frontDir, storage, error)) { return false; }
-	const auto* value_rightDir = FindRecordField(*record, "rightDir", error);
+	const auto* value_rightDir = FindRecordField(*record, "right-dir", error);
 	if (value_rightDir == nullptr) return false;
 	if (!Read_Float3(*value_rightDir, output.rightDir, storage, error)) { return false; }
 	return true;
@@ -2866,9 +2866,9 @@ bool Read_SetFeatureDirectionQuery(const WasmValue& input, SetFeatureDirectionQu
 WasmValue Write_SetFeatureDirectionQuery(const SetFeatureDirectionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("frontDir", Write_Float3(value.frontDir));
-	fields.emplace("rightDir", Write_Float3(value.rightDir));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("front-dir", Write_Float3(value.frontDir));
+	fields.emplace("right-dir", Write_Float3(value.rightDir));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2893,10 +2893,10 @@ bool Read_SetFeatureFireTimeQuery(const WasmValue& input, SetFeatureFireTimeQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_fireTime = FindRecordField(*record, "fireTime", error);
+	const auto* value_fireTime = FindRecordField(*record, "fire-time", error);
 	if (value_fireTime == nullptr) return false;
 	if (!ReadScalar(*value_fireTime, output.fireTime, error)) { return false; }
 	return true;
@@ -2905,8 +2905,8 @@ bool Read_SetFeatureFireTimeQuery(const WasmValue& input, SetFeatureFireTimeQuer
 WasmValue Write_SetFeatureFireTimeQuery(const SetFeatureFireTimeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("fireTime", WriteScalar(value.fireTime));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("fire-time", WriteScalar(value.fireTime));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2931,13 +2931,13 @@ bool Read_SetFeatureHeadingAndUpDirQuery(const WasmValue& input, SetFeatureHeadi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_heading = FindRecordField(*record, "heading", error);
 	if (value_heading == nullptr) return false;
 	if (!ReadScalar(*value_heading, output.heading, error)) { return false; }
-	const auto* value_upDir = FindRecordField(*record, "upDir", error);
+	const auto* value_upDir = FindRecordField(*record, "up-dir", error);
 	if (value_upDir == nullptr) return false;
 	if (!Read_Float3(*value_upDir, output.upDir, storage, error)) { return false; }
 	return true;
@@ -2946,9 +2946,9 @@ bool Read_SetFeatureHeadingAndUpDirQuery(const WasmValue& input, SetFeatureHeadi
 WasmValue Write_SetFeatureHeadingAndUpDirQuery(const SetFeatureHeadingAndUpDirQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("heading", WriteScalar(value.heading));
-	fields.emplace("upDir", Write_Float3(value.upDir));
+	fields.emplace("up-dir", Write_Float3(value.upDir));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2973,13 +2973,13 @@ bool Read_SetFeatureHealthQuery(const WasmValue& input, SetFeatureHealthQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_health = FindRecordField(*record, "health", error);
 	if (value_health == nullptr) return false;
 	if (!ReadScalar(*value_health, output.health, error)) { return false; }
-	const auto* value_checkDestruction = FindRecordField(*record, "checkDestruction", error);
+	const auto* value_checkDestruction = FindRecordField(*record, "check-destruction", error);
 	if (value_checkDestruction == nullptr) return false;
 	if (!ReadScalar(*value_checkDestruction, output.checkDestruction, error)) { return false; }
 	return true;
@@ -2988,9 +2988,9 @@ bool Read_SetFeatureHealthQuery(const WasmValue& input, SetFeatureHealthQuery& o
 WasmValue Write_SetFeatureHealthQuery(const SetFeatureHealthQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("health", WriteScalar(value.health));
-	fields.emplace("checkDestruction", WriteScalar(value.checkDestruction));
+	fields.emplace("check-destruction", WriteScalar(value.checkDestruction));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3015,7 +3015,7 @@ bool Read_SetFeatureMassQuery(const WasmValue& input, SetFeatureMassQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_mass = FindRecordField(*record, "mass", error);
@@ -3027,7 +3027,7 @@ bool Read_SetFeatureMassQuery(const WasmValue& input, SetFeatureMassQuery& outpu
 WasmValue Write_SetFeatureMassQuery(const SetFeatureMassQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("mass", WriteScalar(value.mass));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3053,10 +3053,10 @@ bool Read_SetFeatureMaxHealthQuery(const WasmValue& input, SetFeatureMaxHealthQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_maxHealth = FindRecordField(*record, "maxHealth", error);
+	const auto* value_maxHealth = FindRecordField(*record, "max-health", error);
 	if (value_maxHealth == nullptr) return false;
 	if (!ReadScalar(*value_maxHealth, output.maxHealth, error)) { return false; }
 	return true;
@@ -3065,8 +3065,8 @@ bool Read_SetFeatureMaxHealthQuery(const WasmValue& input, SetFeatureMaxHealthQu
 WasmValue Write_SetFeatureMaxHealthQuery(const SetFeatureMaxHealthQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("maxHealth", WriteScalar(value.maxHealth));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("max-health", WriteScalar(value.maxHealth));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3091,16 +3091,16 @@ bool Read_SetFeatureMidAndAimPosQuery(const WasmValue& input, SetFeatureMidAndAi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_midPos = FindRecordField(*record, "midPos", error);
+	const auto* value_midPos = FindRecordField(*record, "mid-pos", error);
 	if (value_midPos == nullptr) return false;
 	if (!Read_Float3(*value_midPos, output.midPos, storage, error)) { return false; }
-	const auto* value_aimPos = FindRecordField(*record, "aimPos", error);
+	const auto* value_aimPos = FindRecordField(*record, "aim-pos", error);
 	if (value_aimPos == nullptr) return false;
 	if (!Read_Float3(*value_aimPos, output.aimPos, storage, error)) { return false; }
-	const auto* value_setRelative = FindRecordField(*record, "setRelative", error);
+	const auto* value_setRelative = FindRecordField(*record, "set-relative", error);
 	if (value_setRelative == nullptr) return false;
 	if (!ReadScalar(*value_setRelative, output.setRelative, error)) { return false; }
 	return true;
@@ -3109,10 +3109,10 @@ bool Read_SetFeatureMidAndAimPosQuery(const WasmValue& input, SetFeatureMidAndAi
 WasmValue Write_SetFeatureMidAndAimPosQuery(const SetFeatureMidAndAimPosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("midPos", Write_Float3(value.midPos));
-	fields.emplace("aimPos", Write_Float3(value.aimPos));
-	fields.emplace("setRelative", WriteScalar(value.setRelative));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("mid-pos", Write_Float3(value.midPos));
+	fields.emplace("aim-pos", Write_Float3(value.aimPos));
+	fields.emplace("set-relative", WriteScalar(value.setRelative));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3137,19 +3137,19 @@ bool Read_SetFeatureMoveCtrlQuery(const WasmValue& input, SetFeatureMoveCtrlQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_enable = FindRecordField(*record, "enable", error);
 	if (value_enable == nullptr) return false;
 	if (!ReadScalar(*value_enable, output.enable, error)) { return false; }
-	const auto* value_velocityOrMask = FindRecordField(*record, "velocityOrMask", error);
+	const auto* value_velocityOrMask = FindRecordField(*record, "velocity-or-mask", error);
 	if (value_velocityOrMask == nullptr) return false;
 	if (!Read_Float3(*value_velocityOrMask, output.velocityOrMask, storage, error)) { return false; }
-	const auto* value_accelerationOrImpulseMask = FindRecordField(*record, "accelerationOrImpulseMask", error);
+	const auto* value_accelerationOrImpulseMask = FindRecordField(*record, "acceleration-or-impulse-mask", error);
 	if (value_accelerationOrImpulseMask == nullptr) return false;
 	if (!Read_Float3(*value_accelerationOrImpulseMask, output.accelerationOrImpulseMask, storage, error)) { return false; }
-	const auto* value_movementMask = FindRecordField(*record, "movementMask", error);
+	const auto* value_movementMask = FindRecordField(*record, "movement-mask", error);
 	if (value_movementMask == nullptr) return false;
 	if (!Read_Float3(*value_movementMask, output.movementMask, storage, error)) { return false; }
 	return true;
@@ -3158,11 +3158,11 @@ bool Read_SetFeatureMoveCtrlQuery(const WasmValue& input, SetFeatureMoveCtrlQuer
 WasmValue Write_SetFeatureMoveCtrlQuery(const SetFeatureMoveCtrlQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("enable", WriteScalar(value.enable));
-	fields.emplace("velocityOrMask", Write_Float3(value.velocityOrMask));
-	fields.emplace("accelerationOrImpulseMask", Write_Float3(value.accelerationOrImpulseMask));
-	fields.emplace("movementMask", Write_Float3(value.movementMask));
+	fields.emplace("velocity-or-mask", Write_Float3(value.velocityOrMask));
+	fields.emplace("acceleration-or-impulse-mask", Write_Float3(value.accelerationOrImpulseMask));
+	fields.emplace("movement-mask", Write_Float3(value.movementMask));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3187,10 +3187,10 @@ bool Read_SetFeatureNoSelectQuery(const WasmValue& input, SetFeatureNoSelectQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_noSelect = FindRecordField(*record, "noSelect", error);
+	const auto* value_noSelect = FindRecordField(*record, "no-select", error);
 	if (value_noSelect == nullptr) return false;
 	if (!ReadScalar(*value_noSelect, output.noSelect, error)) { return false; }
 	return true;
@@ -3199,8 +3199,8 @@ bool Read_SetFeatureNoSelectQuery(const WasmValue& input, SetFeatureNoSelectQuer
 WasmValue Write_SetFeatureNoSelectQuery(const SetFeatureNoSelectQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("noSelect", WriteScalar(value.noSelect));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("no-select", WriteScalar(value.noSelect));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3225,7 +3225,7 @@ bool Read_SetFeaturePhysicsQuery(const WasmValue& input, SetFeaturePhysicsQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -3246,7 +3246,7 @@ bool Read_SetFeaturePhysicsQuery(const WasmValue& input, SetFeaturePhysicsQuery&
 WasmValue Write_SetFeaturePhysicsQuery(const SetFeaturePhysicsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("velocity", Write_Float3(value.velocity));
 	fields.emplace("rotation", Write_Float3(value.rotation));
@@ -3275,10 +3275,10 @@ bool Read_SetFeaturePieceCollisionVolumeDataQuery(const WasmValue& input, SetFea
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_pieceIndex = FindRecordField(*record, "pieceIndex", error);
+	const auto* value_pieceIndex = FindRecordField(*record, "piece-index", error);
 	if (value_pieceIndex == nullptr) return false;
 	if (!ReadScalar(*value_pieceIndex, output.pieceIndex, error)) { return false; }
 	const auto* value_enable = FindRecordField(*record, "enable", error);
@@ -3290,10 +3290,10 @@ bool Read_SetFeaturePieceCollisionVolumeDataQuery(const WasmValue& input, SetFea
 	const auto* value_offsets = FindRecordField(*record, "offsets", error);
 	if (value_offsets == nullptr) return false;
 	if (!Read_Float3(*value_offsets, output.offsets, storage, error)) { return false; }
-	const auto* value_volumeType = FindRecordField(*record, "volumeType", error);
+	const auto* value_volumeType = FindRecordField(*record, "volume-type", error);
 	if (value_volumeType == nullptr) return false;
 	if (!ReadScalar(*value_volumeType, output.volumeType, error)) { return false; }
-	const auto* value_primaryAxis = FindRecordField(*record, "primaryAxis", error);
+	const auto* value_primaryAxis = FindRecordField(*record, "primary-axis", error);
 	if (value_primaryAxis == nullptr) return false;
 	if (!ReadScalar(*value_primaryAxis, output.primaryAxis, error)) { return false; }
 	return true;
@@ -3302,13 +3302,13 @@ bool Read_SetFeaturePieceCollisionVolumeDataQuery(const WasmValue& input, SetFea
 WasmValue Write_SetFeaturePieceCollisionVolumeDataQuery(const SetFeaturePieceCollisionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("pieceIndex", WriteScalar(value.pieceIndex));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("piece-index", WriteScalar(value.pieceIndex));
 	fields.emplace("enable", WriteScalar(value.enable));
 	fields.emplace("scales", Write_Float3(value.scales));
 	fields.emplace("offsets", Write_Float3(value.offsets));
-	fields.emplace("volumeType", WriteScalar(value.volumeType));
-	fields.emplace("primaryAxis", WriteScalar(value.primaryAxis));
+	fields.emplace("volume-type", WriteScalar(value.volumeType));
+	fields.emplace("primary-axis", WriteScalar(value.primaryAxis));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3333,10 +3333,10 @@ bool Read_SetFeaturePieceMatrixQuery(const WasmValue& input, SetFeaturePieceMatr
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_pieceIndex = FindRecordField(*record, "pieceIndex", error);
+	const auto* value_pieceIndex = FindRecordField(*record, "piece-index", error);
 	if (value_pieceIndex == nullptr) return false;
 	if (!ReadScalar(*value_pieceIndex, output.pieceIndex, error)) { return false; }
 	const auto* value_matrix = FindRecordField(*record, "matrix", error);
@@ -3352,8 +3352,8 @@ bool Read_SetFeaturePieceMatrixQuery(const WasmValue& input, SetFeaturePieceMatr
 WasmValue Write_SetFeaturePieceMatrixQuery(const SetFeaturePieceMatrixQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("pieceIndex", WriteScalar(value.pieceIndex));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("piece-index", WriteScalar(value.pieceIndex));
 	fields.emplace("matrix", WriteNativeArray(value.matrix, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3362,7 +3362,7 @@ bool Read_SetFeaturePieceMatrixResult(const WasmValue& input, SetFeaturePieceMat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_blockScriptAnims = FindRecordField(*record, "blockScriptAnims", error);
+	const auto* value_blockScriptAnims = FindRecordField(*record, "block-script-anims", error);
 	if (value_blockScriptAnims == nullptr) return false;
 	if (!ReadScalar(*value_blockScriptAnims, output.blockScriptAnims, error)) { return false; }
 	return true;
@@ -3371,7 +3371,7 @@ bool Read_SetFeaturePieceMatrixResult(const WasmValue& input, SetFeaturePieceMat
 WasmValue Write_SetFeaturePieceMatrixResult(const SetFeaturePieceMatrixResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("blockScriptAnims", WriteScalar(value.blockScriptAnims));
+	fields.emplace("block-script-anims", WriteScalar(value.blockScriptAnims));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3379,10 +3379,10 @@ bool Read_SetFeaturePieceVisibleQuery(const WasmValue& input, SetFeaturePieceVis
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_pieceIndex = FindRecordField(*record, "pieceIndex", error);
+	const auto* value_pieceIndex = FindRecordField(*record, "piece-index", error);
 	if (value_pieceIndex == nullptr) return false;
 	if (!ReadScalar(*value_pieceIndex, output.pieceIndex, error)) { return false; }
 	const auto* value_visible = FindRecordField(*record, "visible", error);
@@ -3394,8 +3394,8 @@ bool Read_SetFeaturePieceVisibleQuery(const WasmValue& input, SetFeaturePieceVis
 WasmValue Write_SetFeaturePieceVisibleQuery(const SetFeaturePieceVisibleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("pieceIndex", WriteScalar(value.pieceIndex));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("piece-index", WriteScalar(value.pieceIndex));
 	fields.emplace("visible", WriteScalar(value.visible));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3421,13 +3421,13 @@ bool Read_SetFeaturePositionQuery(const WasmValue& input, SetFeaturePositionQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_snapToGround = FindRecordField(*record, "snapToGround", error);
+	const auto* value_snapToGround = FindRecordField(*record, "snap-to-ground", error);
 	if (value_snapToGround == nullptr) return false;
 	if (!ReadScalar(*value_snapToGround, output.snapToGround, error)) { return false; }
 	return true;
@@ -3436,9 +3436,9 @@ bool Read_SetFeaturePositionQuery(const WasmValue& input, SetFeaturePositionQuer
 WasmValue Write_SetFeaturePositionQuery(const SetFeaturePositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("snapToGround", WriteScalar(value.snapToGround));
+	fields.emplace("snap-to-ground", WriteScalar(value.snapToGround));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3463,7 +3463,7 @@ bool Read_SetFeatureRadiusAndHeightQuery(const WasmValue& input, SetFeatureRadiu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_radius = FindRecordField(*record, "radius", error);
@@ -3478,7 +3478,7 @@ bool Read_SetFeatureRadiusAndHeightQuery(const WasmValue& input, SetFeatureRadiu
 WasmValue Write_SetFeatureRadiusAndHeightQuery(const SetFeatureRadiusAndHeightQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("radius", WriteScalar(value.radius));
 	fields.emplace("height", WriteScalar(value.height));
 	return WasmValue::Record(std::move(fields));
@@ -3505,10 +3505,10 @@ bool Read_SetFeatureReclaimQuery(const WasmValue& input, SetFeatureReclaimQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_reclaimLeft = FindRecordField(*record, "reclaimLeft", error);
+	const auto* value_reclaimLeft = FindRecordField(*record, "reclaim-left", error);
 	if (value_reclaimLeft == nullptr) return false;
 	if (!ReadScalar(*value_reclaimLeft, output.reclaimLeft, error)) { return false; }
 	return true;
@@ -3517,8 +3517,8 @@ bool Read_SetFeatureReclaimQuery(const WasmValue& input, SetFeatureReclaimQuery&
 WasmValue Write_SetFeatureReclaimQuery(const SetFeatureReclaimQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("reclaimLeft", WriteScalar(value.reclaimLeft));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("reclaim-left", WriteScalar(value.reclaimLeft));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3543,7 +3543,7 @@ bool Read_SetFeatureResourcesQuery(const WasmValue& input, SetFeatureResourcesQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_metal = FindRecordField(*record, "metal", error);
@@ -3552,16 +3552,16 @@ bool Read_SetFeatureResourcesQuery(const WasmValue& input, SetFeatureResourcesQu
 	const auto* value_energy = FindRecordField(*record, "energy", error);
 	if (value_energy == nullptr) return false;
 	if (!ReadScalar(*value_energy, output.energy, error)) { return false; }
-	const auto* value_reclaimTime = FindRecordField(*record, "reclaimTime", error);
+	const auto* value_reclaimTime = FindRecordField(*record, "reclaim-time", error);
 	if (value_reclaimTime == nullptr) return false;
 	if (!ReadScalar(*value_reclaimTime, output.reclaimTime, error)) { return false; }
-	const auto* value_reclaimLeft = FindRecordField(*record, "reclaimLeft", error);
+	const auto* value_reclaimLeft = FindRecordField(*record, "reclaim-left", error);
 	if (value_reclaimLeft == nullptr) return false;
 	if (!ReadScalar(*value_reclaimLeft, output.reclaimLeft, error)) { return false; }
-	const auto* value_featureDefMetal = FindRecordField(*record, "featureDefMetal", error);
+	const auto* value_featureDefMetal = FindRecordField(*record, "feature-def-metal", error);
 	if (value_featureDefMetal == nullptr) return false;
 	if (!ReadScalar(*value_featureDefMetal, output.featureDefMetal, error)) { return false; }
-	const auto* value_featureDefEnergy = FindRecordField(*record, "featureDefEnergy", error);
+	const auto* value_featureDefEnergy = FindRecordField(*record, "feature-def-energy", error);
 	if (value_featureDefEnergy == nullptr) return false;
 	if (!ReadScalar(*value_featureDefEnergy, output.featureDefEnergy, error)) { return false; }
 	return true;
@@ -3570,13 +3570,13 @@ bool Read_SetFeatureResourcesQuery(const WasmValue& input, SetFeatureResourcesQu
 WasmValue Write_SetFeatureResourcesQuery(const SetFeatureResourcesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("metal", WriteScalar(value.metal));
 	fields.emplace("energy", WriteScalar(value.energy));
-	fields.emplace("reclaimTime", WriteScalar(value.reclaimTime));
-	fields.emplace("reclaimLeft", WriteScalar(value.reclaimLeft));
-	fields.emplace("featureDefMetal", WriteScalar(value.featureDefMetal));
-	fields.emplace("featureDefEnergy", WriteScalar(value.featureDefEnergy));
+	fields.emplace("reclaim-time", WriteScalar(value.reclaimTime));
+	fields.emplace("reclaim-left", WriteScalar(value.reclaimLeft));
+	fields.emplace("feature-def-metal", WriteScalar(value.featureDefMetal));
+	fields.emplace("feature-def-energy", WriteScalar(value.featureDefEnergy));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3601,10 +3601,10 @@ bool Read_SetFeatureResurrectQuery(const WasmValue& input, SetFeatureResurrectQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_unitDef = FindRecordField(*record, "unitDef", error);
+	const auto* value_unitDef = FindRecordField(*record, "unit-def", error);
 	if (value_unitDef == nullptr) return false;
 	if (!Read_DefRef(*value_unitDef, output.unitDef, storage, error)) { return false; }
 	const auto* value_facing = FindRecordField(*record, "facing", error);
@@ -3619,8 +3619,8 @@ bool Read_SetFeatureResurrectQuery(const WasmValue& input, SetFeatureResurrectQu
 WasmValue Write_SetFeatureResurrectQuery(const SetFeatureResurrectQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("unitDef", Write_DefRef(value.unitDef));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("unit-def", Write_DefRef(value.unitDef));
 	fields.emplace("facing", WriteScalar(value.facing));
 	fields.emplace("progress", WriteScalar(value.progress));
 	return WasmValue::Record(std::move(fields));
@@ -3647,7 +3647,7 @@ bool Read_SetFeatureRotationQuery(const WasmValue& input, SetFeatureRotationQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_rotation = FindRecordField(*record, "rotation", error);
@@ -3659,7 +3659,7 @@ bool Read_SetFeatureRotationQuery(const WasmValue& input, SetFeatureRotationQuer
 WasmValue Write_SetFeatureRotationQuery(const SetFeatureRotationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("rotation", Write_Float3(value.rotation));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3685,7 +3685,7 @@ bool Read_SetFeatureSelectionVolumeDataQuery(const WasmValue& input, SetFeatureS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_scales = FindRecordField(*record, "scales", error);
@@ -3694,13 +3694,13 @@ bool Read_SetFeatureSelectionVolumeDataQuery(const WasmValue& input, SetFeatureS
 	const auto* value_offsets = FindRecordField(*record, "offsets", error);
 	if (value_offsets == nullptr) return false;
 	if (!Read_Float3(*value_offsets, output.offsets, storage, error)) { return false; }
-	const auto* value_volumeType = FindRecordField(*record, "volumeType", error);
+	const auto* value_volumeType = FindRecordField(*record, "volume-type", error);
 	if (value_volumeType == nullptr) return false;
 	if (!ReadScalar(*value_volumeType, output.volumeType, error)) { return false; }
-	const auto* value_primaryAxis = FindRecordField(*record, "primaryAxis", error);
+	const auto* value_primaryAxis = FindRecordField(*record, "primary-axis", error);
 	if (value_primaryAxis == nullptr) return false;
 	if (!ReadScalar(*value_primaryAxis, output.primaryAxis, error)) { return false; }
-	const auto* value_useContHitTest = FindRecordField(*record, "useContHitTest", error);
+	const auto* value_useContHitTest = FindRecordField(*record, "use-cont-hit-test", error);
 	if (value_useContHitTest == nullptr) return false;
 	if (!ReadScalar(*value_useContHitTest, output.useContHitTest, error)) { return false; }
 	return true;
@@ -3709,12 +3709,12 @@ bool Read_SetFeatureSelectionVolumeDataQuery(const WasmValue& input, SetFeatureS
 WasmValue Write_SetFeatureSelectionVolumeDataQuery(const SetFeatureSelectionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("scales", Write_Float3(value.scales));
 	fields.emplace("offsets", Write_Float3(value.offsets));
-	fields.emplace("volumeType", WriteScalar(value.volumeType));
-	fields.emplace("primaryAxis", WriteScalar(value.primaryAxis));
-	fields.emplace("useContHitTest", WriteScalar(value.useContHitTest));
+	fields.emplace("volume-type", WriteScalar(value.volumeType));
+	fields.emplace("primary-axis", WriteScalar(value.primaryAxis));
+	fields.emplace("use-cont-hit-test", WriteScalar(value.useContHitTest));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3739,10 +3739,10 @@ bool Read_SetFeatureSmokeTimeQuery(const WasmValue& input, SetFeatureSmokeTimeQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_smokeTime = FindRecordField(*record, "smokeTime", error);
+	const auto* value_smokeTime = FindRecordField(*record, "smoke-time", error);
 	if (value_smokeTime == nullptr) return false;
 	if (!ReadScalar(*value_smokeTime, output.smokeTime, error)) { return false; }
 	return true;
@@ -3751,8 +3751,8 @@ bool Read_SetFeatureSmokeTimeQuery(const WasmValue& input, SetFeatureSmokeTimeQu
 WasmValue Write_SetFeatureSmokeTimeQuery(const SetFeatureSmokeTimeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("smokeTime", WriteScalar(value.smokeTime));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("smoke-time", WriteScalar(value.smokeTime));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3777,10 +3777,10 @@ bool Read_SetFeatureUseAirLosQuery(const WasmValue& input, SetFeatureUseAirLosQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_useAirLos = FindRecordField(*record, "useAirLos", error);
+	const auto* value_useAirLos = FindRecordField(*record, "use-air-los", error);
 	if (value_useAirLos == nullptr) return false;
 	if (!ReadScalar(*value_useAirLos, output.useAirLos, error)) { return false; }
 	return true;
@@ -3789,8 +3789,8 @@ bool Read_SetFeatureUseAirLosQuery(const WasmValue& input, SetFeatureUseAirLosQu
 WasmValue Write_SetFeatureUseAirLosQuery(const SetFeatureUseAirLosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("useAirLos", WriteScalar(value.useAirLos));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("use-air-los", WriteScalar(value.useAirLos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3815,7 +3815,7 @@ bool Read_SetFeatureVelocityQuery(const WasmValue& input, SetFeatureVelocityQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_velocity = FindRecordField(*record, "velocity", error);
@@ -3827,7 +3827,7 @@ bool Read_SetFeatureVelocityQuery(const WasmValue& input, SetFeatureVelocityQuer
 WasmValue Write_SetFeatureVelocityQuery(const SetFeatureVelocityQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("velocity", Write_Float3(value.velocity));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3853,7 +3853,7 @@ bool Read_SetGlobalLosQuery(const WasmValue& input, SetGlobalLosQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	const auto* value_enabled = FindRecordField(*record, "enabled", error);
@@ -3865,7 +3865,7 @@ bool Read_SetGlobalLosQuery(const WasmValue& input, SetGlobalLosQuery& output, N
 WasmValue Write_SetGlobalLosQuery(const SetGlobalLosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	fields.emplace("enabled", WriteScalar(value.enabled));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3891,10 +3891,10 @@ bool Read_SetGodModeOptions(const WasmValue& input, SetGodModeOptions& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_controlAllies = FindRecordField(*record, "controlAllies", error);
+	const auto* value_controlAllies = FindRecordField(*record, "control-allies", error);
 	if (value_controlAllies == nullptr) return false;
 	if (!ReadScalar(*value_controlAllies, output.controlAllies, error)) { return false; }
-	const auto* value_controlEnemies = FindRecordField(*record, "controlEnemies", error);
+	const auto* value_controlEnemies = FindRecordField(*record, "control-enemies", error);
 	if (value_controlEnemies == nullptr) return false;
 	if (!ReadScalar(*value_controlEnemies, output.controlEnemies, error)) { return false; }
 	return true;
@@ -3903,8 +3903,8 @@ bool Read_SetGodModeOptions(const WasmValue& input, SetGodModeOptions& output, N
 WasmValue Write_SetGodModeOptions(const SetGodModeOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("controlAllies", WriteScalar(value.controlAllies));
-	fields.emplace("controlEnemies", WriteScalar(value.controlEnemies));
+	fields.emplace("control-allies", WriteScalar(value.controlAllies));
+	fields.emplace("control-enemies", WriteScalar(value.controlEnemies));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4015,7 +4015,7 @@ bool Read_SetMapSquareTerrainTypeQuery(const WasmValue& input, SetMapSquareTerra
 	const auto* value_z = FindRecordField(*record, "z", error);
 	if (value_z == nullptr) return false;
 	if (!ReadScalar(*value_z, output.z, error)) { return false; }
-	const auto* value_terrainType = FindRecordField(*record, "terrainType", error);
+	const auto* value_terrainType = FindRecordField(*record, "terrain-type", error);
 	if (value_terrainType == nullptr) return false;
 	if (!ReadScalar(*value_terrainType, output.terrainType, error)) { return false; }
 	return true;
@@ -4026,7 +4026,7 @@ WasmValue Write_SetMapSquareTerrainTypeQuery(const SetMapSquareTerrainTypeQuery&
 	WasmValueRecord fields;
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("z", WriteScalar(value.z));
-	fields.emplace("terrainType", WriteScalar(value.terrainType));
+	fields.emplace("terrain-type", WriteScalar(value.terrainType));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4051,7 +4051,7 @@ bool Read_SetNoPauseQuery(const WasmValue& input, SetNoPauseQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_noPause = FindRecordField(*record, "noPause", error);
+	const auto* value_noPause = FindRecordField(*record, "no-pause", error);
 	if (value_noPause == nullptr) return false;
 	if (!ReadScalar(*value_noPause, output.noPause, error)) { return false; }
 	return true;
@@ -4060,7 +4060,7 @@ bool Read_SetNoPauseQuery(const WasmValue& input, SetNoPauseQuery& output, Nativ
 WasmValue Write_SetNoPauseQuery(const SetNoPauseQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("noPause", WriteScalar(value.noPause));
+	fields.emplace("no-pause", WriteScalar(value.noPause));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4148,19 +4148,19 @@ bool Read_SetPieceProjectileParamsQuery(const WasmValue& input, SetPieceProjecti
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
-	const auto* value_explFlags = FindRecordField(*record, "explFlags", error);
+	const auto* value_explFlags = FindRecordField(*record, "expl-flags", error);
 	if (value_explFlags == nullptr) return false;
 	if (!ReadScalar(*value_explFlags, output.explFlags, error)) { return false; }
-	const auto* value_spinAngle = FindRecordField(*record, "spinAngle", error);
+	const auto* value_spinAngle = FindRecordField(*record, "spin-angle", error);
 	if (value_spinAngle == nullptr) return false;
 	if (!ReadScalar(*value_spinAngle, output.spinAngle, error)) { return false; }
-	const auto* value_spinSpeed = FindRecordField(*record, "spinSpeed", error);
+	const auto* value_spinSpeed = FindRecordField(*record, "spin-speed", error);
 	if (value_spinSpeed == nullptr) return false;
 	if (!ReadScalar(*value_spinSpeed, output.spinSpeed, error)) { return false; }
-	const auto* value_spinVec = FindRecordField(*record, "spinVec", error);
+	const auto* value_spinVec = FindRecordField(*record, "spin-vec", error);
 	if (value_spinVec == nullptr) return false;
 	if (!Read_Float3(*value_spinVec, output.spinVec, storage, error)) { return false; }
 	return true;
@@ -4169,11 +4169,11 @@ bool Read_SetPieceProjectileParamsQuery(const WasmValue& input, SetPieceProjecti
 WasmValue Write_SetPieceProjectileParamsQuery(const SetPieceProjectileParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
-	fields.emplace("explFlags", WriteScalar(value.explFlags));
-	fields.emplace("spinAngle", WriteScalar(value.spinAngle));
-	fields.emplace("spinSpeed", WriteScalar(value.spinSpeed));
-	fields.emplace("spinVec", Write_Float3(value.spinVec));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
+	fields.emplace("expl-flags", WriteScalar(value.explFlags));
+	fields.emplace("spin-angle", WriteScalar(value.spinAngle));
+	fields.emplace("spin-speed", WriteScalar(value.spinSpeed));
+	fields.emplace("spin-vec", Write_Float3(value.spinVec));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4198,7 +4198,7 @@ bool Read_SetPlayerReadyStateQuery(const WasmValue& input, SetPlayerReadyStateQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	const auto* value_ready = FindRecordField(*record, "ready", error);
@@ -4210,7 +4210,7 @@ bool Read_SetPlayerReadyStateQuery(const WasmValue& input, SetPlayerReadyStateQu
 WasmValue Write_SetPlayerReadyStateQuery(const SetPlayerReadyStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	fields.emplace("ready", WriteScalar(value.ready));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4236,10 +4236,10 @@ bool Read_SetProjectileAlwaysVisibleQuery(const WasmValue& input, SetProjectileA
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
-	const auto* value_alwaysVisible = FindRecordField(*record, "alwaysVisible", error);
+	const auto* value_alwaysVisible = FindRecordField(*record, "always-visible", error);
 	if (value_alwaysVisible == nullptr) return false;
 	if (!ReadScalar(*value_alwaysVisible, output.alwaysVisible, error)) { return false; }
 	return true;
@@ -4248,8 +4248,8 @@ bool Read_SetProjectileAlwaysVisibleQuery(const WasmValue& input, SetProjectileA
 WasmValue Write_SetProjectileAlwaysVisibleQuery(const SetProjectileAlwaysVisibleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
-	fields.emplace("alwaysVisible", WriteScalar(value.alwaysVisible));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
+	fields.emplace("always-visible", WriteScalar(value.alwaysVisible));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4274,10 +4274,10 @@ bool Read_SetProjectileCEGQuery(const WasmValue& input, SetProjectileCEGQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
-	const auto* value_cegName = FindRecordField(*record, "cegName", error);
+	const auto* value_cegName = FindRecordField(*record, "ceg-name", error);
 	if (value_cegName == nullptr) return false;
 	auto& stored_string_output_cegName = storage.Make<std::string>();
 	if (!ReadString(*value_cegName, stored_string_output_cegName, error)) { return false; }
@@ -4288,8 +4288,8 @@ bool Read_SetProjectileCEGQuery(const WasmValue& input, SetProjectileCEGQuery& o
 WasmValue Write_SetProjectileCEGQuery(const SetProjectileCEGQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
-	fields.emplace("cegName", WasmValue::String((value.cegName == nullptr) ? std::string{} : std::string(value.cegName)));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
+	fields.emplace("ceg-name", WasmValue::String((value.cegName == nullptr) ? std::string{} : std::string(value.cegName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4297,7 +4297,7 @@ bool Read_SetProjectileCEGResult(const WasmValue& input, SetProjectileCEGResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cegID = FindRecordField(*record, "cegID", error);
+	const auto* value_cegID = FindRecordField(*record, "ceg-id", error);
 	if (value_cegID == nullptr) return false;
 	if (!ReadScalar(*value_cegID, output.cegID, error)) { return false; }
 	return true;
@@ -4306,7 +4306,7 @@ bool Read_SetProjectileCEGResult(const WasmValue& input, SetProjectileCEGResult&
 WasmValue Write_SetProjectileCEGResult(const SetProjectileCEGResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cegID", WriteScalar(value.cegID));
+	fields.emplace("ceg-id", WriteScalar(value.cegID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4314,7 +4314,7 @@ bool Read_SetProjectileCollisionQuery(const WasmValue& input, SetProjectileColli
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -4323,7 +4323,7 @@ bool Read_SetProjectileCollisionQuery(const WasmValue& input, SetProjectileColli
 WasmValue Write_SetProjectileCollisionQuery(const SetProjectileCollisionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4348,18 +4348,18 @@ bool Read_SetProjectileDamagesQuery(const WasmValue& input, SetProjectileDamages
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_unused = FindRecordField(*record, "unused", error);
 	if (value_unused == nullptr) return false;
 	if (!ReadScalar(*value_unused, output.unused, error)) { return false; }
-	const auto* value_damageKey = FindRecordField(*record, "damageKey", error);
+	const auto* value_damageKey = FindRecordField(*record, "damage-key", error);
 	if (value_damageKey == nullptr) return false;
 	auto& stored_string_output_damageKey = storage.Make<std::string>();
 	if (!ReadString(*value_damageKey, stored_string_output_damageKey, error)) { return false; }
 	output.damageKey = stored_string_output_damageKey.c_str();
-	const auto* value_damageValue = FindRecordField(*record, "damageValue", error);
+	const auto* value_damageValue = FindRecordField(*record, "damage-value", error);
 	if (value_damageValue == nullptr) return false;
 	if (!ReadScalar(*value_damageValue, output.damageValue, error)) { return false; }
 	return true;
@@ -4368,10 +4368,10 @@ bool Read_SetProjectileDamagesQuery(const WasmValue& input, SetProjectileDamages
 WasmValue Write_SetProjectileDamagesQuery(const SetProjectileDamagesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("unused", WriteScalar(value.unused));
-	fields.emplace("damageKey", WasmValue::String((value.damageKey == nullptr) ? std::string{} : std::string(value.damageKey)));
-	fields.emplace("damageValue", WriteScalar(value.damageValue));
+	fields.emplace("damage-key", WasmValue::String((value.damageKey == nullptr) ? std::string{} : std::string(value.damageKey)));
+	fields.emplace("damage-value", WriteScalar(value.damageValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4396,7 +4396,7 @@ bool Read_SetProjectileGravityQuery(const WasmValue& input, SetProjectileGravity
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_gravity = FindRecordField(*record, "gravity", error);
@@ -4408,7 +4408,7 @@ bool Read_SetProjectileGravityQuery(const WasmValue& input, SetProjectileGravity
 WasmValue Write_SetProjectileGravityQuery(const SetProjectileGravityQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("gravity", WriteScalar(value.gravity));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4434,7 +4434,7 @@ bool Read_SetProjectileIgnoreTrackingErrorQuery(const WasmValue& input, SetProje
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_ignore = FindRecordField(*record, "ignore", error);
@@ -4446,7 +4446,7 @@ bool Read_SetProjectileIgnoreTrackingErrorQuery(const WasmValue& input, SetProje
 WasmValue Write_SetProjectileIgnoreTrackingErrorQuery(const SetProjectileIgnoreTrackingErrorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("ignore", WriteScalar(value.ignore));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4472,7 +4472,7 @@ bool Read_SetProjectileIsInterceptedQuery(const WasmValue& input, SetProjectileI
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_intercepted = FindRecordField(*record, "intercepted", error);
@@ -4484,7 +4484,7 @@ bool Read_SetProjectileIsInterceptedQuery(const WasmValue& input, SetProjectileI
 WasmValue Write_SetProjectileIsInterceptedQuery(const SetProjectileIsInterceptedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("intercepted", WriteScalar(value.intercepted));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4510,7 +4510,7 @@ bool Read_SetProjectileMoveControlQuery(const WasmValue& input, SetProjectileMov
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_enable = FindRecordField(*record, "enable", error);
@@ -4522,7 +4522,7 @@ bool Read_SetProjectileMoveControlQuery(const WasmValue& input, SetProjectileMov
 WasmValue Write_SetProjectileMoveControlQuery(const SetProjectileMoveControlQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("enable", WriteScalar(value.enable));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4548,7 +4548,7 @@ bool Read_SetProjectilePositionQuery(const WasmValue& input, SetProjectilePositi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -4560,7 +4560,7 @@ bool Read_SetProjectilePositionQuery(const WasmValue& input, SetProjectilePositi
 WasmValue Write_SetProjectilePositionQuery(const SetProjectilePositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4586,7 +4586,7 @@ bool Read_SetProjectileTargetQuery(const WasmValue& input, SetProjectileTargetQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_target = FindRecordField(*record, "target", error);
@@ -4598,7 +4598,7 @@ bool Read_SetProjectileTargetQuery(const WasmValue& input, SetProjectileTargetQu
 WasmValue Write_SetProjectileTargetQuery(const SetProjectileTargetQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("target", Write_ProjectileTargetRef(value.target));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4624,10 +4624,10 @@ bool Read_SetProjectileTimeToLiveQuery(const WasmValue& input, SetProjectileTime
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
-	const auto* value_timeToLive = FindRecordField(*record, "timeToLive", error);
+	const auto* value_timeToLive = FindRecordField(*record, "time-to-live", error);
 	if (value_timeToLive == nullptr) return false;
 	if (!ReadScalar(*value_timeToLive, output.timeToLive, error)) { return false; }
 	return true;
@@ -4636,8 +4636,8 @@ bool Read_SetProjectileTimeToLiveQuery(const WasmValue& input, SetProjectileTime
 WasmValue Write_SetProjectileTimeToLiveQuery(const SetProjectileTimeToLiveQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
-	fields.emplace("timeToLive", WriteScalar(value.timeToLive));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
+	fields.emplace("time-to-live", WriteScalar(value.timeToLive));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4662,10 +4662,10 @@ bool Read_SetProjectileUseAirLosQuery(const WasmValue& input, SetProjectileUseAi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
-	const auto* value_useAirLos = FindRecordField(*record, "useAirLos", error);
+	const auto* value_useAirLos = FindRecordField(*record, "use-air-los", error);
 	if (value_useAirLos == nullptr) return false;
 	if (!ReadScalar(*value_useAirLos, output.useAirLos, error)) { return false; }
 	return true;
@@ -4674,8 +4674,8 @@ bool Read_SetProjectileUseAirLosQuery(const WasmValue& input, SetProjectileUseAi
 WasmValue Write_SetProjectileUseAirLosQuery(const SetProjectileUseAirLosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
-	fields.emplace("useAirLos", WriteScalar(value.useAirLos));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
+	fields.emplace("use-air-los", WriteScalar(value.useAirLos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4700,7 +4700,7 @@ bool Read_SetProjectileVelocityQuery(const WasmValue& input, SetProjectileVeloci
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_velocity = FindRecordField(*record, "velocity", error);
@@ -4712,7 +4712,7 @@ bool Read_SetProjectileVelocityQuery(const WasmValue& input, SetProjectileVeloci
 WasmValue Write_SetProjectileVelocityQuery(const SetProjectileVelocityQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("velocity", Write_Float3(value.velocity));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4738,16 +4738,16 @@ bool Read_SetRadarErrorParamsQuery(const WasmValue& input, SetRadarErrorParamsQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
-	const auto* value_allyTeamErrorSize = FindRecordField(*record, "allyTeamErrorSize", error);
+	const auto* value_allyTeamErrorSize = FindRecordField(*record, "ally-team-error-size", error);
 	if (value_allyTeamErrorSize == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamErrorSize, output.allyTeamErrorSize, error)) { return false; }
-	const auto* value_baseErrorSize = FindRecordField(*record, "baseErrorSize", error);
+	const auto* value_baseErrorSize = FindRecordField(*record, "base-error-size", error);
 	if (value_baseErrorSize == nullptr) return false;
 	if (!ReadScalar(*value_baseErrorSize, output.baseErrorSize, error)) { return false; }
-	const auto* value_baseErrorMult = FindRecordField(*record, "baseErrorMult", error);
+	const auto* value_baseErrorMult = FindRecordField(*record, "base-error-mult", error);
 	if (value_baseErrorMult == nullptr) return false;
 	if (!ReadScalar(*value_baseErrorMult, output.baseErrorMult, error)) { return false; }
 	return true;
@@ -4756,10 +4756,10 @@ bool Read_SetRadarErrorParamsQuery(const WasmValue& input, SetRadarErrorParamsQu
 WasmValue Write_SetRadarErrorParamsQuery(const SetRadarErrorParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
-	fields.emplace("allyTeamErrorSize", WriteScalar(value.allyTeamErrorSize));
-	fields.emplace("baseErrorSize", WriteScalar(value.baseErrorSize));
-	fields.emplace("baseErrorMult", WriteScalar(value.baseErrorMult));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-error-size", WriteScalar(value.allyTeamErrorSize));
+	fields.emplace("base-error-size", WriteScalar(value.baseErrorSize));
+	fields.emplace("base-error-mult", WriteScalar(value.baseErrorMult));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4889,10 +4889,10 @@ bool Read_SetTeamResourceQuery(const WasmValue& input, SetTeamResourceQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_resourceType = FindRecordField(*record, "resourceType", error);
+	const auto* value_resourceType = FindRecordField(*record, "resource-type", error);
 	if (value_resourceType == nullptr) return false;
 	auto& stored_string_output_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_output_resourceType, error)) { return false; }
@@ -4906,8 +4906,8 @@ bool Read_SetTeamResourceQuery(const WasmValue& input, SetTeamResourceQuery& out
 WasmValue Write_SetTeamResourceQuery(const SetTeamResourceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("resourceType", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("resource-type", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4933,15 +4933,15 @@ bool Read_SetTeamShareLevelQuery(const WasmValue& input, SetTeamShareLevelQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_resourceType = FindRecordField(*record, "resourceType", error);
+	const auto* value_resourceType = FindRecordField(*record, "resource-type", error);
 	if (value_resourceType == nullptr) return false;
 	auto& stored_string_output_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_output_resourceType, error)) { return false; }
 	output.resourceType = stored_string_output_resourceType.c_str();
-	const auto* value_shareLevel = FindRecordField(*record, "shareLevel", error);
+	const auto* value_shareLevel = FindRecordField(*record, "share-level", error);
 	if (value_shareLevel == nullptr) return false;
 	if (!ReadScalar(*value_shareLevel, output.shareLevel, error)) { return false; }
 	return true;
@@ -4950,9 +4950,9 @@ bool Read_SetTeamShareLevelQuery(const WasmValue& input, SetTeamShareLevelQuery&
 WasmValue Write_SetTeamShareLevelQuery(const SetTeamShareLevelQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("resourceType", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
-	fields.emplace("shareLevel", WriteScalar(value.shareLevel));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("resource-type", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
+	fields.emplace("share-level", WriteScalar(value.shareLevel));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4977,7 +4977,7 @@ bool Read_SetTeamStartPositionQuery(const WasmValue& input, SetTeamStartPosition
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -4989,7 +4989,7 @@ bool Read_SetTeamStartPositionQuery(const WasmValue& input, SetTeamStartPosition
 WasmValue Write_SetTeamStartPositionQuery(const SetTeamStartPositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5015,25 +5015,25 @@ bool Read_SetTerrainTypeDataQuery(const WasmValue& input, SetTerrainTypeDataQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_typeIndex = FindRecordField(*record, "typeIndex", error);
+	const auto* value_typeIndex = FindRecordField(*record, "type-index", error);
 	if (value_typeIndex == nullptr) return false;
 	if (!ReadScalar(*value_typeIndex, output.typeIndex, error)) { return false; }
-	const auto* value_tankSpeed = FindRecordField(*record, "tankSpeed", error);
+	const auto* value_tankSpeed = FindRecordField(*record, "tank-speed", error);
 	if (value_tankSpeed == nullptr) return false;
 	if (!ReadScalar(*value_tankSpeed, output.tankSpeed, error)) { return false; }
-	const auto* value_kbotSpeed = FindRecordField(*record, "kbotSpeed", error);
+	const auto* value_kbotSpeed = FindRecordField(*record, "kbot-speed", error);
 	if (value_kbotSpeed == nullptr) return false;
 	if (!ReadScalar(*value_kbotSpeed, output.kbotSpeed, error)) { return false; }
-	const auto* value_hoverSpeed = FindRecordField(*record, "hoverSpeed", error);
+	const auto* value_hoverSpeed = FindRecordField(*record, "hover-speed", error);
 	if (value_hoverSpeed == nullptr) return false;
 	if (!ReadScalar(*value_hoverSpeed, output.hoverSpeed, error)) { return false; }
-	const auto* value_shipSpeed = FindRecordField(*record, "shipSpeed", error);
+	const auto* value_shipSpeed = FindRecordField(*record, "ship-speed", error);
 	if (value_shipSpeed == nullptr) return false;
 	if (!ReadScalar(*value_shipSpeed, output.shipSpeed, error)) { return false; }
 	const auto* value_hardness = FindRecordField(*record, "hardness", error);
 	if (value_hardness == nullptr) return false;
 	if (!ReadScalar(*value_hardness, output.hardness, error)) { return false; }
-	const auto* value_receiveTracks = FindRecordField(*record, "receiveTracks", error);
+	const auto* value_receiveTracks = FindRecordField(*record, "receive-tracks", error);
 	if (value_receiveTracks == nullptr) return false;
 	if (!ReadScalar(*value_receiveTracks, output.receiveTracks, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -5047,13 +5047,13 @@ bool Read_SetTerrainTypeDataQuery(const WasmValue& input, SetTerrainTypeDataQuer
 WasmValue Write_SetTerrainTypeDataQuery(const SetTerrainTypeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("typeIndex", WriteScalar(value.typeIndex));
-	fields.emplace("tankSpeed", WriteScalar(value.tankSpeed));
-	fields.emplace("kbotSpeed", WriteScalar(value.kbotSpeed));
-	fields.emplace("hoverSpeed", WriteScalar(value.hoverSpeed));
-	fields.emplace("shipSpeed", WriteScalar(value.shipSpeed));
+	fields.emplace("type-index", WriteScalar(value.typeIndex));
+	fields.emplace("tank-speed", WriteScalar(value.tankSpeed));
+	fields.emplace("kbot-speed", WriteScalar(value.kbotSpeed));
+	fields.emplace("hover-speed", WriteScalar(value.hoverSpeed));
+	fields.emplace("ship-speed", WriteScalar(value.shipSpeed));
 	fields.emplace("hardness", WriteScalar(value.hardness));
-	fields.emplace("receiveTracks", WriteScalar(value.receiveTracks));
+	fields.emplace("receive-tracks", WriteScalar(value.receiveTracks));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5113,10 +5113,10 @@ bool Read_SetUnitAlwaysVisibleQuery(const WasmValue& input, SetUnitAlwaysVisible
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_alwaysVisible = FindRecordField(*record, "alwaysVisible", error);
+	const auto* value_alwaysVisible = FindRecordField(*record, "always-visible", error);
 	if (value_alwaysVisible == nullptr) return false;
 	if (!ReadScalar(*value_alwaysVisible, output.alwaysVisible, error)) { return false; }
 	return true;
@@ -5125,8 +5125,8 @@ bool Read_SetUnitAlwaysVisibleQuery(const WasmValue& input, SetUnitAlwaysVisible
 WasmValue Write_SetUnitAlwaysVisibleQuery(const SetUnitAlwaysVisibleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("alwaysVisible", WriteScalar(value.alwaysVisible));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("always-visible", WriteScalar(value.alwaysVisible));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5151,13 +5151,13 @@ bool Read_SetUnitArmoredQuery(const WasmValue& input, SetUnitArmoredQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_armoredState = FindRecordField(*record, "armoredState", error);
+	const auto* value_armoredState = FindRecordField(*record, "armored-state", error);
 	if (value_armoredState == nullptr) return false;
 	if (!ReadScalar(*value_armoredState, output.armoredState, error)) { return false; }
-	const auto* value_armoredMultiple = FindRecordField(*record, "armoredMultiple", error);
+	const auto* value_armoredMultiple = FindRecordField(*record, "armored-multiple", error);
 	if (value_armoredMultiple == nullptr) return false;
 	if (!ReadScalar(*value_armoredMultiple, output.armoredMultiple, error)) { return false; }
 	return true;
@@ -5166,9 +5166,9 @@ bool Read_SetUnitArmoredQuery(const WasmValue& input, SetUnitArmoredQuery& outpu
 WasmValue Write_SetUnitArmoredQuery(const SetUnitArmoredQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("armoredState", WriteScalar(value.armoredState));
-	fields.emplace("armoredMultiple", WriteScalar(value.armoredMultiple));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("armored-state", WriteScalar(value.armoredState));
+	fields.emplace("armored-multiple", WriteScalar(value.armoredMultiple));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5196,22 +5196,22 @@ bool Read_SetUnitBlockingOptions(const WasmValue& input, SetUnitBlockingOptions&
 	const auto* value_blocking = FindRecordField(*record, "blocking", error);
 	if (value_blocking == nullptr) return false;
 	if (!ReadScalar(*value_blocking, output.blocking, error)) { return false; }
-	const auto* value_solidObjects = FindRecordField(*record, "solidObjects", error);
+	const auto* value_solidObjects = FindRecordField(*record, "solid-objects", error);
 	if (value_solidObjects == nullptr) return false;
 	if (!ReadScalar(*value_solidObjects, output.solidObjects, error)) { return false; }
 	const auto* value_projectiles = FindRecordField(*record, "projectiles", error);
 	if (value_projectiles == nullptr) return false;
 	if (!ReadScalar(*value_projectiles, output.projectiles, error)) { return false; }
-	const auto* value_quadMapRays = FindRecordField(*record, "quadMapRays", error);
+	const auto* value_quadMapRays = FindRecordField(*record, "quad-map-rays", error);
 	if (value_quadMapRays == nullptr) return false;
 	if (!ReadScalar(*value_quadMapRays, output.quadMapRays, error)) { return false; }
 	const auto* value_crushable = FindRecordField(*record, "crushable", error);
 	if (value_crushable == nullptr) return false;
 	if (!ReadScalar(*value_crushable, output.crushable, error)) { return false; }
-	const auto* value_blockEnemyPushing = FindRecordField(*record, "blockEnemyPushing", error);
+	const auto* value_blockEnemyPushing = FindRecordField(*record, "block-enemy-pushing", error);
 	if (value_blockEnemyPushing == nullptr) return false;
 	if (!ReadScalar(*value_blockEnemyPushing, output.blockEnemyPushing, error)) { return false; }
-	const auto* value_blockHeightChanges = FindRecordField(*record, "blockHeightChanges", error);
+	const auto* value_blockHeightChanges = FindRecordField(*record, "block-height-changes", error);
 	if (value_blockHeightChanges == nullptr) return false;
 	if (!ReadScalar(*value_blockHeightChanges, output.blockHeightChanges, error)) { return false; }
 	return true;
@@ -5221,12 +5221,12 @@ WasmValue Write_SetUnitBlockingOptions(const SetUnitBlockingOptions& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("blocking", WriteScalar(value.blocking));
-	fields.emplace("solidObjects", WriteScalar(value.solidObjects));
+	fields.emplace("solid-objects", WriteScalar(value.solidObjects));
 	fields.emplace("projectiles", WriteScalar(value.projectiles));
-	fields.emplace("quadMapRays", WriteScalar(value.quadMapRays));
+	fields.emplace("quad-map-rays", WriteScalar(value.quadMapRays));
 	fields.emplace("crushable", WriteScalar(value.crushable));
-	fields.emplace("blockEnemyPushing", WriteScalar(value.blockEnemyPushing));
-	fields.emplace("blockHeightChanges", WriteScalar(value.blockHeightChanges));
+	fields.emplace("block-enemy-pushing", WriteScalar(value.blockEnemyPushing));
+	fields.emplace("block-height-changes", WriteScalar(value.blockHeightChanges));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5234,7 +5234,7 @@ bool Read_SetUnitBlockingQuery(const WasmValue& input, SetUnitBlockingQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -5246,7 +5246,7 @@ bool Read_SetUnitBlockingQuery(const WasmValue& input, SetUnitBlockingQuery& out
 WasmValue Write_SetUnitBlockingQuery(const SetUnitBlockingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("options", Write_SetUnitBlockingOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5272,10 +5272,10 @@ bool Read_SetUnitBuildParamsQuery(const WasmValue& input, SetUnitBuildParamsQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -5289,8 +5289,8 @@ bool Read_SetUnitBuildParamsQuery(const WasmValue& input, SetUnitBuildParamsQuer
 WasmValue Write_SetUnitBuildParamsQuery(const SetUnitBuildParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	fields.emplace("value", Write_NumberOrBool(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5316,25 +5316,25 @@ bool Read_SetUnitBuildSpeedQuery(const WasmValue& input, SetUnitBuildSpeedQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_buildSpeed = FindRecordField(*record, "buildSpeed", error);
+	const auto* value_buildSpeed = FindRecordField(*record, "build-speed", error);
 	if (value_buildSpeed == nullptr) return false;
 	if (!ReadScalar(*value_buildSpeed, output.buildSpeed, error)) { return false; }
-	const auto* value_repairSpeed = FindRecordField(*record, "repairSpeed", error);
+	const auto* value_repairSpeed = FindRecordField(*record, "repair-speed", error);
 	if (value_repairSpeed == nullptr) return false;
 	if (!ReadScalar(*value_repairSpeed, output.repairSpeed, error)) { return false; }
-	const auto* value_reclaimSpeed = FindRecordField(*record, "reclaimSpeed", error);
+	const auto* value_reclaimSpeed = FindRecordField(*record, "reclaim-speed", error);
 	if (value_reclaimSpeed == nullptr) return false;
 	if (!ReadScalar(*value_reclaimSpeed, output.reclaimSpeed, error)) { return false; }
-	const auto* value_resurrectSpeed = FindRecordField(*record, "resurrectSpeed", error);
+	const auto* value_resurrectSpeed = FindRecordField(*record, "resurrect-speed", error);
 	if (value_resurrectSpeed == nullptr) return false;
 	if (!ReadScalar(*value_resurrectSpeed, output.resurrectSpeed, error)) { return false; }
-	const auto* value_captureSpeed = FindRecordField(*record, "captureSpeed", error);
+	const auto* value_captureSpeed = FindRecordField(*record, "capture-speed", error);
 	if (value_captureSpeed == nullptr) return false;
 	if (!ReadScalar(*value_captureSpeed, output.captureSpeed, error)) { return false; }
-	const auto* value_terraformSpeed = FindRecordField(*record, "terraformSpeed", error);
+	const auto* value_terraformSpeed = FindRecordField(*record, "terraform-speed", error);
 	if (value_terraformSpeed == nullptr) return false;
 	if (!ReadScalar(*value_terraformSpeed, output.terraformSpeed, error)) { return false; }
 	return true;
@@ -5343,13 +5343,13 @@ bool Read_SetUnitBuildSpeedQuery(const WasmValue& input, SetUnitBuildSpeedQuery&
 WasmValue Write_SetUnitBuildSpeedQuery(const SetUnitBuildSpeedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("buildSpeed", WriteScalar(value.buildSpeed));
-	fields.emplace("repairSpeed", WriteScalar(value.repairSpeed));
-	fields.emplace("reclaimSpeed", WriteScalar(value.reclaimSpeed));
-	fields.emplace("resurrectSpeed", WriteScalar(value.resurrectSpeed));
-	fields.emplace("captureSpeed", WriteScalar(value.captureSpeed));
-	fields.emplace("terraformSpeed", WriteScalar(value.terraformSpeed));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("build-speed", WriteScalar(value.buildSpeed));
+	fields.emplace("repair-speed", WriteScalar(value.repairSpeed));
+	fields.emplace("reclaim-speed", WriteScalar(value.reclaimSpeed));
+	fields.emplace("resurrect-speed", WriteScalar(value.resurrectSpeed));
+	fields.emplace("capture-speed", WriteScalar(value.captureSpeed));
+	fields.emplace("terraform-speed", WriteScalar(value.terraformSpeed));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5374,7 +5374,7 @@ bool Read_SetUnitBuildeeRadiusQuery(const WasmValue& input, SetUnitBuildeeRadius
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_radius = FindRecordField(*record, "radius", error);
@@ -5386,7 +5386,7 @@ bool Read_SetUnitBuildeeRadiusQuery(const WasmValue& input, SetUnitBuildeeRadius
 WasmValue Write_SetUnitBuildeeRadiusQuery(const SetUnitBuildeeRadiusQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("radius", WriteScalar(value.radius));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5412,13 +5412,13 @@ bool Read_SetUnitCloakQuery(const WasmValue& input, SetUnitCloakQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_cloak = FindRecordField(*record, "cloak", error);
 	if (value_cloak == nullptr) return false;
 	if (!Read_NumberOrBool(*value_cloak, output.cloak, storage, error)) { return false; }
-	const auto* value_cloakArg = FindRecordField(*record, "cloakArg", error);
+	const auto* value_cloakArg = FindRecordField(*record, "cloak-arg", error);
 	if (value_cloakArg == nullptr) return false;
 	if (!Read_NumberOrBool(*value_cloakArg, output.cloakArg, storage, error)) { return false; }
 	return true;
@@ -5427,9 +5427,9 @@ bool Read_SetUnitCloakQuery(const WasmValue& input, SetUnitCloakQuery& output, N
 WasmValue Write_SetUnitCloakQuery(const SetUnitCloakQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("cloak", Write_NumberOrBool(value.cloak));
-	fields.emplace("cloakArg", Write_NumberOrBool(value.cloakArg));
+	fields.emplace("cloak-arg", Write_NumberOrBool(value.cloakArg));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5454,7 +5454,7 @@ bool Read_SetUnitCollisionVolumeDataQuery(const WasmValue& input, SetUnitCollisi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_scales = FindRecordField(*record, "scales", error);
@@ -5463,13 +5463,13 @@ bool Read_SetUnitCollisionVolumeDataQuery(const WasmValue& input, SetUnitCollisi
 	const auto* value_offsets = FindRecordField(*record, "offsets", error);
 	if (value_offsets == nullptr) return false;
 	if (!Read_Float3(*value_offsets, output.offsets, storage, error)) { return false; }
-	const auto* value_volumeType = FindRecordField(*record, "volumeType", error);
+	const auto* value_volumeType = FindRecordField(*record, "volume-type", error);
 	if (value_volumeType == nullptr) return false;
 	if (!ReadScalar(*value_volumeType, output.volumeType, error)) { return false; }
-	const auto* value_testType = FindRecordField(*record, "testType", error);
+	const auto* value_testType = FindRecordField(*record, "test-type", error);
 	if (value_testType == nullptr) return false;
 	if (!ReadScalar(*value_testType, output.testType, error)) { return false; }
-	const auto* value_primaryAxis = FindRecordField(*record, "primaryAxis", error);
+	const auto* value_primaryAxis = FindRecordField(*record, "primary-axis", error);
 	if (value_primaryAxis == nullptr) return false;
 	if (!ReadScalar(*value_primaryAxis, output.primaryAxis, error)) { return false; }
 	return true;
@@ -5478,12 +5478,12 @@ bool Read_SetUnitCollisionVolumeDataQuery(const WasmValue& input, SetUnitCollisi
 WasmValue Write_SetUnitCollisionVolumeDataQuery(const SetUnitCollisionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("scales", Write_Float3(value.scales));
 	fields.emplace("offsets", Write_Float3(value.offsets));
-	fields.emplace("volumeType", WriteScalar(value.volumeType));
-	fields.emplace("testType", WriteScalar(value.testType));
-	fields.emplace("primaryAxis", WriteScalar(value.primaryAxis));
+	fields.emplace("volume-type", WriteScalar(value.volumeType));
+	fields.emplace("test-type", WriteScalar(value.testType));
+	fields.emplace("primary-axis", WriteScalar(value.primaryAxis));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5508,7 +5508,7 @@ bool Read_SetUnitCostsQuery(const WasmValue& input, SetUnitCostsQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_costs = FindRecordField(*record, "costs", error);
@@ -5520,7 +5520,7 @@ bool Read_SetUnitCostsQuery(const WasmValue& input, SetUnitCostsQuery& output, N
 WasmValue Write_SetUnitCostsQuery(const SetUnitCostsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("costs", Write_UnitCostOverrides(value.costs));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5546,10 +5546,10 @@ bool Read_SetUnitCrashingQuery(const WasmValue& input, SetUnitCrashingQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_wantCrash = FindRecordField(*record, "wantCrash", error);
+	const auto* value_wantCrash = FindRecordField(*record, "want-crash", error);
 	if (value_wantCrash == nullptr) return false;
 	if (!ReadScalar(*value_wantCrash, output.wantCrash, error)) { return false; }
 	return true;
@@ -5558,8 +5558,8 @@ bool Read_SetUnitCrashingQuery(const WasmValue& input, SetUnitCrashingQuery& out
 WasmValue Write_SetUnitCrashingQuery(const SetUnitCrashingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("wantCrash", WriteScalar(value.wantCrash));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("want-crash", WriteScalar(value.wantCrash));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5567,7 +5567,7 @@ bool Read_SetUnitCrashingResult(const WasmValue& input, SetUnitCrashingResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_stateChanged = FindRecordField(*record, "stateChanged", error);
+	const auto* value_stateChanged = FindRecordField(*record, "state-changed", error);
 	if (value_stateChanged == nullptr) return false;
 	if (!ReadScalar(*value_stateChanged, output.stateChanged, error)) { return false; }
 	return true;
@@ -5576,7 +5576,7 @@ bool Read_SetUnitCrashingResult(const WasmValue& input, SetUnitCrashingResult& o
 WasmValue Write_SetUnitCrashingResult(const SetUnitCrashingResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("stateChanged", WriteScalar(value.stateChanged));
+	fields.emplace("state-changed", WriteScalar(value.stateChanged));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5584,13 +5584,13 @@ bool Read_SetUnitDirectionQuery(const WasmValue& input, SetUnitDirectionQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_frontDir = FindRecordField(*record, "frontDir", error);
+	const auto* value_frontDir = FindRecordField(*record, "front-dir", error);
 	if (value_frontDir == nullptr) return false;
 	if (!Read_Float3(*value_frontDir, output.frontDir, storage, error)) { return false; }
-	const auto* value_rightDir = FindRecordField(*record, "rightDir", error);
+	const auto* value_rightDir = FindRecordField(*record, "right-dir", error);
 	if (value_rightDir == nullptr) return false;
 	if (!Read_Float3(*value_rightDir, output.rightDir, storage, error)) { return false; }
 	return true;
@@ -5599,9 +5599,9 @@ bool Read_SetUnitDirectionQuery(const WasmValue& input, SetUnitDirectionQuery& o
 WasmValue Write_SetUnitDirectionQuery(const SetUnitDirectionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("frontDir", Write_Float3(value.frontDir));
-	fields.emplace("rightDir", Write_Float3(value.rightDir));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("front-dir", Write_Float3(value.frontDir));
+	fields.emplace("right-dir", Write_Float3(value.rightDir));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5626,7 +5626,7 @@ bool Read_SetUnitExperienceQuery(const WasmValue& input, SetUnitExperienceQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_experience = FindRecordField(*record, "experience", error);
@@ -5638,7 +5638,7 @@ bool Read_SetUnitExperienceQuery(const WasmValue& input, SetUnitExperienceQuery&
 WasmValue Write_SetUnitExperienceQuery(const SetUnitExperienceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("experience", WriteScalar(value.experience));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5664,7 +5664,7 @@ bool Read_SetUnitFlankingQuery(const WasmValue& input, SetUnitFlankingQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_type = FindRecordField(*record, "type", error);
@@ -5681,7 +5681,7 @@ bool Read_SetUnitFlankingQuery(const WasmValue& input, SetUnitFlankingQuery& out
 WasmValue Write_SetUnitFlankingQuery(const SetUnitFlankingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("type", WasmValue::String((value.type == nullptr) ? std::string{} : std::string(value.type)));
 	fields.emplace("args", Write_Float3(value.args));
 	return WasmValue::Record(std::move(fields));
@@ -5708,19 +5708,19 @@ bool Read_SetUnitHarvestStorageQuery(const WasmValue& input, SetUnitHarvestStora
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_storedMetal = FindRecordField(*record, "storedMetal", error);
+	const auto* value_storedMetal = FindRecordField(*record, "stored-metal", error);
 	if (value_storedMetal == nullptr) return false;
 	if (!ReadScalar(*value_storedMetal, output.storedMetal, error)) { return false; }
-	const auto* value_maxStoredMetal = FindRecordField(*record, "maxStoredMetal", error);
+	const auto* value_maxStoredMetal = FindRecordField(*record, "max-stored-metal", error);
 	if (value_maxStoredMetal == nullptr) return false;
 	if (!ReadScalar(*value_maxStoredMetal, output.maxStoredMetal, error)) { return false; }
-	const auto* value_storedEnergy = FindRecordField(*record, "storedEnergy", error);
+	const auto* value_storedEnergy = FindRecordField(*record, "stored-energy", error);
 	if (value_storedEnergy == nullptr) return false;
 	if (!ReadScalar(*value_storedEnergy, output.storedEnergy, error)) { return false; }
-	const auto* value_maxStoredEnergy = FindRecordField(*record, "maxStoredEnergy", error);
+	const auto* value_maxStoredEnergy = FindRecordField(*record, "max-stored-energy", error);
 	if (value_maxStoredEnergy == nullptr) return false;
 	if (!ReadScalar(*value_maxStoredEnergy, output.maxStoredEnergy, error)) { return false; }
 	return true;
@@ -5729,11 +5729,11 @@ bool Read_SetUnitHarvestStorageQuery(const WasmValue& input, SetUnitHarvestStora
 WasmValue Write_SetUnitHarvestStorageQuery(const SetUnitHarvestStorageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("storedMetal", WriteScalar(value.storedMetal));
-	fields.emplace("maxStoredMetal", WriteScalar(value.maxStoredMetal));
-	fields.emplace("storedEnergy", WriteScalar(value.storedEnergy));
-	fields.emplace("maxStoredEnergy", WriteScalar(value.maxStoredEnergy));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("stored-metal", WriteScalar(value.storedMetal));
+	fields.emplace("max-stored-metal", WriteScalar(value.maxStoredMetal));
+	fields.emplace("stored-energy", WriteScalar(value.storedEnergy));
+	fields.emplace("max-stored-energy", WriteScalar(value.maxStoredEnergy));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5758,13 +5758,13 @@ bool Read_SetUnitHeadingAndUpDirQuery(const WasmValue& input, SetUnitHeadingAndU
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_heading = FindRecordField(*record, "heading", error);
 	if (value_heading == nullptr) return false;
 	if (!ReadScalar(*value_heading, output.heading, error)) { return false; }
-	const auto* value_upDir = FindRecordField(*record, "upDir", error);
+	const auto* value_upDir = FindRecordField(*record, "up-dir", error);
 	if (value_upDir == nullptr) return false;
 	if (!Read_Float3(*value_upDir, output.upDir, storage, error)) { return false; }
 	return true;
@@ -5773,9 +5773,9 @@ bool Read_SetUnitHeadingAndUpDirQuery(const WasmValue& input, SetUnitHeadingAndU
 WasmValue Write_SetUnitHeadingAndUpDirQuery(const SetUnitHeadingAndUpDirQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("heading", WriteScalar(value.heading));
-	fields.emplace("upDir", Write_Float3(value.upDir));
+	fields.emplace("up-dir", Write_Float3(value.upDir));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5800,13 +5800,13 @@ bool Read_SetUnitHeadingQuery(const WasmValue& input, SetUnitHeadingQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_heading = FindRecordField(*record, "heading", error);
 	if (value_heading == nullptr) return false;
 	if (!ReadScalar(*value_heading, output.heading, error)) { return false; }
-	const auto* value_useSmoothing = FindRecordField(*record, "useSmoothing", error);
+	const auto* value_useSmoothing = FindRecordField(*record, "use-smoothing", error);
 	if (value_useSmoothing == nullptr) return false;
 	if (!ReadScalar(*value_useSmoothing, output.useSmoothing, error)) { return false; }
 	return true;
@@ -5815,9 +5815,9 @@ bool Read_SetUnitHeadingQuery(const WasmValue& input, SetUnitHeadingQuery& outpu
 WasmValue Write_SetUnitHeadingQuery(const SetUnitHeadingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("heading", WriteScalar(value.heading));
-	fields.emplace("useSmoothing", WriteScalar(value.useSmoothing));
+	fields.emplace("use-smoothing", WriteScalar(value.useSmoothing));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5842,7 +5842,7 @@ bool Read_SetUnitHealthQuery(const WasmValue& input, SetUnitHealthQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -5854,7 +5854,7 @@ bool Read_SetUnitHealthQuery(const WasmValue& input, SetUnitHealthQuery& output,
 WasmValue Write_SetUnitHealthQuery(const SetUnitHealthQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("value", Write_UnitHealthValue(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5880,13 +5880,13 @@ bool Read_SetUnitLandGoalQuery(const WasmValue& input, SetUnitLandGoalQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_radiusSq = FindRecordField(*record, "radiusSq", error);
+	const auto* value_radiusSq = FindRecordField(*record, "radius-sq", error);
 	if (value_radiusSq == nullptr) return false;
 	if (!ReadScalar(*value_radiusSq, output.radiusSq, error)) { return false; }
 	return true;
@@ -5895,9 +5895,9 @@ bool Read_SetUnitLandGoalQuery(const WasmValue& input, SetUnitLandGoalQuery& out
 WasmValue Write_SetUnitLandGoalQuery(const SetUnitLandGoalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("radiusSq", WriteScalar(value.radiusSq));
+	fields.emplace("radius-sq", WriteScalar(value.radiusSq));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5922,10 +5922,10 @@ bool Read_SetUnitLeavesGhostOptions(const WasmValue& input, SetUnitLeavesGhostOp
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_leavesGhost = FindRecordField(*record, "leavesGhost", error);
+	const auto* value_leavesGhost = FindRecordField(*record, "leaves-ghost", error);
 	if (value_leavesGhost == nullptr) return false;
 	if (!ReadScalar(*value_leavesGhost, output.leavesGhost, error)) { return false; }
-	const auto* value_leaveDeadGhost = FindRecordField(*record, "leaveDeadGhost", error);
+	const auto* value_leaveDeadGhost = FindRecordField(*record, "leave-dead-ghost", error);
 	if (value_leaveDeadGhost == nullptr) return false;
 	if (!ReadScalar(*value_leaveDeadGhost, output.leaveDeadGhost, error)) { return false; }
 	return true;
@@ -5934,8 +5934,8 @@ bool Read_SetUnitLeavesGhostOptions(const WasmValue& input, SetUnitLeavesGhostOp
 WasmValue Write_SetUnitLeavesGhostOptions(const SetUnitLeavesGhostOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("leavesGhost", WriteScalar(value.leavesGhost));
-	fields.emplace("leaveDeadGhost", WriteScalar(value.leaveDeadGhost));
+	fields.emplace("leaves-ghost", WriteScalar(value.leavesGhost));
+	fields.emplace("leave-dead-ghost", WriteScalar(value.leaveDeadGhost));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5943,7 +5943,7 @@ bool Read_SetUnitLeavesGhostQuery(const WasmValue& input, SetUnitLeavesGhostQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -5955,7 +5955,7 @@ bool Read_SetUnitLeavesGhostQuery(const WasmValue& input, SetUnitLeavesGhostQuer
 WasmValue Write_SetUnitLeavesGhostQuery(const SetUnitLeavesGhostQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("options", Write_SetUnitLeavesGhostOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -5981,10 +5981,10 @@ bool Read_SetUnitLoadingTransportQuery(const WasmValue& input, SetUnitLoadingTra
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_transportID = FindRecordField(*record, "transportID", error);
+	const auto* value_transportID = FindRecordField(*record, "transport-id", error);
 	if (value_transportID == nullptr) return false;
 	if (!ReadScalar(*value_transportID, output.transportID, error)) { return false; }
 	return true;
@@ -5993,8 +5993,8 @@ bool Read_SetUnitLoadingTransportQuery(const WasmValue& input, SetUnitLoadingTra
 WasmValue Write_SetUnitLoadingTransportQuery(const SetUnitLoadingTransportQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("transportID", WriteScalar(value.transportID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("transport-id", WriteScalar(value.transportID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6019,13 +6019,13 @@ bool Read_SetUnitLosMaskQuery(const WasmValue& input, SetUnitLosMaskQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
-	const auto* value_losMask = FindRecordField(*record, "losMask", error);
+	const auto* value_losMask = FindRecordField(*record, "los-mask", error);
 	if (value_losMask == nullptr) return false;
 	if (!ReadScalar(*value_losMask, output.losMask, error)) { return false; }
 	return true;
@@ -6034,9 +6034,9 @@ bool Read_SetUnitLosMaskQuery(const WasmValue& input, SetUnitLosMaskQuery& outpu
 WasmValue Write_SetUnitLosMaskQuery(const SetUnitLosMaskQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
-	fields.emplace("losMask", WriteScalar(value.losMask));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
+	fields.emplace("los-mask", WriteScalar(value.losMask));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6061,13 +6061,13 @@ bool Read_SetUnitLosStateQuery(const WasmValue& input, SetUnitLosStateQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
-	const auto* value_losState = FindRecordField(*record, "losState", error);
+	const auto* value_losState = FindRecordField(*record, "los-state", error);
 	if (value_losState == nullptr) return false;
 	if (!ReadScalar(*value_losState, output.losState, error)) { return false; }
 	return true;
@@ -6076,9 +6076,9 @@ bool Read_SetUnitLosStateQuery(const WasmValue& input, SetUnitLosStateQuery& out
 WasmValue Write_SetUnitLosStateQuery(const SetUnitLosStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
-	fields.emplace("losState", WriteScalar(value.losState));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
+	fields.emplace("los-state", WriteScalar(value.losState));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6103,7 +6103,7 @@ bool Read_SetUnitMassQuery(const WasmValue& input, SetUnitMassQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_mass = FindRecordField(*record, "mass", error);
@@ -6115,7 +6115,7 @@ bool Read_SetUnitMassQuery(const WasmValue& input, SetUnitMassQuery& output, Nat
 WasmValue Write_SetUnitMassQuery(const SetUnitMassQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("mass", WriteScalar(value.mass));
 	return WasmValue::Record(std::move(fields));
 }
@@ -6141,10 +6141,10 @@ bool Read_SetUnitMaxHealthQuery(const WasmValue& input, SetUnitMaxHealthQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_maxHealth = FindRecordField(*record, "maxHealth", error);
+	const auto* value_maxHealth = FindRecordField(*record, "max-health", error);
 	if (value_maxHealth == nullptr) return false;
 	if (!ReadScalar(*value_maxHealth, output.maxHealth, error)) { return false; }
 	return true;
@@ -6153,8 +6153,8 @@ bool Read_SetUnitMaxHealthQuery(const WasmValue& input, SetUnitMaxHealthQuery& o
 WasmValue Write_SetUnitMaxHealthQuery(const SetUnitMaxHealthQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("maxHealth", WriteScalar(value.maxHealth));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("max-health", WriteScalar(value.maxHealth));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6179,10 +6179,10 @@ bool Read_SetUnitMaxRangeQuery(const WasmValue& input, SetUnitMaxRangeQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_maxRange = FindRecordField(*record, "maxRange", error);
+	const auto* value_maxRange = FindRecordField(*record, "max-range", error);
 	if (value_maxRange == nullptr) return false;
 	if (!ReadScalar(*value_maxRange, output.maxRange, error)) { return false; }
 	return true;
@@ -6191,8 +6191,8 @@ bool Read_SetUnitMaxRangeQuery(const WasmValue& input, SetUnitMaxRangeQuery& out
 WasmValue Write_SetUnitMaxRangeQuery(const SetUnitMaxRangeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("maxRange", WriteScalar(value.maxRange));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("max-range", WriteScalar(value.maxRange));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6217,7 +6217,7 @@ bool Read_SetUnitMetalExtractionQuery(const WasmValue& input, SetUnitMetalExtrac
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_depth = FindRecordField(*record, "depth", error);
@@ -6232,7 +6232,7 @@ bool Read_SetUnitMetalExtractionQuery(const WasmValue& input, SetUnitMetalExtrac
 WasmValue Write_SetUnitMetalExtractionQuery(const SetUnitMetalExtractionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("depth", WriteScalar(value.depth));
 	fields.emplace("range", WriteScalar(value.range));
 	return WasmValue::Record(std::move(fields));
@@ -6259,16 +6259,16 @@ bool Read_SetUnitMidAndAimPosQuery(const WasmValue& input, SetUnitMidAndAimPosQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_midPos = FindRecordField(*record, "midPos", error);
+	const auto* value_midPos = FindRecordField(*record, "mid-pos", error);
 	if (value_midPos == nullptr) return false;
 	if (!Read_Float3(*value_midPos, output.midPos, storage, error)) { return false; }
-	const auto* value_aimPos = FindRecordField(*record, "aimPos", error);
+	const auto* value_aimPos = FindRecordField(*record, "aim-pos", error);
 	if (value_aimPos == nullptr) return false;
 	if (!Read_Float3(*value_aimPos, output.aimPos, storage, error)) { return false; }
-	const auto* value_setRelative = FindRecordField(*record, "setRelative", error);
+	const auto* value_setRelative = FindRecordField(*record, "set-relative", error);
 	if (value_setRelative == nullptr) return false;
 	if (!ReadScalar(*value_setRelative, output.setRelative, error)) { return false; }
 	return true;
@@ -6277,10 +6277,10 @@ bool Read_SetUnitMidAndAimPosQuery(const WasmValue& input, SetUnitMidAndAimPosQu
 WasmValue Write_SetUnitMidAndAimPosQuery(const SetUnitMidAndAimPosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("midPos", Write_Float3(value.midPos));
-	fields.emplace("aimPos", Write_Float3(value.aimPos));
-	fields.emplace("setRelative", WriteScalar(value.setRelative));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("mid-pos", Write_Float3(value.midPos));
+	fields.emplace("aim-pos", Write_Float3(value.aimPos));
+	fields.emplace("set-relative", WriteScalar(value.setRelative));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6305,7 +6305,7 @@ bool Read_SetUnitMoveGoalQuery(const WasmValue& input, SetUnitMoveGoalQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -6326,7 +6326,7 @@ bool Read_SetUnitMoveGoalQuery(const WasmValue& input, SetUnitMoveGoalQuery& out
 WasmValue Write_SetUnitMoveGoalQuery(const SetUnitMoveGoalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("radius", WriteScalar(value.radius));
 	fields.emplace("speed", WriteScalar(value.speed));
@@ -6355,10 +6355,10 @@ bool Read_SetUnitNanoPiecesQuery(const WasmValue& input, SetUnitNanoPiecesQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_pieceIndices = FindRecordField(*record, "pieceIndices", error);
+	const auto* value_pieceIndices = FindRecordField(*record, "piece-indices", error);
 	if (value_pieceIndices == nullptr) return false;
 	const auto* list_pieceIndices = std::get_if<WasmValueList>(&(*value_pieceIndices).storage);
 	if (list_pieceIndices == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -6377,8 +6377,8 @@ bool Read_SetUnitNanoPiecesQuery(const WasmValue& input, SetUnitNanoPiecesQuery&
 WasmValue Write_SetUnitNanoPiecesQuery(const SetUnitNanoPiecesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("pieceIndices", WriteNativeList(value.pieceIndices, value.pieceCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("piece-indices", WriteNativeList(value.pieceIndices, value.pieceCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6403,7 +6403,7 @@ bool Read_SetUnitNeutralQuery(const WasmValue& input, SetUnitNeutralQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_neutral = FindRecordField(*record, "neutral", error);
@@ -6415,7 +6415,7 @@ bool Read_SetUnitNeutralQuery(const WasmValue& input, SetUnitNeutralQuery& outpu
 WasmValue Write_SetUnitNeutralQuery(const SetUnitNeutralQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("neutral", WriteScalar(value.neutral));
 	return WasmValue::Record(std::move(fields));
 }
@@ -6441,10 +6441,10 @@ bool Read_SetUnitPhysicalStateBitQuery(const WasmValue& input, SetUnitPhysicalSt
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_stateBit = FindRecordField(*record, "stateBit", error);
+	const auto* value_stateBit = FindRecordField(*record, "state-bit", error);
 	if (value_stateBit == nullptr) return false;
 	if (!ReadScalar(*value_stateBit, output.stateBit, error)) { return false; }
 	return true;
@@ -6453,8 +6453,8 @@ bool Read_SetUnitPhysicalStateBitQuery(const WasmValue& input, SetUnitPhysicalSt
 WasmValue Write_SetUnitPhysicalStateBitQuery(const SetUnitPhysicalStateBitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("stateBit", WriteScalar(value.stateBit));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("state-bit", WriteScalar(value.stateBit));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6479,7 +6479,7 @@ bool Read_SetUnitPhysicsQuery(const WasmValue& input, SetUnitPhysicsQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -6500,7 +6500,7 @@ bool Read_SetUnitPhysicsQuery(const WasmValue& input, SetUnitPhysicsQuery& outpu
 WasmValue Write_SetUnitPhysicsQuery(const SetUnitPhysicsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("velocity", Write_Float3(value.velocity));
 	fields.emplace("rotation", Write_Float3(value.rotation));
@@ -6529,10 +6529,10 @@ bool Read_SetUnitPieceCollisionVolumeDataQuery(const WasmValue& input, SetUnitPi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_pieceIndex = FindRecordField(*record, "pieceIndex", error);
+	const auto* value_pieceIndex = FindRecordField(*record, "piece-index", error);
 	if (value_pieceIndex == nullptr) return false;
 	if (!ReadScalar(*value_pieceIndex, output.pieceIndex, error)) { return false; }
 	const auto* value_enable = FindRecordField(*record, "enable", error);
@@ -6544,10 +6544,10 @@ bool Read_SetUnitPieceCollisionVolumeDataQuery(const WasmValue& input, SetUnitPi
 	const auto* value_offsets = FindRecordField(*record, "offsets", error);
 	if (value_offsets == nullptr) return false;
 	if (!Read_Float3(*value_offsets, output.offsets, storage, error)) { return false; }
-	const auto* value_volumeType = FindRecordField(*record, "volumeType", error);
+	const auto* value_volumeType = FindRecordField(*record, "volume-type", error);
 	if (value_volumeType == nullptr) return false;
 	if (!ReadScalar(*value_volumeType, output.volumeType, error)) { return false; }
-	const auto* value_primaryAxis = FindRecordField(*record, "primaryAxis", error);
+	const auto* value_primaryAxis = FindRecordField(*record, "primary-axis", error);
 	if (value_primaryAxis == nullptr) return false;
 	if (!ReadScalar(*value_primaryAxis, output.primaryAxis, error)) { return false; }
 	return true;
@@ -6556,13 +6556,13 @@ bool Read_SetUnitPieceCollisionVolumeDataQuery(const WasmValue& input, SetUnitPi
 WasmValue Write_SetUnitPieceCollisionVolumeDataQuery(const SetUnitPieceCollisionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("pieceIndex", WriteScalar(value.pieceIndex));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("piece-index", WriteScalar(value.pieceIndex));
 	fields.emplace("enable", WriteScalar(value.enable));
 	fields.emplace("scales", Write_Float3(value.scales));
 	fields.emplace("offsets", Write_Float3(value.offsets));
-	fields.emplace("volumeType", WriteScalar(value.volumeType));
-	fields.emplace("primaryAxis", WriteScalar(value.primaryAxis));
+	fields.emplace("volume-type", WriteScalar(value.volumeType));
+	fields.emplace("primary-axis", WriteScalar(value.primaryAxis));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6587,10 +6587,10 @@ bool Read_SetUnitPieceMatrixQuery(const WasmValue& input, SetUnitPieceMatrixQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_pieceIndex = FindRecordField(*record, "pieceIndex", error);
+	const auto* value_pieceIndex = FindRecordField(*record, "piece-index", error);
 	if (value_pieceIndex == nullptr) return false;
 	if (!ReadScalar(*value_pieceIndex, output.pieceIndex, error)) { return false; }
 	const auto* value_matrix = FindRecordField(*record, "matrix", error);
@@ -6606,8 +6606,8 @@ bool Read_SetUnitPieceMatrixQuery(const WasmValue& input, SetUnitPieceMatrixQuer
 WasmValue Write_SetUnitPieceMatrixQuery(const SetUnitPieceMatrixQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("pieceIndex", WriteScalar(value.pieceIndex));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("piece-index", WriteScalar(value.pieceIndex));
 	fields.emplace("matrix", WriteNativeArray(value.matrix, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -6616,7 +6616,7 @@ bool Read_SetUnitPieceMatrixResult(const WasmValue& input, SetUnitPieceMatrixRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_blockScriptAnims = FindRecordField(*record, "blockScriptAnims", error);
+	const auto* value_blockScriptAnims = FindRecordField(*record, "block-script-anims", error);
 	if (value_blockScriptAnims == nullptr) return false;
 	if (!ReadScalar(*value_blockScriptAnims, output.blockScriptAnims, error)) { return false; }
 	return true;
@@ -6625,7 +6625,7 @@ bool Read_SetUnitPieceMatrixResult(const WasmValue& input, SetUnitPieceMatrixRes
 WasmValue Write_SetUnitPieceMatrixResult(const SetUnitPieceMatrixResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("blockScriptAnims", WriteScalar(value.blockScriptAnims));
+	fields.emplace("block-script-anims", WriteScalar(value.blockScriptAnims));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6633,13 +6633,13 @@ bool Read_SetUnitPieceParentQuery(const WasmValue& input, SetUnitPieceParentQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_childPieceIndex = FindRecordField(*record, "childPieceIndex", error);
+	const auto* value_childPieceIndex = FindRecordField(*record, "child-piece-index", error);
 	if (value_childPieceIndex == nullptr) return false;
 	if (!ReadScalar(*value_childPieceIndex, output.childPieceIndex, error)) { return false; }
-	const auto* value_parentPieceIndex = FindRecordField(*record, "parentPieceIndex", error);
+	const auto* value_parentPieceIndex = FindRecordField(*record, "parent-piece-index", error);
 	if (value_parentPieceIndex == nullptr) return false;
 	if (!ReadScalar(*value_parentPieceIndex, output.parentPieceIndex, error)) { return false; }
 	return true;
@@ -6648,9 +6648,9 @@ bool Read_SetUnitPieceParentQuery(const WasmValue& input, SetUnitPieceParentQuer
 WasmValue Write_SetUnitPieceParentQuery(const SetUnitPieceParentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("childPieceIndex", WriteScalar(value.childPieceIndex));
-	fields.emplace("parentPieceIndex", WriteScalar(value.parentPieceIndex));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("child-piece-index", WriteScalar(value.childPieceIndex));
+	fields.emplace("parent-piece-index", WriteScalar(value.parentPieceIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6675,10 +6675,10 @@ bool Read_SetUnitPieceVisibleQuery(const WasmValue& input, SetUnitPieceVisibleQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_pieceIndex = FindRecordField(*record, "pieceIndex", error);
+	const auto* value_pieceIndex = FindRecordField(*record, "piece-index", error);
 	if (value_pieceIndex == nullptr) return false;
 	if (!ReadScalar(*value_pieceIndex, output.pieceIndex, error)) { return false; }
 	const auto* value_visible = FindRecordField(*record, "visible", error);
@@ -6690,8 +6690,8 @@ bool Read_SetUnitPieceVisibleQuery(const WasmValue& input, SetUnitPieceVisibleQu
 WasmValue Write_SetUnitPieceVisibleQuery(const SetUnitPieceVisibleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("pieceIndex", WriteScalar(value.pieceIndex));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("piece-index", WriteScalar(value.pieceIndex));
 	fields.emplace("visible", WriteScalar(value.visible));
 	return WasmValue::Record(std::move(fields));
 }
@@ -6717,22 +6717,22 @@ bool Read_SetUnitPosErrorParamsQuery(const WasmValue& input, SetUnitPosErrorPara
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_posErrorVector = FindRecordField(*record, "posErrorVector", error);
+	const auto* value_posErrorVector = FindRecordField(*record, "pos-error-vector", error);
 	if (value_posErrorVector == nullptr) return false;
 	if (!Read_Float3(*value_posErrorVector, output.posErrorVector, storage, error)) { return false; }
-	const auto* value_posErrorDelta = FindRecordField(*record, "posErrorDelta", error);
+	const auto* value_posErrorDelta = FindRecordField(*record, "pos-error-delta", error);
 	if (value_posErrorDelta == nullptr) return false;
 	if (!Read_Float3(*value_posErrorDelta, output.posErrorDelta, storage, error)) { return false; }
-	const auto* value_nextPosErrorUpdate = FindRecordField(*record, "nextPosErrorUpdate", error);
+	const auto* value_nextPosErrorUpdate = FindRecordField(*record, "next-pos-error-update", error);
 	if (value_nextPosErrorUpdate == nullptr) return false;
 	if (!ReadScalar(*value_nextPosErrorUpdate, output.nextPosErrorUpdate, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
-	const auto* value_setPosErrorBit = FindRecordField(*record, "setPosErrorBit", error);
+	const auto* value_setPosErrorBit = FindRecordField(*record, "set-pos-error-bit", error);
 	if (value_setPosErrorBit == nullptr) return false;
 	if (!ReadScalar(*value_setPosErrorBit, output.setPosErrorBit, error)) { return false; }
 	return true;
@@ -6741,12 +6741,12 @@ bool Read_SetUnitPosErrorParamsQuery(const WasmValue& input, SetUnitPosErrorPara
 WasmValue Write_SetUnitPosErrorParamsQuery(const SetUnitPosErrorParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("posErrorVector", Write_Float3(value.posErrorVector));
-	fields.emplace("posErrorDelta", Write_Float3(value.posErrorDelta));
-	fields.emplace("nextPosErrorUpdate", WriteScalar(value.nextPosErrorUpdate));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
-	fields.emplace("setPosErrorBit", WriteScalar(value.setPosErrorBit));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("pos-error-vector", Write_Float3(value.posErrorVector));
+	fields.emplace("pos-error-delta", Write_Float3(value.posErrorDelta));
+	fields.emplace("next-pos-error-update", WriteScalar(value.nextPosErrorUpdate));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
+	fields.emplace("set-pos-error-bit", WriteScalar(value.setPosErrorBit));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6771,7 +6771,7 @@ bool Read_SetUnitPositionQuery(const WasmValue& input, SetUnitPositionQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -6783,7 +6783,7 @@ bool Read_SetUnitPositionQuery(const WasmValue& input, SetUnitPositionQuery& out
 WasmValue Write_SetUnitPositionQuery(const SetUnitPositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	return WasmValue::Record(std::move(fields));
 }
@@ -6809,7 +6809,7 @@ bool Read_SetUnitRadiusAndHeightQuery(const WasmValue& input, SetUnitRadiusAndHe
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_radius = FindRecordField(*record, "radius", error);
@@ -6824,7 +6824,7 @@ bool Read_SetUnitRadiusAndHeightQuery(const WasmValue& input, SetUnitRadiusAndHe
 WasmValue Write_SetUnitRadiusAndHeightQuery(const SetUnitRadiusAndHeightQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("radius", WriteScalar(value.radius));
 	fields.emplace("height", WriteScalar(value.height));
 	return WasmValue::Record(std::move(fields));
@@ -6851,7 +6851,7 @@ bool Read_SetUnitResourcingQuery(const WasmValue& input, SetUnitResourcingQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_type = FindRecordField(*record, "type", error);
@@ -6868,7 +6868,7 @@ bool Read_SetUnitResourcingQuery(const WasmValue& input, SetUnitResourcingQuery&
 WasmValue Write_SetUnitResourcingQuery(const SetUnitResourcingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("type", WasmValue::String((value.type == nullptr) ? std::string{} : std::string(value.type)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
@@ -6895,7 +6895,7 @@ bool Read_SetUnitRotationQuery(const WasmValue& input, SetUnitRotationQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_rotation = FindRecordField(*record, "rotation", error);
@@ -6907,7 +6907,7 @@ bool Read_SetUnitRotationQuery(const WasmValue& input, SetUnitRotationQuery& out
 WasmValue Write_SetUnitRotationQuery(const SetUnitRotationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("rotation", Write_Float3(value.rotation));
 	return WasmValue::Record(std::move(fields));
 }
@@ -6933,10 +6933,10 @@ bool Read_SetUnitSeismicSignatureQuery(const WasmValue& input, SetUnitSeismicSig
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_seismicSignature = FindRecordField(*record, "seismicSignature", error);
+	const auto* value_seismicSignature = FindRecordField(*record, "seismic-signature", error);
 	if (value_seismicSignature == nullptr) return false;
 	if (!ReadScalar(*value_seismicSignature, output.seismicSignature, error)) { return false; }
 	return true;
@@ -6945,8 +6945,8 @@ bool Read_SetUnitSeismicSignatureQuery(const WasmValue& input, SetUnitSeismicSig
 WasmValue Write_SetUnitSeismicSignatureQuery(const SetUnitSeismicSignatureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("seismicSignature", WriteScalar(value.seismicSignature));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("seismic-signature", WriteScalar(value.seismicSignature));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -6971,7 +6971,7 @@ bool Read_SetUnitSelectionVolumeDataQuery(const WasmValue& input, SetUnitSelecti
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_scales = FindRecordField(*record, "scales", error);
@@ -6980,13 +6980,13 @@ bool Read_SetUnitSelectionVolumeDataQuery(const WasmValue& input, SetUnitSelecti
 	const auto* value_offsets = FindRecordField(*record, "offsets", error);
 	if (value_offsets == nullptr) return false;
 	if (!Read_Float3(*value_offsets, output.offsets, storage, error)) { return false; }
-	const auto* value_volumeType = FindRecordField(*record, "volumeType", error);
+	const auto* value_volumeType = FindRecordField(*record, "volume-type", error);
 	if (value_volumeType == nullptr) return false;
 	if (!ReadScalar(*value_volumeType, output.volumeType, error)) { return false; }
-	const auto* value_testType = FindRecordField(*record, "testType", error);
+	const auto* value_testType = FindRecordField(*record, "test-type", error);
 	if (value_testType == nullptr) return false;
 	if (!ReadScalar(*value_testType, output.testType, error)) { return false; }
-	const auto* value_primaryAxis = FindRecordField(*record, "primaryAxis", error);
+	const auto* value_primaryAxis = FindRecordField(*record, "primary-axis", error);
 	if (value_primaryAxis == nullptr) return false;
 	if (!ReadScalar(*value_primaryAxis, output.primaryAxis, error)) { return false; }
 	return true;
@@ -6995,12 +6995,12 @@ bool Read_SetUnitSelectionVolumeDataQuery(const WasmValue& input, SetUnitSelecti
 WasmValue Write_SetUnitSelectionVolumeDataQuery(const SetUnitSelectionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("scales", Write_Float3(value.scales));
 	fields.emplace("offsets", Write_Float3(value.offsets));
-	fields.emplace("volumeType", WriteScalar(value.volumeType));
-	fields.emplace("testType", WriteScalar(value.testType));
-	fields.emplace("primaryAxis", WriteScalar(value.primaryAxis));
+	fields.emplace("volume-type", WriteScalar(value.volumeType));
+	fields.emplace("test-type", WriteScalar(value.testType));
+	fields.emplace("primary-axis", WriteScalar(value.primaryAxis));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7025,10 +7025,10 @@ bool Read_SetUnitSensorRadiusQuery(const WasmValue& input, SetUnitSensorRadiusQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_sensorType = FindRecordField(*record, "sensorType", error);
+	const auto* value_sensorType = FindRecordField(*record, "sensor-type", error);
 	if (value_sensorType == nullptr) return false;
 	auto& stored_string_output_sensorType = storage.Make<std::string>();
 	if (!ReadString(*value_sensorType, stored_string_output_sensorType, error)) { return false; }
@@ -7042,8 +7042,8 @@ bool Read_SetUnitSensorRadiusQuery(const WasmValue& input, SetUnitSensorRadiusQu
 WasmValue Write_SetUnitSensorRadiusQuery(const SetUnitSensorRadiusQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("sensorType", WasmValue::String((value.sensorType == nullptr) ? std::string{} : std::string(value.sensorType)));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("sensor-type", WasmValue::String((value.sensorType == nullptr) ? std::string{} : std::string(value.sensorType)));
 	fields.emplace("radius", WriteScalar(value.radius));
 	return WasmValue::Record(std::move(fields));
 }
@@ -7052,7 +7052,7 @@ bool Read_SetUnitSensorRadiusResult(const WasmValue& input, SetUnitSensorRadiusR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_newRadius = FindRecordField(*record, "newRadius", error);
+	const auto* value_newRadius = FindRecordField(*record, "new-radius", error);
 	if (value_newRadius == nullptr) return false;
 	if (!ReadScalar(*value_newRadius, output.newRadius, error)) { return false; }
 	return true;
@@ -7061,7 +7061,7 @@ bool Read_SetUnitSensorRadiusResult(const WasmValue& input, SetUnitSensorRadiusR
 WasmValue Write_SetUnitSensorRadiusResult(const SetUnitSensorRadiusResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("newRadius", WriteScalar(value.newRadius));
+	fields.emplace("new-radius", WriteScalar(value.newRadius));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7069,13 +7069,13 @@ bool Read_SetUnitShieldRechargeDelayQuery(const WasmValue& input, SetUnitShieldR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_weaponNum = FindRecordField(*record, "weaponNum", error);
+	const auto* value_weaponNum = FindRecordField(*record, "weapon-num", error);
 	if (value_weaponNum == nullptr) return false;
 	if (!ReadScalar(*value_weaponNum, output.weaponNum, error)) { return false; }
-	const auto* value_rechargeDelay = FindRecordField(*record, "rechargeDelay", error);
+	const auto* value_rechargeDelay = FindRecordField(*record, "recharge-delay", error);
 	if (value_rechargeDelay == nullptr) return false;
 	if (!ReadScalar(*value_rechargeDelay, output.rechargeDelay, error)) { return false; }
 	return true;
@@ -7084,9 +7084,9 @@ bool Read_SetUnitShieldRechargeDelayQuery(const WasmValue& input, SetUnitShieldR
 WasmValue Write_SetUnitShieldRechargeDelayQuery(const SetUnitShieldRechargeDelayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("weaponNum", WriteScalar(value.weaponNum));
-	fields.emplace("rechargeDelay", WriteScalar(value.rechargeDelay));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("weapon-num", WriteScalar(value.weaponNum));
+	fields.emplace("recharge-delay", WriteScalar(value.rechargeDelay));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7111,10 +7111,10 @@ bool Read_SetUnitShieldStateQuery(const WasmValue& input, SetUnitShieldStateQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_weaponNum = FindRecordField(*record, "weaponNum", error);
+	const auto* value_weaponNum = FindRecordField(*record, "weapon-num", error);
 	if (value_weaponNum == nullptr) return false;
 	if (!ReadScalar(*value_weaponNum, output.weaponNum, error)) { return false; }
 	const auto* value_enabled = FindRecordField(*record, "enabled", error);
@@ -7129,8 +7129,8 @@ bool Read_SetUnitShieldStateQuery(const WasmValue& input, SetUnitShieldStateQuer
 WasmValue Write_SetUnitShieldStateQuery(const SetUnitShieldStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("weaponNum", WriteScalar(value.weaponNum));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("weapon-num", WriteScalar(value.weaponNum));
 	fields.emplace("enabled", WriteScalar(value.enabled));
 	fields.emplace("power", WriteScalar(value.power));
 	return WasmValue::Record(std::move(fields));
@@ -7157,10 +7157,10 @@ bool Read_SetUnitSonarStealthQuery(const WasmValue& input, SetUnitSonarStealthQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_sonarStealth = FindRecordField(*record, "sonarStealth", error);
+	const auto* value_sonarStealth = FindRecordField(*record, "sonar-stealth", error);
 	if (value_sonarStealth == nullptr) return false;
 	if (!ReadScalar(*value_sonarStealth, output.sonarStealth, error)) { return false; }
 	return true;
@@ -7169,8 +7169,8 @@ bool Read_SetUnitSonarStealthQuery(const WasmValue& input, SetUnitSonarStealthQu
 WasmValue Write_SetUnitSonarStealthQuery(const SetUnitSonarStealthQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("sonarStealth", WriteScalar(value.sonarStealth));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("sonar-stealth", WriteScalar(value.sonarStealth));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7195,7 +7195,7 @@ bool Read_SetUnitStealthQuery(const WasmValue& input, SetUnitStealthQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_stealth = FindRecordField(*record, "stealth", error);
@@ -7207,7 +7207,7 @@ bool Read_SetUnitStealthQuery(const WasmValue& input, SetUnitStealthQuery& outpu
 WasmValue Write_SetUnitStealthQuery(const SetUnitStealthQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("stealth", WriteScalar(value.stealth));
 	return WasmValue::Record(std::move(fields));
 }
@@ -7233,13 +7233,13 @@ bool Read_SetUnitStockpileQuery(const WasmValue& input, SetUnitStockpileQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_stockpile = FindRecordField(*record, "stockpile", error);
 	if (value_stockpile == nullptr) return false;
 	if (!ReadScalar(*value_stockpile, output.stockpile, error)) { return false; }
-	const auto* value_buildPercent = FindRecordField(*record, "buildPercent", error);
+	const auto* value_buildPercent = FindRecordField(*record, "build-percent", error);
 	if (value_buildPercent == nullptr) return false;
 	if (!ReadScalar(*value_buildPercent, output.buildPercent, error)) { return false; }
 	return true;
@@ -7248,9 +7248,9 @@ bool Read_SetUnitStockpileQuery(const WasmValue& input, SetUnitStockpileQuery& o
 WasmValue Write_SetUnitStockpileQuery(const SetUnitStockpileQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("stockpile", WriteScalar(value.stockpile));
-	fields.emplace("buildPercent", WriteScalar(value.buildPercent));
+	fields.emplace("build-percent", WriteScalar(value.buildPercent));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7275,7 +7275,7 @@ bool Read_SetUnitStorageQuery(const WasmValue& input, SetUnitStorageQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_resource = FindRecordField(*record, "resource", error);
@@ -7292,7 +7292,7 @@ bool Read_SetUnitStorageQuery(const WasmValue& input, SetUnitStorageQuery& outpu
 WasmValue Write_SetUnitStorageQuery(const SetUnitStorageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("resource", WasmValue::String((value.resource == nullptr) ? std::string{} : std::string(value.resource)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
@@ -7319,10 +7319,10 @@ bool Read_SetUnitTargetOptions(const WasmValue& input, SetUnitTargetOptions& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_manualFire = FindRecordField(*record, "manualFire", error);
+	const auto* value_manualFire = FindRecordField(*record, "manual-fire", error);
 	if (value_manualFire == nullptr) return false;
 	if (!ReadScalar(*value_manualFire, output.manualFire, error)) { return false; }
-	const auto* value_userTarget = FindRecordField(*record, "userTarget", error);
+	const auto* value_userTarget = FindRecordField(*record, "user-target", error);
 	if (value_userTarget == nullptr) return false;
 	if (!ReadScalar(*value_userTarget, output.userTarget, error)) { return false; }
 	return true;
@@ -7331,8 +7331,8 @@ bool Read_SetUnitTargetOptions(const WasmValue& input, SetUnitTargetOptions& out
 WasmValue Write_SetUnitTargetOptions(const SetUnitTargetOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("manualFire", WriteScalar(value.manualFire));
-	fields.emplace("userTarget", WriteScalar(value.userTarget));
+	fields.emplace("manual-fire", WriteScalar(value.manualFire));
+	fields.emplace("user-target", WriteScalar(value.userTarget));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7340,7 +7340,7 @@ bool Read_SetUnitTargetQuery(const WasmValue& input, SetUnitTargetQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_target = FindRecordField(*record, "target", error);
@@ -7349,7 +7349,7 @@ bool Read_SetUnitTargetQuery(const WasmValue& input, SetUnitTargetQuery& output,
 	const auto* value_options = FindRecordField(*record, "options", error);
 	if (value_options == nullptr) return false;
 	if (!Read_SetUnitTargetOptions(*value_options, output.options, storage, error)) { return false; }
-	const auto* value_weaponNum = FindRecordField(*record, "weaponNum", error);
+	const auto* value_weaponNum = FindRecordField(*record, "weapon-num", error);
 	if (value_weaponNum == nullptr) return false;
 	if (!ReadScalar(*value_weaponNum, output.weaponNum, error)) { return false; }
 	return true;
@@ -7358,10 +7358,10 @@ bool Read_SetUnitTargetQuery(const WasmValue& input, SetUnitTargetQuery& output,
 WasmValue Write_SetUnitTargetQuery(const SetUnitTargetQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("target", Write_UnitTargetRef(value.target));
 	fields.emplace("options", Write_SetUnitTargetOptions(value.options));
-	fields.emplace("weaponNum", WriteScalar(value.weaponNum));
+	fields.emplace("weapon-num", WriteScalar(value.weaponNum));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7386,7 +7386,7 @@ bool Read_SetUnitTooltipQuery(const WasmValue& input, SetUnitTooltipQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_tooltip = FindRecordField(*record, "tooltip", error);
@@ -7400,7 +7400,7 @@ bool Read_SetUnitTooltipQuery(const WasmValue& input, SetUnitTooltipQuery& outpu
 WasmValue Write_SetUnitTooltipQuery(const SetUnitTooltipQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("tooltip", WasmValue::String((value.tooltip == nullptr) ? std::string{} : std::string(value.tooltip)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -7426,10 +7426,10 @@ bool Read_SetUnitUseAirLosQuery(const WasmValue& input, SetUnitUseAirLosQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_useAirLos = FindRecordField(*record, "useAirLos", error);
+	const auto* value_useAirLos = FindRecordField(*record, "use-air-los", error);
 	if (value_useAirLos == nullptr) return false;
 	if (!ReadScalar(*value_useAirLos, output.useAirLos, error)) { return false; }
 	return true;
@@ -7438,8 +7438,8 @@ bool Read_SetUnitUseAirLosQuery(const WasmValue& input, SetUnitUseAirLosQuery& o
 WasmValue Write_SetUnitUseAirLosQuery(const SetUnitUseAirLosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("useAirLos", WriteScalar(value.useAirLos));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("use-air-los", WriteScalar(value.useAirLos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7464,10 +7464,10 @@ bool Read_SetUnitUseWeaponsOptions(const WasmValue& input, SetUnitUseWeaponsOpti
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_forceUseWeapons = FindRecordField(*record, "forceUseWeapons", error);
+	const auto* value_forceUseWeapons = FindRecordField(*record, "force-use-weapons", error);
 	if (value_forceUseWeapons == nullptr) return false;
 	if (!ReadScalar(*value_forceUseWeapons, output.forceUseWeapons, error)) { return false; }
-	const auto* value_allowUseWeapons = FindRecordField(*record, "allowUseWeapons", error);
+	const auto* value_allowUseWeapons = FindRecordField(*record, "allow-use-weapons", error);
 	if (value_allowUseWeapons == nullptr) return false;
 	if (!ReadScalar(*value_allowUseWeapons, output.allowUseWeapons, error)) { return false; }
 	return true;
@@ -7476,8 +7476,8 @@ bool Read_SetUnitUseWeaponsOptions(const WasmValue& input, SetUnitUseWeaponsOpti
 WasmValue Write_SetUnitUseWeaponsOptions(const SetUnitUseWeaponsOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("forceUseWeapons", WriteScalar(value.forceUseWeapons));
-	fields.emplace("allowUseWeapons", WriteScalar(value.allowUseWeapons));
+	fields.emplace("force-use-weapons", WriteScalar(value.forceUseWeapons));
+	fields.emplace("allow-use-weapons", WriteScalar(value.allowUseWeapons));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7485,7 +7485,7 @@ bool Read_SetUnitUseWeaponsQuery(const WasmValue& input, SetUnitUseWeaponsQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -7497,7 +7497,7 @@ bool Read_SetUnitUseWeaponsQuery(const WasmValue& input, SetUnitUseWeaponsQuery&
 WasmValue Write_SetUnitUseWeaponsQuery(const SetUnitUseWeaponsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("options", Write_SetUnitUseWeaponsOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -7523,7 +7523,7 @@ bool Read_SetUnitVelocityQuery(const WasmValue& input, SetUnitVelocityQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_velocity = FindRecordField(*record, "velocity", error);
@@ -7535,7 +7535,7 @@ bool Read_SetUnitVelocityQuery(const WasmValue& input, SetUnitVelocityQuery& out
 WasmValue Write_SetUnitVelocityQuery(const SetUnitVelocityQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("velocity", Write_Float3(value.velocity));
 	return WasmValue::Record(std::move(fields));
 }
@@ -7561,18 +7561,18 @@ bool Read_SetUnitWeaponDamagesQuery(const WasmValue& input, SetUnitWeaponDamages
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_weaponNum = FindRecordField(*record, "weaponNum", error);
+	const auto* value_weaponNum = FindRecordField(*record, "weapon-num", error);
 	if (value_weaponNum == nullptr) return false;
 	if (!ReadScalar(*value_weaponNum, output.weaponNum, error)) { return false; }
-	const auto* value_damageKey = FindRecordField(*record, "damageKey", error);
+	const auto* value_damageKey = FindRecordField(*record, "damage-key", error);
 	if (value_damageKey == nullptr) return false;
 	auto& stored_string_output_damageKey = storage.Make<std::string>();
 	if (!ReadString(*value_damageKey, stored_string_output_damageKey, error)) { return false; }
 	output.damageKey = stored_string_output_damageKey.c_str();
-	const auto* value_damageValue = FindRecordField(*record, "damageValue", error);
+	const auto* value_damageValue = FindRecordField(*record, "damage-value", error);
 	if (value_damageValue == nullptr) return false;
 	if (!ReadScalar(*value_damageValue, output.damageValue, error)) { return false; }
 	return true;
@@ -7581,10 +7581,10 @@ bool Read_SetUnitWeaponDamagesQuery(const WasmValue& input, SetUnitWeaponDamages
 WasmValue Write_SetUnitWeaponDamagesQuery(const SetUnitWeaponDamagesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("weaponNum", WriteScalar(value.weaponNum));
-	fields.emplace("damageKey", WasmValue::String((value.damageKey == nullptr) ? std::string{} : std::string(value.damageKey)));
-	fields.emplace("damageValue", WriteScalar(value.damageValue));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("weapon-num", WriteScalar(value.weaponNum));
+	fields.emplace("damage-key", WasmValue::String((value.damageKey == nullptr) ? std::string{} : std::string(value.damageKey)));
+	fields.emplace("damage-value", WriteScalar(value.damageValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7609,10 +7609,10 @@ bool Read_SetUnitWeaponStateQuery(const WasmValue& input, SetUnitWeaponStateQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_weaponNum = FindRecordField(*record, "weaponNum", error);
+	const auto* value_weaponNum = FindRecordField(*record, "weapon-num", error);
 	if (value_weaponNum == nullptr) return false;
 	if (!ReadScalar(*value_weaponNum, output.weaponNum, error)) { return false; }
 	const auto* value_key = FindRecordField(*record, "key", error);
@@ -7629,8 +7629,8 @@ bool Read_SetUnitWeaponStateQuery(const WasmValue& input, SetUnitWeaponStateQuer
 WasmValue Write_SetUnitWeaponStateQuery(const SetUnitWeaponStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("weaponNum", WriteScalar(value.weaponNum));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("weapon-num", WriteScalar(value.weaponNum));
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
@@ -7657,10 +7657,10 @@ bool Read_SetWindQuery(const WasmValue& input, SetWindQuery& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_minWind = FindRecordField(*record, "minWind", error);
+	const auto* value_minWind = FindRecordField(*record, "min-wind", error);
 	if (value_minWind == nullptr) return false;
 	if (!ReadScalar(*value_minWind, output.minWind, error)) { return false; }
-	const auto* value_maxWind = FindRecordField(*record, "maxWind", error);
+	const auto* value_maxWind = FindRecordField(*record, "max-wind", error);
 	if (value_maxWind == nullptr) return false;
 	if (!ReadScalar(*value_maxWind, output.maxWind, error)) { return false; }
 	return true;
@@ -7669,8 +7669,8 @@ bool Read_SetWindQuery(const WasmValue& input, SetWindQuery& output, NativeCallS
 WasmValue Write_SetWindQuery(const SetWindQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("minWind", WriteScalar(value.minWind));
-	fields.emplace("maxWind", WriteScalar(value.maxWind));
+	fields.emplace("min-wind", WriteScalar(value.minWind));
+	fields.emplace("max-wind", WriteScalar(value.maxWind));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7695,13 +7695,13 @@ bool Read_ShareTeamResourceQuery(const WasmValue& input, ShareTeamResourceQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_targetTeamID = FindRecordField(*record, "targetTeamID", error);
+	const auto* value_targetTeamID = FindRecordField(*record, "target-team-id", error);
 	if (value_targetTeamID == nullptr) return false;
 	if (!ReadScalar(*value_targetTeamID, output.targetTeamID, error)) { return false; }
-	const auto* value_resourceType = FindRecordField(*record, "resourceType", error);
+	const auto* value_resourceType = FindRecordField(*record, "resource-type", error);
 	if (value_resourceType == nullptr) return false;
 	auto& stored_string_output_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_output_resourceType, error)) { return false; }
@@ -7715,9 +7715,9 @@ bool Read_ShareTeamResourceQuery(const WasmValue& input, ShareTeamResourceQuery&
 WasmValue Write_ShareTeamResourceQuery(const ShareTeamResourceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("targetTeamID", WriteScalar(value.targetTeamID));
-	fields.emplace("resourceType", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("target-team-id", WriteScalar(value.targetTeamID));
+	fields.emplace("resource-type", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
 }
@@ -7758,7 +7758,7 @@ bool Read_SpawnCEGQuery(const WasmValue& input, SpawnCEGQuery& output, NativeCal
 	const auto* value_damage = FindRecordField(*record, "damage", error);
 	if (value_damage == nullptr) return false;
 	if (!ReadScalar(*value_damage, output.damage, error)) { return false; }
-	const auto* value_dmgMod = FindRecordField(*record, "dmgMod", error);
+	const auto* value_dmgMod = FindRecordField(*record, "dmg-mod", error);
 	if (value_dmgMod == nullptr) return false;
 	if (!ReadScalar(*value_dmgMod, output.dmgMod, error)) { return false; }
 	return true;
@@ -7772,7 +7772,7 @@ WasmValue Write_SpawnCEGQuery(const SpawnCEGQuery& value)
 	fields.emplace("dir", Write_Float3(value.dir));
 	fields.emplace("radius", WriteScalar(value.radius));
 	fields.emplace("damage", WriteScalar(value.damage));
-	fields.emplace("dmgMod", WriteScalar(value.dmgMod));
+	fields.emplace("dmg-mod", WriteScalar(value.dmgMod));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7783,7 +7783,7 @@ bool Read_SpawnCEGResult(const WasmValue& input, SpawnCEGResult& output, NativeC
 	const auto* value_success = FindRecordField(*record, "success", error);
 	if (value_success == nullptr) return false;
 	if (!ReadScalar(*value_success, output.success, error)) { return false; }
-	const auto* value_cegID = FindRecordField(*record, "cegID", error);
+	const auto* value_cegID = FindRecordField(*record, "ceg-id", error);
 	if (value_cegID == nullptr) return false;
 	if (!ReadScalar(*value_cegID, output.cegID, error)) { return false; }
 	return true;
@@ -7793,7 +7793,7 @@ WasmValue Write_SpawnCEGResult(const SpawnCEGResult& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("success", WriteScalar(value.success));
-	fields.emplace("cegID", WriteScalar(value.cegID));
+	fields.emplace("ceg-id", WriteScalar(value.cegID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7807,7 +7807,7 @@ bool Read_SpawnExplosionQuery(const WasmValue& input, SpawnExplosionQuery& outpu
 	const auto* value_dir = FindRecordField(*record, "dir", error);
 	if (value_dir == nullptr) return false;
 	if (!Read_Float3(*value_dir, output.dir, storage, error)) { return false; }
-	const auto* value_explosionParams = FindRecordField(*record, "explosionParams", error);
+	const auto* value_explosionParams = FindRecordField(*record, "explosion-params", error);
 	if (value_explosionParams == nullptr) return false;
 	if (!Read_NativeExplosionParams(*value_explosionParams, output.explosionParams, storage, error)) { return false; }
 	return true;
@@ -7818,7 +7818,7 @@ WasmValue Write_SpawnExplosionQuery(const SpawnExplosionQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("dir", Write_Float3(value.dir));
-	fields.emplace("explosionParams", Write_NativeExplosionParams(value.explosionParams));
+	fields.emplace("explosion-params", Write_NativeExplosionParams(value.explosionParams));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7843,10 +7843,10 @@ bool Read_SpawnProjectileQuery(const WasmValue& input, SpawnProjectileQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
-	const auto* value_projectileParams = FindRecordField(*record, "projectileParams", error);
+	const auto* value_projectileParams = FindRecordField(*record, "projectile-params", error);
 	if (value_projectileParams == nullptr) return false;
 	if (!Read_NativeProjectileParams(*value_projectileParams, output.projectileParams, storage, error)) { return false; }
 	return true;
@@ -7855,8 +7855,8 @@ bool Read_SpawnProjectileQuery(const WasmValue& input, SpawnProjectileQuery& out
 WasmValue Write_SpawnProjectileQuery(const SpawnProjectileQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
-	fields.emplace("projectileParams", Write_NativeProjectileParams(value.projectileParams));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
+	fields.emplace("projectile-params", Write_NativeProjectileParams(value.projectileParams));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7864,7 +7864,7 @@ bool Read_SpawnProjectileResult(const WasmValue& input, SpawnProjectileResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -7873,7 +7873,7 @@ bool Read_SpawnProjectileResult(const WasmValue& input, SpawnProjectileResult& o
 WasmValue Write_SpawnProjectileResult(const SpawnProjectileResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7881,10 +7881,10 @@ bool Read_SpawnSFXQuery(const WasmValue& input, SpawnSFXQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_sfxID = FindRecordField(*record, "sfxID", error);
+	const auto* value_sfxID = FindRecordField(*record, "sfx-id", error);
 	if (value_sfxID == nullptr) return false;
 	if (!ReadScalar(*value_sfxID, output.sfxID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -7908,8 +7908,8 @@ bool Read_SpawnSFXQuery(const WasmValue& input, SpawnSFXQuery& output, NativeCal
 WasmValue Write_SpawnSFXQuery(const SpawnSFXQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("sfxID", WriteScalar(value.sfxID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("sfx-id", WriteScalar(value.sfxID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("dir", Write_Float3(value.dir));
 	fields.emplace("radius", WriteScalar(value.radius));
@@ -7939,10 +7939,10 @@ bool Read_TransferFeatureQuery(const WasmValue& input, TransferFeatureQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_newTeamID = FindRecordField(*record, "newTeamID", error);
+	const auto* value_newTeamID = FindRecordField(*record, "new-team-id", error);
 	if (value_newTeamID == nullptr) return false;
 	if (!ReadScalar(*value_newTeamID, output.newTeamID, error)) { return false; }
 	return true;
@@ -7951,8 +7951,8 @@ bool Read_TransferFeatureQuery(const WasmValue& input, TransferFeatureQuery& out
 WasmValue Write_TransferFeatureQuery(const TransferFeatureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("newTeamID", WriteScalar(value.newTeamID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("new-team-id", WriteScalar(value.newTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -7977,10 +7977,10 @@ bool Read_TransferTeamMaxUnitsQuery(const WasmValue& input, TransferTeamMaxUnits
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fromTeamID = FindRecordField(*record, "fromTeamID", error);
+	const auto* value_fromTeamID = FindRecordField(*record, "from-team-id", error);
 	if (value_fromTeamID == nullptr) return false;
 	if (!ReadScalar(*value_fromTeamID, output.fromTeamID, error)) { return false; }
-	const auto* value_toTeamID = FindRecordField(*record, "toTeamID", error);
+	const auto* value_toTeamID = FindRecordField(*record, "to-team-id", error);
 	if (value_toTeamID == nullptr) return false;
 	if (!ReadScalar(*value_toTeamID, output.toTeamID, error)) { return false; }
 	const auto* value_amount = FindRecordField(*record, "amount", error);
@@ -7992,8 +7992,8 @@ bool Read_TransferTeamMaxUnitsQuery(const WasmValue& input, TransferTeamMaxUnits
 WasmValue Write_TransferTeamMaxUnitsQuery(const TransferTeamMaxUnitsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fromTeamID", WriteScalar(value.fromTeamID));
-	fields.emplace("toTeamID", WriteScalar(value.toTeamID));
+	fields.emplace("from-team-id", WriteScalar(value.fromTeamID));
+	fields.emplace("to-team-id", WriteScalar(value.toTeamID));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
 }
@@ -8019,16 +8019,16 @@ bool Read_TransferUnitQuery(const WasmValue& input, TransferUnitQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_newTeamID = FindRecordField(*record, "newTeamID", error);
+	const auto* value_newTeamID = FindRecordField(*record, "new-team-id", error);
 	if (value_newTeamID == nullptr) return false;
 	if (!ReadScalar(*value_newTeamID, output.newTeamID, error)) { return false; }
 	const auto* value_given = FindRecordField(*record, "given", error);
 	if (value_given == nullptr) return false;
 	if (!ReadScalar(*value_given, output.given, error)) { return false; }
-	const auto* value_adjustUnitLimit = FindRecordField(*record, "adjustUnitLimit", error);
+	const auto* value_adjustUnitLimit = FindRecordField(*record, "adjust-unit-limit", error);
 	if (value_adjustUnitLimit == nullptr) return false;
 	if (!ReadScalar(*value_adjustUnitLimit, output.adjustUnitLimit, error)) { return false; }
 	return true;
@@ -8037,10 +8037,10 @@ bool Read_TransferUnitQuery(const WasmValue& input, TransferUnitQuery& output, N
 WasmValue Write_TransferUnitQuery(const TransferUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("newTeamID", WriteScalar(value.newTeamID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("new-team-id", WriteScalar(value.newTeamID));
 	fields.emplace("given", WriteScalar(value.given));
-	fields.emplace("adjustUnitLimit", WriteScalar(value.adjustUnitLimit));
+	fields.emplace("adjust-unit-limit", WriteScalar(value.adjustUnitLimit));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -8065,13 +8065,13 @@ bool Read_UnitAttachQuery(const WasmValue& input, UnitAttachQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_transporterID = FindRecordField(*record, "transporterID", error);
+	const auto* value_transporterID = FindRecordField(*record, "transporter-id", error);
 	if (value_transporterID == nullptr) return false;
 	if (!ReadScalar(*value_transporterID, output.transporterID, error)) { return false; }
-	const auto* value_transporteeID = FindRecordField(*record, "transporteeID", error);
+	const auto* value_transporteeID = FindRecordField(*record, "transportee-id", error);
 	if (value_transporteeID == nullptr) return false;
 	if (!ReadScalar(*value_transporteeID, output.transporteeID, error)) { return false; }
-	const auto* value_pieceNum = FindRecordField(*record, "pieceNum", error);
+	const auto* value_pieceNum = FindRecordField(*record, "piece-num", error);
 	if (value_pieceNum == nullptr) return false;
 	if (!ReadScalar(*value_pieceNum, output.pieceNum, error)) { return false; }
 	return true;
@@ -8080,9 +8080,9 @@ bool Read_UnitAttachQuery(const WasmValue& input, UnitAttachQuery& output, Nativ
 WasmValue Write_UnitAttachQuery(const UnitAttachQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("transporterID", WriteScalar(value.transporterID));
-	fields.emplace("transporteeID", WriteScalar(value.transporteeID));
-	fields.emplace("pieceNum", WriteScalar(value.pieceNum));
+	fields.emplace("transporter-id", WriteScalar(value.transporterID));
+	fields.emplace("transportee-id", WriteScalar(value.transporteeID));
+	fields.emplace("piece-num", WriteScalar(value.pieceNum));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -8107,7 +8107,7 @@ bool Read_UnitDetachFromAirQuery(const WasmValue& input, UnitDetachFromAirQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_transporteeID = FindRecordField(*record, "transporteeID", error);
+	const auto* value_transporteeID = FindRecordField(*record, "transportee-id", error);
 	if (value_transporteeID == nullptr) return false;
 	if (!ReadScalar(*value_transporteeID, output.transporteeID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -8119,7 +8119,7 @@ bool Read_UnitDetachFromAirQuery(const WasmValue& input, UnitDetachFromAirQuery&
 WasmValue Write_UnitDetachFromAirQuery(const UnitDetachFromAirQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("transporteeID", WriteScalar(value.transporteeID));
+	fields.emplace("transportee-id", WriteScalar(value.transporteeID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	return WasmValue::Record(std::move(fields));
 }
@@ -8145,7 +8145,7 @@ bool Read_UnitDetachQuery(const WasmValue& input, UnitDetachQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_transporteeID = FindRecordField(*record, "transporteeID", error);
+	const auto* value_transporteeID = FindRecordField(*record, "transportee-id", error);
 	if (value_transporteeID == nullptr) return false;
 	if (!ReadScalar(*value_transporteeID, output.transporteeID, error)) { return false; }
 	return true;
@@ -8154,7 +8154,7 @@ bool Read_UnitDetachQuery(const WasmValue& input, UnitDetachQuery& output, Nativ
 WasmValue Write_UnitDetachQuery(const UnitDetachQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("transporteeID", WriteScalar(value.transporteeID));
+	fields.emplace("transportee-id", WriteScalar(value.transporteeID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -8179,7 +8179,7 @@ bool Read_UnitFinishCommandQuery(const WasmValue& input, UnitFinishCommandQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -8188,7 +8188,7 @@ bool Read_UnitFinishCommandQuery(const WasmValue& input, UnitFinishCommandQuery&
 WasmValue Write_UnitFinishCommandQuery(const UnitFinishCommandQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -8213,10 +8213,10 @@ bool Read_UnitWeaponFireQuery(const WasmValue& input, UnitWeaponFireQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_weaponNum = FindRecordField(*record, "weaponNum", error);
+	const auto* value_weaponNum = FindRecordField(*record, "weapon-num", error);
 	if (value_weaponNum == nullptr) return false;
 	if (!ReadScalar(*value_weaponNum, output.weaponNum, error)) { return false; }
 	return true;
@@ -8225,8 +8225,8 @@ bool Read_UnitWeaponFireQuery(const WasmValue& input, UnitWeaponFireQuery& outpu
 WasmValue Write_UnitWeaponFireQuery(const UnitWeaponFireQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("weaponNum", WriteScalar(value.weaponNum));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("weapon-num", WriteScalar(value.weaponNum));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -8251,10 +8251,10 @@ bool Read_UnitWeaponHoldFireQuery(const WasmValue& input, UnitWeaponHoldFireQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_weaponNum = FindRecordField(*record, "weaponNum", error);
+	const auto* value_weaponNum = FindRecordField(*record, "weapon-num", error);
 	if (value_weaponNum == nullptr) return false;
 	if (!ReadScalar(*value_weaponNum, output.weaponNum, error)) { return false; }
 	return true;
@@ -8263,8 +8263,8 @@ bool Read_UnitWeaponHoldFireQuery(const WasmValue& input, UnitWeaponHoldFireQuer
 WasmValue Write_UnitWeaponHoldFireQuery(const UnitWeaponHoldFireQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("weaponNum", WriteScalar(value.weaponNum));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("weapon-num", WriteScalar(value.weaponNum));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -8289,10 +8289,10 @@ bool Read_UseTeamResourceQuery(const WasmValue& input, UseTeamResourceQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_resourceType = FindRecordField(*record, "resourceType", error);
+	const auto* value_resourceType = FindRecordField(*record, "resource-type", error);
 	if (value_resourceType == nullptr) return false;
 	auto& stored_string_output_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_output_resourceType, error)) { return false; }
@@ -8306,8 +8306,8 @@ bool Read_UseTeamResourceQuery(const WasmValue& input, UseTeamResourceQuery& out
 WasmValue Write_UseTeamResourceQuery(const UseTeamResourceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("resourceType", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("resource-type", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
 }
@@ -8333,10 +8333,10 @@ bool Read_UseUnitResourceQuery(const WasmValue& input, UseUnitResourceQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_resourceType = FindRecordField(*record, "resourceType", error);
+	const auto* value_resourceType = FindRecordField(*record, "resource-type", error);
 	if (value_resourceType == nullptr) return false;
 	auto& stored_string_output_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_output_resourceType, error)) { return false; }
@@ -8350,8 +8350,8 @@ bool Read_UseUnitResourceQuery(const WasmValue& input, UseUnitResourceQuery& out
 WasmValue Write_UseUnitResourceQuery(const UseUnitResourceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("resourceType", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("resource-type", WasmValue::String((value.resourceType == nullptr) ? std::string{} : std::string(value.resourceType)));
 	fields.emplace("amount", WriteScalar(value.amount));
 	return WasmValue::Record(std::move(fields));
 }

@@ -285,6 +285,22 @@ impl<'a> Messages<'a> {
         }
     }
 
+    pub fn send_to_unsynced(&self, message: &str) -> Result<bool, Error> {
+        unsafe {
+            let message_cstr = std::ffi::CString::new(message).map_err(|_| Error::invalid_argument("message"))?;
+            let query = sys::SendToUnsyncedQuery {
+                message: message_cstr.as_ptr(),
+            };
+            let mut result = MaybeUninit::<sys::SendToUnsyncedResult>::zeroed();
+            let func = self.api.SendToUnsynced.expect("SendToUnsynced function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
     pub fn get_console_buffer(&self, max_lines: u32) -> Result<Vec<sys::ConsoleEntry>, Error> {
         unsafe {
             let query = sys::GetConsoleBufferQuery {

@@ -76,6 +76,8 @@
 #include "System/AABB.hpp"
 #include "System/MainDefines.h"
 #include "System/SpringMath.h"
+#include "System/Misc/SpringTime.h"
+#include "System/SyncedTiming.h"
 #include "System/FileSystem/FileHandler.h"
 #include "System/FileSystem/FileSystem.h"
 #include "System/StringUtil.h"
@@ -125,6 +127,7 @@ bool LuaSyncedRead::PushEntries(lua_State* L)
 
 	REGISTER_LUA_CFUNC(GetGameFrame);
 	REGISTER_LUA_CFUNC(GetGameSeconds);
+	REGISTER_LUA_CFUNC(GetTimerMicros);
 
 	REGISTER_LUA_CFUNC(GetGameRulesParam);
 	REGISTER_LUA_CFUNC(GetGameRulesParams);
@@ -930,6 +933,27 @@ int LuaSyncedRead::GetGameFrame(lua_State* L)
 int LuaSyncedRead::GetGameSeconds(lua_State* L)
 {
 	lua_pushnumber(L, gs->GetLuaSimFrame() * INV_GAME_SPEED);
+	return 1;
+}
+
+/**
+ * @function Spring.GetTimerMicros
+ * @return integer monotonic timer in microseconds
+ *
+ * This is a diagnostic timer, not a synced input. It is available to synced
+ * scripts only when SPRING_ENABLE_SYNCED_TIMERS is explicitly set in the
+ * engine process environment. Scripts must never use the result to influence
+ * lockstep state or command decisions.
+ */
+int LuaSyncedRead::GetTimerMicros(lua_State* L)
+{
+	if (!spring::synced_timing::IsEnabled()) {
+		return luaL_error(L,
+			"Spring.GetTimerMicros is disabled for synced scripts; set "
+			"SPRING_ENABLE_SYNCED_TIMERS=1 for diagnostic benchmarking");
+	}
+
+	lua_pushinteger(L, static_cast<lua_Integer>(spring_now().toMicroSecsi()));
 	return 1;
 }
 

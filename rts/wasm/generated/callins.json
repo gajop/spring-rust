@@ -31,11 +31,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowCommand",
@@ -43,11 +41,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowDirectUnitControl",
@@ -55,11 +51,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowFeatureBuildStep",
@@ -67,11 +61,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowFeatureCreation",
@@ -79,11 +71,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowResourceLevel",
@@ -91,11 +81,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowResourceTransfer",
@@ -103,11 +91,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowStartPosition",
@@ -115,11 +101,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowUnitBuildStep",
@@ -127,11 +111,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true",
+    "aggregation": "and-false",
     "aliases": [
       "AllowUnitCaptureStep"
     ]
@@ -142,11 +124,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowUnitCreation",
@@ -154,9 +134,7 @@
     "result": "AllowUnitCreationResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "first"
   },
@@ -166,11 +144,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowUnitKamikaze",
@@ -178,11 +154,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowUnitTransfer",
@@ -190,11 +164,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowUnitTransport",
@@ -202,11 +174,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowUnitTransportPosition",
@@ -214,11 +184,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true",
+    "aggregation": "and-false",
     "aliases": [
       "AllowUnitTransportLoad",
       "AllowUnitTransportUnload"
@@ -230,11 +198,9 @@
     "result": "BoolCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
-    "aggregation": "or-true"
+    "aggregation": "and-false"
   },
   {
     "name": "AllowWeaponTarget",
@@ -242,9 +208,7 @@
     "result": "AllowWeaponTargetResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "first"
   },
@@ -254,9 +218,7 @@
     "result": "IntCallinResult",
     "environments": [
       "rules-synced",
-      "rules-unsynced",
-      "gaia-synced",
-      "gaia-unsynced"
+      "gaia-synced"
     ],
     "aggregation": "first"
   },
@@ -1068,6 +1030,16 @@
     "aliases": [
       "UnsyncedHeightMapUpdate"
     ]
+  },
+  {
+    "name": "RecvFromSynced",
+    "query": "RecvFromSyncedQuery",
+    "result": "RecvFromSyncedResult",
+    "environments": [
+      "rules-unsynced",
+      "gaia-unsynced"
+    ],
+    "aggregation": "ignore"
   },
   {
     "name": "RenderUnitDestroyed",

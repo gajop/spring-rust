@@ -77,7 +77,7 @@ bool Read_GetConsoleBufferQuery(const WasmValue& input, GetConsoleBufferQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_maxLines = FindRecordField(*record, "maxLines", error);
+	const auto* value_maxLines = FindRecordField(*record, "max-lines", error);
 	if (value_maxLines == nullptr) return false;
 	if (!ReadScalar(*value_maxLines, output.maxLines, error)) { return false; }
 	return true;
@@ -86,7 +86,7 @@ bool Read_GetConsoleBufferQuery(const WasmValue& input, GetConsoleBufferQuery& o
 WasmValue Write_GetConsoleBufferQuery(const GetConsoleBufferQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("maxLines", WriteScalar(value.maxLines));
+	fields.emplace("max-lines", WriteScalar(value.maxLines));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -121,7 +121,7 @@ bool Read_GetCurrentTooltipQuery(const WasmValue& input, GetCurrentTooltipQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -130,7 +130,7 @@ bool Read_GetCurrentTooltipQuery(const WasmValue& input, GetCurrentTooltipQuery&
 WasmValue Write_GetCurrentTooltipQuery(const GetCurrentTooltipQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -157,7 +157,7 @@ bool Read_IsUserWritingQuery(const WasmValue& input, IsUserWritingQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -166,7 +166,7 @@ bool Read_IsUserWritingQuery(const WasmValue& input, IsUserWritingQuery& output,
 WasmValue Write_IsUserWritingQuery(const IsUserWritingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -501,7 +501,7 @@ bool Read_SendMessageToAllyTeamQuery(const WasmValue& input, SendMessageToAllyTe
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	const auto* value_message = FindRecordField(*record, "message", error);
@@ -515,7 +515,7 @@ bool Read_SendMessageToAllyTeamQuery(const WasmValue& input, SendMessageToAllyTe
 WasmValue Write_SendMessageToAllyTeamQuery(const SendMessageToAllyTeamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -541,7 +541,7 @@ bool Read_SendMessageToPlayerQuery(const WasmValue& input, SendMessageToPlayerQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	const auto* value_message = FindRecordField(*record, "message", error);
@@ -555,7 +555,7 @@ bool Read_SendMessageToPlayerQuery(const WasmValue& input, SendMessageToPlayerQu
 WasmValue Write_SendMessageToPlayerQuery(const SendMessageToPlayerQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -617,7 +617,7 @@ bool Read_SendMessageToTeamQuery(const WasmValue& input, SendMessageToTeamQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_message = FindRecordField(*record, "message", error);
@@ -631,7 +631,7 @@ bool Read_SendMessageToTeamQuery(const WasmValue& input, SendMessageToTeamQuery&
 WasmValue Write_SendMessageToTeamQuery(const SendMessageToTeamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -662,7 +662,7 @@ bool Read_SendPrivateChatQuery(const WasmValue& input, SendPrivateChatQuery& out
 	auto& stored_string_output_message = storage.Make<std::string>();
 	if (!ReadString(*value_message, stored_string_output_message, error)) { return false; }
 	output.message = stored_string_output_message.c_str();
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	return true;
@@ -672,7 +672,7 @@ WasmValue Write_SendPrivateChatQuery(const SendPrivateChatQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -733,7 +733,7 @@ bool Read_SendSkirmishAIMessageQuery(const WasmValue& input, SendSkirmishAIMessa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_aiID = FindRecordField(*record, "aiID", error);
+	const auto* value_aiID = FindRecordField(*record, "ai-id", error);
 	if (value_aiID == nullptr) return false;
 	if (!ReadScalar(*value_aiID, output.aiID, error)) { return false; }
 	const auto* value_message = FindRecordField(*record, "message", error);
@@ -747,7 +747,7 @@ bool Read_SendSkirmishAIMessageQuery(const WasmValue& input, SendSkirmishAIMessa
 WasmValue Write_SendSkirmishAIMessageQuery(const SendSkirmishAIMessageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("aiID", WriteScalar(value.aiID));
+	fields.emplace("ai-id", WriteScalar(value.aiID));
 	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -805,6 +805,42 @@ WasmValue Write_SendSpectatorChatResult(const SendSpectatorChatResult& value)
 	return WasmValue::Record(std::move(fields));
 }
 
+bool Read_SendToUnsyncedQuery(const WasmValue& input, SendToUnsyncedQuery& output, NativeCallStorage& storage, std::string& error)
+{
+	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
+	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
+	const auto* value_message = FindRecordField(*record, "message", error);
+	if (value_message == nullptr) return false;
+	auto& stored_string_output_message = storage.Make<std::string>();
+	if (!ReadString(*value_message, stored_string_output_message, error)) { return false; }
+	output.message = stored_string_output_message.c_str();
+	return true;
+}
+
+WasmValue Write_SendToUnsyncedQuery(const SendToUnsyncedQuery& value)
+{
+	WasmValueRecord fields;
+	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
+	return WasmValue::Record(std::move(fields));
+}
+
+bool Read_SendToUnsyncedResult(const WasmValue& input, SendToUnsyncedResult& output, NativeCallStorage& storage, std::string& error)
+{
+	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
+	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
+	const auto* value_success = FindRecordField(*record, "success", error);
+	if (value_success == nullptr) return false;
+	if (!ReadScalar(*value_success, output.success, error)) { return false; }
+	return true;
+}
+
+WasmValue Write_SendToUnsyncedResult(const SendToUnsyncedResult& value)
+{
+	WasmValueRecord fields;
+	fields.emplace("success", WriteScalar(value.success));
+	return WasmValue::Record(std::move(fields));
+}
+
 }
 
 namespace {
@@ -837,7 +873,7 @@ NativeCalloutDispatch Dispatch_messages_GetConsoleBuffer(NativeInterface* native
 	NativeCallStorage storage;
 	GetConsoleBufferQuery query{};
 	GetConsoleBufferResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "maxLines", query.maxLines, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "max-lines", query.maxLines, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->messages->GetConsoleBuffer(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.entries, nativeResult.count, [](const auto& value) { return Write_ConsoleEntry(value); });
@@ -850,7 +886,7 @@ NativeCalloutDispatch Dispatch_messages_GetCurrentTooltip(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetCurrentTooltipQuery query{};
 	GetCurrentTooltipResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->messages->GetCurrentTooltip(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.tooltip == nullptr) ? std::string{} : std::string(nativeResult.tooltip));
@@ -863,7 +899,7 @@ NativeCalloutDispatch Dispatch_messages_IsUserWriting(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	IsUserWritingQuery query{};
 	IsUserWritingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->messages->IsUserWriting(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.writing);
@@ -1028,7 +1064,7 @@ NativeCalloutDispatch Dispatch_messages_SendMessageToAllyTeam(NativeInterface* n
 	NativeCallStorage storage;
 	SendMessageToAllyTeamQuery query{};
 	SendMessageToAllyTeamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_message = FindArgument(arguments, 1u, 1u, 2u, 2u, "message", error);
 	if (value_message == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_message = storage.Make<std::string>();
@@ -1046,7 +1082,7 @@ NativeCalloutDispatch Dispatch_messages_SendMessageToPlayer(NativeInterface* nat
 	NativeCallStorage storage;
 	SendMessageToPlayerQuery query{};
 	SendMessageToPlayerResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_message = FindArgument(arguments, 1u, 1u, 2u, 2u, "message", error);
 	if (value_message == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_message = storage.Make<std::string>();
@@ -1081,7 +1117,7 @@ NativeCalloutDispatch Dispatch_messages_SendMessageToTeam(NativeInterface* nativ
 	NativeCallStorage storage;
 	SendMessageToTeamQuery query{};
 	SendMessageToTeamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_message = FindArgument(arguments, 1u, 1u, 2u, 2u, "message", error);
 	if (value_message == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_message = storage.Make<std::string>();
@@ -1104,7 +1140,7 @@ NativeCalloutDispatch Dispatch_messages_SendPrivateChat(NativeInterface* nativeI
 	auto& stored_string_query_message = storage.Make<std::string>();
 	if (!ReadString(*value_message, stored_string_query_message, error)) { return NativeCalloutDispatch::handled; }
 	query.message = stored_string_query_message.c_str();
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->messages->SendPrivateChat(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1134,7 +1170,7 @@ NativeCalloutDispatch Dispatch_messages_SendSkirmishAIMessage(NativeInterface* n
 	NativeCallStorage storage;
 	SendSkirmishAIMessageQuery query{};
 	SendSkirmishAIMessageResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "aiID", query.aiID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "ai-id", query.aiID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_message = FindArgument(arguments, 1u, 1u, 2u, 2u, "message", error);
 	if (value_message == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_message = storage.Make<std::string>();
@@ -1158,6 +1194,23 @@ NativeCalloutDispatch Dispatch_messages_SendSpectatorChat(NativeInterface* nativ
 	if (!ReadString(*value_message, stored_string_query_message, error)) { return NativeCalloutDispatch::handled; }
 	query.message = stored_string_query_message.c_str();
 	nativeInterface->messages->SendSpectatorChat(&query, &nativeResult);
+	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
+	result = WriteScalar(nativeResult.success);
+	return NativeCalloutDispatch::handled;
+}
+
+NativeCalloutDispatch Dispatch_messages_SendToUnsynced(NativeInterface* nativeInterface, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
+{
+	if (nativeInterface == nullptr || nativeInterface->messages == nullptr || nativeInterface->messages->SendToUnsynced == nullptr) { error = "NativeInterface API is unavailable: messages.SendToUnsynced"; return NativeCalloutDispatch::handled; }
+	NativeCallStorage storage;
+	SendToUnsyncedQuery query{};
+	SendToUnsyncedResult nativeResult{};
+	const WasmValue* value_message = FindArgument(arguments, 0u, 0u, 1u, 1u, "message", error);
+	if (value_message == nullptr) return NativeCalloutDispatch::handled;
+	auto& stored_string_query_message = storage.Make<std::string>();
+	if (!ReadString(*value_message, stored_string_query_message, error)) { return NativeCalloutDispatch::handled; }
+	query.message = stored_string_query_message.c_str();
+	nativeInterface->messages->SendToUnsynced(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
 	return NativeCalloutDispatch::handled;
@@ -1190,6 +1243,7 @@ NativeCalloutDispatch DispatchNativeCalloutModule_messages(NativeInterface* nati
 	if (detail::FunctionEquals(function, "SendPublicChat")) return Dispatch_messages_SendPublicChat(nativeInterface, arguments, result, error);
 	if (detail::FunctionEquals(function, "SendSkirmishAIMessage")) return Dispatch_messages_SendSkirmishAIMessage(nativeInterface, arguments, result, error);
 	if (detail::FunctionEquals(function, "SendSpectatorChat")) return Dispatch_messages_SendSpectatorChat(nativeInterface, arguments, result, error);
+	if (detail::FunctionEquals(function, "SendToUnsynced")) return Dispatch_messages_SendToUnsynced(nativeInterface, arguments, result, error);
 	return NativeCalloutDispatch::notHandled;
 }
 }

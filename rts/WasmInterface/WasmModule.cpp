@@ -6,6 +6,7 @@
 #include <charconv>
 #include <cctype>
 #include <limits>
+#include <unordered_set>
 #include <utility>
 
 #include "wasm/generated/WasmCalloutRegistry.h"
@@ -431,6 +432,80 @@ void DeleteComponentNames(std::vector<wasm_name_t>& names)
 		wasm_name_delete(&name);
 }
 
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+void CollectComponentExports(const wasmtime_component_type_t* type,
+	const wasm_engine_t* engine, std::string_view prefix,
+	std::unordered_set<std::string>& functions);
+
+void CollectComponentInstanceExports(const wasmtime_component_instance_type_t* type,
+	const wasm_engine_t* engine, std::string_view prefix,
+	std::unordered_set<std::string>& functions)
+{
+	const std::size_t exportCount = wasmtime_component_instance_type_export_count(type, engine);
+	for (std::size_t index = 0; index < exportCount; ++index) {
+		const char* name = nullptr;
+		std::size_t nameLength = 0;
+		wasmtime_component_item_t item{};
+		if (!wasmtime_component_instance_type_export_nth(type, engine, index,
+				&name, &nameLength, &item))
+			continue;
+
+		std::string path(prefix);
+		if (!path.empty())
+			path.push_back('/');
+		path.append(name, nameLength);
+		switch (item.kind) {
+			case WASMTIME_COMPONENT_ITEM_COMPONENT_FUNC:
+				functions.insert(std::move(path));
+				break;
+			case WASMTIME_COMPONENT_ITEM_COMPONENT_INSTANCE:
+				CollectComponentInstanceExports(item.of.component_instance, engine, path, functions);
+				break;
+			case WASMTIME_COMPONENT_ITEM_COMPONENT:
+				CollectComponentExports(item.of.component, engine, path, functions);
+				break;
+			default:
+				break;
+		}
+		wasmtime_component_item_delete(&item);
+	}
+}
+
+void CollectComponentExports(const wasmtime_component_type_t* type,
+	const wasm_engine_t* engine, std::string_view prefix,
+	std::unordered_set<std::string>& functions)
+{
+	const std::size_t exportCount = wasmtime_component_type_export_count(type, engine);
+	for (std::size_t index = 0; index < exportCount; ++index) {
+		const char* name = nullptr;
+		std::size_t nameLength = 0;
+		wasmtime_component_item_t item{};
+		if (!wasmtime_component_type_export_nth(type, engine, index,
+				&name, &nameLength, &item))
+		continue;
+
+		std::string path(prefix);
+		if (!path.empty())
+			path.push_back('/');
+		path.append(name, nameLength);
+		switch (item.kind) {
+			case WASMTIME_COMPONENT_ITEM_COMPONENT_FUNC:
+				functions.insert(std::move(path));
+				break;
+			case WASMTIME_COMPONENT_ITEM_COMPONENT_INSTANCE:
+				CollectComponentInstanceExports(item.of.component_instance, engine, path, functions);
+				break;
+			case WASMTIME_COMPONENT_ITEM_COMPONENT:
+				CollectComponentExports(item.of.component, engine, path, functions);
+				break;
+			default:
+				break;
+		}
+		wasmtime_component_item_delete(&item);
+	}
+}
+#endif
+
 class ComponentExportIndexPath {
 public:
 	~ComponentExportIndexPath()
@@ -442,64 +517,39 @@ public:
 	bool Resolve(const wasmtime_component_instance_t& instance, wasmtime_context_t* context,
 		std::string_view path)
 	{
-		if (auto* directIndex = wasmtime_component_instance_get_export_index(
+		const std::size_t separator = path.find_last_of('/');
+		if (separator == std::string_view::npos) {
+			auto* index = wasmtime_component_instance_get_export_index(
 				&instance, context, nullptr, path.data(), path.size());
-			directIndex != nullptr) {
-			indexes.push_back(directIndex);
-			return true;
-		}
-
-		// WIT package-qualified interface exports contain a slash in their
-		// name (for example `recoil:spring-api/callins-rules-synced@1.0.0`).
-		// Resolve that interface as one root item before looking up its
-		// function.  The fallback below keeps the shorter hand-authored path
-		// convention working for older fixtures.
-		if (const std::size_t separator = path.find_last_of('/');
-			separator != std::string_view::npos) {
-			const std::string_view interfaceName = path.substr(0, separator);
-			const std::string_view functionName = path.substr(separator + 1);
-			std::string qualifiedFunction(interfaceName);
-			qualifiedFunction.push_back('#');
-			qualifiedFunction.append(functionName);
-			if (auto* qualifiedIndex = wasmtime_component_instance_get_export_index(
-					&instance, context, nullptr, qualifiedFunction.data(), qualifiedFunction.size());
-				qualifiedIndex != nullptr) {
-				indexes.push_back(qualifiedIndex);
-				return true;
-			}
-			if (auto* interfaceIndex = wasmtime_component_instance_get_export_index(
-					&instance, context, nullptr, interfaceName.data(), interfaceName.size());
-				interfaceIndex != nullptr) {
-				if (auto* functionIndex = wasmtime_component_instance_get_export_index(
-						&instance, context, interfaceIndex, functionName.data(), functionName.size());
-					functionIndex != nullptr) {
-					indexes.push_back(interfaceIndex);
-					indexes.push_back(functionIndex);
-					return true;
-				}
-				wasmtime_component_export_index_delete(interfaceIndex);
-			}
-		}
-
-		const wasmtime_component_export_index_t* parent = nullptr;
-		std::size_t start = 0;
-		while (start <= path.size()) {
-			const std::size_t end = path.find('/', start);
-			const std::size_t length = end == std::string_view::npos ?
-				path.size() - start : end - start;
-			if (length == 0)
-				return false;
-			auto* index = wasmtime_component_instance_get_export_index(&instance, context, parent,
-				path.data() + start, length);
 			if (index == nullptr)
 				return false;
 			indexes.push_back(index);
-			parent = index;
-			if (end == std::string_view::npos)
-				break;
-			start = end + 1;
+			return true;
 		}
-		return !indexes.empty();
+
+		// Package-qualified WIT interfaces are exported as one root item whose
+		// name contains slashes (for example
+		// `recoil:spring-api/callins-ui@1.0.0`). Resolve that root first, then
+		// resolve the function inside it. Passing the complete
+		// `interface/function` spelling to the C API is not equivalent and can
+		// make a missing optional callin lookup scan indefinitely.
+		const std::string_view interfaceName = path.substr(0, separator);
+		const std::string_view functionName = path.substr(separator + 1);
+		if (interfaceName.empty() || functionName.empty())
+			return false;
+		auto* interfaceIndex = wasmtime_component_instance_get_export_index(
+			&instance, context, nullptr, interfaceName.data(), interfaceName.size());
+		if (interfaceIndex == nullptr)
+			return false;
+		auto* functionIndex = wasmtime_component_instance_get_export_index(
+			&instance, context, interfaceIndex, functionName.data(), functionName.size());
+		if (functionIndex == nullptr) {
+			wasmtime_component_export_index_delete(interfaceIndex);
+			return false;
+		}
+		indexes.push_back(interfaceIndex);
+		indexes.push_back(functionIndex);
+		return true;
 	}
 
 	wasmtime_component_export_index_t* Get() const
@@ -1582,6 +1632,7 @@ struct WasmModule::BackendState {
 	wasmtime_instance_t coreInstance{};
 	wasmtime_component_instance_t componentInstance{};
 	bool isComponent = false;
+	std::unordered_set<std::string> componentFunctionExports;
 	std::vector<std::unique_ptr<WasmHostFunctionData>> hostFunctions;
 	std::map<WasmHandle, ComponentResourceEntry> componentResources;
 
@@ -1715,13 +1766,15 @@ bool WasmModule::Initialize(std::string& error)
 		std::max<std::int64_t>(2, runtime.Config().maxComponentNesting + 1),
 		std::max<std::int64_t>(2, runtime.Config().maxComponentNesting + 1),
 		std::max<std::int64_t>(2, runtime.Config().maxComponentNesting + 1));
-	if (wasmtime_error_t* fuelError = wasmtime_context_set_fuel(
-		wasmtime_store_context(backendState->store), runtime.Config().instructionFuel);
-		fuelError != nullptr) {
-		error = "Wasmtime could not configure instruction fuel: " +
-			WasmtimeErrorMessage(fuelError);
-		Fault(error);
-		return false;
+	if (runtime.Config().instructionFuel != 0) {
+		if (wasmtime_error_t* fuelError = wasmtime_context_set_fuel(
+			wasmtime_store_context(backendState->store), runtime.Config().instructionFuel);
+			fuelError != nullptr) {
+			error = "Wasmtime could not configure instruction fuel: " +
+				WasmtimeErrorMessage(fuelError);
+			Fault(error);
+			return false;
+		}
 	}
 
 	if (backendState->isComponent) {
@@ -1733,6 +1786,13 @@ bool WasmModule::Initialize(std::string& error)
 				WasmtimeErrorMessage(compileError);
 			Fault(error);
 			return false;
+		}
+		if (auto* componentType = wasmtime_component_type(backendState->component);
+			componentType != nullptr) {
+			CollectComponentExports(componentType,
+				static_cast<wasm_engine_t*>(runtime.BackendEngine()), {},
+				backendState->componentFunctionExports);
+			wasmtime_component_type_delete(componentType);
 		}
 		backendState->componentLinker = wasmtime_component_linker_new(
 			static_cast<wasm_engine_t*>(runtime.BackendEngine()));
@@ -1944,7 +2004,21 @@ WasmCallbackID WasmModule::RegisterGuestCallback(std::uint32_t guestCallbackID,
 		error = "Wasm module is not running";
 		return 0;
 	}
-	const std::string callbackPath = "callbacks/" + std::to_string(guestCallbackID);
+	const std::string legacyPath = "callback-" + std::to_string(guestCallbackID);
+	std::string callbackPath = legacyPath;
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (backendState == nullptr || !backendState->isComponent) {
+		error = "Wasm callbacks require a Component Model module";
+		return 0;
+	}
+	const std::string canonicalPath = "callbacks/" + std::to_string(guestCallbackID);
+	if (backendState->componentFunctionExports.contains(canonicalPath)) {
+		callbackPath = canonicalPath;
+	} else if (!backendState->componentFunctionExports.contains(legacyPath)) {
+		error = "Wasm callback export not found: " + legacyPath;
+		return 0;
+	}
+#endif
 	const WasmCallbackID callbackID = callbacks.Register(policy, [this, guestCallbackID, callbackPath](
 		const std::vector<std::uint64_t>& arguments) {
 		std::vector<WasmValue> values;
@@ -1955,14 +2029,6 @@ WasmCallbackID WasmModule::RegisterGuestCallback(std::uint32_t guestCallbackID,
 		std::string callbackError;
 		if (Callin(callbackPath, values, result, callbackError))
 			return true;
-		// Keep a short compatibility spelling for hand-authored components while
-		// making `callbacks/<id>` the canonical convention.
-		if (state == WasmModuleState::Running) {
-			const std::string legacyPath = "callback-" + std::to_string(guestCallbackID);
-			callbackError.clear();
-			if (Callin(legacyPath, values, result, callbackError))
-				return true;
-		}
 		if (state == WasmModuleState::Running)
 			Fault("Wasm callback " + std::to_string(guestCallbackID) +
 				" failed: " + callbackError);
@@ -2518,7 +2584,17 @@ bool WasmModule::Callin(std::string_view name, const std::vector<WasmValue>& arg
 		error = "semantic Wasm callins require a Component Model module";
 		return false;
 	}
-	ComponentExportIndexPath exportPath;
+	// Callins are optional component exports. Check the component type before
+	// asking the instance API for a nested function index; the latter is a
+	// relatively expensive operation and, for a missing function in an
+	// exported interface, can scan the complete component export tree.
+		if (name.find('/') != std::string_view::npos &&
+			backendState->componentFunctionExports.find(std::string(name)) ==
+				backendState->componentFunctionExports.end()) {
+			result = WasmValue::Unit();
+			return true;
+		}
+		ComponentExportIndexPath exportPath;
 	if (!exportPath.Resolve(backendState->componentInstance,
 		wasmtime_store_context(backendState->store), name)) {
 		// Component worlds are intentionally modular: a guest may export only

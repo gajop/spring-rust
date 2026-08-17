@@ -23,12 +23,12 @@ NativeCalloutDispatch Dispatch_effects_control_SpawnCEG(NativeInterface* nativeI
 	if (!ReadRecordArgument(arguments, 2u, 2u, 6u, 6u, "dir", Read_Float3, query.dir, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "radius", query.radius, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "damage", query.damage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "dmgMod", query.dmgMod, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "dmg-mod", query.dmgMod, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->effects->SpawnCEG(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
-	outputFields.emplace("cegID", WriteScalar(nativeResult.cegID));
+	outputFields.emplace("ceg-id", WriteScalar(nativeResult.cegID));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -41,7 +41,7 @@ NativeCalloutDispatch Dispatch_effects_control_SpawnExplosion(NativeInterface* n
 	SpawnExplosionResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 3u, 3u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "dir", Read_Float3, query.dir, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "explosionParams", Read_NativeExplosionParams, query.explosionParams, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "explosion-params", Read_NativeExplosionParams, query.explosionParams, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->effects->SpawnExplosion(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -54,8 +54,8 @@ NativeCalloutDispatch Dispatch_effects_control_SpawnSFX(NativeInterface* nativeI
 	NativeCallStorage storage;
 	SpawnSFXQuery query{};
 	SpawnSFXResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "sfxID", query.sfxID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "sfx-id", query.sfxID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 7u, 7u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 3u, 3u, 7u, 7u, "dir", Read_Float3, query.dir, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "radius", query.radius, error)) return NativeCalloutDispatch::handled;

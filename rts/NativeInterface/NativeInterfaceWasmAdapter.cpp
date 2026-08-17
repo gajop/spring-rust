@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "generated/WasmHostAdapter.h"
+#include "System/SyncedTiming.h"
 #include "WasmUiVisibility.h"
 #include "WasmInterface/WasmModule.h"
 
@@ -675,6 +676,22 @@ bool NativeInterfaceWasmAdapter::CalloutImpl(WasmModule* owner, std::string_view
 	const bool uiEnvironment = owner != nullptr &&
 		owner->Descriptor().environment == WasmEnvironment::UI;
 	WasmUiVisibility::ScopedContext uiContext(uiEnvironment);
+
+	// The generated profiling API exposes the process monotonic clock. That is
+	// useful for diagnostics, but it is not deterministic and therefore must
+	// not be callable from a synced Wasm world by default. Keep the check at
+	// the environment-aware Wasm boundary so an ordinary synced guest cannot
+	// accidentally turn a host timestamp into lockstep state.
+	const bool syncedEnvironment = owner != nullptr &&
+		WasmEnvironmentMatrix::Policy(owner->Descriptor().environment).synced;
+	const bool timerCall = module == "profiling" &&
+		(IsFunction(function, "GetTimer", "get-timer") ||
+		 IsFunction(function, "GetTimerMicros", "get-timer-micros"));
+	if (syncedEnvironment && timerCall && !spring::synced_timing::IsEnabled()) {
+		error = "synced Wasm timers are disabled; set "
+			"SPRING_ENABLE_SYNCED_TIMERS=1 for diagnostic benchmarking";
+		return false;
+	}
 
 	// CreateContext may return an already-existing context.  Only claim a
 	// context that this instance is about to create; a Wasm module must not

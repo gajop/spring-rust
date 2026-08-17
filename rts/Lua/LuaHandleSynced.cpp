@@ -53,6 +53,8 @@
 #include "System/SpringMath.h"
 #include "System/LoadLock.h"
 
+#include "NativeInterface/NativeInterfaceSystem.h"
+
 #include "System/Misc/TracyDefs.h"
 
 #include <ranges>
@@ -196,6 +198,30 @@ void CUnsyncedLuaHandle::RecvFromSynced(lua_State* srcState, int args)
 
 	// call the routine
 	RunCallIn(L, cmdStr, args, 0);
+}
+
+bool CSplitLuaHandle::SendToUnsyncedMessage(const std::string& message)
+{
+	if (!syncedLuaHandle.IsValid() || !unsyncedLuaHandle.IsValid())
+		return false;
+
+	lua_State* sourceState = syncedLuaHandle.GetLuaState();
+	const int top = lua_gettop(sourceState);
+	lua_pushlstring(sourceState, message.data(), message.size());
+	unsyncedLuaHandle.RecvFromSynced(sourceState, 1);
+	lua_settop(sourceState, top);
+
+	// Keep the Lua channel intact while delivering the same explicit message
+	// to unsynced Wasm instances. This is deliberately one-way: an unsynced
+	// Wasm trap is logged by the owner but cannot alter synced Lua execution.
+	if (NativeInterfaceSystem::s_instance != nullptr) {
+		std::string error;
+		if (!NativeInterfaceSystem::s_instance->DispatchWasmSyncedMessage(message, error) &&
+			!error.empty()) {
+			LOG_L(L_WARNING, "SendToUnsynced Wasm delivery failed: %s", error.c_str());
+		}
+	}
+	return true;
 }
 
 /*** Custom Object Rendering

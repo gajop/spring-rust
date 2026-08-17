@@ -1,6 +1,121 @@
 local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
 local parityOptions = Spring.GetModOptions() or {}
+if tostring(parityOptions.native_api_parity_mode or "") == "benchmark" then
+	local benchmarkCase = tostring(parityOptions.native_api_parity_benchmark_case or "")
+	if benchmarkCase == "draw" then
+		local backend = tostring(parityOptions.native_api_parity_benchmark_backend or "lua")
+		local outputDir = tostring(parityOptions.native_api_parity_output_dir or "benchmark")
+		local scale = math.max(0.0001, math.min(1, tonumber(parityOptions.native_api_parity_benchmark_scale or 0.01) or 0.01))
+		local repeats = math.max(1, tonumber(parityOptions.native_api_parity_benchmark_repeats or 5) or 5)
+		local complete = false
+		local nativeStarted = false
+
+		local function count(value)
+			return math.max(1, math.floor(value * scale + 0.5))
+		end
+
+		local function elapsedMs(start)
+			return Spring.DiffTimers(Spring.GetTimerMicros(), start, true, true)
+		end
+
+		local function median(values)
+			table.sort(values)
+			return values[math.floor((#values + 1) / 2)]
+		end
+
+		local function writeRow(name, payload)
+			local file = io.open(outputDir .. "/benchmark_" .. name .. ".jsonl", "a")
+			if file then
+				file:write(Common.encode(payload))
+				file:write("\n")
+				file:close()
+			end
+		end
+
+		local function drawVertices(vertexCount)
+			gl.BeginEnd(GL.LINES, function()
+				for index = 1, vertexCount do
+					gl.Vertex((index % 100) * 0.01, math.floor(index / 100) * 0.01, 0, 1)
+				end
+			end)
+		end
+
+		local function runLuaDraw()
+			local calloutIterations = count(100000)
+			local calloutSamples = {}
+			for repeatIndex = 1, repeats do
+				local start = Spring.GetTimerMicros()
+				drawVertices(calloutIterations)
+				calloutSamples[repeatIndex] = elapsedMs(start) * 1000000 / calloutIterations
+			end
+			writeRow("lua", {
+				backend = "lua",
+				test = "callout_draw",
+				status = "pass",
+				iterations = calloutIterations,
+				medianNs = median(calloutSamples),
+				scale = scale,
+			})
+
+			local workloadLines = count(2000)
+			local workloadSamples = {}
+			for repeatIndex = 1, repeats do
+				local start = Spring.GetTimerMicros()
+				drawVertices(workloadLines * 2)
+				workloadSamples[repeatIndex] = elapsedMs(start)
+			end
+			writeRow("lua", {
+				backend = "lua",
+				test = "wl_ui_draw",
+				status = "pass",
+				lines = workloadLines,
+				medianMs = median(workloadSamples),
+				scale = scale,
+			})
+			writeRow("lua", { backend = "lua", test = "complete", status = "pass" })
+			complete = true
+		end
+
+		if backend == "lua" or backend == "native" then
+			function DrawWorld()
+				if not complete then
+					if backend == "lua" then
+						runLuaDraw()
+					elseif not nativeStarted then
+						nativeStarted = true
+						Spring.InvokeNativeModule(Common.encode({testName = "benchmark", command = "draw"}))
+					end
+				end
+			end
+		end
+
+		function RecvLuaMsg(message)
+			if message:sub(1, 10) ~= "WASM_DRAW|" then
+				return false
+			end
+			local encoded = message:sub(11)
+			local resultBackend = encoded:find('"backend":"native"', 1, true) and "native" or "wasm"
+			local file = io.open(outputDir .. "/benchmark_" .. resultBackend .. ".jsonl", "a")
+			if file then
+				file:write(encoded)
+				file:write("\n")
+				file:close()
+			end
+			if encoded:find('"test":"complete"', 1, true) then
+				complete = true
+			end
+			return true
+		end
+
+		function GameFrame()
+			if complete then
+				Spring.Quit()
+			end
+		end
+	end
+	return
+end
 local wasmContext = tostring(parityOptions.native_api_parity_wasm_context or "synced_gadget")
 local wasmRole = tostring(parityOptions.native_api_parity_wasm_role or "combined")
 local WasmProbeSpec

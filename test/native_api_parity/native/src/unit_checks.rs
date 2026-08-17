@@ -581,10 +581,20 @@ impl NativeApiParity {
         label: &str,
     ) -> Result<(), String> {
         let unit_id = i32_field(message, "unitID")?;
+        let options = spring_native::GetUnitPositionOptions {
+            mid_pos: message
+                .get("midPos")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+            aim_pos: message
+                .get("aimPos")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+        };
         let native = self
             .interface
             .units_info()
-            .get_unit_position(unit_id, spring_native::GetUnitPositionOptions::default())
+            .get_unit_position(unit_id, options)
             .map_err(|err| format!("get_unit_position({unit_id}) failed: {err:?}"))?;
         self.same_vec3(label, native, message)
     }

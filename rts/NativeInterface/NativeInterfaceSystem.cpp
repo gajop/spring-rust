@@ -3,6 +3,8 @@
 #include "NativeInterfaceSystem.h"
 
 #include <algorithm>
+#include <charconv>
+#include <cctype>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -15,6 +17,7 @@
 #include "NativeInterfaceWasmAdapter.h"
 #include "NativeModulePath.h"
 #include "NativeInterface/api/RmlUi.h"
+#include "Game/GameSetup.h"
 #include "WasmInterface/WasmInterfaceSystem.h"
 
 #include "Rml/Backends/RmlUi_Backend.h"
@@ -31,6 +34,38 @@ namespace fs = std::filesystem;
 NativeInterfaceSystem* NativeInterfaceSystem::s_instance = nullptr;
 
 namespace {
+	std::uint64_t ReadWasmLimitOption(std::string_view name, std::uint64_t fallback)
+	{
+		const auto& options = CGameSetup::GetModOptions();
+		const auto iter = options.find(std::string(name));
+		if (iter == options.end() || iter->second.empty())
+			return fallback;
+
+		std::string value = iter->second;
+		std::transform(value.begin(), value.end(), value.begin(), [](unsigned char character) {
+			return static_cast<char>(std::tolower(character));
+		});
+		if (value == "0" || value == "off" || value == "false" || value == "unlimited")
+			return 0;
+
+		std::uint64_t parsed = 0;
+		const auto result = std::from_chars(value.data(), value.data() + value.size(), parsed);
+		if (result.ec == std::errc{} && result.ptr == value.data() + value.size())
+			return parsed;
+
+		LOG_L(L_WARNING, "Ignoring invalid Wasm limit mod option %s=%s", iter->first.c_str(),
+			iter->second.c_str());
+		return fallback;
+	}
+
+	WasmRuntimeConfig WasmRuntimeConfigFromModOptions()
+	{
+		WasmRuntimeConfig config;
+		config.instructionFuel = ReadWasmLimitOption("wasm_instruction_fuel", config.instructionFuel);
+		config.hostWorkLimit = ReadWasmLimitOption("wasm_host_work_limit", config.hostWorkLimit);
+		return config;
+	}
+
 	void RemoveNativeRmlContext(uint64_t contextHandle) {
 		RmlGui::RemoveContextImmediately(
 			reinterpret_cast<Rml::Context*>(static_cast<uintptr_t>(contextHandle)));
@@ -101,6 +136,7 @@ public:
 	NativeInterfaceWasmAdapter wasmAdapter{&nativeInterface};
 	std::unique_ptr<SharedLib> sharedLib;
 	std::unique_ptr<NativeInterfaceEventClient> eventClient;
+	std::vector<std::unique_ptr<NativeInterfaceEventClient>> benchmarkEventClients;
 	std::unique_ptr<WasmInterfaceSystem> wasmSystem;
 
 	Impl() {
@@ -150,32 +186,41 @@ public:
 		nativeInterface.tracing = &TRACING_API;
 		nativeInterface.utils = &UTILS_API;
 		nativeInterface.player = &PLAYER_API;
-		wasmSystem = std::make_unique<WasmInterfaceSystem>(&wasmAdapter);
+		wasmSystem = std::make_unique<WasmInterfaceSystem>(&wasmAdapter,
+			WasmRuntimeConfigFromModOptions());
 	}
 
 	~Impl() {
 		// Stop callbacks, then let the module release resources while its shared
 		// object (and therefore its shutdown function) is still loaded.
-		if (eventClient) {
+		UnloadEventClients();
+
+		sharedLib.reset();
+	}
+
+	void UnloadEventClients() {
+		for (auto& client : benchmarkEventClients)
+			eventHandler.RemoveClient(client.get());
+		if (eventClient)
 			eventHandler.RemoveClient(eventClient.get());
+
+		if (eventClient || !benchmarkEventClients.empty())
 			NativeRmlUi::ClearAllContexts(RemoveNativeRmlContext);
+
+		for (auto& client : benchmarkEventClients)
+			client->Shutdown();
+		benchmarkEventClients.clear();
+		if (eventClient) {
 			eventClient->Shutdown();
 			eventClient.reset();
 		}
-
-		sharedLib.reset();
 	}
 
 	void LoadDLL(const NativeModuleSource& source) {
 		// Stop callbacks, then let the old module release resources before its
 		// shared object is unloaded. This is essential for module-owned RmlUi
 		// contexts and other host resources.
-		if (eventClient) {
-			eventHandler.RemoveClient(eventClient.get());
-			NativeRmlUi::ClearAllContexts(RemoveNativeRmlContext);
-			eventClient->Shutdown();
-			eventClient.reset();
-		}
+		UnloadEventClients();
 
 		sharedLib.reset();
 
@@ -238,6 +283,28 @@ public:
 		eventClient->LoadSymbols();
 		eventClient->Initialize();
 		eventHandler.AddClient(eventClient.get());
+
+		// The normal native integration has one module instance. The benchmark
+		// explicitly opts into four independent event clients so its fan-out row
+		// measures real module lifecycle/dispatch behavior rather than repeating a
+		// callback in the benchmark guest.
+		std::size_t benchmarkModuleCount = 1;
+		if (const char* value = std::getenv("SPRING_NATIVE_BENCHMARK_MODULES");
+			value != nullptr && *value != '\0') {
+			std::uint64_t parsed = 0;
+			const auto [end, conversionError] = std::from_chars(
+				value, value + std::char_traits<char>::length(value), parsed);
+			if (conversionError == std::errc{} && end == value + std::char_traits<char>::length(value))
+				benchmarkModuleCount = std::clamp<std::size_t>(parsed, 1, 16);
+		}
+		for (std::size_t index = 1; index < benchmarkModuleCount; ++index) {
+			auto client = std::make_unique<NativeInterfaceEventClient>(
+				&nativeInterface, sharedLib.get(), wasmSystem.get());
+			client->LoadSymbols();
+			client->Initialize();
+			eventHandler.AddClient(client.get());
+			benchmarkEventClients.push_back(std::move(client));
+		}
 	}
 
 	void EnsureWasmEventClient() {
@@ -345,6 +412,12 @@ void NativeInterfaceSystem::HandleLuaMsg(int playerID, int script, int mode, con
 void NativeInterfaceSystem::HandleLuaCall(const char* msg, size_t msgLength, bool synced) {
 	if (pImpl->eventClient)
 		pImpl->eventClient->HandleLuaCall(msg, msgLength, synced);
+}
+
+bool NativeInterfaceSystem::DispatchWasmSyncedMessage(std::string_view message,
+	std::string& error)
+{
+	return pImpl->wasmSystem->DispatchSyncedMessage(message, error);
 }
 
 bool NativeInterfaceSystem::LoadWasmModule(WasmModuleDescriptor descriptor, std::string& error) {

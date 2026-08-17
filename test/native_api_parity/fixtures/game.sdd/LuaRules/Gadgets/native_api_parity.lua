@@ -1,10 +1,14 @@
 function gadget:GetInfo()
+	local mode = Spring.GetModOptions() or {}
 	return {
 		name = "Native API Parity",
 		desc = "Runs Lua/native parity checks for a small engine fixture",
 		author = "Spring",
 		layer = 0,
-		enabled = true,
+		-- The benchmark fixture is a separate gadget.  Keeping the parity gadget
+		-- disabled makes a benchmark process measure only the requested workload
+		-- instead of also creating the small parity fixture and running its probes.
+		enabled = tostring(mode.native_api_parity_mode or "") ~= "benchmark",
 	}
 end
 
@@ -1986,6 +1990,22 @@ function gadget:RecvLuaMsg(message, playerID)
 			status = status,
 			reason = probeParts[4] or "",
 			playerID = playerID,
+		})
+		return false
+	end
+	if probeParts[1] == "WASM_DIRECT_SYNCED" then
+		local messageLength = tonumber(probeParts[2])
+		local message = probeParts[3] or ""
+		local valid = messageLength ~= nil
+			and message == "native_api_wasm_direct_probe"
+			and messageLength == #message
+		sendWasmParity({
+			source = "wasm-direct",
+			frame = Spring.GetGameFrame and Spring.GetGameFrame() or 0,
+			testName = "send_to_unsynced/recv_from_synced",
+			status = valid and "pass" or "fail",
+			messageLength = messageLength,
+			message = message,
 		})
 		return false
 	end

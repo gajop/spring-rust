@@ -201,6 +201,10 @@ macro_rules! generated_callin_trace_methods {
         let mut trace_args = Vec::new();
         trace_args.push(self.trace_i32(game_frame));
         let callback_result = {
+        if std::env::var("SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT")            .as_deref() == Ok("gameframe") {
+            std::hint::black_box(game_frame);
+        }
+
         let _ = game_frame;
         Ok(())
             };
@@ -258,6 +262,12 @@ macro_rules! generated_callin_trace_methods {
     fn draw_world(&mut self) -> Result<(), Error> {
         let mut trace_args = Vec::new();
         let callback_result = {
+        if std::env::var("SPRING_NATIVE_BENCHMARK_CASE")            .as_deref() == Ok("draw") {
+            if let Err(error) = self.benchmark_draw_world() {
+                return Err(spring_native::Error::new(1, error));
+            }
+        }
+
         Ok(())
             };
         let trace_results = match &callback_result {

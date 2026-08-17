@@ -33,7 +33,11 @@ struct WasmRuntimeConfig {
 	std::uint32_t maxSections = 128;
 	std::uint32_t maxComponentNesting = 16;
 	std::uint32_t maxValueNodes = 1u << 20;
-	std::uint64_t instructionFuel = 10'000'000;
+	// Zero disables Wasmtime's instruction counter. A positive value is a
+	// deterministic per-module fuel budget selected by the game configuration.
+	std::uint64_t instructionFuel = 0;
+	// Zero disables the host-call work counter. A positive value remains
+	// available to games that want an explicit deterministic host-work cap.
 	std::uint64_t hostWorkLimit = 10'000'000;
 	std::size_t resultBytesLimit = 16u * 1024u * 1024u;
 	bool allowThreads = false;

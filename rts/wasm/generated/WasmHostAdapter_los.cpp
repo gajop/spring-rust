@@ -12,7 +12,7 @@ bool Read_GetClosestValidPositionQuery(const WasmValue& input, GetClosestValidPo
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_x = FindRecordField(*record, "x", error);
@@ -30,7 +30,7 @@ bool Read_GetClosestValidPositionQuery(const WasmValue& input, GetClosestValidPo
 WasmValue Write_GetClosestValidPositionQuery(const GetClosestValidPositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("z", WriteScalar(value.z));
 	fields.emplace("radius", WriteScalar(value.radius));
@@ -61,7 +61,7 @@ bool Read_GetPositionLosStateQuery(const WasmValue& input, GetPositionLosStateQu
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -71,7 +71,7 @@ WasmValue Write_GetPositionLosStateQuery(const GetPositionLosStateQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -96,7 +96,7 @@ bool Read_GetRadarErrorParamsQuery(const WasmValue& input, GetRadarErrorParamsQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -105,7 +105,7 @@ bool Read_GetRadarErrorParamsQuery(const WasmValue& input, GetRadarErrorParamsQu
 WasmValue Write_GetRadarErrorParamsQuery(const GetRadarErrorParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -133,7 +133,7 @@ bool Read_IsPosInAirLosQuery(const WasmValue& input, IsPosInAirLosQuery& output,
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -143,7 +143,7 @@ WasmValue Write_IsPosInAirLosQuery(const IsPosInAirLosQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -151,7 +151,7 @@ bool Read_IsPosInAirLosResult(const WasmValue& input, IsPosInAirLosResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inAirLos = FindRecordField(*record, "inAirLos", error);
+	const auto* value_inAirLos = FindRecordField(*record, "in-air-los", error);
 	if (value_inAirLos == nullptr) return false;
 	if (!ReadScalar(*value_inAirLos, output.inAirLos, error)) { return false; }
 	return true;
@@ -160,7 +160,7 @@ bool Read_IsPosInAirLosResult(const WasmValue& input, IsPosInAirLosResult& outpu
 WasmValue Write_IsPosInAirLosResult(const IsPosInAirLosResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inAirLos", WriteScalar(value.inAirLos));
+	fields.emplace("in-air-los", WriteScalar(value.inAirLos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -171,7 +171,7 @@ bool Read_IsPosInLosQuery(const WasmValue& input, IsPosInLosQuery& output, Nativ
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -181,7 +181,7 @@ WasmValue Write_IsPosInLosQuery(const IsPosInLosQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -189,7 +189,7 @@ bool Read_IsPosInLosResult(const WasmValue& input, IsPosInLosResult& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inLos = FindRecordField(*record, "inLos", error);
+	const auto* value_inLos = FindRecordField(*record, "in-los", error);
 	if (value_inLos == nullptr) return false;
 	if (!ReadScalar(*value_inLos, output.inLos, error)) { return false; }
 	return true;
@@ -198,7 +198,7 @@ bool Read_IsPosInLosResult(const WasmValue& input, IsPosInLosResult& output, Nat
 WasmValue Write_IsPosInLosResult(const IsPosInLosResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inLos", WriteScalar(value.inLos));
+	fields.emplace("in-los", WriteScalar(value.inLos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -209,7 +209,7 @@ bool Read_IsPosInRadarQuery(const WasmValue& input, IsPosInRadarQuery& output, N
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -219,7 +219,7 @@ WasmValue Write_IsPosInRadarQuery(const IsPosInRadarQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -227,7 +227,7 @@ bool Read_IsPosInRadarResult(const WasmValue& input, IsPosInRadarResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inRadar = FindRecordField(*record, "inRadar", error);
+	const auto* value_inRadar = FindRecordField(*record, "in-radar", error);
 	if (value_inRadar == nullptr) return false;
 	if (!ReadScalar(*value_inRadar, output.inRadar, error)) { return false; }
 	return true;
@@ -236,7 +236,7 @@ bool Read_IsPosInRadarResult(const WasmValue& input, IsPosInRadarResult& output,
 WasmValue Write_IsPosInRadarResult(const IsPosInRadarResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inRadar", WriteScalar(value.inRadar));
+	fields.emplace("in-radar", WriteScalar(value.inRadar));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -244,10 +244,10 @@ bool Read_IsUnitInAirLosQuery(const WasmValue& input, IsUnitInAirLosQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -256,8 +256,8 @@ bool Read_IsUnitInAirLosQuery(const WasmValue& input, IsUnitInAirLosQuery& outpu
 WasmValue Write_IsUnitInAirLosQuery(const IsUnitInAirLosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -265,7 +265,7 @@ bool Read_IsUnitInAirLosResult(const WasmValue& input, IsUnitInAirLosResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inAirLos = FindRecordField(*record, "inAirLos", error);
+	const auto* value_inAirLos = FindRecordField(*record, "in-air-los", error);
 	if (value_inAirLos == nullptr) return false;
 	if (!ReadScalar(*value_inAirLos, output.inAirLos, error)) { return false; }
 	return true;
@@ -274,7 +274,7 @@ bool Read_IsUnitInAirLosResult(const WasmValue& input, IsUnitInAirLosResult& out
 WasmValue Write_IsUnitInAirLosResult(const IsUnitInAirLosResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inAirLos", WriteScalar(value.inAirLos));
+	fields.emplace("in-air-los", WriteScalar(value.inAirLos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -282,10 +282,10 @@ bool Read_IsUnitInJammerQuery(const WasmValue& input, IsUnitInJammerQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -294,8 +294,8 @@ bool Read_IsUnitInJammerQuery(const WasmValue& input, IsUnitInJammerQuery& outpu
 WasmValue Write_IsUnitInJammerQuery(const IsUnitInJammerQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -303,7 +303,7 @@ bool Read_IsUnitInJammerResult(const WasmValue& input, IsUnitInJammerResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inJammer = FindRecordField(*record, "inJammer", error);
+	const auto* value_inJammer = FindRecordField(*record, "in-jammer", error);
 	if (value_inJammer == nullptr) return false;
 	if (!ReadScalar(*value_inJammer, output.inJammer, error)) { return false; }
 	return true;
@@ -312,7 +312,7 @@ bool Read_IsUnitInJammerResult(const WasmValue& input, IsUnitInJammerResult& out
 WasmValue Write_IsUnitInJammerResult(const IsUnitInJammerResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inJammer", WriteScalar(value.inJammer));
+	fields.emplace("in-jammer", WriteScalar(value.inJammer));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -320,10 +320,10 @@ bool Read_IsUnitInLosQuery(const WasmValue& input, IsUnitInLosQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -332,8 +332,8 @@ bool Read_IsUnitInLosQuery(const WasmValue& input, IsUnitInLosQuery& output, Nat
 WasmValue Write_IsUnitInLosQuery(const IsUnitInLosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -341,7 +341,7 @@ bool Read_IsUnitInLosResult(const WasmValue& input, IsUnitInLosResult& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inLos = FindRecordField(*record, "inLos", error);
+	const auto* value_inLos = FindRecordField(*record, "in-los", error);
 	if (value_inLos == nullptr) return false;
 	if (!ReadScalar(*value_inLos, output.inLos, error)) { return false; }
 	return true;
@@ -350,7 +350,7 @@ bool Read_IsUnitInLosResult(const WasmValue& input, IsUnitInLosResult& output, N
 WasmValue Write_IsUnitInLosResult(const IsUnitInLosResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inLos", WriteScalar(value.inLos));
+	fields.emplace("in-los", WriteScalar(value.inLos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -358,10 +358,10 @@ bool Read_IsUnitInRadarQuery(const WasmValue& input, IsUnitInRadarQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -370,8 +370,8 @@ bool Read_IsUnitInRadarQuery(const WasmValue& input, IsUnitInRadarQuery& output,
 WasmValue Write_IsUnitInRadarQuery(const IsUnitInRadarQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -379,7 +379,7 @@ bool Read_IsUnitInRadarResult(const WasmValue& input, IsUnitInRadarResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inRadar = FindRecordField(*record, "inRadar", error);
+	const auto* value_inRadar = FindRecordField(*record, "in-radar", error);
 	if (value_inRadar == nullptr) return false;
 	if (!ReadScalar(*value_inRadar, output.inRadar, error)) { return false; }
 	return true;
@@ -388,7 +388,7 @@ bool Read_IsUnitInRadarResult(const WasmValue& input, IsUnitInRadarResult& outpu
 WasmValue Write_IsUnitInRadarResult(const IsUnitInRadarResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inRadar", WriteScalar(value.inRadar));
+	fields.emplace("in-radar", WriteScalar(value.inRadar));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -396,16 +396,16 @@ bool Read_PositionLosState(const WasmValue& input, PositionLosState& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inLosOrRadar = FindRecordField(*record, "inLosOrRadar", error);
+	const auto* value_inLosOrRadar = FindRecordField(*record, "in-los-or-radar", error);
 	if (value_inLosOrRadar == nullptr) return false;
 	if (!ReadScalar(*value_inLosOrRadar, output.inLosOrRadar, error)) { return false; }
-	const auto* value_inLos = FindRecordField(*record, "inLos", error);
+	const auto* value_inLos = FindRecordField(*record, "in-los", error);
 	if (value_inLos == nullptr) return false;
 	if (!ReadScalar(*value_inLos, output.inLos, error)) { return false; }
-	const auto* value_inRadar = FindRecordField(*record, "inRadar", error);
+	const auto* value_inRadar = FindRecordField(*record, "in-radar", error);
 	if (value_inRadar == nullptr) return false;
 	if (!ReadScalar(*value_inRadar, output.inRadar, error)) { return false; }
-	const auto* value_inJammer = FindRecordField(*record, "inJammer", error);
+	const auto* value_inJammer = FindRecordField(*record, "in-jammer", error);
 	if (value_inJammer == nullptr) return false;
 	if (!ReadScalar(*value_inJammer, output.inJammer, error)) { return false; }
 	return true;
@@ -414,10 +414,10 @@ bool Read_PositionLosState(const WasmValue& input, PositionLosState& output, Nat
 WasmValue Write_PositionLosState(const PositionLosState& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inLosOrRadar", WriteScalar(value.inLosOrRadar));
-	fields.emplace("inLos", WriteScalar(value.inLos));
-	fields.emplace("inRadar", WriteScalar(value.inRadar));
-	fields.emplace("inJammer", WriteScalar(value.inJammer));
+	fields.emplace("in-los-or-radar", WriteScalar(value.inLosOrRadar));
+	fields.emplace("in-los", WriteScalar(value.inLos));
+	fields.emplace("in-radar", WriteScalar(value.inRadar));
+	fields.emplace("in-jammer", WriteScalar(value.inJammer));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -425,13 +425,13 @@ bool Read_RadarErrorParams(const WasmValue& input, RadarErrorParams& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_radarErrorSize = FindRecordField(*record, "radarErrorSize", error);
+	const auto* value_radarErrorSize = FindRecordField(*record, "radar-error-size", error);
 	if (value_radarErrorSize == nullptr) return false;
 	if (!ReadScalar(*value_radarErrorSize, output.radarErrorSize, error)) { return false; }
-	const auto* value_baseRadarErrorSize = FindRecordField(*record, "baseRadarErrorSize", error);
+	const auto* value_baseRadarErrorSize = FindRecordField(*record, "base-radar-error-size", error);
 	if (value_baseRadarErrorSize == nullptr) return false;
 	if (!ReadScalar(*value_baseRadarErrorSize, output.baseRadarErrorSize, error)) { return false; }
-	const auto* value_baseRadarErrorMult = FindRecordField(*record, "baseRadarErrorMult", error);
+	const auto* value_baseRadarErrorMult = FindRecordField(*record, "base-radar-error-mult", error);
 	if (value_baseRadarErrorMult == nullptr) return false;
 	if (!ReadScalar(*value_baseRadarErrorMult, output.baseRadarErrorMult, error)) { return false; }
 	return true;
@@ -440,9 +440,9 @@ bool Read_RadarErrorParams(const WasmValue& input, RadarErrorParams& output, Nat
 WasmValue Write_RadarErrorParams(const RadarErrorParams& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("radarErrorSize", WriteScalar(value.radarErrorSize));
-	fields.emplace("baseRadarErrorSize", WriteScalar(value.baseRadarErrorSize));
-	fields.emplace("baseRadarErrorMult", WriteScalar(value.baseRadarErrorMult));
+	fields.emplace("radar-error-size", WriteScalar(value.radarErrorSize));
+	fields.emplace("base-radar-error-size", WriteScalar(value.baseRadarErrorSize));
+	fields.emplace("base-radar-error-mult", WriteScalar(value.baseRadarErrorMult));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -456,7 +456,7 @@ NativeCalloutDispatch Dispatch_los_GetClosestValidPosition(NativeInterface* nati
 	NativeCallStorage storage;
 	GetClosestValidPositionQuery query{};
 	GetClosestValidPositionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "x", query.x, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "z", query.z, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "radius", query.radius, error)) return NativeCalloutDispatch::handled;
@@ -473,7 +473,7 @@ NativeCalloutDispatch Dispatch_los_GetPositionLosState(NativeInterface* nativeIn
 	GetPositionLosStateQuery query{};
 	GetPositionLosStateResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->GetPositionLosState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_PositionLosState(nativeResult.state);
@@ -486,7 +486,7 @@ NativeCalloutDispatch Dispatch_los_GetRadarErrorParams(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetRadarErrorParamsQuery query{};
 	GetRadarErrorParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->GetRadarErrorParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_RadarErrorParams(nativeResult.params);
@@ -500,7 +500,7 @@ NativeCalloutDispatch Dispatch_los_IsPosInAirLos(NativeInterface* nativeInterfac
 	IsPosInAirLosQuery query{};
 	IsPosInAirLosResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->IsPosInAirLos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.inAirLos);
@@ -514,7 +514,7 @@ NativeCalloutDispatch Dispatch_los_IsPosInLos(NativeInterface* nativeInterface, 
 	IsPosInLosQuery query{};
 	IsPosInLosResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->IsPosInLos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.inLos);
@@ -528,7 +528,7 @@ NativeCalloutDispatch Dispatch_los_IsPosInRadar(NativeInterface* nativeInterface
 	IsPosInRadarQuery query{};
 	IsPosInRadarResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->IsPosInRadar(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.inRadar);
@@ -541,8 +541,8 @@ NativeCalloutDispatch Dispatch_los_IsUnitInAirLos(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	IsUnitInAirLosQuery query{};
 	IsUnitInAirLosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->IsUnitInAirLos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.inAirLos);
@@ -555,8 +555,8 @@ NativeCalloutDispatch Dispatch_los_IsUnitInJammer(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	IsUnitInJammerQuery query{};
 	IsUnitInJammerResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->IsUnitInJammer(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.inJammer);
@@ -569,8 +569,8 @@ NativeCalloutDispatch Dispatch_los_IsUnitInLos(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	IsUnitInLosQuery query{};
 	IsUnitInLosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->IsUnitInLos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.inLos);
@@ -583,8 +583,8 @@ NativeCalloutDispatch Dispatch_los_IsUnitInRadar(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	IsUnitInRadarQuery query{};
 	IsUnitInRadarResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->los->IsUnitInRadar(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.inRadar);

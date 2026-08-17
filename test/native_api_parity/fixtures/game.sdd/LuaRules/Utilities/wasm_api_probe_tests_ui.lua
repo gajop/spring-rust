@@ -105,6 +105,26 @@ return {
 
 		"get_group_units_counts",
 
+		"ui_visibility_ally_los",
+
+		"ui_visibility_enemy_los",
+
+		"ui_visibility_radar_los",
+
+		"ui_visibility_radar_state",
+
+		"ui_visibility_radar_position",
+
+		"ui_visibility_radar_mid_position",
+
+		"ui_visibility_radar_aim_position",
+
+		"ui_visibility_radar_base_position",
+
+		"ui_visibility_radar_view_position",
+
+		"ui_visibility_radar_view_mid_position",
+
 		"get_group_units_sorted_fixed",
 
 		"get_key_bindings_count",
@@ -226,6 +246,27 @@ return {
 		},
 		["get_group_units_counts"] = {
 			groupID = 0,
+		},
+		["ui_visibility_radar_state"] = {
+			raw = false,
+		},
+		["ui_visibility_radar_position"] = {
+			midPos = false,
+			aimPos = false,
+		},
+		["ui_visibility_radar_mid_position"] = {
+			midPos = true,
+			aimPos = false,
+		},
+		["ui_visibility_radar_aim_position"] = {
+			midPos = false,
+			aimPos = true,
+		},
+		["ui_visibility_radar_view_position"] = {
+			midPos = false,
+		},
+		["ui_visibility_radar_view_mid_position"] = {
+			midPos = true,
 		},
 		["get_group_units_sorted_fixed"] = {
 			groupID = 0,

@@ -3,12 +3,13 @@
 -- the same neutral/default values as the C++ Lua implementation.
 
 function gadget:GetInfo()
+	local mode = Spring.GetModOptions() or {}
 	return {
 		name = "Native API Callin Parity Trace",
 		desc = "Traces shared engine-to-Lua/native callins",
 		author = "Spring",
 		layer = 1000000,
-		enabled = true,
+		enabled = tostring(mode.native_api_parity_mode or "") ~= "benchmark",
 	}
 end
 

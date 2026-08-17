@@ -213,6 +213,65 @@ pub fn validate_names(path: &Path, native_header: &Path) -> Result<()> {
     }
 }
 
+/// The Lua engine declares Allow* callins on CSyncedLuaHandle. Keep the
+/// generated environment mask aligned with that authoritative declaration:
+/// an unsynced or UI Wasm module must never be able to influence a synced
+/// permission decision.
+pub fn validate_synced_environments(
+    callins: &[CallinModel],
+    lua_synced_header: &Path,
+) -> Result<()> {
+    let text = std::fs::read_to_string(lua_synced_header)
+        .with_context(|| format!("failed to read {}", lua_synced_header.display()))?;
+    let class_start = text.find("class CSyncedLuaHandle").ok_or_else(|| {
+        anyhow!(
+            "{} does not declare CSyncedLuaHandle",
+            lua_synced_header.display()
+        )
+    })?;
+    let class_end = text[class_start..].find("\n};").ok_or_else(|| {
+        anyhow!(
+            "{} has an unterminated CSyncedLuaHandle",
+            lua_synced_header.display()
+        )
+    })?;
+    let class_body = &text[class_start..class_start + class_end];
+
+    let lua_synced_allow_names = class_body
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            if !line.starts_with("bool ")
+                && !line.starts_with("int ")
+                && !line.starts_with("std::pair")
+            {
+                return None;
+            }
+            let name = line.split('(').next()?.split_whitespace().last()?;
+            name.starts_with("Allow").then_some(name.to_string())
+        })
+        .collect::<BTreeSet<_>>();
+
+    for callin in callins {
+        let mut names = std::iter::once(&callin.name).chain(callin.aliases.iter());
+        if !names.any(|name| lua_synced_allow_names.contains(name)) {
+            continue;
+        }
+        if callin.environments.iter().any(|environment| {
+            !matches!(
+                environment,
+                Environment::RulesSynced | Environment::GaiaSynced
+            )
+        }) {
+            return Err(anyhow!(
+                "synced Lua callin {} is exposed to an unsynced or UI Wasm environment",
+                callin.name
+            ));
+        }
+    }
+    Ok(())
+}
+
 /// Validate the semantic side of the inventory after all NativeInterface
 /// headers have been parsed.  This catches a typo that happens to match a
 /// native function-pointer name but does not have a query/result definition.
@@ -239,6 +298,23 @@ pub fn validate_model(callins: &[CallinModel], model: &ApiModel) -> Result<()> {
         if callin.aggregation.is_empty() {
             return Err(anyhow!("callin {} has no aggregation rule", callin.name));
         }
+        if !matches!(
+            callin.aggregation.as_str(),
+            "ignore" | "or-true" | "and-false" | "first" | "first-non-empty"
+        ) {
+            return Err(anyhow!(
+                "callin {} has unknown aggregation rule {}",
+                callin.name,
+                callin.aggregation
+            ));
+        }
+        if callin.aggregation == "and-false" && callin.result != "BoolCallinResult" {
+            return Err(anyhow!(
+                "callin {} uses and-false with non-boolean result {}",
+                callin.name,
+                callin.result
+            ));
+        }
         for alias in &callin.aliases {
             if !names.insert(alias.as_str()) {
                 return Err(anyhow!("duplicate callin alias {}", alias));
@@ -263,6 +339,53 @@ mod tests {
         let callins = parse(&path).unwrap();
         assert_eq!(callins.len(), 1);
         assert_eq!(callins[0].aliases, vec!["Frame"]);
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn rejects_synced_lua_allow_callins_in_unsynced_worlds() {
+        let mut path = std::env::temp_dir();
+        path.push(format!("recoil-lua-synced-{}.h", std::process::id()));
+        let mut file = std::fs::File::create(&path).unwrap();
+        writeln!(file, "class CSyncedLuaHandle {{").unwrap();
+        writeln!(file, "public:").unwrap();
+        writeln!(file, "\tbool AllowCommand(int); ").unwrap();
+        writeln!(file, "}};").unwrap();
+
+        let callins = vec![CallinModel {
+            name: "AllowCommand".to_string(),
+            query: "Query".to_string(),
+            result: "BoolCallinResult".to_string(),
+            environments: BTreeSet::from([Environment::RulesSynced, Environment::RulesUnsynced]),
+            aggregation: "and-false".to_string(),
+            aliases: Vec::new(),
+            flags: Vec::new(),
+        }];
+        let error = validate_synced_environments(&callins, &path).unwrap_err();
+        assert!(error.to_string().contains("AllowCommand"));
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn accepts_synced_lua_allow_callins_in_synced_worlds() {
+        let mut path = std::env::temp_dir();
+        path.push(format!("recoil-lua-synced-ok-{}.h", std::process::id()));
+        let mut file = std::fs::File::create(&path).unwrap();
+        writeln!(file, "class CSyncedLuaHandle {{").unwrap();
+        writeln!(file, "public:").unwrap();
+        writeln!(file, "\tbool AllowCommand(int); ").unwrap();
+        writeln!(file, "}};").unwrap();
+
+        let callins = vec![CallinModel {
+            name: "AllowCommand".to_string(),
+            query: "Query".to_string(),
+            result: "BoolCallinResult".to_string(),
+            environments: BTreeSet::from([Environment::RulesSynced, Environment::GaiaSynced]),
+            aggregation: "and-false".to_string(),
+            aliases: Vec::new(),
+            flags: Vec::new(),
+        }];
+        validate_synced_environments(&callins, &path).unwrap();
         let _ = std::fs::remove_file(path);
     }
 }

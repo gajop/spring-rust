@@ -24,6 +24,7 @@ class LuaDebugExtra {
 		static int EmulateMouseWheel(lua_State* L);
 		static int EmulateUnitMoveFailed(lua_State* L);
 		static int EmulateNativeApiParityCallins(lua_State* L);
+		static int EmulateNativeApiParityUnimplementedCallin(lua_State* L);
 		static int ClearEmulatedInputLua(lua_State* L);
 };
 

@@ -362,6 +362,22 @@ static void NativeSendLuaRulesMsg(const SendLuaRulesQuery* query, SendLuaRulesRe
 	result->success = true;
 }
 
+static void NativeSendToUnsynced(const SendToUnsyncedQuery* query, SendToUnsyncedResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (query->message == nullptr) {
+		return;
+	}
+	if (luaRules == nullptr || !luaRules->SendToUnsyncedMessage(query->message)) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	result->success = true;
+}
+
 static void NativeGetConsoleBuffer(const GetConsoleBufferQuery* query, GetConsoleBufferResult* result) {
 	bufferPos = 0;
 
@@ -453,6 +469,7 @@ const MessagesApi MESSAGES_API = {
 	.SendLuaUIMsg = NativeSendLuaUIMsg,
 	.SendLuaGaiaMsg = NativeSendLuaGaiaMsg,
 	.SendLuaRulesMsg = NativeSendLuaRulesMsg,
+	.SendToUnsynced = NativeSendToUnsynced,
 	.GetConsoleBuffer = NativeGetConsoleBuffer,
 	.GetCurrentTooltip = NativeGetCurrentTooltip,
 	.IsUserWriting = NativeIsUserWriting,

@@ -18,8 +18,8 @@ NativeCalloutDispatch Dispatch_cob_script_GetCOBScriptID(NativeInterface* native
 	NativeCallStorage storage;
 	GetCOBScriptIDQuery query{};
 	GetCOBScriptIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_funcName = FindArgument(arguments, 1u, 1u, 2u, 2u, "funcName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_funcName = FindArgument(arguments, 1u, 1u, 2u, 2u, "func-name", error);
 	if (value_funcName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_funcName = storage.Make<std::string>();
 	if (!ReadString(*value_funcName, stored_string_query_funcName, error)) { return NativeCalloutDispatch::handled; }

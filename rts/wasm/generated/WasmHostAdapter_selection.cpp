@@ -12,7 +12,7 @@ bool Read_DeselectUnitArrayQuery(const WasmValue& input, DeselectUnitArrayQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -31,7 +31,7 @@ bool Read_DeselectUnitArrayQuery(const WasmValue& input, DeselectUnitArrayQuery&
 WasmValue Write_DeselectUnitArrayQuery(const DeselectUnitArrayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -56,7 +56,7 @@ bool Read_DeselectUnitQuery(const WasmValue& input, DeselectUnitQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -65,7 +65,7 @@ bool Read_DeselectUnitQuery(const WasmValue& input, DeselectUnitQuery& output, N
 WasmValue Write_DeselectUnitQuery(const DeselectUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -90,7 +90,7 @@ bool Read_GetGroupListQuery(const WasmValue& input, GetGroupListQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -99,7 +99,7 @@ bool Read_GetGroupListQuery(const WasmValue& input, GetGroupListQuery& output, N
 WasmValue Write_GetGroupListQuery(const GetGroupListQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -134,7 +134,7 @@ bool Read_GetGroupUnitsCountQuery(const WasmValue& input, GetGroupUnitsCountQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_groupID = FindRecordField(*record, "groupID", error);
+	const auto* value_groupID = FindRecordField(*record, "group-id", error);
 	if (value_groupID == nullptr) return false;
 	if (!ReadScalar(*value_groupID, output.groupID, error)) { return false; }
 	return true;
@@ -143,7 +143,7 @@ bool Read_GetGroupUnitsCountQuery(const WasmValue& input, GetGroupUnitsCountQuer
 WasmValue Write_GetGroupUnitsCountQuery(const GetGroupUnitsCountQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("groupID", WriteScalar(value.groupID));
+	fields.emplace("group-id", WriteScalar(value.groupID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -168,7 +168,7 @@ bool Read_GetGroupUnitsCountsQuery(const WasmValue& input, GetGroupUnitsCountsQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_groupID = FindRecordField(*record, "groupID", error);
+	const auto* value_groupID = FindRecordField(*record, "group-id", error);
 	if (value_groupID == nullptr) return false;
 	if (!ReadScalar(*value_groupID, output.groupID, error)) { return false; }
 	return true;
@@ -177,7 +177,7 @@ bool Read_GetGroupUnitsCountsQuery(const WasmValue& input, GetGroupUnitsCountsQu
 WasmValue Write_GetGroupUnitsCountsQuery(const GetGroupUnitsCountsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("groupID", WriteScalar(value.groupID));
+	fields.emplace("group-id", WriteScalar(value.groupID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -202,7 +202,7 @@ bool Read_GetGroupUnitsQuery(const WasmValue& input, GetGroupUnitsQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_groupID = FindRecordField(*record, "groupID", error);
+	const auto* value_groupID = FindRecordField(*record, "group-id", error);
 	if (value_groupID == nullptr) return false;
 	if (!ReadScalar(*value_groupID, output.groupID, error)) { return false; }
 	return true;
@@ -211,7 +211,7 @@ bool Read_GetGroupUnitsQuery(const WasmValue& input, GetGroupUnitsQuery& output,
 WasmValue Write_GetGroupUnitsQuery(const GetGroupUnitsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("groupID", WriteScalar(value.groupID));
+	fields.emplace("group-id", WriteScalar(value.groupID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -246,7 +246,7 @@ bool Read_GetGroupUnitsSortedQuery(const WasmValue& input, GetGroupUnitsSortedQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_groupID = FindRecordField(*record, "groupID", error);
+	const auto* value_groupID = FindRecordField(*record, "group-id", error);
 	if (value_groupID == nullptr) return false;
 	if (!ReadScalar(*value_groupID, output.groupID, error)) { return false; }
 	return true;
@@ -255,7 +255,7 @@ bool Read_GetGroupUnitsSortedQuery(const WasmValue& input, GetGroupUnitsSortedQu
 WasmValue Write_GetGroupUnitsSortedQuery(const GetGroupUnitsSortedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("groupID", WriteScalar(value.groupID));
+	fields.emplace("group-id", WriteScalar(value.groupID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -290,7 +290,7 @@ bool Read_GetSelectedGroupQuery(const WasmValue& input, GetSelectedGroupQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -299,7 +299,7 @@ bool Read_GetSelectedGroupQuery(const WasmValue& input, GetSelectedGroupQuery& o
 WasmValue Write_GetSelectedGroupQuery(const GetSelectedGroupQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -307,7 +307,7 @@ bool Read_GetSelectedGroupResult(const WasmValue& input, GetSelectedGroupResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_groupID = FindRecordField(*record, "groupID", error);
+	const auto* value_groupID = FindRecordField(*record, "group-id", error);
 	if (value_groupID == nullptr) return false;
 	if (!ReadScalar(*value_groupID, output.groupID, error)) { return false; }
 	return true;
@@ -316,7 +316,7 @@ bool Read_GetSelectedGroupResult(const WasmValue& input, GetSelectedGroupResult&
 WasmValue Write_GetSelectedGroupResult(const GetSelectedGroupResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("groupID", WriteScalar(value.groupID));
+	fields.emplace("group-id", WriteScalar(value.groupID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -324,7 +324,7 @@ bool Read_GetSelectedUnitsCountQuery(const WasmValue& input, GetSelectedUnitsCou
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -333,7 +333,7 @@ bool Read_GetSelectedUnitsCountQuery(const WasmValue& input, GetSelectedUnitsCou
 WasmValue Write_GetSelectedUnitsCountQuery(const GetSelectedUnitsCountQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -358,7 +358,7 @@ bool Read_GetSelectedUnitsCountsQuery(const WasmValue& input, GetSelectedUnitsCo
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -367,7 +367,7 @@ bool Read_GetSelectedUnitsCountsQuery(const WasmValue& input, GetSelectedUnitsCo
 WasmValue Write_GetSelectedUnitsCountsQuery(const GetSelectedUnitsCountsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -392,7 +392,7 @@ bool Read_GetSelectedUnitsQuery(const WasmValue& input, GetSelectedUnitsQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -401,7 +401,7 @@ bool Read_GetSelectedUnitsQuery(const WasmValue& input, GetSelectedUnitsQuery& o
 WasmValue Write_GetSelectedUnitsQuery(const GetSelectedUnitsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -436,7 +436,7 @@ bool Read_GetSelectedUnitsSortedQuery(const WasmValue& input, GetSelectedUnitsSo
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -445,7 +445,7 @@ bool Read_GetSelectedUnitsSortedQuery(const WasmValue& input, GetSelectedUnitsSo
 WasmValue Write_GetSelectedUnitsSortedQuery(const GetSelectedUnitsSortedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -480,7 +480,7 @@ bool Read_GetUnitGroupQuery(const WasmValue& input, GetUnitGroupQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -489,7 +489,7 @@ bool Read_GetUnitGroupQuery(const WasmValue& input, GetUnitGroupQuery& output, N
 WasmValue Write_GetUnitGroupQuery(const GetUnitGroupQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -497,7 +497,7 @@ bool Read_GetUnitGroupResult(const WasmValue& input, GetUnitGroupResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_groupID = FindRecordField(*record, "groupID", error);
+	const auto* value_groupID = FindRecordField(*record, "group-id", error);
 	if (value_groupID == nullptr) return false;
 	if (!ReadScalar(*value_groupID, output.groupID, error)) { return false; }
 	return true;
@@ -506,7 +506,7 @@ bool Read_GetUnitGroupResult(const WasmValue& input, GetUnitGroupResult& output,
 WasmValue Write_GetUnitGroupResult(const GetUnitGroupResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("groupID", WriteScalar(value.groupID));
+	fields.emplace("group-id", WriteScalar(value.groupID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -514,7 +514,7 @@ bool Read_SelectUnitArrayQuery(const WasmValue& input, SelectUnitArrayQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -536,7 +536,7 @@ bool Read_SelectUnitArrayQuery(const WasmValue& input, SelectUnitArrayQuery& out
 WasmValue Write_SelectUnitArrayQuery(const SelectUnitArrayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("append", WriteScalar(value.append));
 	return WasmValue::Record(std::move(fields));
 }
@@ -562,7 +562,7 @@ bool Read_SelectUnitQuery(const WasmValue& input, SelectUnitQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_append = FindRecordField(*record, "append", error);
@@ -574,7 +574,7 @@ bool Read_SelectUnitQuery(const WasmValue& input, SelectUnitQuery& output, Nativ
 WasmValue Write_SelectUnitQuery(const SelectUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("append", WriteScalar(value.append));
 	return WasmValue::Record(std::move(fields));
 }
@@ -600,7 +600,7 @@ bool Read_SelectionCounts(const WasmValue& input, SelectionCounts& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefIDs = FindRecordField(*record, "unitDefIDs", error);
+	const auto* value_unitDefIDs = FindRecordField(*record, "unit-def-i-ds", error);
 	if (value_unitDefIDs == nullptr) return false;
 	const auto* list_unitDefIDs = std::get_if<WasmValueList>(&(*value_unitDefIDs).storage);
 	if (list_unitDefIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -632,7 +632,7 @@ bool Read_SelectionCounts(const WasmValue& input, SelectionCounts& output, Nativ
 WasmValue Write_SelectionCounts(const SelectionCounts& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefIDs", WriteNativeList(value.unitDefIDs, value.uniqueCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-def-i-ds", WriteNativeList(value.unitDefIDs, value.uniqueCount, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("counts", WriteNativeList(value.counts, value.uniqueCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -641,10 +641,10 @@ bool Read_SetUnitGroupQuery(const WasmValue& input, SetUnitGroupQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_groupID = FindRecordField(*record, "groupID", error);
+	const auto* value_groupID = FindRecordField(*record, "group-id", error);
 	if (value_groupID == nullptr) return false;
 	if (!ReadScalar(*value_groupID, output.groupID, error)) { return false; }
 	return true;
@@ -653,8 +653,8 @@ bool Read_SetUnitGroupQuery(const WasmValue& input, SetUnitGroupQuery& output, N
 WasmValue Write_SetUnitGroupQuery(const SetUnitGroupQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("groupID", WriteScalar(value.groupID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("group-id", WriteScalar(value.groupID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -685,7 +685,7 @@ NativeCalloutDispatch Dispatch_selection_DeselectUnit(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	DeselectUnitQuery query{};
 	DeselectUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->DeselectUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -698,7 +698,7 @@ NativeCalloutDispatch Dispatch_selection_DeselectUnitArray(NativeInterface* nati
 	NativeCallStorage storage;
 	DeselectUnitArrayQuery query{};
 	DeselectUnitArrayResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 1u, 1u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 1u, 1u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -723,7 +723,7 @@ NativeCalloutDispatch Dispatch_selection_GetGroupList(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetGroupListQuery query{};
 	GetGroupListResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetGroupList(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.groups, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -736,7 +736,7 @@ NativeCalloutDispatch Dispatch_selection_GetGroupUnits(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetGroupUnitsQuery query{};
 	GetGroupUnitsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "groupID", query.groupID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "group-id", query.groupID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetGroupUnits(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.units, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -749,7 +749,7 @@ NativeCalloutDispatch Dispatch_selection_GetGroupUnitsCount(NativeInterface* nat
 	NativeCallStorage storage;
 	GetGroupUnitsCountQuery query{};
 	GetGroupUnitsCountResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "groupID", query.groupID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "group-id", query.groupID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetGroupUnitsCount(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.count);
@@ -762,7 +762,7 @@ NativeCalloutDispatch Dispatch_selection_GetGroupUnitsCounts(NativeInterface* na
 	NativeCallStorage storage;
 	GetGroupUnitsCountsQuery query{};
 	GetGroupUnitsCountsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "groupID", query.groupID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "group-id", query.groupID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetGroupUnitsCounts(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_SelectionCounts(nativeResult.counts);
@@ -775,7 +775,7 @@ NativeCalloutDispatch Dispatch_selection_GetGroupUnitsSorted(NativeInterface* na
 	NativeCallStorage storage;
 	GetGroupUnitsSortedQuery query{};
 	GetGroupUnitsSortedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "groupID", query.groupID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "group-id", query.groupID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetGroupUnitsSorted(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.groups, nativeResult.count, [](const auto& value) { return Write_TeamUnitsByDef(value); });
@@ -788,7 +788,7 @@ NativeCalloutDispatch Dispatch_selection_GetSelectedGroup(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetSelectedGroupQuery query{};
 	GetSelectedGroupResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetSelectedGroup(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.groupID);
@@ -801,7 +801,7 @@ NativeCalloutDispatch Dispatch_selection_GetSelectedUnits(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetSelectedUnitsQuery query{};
 	GetSelectedUnitsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetSelectedUnits(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.units, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -814,7 +814,7 @@ NativeCalloutDispatch Dispatch_selection_GetSelectedUnitsCount(NativeInterface* 
 	NativeCallStorage storage;
 	GetSelectedUnitsCountQuery query{};
 	GetSelectedUnitsCountResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetSelectedUnitsCount(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.count);
@@ -827,7 +827,7 @@ NativeCalloutDispatch Dispatch_selection_GetSelectedUnitsCounts(NativeInterface*
 	NativeCallStorage storage;
 	GetSelectedUnitsCountsQuery query{};
 	GetSelectedUnitsCountsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetSelectedUnitsCounts(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_SelectionCounts(nativeResult.counts);
@@ -840,7 +840,7 @@ NativeCalloutDispatch Dispatch_selection_GetSelectedUnitsSorted(NativeInterface*
 	NativeCallStorage storage;
 	GetSelectedUnitsSortedQuery query{};
 	GetSelectedUnitsSortedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetSelectedUnitsSorted(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.units, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -853,7 +853,7 @@ NativeCalloutDispatch Dispatch_selection_GetUnitGroup(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetUnitGroupQuery query{};
 	GetUnitGroupResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->GetUnitGroup(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.groupID);
@@ -866,7 +866,7 @@ NativeCalloutDispatch Dispatch_selection_SelectUnit(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	SelectUnitQuery query{};
 	SelectUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "append", query.append, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->SelectUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -880,7 +880,7 @@ NativeCalloutDispatch Dispatch_selection_SelectUnitArray(NativeInterface* native
 	NativeCallStorage storage;
 	SelectUnitArrayQuery query{};
 	SelectUnitArrayResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 2u, 2u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 2u, 2u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -906,8 +906,8 @@ NativeCalloutDispatch Dispatch_selection_SetUnitGroup(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	SetUnitGroupQuery query{};
 	SetUnitGroupResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "groupID", query.groupID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "group-id", query.groupID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->selection->SetUnitGroup(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

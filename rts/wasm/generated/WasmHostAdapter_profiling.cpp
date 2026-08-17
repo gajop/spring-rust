@@ -12,10 +12,10 @@ bool Read_DiffTimersOptions(const WasmValue& input, DiffTimersOptions& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_returnMs = FindRecordField(*record, "returnMs", error);
+	const auto* value_returnMs = FindRecordField(*record, "return-ms", error);
 	if (value_returnMs == nullptr) return false;
 	if (!ReadScalar(*value_returnMs, output.returnMs, error)) { return false; }
-	const auto* value_fromMicroSecs = FindRecordField(*record, "fromMicroSecs", error);
+	const auto* value_fromMicroSecs = FindRecordField(*record, "from-micro-secs", error);
 	if (value_fromMicroSecs == nullptr) return false;
 	if (!ReadScalar(*value_fromMicroSecs, output.fromMicroSecs, error)) { return false; }
 	return true;
@@ -24,8 +24,8 @@ bool Read_DiffTimersOptions(const WasmValue& input, DiffTimersOptions& output, N
 WasmValue Write_DiffTimersOptions(const DiffTimersOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("returnMs", WriteScalar(value.returnMs));
-	fields.emplace("fromMicroSecs", WriteScalar(value.fromMicroSecs));
+	fields.emplace("return-ms", WriteScalar(value.returnMs));
+	fields.emplace("from-micro-secs", WriteScalar(value.fromMicroSecs));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -33,10 +33,10 @@ bool Read_DiffTimersQuery(const WasmValue& input, DiffTimersQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_endTimer = FindRecordField(*record, "endTimer", error);
+	const auto* value_endTimer = FindRecordField(*record, "end-timer", error);
 	if (value_endTimer == nullptr) return false;
 	if (!ReadScalar(*value_endTimer, output.endTimer, error)) { return false; }
-	const auto* value_startTimer = FindRecordField(*record, "startTimer", error);
+	const auto* value_startTimer = FindRecordField(*record, "start-timer", error);
 	if (value_startTimer == nullptr) return false;
 	if (!ReadScalar(*value_startTimer, output.startTimer, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -48,8 +48,8 @@ bool Read_DiffTimersQuery(const WasmValue& input, DiffTimersQuery& output, Nativ
 WasmValue Write_DiffTimersQuery(const DiffTimersQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("endTimer", WriteScalar(value.endTimer));
-	fields.emplace("startTimer", WriteScalar(value.startTimer));
+	fields.emplace("end-timer", WriteScalar(value.endTimer));
+	fields.emplace("start-timer", WriteScalar(value.startTimer));
 	fields.emplace("options", Write_DiffTimersOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -75,7 +75,7 @@ bool Read_GetDrawSecondsQuery(const WasmValue& input, GetDrawSecondsQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -84,7 +84,7 @@ bool Read_GetDrawSecondsQuery(const WasmValue& input, GetDrawSecondsQuery& outpu
 WasmValue Write_GetDrawSecondsQuery(const GetDrawSecondsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -109,7 +109,7 @@ bool Read_GetFrameTimerQuery(const WasmValue& input, GetFrameTimerQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_lastFrameTime = FindRecordField(*record, "lastFrameTime", error);
+	const auto* value_lastFrameTime = FindRecordField(*record, "last-frame-time", error);
 	if (value_lastFrameTime == nullptr) return false;
 	if (!ReadScalar(*value_lastFrameTime, output.lastFrameTime, error)) { return false; }
 	return true;
@@ -118,7 +118,7 @@ bool Read_GetFrameTimerQuery(const WasmValue& input, GetFrameTimerQuery& output,
 WasmValue Write_GetFrameTimerQuery(const GetFrameTimerQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("lastFrameTime", WriteScalar(value.lastFrameTime));
+	fields.emplace("last-frame-time", WriteScalar(value.lastFrameTime));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -143,7 +143,7 @@ bool Read_GetLuaMemUsageQuery(const WasmValue& input, GetLuaMemUsageQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -152,7 +152,7 @@ bool Read_GetLuaMemUsageQuery(const WasmValue& input, GetLuaMemUsageQuery& outpu
 WasmValue Write_GetLuaMemUsageQuery(const GetLuaMemUsageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -160,28 +160,28 @@ bool Read_GetLuaMemUsageResult(const WasmValue& input, GetLuaMemUsageResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_handleAllocedKB = FindRecordField(*record, "handleAllocedKB", error);
+	const auto* value_handleAllocedKB = FindRecordField(*record, "handle-alloced-kb", error);
 	if (value_handleAllocedKB == nullptr) return false;
 	if (!ReadScalar(*value_handleAllocedKB, output.handleAllocedKB, error)) { return false; }
-	const auto* value_handleAllocsK = FindRecordField(*record, "handleAllocsK", error);
+	const auto* value_handleAllocsK = FindRecordField(*record, "handle-allocs-k", error);
 	if (value_handleAllocsK == nullptr) return false;
 	if (!ReadScalar(*value_handleAllocsK, output.handleAllocsK, error)) { return false; }
-	const auto* value_globalAllocedKB = FindRecordField(*record, "globalAllocedKB", error);
+	const auto* value_globalAllocedKB = FindRecordField(*record, "global-alloced-kb", error);
 	if (value_globalAllocedKB == nullptr) return false;
 	if (!ReadScalar(*value_globalAllocedKB, output.globalAllocedKB, error)) { return false; }
-	const auto* value_globalAllocsK = FindRecordField(*record, "globalAllocsK", error);
+	const auto* value_globalAllocsK = FindRecordField(*record, "global-allocs-k", error);
 	if (value_globalAllocsK == nullptr) return false;
 	if (!ReadScalar(*value_globalAllocsK, output.globalAllocsK, error)) { return false; }
-	const auto* value_unsyncedAllocedKB = FindRecordField(*record, "unsyncedAllocedKB", error);
+	const auto* value_unsyncedAllocedKB = FindRecordField(*record, "unsynced-alloced-kb", error);
 	if (value_unsyncedAllocedKB == nullptr) return false;
 	if (!ReadScalar(*value_unsyncedAllocedKB, output.unsyncedAllocedKB, error)) { return false; }
-	const auto* value_unsyncedAllocsK = FindRecordField(*record, "unsyncedAllocsK", error);
+	const auto* value_unsyncedAllocsK = FindRecordField(*record, "unsynced-allocs-k", error);
 	if (value_unsyncedAllocsK == nullptr) return false;
 	if (!ReadScalar(*value_unsyncedAllocsK, output.unsyncedAllocsK, error)) { return false; }
-	const auto* value_syncedAllocedKB = FindRecordField(*record, "syncedAllocedKB", error);
+	const auto* value_syncedAllocedKB = FindRecordField(*record, "synced-alloced-kb", error);
 	if (value_syncedAllocedKB == nullptr) return false;
 	if (!ReadScalar(*value_syncedAllocedKB, output.syncedAllocedKB, error)) { return false; }
-	const auto* value_syncedAllocsK = FindRecordField(*record, "syncedAllocsK", error);
+	const auto* value_syncedAllocsK = FindRecordField(*record, "synced-allocs-k", error);
 	if (value_syncedAllocsK == nullptr) return false;
 	if (!ReadScalar(*value_syncedAllocsK, output.syncedAllocsK, error)) { return false; }
 	return true;
@@ -190,14 +190,14 @@ bool Read_GetLuaMemUsageResult(const WasmValue& input, GetLuaMemUsageResult& out
 WasmValue Write_GetLuaMemUsageResult(const GetLuaMemUsageResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("handleAllocedKB", WriteScalar(value.handleAllocedKB));
-	fields.emplace("handleAllocsK", WriteScalar(value.handleAllocsK));
-	fields.emplace("globalAllocedKB", WriteScalar(value.globalAllocedKB));
-	fields.emplace("globalAllocsK", WriteScalar(value.globalAllocsK));
-	fields.emplace("unsyncedAllocedKB", WriteScalar(value.unsyncedAllocedKB));
-	fields.emplace("unsyncedAllocsK", WriteScalar(value.unsyncedAllocsK));
-	fields.emplace("syncedAllocedKB", WriteScalar(value.syncedAllocedKB));
-	fields.emplace("syncedAllocsK", WriteScalar(value.syncedAllocsK));
+	fields.emplace("handle-alloced-kb", WriteScalar(value.handleAllocedKB));
+	fields.emplace("handle-allocs-k", WriteScalar(value.handleAllocsK));
+	fields.emplace("global-alloced-kb", WriteScalar(value.globalAllocedKB));
+	fields.emplace("global-allocs-k", WriteScalar(value.globalAllocsK));
+	fields.emplace("unsynced-alloced-kb", WriteScalar(value.unsyncedAllocedKB));
+	fields.emplace("unsynced-allocs-k", WriteScalar(value.unsyncedAllocsK));
+	fields.emplace("synced-alloced-kb", WriteScalar(value.syncedAllocedKB));
+	fields.emplace("synced-allocs-k", WriteScalar(value.syncedAllocsK));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -205,7 +205,7 @@ bool Read_GetProfilerRecordNamesQuery(const WasmValue& input, GetProfilerRecordN
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -214,7 +214,7 @@ bool Read_GetProfilerRecordNamesQuery(const WasmValue& input, GetProfilerRecordN
 WasmValue Write_GetProfilerRecordNamesQuery(const GetProfilerRecordNamesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -259,7 +259,7 @@ bool Read_GetProfilerTimeRecordQuery(const WasmValue& input, GetProfilerTimeReco
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_includeFrameData = FindRecordField(*record, "includeFrameData", error);
+	const auto* value_includeFrameData = FindRecordField(*record, "include-frame-data", error);
 	if (value_includeFrameData == nullptr) return false;
 	if (!ReadScalar(*value_includeFrameData, output.includeFrameData, error)) { return false; }
 	return true;
@@ -269,7 +269,7 @@ WasmValue Write_GetProfilerTimeRecordQuery(const GetProfilerTimeRecordQuery& val
 {
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("includeFrameData", WriteScalar(value.includeFrameData));
+	fields.emplace("include-frame-data", WriteScalar(value.includeFrameData));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -277,22 +277,22 @@ bool Read_GetProfilerTimeRecordResult(const WasmValue& input, GetProfilerTimeRec
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_totalMs = FindRecordField(*record, "totalMs", error);
+	const auto* value_totalMs = FindRecordField(*record, "total-ms", error);
 	if (value_totalMs == nullptr) return false;
 	if (!ReadScalar(*value_totalMs, output.totalMs, error)) { return false; }
-	const auto* value_currentMs = FindRecordField(*record, "currentMs", error);
+	const auto* value_currentMs = FindRecordField(*record, "current-ms", error);
 	if (value_currentMs == nullptr) return false;
 	if (!ReadScalar(*value_currentMs, output.currentMs, error)) { return false; }
-	const auto* value_maxDt = FindRecordField(*record, "maxDt", error);
+	const auto* value_maxDt = FindRecordField(*record, "max-dt", error);
 	if (value_maxDt == nullptr) return false;
 	if (!ReadScalar(*value_maxDt, output.maxDt, error)) { return false; }
-	const auto* value_timePct = FindRecordField(*record, "timePct", error);
+	const auto* value_timePct = FindRecordField(*record, "time-pct", error);
 	if (value_timePct == nullptr) return false;
 	if (!ReadScalar(*value_timePct, output.timePct, error)) { return false; }
-	const auto* value_peakPct = FindRecordField(*record, "peakPct", error);
+	const auto* value_peakPct = FindRecordField(*record, "peak-pct", error);
 	if (value_peakPct == nullptr) return false;
 	if (!ReadScalar(*value_peakPct, output.peakPct, error)) { return false; }
-	const auto* value_frameData = FindRecordField(*record, "frameData", error);
+	const auto* value_frameData = FindRecordField(*record, "frame-data", error);
 	if (value_frameData == nullptr) return false;
 	const auto* list_frameData = std::get_if<WasmValueList>(&(*value_frameData).storage);
 	if (list_frameData == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -311,12 +311,12 @@ bool Read_GetProfilerTimeRecordResult(const WasmValue& input, GetProfilerTimeRec
 WasmValue Write_GetProfilerTimeRecordResult(const GetProfilerTimeRecordResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("totalMs", WriteScalar(value.totalMs));
-	fields.emplace("currentMs", WriteScalar(value.currentMs));
-	fields.emplace("maxDt", WriteScalar(value.maxDt));
-	fields.emplace("timePct", WriteScalar(value.timePct));
-	fields.emplace("peakPct", WriteScalar(value.peakPct));
-	fields.emplace("frameData", WriteNativeList(value.frameData, value.frameCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("total-ms", WriteScalar(value.totalMs));
+	fields.emplace("current-ms", WriteScalar(value.currentMs));
+	fields.emplace("max-dt", WriteScalar(value.maxDt));
+	fields.emplace("time-pct", WriteScalar(value.timePct));
+	fields.emplace("peak-pct", WriteScalar(value.peakPct));
+	fields.emplace("frame-data", WriteNativeList(value.frameData, value.frameCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -341,7 +341,7 @@ bool Read_GetSyncedGCInfoResult(const WasmValue& input, GetSyncedGCInfoResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_gcKB = FindRecordField(*record, "gcKB", error);
+	const auto* value_gcKB = FindRecordField(*record, "gc-kb", error);
 	if (value_gcKB == nullptr) return false;
 	if (!ReadScalar(*value_gcKB, output.gcKB, error)) { return false; }
 	return true;
@@ -350,7 +350,7 @@ bool Read_GetSyncedGCInfoResult(const WasmValue& input, GetSyncedGCInfoResult& o
 WasmValue Write_GetSyncedGCInfoResult(const GetSyncedGCInfoResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("gcKB", WriteScalar(value.gcKB));
+	fields.emplace("gc-kb", WriteScalar(value.gcKB));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -358,7 +358,7 @@ bool Read_GetTimerMicrosQuery(const WasmValue& input, GetTimerMicrosQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -367,7 +367,7 @@ bool Read_GetTimerMicrosQuery(const WasmValue& input, GetTimerMicrosQuery& outpu
 WasmValue Write_GetTimerMicrosQuery(const GetTimerMicrosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -392,7 +392,7 @@ bool Read_GetTimerQuery(const WasmValue& input, GetTimerQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -401,7 +401,7 @@ bool Read_GetTimerQuery(const WasmValue& input, GetTimerQuery& output, NativeCal
 WasmValue Write_GetTimerQuery(const GetTimerQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -426,7 +426,7 @@ bool Read_GetVidMemUsageQuery(const WasmValue& input, GetVidMemUsageQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -435,7 +435,7 @@ bool Read_GetVidMemUsageQuery(const WasmValue& input, GetVidMemUsageQuery& outpu
 WasmValue Write_GetVidMemUsageQuery(const GetVidMemUsageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -443,10 +443,10 @@ bool Read_GetVidMemUsageResult(const WasmValue& input, GetVidMemUsageResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_usedMB = FindRecordField(*record, "usedMB", error);
+	const auto* value_usedMB = FindRecordField(*record, "used-mb", error);
 	if (value_usedMB == nullptr) return false;
 	if (!ReadScalar(*value_usedMB, output.usedMB, error)) { return false; }
-	const auto* value_availableMB = FindRecordField(*record, "availableMB", error);
+	const auto* value_availableMB = FindRecordField(*record, "available-mb", error);
 	if (value_availableMB == nullptr) return false;
 	if (!ReadScalar(*value_availableMB, output.availableMB, error)) { return false; }
 	return true;
@@ -455,8 +455,8 @@ bool Read_GetVidMemUsageResult(const WasmValue& input, GetVidMemUsageResult& out
 WasmValue Write_GetVidMemUsageResult(const GetVidMemUsageResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("usedMB", WriteScalar(value.usedMB));
-	fields.emplace("availableMB", WriteScalar(value.availableMB));
+	fields.emplace("used-mb", WriteScalar(value.usedMB));
+	fields.emplace("available-mb", WriteScalar(value.availableMB));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -470,8 +470,8 @@ NativeCalloutDispatch Dispatch_profiling_DiffTimers(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	DiffTimersQuery query{};
 	DiffTimersResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "endTimer", query.endTimer, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "startTimer", query.startTimer, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "end-timer", query.endTimer, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "start-timer", query.startTimer, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "options", Read_DiffTimersOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->DiffTimers(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -485,7 +485,7 @@ NativeCalloutDispatch Dispatch_profiling_GetDrawSeconds(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetDrawSecondsQuery query{};
 	GetDrawSecondsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->GetDrawSeconds(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.seconds);
@@ -498,7 +498,7 @@ NativeCalloutDispatch Dispatch_profiling_GetFrameTimer(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetFrameTimerQuery query{};
 	GetFrameTimerResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "lastFrameTime", query.lastFrameTime, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "last-frame-time", query.lastFrameTime, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->GetFrameTimer(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.timer);
@@ -511,18 +511,18 @@ NativeCalloutDispatch Dispatch_profiling_GetLuaMemUsage(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetLuaMemUsageQuery query{};
 	GetLuaMemUsageResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->GetLuaMemUsage(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("handleAllocedKB", WriteScalar(nativeResult.handleAllocedKB));
-	outputFields.emplace("handleAllocsK", WriteScalar(nativeResult.handleAllocsK));
-	outputFields.emplace("globalAllocedKB", WriteScalar(nativeResult.globalAllocedKB));
-	outputFields.emplace("globalAllocsK", WriteScalar(nativeResult.globalAllocsK));
-	outputFields.emplace("unsyncedAllocedKB", WriteScalar(nativeResult.unsyncedAllocedKB));
-	outputFields.emplace("unsyncedAllocsK", WriteScalar(nativeResult.unsyncedAllocsK));
-	outputFields.emplace("syncedAllocedKB", WriteScalar(nativeResult.syncedAllocedKB));
-	outputFields.emplace("syncedAllocsK", WriteScalar(nativeResult.syncedAllocsK));
+	outputFields.emplace("handle-alloced-kb", WriteScalar(nativeResult.handleAllocedKB));
+	outputFields.emplace("handle-allocs-k", WriteScalar(nativeResult.handleAllocsK));
+	outputFields.emplace("global-alloced-kb", WriteScalar(nativeResult.globalAllocedKB));
+	outputFields.emplace("global-allocs-k", WriteScalar(nativeResult.globalAllocsK));
+	outputFields.emplace("unsynced-alloced-kb", WriteScalar(nativeResult.unsyncedAllocedKB));
+	outputFields.emplace("unsynced-allocs-k", WriteScalar(nativeResult.unsyncedAllocsK));
+	outputFields.emplace("synced-alloced-kb", WriteScalar(nativeResult.syncedAllocedKB));
+	outputFields.emplace("synced-allocs-k", WriteScalar(nativeResult.syncedAllocsK));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -533,7 +533,7 @@ NativeCalloutDispatch Dispatch_profiling_GetProfilerRecordNames(NativeInterface*
 	NativeCallStorage storage;
 	GetProfilerRecordNamesQuery query{};
 	GetProfilerRecordNamesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->GetProfilerRecordNames(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.names, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -551,16 +551,16 @@ NativeCalloutDispatch Dispatch_profiling_GetProfilerTimeRecord(NativeInterface* 
 	auto& stored_string_query_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_query_name, error)) { return NativeCalloutDispatch::handled; }
 	query.name = stored_string_query_name.c_str();
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "includeFrameData", query.includeFrameData, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "include-frame-data", query.includeFrameData, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->GetProfilerTimeRecord(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("totalMs", WriteScalar(nativeResult.totalMs));
-	outputFields.emplace("currentMs", WriteScalar(nativeResult.currentMs));
-	outputFields.emplace("maxDt", WriteScalar(nativeResult.maxDt));
-	outputFields.emplace("timePct", WriteScalar(nativeResult.timePct));
-	outputFields.emplace("peakPct", WriteScalar(nativeResult.peakPct));
-	outputFields.emplace("frameData", WriteNativeList(nativeResult.frameData, nativeResult.frameCount, [](const auto& value) { return WriteScalar(value); }));
+	outputFields.emplace("total-ms", WriteScalar(nativeResult.totalMs));
+	outputFields.emplace("current-ms", WriteScalar(nativeResult.currentMs));
+	outputFields.emplace("max-dt", WriteScalar(nativeResult.maxDt));
+	outputFields.emplace("time-pct", WriteScalar(nativeResult.timePct));
+	outputFields.emplace("peak-pct", WriteScalar(nativeResult.peakPct));
+	outputFields.emplace("frame-data", WriteNativeList(nativeResult.frameData, nativeResult.frameCount, [](const auto& value) { return WriteScalar(value); }));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -584,7 +584,7 @@ NativeCalloutDispatch Dispatch_profiling_GetTimer(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetTimerQuery query{};
 	GetTimerResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->GetTimer(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.timer);
@@ -597,7 +597,7 @@ NativeCalloutDispatch Dispatch_profiling_GetTimerMicros(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetTimerMicrosQuery query{};
 	GetTimerMicrosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->GetTimerMicros(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.timer);
@@ -610,12 +610,12 @@ NativeCalloutDispatch Dispatch_profiling_GetVidMemUsage(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetVidMemUsageQuery query{};
 	GetVidMemUsageResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->profiling->GetVidMemUsage(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("usedMB", WriteScalar(nativeResult.usedMB));
-	outputFields.emplace("availableMB", WriteScalar(nativeResult.availableMB));
+	outputFields.emplace("used-mb", WriteScalar(nativeResult.usedMB));
+	outputFields.emplace("available-mb", WriteScalar(nativeResult.availableMB));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }

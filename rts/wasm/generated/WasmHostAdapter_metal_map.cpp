@@ -88,7 +88,7 @@ bool Read_GetMetalMapSizeQuery(const WasmValue& input, GetMetalMapSizeQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -97,7 +97,7 @@ bool Read_GetMetalMapSizeQuery(const WasmValue& input, GetMetalMapSizeQuery& out
 WasmValue Write_GetMetalMapSizeQuery(const GetMetalMapSizeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -198,7 +198,7 @@ NativeCalloutDispatch Dispatch_metal_map_GetMetalMapSize(NativeInterface* native
 	NativeCallStorage storage;
 	GetMetalMapSizeQuery query{};
 	GetMetalMapSizeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->metalMap->GetMetalMapSize(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;

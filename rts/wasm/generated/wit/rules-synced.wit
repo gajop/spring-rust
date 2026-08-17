@@ -35,6 +35,7 @@ world rules-synced {
   import selection-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import sound-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import messages-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
+  import messages-rules-synced-gaia-synced;
   import config-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import tracing;
   import utils;
@@ -44,6 +45,7 @@ world rules-synced {
   import markers;
   import ground-decals-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import system-control-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
+  import profiling-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import vfs-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import unsynced-read-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import team-control;

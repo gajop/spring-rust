@@ -190,6 +190,12 @@ class CSplitLuaHandle
 			return syncedLuaHandle.RecvLuaMsg(msg, playerID);
 		}
 
+		// Deliver one owned string to LuaRules' unsynced handle using the same
+		// copy-and-call path as the synced Lua SendToUnsynced callout.  Native
+		// and Wasm synced modules use this for deterministic event payloads;
+		// the unsynced handle remains the only owner of the callback execution.
+		bool SendToUnsyncedMessage(const std::string& message);
+
 	public:
 		void CheckStack() {
 			syncedLuaHandle.CheckStack();

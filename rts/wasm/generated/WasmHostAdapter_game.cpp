@@ -12,7 +12,7 @@ bool Read_AreHelperAIsEnabledQuery(const WasmValue& input, AreHelperAIsEnabledQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_AreHelperAIsEnabledQuery(const WasmValue& input, AreHelperAIsEnabledQu
 WasmValue Write_AreHelperAIsEnabledQuery(const AreHelperAIsEnabledQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -46,7 +46,7 @@ bool Read_FixedAlliesQuery(const WasmValue& input, FixedAlliesQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -55,7 +55,7 @@ bool Read_FixedAlliesQuery(const WasmValue& input, FixedAlliesQuery& output, Nat
 WasmValue Write_FixedAlliesQuery(const FixedAlliesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -80,49 +80,49 @@ bool Read_GameMapInfo(const WasmValue& input, GameMapInfo& output, NativeCallSto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_mapName = FindRecordField(*record, "mapName", error);
+	const auto* value_mapName = FindRecordField(*record, "map-name", error);
 	if (value_mapName == nullptr) return false;
 	auto& stored_string_output_mapName = storage.Make<std::string>();
 	if (!ReadString(*value_mapName, stored_string_output_mapName, error)) { return false; }
 	output.mapName = stored_string_output_mapName.c_str();
-	const auto* value_mapDescription = FindRecordField(*record, "mapDescription", error);
+	const auto* value_mapDescription = FindRecordField(*record, "map-description", error);
 	if (value_mapDescription == nullptr) return false;
 	auto& stored_string_output_mapDescription = storage.Make<std::string>();
 	if (!ReadString(*value_mapDescription, stored_string_output_mapDescription, error)) { return false; }
 	output.mapDescription = stored_string_output_mapDescription.c_str();
-	const auto* value_mapChecksum = FindRecordField(*record, "mapChecksum", error);
+	const auto* value_mapChecksum = FindRecordField(*record, "map-checksum", error);
 	if (value_mapChecksum == nullptr) return false;
 	auto& stored_string_output_mapChecksum = storage.Make<std::string>();
 	if (!ReadString(*value_mapChecksum, stored_string_output_mapChecksum, error)) { return false; }
 	output.mapChecksum = stored_string_output_mapChecksum.c_str();
-	const auto* value_mapHardness = FindRecordField(*record, "mapHardness", error);
+	const auto* value_mapHardness = FindRecordField(*record, "map-hardness", error);
 	if (value_mapHardness == nullptr) return false;
 	if (!ReadScalar(*value_mapHardness, output.mapHardness, error)) { return false; }
-	const auto* value_extractorRadius = FindRecordField(*record, "extractorRadius", error);
+	const auto* value_extractorRadius = FindRecordField(*record, "extractor-radius", error);
 	if (value_extractorRadius == nullptr) return false;
 	if (!ReadScalar(*value_extractorRadius, output.extractorRadius, error)) { return false; }
 	const auto* value_tidal = FindRecordField(*record, "tidal", error);
 	if (value_tidal == nullptr) return false;
 	if (!ReadScalar(*value_tidal, output.tidal, error)) { return false; }
-	const auto* value_waterDamage = FindRecordField(*record, "waterDamage", error);
+	const auto* value_waterDamage = FindRecordField(*record, "water-damage", error);
 	if (value_waterDamage == nullptr) return false;
 	if (!ReadScalar(*value_waterDamage, output.waterDamage, error)) { return false; }
 	const auto* value_gravity = FindRecordField(*record, "gravity", error);
 	if (value_gravity == nullptr) return false;
 	if (!ReadScalar(*value_gravity, output.gravity, error)) { return false; }
-	const auto* value_mapX = FindRecordField(*record, "mapX", error);
+	const auto* value_mapX = FindRecordField(*record, "map-x", error);
 	if (value_mapX == nullptr) return false;
 	if (!ReadScalar(*value_mapX, output.mapX, error)) { return false; }
-	const auto* value_mapY = FindRecordField(*record, "mapY", error);
+	const auto* value_mapY = FindRecordField(*record, "map-y", error);
 	if (value_mapY == nullptr) return false;
 	if (!ReadScalar(*value_mapY, output.mapY, error)) { return false; }
-	const auto* value_mapSizeX = FindRecordField(*record, "mapSizeX", error);
+	const auto* value_mapSizeX = FindRecordField(*record, "map-size-x", error);
 	if (value_mapSizeX == nullptr) return false;
 	if (!ReadScalar(*value_mapSizeX, output.mapSizeX, error)) { return false; }
-	const auto* value_mapSizeZ = FindRecordField(*record, "mapSizeZ", error);
+	const auto* value_mapSizeZ = FindRecordField(*record, "map-size-z", error);
 	if (value_mapSizeZ == nullptr) return false;
 	if (!ReadScalar(*value_mapSizeZ, output.mapSizeZ, error)) { return false; }
-	const auto* value_mapDamage = FindRecordField(*record, "mapDamage", error);
+	const auto* value_mapDamage = FindRecordField(*record, "map-damage", error);
 	if (value_mapDamage == nullptr) return false;
 	if (!ReadScalar(*value_mapDamage, output.mapDamage, error)) { return false; }
 	return true;
@@ -131,19 +131,19 @@ bool Read_GameMapInfo(const WasmValue& input, GameMapInfo& output, NativeCallSto
 WasmValue Write_GameMapInfo(const GameMapInfo& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("mapName", WasmValue::String((value.mapName == nullptr) ? std::string{} : std::string(value.mapName)));
-	fields.emplace("mapDescription", WasmValue::String((value.mapDescription == nullptr) ? std::string{} : std::string(value.mapDescription)));
-	fields.emplace("mapChecksum", WasmValue::String((value.mapChecksum == nullptr) ? std::string{} : std::string(value.mapChecksum)));
-	fields.emplace("mapHardness", WriteScalar(value.mapHardness));
-	fields.emplace("extractorRadius", WriteScalar(value.extractorRadius));
+	fields.emplace("map-name", WasmValue::String((value.mapName == nullptr) ? std::string{} : std::string(value.mapName)));
+	fields.emplace("map-description", WasmValue::String((value.mapDescription == nullptr) ? std::string{} : std::string(value.mapDescription)));
+	fields.emplace("map-checksum", WasmValue::String((value.mapChecksum == nullptr) ? std::string{} : std::string(value.mapChecksum)));
+	fields.emplace("map-hardness", WriteScalar(value.mapHardness));
+	fields.emplace("extractor-radius", WriteScalar(value.extractorRadius));
 	fields.emplace("tidal", WriteScalar(value.tidal));
-	fields.emplace("waterDamage", WriteScalar(value.waterDamage));
+	fields.emplace("water-damage", WriteScalar(value.waterDamage));
 	fields.emplace("gravity", WriteScalar(value.gravity));
-	fields.emplace("mapX", WriteScalar(value.mapX));
-	fields.emplace("mapY", WriteScalar(value.mapY));
-	fields.emplace("mapSizeX", WriteScalar(value.mapSizeX));
-	fields.emplace("mapSizeZ", WriteScalar(value.mapSizeZ));
-	fields.emplace("mapDamage", WriteScalar(value.mapDamage));
+	fields.emplace("map-x", WriteScalar(value.mapX));
+	fields.emplace("map-y", WriteScalar(value.mapY));
+	fields.emplace("map-size-x", WriteScalar(value.mapSizeX));
+	fields.emplace("map-size-z", WriteScalar(value.mapSizeZ));
+	fields.emplace("map-damage", WriteScalar(value.mapDamage));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -151,57 +151,57 @@ bool Read_GameModInfo(const WasmValue& input, GameModInfo& output, NativeCallSto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_gameName = FindRecordField(*record, "gameName", error);
+	const auto* value_gameName = FindRecordField(*record, "game-name", error);
 	if (value_gameName == nullptr) return false;
 	auto& stored_string_output_gameName = storage.Make<std::string>();
 	if (!ReadString(*value_gameName, stored_string_output_gameName, error)) { return false; }
 	output.gameName = stored_string_output_gameName.c_str();
-	const auto* value_gameShortName = FindRecordField(*record, "gameShortName", error);
+	const auto* value_gameShortName = FindRecordField(*record, "game-short-name", error);
 	if (value_gameShortName == nullptr) return false;
 	auto& stored_string_output_gameShortName = storage.Make<std::string>();
 	if (!ReadString(*value_gameShortName, stored_string_output_gameShortName, error)) { return false; }
 	output.gameShortName = stored_string_output_gameShortName.c_str();
-	const auto* value_gameVersion = FindRecordField(*record, "gameVersion", error);
+	const auto* value_gameVersion = FindRecordField(*record, "game-version", error);
 	if (value_gameVersion == nullptr) return false;
 	auto& stored_string_output_gameVersion = storage.Make<std::string>();
 	if (!ReadString(*value_gameVersion, stored_string_output_gameVersion, error)) { return false; }
 	output.gameVersion = stored_string_output_gameVersion.c_str();
-	const auto* value_gameMutator = FindRecordField(*record, "gameMutator", error);
+	const auto* value_gameMutator = FindRecordField(*record, "game-mutator", error);
 	if (value_gameMutator == nullptr) return false;
 	auto& stored_string_output_gameMutator = storage.Make<std::string>();
 	if (!ReadString(*value_gameMutator, stored_string_output_gameMutator, error)) { return false; }
 	output.gameMutator = stored_string_output_gameMutator.c_str();
-	const auto* value_gameDesc = FindRecordField(*record, "gameDesc", error);
+	const auto* value_gameDesc = FindRecordField(*record, "game-desc", error);
 	if (value_gameDesc == nullptr) return false;
 	auto& stored_string_output_gameDesc = storage.Make<std::string>();
 	if (!ReadString(*value_gameDesc, stored_string_output_gameDesc, error)) { return false; }
 	output.gameDesc = stored_string_output_gameDesc.c_str();
-	const auto* value_modName = FindRecordField(*record, "modName", error);
+	const auto* value_modName = FindRecordField(*record, "mod-name", error);
 	if (value_modName == nullptr) return false;
 	auto& stored_string_output_modName = storage.Make<std::string>();
 	if (!ReadString(*value_modName, stored_string_output_modName, error)) { return false; }
 	output.modName = stored_string_output_modName.c_str();
-	const auto* value_modShortName = FindRecordField(*record, "modShortName", error);
+	const auto* value_modShortName = FindRecordField(*record, "mod-short-name", error);
 	if (value_modShortName == nullptr) return false;
 	auto& stored_string_output_modShortName = storage.Make<std::string>();
 	if (!ReadString(*value_modShortName, stored_string_output_modShortName, error)) { return false; }
 	output.modShortName = stored_string_output_modShortName.c_str();
-	const auto* value_modVersion = FindRecordField(*record, "modVersion", error);
+	const auto* value_modVersion = FindRecordField(*record, "mod-version", error);
 	if (value_modVersion == nullptr) return false;
 	auto& stored_string_output_modVersion = storage.Make<std::string>();
 	if (!ReadString(*value_modVersion, stored_string_output_modVersion, error)) { return false; }
 	output.modVersion = stored_string_output_modVersion.c_str();
-	const auto* value_modMutator = FindRecordField(*record, "modMutator", error);
+	const auto* value_modMutator = FindRecordField(*record, "mod-mutator", error);
 	if (value_modMutator == nullptr) return false;
 	auto& stored_string_output_modMutator = storage.Make<std::string>();
 	if (!ReadString(*value_modMutator, stored_string_output_modMutator, error)) { return false; }
 	output.modMutator = stored_string_output_modMutator.c_str();
-	const auto* value_modDesc = FindRecordField(*record, "modDesc", error);
+	const auto* value_modDesc = FindRecordField(*record, "mod-desc", error);
 	if (value_modDesc == nullptr) return false;
 	auto& stored_string_output_modDesc = storage.Make<std::string>();
 	if (!ReadString(*value_modDesc, stored_string_output_modDesc, error)) { return false; }
 	output.modDesc = stored_string_output_modDesc.c_str();
-	const auto* value_modChecksum = FindRecordField(*record, "modChecksum", error);
+	const auto* value_modChecksum = FindRecordField(*record, "mod-checksum", error);
 	if (value_modChecksum == nullptr) return false;
 	auto& stored_string_output_modChecksum = storage.Make<std::string>();
 	if (!ReadString(*value_modChecksum, stored_string_output_modChecksum, error)) { return false; }
@@ -212,17 +212,17 @@ bool Read_GameModInfo(const WasmValue& input, GameModInfo& output, NativeCallSto
 WasmValue Write_GameModInfo(const GameModInfo& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("gameName", WasmValue::String((value.gameName == nullptr) ? std::string{} : std::string(value.gameName)));
-	fields.emplace("gameShortName", WasmValue::String((value.gameShortName == nullptr) ? std::string{} : std::string(value.gameShortName)));
-	fields.emplace("gameVersion", WasmValue::String((value.gameVersion == nullptr) ? std::string{} : std::string(value.gameVersion)));
-	fields.emplace("gameMutator", WasmValue::String((value.gameMutator == nullptr) ? std::string{} : std::string(value.gameMutator)));
-	fields.emplace("gameDesc", WasmValue::String((value.gameDesc == nullptr) ? std::string{} : std::string(value.gameDesc)));
-	fields.emplace("modName", WasmValue::String((value.modName == nullptr) ? std::string{} : std::string(value.modName)));
-	fields.emplace("modShortName", WasmValue::String((value.modShortName == nullptr) ? std::string{} : std::string(value.modShortName)));
-	fields.emplace("modVersion", WasmValue::String((value.modVersion == nullptr) ? std::string{} : std::string(value.modVersion)));
-	fields.emplace("modMutator", WasmValue::String((value.modMutator == nullptr) ? std::string{} : std::string(value.modMutator)));
-	fields.emplace("modDesc", WasmValue::String((value.modDesc == nullptr) ? std::string{} : std::string(value.modDesc)));
-	fields.emplace("modChecksum", WasmValue::String((value.modChecksum == nullptr) ? std::string{} : std::string(value.modChecksum)));
+	fields.emplace("game-name", WasmValue::String((value.gameName == nullptr) ? std::string{} : std::string(value.gameName)));
+	fields.emplace("game-short-name", WasmValue::String((value.gameShortName == nullptr) ? std::string{} : std::string(value.gameShortName)));
+	fields.emplace("game-version", WasmValue::String((value.gameVersion == nullptr) ? std::string{} : std::string(value.gameVersion)));
+	fields.emplace("game-mutator", WasmValue::String((value.gameMutator == nullptr) ? std::string{} : std::string(value.gameMutator)));
+	fields.emplace("game-desc", WasmValue::String((value.gameDesc == nullptr) ? std::string{} : std::string(value.gameDesc)));
+	fields.emplace("mod-name", WasmValue::String((value.modName == nullptr) ? std::string{} : std::string(value.modName)));
+	fields.emplace("mod-short-name", WasmValue::String((value.modShortName == nullptr) ? std::string{} : std::string(value.modShortName)));
+	fields.emplace("mod-version", WasmValue::String((value.modVersion == nullptr) ? std::string{} : std::string(value.modVersion)));
+	fields.emplace("mod-mutator", WasmValue::String((value.modMutator == nullptr) ? std::string{} : std::string(value.modMutator)));
+	fields.emplace("mod-desc", WasmValue::String((value.modDesc == nullptr) ? std::string{} : std::string(value.modDesc)));
+	fields.emplace("mod-checksum", WasmValue::String((value.modChecksum == nullptr) ? std::string{} : std::string(value.modChecksum)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -230,85 +230,85 @@ bool Read_GameRulesInfo(const WasmValue& input, GameRulesInfo& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_maxUnits = FindRecordField(*record, "maxUnits", error);
+	const auto* value_maxUnits = FindRecordField(*record, "max-units", error);
 	if (value_maxUnits == nullptr) return false;
 	if (!ReadScalar(*value_maxUnits, output.maxUnits, error)) { return false; }
-	const auto* value_constructionDecay = FindRecordField(*record, "constructionDecay", error);
+	const auto* value_constructionDecay = FindRecordField(*record, "construction-decay", error);
 	if (value_constructionDecay == nullptr) return false;
 	if (!ReadScalar(*value_constructionDecay, output.constructionDecay, error)) { return false; }
-	const auto* value_constructionDecayTime = FindRecordField(*record, "constructionDecayTime", error);
+	const auto* value_constructionDecayTime = FindRecordField(*record, "construction-decay-time", error);
 	if (value_constructionDecayTime == nullptr) return false;
 	if (!ReadScalar(*value_constructionDecayTime, output.constructionDecayTime, error)) { return false; }
-	const auto* value_constructionDecaySpeed = FindRecordField(*record, "constructionDecaySpeed", error);
+	const auto* value_constructionDecaySpeed = FindRecordField(*record, "construction-decay-speed", error);
 	if (value_constructionDecaySpeed == nullptr) return false;
 	if (!ReadScalar(*value_constructionDecaySpeed, output.constructionDecaySpeed, error)) { return false; }
-	const auto* value_multiReclaim = FindRecordField(*record, "multiReclaim", error);
+	const auto* value_multiReclaim = FindRecordField(*record, "multi-reclaim", error);
 	if (value_multiReclaim == nullptr) return false;
 	if (!ReadScalar(*value_multiReclaim, output.multiReclaim, error)) { return false; }
-	const auto* value_reclaimMethod = FindRecordField(*record, "reclaimMethod", error);
+	const auto* value_reclaimMethod = FindRecordField(*record, "reclaim-method", error);
 	if (value_reclaimMethod == nullptr) return false;
 	if (!ReadScalar(*value_reclaimMethod, output.reclaimMethod, error)) { return false; }
-	const auto* value_reclaimUnitMethod = FindRecordField(*record, "reclaimUnitMethod", error);
+	const auto* value_reclaimUnitMethod = FindRecordField(*record, "reclaim-unit-method", error);
 	if (value_reclaimUnitMethod == nullptr) return false;
 	if (!ReadScalar(*value_reclaimUnitMethod, output.reclaimUnitMethod, error)) { return false; }
-	const auto* value_reclaimUnitEnergyCostFactor = FindRecordField(*record, "reclaimUnitEnergyCostFactor", error);
+	const auto* value_reclaimUnitEnergyCostFactor = FindRecordField(*record, "reclaim-unit-energy-cost-factor", error);
 	if (value_reclaimUnitEnergyCostFactor == nullptr) return false;
 	if (!ReadScalar(*value_reclaimUnitEnergyCostFactor, output.reclaimUnitEnergyCostFactor, error)) { return false; }
-	const auto* value_reclaimUnitEfficiency = FindRecordField(*record, "reclaimUnitEfficiency", error);
+	const auto* value_reclaimUnitEfficiency = FindRecordField(*record, "reclaim-unit-efficiency", error);
 	if (value_reclaimUnitEfficiency == nullptr) return false;
 	if (!ReadScalar(*value_reclaimUnitEfficiency, output.reclaimUnitEfficiency, error)) { return false; }
-	const auto* value_reclaimFeatureEnergyCostFactor = FindRecordField(*record, "reclaimFeatureEnergyCostFactor", error);
+	const auto* value_reclaimFeatureEnergyCostFactor = FindRecordField(*record, "reclaim-feature-energy-cost-factor", error);
 	if (value_reclaimFeatureEnergyCostFactor == nullptr) return false;
 	if (!ReadScalar(*value_reclaimFeatureEnergyCostFactor, output.reclaimFeatureEnergyCostFactor, error)) { return false; }
-	const auto* value_reclaimUnitDrainHealth = FindRecordField(*record, "reclaimUnitDrainHealth", error);
+	const auto* value_reclaimUnitDrainHealth = FindRecordField(*record, "reclaim-unit-drain-health", error);
 	if (value_reclaimUnitDrainHealth == nullptr) return false;
 	if (!ReadScalar(*value_reclaimUnitDrainHealth, output.reclaimUnitDrainHealth, error)) { return false; }
-	const auto* value_reclaimAllowEnemies = FindRecordField(*record, "reclaimAllowEnemies", error);
+	const auto* value_reclaimAllowEnemies = FindRecordField(*record, "reclaim-allow-enemies", error);
 	if (value_reclaimAllowEnemies == nullptr) return false;
 	if (!ReadScalar(*value_reclaimAllowEnemies, output.reclaimAllowEnemies, error)) { return false; }
-	const auto* value_reclaimAllowAllies = FindRecordField(*record, "reclaimAllowAllies", error);
+	const auto* value_reclaimAllowAllies = FindRecordField(*record, "reclaim-allow-allies", error);
 	if (value_reclaimAllowAllies == nullptr) return false;
 	if (!ReadScalar(*value_reclaimAllowAllies, output.reclaimAllowAllies, error)) { return false; }
-	const auto* value_repairEnergyCostFactor = FindRecordField(*record, "repairEnergyCostFactor", error);
+	const auto* value_repairEnergyCostFactor = FindRecordField(*record, "repair-energy-cost-factor", error);
 	if (value_repairEnergyCostFactor == nullptr) return false;
 	if (!ReadScalar(*value_repairEnergyCostFactor, output.repairEnergyCostFactor, error)) { return false; }
-	const auto* value_resurrectEnergyCostFactor = FindRecordField(*record, "resurrectEnergyCostFactor", error);
+	const auto* value_resurrectEnergyCostFactor = FindRecordField(*record, "resurrect-energy-cost-factor", error);
 	if (value_resurrectEnergyCostFactor == nullptr) return false;
 	if (!ReadScalar(*value_resurrectEnergyCostFactor, output.resurrectEnergyCostFactor, error)) { return false; }
-	const auto* value_captureEnergyCostFactor = FindRecordField(*record, "captureEnergyCostFactor", error);
+	const auto* value_captureEnergyCostFactor = FindRecordField(*record, "capture-energy-cost-factor", error);
 	if (value_captureEnergyCostFactor == nullptr) return false;
 	if (!ReadScalar(*value_captureEnergyCostFactor, output.captureEnergyCostFactor, error)) { return false; }
-	const auto* value_transportAir = FindRecordField(*record, "transportAir", error);
+	const auto* value_transportAir = FindRecordField(*record, "transport-air", error);
 	if (value_transportAir == nullptr) return false;
 	if (!ReadScalar(*value_transportAir, output.transportAir, error)) { return false; }
-	const auto* value_transportShip = FindRecordField(*record, "transportShip", error);
+	const auto* value_transportShip = FindRecordField(*record, "transport-ship", error);
 	if (value_transportShip == nullptr) return false;
 	if (!ReadScalar(*value_transportShip, output.transportShip, error)) { return false; }
-	const auto* value_transportHover = FindRecordField(*record, "transportHover", error);
+	const auto* value_transportHover = FindRecordField(*record, "transport-hover", error);
 	if (value_transportHover == nullptr) return false;
 	if (!ReadScalar(*value_transportHover, output.transportHover, error)) { return false; }
-	const auto* value_transportGround = FindRecordField(*record, "transportGround", error);
+	const auto* value_transportGround = FindRecordField(*record, "transport-ground", error);
 	if (value_transportGround == nullptr) return false;
 	if (!ReadScalar(*value_transportGround, output.transportGround, error)) { return false; }
-	const auto* value_fireAtKilled = FindRecordField(*record, "fireAtKilled", error);
+	const auto* value_fireAtKilled = FindRecordField(*record, "fire-at-killed", error);
 	if (value_fireAtKilled == nullptr) return false;
 	if (!ReadScalar(*value_fireAtKilled, output.fireAtKilled, error)) { return false; }
-	const auto* value_fireAtCrashing = FindRecordField(*record, "fireAtCrashing", error);
+	const auto* value_fireAtCrashing = FindRecordField(*record, "fire-at-crashing", error);
 	if (value_fireAtCrashing == nullptr) return false;
 	if (!ReadScalar(*value_fireAtCrashing, output.fireAtCrashing, error)) { return false; }
-	const auto* value_requireSonarUnderWater = FindRecordField(*record, "requireSonarUnderWater", error);
+	const auto* value_requireSonarUnderWater = FindRecordField(*record, "require-sonar-under-water", error);
 	if (value_requireSonarUnderWater == nullptr) return false;
 	if (!ReadScalar(*value_requireSonarUnderWater, output.requireSonarUnderWater, error)) { return false; }
-	const auto* value_paralyzeOnMaxHealth = FindRecordField(*record, "paralyzeOnMaxHealth", error);
+	const auto* value_paralyzeOnMaxHealth = FindRecordField(*record, "paralyze-on-max-health", error);
 	if (value_paralyzeOnMaxHealth == nullptr) return false;
 	if (!ReadScalar(*value_paralyzeOnMaxHealth, output.paralyzeOnMaxHealth, error)) { return false; }
-	const auto* value_paralyzeDeclineRate = FindRecordField(*record, "paralyzeDeclineRate", error);
+	const auto* value_paralyzeDeclineRate = FindRecordField(*record, "paralyze-decline-rate", error);
 	if (value_paralyzeDeclineRate == nullptr) return false;
 	if (!ReadScalar(*value_paralyzeDeclineRate, output.paralyzeDeclineRate, error)) { return false; }
-	const auto* value_allowEnginePlayerlist = FindRecordField(*record, "allowEnginePlayerlist", error);
+	const auto* value_allowEnginePlayerlist = FindRecordField(*record, "allow-engine-playerlist", error);
 	if (value_allowEnginePlayerlist == nullptr) return false;
 	if (!ReadScalar(*value_allowEnginePlayerlist, output.allowEnginePlayerlist, error)) { return false; }
-	const auto* value_nativeExcessSharing = FindRecordField(*record, "nativeExcessSharing", error);
+	const auto* value_nativeExcessSharing = FindRecordField(*record, "native-excess-sharing", error);
 	if (value_nativeExcessSharing == nullptr) return false;
 	if (!ReadScalar(*value_nativeExcessSharing, output.nativeExcessSharing, error)) { return false; }
 	return true;
@@ -317,33 +317,33 @@ bool Read_GameRulesInfo(const WasmValue& input, GameRulesInfo& output, NativeCal
 WasmValue Write_GameRulesInfo(const GameRulesInfo& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("maxUnits", WriteScalar(value.maxUnits));
-	fields.emplace("constructionDecay", WriteScalar(value.constructionDecay));
-	fields.emplace("constructionDecayTime", WriteScalar(value.constructionDecayTime));
-	fields.emplace("constructionDecaySpeed", WriteScalar(value.constructionDecaySpeed));
-	fields.emplace("multiReclaim", WriteScalar(value.multiReclaim));
-	fields.emplace("reclaimMethod", WriteScalar(value.reclaimMethod));
-	fields.emplace("reclaimUnitMethod", WriteScalar(value.reclaimUnitMethod));
-	fields.emplace("reclaimUnitEnergyCostFactor", WriteScalar(value.reclaimUnitEnergyCostFactor));
-	fields.emplace("reclaimUnitEfficiency", WriteScalar(value.reclaimUnitEfficiency));
-	fields.emplace("reclaimFeatureEnergyCostFactor", WriteScalar(value.reclaimFeatureEnergyCostFactor));
-	fields.emplace("reclaimUnitDrainHealth", WriteScalar(value.reclaimUnitDrainHealth));
-	fields.emplace("reclaimAllowEnemies", WriteScalar(value.reclaimAllowEnemies));
-	fields.emplace("reclaimAllowAllies", WriteScalar(value.reclaimAllowAllies));
-	fields.emplace("repairEnergyCostFactor", WriteScalar(value.repairEnergyCostFactor));
-	fields.emplace("resurrectEnergyCostFactor", WriteScalar(value.resurrectEnergyCostFactor));
-	fields.emplace("captureEnergyCostFactor", WriteScalar(value.captureEnergyCostFactor));
-	fields.emplace("transportAir", WriteScalar(value.transportAir));
-	fields.emplace("transportShip", WriteScalar(value.transportShip));
-	fields.emplace("transportHover", WriteScalar(value.transportHover));
-	fields.emplace("transportGround", WriteScalar(value.transportGround));
-	fields.emplace("fireAtKilled", WriteScalar(value.fireAtKilled));
-	fields.emplace("fireAtCrashing", WriteScalar(value.fireAtCrashing));
-	fields.emplace("requireSonarUnderWater", WriteScalar(value.requireSonarUnderWater));
-	fields.emplace("paralyzeOnMaxHealth", WriteScalar(value.paralyzeOnMaxHealth));
-	fields.emplace("paralyzeDeclineRate", WriteScalar(value.paralyzeDeclineRate));
-	fields.emplace("allowEnginePlayerlist", WriteScalar(value.allowEnginePlayerlist));
-	fields.emplace("nativeExcessSharing", WriteScalar(value.nativeExcessSharing));
+	fields.emplace("max-units", WriteScalar(value.maxUnits));
+	fields.emplace("construction-decay", WriteScalar(value.constructionDecay));
+	fields.emplace("construction-decay-time", WriteScalar(value.constructionDecayTime));
+	fields.emplace("construction-decay-speed", WriteScalar(value.constructionDecaySpeed));
+	fields.emplace("multi-reclaim", WriteScalar(value.multiReclaim));
+	fields.emplace("reclaim-method", WriteScalar(value.reclaimMethod));
+	fields.emplace("reclaim-unit-method", WriteScalar(value.reclaimUnitMethod));
+	fields.emplace("reclaim-unit-energy-cost-factor", WriteScalar(value.reclaimUnitEnergyCostFactor));
+	fields.emplace("reclaim-unit-efficiency", WriteScalar(value.reclaimUnitEfficiency));
+	fields.emplace("reclaim-feature-energy-cost-factor", WriteScalar(value.reclaimFeatureEnergyCostFactor));
+	fields.emplace("reclaim-unit-drain-health", WriteScalar(value.reclaimUnitDrainHealth));
+	fields.emplace("reclaim-allow-enemies", WriteScalar(value.reclaimAllowEnemies));
+	fields.emplace("reclaim-allow-allies", WriteScalar(value.reclaimAllowAllies));
+	fields.emplace("repair-energy-cost-factor", WriteScalar(value.repairEnergyCostFactor));
+	fields.emplace("resurrect-energy-cost-factor", WriteScalar(value.resurrectEnergyCostFactor));
+	fields.emplace("capture-energy-cost-factor", WriteScalar(value.captureEnergyCostFactor));
+	fields.emplace("transport-air", WriteScalar(value.transportAir));
+	fields.emplace("transport-ship", WriteScalar(value.transportShip));
+	fields.emplace("transport-hover", WriteScalar(value.transportHover));
+	fields.emplace("transport-ground", WriteScalar(value.transportGround));
+	fields.emplace("fire-at-killed", WriteScalar(value.fireAtKilled));
+	fields.emplace("fire-at-crashing", WriteScalar(value.fireAtCrashing));
+	fields.emplace("require-sonar-under-water", WriteScalar(value.requireSonarUnderWater));
+	fields.emplace("paralyze-on-max-health", WriteScalar(value.paralyzeOnMaxHealth));
+	fields.emplace("paralyze-decline-rate", WriteScalar(value.paralyzeDeclineRate));
+	fields.emplace("allow-engine-playerlist", WriteScalar(value.allowEnginePlayerlist));
+	fields.emplace("native-excess-sharing", WriteScalar(value.nativeExcessSharing));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -351,22 +351,22 @@ bool Read_GameRulesResourceInfo(const WasmValue& input, GameRulesResourceInfo& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_reclaimUnitCostFactor = FindRecordField(*record, "reclaimUnitCostFactor", error);
+	const auto* value_reclaimUnitCostFactor = FindRecordField(*record, "reclaim-unit-cost-factor", error);
 	if (value_reclaimUnitCostFactor == nullptr) return false;
 	if (!Read_ResourcePack(*value_reclaimUnitCostFactor, output.reclaimUnitCostFactor, storage, error)) { return false; }
-	const auto* value_reclaimUnitEfficiency = FindRecordField(*record, "reclaimUnitEfficiency", error);
+	const auto* value_reclaimUnitEfficiency = FindRecordField(*record, "reclaim-unit-efficiency", error);
 	if (value_reclaimUnitEfficiency == nullptr) return false;
 	if (!Read_ResourcePack(*value_reclaimUnitEfficiency, output.reclaimUnitEfficiency, storage, error)) { return false; }
-	const auto* value_reclaimFeatureCostFactor = FindRecordField(*record, "reclaimFeatureCostFactor", error);
+	const auto* value_reclaimFeatureCostFactor = FindRecordField(*record, "reclaim-feature-cost-factor", error);
 	if (value_reclaimFeatureCostFactor == nullptr) return false;
 	if (!Read_ResourcePack(*value_reclaimFeatureCostFactor, output.reclaimFeatureCostFactor, storage, error)) { return false; }
-	const auto* value_repairCostFactor = FindRecordField(*record, "repairCostFactor", error);
+	const auto* value_repairCostFactor = FindRecordField(*record, "repair-cost-factor", error);
 	if (value_repairCostFactor == nullptr) return false;
 	if (!Read_ResourcePack(*value_repairCostFactor, output.repairCostFactor, storage, error)) { return false; }
-	const auto* value_resurrectCostFactor = FindRecordField(*record, "resurrectCostFactor", error);
+	const auto* value_resurrectCostFactor = FindRecordField(*record, "resurrect-cost-factor", error);
 	if (value_resurrectCostFactor == nullptr) return false;
 	if (!Read_ResourcePack(*value_resurrectCostFactor, output.resurrectCostFactor, storage, error)) { return false; }
-	const auto* value_captureCostFactor = FindRecordField(*record, "captureCostFactor", error);
+	const auto* value_captureCostFactor = FindRecordField(*record, "capture-cost-factor", error);
 	if (value_captureCostFactor == nullptr) return false;
 	if (!Read_ResourcePack(*value_captureCostFactor, output.captureCostFactor, storage, error)) { return false; }
 	return true;
@@ -375,12 +375,12 @@ bool Read_GameRulesResourceInfo(const WasmValue& input, GameRulesResourceInfo& o
 WasmValue Write_GameRulesResourceInfo(const GameRulesResourceInfo& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("reclaimUnitCostFactor", Write_ResourcePack(value.reclaimUnitCostFactor));
-	fields.emplace("reclaimUnitEfficiency", Write_ResourcePack(value.reclaimUnitEfficiency));
-	fields.emplace("reclaimFeatureCostFactor", Write_ResourcePack(value.reclaimFeatureCostFactor));
-	fields.emplace("repairCostFactor", Write_ResourcePack(value.repairCostFactor));
-	fields.emplace("resurrectCostFactor", Write_ResourcePack(value.resurrectCostFactor));
-	fields.emplace("captureCostFactor", Write_ResourcePack(value.captureCostFactor));
+	fields.emplace("reclaim-unit-cost-factor", Write_ResourcePack(value.reclaimUnitCostFactor));
+	fields.emplace("reclaim-unit-efficiency", Write_ResourcePack(value.reclaimUnitEfficiency));
+	fields.emplace("reclaim-feature-cost-factor", Write_ResourcePack(value.reclaimFeatureCostFactor));
+	fields.emplace("repair-cost-factor", Write_ResourcePack(value.repairCostFactor));
+	fields.emplace("resurrect-cost-factor", Write_ResourcePack(value.resurrectCostFactor));
+	fields.emplace("capture-cost-factor", Write_ResourcePack(value.captureCostFactor));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -388,13 +388,13 @@ bool Read_GameSetupInfo(const WasmValue& input, GameSetupInfo& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_startPosType = FindRecordField(*record, "startPosType", error);
+	const auto* value_startPosType = FindRecordField(*record, "start-pos-type", error);
 	if (value_startPosType == nullptr) return false;
 	if (!ReadScalar(*value_startPosType, output.startPosType, error)) { return false; }
-	const auto* value_ghostedBuildings = FindRecordField(*record, "ghostedBuildings", error);
+	const auto* value_ghostedBuildings = FindRecordField(*record, "ghosted-buildings", error);
 	if (value_ghostedBuildings == nullptr) return false;
 	if (!ReadScalar(*value_ghostedBuildings, output.ghostedBuildings, error)) { return false; }
-	const auto* value_demoPlayName = FindRecordField(*record, "demoPlayName", error);
+	const auto* value_demoPlayName = FindRecordField(*record, "demo-play-name", error);
 	if (value_demoPlayName == nullptr) return false;
 	auto& stored_string_output_demoPlayName = storage.Make<std::string>();
 	if (!ReadString(*value_demoPlayName, stored_string_output_demoPlayName, error)) { return false; }
@@ -405,9 +405,9 @@ bool Read_GameSetupInfo(const WasmValue& input, GameSetupInfo& output, NativeCal
 WasmValue Write_GameSetupInfo(const GameSetupInfo& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("startPosType", WriteScalar(value.startPosType));
-	fields.emplace("ghostedBuildings", WriteScalar(value.ghostedBuildings));
-	fields.emplace("demoPlayName", WasmValue::String((value.demoPlayName == nullptr) ? std::string{} : std::string(value.demoPlayName)));
+	fields.emplace("start-pos-type", WriteScalar(value.startPosType));
+	fields.emplace("ghosted-buildings", WriteScalar(value.ghostedBuildings));
+	fields.emplace("demo-play-name", WasmValue::String((value.demoPlayName == nullptr) ? std::string{} : std::string(value.demoPlayName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -415,7 +415,7 @@ bool Read_GetAllyTeamStartBoxQuery(const WasmValue& input, GetAllyTeamStartBoxQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -424,7 +424,7 @@ bool Read_GetAllyTeamStartBoxQuery(const WasmValue& input, GetAllyTeamStartBoxQu
 WasmValue Write_GetAllyTeamStartBoxQuery(const GetAllyTeamStartBoxQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -487,7 +487,7 @@ bool Read_GetGaiaTeamIDQuery(const WasmValue& input, GetGaiaTeamIDQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -496,7 +496,7 @@ bool Read_GetGaiaTeamIDQuery(const WasmValue& input, GetGaiaTeamIDQuery& output,
 WasmValue Write_GetGaiaTeamIDQuery(const GetGaiaTeamIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -504,7 +504,7 @@ bool Read_GetGaiaTeamIDResult(const WasmValue& input, GetGaiaTeamIDResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -513,7 +513,7 @@ bool Read_GetGaiaTeamIDResult(const WasmValue& input, GetGaiaTeamIDResult& outpu
 WasmValue Write_GetGaiaTeamIDResult(const GetGaiaTeamIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -521,7 +521,7 @@ bool Read_GetGameFrameQuery(const WasmValue& input, GetGameFrameQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -530,7 +530,7 @@ bool Read_GetGameFrameQuery(const WasmValue& input, GetGameFrameQuery& output, N
 WasmValue Write_GetGameFrameQuery(const GetGameFrameQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -559,7 +559,7 @@ bool Read_GetGameMapInfoQuery(const WasmValue& input, GetGameMapInfoQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -568,7 +568,7 @@ bool Read_GetGameMapInfoQuery(const WasmValue& input, GetGameMapInfoQuery& outpu
 WasmValue Write_GetGameMapInfoQuery(const GetGameMapInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -593,7 +593,7 @@ bool Read_GetGameModInfoQuery(const WasmValue& input, GetGameModInfoQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -602,7 +602,7 @@ bool Read_GetGameModInfoQuery(const WasmValue& input, GetGameModInfoQuery& outpu
 WasmValue Write_GetGameModInfoQuery(const GetGameModInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -627,7 +627,7 @@ bool Read_GetGameRulesInfoQuery(const WasmValue& input, GetGameRulesInfoQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -636,7 +636,7 @@ bool Read_GetGameRulesInfoQuery(const WasmValue& input, GetGameRulesInfoQuery& o
 WasmValue Write_GetGameRulesInfoQuery(const GetGameRulesInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -661,7 +661,7 @@ bool Read_GetGameRulesResourceInfoQuery(const WasmValue& input, GetGameRulesReso
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -670,7 +670,7 @@ bool Read_GetGameRulesResourceInfoQuery(const WasmValue& input, GetGameRulesReso
 WasmValue Write_GetGameRulesResourceInfoQuery(const GetGameRulesResourceInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -695,7 +695,7 @@ bool Read_GetGameSecondsQuery(const WasmValue& input, GetGameSecondsQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -704,7 +704,7 @@ bool Read_GetGameSecondsQuery(const WasmValue& input, GetGameSecondsQuery& outpu
 WasmValue Write_GetGameSecondsQuery(const GetGameSecondsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -729,7 +729,7 @@ bool Read_GetGameSetupInfoQuery(const WasmValue& input, GetGameSetupInfoQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -738,7 +738,7 @@ bool Read_GetGameSetupInfoQuery(const WasmValue& input, GetGameSetupInfoQuery& o
 WasmValue Write_GetGameSetupInfoQuery(const GetGameSetupInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -763,7 +763,7 @@ bool Read_GetGlobalLosQuery(const WasmValue& input, GetGlobalLosQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -772,7 +772,7 @@ bool Read_GetGlobalLosQuery(const WasmValue& input, GetGlobalLosQuery& output, N
 WasmValue Write_GetGlobalLosQuery(const GetGlobalLosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -911,7 +911,7 @@ bool Read_GetMapOptionsQuery(const WasmValue& input, GetMapOptionsQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -920,7 +920,7 @@ bool Read_GetMapOptionsQuery(const WasmValue& input, GetMapOptionsQuery& output,
 WasmValue Write_GetMapOptionsQuery(const GetMapOptionsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -960,7 +960,7 @@ bool Read_GetMapStartPositionsQuery(const WasmValue& input, GetMapStartPositions
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -969,7 +969,7 @@ bool Read_GetMapStartPositionsQuery(const WasmValue& input, GetMapStartPositions
 WasmValue Write_GetMapStartPositionsQuery(const GetMapStartPositionsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1046,7 +1046,7 @@ bool Read_GetModOptionsQuery(const WasmValue& input, GetModOptionsQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1055,7 +1055,7 @@ bool Read_GetModOptionsQuery(const WasmValue& input, GetModOptionsQuery& output,
 WasmValue Write_GetModOptionsQuery(const GetModOptionsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1095,7 +1095,7 @@ bool Read_GetSideDataByIndexQuery(const WasmValue& input, GetSideDataByIndexQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sideIndex = FindRecordField(*record, "sideIndex", error);
+	const auto* value_sideIndex = FindRecordField(*record, "side-index", error);
 	if (value_sideIndex == nullptr) return false;
 	if (!ReadScalar(*value_sideIndex, output.sideIndex, error)) { return false; }
 	return true;
@@ -1104,7 +1104,7 @@ bool Read_GetSideDataByIndexQuery(const WasmValue& input, GetSideDataByIndexQuer
 WasmValue Write_GetSideDataByIndexQuery(const GetSideDataByIndexQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sideIndex", WriteScalar(value.sideIndex));
+	fields.emplace("side-index", WriteScalar(value.sideIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1129,7 +1129,7 @@ bool Read_GetSideDataCountQuery(const WasmValue& input, GetSideDataCountQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1138,7 +1138,7 @@ bool Read_GetSideDataCountQuery(const WasmValue& input, GetSideDataCountQuery& o
 WasmValue Write_GetSideDataCountQuery(const GetSideDataCountQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1163,7 +1163,7 @@ bool Read_GetSideDataQuery(const WasmValue& input, GetSideDataQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sideName = FindRecordField(*record, "sideName", error);
+	const auto* value_sideName = FindRecordField(*record, "side-name", error);
 	if (value_sideName == nullptr) return false;
 	auto& stored_string_output_sideName = storage.Make<std::string>();
 	if (!ReadString(*value_sideName, stored_string_output_sideName, error)) { return false; }
@@ -1174,7 +1174,7 @@ bool Read_GetSideDataQuery(const WasmValue& input, GetSideDataQuery& output, Nat
 WasmValue Write_GetSideDataQuery(const GetSideDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sideName", WasmValue::String((value.sideName == nullptr) ? std::string{} : std::string(value.sideName)));
+	fields.emplace("side-name", WasmValue::String((value.sideName == nullptr) ? std::string{} : std::string(value.sideName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1199,7 +1199,7 @@ bool Read_GetTeamStartPositionQuery(const WasmValue& input, GetTeamStartPosition
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -1208,7 +1208,7 @@ bool Read_GetTeamStartPositionQuery(const WasmValue& input, GetTeamStartPosition
 WasmValue Write_GetTeamStartPositionQuery(const GetTeamStartPositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1237,7 +1237,7 @@ bool Read_GetTidalQuery(const WasmValue& input, GetTidalQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1246,7 +1246,7 @@ bool Read_GetTidalQuery(const WasmValue& input, GetTidalQuery& output, NativeCal
 WasmValue Write_GetTidalQuery(const GetTidalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1305,7 +1305,7 @@ bool Read_GetWindQuery(const WasmValue& input, GetWindQuery& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1314,7 +1314,7 @@ bool Read_GetWindQuery(const WasmValue& input, GetWindQuery& output, NativeCallS
 WasmValue Write_GetWindQuery(const GetWindQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1339,7 +1339,7 @@ bool Read_IsCheatingEnabledQuery(const WasmValue& input, IsCheatingEnabledQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1348,7 +1348,7 @@ bool Read_IsCheatingEnabledQuery(const WasmValue& input, IsCheatingEnabledQuery&
 WasmValue Write_IsCheatingEnabledQuery(const IsCheatingEnabledQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1373,7 +1373,7 @@ bool Read_IsDevLuaEnabledQuery(const WasmValue& input, IsDevLuaEnabledQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1382,7 +1382,7 @@ bool Read_IsDevLuaEnabledQuery(const WasmValue& input, IsDevLuaEnabledQuery& out
 WasmValue Write_IsDevLuaEnabledQuery(const IsDevLuaEnabledQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1407,7 +1407,7 @@ bool Read_IsEditDefsEnabledQuery(const WasmValue& input, IsEditDefsEnabledQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1416,7 +1416,7 @@ bool Read_IsEditDefsEnabledQuery(const WasmValue& input, IsEditDefsEnabledQuery&
 WasmValue Write_IsEditDefsEnabledQuery(const IsEditDefsEnabledQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1441,7 +1441,7 @@ bool Read_IsGameOverQuery(const WasmValue& input, IsGameOverQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1450,7 +1450,7 @@ bool Read_IsGameOverQuery(const WasmValue& input, IsGameOverQuery& output, Nativ
 WasmValue Write_IsGameOverQuery(const IsGameOverQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1458,7 +1458,7 @@ bool Read_IsGameOverResult(const WasmValue& input, IsGameOverResult& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_gameOver = FindRecordField(*record, "gameOver", error);
+	const auto* value_gameOver = FindRecordField(*record, "game-over", error);
 	if (value_gameOver == nullptr) return false;
 	if (!ReadScalar(*value_gameOver, output.gameOver, error)) { return false; }
 	return true;
@@ -1467,7 +1467,7 @@ bool Read_IsGameOverResult(const WasmValue& input, IsGameOverResult& output, Nat
 WasmValue Write_IsGameOverResult(const IsGameOverResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("gameOver", WriteScalar(value.gameOver));
+	fields.emplace("game-over", WriteScalar(value.gameOver));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1475,7 +1475,7 @@ bool Read_IsGodModeEnabledQuery(const WasmValue& input, IsGodModeEnabledQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1484,7 +1484,7 @@ bool Read_IsGodModeEnabledQuery(const WasmValue& input, IsGodModeEnabledQuery& o
 WasmValue Write_IsGodModeEnabledQuery(const IsGodModeEnabledQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1509,7 +1509,7 @@ bool Read_IsNoCostEnabledQuery(const WasmValue& input, IsNoCostEnabledQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1518,7 +1518,7 @@ bool Read_IsNoCostEnabledQuery(const WasmValue& input, IsNoCostEnabledQuery& out
 WasmValue Write_IsNoCostEnabledQuery(const IsNoCostEnabledQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1543,22 +1543,22 @@ bool Read_SideData(const WasmValue& input, SideData& output, NativeCallStorage& 
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sideName = FindRecordField(*record, "sideName", error);
+	const auto* value_sideName = FindRecordField(*record, "side-name", error);
 	if (value_sideName == nullptr) return false;
 	auto& stored_string_output_sideName = storage.Make<std::string>();
 	if (!ReadString(*value_sideName, stored_string_output_sideName, error)) { return false; }
 	output.sideName = stored_string_output_sideName.c_str();
-	const auto* value_caseName = FindRecordField(*record, "caseName", error);
+	const auto* value_caseName = FindRecordField(*record, "case-name", error);
 	if (value_caseName == nullptr) return false;
 	auto& stored_string_output_caseName = storage.Make<std::string>();
 	if (!ReadString(*value_caseName, stored_string_output_caseName, error)) { return false; }
 	output.caseName = stored_string_output_caseName.c_str();
-	const auto* value_startUnit = FindRecordField(*record, "startUnit", error);
+	const auto* value_startUnit = FindRecordField(*record, "start-unit", error);
 	if (value_startUnit == nullptr) return false;
 	auto& stored_string_output_startUnit = storage.Make<std::string>();
 	if (!ReadString(*value_startUnit, stored_string_output_startUnit, error)) { return false; }
 	output.startUnit = stored_string_output_startUnit.c_str();
-	const auto* value_sideIndex = FindRecordField(*record, "sideIndex", error);
+	const auto* value_sideIndex = FindRecordField(*record, "side-index", error);
 	if (value_sideIndex == nullptr) return false;
 	if (!ReadScalar(*value_sideIndex, output.sideIndex, error)) { return false; }
 	return true;
@@ -1567,10 +1567,10 @@ bool Read_SideData(const WasmValue& input, SideData& output, NativeCallStorage& 
 WasmValue Write_SideData(const SideData& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sideName", WasmValue::String((value.sideName == nullptr) ? std::string{} : std::string(value.sideName)));
-	fields.emplace("caseName", WasmValue::String((value.caseName == nullptr) ? std::string{} : std::string(value.caseName)));
-	fields.emplace("startUnit", WasmValue::String((value.startUnit == nullptr) ? std::string{} : std::string(value.startUnit)));
-	fields.emplace("sideIndex", WriteScalar(value.sideIndex));
+	fields.emplace("side-name", WasmValue::String((value.sideName == nullptr) ? std::string{} : std::string(value.sideName)));
+	fields.emplace("case-name", WasmValue::String((value.caseName == nullptr) ? std::string{} : std::string(value.caseName)));
+	fields.emplace("start-unit", WasmValue::String((value.startUnit == nullptr) ? std::string{} : std::string(value.startUnit)));
+	fields.emplace("side-index", WriteScalar(value.sideIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1578,16 +1578,16 @@ bool Read_StartBox(const WasmValue& input, StartBox& output, NativeCallStorage& 
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_minX = FindRecordField(*record, "minX", error);
+	const auto* value_minX = FindRecordField(*record, "min-x", error);
 	if (value_minX == nullptr) return false;
 	if (!ReadScalar(*value_minX, output.minX, error)) { return false; }
-	const auto* value_minZ = FindRecordField(*record, "minZ", error);
+	const auto* value_minZ = FindRecordField(*record, "min-z", error);
 	if (value_minZ == nullptr) return false;
 	if (!ReadScalar(*value_minZ, output.minZ, error)) { return false; }
-	const auto* value_maxX = FindRecordField(*record, "maxX", error);
+	const auto* value_maxX = FindRecordField(*record, "max-x", error);
 	if (value_maxX == nullptr) return false;
 	if (!ReadScalar(*value_maxX, output.maxX, error)) { return false; }
-	const auto* value_maxZ = FindRecordField(*record, "maxZ", error);
+	const auto* value_maxZ = FindRecordField(*record, "max-z", error);
 	if (value_maxZ == nullptr) return false;
 	if (!ReadScalar(*value_maxZ, output.maxZ, error)) { return false; }
 	return true;
@@ -1596,10 +1596,10 @@ bool Read_StartBox(const WasmValue& input, StartBox& output, NativeCallStorage& 
 WasmValue Write_StartBox(const StartBox& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("minX", WriteScalar(value.minX));
-	fields.emplace("minZ", WriteScalar(value.minZ));
-	fields.emplace("maxX", WriteScalar(value.maxX));
-	fields.emplace("maxZ", WriteScalar(value.maxZ));
+	fields.emplace("min-x", WriteScalar(value.minX));
+	fields.emplace("min-z", WriteScalar(value.minZ));
+	fields.emplace("max-x", WriteScalar(value.maxX));
+	fields.emplace("max-z", WriteScalar(value.maxZ));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1610,7 +1610,7 @@ bool Read_StartPosition(const WasmValue& input, StartPosition& output, NativeCal
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -1620,7 +1620,7 @@ WasmValue Write_StartPosition(const StartPosition& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1659,7 +1659,7 @@ NativeCalloutDispatch Dispatch_game_AreHelperAIsEnabled(NativeInterface* nativeI
 	NativeCallStorage storage;
 	AreHelperAIsEnabledQuery query{};
 	AreHelperAIsEnabledResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->AreHelperAIsEnabled(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);
@@ -1672,7 +1672,7 @@ NativeCalloutDispatch Dispatch_game_FixedAllies(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	FixedAlliesQuery query{};
 	FixedAlliesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->FixedAllies(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.fixed);
@@ -1685,7 +1685,7 @@ NativeCalloutDispatch Dispatch_game_GetAllyTeamStartBox(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetAllyTeamStartBoxQuery query{};
 	GetAllyTeamStartBoxResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetAllyTeamStartBox(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1714,7 +1714,7 @@ NativeCalloutDispatch Dispatch_game_GetGaiaTeamID(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetGaiaTeamIDQuery query{};
 	GetGaiaTeamIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGaiaTeamID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.teamID);
@@ -1727,7 +1727,7 @@ NativeCalloutDispatch Dispatch_game_GetGameFrame(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GetGameFrameQuery query{};
 	GetGameFrameResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGameFrame(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1743,7 +1743,7 @@ NativeCalloutDispatch Dispatch_game_GetGameMapInfo(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GetGameMapInfoQuery query{};
 	GetGameMapInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGameMapInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_GameMapInfo(nativeResult.info);
@@ -1756,7 +1756,7 @@ NativeCalloutDispatch Dispatch_game_GetGameModInfo(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GetGameModInfoQuery query{};
 	GetGameModInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGameModInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_GameModInfo(nativeResult.info);
@@ -1769,7 +1769,7 @@ NativeCalloutDispatch Dispatch_game_GetGameRulesInfo(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetGameRulesInfoQuery query{};
 	GetGameRulesInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGameRulesInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_GameRulesInfo(nativeResult.info);
@@ -1782,7 +1782,7 @@ NativeCalloutDispatch Dispatch_game_GetGameRulesResourceInfo(NativeInterface* na
 	NativeCallStorage storage;
 	GetGameRulesResourceInfoQuery query{};
 	GetGameRulesResourceInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGameRulesResourceInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_GameRulesResourceInfo(nativeResult.info);
@@ -1795,7 +1795,7 @@ NativeCalloutDispatch Dispatch_game_GetGameSeconds(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GetGameSecondsQuery query{};
 	GetGameSecondsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGameSeconds(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.seconds);
@@ -1808,7 +1808,7 @@ NativeCalloutDispatch Dispatch_game_GetGameSetupInfo(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetGameSetupInfoQuery query{};
 	GetGameSetupInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGameSetupInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_GameSetupInfo(nativeResult.info);
@@ -1821,7 +1821,7 @@ NativeCalloutDispatch Dispatch_game_GetGlobalLos(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GetGlobalLosQuery query{};
 	GetGlobalLosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetGlobalLos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.los);
@@ -1881,7 +1881,7 @@ NativeCalloutDispatch Dispatch_game_GetMapOptions(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetMapOptionsQuery query{};
 	GetMapOptionsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetMapOptions(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.keys, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -1894,7 +1894,7 @@ NativeCalloutDispatch Dispatch_game_GetMapStartPositions(NativeInterface* native
 	NativeCallStorage storage;
 	GetMapStartPositionsQuery query{};
 	GetMapStartPositionsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetMapStartPositions(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.positions, nativeResult.count, [](const auto& value) { return Write_StartPosition(value); });
@@ -1927,7 +1927,7 @@ NativeCalloutDispatch Dispatch_game_GetModOptions(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetModOptionsQuery query{};
 	GetModOptionsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetModOptions(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.keys, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -1940,7 +1940,7 @@ NativeCalloutDispatch Dispatch_game_GetSideData(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GetSideDataQuery query{};
 	GetSideDataResult nativeResult{};
-	const WasmValue* value_sideName = FindArgument(arguments, 0u, 0u, 1u, 1u, "sideName", error);
+	const WasmValue* value_sideName = FindArgument(arguments, 0u, 0u, 1u, 1u, "side-name", error);
 	if (value_sideName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_sideName = storage.Make<std::string>();
 	if (!ReadString(*value_sideName, stored_string_query_sideName, error)) { return NativeCalloutDispatch::handled; }
@@ -1957,7 +1957,7 @@ NativeCalloutDispatch Dispatch_game_GetSideDataByIndex(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetSideDataByIndexQuery query{};
 	GetSideDataByIndexResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "sideIndex", query.sideIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "side-index", query.sideIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetSideDataByIndex(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_SideData(nativeResult.data);
@@ -1970,7 +1970,7 @@ NativeCalloutDispatch Dispatch_game_GetSideDataCount(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetSideDataCountQuery query{};
 	GetSideDataCountResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetSideDataCount(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.count);
@@ -1983,7 +1983,7 @@ NativeCalloutDispatch Dispatch_game_GetTeamStartPosition(NativeInterface* native
 	NativeCallStorage storage;
 	GetTeamStartPositionQuery query{};
 	GetTeamStartPositionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetTeamStartPosition(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1999,7 +1999,7 @@ NativeCalloutDispatch Dispatch_game_GetTidal(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GetTidalQuery query{};
 	GetTidalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetTidal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.strength);
@@ -2025,7 +2025,7 @@ NativeCalloutDispatch Dispatch_game_GetWind(NativeInterface* nativeInterface, co
 	NativeCallStorage storage;
 	GetWindQuery query{};
 	GetWindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->GetWind(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_WindData(nativeResult.data);
@@ -2038,7 +2038,7 @@ NativeCalloutDispatch Dispatch_game_IsCheatingEnabled(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	IsCheatingEnabledQuery query{};
 	IsCheatingEnabledResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->IsCheatingEnabled(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);
@@ -2051,7 +2051,7 @@ NativeCalloutDispatch Dispatch_game_IsDevLuaEnabled(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	IsDevLuaEnabledQuery query{};
 	IsDevLuaEnabledResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->IsDevLuaEnabled(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);
@@ -2064,7 +2064,7 @@ NativeCalloutDispatch Dispatch_game_IsEditDefsEnabled(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	IsEditDefsEnabledQuery query{};
 	IsEditDefsEnabledResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->IsEditDefsEnabled(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);
@@ -2077,7 +2077,7 @@ NativeCalloutDispatch Dispatch_game_IsGameOver(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	IsGameOverQuery query{};
 	IsGameOverResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->IsGameOver(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.gameOver);
@@ -2090,7 +2090,7 @@ NativeCalloutDispatch Dispatch_game_IsGodModeEnabled(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	IsGodModeEnabledQuery query{};
 	IsGodModeEnabledResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->IsGodModeEnabled(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);
@@ -2103,7 +2103,7 @@ NativeCalloutDispatch Dispatch_game_IsNoCostEnabled(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	IsNoCostEnabledQuery query{};
 	IsNoCostEnabledResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->game->IsNoCostEnabled(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);

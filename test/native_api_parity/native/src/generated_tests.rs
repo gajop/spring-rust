@@ -284,6 +284,16 @@ native_tests! {
     get_group_units { check = check_selection_value, set = set_selection_value, }
     get_group_units_count { check = check_selection_value, set = set_selection_value, }
     get_group_units_counts { check = check_selection_value, set = set_selection_value, }
+    ui_visibility_ally_los { check = check_los_bool, set = set_noop, }
+    ui_visibility_enemy_los { check = check_los_bool, set = set_noop, }
+    ui_visibility_radar_los { check = check_los_bool, set = set_noop, }
+    ui_visibility_radar_state { check = check_unit_los_state, set = set_noop, }
+    ui_visibility_radar_position { check = check_unit_position, set = set_noop, }
+    ui_visibility_radar_mid_position { check = check_unit_position, set = set_noop, }
+    ui_visibility_radar_aim_position { check = check_unit_position, set = set_noop, }
+    ui_visibility_radar_base_position { check = check_unit_base_position, set = set_noop, }
+    ui_visibility_radar_view_position { check = check_unit_view_position, set = set_noop, }
+    ui_visibility_radar_view_mid_position { check = check_unit_view_position, set = set_noop, }
     unit_health { check = check_unit_health, set = set_unit_health, }
     unit_max_health { check = check_unit_health, set = set_unit_max_health, }
     unit_experience { check = check_unit_experience, set = set_unit_experience, }

@@ -12,10 +12,10 @@ bool Read_GetAllProjectilesOptions(const WasmValue& input, GetAllProjectilesOpti
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_excludeWeaponProjectiles = FindRecordField(*record, "excludeWeaponProjectiles", error);
+	const auto* value_excludeWeaponProjectiles = FindRecordField(*record, "exclude-weapon-projectiles", error);
 	if (value_excludeWeaponProjectiles == nullptr) return false;
 	if (!ReadScalar(*value_excludeWeaponProjectiles, output.excludeWeaponProjectiles, error)) { return false; }
-	const auto* value_excludePieceProjectiles = FindRecordField(*record, "excludePieceProjectiles", error);
+	const auto* value_excludePieceProjectiles = FindRecordField(*record, "exclude-piece-projectiles", error);
 	if (value_excludePieceProjectiles == nullptr) return false;
 	if (!ReadScalar(*value_excludePieceProjectiles, output.excludePieceProjectiles, error)) { return false; }
 	return true;
@@ -24,8 +24,8 @@ bool Read_GetAllProjectilesOptions(const WasmValue& input, GetAllProjectilesOpti
 WasmValue Write_GetAllProjectilesOptions(const GetAllProjectilesOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("excludeWeaponProjectiles", WriteScalar(value.excludeWeaponProjectiles));
-	fields.emplace("excludePieceProjectiles", WriteScalar(value.excludePieceProjectiles));
+	fields.emplace("exclude-weapon-projectiles", WriteScalar(value.excludeWeaponProjectiles));
+	fields.emplace("exclude-piece-projectiles", WriteScalar(value.excludePieceProjectiles));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -77,7 +77,7 @@ bool Read_GetPieceProjectileParamsQuery(const WasmValue& input, GetPieceProjecti
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -86,7 +86,7 @@ bool Read_GetPieceProjectileParamsQuery(const WasmValue& input, GetPieceProjecti
 WasmValue Write_GetPieceProjectileParamsQuery(const GetPieceProjectileParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -97,7 +97,7 @@ bool Read_GetPieceProjectileParamsResult(const WasmValue& input, GetPieceProject
 	const auto* value_params = FindRecordField(*record, "params", error);
 	if (value_params == nullptr) return false;
 	if (!Read_PieceProjectileParams(*value_params, output.params, storage, error)) { return false; }
-	const auto* value_isPieceProjectile = FindRecordField(*record, "isPieceProjectile", error);
+	const auto* value_isPieceProjectile = FindRecordField(*record, "is-piece-projectile", error);
 	if (value_isPieceProjectile == nullptr) return false;
 	if (!ReadScalar(*value_isPieceProjectile, output.isPieceProjectile, error)) { return false; }
 	return true;
@@ -107,7 +107,7 @@ WasmValue Write_GetPieceProjectileParamsResult(const GetPieceProjectileParamsRes
 {
 	WasmValueRecord fields;
 	fields.emplace("params", Write_PieceProjectileParams(value.params));
-	fields.emplace("isPieceProjectile", WriteScalar(value.isPieceProjectile));
+	fields.emplace("is-piece-projectile", WriteScalar(value.isPieceProjectile));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -115,7 +115,7 @@ bool Read_GetProjectileAllyTeamIDQuery(const WasmValue& input, GetProjectileAlly
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -124,7 +124,7 @@ bool Read_GetProjectileAllyTeamIDQuery(const WasmValue& input, GetProjectileAlly
 WasmValue Write_GetProjectileAllyTeamIDQuery(const GetProjectileAllyTeamIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -132,7 +132,7 @@ bool Read_GetProjectileAllyTeamIDResult(const WasmValue& input, GetProjectileAll
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -141,7 +141,7 @@ bool Read_GetProjectileAllyTeamIDResult(const WasmValue& input, GetProjectileAll
 WasmValue Write_GetProjectileAllyTeamIDResult(const GetProjectileAllyTeamIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -149,7 +149,7 @@ bool Read_GetProjectileDamagesQuery(const WasmValue& input, GetProjectileDamages
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	const auto* value_tag = FindRecordField(*record, "tag", error);
@@ -163,7 +163,7 @@ bool Read_GetProjectileDamagesQuery(const WasmValue& input, GetProjectileDamages
 WasmValue Write_GetProjectileDamagesQuery(const GetProjectileDamagesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	fields.emplace("tag", WasmValue::String((value.tag == nullptr) ? std::string{} : std::string(value.tag)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -189,7 +189,7 @@ bool Read_GetProjectileDefIDQuery(const WasmValue& input, GetProjectileDefIDQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -198,7 +198,7 @@ bool Read_GetProjectileDefIDQuery(const WasmValue& input, GetProjectileDefIDQuer
 WasmValue Write_GetProjectileDefIDQuery(const GetProjectileDefIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -206,7 +206,7 @@ bool Read_GetProjectileDefIDResult(const WasmValue& input, GetProjectileDefIDRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_defID = FindRecordField(*record, "defID", error);
+	const auto* value_defID = FindRecordField(*record, "def-id", error);
 	if (value_defID == nullptr) return false;
 	if (!ReadScalar(*value_defID, output.defID, error)) { return false; }
 	return true;
@@ -215,7 +215,7 @@ bool Read_GetProjectileDefIDResult(const WasmValue& input, GetProjectileDefIDRes
 WasmValue Write_GetProjectileDefIDResult(const GetProjectileDefIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("defID", WriteScalar(value.defID));
+	fields.emplace("def-id", WriteScalar(value.defID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -223,7 +223,7 @@ bool Read_GetProjectileDirectionQuery(const WasmValue& input, GetProjectileDirec
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -232,7 +232,7 @@ bool Read_GetProjectileDirectionQuery(const WasmValue& input, GetProjectileDirec
 WasmValue Write_GetProjectileDirectionQuery(const GetProjectileDirectionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -257,7 +257,7 @@ bool Read_GetProjectileGravityQuery(const WasmValue& input, GetProjectileGravity
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -266,7 +266,7 @@ bool Read_GetProjectileGravityQuery(const WasmValue& input, GetProjectileGravity
 WasmValue Write_GetProjectileGravityQuery(const GetProjectileGravityQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -291,7 +291,7 @@ bool Read_GetProjectileIsInterceptedQuery(const WasmValue& input, GetProjectileI
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -300,7 +300,7 @@ bool Read_GetProjectileIsInterceptedQuery(const WasmValue& input, GetProjectileI
 WasmValue Write_GetProjectileIsInterceptedQuery(const GetProjectileIsInterceptedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -308,7 +308,7 @@ bool Read_GetProjectileIsInterceptedResult(const WasmValue& input, GetProjectile
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_isIntercepted = FindRecordField(*record, "isIntercepted", error);
+	const auto* value_isIntercepted = FindRecordField(*record, "is-intercepted", error);
 	if (value_isIntercepted == nullptr) return false;
 	if (!ReadScalar(*value_isIntercepted, output.isIntercepted, error)) { return false; }
 	return true;
@@ -317,7 +317,7 @@ bool Read_GetProjectileIsInterceptedResult(const WasmValue& input, GetProjectile
 WasmValue Write_GetProjectileIsInterceptedResult(const GetProjectileIsInterceptedResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("isIntercepted", WriteScalar(value.isIntercepted));
+	fields.emplace("is-intercepted", WriteScalar(value.isIntercepted));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -325,7 +325,7 @@ bool Read_GetProjectileOwnerIDQuery(const WasmValue& input, GetProjectileOwnerID
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -334,7 +334,7 @@ bool Read_GetProjectileOwnerIDQuery(const WasmValue& input, GetProjectileOwnerID
 WasmValue Write_GetProjectileOwnerIDQuery(const GetProjectileOwnerIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -342,7 +342,7 @@ bool Read_GetProjectileOwnerIDResult(const WasmValue& input, GetProjectileOwnerI
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_ownerID = FindRecordField(*record, "ownerID", error);
+	const auto* value_ownerID = FindRecordField(*record, "owner-id", error);
 	if (value_ownerID == nullptr) return false;
 	if (!ReadScalar(*value_ownerID, output.ownerID, error)) { return false; }
 	return true;
@@ -351,7 +351,7 @@ bool Read_GetProjectileOwnerIDResult(const WasmValue& input, GetProjectileOwnerI
 WasmValue Write_GetProjectileOwnerIDResult(const GetProjectileOwnerIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("ownerID", WriteScalar(value.ownerID));
+	fields.emplace("owner-id", WriteScalar(value.ownerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -359,7 +359,7 @@ bool Read_GetProjectilePositionQuery(const WasmValue& input, GetProjectilePositi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -368,7 +368,7 @@ bool Read_GetProjectilePositionQuery(const WasmValue& input, GetProjectilePositi
 WasmValue Write_GetProjectilePositionQuery(const GetProjectilePositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -393,7 +393,7 @@ bool Read_GetProjectileTargetQuery(const WasmValue& input, GetProjectileTargetQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -402,7 +402,7 @@ bool Read_GetProjectileTargetQuery(const WasmValue& input, GetProjectileTargetQu
 WasmValue Write_GetProjectileTargetQuery(const GetProjectileTargetQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -427,7 +427,7 @@ bool Read_GetProjectileTeamIDQuery(const WasmValue& input, GetProjectileTeamIDQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -436,7 +436,7 @@ bool Read_GetProjectileTeamIDQuery(const WasmValue& input, GetProjectileTeamIDQu
 WasmValue Write_GetProjectileTeamIDQuery(const GetProjectileTeamIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -444,7 +444,7 @@ bool Read_GetProjectileTeamIDResult(const WasmValue& input, GetProjectileTeamIDR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -453,7 +453,7 @@ bool Read_GetProjectileTeamIDResult(const WasmValue& input, GetProjectileTeamIDR
 WasmValue Write_GetProjectileTeamIDResult(const GetProjectileTeamIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -461,7 +461,7 @@ bool Read_GetProjectileTimeToLiveQuery(const WasmValue& input, GetProjectileTime
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -470,7 +470,7 @@ bool Read_GetProjectileTimeToLiveQuery(const WasmValue& input, GetProjectileTime
 WasmValue Write_GetProjectileTimeToLiveQuery(const GetProjectileTimeToLiveQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -495,7 +495,7 @@ bool Read_GetProjectileTypeQuery(const WasmValue& input, GetProjectileTypeQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -504,7 +504,7 @@ bool Read_GetProjectileTypeQuery(const WasmValue& input, GetProjectileTypeQuery&
 WasmValue Write_GetProjectileTypeQuery(const GetProjectileTypeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -533,7 +533,7 @@ bool Read_GetProjectileVelocityQuery(const WasmValue& input, GetProjectileVeloci
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_projectileID = FindRecordField(*record, "projectileID", error);
+	const auto* value_projectileID = FindRecordField(*record, "projectile-id", error);
 	if (value_projectileID == nullptr) return false;
 	if (!ReadScalar(*value_projectileID, output.projectileID, error)) { return false; }
 	return true;
@@ -542,7 +542,7 @@ bool Read_GetProjectileVelocityQuery(const WasmValue& input, GetProjectileVeloci
 WasmValue Write_GetProjectileVelocityQuery(const GetProjectileVelocityQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("projectileID", WriteScalar(value.projectileID));
+	fields.emplace("projectile-id", WriteScalar(value.projectileID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -567,10 +567,10 @@ bool Read_GetProjectilesInRectangleOptions(const WasmValue& input, GetProjectile
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_excludeWeaponProjectiles = FindRecordField(*record, "excludeWeaponProjectiles", error);
+	const auto* value_excludeWeaponProjectiles = FindRecordField(*record, "exclude-weapon-projectiles", error);
 	if (value_excludeWeaponProjectiles == nullptr) return false;
 	if (!ReadScalar(*value_excludeWeaponProjectiles, output.excludeWeaponProjectiles, error)) { return false; }
-	const auto* value_excludePieceProjectiles = FindRecordField(*record, "excludePieceProjectiles", error);
+	const auto* value_excludePieceProjectiles = FindRecordField(*record, "exclude-piece-projectiles", error);
 	if (value_excludePieceProjectiles == nullptr) return false;
 	if (!ReadScalar(*value_excludePieceProjectiles, output.excludePieceProjectiles, error)) { return false; }
 	return true;
@@ -579,8 +579,8 @@ bool Read_GetProjectilesInRectangleOptions(const WasmValue& input, GetProjectile
 WasmValue Write_GetProjectilesInRectangleOptions(const GetProjectilesInRectangleOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("excludeWeaponProjectiles", WriteScalar(value.excludeWeaponProjectiles));
-	fields.emplace("excludePieceProjectiles", WriteScalar(value.excludePieceProjectiles));
+	fields.emplace("exclude-weapon-projectiles", WriteScalar(value.excludeWeaponProjectiles));
+	fields.emplace("exclude-piece-projectiles", WriteScalar(value.excludePieceProjectiles));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -588,16 +588,16 @@ bool Read_GetProjectilesInRectangleQuery(const WasmValue& input, GetProjectilesI
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_minX = FindRecordField(*record, "minX", error);
+	const auto* value_minX = FindRecordField(*record, "min-x", error);
 	if (value_minX == nullptr) return false;
 	if (!ReadScalar(*value_minX, output.minX, error)) { return false; }
-	const auto* value_minZ = FindRecordField(*record, "minZ", error);
+	const auto* value_minZ = FindRecordField(*record, "min-z", error);
 	if (value_minZ == nullptr) return false;
 	if (!ReadScalar(*value_minZ, output.minZ, error)) { return false; }
-	const auto* value_maxX = FindRecordField(*record, "maxX", error);
+	const auto* value_maxX = FindRecordField(*record, "max-x", error);
 	if (value_maxX == nullptr) return false;
 	if (!ReadScalar(*value_maxX, output.maxX, error)) { return false; }
-	const auto* value_maxZ = FindRecordField(*record, "maxZ", error);
+	const auto* value_maxZ = FindRecordField(*record, "max-z", error);
 	if (value_maxZ == nullptr) return false;
 	if (!ReadScalar(*value_maxZ, output.maxZ, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -609,10 +609,10 @@ bool Read_GetProjectilesInRectangleQuery(const WasmValue& input, GetProjectilesI
 WasmValue Write_GetProjectilesInRectangleQuery(const GetProjectilesInRectangleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("minX", WriteScalar(value.minX));
-	fields.emplace("minZ", WriteScalar(value.minZ));
-	fields.emplace("maxX", WriteScalar(value.maxX));
-	fields.emplace("maxZ", WriteScalar(value.maxZ));
+	fields.emplace("min-x", WriteScalar(value.minX));
+	fields.emplace("min-z", WriteScalar(value.minZ));
+	fields.emplace("max-x", WriteScalar(value.maxX));
+	fields.emplace("max-z", WriteScalar(value.maxZ));
 	fields.emplace("options", Write_GetProjectilesInRectangleOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -648,10 +648,10 @@ bool Read_GetProjectilesInSphereOptions(const WasmValue& input, GetProjectilesIn
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_excludeWeaponProjectiles = FindRecordField(*record, "excludeWeaponProjectiles", error);
+	const auto* value_excludeWeaponProjectiles = FindRecordField(*record, "exclude-weapon-projectiles", error);
 	if (value_excludeWeaponProjectiles == nullptr) return false;
 	if (!ReadScalar(*value_excludeWeaponProjectiles, output.excludeWeaponProjectiles, error)) { return false; }
-	const auto* value_excludePieceProjectiles = FindRecordField(*record, "excludePieceProjectiles", error);
+	const auto* value_excludePieceProjectiles = FindRecordField(*record, "exclude-piece-projectiles", error);
 	if (value_excludePieceProjectiles == nullptr) return false;
 	if (!ReadScalar(*value_excludePieceProjectiles, output.excludePieceProjectiles, error)) { return false; }
 	return true;
@@ -660,8 +660,8 @@ bool Read_GetProjectilesInSphereOptions(const WasmValue& input, GetProjectilesIn
 WasmValue Write_GetProjectilesInSphereOptions(const GetProjectilesInSphereOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("excludeWeaponProjectiles", WriteScalar(value.excludeWeaponProjectiles));
-	fields.emplace("excludePieceProjectiles", WriteScalar(value.excludePieceProjectiles));
+	fields.emplace("exclude-weapon-projectiles", WriteScalar(value.excludeWeaponProjectiles));
+	fields.emplace("exclude-piece-projectiles", WriteScalar(value.excludePieceProjectiles));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -730,25 +730,25 @@ bool Read_PieceProjectileParams(const WasmValue& input, PieceProjectileParams& o
 	const auto* value_gravity = FindRecordField(*record, "gravity", error);
 	if (value_gravity == nullptr) return false;
 	if (!Read_Float3(*value_gravity, output.gravity, storage, error)) { return false; }
-	const auto* value_spinVec = FindRecordField(*record, "spinVec", error);
+	const auto* value_spinVec = FindRecordField(*record, "spin-vec", error);
 	if (value_spinVec == nullptr) return false;
 	if (!Read_Float3(*value_spinVec, output.spinVec, storage, error)) { return false; }
-	const auto* value_explFlags = FindRecordField(*record, "explFlags", error);
+	const auto* value_explFlags = FindRecordField(*record, "expl-flags", error);
 	if (value_explFlags == nullptr) return false;
 	if (!ReadScalar(*value_explFlags, output.explFlags, error)) { return false; }
-	const auto* value_spinAngle = FindRecordField(*record, "spinAngle", error);
+	const auto* value_spinAngle = FindRecordField(*record, "spin-angle", error);
 	if (value_spinAngle == nullptr) return false;
 	if (!ReadScalar(*value_spinAngle, output.spinAngle, error)) { return false; }
-	const auto* value_spinSpeed = FindRecordField(*record, "spinSpeed", error);
+	const auto* value_spinSpeed = FindRecordField(*record, "spin-speed", error);
 	if (value_spinSpeed == nullptr) return false;
 	if (!ReadScalar(*value_spinSpeed, output.spinSpeed, error)) { return false; }
-	const auto* value_modelPieceNum = FindRecordField(*record, "modelPieceNum", error);
+	const auto* value_modelPieceNum = FindRecordField(*record, "model-piece-num", error);
 	if (value_modelPieceNum == nullptr) return false;
 	if (!ReadScalar(*value_modelPieceNum, output.modelPieceNum, error)) { return false; }
-	const auto* value_modelObjectType = FindRecordField(*record, "modelObjectType", error);
+	const auto* value_modelObjectType = FindRecordField(*record, "model-object-type", error);
 	if (value_modelObjectType == nullptr) return false;
 	if (!ReadScalar(*value_modelObjectType, output.modelObjectType, error)) { return false; }
-	const auto* value_modelName = FindRecordField(*record, "modelName", error);
+	const auto* value_modelName = FindRecordField(*record, "model-name", error);
 	if (value_modelName == nullptr) return false;
 	auto& stored_string_output_modelName = storage.Make<std::string>();
 	if (!ReadString(*value_modelName, stored_string_output_modelName, error)) { return false; }
@@ -765,13 +765,13 @@ WasmValue Write_PieceProjectileParams(const PieceProjectileParams& value)
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("speed", Write_Float3(value.speed));
 	fields.emplace("gravity", Write_Float3(value.gravity));
-	fields.emplace("spinVec", Write_Float3(value.spinVec));
-	fields.emplace("explFlags", WriteScalar(value.explFlags));
-	fields.emplace("spinAngle", WriteScalar(value.spinAngle));
-	fields.emplace("spinSpeed", WriteScalar(value.spinSpeed));
-	fields.emplace("modelPieceNum", WriteScalar(value.modelPieceNum));
-	fields.emplace("modelObjectType", WriteScalar(value.modelObjectType));
-	fields.emplace("modelName", WasmValue::String((value.modelName == nullptr) ? std::string{} : std::string(value.modelName)));
+	fields.emplace("spin-vec", Write_Float3(value.spinVec));
+	fields.emplace("expl-flags", WriteScalar(value.explFlags));
+	fields.emplace("spin-angle", WriteScalar(value.spinAngle));
+	fields.emplace("spin-speed", WriteScalar(value.spinSpeed));
+	fields.emplace("model-piece-num", WriteScalar(value.modelPieceNum));
+	fields.emplace("model-object-type", WriteScalar(value.modelObjectType));
+	fields.emplace("model-name", WasmValue::String((value.modelName == nullptr) ? std::string{} : std::string(value.modelName)));
 	fields.emplace("team", WriteScalar(value.team));
 	return WasmValue::Record(std::move(fields));
 }
@@ -793,46 +793,46 @@ bool Read_ProjectileDamages(const WasmValue& input, ProjectileDamages& output, N
 	}
 	output.damages = native_damages.data();
 	if (!AssignCount(list_damages->size(), output.damageCount, error)) { return false; }
-	const auto* value_paralyzeDamageTime = FindRecordField(*record, "paralyzeDamageTime", error);
+	const auto* value_paralyzeDamageTime = FindRecordField(*record, "paralyze-damage-time", error);
 	if (value_paralyzeDamageTime == nullptr) return false;
 	if (!ReadScalar(*value_paralyzeDamageTime, output.paralyzeDamageTime, error)) { return false; }
-	const auto* value_impulseFactor = FindRecordField(*record, "impulseFactor", error);
+	const auto* value_impulseFactor = FindRecordField(*record, "impulse-factor", error);
 	if (value_impulseFactor == nullptr) return false;
 	if (!ReadScalar(*value_impulseFactor, output.impulseFactor, error)) { return false; }
-	const auto* value_impulseBoost = FindRecordField(*record, "impulseBoost", error);
+	const auto* value_impulseBoost = FindRecordField(*record, "impulse-boost", error);
 	if (value_impulseBoost == nullptr) return false;
 	if (!ReadScalar(*value_impulseBoost, output.impulseBoost, error)) { return false; }
-	const auto* value_craterMult = FindRecordField(*record, "craterMult", error);
+	const auto* value_craterMult = FindRecordField(*record, "crater-mult", error);
 	if (value_craterMult == nullptr) return false;
 	if (!ReadScalar(*value_craterMult, output.craterMult, error)) { return false; }
-	const auto* value_craterBoost = FindRecordField(*record, "craterBoost", error);
+	const auto* value_craterBoost = FindRecordField(*record, "crater-boost", error);
 	if (value_craterBoost == nullptr) return false;
 	if (!ReadScalar(*value_craterBoost, output.craterBoost, error)) { return false; }
-	const auto* value_defaultDamage = FindRecordField(*record, "defaultDamage", error);
+	const auto* value_defaultDamage = FindRecordField(*record, "default-damage", error);
 	if (value_defaultDamage == nullptr) return false;
 	if (!ReadScalar(*value_defaultDamage, output.defaultDamage, error)) { return false; }
-	const auto* value_dynDamageExp = FindRecordField(*record, "dynDamageExp", error);
+	const auto* value_dynDamageExp = FindRecordField(*record, "dyn-damage-exp", error);
 	if (value_dynDamageExp == nullptr) return false;
 	if (!ReadScalar(*value_dynDamageExp, output.dynDamageExp, error)) { return false; }
-	const auto* value_dynDamageMin = FindRecordField(*record, "dynDamageMin", error);
+	const auto* value_dynDamageMin = FindRecordField(*record, "dyn-damage-min", error);
 	if (value_dynDamageMin == nullptr) return false;
 	if (!ReadScalar(*value_dynDamageMin, output.dynDamageMin, error)) { return false; }
-	const auto* value_dynDamageRange = FindRecordField(*record, "dynDamageRange", error);
+	const auto* value_dynDamageRange = FindRecordField(*record, "dyn-damage-range", error);
 	if (value_dynDamageRange == nullptr) return false;
 	if (!ReadScalar(*value_dynDamageRange, output.dynDamageRange, error)) { return false; }
-	const auto* value_dynDamageInverted = FindRecordField(*record, "dynDamageInverted", error);
+	const auto* value_dynDamageInverted = FindRecordField(*record, "dyn-damage-inverted", error);
 	if (value_dynDamageInverted == nullptr) return false;
 	if (!ReadScalar(*value_dynDamageInverted, output.dynDamageInverted, error)) { return false; }
-	const auto* value_craterAreaOfEffect = FindRecordField(*record, "craterAreaOfEffect", error);
+	const auto* value_craterAreaOfEffect = FindRecordField(*record, "crater-area-of-effect", error);
 	if (value_craterAreaOfEffect == nullptr) return false;
 	if (!ReadScalar(*value_craterAreaOfEffect, output.craterAreaOfEffect, error)) { return false; }
-	const auto* value_damageAreaOfEffect = FindRecordField(*record, "damageAreaOfEffect", error);
+	const auto* value_damageAreaOfEffect = FindRecordField(*record, "damage-area-of-effect", error);
 	if (value_damageAreaOfEffect == nullptr) return false;
 	if (!ReadScalar(*value_damageAreaOfEffect, output.damageAreaOfEffect, error)) { return false; }
-	const auto* value_edgeEffectiveness = FindRecordField(*record, "edgeEffectiveness", error);
+	const auto* value_edgeEffectiveness = FindRecordField(*record, "edge-effectiveness", error);
 	if (value_edgeEffectiveness == nullptr) return false;
 	if (!ReadScalar(*value_edgeEffectiveness, output.edgeEffectiveness, error)) { return false; }
-	const auto* value_explosionSpeed = FindRecordField(*record, "explosionSpeed", error);
+	const auto* value_explosionSpeed = FindRecordField(*record, "explosion-speed", error);
 	if (value_explosionSpeed == nullptr) return false;
 	if (!ReadScalar(*value_explosionSpeed, output.explosionSpeed, error)) { return false; }
 	return true;
@@ -842,20 +842,20 @@ WasmValue Write_ProjectileDamages(const ProjectileDamages& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("damages", WriteNativeList(value.damages, value.damageCount, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("paralyzeDamageTime", WriteScalar(value.paralyzeDamageTime));
-	fields.emplace("impulseFactor", WriteScalar(value.impulseFactor));
-	fields.emplace("impulseBoost", WriteScalar(value.impulseBoost));
-	fields.emplace("craterMult", WriteScalar(value.craterMult));
-	fields.emplace("craterBoost", WriteScalar(value.craterBoost));
-	fields.emplace("defaultDamage", WriteScalar(value.defaultDamage));
-	fields.emplace("dynDamageExp", WriteScalar(value.dynDamageExp));
-	fields.emplace("dynDamageMin", WriteScalar(value.dynDamageMin));
-	fields.emplace("dynDamageRange", WriteScalar(value.dynDamageRange));
-	fields.emplace("dynDamageInverted", WriteScalar(value.dynDamageInverted));
-	fields.emplace("craterAreaOfEffect", WriteScalar(value.craterAreaOfEffect));
-	fields.emplace("damageAreaOfEffect", WriteScalar(value.damageAreaOfEffect));
-	fields.emplace("edgeEffectiveness", WriteScalar(value.edgeEffectiveness));
-	fields.emplace("explosionSpeed", WriteScalar(value.explosionSpeed));
+	fields.emplace("paralyze-damage-time", WriteScalar(value.paralyzeDamageTime));
+	fields.emplace("impulse-factor", WriteScalar(value.impulseFactor));
+	fields.emplace("impulse-boost", WriteScalar(value.impulseBoost));
+	fields.emplace("crater-mult", WriteScalar(value.craterMult));
+	fields.emplace("crater-boost", WriteScalar(value.craterBoost));
+	fields.emplace("default-damage", WriteScalar(value.defaultDamage));
+	fields.emplace("dyn-damage-exp", WriteScalar(value.dynDamageExp));
+	fields.emplace("dyn-damage-min", WriteScalar(value.dynDamageMin));
+	fields.emplace("dyn-damage-range", WriteScalar(value.dynDamageRange));
+	fields.emplace("dyn-damage-inverted", WriteScalar(value.dynDamageInverted));
+	fields.emplace("crater-area-of-effect", WriteScalar(value.craterAreaOfEffect));
+	fields.emplace("damage-area-of-effect", WriteScalar(value.damageAreaOfEffect));
+	fields.emplace("edge-effectiveness", WriteScalar(value.edgeEffectiveness));
+	fields.emplace("explosion-speed", WriteScalar(value.explosionSpeed));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -863,13 +863,13 @@ bool Read_ProjectileTarget(const WasmValue& input, ProjectileTarget& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_targetType = FindRecordField(*record, "targetType", error);
+	const auto* value_targetType = FindRecordField(*record, "target-type", error);
 	if (value_targetType == nullptr) return false;
 	if (!ReadScalar(*value_targetType, output.targetType, error)) { return false; }
-	const auto* value_targetID = FindRecordField(*record, "targetID", error);
+	const auto* value_targetID = FindRecordField(*record, "target-id", error);
 	if (value_targetID == nullptr) return false;
 	if (!ReadScalar(*value_targetID, output.targetID, error)) { return false; }
-	const auto* value_targetPos = FindRecordField(*record, "targetPos", error);
+	const auto* value_targetPos = FindRecordField(*record, "target-pos", error);
 	if (value_targetPos == nullptr) return false;
 	if (!Read_Float3(*value_targetPos, output.targetPos, storage, error)) { return false; }
 	return true;
@@ -878,9 +878,9 @@ bool Read_ProjectileTarget(const WasmValue& input, ProjectileTarget& output, Nat
 WasmValue Write_ProjectileTarget(const ProjectileTarget& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("targetType", WriteScalar(value.targetType));
-	fields.emplace("targetID", WriteScalar(value.targetID));
-	fields.emplace("targetPos", Write_Float3(value.targetPos));
+	fields.emplace("target-type", WriteScalar(value.targetType));
+	fields.emplace("target-id", WriteScalar(value.targetID));
+	fields.emplace("target-pos", Write_Float3(value.targetPos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -907,12 +907,12 @@ NativeCalloutDispatch Dispatch_projectiles_GetPieceProjectileParams(NativeInterf
 	NativeCallStorage storage;
 	GetPieceProjectileParamsQuery query{};
 	GetPieceProjectileParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetPieceProjectileParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("params", Write_PieceProjectileParams(nativeResult.params));
-	outputFields.emplace("isPieceProjectile", WriteScalar(nativeResult.isPieceProjectile));
+	outputFields.emplace("is-piece-projectile", WriteScalar(nativeResult.isPieceProjectile));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -923,7 +923,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileAllyTeamID(NativeInterfa
 	NativeCallStorage storage;
 	GetProjectileAllyTeamIDQuery query{};
 	GetProjectileAllyTeamIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileAllyTeamID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.allyTeamID);
@@ -936,7 +936,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileDamages(NativeInterface*
 	NativeCallStorage storage;
 	GetProjectileDamagesQuery query{};
 	GetProjectileDamagesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_tag = FindArgument(arguments, 1u, 1u, 2u, 2u, "tag", error);
 	if (value_tag == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_tag = storage.Make<std::string>();
@@ -954,7 +954,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileDefID(NativeInterface* n
 	NativeCallStorage storage;
 	GetProjectileDefIDQuery query{};
 	GetProjectileDefIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileDefID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.defID);
@@ -967,7 +967,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileDirection(NativeInterfac
 	NativeCallStorage storage;
 	GetProjectileDirectionQuery query{};
 	GetProjectileDirectionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileDirection(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.direction);
@@ -980,7 +980,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileGravity(NativeInterface*
 	NativeCallStorage storage;
 	GetProjectileGravityQuery query{};
 	GetProjectileGravityResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileGravity(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.gravity);
@@ -993,7 +993,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileIsIntercepted(NativeInte
 	NativeCallStorage storage;
 	GetProjectileIsInterceptedQuery query{};
 	GetProjectileIsInterceptedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileIsIntercepted(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.isIntercepted);
@@ -1006,7 +1006,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileOwnerID(NativeInterface*
 	NativeCallStorage storage;
 	GetProjectileOwnerIDQuery query{};
 	GetProjectileOwnerIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileOwnerID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.ownerID);
@@ -1019,7 +1019,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectilePosition(NativeInterface
 	NativeCallStorage storage;
 	GetProjectilePositionQuery query{};
 	GetProjectilePositionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectilePosition(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.position);
@@ -1032,7 +1032,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileTarget(NativeInterface* 
 	NativeCallStorage storage;
 	GetProjectileTargetQuery query{};
 	GetProjectileTargetResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileTarget(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_ProjectileTarget(nativeResult.target);
@@ -1045,7 +1045,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileTeamID(NativeInterface* 
 	NativeCallStorage storage;
 	GetProjectileTeamIDQuery query{};
 	GetProjectileTeamIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileTeamID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.teamID);
@@ -1058,7 +1058,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileTimeToLive(NativeInterfa
 	NativeCallStorage storage;
 	GetProjectileTimeToLiveQuery query{};
 	GetProjectileTimeToLiveResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileTimeToLive(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.ttl);
@@ -1071,7 +1071,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileType(NativeInterface* na
 	NativeCallStorage storage;
 	GetProjectileTypeQuery query{};
 	GetProjectileTypeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileType(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1087,7 +1087,7 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectileVelocity(NativeInterface
 	NativeCallStorage storage;
 	GetProjectileVelocityQuery query{};
 	GetProjectileVelocityResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectileVelocity(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.velocity);
@@ -1100,10 +1100,10 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectilesInRectangle(NativeInter
 	NativeCallStorage storage;
 	GetProjectilesInRectangleQuery query{};
 	GetProjectilesInRectangleResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "minX", query.minX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "minZ", query.minZ, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "maxX", query.maxX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "maxZ", query.maxZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "min-x", query.minX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "min-z", query.minZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "max-x", query.maxX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "max-z", query.maxZ, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 4u, 4u, 5u, 5u, "options", Read_GetProjectilesInRectangleOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->projectiles->GetProjectilesInRectangle(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;

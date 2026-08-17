@@ -110,8 +110,8 @@
     },
     {
       "name": "messages_generated.rs",
-      "sha256": "5e9be63eab3f3d41ce5feb9729a7d651068269f9bc6a1a868e9469156df15141",
-      "bytes": 15399
+      "sha256": "6c1876c2e20b664c4ced456e4c48d17198e93d0d3421ab5e0a801e25e340f7f6",
+      "bytes": 16111
     },
     {
       "name": "metal_map_generated.rs",

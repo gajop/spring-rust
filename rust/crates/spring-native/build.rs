@@ -98,7 +98,7 @@ fn main() {
     println!("cargo:rerun-if-changed={}", include_dir.display());
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let codegen = spring_native_codegen::CodeGenerator::new()
+    let codegen = spring_native_codegen::CodeGenerator::with_repository_root(&project_root)
         .unwrap_or_else(|error| panic!("initialize code generator: {error}"));
 
     // Generate code for all APIs

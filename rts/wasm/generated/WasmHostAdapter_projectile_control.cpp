@@ -18,7 +18,7 @@ NativeCalloutDispatch Dispatch_projectile_control_DeleteProjectile(NativeInterfa
 	NativeCallStorage storage;
 	DeleteProjectileQuery query{};
 	DeleteProjectileResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->DeleteProjectile(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -31,11 +31,11 @@ NativeCalloutDispatch Dispatch_projectile_control_SetPieceProjectileParams(Nativ
 	NativeCallStorage storage;
 	SetPieceProjectileParamsQuery query{};
 	SetPieceProjectileParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "explFlags", query.explFlags, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "spinAngle", query.spinAngle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "spinSpeed", query.spinSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 4u, 4u, 5u, 5u, "spinVec", Read_Float3, query.spinVec, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "expl-flags", query.explFlags, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "spin-angle", query.spinAngle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "spin-speed", query.spinSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 4u, 4u, 5u, 5u, "spin-vec", Read_Float3, query.spinVec, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetPieceProjectileParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -48,8 +48,8 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileAlwaysVisible(Nat
 	NativeCallStorage storage;
 	SetProjectileAlwaysVisibleQuery query{};
 	SetProjectileAlwaysVisibleResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "alwaysVisible", query.alwaysVisible, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "always-visible", query.alwaysVisible, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileAlwaysVisible(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -62,8 +62,8 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileCEG(NativeInterfa
 	NativeCallStorage storage;
 	SetProjectileCEGQuery query{};
 	SetProjectileCEGResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_cegName = FindArgument(arguments, 1u, 1u, 2u, 2u, "cegName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_cegName = FindArgument(arguments, 1u, 1u, 2u, 2u, "ceg-name", error);
 	if (value_cegName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_cegName = storage.Make<std::string>();
 	if (!ReadString(*value_cegName, stored_string_query_cegName, error)) { return NativeCalloutDispatch::handled; }
@@ -80,7 +80,7 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileCollision(NativeI
 	NativeCallStorage storage;
 	SetProjectileCollisionQuery query{};
 	SetProjectileCollisionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileCollision(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -93,14 +93,14 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileDamages(NativeInt
 	NativeCallStorage storage;
 	SetProjectileDamagesQuery query{};
 	SetProjectileDamagesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "unused", query.unused, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_damageKey = FindArgument(arguments, 2u, 2u, 4u, 4u, "damageKey", error);
+	const WasmValue* value_damageKey = FindArgument(arguments, 2u, 2u, 4u, 4u, "damage-key", error);
 	if (value_damageKey == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_damageKey = storage.Make<std::string>();
 	if (!ReadString(*value_damageKey, stored_string_query_damageKey, error)) { return NativeCalloutDispatch::handled; }
 	query.damageKey = stored_string_query_damageKey.c_str();
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "damageValue", query.damageValue, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "damage-value", query.damageValue, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileDamages(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -113,7 +113,7 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileGravity(NativeInt
 	NativeCallStorage storage;
 	SetProjectileGravityQuery query{};
 	SetProjectileGravityResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "gravity", query.gravity, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileGravity(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -127,7 +127,7 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileIgnoreTrackingErr
 	NativeCallStorage storage;
 	SetProjectileIgnoreTrackingErrorQuery query{};
 	SetProjectileIgnoreTrackingErrorResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ignore", query.ignore, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileIgnoreTrackingError(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -141,7 +141,7 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileIsIntercepted(Nat
 	NativeCallStorage storage;
 	SetProjectileIsInterceptedQuery query{};
 	SetProjectileIsInterceptedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "intercepted", query.intercepted, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileIsIntercepted(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -155,7 +155,7 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileMoveControl(Nativ
 	NativeCallStorage storage;
 	SetProjectileMoveControlQuery query{};
 	SetProjectileMoveControlResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "enable", query.enable, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileMoveControl(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -169,7 +169,7 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectilePosition(NativeIn
 	NativeCallStorage storage;
 	SetProjectilePositionQuery query{};
 	SetProjectilePositionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectilePosition(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -183,7 +183,7 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileTarget(NativeInte
 	NativeCallStorage storage;
 	SetProjectileTargetQuery query{};
 	SetProjectileTargetResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "target", Read_ProjectileTargetRef, query.target, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileTarget(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -197,8 +197,8 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileTimeToLive(Native
 	NativeCallStorage storage;
 	SetProjectileTimeToLiveQuery query{};
 	SetProjectileTimeToLiveResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "timeToLive", query.timeToLive, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "time-to-live", query.timeToLive, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileTimeToLive(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -211,8 +211,8 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileUseAirLos(NativeI
 	NativeCallStorage storage;
 	SetProjectileUseAirLosQuery query{};
 	SetProjectileUseAirLosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "useAirLos", query.useAirLos, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "use-air-los", query.useAirLos, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileUseAirLos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -225,7 +225,7 @@ NativeCalloutDispatch Dispatch_projectile_control_SetProjectileVelocity(NativeIn
 	NativeCallStorage storage;
 	SetProjectileVelocityQuery query{};
 	SetProjectileVelocityResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectileID", query.projectileID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "projectile-id", query.projectileID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "velocity", Read_Float3, query.velocity, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SetProjectileVelocity(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -239,8 +239,8 @@ NativeCalloutDispatch Dispatch_projectile_control_SpawnProjectile(NativeInterfac
 	NativeCallStorage storage;
 	SpawnProjectileQuery query{};
 	SpawnProjectileResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "projectileParams", Read_NativeProjectileParams, query.projectileParams, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "projectile-params", Read_NativeProjectileParams, query.projectileParams, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->projectile->SpawnProjectile(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.projectileID);

@@ -796,64 +796,64 @@ interface callins-gaia-synced {
   /// aggregation: or-true
   add-console-line: func(query: add-console-line-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-builder-hold-fire: func(query: allow-builder-hold-fire-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-command: func(query: unit-command-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-direct-unit-control: func(query: allow-direct-unit-control-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-feature-build-step: func(query: allow-feature-build-step-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-feature-creation: func(query: allow-feature-creation-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-resource-level: func(query: allow-resource-level-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-resource-transfer: func(query: allow-resource-transfer-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-start-position: func(query: allow-start-position-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-build-step: func(query: allow-unit-build-step-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-capture-step: func(query: allow-unit-build-step-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-cloak: func(query: allow-unit-cloak-query) -> result<bool-callin-result, spring-error>;
 
   /// aggregation: first
   allow-unit-creation: func(query: allow-unit-creation-query) -> result<allow-unit-creation-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-decloak: func(query: allow-unit-decloak-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-kamikaze: func(query: allow-unit-kamikaze-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-transfer: func(query: allow-unit-transfer-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-transport: func(query: allow-unit-transport-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-transport-position: func(query: allow-unit-transport-position-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-transport-load: func(query: allow-unit-transport-position-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-unit-transport-unload: func(query: allow-unit-transport-position-query) -> result<bool-callin-result, spring-error>;
 
-  /// aggregation: or-true
+  /// aggregation: and-false
   allow-weapon-intercept-target: func(query: allow-weapon-intercept-target-query) -> result<bool-callin-result, spring-error>;
 
   /// aggregation: first

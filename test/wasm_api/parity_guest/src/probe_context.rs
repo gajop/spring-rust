@@ -27,3 +27,11 @@ pub(crate) fn feature_candidate_is_primary(_feature_id: i32) -> bool {
 pub(crate) fn fixture_ready(_unit_id: i32, _feature_id: i32) -> bool {
     true
 }
+
+pub(crate) fn visibility_enemy_ids(
+    _unit_ids: &[i32],
+    _team_id: i32,
+    _ally_team_id: i32,
+) -> Result<Option<(i32, i32)>, String> {
+    Ok(None)
+}

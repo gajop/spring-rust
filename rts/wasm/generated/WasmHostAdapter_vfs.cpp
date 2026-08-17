@@ -12,7 +12,7 @@ bool Read_AIInfoEntry(const WasmValue& input, AIInfoEntry& output, NativeCallSto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_shortName = FindRecordField(*record, "shortName", error);
+	const auto* value_shortName = FindRecordField(*record, "short-name", error);
 	if (value_shortName == nullptr) return false;
 	auto& stored_string_output_shortName = storage.Make<std::string>();
 	if (!ReadString(*value_shortName, stored_string_output_shortName, error)) { return false; }
@@ -22,7 +22,7 @@ bool Read_AIInfoEntry(const WasmValue& input, AIInfoEntry& output, NativeCallSto
 	auto& stored_string_output_version = storage.Make<std::string>();
 	if (!ReadString(*value_version, stored_string_output_version, error)) { return false; }
 	output.version = stored_string_output_version.c_str();
-	const auto* value_isLuaAI = FindRecordField(*record, "isLuaAI", error);
+	const auto* value_isLuaAI = FindRecordField(*record, "is-lua-ai", error);
 	if (value_isLuaAI == nullptr) return false;
 	if (!ReadScalar(*value_isLuaAI, output.isLuaAI, error)) { return false; }
 	return true;
@@ -31,9 +31,9 @@ bool Read_AIInfoEntry(const WasmValue& input, AIInfoEntry& output, NativeCallSto
 WasmValue Write_AIInfoEntry(const AIInfoEntry& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("shortName", WasmValue::String((value.shortName == nullptr) ? std::string{} : std::string(value.shortName)));
+	fields.emplace("short-name", WasmValue::String((value.shortName == nullptr) ? std::string{} : std::string(value.shortName)));
 	fields.emplace("version", WasmValue::String((value.version == nullptr) ? std::string{} : std::string(value.version)));
-	fields.emplace("isLuaAI", WriteScalar(value.isLuaAI));
+	fields.emplace("is-lua-ai", WriteScalar(value.isLuaAI));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -85,18 +85,18 @@ bool Read_ArchiveInfoEntry(const WasmValue& input, ArchiveInfoEntry& output, Nat
 	auto& stored_string_output_type = storage.Make<std::string>();
 	if (!ReadString(*value_type, stored_string_output_type, error)) { return false; }
 	output.type = stored_string_output_type.c_str();
-	const auto* value_stringValue = FindRecordField(*record, "stringValue", error);
+	const auto* value_stringValue = FindRecordField(*record, "string-value", error);
 	if (value_stringValue == nullptr) return false;
 	auto& stored_string_output_stringValue = storage.Make<std::string>();
 	if (!ReadString(*value_stringValue, stored_string_output_stringValue, error)) { return false; }
 	output.stringValue = stored_string_output_stringValue.c_str();
-	const auto* value_intValue = FindRecordField(*record, "intValue", error);
+	const auto* value_intValue = FindRecordField(*record, "int-value", error);
 	if (value_intValue == nullptr) return false;
 	if (!ReadScalar(*value_intValue, output.intValue, error)) { return false; }
-	const auto* value_floatValue = FindRecordField(*record, "floatValue", error);
+	const auto* value_floatValue = FindRecordField(*record, "float-value", error);
 	if (value_floatValue == nullptr) return false;
 	if (!ReadScalar(*value_floatValue, output.floatValue, error)) { return false; }
-	const auto* value_boolValue = FindRecordField(*record, "boolValue", error);
+	const auto* value_boolValue = FindRecordField(*record, "bool-value", error);
 	if (value_boolValue == nullptr) return false;
 	if (!ReadScalar(*value_boolValue, output.boolValue, error)) { return false; }
 	return true;
@@ -107,10 +107,10 @@ WasmValue Write_ArchiveInfoEntry(const ArchiveInfoEntry& value)
 	WasmValueRecord fields;
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
 	fields.emplace("type", WasmValue::String((value.type == nullptr) ? std::string{} : std::string(value.type)));
-	fields.emplace("stringValue", WasmValue::String((value.stringValue == nullptr) ? std::string{} : std::string(value.stringValue)));
-	fields.emplace("intValue", WriteScalar(value.intValue));
-	fields.emplace("floatValue", WriteScalar(value.floatValue));
-	fields.emplace("boolValue", WriteScalar(value.boolValue));
+	fields.emplace("string-value", WasmValue::String((value.stringValue == nullptr) ? std::string{} : std::string(value.stringValue)));
+	fields.emplace("int-value", WriteScalar(value.intValue));
+	fields.emplace("float-value", WriteScalar(value.floatValue));
+	fields.emplace("bool-value", WriteScalar(value.boolValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -124,7 +124,7 @@ bool Read_CalculateHashQuery(const WasmValue& input, CalculateHashQuery& output,
 	if (!ReadByteList(*value_data, native_data, error)) { return false; }
 	output.data = reinterpret_cast<decltype(output.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), output.dataSize, error)) { return false; }
-	const auto* value_hashType = FindRecordField(*record, "hashType", error);
+	const auto* value_hashType = FindRecordField(*record, "hash-type", error);
 	if (value_hashType == nullptr) return false;
 	if (!ReadScalar(*value_hashType, output.hashType, error)) { return false; }
 	return true;
@@ -134,7 +134,7 @@ WasmValue Write_CalculateHashQuery(const CalculateHashQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("hashType", WriteScalar(value.hashType));
+	fields.emplace("hash-type", WriteScalar(value.hashType));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -161,22 +161,22 @@ bool Read_CompressFolderQuery(const WasmValue& input, CompressFolderQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_folderPath = FindRecordField(*record, "folderPath", error);
+	const auto* value_folderPath = FindRecordField(*record, "folder-path", error);
 	if (value_folderPath == nullptr) return false;
 	auto& stored_string_output_folderPath = storage.Make<std::string>();
 	if (!ReadString(*value_folderPath, stored_string_output_folderPath, error)) { return false; }
 	output.folderPath = stored_string_output_folderPath.c_str();
-	const auto* value_archiveType = FindRecordField(*record, "archiveType", error);
+	const auto* value_archiveType = FindRecordField(*record, "archive-type", error);
 	if (value_archiveType == nullptr) return false;
 	auto& stored_string_output_archiveType = storage.Make<std::string>();
 	if (!ReadString(*value_archiveType, stored_string_output_archiveType, error)) { return false; }
 	output.archiveType = stored_string_output_archiveType.c_str();
-	const auto* value_compressedFilePath = FindRecordField(*record, "compressedFilePath", error);
+	const auto* value_compressedFilePath = FindRecordField(*record, "compressed-file-path", error);
 	if (value_compressedFilePath == nullptr) return false;
 	auto& stored_string_output_compressedFilePath = storage.Make<std::string>();
 	if (!ReadString(*value_compressedFilePath, stored_string_output_compressedFilePath, error)) { return false; }
 	output.compressedFilePath = stored_string_output_compressedFilePath.c_str();
-	const auto* value_includeFolder = FindRecordField(*record, "includeFolder", error);
+	const auto* value_includeFolder = FindRecordField(*record, "include-folder", error);
 	if (value_includeFolder == nullptr) return false;
 	if (!ReadScalar(*value_includeFolder, output.includeFolder, error)) { return false; }
 	const auto* value_mode = FindRecordField(*record, "mode", error);
@@ -190,10 +190,10 @@ bool Read_CompressFolderQuery(const WasmValue& input, CompressFolderQuery& outpu
 WasmValue Write_CompressFolderQuery(const CompressFolderQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("folderPath", WasmValue::String((value.folderPath == nullptr) ? std::string{} : std::string(value.folderPath)));
-	fields.emplace("archiveType", WasmValue::String((value.archiveType == nullptr) ? std::string{} : std::string(value.archiveType)));
-	fields.emplace("compressedFilePath", WasmValue::String((value.compressedFilePath == nullptr) ? std::string{} : std::string(value.compressedFilePath)));
-	fields.emplace("includeFolder", WriteScalar(value.includeFolder));
+	fields.emplace("folder-path", WasmValue::String((value.folderPath == nullptr) ? std::string{} : std::string(value.folderPath)));
+	fields.emplace("archive-type", WasmValue::String((value.archiveType == nullptr) ? std::string{} : std::string(value.archiveType)));
+	fields.emplace("compressed-file-path", WasmValue::String((value.compressedFilePath == nullptr) ? std::string{} : std::string(value.compressedFilePath)));
+	fields.emplace("include-folder", WriteScalar(value.includeFolder));
 	fields.emplace("mode", WasmValue::String((value.mode == nullptr) ? std::string{} : std::string(value.mode)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -260,7 +260,7 @@ bool Read_DirEntry(const WasmValue& input, DirEntry& output, NativeCallStorage& 
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_isDirectory = FindRecordField(*record, "isDirectory", error);
+	const auto* value_isDirectory = FindRecordField(*record, "is-directory", error);
 	if (value_isDirectory == nullptr) return false;
 	if (!ReadScalar(*value_isDirectory, output.isDirectory, error)) { return false; }
 	return true;
@@ -270,7 +270,7 @@ WasmValue Write_DirEntry(const DirEntry& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("isDirectory", WriteScalar(value.isDirectory));
+	fields.emplace("is-directory", WriteScalar(value.isDirectory));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -399,7 +399,7 @@ bool Read_FileInfo(const WasmValue& input, FileInfo& output, NativeCallStorage& 
 	const auto* value_mode = FindRecordField(*record, "mode", error);
 	if (value_mode == nullptr) return false;
 	if (!ReadScalar(*value_mode, output.mode, error)) { return false; }
-	const auto* value_isDirectory = FindRecordField(*record, "isDirectory", error);
+	const auto* value_isDirectory = FindRecordField(*record, "is-directory", error);
 	if (value_isDirectory == nullptr) return false;
 	if (!ReadScalar(*value_isDirectory, output.isDirectory, error)) { return false; }
 	return true;
@@ -411,7 +411,7 @@ WasmValue Write_FileInfo(const FileInfo& value)
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("size", WriteScalar(value.size));
 	fields.emplace("mode", WriteScalar(value.mode));
-	fields.emplace("isDirectory", WriteScalar(value.isDirectory));
+	fields.emplace("is-directory", WriteScalar(value.isDirectory));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -419,7 +419,7 @@ bool Read_GetAllArchivesQuery(const WasmValue& input, GetAllArchivesQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -428,7 +428,7 @@ bool Read_GetAllArchivesQuery(const WasmValue& input, GetAllArchivesQuery& outpu
 WasmValue Write_GetAllArchivesQuery(const GetAllArchivesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -468,7 +468,7 @@ bool Read_GetArchiveChecksumQuery(const WasmValue& input, GetArchiveChecksumQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_archiveName = FindRecordField(*record, "archiveName", error);
+	const auto* value_archiveName = FindRecordField(*record, "archive-name", error);
 	if (value_archiveName == nullptr) return false;
 	auto& stored_string_output_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_output_archiveName, error)) { return false; }
@@ -479,7 +479,7 @@ bool Read_GetArchiveChecksumQuery(const WasmValue& input, GetArchiveChecksumQuer
 WasmValue Write_GetArchiveChecksumQuery(const GetArchiveChecksumQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("archiveName", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
+	fields.emplace("archive-name", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -487,12 +487,12 @@ bool Read_GetArchiveChecksumResult(const WasmValue& input, GetArchiveChecksumRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_singleChecksum = FindRecordField(*record, "singleChecksum", error);
+	const auto* value_singleChecksum = FindRecordField(*record, "single-checksum", error);
 	if (value_singleChecksum == nullptr) return false;
 	auto& stored_string_output_singleChecksum = storage.Make<std::string>();
 	if (!ReadString(*value_singleChecksum, stored_string_output_singleChecksum, error)) { return false; }
 	output.singleChecksum = stored_string_output_singleChecksum.c_str();
-	const auto* value_completeChecksum = FindRecordField(*record, "completeChecksum", error);
+	const auto* value_completeChecksum = FindRecordField(*record, "complete-checksum", error);
 	if (value_completeChecksum == nullptr) return false;
 	auto& stored_string_output_completeChecksum = storage.Make<std::string>();
 	if (!ReadString(*value_completeChecksum, stored_string_output_completeChecksum, error)) { return false; }
@@ -503,8 +503,8 @@ bool Read_GetArchiveChecksumResult(const WasmValue& input, GetArchiveChecksumRes
 WasmValue Write_GetArchiveChecksumResult(const GetArchiveChecksumResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("singleChecksum", WasmValue::String((value.singleChecksum == nullptr) ? std::string{} : std::string(value.singleChecksum)));
-	fields.emplace("completeChecksum", WasmValue::String((value.completeChecksum == nullptr) ? std::string{} : std::string(value.completeChecksum)));
+	fields.emplace("single-checksum", WasmValue::String((value.singleChecksum == nullptr) ? std::string{} : std::string(value.singleChecksum)));
+	fields.emplace("complete-checksum", WasmValue::String((value.completeChecksum == nullptr) ? std::string{} : std::string(value.completeChecksum)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -537,7 +537,7 @@ bool Read_GetArchiveContainingFileResult(const WasmValue& input, GetArchiveConta
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_archiveName = FindRecordField(*record, "archiveName", error);
+	const auto* value_archiveName = FindRecordField(*record, "archive-name", error);
 	if (value_archiveName == nullptr) return false;
 	auto& stored_string_output_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_output_archiveName, error)) { return false; }
@@ -548,7 +548,7 @@ bool Read_GetArchiveContainingFileResult(const WasmValue& input, GetArchiveConta
 WasmValue Write_GetArchiveContainingFileResult(const GetArchiveContainingFileResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("archiveName", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
+	fields.emplace("archive-name", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -556,7 +556,7 @@ bool Read_GetArchiveDependenciesQuery(const WasmValue& input, GetArchiveDependen
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_archiveName = FindRecordField(*record, "archiveName", error);
+	const auto* value_archiveName = FindRecordField(*record, "archive-name", error);
 	if (value_archiveName == nullptr) return false;
 	auto& stored_string_output_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_output_archiveName, error)) { return false; }
@@ -567,7 +567,7 @@ bool Read_GetArchiveDependenciesQuery(const WasmValue& input, GetArchiveDependen
 WasmValue Write_GetArchiveDependenciesQuery(const GetArchiveDependenciesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("archiveName", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
+	fields.emplace("archive-name", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -607,7 +607,7 @@ bool Read_GetArchiveInfoQuery(const WasmValue& input, GetArchiveInfoQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_archiveName = FindRecordField(*record, "archiveName", error);
+	const auto* value_archiveName = FindRecordField(*record, "archive-name", error);
 	if (value_archiveName == nullptr) return false;
 	auto& stored_string_output_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_output_archiveName, error)) { return false; }
@@ -618,7 +618,7 @@ bool Read_GetArchiveInfoQuery(const WasmValue& input, GetArchiveInfoQuery& outpu
 WasmValue Write_GetArchiveInfoQuery(const GetArchiveInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("archiveName", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
+	fields.emplace("archive-name", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -653,7 +653,7 @@ bool Read_GetArchivePathQuery(const WasmValue& input, GetArchivePathQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_archiveName = FindRecordField(*record, "archiveName", error);
+	const auto* value_archiveName = FindRecordField(*record, "archive-name", error);
 	if (value_archiveName == nullptr) return false;
 	auto& stored_string_output_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_output_archiveName, error)) { return false; }
@@ -664,7 +664,7 @@ bool Read_GetArchivePathQuery(const WasmValue& input, GetArchivePathQuery& outpu
 WasmValue Write_GetArchivePathQuery(const GetArchivePathQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("archiveName", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
+	fields.emplace("archive-name", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -691,7 +691,7 @@ bool Read_GetArchiveReplacesQuery(const WasmValue& input, GetArchiveReplacesQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_archiveName = FindRecordField(*record, "archiveName", error);
+	const auto* value_archiveName = FindRecordField(*record, "archive-name", error);
 	if (value_archiveName == nullptr) return false;
 	auto& stored_string_output_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_output_archiveName, error)) { return false; }
@@ -702,7 +702,7 @@ bool Read_GetArchiveReplacesQuery(const WasmValue& input, GetArchiveReplacesQuer
 WasmValue Write_GetArchiveReplacesQuery(const GetArchiveReplacesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("archiveName", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
+	fields.emplace("archive-name", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -742,7 +742,7 @@ bool Read_GetArchivesQuery(const WasmValue& input, GetArchivesQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -751,7 +751,7 @@ bool Read_GetArchivesQuery(const WasmValue& input, GetArchivesQuery& output, Nat
 WasmValue Write_GetArchivesQuery(const GetArchivesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -791,12 +791,12 @@ bool Read_GetAvailableAIsQuery(const WasmValue& input, GetAvailableAIsQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_gameArchiveName = FindRecordField(*record, "gameArchiveName", error);
+	const auto* value_gameArchiveName = FindRecordField(*record, "game-archive-name", error);
 	if (value_gameArchiveName == nullptr) return false;
 	auto& stored_string_output_gameArchiveName = storage.Make<std::string>();
 	if (!ReadString(*value_gameArchiveName, stored_string_output_gameArchiveName, error)) { return false; }
 	output.gameArchiveName = stored_string_output_gameArchiveName.c_str();
-	const auto* value_mapArchiveName = FindRecordField(*record, "mapArchiveName", error);
+	const auto* value_mapArchiveName = FindRecordField(*record, "map-archive-name", error);
 	if (value_mapArchiveName == nullptr) return false;
 	auto& stored_string_output_mapArchiveName = storage.Make<std::string>();
 	if (!ReadString(*value_mapArchiveName, stored_string_output_mapArchiveName, error)) { return false; }
@@ -807,8 +807,8 @@ bool Read_GetAvailableAIsQuery(const WasmValue& input, GetAvailableAIsQuery& out
 WasmValue Write_GetAvailableAIsQuery(const GetAvailableAIsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("gameArchiveName", WasmValue::String((value.gameArchiveName == nullptr) ? std::string{} : std::string(value.gameArchiveName)));
-	fields.emplace("mapArchiveName", WasmValue::String((value.mapArchiveName == nullptr) ? std::string{} : std::string(value.mapArchiveName)));
+	fields.emplace("game-archive-name", WasmValue::String((value.gameArchiveName == nullptr) ? std::string{} : std::string(value.gameArchiveName)));
+	fields.emplace("map-archive-name", WasmValue::String((value.mapArchiveName == nullptr) ? std::string{} : std::string(value.mapArchiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -963,7 +963,7 @@ bool Read_GetGamesQuery(const WasmValue& input, GetGamesQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -972,7 +972,7 @@ bool Read_GetGamesQuery(const WasmValue& input, GetGamesQuery& output, NativeCal
 WasmValue Write_GetGamesQuery(const GetGamesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1012,7 +1012,7 @@ bool Read_GetLoadedArchivesQuery(const WasmValue& input, GetLoadedArchivesQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1021,7 +1021,7 @@ bool Read_GetLoadedArchivesQuery(const WasmValue& input, GetLoadedArchivesQuery&
 WasmValue Write_GetLoadedArchivesQuery(const GetLoadedArchivesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1061,7 +1061,7 @@ bool Read_GetMapSquareTextureInfoQuery(const WasmValue& input, GetMapSquareTextu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1070,7 +1070,7 @@ bool Read_GetMapSquareTextureInfoQuery(const WasmValue& input, GetMapSquareTextu
 WasmValue Write_GetMapSquareTextureInfoQuery(const GetMapSquareTextureInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1078,13 +1078,13 @@ bool Read_GetMapSquareTextureInfoResult(const WasmValue& input, GetMapSquareText
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_squareSize = FindRecordField(*record, "squareSize", error);
+	const auto* value_squareSize = FindRecordField(*record, "square-size", error);
 	if (value_squareSize == nullptr) return false;
 	if (!ReadScalar(*value_squareSize, output.squareSize, error)) { return false; }
-	const auto* value_numSquaresX = FindRecordField(*record, "numSquaresX", error);
+	const auto* value_numSquaresX = FindRecordField(*record, "num-squares-x", error);
 	if (value_numSquaresX == nullptr) return false;
 	if (!ReadScalar(*value_numSquaresX, output.numSquaresX, error)) { return false; }
-	const auto* value_numSquaresZ = FindRecordField(*record, "numSquaresZ", error);
+	const auto* value_numSquaresZ = FindRecordField(*record, "num-squares-z", error);
 	if (value_numSquaresZ == nullptr) return false;
 	if (!ReadScalar(*value_numSquaresZ, output.numSquaresZ, error)) { return false; }
 	return true;
@@ -1093,9 +1093,9 @@ bool Read_GetMapSquareTextureInfoResult(const WasmValue& input, GetMapSquareText
 WasmValue Write_GetMapSquareTextureInfoResult(const GetMapSquareTextureInfoResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("squareSize", WriteScalar(value.squareSize));
-	fields.emplace("numSquaresX", WriteScalar(value.numSquaresX));
-	fields.emplace("numSquaresZ", WriteScalar(value.numSquaresZ));
+	fields.emplace("square-size", WriteScalar(value.squareSize));
+	fields.emplace("num-squares-x", WriteScalar(value.numSquaresX));
+	fields.emplace("num-squares-z", WriteScalar(value.numSquaresZ));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1103,21 +1103,21 @@ bool Read_GetMapSquareTextureQuery(const WasmValue& input, GetMapSquareTextureQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texSquareX = FindRecordField(*record, "texSquareX", error);
+	const auto* value_texSquareX = FindRecordField(*record, "tex-square-x", error);
 	if (value_texSquareX == nullptr) return false;
 	if (!ReadScalar(*value_texSquareX, output.texSquareX, error)) { return false; }
-	const auto* value_texSquareY = FindRecordField(*record, "texSquareY", error);
+	const auto* value_texSquareY = FindRecordField(*record, "tex-square-y", error);
 	if (value_texSquareY == nullptr) return false;
 	if (!ReadScalar(*value_texSquareY, output.texSquareY, error)) { return false; }
-	const auto* value_lodMin = FindRecordField(*record, "lodMin", error);
+	const auto* value_lodMin = FindRecordField(*record, "lod-min", error);
 	if (value_lodMin == nullptr) return false;
 	if (!ReadScalar(*value_lodMin, output.lodMin, error)) { return false; }
-	const auto* value_textureName = FindRecordField(*record, "textureName", error);
+	const auto* value_textureName = FindRecordField(*record, "texture-name", error);
 	if (value_textureName == nullptr) return false;
 	auto& stored_string_output_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_output_textureName, error)) { return false; }
 	output.textureName = stored_string_output_textureName.c_str();
-	const auto* value_lodMax = FindRecordField(*record, "lodMax", error);
+	const auto* value_lodMax = FindRecordField(*record, "lod-max", error);
 	if (value_lodMax == nullptr) return false;
 	if (!ReadScalar(*value_lodMax, output.lodMax, error)) { return false; }
 	return true;
@@ -1126,11 +1126,11 @@ bool Read_GetMapSquareTextureQuery(const WasmValue& input, GetMapSquareTextureQu
 WasmValue Write_GetMapSquareTextureQuery(const GetMapSquareTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texSquareX", WriteScalar(value.texSquareX));
-	fields.emplace("texSquareY", WriteScalar(value.texSquareY));
-	fields.emplace("lodMin", WriteScalar(value.lodMin));
-	fields.emplace("textureName", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
-	fields.emplace("lodMax", WriteScalar(value.lodMax));
+	fields.emplace("tex-square-x", WriteScalar(value.texSquareX));
+	fields.emplace("tex-square-y", WriteScalar(value.texSquareY));
+	fields.emplace("lod-min", WriteScalar(value.lodMin));
+	fields.emplace("texture-name", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
+	fields.emplace("lod-max", WriteScalar(value.lodMax));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1155,7 +1155,7 @@ bool Read_GetMapsQuery(const WasmValue& input, GetMapsQuery& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1164,7 +1164,7 @@ bool Read_GetMapsQuery(const WasmValue& input, GetMapsQuery& output, NativeCallS
 WasmValue Write_GetMapsQuery(const GetMapsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1204,7 +1204,7 @@ bool Read_GetNameFromRapidTagQuery(const WasmValue& input, GetNameFromRapidTagQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_rapidTag = FindRecordField(*record, "rapidTag", error);
+	const auto* value_rapidTag = FindRecordField(*record, "rapid-tag", error);
 	if (value_rapidTag == nullptr) return false;
 	auto& stored_string_output_rapidTag = storage.Make<std::string>();
 	if (!ReadString(*value_rapidTag, stored_string_output_rapidTag, error)) { return false; }
@@ -1215,7 +1215,7 @@ bool Read_GetNameFromRapidTagQuery(const WasmValue& input, GetNameFromRapidTagQu
 WasmValue Write_GetNameFromRapidTagQuery(const GetNameFromRapidTagQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("rapidTag", WasmValue::String((value.rapidTag == nullptr) ? std::string{} : std::string(value.rapidTag)));
+	fields.emplace("rapid-tag", WasmValue::String((value.rapidTag == nullptr) ? std::string{} : std::string(value.rapidTag)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1223,7 +1223,7 @@ bool Read_GetNameFromRapidTagResult(const WasmValue& input, GetNameFromRapidTagR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_archiveName = FindRecordField(*record, "archiveName", error);
+	const auto* value_archiveName = FindRecordField(*record, "archive-name", error);
 	if (value_archiveName == nullptr) return false;
 	auto& stored_string_output_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_output_archiveName, error)) { return false; }
@@ -1234,7 +1234,7 @@ bool Read_GetNameFromRapidTagResult(const WasmValue& input, GetNameFromRapidTagR
 WasmValue Write_GetNameFromRapidTagResult(const GetNameFromRapidTagResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("archiveName", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
+	fields.emplace("archive-name", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1242,7 +1242,7 @@ bool Read_HasArchiveQuery(const WasmValue& input, HasArchiveQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_archiveName = FindRecordField(*record, "archiveName", error);
+	const auto* value_archiveName = FindRecordField(*record, "archive-name", error);
 	if (value_archiveName == nullptr) return false;
 	auto& stored_string_output_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_output_archiveName, error)) { return false; }
@@ -1253,7 +1253,7 @@ bool Read_HasArchiveQuery(const WasmValue& input, HasArchiveQuery& output, Nativ
 WasmValue Write_HasArchiveQuery(const HasArchiveQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("archiveName", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
+	fields.emplace("archive-name", WasmValue::String((value.archiveName == nullptr) ? std::string{} : std::string(value.archiveName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1261,7 +1261,7 @@ bool Read_HasArchiveResult(const WasmValue& input, HasArchiveResult& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_hasArchive = FindRecordField(*record, "hasArchive", error);
+	const auto* value_hasArchive = FindRecordField(*record, "has-archive", error);
 	if (value_hasArchive == nullptr) return false;
 	if (!ReadScalar(*value_hasArchive, output.hasArchive, error)) { return false; }
 	return true;
@@ -1270,7 +1270,7 @@ bool Read_HasArchiveResult(const WasmValue& input, HasArchiveResult& output, Nat
 WasmValue Write_HasArchiveResult(const HasArchiveResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("hasArchive", WriteScalar(value.hasArchive));
+	fields.emplace("has-archive", WriteScalar(value.hasArchive));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1297,7 +1297,7 @@ bool Read_IsDirectoryResult(const WasmValue& input, IsDirectoryResult& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_isDirectory = FindRecordField(*record, "isDirectory", error);
+	const auto* value_isDirectory = FindRecordField(*record, "is-directory", error);
 	if (value_isDirectory == nullptr) return false;
 	if (!ReadScalar(*value_isDirectory, output.isDirectory, error)) { return false; }
 	return true;
@@ -1306,7 +1306,7 @@ bool Read_IsDirectoryResult(const WasmValue& input, IsDirectoryResult& output, N
 WasmValue Write_IsDirectoryResult(const IsDirectoryResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("isDirectory", WriteScalar(value.isDirectory));
+	fields.emplace("is-directory", WriteScalar(value.isDirectory));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1767,7 +1767,7 @@ bool Read_ReadFileAsStringResult(const WasmValue& input, ReadFileAsStringResult&
 	auto& stored_string_output_content = storage.Make<std::string>();
 	if (!ReadString(*value_content, stored_string_output_content, error)) { return false; }
 	output.content = stored_string_output_content.c_str();
-	const auto* value_contentLength = FindRecordField(*record, "contentLength", error);
+	const auto* value_contentLength = FindRecordField(*record, "content-length", error);
 	if (value_contentLength == nullptr) return false;
 	if (!ReadScalar(*value_contentLength, output.contentLength, error)) { return false; }
 	return true;
@@ -1777,7 +1777,7 @@ WasmValue Write_ReadFileAsStringResult(const ReadFileAsStringResult& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("content", WasmValue::String((value.content == nullptr) ? std::string{} : std::string(value.content)));
-	fields.emplace("contentLength", WriteScalar(value.contentLength));
+	fields.emplace("content-length", WriteScalar(value.contentLength));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1824,7 +1824,7 @@ bool Read_ScanAllDirsQuery(const WasmValue& input, ScanAllDirsQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1833,7 +1833,7 @@ bool Read_ScanAllDirsQuery(const WasmValue& input, ScanAllDirsQuery& output, Nat
 WasmValue Write_ScanAllDirsQuery(const ScanAllDirsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1854,13 +1854,13 @@ bool Read_SetMapSquareTextureQuery(const WasmValue& input, SetMapSquareTextureQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texSquareX = FindRecordField(*record, "texSquareX", error);
+	const auto* value_texSquareX = FindRecordField(*record, "tex-square-x", error);
 	if (value_texSquareX == nullptr) return false;
 	if (!ReadScalar(*value_texSquareX, output.texSquareX, error)) { return false; }
-	const auto* value_texSquareY = FindRecordField(*record, "texSquareY", error);
+	const auto* value_texSquareY = FindRecordField(*record, "tex-square-y", error);
 	if (value_texSquareY == nullptr) return false;
 	if (!ReadScalar(*value_texSquareY, output.texSquareY, error)) { return false; }
-	const auto* value_textureName = FindRecordField(*record, "textureName", error);
+	const auto* value_textureName = FindRecordField(*record, "texture-name", error);
 	if (value_textureName == nullptr) return false;
 	auto& stored_string_output_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_output_textureName, error)) { return false; }
@@ -1871,9 +1871,9 @@ bool Read_SetMapSquareTextureQuery(const WasmValue& input, SetMapSquareTextureQu
 WasmValue Write_SetMapSquareTextureQuery(const SetMapSquareTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texSquareX", WriteScalar(value.texSquareX));
-	fields.emplace("texSquareY", WriteScalar(value.texSquareY));
-	fields.emplace("textureName", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
+	fields.emplace("tex-square-x", WriteScalar(value.texSquareX));
+	fields.emplace("tex-square-y", WriteScalar(value.texSquareY));
+	fields.emplace("texture-name", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1971,7 +1971,7 @@ bool Read_UnpackF32Query(const WasmValue& input, UnpackF32Query& output, NativeC
 	if (!ReadByteList(*value_data, native_data, error)) { return false; }
 	output.data = reinterpret_cast<decltype(output.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), output.dataSize, error)) { return false; }
-	const auto* value_byteOffset = FindRecordField(*record, "byteOffset", error);
+	const auto* value_byteOffset = FindRecordField(*record, "byte-offset", error);
 	if (value_byteOffset == nullptr) return false;
 	if (!ReadScalar(*value_byteOffset, output.byteOffset, error)) { return false; }
 	const auto* value_count = FindRecordField(*record, "count", error);
@@ -1984,7 +1984,7 @@ WasmValue Write_UnpackF32Query(const UnpackF32Query& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("byteOffset", WriteScalar(value.byteOffset));
+	fields.emplace("byte-offset", WriteScalar(value.byteOffset));
 	fields.emplace("count", WriteScalar(value.count));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2026,7 +2026,7 @@ bool Read_UnpackS16Query(const WasmValue& input, UnpackS16Query& output, NativeC
 	if (!ReadByteList(*value_data, native_data, error)) { return false; }
 	output.data = reinterpret_cast<decltype(output.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), output.dataSize, error)) { return false; }
-	const auto* value_byteOffset = FindRecordField(*record, "byteOffset", error);
+	const auto* value_byteOffset = FindRecordField(*record, "byte-offset", error);
 	if (value_byteOffset == nullptr) return false;
 	if (!ReadScalar(*value_byteOffset, output.byteOffset, error)) { return false; }
 	const auto* value_count = FindRecordField(*record, "count", error);
@@ -2039,7 +2039,7 @@ WasmValue Write_UnpackS16Query(const UnpackS16Query& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("byteOffset", WriteScalar(value.byteOffset));
+	fields.emplace("byte-offset", WriteScalar(value.byteOffset));
 	fields.emplace("count", WriteScalar(value.count));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2081,7 +2081,7 @@ bool Read_UnpackS32Query(const WasmValue& input, UnpackS32Query& output, NativeC
 	if (!ReadByteList(*value_data, native_data, error)) { return false; }
 	output.data = reinterpret_cast<decltype(output.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), output.dataSize, error)) { return false; }
-	const auto* value_byteOffset = FindRecordField(*record, "byteOffset", error);
+	const auto* value_byteOffset = FindRecordField(*record, "byte-offset", error);
 	if (value_byteOffset == nullptr) return false;
 	if (!ReadScalar(*value_byteOffset, output.byteOffset, error)) { return false; }
 	const auto* value_count = FindRecordField(*record, "count", error);
@@ -2094,7 +2094,7 @@ WasmValue Write_UnpackS32Query(const UnpackS32Query& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("byteOffset", WriteScalar(value.byteOffset));
+	fields.emplace("byte-offset", WriteScalar(value.byteOffset));
 	fields.emplace("count", WriteScalar(value.count));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2136,7 +2136,7 @@ bool Read_UnpackS8Query(const WasmValue& input, UnpackS8Query& output, NativeCal
 	if (!ReadByteList(*value_data, native_data, error)) { return false; }
 	output.data = reinterpret_cast<decltype(output.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), output.dataSize, error)) { return false; }
-	const auto* value_byteOffset = FindRecordField(*record, "byteOffset", error);
+	const auto* value_byteOffset = FindRecordField(*record, "byte-offset", error);
 	if (value_byteOffset == nullptr) return false;
 	if (!ReadScalar(*value_byteOffset, output.byteOffset, error)) { return false; }
 	const auto* value_count = FindRecordField(*record, "count", error);
@@ -2149,7 +2149,7 @@ WasmValue Write_UnpackS8Query(const UnpackS8Query& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("byteOffset", WriteScalar(value.byteOffset));
+	fields.emplace("byte-offset", WriteScalar(value.byteOffset));
 	fields.emplace("count", WriteScalar(value.count));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2191,7 +2191,7 @@ bool Read_UnpackU16Query(const WasmValue& input, UnpackU16Query& output, NativeC
 	if (!ReadByteList(*value_data, native_data, error)) { return false; }
 	output.data = reinterpret_cast<decltype(output.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), output.dataSize, error)) { return false; }
-	const auto* value_byteOffset = FindRecordField(*record, "byteOffset", error);
+	const auto* value_byteOffset = FindRecordField(*record, "byte-offset", error);
 	if (value_byteOffset == nullptr) return false;
 	if (!ReadScalar(*value_byteOffset, output.byteOffset, error)) { return false; }
 	const auto* value_count = FindRecordField(*record, "count", error);
@@ -2204,7 +2204,7 @@ WasmValue Write_UnpackU16Query(const UnpackU16Query& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("byteOffset", WriteScalar(value.byteOffset));
+	fields.emplace("byte-offset", WriteScalar(value.byteOffset));
 	fields.emplace("count", WriteScalar(value.count));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2246,7 +2246,7 @@ bool Read_UnpackU32Query(const WasmValue& input, UnpackU32Query& output, NativeC
 	if (!ReadByteList(*value_data, native_data, error)) { return false; }
 	output.data = reinterpret_cast<decltype(output.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), output.dataSize, error)) { return false; }
-	const auto* value_byteOffset = FindRecordField(*record, "byteOffset", error);
+	const auto* value_byteOffset = FindRecordField(*record, "byte-offset", error);
 	if (value_byteOffset == nullptr) return false;
 	if (!ReadScalar(*value_byteOffset, output.byteOffset, error)) { return false; }
 	const auto* value_count = FindRecordField(*record, "count", error);
@@ -2259,7 +2259,7 @@ WasmValue Write_UnpackU32Query(const UnpackU32Query& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("byteOffset", WriteScalar(value.byteOffset));
+	fields.emplace("byte-offset", WriteScalar(value.byteOffset));
 	fields.emplace("count", WriteScalar(value.count));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2301,7 +2301,7 @@ bool Read_UnpackU8Query(const WasmValue& input, UnpackU8Query& output, NativeCal
 	if (!ReadByteList(*value_data, native_data, error)) { return false; }
 	output.data = reinterpret_cast<decltype(output.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), output.dataSize, error)) { return false; }
-	const auto* value_byteOffset = FindRecordField(*record, "byteOffset", error);
+	const auto* value_byteOffset = FindRecordField(*record, "byte-offset", error);
 	if (value_byteOffset == nullptr) return false;
 	if (!ReadScalar(*value_byteOffset, output.byteOffset, error)) { return false; }
 	const auto* value_count = FindRecordField(*record, "count", error);
@@ -2314,7 +2314,7 @@ WasmValue Write_UnpackU8Query(const UnpackU8Query& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("byteOffset", WriteScalar(value.byteOffset));
+	fields.emplace("byte-offset", WriteScalar(value.byteOffset));
 	fields.emplace("count", WriteScalar(value.count));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2465,7 +2465,7 @@ NativeCalloutDispatch Dispatch_vfs_CalculateHash(NativeInterface* nativeInterfac
 	if (!ReadByteList(*value_data, native_data, error)) { return NativeCalloutDispatch::handled; }
 	query.data = reinterpret_cast<decltype(query.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), query.dataSize, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "hashType", query.hashType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "hash-type", query.hashType, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->CalculateHash(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.hash == nullptr) ? std::string{} : std::string(nativeResult.hash));
@@ -2478,22 +2478,22 @@ NativeCalloutDispatch Dispatch_vfs_CompressFolder(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	CompressFolderQuery query{};
 	CompressFolderResult nativeResult{};
-	const WasmValue* value_folderPath = FindArgument(arguments, 0u, 0u, 5u, 5u, "folderPath", error);
+	const WasmValue* value_folderPath = FindArgument(arguments, 0u, 0u, 5u, 5u, "folder-path", error);
 	if (value_folderPath == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_folderPath = storage.Make<std::string>();
 	if (!ReadString(*value_folderPath, stored_string_query_folderPath, error)) { return NativeCalloutDispatch::handled; }
 	query.folderPath = stored_string_query_folderPath.c_str();
-	const WasmValue* value_archiveType = FindArgument(arguments, 1u, 1u, 5u, 5u, "archiveType", error);
+	const WasmValue* value_archiveType = FindArgument(arguments, 1u, 1u, 5u, 5u, "archive-type", error);
 	if (value_archiveType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_archiveType = storage.Make<std::string>();
 	if (!ReadString(*value_archiveType, stored_string_query_archiveType, error)) { return NativeCalloutDispatch::handled; }
 	query.archiveType = stored_string_query_archiveType.c_str();
-	const WasmValue* value_compressedFilePath = FindArgument(arguments, 2u, 2u, 5u, 5u, "compressedFilePath", error);
+	const WasmValue* value_compressedFilePath = FindArgument(arguments, 2u, 2u, 5u, 5u, "compressed-file-path", error);
 	if (value_compressedFilePath == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_compressedFilePath = storage.Make<std::string>();
 	if (!ReadString(*value_compressedFilePath, stored_string_query_compressedFilePath, error)) { return NativeCalloutDispatch::handled; }
 	query.compressedFilePath = stored_string_query_compressedFilePath.c_str();
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "includeFolder", query.includeFolder, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "include-folder", query.includeFolder, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_mode = FindArgument(arguments, 4u, 4u, 5u, 5u, "mode", error);
 	if (value_mode == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_mode = storage.Make<std::string>();
@@ -2612,7 +2612,7 @@ NativeCalloutDispatch Dispatch_vfs_GetAllArchives(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetAllArchivesQuery query{};
 	GetAllArchivesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->GetAllArchives(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.archives, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -2625,7 +2625,7 @@ NativeCalloutDispatch Dispatch_vfs_GetArchiveChecksum(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetArchiveChecksumQuery query{};
 	GetArchiveChecksumResult nativeResult{};
-	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archiveName", error);
+	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archive-name", error);
 	if (value_archiveName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_query_archiveName, error)) { return NativeCalloutDispatch::handled; }
@@ -2633,8 +2633,8 @@ NativeCalloutDispatch Dispatch_vfs_GetArchiveChecksum(NativeInterface* nativeInt
 	nativeInterface->vfs->GetArchiveChecksum(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("singleChecksum", WasmValue::String((nativeResult.singleChecksum == nullptr) ? std::string{} : std::string(nativeResult.singleChecksum)));
-	outputFields.emplace("completeChecksum", WasmValue::String((nativeResult.completeChecksum == nullptr) ? std::string{} : std::string(nativeResult.completeChecksum)));
+	outputFields.emplace("single-checksum", WasmValue::String((nativeResult.singleChecksum == nullptr) ? std::string{} : std::string(nativeResult.singleChecksum)));
+	outputFields.emplace("complete-checksum", WasmValue::String((nativeResult.completeChecksum == nullptr) ? std::string{} : std::string(nativeResult.completeChecksum)));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -2667,7 +2667,7 @@ NativeCalloutDispatch Dispatch_vfs_GetArchiveDependencies(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetArchiveDependenciesQuery query{};
 	GetArchiveDependenciesResult nativeResult{};
-	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archiveName", error);
+	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archive-name", error);
 	if (value_archiveName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_query_archiveName, error)) { return NativeCalloutDispatch::handled; }
@@ -2684,7 +2684,7 @@ NativeCalloutDispatch Dispatch_vfs_GetArchiveInfo(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetArchiveInfoQuery query{};
 	GetArchiveInfoResult nativeResult{};
-	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archiveName", error);
+	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archive-name", error);
 	if (value_archiveName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_query_archiveName, error)) { return NativeCalloutDispatch::handled; }
@@ -2701,7 +2701,7 @@ NativeCalloutDispatch Dispatch_vfs_GetArchivePath(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetArchivePathQuery query{};
 	GetArchivePathResult nativeResult{};
-	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archiveName", error);
+	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archive-name", error);
 	if (value_archiveName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_query_archiveName, error)) { return NativeCalloutDispatch::handled; }
@@ -2718,7 +2718,7 @@ NativeCalloutDispatch Dispatch_vfs_GetArchiveReplaces(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetArchiveReplacesQuery query{};
 	GetArchiveReplacesResult nativeResult{};
-	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archiveName", error);
+	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archive-name", error);
 	if (value_archiveName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_query_archiveName, error)) { return NativeCalloutDispatch::handled; }
@@ -2735,7 +2735,7 @@ NativeCalloutDispatch Dispatch_vfs_GetArchives(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	GetArchivesQuery query{};
 	GetArchivesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->GetArchives(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.archives, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -2748,12 +2748,12 @@ NativeCalloutDispatch Dispatch_vfs_GetAvailableAIs(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GetAvailableAIsQuery query{};
 	GetAvailableAIsResult nativeResult{};
-	const WasmValue* value_gameArchiveName = FindArgument(arguments, 0u, 0u, 2u, 2u, "gameArchiveName", error);
+	const WasmValue* value_gameArchiveName = FindArgument(arguments, 0u, 0u, 2u, 2u, "game-archive-name", error);
 	if (value_gameArchiveName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_gameArchiveName = storage.Make<std::string>();
 	if (!ReadString(*value_gameArchiveName, stored_string_query_gameArchiveName, error)) { return NativeCalloutDispatch::handled; }
 	query.gameArchiveName = stored_string_query_gameArchiveName.c_str();
-	const WasmValue* value_mapArchiveName = FindArgument(arguments, 1u, 1u, 2u, 2u, "mapArchiveName", error);
+	const WasmValue* value_mapArchiveName = FindArgument(arguments, 1u, 1u, 2u, 2u, "map-archive-name", error);
 	if (value_mapArchiveName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_mapArchiveName = storage.Make<std::string>();
 	if (!ReadString(*value_mapArchiveName, stored_string_query_mapArchiveName, error)) { return NativeCalloutDispatch::handled; }
@@ -2829,7 +2829,7 @@ NativeCalloutDispatch Dispatch_vfs_GetGames(NativeInterface* nativeInterface, co
 	NativeCallStorage storage;
 	GetGamesQuery query{};
 	GetGamesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->GetGames(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.games, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -2842,7 +2842,7 @@ NativeCalloutDispatch Dispatch_vfs_GetLoadedArchives(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetLoadedArchivesQuery query{};
 	GetLoadedArchivesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->GetLoadedArchives(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.archives, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -2855,15 +2855,15 @@ NativeCalloutDispatch Dispatch_vfs_GetMapSquareTexture(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetMapSquareTextureQuery query{};
 	GetMapSquareTextureResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "texSquareX", query.texSquareX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "texSquareY", query.texSquareY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "lodMin", query.lodMin, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_textureName = FindArgument(arguments, 3u, 3u, 5u, 5u, "textureName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "tex-square-x", query.texSquareX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "tex-square-y", query.texSquareY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "lod-min", query.lodMin, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_textureName = FindArgument(arguments, 3u, 3u, 5u, 5u, "texture-name", error);
 	if (value_textureName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_query_textureName, error)) { return NativeCalloutDispatch::handled; }
 	query.textureName = stored_string_query_textureName.c_str();
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "lodMax", query.lodMax, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "lod-max", query.lodMax, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->GetMapSquareTexture(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -2876,13 +2876,13 @@ NativeCalloutDispatch Dispatch_vfs_GetMapSquareTextureInfo(NativeInterface* nati
 	NativeCallStorage storage;
 	GetMapSquareTextureInfoQuery query{};
 	GetMapSquareTextureInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->GetMapSquareTextureInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("squareSize", WriteScalar(nativeResult.squareSize));
-	outputFields.emplace("numSquaresX", WriteScalar(nativeResult.numSquaresX));
-	outputFields.emplace("numSquaresZ", WriteScalar(nativeResult.numSquaresZ));
+	outputFields.emplace("square-size", WriteScalar(nativeResult.squareSize));
+	outputFields.emplace("num-squares-x", WriteScalar(nativeResult.numSquaresX));
+	outputFields.emplace("num-squares-z", WriteScalar(nativeResult.numSquaresZ));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -2893,7 +2893,7 @@ NativeCalloutDispatch Dispatch_vfs_GetMaps(NativeInterface* nativeInterface, con
 	NativeCallStorage storage;
 	GetMapsQuery query{};
 	GetMapsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->GetMaps(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.maps, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -2906,7 +2906,7 @@ NativeCalloutDispatch Dispatch_vfs_GetNameFromRapidTag(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetNameFromRapidTagQuery query{};
 	GetNameFromRapidTagResult nativeResult{};
-	const WasmValue* value_rapidTag = FindArgument(arguments, 0u, 0u, 1u, 1u, "rapidTag", error);
+	const WasmValue* value_rapidTag = FindArgument(arguments, 0u, 0u, 1u, 1u, "rapid-tag", error);
 	if (value_rapidTag == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_rapidTag = storage.Make<std::string>();
 	if (!ReadString(*value_rapidTag, stored_string_query_rapidTag, error)) { return NativeCalloutDispatch::handled; }
@@ -2923,7 +2923,7 @@ NativeCalloutDispatch Dispatch_vfs_HasArchive(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	HasArchiveQuery query{};
 	HasArchiveResult nativeResult{};
-	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archiveName", error);
+	const WasmValue* value_archiveName = FindArgument(arguments, 0u, 0u, 1u, 1u, "archive-name", error);
 	if (value_archiveName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_archiveName = storage.Make<std::string>();
 	if (!ReadString(*value_archiveName, stored_string_query_archiveName, error)) { return NativeCalloutDispatch::handled; }
@@ -3209,7 +3209,7 @@ NativeCalloutDispatch Dispatch_vfs_ScanAllDirs(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	ScanAllDirsQuery query{};
 	ScanAllDirsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->ScanAllDirs(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -3222,9 +3222,9 @@ NativeCalloutDispatch Dispatch_vfs_SetMapSquareTexture(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	SetMapSquareTextureQuery query{};
 	SetMapSquareTextureResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "texSquareX", query.texSquareX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "texSquareY", query.texSquareY, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_textureName = FindArgument(arguments, 2u, 2u, 3u, 3u, "textureName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "tex-square-x", query.texSquareX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "tex-square-y", query.texSquareY, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_textureName = FindArgument(arguments, 2u, 2u, 3u, 3u, "texture-name", error);
 	if (value_textureName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_query_textureName, error)) { return NativeCalloutDispatch::handled; }
@@ -3275,7 +3275,7 @@ NativeCalloutDispatch Dispatch_vfs_UnpackF32(NativeInterface* nativeInterface, c
 	if (!ReadByteList(*value_data, native_data, error)) { return NativeCalloutDispatch::handled; }
 	query.data = reinterpret_cast<decltype(query.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), query.dataSize, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byteOffset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byte-offset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "count", query.count, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->UnpackF32(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -3295,7 +3295,7 @@ NativeCalloutDispatch Dispatch_vfs_UnpackS16(NativeInterface* nativeInterface, c
 	if (!ReadByteList(*value_data, native_data, error)) { return NativeCalloutDispatch::handled; }
 	query.data = reinterpret_cast<decltype(query.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), query.dataSize, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byteOffset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byte-offset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "count", query.count, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->UnpackS16(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -3315,7 +3315,7 @@ NativeCalloutDispatch Dispatch_vfs_UnpackS32(NativeInterface* nativeInterface, c
 	if (!ReadByteList(*value_data, native_data, error)) { return NativeCalloutDispatch::handled; }
 	query.data = reinterpret_cast<decltype(query.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), query.dataSize, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byteOffset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byte-offset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "count", query.count, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->UnpackS32(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -3335,7 +3335,7 @@ NativeCalloutDispatch Dispatch_vfs_UnpackS8(NativeInterface* nativeInterface, co
 	if (!ReadByteList(*value_data, native_data, error)) { return NativeCalloutDispatch::handled; }
 	query.data = reinterpret_cast<decltype(query.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), query.dataSize, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byteOffset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byte-offset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "count", query.count, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->UnpackS8(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -3355,7 +3355,7 @@ NativeCalloutDispatch Dispatch_vfs_UnpackU16(NativeInterface* nativeInterface, c
 	if (!ReadByteList(*value_data, native_data, error)) { return NativeCalloutDispatch::handled; }
 	query.data = reinterpret_cast<decltype(query.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), query.dataSize, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byteOffset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byte-offset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "count", query.count, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->UnpackU16(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -3375,7 +3375,7 @@ NativeCalloutDispatch Dispatch_vfs_UnpackU32(NativeInterface* nativeInterface, c
 	if (!ReadByteList(*value_data, native_data, error)) { return NativeCalloutDispatch::handled; }
 	query.data = reinterpret_cast<decltype(query.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), query.dataSize, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byteOffset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byte-offset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "count", query.count, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->UnpackU32(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -3395,7 +3395,7 @@ NativeCalloutDispatch Dispatch_vfs_UnpackU8(NativeInterface* nativeInterface, co
 	if (!ReadByteList(*value_data, native_data, error)) { return NativeCalloutDispatch::handled; }
 	query.data = reinterpret_cast<decltype(query.data)>(native_data.data());
 	if (!AssignCount(native_data.size(), query.dataSize, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byteOffset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "byte-offset", query.byteOffset, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "count", query.count, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->vfs->UnpackU8(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;

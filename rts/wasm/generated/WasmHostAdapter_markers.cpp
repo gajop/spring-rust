@@ -12,7 +12,7 @@ bool Read_AddWorldIconQuery(const WasmValue& input, AddWorldIconQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cmdID = FindRecordField(*record, "cmdID", error);
+	const auto* value_cmdID = FindRecordField(*record, "cmd-id", error);
 	if (value_cmdID == nullptr) return false;
 	if (!ReadScalar(*value_cmdID, output.cmdID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -24,7 +24,7 @@ bool Read_AddWorldIconQuery(const WasmValue& input, AddWorldIconQuery& output, N
 WasmValue Write_AddWorldIconQuery(const AddWorldIconQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cmdID", WriteScalar(value.cmdID));
+	fields.emplace("cmd-id", WriteScalar(value.cmdID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	return WasmValue::Record(std::move(fields));
 }
@@ -90,13 +90,13 @@ bool Read_AddWorldUnitQuery(const WasmValue& input, AddWorldUnitQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_facing = FindRecordField(*record, "facing", error);
@@ -108,9 +108,9 @@ bool Read_AddWorldUnitQuery(const WasmValue& input, AddWorldUnitQuery& output, N
 WasmValue Write_AddWorldUnitQuery(const AddWorldUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("facing", WriteScalar(value.facing));
 	return WasmValue::Record(std::move(fields));
 }
@@ -142,10 +142,10 @@ bool Read_MarkerAddLineQuery(const WasmValue& input, MarkerAddLineQuery& output,
 	const auto* value_to = FindRecordField(*record, "to", error);
 	if (value_to == nullptr) return false;
 	if (!Read_Float3(*value_to, output.to, storage, error)) { return false; }
-	const auto* value_localOnly = FindRecordField(*record, "localOnly", error);
+	const auto* value_localOnly = FindRecordField(*record, "local-only", error);
 	if (value_localOnly == nullptr) return false;
 	if (!ReadScalar(*value_localOnly, output.localOnly, error)) { return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	return true;
@@ -156,8 +156,8 @@ WasmValue Write_MarkerAddLineQuery(const MarkerAddLineQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("from", Write_Float3(value.from));
 	fields.emplace("to", Write_Float3(value.to));
-	fields.emplace("localOnly", WriteScalar(value.localOnly));
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("local-only", WriteScalar(value.localOnly));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -190,10 +190,10 @@ bool Read_MarkerAddPointQuery(const WasmValue& input, MarkerAddPointQuery& outpu
 	auto& stored_string_output_text = storage.Make<std::string>();
 	if (!ReadString(*value_text, stored_string_output_text, error)) { return false; }
 	output.text = stored_string_output_text.c_str();
-	const auto* value_localOnly = FindRecordField(*record, "localOnly", error);
+	const auto* value_localOnly = FindRecordField(*record, "local-only", error);
 	if (value_localOnly == nullptr) return false;
 	if (!ReadScalar(*value_localOnly, output.localOnly, error)) { return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	return true;
@@ -204,8 +204,8 @@ WasmValue Write_MarkerAddPointQuery(const MarkerAddPointQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("text", WasmValue::String((value.text == nullptr) ? std::string{} : std::string(value.text)));
-	fields.emplace("localOnly", WriteScalar(value.localOnly));
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("local-only", WriteScalar(value.localOnly));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -230,10 +230,10 @@ bool Read_MarkerErasePositionOptions(const WasmValue& input, MarkerErasePosition
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_localOnly = FindRecordField(*record, "localOnly", error);
+	const auto* value_localOnly = FindRecordField(*record, "local-only", error);
 	if (value_localOnly == nullptr) return false;
 	if (!ReadScalar(*value_localOnly, output.localOnly, error)) { return false; }
-	const auto* value_alwaysErase = FindRecordField(*record, "alwaysErase", error);
+	const auto* value_alwaysErase = FindRecordField(*record, "always-erase", error);
 	if (value_alwaysErase == nullptr) return false;
 	if (!ReadScalar(*value_alwaysErase, output.alwaysErase, error)) { return false; }
 	return true;
@@ -242,8 +242,8 @@ bool Read_MarkerErasePositionOptions(const WasmValue& input, MarkerErasePosition
 WasmValue Write_MarkerErasePositionOptions(const MarkerErasePositionOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("localOnly", WriteScalar(value.localOnly));
-	fields.emplace("alwaysErase", WriteScalar(value.alwaysErase));
+	fields.emplace("local-only", WriteScalar(value.localOnly));
+	fields.emplace("always-erase", WriteScalar(value.alwaysErase));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -260,7 +260,7 @@ bool Read_MarkerErasePositionQuery(const WasmValue& input, MarkerErasePositionQu
 	const auto* value_options = FindRecordField(*record, "options", error);
 	if (value_options == nullptr) return false;
 	if (!Read_MarkerErasePositionOptions(*value_options, output.options, storage, error)) { return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	return true;
@@ -272,7 +272,7 @@ WasmValue Write_MarkerErasePositionQuery(const MarkerErasePositionQuery& value)
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("unused", WriteScalar(value.unused));
 	fields.emplace("options", Write_MarkerErasePositionOptions(value.options));
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -303,7 +303,7 @@ NativeCalloutDispatch Dispatch_markers_AddWorldIcon(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	AddWorldIconQuery query{};
 	AddWorldIconResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "cmdID", query.cmdID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "cmd-id", query.cmdID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->markers->AddWorldIcon(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -335,9 +335,9 @@ NativeCalloutDispatch Dispatch_markers_AddWorldUnit(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	AddWorldUnitQuery query{};
 	AddWorldUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 4u, 4u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "facing", query.facing, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->markers->AddWorldUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -353,8 +353,8 @@ NativeCalloutDispatch Dispatch_markers_MarkerAddLine(NativeInterface* nativeInte
 	MarkerAddLineResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 4u, 4u, "from", Read_Float3, query.from, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 4u, 4u, "to", Read_Float3, query.to, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "localOnly", query.localOnly, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "local-only", query.localOnly, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->markers->MarkerAddLine(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -373,8 +373,8 @@ NativeCalloutDispatch Dispatch_markers_MarkerAddPoint(NativeInterface* nativeInt
 	auto& stored_string_query_text = storage.Make<std::string>();
 	if (!ReadString(*value_text, stored_string_query_text, error)) { return NativeCalloutDispatch::handled; }
 	query.text = stored_string_query_text.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "localOnly", query.localOnly, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "local-only", query.localOnly, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->markers->MarkerAddPoint(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -390,7 +390,7 @@ NativeCalloutDispatch Dispatch_markers_MarkerErasePosition(NativeInterface* nati
 	if (!ReadRecordArgument(arguments, 0u, 0u, 4u, 4u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "unused", query.unused, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 4u, 4u, "options", Read_MarkerErasePositionOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->markers->MarkerErasePosition(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

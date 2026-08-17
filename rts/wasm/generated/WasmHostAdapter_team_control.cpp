@@ -18,8 +18,8 @@ NativeCalloutDispatch Dispatch_team_control_AddTeamResource(NativeInterface* nat
 	NativeCallStorage storage;
 	AddTeamResourceQuery query{};
 	AddTeamResourceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resourceType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resource-type", error);
 	if (value_resourceType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_query_resourceType, error)) { return NativeCalloutDispatch::handled; }
@@ -37,8 +37,8 @@ NativeCalloutDispatch Dispatch_team_control_AddTeamResourceExcessStats(NativeInt
 	NativeCallStorage storage;
 	AddTeamResourceExcessStatsQuery query{};
 	AddTeamResourceExcessStatsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resourceType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resource-type", error);
 	if (value_resourceType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_query_resourceType, error)) { return NativeCalloutDispatch::handled; }
@@ -56,8 +56,8 @@ NativeCalloutDispatch Dispatch_team_control_AssignPlayerToTeam(NativeInterface* 
 	NativeCallStorage storage;
 	AssignPlayerToTeamQuery query{};
 	AssignPlayerToTeamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->AssignPlayerToTeam(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -70,7 +70,7 @@ NativeCalloutDispatch Dispatch_team_control_GameOver(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GameOverQuery query{};
 	GameOverResult nativeResult{};
-	const WasmValue* value_winningAllyTeams = FindArgument(arguments, 0u, 0u, 1u, 1u, "winningAllyTeams", error);
+	const WasmValue* value_winningAllyTeams = FindArgument(arguments, 0u, 0u, 1u, 1u, "winning-ally-teams", error);
 	if (value_winningAllyTeams == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_winningAllyTeams = std::get_if<WasmValueList>(&(*value_winningAllyTeams).storage);
 	if (list_winningAllyTeams == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -95,7 +95,7 @@ NativeCalloutDispatch Dispatch_team_control_KillTeam(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	KillTeamQuery query{};
 	KillTeamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->KillTeam(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -108,8 +108,8 @@ NativeCalloutDispatch Dispatch_team_control_SetAlly(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	SetAllyQuery query{};
 	SetAllyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "firstAllyTeamID", query.firstAllyTeamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "secondAllyTeamID", query.secondAllyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "first-ally-team-id", query.firstAllyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "second-ally-team-id", query.secondAllyTeamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "allied", query.allied, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->SetAlly(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -123,11 +123,11 @@ NativeCalloutDispatch Dispatch_team_control_SetAllyTeamStartBox(NativeInterface*
 	NativeCallStorage storage;
 	SetAllyTeamStartBoxQuery query{};
 	SetAllyTeamStartBoxResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "minX", query.minX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "minZ", query.minZ, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "maxX", query.maxX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "maxZ", query.maxZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "min-x", query.minX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "min-z", query.minZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "max-x", query.maxX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "max-z", query.maxZ, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->SetAllyTeamStartBox(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -140,7 +140,7 @@ NativeCalloutDispatch Dispatch_team_control_SetGlobalLos(NativeInterface* native
 	NativeCallStorage storage;
 	SetGlobalLosQuery query{};
 	SetGlobalLosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "enabled", query.enabled, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->SetGlobalLos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -154,7 +154,7 @@ NativeCalloutDispatch Dispatch_team_control_SetPlayerReadyState(NativeInterface*
 	NativeCallStorage storage;
 	SetPlayerReadyStateQuery query{};
 	SetPlayerReadyStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ready", query.ready, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->SetPlayerReadyState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -168,8 +168,8 @@ NativeCalloutDispatch Dispatch_team_control_SetTeamResource(NativeInterface* nat
 	NativeCallStorage storage;
 	SetTeamResourceQuery query{};
 	SetTeamResourceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resourceType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resource-type", error);
 	if (value_resourceType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_query_resourceType, error)) { return NativeCalloutDispatch::handled; }
@@ -187,13 +187,13 @@ NativeCalloutDispatch Dispatch_team_control_SetTeamShareLevel(NativeInterface* n
 	NativeCallStorage storage;
 	SetTeamShareLevelQuery query{};
 	SetTeamShareLevelResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resourceType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resource-type", error);
 	if (value_resourceType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_query_resourceType, error)) { return NativeCalloutDispatch::handled; }
 	query.resourceType = stored_string_query_resourceType.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "shareLevel", query.shareLevel, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "share-level", query.shareLevel, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->SetTeamShareLevel(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -206,7 +206,7 @@ NativeCalloutDispatch Dispatch_team_control_SetTeamStartPosition(NativeInterface
 	NativeCallStorage storage;
 	SetTeamStartPositionQuery query{};
 	SetTeamStartPositionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->SetTeamStartPosition(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -220,9 +220,9 @@ NativeCalloutDispatch Dispatch_team_control_ShareTeamResource(NativeInterface* n
 	NativeCallStorage storage;
 	ShareTeamResourceQuery query{};
 	ShareTeamResourceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "targetTeamID", query.targetTeamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_resourceType = FindArgument(arguments, 2u, 2u, 4u, 4u, "resourceType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "target-team-id", query.targetTeamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_resourceType = FindArgument(arguments, 2u, 2u, 4u, 4u, "resource-type", error);
 	if (value_resourceType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_query_resourceType, error)) { return NativeCalloutDispatch::handled; }
@@ -240,8 +240,8 @@ NativeCalloutDispatch Dispatch_team_control_TransferTeamMaxUnits(NativeInterface
 	NativeCallStorage storage;
 	TransferTeamMaxUnitsQuery query{};
 	TransferTeamMaxUnitsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "fromTeamID", query.fromTeamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "toTeamID", query.toTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "from-team-id", query.fromTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "to-team-id", query.toTeamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "amount", query.amount, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->team->TransferTeamMaxUnits(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -255,8 +255,8 @@ NativeCalloutDispatch Dispatch_team_control_UseTeamResource(NativeInterface* nat
 	NativeCallStorage storage;
 	UseTeamResourceQuery query{};
 	UseTeamResourceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resourceType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resource-type", error);
 	if (value_resourceType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_query_resourceType, error)) { return NativeCalloutDispatch::handled; }

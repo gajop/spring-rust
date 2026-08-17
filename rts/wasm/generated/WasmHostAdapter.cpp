@@ -137,6 +137,7 @@ NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,
 	if (module == "sound_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_sound(nativeInterface, function, arguments, result, error);
 	if (module == "messages") return DispatchNativeCalloutModule_messages(nativeInterface, function, arguments, result, error);
 	if (module == "messages_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_messages(nativeInterface, function, arguments, result, error);
+	if (module == "messages_rules_synced_gaia_synced") return DispatchNativeCalloutModule_messages(nativeInterface, function, arguments, result, error);
 	if (module == "messages_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_messages(nativeInterface, function, arguments, result, error);
 	if (module == "config") return DispatchNativeCalloutModule_config(nativeInterface, function, arguments, result, error);
 	if (module == "config_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_config(nativeInterface, function, arguments, result, error);
@@ -164,7 +165,8 @@ NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,
 	if (module == "system_control_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_system_control(nativeInterface, function, arguments, result, error);
 	if (module == "system_control_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_system_control(nativeInterface, function, arguments, result, error);
 	if (module == "profiling") return DispatchNativeCalloutModule_profiling(nativeInterface, function, arguments, result, error);
-	if (module == "profiling") return DispatchNativeCalloutModule_profiling(nativeInterface, function, arguments, result, error);
+	if (module == "profiling_rules_synced_rules_unsynced_gaia_synced_gaia_unsynced_ui") return DispatchNativeCalloutModule_profiling(nativeInterface, function, arguments, result, error);
+	if (module == "profiling_rules_unsynced_gaia_unsynced_ui") return DispatchNativeCalloutModule_profiling(nativeInterface, function, arguments, result, error);
 	if (module == "rml_ui") return DispatchNativeCalloutModule_rml_ui(nativeInterface, function, arguments, result, error);
 	if (module == "rml_ui") return DispatchNativeCalloutModule_rml_ui(nativeInterface, function, arguments, result, error);
 	if (module == "vfs") return DispatchNativeCalloutModule_vfs(nativeInterface, function, arguments, result, error);
@@ -694,6 +696,11 @@ bool SerializeCallinQuery(std::string_view name, const void* query,
 	if (name == "UnsyncedHeightMapUpdate") {
 		if (query == nullptr) { error = "null native callin query"; return false; }
 		result = detail::Write_RectChangedQuery(*static_cast<const RectChangedQuery*>(query));
+		return true;
+	}
+	if (name == "RecvFromSynced") {
+		if (query == nullptr) { error = "null native callin query"; return false; }
+		result = detail::Write_RecvFromSyncedQuery(*static_cast<const RecvFromSyncedQuery*>(query));
 		return true;
 	}
 	if (name == "RenderUnitDestroyed") {

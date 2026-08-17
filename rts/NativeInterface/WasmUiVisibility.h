@@ -55,8 +55,9 @@ bool IsUnitTyped(const CUnit* unit);
 bool IsUnitAlly(const CUnit* unit);
 const UnitDef* EffectiveUnitDef(const CUnit* unit);
 // Lua's general object parsers use visible (LOS or radar) access. Callers
-// whose counterpart requires a stronger condition must request it explicitly.
-const CUnit* FindUnit(int unitID, UnitAccess access = UnitAccess::Visible);
+// must still state that policy explicitly so a newly added field cannot
+// silently inherit a weaker visibility check.
+const CUnit* FindUnit(int unitID, UnitAccess access);
 
 bool IsFeatureVisible(const CFeature* feature);
 const CFeature* FindFeature(int featureID);

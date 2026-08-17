@@ -200,7 +200,7 @@ static void NativeGetUnitCrashing(const GetUnitCrashingQuery* query, GetUnitCras
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -271,7 +271,7 @@ static void NativeGetUnitIsStunned(const GetUnitIsStunnedQuery* query, GetUnitIs
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -290,7 +290,7 @@ static void NativeGetUnitIsBeingBuilt(const GetUnitIsBeingBuiltQuery* query, Get
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -308,7 +308,7 @@ static void NativeGetUnitCosts(const GetUnitCostsQuery* query, GetUnitCostsResul
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr || unit->unitDef == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -333,7 +333,7 @@ static void NativeGetUnitResources(const GetUnitResourcesQuery* query, GetUnitRe
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr || unit->unitDef == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -357,7 +357,7 @@ static void NativeGetUnitStorage(const GetUnitStorageQuery* query, GetUnitStorag
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr || unit->unitDef == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -377,7 +377,7 @@ static void NativeGetUnitMetalExtraction(const GetUnitMetalExtractionQuery* quer
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -396,7 +396,7 @@ static void NativeGetUnitExperience(const GetUnitExperienceQuery* query, GetUnit
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -414,7 +414,7 @@ static void NativeGetUnitStates(const GetUnitStatesQuery* query, GetUnitStatesRe
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr || unit->unitDef == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -460,7 +460,7 @@ static void NativeGetUnitArmored(const GetUnitArmoredQuery* query, GetUnitArmore
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -480,7 +480,7 @@ static void NativeGetUnitIsActive(const GetUnitIsActiveQuery* query, GetUnitIsAc
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -499,7 +499,7 @@ static void NativeGetUnitIsCloaked(const GetUnitIsCloakedQuery* query, GetUnitIs
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -518,7 +518,7 @@ static void NativeGetUnitSeismicSignature(const GetUnitSeismicSignatureQuery* qu
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -537,7 +537,7 @@ static void NativeGetUnitSensorRadius(const GetUnitSensorRadiusQuery* query, Get
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -646,7 +646,7 @@ static void NativeGetUnitMass(const GetUnitMassQuery* query, GetUnitMassResult* 
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -711,7 +711,7 @@ static void NativeGetUnitVectors(const GetUnitVectorsQuery* query, GetUnitVector
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -739,7 +739,7 @@ static void NativeGetUnitRotation(const GetUnitRotationQuery* query, GetUnitRota
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -761,7 +761,7 @@ static void NativeGetUnitDirection(const GetUnitDirectionQuery* query, GetUnitDi
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -782,7 +782,7 @@ static void NativeGetUnitHeading(const GetUnitHeadingQuery* query, GetUnitHeadin
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -801,7 +801,7 @@ static void NativeGetUnitVelocity(const GetUnitVelocityQuery* query, GetUnitVelo
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -822,7 +822,7 @@ static void NativeGetUnitBuildFacing(const GetUnitBuildFacingQuery* query, GetUn
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -841,7 +841,7 @@ static void NativeGetUnitIsBuilding(const GetUnitIsBuildingQuery* query, GetUnit
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -872,7 +872,7 @@ static void NativeGetUnitWorkerTask(const GetUnitWorkerTaskQuery* query, GetUnit
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -933,7 +933,7 @@ static void NativeGetUnitEffectiveBuildRange(const GetUnitEffectiveBuildRangeQue
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr || unit->unitDef == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -971,7 +971,7 @@ static void NativeGetUnitCurrentBuildPower(const GetUnitCurrentBuildPowerQuery* 
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr || unit->unitDef == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1002,7 +1002,7 @@ static void NativeGetUnitBuildParams(const GetUnitBuildParamsQuery* query, GetUn
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1040,7 +1040,7 @@ static void NativeGetUnitInBuildStance(const GetUnitInBuildStanceQuery* query, G
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1060,7 +1060,7 @@ static void NativeGetUnitNanoPieces(const GetUnitNanoPiecesQuery* query, GetUnit
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1118,7 +1118,7 @@ static void NativeGetUnitTransporter(const GetUnitTransporterQuery* query, GetUn
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1141,7 +1141,7 @@ static void NativeGetUnitIsTransporting(const GetUnitIsTransportingQuery* query,
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1183,7 +1183,7 @@ static void NativeGetUnitStockpile(const GetUnitStockpileQuery* query, GetUnitSt
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1210,7 +1210,7 @@ static void NativeGetUnitSelfDTime(const GetUnitSelfDTimeQuery* query, GetUnitSe
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1229,7 +1229,7 @@ static void NativeGetUnitShieldState(const GetUnitShieldStateQuery* query, GetUn
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1257,7 +1257,7 @@ static void NativeGetUnitFlanking(const GetUnitFlankingQuery* query, GetUnitFlan
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1283,13 +1283,13 @@ static void NativeGetUnitLastAttacker(const GetUnitLastAttackerQuery* query, Get
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Visible);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
 	}
 
-	if (unit->lastAttacker != nullptr) {
+	if (unit->lastAttacker != nullptr && WasmUiVisibility::IsUnitVisible(unit->lastAttacker)) {
 		result->hasAttacker = true;
 		result->attacker.attackerID = unit->lastAttacker->id;
 		result->attacker.attackerDefID = unit->lastAttacker->unitDef ? unit->lastAttacker->unitDef->id : -1;
@@ -1310,7 +1310,7 @@ static void NativeGetUnitLastAttackedPiece(const GetUnitLastAttackedPieceQuery* 
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1378,7 +1378,7 @@ static void NativeGetUnitCollisionVolumeData(const GetUnitCollisionVolumeDataQue
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1406,7 +1406,7 @@ static void NativeGetUnitPieceCollisionVolumeData(const GetUnitPieceCollisionVol
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::InLos);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1448,7 +1448,7 @@ static void NativeGetUnitBlocking(const GetUnitBlockingQuery* query, GetUnitBloc
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Typed);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -1473,7 +1473,7 @@ static void NativeGetUnitHarvestStorage(const GetUnitHarvestStorageQuery* query,
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;

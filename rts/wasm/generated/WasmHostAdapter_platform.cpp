@@ -12,7 +12,7 @@ bool Read_GetArchitectureQuery(const WasmValue& input, GetArchitectureQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_GetArchitectureQuery(const WasmValue& input, GetArchitectureQuery& out
 WasmValue Write_GetArchitectureQuery(const GetArchitectureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -48,7 +48,7 @@ bool Read_IsHeadlessQuery(const WasmValue& input, IsHeadlessQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -57,7 +57,7 @@ bool Read_IsHeadlessQuery(const WasmValue& input, IsHeadlessQuery& output, Nativ
 WasmValue Write_IsHeadlessQuery(const IsHeadlessQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -65,7 +65,7 @@ bool Read_IsHeadlessResult(const WasmValue& input, IsHeadlessResult& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_isHeadless = FindRecordField(*record, "isHeadless", error);
+	const auto* value_isHeadless = FindRecordField(*record, "is-headless", error);
 	if (value_isHeadless == nullptr) return false;
 	if (!ReadScalar(*value_isHeadless, output.isHeadless, error)) { return false; }
 	return true;
@@ -74,7 +74,7 @@ bool Read_IsHeadlessResult(const WasmValue& input, IsHeadlessResult& output, Nat
 WasmValue Write_IsHeadlessResult(const IsHeadlessResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("isHeadless", WriteScalar(value.isHeadless));
+	fields.emplace("is-headless", WriteScalar(value.isHeadless));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -88,7 +88,7 @@ NativeCalloutDispatch Dispatch_platform_GetArchitecture(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetArchitectureQuery query{};
 	GetArchitectureResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->platform->GetArchitecture(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.architecture == nullptr) ? std::string{} : std::string(nativeResult.architecture));
@@ -101,7 +101,7 @@ NativeCalloutDispatch Dispatch_platform_IsHeadless(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	IsHeadlessQuery query{};
 	IsHeadlessResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->platform->IsHeadless(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.isHeadless);

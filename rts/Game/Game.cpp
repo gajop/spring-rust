@@ -113,6 +113,7 @@
 #include "UI/ProfileDrawer.h"
 #include "UI/Groups/GroupHandler.h"
 #include "System/Config/ConfigHandler.h"
+#include "System/BenchmarkCallins.h"
 #include "System/creg/SerializeLuaState.h"
 #include "System/EventHandler.h"
 #include "System/Exceptions.h"
@@ -992,6 +993,7 @@ void CGame::KillLua(bool dtor)
 
 	LOG("[Game::%s][3] dtor=%d luaRules=%p", __func__, dtor, luaRules);
 	CLuaRules::FreeHandler();
+	spring::benchmark_callins::Flush();
 
 	CSplitLuaHandle::ClearGameParams();
 	LEAVE_SYNCED_CODE();

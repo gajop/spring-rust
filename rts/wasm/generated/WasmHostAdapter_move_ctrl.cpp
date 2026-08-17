@@ -12,7 +12,7 @@ bool Read_GetUnitEstimatedPathQuery(const WasmValue& input, GetUnitEstimatedPath
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_GetUnitEstimatedPathQuery(const WasmValue& input, GetUnitEstimatedPath
 WasmValue Write_GetUnitEstimatedPathQuery(const GetUnitEstimatedPathQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -70,7 +70,7 @@ bool Read_GetUnitMoveTypeDataQuery(const WasmValue& input, GetUnitMoveTypeDataQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -79,7 +79,7 @@ bool Read_GetUnitMoveTypeDataQuery(const WasmValue& input, GetUnitMoveTypeDataQu
 WasmValue Write_GetUnitMoveTypeDataQuery(const GetUnitMoveTypeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -104,7 +104,7 @@ bool Read_IsMoveCtrlEnabledQuery(const WasmValue& input, IsMoveCtrlEnabledQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -113,7 +113,7 @@ bool Read_IsMoveCtrlEnabledQuery(const WasmValue& input, IsMoveCtrlEnabledQuery&
 WasmValue Write_IsMoveCtrlEnabledQuery(const IsMoveCtrlEnabledQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -138,7 +138,7 @@ bool Read_MoveCtrlQuery(const WasmValue& input, MoveCtrlQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_enable = FindRecordField(*record, "enable", error);
@@ -150,7 +150,7 @@ bool Read_MoveCtrlQuery(const WasmValue& input, MoveCtrlQuery& output, NativeCal
 WasmValue Write_MoveCtrlQuery(const MoveCtrlQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("enable", WriteScalar(value.enable));
 	return WasmValue::Record(std::move(fields));
 }
@@ -181,55 +181,55 @@ bool Read_MoveTypeData(const WasmValue& input, MoveTypeData& output, NativeCallS
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_maxSpeed = FindRecordField(*record, "maxSpeed", error);
+	const auto* value_maxSpeed = FindRecordField(*record, "max-speed", error);
 	if (value_maxSpeed == nullptr) return false;
 	if (!ReadScalar(*value_maxSpeed, output.maxSpeed, error)) { return false; }
-	const auto* value_maxWantedSpeed = FindRecordField(*record, "maxWantedSpeed", error);
+	const auto* value_maxWantedSpeed = FindRecordField(*record, "max-wanted-speed", error);
 	if (value_maxWantedSpeed == nullptr) return false;
 	if (!ReadScalar(*value_maxWantedSpeed, output.maxWantedSpeed, error)) { return false; }
-	const auto* value_goalX = FindRecordField(*record, "goalX", error);
+	const auto* value_goalX = FindRecordField(*record, "goal-x", error);
 	if (value_goalX == nullptr) return false;
 	if (!ReadScalar(*value_goalX, output.goalX, error)) { return false; }
-	const auto* value_goalY = FindRecordField(*record, "goalY", error);
+	const auto* value_goalY = FindRecordField(*record, "goal-y", error);
 	if (value_goalY == nullptr) return false;
 	if (!ReadScalar(*value_goalY, output.goalY, error)) { return false; }
-	const auto* value_goalZ = FindRecordField(*record, "goalZ", error);
+	const auto* value_goalZ = FindRecordField(*record, "goal-z", error);
 	if (value_goalZ == nullptr) return false;
 	if (!ReadScalar(*value_goalZ, output.goalZ, error)) { return false; }
-	const auto* value_turnRate = FindRecordField(*record, "turnRate", error);
+	const auto* value_turnRate = FindRecordField(*record, "turn-rate", error);
 	if (value_turnRate == nullptr) return false;
 	if (!ReadScalar(*value_turnRate, output.turnRate, error)) { return false; }
-	const auto* value_accRate = FindRecordField(*record, "accRate", error);
+	const auto* value_accRate = FindRecordField(*record, "acc-rate", error);
 	if (value_accRate == nullptr) return false;
 	if (!ReadScalar(*value_accRate, output.accRate, error)) { return false; }
-	const auto* value_decRate = FindRecordField(*record, "decRate", error);
+	const auto* value_decRate = FindRecordField(*record, "dec-rate", error);
 	if (value_decRate == nullptr) return false;
 	if (!ReadScalar(*value_decRate, output.decRate, error)) { return false; }
-	const auto* value_maxReverseSpeed = FindRecordField(*record, "maxReverseSpeed", error);
+	const auto* value_maxReverseSpeed = FindRecordField(*record, "max-reverse-speed", error);
 	if (value_maxReverseSpeed == nullptr) return false;
 	if (!ReadScalar(*value_maxReverseSpeed, output.maxReverseSpeed, error)) { return false; }
-	const auto* value_wantedSpeed = FindRecordField(*record, "wantedSpeed", error);
+	const auto* value_wantedSpeed = FindRecordField(*record, "wanted-speed", error);
 	if (value_wantedSpeed == nullptr) return false;
 	if (!ReadScalar(*value_wantedSpeed, output.wantedSpeed, error)) { return false; }
-	const auto* value_currentSpeed = FindRecordField(*record, "currentSpeed", error);
+	const auto* value_currentSpeed = FindRecordField(*record, "current-speed", error);
 	if (value_currentSpeed == nullptr) return false;
 	if (!ReadScalar(*value_currentSpeed, output.currentSpeed, error)) { return false; }
-	const auto* value_deltaSpeed = FindRecordField(*record, "deltaSpeed", error);
+	const auto* value_deltaSpeed = FindRecordField(*record, "delta-speed", error);
 	if (value_deltaSpeed == nullptr) return false;
 	if (!ReadScalar(*value_deltaSpeed, output.deltaSpeed, error)) { return false; }
-	const auto* value_maxBank = FindRecordField(*record, "maxBank", error);
+	const auto* value_maxBank = FindRecordField(*record, "max-bank", error);
 	if (value_maxBank == nullptr) return false;
 	if (!ReadScalar(*value_maxBank, output.maxBank, error)) { return false; }
-	const auto* value_maxPitch = FindRecordField(*record, "maxPitch", error);
+	const auto* value_maxPitch = FindRecordField(*record, "max-pitch", error);
 	if (value_maxPitch == nullptr) return false;
 	if (!ReadScalar(*value_maxPitch, output.maxPitch, error)) { return false; }
-	const auto* value_maxAileron = FindRecordField(*record, "maxAileron", error);
+	const auto* value_maxAileron = FindRecordField(*record, "max-aileron", error);
 	if (value_maxAileron == nullptr) return false;
 	if (!ReadScalar(*value_maxAileron, output.maxAileron, error)) { return false; }
-	const auto* value_maxElevator = FindRecordField(*record, "maxElevator", error);
+	const auto* value_maxElevator = FindRecordField(*record, "max-elevator", error);
 	if (value_maxElevator == nullptr) return false;
 	if (!ReadScalar(*value_maxElevator, output.maxElevator, error)) { return false; }
-	const auto* value_maxRudder = FindRecordField(*record, "maxRudder", error);
+	const auto* value_maxRudder = FindRecordField(*record, "max-rudder", error);
 	if (value_maxRudder == nullptr) return false;
 	if (!ReadScalar(*value_maxRudder, output.maxRudder, error)) { return false; }
 	return true;
@@ -239,23 +239,23 @@ WasmValue Write_MoveTypeData(const MoveTypeData& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("maxSpeed", WriteScalar(value.maxSpeed));
-	fields.emplace("maxWantedSpeed", WriteScalar(value.maxWantedSpeed));
-	fields.emplace("goalX", WriteScalar(value.goalX));
-	fields.emplace("goalY", WriteScalar(value.goalY));
-	fields.emplace("goalZ", WriteScalar(value.goalZ));
-	fields.emplace("turnRate", WriteScalar(value.turnRate));
-	fields.emplace("accRate", WriteScalar(value.accRate));
-	fields.emplace("decRate", WriteScalar(value.decRate));
-	fields.emplace("maxReverseSpeed", WriteScalar(value.maxReverseSpeed));
-	fields.emplace("wantedSpeed", WriteScalar(value.wantedSpeed));
-	fields.emplace("currentSpeed", WriteScalar(value.currentSpeed));
-	fields.emplace("deltaSpeed", WriteScalar(value.deltaSpeed));
-	fields.emplace("maxBank", WriteScalar(value.maxBank));
-	fields.emplace("maxPitch", WriteScalar(value.maxPitch));
-	fields.emplace("maxAileron", WriteScalar(value.maxAileron));
-	fields.emplace("maxElevator", WriteScalar(value.maxElevator));
-	fields.emplace("maxRudder", WriteScalar(value.maxRudder));
+	fields.emplace("max-speed", WriteScalar(value.maxSpeed));
+	fields.emplace("max-wanted-speed", WriteScalar(value.maxWantedSpeed));
+	fields.emplace("goal-x", WriteScalar(value.goalX));
+	fields.emplace("goal-y", WriteScalar(value.goalY));
+	fields.emplace("goal-z", WriteScalar(value.goalZ));
+	fields.emplace("turn-rate", WriteScalar(value.turnRate));
+	fields.emplace("acc-rate", WriteScalar(value.accRate));
+	fields.emplace("dec-rate", WriteScalar(value.decRate));
+	fields.emplace("max-reverse-speed", WriteScalar(value.maxReverseSpeed));
+	fields.emplace("wanted-speed", WriteScalar(value.wantedSpeed));
+	fields.emplace("current-speed", WriteScalar(value.currentSpeed));
+	fields.emplace("delta-speed", WriteScalar(value.deltaSpeed));
+	fields.emplace("max-bank", WriteScalar(value.maxBank));
+	fields.emplace("max-pitch", WriteScalar(value.maxPitch));
+	fields.emplace("max-aileron", WriteScalar(value.maxAileron));
+	fields.emplace("max-elevator", WriteScalar(value.maxElevator));
+	fields.emplace("max-rudder", WriteScalar(value.maxRudder));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -284,10 +284,10 @@ bool Read_SetMoveCtrlGravityQuery(const WasmValue& input, SetMoveCtrlGravityQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_gravityFactor = FindRecordField(*record, "gravityFactor", error);
+	const auto* value_gravityFactor = FindRecordField(*record, "gravity-factor", error);
 	if (value_gravityFactor == nullptr) return false;
 	if (!ReadScalar(*value_gravityFactor, output.gravityFactor, error)) { return false; }
 	return true;
@@ -296,8 +296,8 @@ bool Read_SetMoveCtrlGravityQuery(const WasmValue& input, SetMoveCtrlGravityQuer
 WasmValue Write_SetMoveCtrlGravityQuery(const SetMoveCtrlGravityQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("gravityFactor", WriteScalar(value.gravityFactor));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("gravity-factor", WriteScalar(value.gravityFactor));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -328,7 +328,7 @@ NativeCalloutDispatch Dispatch_move_ctrl_GetUnitEstimatedPath(NativeInterface* n
 	NativeCallStorage storage;
 	GetUnitEstimatedPathQuery query{};
 	GetUnitEstimatedPathResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->moveCtrl->GetUnitEstimatedPath(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -344,7 +344,7 @@ NativeCalloutDispatch Dispatch_move_ctrl_GetUnitMoveTypeData(NativeInterface* na
 	NativeCallStorage storage;
 	GetUnitMoveTypeDataQuery query{};
 	GetUnitMoveTypeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->moveCtrl->GetUnitMoveTypeData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_MoveTypeData(nativeResult.data);
@@ -357,7 +357,7 @@ NativeCalloutDispatch Dispatch_move_ctrl_IsMoveCtrlEnabled(NativeInterface* nati
 	NativeCallStorage storage;
 	IsMoveCtrlEnabledQuery query{};
 	IsMoveCtrlEnabledResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->moveCtrl->IsMoveCtrlEnabled(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);
@@ -370,7 +370,7 @@ NativeCalloutDispatch Dispatch_move_ctrl_MoveCtrl(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	MoveCtrlQuery query{};
 	MoveCtrlResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "enable", query.enable, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->moveCtrl->MoveCtrl(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -384,8 +384,8 @@ NativeCalloutDispatch Dispatch_move_ctrl_SetMoveCtrlGravity(NativeInterface* nat
 	NativeCallStorage storage;
 	SetMoveCtrlGravityQuery query{};
 	SetMoveCtrlGravityResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "gravityFactor", query.gravityFactor, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "gravity-factor", query.gravityFactor, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->moveCtrl->SetMoveCtrlGravity(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

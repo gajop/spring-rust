@@ -246,6 +246,222 @@ bool CheckNativeError(const Result& result, std::string& error)
 	return false;
 }
 
+inline bool ReadEnum_CommonErrorCode(const WasmValue& input, CommonErrorCode& output, std::string& error)
+{
+	const auto* enum_name = std::get_if<std::string>(&input.storage);
+	if (enum_name == nullptr) { error = "Wasm argument is not an enum name"; return false; }
+	if (*enum_name == "error-already-exists") { output = static_cast<CommonErrorCode>(7); return true; }
+	if (*enum_name == "error-buffer-overflow") { output = static_cast<CommonErrorCode>(9); return true; }
+	if (*enum_name == "error-internal") { output = static_cast<CommonErrorCode>(999); return true; }
+	if (*enum_name == "error-invalid-argument") { output = static_cast<CommonErrorCode>(1); return true; }
+	if (*enum_name == "error-invalid-id") { output = static_cast<CommonErrorCode>(10); return true; }
+	if (*enum_name == "error-invalid-state") { output = static_cast<CommonErrorCode>(5); return true; }
+	if (*enum_name == "error-none") { output = static_cast<CommonErrorCode>(0); return true; }
+	if (*enum_name == "error-not-available") { output = static_cast<CommonErrorCode>(4); return true; }
+	if (*enum_name == "error-not-found") { output = static_cast<CommonErrorCode>(3); return true; }
+	if (*enum_name == "error-operation-failed") { output = static_cast<CommonErrorCode>(8); return true; }
+	if (*enum_name == "error-out-of-bounds") { output = static_cast<CommonErrorCode>(2); return true; }
+	if (*enum_name == "error-permission-denied") { output = static_cast<CommonErrorCode>(6); return true; }
+	error = "unknown Wasm enum value: " + *enum_name;
+	return false;
+}
+
+inline WasmValue WriteEnum_CommonErrorCode(const CommonErrorCode& value)
+{
+	if (value == static_cast<CommonErrorCode>(7)) return WasmValue::String("error-already-exists");
+	if (value == static_cast<CommonErrorCode>(9)) return WasmValue::String("error-buffer-overflow");
+	if (value == static_cast<CommonErrorCode>(999)) return WasmValue::String("error-internal");
+	if (value == static_cast<CommonErrorCode>(1)) return WasmValue::String("error-invalid-argument");
+	if (value == static_cast<CommonErrorCode>(10)) return WasmValue::String("error-invalid-id");
+	if (value == static_cast<CommonErrorCode>(5)) return WasmValue::String("error-invalid-state");
+	if (value == static_cast<CommonErrorCode>(0)) return WasmValue::String("error-none");
+	if (value == static_cast<CommonErrorCode>(4)) return WasmValue::String("error-not-available");
+	if (value == static_cast<CommonErrorCode>(3)) return WasmValue::String("error-not-found");
+	if (value == static_cast<CommonErrorCode>(8)) return WasmValue::String("error-operation-failed");
+	if (value == static_cast<CommonErrorCode>(2)) return WasmValue::String("error-out-of-bounds");
+	if (value == static_cast<CommonErrorCode>(6)) return WasmValue::String("error-permission-denied");
+	return WasmValue::String("unknown");
+}
+
+inline bool ReadEnum_ConfigValueType(const WasmValue& input, ConfigValueType& output, std::string& error)
+{
+	const auto* enum_name = std::get_if<std::string>(&input.storage);
+	if (enum_name == nullptr) { error = "Wasm argument is not an enum name"; return false; }
+	if (*enum_name == "config-type-bool") { output = static_cast<ConfigValueType>(3); return true; }
+	if (*enum_name == "config-type-float") { output = static_cast<ConfigValueType>(1); return true; }
+	if (*enum_name == "config-type-int") { output = static_cast<ConfigValueType>(0); return true; }
+	if (*enum_name == "config-type-string") { output = static_cast<ConfigValueType>(2); return true; }
+	error = "unknown Wasm enum value: " + *enum_name;
+	return false;
+}
+
+inline WasmValue WriteEnum_ConfigValueType(const ConfigValueType& value)
+{
+	if (value == static_cast<ConfigValueType>(3)) return WasmValue::String("config-type-bool");
+	if (value == static_cast<ConfigValueType>(1)) return WasmValue::String("config-type-float");
+	if (value == static_cast<ConfigValueType>(0)) return WasmValue::String("config-type-int");
+	if (value == static_cast<ConfigValueType>(2)) return WasmValue::String("config-type-string");
+	return WasmValue::String("unknown");
+}
+
+inline bool ReadEnum_RmlDataFieldType(const WasmValue& input, RmlDataFieldType& output, std::string& error)
+{
+	const auto* enum_name = std::get_if<std::string>(&input.storage);
+	if (enum_name == nullptr) { error = "Wasm argument is not an enum name"; return false; }
+	if (*enum_name == "rml-field-bool") { output = static_cast<RmlDataFieldType>(0); return true; }
+	if (*enum_name == "rml-field-color") { output = static_cast<RmlDataFieldType>(4); return true; }
+	if (*enum_name == "rml-field-float") { output = static_cast<RmlDataFieldType>(2); return true; }
+	if (*enum_name == "rml-field-int") { output = static_cast<RmlDataFieldType>(1); return true; }
+	if (*enum_name == "rml-field-percent") { output = static_cast<RmlDataFieldType>(6); return true; }
+	if (*enum_name == "rml-field-pixels") { output = static_cast<RmlDataFieldType>(5); return true; }
+	if (*enum_name == "rml-field-string") { output = static_cast<RmlDataFieldType>(3); return true; }
+	error = "unknown Wasm enum value: " + *enum_name;
+	return false;
+}
+
+inline WasmValue WriteEnum_RmlDataFieldType(const RmlDataFieldType& value)
+{
+	if (value == static_cast<RmlDataFieldType>(0)) return WasmValue::String("rml-field-bool");
+	if (value == static_cast<RmlDataFieldType>(4)) return WasmValue::String("rml-field-color");
+	if (value == static_cast<RmlDataFieldType>(2)) return WasmValue::String("rml-field-float");
+	if (value == static_cast<RmlDataFieldType>(1)) return WasmValue::String("rml-field-int");
+	if (value == static_cast<RmlDataFieldType>(6)) return WasmValue::String("rml-field-percent");
+	if (value == static_cast<RmlDataFieldType>(5)) return WasmValue::String("rml-field-pixels");
+	if (value == static_cast<RmlDataFieldType>(3)) return WasmValue::String("rml-field-string");
+	return WasmValue::String("unknown");
+}
+
+inline bool ReadEnum_RulesParamLOS(const WasmValue& input, RulesParamLOS& output, std::string& error)
+{
+	const auto* enum_name = std::get_if<std::string>(&input.storage);
+	if (enum_name == nullptr) { error = "Wasm argument is not an enum name"; return false; }
+	if (*enum_name == "rulesparamlos-allied") { output = static_cast<RulesParamLOS>(2); return true; }
+	if (*enum_name == "rulesparamlos-allied-mask") { output = static_cast<RulesParamLOS>(62); return true; }
+	if (*enum_name == "rulesparamlos-inlos") { output = static_cast<RulesParamLOS>(4); return true; }
+	if (*enum_name == "rulesparamlos-inlos-mask") { output = static_cast<RulesParamLOS>(60); return true; }
+	if (*enum_name == "rulesparamlos-inradar") { output = static_cast<RulesParamLOS>(16); return true; }
+	if (*enum_name == "rulesparamlos-inradar-mask") { output = static_cast<RulesParamLOS>(48); return true; }
+	if (*enum_name == "rulesparamlos-private") { output = static_cast<RulesParamLOS>(1); return true; }
+	if (*enum_name == "rulesparamlos-private-mask") { output = static_cast<RulesParamLOS>(63); return true; }
+	if (*enum_name == "rulesparamlos-public") { output = static_cast<RulesParamLOS>(32); return true; }
+	if (*enum_name == "rulesparamlos-public-mask") { output = static_cast<RulesParamLOS>(32); return true; }
+	if (*enum_name == "rulesparamlos-typed") { output = static_cast<RulesParamLOS>(8); return true; }
+	if (*enum_name == "rulesparamlos-typed-mask") { output = static_cast<RulesParamLOS>(56); return true; }
+	error = "unknown Wasm enum value: " + *enum_name;
+	return false;
+}
+
+inline WasmValue WriteEnum_RulesParamLOS(const RulesParamLOS& value)
+{
+	if (value == static_cast<RulesParamLOS>(2)) return WasmValue::String("rulesparamlos-allied");
+	if (value == static_cast<RulesParamLOS>(62)) return WasmValue::String("rulesparamlos-allied-mask");
+	if (value == static_cast<RulesParamLOS>(4)) return WasmValue::String("rulesparamlos-inlos");
+	if (value == static_cast<RulesParamLOS>(60)) return WasmValue::String("rulesparamlos-inlos-mask");
+	if (value == static_cast<RulesParamLOS>(16)) return WasmValue::String("rulesparamlos-inradar");
+	if (value == static_cast<RulesParamLOS>(48)) return WasmValue::String("rulesparamlos-inradar-mask");
+	if (value == static_cast<RulesParamLOS>(1)) return WasmValue::String("rulesparamlos-private");
+	if (value == static_cast<RulesParamLOS>(63)) return WasmValue::String("rulesparamlos-private-mask");
+	if (value == static_cast<RulesParamLOS>(32)) return WasmValue::String("rulesparamlos-public");
+	if (value == static_cast<RulesParamLOS>(32)) return WasmValue::String("rulesparamlos-public-mask");
+	if (value == static_cast<RulesParamLOS>(8)) return WasmValue::String("rulesparamlos-typed");
+	if (value == static_cast<RulesParamLOS>(56)) return WasmValue::String("rulesparamlos-typed-mask");
+	return WasmValue::String("unknown");
+}
+
+inline bool ReadEnum_RulesParamType(const WasmValue& input, RulesParamType& output, std::string& error)
+{
+	const auto* enum_name = std::get_if<std::string>(&input.storage);
+	if (enum_name == nullptr) { error = "Wasm argument is not an enum name"; return false; }
+	if (*enum_name == "rulesparam-type-bool") { output = static_cast<RulesParamType>(0); return true; }
+	if (*enum_name == "rulesparam-type-float") { output = static_cast<RulesParamType>(1); return true; }
+	if (*enum_name == "rulesparam-type-string") { output = static_cast<RulesParamType>(2); return true; }
+	error = "unknown Wasm enum value: " + *enum_name;
+	return false;
+}
+
+inline WasmValue WriteEnum_RulesParamType(const RulesParamType& value)
+{
+	if (value == static_cast<RulesParamType>(0)) return WasmValue::String("rulesparam-type-bool");
+	if (value == static_cast<RulesParamType>(1)) return WasmValue::String("rulesparam-type-float");
+	if (value == static_cast<RulesParamType>(2)) return WasmValue::String("rulesparam-type-string");
+	return WasmValue::String("unknown");
+}
+
+inline bool ReadEnum_TraceFlags(const WasmValue& input, TraceFlags& output, std::string& error)
+{
+	const auto* enum_name = std::get_if<std::string>(&input.storage);
+	if (enum_name == nullptr) { error = "Wasm argument is not an enum name"; return false; }
+	if (*enum_name == "trace-features") { output = static_cast<TraceFlags>(2); return true; }
+	if (*enum_name == "trace-ground") { output = static_cast<TraceFlags>(4); return true; }
+	if (*enum_name == "trace-no-enemy-units") { output = static_cast<TraceFlags>(16); return true; }
+	if (*enum_name == "trace-only-enemy") { output = static_cast<TraceFlags>(32); return true; }
+	if (*enum_name == "trace-sky") { output = static_cast<TraceFlags>(8); return true; }
+	if (*enum_name == "trace-units") { output = static_cast<TraceFlags>(1); return true; }
+	error = "unknown Wasm enum value: " + *enum_name;
+	return false;
+}
+
+inline WasmValue WriteEnum_TraceFlags(const TraceFlags& value)
+{
+	if (value == static_cast<TraceFlags>(2)) return WasmValue::String("trace-features");
+	if (value == static_cast<TraceFlags>(4)) return WasmValue::String("trace-ground");
+	if (value == static_cast<TraceFlags>(16)) return WasmValue::String("trace-no-enemy-units");
+	if (value == static_cast<TraceFlags>(32)) return WasmValue::String("trace-only-enemy");
+	if (value == static_cast<TraceFlags>(8)) return WasmValue::String("trace-sky");
+	if (value == static_cast<TraceFlags>(1)) return WasmValue::String("trace-units");
+	return WasmValue::String("unknown");
+}
+
+inline bool ReadEnum_UnitDefParamType(const WasmValue& input, UnitDefParamType& output, std::string& error)
+{
+	const auto* enum_name = std::get_if<std::string>(&input.storage);
+	if (enum_name == nullptr) { error = "Wasm argument is not an enum name"; return false; }
+	if (*enum_name == "unit-def-param-bool") { output = static_cast<UnitDefParamType>(2); return true; }
+	if (*enum_name == "unit-def-param-float") { output = static_cast<UnitDefParamType>(3); return true; }
+	if (*enum_name == "unit-def-param-int") { output = static_cast<UnitDefParamType>(1); return true; }
+	if (*enum_name == "unit-def-param-missing") { output = static_cast<UnitDefParamType>(0); return true; }
+	if (*enum_name == "unit-def-param-string") { output = static_cast<UnitDefParamType>(4); return true; }
+	if (*enum_name == "unit-def-param-table") { output = static_cast<UnitDefParamType>(5); return true; }
+	error = "unknown Wasm enum value: " + *enum_name;
+	return false;
+}
+
+inline WasmValue WriteEnum_UnitDefParamType(const UnitDefParamType& value)
+{
+	if (value == static_cast<UnitDefParamType>(2)) return WasmValue::String("unit-def-param-bool");
+	if (value == static_cast<UnitDefParamType>(3)) return WasmValue::String("unit-def-param-float");
+	if (value == static_cast<UnitDefParamType>(1)) return WasmValue::String("unit-def-param-int");
+	if (value == static_cast<UnitDefParamType>(0)) return WasmValue::String("unit-def-param-missing");
+	if (value == static_cast<UnitDefParamType>(4)) return WasmValue::String("unit-def-param-string");
+	if (value == static_cast<UnitDefParamType>(5)) return WasmValue::String("unit-def-param-table");
+	return WasmValue::String("unknown");
+}
+
+inline bool ReadEnum_UnitFilter(const WasmValue& input, UnitFilter& output, std::string& error)
+{
+	const auto* enum_name = std::get_if<std::string>(&input.storage);
+	if (enum_name == nullptr) { error = "Wasm argument is not an enum name"; return false; }
+	if (*enum_name == "unit-filter-all") { output = static_cast<UnitFilter>(0); return true; }
+	if (*enum_name == "unit-filter-allyteam") { output = static_cast<UnitFilter>(5); return true; }
+	if (*enum_name == "unit-filter-ally-units") { output = static_cast<UnitFilter>(2); return true; }
+	if (*enum_name == "unit-filter-enemy-units") { output = static_cast<UnitFilter>(3); return true; }
+	if (*enum_name == "unit-filter-my-units") { output = static_cast<UnitFilter>(1); return true; }
+	if (*enum_name == "unit-filter-team") { output = static_cast<UnitFilter>(4); return true; }
+	error = "unknown Wasm enum value: " + *enum_name;
+	return false;
+}
+
+inline WasmValue WriteEnum_UnitFilter(const UnitFilter& value)
+{
+	if (value == static_cast<UnitFilter>(0)) return WasmValue::String("unit-filter-all");
+	if (value == static_cast<UnitFilter>(5)) return WasmValue::String("unit-filter-allyteam");
+	if (value == static_cast<UnitFilter>(2)) return WasmValue::String("unit-filter-ally-units");
+	if (value == static_cast<UnitFilter>(3)) return WasmValue::String("unit-filter-enemy-units");
+	if (value == static_cast<UnitFilter>(1)) return WasmValue::String("unit-filter-my-units");
+	if (value == static_cast<UnitFilter>(4)) return WasmValue::String("unit-filter-team");
+	return WasmValue::String("unknown");
+}
+
 inline bool FunctionEquals(std::string_view left, std::string_view right)
 {
 	if (left.size() != right.size()) return false;
@@ -3577,6 +3793,10 @@ bool Read_RectChangedResult(const WasmValue& input, RectChangedResult& output, N
 WasmValue Write_RectChangedResult(const RectChangedResult& value);
 bool Read_RectangleQuery(const WasmValue& input, RectangleQuery& output, NativeCallStorage& storage, std::string& error);
 WasmValue Write_RectangleQuery(const RectangleQuery& value);
+bool Read_RecvFromSyncedQuery(const WasmValue& input, RecvFromSyncedQuery& output, NativeCallStorage& storage, std::string& error);
+WasmValue Write_RecvFromSyncedQuery(const RecvFromSyncedQuery& value);
+bool Read_RecvFromSyncedResult(const WasmValue& input, RecvFromSyncedResult& output, NativeCallStorage& storage, std::string& error);
+WasmValue Write_RecvFromSyncedResult(const RecvFromSyncedResult& value);
 bool Read_ReloadQuery(const WasmValue& input, ReloadQuery& output, NativeCallStorage& storage, std::string& error);
 WasmValue Write_ReloadQuery(const ReloadQuery& value);
 bool Read_ReloadResult(const WasmValue& input, ReloadResult& output, NativeCallStorage& storage, std::string& error);
@@ -4055,6 +4275,10 @@ bool Read_SendSpectatorChatQuery(const WasmValue& input, SendSpectatorChatQuery&
 WasmValue Write_SendSpectatorChatQuery(const SendSpectatorChatQuery& value);
 bool Read_SendSpectatorChatResult(const WasmValue& input, SendSpectatorChatResult& output, NativeCallStorage& storage, std::string& error);
 WasmValue Write_SendSpectatorChatResult(const SendSpectatorChatResult& value);
+bool Read_SendToUnsyncedQuery(const WasmValue& input, SendToUnsyncedQuery& output, NativeCallStorage& storage, std::string& error);
+WasmValue Write_SendToUnsyncedQuery(const SendToUnsyncedQuery& value);
+bool Read_SendToUnsyncedResult(const WasmValue& input, SendToUnsyncedResult& output, NativeCallStorage& storage, std::string& error);
+WasmValue Write_SendToUnsyncedResult(const SendToUnsyncedResult& value);
 bool Read_SetActiveCommandOptions(const WasmValue& input, SetActiveCommandOptions& output, NativeCallStorage& storage, std::string& error);
 WasmValue Write_SetActiveCommandOptions(const SetActiveCommandOptions& value);
 bool Read_SetActiveCommandQuery(const WasmValue& input, SetActiveCommandQuery& output, NativeCallStorage& storage, std::string& error);

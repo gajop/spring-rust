@@ -496,13 +496,8 @@ mod tests {
                 "GetAllProjectiles",
             ),
         ] {
-            let environments = matrix.environments_for_function(
-                &root.join(header),
-                module,
-                function,
-                false,
-                true,
-            );
+            let environments =
+                matrix.environments_for_function(&root.join(header), module, function, false, true);
             assert!(
                 environments.contains(&Environment::Ui),
                 "{module}::{function} must be available to LuaUI: {environments:?}"

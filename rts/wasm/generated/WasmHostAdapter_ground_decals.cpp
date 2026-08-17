@@ -12,7 +12,7 @@ bool Read_CreateGroundDecalQuery(const WasmValue& input, CreateGroundDecalQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_CreateGroundDecalQuery(const WasmValue& input, CreateGroundDecalQuery&
 WasmValue Write_CreateGroundDecalQuery(const CreateGroundDecalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -29,7 +29,7 @@ bool Read_CreateGroundDecalResult(const WasmValue& input, CreateGroundDecalResul
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -41,7 +41,7 @@ bool Read_CreateGroundDecalResult(const WasmValue& input, CreateGroundDecalResul
 WasmValue Write_CreateGroundDecalResult(const CreateGroundDecalResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -50,7 +50,7 @@ bool Read_DestroyGroundDecalQuery(const WasmValue& input, DestroyGroundDecalQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -59,7 +59,7 @@ bool Read_DestroyGroundDecalQuery(const WasmValue& input, DestroyGroundDecalQuer
 WasmValue Write_DestroyGroundDecalQuery(const DestroyGroundDecalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -84,7 +84,7 @@ bool Read_GetAllGroundDecalsQuery(const WasmValue& input, GetAllGroundDecalsQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -93,7 +93,7 @@ bool Read_GetAllGroundDecalsQuery(const WasmValue& input, GetAllGroundDecalsQuer
 WasmValue Write_GetAllGroundDecalsQuery(const GetAllGroundDecalsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -101,7 +101,7 @@ bool Read_GetAllGroundDecalsResult(const WasmValue& input, GetAllGroundDecalsRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalIDs = FindRecordField(*record, "decalIDs", error);
+	const auto* value_decalIDs = FindRecordField(*record, "decal-i-ds", error);
 	if (value_decalIDs == nullptr) return false;
 	const auto* list_decalIDs = std::get_if<WasmValueList>(&(*value_decalIDs).storage);
 	if (list_decalIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -120,7 +120,7 @@ bool Read_GetAllGroundDecalsResult(const WasmValue& input, GetAllGroundDecalsRes
 WasmValue Write_GetAllGroundDecalsResult(const GetAllGroundDecalsResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalIDs", WriteNativeList(value.decalIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("decal-i-ds", WriteNativeList(value.decalIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -128,7 +128,7 @@ bool Read_GetGroundDecalAlphaQuery(const WasmValue& input, GetGroundDecalAlphaQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -137,7 +137,7 @@ bool Read_GetGroundDecalAlphaQuery(const WasmValue& input, GetGroundDecalAlphaQu
 WasmValue Write_GetGroundDecalAlphaQuery(const GetGroundDecalAlphaQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -148,7 +148,7 @@ bool Read_GetGroundDecalAlphaResult(const WasmValue& input, GetGroundDecalAlphaR
 	const auto* value_alpha = FindRecordField(*record, "alpha", error);
 	if (value_alpha == nullptr) return false;
 	if (!ReadScalar(*value_alpha, output.alpha, error)) { return false; }
-	const auto* value_alphaFalloff = FindRecordField(*record, "alphaFalloff", error);
+	const auto* value_alphaFalloff = FindRecordField(*record, "alpha-falloff", error);
 	if (value_alphaFalloff == nullptr) return false;
 	if (!ReadScalar(*value_alphaFalloff, output.alphaFalloff, error)) { return false; }
 	return true;
@@ -158,7 +158,7 @@ WasmValue Write_GetGroundDecalAlphaResult(const GetGroundDecalAlphaResult& value
 {
 	WasmValueRecord fields;
 	fields.emplace("alpha", WriteScalar(value.alpha));
-	fields.emplace("alphaFalloff", WriteScalar(value.alphaFalloff));
+	fields.emplace("alpha-falloff", WriteScalar(value.alphaFalloff));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -166,7 +166,7 @@ bool Read_GetGroundDecalCreationFrameQuery(const WasmValue& input, GetGroundDeca
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -175,7 +175,7 @@ bool Read_GetGroundDecalCreationFrameQuery(const WasmValue& input, GetGroundDeca
 WasmValue Write_GetGroundDecalCreationFrameQuery(const GetGroundDecalCreationFrameQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -183,10 +183,10 @@ bool Read_GetGroundDecalCreationFrameResult(const WasmValue& input, GetGroundDec
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_creationFrameMin = FindRecordField(*record, "creationFrameMin", error);
+	const auto* value_creationFrameMin = FindRecordField(*record, "creation-frame-min", error);
 	if (value_creationFrameMin == nullptr) return false;
 	if (!ReadScalar(*value_creationFrameMin, output.creationFrameMin, error)) { return false; }
-	const auto* value_creationFrameMax = FindRecordField(*record, "creationFrameMax", error);
+	const auto* value_creationFrameMax = FindRecordField(*record, "creation-frame-max", error);
 	if (value_creationFrameMax == nullptr) return false;
 	if (!ReadScalar(*value_creationFrameMax, output.creationFrameMax, error)) { return false; }
 	return true;
@@ -195,8 +195,8 @@ bool Read_GetGroundDecalCreationFrameResult(const WasmValue& input, GetGroundDec
 WasmValue Write_GetGroundDecalCreationFrameResult(const GetGroundDecalCreationFrameResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("creationFrameMin", WriteScalar(value.creationFrameMin));
-	fields.emplace("creationFrameMax", WriteScalar(value.creationFrameMax));
+	fields.emplace("creation-frame-min", WriteScalar(value.creationFrameMin));
+	fields.emplace("creation-frame-max", WriteScalar(value.creationFrameMax));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -204,7 +204,7 @@ bool Read_GetGroundDecalGlowParamsQuery(const WasmValue& input, GetGroundDecalGl
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -213,7 +213,7 @@ bool Read_GetGroundDecalGlowParamsQuery(const WasmValue& input, GetGroundDecalGl
 WasmValue Write_GetGroundDecalGlowParamsQuery(const GetGroundDecalGlowParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -224,7 +224,7 @@ bool Read_GetGroundDecalGlowParamsResult(const WasmValue& input, GetGroundDecalG
 	const auto* value_glow = FindRecordField(*record, "glow", error);
 	if (value_glow == nullptr) return false;
 	if (!ReadScalar(*value_glow, output.glow, error)) { return false; }
-	const auto* value_glowFalloff = FindRecordField(*record, "glowFalloff", error);
+	const auto* value_glowFalloff = FindRecordField(*record, "glow-falloff", error);
 	if (value_glowFalloff == nullptr) return false;
 	if (!ReadScalar(*value_glowFalloff, output.glowFalloff, error)) { return false; }
 	return true;
@@ -234,7 +234,7 @@ WasmValue Write_GetGroundDecalGlowParamsResult(const GetGroundDecalGlowParamsRes
 {
 	WasmValueRecord fields;
 	fields.emplace("glow", WriteScalar(value.glow));
-	fields.emplace("glowFalloff", WriteScalar(value.glowFalloff));
+	fields.emplace("glow-falloff", WriteScalar(value.glowFalloff));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -242,7 +242,7 @@ bool Read_GetGroundDecalMiddlePosQuery(const WasmValue& input, GetGroundDecalMid
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -251,7 +251,7 @@ bool Read_GetGroundDecalMiddlePosQuery(const WasmValue& input, GetGroundDecalMid
 WasmValue Write_GetGroundDecalMiddlePosQuery(const GetGroundDecalMiddlePosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -259,7 +259,7 @@ bool Read_GetGroundDecalMiddlePosResult(const WasmValue& input, GetGroundDecalMi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_midPos = FindRecordField(*record, "midPos", error);
+	const auto* value_midPos = FindRecordField(*record, "mid-pos", error);
 	if (value_midPos == nullptr) return false;
 	const auto* array_values_midPos = std::get_if<WasmValueList>(&(*value_midPos).storage);
 	if (array_values_midPos == nullptr || array_values_midPos->size() != 2u) { error = "Wasm fixed array has the wrong length"; return false; }
@@ -275,7 +275,7 @@ bool Read_GetGroundDecalMiddlePosResult(const WasmValue& input, GetGroundDecalMi
 WasmValue Write_GetGroundDecalMiddlePosResult(const GetGroundDecalMiddlePosResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("midPos", WriteNativeArray(value.midPos, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("mid-pos", WriteNativeArray(value.midPos, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -284,7 +284,7 @@ bool Read_GetGroundDecalMiscQuery(const WasmValue& input, GetGroundDecalMiscQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -293,7 +293,7 @@ bool Read_GetGroundDecalMiscQuery(const WasmValue& input, GetGroundDecalMiscQuer
 WasmValue Write_GetGroundDecalMiscQuery(const GetGroundDecalMiscQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -301,19 +301,19 @@ bool Read_GetGroundDecalMiscResult(const WasmValue& input, GetGroundDecalMiscRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dotElimExp = FindRecordField(*record, "dotElimExp", error);
+	const auto* value_dotElimExp = FindRecordField(*record, "dot-elim-exp", error);
 	if (value_dotElimExp == nullptr) return false;
 	if (!ReadScalar(*value_dotElimExp, output.dotElimExp, error)) { return false; }
-	const auto* value_refHeight = FindRecordField(*record, "refHeight", error);
+	const auto* value_refHeight = FindRecordField(*record, "ref-height", error);
 	if (value_refHeight == nullptr) return false;
 	if (!ReadScalar(*value_refHeight, output.refHeight, error)) { return false; }
-	const auto* value_minHeight = FindRecordField(*record, "minHeight", error);
+	const auto* value_minHeight = FindRecordField(*record, "min-height", error);
 	if (value_minHeight == nullptr) return false;
 	if (!ReadScalar(*value_minHeight, output.minHeight, error)) { return false; }
-	const auto* value_maxHeight = FindRecordField(*record, "maxHeight", error);
+	const auto* value_maxHeight = FindRecordField(*record, "max-height", error);
 	if (value_maxHeight == nullptr) return false;
 	if (!ReadScalar(*value_maxHeight, output.maxHeight, error)) { return false; }
-	const auto* value_forceHeightMode = FindRecordField(*record, "forceHeightMode", error);
+	const auto* value_forceHeightMode = FindRecordField(*record, "force-height-mode", error);
 	if (value_forceHeightMode == nullptr) return false;
 	if (!ReadScalar(*value_forceHeightMode, output.forceHeightMode, error)) { return false; }
 	return true;
@@ -322,11 +322,11 @@ bool Read_GetGroundDecalMiscResult(const WasmValue& input, GetGroundDecalMiscRes
 WasmValue Write_GetGroundDecalMiscResult(const GetGroundDecalMiscResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dotElimExp", WriteScalar(value.dotElimExp));
-	fields.emplace("refHeight", WriteScalar(value.refHeight));
-	fields.emplace("minHeight", WriteScalar(value.minHeight));
-	fields.emplace("maxHeight", WriteScalar(value.maxHeight));
-	fields.emplace("forceHeightMode", WriteScalar(value.forceHeightMode));
+	fields.emplace("dot-elim-exp", WriteScalar(value.dotElimExp));
+	fields.emplace("ref-height", WriteScalar(value.refHeight));
+	fields.emplace("min-height", WriteScalar(value.minHeight));
+	fields.emplace("max-height", WriteScalar(value.maxHeight));
+	fields.emplace("force-height-mode", WriteScalar(value.forceHeightMode));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -334,7 +334,7 @@ bool Read_GetGroundDecalNormalQuery(const WasmValue& input, GetGroundDecalNormal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -343,7 +343,7 @@ bool Read_GetGroundDecalNormalQuery(const WasmValue& input, GetGroundDecalNormal
 WasmValue Write_GetGroundDecalNormalQuery(const GetGroundDecalNormalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -372,7 +372,7 @@ bool Read_GetGroundDecalOwnerQuery(const WasmValue& input, GetGroundDecalOwnerQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -381,7 +381,7 @@ bool Read_GetGroundDecalOwnerQuery(const WasmValue& input, GetGroundDecalOwnerQu
 WasmValue Write_GetGroundDecalOwnerQuery(const GetGroundDecalOwnerQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -389,10 +389,10 @@ bool Read_GetGroundDecalOwnerResult(const WasmValue& input, GetGroundDecalOwnerR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_hasOwner = FindRecordField(*record, "hasOwner", error);
+	const auto* value_hasOwner = FindRecordField(*record, "has-owner", error);
 	if (value_hasOwner == nullptr) return false;
 	if (!ReadScalar(*value_hasOwner, output.hasOwner, error)) { return false; }
-	const auto* value_ownerID = FindRecordField(*record, "ownerID", error);
+	const auto* value_ownerID = FindRecordField(*record, "owner-id", error);
 	if (value_ownerID == nullptr) return false;
 	if (!ReadScalar(*value_ownerID, output.ownerID, error)) { return false; }
 	return true;
@@ -401,8 +401,8 @@ bool Read_GetGroundDecalOwnerResult(const WasmValue& input, GetGroundDecalOwnerR
 WasmValue Write_GetGroundDecalOwnerResult(const GetGroundDecalOwnerResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("hasOwner", WriteScalar(value.hasOwner));
-	fields.emplace("ownerID", WriteScalar(value.ownerID));
+	fields.emplace("has-owner", WriteScalar(value.hasOwner));
+	fields.emplace("owner-id", WriteScalar(value.ownerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -410,7 +410,7 @@ bool Read_GetGroundDecalQuadPosQuery(const WasmValue& input, GetGroundDecalQuadP
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -419,7 +419,7 @@ bool Read_GetGroundDecalQuadPosQuery(const WasmValue& input, GetGroundDecalQuadP
 WasmValue Write_GetGroundDecalQuadPosQuery(const GetGroundDecalQuadPosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -452,7 +452,7 @@ bool Read_GetGroundDecalRotationQuery(const WasmValue& input, GetGroundDecalRota
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -461,7 +461,7 @@ bool Read_GetGroundDecalRotationQuery(const WasmValue& input, GetGroundDecalRota
 WasmValue Write_GetGroundDecalRotationQuery(const GetGroundDecalRotationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -490,7 +490,7 @@ bool Read_GetGroundDecalSizeAndHeightQuery(const WasmValue& input, GetGroundDeca
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -499,7 +499,7 @@ bool Read_GetGroundDecalSizeAndHeightQuery(const WasmValue& input, GetGroundDeca
 WasmValue Write_GetGroundDecalSizeAndHeightQuery(const GetGroundDecalSizeAndHeightQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -507,10 +507,10 @@ bool Read_GetGroundDecalSizeAndHeightResult(const WasmValue& input, GetGroundDec
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sizeX = FindRecordField(*record, "sizeX", error);
+	const auto* value_sizeX = FindRecordField(*record, "size-x", error);
 	if (value_sizeX == nullptr) return false;
 	if (!ReadScalar(*value_sizeX, output.sizeX, error)) { return false; }
-	const auto* value_sizeZ = FindRecordField(*record, "sizeZ", error);
+	const auto* value_sizeZ = FindRecordField(*record, "size-z", error);
 	if (value_sizeZ == nullptr) return false;
 	if (!ReadScalar(*value_sizeZ, output.sizeZ, error)) { return false; }
 	const auto* value_height = FindRecordField(*record, "height", error);
@@ -525,8 +525,8 @@ bool Read_GetGroundDecalSizeAndHeightResult(const WasmValue& input, GetGroundDec
 WasmValue Write_GetGroundDecalSizeAndHeightResult(const GetGroundDecalSizeAndHeightResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sizeX", WriteScalar(value.sizeX));
-	fields.emplace("sizeZ", WriteScalar(value.sizeZ));
+	fields.emplace("size-x", WriteScalar(value.sizeX));
+	fields.emplace("size-z", WriteScalar(value.sizeZ));
 	fields.emplace("height", WriteScalar(value.height));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
@@ -536,7 +536,7 @@ bool Read_GetGroundDecalTextureParamsQuery(const WasmValue& input, GetGroundDeca
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -545,7 +545,7 @@ bool Read_GetGroundDecalTextureParamsQuery(const WasmValue& input, GetGroundDeca
 WasmValue Write_GetGroundDecalTextureParamsQuery(const GetGroundDecalTextureParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -553,10 +553,10 @@ bool Read_GetGroundDecalTextureParamsResult(const WasmValue& input, GetGroundDec
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texWrapDistance = FindRecordField(*record, "texWrapDistance", error);
+	const auto* value_texWrapDistance = FindRecordField(*record, "tex-wrap-distance", error);
 	if (value_texWrapDistance == nullptr) return false;
 	if (!ReadScalar(*value_texWrapDistance, output.texWrapDistance, error)) { return false; }
-	const auto* value_texTraveledDistance = FindRecordField(*record, "texTraveledDistance", error);
+	const auto* value_texTraveledDistance = FindRecordField(*record, "tex-traveled-distance", error);
 	if (value_texTraveledDistance == nullptr) return false;
 	if (!ReadScalar(*value_texTraveledDistance, output.texTraveledDistance, error)) { return false; }
 	return true;
@@ -565,8 +565,8 @@ bool Read_GetGroundDecalTextureParamsResult(const WasmValue& input, GetGroundDec
 WasmValue Write_GetGroundDecalTextureParamsResult(const GetGroundDecalTextureParamsResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texWrapDistance", WriteScalar(value.texWrapDistance));
-	fields.emplace("texTraveledDistance", WriteScalar(value.texTraveledDistance));
+	fields.emplace("tex-wrap-distance", WriteScalar(value.texWrapDistance));
+	fields.emplace("tex-traveled-distance", WriteScalar(value.texTraveledDistance));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -574,10 +574,10 @@ bool Read_GetGroundDecalTextureQuery(const WasmValue& input, GetGroundDecalTextu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_mainTex = FindRecordField(*record, "mainTex", error);
+	const auto* value_mainTex = FindRecordField(*record, "main-tex", error);
 	if (value_mainTex == nullptr) return false;
 	if (!ReadScalar(*value_mainTex, output.mainTex, error)) { return false; }
 	return true;
@@ -586,8 +586,8 @@ bool Read_GetGroundDecalTextureQuery(const WasmValue& input, GetGroundDecalTextu
 WasmValue Write_GetGroundDecalTextureQuery(const GetGroundDecalTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("mainTex", WriteScalar(value.mainTex));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("main-tex", WriteScalar(value.mainTex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -614,7 +614,7 @@ bool Read_GetGroundDecalTexturesOptions(const WasmValue& input, GetGroundDecalTe
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_mainTex = FindRecordField(*record, "mainTex", error);
+	const auto* value_mainTex = FindRecordField(*record, "main-tex", error);
 	if (value_mainTex == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_mainTex).storage)) {
 		output.mainTex = {};
@@ -623,7 +623,7 @@ bool Read_GetGroundDecalTexturesOptions(const WasmValue& input, GetGroundDecalTe
 		output.hasMainTex = true;
 		if (!ReadScalar(*value_mainTex, output.mainTex, error)) { return false; }
 	}
-	const auto* value_includeFilenames = FindRecordField(*record, "includeFilenames", error);
+	const auto* value_includeFilenames = FindRecordField(*record, "include-filenames", error);
 	if (value_includeFilenames == nullptr) return false;
 	if (!ReadScalar(*value_includeFilenames, output.includeFilenames, error)) { return false; }
 	return true;
@@ -632,8 +632,8 @@ bool Read_GetGroundDecalTexturesOptions(const WasmValue& input, GetGroundDecalTe
 WasmValue Write_GetGroundDecalTexturesOptions(const GetGroundDecalTexturesOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("mainTex", value.hasMainTex ? WriteScalar(value.mainTex) : WasmValue::Unit());
-	fields.emplace("includeFilenames", WriteScalar(value.includeFilenames));
+	fields.emplace("main-tex", value.hasMainTex ? WriteScalar(value.mainTex) : WasmValue::Unit());
+	fields.emplace("include-filenames", WriteScalar(value.includeFilenames));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -709,7 +709,7 @@ bool Read_GetGroundDecalTintQuery(const WasmValue& input, GetGroundDecalTintQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -718,7 +718,7 @@ bool Read_GetGroundDecalTintQuery(const WasmValue& input, GetGroundDecalTintQuer
 WasmValue Write_GetGroundDecalTintQuery(const GetGroundDecalTintQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -747,7 +747,7 @@ bool Read_GetGroundDecalTypeQuery(const WasmValue& input, GetGroundDecalTypeQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	return true;
@@ -756,7 +756,7 @@ bool Read_GetGroundDecalTypeQuery(const WasmValue& input, GetGroundDecalTypeQuer
 WasmValue Write_GetGroundDecalTypeQuery(const GetGroundDecalTypeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -783,10 +783,10 @@ bool Read_GetGroundDecalUserDataQuery(const WasmValue& input, GetGroundDecalUser
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_quadIndex = FindRecordField(*record, "quadIndex", error);
+	const auto* value_quadIndex = FindRecordField(*record, "quad-index", error);
 	if (value_quadIndex == nullptr) return false;
 	if (!ReadScalar(*value_quadIndex, output.quadIndex, error)) { return false; }
 	return true;
@@ -795,8 +795,8 @@ bool Read_GetGroundDecalUserDataQuery(const WasmValue& input, GetGroundDecalUser
 WasmValue Write_GetGroundDecalUserDataQuery(const GetGroundDecalUserDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("quadIndex", WriteScalar(value.quadIndex));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("quad-index", WriteScalar(value.quadIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -829,13 +829,13 @@ bool Read_SetGroundDecalAlphaQuery(const WasmValue& input, SetGroundDecalAlphaQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	const auto* value_alpha = FindRecordField(*record, "alpha", error);
 	if (value_alpha == nullptr) return false;
 	if (!ReadScalar(*value_alpha, output.alpha, error)) { return false; }
-	const auto* value_alphaFalloff = FindRecordField(*record, "alphaFalloff", error);
+	const auto* value_alphaFalloff = FindRecordField(*record, "alpha-falloff", error);
 	if (value_alphaFalloff == nullptr) return false;
 	if (!ReadScalar(*value_alphaFalloff, output.alphaFalloff, error)) { return false; }
 	return true;
@@ -844,9 +844,9 @@ bool Read_SetGroundDecalAlphaQuery(const WasmValue& input, SetGroundDecalAlphaQu
 WasmValue Write_SetGroundDecalAlphaQuery(const SetGroundDecalAlphaQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	fields.emplace("alpha", WriteScalar(value.alpha));
-	fields.emplace("alphaFalloff", WriteScalar(value.alphaFalloff));
+	fields.emplace("alpha-falloff", WriteScalar(value.alphaFalloff));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -871,13 +871,13 @@ bool Read_SetGroundDecalCreationFrameQuery(const WasmValue& input, SetGroundDeca
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_creationFrameMin = FindRecordField(*record, "creationFrameMin", error);
+	const auto* value_creationFrameMin = FindRecordField(*record, "creation-frame-min", error);
 	if (value_creationFrameMin == nullptr) return false;
 	if (!ReadScalar(*value_creationFrameMin, output.creationFrameMin, error)) { return false; }
-	const auto* value_creationFrameMax = FindRecordField(*record, "creationFrameMax", error);
+	const auto* value_creationFrameMax = FindRecordField(*record, "creation-frame-max", error);
 	if (value_creationFrameMax == nullptr) return false;
 	if (!ReadScalar(*value_creationFrameMax, output.creationFrameMax, error)) { return false; }
 	return true;
@@ -886,9 +886,9 @@ bool Read_SetGroundDecalCreationFrameQuery(const WasmValue& input, SetGroundDeca
 WasmValue Write_SetGroundDecalCreationFrameQuery(const SetGroundDecalCreationFrameQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("creationFrameMin", WriteScalar(value.creationFrameMin));
-	fields.emplace("creationFrameMax", WriteScalar(value.creationFrameMax));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("creation-frame-min", WriteScalar(value.creationFrameMin));
+	fields.emplace("creation-frame-max", WriteScalar(value.creationFrameMax));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -913,13 +913,13 @@ bool Read_SetGroundDecalGlowParamsQuery(const WasmValue& input, SetGroundDecalGl
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	const auto* value_glow = FindRecordField(*record, "glow", error);
 	if (value_glow == nullptr) return false;
 	if (!ReadScalar(*value_glow, output.glow, error)) { return false; }
-	const auto* value_glowFalloff = FindRecordField(*record, "glowFalloff", error);
+	const auto* value_glowFalloff = FindRecordField(*record, "glow-falloff", error);
 	if (value_glowFalloff == nullptr) return false;
 	if (!ReadScalar(*value_glowFalloff, output.glowFalloff, error)) { return false; }
 	return true;
@@ -928,9 +928,9 @@ bool Read_SetGroundDecalGlowParamsQuery(const WasmValue& input, SetGroundDecalGl
 WasmValue Write_SetGroundDecalGlowParamsQuery(const SetGroundDecalGlowParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	fields.emplace("glow", WriteScalar(value.glow));
-	fields.emplace("glowFalloff", WriteScalar(value.glowFalloff));
+	fields.emplace("glow-falloff", WriteScalar(value.glowFalloff));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -955,22 +955,22 @@ bool Read_SetGroundDecalMiscQuery(const WasmValue& input, SetGroundDecalMiscQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_dotElimExp = FindRecordField(*record, "dotElimExp", error);
+	const auto* value_dotElimExp = FindRecordField(*record, "dot-elim-exp", error);
 	if (value_dotElimExp == nullptr) return false;
 	if (!ReadScalar(*value_dotElimExp, output.dotElimExp, error)) { return false; }
-	const auto* value_refHeight = FindRecordField(*record, "refHeight", error);
+	const auto* value_refHeight = FindRecordField(*record, "ref-height", error);
 	if (value_refHeight == nullptr) return false;
 	if (!ReadScalar(*value_refHeight, output.refHeight, error)) { return false; }
-	const auto* value_minHeight = FindRecordField(*record, "minHeight", error);
+	const auto* value_minHeight = FindRecordField(*record, "min-height", error);
 	if (value_minHeight == nullptr) return false;
 	if (!ReadScalar(*value_minHeight, output.minHeight, error)) { return false; }
-	const auto* value_maxHeight = FindRecordField(*record, "maxHeight", error);
+	const auto* value_maxHeight = FindRecordField(*record, "max-height", error);
 	if (value_maxHeight == nullptr) return false;
 	if (!ReadScalar(*value_maxHeight, output.maxHeight, error)) { return false; }
-	const auto* value_forceHeightMode = FindRecordField(*record, "forceHeightMode", error);
+	const auto* value_forceHeightMode = FindRecordField(*record, "force-height-mode", error);
 	if (value_forceHeightMode == nullptr) return false;
 	if (!ReadScalar(*value_forceHeightMode, output.forceHeightMode, error)) { return false; }
 	return true;
@@ -979,12 +979,12 @@ bool Read_SetGroundDecalMiscQuery(const WasmValue& input, SetGroundDecalMiscQuer
 WasmValue Write_SetGroundDecalMiscQuery(const SetGroundDecalMiscQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("dotElimExp", WriteScalar(value.dotElimExp));
-	fields.emplace("refHeight", WriteScalar(value.refHeight));
-	fields.emplace("minHeight", WriteScalar(value.minHeight));
-	fields.emplace("maxHeight", WriteScalar(value.maxHeight));
-	fields.emplace("forceHeightMode", WriteScalar(value.forceHeightMode));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("dot-elim-exp", WriteScalar(value.dotElimExp));
+	fields.emplace("ref-height", WriteScalar(value.refHeight));
+	fields.emplace("min-height", WriteScalar(value.minHeight));
+	fields.emplace("max-height", WriteScalar(value.maxHeight));
+	fields.emplace("force-height-mode", WriteScalar(value.forceHeightMode));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1009,16 +1009,16 @@ bool Read_SetGroundDecalNormalQuery(const WasmValue& input, SetGroundDecalNormal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_normalX = FindRecordField(*record, "normalX", error);
+	const auto* value_normalX = FindRecordField(*record, "normal-x", error);
 	if (value_normalX == nullptr) return false;
 	if (!ReadScalar(*value_normalX, output.normalX, error)) { return false; }
-	const auto* value_normalY = FindRecordField(*record, "normalY", error);
+	const auto* value_normalY = FindRecordField(*record, "normal-y", error);
 	if (value_normalY == nullptr) return false;
 	if (!ReadScalar(*value_normalY, output.normalY, error)) { return false; }
-	const auto* value_normalZ = FindRecordField(*record, "normalZ", error);
+	const auto* value_normalZ = FindRecordField(*record, "normal-z", error);
 	if (value_normalZ == nullptr) return false;
 	if (!ReadScalar(*value_normalZ, output.normalZ, error)) { return false; }
 	return true;
@@ -1027,10 +1027,10 @@ bool Read_SetGroundDecalNormalQuery(const WasmValue& input, SetGroundDecalNormal
 WasmValue Write_SetGroundDecalNormalQuery(const SetGroundDecalNormalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("normalX", WriteScalar(value.normalX));
-	fields.emplace("normalY", WriteScalar(value.normalY));
-	fields.emplace("normalZ", WriteScalar(value.normalZ));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("normal-x", WriteScalar(value.normalX));
+	fields.emplace("normal-y", WriteScalar(value.normalY));
+	fields.emplace("normal-z", WriteScalar(value.normalZ));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1055,22 +1055,22 @@ bool Read_SetGroundDecalPosAndDimsQuery(const WasmValue& input, SetGroundDecalPo
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_midPosX = FindRecordField(*record, "midPosX", error);
+	const auto* value_midPosX = FindRecordField(*record, "mid-pos-x", error);
 	if (value_midPosX == nullptr) return false;
 	if (!ReadScalar(*value_midPosX, output.midPosX, error)) { return false; }
-	const auto* value_midPosZ = FindRecordField(*record, "midPosZ", error);
+	const auto* value_midPosZ = FindRecordField(*record, "mid-pos-z", error);
 	if (value_midPosZ == nullptr) return false;
 	if (!ReadScalar(*value_midPosZ, output.midPosZ, error)) { return false; }
-	const auto* value_sizeX = FindRecordField(*record, "sizeX", error);
+	const auto* value_sizeX = FindRecordField(*record, "size-x", error);
 	if (value_sizeX == nullptr) return false;
 	if (!ReadScalar(*value_sizeX, output.sizeX, error)) { return false; }
-	const auto* value_sizeZ = FindRecordField(*record, "sizeZ", error);
+	const auto* value_sizeZ = FindRecordField(*record, "size-z", error);
 	if (value_sizeZ == nullptr) return false;
 	if (!ReadScalar(*value_sizeZ, output.sizeZ, error)) { return false; }
-	const auto* value_projCubeHeight = FindRecordField(*record, "projCubeHeight", error);
+	const auto* value_projCubeHeight = FindRecordField(*record, "proj-cube-height", error);
 	if (value_projCubeHeight == nullptr) return false;
 	if (!ReadScalar(*value_projCubeHeight, output.projCubeHeight, error)) { return false; }
 	return true;
@@ -1079,12 +1079,12 @@ bool Read_SetGroundDecalPosAndDimsQuery(const WasmValue& input, SetGroundDecalPo
 WasmValue Write_SetGroundDecalPosAndDimsQuery(const SetGroundDecalPosAndDimsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("midPosX", WriteScalar(value.midPosX));
-	fields.emplace("midPosZ", WriteScalar(value.midPosZ));
-	fields.emplace("sizeX", WriteScalar(value.sizeX));
-	fields.emplace("sizeZ", WriteScalar(value.sizeZ));
-	fields.emplace("projCubeHeight", WriteScalar(value.projCubeHeight));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("mid-pos-x", WriteScalar(value.midPosX));
+	fields.emplace("mid-pos-z", WriteScalar(value.midPosZ));
+	fields.emplace("size-x", WriteScalar(value.sizeX));
+	fields.emplace("size-z", WriteScalar(value.sizeZ));
+	fields.emplace("proj-cube-height", WriteScalar(value.projCubeHeight));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1109,34 +1109,34 @@ bool Read_SetGroundDecalQuadPosAndHeightQuery(const WasmValue& input, SetGroundD
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_posTLX = FindRecordField(*record, "posTLX", error);
+	const auto* value_posTLX = FindRecordField(*record, "pos-tlx", error);
 	if (value_posTLX == nullptr) return false;
 	if (!ReadScalar(*value_posTLX, output.posTLX, error)) { return false; }
-	const auto* value_posTLY = FindRecordField(*record, "posTLY", error);
+	const auto* value_posTLY = FindRecordField(*record, "pos-tly", error);
 	if (value_posTLY == nullptr) return false;
 	if (!ReadScalar(*value_posTLY, output.posTLY, error)) { return false; }
-	const auto* value_posTRX = FindRecordField(*record, "posTRX", error);
+	const auto* value_posTRX = FindRecordField(*record, "pos-trx", error);
 	if (value_posTRX == nullptr) return false;
 	if (!ReadScalar(*value_posTRX, output.posTRX, error)) { return false; }
-	const auto* value_posTRY = FindRecordField(*record, "posTRY", error);
+	const auto* value_posTRY = FindRecordField(*record, "pos-try", error);
 	if (value_posTRY == nullptr) return false;
 	if (!ReadScalar(*value_posTRY, output.posTRY, error)) { return false; }
-	const auto* value_posBRX = FindRecordField(*record, "posBRX", error);
+	const auto* value_posBRX = FindRecordField(*record, "pos-brx", error);
 	if (value_posBRX == nullptr) return false;
 	if (!ReadScalar(*value_posBRX, output.posBRX, error)) { return false; }
-	const auto* value_posBRY = FindRecordField(*record, "posBRY", error);
+	const auto* value_posBRY = FindRecordField(*record, "pos-bry", error);
 	if (value_posBRY == nullptr) return false;
 	if (!ReadScalar(*value_posBRY, output.posBRY, error)) { return false; }
-	const auto* value_posBLX = FindRecordField(*record, "posBLX", error);
+	const auto* value_posBLX = FindRecordField(*record, "pos-blx", error);
 	if (value_posBLX == nullptr) return false;
 	if (!ReadScalar(*value_posBLX, output.posBLX, error)) { return false; }
-	const auto* value_posBLY = FindRecordField(*record, "posBLY", error);
+	const auto* value_posBLY = FindRecordField(*record, "pos-bly", error);
 	if (value_posBLY == nullptr) return false;
 	if (!ReadScalar(*value_posBLY, output.posBLY, error)) { return false; }
-	const auto* value_projCubeHeight = FindRecordField(*record, "projCubeHeight", error);
+	const auto* value_projCubeHeight = FindRecordField(*record, "proj-cube-height", error);
 	if (value_projCubeHeight == nullptr) return false;
 	if (!ReadScalar(*value_projCubeHeight, output.projCubeHeight, error)) { return false; }
 	return true;
@@ -1145,16 +1145,16 @@ bool Read_SetGroundDecalQuadPosAndHeightQuery(const WasmValue& input, SetGroundD
 WasmValue Write_SetGroundDecalQuadPosAndHeightQuery(const SetGroundDecalQuadPosAndHeightQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("posTLX", WriteScalar(value.posTLX));
-	fields.emplace("posTLY", WriteScalar(value.posTLY));
-	fields.emplace("posTRX", WriteScalar(value.posTRX));
-	fields.emplace("posTRY", WriteScalar(value.posTRY));
-	fields.emplace("posBRX", WriteScalar(value.posBRX));
-	fields.emplace("posBRY", WriteScalar(value.posBRY));
-	fields.emplace("posBLX", WriteScalar(value.posBLX));
-	fields.emplace("posBLY", WriteScalar(value.posBLY));
-	fields.emplace("projCubeHeight", WriteScalar(value.projCubeHeight));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("pos-tlx", WriteScalar(value.posTLX));
+	fields.emplace("pos-tly", WriteScalar(value.posTLY));
+	fields.emplace("pos-trx", WriteScalar(value.posTRX));
+	fields.emplace("pos-try", WriteScalar(value.posTRY));
+	fields.emplace("pos-brx", WriteScalar(value.posBRX));
+	fields.emplace("pos-bry", WriteScalar(value.posBRY));
+	fields.emplace("pos-blx", WriteScalar(value.posBLX));
+	fields.emplace("pos-bly", WriteScalar(value.posBLY));
+	fields.emplace("proj-cube-height", WriteScalar(value.projCubeHeight));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1179,7 +1179,7 @@ bool Read_SetGroundDecalRotationQuery(const WasmValue& input, SetGroundDecalRota
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
 	const auto* value_rotation = FindRecordField(*record, "rotation", error);
@@ -1191,7 +1191,7 @@ bool Read_SetGroundDecalRotationQuery(const WasmValue& input, SetGroundDecalRota
 WasmValue Write_SetGroundDecalRotationQuery(const SetGroundDecalRotationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
 	fields.emplace("rotation", WriteScalar(value.rotation));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1217,13 +1217,13 @@ bool Read_SetGroundDecalTextureParamsQuery(const WasmValue& input, SetGroundDeca
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_texWrapDistance = FindRecordField(*record, "texWrapDistance", error);
+	const auto* value_texWrapDistance = FindRecordField(*record, "tex-wrap-distance", error);
 	if (value_texWrapDistance == nullptr) return false;
 	if (!ReadScalar(*value_texWrapDistance, output.texWrapDistance, error)) { return false; }
-	const auto* value_texTraveledDistance = FindRecordField(*record, "texTraveledDistance", error);
+	const auto* value_texTraveledDistance = FindRecordField(*record, "tex-traveled-distance", error);
 	if (value_texTraveledDistance == nullptr) return false;
 	if (!ReadScalar(*value_texTraveledDistance, output.texTraveledDistance, error)) { return false; }
 	return true;
@@ -1232,9 +1232,9 @@ bool Read_SetGroundDecalTextureParamsQuery(const WasmValue& input, SetGroundDeca
 WasmValue Write_SetGroundDecalTextureParamsQuery(const SetGroundDecalTextureParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("texWrapDistance", WriteScalar(value.texWrapDistance));
-	fields.emplace("texTraveledDistance", WriteScalar(value.texTraveledDistance));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("tex-wrap-distance", WriteScalar(value.texWrapDistance));
+	fields.emplace("tex-traveled-distance", WriteScalar(value.texTraveledDistance));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1259,15 +1259,15 @@ bool Read_SetGroundDecalTextureQuery(const WasmValue& input, SetGroundDecalTextu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_textureName = FindRecordField(*record, "textureName", error);
+	const auto* value_textureName = FindRecordField(*record, "texture-name", error);
 	if (value_textureName == nullptr) return false;
 	auto& stored_string_output_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_output_textureName, error)) { return false; }
 	output.textureName = stored_string_output_textureName.c_str();
-	const auto* value_mainTex = FindRecordField(*record, "mainTex", error);
+	const auto* value_mainTex = FindRecordField(*record, "main-tex", error);
 	if (value_mainTex == nullptr) return false;
 	if (!ReadScalar(*value_mainTex, output.mainTex, error)) { return false; }
 	return true;
@@ -1276,9 +1276,9 @@ bool Read_SetGroundDecalTextureQuery(const WasmValue& input, SetGroundDecalTextu
 WasmValue Write_SetGroundDecalTextureQuery(const SetGroundDecalTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("textureName", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
-	fields.emplace("mainTex", WriteScalar(value.mainTex));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("texture-name", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
+	fields.emplace("main-tex", WriteScalar(value.mainTex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1303,19 +1303,19 @@ bool Read_SetGroundDecalTintQuery(const WasmValue& input, SetGroundDecalTintQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_tintR = FindRecordField(*record, "tintR", error);
+	const auto* value_tintR = FindRecordField(*record, "tint-r", error);
 	if (value_tintR == nullptr) return false;
 	if (!ReadScalar(*value_tintR, output.tintR, error)) { return false; }
-	const auto* value_tintG = FindRecordField(*record, "tintG", error);
+	const auto* value_tintG = FindRecordField(*record, "tint-g", error);
 	if (value_tintG == nullptr) return false;
 	if (!ReadScalar(*value_tintG, output.tintG, error)) { return false; }
-	const auto* value_tintB = FindRecordField(*record, "tintB", error);
+	const auto* value_tintB = FindRecordField(*record, "tint-b", error);
 	if (value_tintB == nullptr) return false;
 	if (!ReadScalar(*value_tintB, output.tintB, error)) { return false; }
-	const auto* value_tintA = FindRecordField(*record, "tintA", error);
+	const auto* value_tintA = FindRecordField(*record, "tint-a", error);
 	if (value_tintA == nullptr) return false;
 	if (!ReadScalar(*value_tintA, output.tintA, error)) { return false; }
 	return true;
@@ -1324,11 +1324,11 @@ bool Read_SetGroundDecalTintQuery(const WasmValue& input, SetGroundDecalTintQuer
 WasmValue Write_SetGroundDecalTintQuery(const SetGroundDecalTintQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("tintR", WriteScalar(value.tintR));
-	fields.emplace("tintG", WriteScalar(value.tintG));
-	fields.emplace("tintB", WriteScalar(value.tintB));
-	fields.emplace("tintA", WriteScalar(value.tintA));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("tint-r", WriteScalar(value.tintR));
+	fields.emplace("tint-g", WriteScalar(value.tintG));
+	fields.emplace("tint-b", WriteScalar(value.tintB));
+	fields.emplace("tint-a", WriteScalar(value.tintA));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1353,22 +1353,22 @@ bool Read_SetGroundDecalUserDataQuery(const WasmValue& input, SetGroundDecalUser
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_decalID = FindRecordField(*record, "decalID", error);
+	const auto* value_decalID = FindRecordField(*record, "decal-id", error);
 	if (value_decalID == nullptr) return false;
 	if (!ReadScalar(*value_decalID, output.decalID, error)) { return false; }
-	const auto* value_quadIndex = FindRecordField(*record, "quadIndex", error);
+	const auto* value_quadIndex = FindRecordField(*record, "quad-index", error);
 	if (value_quadIndex == nullptr) return false;
 	if (!ReadScalar(*value_quadIndex, output.quadIndex, error)) { return false; }
-	const auto* value_valueX = FindRecordField(*record, "valueX", error);
+	const auto* value_valueX = FindRecordField(*record, "value-x", error);
 	if (value_valueX == nullptr) return false;
 	if (!ReadScalar(*value_valueX, output.valueX, error)) { return false; }
-	const auto* value_valueY = FindRecordField(*record, "valueY", error);
+	const auto* value_valueY = FindRecordField(*record, "value-y", error);
 	if (value_valueY == nullptr) return false;
 	if (!ReadScalar(*value_valueY, output.valueY, error)) { return false; }
-	const auto* value_valueZ = FindRecordField(*record, "valueZ", error);
+	const auto* value_valueZ = FindRecordField(*record, "value-z", error);
 	if (value_valueZ == nullptr) return false;
 	if (!ReadScalar(*value_valueZ, output.valueZ, error)) { return false; }
-	const auto* value_valueW = FindRecordField(*record, "valueW", error);
+	const auto* value_valueW = FindRecordField(*record, "value-w", error);
 	if (value_valueW == nullptr) return false;
 	if (!ReadScalar(*value_valueW, output.valueW, error)) { return false; }
 	return true;
@@ -1377,12 +1377,12 @@ bool Read_SetGroundDecalUserDataQuery(const WasmValue& input, SetGroundDecalUser
 WasmValue Write_SetGroundDecalUserDataQuery(const SetGroundDecalUserDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("decalID", WriteScalar(value.decalID));
-	fields.emplace("quadIndex", WriteScalar(value.quadIndex));
-	fields.emplace("valueX", WriteScalar(value.valueX));
-	fields.emplace("valueY", WriteScalar(value.valueY));
-	fields.emplace("valueZ", WriteScalar(value.valueZ));
-	fields.emplace("valueW", WriteScalar(value.valueW));
+	fields.emplace("decal-id", WriteScalar(value.decalID));
+	fields.emplace("quad-index", WriteScalar(value.quadIndex));
+	fields.emplace("value-x", WriteScalar(value.valueX));
+	fields.emplace("value-y", WriteScalar(value.valueY));
+	fields.emplace("value-z", WriteScalar(value.valueZ));
+	fields.emplace("value-w", WriteScalar(value.valueW));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1413,11 +1413,11 @@ NativeCalloutDispatch Dispatch_ground_decals_CreateGroundDecal(NativeInterface* 
 	NativeCallStorage storage;
 	CreateGroundDecalQuery query{};
 	CreateGroundDecalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->CreateGroundDecal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("decalID", WriteScalar(nativeResult.decalID));
+	outputFields.emplace("decal-id", WriteScalar(nativeResult.decalID));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -1429,7 +1429,7 @@ NativeCalloutDispatch Dispatch_ground_decals_DestroyGroundDecal(NativeInterface*
 	NativeCallStorage storage;
 	DestroyGroundDecalQuery query{};
 	DestroyGroundDecalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->DestroyGroundDecal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1442,7 +1442,7 @@ NativeCalloutDispatch Dispatch_ground_decals_GetAllGroundDecals(NativeInterface*
 	NativeCallStorage storage;
 	GetAllGroundDecalsQuery query{};
 	GetAllGroundDecalsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetAllGroundDecals(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.decalIDs, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1455,12 +1455,12 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalAlpha(NativeInterface
 	NativeCallStorage storage;
 	GetGroundDecalAlphaQuery query{};
 	GetGroundDecalAlphaResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalAlpha(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("alpha", WriteScalar(nativeResult.alpha));
-	outputFields.emplace("alphaFalloff", WriteScalar(nativeResult.alphaFalloff));
+	outputFields.emplace("alpha-falloff", WriteScalar(nativeResult.alphaFalloff));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1471,12 +1471,12 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalCreationFrame(NativeI
 	NativeCallStorage storage;
 	GetGroundDecalCreationFrameQuery query{};
 	GetGroundDecalCreationFrameResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalCreationFrame(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("creationFrameMin", WriteScalar(nativeResult.creationFrameMin));
-	outputFields.emplace("creationFrameMax", WriteScalar(nativeResult.creationFrameMax));
+	outputFields.emplace("creation-frame-min", WriteScalar(nativeResult.creationFrameMin));
+	outputFields.emplace("creation-frame-max", WriteScalar(nativeResult.creationFrameMax));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1487,12 +1487,12 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalGlowParams(NativeInte
 	NativeCallStorage storage;
 	GetGroundDecalGlowParamsQuery query{};
 	GetGroundDecalGlowParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalGlowParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("glow", WriteScalar(nativeResult.glow));
-	outputFields.emplace("glowFalloff", WriteScalar(nativeResult.glowFalloff));
+	outputFields.emplace("glow-falloff", WriteScalar(nativeResult.glowFalloff));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1503,11 +1503,11 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalMiddlePos(NativeInter
 	NativeCallStorage storage;
 	GetGroundDecalMiddlePosQuery query{};
 	GetGroundDecalMiddlePosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalMiddlePos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("midPos", WriteNativeArray(nativeResult.midPos, [](const auto& value) { return WriteScalar(value); }));
+	outputFields.emplace("mid-pos", WriteNativeArray(nativeResult.midPos, [](const auto& value) { return WriteScalar(value); }));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -1519,15 +1519,15 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalMisc(NativeInterface*
 	NativeCallStorage storage;
 	GetGroundDecalMiscQuery query{};
 	GetGroundDecalMiscResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalMisc(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("dotElimExp", WriteScalar(nativeResult.dotElimExp));
-	outputFields.emplace("refHeight", WriteScalar(nativeResult.refHeight));
-	outputFields.emplace("minHeight", WriteScalar(nativeResult.minHeight));
-	outputFields.emplace("maxHeight", WriteScalar(nativeResult.maxHeight));
-	outputFields.emplace("forceHeightMode", WriteScalar(nativeResult.forceHeightMode));
+	outputFields.emplace("dot-elim-exp", WriteScalar(nativeResult.dotElimExp));
+	outputFields.emplace("ref-height", WriteScalar(nativeResult.refHeight));
+	outputFields.emplace("min-height", WriteScalar(nativeResult.minHeight));
+	outputFields.emplace("max-height", WriteScalar(nativeResult.maxHeight));
+	outputFields.emplace("force-height-mode", WriteScalar(nativeResult.forceHeightMode));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1538,7 +1538,7 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalNormal(NativeInterfac
 	NativeCallStorage storage;
 	GetGroundDecalNormalQuery query{};
 	GetGroundDecalNormalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalNormal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeArray(nativeResult.normal, [](const auto& value) { return WriteScalar(value); });
@@ -1551,12 +1551,12 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalOwner(NativeInterface
 	NativeCallStorage storage;
 	GetGroundDecalOwnerQuery query{};
 	GetGroundDecalOwnerResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalOwner(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("hasOwner", WriteScalar(nativeResult.hasOwner));
-	outputFields.emplace("ownerID", WriteScalar(nativeResult.ownerID));
+	outputFields.emplace("has-owner", WriteScalar(nativeResult.hasOwner));
+	outputFields.emplace("owner-id", WriteScalar(nativeResult.ownerID));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1567,7 +1567,7 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalQuadPos(NativeInterfa
 	NativeCallStorage storage;
 	GetGroundDecalQuadPosQuery query{};
 	GetGroundDecalQuadPosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalQuadPos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1583,7 +1583,7 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalRotation(NativeInterf
 	NativeCallStorage storage;
 	GetGroundDecalRotationQuery query{};
 	GetGroundDecalRotationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalRotation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1599,12 +1599,12 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalSizeAndHeight(NativeI
 	NativeCallStorage storage;
 	GetGroundDecalSizeAndHeightQuery query{};
 	GetGroundDecalSizeAndHeightResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalSizeAndHeight(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("sizeX", WriteScalar(nativeResult.sizeX));
-	outputFields.emplace("sizeZ", WriteScalar(nativeResult.sizeZ));
+	outputFields.emplace("size-x", WriteScalar(nativeResult.sizeX));
+	outputFields.emplace("size-z", WriteScalar(nativeResult.sizeZ));
 	outputFields.emplace("height", WriteScalar(nativeResult.height));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
@@ -1617,8 +1617,8 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalTexture(NativeInterfa
 	NativeCallStorage storage;
 	GetGroundDecalTextureQuery query{};
 	GetGroundDecalTextureResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "mainTex", query.mainTex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "main-tex", query.mainTex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalTexture(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.texture == nullptr) ? std::string{} : std::string(nativeResult.texture));
@@ -1631,12 +1631,12 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalTextureParams(NativeI
 	NativeCallStorage storage;
 	GetGroundDecalTextureParamsQuery query{};
 	GetGroundDecalTextureParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalTextureParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("texWrapDistance", WriteScalar(nativeResult.texWrapDistance));
-	outputFields.emplace("texTraveledDistance", WriteScalar(nativeResult.texTraveledDistance));
+	outputFields.emplace("tex-wrap-distance", WriteScalar(nativeResult.texWrapDistance));
+	outputFields.emplace("tex-traveled-distance", WriteScalar(nativeResult.texTraveledDistance));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1663,7 +1663,7 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalTint(NativeInterface*
 	NativeCallStorage storage;
 	GetGroundDecalTintQuery query{};
 	GetGroundDecalTintResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalTint(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeArray(nativeResult.tint, [](const auto& value) { return WriteScalar(value); });
@@ -1676,7 +1676,7 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalType(NativeInterface*
 	NativeCallStorage storage;
 	GetGroundDecalTypeQuery query{};
 	GetGroundDecalTypeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalType(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.type == nullptr) ? std::string{} : std::string(nativeResult.type));
@@ -1689,8 +1689,8 @@ NativeCalloutDispatch Dispatch_ground_decals_GetGroundDecalUserData(NativeInterf
 	NativeCallStorage storage;
 	GetGroundDecalUserDataQuery query{};
 	GetGroundDecalUserDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "quadIndex", query.quadIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "quad-index", query.quadIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->GetGroundDecalUserData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1706,9 +1706,9 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalAlpha(NativeInterface
 	NativeCallStorage storage;
 	SetGroundDecalAlphaQuery query{};
 	SetGroundDecalAlphaResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "alpha", query.alpha, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "alphaFalloff", query.alphaFalloff, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "alpha-falloff", query.alphaFalloff, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalAlpha(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1721,9 +1721,9 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalCreationFrame(NativeI
 	NativeCallStorage storage;
 	SetGroundDecalCreationFrameQuery query{};
 	SetGroundDecalCreationFrameResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "creationFrameMin", query.creationFrameMin, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "creationFrameMax", query.creationFrameMax, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "creation-frame-min", query.creationFrameMin, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "creation-frame-max", query.creationFrameMax, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalCreationFrame(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1736,9 +1736,9 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalGlowParams(NativeInte
 	NativeCallStorage storage;
 	SetGroundDecalGlowParamsQuery query{};
 	SetGroundDecalGlowParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "glow", query.glow, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "glowFalloff", query.glowFalloff, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "glow-falloff", query.glowFalloff, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalGlowParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1751,12 +1751,12 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalMisc(NativeInterface*
 	NativeCallStorage storage;
 	SetGroundDecalMiscQuery query{};
 	SetGroundDecalMiscResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "dotElimExp", query.dotElimExp, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "refHeight", query.refHeight, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "minHeight", query.minHeight, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "maxHeight", query.maxHeight, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "forceHeightMode", query.forceHeightMode, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "dot-elim-exp", query.dotElimExp, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "ref-height", query.refHeight, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "min-height", query.minHeight, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "max-height", query.maxHeight, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "force-height-mode", query.forceHeightMode, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalMisc(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1769,10 +1769,10 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalNormal(NativeInterfac
 	NativeCallStorage storage;
 	SetGroundDecalNormalQuery query{};
 	SetGroundDecalNormalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "normalX", query.normalX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "normalY", query.normalY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "normalZ", query.normalZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "normal-x", query.normalX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "normal-y", query.normalY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "normal-z", query.normalZ, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalNormal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1785,12 +1785,12 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalPosAndDims(NativeInte
 	NativeCallStorage storage;
 	SetGroundDecalPosAndDimsQuery query{};
 	SetGroundDecalPosAndDimsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "midPosX", query.midPosX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "midPosZ", query.midPosZ, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "sizeX", query.sizeX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "sizeZ", query.sizeZ, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "projCubeHeight", query.projCubeHeight, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "mid-pos-x", query.midPosX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "mid-pos-z", query.midPosZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "size-x", query.sizeX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "size-z", query.sizeZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "proj-cube-height", query.projCubeHeight, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalPosAndDims(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1803,16 +1803,16 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalQuadPosAndHeight(Nati
 	NativeCallStorage storage;
 	SetGroundDecalQuadPosAndHeightQuery query{};
 	SetGroundDecalQuadPosAndHeightResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 10u, 10u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 10u, 10u, "posTLX", query.posTLX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 10u, 10u, "posTLY", query.posTLY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 10u, 10u, "posTRX", query.posTRX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 10u, 10u, "posTRY", query.posTRY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 10u, 10u, "posBRX", query.posBRX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 10u, 10u, "posBRY", query.posBRY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 7u, 7u, 10u, 10u, "posBLX", query.posBLX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 8u, 8u, 10u, 10u, "posBLY", query.posBLY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 9u, 9u, 10u, 10u, "projCubeHeight", query.projCubeHeight, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 10u, 10u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 10u, 10u, "pos-tlx", query.posTLX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 10u, 10u, "pos-tly", query.posTLY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 10u, 10u, "pos-trx", query.posTRX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 10u, 10u, "pos-try", query.posTRY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 10u, 10u, "pos-brx", query.posBRX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 10u, 10u, "pos-bry", query.posBRY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 7u, 7u, 10u, 10u, "pos-blx", query.posBLX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 8u, 8u, 10u, 10u, "pos-bly", query.posBLY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 9u, 9u, 10u, 10u, "proj-cube-height", query.projCubeHeight, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalQuadPosAndHeight(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1825,7 +1825,7 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalRotation(NativeInterf
 	NativeCallStorage storage;
 	SetGroundDecalRotationQuery query{};
 	SetGroundDecalRotationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "rotation", query.rotation, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalRotation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1839,13 +1839,13 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalTexture(NativeInterfa
 	NativeCallStorage storage;
 	SetGroundDecalTextureQuery query{};
 	SetGroundDecalTextureResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_textureName = FindArgument(arguments, 1u, 1u, 3u, 3u, "textureName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_textureName = FindArgument(arguments, 1u, 1u, 3u, 3u, "texture-name", error);
 	if (value_textureName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_query_textureName, error)) { return NativeCalloutDispatch::handled; }
 	query.textureName = stored_string_query_textureName.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "mainTex", query.mainTex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "main-tex", query.mainTex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalTexture(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1858,9 +1858,9 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalTextureParams(NativeI
 	NativeCallStorage storage;
 	SetGroundDecalTextureParamsQuery query{};
 	SetGroundDecalTextureParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "texWrapDistance", query.texWrapDistance, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "texTraveledDistance", query.texTraveledDistance, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "tex-wrap-distance", query.texWrapDistance, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "tex-traveled-distance", query.texTraveledDistance, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalTextureParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1873,11 +1873,11 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalTint(NativeInterface*
 	NativeCallStorage storage;
 	SetGroundDecalTintQuery query{};
 	SetGroundDecalTintResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "tintR", query.tintR, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "tintG", query.tintG, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "tintB", query.tintB, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "tintA", query.tintA, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "tint-r", query.tintR, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "tint-g", query.tintG, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "tint-b", query.tintB, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "tint-a", query.tintA, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalTint(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1890,12 +1890,12 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalUserData(NativeInterf
 	NativeCallStorage storage;
 	SetGroundDecalUserDataQuery query{};
 	SetGroundDecalUserDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "decalID", query.decalID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "quadIndex", query.quadIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "valueX", query.valueX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "valueY", query.valueY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "valueZ", query.valueZ, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "valueW", query.valueW, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "decal-id", query.decalID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "quad-index", query.quadIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "value-x", query.valueX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "value-y", query.valueY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "value-z", query.valueZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "value-w", query.valueW, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->groundDecals->SetGroundDecalUserData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

@@ -36,10 +36,10 @@ bool Read_FeatureDefInfo(const WasmValue& input, FeatureDefInfo& output, NativeC
 	const auto* value_energy = FindRecordField(*record, "energy", error);
 	if (value_energy == nullptr) return false;
 	if (!ReadScalar(*value_energy, output.energy, error)) { return false; }
-	const auto* value_maxHealth = FindRecordField(*record, "maxHealth", error);
+	const auto* value_maxHealth = FindRecordField(*record, "max-health", error);
 	if (value_maxHealth == nullptr) return false;
 	if (!ReadScalar(*value_maxHealth, output.maxHealth, error)) { return false; }
-	const auto* value_reclaimTime = FindRecordField(*record, "reclaimTime", error);
+	const auto* value_reclaimTime = FindRecordField(*record, "reclaim-time", error);
 	if (value_reclaimTime == nullptr) return false;
 	if (!ReadScalar(*value_reclaimTime, output.reclaimTime, error)) { return false; }
 	const auto* value_mass = FindRecordField(*record, "mass", error);
@@ -60,15 +60,15 @@ bool Read_FeatureDefInfo(const WasmValue& input, FeatureDefInfo& output, NativeC
 	const auto* value_floating = FindRecordField(*record, "floating", error);
 	if (value_floating == nullptr) return false;
 	if (!ReadScalar(*value_floating, output.floating, error)) { return false; }
-	const auto* value_geoThermal = FindRecordField(*record, "geoThermal", error);
+	const auto* value_geoThermal = FindRecordField(*record, "geo-thermal", error);
 	if (value_geoThermal == nullptr) return false;
 	if (!ReadScalar(*value_geoThermal, output.geoThermal, error)) { return false; }
-	const auto* value_modelName = FindRecordField(*record, "modelName", error);
+	const auto* value_modelName = FindRecordField(*record, "model-name", error);
 	if (value_modelName == nullptr) return false;
 	auto& stored_string_output_modelName = storage.Make<std::string>();
 	if (!ReadString(*value_modelName, stored_string_output_modelName, error)) { return false; }
 	output.modelName = stored_string_output_modelName.c_str();
-	const auto* value_resurrectAs = FindRecordField(*record, "resurrectAs", error);
+	const auto* value_resurrectAs = FindRecordField(*record, "resurrect-as", error);
 	if (value_resurrectAs == nullptr) return false;
 	auto& stored_string_output_resurrectAs = storage.Make<std::string>();
 	if (!ReadString(*value_resurrectAs, stored_string_output_resurrectAs, error)) { return false; }
@@ -85,17 +85,17 @@ WasmValue Write_FeatureDefInfo(const FeatureDefInfo& value)
 	fields.emplace("tooltip", WasmValue::String((value.tooltip == nullptr) ? std::string{} : std::string(value.tooltip)));
 	fields.emplace("metal", WriteScalar(value.metal));
 	fields.emplace("energy", WriteScalar(value.energy));
-	fields.emplace("maxHealth", WriteScalar(value.maxHealth));
-	fields.emplace("reclaimTime", WriteScalar(value.reclaimTime));
+	fields.emplace("max-health", WriteScalar(value.maxHealth));
+	fields.emplace("reclaim-time", WriteScalar(value.reclaimTime));
 	fields.emplace("mass", WriteScalar(value.mass));
 	fields.emplace("destructable", WriteScalar(value.destructable));
 	fields.emplace("reclaimable", WriteScalar(value.reclaimable));
 	fields.emplace("blocking", WriteScalar(value.blocking));
 	fields.emplace("burnable", WriteScalar(value.burnable));
 	fields.emplace("floating", WriteScalar(value.floating));
-	fields.emplace("geoThermal", WriteScalar(value.geoThermal));
-	fields.emplace("modelName", WasmValue::String((value.modelName == nullptr) ? std::string{} : std::string(value.modelName)));
-	fields.emplace("resurrectAs", WasmValue::String((value.resurrectAs == nullptr) ? std::string{} : std::string(value.resurrectAs)));
+	fields.emplace("geo-thermal", WriteScalar(value.geoThermal));
+	fields.emplace("model-name", WasmValue::String((value.modelName == nullptr) ? std::string{} : std::string(value.modelName)));
+	fields.emplace("resurrect-as", WasmValue::String((value.resurrectAs == nullptr) ? std::string{} : std::string(value.resurrectAs)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -103,7 +103,7 @@ bool Read_GetFeatureDefByIDQuery(const WasmValue& input, GetFeatureDefByIDQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefID = FindRecordField(*record, "featureDefID", error);
+	const auto* value_featureDefID = FindRecordField(*record, "feature-def-id", error);
 	if (value_featureDefID == nullptr) return false;
 	if (!ReadScalar(*value_featureDefID, output.featureDefID, error)) { return false; }
 	return true;
@@ -112,7 +112,7 @@ bool Read_GetFeatureDefByIDQuery(const WasmValue& input, GetFeatureDefByIDQuery&
 WasmValue Write_GetFeatureDefByIDQuery(const GetFeatureDefByIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefID", WriteScalar(value.featureDefID));
+	fields.emplace("feature-def-id", WriteScalar(value.featureDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -141,7 +141,7 @@ bool Read_GetFeatureDefCountQuery(const WasmValue& input, GetFeatureDefCountQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -150,7 +150,7 @@ bool Read_GetFeatureDefCountQuery(const WasmValue& input, GetFeatureDefCountQuer
 WasmValue Write_GetFeatureDefCountQuery(const GetFeatureDefCountQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -175,7 +175,7 @@ bool Read_GetFeatureDefCustomParamKeysQuery(const WasmValue& input, GetFeatureDe
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefID = FindRecordField(*record, "featureDefID", error);
+	const auto* value_featureDefID = FindRecordField(*record, "feature-def-id", error);
 	if (value_featureDefID == nullptr) return false;
 	if (!ReadScalar(*value_featureDefID, output.featureDefID, error)) { return false; }
 	return true;
@@ -184,7 +184,7 @@ bool Read_GetFeatureDefCustomParamKeysQuery(const WasmValue& input, GetFeatureDe
 WasmValue Write_GetFeatureDefCustomParamKeysQuery(const GetFeatureDefCustomParamKeysQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefID", WriteScalar(value.featureDefID));
+	fields.emplace("feature-def-id", WriteScalar(value.featureDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -224,7 +224,7 @@ bool Read_GetFeatureDefCustomParamQuery(const WasmValue& input, GetFeatureDefCus
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefID = FindRecordField(*record, "featureDefID", error);
+	const auto* value_featureDefID = FindRecordField(*record, "feature-def-id", error);
 	if (value_featureDefID == nullptr) return false;
 	if (!ReadScalar(*value_featureDefID, output.featureDefID, error)) { return false; }
 	const auto* value_key = FindRecordField(*record, "key", error);
@@ -238,7 +238,7 @@ bool Read_GetFeatureDefCustomParamQuery(const WasmValue& input, GetFeatureDefCus
 WasmValue Write_GetFeatureDefCustomParamQuery(const GetFeatureDefCustomParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefID", WriteScalar(value.featureDefID));
+	fields.emplace("feature-def-id", WriteScalar(value.featureDefID));
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -266,7 +266,7 @@ bool Read_GetFeatureDefEnergyQuery(const WasmValue& input, GetFeatureDefEnergyQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefID = FindRecordField(*record, "featureDefID", error);
+	const auto* value_featureDefID = FindRecordField(*record, "feature-def-id", error);
 	if (value_featureDefID == nullptr) return false;
 	if (!ReadScalar(*value_featureDefID, output.featureDefID, error)) { return false; }
 	return true;
@@ -275,7 +275,7 @@ bool Read_GetFeatureDefEnergyQuery(const WasmValue& input, GetFeatureDefEnergyQu
 WasmValue Write_GetFeatureDefEnergyQuery(const GetFeatureDefEnergyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefID", WriteScalar(value.featureDefID));
+	fields.emplace("feature-def-id", WriteScalar(value.featureDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -300,7 +300,7 @@ bool Read_GetFeatureDefIDByNameQuery(const WasmValue& input, GetFeatureDefIDByNa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefName = FindRecordField(*record, "featureDefName", error);
+	const auto* value_featureDefName = FindRecordField(*record, "feature-def-name", error);
 	if (value_featureDefName == nullptr) return false;
 	auto& stored_string_output_featureDefName = storage.Make<std::string>();
 	if (!ReadString(*value_featureDefName, stored_string_output_featureDefName, error)) { return false; }
@@ -311,7 +311,7 @@ bool Read_GetFeatureDefIDByNameQuery(const WasmValue& input, GetFeatureDefIDByNa
 WasmValue Write_GetFeatureDefIDByNameQuery(const GetFeatureDefIDByNameQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefName", WasmValue::String((value.featureDefName == nullptr) ? std::string{} : std::string(value.featureDefName)));
+	fields.emplace("feature-def-name", WasmValue::String((value.featureDefName == nullptr) ? std::string{} : std::string(value.featureDefName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -336,7 +336,7 @@ bool Read_GetFeatureDefIDsQuery(const WasmValue& input, GetFeatureDefIDsQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -345,7 +345,7 @@ bool Read_GetFeatureDefIDsQuery(const WasmValue& input, GetFeatureDefIDsQuery& o
 WasmValue Write_GetFeatureDefIDsQuery(const GetFeatureDefIDsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -380,7 +380,7 @@ bool Read_GetFeatureDefMetalQuery(const WasmValue& input, GetFeatureDefMetalQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefID = FindRecordField(*record, "featureDefID", error);
+	const auto* value_featureDefID = FindRecordField(*record, "feature-def-id", error);
 	if (value_featureDefID == nullptr) return false;
 	if (!ReadScalar(*value_featureDefID, output.featureDefID, error)) { return false; }
 	return true;
@@ -389,7 +389,7 @@ bool Read_GetFeatureDefMetalQuery(const WasmValue& input, GetFeatureDefMetalQuer
 WasmValue Write_GetFeatureDefMetalQuery(const GetFeatureDefMetalQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefID", WriteScalar(value.featureDefID));
+	fields.emplace("feature-def-id", WriteScalar(value.featureDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -414,7 +414,7 @@ bool Read_GetFeatureDefNameQuery(const WasmValue& input, GetFeatureDefNameQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefID = FindRecordField(*record, "featureDefID", error);
+	const auto* value_featureDefID = FindRecordField(*record, "feature-def-id", error);
 	if (value_featureDefID == nullptr) return false;
 	if (!ReadScalar(*value_featureDefID, output.featureDefID, error)) { return false; }
 	return true;
@@ -423,7 +423,7 @@ bool Read_GetFeatureDefNameQuery(const WasmValue& input, GetFeatureDefNameQuery&
 WasmValue Write_GetFeatureDefNameQuery(const GetFeatureDefNameQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefID", WriteScalar(value.featureDefID));
+	fields.emplace("feature-def-id", WriteScalar(value.featureDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -450,7 +450,7 @@ bool Read_ValidFeatureDefIDQuery(const WasmValue& input, ValidFeatureDefIDQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefID = FindRecordField(*record, "featureDefID", error);
+	const auto* value_featureDefID = FindRecordField(*record, "feature-def-id", error);
 	if (value_featureDefID == nullptr) return false;
 	if (!ReadScalar(*value_featureDefID, output.featureDefID, error)) { return false; }
 	return true;
@@ -459,7 +459,7 @@ bool Read_ValidFeatureDefIDQuery(const WasmValue& input, ValidFeatureDefIDQuery&
 WasmValue Write_ValidFeatureDefIDQuery(const ValidFeatureDefIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefID", WriteScalar(value.featureDefID));
+	fields.emplace("feature-def-id", WriteScalar(value.featureDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -490,7 +490,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefByID(NativeInterface* n
 	NativeCallStorage storage;
 	GetFeatureDefByIDQuery query{};
 	GetFeatureDefByIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureDefID", query.featureDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-def-id", query.featureDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->featureDefs->GetFeatureDefByID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -506,7 +506,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefCount(NativeInterface* 
 	NativeCallStorage storage;
 	GetFeatureDefCountQuery query{};
 	GetFeatureDefCountResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->featureDefs->GetFeatureDefCount(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.count);
@@ -519,7 +519,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefCustomParam(NativeInter
 	NativeCallStorage storage;
 	GetFeatureDefCustomParamQuery query{};
 	GetFeatureDefCustomParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureDefID", query.featureDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-def-id", query.featureDefID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_key = FindArgument(arguments, 1u, 1u, 2u, 2u, "key", error);
 	if (value_key == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_key = storage.Make<std::string>();
@@ -537,7 +537,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefCustomParamKeys(NativeI
 	NativeCallStorage storage;
 	GetFeatureDefCustomParamKeysQuery query{};
 	GetFeatureDefCustomParamKeysResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureDefID", query.featureDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-def-id", query.featureDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->featureDefs->GetFeatureDefCustomParamKeys(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.keys, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -550,7 +550,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefEnergy(NativeInterface*
 	NativeCallStorage storage;
 	GetFeatureDefEnergyQuery query{};
 	GetFeatureDefEnergyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureDefID", query.featureDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-def-id", query.featureDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->featureDefs->GetFeatureDefEnergy(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.energy);
@@ -563,7 +563,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefIDByName(NativeInterfac
 	NativeCallStorage storage;
 	GetFeatureDefIDByNameQuery query{};
 	GetFeatureDefIDByNameResult nativeResult{};
-	const WasmValue* value_featureDefName = FindArgument(arguments, 0u, 0u, 1u, 1u, "featureDefName", error);
+	const WasmValue* value_featureDefName = FindArgument(arguments, 0u, 0u, 1u, 1u, "feature-def-name", error);
 	if (value_featureDefName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_featureDefName = storage.Make<std::string>();
 	if (!ReadString(*value_featureDefName, stored_string_query_featureDefName, error)) { return NativeCalloutDispatch::handled; }
@@ -580,7 +580,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefIDs(NativeInterface* na
 	NativeCallStorage storage;
 	GetFeatureDefIDsQuery query{};
 	GetFeatureDefIDsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->featureDefs->GetFeatureDefIDs(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.ids, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -593,7 +593,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefMetal(NativeInterface* 
 	NativeCallStorage storage;
 	GetFeatureDefMetalQuery query{};
 	GetFeatureDefMetalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureDefID", query.featureDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-def-id", query.featureDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->featureDefs->GetFeatureDefMetal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.metal);
@@ -606,7 +606,7 @@ NativeCalloutDispatch Dispatch_feature_defs_GetFeatureDefName(NativeInterface* n
 	NativeCallStorage storage;
 	GetFeatureDefNameQuery query{};
 	GetFeatureDefNameResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureDefID", query.featureDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-def-id", query.featureDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->featureDefs->GetFeatureDefName(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.name == nullptr) ? std::string{} : std::string(nativeResult.name));
@@ -619,7 +619,7 @@ NativeCalloutDispatch Dispatch_feature_defs_ValidFeatureDefID(NativeInterface* n
 	NativeCallStorage storage;
 	ValidFeatureDefIDQuery query{};
 	ValidFeatureDefIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureDefID", query.featureDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-def-id", query.featureDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->featureDefs->ValidFeatureDefID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.valid);

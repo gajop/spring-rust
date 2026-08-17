@@ -12,19 +12,19 @@ bool Read_ClosestBuildPosQuery(const WasmValue& input, ClosestBuildPosQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
 	if (value_pos == nullptr) return false;
 	if (!Read_Float3(*value_pos, output.pos, storage, error)) { return false; }
-	const auto* value_searchRadius = FindRecordField(*record, "searchRadius", error);
+	const auto* value_searchRadius = FindRecordField(*record, "search-radius", error);
 	if (value_searchRadius == nullptr) return false;
 	if (!ReadScalar(*value_searchRadius, output.searchRadius, error)) { return false; }
-	const auto* value_minDist = FindRecordField(*record, "minDist", error);
+	const auto* value_minDist = FindRecordField(*record, "min-dist", error);
 	if (value_minDist == nullptr) return false;
 	if (!ReadScalar(*value_minDist, output.minDist, error)) { return false; }
 	const auto* value_facing = FindRecordField(*record, "facing", error);
@@ -36,11 +36,11 @@ bool Read_ClosestBuildPosQuery(const WasmValue& input, ClosestBuildPosQuery& out
 WasmValue Write_ClosestBuildPosQuery(const ClosestBuildPosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("pos", Write_Float3(value.pos));
-	fields.emplace("searchRadius", WriteScalar(value.searchRadius));
-	fields.emplace("minDist", WriteScalar(value.minDist));
+	fields.emplace("search-radius", WriteScalar(value.searchRadius));
+	fields.emplace("min-dist", WriteScalar(value.minDist));
 	fields.emplace("facing", WriteScalar(value.facing));
 	return WasmValue::Record(std::move(fields));
 }
@@ -49,7 +49,7 @@ bool Read_ClosestBuildPosResult(const WasmValue& input, ClosestBuildPosResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_buildPos = FindRecordField(*record, "buildPos", error);
+	const auto* value_buildPos = FindRecordField(*record, "build-pos", error);
 	if (value_buildPos == nullptr) return false;
 	if (!Read_Float3(*value_buildPos, output.buildPos, storage, error)) { return false; }
 	return true;
@@ -58,7 +58,7 @@ bool Read_ClosestBuildPosResult(const WasmValue& input, ClosestBuildPosResult& o
 WasmValue Write_ClosestBuildPosResult(const ClosestBuildPosResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("buildPos", Write_Float3(value.buildPos));
+	fields.emplace("build-pos", Write_Float3(value.buildPos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -66,7 +66,7 @@ bool Read_GetCEGIDQuery(const WasmValue& input, GetCEGIDQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cegName = FindRecordField(*record, "cegName", error);
+	const auto* value_cegName = FindRecordField(*record, "ceg-name", error);
 	if (value_cegName == nullptr) return false;
 	auto& stored_string_output_cegName = storage.Make<std::string>();
 	if (!ReadString(*value_cegName, stored_string_output_cegName, error)) { return false; }
@@ -77,7 +77,7 @@ bool Read_GetCEGIDQuery(const WasmValue& input, GetCEGIDQuery& output, NativeCal
 WasmValue Write_GetCEGIDQuery(const GetCEGIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cegName", WasmValue::String((value.cegName == nullptr) ? std::string{} : std::string(value.cegName)));
+	fields.emplace("ceg-name", WasmValue::String((value.cegName == nullptr) ? std::string{} : std::string(value.cegName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -85,7 +85,7 @@ bool Read_GetCEGIDResult(const WasmValue& input, GetCEGIDResult& output, NativeC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cegID = FindRecordField(*record, "cegID", error);
+	const auto* value_cegID = FindRecordField(*record, "ceg-id", error);
 	if (value_cegID == nullptr) return false;
 	if (!ReadScalar(*value_cegID, output.cegID, error)) { return false; }
 	return true;
@@ -94,7 +94,7 @@ bool Read_GetCEGIDResult(const WasmValue& input, GetCEGIDResult& output, NativeC
 WasmValue Write_GetCEGIDResult(const GetCEGIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cegID", WriteScalar(value.cegID));
+	fields.emplace("ceg-id", WriteScalar(value.cegID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -102,7 +102,7 @@ bool Read_GetFeatureDefDimensionsQuery(const WasmValue& input, GetFeatureDefDime
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureDefID = FindRecordField(*record, "featureDefID", error);
+	const auto* value_featureDefID = FindRecordField(*record, "feature-def-id", error);
 	if (value_featureDefID == nullptr) return false;
 	if (!ReadScalar(*value_featureDefID, output.featureDefID, error)) { return false; }
 	return true;
@@ -111,7 +111,7 @@ bool Read_GetFeatureDefDimensionsQuery(const WasmValue& input, GetFeatureDefDime
 WasmValue Write_GetFeatureDefDimensionsQuery(const GetFeatureDefDimensionsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureDefID", WriteScalar(value.featureDefID));
+	fields.emplace("feature-def-id", WriteScalar(value.featureDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -136,7 +136,7 @@ bool Read_GetUnitDefDimensionsQuery(const WasmValue& input, GetUnitDefDimensions
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	return true;
@@ -145,7 +145,7 @@ bool Read_GetUnitDefDimensionsQuery(const WasmValue& input, GetUnitDefDimensions
 WasmValue Write_GetUnitDefDimensionsQuery(const GetUnitDefDimensionsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -170,7 +170,7 @@ bool Read_Pos2BuildPosQuery(const WasmValue& input, Pos2BuildPosQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -185,7 +185,7 @@ bool Read_Pos2BuildPosQuery(const WasmValue& input, Pos2BuildPosQuery& output, N
 WasmValue Write_Pos2BuildPosQuery(const Pos2BuildPosQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("facing", WriteScalar(value.facing));
 	return WasmValue::Record(std::move(fields));
@@ -195,7 +195,7 @@ bool Read_Pos2BuildPosResult(const WasmValue& input, Pos2BuildPosResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_buildPos = FindRecordField(*record, "buildPos", error);
+	const auto* value_buildPos = FindRecordField(*record, "build-pos", error);
 	if (value_buildPos == nullptr) return false;
 	if (!Read_Float3(*value_buildPos, output.buildPos, storage, error)) { return false; }
 	return true;
@@ -204,7 +204,7 @@ bool Read_Pos2BuildPosResult(const WasmValue& input, Pos2BuildPosResult& output,
 WasmValue Write_Pos2BuildPosResult(const Pos2BuildPosResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("buildPos", Write_Float3(value.buildPos));
+	fields.emplace("build-pos", Write_Float3(value.buildPos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -212,7 +212,7 @@ bool Read_TestBuildOrderQuery(const WasmValue& input, TestBuildOrderQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -227,7 +227,7 @@ bool Read_TestBuildOrderQuery(const WasmValue& input, TestBuildOrderQuery& outpu
 WasmValue Write_TestBuildOrderQuery(const TestBuildOrderQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("facing", WriteScalar(value.facing));
 	return WasmValue::Record(std::move(fields));
@@ -240,7 +240,7 @@ bool Read_TestBuildOrderResult(const WasmValue& input, TestBuildOrderResult& out
 	const auto* value_status = FindRecordField(*record, "status", error);
 	if (value_status == nullptr) return false;
 	if (!ReadScalar(*value_status, output.status, error)) { return false; }
-	const auto* value_canBuild = FindRecordField(*record, "canBuild", error);
+	const auto* value_canBuild = FindRecordField(*record, "can-build", error);
 	if (value_canBuild == nullptr) return false;
 	if (!ReadScalar(*value_canBuild, output.canBuild, error)) { return false; }
 	const auto* value_feature = FindRecordField(*record, "feature", error);
@@ -253,7 +253,7 @@ WasmValue Write_TestBuildOrderResult(const TestBuildOrderResult& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("status", WriteScalar(value.status));
-	fields.emplace("canBuild", WriteScalar(value.canBuild));
+	fields.emplace("can-build", WriteScalar(value.canBuild));
 	fields.emplace("feature", WriteScalar(value.feature));
 	return WasmValue::Record(std::move(fields));
 }
@@ -262,13 +262,13 @@ bool Read_TestMoveOrderOptions(const WasmValue& input, TestMoveOrderOptions& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_testTerrain = FindRecordField(*record, "testTerrain", error);
+	const auto* value_testTerrain = FindRecordField(*record, "test-terrain", error);
 	if (value_testTerrain == nullptr) return false;
 	if (!ReadScalar(*value_testTerrain, output.testTerrain, error)) { return false; }
-	const auto* value_testObjects = FindRecordField(*record, "testObjects", error);
+	const auto* value_testObjects = FindRecordField(*record, "test-objects", error);
 	if (value_testObjects == nullptr) return false;
 	if (!ReadScalar(*value_testObjects, output.testObjects, error)) { return false; }
-	const auto* value_centerOnly = FindRecordField(*record, "centerOnly", error);
+	const auto* value_centerOnly = FindRecordField(*record, "center-only", error);
 	if (value_centerOnly == nullptr) return false;
 	if (!ReadScalar(*value_centerOnly, output.centerOnly, error)) { return false; }
 	return true;
@@ -277,9 +277,9 @@ bool Read_TestMoveOrderOptions(const WasmValue& input, TestMoveOrderOptions& out
 WasmValue Write_TestMoveOrderOptions(const TestMoveOrderOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("testTerrain", WriteScalar(value.testTerrain));
-	fields.emplace("testObjects", WriteScalar(value.testObjects));
-	fields.emplace("centerOnly", WriteScalar(value.centerOnly));
+	fields.emplace("test-terrain", WriteScalar(value.testTerrain));
+	fields.emplace("test-objects", WriteScalar(value.testObjects));
+	fields.emplace("center-only", WriteScalar(value.centerOnly));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -287,7 +287,7 @@ bool Read_TestMoveOrderQuery(const WasmValue& input, TestMoveOrderQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_pos = FindRecordField(*record, "pos", error);
@@ -305,7 +305,7 @@ bool Read_TestMoveOrderQuery(const WasmValue& input, TestMoveOrderQuery& output,
 WasmValue Write_TestMoveOrderQuery(const TestMoveOrderQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("dir", Write_Float3(value.dir));
 	fields.emplace("options", Write_TestMoveOrderOptions(value.options));
@@ -316,7 +316,7 @@ bool Read_TestMoveOrderResult(const WasmValue& input, TestMoveOrderResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_canMove = FindRecordField(*record, "canMove", error);
+	const auto* value_canMove = FindRecordField(*record, "can-move", error);
 	if (value_canMove == nullptr) return false;
 	if (!ReadScalar(*value_canMove, output.canMove, error)) { return false; }
 	return true;
@@ -325,7 +325,7 @@ bool Read_TestMoveOrderResult(const WasmValue& input, TestMoveOrderResult& outpu
 WasmValue Write_TestMoveOrderResult(const TestMoveOrderResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("canMove", WriteScalar(value.canMove));
+	fields.emplace("can-move", WriteScalar(value.canMove));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -396,11 +396,11 @@ NativeCalloutDispatch Dispatch_utils_ClosestBuildPos(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	ClosestBuildPosQuery query{};
 	ClosestBuildPosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 6u, 6u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "searchRadius", query.searchRadius, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "minDist", query.minDist, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "search-radius", query.searchRadius, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "min-dist", query.minDist, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "facing", query.facing, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->utils->ClosestBuildPos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -414,7 +414,7 @@ NativeCalloutDispatch Dispatch_utils_GetCEGID(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GetCEGIDQuery query{};
 	GetCEGIDResult nativeResult{};
-	const WasmValue* value_cegName = FindArgument(arguments, 0u, 0u, 1u, 1u, "cegName", error);
+	const WasmValue* value_cegName = FindArgument(arguments, 0u, 0u, 1u, 1u, "ceg-name", error);
 	if (value_cegName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_cegName = storage.Make<std::string>();
 	if (!ReadString(*value_cegName, stored_string_query_cegName, error)) { return NativeCalloutDispatch::handled; }
@@ -431,7 +431,7 @@ NativeCalloutDispatch Dispatch_utils_GetFeatureDefDimensions(NativeInterface* na
 	NativeCallStorage storage;
 	GetFeatureDefDimensionsQuery query{};
 	GetFeatureDefDimensionsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureDefID", query.featureDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-def-id", query.featureDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->utils->GetFeatureDefDimensions(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_UnitDefDimensions(nativeResult.dimensions);
@@ -444,7 +444,7 @@ NativeCalloutDispatch Dispatch_utils_GetUnitDefDimensions(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetUnitDefDimensionsQuery query{};
 	GetUnitDefDimensionsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->utils->GetUnitDefDimensions(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_UnitDefDimensions(nativeResult.dimensions);
@@ -457,7 +457,7 @@ NativeCalloutDispatch Dispatch_utils_Pos2BuildPos(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	Pos2BuildPosQuery query{};
 	Pos2BuildPosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "facing", query.facing, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->utils->Pos2BuildPos(&query, &nativeResult);
@@ -472,14 +472,14 @@ NativeCalloutDispatch Dispatch_utils_TestBuildOrder(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	TestBuildOrderQuery query{};
 	TestBuildOrderResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "facing", query.facing, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->utils->TestBuildOrder(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("status", WriteScalar(nativeResult.status));
-	outputFields.emplace("canBuild", WriteScalar(nativeResult.canBuild));
+	outputFields.emplace("can-build", WriteScalar(nativeResult.canBuild));
 	outputFields.emplace("feature", WriteScalar(nativeResult.feature));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -491,7 +491,7 @@ NativeCalloutDispatch Dispatch_utils_TestMoveOrder(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	TestMoveOrderQuery query{};
 	TestMoveOrderResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 4u, 4u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 4u, 4u, "dir", Read_Float3, query.dir, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 3u, 3u, 4u, 4u, "options", Read_TestMoveOrderOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;

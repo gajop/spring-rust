@@ -30,6 +30,7 @@
 #include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Sim/Weapons/Weapon.h"
 #include "System/Log/ILog.h"
+#include "System/BenchmarkCallins.h"
 #include "System/Input/KeyInput.h"
 #include "System/Platform/SDL1_keysym.h"
 #include "System/Platform/SharedLib.h"
@@ -494,7 +495,6 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 		}
 		return false;
 	}
-
 	// UI is an unsynced environment, but LuaUI also receives lifecycle events
 	// that are dispatched from the engine's synced path (for example
 	// GameStart). Give it an owned, visibility-filtered copy of the query;
@@ -813,8 +813,9 @@ void* NativeInterfaceEventClient::Initialize() {
 }
 
 void NativeInterfaceEventClient::Shutdown() {
-	if (!m_initialized)
+	if (!m_initialized) {
 		return;
+	}
 
 	if (m_ShutdownFuncPtr != nullptr) {
 		ShutdownQuery query = {};
@@ -903,11 +904,23 @@ void NativeInterfaceEventClient::GameOver(const std::vector<unsigned char>& winn
 
 void NativeInterfaceEventClient::GameFrame(int gameFrame) {
 	GameFrameQuery query = {.gameFrame = gameFrame};
+	const auto wasmToken = spring::benchmark_callins::Begin(
+		"wasm", spring::benchmark_callins::GameFrameTestName());
 	DispatchWasmCallin("GameFrame", &query, true);
-	if (m_GameFrameFuncPtr) {
+	spring::benchmark_callins::End(wasmToken);
+	const bool benchmarkUnimplemented = spring::benchmark_callins::IsCase("callins") &&
+		spring::benchmark_callins::IsVariant("unimplemented");
+	const auto nativeToken = benchmarkUnimplemented
+		? spring::benchmark_callins::Begin("native", "callin_unimplemented")
+		: spring::benchmark_callins::Token{};
+	if (!benchmarkUnimplemented && m_GameFrameFuncPtr) {
+		const auto nativeToken = spring::benchmark_callins::Begin(
+			"native", spring::benchmark_callins::GameFrameTestName());
 		GameFrameResult result = {};
 		m_GameFrameFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		spring::benchmark_callins::End(nativeToken);
 	}
+	spring::benchmark_callins::End(nativeToken);
 }
 
 void NativeInterfaceEventClient::GameFramePost(int gameFrame) {
@@ -923,10 +936,14 @@ void NativeInterfaceEventClient::Update() {
 	UpdateQuery query = {
 		.deltaSeconds = (game != nullptr) ? game->updateDeltaSeconds : 0.0f,
 	};
+	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_update");
 	DispatchWasmCallin("Update", &query, false);
+	spring::benchmark_callins::End(wasmToken);
 	if (m_UpdateFuncPtr) {
+		const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_update");
 		UpdateResult result = {};
 		m_UpdateFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		spring::benchmark_callins::End(nativeToken);
 	}
 }
 
@@ -945,10 +962,16 @@ void NativeInterfaceEventClient::DrawScreen() {
 #define DISPATCH_SIMPLE_CALLIN(EventName)                                      \
 	void NativeInterfaceEventClient::EventName() {                              \
 		SimpleCallinQuery query = {};                                           \
+		const auto wasmToken = spring::benchmark_callins::Begin(                 \
+			"wasm", spring::benchmark_callins::EventTestName(#EventName));       \
 		DispatchWasmCallin(#EventName, &query, false);                           \
+		spring::benchmark_callins::End(wasmToken);                               \
 		if (m_##EventName##FuncPtr) {                                             \
+			const auto nativeToken = spring::benchmark_callins::Begin(              \
+				"native", spring::benchmark_callins::EventTestName(#EventName));      \
 			SimpleCallinResult result = {};                                         \
 			m_##EventName##FuncPtr(m_nativeInterface, m_moduleData, &query, &result); \
+			spring::benchmark_callins::End(nativeToken);                            \
 		}                                                                          \
 	}
 
@@ -1232,10 +1255,14 @@ void NativeInterfaceEventClient::UnitCreated(const CUnit* unit, const CUnit* bui
 		.unitTeam = unit->team,
 		.builderID = builder != nullptr ? builder->id : -1
 	};
+	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_unitcreated");
 	DispatchWasmCallin("UnitCreated", &query, true);
+	spring::benchmark_callins::End(wasmToken);
 	if (m_UnitCreatedFuncPtr) {
+		const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_unitcreated");
 		UnitCreatedResult result = {};
 		m_UnitCreatedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+		spring::benchmark_callins::End(nativeToken);
 	}
 }
 
@@ -1406,7 +1433,7 @@ bool NativeInterfaceEventClient::AllowCommand(const CUnit* unit, const Command& 
 
 	BoolCallinResult result = {.value = true};
 	m_AllowCommandFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDef* unitDef, const CUnit* builder, const BuildInfo* buildInfo) {
@@ -1418,8 +1445,10 @@ std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDe
 		.buildPos = (buildInfo != nullptr) ? Float3{buildInfo->pos.x, buildInfo->pos.y, buildInfo->pos.z} : Float3{},
 		.buildFacing = (buildInfo != nullptr) ? buildInfo->buildFacing : 0,
 	};
+	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_allowunitcreation");
 	WasmValue wasmResult;
 	const bool hasWasmResult = DispatchWasmCallin("AllowUnitCreation", &query, true, &wasmResult);
+	spring::benchmark_callins::End(wasmToken);
 	bool wasmAllow = true;
 	bool wasmDropOrder = true;
 	const WasmValueRecord* wasmRecord = hasWasmResult ? WasmResultRecord(wasmResult) : nullptr;
@@ -1429,8 +1458,10 @@ std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDe
 	if (m_AllowUnitCreationFuncPtr == nullptr)
 		return hasWasmFields ? std::pair{wasmAllow, wasmDropOrder} : std::pair{true, true};
 
+	const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_allowunitcreation");
 	AllowUnitCreationResult result = {.allow = true, .dropOrder = true};
 	m_AllowUnitCreationFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	spring::benchmark_callins::End(nativeToken);
 	return {result.allow, result.dropOrder};
 }
 
@@ -1449,7 +1480,7 @@ bool NativeInterfaceEventClient::AllowUnitTransfer(const CUnit* unit, int newTea
 
 	BoolCallinResult result = {.value = true};
 	m_AllowUnitTransferFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::AllowUnitBuildStep(const CUnit* builder, const CUnit* unit, float part) {
@@ -1467,7 +1498,7 @@ bool NativeInterfaceEventClient::AllowUnitBuildStep(const CUnit* builder, const 
 
 	BoolCallinResult result = {.value = true};
 	m_AllowUnitBuildStepFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::AllowUnitCaptureStep(const CUnit* builder, const CUnit* unit, float part) {
@@ -1485,7 +1516,7 @@ bool NativeInterfaceEventClient::AllowUnitCaptureStep(const CUnit* builder, cons
 
 	BoolCallinResult result = {.value = true};
 	m_AllowUnitCaptureStepFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::AllowUnitTransport(const CUnit* transporter, const CUnit* transportee) {
@@ -1504,7 +1535,7 @@ bool NativeInterfaceEventClient::AllowUnitTransport(const CUnit* transporter, co
 
 	BoolCallinResult result = {.value = true};
 	m_AllowUnitTransportFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter, const CUnit* transportee, const float3& loadPos, bool allowed) {
@@ -1530,7 +1561,7 @@ bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter
 
 	BoolCallinResult result = {.value = allowed};
 	m_AllowUnitTransportLoadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::AllowUnitTransportUnload(const CUnit* transporter, const CUnit* transportee, const float3& unloadPos, bool allowed) {
@@ -1556,7 +1587,7 @@ bool NativeInterfaceEventClient::AllowUnitTransportUnload(const CUnit* transport
 
 	BoolCallinResult result = {.value = allowed};
 	m_AllowUnitTransportUnloadFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::AllowUnitCloak(const CUnit* unit, const CUnit* enemy) {
@@ -1572,7 +1603,7 @@ bool NativeInterfaceEventClient::AllowUnitCloak(const CUnit* unit, const CUnit* 
 
 	BoolCallinResult result = {.value = true};
 	m_AllowUnitCloakFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::AllowUnitDecloak(const CUnit* unit, const CSolidObject* object, const CWeapon* weapon) {
@@ -1593,7 +1624,7 @@ bool NativeInterfaceEventClient::AllowUnitDecloak(const CUnit* unit, const CSoli
 
 	BoolCallinResult result = {.value = true};
 	m_AllowUnitDecloakFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::AllowUnitKamikaze(const CUnit* unit, const CUnit* target, bool allowed) {
@@ -1609,7 +1640,7 @@ bool NativeInterfaceEventClient::AllowUnitKamikaze(const CUnit* unit, const CUni
 
 	BoolCallinResult result = {.value = allowed};
 	m_AllowUnitKamikazeFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 void NativeInterfaceEventClient::UnitCmdDone(const CUnit* unit, const Command& command) {
@@ -2035,9 +2066,6 @@ bool NativeInterfaceEventClient::AllowBuilderHoldFire(const CUnit* unit, int act
 }
 
 bool NativeInterfaceEventClient::AllowStartPosition(int playerID, int teamID, unsigned char readyState, const float3& clampedPos, const float3& rawPickPos) {
-	if (m_AllowStartPositionFuncPtr == nullptr)
-		return true;
-
 	AllowStartPositionQuery query = {
 		.playerID = playerID,
 		.teamID = teamID,
@@ -2052,7 +2080,7 @@ bool NativeInterfaceEventClient::AllowStartPosition(int playerID, int teamID, un
 
 	BoolCallinResult result = {.value = true};
 	m_AllowStartPositionFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
-	return result.value || (hasWasmValue && wasmValue);
+	return result.value && (!hasWasmValue || wasmValue);
 }
 
 bool NativeInterfaceEventClient::TerraformComplete(const CUnit* unit, const CUnit* build) {
@@ -2235,8 +2263,10 @@ bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* 
 		.attackerDefID = (attacker != nullptr && attacker->unitDef != nullptr) ? attacker->unitDef->id : -1,
 		.attackerTeam = (attacker != nullptr) ? attacker->team : -1,
 	};
+	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_unitpredamaged");
 	WasmValue wasmResult;
 	const bool hasWasmResult = DispatchWasmCallin("UnitPreDamaged", &query, true, &wasmResult);
+	spring::benchmark_callins::End(wasmToken);
 	float wasmDamage = (newDamage != nullptr) ? *newDamage : damage;
 	float wasmImpulse = (impulseMult != nullptr) ? *impulseMult : 1.0f;
 	const WasmValueRecord* wasmRecord = hasWasmResult ? WasmResultRecord(wasmResult) : nullptr;
@@ -2253,11 +2283,13 @@ bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* 
 		}
 		return false;
 	}
+	const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_unitpredamaged");
 	DamageCallinResult result = {
 		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
 		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
 	};
 	m_UnitPreDamagedFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
+	spring::benchmark_callins::End(nativeToken);
 	if (newDamage != nullptr)
 		*newDamage = result.newDamage;
 	if (impulseMult != nullptr)

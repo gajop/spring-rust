@@ -1,5 +1,6 @@
 use super::*;
 use std::sync::Mutex;
+use std::sync::OnceLock;
 
 fn rounded_float(value: f32) -> f64 {
     // Lua receives the engine's float values as doubles.  Rounding at the
@@ -23,8 +24,16 @@ fn rounded_float(value: f32) -> f64 {
 // Serialize JSONL writes so a row cannot be interleaved with another callback.
 static RECORD_LOCK: Mutex<()> = Mutex::new(());
 
+fn record_callins_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("SPRING_NATIVE_BENCHMARK").is_err())
+}
+
 impl NativeApiParity {
     pub(crate) fn record_callin(&self, name: &str, arity: usize) {
+        if !record_callins_enabled() {
+            return;
+        }
         if let Some(parent) = self.callin_trace_path.parent() {
             let _ = fs::create_dir_all(parent);
         }
@@ -54,6 +63,9 @@ impl NativeApiParity {
         args: Vec<Value>,
         results: Vec<Value>,
     ) {
+        if !record_callins_enabled() {
+            return;
+        }
         if let Some(parent) = self.callin_trace_path.parent() {
             let _ = fs::create_dir_all(parent);
         }

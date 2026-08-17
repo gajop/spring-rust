@@ -15,7 +15,8 @@
 
 class WasmInterfaceSystem {
 public:
-	explicit WasmInterfaceSystem(WasmHostAdapter* hostAdapter = nullptr);
+	explicit WasmInterfaceSystem(WasmHostAdapter* hostAdapter = nullptr,
+		WasmRuntimeConfig runtimeConfig = {});
 	~WasmInterfaceSystem();
 
 	WasmInterfaceSystem(const WasmInterfaceSystem&) = delete;
@@ -60,6 +61,16 @@ public:
 	bool DispatchCallin(std::string_view name,
 		const std::vector<CallinInvocation>& invocations, WasmValue& result,
 		std::string& error);
+	// Combine one already-unwrapped callin payload with the aggregate. This is
+	// public so focused registry tests can exercise the exact fan-out rules
+	// without depending on a compiled guest module.
+	static bool AggregateCallinResult(std::string_view aggregation,
+		const WasmValue& value, bool& haveResult, WasmValue& result,
+		std::string& error);
+	// Deliver an opaque message from a synced module to local unsynced Wasm
+	// instances. The delivery is one-way and its result cannot affect synced
+	// state; module faults remain isolated to their unsynced environment.
+	bool DispatchSyncedMessage(std::string_view message, std::string& error);
 
 	std::size_t ModuleCount() const;
 	const WasmRuntime& Runtime() const { return *runtime; }

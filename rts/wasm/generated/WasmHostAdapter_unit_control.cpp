@@ -18,7 +18,7 @@ NativeCalloutDispatch Dispatch_unit_control_AddObjectDecal(NativeInterface* nati
 	NativeCallStorage storage;
 	AddObjectDecalQuery query{};
 	AddObjectDecalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->AddObjectDecal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -31,11 +31,11 @@ NativeCalloutDispatch Dispatch_unit_control_AddUnitDamage(NativeInterface* nativ
 	NativeCallStorage storage;
 	AddUnitDamageQuery query{};
 	AddUnitDamageResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "damage", query.damage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "paralyzeTime", query.paralyzeTime, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "attackerID", query.attackerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "paralyze-time", query.paralyzeTime, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "attacker-id", query.attackerID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 5u, 5u, 6u, 6u, "impulse", Read_Float3, query.impulse, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->AddUnitDamage(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -49,7 +49,7 @@ NativeCalloutDispatch Dispatch_unit_control_AddUnitExperience(NativeInterface* n
 	NativeCallStorage storage;
 	AddUnitExperienceQuery query{};
 	AddUnitExperienceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "experience", query.experience, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->AddUnitExperience(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -63,9 +63,9 @@ NativeCalloutDispatch Dispatch_unit_control_AddUnitImpulse(NativeInterface* nati
 	NativeCallStorage storage;
 	AddUnitImpulseQuery query{};
 	AddUnitImpulseResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "impulse", Read_Float3, query.impulse, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "decayRate", query.decayRate, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "decay-rate", query.decayRate, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->AddUnitImpulse(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -78,8 +78,8 @@ NativeCalloutDispatch Dispatch_unit_control_AddUnitResource(NativeInterface* nat
 	NativeCallStorage storage;
 	AddUnitResourceQuery query{};
 	AddUnitResourceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resourceType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resource-type", error);
 	if (value_resourceType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_query_resourceType, error)) { return NativeCalloutDispatch::handled; }
@@ -97,8 +97,8 @@ NativeCalloutDispatch Dispatch_unit_control_AddUnitSeismicPing(NativeInterface* 
 	NativeCallStorage storage;
 	AddUnitSeismicPingQuery query{};
 	AddUnitSeismicPingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pingSize", query.pingSize, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "ping-size", query.pingSize, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->AddUnitSeismicPing(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -113,9 +113,9 @@ NativeCalloutDispatch Dispatch_unit_control_BuggerOff(NativeInterface* nativeInt
 	BuggerOffResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 5u, 5u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "radius", query.radius, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 3u, 3u, 5u, 5u, "options", Read_BuggerOffOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_excludeUnitDefIDs = FindArgument(arguments, 4u, 4u, 5u, 5u, "excludeUnitDefIDs", error);
+	const WasmValue* value_excludeUnitDefIDs = FindArgument(arguments, 4u, 4u, 5u, 5u, "exclude-unit-def-i-ds", error);
 	if (value_excludeUnitDefIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_excludeUnitDefIDs = std::get_if<WasmValueList>(&(*value_excludeUnitDefIDs).storage);
 	if (list_excludeUnitDefIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -140,8 +140,8 @@ NativeCalloutDispatch Dispatch_unit_control_ClearUnitGoal(NativeInterface* nativ
 	NativeCallStorage storage;
 	ClearUnitGoalQuery query{};
 	ClearUnitGoalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "cancelRaw", query.cancelRaw, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "cancel-raw", query.cancelRaw, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->ClearUnitGoal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -154,10 +154,10 @@ NativeCalloutDispatch Dispatch_unit_control_CreateUnit(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	CreateUnitQuery query{};
 	CreateUnitResult nativeResult{};
-	if (!ReadRecordArgument(arguments, 0u, 0u, 5u, 5u, "unitDef", Read_DefRef, query.unitDef, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 0u, 0u, 5u, 5u, "unit-def", Read_DefRef, query.unitDef, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 5u, 5u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "facing", query.facing, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 4u, 4u, 5u, 5u, "options", Read_CreateUnitOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->CreateUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -171,7 +171,7 @@ NativeCalloutDispatch Dispatch_unit_control_DestroyUnit(NativeInterface* nativeI
 	NativeCallStorage storage;
 	DestroyUnitQuery query{};
 	DestroyUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_DestroyUnitOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->DestroyUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -185,7 +185,7 @@ NativeCalloutDispatch Dispatch_unit_control_ForceUnitCollisionUpdate(NativeInter
 	NativeCallStorage storage;
 	ForceUnitCollisionUpdateQuery query{};
 	ForceUnitCollisionUpdateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->ForceUnitCollisionUpdate(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -198,9 +198,9 @@ NativeCalloutDispatch Dispatch_unit_control_GetUnitFeatureSeparation(NativeInter
 	NativeCallStorage storage;
 	GetUnitFeatureSeparationQuery query{};
 	GetUnitFeatureSeparationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "ignoreY", query.ignoreY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "ignore-y", query.ignoreY, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->GetUnitFeatureSeparation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.distance);
@@ -213,7 +213,7 @@ NativeCalloutDispatch Dispatch_unit_control_GetUnitLeavesGhost(NativeInterface* 
 	NativeCallStorage storage;
 	GetUnitLeavesGhostQuery query{};
 	GetUnitLeavesGhostResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->GetUnitLeavesGhost(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.leavesGhost);
@@ -226,7 +226,7 @@ NativeCalloutDispatch Dispatch_unit_control_GetUnitPhysicalState(NativeInterface
 	NativeCallStorage storage;
 	GetUnitPhysicalStateQuery query{};
 	GetUnitPhysicalStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->GetUnitPhysicalState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.physicalState);
@@ -239,7 +239,7 @@ NativeCalloutDispatch Dispatch_unit_control_GiveOrderArrayToUnit(NativeInterface
 	NativeCallStorage storage;
 	GiveOrderArrayToUnitQuery query{};
 	GiveOrderArrayToUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_commands = FindArgument(arguments, 1u, 1u, 2u, 2u, "commands", error);
 	if (value_commands == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_commands = std::get_if<WasmValueList>(&(*value_commands).storage);
@@ -265,7 +265,7 @@ NativeCalloutDispatch Dispatch_unit_control_GiveOrderArrayToUnitArray(NativeInte
 	NativeCallStorage storage;
 	GiveOrderArrayToUnitArrayQuery query{};
 	GiveOrderArrayToUnitArrayResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 3u, 3u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 3u, 3u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -304,8 +304,8 @@ NativeCalloutDispatch Dispatch_unit_control_GiveOrderToUnit(NativeInterface* nat
 	NativeCallStorage storage;
 	GiveOrderToUnitQuery query{};
 	GiveOrderToUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "cmdID", query.cmdID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "cmd-id", query.cmdID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_params = FindArgument(arguments, 2u, 2u, 5u, 5u, "params", error);
 	if (value_params == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_params = std::get_if<WasmValueList>(&(*value_params).storage);
@@ -333,7 +333,7 @@ NativeCalloutDispatch Dispatch_unit_control_GiveOrderToUnitArray(NativeInterface
 	NativeCallStorage storage;
 	GiveOrderToUnitArrayQuery query{};
 	GiveOrderToUnitArrayResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 5u, 5u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 5u, 5u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -346,7 +346,7 @@ NativeCalloutDispatch Dispatch_unit_control_GiveOrderToUnitArray(NativeInterface
 	}
 	query.unitIDs = native_unitIDs.data();
 	if (!AssignCount(list_unitIDs->size(), query.count, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "cmdID", query.cmdID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "cmd-id", query.cmdID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_params = FindArgument(arguments, 2u, 2u, 5u, 5u, "params", error);
 	if (value_params == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_params = std::get_if<WasmValueList>(&(*value_params).storage);
@@ -374,7 +374,7 @@ NativeCalloutDispatch Dispatch_unit_control_RemoveObjectDecal(NativeInterface* n
 	NativeCallStorage storage;
 	RemoveObjectDecalQuery query{};
 	RemoveObjectDecalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->RemoveObjectDecal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -387,8 +387,8 @@ NativeCalloutDispatch Dispatch_unit_control_RemoveUnitCmdDesc(NativeInterface* n
 	NativeCallStorage storage;
 	RemoveUnitCmdDescQuery query{};
 	RemoveUnitCmdDescResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "cmdDescIndex", query.cmdDescIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "cmd-desc-index", query.cmdDescIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->RemoveUnitCmdDesc(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -401,7 +401,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetFactoryBuggerOff(NativeInterface*
 	NativeCallStorage storage;
 	SetFactoryBuggerOffQuery query{};
 	SetFactoryBuggerOffResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_SetFactoryBuggerOffOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetFactoryBuggerOff(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -415,8 +415,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitAlwaysVisible(NativeInterface
 	NativeCallStorage storage;
 	SetUnitAlwaysVisibleQuery query{};
 	SetUnitAlwaysVisibleResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "alwaysVisible", query.alwaysVisible, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "always-visible", query.alwaysVisible, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitAlwaysVisible(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -429,9 +429,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitArmored(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitArmoredQuery query{};
 	SetUnitArmoredResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "armoredState", query.armoredState, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "armoredMultiple", query.armoredMultiple, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "armored-state", query.armoredState, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "armored-multiple", query.armoredMultiple, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitArmored(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -444,7 +444,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitBlocking(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitBlockingQuery query{};
 	SetUnitBlockingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_SetUnitBlockingOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitBlocking(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -458,8 +458,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitBuildParams(NativeInterface* 
 	NativeCallStorage storage;
 	SetUnitBuildParamsQuery query{};
 	SetUnitBuildParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 3u, 3u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 3u, 3u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -477,13 +477,13 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitBuildSpeed(NativeInterface* n
 	NativeCallStorage storage;
 	SetUnitBuildSpeedQuery query{};
 	SetUnitBuildSpeedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "buildSpeed", query.buildSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 7u, 7u, "repairSpeed", query.repairSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "reclaimSpeed", query.reclaimSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "resurrectSpeed", query.resurrectSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "captureSpeed", query.captureSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "terraformSpeed", query.terraformSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "build-speed", query.buildSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 7u, 7u, "repair-speed", query.repairSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "reclaim-speed", query.reclaimSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "resurrect-speed", query.resurrectSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "capture-speed", query.captureSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "terraform-speed", query.terraformSpeed, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitBuildSpeed(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -496,7 +496,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitBuildeeRadius(NativeInterface
 	NativeCallStorage storage;
 	SetUnitBuildeeRadiusQuery query{};
 	SetUnitBuildeeRadiusResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "radius", query.radius, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitBuildeeRadius(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -510,9 +510,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitCloak(NativeInterface* native
 	NativeCallStorage storage;
 	SetUnitCloakQuery query{};
 	SetUnitCloakResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "cloak", Read_NumberOrBool, query.cloak, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "cloakArg", Read_NumberOrBool, query.cloakArg, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "cloak-arg", Read_NumberOrBool, query.cloakArg, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitCloak(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -525,12 +525,12 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitCollisionVolumeData(NativeInt
 	NativeCallStorage storage;
 	SetUnitCollisionVolumeDataQuery query{};
 	SetUnitCollisionVolumeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 6u, 6u, "scales", Read_Float3, query.scales, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 6u, 6u, "offsets", Read_Float3, query.offsets, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "volumeType", query.volumeType, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "testType", query.testType, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "primaryAxis", query.primaryAxis, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "volume-type", query.volumeType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "test-type", query.testType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "primary-axis", query.primaryAxis, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitCollisionVolumeData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -543,7 +543,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitCosts(NativeInterface* native
 	NativeCallStorage storage;
 	SetUnitCostsQuery query{};
 	SetUnitCostsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "costs", Read_UnitCostOverrides, query.costs, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitCosts(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -557,8 +557,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitCrashing(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitCrashingQuery query{};
 	SetUnitCrashingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "wantCrash", query.wantCrash, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "want-crash", query.wantCrash, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitCrashing(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.stateChanged);
@@ -571,9 +571,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitDirection(NativeInterface* na
 	NativeCallStorage storage;
 	SetUnitDirectionQuery query{};
 	SetUnitDirectionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "frontDir", Read_Float3, query.frontDir, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "rightDir", Read_Float3, query.rightDir, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "front-dir", Read_Float3, query.frontDir, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "right-dir", Read_Float3, query.rightDir, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitDirection(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -586,7 +586,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitExperience(NativeInterface* n
 	NativeCallStorage storage;
 	SetUnitExperienceQuery query{};
 	SetUnitExperienceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "experience", query.experience, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitExperience(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -600,7 +600,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitFlanking(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitFlankingQuery query{};
 	SetUnitFlankingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_type = FindArgument(arguments, 1u, 1u, 3u, 3u, "type", error);
 	if (value_type == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_type = storage.Make<std::string>();
@@ -619,11 +619,11 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitHarvestStorage(NativeInterfac
 	NativeCallStorage storage;
 	SetUnitHarvestStorageQuery query{};
 	SetUnitHarvestStorageResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "storedMetal", query.storedMetal, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "maxStoredMetal", query.maxStoredMetal, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "storedEnergy", query.storedEnergy, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "maxStoredEnergy", query.maxStoredEnergy, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "stored-metal", query.storedMetal, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "max-stored-metal", query.maxStoredMetal, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "stored-energy", query.storedEnergy, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "max-stored-energy", query.maxStoredEnergy, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitHarvestStorage(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -636,9 +636,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitHeading(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitHeadingQuery query{};
 	SetUnitHeadingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "heading", query.heading, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "useSmoothing", query.useSmoothing, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "use-smoothing", query.useSmoothing, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitHeading(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -651,9 +651,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitHeadingAndUpDir(NativeInterfa
 	NativeCallStorage storage;
 	SetUnitHeadingAndUpDirQuery query{};
 	SetUnitHeadingAndUpDirResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "heading", query.heading, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "upDir", Read_Float3, query.upDir, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "up-dir", Read_Float3, query.upDir, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitHeadingAndUpDir(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -666,7 +666,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitHealth(NativeInterface* nativ
 	NativeCallStorage storage;
 	SetUnitHealthQuery query{};
 	SetUnitHealthResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "value", Read_UnitHealthValue, query.value, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitHealth(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -680,9 +680,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitLandGoal(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitLandGoalQuery query{};
 	SetUnitLandGoalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "radiusSq", query.radiusSq, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "radius-sq", query.radiusSq, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitLandGoal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -695,7 +695,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitLeavesGhost(NativeInterface* 
 	NativeCallStorage storage;
 	SetUnitLeavesGhostQuery query{};
 	SetUnitLeavesGhostResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_SetUnitLeavesGhostOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitLeavesGhost(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -709,8 +709,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitLoadingTransport(NativeInterf
 	NativeCallStorage storage;
 	SetUnitLoadingTransportQuery query{};
 	SetUnitLoadingTransportResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "transportID", query.transportID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "transport-id", query.transportID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitLoadingTransport(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -723,9 +723,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitLosMask(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitLosMaskQuery query{};
 	SetUnitLosMaskResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "losMask", query.losMask, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "los-mask", query.losMask, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitLosMask(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -738,9 +738,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitLosState(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitLosStateQuery query{};
 	SetUnitLosStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "losState", query.losState, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "los-state", query.losState, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitLosState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -753,7 +753,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitMass(NativeInterface* nativeI
 	NativeCallStorage storage;
 	SetUnitMassQuery query{};
 	SetUnitMassResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "mass", query.mass, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitMass(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -767,8 +767,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitMaxHealth(NativeInterface* na
 	NativeCallStorage storage;
 	SetUnitMaxHealthQuery query{};
 	SetUnitMaxHealthResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "maxHealth", query.maxHealth, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "max-health", query.maxHealth, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitMaxHealth(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -781,8 +781,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitMaxRange(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitMaxRangeQuery query{};
 	SetUnitMaxRangeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "maxRange", query.maxRange, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "max-range", query.maxRange, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitMaxRange(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -795,7 +795,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitMetalExtraction(NativeInterfa
 	NativeCallStorage storage;
 	SetUnitMetalExtractionQuery query{};
 	SetUnitMetalExtractionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "depth", query.depth, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "range", query.range, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitMetalExtraction(&query, &nativeResult);
@@ -810,10 +810,10 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitMidAndAimPos(NativeInterface*
 	NativeCallStorage storage;
 	SetUnitMidAndAimPosQuery query{};
 	SetUnitMidAndAimPosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 1u, 1u, 4u, 4u, "midPos", Read_Float3, query.midPos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 2u, 2u, 4u, 4u, "aimPos", Read_Float3, query.aimPos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "setRelative", query.setRelative, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 1u, 1u, 4u, 4u, "mid-pos", Read_Float3, query.midPos, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 2u, 2u, 4u, 4u, "aim-pos", Read_Float3, query.aimPos, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "set-relative", query.setRelative, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitMidAndAimPos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -826,7 +826,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitMoveGoal(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitMoveGoalQuery query{};
 	SetUnitMoveGoalResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 5u, 5u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "radius", query.radius, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "speed", query.speed, error)) return NativeCalloutDispatch::handled;
@@ -843,8 +843,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitNanoPieces(NativeInterface* n
 	NativeCallStorage storage;
 	SetUnitNanoPiecesQuery query{};
 	SetUnitNanoPiecesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_pieceIndices = FindArgument(arguments, 1u, 1u, 2u, 2u, "pieceIndices", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_pieceIndices = FindArgument(arguments, 1u, 1u, 2u, 2u, "piece-indices", error);
 	if (value_pieceIndices == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_pieceIndices = std::get_if<WasmValueList>(&(*value_pieceIndices).storage);
 	if (list_pieceIndices == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -869,7 +869,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitNeutral(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitNeutralQuery query{};
 	SetUnitNeutralResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "neutral", query.neutral, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitNeutral(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -883,8 +883,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitPhysicalStateBit(NativeInterf
 	NativeCallStorage storage;
 	SetUnitPhysicalStateBitQuery query{};
 	SetUnitPhysicalStateBitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "stateBit", query.stateBit, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "state-bit", query.stateBit, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitPhysicalStateBit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -897,7 +897,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitPhysics(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitPhysicsQuery query{};
 	SetUnitPhysicsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 5u, 5u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 5u, 5u, "velocity", Read_Float3, query.velocity, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 3u, 3u, 5u, 5u, "rotation", Read_Float3, query.rotation, storage, error)) return NativeCalloutDispatch::handled;
@@ -914,13 +914,13 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitPieceCollisionVolumeData(Nati
 	NativeCallStorage storage;
 	SetUnitPieceCollisionVolumeDataQuery query{};
 	SetUnitPieceCollisionVolumeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "pieceIndex", query.pieceIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "piece-index", query.pieceIndex, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 7u, 7u, "enable", query.enable, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 3u, 3u, 7u, 7u, "scales", Read_Float3, query.scales, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 4u, 4u, 7u, 7u, "offsets", Read_Float3, query.offsets, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "volumeType", query.volumeType, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "primaryAxis", query.primaryAxis, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "volume-type", query.volumeType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "primary-axis", query.primaryAxis, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitPieceCollisionVolumeData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -933,8 +933,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitPieceMatrix(NativeInterface* 
 	NativeCallStorage storage;
 	SetUnitPieceMatrixQuery query{};
 	SetUnitPieceMatrixResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "pieceIndex", query.pieceIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "piece-index", query.pieceIndex, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_matrix = FindArgument(arguments, 2u, 2u, 3u, 3u, "matrix", error);
 	if (value_matrix == nullptr) return NativeCalloutDispatch::handled;
 	const auto* array_values_matrix = std::get_if<WasmValueList>(&(*value_matrix).storage);
@@ -954,9 +954,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitPieceParent(NativeInterface* 
 	NativeCallStorage storage;
 	SetUnitPieceParentQuery query{};
 	SetUnitPieceParentResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "childPieceIndex", query.childPieceIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "parentPieceIndex", query.parentPieceIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "child-piece-index", query.childPieceIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "parent-piece-index", query.parentPieceIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitPieceParent(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -969,8 +969,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitPieceVisible(NativeInterface*
 	NativeCallStorage storage;
 	SetUnitPieceVisibleQuery query{};
 	SetUnitPieceVisibleResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "pieceIndex", query.pieceIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "piece-index", query.pieceIndex, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "visible", query.visible, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitPieceVisible(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -984,12 +984,12 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitPosErrorParams(NativeInterfac
 	NativeCallStorage storage;
 	SetUnitPosErrorParamsQuery query{};
 	SetUnitPosErrorParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 1u, 1u, 6u, 6u, "posErrorVector", Read_Float3, query.posErrorVector, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 2u, 2u, 6u, 6u, "posErrorDelta", Read_Float3, query.posErrorDelta, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "nextPosErrorUpdate", query.nextPosErrorUpdate, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "setPosErrorBit", query.setPosErrorBit, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 1u, 1u, 6u, 6u, "pos-error-vector", Read_Float3, query.posErrorVector, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 2u, 2u, 6u, 6u, "pos-error-delta", Read_Float3, query.posErrorDelta, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "next-pos-error-update", query.nextPosErrorUpdate, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "set-pos-error-bit", query.setPosErrorBit, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitPosErrorParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1002,7 +1002,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitPosition(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitPositionQuery query{};
 	SetUnitPositionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitPosition(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1016,7 +1016,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitRadiusAndHeight(NativeInterfa
 	NativeCallStorage storage;
 	SetUnitRadiusAndHeightQuery query{};
 	SetUnitRadiusAndHeightResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "radius", query.radius, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "height", query.height, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitRadiusAndHeight(&query, &nativeResult);
@@ -1031,7 +1031,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitResourcing(NativeInterface* n
 	NativeCallStorage storage;
 	SetUnitResourcingQuery query{};
 	SetUnitResourcingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_type = FindArgument(arguments, 1u, 1u, 3u, 3u, "type", error);
 	if (value_type == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_type = storage.Make<std::string>();
@@ -1050,7 +1050,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitRotation(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitRotationQuery query{};
 	SetUnitRotationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "rotation", Read_Float3, query.rotation, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitRotation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1064,8 +1064,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitSeismicSignature(NativeInterf
 	NativeCallStorage storage;
 	SetUnitSeismicSignatureQuery query{};
 	SetUnitSeismicSignatureResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "seismicSignature", query.seismicSignature, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "seismic-signature", query.seismicSignature, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitSeismicSignature(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1078,12 +1078,12 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitSelectionVolumeData(NativeInt
 	NativeCallStorage storage;
 	SetUnitSelectionVolumeDataQuery query{};
 	SetUnitSelectionVolumeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 6u, 6u, "scales", Read_Float3, query.scales, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 6u, 6u, "offsets", Read_Float3, query.offsets, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "volumeType", query.volumeType, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "testType", query.testType, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "primaryAxis", query.primaryAxis, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "volume-type", query.volumeType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "test-type", query.testType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "primary-axis", query.primaryAxis, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitSelectionVolumeData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1096,8 +1096,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitSensorRadius(NativeInterface*
 	NativeCallStorage storage;
 	SetUnitSensorRadiusQuery query{};
 	SetUnitSensorRadiusResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_sensorType = FindArgument(arguments, 1u, 1u, 3u, 3u, "sensorType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_sensorType = FindArgument(arguments, 1u, 1u, 3u, 3u, "sensor-type", error);
 	if (value_sensorType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_sensorType = storage.Make<std::string>();
 	if (!ReadString(*value_sensorType, stored_string_query_sensorType, error)) { return NativeCalloutDispatch::handled; }
@@ -1115,9 +1115,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitShieldRechargeDelay(NativeInt
 	NativeCallStorage storage;
 	SetUnitShieldRechargeDelayQuery query{};
 	SetUnitShieldRechargeDelayResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "weaponNum", query.weaponNum, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "rechargeDelay", query.rechargeDelay, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "weapon-num", query.weaponNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "recharge-delay", query.rechargeDelay, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitShieldRechargeDelay(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1130,8 +1130,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitShieldState(NativeInterface* 
 	NativeCallStorage storage;
 	SetUnitShieldStateQuery query{};
 	SetUnitShieldStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "weaponNum", query.weaponNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "weapon-num", query.weaponNum, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "enabled", query.enabled, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "power", query.power, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitShieldState(&query, &nativeResult);
@@ -1146,8 +1146,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitSonarStealth(NativeInterface*
 	NativeCallStorage storage;
 	SetUnitSonarStealthQuery query{};
 	SetUnitSonarStealthResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "sonarStealth", query.sonarStealth, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "sonar-stealth", query.sonarStealth, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitSonarStealth(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1160,7 +1160,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitStealth(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitStealthQuery query{};
 	SetUnitStealthResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "stealth", query.stealth, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitStealth(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1174,9 +1174,9 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitStockpile(NativeInterface* na
 	NativeCallStorage storage;
 	SetUnitStockpileQuery query{};
 	SetUnitStockpileResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "stockpile", query.stockpile, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "buildPercent", query.buildPercent, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "build-percent", query.buildPercent, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitStockpile(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1189,7 +1189,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitStorage(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitStorageQuery query{};
 	SetUnitStorageResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_resource = FindArgument(arguments, 1u, 1u, 3u, 3u, "resource", error);
 	if (value_resource == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resource = storage.Make<std::string>();
@@ -1208,10 +1208,10 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitTarget(NativeInterface* nativ
 	NativeCallStorage storage;
 	SetUnitTargetQuery query{};
 	SetUnitTargetResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 4u, 4u, "target", Read_UnitTargetRef, query.target, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 4u, 4u, "options", Read_SetUnitTargetOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "weaponNum", query.weaponNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "weapon-num", query.weaponNum, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitTarget(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1224,7 +1224,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitTooltip(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitTooltipQuery query{};
 	SetUnitTooltipResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_tooltip = FindArgument(arguments, 1u, 1u, 2u, 2u, "tooltip", error);
 	if (value_tooltip == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_tooltip = storage.Make<std::string>();
@@ -1242,8 +1242,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitUseAirLos(NativeInterface* na
 	NativeCallStorage storage;
 	SetUnitUseAirLosQuery query{};
 	SetUnitUseAirLosResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "useAirLos", query.useAirLos, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "use-air-los", query.useAirLos, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitUseAirLos(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1256,7 +1256,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitUseWeapons(NativeInterface* n
 	NativeCallStorage storage;
 	SetUnitUseWeaponsQuery query{};
 	SetUnitUseWeaponsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_SetUnitUseWeaponsOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitUseWeapons(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1270,7 +1270,7 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitVelocity(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitVelocityQuery query{};
 	SetUnitVelocityResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "velocity", Read_Float3, query.velocity, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitVelocity(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1284,14 +1284,14 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitWeaponDamages(NativeInterface
 	NativeCallStorage storage;
 	SetUnitWeaponDamagesQuery query{};
 	SetUnitWeaponDamagesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "weaponNum", query.weaponNum, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_damageKey = FindArgument(arguments, 2u, 2u, 4u, 4u, "damageKey", error);
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "weapon-num", query.weaponNum, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_damageKey = FindArgument(arguments, 2u, 2u, 4u, 4u, "damage-key", error);
 	if (value_damageKey == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_damageKey = storage.Make<std::string>();
 	if (!ReadString(*value_damageKey, stored_string_query_damageKey, error)) { return NativeCalloutDispatch::handled; }
 	query.damageKey = stored_string_query_damageKey.c_str();
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "damageValue", query.damageValue, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "damage-value", query.damageValue, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->SetUnitWeaponDamages(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1304,8 +1304,8 @@ NativeCalloutDispatch Dispatch_unit_control_SetUnitWeaponState(NativeInterface* 
 	NativeCallStorage storage;
 	SetUnitWeaponStateQuery query{};
 	SetUnitWeaponStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "weaponNum", query.weaponNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "weapon-num", query.weaponNum, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_key = FindArgument(arguments, 2u, 2u, 4u, 4u, "key", error);
 	if (value_key == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_key = storage.Make<std::string>();
@@ -1324,10 +1324,10 @@ NativeCalloutDispatch Dispatch_unit_control_TransferUnit(NativeInterface* native
 	NativeCallStorage storage;
 	TransferUnitQuery query{};
 	TransferUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "newTeamID", query.newTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "new-team-id", query.newTeamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "given", query.given, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "adjustUnitLimit", query.adjustUnitLimit, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "adjust-unit-limit", query.adjustUnitLimit, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->TransferUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1340,9 +1340,9 @@ NativeCalloutDispatch Dispatch_unit_control_UnitAttach(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	UnitAttachQuery query{};
 	UnitAttachResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "transporterID", query.transporterID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "transporteeID", query.transporteeID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "pieceNum", query.pieceNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "transporter-id", query.transporterID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "transportee-id", query.transporteeID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "piece-num", query.pieceNum, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->UnitAttach(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1355,7 +1355,7 @@ NativeCalloutDispatch Dispatch_unit_control_UnitDetach(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	UnitDetachQuery query{};
 	UnitDetachResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "transporteeID", query.transporteeID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "transportee-id", query.transporteeID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->UnitDetach(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1368,7 +1368,7 @@ NativeCalloutDispatch Dispatch_unit_control_UnitDetachFromAir(NativeInterface* n
 	NativeCallStorage storage;
 	UnitDetachFromAirQuery query{};
 	UnitDetachFromAirResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "transporteeID", query.transporteeID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "transportee-id", query.transporteeID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->UnitDetachFromAir(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1382,7 +1382,7 @@ NativeCalloutDispatch Dispatch_unit_control_UnitFinishCommand(NativeInterface* n
 	NativeCallStorage storage;
 	UnitFinishCommandQuery query{};
 	UnitFinishCommandResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->UnitFinishCommand(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1395,8 +1395,8 @@ NativeCalloutDispatch Dispatch_unit_control_UnitWeaponFire(NativeInterface* nati
 	NativeCallStorage storage;
 	UnitWeaponFireQuery query{};
 	UnitWeaponFireResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "weaponNum", query.weaponNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "weapon-num", query.weaponNum, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->UnitWeaponFire(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1409,8 +1409,8 @@ NativeCalloutDispatch Dispatch_unit_control_UnitWeaponHoldFire(NativeInterface* 
 	NativeCallStorage storage;
 	UnitWeaponHoldFireQuery query{};
 	UnitWeaponHoldFireResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "weaponNum", query.weaponNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "weapon-num", query.weaponNum, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->unit->UnitWeaponHoldFire(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1423,8 +1423,8 @@ NativeCalloutDispatch Dispatch_unit_control_UseUnitResource(NativeInterface* nat
 	NativeCallStorage storage;
 	UseUnitResourceQuery query{};
 	UseUnitResourceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resourceType", error);
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_resourceType = FindArgument(arguments, 1u, 1u, 3u, 3u, "resource-type", error);
 	if (value_resourceType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resourceType = storage.Make<std::string>();
 	if (!ReadString(*value_resourceType, stored_string_query_resourceType, error)) { return NativeCalloutDispatch::handled; }

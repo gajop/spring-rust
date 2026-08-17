@@ -585,7 +585,7 @@ WasmRuntime::WasmRuntime(WasmRuntimeConfig config)
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	wasm_config_t* wasmtimeConfig = wasm_config_new();
 	if (wasmtimeConfig != nullptr) {
-		wasmtime_config_consume_fuel_set(wasmtimeConfig, true);
+		wasmtime_config_consume_fuel_set(wasmtimeConfig, config.instructionFuel != 0);
 		wasmtime_config_wasm_component_model_set(wasmtimeConfig, true);
 		// Component canonical lowering can execute guest realloc while a host
 		// import is active. Keep Wasmtime's native trap handler explicit here:

@@ -71,6 +71,9 @@ struct SendLuaGaiaResult { const Error* error; bool success; };
 
 struct SendLuaRulesQuery { const char* message; };
 struct SendLuaRulesResult { const Error* error; bool success; };
+// Synced-only bridge matching Lua's SendToUnsynced(string) callout.
+struct SendToUnsyncedQuery { const char* message; };
+struct SendToUnsyncedResult { const Error* error; bool success; };
 
 struct GetConsoleBufferQuery { uint32_t maxLines; };
 struct GetConsoleBufferResult { const Error* error; ConsoleEntry* entries; uint32_t count; };
@@ -100,6 +103,7 @@ struct MessagesApi {
 	void (*SendLuaUIMsg)(const SendLuaUIQuery* query, SendLuaUIResult* result);
 	void (*SendLuaGaiaMsg)(const SendLuaGaiaQuery* query, SendLuaGaiaResult* result);
 	void (*SendLuaRulesMsg)(const SendLuaRulesQuery* query, SendLuaRulesResult* result);
+	void (*SendToUnsynced)(const SendToUnsyncedQuery* query, SendToUnsyncedResult* result);
 	void (*GetConsoleBuffer)(const GetConsoleBufferQuery* query, GetConsoleBufferResult* result);
 	void (*GetCurrentTooltip)(const GetCurrentTooltipQuery* query, GetCurrentTooltipResult* result);
 	void (*IsUserWriting)(const IsUserWritingQuery* query, IsUserWritingResult* result);

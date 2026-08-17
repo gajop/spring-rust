@@ -134,6 +134,8 @@ void WasmExecutionBudget::Reset(std::uint64_t newInstructionFuel,
 
 bool WasmExecutionBudget::ChargeGuest(std::uint64_t fuel)
 {
+	if (instructionFuel == 0)
+		return true;
 	if (fuel > instructionFuel)
 		return false;
 	instructionFuel -= fuel;
@@ -142,6 +144,8 @@ bool WasmExecutionBudget::ChargeGuest(std::uint64_t fuel)
 
 bool WasmExecutionBudget::ChargeHost(std::uint64_t work)
 {
+	if (hostWorkLimit == 0)
+		return true;
 	if (work > std::numeric_limits<std::uint64_t>::max() - hostWork)
 		return false;
 	hostWork += work;

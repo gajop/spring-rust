@@ -31,10 +31,10 @@ NativeCalloutDispatch Dispatch_game_config_SetExperienceGrade(NativeInterface* n
 	NativeCallStorage storage;
 	SetExperienceGradeQuery query{};
 	SetExperienceGradeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "expGrade", query.expGrade, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "expPowerScale", query.expPowerScale, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "expHealthScale", query.expHealthScale, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "expReloadScale", query.expReloadScale, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "exp-grade", query.expGrade, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "exp-power-scale", query.expPowerScale, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "exp-health-scale", query.expHealthScale, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "exp-reload-scale", query.expReloadScale, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->gameConfig->SetExperienceGrade(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -60,7 +60,7 @@ NativeCalloutDispatch Dispatch_game_config_SetNoPause(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	SetNoPauseQuery query{};
 	SetNoPauseResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "noPause", query.noPause, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "no-pause", query.noPause, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->gameConfig->SetNoPause(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -73,10 +73,10 @@ NativeCalloutDispatch Dispatch_game_config_SetRadarErrorParams(NativeInterface* 
 	NativeCallStorage storage;
 	SetRadarErrorParamsQuery query{};
 	SetRadarErrorParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "allyTeamErrorSize", query.allyTeamErrorSize, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "baseErrorSize", query.baseErrorSize, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "baseErrorMult", query.baseErrorMult, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "ally-team-error-size", query.allyTeamErrorSize, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "base-error-size", query.baseErrorSize, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "base-error-mult", query.baseErrorMult, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->gameConfig->SetRadarErrorParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

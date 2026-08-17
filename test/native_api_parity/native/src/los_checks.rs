@@ -55,6 +55,19 @@ impl NativeApiParity {
         let test_name = base_test_name(label);
         let unit_id = i32_field(message, "unitID")?;
         let ally_team_id = i32_field(message, "allyTeamID")?;
+        if test_name == "ui_visibility_radar_los" {
+            let result = self
+                .interface
+                .los()
+                .is_unit_in_los(unit_id, ally_team_id);
+            if result.is_ok() {
+                return Err(
+                    "is_unit_in_los unexpectedly returned a value for a radar-only unit"
+                        .to_string(),
+                );
+            }
+            return self.same_bool_if_present(label, message, "error", true);
+        }
         let (field, native) = match test_name {
             "is_unit_in_los" => (
                 "inLos",

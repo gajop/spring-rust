@@ -12,16 +12,16 @@ bool Read_AddLightTrackingTargetQuery(const WasmValue& input, AddLightTrackingTa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_lightHandle = FindRecordField(*record, "lightHandle", error);
+	const auto* value_lightHandle = FindRecordField(*record, "light-handle", error);
 	if (value_lightHandle == nullptr) return false;
 	if (!ReadScalar(*value_lightHandle, output.lightHandle, error)) { return false; }
-	const auto* value_objectID = FindRecordField(*record, "objectID", error);
+	const auto* value_objectID = FindRecordField(*record, "object-id", error);
 	if (value_objectID == nullptr) return false;
 	if (!ReadScalar(*value_objectID, output.objectID, error)) { return false; }
-	const auto* value_trackUnit = FindRecordField(*record, "trackUnit", error);
+	const auto* value_trackUnit = FindRecordField(*record, "track-unit", error);
 	if (value_trackUnit == nullptr) return false;
 	if (!ReadScalar(*value_trackUnit, output.trackUnit, error)) { return false; }
-	const auto* value_enableTracking = FindRecordField(*record, "enableTracking", error);
+	const auto* value_enableTracking = FindRecordField(*record, "enable-tracking", error);
 	if (value_enableTracking == nullptr) return false;
 	if (!ReadScalar(*value_enableTracking, output.enableTracking, error)) { return false; }
 	return true;
@@ -30,10 +30,10 @@ bool Read_AddLightTrackingTargetQuery(const WasmValue& input, AddLightTrackingTa
 WasmValue Write_AddLightTrackingTargetQuery(const AddLightTrackingTargetQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("lightHandle", WriteScalar(value.lightHandle));
-	fields.emplace("objectID", WriteScalar(value.objectID));
-	fields.emplace("trackUnit", WriteScalar(value.trackUnit));
-	fields.emplace("enableTracking", WriteScalar(value.enableTracking));
+	fields.emplace("light-handle", WriteScalar(value.lightHandle));
+	fields.emplace("object-id", WriteScalar(value.objectID));
+	fields.emplace("track-unit", WriteScalar(value.trackUnit));
+	fields.emplace("enable-tracking", WriteScalar(value.enableTracking));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -75,7 +75,7 @@ bool Read_AddMapLightResult(const WasmValue& input, AddMapLightResult& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_lightHandle = FindRecordField(*record, "lightHandle", error);
+	const auto* value_lightHandle = FindRecordField(*record, "light-handle", error);
 	if (value_lightHandle == nullptr) return false;
 	if (!ReadScalar(*value_lightHandle, output.lightHandle, error)) { return false; }
 	return true;
@@ -84,7 +84,7 @@ bool Read_AddMapLightResult(const WasmValue& input, AddMapLightResult& output, N
 WasmValue Write_AddMapLightResult(const AddMapLightResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("lightHandle", WriteScalar(value.lightHandle));
+	fields.emplace("light-handle", WriteScalar(value.lightHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -109,7 +109,7 @@ bool Read_AddModelLightResult(const WasmValue& input, AddModelLightResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_lightHandle = FindRecordField(*record, "lightHandle", error);
+	const auto* value_lightHandle = FindRecordField(*record, "light-handle", error);
 	if (value_lightHandle == nullptr) return false;
 	if (!ReadScalar(*value_lightHandle, output.lightHandle, error)) { return false; }
 	return true;
@@ -118,7 +118,7 @@ bool Read_AddModelLightResult(const WasmValue& input, AddModelLightResult& outpu
 WasmValue Write_AddModelLightResult(const AddModelLightResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("lightHandle", WriteScalar(value.lightHandle));
+	fields.emplace("light-handle", WriteScalar(value.lightHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -140,28 +140,28 @@ bool Read_LightParams(const WasmValue& input, LightParams& output, NativeCallSto
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_direction)[index], output.direction[index], error)) { return false; }
 	}
-	const auto* value_ambientColor = FindRecordField(*record, "ambientColor", error);
+	const auto* value_ambientColor = FindRecordField(*record, "ambient-color", error);
 	if (value_ambientColor == nullptr) return false;
 	const auto* array_values_ambientColor = std::get_if<WasmValueList>(&(*value_ambientColor).storage);
 	if (array_values_ambientColor == nullptr || array_values_ambientColor->size() != 3u) { error = "Wasm fixed array has the wrong length"; return false; }
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_ambientColor)[index], output.ambientColor[index], error)) { return false; }
 	}
-	const auto* value_diffuseColor = FindRecordField(*record, "diffuseColor", error);
+	const auto* value_diffuseColor = FindRecordField(*record, "diffuse-color", error);
 	if (value_diffuseColor == nullptr) return false;
 	const auto* array_values_diffuseColor = std::get_if<WasmValueList>(&(*value_diffuseColor).storage);
 	if (array_values_diffuseColor == nullptr || array_values_diffuseColor->size() != 3u) { error = "Wasm fixed array has the wrong length"; return false; }
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_diffuseColor)[index], output.diffuseColor[index], error)) { return false; }
 	}
-	const auto* value_specularColor = FindRecordField(*record, "specularColor", error);
+	const auto* value_specularColor = FindRecordField(*record, "specular-color", error);
 	if (value_specularColor == nullptr) return false;
 	const auto* array_values_specularColor = std::get_if<WasmValueList>(&(*value_specularColor).storage);
 	if (array_values_specularColor == nullptr || array_values_specularColor->size() != 3u) { error = "Wasm fixed array has the wrong length"; return false; }
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_specularColor)[index], output.specularColor[index], error)) { return false; }
 	}
-	const auto* value_intensityWeight = FindRecordField(*record, "intensityWeight", error);
+	const auto* value_intensityWeight = FindRecordField(*record, "intensity-weight", error);
 	if (value_intensityWeight == nullptr) return false;
 	const auto* array_values_intensityWeight = std::get_if<WasmValueList>(&(*value_intensityWeight).storage);
 	if (array_values_intensityWeight == nullptr || array_values_intensityWeight->size() != 3u) { error = "Wasm fixed array has the wrong length"; return false; }
@@ -175,28 +175,28 @@ bool Read_LightParams(const WasmValue& input, LightParams& output, NativeCallSto
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_attenuation)[index], output.attenuation[index], error)) { return false; }
 	}
-	const auto* value_ambientDecayRate = FindRecordField(*record, "ambientDecayRate", error);
+	const auto* value_ambientDecayRate = FindRecordField(*record, "ambient-decay-rate", error);
 	if (value_ambientDecayRate == nullptr) return false;
 	const auto* array_values_ambientDecayRate = std::get_if<WasmValueList>(&(*value_ambientDecayRate).storage);
 	if (array_values_ambientDecayRate == nullptr || array_values_ambientDecayRate->size() != 3u) { error = "Wasm fixed array has the wrong length"; return false; }
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_ambientDecayRate)[index], output.ambientDecayRate[index], error)) { return false; }
 	}
-	const auto* value_diffuseDecayRate = FindRecordField(*record, "diffuseDecayRate", error);
+	const auto* value_diffuseDecayRate = FindRecordField(*record, "diffuse-decay-rate", error);
 	if (value_diffuseDecayRate == nullptr) return false;
 	const auto* array_values_diffuseDecayRate = std::get_if<WasmValueList>(&(*value_diffuseDecayRate).storage);
 	if (array_values_diffuseDecayRate == nullptr || array_values_diffuseDecayRate->size() != 3u) { error = "Wasm fixed array has the wrong length"; return false; }
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_diffuseDecayRate)[index], output.diffuseDecayRate[index], error)) { return false; }
 	}
-	const auto* value_specularDecayRate = FindRecordField(*record, "specularDecayRate", error);
+	const auto* value_specularDecayRate = FindRecordField(*record, "specular-decay-rate", error);
 	if (value_specularDecayRate == nullptr) return false;
 	const auto* array_values_specularDecayRate = std::get_if<WasmValueList>(&(*value_specularDecayRate).storage);
 	if (array_values_specularDecayRate == nullptr || array_values_specularDecayRate->size() != 3u) { error = "Wasm fixed array has the wrong length"; return false; }
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_specularDecayRate)[index], output.specularDecayRate[index], error)) { return false; }
 	}
-	const auto* value_decayFunctionType = FindRecordField(*record, "decayFunctionType", error);
+	const auto* value_decayFunctionType = FindRecordField(*record, "decay-function-type", error);
 	if (value_decayFunctionType == nullptr) return false;
 	const auto* array_values_decayFunctionType = std::get_if<WasmValueList>(&(*value_decayFunctionType).storage);
 	if (array_values_decayFunctionType == nullptr || array_values_decayFunctionType->size() != 3u) { error = "Wasm fixed array has the wrong length"; return false; }
@@ -215,10 +215,10 @@ bool Read_LightParams(const WasmValue& input, LightParams& output, NativeCallSto
 	const auto* value_priority = FindRecordField(*record, "priority", error);
 	if (value_priority == nullptr) return false;
 	if (!ReadScalar(*value_priority, output.priority, error)) { return false; }
-	const auto* value_ignoreLOS = FindRecordField(*record, "ignoreLOS", error);
+	const auto* value_ignoreLOS = FindRecordField(*record, "ignore-los", error);
 	if (value_ignoreLOS == nullptr) return false;
 	if (!ReadScalar(*value_ignoreLOS, output.ignoreLOS, error)) { return false; }
-	const auto* value_localSpace = FindRecordField(*record, "localSpace", error);
+	const auto* value_localSpace = FindRecordField(*record, "local-space", error);
 	if (value_localSpace == nullptr) return false;
 	if (!ReadScalar(*value_localSpace, output.localSpace, error)) { return false; }
 	return true;
@@ -229,21 +229,21 @@ WasmValue Write_LightParams(const LightParams& value)
 	WasmValueRecord fields;
 	fields.emplace("position", WriteNativeArray(value.position, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("direction", WriteNativeArray(value.direction, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("ambientColor", WriteNativeArray(value.ambientColor, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("diffuseColor", WriteNativeArray(value.diffuseColor, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("specularColor", WriteNativeArray(value.specularColor, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("intensityWeight", WriteNativeArray(value.intensityWeight, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("ambient-color", WriteNativeArray(value.ambientColor, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("diffuse-color", WriteNativeArray(value.diffuseColor, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("specular-color", WriteNativeArray(value.specularColor, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("intensity-weight", WriteNativeArray(value.intensityWeight, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("attenuation", WriteNativeArray(value.attenuation, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("ambientDecayRate", WriteNativeArray(value.ambientDecayRate, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("diffuseDecayRate", WriteNativeArray(value.diffuseDecayRate, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("specularDecayRate", WriteNativeArray(value.specularDecayRate, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("decayFunctionType", WriteNativeArray(value.decayFunctionType, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("ambient-decay-rate", WriteNativeArray(value.ambientDecayRate, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("diffuse-decay-rate", WriteNativeArray(value.diffuseDecayRate, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("specular-decay-rate", WriteNativeArray(value.specularDecayRate, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("decay-function-type", WriteNativeArray(value.decayFunctionType, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("radius", WriteScalar(value.radius));
 	fields.emplace("fov", WriteScalar(value.fov));
 	fields.emplace("ttl", WriteScalar(value.ttl));
 	fields.emplace("priority", WriteScalar(value.priority));
-	fields.emplace("ignoreLOS", WriteScalar(value.ignoreLOS));
-	fields.emplace("localSpace", WriteScalar(value.localSpace));
+	fields.emplace("ignore-los", WriteScalar(value.ignoreLOS));
+	fields.emplace("local-space", WriteScalar(value.localSpace));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -251,16 +251,16 @@ bool Read_SetMapLightTrackingStateQuery(const WasmValue& input, SetMapLightTrack
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_lightHandle = FindRecordField(*record, "lightHandle", error);
+	const auto* value_lightHandle = FindRecordField(*record, "light-handle", error);
 	if (value_lightHandle == nullptr) return false;
 	if (!ReadScalar(*value_lightHandle, output.lightHandle, error)) { return false; }
-	const auto* value_objectID = FindRecordField(*record, "objectID", error);
+	const auto* value_objectID = FindRecordField(*record, "object-id", error);
 	if (value_objectID == nullptr) return false;
 	if (!ReadScalar(*value_objectID, output.objectID, error)) { return false; }
-	const auto* value_enableTracking = FindRecordField(*record, "enableTracking", error);
+	const auto* value_enableTracking = FindRecordField(*record, "enable-tracking", error);
 	if (value_enableTracking == nullptr) return false;
 	if (!ReadScalar(*value_enableTracking, output.enableTracking, error)) { return false; }
-	const auto* value_trackUnit = FindRecordField(*record, "trackUnit", error);
+	const auto* value_trackUnit = FindRecordField(*record, "track-unit", error);
 	if (value_trackUnit == nullptr) return false;
 	if (!ReadScalar(*value_trackUnit, output.trackUnit, error)) { return false; }
 	return true;
@@ -269,10 +269,10 @@ bool Read_SetMapLightTrackingStateQuery(const WasmValue& input, SetMapLightTrack
 WasmValue Write_SetMapLightTrackingStateQuery(const SetMapLightTrackingStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("lightHandle", WriteScalar(value.lightHandle));
-	fields.emplace("objectID", WriteScalar(value.objectID));
-	fields.emplace("enableTracking", WriteScalar(value.enableTracking));
-	fields.emplace("trackUnit", WriteScalar(value.trackUnit));
+	fields.emplace("light-handle", WriteScalar(value.lightHandle));
+	fields.emplace("object-id", WriteScalar(value.objectID));
+	fields.emplace("enable-tracking", WriteScalar(value.enableTracking));
+	fields.emplace("track-unit", WriteScalar(value.trackUnit));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -297,16 +297,16 @@ bool Read_SetModelLightTrackingStateQuery(const WasmValue& input, SetModelLightT
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_lightHandle = FindRecordField(*record, "lightHandle", error);
+	const auto* value_lightHandle = FindRecordField(*record, "light-handle", error);
 	if (value_lightHandle == nullptr) return false;
 	if (!ReadScalar(*value_lightHandle, output.lightHandle, error)) { return false; }
-	const auto* value_objectID = FindRecordField(*record, "objectID", error);
+	const auto* value_objectID = FindRecordField(*record, "object-id", error);
 	if (value_objectID == nullptr) return false;
 	if (!ReadScalar(*value_objectID, output.objectID, error)) { return false; }
-	const auto* value_enableTracking = FindRecordField(*record, "enableTracking", error);
+	const auto* value_enableTracking = FindRecordField(*record, "enable-tracking", error);
 	if (value_enableTracking == nullptr) return false;
 	if (!ReadScalar(*value_enableTracking, output.enableTracking, error)) { return false; }
-	const auto* value_trackUnit = FindRecordField(*record, "trackUnit", error);
+	const auto* value_trackUnit = FindRecordField(*record, "track-unit", error);
 	if (value_trackUnit == nullptr) return false;
 	if (!ReadScalar(*value_trackUnit, output.trackUnit, error)) { return false; }
 	return true;
@@ -315,10 +315,10 @@ bool Read_SetModelLightTrackingStateQuery(const WasmValue& input, SetModelLightT
 WasmValue Write_SetModelLightTrackingStateQuery(const SetModelLightTrackingStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("lightHandle", WriteScalar(value.lightHandle));
-	fields.emplace("objectID", WriteScalar(value.objectID));
-	fields.emplace("enableTracking", WriteScalar(value.enableTracking));
-	fields.emplace("trackUnit", WriteScalar(value.trackUnit));
+	fields.emplace("light-handle", WriteScalar(value.lightHandle));
+	fields.emplace("object-id", WriteScalar(value.objectID));
+	fields.emplace("enable-tracking", WriteScalar(value.enableTracking));
+	fields.emplace("track-unit", WriteScalar(value.trackUnit));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -343,7 +343,7 @@ bool Read_UpdateMapLightQuery(const WasmValue& input, UpdateMapLightQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_lightHandle = FindRecordField(*record, "lightHandle", error);
+	const auto* value_lightHandle = FindRecordField(*record, "light-handle", error);
 	if (value_lightHandle == nullptr) return false;
 	if (!ReadScalar(*value_lightHandle, output.lightHandle, error)) { return false; }
 	const auto* value_params = FindRecordField(*record, "params", error);
@@ -355,7 +355,7 @@ bool Read_UpdateMapLightQuery(const WasmValue& input, UpdateMapLightQuery& outpu
 WasmValue Write_UpdateMapLightQuery(const UpdateMapLightQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("lightHandle", WriteScalar(value.lightHandle));
+	fields.emplace("light-handle", WriteScalar(value.lightHandle));
 	fields.emplace("params", Write_LightParams(value.params));
 	return WasmValue::Record(std::move(fields));
 }
@@ -381,7 +381,7 @@ bool Read_UpdateModelLightQuery(const WasmValue& input, UpdateModelLightQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_lightHandle = FindRecordField(*record, "lightHandle", error);
+	const auto* value_lightHandle = FindRecordField(*record, "light-handle", error);
 	if (value_lightHandle == nullptr) return false;
 	if (!ReadScalar(*value_lightHandle, output.lightHandle, error)) { return false; }
 	const auto* value_params = FindRecordField(*record, "params", error);
@@ -393,7 +393,7 @@ bool Read_UpdateModelLightQuery(const WasmValue& input, UpdateModelLightQuery& o
 WasmValue Write_UpdateModelLightQuery(const UpdateModelLightQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("lightHandle", WriteScalar(value.lightHandle));
+	fields.emplace("light-handle", WriteScalar(value.lightHandle));
 	fields.emplace("params", Write_LightParams(value.params));
 	return WasmValue::Record(std::move(fields));
 }
@@ -425,10 +425,10 @@ NativeCalloutDispatch Dispatch_lights_AddLightTrackingTarget(NativeInterface* na
 	NativeCallStorage storage;
 	AddLightTrackingTargetQuery query{};
 	AddLightTrackingTargetResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "lightHandle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "trackUnit", query.trackUnit, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "enableTracking", query.enableTracking, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "light-handle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "track-unit", query.trackUnit, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "enable-tracking", query.enableTracking, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->lights->AddLightTrackingTarget(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -467,10 +467,10 @@ NativeCalloutDispatch Dispatch_lights_SetMapLightTrackingState(NativeInterface* 
 	NativeCallStorage storage;
 	SetMapLightTrackingStateQuery query{};
 	SetMapLightTrackingStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "lightHandle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "enableTracking", query.enableTracking, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "trackUnit", query.trackUnit, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "light-handle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "enable-tracking", query.enableTracking, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "track-unit", query.trackUnit, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->lights->SetMapLightTrackingState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -483,10 +483,10 @@ NativeCalloutDispatch Dispatch_lights_SetModelLightTrackingState(NativeInterface
 	NativeCallStorage storage;
 	SetModelLightTrackingStateQuery query{};
 	SetModelLightTrackingStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "lightHandle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "enableTracking", query.enableTracking, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "trackUnit", query.trackUnit, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "light-handle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "enable-tracking", query.enableTracking, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "track-unit", query.trackUnit, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->lights->SetModelLightTrackingState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -499,7 +499,7 @@ NativeCalloutDispatch Dispatch_lights_UpdateMapLight(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	UpdateMapLightQuery query{};
 	UpdateMapLightResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "lightHandle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "light-handle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "params", Read_LightParams, query.params, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->lights->UpdateMapLight(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -513,7 +513,7 @@ NativeCalloutDispatch Dispatch_lights_UpdateModelLight(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	UpdateModelLightQuery query{};
 	UpdateModelLightResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "lightHandle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "light-handle", query.lightHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "params", Read_LightParams, query.params, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->lights->UpdateModelLight(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;

@@ -464,6 +464,24 @@ def method_item(name: str, signature: str, params: list[tuple[str, str]], text: 
         # trace compares `(handled, ready)` rather than the trait's neutral
         # no-handler default.
         body = "\n        Ok(Some(true))\n"
+    elif name == "game_frame":
+        body = (
+            "\n        if std::env::var(\"SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT\")"
+            "            .as_deref() == Ok(\"gameframe\") {\n"
+            "            std::hint::black_box(game_frame);\n"
+            "        }\n"
+            + body
+        )
+    elif name == "draw_world":
+        body = (
+            "\n        if std::env::var(\"SPRING_NATIVE_BENCHMARK_CASE\")"
+            "            .as_deref() == Ok(\"draw\") {\n"
+            "            if let Err(error) = self.benchmark_draw_world() {\n"
+            "                return Err(spring_native::Error::new(1, error));\n"
+            "            }\n"
+            "        }\n"
+            + body
+        )
     return (
         f"{signature} {{\n"
         f"{trace}\n"
@@ -566,12 +584,13 @@ def generate_lua() -> str:
         "-- the same neutral/default values as the C++ Lua implementation.",
         "",
         "function gadget:GetInfo()",
+        "\tlocal mode = Spring.GetModOptions() or {}",
         "\treturn {",
         '\t\tname = "Native API Callin Parity Trace",',
         '\t\tdesc = "Traces shared engine-to-Lua/native callins",',
         '\t\tauthor = "Spring",',
         "\t\tlayer = 1000000,",
-        "\t\tenabled = true,",
+        "\t\tenabled = tostring(mode.native_api_parity_mode or \"\") ~= \"benchmark\",",
         "\t}",
         "end",
         "",

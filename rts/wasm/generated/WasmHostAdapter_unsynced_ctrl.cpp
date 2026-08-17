@@ -12,12 +12,12 @@ bool Read_AssignMouseCursorQuery(const WasmValue& input, AssignMouseCursorQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_commandName = FindRecordField(*record, "commandName", error);
+	const auto* value_commandName = FindRecordField(*record, "command-name", error);
 	if (value_commandName == nullptr) return false;
 	auto& stored_string_output_commandName = storage.Make<std::string>();
 	if (!ReadString(*value_commandName, stored_string_output_commandName, error)) { return false; }
 	output.commandName = stored_string_output_commandName.c_str();
-	const auto* value_cursorFileName = FindRecordField(*record, "cursorFileName", error);
+	const auto* value_cursorFileName = FindRecordField(*record, "cursor-file-name", error);
 	if (value_cursorFileName == nullptr) return false;
 	auto& stored_string_output_cursorFileName = storage.Make<std::string>();
 	if (!ReadString(*value_cursorFileName, stored_string_output_cursorFileName, error)) { return false; }
@@ -25,7 +25,7 @@ bool Read_AssignMouseCursorQuery(const WasmValue& input, AssignMouseCursorQuery&
 	const auto* value_overwrite = FindRecordField(*record, "overwrite", error);
 	if (value_overwrite == nullptr) return false;
 	if (!ReadScalar(*value_overwrite, output.overwrite, error)) { return false; }
-	const auto* value_hotSpotTopLeft = FindRecordField(*record, "hotSpotTopLeft", error);
+	const auto* value_hotSpotTopLeft = FindRecordField(*record, "hot-spot-top-left", error);
 	if (value_hotSpotTopLeft == nullptr) return false;
 	if (!ReadScalar(*value_hotSpotTopLeft, output.hotSpotTopLeft, error)) { return false; }
 	return true;
@@ -34,10 +34,10 @@ bool Read_AssignMouseCursorQuery(const WasmValue& input, AssignMouseCursorQuery&
 WasmValue Write_AssignMouseCursorQuery(const AssignMouseCursorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("commandName", WasmValue::String((value.commandName == nullptr) ? std::string{} : std::string(value.commandName)));
-	fields.emplace("cursorFileName", WasmValue::String((value.cursorFileName == nullptr) ? std::string{} : std::string(value.cursorFileName)));
+	fields.emplace("command-name", WasmValue::String((value.commandName == nullptr) ? std::string{} : std::string(value.commandName)));
+	fields.emplace("cursor-file-name", WasmValue::String((value.cursorFileName == nullptr) ? std::string{} : std::string(value.cursorFileName)));
 	fields.emplace("overwrite", WriteScalar(value.overwrite));
-	fields.emplace("hotSpotTopLeft", WriteScalar(value.hotSpotTopLeft));
+	fields.emplace("hot-spot-top-left", WriteScalar(value.hotSpotTopLeft));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -62,7 +62,7 @@ bool Read_DeselectUnitMapQuery(const WasmValue& input, DeselectUnitMapQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -81,7 +81,7 @@ bool Read_DeselectUnitMapQuery(const WasmValue& input, DeselectUnitMapQuery& out
 WasmValue Write_DeselectUnitMapQuery(const DeselectUnitMapQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -106,7 +106,7 @@ bool Read_DrawUnitCommandsQuery(const WasmValue& input, DrawUnitCommandsQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -119,10 +119,10 @@ bool Read_DrawUnitCommandsQuery(const WasmValue& input, DrawUnitCommandsQuery& o
 	}
 	output.unitIDs = native_unitIDs.data();
 	if (!AssignCount(list_unitIDs->size(), output.count, error)) { return false; }
-	const auto* value_tableOrArray = FindRecordField(*record, "tableOrArray", error);
+	const auto* value_tableOrArray = FindRecordField(*record, "table-or-array", error);
 	if (value_tableOrArray == nullptr) return false;
 	if (!ReadScalar(*value_tableOrArray, output.tableOrArray, error)) { return false; }
-	const auto* value_queueDrawDepth = FindRecordField(*record, "queueDrawDepth", error);
+	const auto* value_queueDrawDepth = FindRecordField(*record, "queue-draw-depth", error);
 	if (value_queueDrawDepth == nullptr) return false;
 	if (!ReadScalar(*value_queueDrawDepth, output.queueDrawDepth, error)) { return false; }
 	return true;
@@ -131,9 +131,9 @@ bool Read_DrawUnitCommandsQuery(const WasmValue& input, DrawUnitCommandsQuery& o
 WasmValue Write_DrawUnitCommandsQuery(const DrawUnitCommandsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("tableOrArray", WriteScalar(value.tableOrArray));
-	fields.emplace("queueDrawDepth", WriteScalar(value.queueDrawDepth));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("table-or-array", WriteScalar(value.tableOrArray));
+	fields.emplace("queue-draw-depth", WriteScalar(value.queueDrawDepth));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -158,7 +158,7 @@ bool Read_ForceLayoutUpdateQuery(const WasmValue& input, ForceLayoutUpdateQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -167,7 +167,7 @@ bool Read_ForceLayoutUpdateQuery(const WasmValue& input, ForceLayoutUpdateQuery&
 WasmValue Write_ForceLayoutUpdateQuery(const ForceLayoutUpdateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -230,7 +230,7 @@ bool Read_GetWaterTextureQuery(const WasmValue& input, GetWaterTextureQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texType = FindRecordField(*record, "texType", error);
+	const auto* value_texType = FindRecordField(*record, "tex-type", error);
 	if (value_texType == nullptr) return false;
 	auto& stored_string_output_texType = storage.Make<std::string>();
 	if (!ReadString(*value_texType, stored_string_output_texType, error)) { return false; }
@@ -241,7 +241,7 @@ bool Read_GetWaterTextureQuery(const WasmValue& input, GetWaterTextureQuery& out
 WasmValue Write_GetWaterTextureQuery(const GetWaterTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texType", WasmValue::String((value.texType == nullptr) ? std::string{} : std::string(value.texType)));
+	fields.emplace("tex-type", WasmValue::String((value.texType == nullptr) ? std::string{} : std::string(value.texType)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -249,7 +249,7 @@ bool Read_GetWaterTextureResult(const WasmValue& input, GetWaterTextureResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texName = FindRecordField(*record, "texName", error);
+	const auto* value_texName = FindRecordField(*record, "tex-name", error);
 	if (value_texName == nullptr) return false;
 	auto& stored_string_output_texName = storage.Make<std::string>();
 	if (!ReadString(*value_texName, stored_string_output_texName, error)) { return false; }
@@ -260,7 +260,7 @@ bool Read_GetWaterTextureResult(const WasmValue& input, GetWaterTextureResult& o
 WasmValue Write_GetWaterTextureResult(const GetWaterTextureResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texName", WasmValue::String((value.texName == nullptr) ? std::string{} : std::string(value.texName)));
+	fields.emplace("tex-name", WasmValue::String((value.texName == nullptr) ? std::string{} : std::string(value.texName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -340,7 +340,7 @@ bool Read_LoadModelTexturesQuery(const WasmValue& input, LoadModelTexturesQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_modelName = FindRecordField(*record, "modelName", error);
+	const auto* value_modelName = FindRecordField(*record, "model-name", error);
 	if (value_modelName == nullptr) return false;
 	auto& stored_string_output_modelName = storage.Make<std::string>();
 	if (!ReadString(*value_modelName, stored_string_output_modelName, error)) { return false; }
@@ -351,7 +351,7 @@ bool Read_LoadModelTexturesQuery(const WasmValue& input, LoadModelTexturesQuery&
 WasmValue Write_LoadModelTexturesQuery(const LoadModelTexturesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("modelName", WasmValue::String((value.modelName == nullptr) ? std::string{} : std::string(value.modelName)));
+	fields.emplace("model-name", WasmValue::String((value.modelName == nullptr) ? std::string{} : std::string(value.modelName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -410,7 +410,7 @@ bool Read_PreloadFeatureDefModelQuery(const WasmValue& input, PreloadFeatureDefM
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_defID = FindRecordField(*record, "defID", error);
+	const auto* value_defID = FindRecordField(*record, "def-id", error);
 	if (value_defID == nullptr) return false;
 	if (!ReadScalar(*value_defID, output.defID, error)) { return false; }
 	return true;
@@ -419,7 +419,7 @@ bool Read_PreloadFeatureDefModelQuery(const WasmValue& input, PreloadFeatureDefM
 WasmValue Write_PreloadFeatureDefModelQuery(const PreloadFeatureDefModelQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("defID", WriteScalar(value.defID));
+	fields.emplace("def-id", WriteScalar(value.defID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -444,7 +444,7 @@ bool Read_PreloadUnitDefModelQuery(const WasmValue& input, PreloadUnitDefModelQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_defID = FindRecordField(*record, "defID", error);
+	const auto* value_defID = FindRecordField(*record, "def-id", error);
 	if (value_defID == nullptr) return false;
 	if (!ReadScalar(*value_defID, output.defID, error)) { return false; }
 	return true;
@@ -453,7 +453,7 @@ bool Read_PreloadUnitDefModelQuery(const WasmValue& input, PreloadUnitDefModelQu
 WasmValue Write_PreloadUnitDefModelQuery(const PreloadUnitDefModelQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("defID", WriteScalar(value.defID));
+	fields.emplace("def-id", WriteScalar(value.defID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -478,17 +478,17 @@ bool Read_ReplaceMouseCursorQuery(const WasmValue& input, ReplaceMouseCursorQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_oldCursorFileName = FindRecordField(*record, "oldCursorFileName", error);
+	const auto* value_oldCursorFileName = FindRecordField(*record, "old-cursor-file-name", error);
 	if (value_oldCursorFileName == nullptr) return false;
 	auto& stored_string_output_oldCursorFileName = storage.Make<std::string>();
 	if (!ReadString(*value_oldCursorFileName, stored_string_output_oldCursorFileName, error)) { return false; }
 	output.oldCursorFileName = stored_string_output_oldCursorFileName.c_str();
-	const auto* value_newCursorFileName = FindRecordField(*record, "newCursorFileName", error);
+	const auto* value_newCursorFileName = FindRecordField(*record, "new-cursor-file-name", error);
 	if (value_newCursorFileName == nullptr) return false;
 	auto& stored_string_output_newCursorFileName = storage.Make<std::string>();
 	if (!ReadString(*value_newCursorFileName, stored_string_output_newCursorFileName, error)) { return false; }
 	output.newCursorFileName = stored_string_output_newCursorFileName.c_str();
-	const auto* value_hotSpotTopLeft = FindRecordField(*record, "hotSpotTopLeft", error);
+	const auto* value_hotSpotTopLeft = FindRecordField(*record, "hot-spot-top-left", error);
 	if (value_hotSpotTopLeft == nullptr) return false;
 	if (!ReadScalar(*value_hotSpotTopLeft, output.hotSpotTopLeft, error)) { return false; }
 	return true;
@@ -497,9 +497,9 @@ bool Read_ReplaceMouseCursorQuery(const WasmValue& input, ReplaceMouseCursorQuer
 WasmValue Write_ReplaceMouseCursorQuery(const ReplaceMouseCursorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("oldCursorFileName", WasmValue::String((value.oldCursorFileName == nullptr) ? std::string{} : std::string(value.oldCursorFileName)));
-	fields.emplace("newCursorFileName", WasmValue::String((value.newCursorFileName == nullptr) ? std::string{} : std::string(value.newCursorFileName)));
-	fields.emplace("hotSpotTopLeft", WriteScalar(value.hotSpotTopLeft));
+	fields.emplace("old-cursor-file-name", WasmValue::String((value.oldCursorFileName == nullptr) ? std::string{} : std::string(value.oldCursorFileName)));
+	fields.emplace("new-cursor-file-name", WasmValue::String((value.newCursorFileName == nullptr) ? std::string{} : std::string(value.newCursorFileName)));
+	fields.emplace("hot-spot-top-left", WriteScalar(value.hotSpotTopLeft));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -524,7 +524,7 @@ bool Read_ResumeDollyCameraQuery(const WasmValue& input, ResumeDollyCameraQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -533,7 +533,7 @@ bool Read_ResumeDollyCameraQuery(const WasmValue& input, ResumeDollyCameraQuery&
 WasmValue Write_ResumeDollyCameraQuery(const ResumeDollyCameraQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -558,7 +558,7 @@ bool Read_RunDollyCameraQuery(const WasmValue& input, RunDollyCameraQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_runtimeMs = FindRecordField(*record, "runtimeMs", error);
+	const auto* value_runtimeMs = FindRecordField(*record, "runtime-ms", error);
 	if (value_runtimeMs == nullptr) return false;
 	if (!ReadScalar(*value_runtimeMs, output.runtimeMs, error)) { return false; }
 	return true;
@@ -567,7 +567,7 @@ bool Read_RunDollyCameraQuery(const WasmValue& input, RunDollyCameraQuery& outpu
 WasmValue Write_RunDollyCameraQuery(const RunDollyCameraQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("runtimeMs", WriteScalar(value.runtimeMs));
+	fields.emplace("runtime-ms", WriteScalar(value.runtimeMs));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -638,7 +638,7 @@ bool Read_SDLStartTextInputQuery(const WasmValue& input, SDLStartTextInputQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -647,7 +647,7 @@ bool Read_SDLStartTextInputQuery(const WasmValue& input, SDLStartTextInputQuery&
 WasmValue Write_SDLStartTextInputQuery(const SDLStartTextInputQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -672,7 +672,7 @@ bool Read_SDLStopTextInputQuery(const WasmValue& input, SDLStopTextInputQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -681,7 +681,7 @@ bool Read_SDLStopTextInputQuery(const WasmValue& input, SDLStopTextInputQuery& o
 WasmValue Write_SDLStopTextInputQuery(const SDLStopTextInputQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -706,7 +706,7 @@ bool Read_SelectUnitMapQuery(const WasmValue& input, SelectUnitMapQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -728,7 +728,7 @@ bool Read_SelectUnitMapQuery(const WasmValue& input, SelectUnitMapQuery& output,
 WasmValue Write_SelectUnitMapQuery(const SelectUnitMapQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("append", WriteScalar(value.append));
 	return WasmValue::Record(std::move(fields));
 }
@@ -754,10 +754,10 @@ bool Read_SetActiveCommandOptions(const WasmValue& input, SetActiveCommandOption
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_leftClick = FindRecordField(*record, "leftClick", error);
+	const auto* value_leftClick = FindRecordField(*record, "left-click", error);
 	if (value_leftClick == nullptr) return false;
 	if (!ReadScalar(*value_leftClick, output.leftClick, error)) { return false; }
-	const auto* value_rightClick = FindRecordField(*record, "rightClick", error);
+	const auto* value_rightClick = FindRecordField(*record, "right-click", error);
 	if (value_rightClick == nullptr) return false;
 	if (!ReadScalar(*value_rightClick, output.rightClick, error)) { return false; }
 	const auto* value_alt = FindRecordField(*record, "alt", error);
@@ -778,8 +778,8 @@ bool Read_SetActiveCommandOptions(const WasmValue& input, SetActiveCommandOption
 WasmValue Write_SetActiveCommandOptions(const SetActiveCommandOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("leftClick", WriteScalar(value.leftClick));
-	fields.emplace("rightClick", WriteScalar(value.rightClick));
+	fields.emplace("left-click", WriteScalar(value.leftClick));
+	fields.emplace("right-click", WriteScalar(value.rightClick));
 	fields.emplace("alt", WriteScalar(value.alt));
 	fields.emplace("ctrl", WriteScalar(value.ctrl));
 	fields.emplace("meta", WriteScalar(value.meta));
@@ -791,7 +791,7 @@ bool Read_SetActiveCommandQuery(const WasmValue& input, SetActiveCommandQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cmdIndex = FindRecordField(*record, "cmdIndex", error);
+	const auto* value_cmdIndex = FindRecordField(*record, "cmd-index", error);
 	if (value_cmdIndex == nullptr) return false;
 	if (!ReadScalar(*value_cmdIndex, output.cmdIndex, error)) { return false; }
 	const auto* value_button = FindRecordField(*record, "button", error);
@@ -806,7 +806,7 @@ bool Read_SetActiveCommandQuery(const WasmValue& input, SetActiveCommandQuery& o
 WasmValue Write_SetActiveCommandQuery(const SetActiveCommandQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cmdIndex", WriteScalar(value.cmdIndex));
+	fields.emplace("cmd-index", WriteScalar(value.cmdIndex));
 	fields.emplace("button", WriteScalar(value.button));
 	fields.emplace("options", Write_SetActiveCommandOptions(value.options));
 	return WasmValue::Record(std::move(fields));
@@ -1003,10 +1003,10 @@ bool Read_SetCameraOffsetQuery(const WasmValue& input, SetCameraOffsetQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_posOffset = FindRecordField(*record, "posOffset", error);
+	const auto* value_posOffset = FindRecordField(*record, "pos-offset", error);
 	if (value_posOffset == nullptr) return false;
 	if (!Read_Float3(*value_posOffset, output.posOffset, storage, error)) { return false; }
-	const auto* value_tiltOffset = FindRecordField(*record, "tiltOffset", error);
+	const auto* value_tiltOffset = FindRecordField(*record, "tilt-offset", error);
 	if (value_tiltOffset == nullptr) return false;
 	if (!Read_Float3(*value_tiltOffset, output.tiltOffset, storage, error)) { return false; }
 	return true;
@@ -1015,8 +1015,8 @@ bool Read_SetCameraOffsetQuery(const WasmValue& input, SetCameraOffsetQuery& out
 WasmValue Write_SetCameraOffsetQuery(const SetCameraOffsetQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("posOffset", Write_Float3(value.posOffset));
-	fields.emplace("tiltOffset", Write_Float3(value.tiltOffset));
+	fields.emplace("pos-offset", Write_Float3(value.posOffset));
+	fields.emplace("tilt-offset", Write_Float3(value.tiltOffset));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1077,16 +1077,16 @@ bool Read_SetCustomCommandDrawDataQuery(const WasmValue& input, SetCustomCommand
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cmdID = FindRecordField(*record, "cmdID", error);
+	const auto* value_cmdID = FindRecordField(*record, "cmd-id", error);
 	if (value_cmdID == nullptr) return false;
 	if (!ReadScalar(*value_cmdID, output.cmdID, error)) { return false; }
-	const auto* value_cmdReference = FindRecordField(*record, "cmdReference", error);
+	const auto* value_cmdReference = FindRecordField(*record, "cmd-reference", error);
 	if (value_cmdReference == nullptr) return false;
 	if (!Read_DefRef(*value_cmdReference, output.cmdReference, storage, error)) { return false; }
 	const auto* value_color = FindRecordField(*record, "color", error);
 	if (value_color == nullptr) return false;
 	if (!Read_Float4(*value_color, output.color, storage, error)) { return false; }
-	const auto* value_showArea = FindRecordField(*record, "showArea", error);
+	const auto* value_showArea = FindRecordField(*record, "show-area", error);
 	if (value_showArea == nullptr) return false;
 	if (!ReadScalar(*value_showArea, output.showArea, error)) { return false; }
 	return true;
@@ -1095,10 +1095,10 @@ bool Read_SetCustomCommandDrawDataQuery(const WasmValue& input, SetCustomCommand
 WasmValue Write_SetCustomCommandDrawDataQuery(const SetCustomCommandDrawDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cmdID", WriteScalar(value.cmdID));
-	fields.emplace("cmdReference", Write_DefRef(value.cmdReference));
+	fields.emplace("cmd-id", WriteScalar(value.cmdID));
+	fields.emplace("cmd-reference", Write_DefRef(value.cmdReference));
 	fields.emplace("color", Write_Float4(value.color));
-	fields.emplace("showArea", WriteScalar(value.showArea));
+	fields.emplace("show-area", WriteScalar(value.showArea));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1172,7 +1172,7 @@ bool Read_SetDollyCameraCurveQuery(const WasmValue& input, SetDollyCameraCurveQu
 	const auto* value_degree = FindRecordField(*record, "degree", error);
 	if (value_degree == nullptr) return false;
 	if (!ReadScalar(*value_degree, output.degree, error)) { return false; }
-	const auto* value_controlPoints = FindRecordField(*record, "controlPoints", error);
+	const auto* value_controlPoints = FindRecordField(*record, "control-points", error);
 	if (value_controlPoints == nullptr) return false;
 	const auto* list_controlPoints = std::get_if<WasmValueList>(&(*value_controlPoints).storage);
 	if (list_controlPoints == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -1205,7 +1205,7 @@ WasmValue Write_SetDollyCameraCurveQuery(const SetDollyCameraCurveQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("degree", WriteScalar(value.degree));
-	fields.emplace("controlPoints", WriteNativeList(value.controlPoints, value.controlPointsCount, [](const auto& value) { return Write_Float4(value); }));
+	fields.emplace("control-points", WriteNativeList(value.controlPoints, value.controlPointsCount, [](const auto& value) { return Write_Float4(value); }));
 	fields.emplace("knots", WriteNativeList(value.knots, value.knotsCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1234,7 +1234,7 @@ bool Read_SetDollyCameraLookCurveQuery(const WasmValue& input, SetDollyCameraLoo
 	const auto* value_degree = FindRecordField(*record, "degree", error);
 	if (value_degree == nullptr) return false;
 	if (!ReadScalar(*value_degree, output.degree, error)) { return false; }
-	const auto* value_controlPoints = FindRecordField(*record, "controlPoints", error);
+	const auto* value_controlPoints = FindRecordField(*record, "control-points", error);
 	if (value_controlPoints == nullptr) return false;
 	const auto* list_controlPoints = std::get_if<WasmValueList>(&(*value_controlPoints).storage);
 	if (list_controlPoints == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -1267,7 +1267,7 @@ WasmValue Write_SetDollyCameraLookCurveQuery(const SetDollyCameraLookCurveQuery&
 {
 	WasmValueRecord fields;
 	fields.emplace("degree", WriteScalar(value.degree));
-	fields.emplace("controlPoints", WriteNativeList(value.controlPoints, value.controlPointsCount, [](const auto& value) { return Write_Float4(value); }));
+	fields.emplace("control-points", WriteNativeList(value.controlPoints, value.controlPointsCount, [](const auto& value) { return Write_Float4(value); }));
 	fields.emplace("knots", WriteNativeList(value.knots, value.knotsCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1327,7 +1327,7 @@ bool Read_SetDollyCameraLookUnitQuery(const WasmValue& input, SetDollyCameraLook
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -1336,7 +1336,7 @@ bool Read_SetDollyCameraLookUnitQuery(const WasmValue& input, SetDollyCameraLook
 WasmValue Write_SetDollyCameraLookUnitQuery(const SetDollyCameraLookUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1463,10 +1463,10 @@ bool Read_SetDrawGroundDeferredQuery(const WasmValue& input, SetDrawGroundDeferr
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_drawDeferred = FindRecordField(*record, "drawDeferred", error);
+	const auto* value_drawDeferred = FindRecordField(*record, "draw-deferred", error);
 	if (value_drawDeferred == nullptr) return false;
 	if (!ReadScalar(*value_drawDeferred, output.drawDeferred, error)) { return false; }
-	const auto* value_drawForward = FindRecordField(*record, "drawForward", error);
+	const auto* value_drawForward = FindRecordField(*record, "draw-forward", error);
 	if (value_drawForward == nullptr) return false;
 	if (!ReadScalar(*value_drawForward, output.drawForward, error)) { return false; }
 	return true;
@@ -1475,8 +1475,8 @@ bool Read_SetDrawGroundDeferredQuery(const WasmValue& input, SetDrawGroundDeferr
 WasmValue Write_SetDrawGroundDeferredQuery(const SetDrawGroundDeferredQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("drawDeferred", WriteScalar(value.drawDeferred));
-	fields.emplace("drawForward", WriteScalar(value.drawForward));
+	fields.emplace("draw-deferred", WriteScalar(value.drawDeferred));
+	fields.emplace("draw-forward", WriteScalar(value.drawForward));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1509,7 +1509,7 @@ bool Read_SetDrawGroundQuery(const WasmValue& input, SetDrawGroundQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_drawGround = FindRecordField(*record, "drawGround", error);
+	const auto* value_drawGround = FindRecordField(*record, "draw-ground", error);
 	if (value_drawGround == nullptr) return false;
 	if (!ReadScalar(*value_drawGround, output.drawGround, error)) { return false; }
 	return true;
@@ -1518,7 +1518,7 @@ bool Read_SetDrawGroundQuery(const WasmValue& input, SetDrawGroundQuery& output,
 WasmValue Write_SetDrawGroundQuery(const SetDrawGroundQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("drawGround", WriteScalar(value.drawGround));
+	fields.emplace("draw-ground", WriteScalar(value.drawGround));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1543,16 +1543,16 @@ bool Read_SetDrawModelsDeferredQuery(const WasmValue& input, SetDrawModelsDeferr
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_drawUnitsDeferred = FindRecordField(*record, "drawUnitsDeferred", error);
+	const auto* value_drawUnitsDeferred = FindRecordField(*record, "draw-units-deferred", error);
 	if (value_drawUnitsDeferred == nullptr) return false;
 	if (!ReadScalar(*value_drawUnitsDeferred, output.drawUnitsDeferred, error)) { return false; }
-	const auto* value_drawFeaturesDeferred = FindRecordField(*record, "drawFeaturesDeferred", error);
+	const auto* value_drawFeaturesDeferred = FindRecordField(*record, "draw-features-deferred", error);
 	if (value_drawFeaturesDeferred == nullptr) return false;
 	if (!ReadScalar(*value_drawFeaturesDeferred, output.drawFeaturesDeferred, error)) { return false; }
-	const auto* value_drawUnitsForward = FindRecordField(*record, "drawUnitsForward", error);
+	const auto* value_drawUnitsForward = FindRecordField(*record, "draw-units-forward", error);
 	if (value_drawUnitsForward == nullptr) return false;
 	if (!ReadScalar(*value_drawUnitsForward, output.drawUnitsForward, error)) { return false; }
-	const auto* value_drawFeaturesForward = FindRecordField(*record, "drawFeaturesForward", error);
+	const auto* value_drawFeaturesForward = FindRecordField(*record, "draw-features-forward", error);
 	if (value_drawFeaturesForward == nullptr) return false;
 	if (!ReadScalar(*value_drawFeaturesForward, output.drawFeaturesForward, error)) { return false; }
 	return true;
@@ -1561,10 +1561,10 @@ bool Read_SetDrawModelsDeferredQuery(const WasmValue& input, SetDrawModelsDeferr
 WasmValue Write_SetDrawModelsDeferredQuery(const SetDrawModelsDeferredQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("drawUnitsDeferred", WriteScalar(value.drawUnitsDeferred));
-	fields.emplace("drawFeaturesDeferred", WriteScalar(value.drawFeaturesDeferred));
-	fields.emplace("drawUnitsForward", WriteScalar(value.drawUnitsForward));
-	fields.emplace("drawFeaturesForward", WriteScalar(value.drawFeaturesForward));
+	fields.emplace("draw-units-deferred", WriteScalar(value.drawUnitsDeferred));
+	fields.emplace("draw-features-deferred", WriteScalar(value.drawFeaturesDeferred));
+	fields.emplace("draw-units-forward", WriteScalar(value.drawUnitsForward));
+	fields.emplace("draw-features-forward", WriteScalar(value.drawFeaturesForward));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1575,16 +1575,16 @@ bool Read_SetDrawModelsDeferredResult(const WasmValue& input, SetDrawModelsDefer
 	const auto* value_success = FindRecordField(*record, "success", error);
 	if (value_success == nullptr) return false;
 	if (!ReadScalar(*value_success, output.success, error)) { return false; }
-	const auto* value_unitsDeferred = FindRecordField(*record, "unitsDeferred", error);
+	const auto* value_unitsDeferred = FindRecordField(*record, "units-deferred", error);
 	if (value_unitsDeferred == nullptr) return false;
 	if (!ReadScalar(*value_unitsDeferred, output.unitsDeferred, error)) { return false; }
-	const auto* value_featuresDeferred = FindRecordField(*record, "featuresDeferred", error);
+	const auto* value_featuresDeferred = FindRecordField(*record, "features-deferred", error);
 	if (value_featuresDeferred == nullptr) return false;
 	if (!ReadScalar(*value_featuresDeferred, output.featuresDeferred, error)) { return false; }
-	const auto* value_unitsForward = FindRecordField(*record, "unitsForward", error);
+	const auto* value_unitsForward = FindRecordField(*record, "units-forward", error);
 	if (value_unitsForward == nullptr) return false;
 	if (!ReadScalar(*value_unitsForward, output.unitsForward, error)) { return false; }
-	const auto* value_featuresForward = FindRecordField(*record, "featuresForward", error);
+	const auto* value_featuresForward = FindRecordField(*record, "features-forward", error);
 	if (value_featuresForward == nullptr) return false;
 	if (!ReadScalar(*value_featuresForward, output.featuresForward, error)) { return false; }
 	return true;
@@ -1594,10 +1594,10 @@ WasmValue Write_SetDrawModelsDeferredResult(const SetDrawModelsDeferredResult& v
 {
 	WasmValueRecord fields;
 	fields.emplace("success", WriteScalar(value.success));
-	fields.emplace("unitsDeferred", WriteScalar(value.unitsDeferred));
-	fields.emplace("featuresDeferred", WriteScalar(value.featuresDeferred));
-	fields.emplace("unitsForward", WriteScalar(value.unitsForward));
-	fields.emplace("featuresForward", WriteScalar(value.featuresForward));
+	fields.emplace("units-deferred", WriteScalar(value.unitsDeferred));
+	fields.emplace("features-deferred", WriteScalar(value.featuresDeferred));
+	fields.emplace("units-forward", WriteScalar(value.unitsForward));
+	fields.emplace("features-forward", WriteScalar(value.featuresForward));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1639,7 +1639,7 @@ bool Read_SetDrawSkyQuery(const WasmValue& input, SetDrawSkyQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_drawSky = FindRecordField(*record, "drawSky", error);
+	const auto* value_drawSky = FindRecordField(*record, "draw-sky", error);
 	if (value_drawSky == nullptr) return false;
 	if (!ReadScalar(*value_drawSky, output.drawSky, error)) { return false; }
 	return true;
@@ -1648,7 +1648,7 @@ bool Read_SetDrawSkyQuery(const WasmValue& input, SetDrawSkyQuery& output, Nativ
 WasmValue Write_SetDrawSkyQuery(const SetDrawSkyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("drawSky", WriteScalar(value.drawSky));
+	fields.emplace("draw-sky", WriteScalar(value.drawSky));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1673,7 +1673,7 @@ bool Read_SetDrawWaterQuery(const WasmValue& input, SetDrawWaterQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_drawWater = FindRecordField(*record, "drawWater", error);
+	const auto* value_drawWater = FindRecordField(*record, "draw-water", error);
 	if (value_drawWater == nullptr) return false;
 	if (!ReadScalar(*value_drawWater, output.drawWater, error)) { return false; }
 	return true;
@@ -1682,7 +1682,7 @@ bool Read_SetDrawWaterQuery(const WasmValue& input, SetDrawWaterQuery& output, N
 WasmValue Write_SetDrawWaterQuery(const SetDrawWaterQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("drawWater", WriteScalar(value.drawWater));
+	fields.emplace("draw-water", WriteScalar(value.drawWater));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1741,7 +1741,7 @@ bool Read_SetFeatureAlwaysUpdateMatrixQuery(const WasmValue& input, SetFeatureAl
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_enable = FindRecordField(*record, "enable", error);
@@ -1753,7 +1753,7 @@ bool Read_SetFeatureAlwaysUpdateMatrixQuery(const WasmValue& input, SetFeatureAl
 WasmValue Write_SetFeatureAlwaysUpdateMatrixQuery(const SetFeatureAlwaysUpdateMatrixQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("enable", WriteScalar(value.enable));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1779,7 +1779,7 @@ bool Read_SetFeatureEngineDrawMaskQuery(const WasmValue& input, SetFeatureEngine
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_mask = FindRecordField(*record, "mask", error);
@@ -1791,7 +1791,7 @@ bool Read_SetFeatureEngineDrawMaskQuery(const WasmValue& input, SetFeatureEngine
 WasmValue Write_SetFeatureEngineDrawMaskQuery(const SetFeatureEngineDrawMaskQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("mask", WriteScalar(value.mask));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1817,7 +1817,7 @@ bool Read_SetFeatureFadeQuery(const WasmValue& input, SetFeatureFadeQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_allow = FindRecordField(*record, "allow", error);
@@ -1829,7 +1829,7 @@ bool Read_SetFeatureFadeQuery(const WasmValue& input, SetFeatureFadeQuery& outpu
 WasmValue Write_SetFeatureFadeQuery(const SetFeatureFadeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("allow", WriteScalar(value.allow));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1855,10 +1855,10 @@ bool Read_SetFeatureNoDrawQuery(const WasmValue& input, SetFeatureNoDrawQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_noDraw = FindRecordField(*record, "noDraw", error);
+	const auto* value_noDraw = FindRecordField(*record, "no-draw", error);
 	if (value_noDraw == nullptr) return false;
 	if (!ReadScalar(*value_noDraw, output.noDraw, error)) { return false; }
 	return true;
@@ -1867,8 +1867,8 @@ bool Read_SetFeatureNoDrawQuery(const WasmValue& input, SetFeatureNoDrawQuery& o
 WasmValue Write_SetFeatureNoDrawQuery(const SetFeatureNoDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("noDraw", WriteScalar(value.noDraw));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("no-draw", WriteScalar(value.noDraw));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1893,10 +1893,10 @@ bool Read_SetFeaturePaletteIndexQuery(const WasmValue& input, SetFeaturePaletteI
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_customIndex = FindRecordField(*record, "customIndex", error);
+	const auto* value_customIndex = FindRecordField(*record, "custom-index", error);
 	if (value_customIndex == nullptr) return false;
 	if (!ReadScalar(*value_customIndex, output.customIndex, error)) { return false; }
 	return true;
@@ -1905,8 +1905,8 @@ bool Read_SetFeaturePaletteIndexQuery(const WasmValue& input, SetFeaturePaletteI
 WasmValue Write_SetFeaturePaletteIndexQuery(const SetFeaturePaletteIndexQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("customIndex", WriteScalar(value.customIndex));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("custom-index", WriteScalar(value.customIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2049,10 +2049,10 @@ bool Read_SetMapShaderQuery(const WasmValue& input, SetMapShaderQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_standardShaderID = FindRecordField(*record, "standardShaderID", error);
+	const auto* value_standardShaderID = FindRecordField(*record, "standard-shader-id", error);
 	if (value_standardShaderID == nullptr) return false;
 	if (!ReadScalar(*value_standardShaderID, output.standardShaderID, error)) { return false; }
-	const auto* value_deferredShaderID = FindRecordField(*record, "deferredShaderID", error);
+	const auto* value_deferredShaderID = FindRecordField(*record, "deferred-shader-id", error);
 	if (value_deferredShaderID == nullptr) return false;
 	if (!ReadScalar(*value_deferredShaderID, output.deferredShaderID, error)) { return false; }
 	return true;
@@ -2061,8 +2061,8 @@ bool Read_SetMapShaderQuery(const WasmValue& input, SetMapShaderQuery& output, N
 WasmValue Write_SetMapShaderQuery(const SetMapShaderQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("standardShaderID", WriteScalar(value.standardShaderID));
-	fields.emplace("deferredShaderID", WriteScalar(value.deferredShaderID));
+	fields.emplace("standard-shader-id", WriteScalar(value.standardShaderID));
+	fields.emplace("deferred-shader-id", WriteScalar(value.deferredShaderID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2087,12 +2087,12 @@ bool Read_SetMapShadingTextureQuery(const WasmValue& input, SetMapShadingTexture
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texType = FindRecordField(*record, "texType", error);
+	const auto* value_texType = FindRecordField(*record, "tex-type", error);
 	if (value_texType == nullptr) return false;
 	auto& stored_string_output_texType = storage.Make<std::string>();
 	if (!ReadString(*value_texType, stored_string_output_texType, error)) { return false; }
 	output.texType = stored_string_output_texType.c_str();
-	const auto* value_texName = FindRecordField(*record, "texName", error);
+	const auto* value_texName = FindRecordField(*record, "tex-name", error);
 	if (value_texName == nullptr) return false;
 	auto& stored_string_output_texName = storage.Make<std::string>();
 	if (!ReadString(*value_texName, stored_string_output_texName, error)) { return false; }
@@ -2106,8 +2106,8 @@ bool Read_SetMapShadingTextureQuery(const WasmValue& input, SetMapShadingTexture
 WasmValue Write_SetMapShadingTextureQuery(const SetMapShadingTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texType", WasmValue::String((value.texType == nullptr) ? std::string{} : std::string(value.texType)));
-	fields.emplace("texName", WasmValue::String((value.texName == nullptr) ? std::string{} : std::string(value.texName)));
+	fields.emplace("tex-type", WasmValue::String((value.texType == nullptr) ? std::string{} : std::string(value.texType)));
+	fields.emplace("tex-name", WasmValue::String((value.texName == nullptr) ? std::string{} : std::string(value.texName)));
 	fields.emplace("num", WriteScalar(value.num));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2171,7 +2171,7 @@ bool Read_SetMouseCursorQuery(const WasmValue& input, SetMouseCursorQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cursorName = FindRecordField(*record, "cursorName", error);
+	const auto* value_cursorName = FindRecordField(*record, "cursor-name", error);
 	if (value_cursorName == nullptr) return false;
 	auto& stored_string_output_cursorName = storage.Make<std::string>();
 	if (!ReadString(*value_cursorName, stored_string_output_cursorName, error)) { return false; }
@@ -2185,7 +2185,7 @@ bool Read_SetMouseCursorQuery(const WasmValue& input, SetMouseCursorQuery& outpu
 WasmValue Write_SetMouseCursorQuery(const SetMouseCursorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cursorName", WasmValue::String((value.cursorName == nullptr) ? std::string{} : std::string(value.cursorName)));
+	fields.emplace("cursor-name", WasmValue::String((value.cursorName == nullptr) ? std::string{} : std::string(value.cursorName)));
 	fields.emplace("scale", WriteScalar(value.scale));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2220,13 +2220,13 @@ bool Read_SetNanoProjectileParamsQuery(const WasmValue& input, SetNanoProjectile
 	const auto* value_a = FindRecordField(*record, "a", error);
 	if (value_a == nullptr) return false;
 	if (!ReadScalar(*value_a, output.a, error)) { return false; }
-	const auto* value_randR = FindRecordField(*record, "randR", error);
+	const auto* value_randR = FindRecordField(*record, "rand-r", error);
 	if (value_randR == nullptr) return false;
 	if (!ReadScalar(*value_randR, output.randR, error)) { return false; }
-	const auto* value_randV = FindRecordField(*record, "randV", error);
+	const auto* value_randV = FindRecordField(*record, "rand-v", error);
 	if (value_randV == nullptr) return false;
 	if (!ReadScalar(*value_randV, output.randV, error)) { return false; }
-	const auto* value_randA = FindRecordField(*record, "randA", error);
+	const auto* value_randA = FindRecordField(*record, "rand-a", error);
 	if (value_randA == nullptr) return false;
 	if (!ReadScalar(*value_randA, output.randA, error)) { return false; }
 	return true;
@@ -2238,9 +2238,9 @@ WasmValue Write_SetNanoProjectileParamsQuery(const SetNanoProjectileParamsQuery&
 	fields.emplace("r", WriteScalar(value.r));
 	fields.emplace("v", WriteScalar(value.v));
 	fields.emplace("a", WriteScalar(value.a));
-	fields.emplace("randR", WriteScalar(value.randR));
-	fields.emplace("randV", WriteScalar(value.randV));
-	fields.emplace("randA", WriteScalar(value.randA));
+	fields.emplace("rand-r", WriteScalar(value.randR));
+	fields.emplace("rand-v", WriteScalar(value.randV));
+	fields.emplace("rand-a", WriteScalar(value.randA));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2265,7 +2265,7 @@ bool Read_SetShockFrontFactorsOptions(const WasmValue& input, SetShockFrontFacto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_minArea = FindRecordField(*record, "minArea", error);
+	const auto* value_minArea = FindRecordField(*record, "min-area", error);
 	if (value_minArea == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_minArea).storage)) {
 		output.minArea = {};
@@ -2274,7 +2274,7 @@ bool Read_SetShockFrontFactorsOptions(const WasmValue& input, SetShockFrontFacto
 		output.hasMinArea = true;
 		if (!ReadScalar(*value_minArea, output.minArea, error)) { return false; }
 	}
-	const auto* value_minPower = FindRecordField(*record, "minPower", error);
+	const auto* value_minPower = FindRecordField(*record, "min-power", error);
 	if (value_minPower == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_minPower).storage)) {
 		output.minPower = {};
@@ -2283,7 +2283,7 @@ bool Read_SetShockFrontFactorsOptions(const WasmValue& input, SetShockFrontFacto
 		output.hasMinPower = true;
 		if (!ReadScalar(*value_minPower, output.minPower, error)) { return false; }
 	}
-	const auto* value_distAdj = FindRecordField(*record, "distAdj", error);
+	const auto* value_distAdj = FindRecordField(*record, "dist-adj", error);
 	if (value_distAdj == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_distAdj).storage)) {
 		output.distAdj = {};
@@ -2298,9 +2298,9 @@ bool Read_SetShockFrontFactorsOptions(const WasmValue& input, SetShockFrontFacto
 WasmValue Write_SetShockFrontFactorsOptions(const SetShockFrontFactorsOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("minArea", value.hasMinArea ? WriteScalar(value.minArea) : WasmValue::Unit());
-	fields.emplace("minPower", value.hasMinPower ? WriteScalar(value.minPower) : WasmValue::Unit());
-	fields.emplace("distAdj", value.hasDistAdj ? WriteScalar(value.distAdj) : WasmValue::Unit());
+	fields.emplace("min-area", value.hasMinArea ? WriteScalar(value.minArea) : WasmValue::Unit());
+	fields.emplace("min-power", value.hasMinPower ? WriteScalar(value.minPower) : WasmValue::Unit());
+	fields.emplace("dist-adj", value.hasDistAdj ? WriteScalar(value.distAdj) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2342,7 +2342,7 @@ bool Read_SetSkyBoxTextureQuery(const WasmValue& input, SetSkyBoxTextureQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texName = FindRecordField(*record, "texName", error);
+	const auto* value_texName = FindRecordField(*record, "tex-name", error);
 	if (value_texName == nullptr) return false;
 	auto& stored_string_output_texName = storage.Make<std::string>();
 	if (!ReadString(*value_texName, stored_string_output_texName, error)) { return false; }
@@ -2353,7 +2353,7 @@ bool Read_SetSkyBoxTextureQuery(const WasmValue& input, SetSkyBoxTextureQuery& o
 WasmValue Write_SetSkyBoxTextureQuery(const SetSkyBoxTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texName", WasmValue::String((value.texName == nullptr) ? std::string{} : std::string(value.texName)));
+	fields.emplace("tex-name", WasmValue::String((value.texName == nullptr) ? std::string{} : std::string(value.texName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2450,10 +2450,10 @@ bool Read_SetUnitAlwaysUpdateMatrixQuery(const WasmValue& input, SetUnitAlwaysUp
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_alwaysUpdateMatrix = FindRecordField(*record, "alwaysUpdateMatrix", error);
+	const auto* value_alwaysUpdateMatrix = FindRecordField(*record, "always-update-matrix", error);
 	if (value_alwaysUpdateMatrix == nullptr) return false;
 	if (!ReadScalar(*value_alwaysUpdateMatrix, output.alwaysUpdateMatrix, error)) { return false; }
 	return true;
@@ -2462,8 +2462,8 @@ bool Read_SetUnitAlwaysUpdateMatrixQuery(const WasmValue& input, SetUnitAlwaysUp
 WasmValue Write_SetUnitAlwaysUpdateMatrixQuery(const SetUnitAlwaysUpdateMatrixQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("alwaysUpdateMatrix", WriteScalar(value.alwaysUpdateMatrix));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("always-update-matrix", WriteScalar(value.alwaysUpdateMatrix));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2488,10 +2488,10 @@ bool Read_SetUnitDefIconQuery(const WasmValue& input, SetUnitDefIconQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
-	const auto* value_iconName = FindRecordField(*record, "iconName", error);
+	const auto* value_iconName = FindRecordField(*record, "icon-name", error);
 	if (value_iconName == nullptr) return false;
 	auto& stored_string_output_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_output_iconName, error)) { return false; }
@@ -2502,8 +2502,8 @@ bool Read_SetUnitDefIconQuery(const WasmValue& input, SetUnitDefIconQuery& outpu
 WasmValue Write_SetUnitDefIconQuery(const SetUnitDefIconQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
-	fields.emplace("iconName", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
+	fields.emplace("icon-name", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2528,7 +2528,7 @@ bool Read_SetUnitDefImageQuery(const WasmValue& input, SetUnitDefImageQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_image = FindRecordField(*record, "image", error);
@@ -2542,7 +2542,7 @@ bool Read_SetUnitDefImageQuery(const WasmValue& input, SetUnitDefImageQuery& out
 WasmValue Write_SetUnitDefImageQuery(const SetUnitDefImageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("image", WasmValue::String((value.image == nullptr) ? std::string{} : std::string(value.image)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2568,10 +2568,10 @@ bool Read_SetUnitEngineDrawMaskQuery(const WasmValue& input, SetUnitEngineDrawMa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_drawMask = FindRecordField(*record, "drawMask", error);
+	const auto* value_drawMask = FindRecordField(*record, "draw-mask", error);
 	if (value_drawMask == nullptr) return false;
 	if (!ReadScalar(*value_drawMask, output.drawMask, error)) { return false; }
 	return true;
@@ -2580,8 +2580,8 @@ bool Read_SetUnitEngineDrawMaskQuery(const WasmValue& input, SetUnitEngineDrawMa
 WasmValue Write_SetUnitEngineDrawMaskQuery(const SetUnitEngineDrawMaskQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("drawMask", WriteScalar(value.drawMask));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("draw-mask", WriteScalar(value.drawMask));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2606,10 +2606,10 @@ bool Read_SetUnitIconDrawQuery(const WasmValue& input, SetUnitIconDrawQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_drawIcon = FindRecordField(*record, "drawIcon", error);
+	const auto* value_drawIcon = FindRecordField(*record, "draw-icon", error);
 	if (value_drawIcon == nullptr) return false;
 	if (!ReadScalar(*value_drawIcon, output.drawIcon, error)) { return false; }
 	return true;
@@ -2618,8 +2618,8 @@ bool Read_SetUnitIconDrawQuery(const WasmValue& input, SetUnitIconDrawQuery& out
 WasmValue Write_SetUnitIconDrawQuery(const SetUnitIconDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("drawIcon", WriteScalar(value.drawIcon));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("draw-icon", WriteScalar(value.drawIcon));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2644,10 +2644,10 @@ bool Read_SetUnitIconQuery(const WasmValue& input, SetUnitIconQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_iconName = FindRecordField(*record, "iconName", error);
+	const auto* value_iconName = FindRecordField(*record, "icon-name", error);
 	if (value_iconName == nullptr) return false;
 	auto& stored_string_output_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_output_iconName, error)) { return false; }
@@ -2658,8 +2658,8 @@ bool Read_SetUnitIconQuery(const WasmValue& input, SetUnitIconQuery& output, Nat
 WasmValue Write_SetUnitIconQuery(const SetUnitIconQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("iconName", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("icon-name", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2684,10 +2684,10 @@ bool Read_SetUnitLeaveTracksQuery(const WasmValue& input, SetUnitLeaveTracksQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_leaveTracks = FindRecordField(*record, "leaveTracks", error);
+	const auto* value_leaveTracks = FindRecordField(*record, "leave-tracks", error);
 	if (value_leaveTracks == nullptr) return false;
 	if (!ReadScalar(*value_leaveTracks, output.leaveTracks, error)) { return false; }
 	return true;
@@ -2696,8 +2696,8 @@ bool Read_SetUnitLeaveTracksQuery(const WasmValue& input, SetUnitLeaveTracksQuer
 WasmValue Write_SetUnitLeaveTracksQuery(const SetUnitLeaveTracksQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("leaveTracks", WriteScalar(value.leaveTracks));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("leave-tracks", WriteScalar(value.leaveTracks));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2722,10 +2722,10 @@ bool Read_SetUnitNoDrawQuery(const WasmValue& input, SetUnitNoDrawQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_noDraw = FindRecordField(*record, "noDraw", error);
+	const auto* value_noDraw = FindRecordField(*record, "no-draw", error);
 	if (value_noDraw == nullptr) return false;
 	if (!ReadScalar(*value_noDraw, output.noDraw, error)) { return false; }
 	return true;
@@ -2734,8 +2734,8 @@ bool Read_SetUnitNoDrawQuery(const WasmValue& input, SetUnitNoDrawQuery& output,
 WasmValue Write_SetUnitNoDrawQuery(const SetUnitNoDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("noDraw", WriteScalar(value.noDraw));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("no-draw", WriteScalar(value.noDraw));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2760,10 +2760,10 @@ bool Read_SetUnitNoGroupQuery(const WasmValue& input, SetUnitNoGroupQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_noGroup = FindRecordField(*record, "noGroup", error);
+	const auto* value_noGroup = FindRecordField(*record, "no-group", error);
 	if (value_noGroup == nullptr) return false;
 	if (!ReadScalar(*value_noGroup, output.noGroup, error)) { return false; }
 	return true;
@@ -2772,8 +2772,8 @@ bool Read_SetUnitNoGroupQuery(const WasmValue& input, SetUnitNoGroupQuery& outpu
 WasmValue Write_SetUnitNoGroupQuery(const SetUnitNoGroupQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("noGroup", WriteScalar(value.noGroup));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("no-group", WriteScalar(value.noGroup));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2798,10 +2798,10 @@ bool Read_SetUnitNoMinimapQuery(const WasmValue& input, SetUnitNoMinimapQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_noMinimap = FindRecordField(*record, "noMinimap", error);
+	const auto* value_noMinimap = FindRecordField(*record, "no-minimap", error);
 	if (value_noMinimap == nullptr) return false;
 	if (!ReadScalar(*value_noMinimap, output.noMinimap, error)) { return false; }
 	return true;
@@ -2810,8 +2810,8 @@ bool Read_SetUnitNoMinimapQuery(const WasmValue& input, SetUnitNoMinimapQuery& o
 WasmValue Write_SetUnitNoMinimapQuery(const SetUnitNoMinimapQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("noMinimap", WriteScalar(value.noMinimap));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("no-minimap", WriteScalar(value.noMinimap));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2836,10 +2836,10 @@ bool Read_SetUnitNoSelectQuery(const WasmValue& input, SetUnitNoSelectQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_noSelect = FindRecordField(*record, "noSelect", error);
+	const auto* value_noSelect = FindRecordField(*record, "no-select", error);
 	if (value_noSelect == nullptr) return false;
 	if (!ReadScalar(*value_noSelect, output.noSelect, error)) { return false; }
 	return true;
@@ -2848,8 +2848,8 @@ bool Read_SetUnitNoSelectQuery(const WasmValue& input, SetUnitNoSelectQuery& out
 WasmValue Write_SetUnitNoSelectQuery(const SetUnitNoSelectQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("noSelect", WriteScalar(value.noSelect));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("no-select", WriteScalar(value.noSelect));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2874,10 +2874,10 @@ bool Read_SetUnitPaletteIndexQuery(const WasmValue& input, SetUnitPaletteIndexQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_customIndex = FindRecordField(*record, "customIndex", error);
+	const auto* value_customIndex = FindRecordField(*record, "custom-index", error);
 	if (value_customIndex == nullptr) return false;
 	if (!ReadScalar(*value_customIndex, output.customIndex, error)) { return false; }
 	return true;
@@ -2886,8 +2886,8 @@ bool Read_SetUnitPaletteIndexQuery(const WasmValue& input, SetUnitPaletteIndexQu
 WasmValue Write_SetUnitPaletteIndexQuery(const SetUnitPaletteIndexQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("customIndex", WriteScalar(value.customIndex));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("custom-index", WriteScalar(value.customIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2912,7 +2912,7 @@ bool Read_SetVideoCapturingModeQuery(const WasmValue& input, SetVideoCapturingMo
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allowCaptureMode = FindRecordField(*record, "allowCaptureMode", error);
+	const auto* value_allowCaptureMode = FindRecordField(*record, "allow-capture-mode", error);
 	if (value_allowCaptureMode == nullptr) return false;
 	if (!ReadScalar(*value_allowCaptureMode, output.allowCaptureMode, error)) { return false; }
 	return true;
@@ -2921,7 +2921,7 @@ bool Read_SetVideoCapturingModeQuery(const WasmValue& input, SetVideoCapturingMo
 WasmValue Write_SetVideoCapturingModeQuery(const SetVideoCapturingModeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allowCaptureMode", WriteScalar(value.allowCaptureMode));
+	fields.emplace("allow-capture-mode", WriteScalar(value.allowCaptureMode));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2946,7 +2946,7 @@ bool Read_SetVideoCapturingTimeOffsetQuery(const WasmValue& input, SetVideoCaptu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_timeOffset = FindRecordField(*record, "timeOffset", error);
+	const auto* value_timeOffset = FindRecordField(*record, "time-offset", error);
 	if (value_timeOffset == nullptr) return false;
 	if (!ReadScalar(*value_timeOffset, output.timeOffset, error)) { return false; }
 	return true;
@@ -2955,7 +2955,7 @@ bool Read_SetVideoCapturingTimeOffsetQuery(const WasmValue& input, SetVideoCaptu
 WasmValue Write_SetVideoCapturingTimeOffsetQuery(const SetVideoCapturingTimeOffsetQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("timeOffset", WriteScalar(value.timeOffset));
+	fields.emplace("time-offset", WriteScalar(value.timeOffset));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2985,7 +2985,7 @@ bool Read_SetWMCaptionQuery(const WasmValue& input, SetWMCaptionQuery& output, N
 	auto& stored_string_output_title = storage.Make<std::string>();
 	if (!ReadString(*value_title, stored_string_output_title, error)) { return false; }
 	output.title = stored_string_output_title.c_str();
-	const auto* value_titleShort = FindRecordField(*record, "titleShort", error);
+	const auto* value_titleShort = FindRecordField(*record, "title-short", error);
 	if (value_titleShort == nullptr) return false;
 	auto& stored_string_output_titleShort = storage.Make<std::string>();
 	if (!ReadString(*value_titleShort, stored_string_output_titleShort, error)) { return false; }
@@ -2997,7 +2997,7 @@ WasmValue Write_SetWMCaptionQuery(const SetWMCaptionQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("title", WasmValue::String((value.title == nullptr) ? std::string{} : std::string(value.title)));
-	fields.emplace("titleShort", WasmValue::String((value.titleShort == nullptr) ? std::string{} : std::string(value.titleShort)));
+	fields.emplace("title-short", WasmValue::String((value.titleShort == nullptr) ? std::string{} : std::string(value.titleShort)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3022,12 +3022,12 @@ bool Read_SetWMIconQuery(const WasmValue& input, SetWMIconQuery& output, NativeC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_iconFileName = FindRecordField(*record, "iconFileName", error);
+	const auto* value_iconFileName = FindRecordField(*record, "icon-file-name", error);
 	if (value_iconFileName == nullptr) return false;
 	auto& stored_string_output_iconFileName = storage.Make<std::string>();
 	if (!ReadString(*value_iconFileName, stored_string_output_iconFileName, error)) { return false; }
 	output.iconFileName = stored_string_output_iconFileName.c_str();
-	const auto* value_forceResolution = FindRecordField(*record, "forceResolution", error);
+	const auto* value_forceResolution = FindRecordField(*record, "force-resolution", error);
 	if (value_forceResolution == nullptr) return false;
 	if (!ReadScalar(*value_forceResolution, output.forceResolution, error)) { return false; }
 	return true;
@@ -3036,8 +3036,8 @@ bool Read_SetWMIconQuery(const WasmValue& input, SetWMIconQuery& output, NativeC
 WasmValue Write_SetWMIconQuery(const SetWMIconQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("iconFileName", WasmValue::String((value.iconFileName == nullptr) ? std::string{} : std::string(value.iconFileName)));
-	fields.emplace("forceResolution", WriteScalar(value.forceResolution));
+	fields.emplace("icon-file-name", WasmValue::String((value.iconFileName == nullptr) ? std::string{} : std::string(value.iconFileName)));
+	fields.emplace("force-resolution", WriteScalar(value.forceResolution));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3096,12 +3096,12 @@ bool Read_SetWaterTextureQuery(const WasmValue& input, SetWaterTextureQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texType = FindRecordField(*record, "texType", error);
+	const auto* value_texType = FindRecordField(*record, "tex-type", error);
 	if (value_texType == nullptr) return false;
 	auto& stored_string_output_texType = storage.Make<std::string>();
 	if (!ReadString(*value_texType, stored_string_output_texType, error)) { return false; }
 	output.texType = stored_string_output_texType.c_str();
-	const auto* value_texName = FindRecordField(*record, "texName", error);
+	const auto* value_texName = FindRecordField(*record, "tex-name", error);
 	if (value_texName == nullptr) return false;
 	auto& stored_string_output_texName = storage.Make<std::string>();
 	if (!ReadString(*value_texName, stored_string_output_texName, error)) { return false; }
@@ -3112,8 +3112,8 @@ bool Read_SetWaterTextureQuery(const WasmValue& input, SetWaterTextureQuery& out
 WasmValue Write_SetWaterTextureQuery(const SetWaterTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texType", WasmValue::String((value.texType == nullptr) ? std::string{} : std::string(value.texType)));
-	fields.emplace("texName", WasmValue::String((value.texName == nullptr) ? std::string{} : std::string(value.texName)));
+	fields.emplace("tex-type", WasmValue::String((value.texType == nullptr) ? std::string{} : std::string(value.texType)));
+	fields.emplace("tex-name", WasmValue::String((value.texName == nullptr) ? std::string{} : std::string(value.texName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3138,7 +3138,7 @@ bool Read_SetWindowGeometryOptions(const WasmValue& input, SetWindowGeometryOpti
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fullScreen = FindRecordField(*record, "fullScreen", error);
+	const auto* value_fullScreen = FindRecordField(*record, "full-screen", error);
 	if (value_fullScreen == nullptr) return false;
 	if (!ReadScalar(*value_fullScreen, output.fullScreen, error)) { return false; }
 	const auto* value_borderless = FindRecordField(*record, "borderless", error);
@@ -3150,7 +3150,7 @@ bool Read_SetWindowGeometryOptions(const WasmValue& input, SetWindowGeometryOpti
 WasmValue Write_SetWindowGeometryOptions(const SetWindowGeometryOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fullScreen", WriteScalar(value.fullScreen));
+	fields.emplace("full-screen", WriteScalar(value.fullScreen));
 	fields.emplace("borderless", WriteScalar(value.borderless));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3159,19 +3159,19 @@ bool Read_SetWindowGeometryQuery(const WasmValue& input, SetWindowGeometryQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_displayIndex = FindRecordField(*record, "displayIndex", error);
+	const auto* value_displayIndex = FindRecordField(*record, "display-index", error);
 	if (value_displayIndex == nullptr) return false;
 	if (!ReadScalar(*value_displayIndex, output.displayIndex, error)) { return false; }
-	const auto* value_windowPosX = FindRecordField(*record, "windowPosX", error);
+	const auto* value_windowPosX = FindRecordField(*record, "window-pos-x", error);
 	if (value_windowPosX == nullptr) return false;
 	if (!ReadScalar(*value_windowPosX, output.windowPosX, error)) { return false; }
-	const auto* value_windowPosY = FindRecordField(*record, "windowPosY", error);
+	const auto* value_windowPosY = FindRecordField(*record, "window-pos-y", error);
 	if (value_windowPosY == nullptr) return false;
 	if (!ReadScalar(*value_windowPosY, output.windowPosY, error)) { return false; }
-	const auto* value_windowSizeX = FindRecordField(*record, "windowSizeX", error);
+	const auto* value_windowSizeX = FindRecordField(*record, "window-size-x", error);
 	if (value_windowSizeX == nullptr) return false;
 	if (!ReadScalar(*value_windowSizeX, output.windowSizeX, error)) { return false; }
-	const auto* value_windowSizeY = FindRecordField(*record, "windowSizeY", error);
+	const auto* value_windowSizeY = FindRecordField(*record, "window-size-y", error);
 	if (value_windowSizeY == nullptr) return false;
 	if (!ReadScalar(*value_windowSizeY, output.windowSizeY, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -3183,11 +3183,11 @@ bool Read_SetWindowGeometryQuery(const WasmValue& input, SetWindowGeometryQuery&
 WasmValue Write_SetWindowGeometryQuery(const SetWindowGeometryQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("displayIndex", WriteScalar(value.displayIndex));
-	fields.emplace("windowPosX", WriteScalar(value.windowPosX));
-	fields.emplace("windowPosY", WriteScalar(value.windowPosY));
-	fields.emplace("windowSizeX", WriteScalar(value.windowSizeX));
-	fields.emplace("windowSizeY", WriteScalar(value.windowSizeY));
+	fields.emplace("display-index", WriteScalar(value.displayIndex));
+	fields.emplace("window-pos-x", WriteScalar(value.windowPosX));
+	fields.emplace("window-pos-y", WriteScalar(value.windowPosY));
+	fields.emplace("window-size-x", WriteScalar(value.windowSizeX));
+	fields.emplace("window-size-y", WriteScalar(value.windowSizeY));
 	fields.emplace("options", Write_SetWindowGeometryOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3213,7 +3213,7 @@ bool Read_SetWindowMaximizedQuery(const WasmValue& input, SetWindowMaximizedQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -3222,7 +3222,7 @@ bool Read_SetWindowMaximizedQuery(const WasmValue& input, SetWindowMaximizedQuer
 WasmValue Write_SetWindowMaximizedQuery(const SetWindowMaximizedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3247,7 +3247,7 @@ bool Read_SetWindowMinimizedQuery(const WasmValue& input, SetWindowMinimizedQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -3256,7 +3256,7 @@ bool Read_SetWindowMinimizedQuery(const WasmValue& input, SetWindowMinimizedQuer
 WasmValue Write_SetWindowMinimizedQuery(const SetWindowMinimizedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3325,18 +3325,18 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_AssignMouseCursor(NativeInterface* 
 	NativeCallStorage storage;
 	AssignMouseCursorQuery query{};
 	AssignMouseCursorResult nativeResult{};
-	const WasmValue* value_commandName = FindArgument(arguments, 0u, 0u, 4u, 4u, "commandName", error);
+	const WasmValue* value_commandName = FindArgument(arguments, 0u, 0u, 4u, 4u, "command-name", error);
 	if (value_commandName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_commandName = storage.Make<std::string>();
 	if (!ReadString(*value_commandName, stored_string_query_commandName, error)) { return NativeCalloutDispatch::handled; }
 	query.commandName = stored_string_query_commandName.c_str();
-	const WasmValue* value_cursorFileName = FindArgument(arguments, 1u, 1u, 4u, 4u, "cursorFileName", error);
+	const WasmValue* value_cursorFileName = FindArgument(arguments, 1u, 1u, 4u, 4u, "cursor-file-name", error);
 	if (value_cursorFileName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_cursorFileName = storage.Make<std::string>();
 	if (!ReadString(*value_cursorFileName, stored_string_query_cursorFileName, error)) { return NativeCalloutDispatch::handled; }
 	query.cursorFileName = stored_string_query_cursorFileName.c_str();
 	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "overwrite", query.overwrite, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "hotSpotTopLeft", query.hotSpotTopLeft, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "hot-spot-top-left", query.hotSpotTopLeft, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->AssignMouseCursor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3349,7 +3349,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_DeselectUnitMap(NativeInterface* na
 	NativeCallStorage storage;
 	DeselectUnitMapQuery query{};
 	DeselectUnitMapResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 1u, 1u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 1u, 1u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -3374,7 +3374,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_DrawUnitCommands(NativeInterface* n
 	NativeCallStorage storage;
 	DrawUnitCommandsQuery query{};
 	DrawUnitCommandsResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 3u, 3u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 3u, 3u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -3387,8 +3387,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_DrawUnitCommands(NativeInterface* n
 	}
 	query.unitIDs = native_unitIDs.data();
 	if (!AssignCount(list_unitIDs->size(), query.count, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "tableOrArray", query.tableOrArray, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "queueDrawDepth", query.queueDrawDepth, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "table-or-array", query.tableOrArray, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "queue-draw-depth", query.queueDrawDepth, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->DrawUnitCommands(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3401,7 +3401,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_ForceLayoutUpdate(NativeInterface* 
 	NativeCallStorage storage;
 	ForceLayoutUpdateQuery query{};
 	ForceLayoutUpdateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->ForceLayoutUpdate(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3428,7 +3428,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_GetWaterTexture(NativeInterface* na
 	NativeCallStorage storage;
 	GetWaterTextureQuery query{};
 	GetWaterTextureResult nativeResult{};
-	const WasmValue* value_texType = FindArgument(arguments, 0u, 0u, 1u, 1u, "texType", error);
+	const WasmValue* value_texType = FindArgument(arguments, 0u, 0u, 1u, 1u, "tex-type", error);
 	if (value_texType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_texType = storage.Make<std::string>();
 	if (!ReadString(*value_texType, stored_string_query_texType, error)) { return NativeCalloutDispatch::handled; }
@@ -3479,7 +3479,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_LoadModelTextures(NativeInterface* 
 	NativeCallStorage storage;
 	LoadModelTexturesQuery query{};
 	LoadModelTexturesResult nativeResult{};
-	const WasmValue* value_modelName = FindArgument(arguments, 0u, 0u, 1u, 1u, "modelName", error);
+	const WasmValue* value_modelName = FindArgument(arguments, 0u, 0u, 1u, 1u, "model-name", error);
 	if (value_modelName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_modelName = storage.Make<std::string>();
 	if (!ReadString(*value_modelName, stored_string_query_modelName, error)) { return NativeCalloutDispatch::handled; }
@@ -3509,7 +3509,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_PreloadFeatureDefModel(NativeInterf
 	NativeCallStorage storage;
 	PreloadFeatureDefModelQuery query{};
 	PreloadFeatureDefModelResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "defID", query.defID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "def-id", query.defID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->PreloadFeatureDefModel(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3522,7 +3522,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_PreloadUnitDefModel(NativeInterface
 	NativeCallStorage storage;
 	PreloadUnitDefModelQuery query{};
 	PreloadUnitDefModelResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "defID", query.defID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "def-id", query.defID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->PreloadUnitDefModel(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3535,17 +3535,17 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_ReplaceMouseCursor(NativeInterface*
 	NativeCallStorage storage;
 	ReplaceMouseCursorQuery query{};
 	ReplaceMouseCursorResult nativeResult{};
-	const WasmValue* value_oldCursorFileName = FindArgument(arguments, 0u, 0u, 3u, 3u, "oldCursorFileName", error);
+	const WasmValue* value_oldCursorFileName = FindArgument(arguments, 0u, 0u, 3u, 3u, "old-cursor-file-name", error);
 	if (value_oldCursorFileName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_oldCursorFileName = storage.Make<std::string>();
 	if (!ReadString(*value_oldCursorFileName, stored_string_query_oldCursorFileName, error)) { return NativeCalloutDispatch::handled; }
 	query.oldCursorFileName = stored_string_query_oldCursorFileName.c_str();
-	const WasmValue* value_newCursorFileName = FindArgument(arguments, 1u, 1u, 3u, 3u, "newCursorFileName", error);
+	const WasmValue* value_newCursorFileName = FindArgument(arguments, 1u, 1u, 3u, 3u, "new-cursor-file-name", error);
 	if (value_newCursorFileName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_newCursorFileName = storage.Make<std::string>();
 	if (!ReadString(*value_newCursorFileName, stored_string_query_newCursorFileName, error)) { return NativeCalloutDispatch::handled; }
 	query.newCursorFileName = stored_string_query_newCursorFileName.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "hotSpotTopLeft", query.hotSpotTopLeft, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "hot-spot-top-left", query.hotSpotTopLeft, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->ReplaceMouseCursor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3558,7 +3558,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_ResumeDollyCamera(NativeInterface* 
 	NativeCallStorage storage;
 	ResumeDollyCameraQuery query{};
 	ResumeDollyCameraResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->ResumeDollyCamera(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3571,7 +3571,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_RunDollyCamera(NativeInterface* nat
 	NativeCallStorage storage;
 	RunDollyCameraQuery query{};
 	RunDollyCameraResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "runtimeMs", query.runtimeMs, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "runtime-ms", query.runtimeMs, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->RunDollyCamera(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3600,7 +3600,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SDLStartTextInput(NativeInterface* 
 	NativeCallStorage storage;
 	SDLStartTextInputQuery query{};
 	SDLStartTextInputResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SDLStartTextInput(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3613,7 +3613,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SDLStopTextInput(NativeInterface* n
 	NativeCallStorage storage;
 	SDLStopTextInputQuery query{};
 	SDLStopTextInputResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SDLStopTextInput(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3626,7 +3626,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SelectUnitMap(NativeInterface* nati
 	NativeCallStorage storage;
 	SelectUnitMapQuery query{};
 	SelectUnitMapResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 2u, 2u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 2u, 2u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -3652,7 +3652,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetActiveCommand(NativeInterface* n
 	NativeCallStorage storage;
 	SetActiveCommandQuery query{};
 	SetActiveCommandResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "cmdIndex", query.cmdIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "cmd-index", query.cmdIndex, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "button", query.button, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "options", Read_SetActiveCommandOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetActiveCommand(&query, &nativeResult);
@@ -3732,8 +3732,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetCameraOffset(NativeInterface* na
 	NativeCallStorage storage;
 	SetCameraOffsetQuery query{};
 	SetCameraOffsetResult nativeResult{};
-	if (!ReadRecordArgument(arguments, 0u, 0u, 2u, 2u, "posOffset", Read_Float3, query.posOffset, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "tiltOffset", Read_Float3, query.tiltOffset, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 0u, 0u, 2u, 2u, "pos-offset", Read_Float3, query.posOffset, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "tilt-offset", Read_Float3, query.tiltOffset, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetCameraOffset(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3763,10 +3763,10 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetCustomCommandDrawData(NativeInte
 	NativeCallStorage storage;
 	SetCustomCommandDrawDataQuery query{};
 	SetCustomCommandDrawDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "cmdID", query.cmdID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 1u, 1u, 4u, 4u, "cmdReference", Read_DefRef, query.cmdReference, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "cmd-id", query.cmdID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 1u, 1u, 4u, 4u, "cmd-reference", Read_DefRef, query.cmdReference, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 4u, 4u, "color", Read_Float4, query.color, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "showArea", query.showArea, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "show-area", query.showArea, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetCustomCommandDrawData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3796,7 +3796,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetDollyCameraCurve(NativeInterface
 	SetDollyCameraCurveQuery query{};
 	SetDollyCameraCurveResult nativeResult{};
 	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "degree", query.degree, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_controlPoints = FindArgument(arguments, 1u, 1u, 3u, 3u, "controlPoints", error);
+	const WasmValue* value_controlPoints = FindArgument(arguments, 1u, 1u, 3u, 3u, "control-points", error);
 	if (value_controlPoints == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_controlPoints = std::get_if<WasmValueList>(&(*value_controlPoints).storage);
 	if (list_controlPoints == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -3835,7 +3835,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetDollyCameraLookCurve(NativeInter
 	SetDollyCameraLookCurveQuery query{};
 	SetDollyCameraLookCurveResult nativeResult{};
 	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "degree", query.degree, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_controlPoints = FindArgument(arguments, 1u, 1u, 3u, 3u, "controlPoints", error);
+	const WasmValue* value_controlPoints = FindArgument(arguments, 1u, 1u, 3u, 3u, "control-points", error);
 	if (value_controlPoints == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_controlPoints = std::get_if<WasmValueList>(&(*value_controlPoints).storage);
 	if (list_controlPoints == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -3886,7 +3886,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetDollyCameraLookUnit(NativeInterf
 	NativeCallStorage storage;
 	SetDollyCameraLookUnitQuery query{};
 	SetDollyCameraLookUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetDollyCameraLookUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3938,7 +3938,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetDrawGround(NativeInterface* nati
 	NativeCallStorage storage;
 	SetDrawGroundQuery query{};
 	SetDrawGroundResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "drawGround", query.drawGround, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "draw-ground", query.drawGround, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetDrawGround(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3951,8 +3951,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetDrawGroundDeferred(NativeInterfa
 	NativeCallStorage storage;
 	SetDrawGroundDeferredQuery query{};
 	SetDrawGroundDeferredResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "drawDeferred", query.drawDeferred, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "drawForward", query.drawForward, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "draw-deferred", query.drawDeferred, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "draw-forward", query.drawForward, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetDrawGroundDeferred(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -3969,18 +3969,18 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetDrawModelsDeferred(NativeInterfa
 	NativeCallStorage storage;
 	SetDrawModelsDeferredQuery query{};
 	SetDrawModelsDeferredResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "drawUnitsDeferred", query.drawUnitsDeferred, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "drawFeaturesDeferred", query.drawFeaturesDeferred, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "drawUnitsForward", query.drawUnitsForward, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "drawFeaturesForward", query.drawFeaturesForward, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "draw-units-deferred", query.drawUnitsDeferred, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "draw-features-deferred", query.drawFeaturesDeferred, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "draw-units-forward", query.drawUnitsForward, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "draw-features-forward", query.drawFeaturesForward, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetDrawModelsDeferred(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
-	outputFields.emplace("unitsDeferred", WriteScalar(nativeResult.unitsDeferred));
-	outputFields.emplace("featuresDeferred", WriteScalar(nativeResult.featuresDeferred));
-	outputFields.emplace("unitsForward", WriteScalar(nativeResult.unitsForward));
-	outputFields.emplace("featuresForward", WriteScalar(nativeResult.featuresForward));
+	outputFields.emplace("units-deferred", WriteScalar(nativeResult.unitsDeferred));
+	outputFields.emplace("features-deferred", WriteScalar(nativeResult.featuresDeferred));
+	outputFields.emplace("units-forward", WriteScalar(nativeResult.unitsForward));
+	outputFields.emplace("features-forward", WriteScalar(nativeResult.featuresForward));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -4004,7 +4004,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetDrawSky(NativeInterface* nativeI
 	NativeCallStorage storage;
 	SetDrawSkyQuery query{};
 	SetDrawSkyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "drawSky", query.drawSky, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "draw-sky", query.drawSky, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetDrawSky(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4017,7 +4017,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetDrawWater(NativeInterface* nativ
 	NativeCallStorage storage;
 	SetDrawWaterQuery query{};
 	SetDrawWaterResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "drawWater", query.drawWater, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "draw-water", query.drawWater, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetDrawWater(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4043,7 +4043,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetFeatureAlwaysUpdateMatrix(Native
 	NativeCallStorage storage;
 	SetFeatureAlwaysUpdateMatrixQuery query{};
 	SetFeatureAlwaysUpdateMatrixResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "enable", query.enable, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetFeatureAlwaysUpdateMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4057,7 +4057,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetFeatureEngineDrawMask(NativeInte
 	NativeCallStorage storage;
 	SetFeatureEngineDrawMaskQuery query{};
 	SetFeatureEngineDrawMaskResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "mask", query.mask, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetFeatureEngineDrawMask(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4071,7 +4071,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetFeatureFade(NativeInterface* nat
 	NativeCallStorage storage;
 	SetFeatureFadeQuery query{};
 	SetFeatureFadeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "allow", query.allow, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetFeatureFade(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4085,8 +4085,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetFeatureNoDraw(NativeInterface* n
 	NativeCallStorage storage;
 	SetFeatureNoDrawQuery query{};
 	SetFeatureNoDrawResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "noDraw", query.noDraw, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "no-draw", query.noDraw, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetFeatureNoDraw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4099,8 +4099,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetFeaturePaletteIndex(NativeInterf
 	NativeCallStorage storage;
 	SetFeaturePaletteIndexQuery query{};
 	SetFeaturePaletteIndexResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "customIndex", query.customIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "custom-index", query.customIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetFeaturePaletteIndex(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4156,8 +4156,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetMapShader(NativeInterface* nativ
 	NativeCallStorage storage;
 	SetMapShaderQuery query{};
 	SetMapShaderResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "standardShaderID", query.standardShaderID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "deferredShaderID", query.deferredShaderID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "standard-shader-id", query.standardShaderID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "deferred-shader-id", query.deferredShaderID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetMapShader(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4170,12 +4170,12 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetMapShadingTexture(NativeInterfac
 	NativeCallStorage storage;
 	SetMapShadingTextureQuery query{};
 	SetMapShadingTextureResult nativeResult{};
-	const WasmValue* value_texType = FindArgument(arguments, 0u, 0u, 3u, 3u, "texType", error);
+	const WasmValue* value_texType = FindArgument(arguments, 0u, 0u, 3u, 3u, "tex-type", error);
 	if (value_texType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_texType = storage.Make<std::string>();
 	if (!ReadString(*value_texType, stored_string_query_texType, error)) { return NativeCalloutDispatch::handled; }
 	query.texType = stored_string_query_texType.c_str();
-	const WasmValue* value_texName = FindArgument(arguments, 1u, 1u, 3u, 3u, "texName", error);
+	const WasmValue* value_texName = FindArgument(arguments, 1u, 1u, 3u, 3u, "tex-name", error);
 	if (value_texName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_texName = storage.Make<std::string>();
 	if (!ReadString(*value_texName, stored_string_query_texName, error)) { return NativeCalloutDispatch::handled; }
@@ -4209,7 +4209,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetMouseCursor(NativeInterface* nat
 	NativeCallStorage storage;
 	SetMouseCursorQuery query{};
 	SetMouseCursorResult nativeResult{};
-	const WasmValue* value_cursorName = FindArgument(arguments, 0u, 0u, 2u, 2u, "cursorName", error);
+	const WasmValue* value_cursorName = FindArgument(arguments, 0u, 0u, 2u, 2u, "cursor-name", error);
 	if (value_cursorName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_cursorName = storage.Make<std::string>();
 	if (!ReadString(*value_cursorName, stored_string_query_cursorName, error)) { return NativeCalloutDispatch::handled; }
@@ -4230,9 +4230,9 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetNanoProjectileParams(NativeInter
 	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "r", query.r, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "v", query.v, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "a", query.a, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "randR", query.randR, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "randV", query.randV, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "randA", query.randA, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "rand-r", query.randR, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "rand-v", query.randV, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "rand-a", query.randA, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetNanoProjectileParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4258,7 +4258,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetSkyBoxTexture(NativeInterface* n
 	NativeCallStorage storage;
 	SetSkyBoxTextureQuery query{};
 	SetSkyBoxTextureResult nativeResult{};
-	const WasmValue* value_texName = FindArgument(arguments, 0u, 0u, 1u, 1u, "texName", error);
+	const WasmValue* value_texName = FindArgument(arguments, 0u, 0u, 1u, 1u, "tex-name", error);
 	if (value_texName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_texName = storage.Make<std::string>();
 	if (!ReadString(*value_texName, stored_string_query_texName, error)) { return NativeCalloutDispatch::handled; }
@@ -4302,8 +4302,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitAlwaysUpdateMatrix(NativeInt
 	NativeCallStorage storage;
 	SetUnitAlwaysUpdateMatrixQuery query{};
 	SetUnitAlwaysUpdateMatrixResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "alwaysUpdateMatrix", query.alwaysUpdateMatrix, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "always-update-matrix", query.alwaysUpdateMatrix, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitAlwaysUpdateMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4316,8 +4316,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitDefIcon(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitDefIconQuery query{};
 	SetUnitDefIconResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_iconName = FindArgument(arguments, 1u, 1u, 2u, 2u, "iconName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_iconName = FindArgument(arguments, 1u, 1u, 2u, 2u, "icon-name", error);
 	if (value_iconName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_query_iconName, error)) { return NativeCalloutDispatch::handled; }
@@ -4334,7 +4334,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitDefImage(NativeInterface* na
 	NativeCallStorage storage;
 	SetUnitDefImageQuery query{};
 	SetUnitDefImageResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_image = FindArgument(arguments, 1u, 1u, 2u, 2u, "image", error);
 	if (value_image == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_image = storage.Make<std::string>();
@@ -4352,8 +4352,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitEngineDrawMask(NativeInterfa
 	NativeCallStorage storage;
 	SetUnitEngineDrawMaskQuery query{};
 	SetUnitEngineDrawMaskResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "drawMask", query.drawMask, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "draw-mask", query.drawMask, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitEngineDrawMask(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4366,8 +4366,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitIcon(NativeInterface* native
 	NativeCallStorage storage;
 	SetUnitIconQuery query{};
 	SetUnitIconResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_iconName = FindArgument(arguments, 1u, 1u, 2u, 2u, "iconName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_iconName = FindArgument(arguments, 1u, 1u, 2u, 2u, "icon-name", error);
 	if (value_iconName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_query_iconName, error)) { return NativeCalloutDispatch::handled; }
@@ -4384,8 +4384,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitIconDraw(NativeInterface* na
 	NativeCallStorage storage;
 	SetUnitIconDrawQuery query{};
 	SetUnitIconDrawResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "drawIcon", query.drawIcon, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "draw-icon", query.drawIcon, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitIconDraw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4398,8 +4398,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitLeaveTracks(NativeInterface*
 	NativeCallStorage storage;
 	SetUnitLeaveTracksQuery query{};
 	SetUnitLeaveTracksResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "leaveTracks", query.leaveTracks, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "leave-tracks", query.leaveTracks, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitLeaveTracks(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4412,8 +4412,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitNoDraw(NativeInterface* nati
 	NativeCallStorage storage;
 	SetUnitNoDrawQuery query{};
 	SetUnitNoDrawResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "noDraw", query.noDraw, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "no-draw", query.noDraw, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitNoDraw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4426,8 +4426,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitNoGroup(NativeInterface* nat
 	NativeCallStorage storage;
 	SetUnitNoGroupQuery query{};
 	SetUnitNoGroupResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "noGroup", query.noGroup, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "no-group", query.noGroup, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitNoGroup(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4440,8 +4440,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitNoMinimap(NativeInterface* n
 	NativeCallStorage storage;
 	SetUnitNoMinimapQuery query{};
 	SetUnitNoMinimapResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "noMinimap", query.noMinimap, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "no-minimap", query.noMinimap, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitNoMinimap(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4454,8 +4454,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitNoSelect(NativeInterface* na
 	NativeCallStorage storage;
 	SetUnitNoSelectQuery query{};
 	SetUnitNoSelectResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "noSelect", query.noSelect, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "no-select", query.noSelect, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitNoSelect(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4468,8 +4468,8 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetUnitPaletteIndex(NativeInterface
 	NativeCallStorage storage;
 	SetUnitPaletteIndexQuery query{};
 	SetUnitPaletteIndexResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "customIndex", query.customIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "custom-index", query.customIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetUnitPaletteIndex(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4482,7 +4482,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetVideoCapturingMode(NativeInterfa
 	NativeCallStorage storage;
 	SetVideoCapturingModeQuery query{};
 	SetVideoCapturingModeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "allowCaptureMode", query.allowCaptureMode, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "allow-capture-mode", query.allowCaptureMode, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetVideoCapturingMode(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4495,7 +4495,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetVideoCapturingTimeOffset(NativeI
 	NativeCallStorage storage;
 	SetVideoCapturingTimeOffsetQuery query{};
 	SetVideoCapturingTimeOffsetResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "timeOffset", query.timeOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "time-offset", query.timeOffset, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetVideoCapturingTimeOffset(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4513,7 +4513,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetWMCaption(NativeInterface* nativ
 	auto& stored_string_query_title = storage.Make<std::string>();
 	if (!ReadString(*value_title, stored_string_query_title, error)) { return NativeCalloutDispatch::handled; }
 	query.title = stored_string_query_title.c_str();
-	const WasmValue* value_titleShort = FindArgument(arguments, 1u, 1u, 2u, 2u, "titleShort", error);
+	const WasmValue* value_titleShort = FindArgument(arguments, 1u, 1u, 2u, 2u, "title-short", error);
 	if (value_titleShort == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_titleShort = storage.Make<std::string>();
 	if (!ReadString(*value_titleShort, stored_string_query_titleShort, error)) { return NativeCalloutDispatch::handled; }
@@ -4530,12 +4530,12 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetWMIcon(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	SetWMIconQuery query{};
 	SetWMIconResult nativeResult{};
-	const WasmValue* value_iconFileName = FindArgument(arguments, 0u, 0u, 2u, 2u, "iconFileName", error);
+	const WasmValue* value_iconFileName = FindArgument(arguments, 0u, 0u, 2u, 2u, "icon-file-name", error);
 	if (value_iconFileName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_iconFileName = storage.Make<std::string>();
 	if (!ReadString(*value_iconFileName, stored_string_query_iconFileName, error)) { return NativeCalloutDispatch::handled; }
 	query.iconFileName = stored_string_query_iconFileName.c_str();
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "forceResolution", query.forceResolution, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "force-resolution", query.forceResolution, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetWMIcon(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4561,12 +4561,12 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetWaterTexture(NativeInterface* na
 	NativeCallStorage storage;
 	SetWaterTextureQuery query{};
 	SetWaterTextureResult nativeResult{};
-	const WasmValue* value_texType = FindArgument(arguments, 0u, 0u, 2u, 2u, "texType", error);
+	const WasmValue* value_texType = FindArgument(arguments, 0u, 0u, 2u, 2u, "tex-type", error);
 	if (value_texType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_texType = storage.Make<std::string>();
 	if (!ReadString(*value_texType, stored_string_query_texType, error)) { return NativeCalloutDispatch::handled; }
 	query.texType = stored_string_query_texType.c_str();
-	const WasmValue* value_texName = FindArgument(arguments, 1u, 1u, 2u, 2u, "texName", error);
+	const WasmValue* value_texName = FindArgument(arguments, 1u, 1u, 2u, 2u, "tex-name", error);
 	if (value_texName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_texName = storage.Make<std::string>();
 	if (!ReadString(*value_texName, stored_string_query_texName, error)) { return NativeCalloutDispatch::handled; }
@@ -4583,11 +4583,11 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetWindowGeometry(NativeInterface* 
 	NativeCallStorage storage;
 	SetWindowGeometryQuery query{};
 	SetWindowGeometryResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "displayIndex", query.displayIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "windowPosX", query.windowPosX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "windowPosY", query.windowPosY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "windowSizeX", query.windowSizeX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "windowSizeY", query.windowSizeY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "display-index", query.displayIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "window-pos-x", query.windowPosX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "window-pos-y", query.windowPosY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "window-size-x", query.windowSizeX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "window-size-y", query.windowSizeY, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 5u, 5u, 6u, 6u, "options", Read_SetWindowGeometryOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetWindowGeometry(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4601,7 +4601,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetWindowMaximized(NativeInterface*
 	NativeCallStorage storage;
 	SetWindowMaximizedQuery query{};
 	SetWindowMaximizedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetWindowMaximized(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.maximized);
@@ -4614,7 +4614,7 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_SetWindowMinimized(NativeInterface*
 	NativeCallStorage storage;
 	SetWindowMinimizedQuery query{};
 	SetWindowMinimizedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unsyncedCtrl->SetWindowMinimized(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.minimized);

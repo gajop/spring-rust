@@ -466,9 +466,20 @@ def write_script(
     wasm_context: str,
     wasm_module: Path | None,
     wasm_role: str = "combined",
+    benchmark_backend: str = "",
+    benchmark_repeats: int = 5,
+    benchmark_scale: float = 1.0,
+    benchmark_case: str = "",
+    benchmark_iterations: int = 0,
+    benchmark_callin_variant: str = "empty",
 ) -> None:
     init_blank = "1" if use_blank_map else "0"
     host_port = random.SystemRandom().randint(20_000, 50_000)
+    # Benchmark workloads are measured inside the callin and must not be
+    # dominated by the normal real-time draw loop. A high simulation speed
+    # keeps the 5,000 logical frames reproducible while allowing Spring to
+    # advance and run its normal per-frame GC between samples.
+    speed_limit = "100" if run_mode == "benchmark" else "1"
     # The parity fixture is the test harness.  Its Lua handles perform the
     # assertions and issue the in-engine quit command; the launcher only
     # waits for that natural exit.  Keep LuaUI enabled because it is the
@@ -510,9 +521,9 @@ def write_script(
     MyPlayerNum=0;
     RecordDemo=0;
     GameStartDelay=0;
-    MaxSpeed=1;
-    MinSpeed=1;
-    NumPlayers=2;
+    MaxSpeed={speed_limit};
+    MinSpeed={speed_limit};
+    NumPlayers=1;
     NumTeams=2;
     NumAllyTeams=2;
 
@@ -531,6 +542,14 @@ def write_script(
         native_api_parity_process_stage=initial;
         native_api_parity_wasm_context={wasm_context};
         native_api_parity_wasm_role={wasm_role};
+        native_api_parity_benchmark_backend={benchmark_backend};
+        native_api_parity_benchmark_repeats={benchmark_repeats};
+        native_api_parity_benchmark_scale={benchmark_scale};
+        native_api_parity_benchmark_case={benchmark_case};
+        native_api_parity_benchmark_iterations={benchmark_iterations};
+        native_api_parity_benchmark_callin_variant={benchmark_callin_variant};
+        wasm_instruction_fuel=0;
+        wasm_host_work_limit=0;
     }}
 {map_options}
 
@@ -539,13 +558,6 @@ def write_script(
         Name=NativeApiParity;
         Spectator=0;
         Team=0;
-    }}
-
-    [PLAYER1]
-    {{
-        Name=NativeApiParityEnemy;
-        Spectator=0;
-        Team=1;
     }}
 
     [TEAM0]
@@ -558,7 +570,7 @@ def write_script(
 
     [TEAM1]
     {{
-        TeamLeader=1;
+        TeamLeader=0;
         AllyTeam=1;
         RGBColor=1 0 0;
         Side=Arm;

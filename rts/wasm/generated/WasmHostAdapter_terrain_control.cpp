@@ -20,7 +20,7 @@ NativeCalloutDispatch Dispatch_terrain_control_AddGrass(NativeInterface* nativeI
 	AddGrassResult nativeResult{};
 	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "x", query.x, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "z", query.z, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "grassValue", query.grassValue, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "grass-value", query.grassValue, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->terrain->AddGrass(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -180,7 +180,7 @@ NativeCalloutDispatch Dispatch_terrain_control_RebuildSmoothMesh(NativeInterface
 	NativeCallStorage storage;
 	RebuildSmoothMeshQuery query{};
 	RebuildSmoothMeshResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->terrain->RebuildSmoothMesh(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -211,7 +211,7 @@ NativeCalloutDispatch Dispatch_terrain_control_RevertHeightMap(NativeInterface* 
 	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "z1", query.z1, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "x2", query.x2, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "z2", query.z2, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "origFactor", query.origFactor, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "orig-factor", query.origFactor, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->terrain->RevertHeightMap(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -228,7 +228,7 @@ NativeCalloutDispatch Dispatch_terrain_control_RevertOriginalHeightMap(NativeInt
 	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "z1", query.z1, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "x2", query.x2, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "z2", query.z2, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "origFactor", query.origFactor, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "orig-factor", query.origFactor, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->terrain->RevertOriginalHeightMap(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -245,7 +245,7 @@ NativeCalloutDispatch Dispatch_terrain_control_RevertSmoothMesh(NativeInterface*
 	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "z1", query.z1, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "x2", query.x2, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "z2", query.z2, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "origFactor", query.origFactor, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "orig-factor", query.origFactor, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->terrain->RevertSmoothMesh(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -276,7 +276,7 @@ NativeCalloutDispatch Dispatch_terrain_control_SetMapSquareTerrainType(NativeInt
 	SetMapSquareTerrainTypeResult nativeResult{};
 	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "x", query.x, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "z", query.z, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "terrainType", query.terrainType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "terrain-type", query.terrainType, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->terrain->SetMapSquareTerrainType(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -321,13 +321,13 @@ NativeCalloutDispatch Dispatch_terrain_control_SetTerrainTypeData(NativeInterfac
 	NativeCallStorage storage;
 	SetTerrainTypeDataQuery query{};
 	SetTerrainTypeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 8u, 8u, "typeIndex", query.typeIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 8u, 8u, "tankSpeed", query.tankSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 8u, 8u, "kbotSpeed", query.kbotSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 8u, 8u, "hoverSpeed", query.hoverSpeed, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 8u, 8u, "shipSpeed", query.shipSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 8u, 8u, "type-index", query.typeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 8u, 8u, "tank-speed", query.tankSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 8u, 8u, "kbot-speed", query.kbotSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 8u, 8u, "hover-speed", query.hoverSpeed, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 8u, 8u, "ship-speed", query.shipSpeed, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 5u, 5u, 8u, 8u, "hardness", query.hardness, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 8u, 8u, "receiveTracks", query.receiveTracks, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 8u, 8u, "receive-tracks", query.receiveTracks, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 7u, 7u, 8u, 8u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -358,8 +358,8 @@ NativeCalloutDispatch Dispatch_terrain_control_SetWind(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	SetWindQuery query{};
 	SetWindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "minWind", query.minWind, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "maxWind", query.maxWind, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "min-wind", query.minWind, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "max-wind", query.maxWind, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->syncedCtrl->terrain->SetWind(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

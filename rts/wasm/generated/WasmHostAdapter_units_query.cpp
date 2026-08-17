@@ -58,7 +58,7 @@ bool Read_GetAllUnitsQuery(const WasmValue& input, GetAllUnitsQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -67,7 +67,7 @@ bool Read_GetAllUnitsQuery(const WasmValue& input, GetAllUnitsQuery& output, Nat
 WasmValue Write_GetAllUnitsQuery(const GetAllUnitsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -102,13 +102,13 @@ bool Read_GetClosestEnemyUnitOptions(const WasmValue& input, GetClosestEnemyUnit
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_useLOS = FindRecordField(*record, "useLOS", error);
+	const auto* value_useLOS = FindRecordField(*record, "use-los", error);
 	if (value_useLOS == nullptr) return false;
 	if (!ReadScalar(*value_useLOS, output.useLOS, error)) { return false; }
-	const auto* value_sphereDistTest = FindRecordField(*record, "sphereDistTest", error);
+	const auto* value_sphereDistTest = FindRecordField(*record, "sphere-dist-test", error);
 	if (value_sphereDistTest == nullptr) return false;
 	if (!ReadScalar(*value_sphereDistTest, output.sphereDistTest, error)) { return false; }
-	const auto* value_checkSightDist = FindRecordField(*record, "checkSightDist", error);
+	const auto* value_checkSightDist = FindRecordField(*record, "check-sight-dist", error);
 	if (value_checkSightDist == nullptr) return false;
 	if (!ReadScalar(*value_checkSightDist, output.checkSightDist, error)) { return false; }
 	return true;
@@ -117,9 +117,9 @@ bool Read_GetClosestEnemyUnitOptions(const WasmValue& input, GetClosestEnemyUnit
 WasmValue Write_GetClosestEnemyUnitOptions(const GetClosestEnemyUnitOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("useLOS", WriteScalar(value.useLOS));
-	fields.emplace("sphereDistTest", WriteScalar(value.sphereDistTest));
-	fields.emplace("checkSightDist", WriteScalar(value.checkSightDist));
+	fields.emplace("use-los", WriteScalar(value.useLOS));
+	fields.emplace("sphere-dist-test", WriteScalar(value.sphereDistTest));
+	fields.emplace("check-sight-dist", WriteScalar(value.checkSightDist));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -133,7 +133,7 @@ bool Read_GetClosestEnemyUnitQuery(const WasmValue& input, GetClosestEnemyUnitQu
 	const auto* value_range = FindRecordField(*record, "range", error);
 	if (value_range == nullptr) return false;
 	if (!ReadScalar(*value_range, output.range, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -147,7 +147,7 @@ WasmValue Write_GetClosestEnemyUnitQuery(const GetClosestEnemyUnitQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("range", WriteScalar(value.range));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	fields.emplace("options", Write_GetClosestEnemyUnitOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -156,7 +156,7 @@ bool Read_GetClosestEnemyUnitResult(const WasmValue& input, GetClosestEnemyUnitR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -165,7 +165,7 @@ bool Read_GetClosestEnemyUnitResult(const WasmValue& input, GetClosestEnemyUnitR
 WasmValue Write_GetClosestEnemyUnitResult(const GetClosestEnemyUnitResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -173,7 +173,7 @@ bool Read_GetRenderUnitsDrawFlagChangedQuery(const WasmValue& input, GetRenderUn
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sendMask = FindRecordField(*record, "sendMask", error);
+	const auto* value_sendMask = FindRecordField(*record, "send-mask", error);
 	if (value_sendMask == nullptr) return false;
 	if (!ReadScalar(*value_sendMask, output.sendMask, error)) { return false; }
 	return true;
@@ -182,7 +182,7 @@ bool Read_GetRenderUnitsDrawFlagChangedQuery(const WasmValue& input, GetRenderUn
 WasmValue Write_GetRenderUnitsDrawFlagChangedQuery(const GetRenderUnitsDrawFlagChangedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sendMask", WriteScalar(value.sendMask));
+	fields.emplace("send-mask", WriteScalar(value.sendMask));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -217,10 +217,10 @@ bool Read_GetRenderUnitsQuery(const WasmValue& input, GetRenderUnitsQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_drawMask = FindRecordField(*record, "drawMask", error);
+	const auto* value_drawMask = FindRecordField(*record, "draw-mask", error);
 	if (value_drawMask == nullptr) return false;
 	if (!ReadScalar(*value_drawMask, output.drawMask, error)) { return false; }
-	const auto* value_sendMask = FindRecordField(*record, "sendMask", error);
+	const auto* value_sendMask = FindRecordField(*record, "send-mask", error);
 	if (value_sendMask == nullptr) return false;
 	if (!ReadScalar(*value_sendMask, output.sendMask, error)) { return false; }
 	return true;
@@ -229,8 +229,8 @@ bool Read_GetRenderUnitsQuery(const WasmValue& input, GetRenderUnitsQuery& outpu
 WasmValue Write_GetRenderUnitsQuery(const GetRenderUnitsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("drawMask", WriteScalar(value.drawMask));
-	fields.emplace("sendMask", WriteScalar(value.sendMask));
+	fields.emplace("draw-mask", WriteScalar(value.drawMask));
+	fields.emplace("send-mask", WriteScalar(value.sendMask));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -265,7 +265,7 @@ bool Read_GetTeamUnitCountQuery(const WasmValue& input, GetTeamUnitCountQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -274,7 +274,7 @@ bool Read_GetTeamUnitCountQuery(const WasmValue& input, GetTeamUnitCountQuery& o
 WasmValue Write_GetTeamUnitCountQuery(const GetTeamUnitCountQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -299,10 +299,10 @@ bool Read_GetTeamUnitDefCountQuery(const WasmValue& input, GetTeamUnitDefCountQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	return true;
@@ -311,8 +311,8 @@ bool Read_GetTeamUnitDefCountQuery(const WasmValue& input, GetTeamUnitDefCountQu
 WasmValue Write_GetTeamUnitDefCountQuery(const GetTeamUnitDefCountQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -337,10 +337,10 @@ bool Read_GetTeamUnitsByDefsQuery(const WasmValue& input, GetTeamUnitsByDefsQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_unitDefIDs = FindRecordField(*record, "unitDefIDs", error);
+	const auto* value_unitDefIDs = FindRecordField(*record, "unit-def-i-ds", error);
 	if (value_unitDefIDs == nullptr) return false;
 	const auto* list_unitDefIDs = std::get_if<WasmValueList>(&(*value_unitDefIDs).storage);
 	if (list_unitDefIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -359,8 +359,8 @@ bool Read_GetTeamUnitsByDefsQuery(const WasmValue& input, GetTeamUnitsByDefsQuer
 WasmValue Write_GetTeamUnitsByDefsQuery(const GetTeamUnitsByDefsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("unitDefIDs", WriteNativeList(value.unitDefIDs, value.defCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("unit-def-i-ds", WriteNativeList(value.unitDefIDs, value.defCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -395,7 +395,7 @@ bool Read_GetTeamUnitsCountsQuery(const WasmValue& input, GetTeamUnitsCountsQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -404,7 +404,7 @@ bool Read_GetTeamUnitsCountsQuery(const WasmValue& input, GetTeamUnitsCountsQuer
 WasmValue Write_GetTeamUnitsCountsQuery(const GetTeamUnitsCountsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -439,7 +439,7 @@ bool Read_GetTeamUnitsQuery(const WasmValue& input, GetTeamUnitsQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -448,7 +448,7 @@ bool Read_GetTeamUnitsQuery(const WasmValue& input, GetTeamUnitsQuery& output, N
 WasmValue Write_GetTeamUnitsQuery(const GetTeamUnitsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -483,7 +483,7 @@ bool Read_GetTeamUnitsSortedQuery(const WasmValue& input, GetTeamUnitsSortedQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -492,7 +492,7 @@ bool Read_GetTeamUnitsSortedQuery(const WasmValue& input, GetTeamUnitsSortedQuer
 WasmValue Write_GetTeamUnitsSortedQuery(const GetTeamUnitsSortedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -527,7 +527,7 @@ bool Read_GetUnitArrayCentroidQuery(const WasmValue& input, GetUnitArrayCentroid
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -546,7 +546,7 @@ bool Read_GetUnitArrayCentroidQuery(const WasmValue& input, GetUnitArrayCentroid
 WasmValue Write_GetUnitArrayCentroidQuery(const GetUnitArrayCentroidQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -571,7 +571,7 @@ bool Read_GetUnitMapCentroidQuery(const WasmValue& input, GetUnitMapCentroidQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitIDs = FindRecordField(*record, "unitIDs", error);
+	const auto* value_unitIDs = FindRecordField(*record, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return false;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -590,7 +590,7 @@ bool Read_GetUnitMapCentroidQuery(const WasmValue& input, GetUnitMapCentroidQuer
 WasmValue Write_GetUnitMapCentroidQuery(const GetUnitMapCentroidQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitIDs", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("unit-i-ds", WriteNativeList(value.unitIDs, value.count, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -615,7 +615,7 @@ bool Read_GetUnitNearestAllyQuery(const WasmValue& input, GetUnitNearestAllyQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_range = FindRecordField(*record, "range", error);
@@ -627,7 +627,7 @@ bool Read_GetUnitNearestAllyQuery(const WasmValue& input, GetUnitNearestAllyQuer
 WasmValue Write_GetUnitNearestAllyQuery(const GetUnitNearestAllyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("range", WriteScalar(value.range));
 	return WasmValue::Record(std::move(fields));
 }
@@ -636,7 +636,7 @@ bool Read_GetUnitNearestAllyResult(const WasmValue& input, GetUnitNearestAllyRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -645,7 +645,7 @@ bool Read_GetUnitNearestAllyResult(const WasmValue& input, GetUnitNearestAllyRes
 WasmValue Write_GetUnitNearestAllyResult(const GetUnitNearestAllyResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -653,13 +653,13 @@ bool Read_GetUnitNearestEnemyOptions(const WasmValue& input, GetUnitNearestEnemy
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_useLOS = FindRecordField(*record, "useLOS", error);
+	const auto* value_useLOS = FindRecordField(*record, "use-los", error);
 	if (value_useLOS == nullptr) return false;
 	if (!ReadScalar(*value_useLOS, output.useLOS, error)) { return false; }
-	const auto* value_sphereDistTest = FindRecordField(*record, "sphereDistTest", error);
+	const auto* value_sphereDistTest = FindRecordField(*record, "sphere-dist-test", error);
 	if (value_sphereDistTest == nullptr) return false;
 	if (!ReadScalar(*value_sphereDistTest, output.sphereDistTest, error)) { return false; }
-	const auto* value_checkSightDist = FindRecordField(*record, "checkSightDist", error);
+	const auto* value_checkSightDist = FindRecordField(*record, "check-sight-dist", error);
 	if (value_checkSightDist == nullptr) return false;
 	if (!ReadScalar(*value_checkSightDist, output.checkSightDist, error)) { return false; }
 	return true;
@@ -668,9 +668,9 @@ bool Read_GetUnitNearestEnemyOptions(const WasmValue& input, GetUnitNearestEnemy
 WasmValue Write_GetUnitNearestEnemyOptions(const GetUnitNearestEnemyOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("useLOS", WriteScalar(value.useLOS));
-	fields.emplace("sphereDistTest", WriteScalar(value.sphereDistTest));
-	fields.emplace("checkSightDist", WriteScalar(value.checkSightDist));
+	fields.emplace("use-los", WriteScalar(value.useLOS));
+	fields.emplace("sphere-dist-test", WriteScalar(value.sphereDistTest));
+	fields.emplace("check-sight-dist", WriteScalar(value.checkSightDist));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -678,7 +678,7 @@ bool Read_GetUnitNearestEnemyQuery(const WasmValue& input, GetUnitNearestEnemyQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_range = FindRecordField(*record, "range", error);
@@ -693,7 +693,7 @@ bool Read_GetUnitNearestEnemyQuery(const WasmValue& input, GetUnitNearestEnemyQu
 WasmValue Write_GetUnitNearestEnemyQuery(const GetUnitNearestEnemyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("range", WriteScalar(value.range));
 	fields.emplace("options", Write_GetUnitNearestEnemyOptions(value.options));
 	return WasmValue::Record(std::move(fields));
@@ -703,7 +703,7 @@ bool Read_GetUnitNearestEnemyResult(const WasmValue& input, GetUnitNearestEnemyR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -712,7 +712,7 @@ bool Read_GetUnitNearestEnemyResult(const WasmValue& input, GetUnitNearestEnemyR
 WasmValue Write_GetUnitNearestEnemyResult(const GetUnitNearestEnemyResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -723,7 +723,7 @@ bool Read_GetUnitSeparationOptions(const WasmValue& input, GetUnitSeparationOpti
 	const auto* value_positional = FindRecordField(*record, "positional", error);
 	if (value_positional == nullptr) return false;
 	if (!ReadScalar(*value_positional, output.positional, error)) { return false; }
-	const auto* value_checkMap = FindRecordField(*record, "checkMap", error);
+	const auto* value_checkMap = FindRecordField(*record, "check-map", error);
 	if (value_checkMap == nullptr) return false;
 	if (!ReadScalar(*value_checkMap, output.checkMap, error)) { return false; }
 	return true;
@@ -733,7 +733,7 @@ WasmValue Write_GetUnitSeparationOptions(const GetUnitSeparationOptions& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("positional", WriteScalar(value.positional));
-	fields.emplace("checkMap", WriteScalar(value.checkMap));
+	fields.emplace("check-map", WriteScalar(value.checkMap));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -741,10 +741,10 @@ bool Read_GetUnitSeparationQuery(const WasmValue& input, GetUnitSeparationQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID1 = FindRecordField(*record, "unitID1", error);
+	const auto* value_unitID1 = FindRecordField(*record, "unit-id1", error);
 	if (value_unitID1 == nullptr) return false;
 	if (!ReadScalar(*value_unitID1, output.unitID1, error)) { return false; }
-	const auto* value_unitID2 = FindRecordField(*record, "unitID2", error);
+	const auto* value_unitID2 = FindRecordField(*record, "unit-id2", error);
 	if (value_unitID2 == nullptr) return false;
 	if (!ReadScalar(*value_unitID2, output.unitID2, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -756,8 +756,8 @@ bool Read_GetUnitSeparationQuery(const WasmValue& input, GetUnitSeparationQuery&
 WasmValue Write_GetUnitSeparationQuery(const GetUnitSeparationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID1", WriteScalar(value.unitID1));
-	fields.emplace("unitID2", WriteScalar(value.unitID2));
+	fields.emplace("unit-id1", WriteScalar(value.unitID1));
+	fields.emplace("unit-id2", WriteScalar(value.unitID2));
 	fields.emplace("options", Write_GetUnitSeparationOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1082,7 +1082,7 @@ bool Read_PlanesQuery(const WasmValue& input, PlanesQuery& output, NativeCallSto
 	for (std::size_t index = 0; index < 6u; ++index) {
 		if (!Read_Float4((*array_values_planes)[index], output.planes[index], storage, error)) { return false; }
 	}
-	const auto* value_planeCount = FindRecordField(*record, "planeCount", error);
+	const auto* value_planeCount = FindRecordField(*record, "plane-count", error);
 	if (value_planeCount == nullptr) return false;
 	if (!ReadScalar(*value_planeCount, output.planeCount, error)) { return false; }
 	return true;
@@ -1092,7 +1092,7 @@ WasmValue Write_PlanesQuery(const PlanesQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("planes", WriteNativeArray(value.planes, [](const auto& value) { return Write_Float4(value); }));
-	fields.emplace("planeCount", WriteScalar(value.planeCount));
+	fields.emplace("plane-count", WriteScalar(value.planeCount));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1100,16 +1100,16 @@ bool Read_RectangleQuery(const WasmValue& input, RectangleQuery& output, NativeC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_minX = FindRecordField(*record, "minX", error);
+	const auto* value_minX = FindRecordField(*record, "min-x", error);
 	if (value_minX == nullptr) return false;
 	if (!ReadScalar(*value_minX, output.minX, error)) { return false; }
-	const auto* value_minZ = FindRecordField(*record, "minZ", error);
+	const auto* value_minZ = FindRecordField(*record, "min-z", error);
 	if (value_minZ == nullptr) return false;
 	if (!ReadScalar(*value_minZ, output.minZ, error)) { return false; }
-	const auto* value_maxX = FindRecordField(*record, "maxX", error);
+	const auto* value_maxX = FindRecordField(*record, "max-x", error);
 	if (value_maxX == nullptr) return false;
 	if (!ReadScalar(*value_maxX, output.maxX, error)) { return false; }
-	const auto* value_maxZ = FindRecordField(*record, "maxZ", error);
+	const auto* value_maxZ = FindRecordField(*record, "max-z", error);
 	if (value_maxZ == nullptr) return false;
 	if (!ReadScalar(*value_maxZ, output.maxZ, error)) { return false; }
 	return true;
@@ -1118,10 +1118,10 @@ bool Read_RectangleQuery(const WasmValue& input, RectangleQuery& output, NativeC
 WasmValue Write_RectangleQuery(const RectangleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("minX", WriteScalar(value.minX));
-	fields.emplace("minZ", WriteScalar(value.minZ));
-	fields.emplace("maxX", WriteScalar(value.maxX));
-	fields.emplace("maxZ", WriteScalar(value.maxZ));
+	fields.emplace("min-x", WriteScalar(value.minX));
+	fields.emplace("min-z", WriteScalar(value.minZ));
+	fields.emplace("max-x", WriteScalar(value.maxX));
+	fields.emplace("max-z", WriteScalar(value.maxZ));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1150,7 +1150,7 @@ bool Read_TeamUnitsByDef(const WasmValue& input, TeamUnitsByDef& output, NativeC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_units = FindRecordField(*record, "units", error);
@@ -1172,7 +1172,7 @@ bool Read_TeamUnitsByDef(const WasmValue& input, TeamUnitsByDef& output, NativeC
 WasmValue Write_TeamUnitsByDef(const TeamUnitsByDef& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("units", WriteNativeList(value.units, value.count, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1181,7 +1181,7 @@ bool Read_UnitDefCount(const WasmValue& input, UnitDefCount& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitDefID = FindRecordField(*record, "unitDefID", error);
+	const auto* value_unitDefID = FindRecordField(*record, "unit-def-id", error);
 	if (value_unitDefID == nullptr) return false;
 	if (!ReadScalar(*value_unitDefID, output.unitDefID, error)) { return false; }
 	const auto* value_count = FindRecordField(*record, "count", error);
@@ -1193,7 +1193,7 @@ bool Read_UnitDefCount(const WasmValue& input, UnitDefCount& output, NativeCallS
 WasmValue Write_UnitDefCount(const UnitDefCount& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitDefID", WriteScalar(value.unitDefID));
+	fields.emplace("unit-def-id", WriteScalar(value.unitDefID));
 	fields.emplace("count", WriteScalar(value.count));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1204,11 +1204,11 @@ bool Read_UnitFilterParams(const WasmValue& input, UnitFilterParams& output, Nat
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
 	const auto* value_filter = FindRecordField(*record, "filter", error);
 	if (value_filter == nullptr) return false;
-	if (!ReadScalar(*value_filter, output.filter, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	if (!ReadEnum_UnitFilter(*value_filter, output.filter, error)) { return false; }
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -1217,9 +1217,9 @@ bool Read_UnitFilterParams(const WasmValue& input, UnitFilterParams& output, Nat
 WasmValue Write_UnitFilterParams(const UnitFilterParams& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("filter", WriteScalar(value.filter));
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("filter", WriteEnum_UnitFilter(value.filter));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1227,7 +1227,7 @@ bool Read_ValidUnitIDQuery(const WasmValue& input, ValidUnitIDQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -1236,7 +1236,7 @@ bool Read_ValidUnitIDQuery(const WasmValue& input, ValidUnitIDQuery& output, Nat
 WasmValue Write_ValidUnitIDQuery(const ValidUnitIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1267,7 +1267,7 @@ NativeCalloutDispatch Dispatch_units_query_GetAllUnits(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetAllUnitsQuery query{};
 	GetAllUnitsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetAllUnits(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.units, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1282,7 +1282,7 @@ NativeCalloutDispatch Dispatch_units_query_GetClosestEnemyUnit(NativeInterface* 
 	GetClosestEnemyUnitResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 4u, 4u, "pos", Read_Float3, query.pos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "range", query.range, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 3u, 3u, 4u, 4u, "options", Read_GetClosestEnemyUnitOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetClosestEnemyUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1296,8 +1296,8 @@ NativeCalloutDispatch Dispatch_units_query_GetRenderUnits(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetRenderUnitsQuery query{};
 	GetRenderUnitsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "drawMask", query.drawMask, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "sendMask", query.sendMask, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "draw-mask", query.drawMask, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "send-mask", query.sendMask, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetRenderUnits(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.units, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1310,7 +1310,7 @@ NativeCalloutDispatch Dispatch_units_query_GetRenderUnitsDrawFlagChanged(NativeI
 	NativeCallStorage storage;
 	GetRenderUnitsDrawFlagChangedQuery query{};
 	GetRenderUnitsDrawFlagChangedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "sendMask", query.sendMask, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "send-mask", query.sendMask, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetRenderUnitsDrawFlagChanged(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.units, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1323,7 +1323,7 @@ NativeCalloutDispatch Dispatch_units_query_GetTeamUnitCount(NativeInterface* nat
 	NativeCallStorage storage;
 	GetTeamUnitCountQuery query{};
 	GetTeamUnitCountResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetTeamUnitCount(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.count);
@@ -1336,8 +1336,8 @@ NativeCalloutDispatch Dispatch_units_query_GetTeamUnitDefCount(NativeInterface* 
 	NativeCallStorage storage;
 	GetTeamUnitDefCountQuery query{};
 	GetTeamUnitDefCountResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "unitDefID", query.unitDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "unit-def-id", query.unitDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetTeamUnitDefCount(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.count);
@@ -1350,7 +1350,7 @@ NativeCalloutDispatch Dispatch_units_query_GetTeamUnits(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetTeamUnitsQuery query{};
 	GetTeamUnitsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetTeamUnits(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.units, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1363,8 +1363,8 @@ NativeCalloutDispatch Dispatch_units_query_GetTeamUnitsByDefs(NativeInterface* n
 	NativeCallStorage storage;
 	GetTeamUnitsByDefsQuery query{};
 	GetTeamUnitsByDefsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_unitDefIDs = FindArgument(arguments, 1u, 1u, 2u, 2u, "unitDefIDs", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_unitDefIDs = FindArgument(arguments, 1u, 1u, 2u, 2u, "unit-def-i-ds", error);
 	if (value_unitDefIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitDefIDs = std::get_if<WasmValueList>(&(*value_unitDefIDs).storage);
 	if (list_unitDefIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -1389,7 +1389,7 @@ NativeCalloutDispatch Dispatch_units_query_GetTeamUnitsCounts(NativeInterface* n
 	NativeCallStorage storage;
 	GetTeamUnitsCountsQuery query{};
 	GetTeamUnitsCountsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetTeamUnitsCounts(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.counts, nativeResult.count, [](const auto& value) { return Write_UnitDefCount(value); });
@@ -1402,7 +1402,7 @@ NativeCalloutDispatch Dispatch_units_query_GetTeamUnitsSorted(NativeInterface* n
 	NativeCallStorage storage;
 	GetTeamUnitsSortedQuery query{};
 	GetTeamUnitsSortedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetTeamUnitsSorted(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.groups, nativeResult.count, [](const auto& value) { return Write_TeamUnitsByDef(value); });
@@ -1415,7 +1415,7 @@ NativeCalloutDispatch Dispatch_units_query_GetUnitArrayCentroid(NativeInterface*
 	NativeCallStorage storage;
 	GetUnitArrayCentroidQuery query{};
 	GetUnitArrayCentroidResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 1u, 1u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 1u, 1u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -1440,7 +1440,7 @@ NativeCalloutDispatch Dispatch_units_query_GetUnitMapCentroid(NativeInterface* n
 	NativeCallStorage storage;
 	GetUnitMapCentroidQuery query{};
 	GetUnitMapCentroidResult nativeResult{};
-	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 1u, 1u, "unitIDs", error);
+	const WasmValue* value_unitIDs = FindArgument(arguments, 0u, 0u, 1u, 1u, "unit-i-ds", error);
 	if (value_unitIDs == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_unitIDs = std::get_if<WasmValueList>(&(*value_unitIDs).storage);
 	if (list_unitIDs == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -1465,7 +1465,7 @@ NativeCalloutDispatch Dispatch_units_query_GetUnitNearestAlly(NativeInterface* n
 	NativeCallStorage storage;
 	GetUnitNearestAllyQuery query{};
 	GetUnitNearestAllyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "range", query.range, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetUnitNearestAlly(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1479,7 +1479,7 @@ NativeCalloutDispatch Dispatch_units_query_GetUnitNearestEnemy(NativeInterface* 
 	NativeCallStorage storage;
 	GetUnitNearestEnemyQuery query{};
 	GetUnitNearestEnemyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "range", query.range, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "options", Read_GetUnitNearestEnemyOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetUnitNearestEnemy(&query, &nativeResult);
@@ -1494,8 +1494,8 @@ NativeCalloutDispatch Dispatch_units_query_GetUnitSeparation(NativeInterface* na
 	NativeCallStorage storage;
 	GetUnitSeparationQuery query{};
 	GetUnitSeparationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unitID1", query.unitID1, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "unitID2", query.unitID2, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "unit-id1", query.unitID1, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "unit-id2", query.unitID2, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "options", Read_GetUnitSeparationOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->GetUnitSeparation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1592,7 +1592,7 @@ NativeCalloutDispatch Dispatch_units_query_ValidUnitID(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	ValidUnitIDQuery query{};
 	ValidUnitIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->unitsQuery->ValidUnitID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.valid);

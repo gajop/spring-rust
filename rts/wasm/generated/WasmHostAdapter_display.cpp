@@ -12,7 +12,7 @@ bool Read_GetDrawFrameQuery(const WasmValue& input, GetDrawFrameQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_GetDrawFrameQuery(const WasmValue& input, GetDrawFrameQuery& output, N
 WasmValue Write_GetDrawFrameQuery(const GetDrawFrameQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -50,7 +50,7 @@ bool Read_GetDualViewGeometryQuery(const WasmValue& input, GetDualViewGeometryQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -59,7 +59,7 @@ bool Read_GetDualViewGeometryQuery(const WasmValue& input, GetDualViewGeometryQu
 WasmValue Write_GetDualViewGeometryQuery(const GetDualViewGeometryQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -84,7 +84,7 @@ bool Read_GetFPSQuery(const WasmValue& input, GetFPSQuery& output, NativeCallSto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -93,7 +93,7 @@ bool Read_GetFPSQuery(const WasmValue& input, GetFPSQuery& output, NativeCallSto
 WasmValue Write_GetFPSQuery(const GetFPSQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -118,7 +118,7 @@ bool Read_GetFrameTimeOffsetQuery(const WasmValue& input, GetFrameTimeOffsetQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -127,7 +127,7 @@ bool Read_GetFrameTimeOffsetQuery(const WasmValue& input, GetFrameTimeOffsetQuer
 WasmValue Write_GetFrameTimeOffsetQuery(const GetFrameTimeOffsetQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -152,7 +152,7 @@ bool Read_GetGameSpeedQuery(const WasmValue& input, GetGameSpeedQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -161,7 +161,7 @@ bool Read_GetGameSpeedQuery(const WasmValue& input, GetGameSpeedQuery& output, N
 WasmValue Write_GetGameSpeedQuery(const GetGameSpeedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -169,7 +169,7 @@ bool Read_GetGameSpeedResult(const WasmValue& input, GetGameSpeedResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_wantedSpeed = FindRecordField(*record, "wantedSpeed", error);
+	const auto* value_wantedSpeed = FindRecordField(*record, "wanted-speed", error);
 	if (value_wantedSpeed == nullptr) return false;
 	if (!ReadScalar(*value_wantedSpeed, output.wantedSpeed, error)) { return false; }
 	const auto* value_speed = FindRecordField(*record, "speed", error);
@@ -184,7 +184,7 @@ bool Read_GetGameSpeedResult(const WasmValue& input, GetGameSpeedResult& output,
 WasmValue Write_GetGameSpeedResult(const GetGameSpeedResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("wantedSpeed", WriteScalar(value.wantedSpeed));
+	fields.emplace("wanted-speed", WriteScalar(value.wantedSpeed));
 	fields.emplace("speed", WriteScalar(value.speed));
 	fields.emplace("paused", WriteScalar(value.paused));
 	return WasmValue::Record(std::move(fields));
@@ -194,7 +194,7 @@ bool Read_GetLastUpdateSecondsQuery(const WasmValue& input, GetLastUpdateSeconds
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -203,7 +203,7 @@ bool Read_GetLastUpdateSecondsQuery(const WasmValue& input, GetLastUpdateSeconds
 WasmValue Write_GetLastUpdateSecondsQuery(const GetLastUpdateSecondsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -228,7 +228,7 @@ bool Read_GetLosViewColorsQuery(const WasmValue& input, GetLosViewColorsQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -237,7 +237,7 @@ bool Read_GetLosViewColorsQuery(const WasmValue& input, GetLosViewColorsQuery& o
 WasmValue Write_GetLosViewColorsQuery(const GetLosViewColorsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -245,19 +245,19 @@ bool Read_GetLosViewColorsResult(const WasmValue& input, GetLosViewColorsResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_alwaysColor = FindRecordField(*record, "alwaysColor", error);
+	const auto* value_alwaysColor = FindRecordField(*record, "always-color", error);
 	if (value_alwaysColor == nullptr) return false;
 	if (!Read_Float3(*value_alwaysColor, output.alwaysColor, storage, error)) { return false; }
-	const auto* value_losColor = FindRecordField(*record, "losColor", error);
+	const auto* value_losColor = FindRecordField(*record, "los-color", error);
 	if (value_losColor == nullptr) return false;
 	if (!Read_Float3(*value_losColor, output.losColor, storage, error)) { return false; }
-	const auto* value_radarColor = FindRecordField(*record, "radarColor", error);
+	const auto* value_radarColor = FindRecordField(*record, "radar-color", error);
 	if (value_radarColor == nullptr) return false;
 	if (!Read_Float3(*value_radarColor, output.radarColor, storage, error)) { return false; }
-	const auto* value_jamColor = FindRecordField(*record, "jamColor", error);
+	const auto* value_jamColor = FindRecordField(*record, "jam-color", error);
 	if (value_jamColor == nullptr) return false;
 	if (!Read_Float3(*value_jamColor, output.jamColor, storage, error)) { return false; }
-	const auto* value_radarColor2 = FindRecordField(*record, "radarColor2", error);
+	const auto* value_radarColor2 = FindRecordField(*record, "radar-color2", error);
 	if (value_radarColor2 == nullptr) return false;
 	if (!Read_Float3(*value_radarColor2, output.radarColor2, storage, error)) { return false; }
 	return true;
@@ -266,11 +266,11 @@ bool Read_GetLosViewColorsResult(const WasmValue& input, GetLosViewColorsResult&
 WasmValue Write_GetLosViewColorsResult(const GetLosViewColorsResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("alwaysColor", Write_Float3(value.alwaysColor));
-	fields.emplace("losColor", Write_Float3(value.losColor));
-	fields.emplace("radarColor", Write_Float3(value.radarColor));
-	fields.emplace("jamColor", Write_Float3(value.jamColor));
-	fields.emplace("radarColor2", Write_Float3(value.radarColor2));
+	fields.emplace("always-color", Write_Float3(value.alwaysColor));
+	fields.emplace("los-color", Write_Float3(value.losColor));
+	fields.emplace("radar-color", Write_Float3(value.radarColor));
+	fields.emplace("jam-color", Write_Float3(value.jamColor));
+	fields.emplace("radar-color2", Write_Float3(value.radarColor2));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -278,7 +278,7 @@ bool Read_GetMapDrawModeQuery(const WasmValue& input, GetMapDrawModeQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -287,7 +287,7 @@ bool Read_GetMapDrawModeQuery(const WasmValue& input, GetMapDrawModeQuery& outpu
 WasmValue Write_GetMapDrawModeQuery(const GetMapDrawModeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -314,7 +314,7 @@ bool Read_GetMiniMapDualScreenQuery(const WasmValue& input, GetMiniMapDualScreen
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -323,7 +323,7 @@ bool Read_GetMiniMapDualScreenQuery(const WasmValue& input, GetMiniMapDualScreen
 WasmValue Write_GetMiniMapDualScreenQuery(const GetMiniMapDualScreenQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -336,7 +336,7 @@ bool Read_GetMiniMapDualScreenResult(const WasmValue& input, GetMiniMapDualScree
 	auto& stored_string_output_position = storage.Make<std::string>();
 	if (!ReadString(*value_position, stored_string_output_position, error)) { return false; }
 	output.position = stored_string_output_position.c_str();
-	const auto* value_dualScreen = FindRecordField(*record, "dualScreen", error);
+	const auto* value_dualScreen = FindRecordField(*record, "dual-screen", error);
 	if (value_dualScreen == nullptr) return false;
 	if (!ReadScalar(*value_dualScreen, output.dualScreen, error)) { return false; }
 	return true;
@@ -346,7 +346,7 @@ WasmValue Write_GetMiniMapDualScreenResult(const GetMiniMapDualScreenResult& val
 {
 	WasmValueRecord fields;
 	fields.emplace("position", WasmValue::String((value.position == nullptr) ? std::string{} : std::string(value.position)));
-	fields.emplace("dualScreen", WriteScalar(value.dualScreen));
+	fields.emplace("dual-screen", WriteScalar(value.dualScreen));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -354,7 +354,7 @@ bool Read_GetMiniMapGeometryQuery(const WasmValue& input, GetMiniMapGeometryQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -363,7 +363,7 @@ bool Read_GetMiniMapGeometryQuery(const WasmValue& input, GetMiniMapGeometryQuer
 WasmValue Write_GetMiniMapGeometryQuery(const GetMiniMapGeometryQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -388,7 +388,7 @@ bool Read_GetMiniMapRotationQuery(const WasmValue& input, GetMiniMapRotationQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -397,7 +397,7 @@ bool Read_GetMiniMapRotationQuery(const WasmValue& input, GetMiniMapRotationQuer
 WasmValue Write_GetMiniMapRotationQuery(const GetMiniMapRotationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -422,7 +422,7 @@ bool Read_GetNumDisplaysQuery(const WasmValue& input, GetNumDisplaysQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -431,7 +431,7 @@ bool Read_GetNumDisplaysQuery(const WasmValue& input, GetNumDisplaysQuery& outpu
 WasmValue Write_GetNumDisplaysQuery(const GetNumDisplaysQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -456,10 +456,10 @@ bool Read_GetScreenGeometryQuery(const WasmValue& input, GetScreenGeometryQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_screenNum = FindRecordField(*record, "screenNum", error);
+	const auto* value_screenNum = FindRecordField(*record, "screen-num", error);
 	if (value_screenNum == nullptr) return false;
 	if (!ReadScalar(*value_screenNum, output.screenNum, error)) { return false; }
-	const auto* value_queryUsable = FindRecordField(*record, "queryUsable", error);
+	const auto* value_queryUsable = FindRecordField(*record, "query-usable", error);
 	if (value_queryUsable == nullptr) return false;
 	if (!ReadScalar(*value_queryUsable, output.queryUsable, error)) { return false; }
 	return true;
@@ -468,8 +468,8 @@ bool Read_GetScreenGeometryQuery(const WasmValue& input, GetScreenGeometryQuery&
 WasmValue Write_GetScreenGeometryQuery(const GetScreenGeometryQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("screenNum", WriteScalar(value.screenNum));
-	fields.emplace("queryUsable", WriteScalar(value.queryUsable));
+	fields.emplace("screen-num", WriteScalar(value.screenNum));
+	fields.emplace("query-usable", WriteScalar(value.queryUsable));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -494,7 +494,7 @@ bool Read_GetTeamColorQuery(const WasmValue& input, GetTeamColorQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -503,7 +503,7 @@ bool Read_GetTeamColorQuery(const WasmValue& input, GetTeamColorQuery& output, N
 WasmValue Write_GetTeamColorQuery(const GetTeamColorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -528,7 +528,7 @@ bool Read_GetTeamOrigColorQuery(const WasmValue& input, GetTeamOrigColorQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -537,7 +537,7 @@ bool Read_GetTeamOrigColorQuery(const WasmValue& input, GetTeamOrigColorQuery& o
 WasmValue Write_GetTeamOrigColorQuery(const GetTeamOrigColorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -562,7 +562,7 @@ bool Read_GetViewGeometryQuery(const WasmValue& input, GetViewGeometryQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -571,7 +571,7 @@ bool Read_GetViewGeometryQuery(const WasmValue& input, GetViewGeometryQuery& out
 WasmValue Write_GetViewGeometryQuery(const GetViewGeometryQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -596,7 +596,7 @@ bool Read_GetWaterModeQuery(const WasmValue& input, GetWaterModeQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -605,7 +605,7 @@ bool Read_GetWaterModeQuery(const WasmValue& input, GetWaterModeQuery& output, N
 WasmValue Write_GetWaterModeQuery(const GetWaterModeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -636,7 +636,7 @@ bool Read_GetWindowGeometryQuery(const WasmValue& input, GetWindowGeometryQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -645,7 +645,7 @@ bool Read_GetWindowGeometryQuery(const WasmValue& input, GetWindowGeometryQuery&
 WasmValue Write_GetWindowGeometryQuery(const GetWindowGeometryQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -670,7 +670,7 @@ bool Read_HaveAdvShadingQuery(const WasmValue& input, HaveAdvShadingQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -679,7 +679,7 @@ bool Read_HaveAdvShadingQuery(const WasmValue& input, HaveAdvShadingQuery& outpu
 WasmValue Write_HaveAdvShadingQuery(const HaveAdvShadingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -704,7 +704,7 @@ bool Read_HaveShadowsQuery(const WasmValue& input, HaveShadowsQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -713,7 +713,7 @@ bool Read_HaveShadowsQuery(const WasmValue& input, HaveShadowsQuery& output, Nat
 WasmValue Write_HaveShadowsQuery(const HaveShadowsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -759,7 +759,7 @@ bool Read_IsAABBInViewResult(const WasmValue& input, IsAABBInViewResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inView = FindRecordField(*record, "inView", error);
+	const auto* value_inView = FindRecordField(*record, "in-view", error);
 	if (value_inView == nullptr) return false;
 	if (!ReadScalar(*value_inView, output.inView, error)) { return false; }
 	return true;
@@ -768,7 +768,7 @@ bool Read_IsAABBInViewResult(const WasmValue& input, IsAABBInViewResult& output,
 WasmValue Write_IsAABBInViewResult(const IsAABBInViewResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inView", WriteScalar(value.inView));
+	fields.emplace("in-view", WriteScalar(value.inView));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -776,7 +776,7 @@ bool Read_IsGUIHiddenQuery(const WasmValue& input, IsGUIHiddenQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -785,7 +785,7 @@ bool Read_IsGUIHiddenQuery(const WasmValue& input, IsGUIHiddenQuery& output, Nat
 WasmValue Write_IsGUIHiddenQuery(const IsGUIHiddenQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -831,7 +831,7 @@ bool Read_IsSphereInViewResult(const WasmValue& input, IsSphereInViewResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inView = FindRecordField(*record, "inView", error);
+	const auto* value_inView = FindRecordField(*record, "in-view", error);
 	if (value_inView == nullptr) return false;
 	if (!ReadScalar(*value_inView, output.inView, error)) { return false; }
 	return true;
@@ -840,7 +840,7 @@ bool Read_IsSphereInViewResult(const WasmValue& input, IsSphereInViewResult& out
 WasmValue Write_IsSphereInViewResult(const IsSphereInViewResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inView", WriteScalar(value.inView));
+	fields.emplace("in-view", WriteScalar(value.inView));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -848,16 +848,16 @@ bool Read_MinimapGeometry(const WasmValue& input, MinimapGeometry& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sizeX = FindRecordField(*record, "sizeX", error);
+	const auto* value_sizeX = FindRecordField(*record, "size-x", error);
 	if (value_sizeX == nullptr) return false;
 	if (!ReadScalar(*value_sizeX, output.sizeX, error)) { return false; }
-	const auto* value_sizeY = FindRecordField(*record, "sizeY", error);
+	const auto* value_sizeY = FindRecordField(*record, "size-y", error);
 	if (value_sizeY == nullptr) return false;
 	if (!ReadScalar(*value_sizeY, output.sizeY, error)) { return false; }
-	const auto* value_posX = FindRecordField(*record, "posX", error);
+	const auto* value_posX = FindRecordField(*record, "pos-x", error);
 	if (value_posX == nullptr) return false;
 	if (!ReadScalar(*value_posX, output.posX, error)) { return false; }
-	const auto* value_posY = FindRecordField(*record, "posY", error);
+	const auto* value_posY = FindRecordField(*record, "pos-y", error);
 	if (value_posY == nullptr) return false;
 	if (!ReadScalar(*value_posY, output.posY, error)) { return false; }
 	const auto* value_minimized = FindRecordField(*record, "minimized", error);
@@ -872,10 +872,10 @@ bool Read_MinimapGeometry(const WasmValue& input, MinimapGeometry& output, Nativ
 WasmValue Write_MinimapGeometry(const MinimapGeometry& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sizeX", WriteScalar(value.sizeX));
-	fields.emplace("sizeY", WriteScalar(value.sizeY));
-	fields.emplace("posX", WriteScalar(value.posX));
-	fields.emplace("posY", WriteScalar(value.posY));
+	fields.emplace("size-x", WriteScalar(value.sizeX));
+	fields.emplace("size-y", WriteScalar(value.sizeY));
+	fields.emplace("pos-x", WriteScalar(value.posX));
+	fields.emplace("pos-y", WriteScalar(value.posY));
 	fields.emplace("minimized", WriteScalar(value.minimized));
 	fields.emplace("maximized", WriteScalar(value.maximized));
 	return WasmValue::Record(std::move(fields));
@@ -885,7 +885,7 @@ bool Read_SetTeamColorQuery(const WasmValue& input, SetTeamColorQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_color = FindRecordField(*record, "color", error);
@@ -897,7 +897,7 @@ bool Read_SetTeamColorQuery(const WasmValue& input, SetTeamColorQuery& output, N
 WasmValue Write_SetTeamColorQuery(const SetTeamColorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("color", Write_TeamColor(value.color));
 	return WasmValue::Record(std::move(fields));
 }
@@ -952,16 +952,16 @@ bool Read_ViewGeometry(const WasmValue& input, ViewGeometry& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_viewSizeX = FindRecordField(*record, "viewSizeX", error);
+	const auto* value_viewSizeX = FindRecordField(*record, "view-size-x", error);
 	if (value_viewSizeX == nullptr) return false;
 	if (!ReadScalar(*value_viewSizeX, output.viewSizeX, error)) { return false; }
-	const auto* value_viewSizeY = FindRecordField(*record, "viewSizeY", error);
+	const auto* value_viewSizeY = FindRecordField(*record, "view-size-y", error);
 	if (value_viewSizeY == nullptr) return false;
 	if (!ReadScalar(*value_viewSizeY, output.viewSizeY, error)) { return false; }
-	const auto* value_viewPosX = FindRecordField(*record, "viewPosX", error);
+	const auto* value_viewPosX = FindRecordField(*record, "view-pos-x", error);
 	if (value_viewPosX == nullptr) return false;
 	if (!ReadScalar(*value_viewPosX, output.viewPosX, error)) { return false; }
-	const auto* value_viewPosY = FindRecordField(*record, "viewPosY", error);
+	const auto* value_viewPosY = FindRecordField(*record, "view-pos-y", error);
 	if (value_viewPosY == nullptr) return false;
 	if (!ReadScalar(*value_viewPosY, output.viewPosY, error)) { return false; }
 	return true;
@@ -970,10 +970,10 @@ bool Read_ViewGeometry(const WasmValue& input, ViewGeometry& output, NativeCallS
 WasmValue Write_ViewGeometry(const ViewGeometry& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("viewSizeX", WriteScalar(value.viewSizeX));
-	fields.emplace("viewSizeY", WriteScalar(value.viewSizeY));
-	fields.emplace("viewPosX", WriteScalar(value.viewPosX));
-	fields.emplace("viewPosY", WriteScalar(value.viewPosY));
+	fields.emplace("view-size-x", WriteScalar(value.viewSizeX));
+	fields.emplace("view-size-y", WriteScalar(value.viewSizeY));
+	fields.emplace("view-pos-x", WriteScalar(value.viewPosX));
+	fields.emplace("view-pos-y", WriteScalar(value.viewPosY));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -987,7 +987,7 @@ NativeCalloutDispatch Dispatch_display_GetDrawFrame(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	GetDrawFrameQuery query{};
 	GetDrawFrameResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetDrawFrame(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1003,7 +1003,7 @@ NativeCalloutDispatch Dispatch_display_GetDualViewGeometry(NativeInterface* nati
 	NativeCallStorage storage;
 	GetDualViewGeometryQuery query{};
 	GetDualViewGeometryResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetDualViewGeometry(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_ViewGeometry(nativeResult.geom);
@@ -1016,7 +1016,7 @@ NativeCalloutDispatch Dispatch_display_GetFPS(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GetFPSQuery query{};
 	GetFPSResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetFPS(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.fps);
@@ -1029,7 +1029,7 @@ NativeCalloutDispatch Dispatch_display_GetFrameTimeOffset(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetFrameTimeOffsetQuery query{};
 	GetFrameTimeOffsetResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetFrameTimeOffset(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.offset);
@@ -1042,11 +1042,11 @@ NativeCalloutDispatch Dispatch_display_GetGameSpeed(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	GetGameSpeedQuery query{};
 	GetGameSpeedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetGameSpeed(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("wantedSpeed", WriteScalar(nativeResult.wantedSpeed));
+	outputFields.emplace("wanted-speed", WriteScalar(nativeResult.wantedSpeed));
 	outputFields.emplace("speed", WriteScalar(nativeResult.speed));
 	outputFields.emplace("paused", WriteScalar(nativeResult.paused));
 	result = WasmValue::Record(std::move(outputFields));
@@ -1059,7 +1059,7 @@ NativeCalloutDispatch Dispatch_display_GetLastUpdateSeconds(NativeInterface* nat
 	NativeCallStorage storage;
 	GetLastUpdateSecondsQuery query{};
 	GetLastUpdateSecondsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetLastUpdateSeconds(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.seconds);
@@ -1072,15 +1072,15 @@ NativeCalloutDispatch Dispatch_display_GetLosViewColors(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetLosViewColorsQuery query{};
 	GetLosViewColorsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetLosViewColors(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("alwaysColor", Write_Float3(nativeResult.alwaysColor));
-	outputFields.emplace("losColor", Write_Float3(nativeResult.losColor));
-	outputFields.emplace("radarColor", Write_Float3(nativeResult.radarColor));
-	outputFields.emplace("jamColor", Write_Float3(nativeResult.jamColor));
-	outputFields.emplace("radarColor2", Write_Float3(nativeResult.radarColor2));
+	outputFields.emplace("always-color", Write_Float3(nativeResult.alwaysColor));
+	outputFields.emplace("los-color", Write_Float3(nativeResult.losColor));
+	outputFields.emplace("radar-color", Write_Float3(nativeResult.radarColor));
+	outputFields.emplace("jam-color", Write_Float3(nativeResult.jamColor));
+	outputFields.emplace("radar-color2", Write_Float3(nativeResult.radarColor2));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1091,7 +1091,7 @@ NativeCalloutDispatch Dispatch_display_GetMapDrawMode(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetMapDrawModeQuery query{};
 	GetMapDrawModeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetMapDrawMode(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.mode == nullptr) ? std::string{} : std::string(nativeResult.mode));
@@ -1104,12 +1104,12 @@ NativeCalloutDispatch Dispatch_display_GetMiniMapDualScreen(NativeInterface* nat
 	NativeCallStorage storage;
 	GetMiniMapDualScreenQuery query{};
 	GetMiniMapDualScreenResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetMiniMapDualScreen(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("position", WasmValue::String((nativeResult.position == nullptr) ? std::string{} : std::string(nativeResult.position)));
-	outputFields.emplace("dualScreen", WriteScalar(nativeResult.dualScreen));
+	outputFields.emplace("dual-screen", WriteScalar(nativeResult.dualScreen));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1120,7 +1120,7 @@ NativeCalloutDispatch Dispatch_display_GetMiniMapGeometry(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetMiniMapGeometryQuery query{};
 	GetMiniMapGeometryResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetMiniMapGeometry(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_MinimapGeometry(nativeResult.geom);
@@ -1133,7 +1133,7 @@ NativeCalloutDispatch Dispatch_display_GetMiniMapRotation(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetMiniMapRotationQuery query{};
 	GetMiniMapRotationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetMiniMapRotation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.rotation);
@@ -1146,7 +1146,7 @@ NativeCalloutDispatch Dispatch_display_GetNumDisplays(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetNumDisplaysQuery query{};
 	GetNumDisplaysResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetNumDisplays(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.count);
@@ -1159,8 +1159,8 @@ NativeCalloutDispatch Dispatch_display_GetScreenGeometry(NativeInterface* native
 	NativeCallStorage storage;
 	GetScreenGeometryQuery query{};
 	GetScreenGeometryResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "screenNum", query.screenNum, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "queryUsable", query.queryUsable, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "screen-num", query.screenNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "query-usable", query.queryUsable, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetScreenGeometry(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_ViewGeometry(nativeResult.geom);
@@ -1173,7 +1173,7 @@ NativeCalloutDispatch Dispatch_display_GetTeamColor(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	GetTeamColorQuery query{};
 	GetTeamColorResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetTeamColor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_TeamColor(nativeResult.color);
@@ -1186,7 +1186,7 @@ NativeCalloutDispatch Dispatch_display_GetTeamOrigColor(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetTeamOrigColorQuery query{};
 	GetTeamOrigColorResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetTeamOrigColor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_TeamColor(nativeResult.color);
@@ -1199,7 +1199,7 @@ NativeCalloutDispatch Dispatch_display_GetViewGeometry(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetViewGeometryQuery query{};
 	GetViewGeometryResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetViewGeometry(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_ViewGeometry(nativeResult.geom);
@@ -1212,7 +1212,7 @@ NativeCalloutDispatch Dispatch_display_GetWaterMode(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	GetWaterModeQuery query{};
 	GetWaterModeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetWaterMode(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -1228,7 +1228,7 @@ NativeCalloutDispatch Dispatch_display_GetWindowGeometry(NativeInterface* native
 	NativeCallStorage storage;
 	GetWindowGeometryQuery query{};
 	GetWindowGeometryResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->GetWindowGeometry(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_ViewGeometry(nativeResult.geom);
@@ -1241,7 +1241,7 @@ NativeCalloutDispatch Dispatch_display_HaveAdvShading(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	HaveAdvShadingQuery query{};
 	HaveAdvShadingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->HaveAdvShading(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);
@@ -1254,7 +1254,7 @@ NativeCalloutDispatch Dispatch_display_HaveShadows(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	HaveShadowsQuery query{};
 	HaveShadowsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->HaveShadows(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.enabled);
@@ -1281,7 +1281,7 @@ NativeCalloutDispatch Dispatch_display_IsGUIHidden(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	IsGUIHiddenQuery query{};
 	IsGUIHiddenResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->IsGUIHidden(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.hidden);
@@ -1308,7 +1308,7 @@ NativeCalloutDispatch Dispatch_display_SetTeamColor(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	SetTeamColorQuery query{};
 	SetTeamColorResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "color", Read_TeamColor, query.color, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->display->SetTeamColor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;

@@ -44,6 +44,10 @@ public:
 	// Special events (called from Lua)
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
 	void HandleLuaCall(const char* msg, size_t msgLength, bool synced);
+	// One-way synced-to-unsynced Wasm message delivery. Unsynced receiver
+	// failures are reported to the caller for logging but never feed back into
+	// the simulation result.
+	bool DispatchWasmSyncedMessage(std::string_view message, std::string& error);
 
 	// Wasm module lifecycle is explicit so game/map discovery can feed the same
 	// instance registry without exposing runtime internals to CGame.

@@ -12,7 +12,7 @@ bool Read_GetWeaponDefByIDQuery(const WasmValue& input, GetWeaponDefByIDQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_GetWeaponDefByIDQuery(const WasmValue& input, GetWeaponDefByIDQuery& o
 WasmValue Write_GetWeaponDefByIDQuery(const GetWeaponDefByIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -50,7 +50,7 @@ bool Read_GetWeaponDefCountQuery(const WasmValue& input, GetWeaponDefCountQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -59,7 +59,7 @@ bool Read_GetWeaponDefCountQuery(const WasmValue& input, GetWeaponDefCountQuery&
 WasmValue Write_GetWeaponDefCountQuery(const GetWeaponDefCountQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -84,7 +84,7 @@ bool Read_GetWeaponDefCustomParamKeysQuery(const WasmValue& input, GetWeaponDefC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
 	return true;
@@ -93,7 +93,7 @@ bool Read_GetWeaponDefCustomParamKeysQuery(const WasmValue& input, GetWeaponDefC
 WasmValue Write_GetWeaponDefCustomParamKeysQuery(const GetWeaponDefCustomParamKeysQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -133,7 +133,7 @@ bool Read_GetWeaponDefCustomParamQuery(const WasmValue& input, GetWeaponDefCusto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
 	const auto* value_key = FindRecordField(*record, "key", error);
@@ -147,7 +147,7 @@ bool Read_GetWeaponDefCustomParamQuery(const WasmValue& input, GetWeaponDefCusto
 WasmValue Write_GetWeaponDefCustomParamQuery(const GetWeaponDefCustomParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -175,7 +175,7 @@ bool Read_GetWeaponDefDamageQuery(const WasmValue& input, GetWeaponDefDamageQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
 	return true;
@@ -184,7 +184,7 @@ bool Read_GetWeaponDefDamageQuery(const WasmValue& input, GetWeaponDefDamageQuer
 WasmValue Write_GetWeaponDefDamageQuery(const GetWeaponDefDamageQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -209,7 +209,7 @@ bool Read_GetWeaponDefIDQuery(const WasmValue& input, GetWeaponDefIDQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefName = FindRecordField(*record, "weaponDefName", error);
+	const auto* value_weaponDefName = FindRecordField(*record, "weapon-def-name", error);
 	if (value_weaponDefName == nullptr) return false;
 	auto& stored_string_output_weaponDefName = storage.Make<std::string>();
 	if (!ReadString(*value_weaponDefName, stored_string_output_weaponDefName, error)) { return false; }
@@ -220,7 +220,7 @@ bool Read_GetWeaponDefIDQuery(const WasmValue& input, GetWeaponDefIDQuery& outpu
 WasmValue Write_GetWeaponDefIDQuery(const GetWeaponDefIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefName", WasmValue::String((value.weaponDefName == nullptr) ? std::string{} : std::string(value.weaponDefName)));
+	fields.emplace("weapon-def-name", WasmValue::String((value.weaponDefName == nullptr) ? std::string{} : std::string(value.weaponDefName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -245,7 +245,7 @@ bool Read_GetWeaponDefIDsQuery(const WasmValue& input, GetWeaponDefIDsQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -254,7 +254,7 @@ bool Read_GetWeaponDefIDsQuery(const WasmValue& input, GetWeaponDefIDsQuery& out
 WasmValue Write_GetWeaponDefIDsQuery(const GetWeaponDefIDsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -289,7 +289,7 @@ bool Read_GetWeaponDefNameQuery(const WasmValue& input, GetWeaponDefNameQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
 	return true;
@@ -298,7 +298,7 @@ bool Read_GetWeaponDefNameQuery(const WasmValue& input, GetWeaponDefNameQuery& o
 WasmValue Write_GetWeaponDefNameQuery(const GetWeaponDefNameQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -325,7 +325,7 @@ bool Read_GetWeaponDefRangeQuery(const WasmValue& input, GetWeaponDefRangeQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
 	return true;
@@ -334,7 +334,7 @@ bool Read_GetWeaponDefRangeQuery(const WasmValue& input, GetWeaponDefRangeQuery&
 WasmValue Write_GetWeaponDefRangeQuery(const GetWeaponDefRangeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -359,7 +359,7 @@ bool Read_ValidWeaponDefIDQuery(const WasmValue& input, ValidWeaponDefIDQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
 	return true;
@@ -368,7 +368,7 @@ bool Read_ValidWeaponDefIDQuery(const WasmValue& input, ValidWeaponDefIDQuery& o
 WasmValue Write_ValidWeaponDefIDQuery(const ValidWeaponDefIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -414,22 +414,22 @@ bool Read_WeaponDefInfo(const WasmValue& input, WeaponDefInfo& output, NativeCal
 	const auto* value_range = FindRecordField(*record, "range", error);
 	if (value_range == nullptr) return false;
 	if (!ReadScalar(*value_range, output.range, error)) { return false; }
-	const auto* value_reloadTime = FindRecordField(*record, "reloadTime", error);
+	const auto* value_reloadTime = FindRecordField(*record, "reload-time", error);
 	if (value_reloadTime == nullptr) return false;
 	if (!ReadScalar(*value_reloadTime, output.reloadTime, error)) { return false; }
 	const auto* value_damage = FindRecordField(*record, "damage", error);
 	if (value_damage == nullptr) return false;
 	if (!ReadScalar(*value_damage, output.damage, error)) { return false; }
-	const auto* value_areaOfEffect = FindRecordField(*record, "areaOfEffect", error);
+	const auto* value_areaOfEffect = FindRecordField(*record, "area-of-effect", error);
 	if (value_areaOfEffect == nullptr) return false;
 	if (!ReadScalar(*value_areaOfEffect, output.areaOfEffect, error)) { return false; }
-	const auto* value_projectileSpeed = FindRecordField(*record, "projectileSpeed", error);
+	const auto* value_projectileSpeed = FindRecordField(*record, "projectile-speed", error);
 	if (value_projectileSpeed == nullptr) return false;
 	if (!ReadScalar(*value_projectileSpeed, output.projectileSpeed, error)) { return false; }
 	const auto* value_paralyzer = FindRecordField(*record, "paralyzer", error);
 	if (value_paralyzer == nullptr) return false;
 	if (!ReadScalar(*value_paralyzer, output.paralyzer, error)) { return false; }
-	const auto* value_impactOnly = FindRecordField(*record, "impactOnly", error);
+	const auto* value_impactOnly = FindRecordField(*record, "impact-only", error);
 	if (value_impactOnly == nullptr) return false;
 	if (!ReadScalar(*value_impactOnly, output.impactOnly, error)) { return false; }
 	const auto* value_turret = FindRecordField(*record, "turret", error);
@@ -446,12 +446,12 @@ WasmValue Write_WeaponDefInfo(const WeaponDefInfo& value)
 	fields.emplace("type", WasmValue::String((value.type == nullptr) ? std::string{} : std::string(value.type)));
 	fields.emplace("description", WasmValue::String((value.description == nullptr) ? std::string{} : std::string(value.description)));
 	fields.emplace("range", WriteScalar(value.range));
-	fields.emplace("reloadTime", WriteScalar(value.reloadTime));
+	fields.emplace("reload-time", WriteScalar(value.reloadTime));
 	fields.emplace("damage", WriteScalar(value.damage));
-	fields.emplace("areaOfEffect", WriteScalar(value.areaOfEffect));
-	fields.emplace("projectileSpeed", WriteScalar(value.projectileSpeed));
+	fields.emplace("area-of-effect", WriteScalar(value.areaOfEffect));
+	fields.emplace("projectile-speed", WriteScalar(value.projectileSpeed));
 	fields.emplace("paralyzer", WriteScalar(value.paralyzer));
-	fields.emplace("impactOnly", WriteScalar(value.impactOnly));
+	fields.emplace("impact-only", WriteScalar(value.impactOnly));
 	fields.emplace("turret", WriteScalar(value.turret));
 	return WasmValue::Record(std::move(fields));
 }
@@ -466,7 +466,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefByID(NativeInterface* nat
 	NativeCallStorage storage;
 	GetWeaponDefByIDQuery query{};
 	GetWeaponDefByIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->weaponDefs->GetWeaponDefByID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -482,7 +482,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefCount(NativeInterface* na
 	NativeCallStorage storage;
 	GetWeaponDefCountQuery query{};
 	GetWeaponDefCountResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->weaponDefs->GetWeaponDefCount(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.count);
@@ -495,7 +495,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefCustomParam(NativeInterfa
 	NativeCallStorage storage;
 	GetWeaponDefCustomParamQuery query{};
 	GetWeaponDefCustomParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_key = FindArgument(arguments, 1u, 1u, 2u, 2u, "key", error);
 	if (value_key == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_key = storage.Make<std::string>();
@@ -513,7 +513,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefCustomParamKeys(NativeInt
 	NativeCallStorage storage;
 	GetWeaponDefCustomParamKeysQuery query{};
 	GetWeaponDefCustomParamKeysResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->weaponDefs->GetWeaponDefCustomParamKeys(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.keys, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -526,7 +526,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefDamage(NativeInterface* n
 	NativeCallStorage storage;
 	GetWeaponDefDamageQuery query{};
 	GetWeaponDefDamageResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->weaponDefs->GetWeaponDefDamage(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.damage);
@@ -539,7 +539,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefID(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetWeaponDefIDQuery query{};
 	GetWeaponDefIDResult nativeResult{};
-	const WasmValue* value_weaponDefName = FindArgument(arguments, 0u, 0u, 1u, 1u, "weaponDefName", error);
+	const WasmValue* value_weaponDefName = FindArgument(arguments, 0u, 0u, 1u, 1u, "weapon-def-name", error);
 	if (value_weaponDefName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_weaponDefName = storage.Make<std::string>();
 	if (!ReadString(*value_weaponDefName, stored_string_query_weaponDefName, error)) { return NativeCalloutDispatch::handled; }
@@ -556,7 +556,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefIDs(NativeInterface* nati
 	NativeCallStorage storage;
 	GetWeaponDefIDsQuery query{};
 	GetWeaponDefIDsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->weaponDefs->GetWeaponDefIDs(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.ids, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -569,7 +569,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefName(NativeInterface* nat
 	NativeCallStorage storage;
 	GetWeaponDefNameQuery query{};
 	GetWeaponDefNameResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->weaponDefs->GetWeaponDefName(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.name == nullptr) ? std::string{} : std::string(nativeResult.name));
@@ -582,7 +582,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_GetWeaponDefRange(NativeInterface* na
 	NativeCallStorage storage;
 	GetWeaponDefRangeQuery query{};
 	GetWeaponDefRangeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->weaponDefs->GetWeaponDefRange(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.range);
@@ -595,7 +595,7 @@ NativeCalloutDispatch Dispatch_weapon_defs_ValidWeaponDefID(NativeInterface* nat
 	NativeCallStorage storage;
 	ValidWeaponDefIDQuery query{};
 	ValidWeaponDefIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->weaponDefs->ValidWeaponDefID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.valid);

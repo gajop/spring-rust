@@ -1046,6 +1046,18 @@ struct HandleLuaMsgResult {
 	const Error* error;
 };
 
+// Explicit engine-mediated delivery from a synced Wasm instance to local
+// unsynced Wasm instances. The message is opaque to the engine and is never
+// fed back into synced execution.
+struct RecvFromSyncedQuery {
+	const char* message;
+	uint32_t messageLength;
+};
+
+struct RecvFromSyncedResult {
+	const Error* error;
+};
+
 struct HandleLuaCallQuery {
 	const char* message;
 	uint32_t messageLength;

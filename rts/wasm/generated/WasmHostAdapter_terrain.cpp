@@ -33,7 +33,7 @@ bool Read_GetGrassResult(const WasmValue& input, GetGrassResult& output, NativeC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_grassLevel = FindRecordField(*record, "grassLevel", error);
+	const auto* value_grassLevel = FindRecordField(*record, "grass-level", error);
 	if (value_grassLevel == nullptr) return false;
 	if (!ReadScalar(*value_grassLevel, output.grassLevel, error)) { return false; }
 	return true;
@@ -42,7 +42,7 @@ bool Read_GetGrassResult(const WasmValue& input, GetGrassResult& output, NativeC
 WasmValue Write_GetGrassResult(const GetGrassResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("grassLevel", WriteScalar(value.grassLevel));
+	fields.emplace("grass-level", WriteScalar(value.grassLevel));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -96,7 +96,7 @@ bool Read_GetGroundExtremesQuery(const WasmValue& input, GetGroundExtremesQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -105,7 +105,7 @@ bool Read_GetGroundExtremesQuery(const WasmValue& input, GetGroundExtremesQuery&
 WasmValue Write_GetGroundExtremesQuery(const GetGroundExtremesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -113,16 +113,16 @@ bool Read_GetGroundExtremesResult(const WasmValue& input, GetGroundExtremesResul
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_initMinHeight = FindRecordField(*record, "initMinHeight", error);
+	const auto* value_initMinHeight = FindRecordField(*record, "init-min-height", error);
 	if (value_initMinHeight == nullptr) return false;
 	if (!ReadScalar(*value_initMinHeight, output.initMinHeight, error)) { return false; }
-	const auto* value_initMaxHeight = FindRecordField(*record, "initMaxHeight", error);
+	const auto* value_initMaxHeight = FindRecordField(*record, "init-max-height", error);
 	if (value_initMaxHeight == nullptr) return false;
 	if (!ReadScalar(*value_initMaxHeight, output.initMaxHeight, error)) { return false; }
-	const auto* value_currMinHeight = FindRecordField(*record, "currMinHeight", error);
+	const auto* value_currMinHeight = FindRecordField(*record, "curr-min-height", error);
 	if (value_currMinHeight == nullptr) return false;
 	if (!ReadScalar(*value_currMinHeight, output.currMinHeight, error)) { return false; }
-	const auto* value_currMaxHeight = FindRecordField(*record, "currMaxHeight", error);
+	const auto* value_currMaxHeight = FindRecordField(*record, "curr-max-height", error);
 	if (value_currMaxHeight == nullptr) return false;
 	if (!ReadScalar(*value_currMaxHeight, output.currMaxHeight, error)) { return false; }
 	return true;
@@ -131,10 +131,10 @@ bool Read_GetGroundExtremesResult(const WasmValue& input, GetGroundExtremesResul
 WasmValue Write_GetGroundExtremesResult(const GetGroundExtremesResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("initMinHeight", WriteScalar(value.initMinHeight));
-	fields.emplace("initMaxHeight", WriteScalar(value.initMaxHeight));
-	fields.emplace("currMinHeight", WriteScalar(value.currMinHeight));
-	fields.emplace("currMaxHeight", WriteScalar(value.currMaxHeight));
+	fields.emplace("init-min-height", WriteScalar(value.initMinHeight));
+	fields.emplace("init-max-height", WriteScalar(value.initMaxHeight));
+	fields.emplace("curr-min-height", WriteScalar(value.currMinHeight));
+	fields.emplace("curr-max-height", WriteScalar(value.currMaxHeight));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -201,33 +201,33 @@ bool Read_GetGroundInfoResult(const WasmValue& input, GetGroundInfoResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_terrainTypeIndex = FindRecordField(*record, "terrainTypeIndex", error);
+	const auto* value_terrainTypeIndex = FindRecordField(*record, "terrain-type-index", error);
 	if (value_terrainTypeIndex == nullptr) return false;
 	if (!ReadScalar(*value_terrainTypeIndex, output.terrainTypeIndex, error)) { return false; }
-	const auto* value_terrainTypeName = FindRecordField(*record, "terrainTypeName", error);
+	const auto* value_terrainTypeName = FindRecordField(*record, "terrain-type-name", error);
 	if (value_terrainTypeName == nullptr) return false;
 	auto& stored_string_output_terrainTypeName = storage.Make<std::string>();
 	if (!ReadString(*value_terrainTypeName, stored_string_output_terrainTypeName, error)) { return false; }
 	output.terrainTypeName = stored_string_output_terrainTypeName.c_str();
-	const auto* value_metalExtraction = FindRecordField(*record, "metalExtraction", error);
+	const auto* value_metalExtraction = FindRecordField(*record, "metal-extraction", error);
 	if (value_metalExtraction == nullptr) return false;
 	if (!ReadScalar(*value_metalExtraction, output.metalExtraction, error)) { return false; }
 	const auto* value_hardness = FindRecordField(*record, "hardness", error);
 	if (value_hardness == nullptr) return false;
 	if (!ReadScalar(*value_hardness, output.hardness, error)) { return false; }
-	const auto* value_tankSpeed = FindRecordField(*record, "tankSpeed", error);
+	const auto* value_tankSpeed = FindRecordField(*record, "tank-speed", error);
 	if (value_tankSpeed == nullptr) return false;
 	if (!ReadScalar(*value_tankSpeed, output.tankSpeed, error)) { return false; }
-	const auto* value_kbotSpeed = FindRecordField(*record, "kbotSpeed", error);
+	const auto* value_kbotSpeed = FindRecordField(*record, "kbot-speed", error);
 	if (value_kbotSpeed == nullptr) return false;
 	if (!ReadScalar(*value_kbotSpeed, output.kbotSpeed, error)) { return false; }
-	const auto* value_hoverSpeed = FindRecordField(*record, "hoverSpeed", error);
+	const auto* value_hoverSpeed = FindRecordField(*record, "hover-speed", error);
 	if (value_hoverSpeed == nullptr) return false;
 	if (!ReadScalar(*value_hoverSpeed, output.hoverSpeed, error)) { return false; }
-	const auto* value_shipSpeed = FindRecordField(*record, "shipSpeed", error);
+	const auto* value_shipSpeed = FindRecordField(*record, "ship-speed", error);
 	if (value_shipSpeed == nullptr) return false;
 	if (!ReadScalar(*value_shipSpeed, output.shipSpeed, error)) { return false; }
-	const auto* value_receiveTracks = FindRecordField(*record, "receiveTracks", error);
+	const auto* value_receiveTracks = FindRecordField(*record, "receive-tracks", error);
 	if (value_receiveTracks == nullptr) return false;
 	if (!ReadScalar(*value_receiveTracks, output.receiveTracks, error)) { return false; }
 	return true;
@@ -236,15 +236,15 @@ bool Read_GetGroundInfoResult(const WasmValue& input, GetGroundInfoResult& outpu
 WasmValue Write_GetGroundInfoResult(const GetGroundInfoResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("terrainTypeIndex", WriteScalar(value.terrainTypeIndex));
-	fields.emplace("terrainTypeName", WasmValue::String((value.terrainTypeName == nullptr) ? std::string{} : std::string(value.terrainTypeName)));
-	fields.emplace("metalExtraction", WriteScalar(value.metalExtraction));
+	fields.emplace("terrain-type-index", WriteScalar(value.terrainTypeIndex));
+	fields.emplace("terrain-type-name", WasmValue::String((value.terrainTypeName == nullptr) ? std::string{} : std::string(value.terrainTypeName)));
+	fields.emplace("metal-extraction", WriteScalar(value.metalExtraction));
 	fields.emplace("hardness", WriteScalar(value.hardness));
-	fields.emplace("tankSpeed", WriteScalar(value.tankSpeed));
-	fields.emplace("kbotSpeed", WriteScalar(value.kbotSpeed));
-	fields.emplace("hoverSpeed", WriteScalar(value.hoverSpeed));
-	fields.emplace("shipSpeed", WriteScalar(value.shipSpeed));
-	fields.emplace("receiveTracks", WriteScalar(value.receiveTracks));
+	fields.emplace("tank-speed", WriteScalar(value.tankSpeed));
+	fields.emplace("kbot-speed", WriteScalar(value.kbotSpeed));
+	fields.emplace("hover-speed", WriteScalar(value.hoverSpeed));
+	fields.emplace("ship-speed", WriteScalar(value.shipSpeed));
+	fields.emplace("receive-tracks", WriteScalar(value.receiveTracks));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -336,7 +336,7 @@ bool Read_GetHeightMapSizeQuery(const WasmValue& input, GetHeightMapSizeQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -345,7 +345,7 @@ bool Read_GetHeightMapSizeQuery(const WasmValue& input, GetHeightMapSizeQuery& o
 WasmValue Write_GetHeightMapSizeQuery(const GetHeightMapSizeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -353,10 +353,10 @@ bool Read_GetHeightMapSizeResult(const WasmValue& input, GetHeightMapSizeResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_pointsX = FindRecordField(*record, "pointsX", error);
+	const auto* value_pointsX = FindRecordField(*record, "points-x", error);
 	if (value_pointsX == nullptr) return false;
 	if (!ReadScalar(*value_pointsX, output.pointsX, error)) { return false; }
-	const auto* value_pointsZ = FindRecordField(*record, "pointsZ", error);
+	const auto* value_pointsZ = FindRecordField(*record, "points-z", error);
 	if (value_pointsZ == nullptr) return false;
 	if (!ReadScalar(*value_pointsZ, output.pointsZ, error)) { return false; }
 	return true;
@@ -365,8 +365,8 @@ bool Read_GetHeightMapSizeResult(const WasmValue& input, GetHeightMapSizeResult&
 WasmValue Write_GetHeightMapSizeResult(const GetHeightMapSizeResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("pointsX", WriteScalar(value.pointsX));
-	fields.emplace("pointsZ", WriteScalar(value.pointsZ));
+	fields.emplace("points-x", WriteScalar(value.pointsX));
+	fields.emplace("points-z", WriteScalar(value.pointsZ));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -412,7 +412,7 @@ bool Read_GetTerrainTypeDataQuery(const WasmValue& input, GetTerrainTypeDataQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_terrainTypeIndex = FindRecordField(*record, "terrainTypeIndex", error);
+	const auto* value_terrainTypeIndex = FindRecordField(*record, "terrain-type-index", error);
 	if (value_terrainTypeIndex == nullptr) return false;
 	if (!ReadScalar(*value_terrainTypeIndex, output.terrainTypeIndex, error)) { return false; }
 	return true;
@@ -421,7 +421,7 @@ bool Read_GetTerrainTypeDataQuery(const WasmValue& input, GetTerrainTypeDataQuer
 WasmValue Write_GetTerrainTypeDataQuery(const GetTerrainTypeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("terrainTypeIndex", WriteScalar(value.terrainTypeIndex));
+	fields.emplace("terrain-type-index", WriteScalar(value.terrainTypeIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -440,19 +440,19 @@ bool Read_GetTerrainTypeDataResult(const WasmValue& input, GetTerrainTypeDataRes
 	const auto* value_hardness = FindRecordField(*record, "hardness", error);
 	if (value_hardness == nullptr) return false;
 	if (!ReadScalar(*value_hardness, output.hardness, error)) { return false; }
-	const auto* value_tankSpeed = FindRecordField(*record, "tankSpeed", error);
+	const auto* value_tankSpeed = FindRecordField(*record, "tank-speed", error);
 	if (value_tankSpeed == nullptr) return false;
 	if (!ReadScalar(*value_tankSpeed, output.tankSpeed, error)) { return false; }
-	const auto* value_kbotSpeed = FindRecordField(*record, "kbotSpeed", error);
+	const auto* value_kbotSpeed = FindRecordField(*record, "kbot-speed", error);
 	if (value_kbotSpeed == nullptr) return false;
 	if (!ReadScalar(*value_kbotSpeed, output.kbotSpeed, error)) { return false; }
-	const auto* value_hoverSpeed = FindRecordField(*record, "hoverSpeed", error);
+	const auto* value_hoverSpeed = FindRecordField(*record, "hover-speed", error);
 	if (value_hoverSpeed == nullptr) return false;
 	if (!ReadScalar(*value_hoverSpeed, output.hoverSpeed, error)) { return false; }
-	const auto* value_shipSpeed = FindRecordField(*record, "shipSpeed", error);
+	const auto* value_shipSpeed = FindRecordField(*record, "ship-speed", error);
 	if (value_shipSpeed == nullptr) return false;
 	if (!ReadScalar(*value_shipSpeed, output.shipSpeed, error)) { return false; }
-	const auto* value_receiveTracks = FindRecordField(*record, "receiveTracks", error);
+	const auto* value_receiveTracks = FindRecordField(*record, "receive-tracks", error);
 	if (value_receiveTracks == nullptr) return false;
 	if (!ReadScalar(*value_receiveTracks, output.receiveTracks, error)) { return false; }
 	return true;
@@ -464,11 +464,11 @@ WasmValue Write_GetTerrainTypeDataResult(const GetTerrainTypeDataResult& value)
 	fields.emplace("index", WriteScalar(value.index));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("hardness", WriteScalar(value.hardness));
-	fields.emplace("tankSpeed", WriteScalar(value.tankSpeed));
-	fields.emplace("kbotSpeed", WriteScalar(value.kbotSpeed));
-	fields.emplace("hoverSpeed", WriteScalar(value.hoverSpeed));
-	fields.emplace("shipSpeed", WriteScalar(value.shipSpeed));
-	fields.emplace("receiveTracks", WriteScalar(value.receiveTracks));
+	fields.emplace("tank-speed", WriteScalar(value.tankSpeed));
+	fields.emplace("kbot-speed", WriteScalar(value.kbotSpeed));
+	fields.emplace("hover-speed", WriteScalar(value.hoverSpeed));
+	fields.emplace("ship-speed", WriteScalar(value.shipSpeed));
+	fields.emplace("receive-tracks", WriteScalar(value.receiveTracks));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -514,7 +514,7 @@ bool Read_GetWaterPlaneLevelQuery(const WasmValue& input, GetWaterPlaneLevelQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -523,7 +523,7 @@ bool Read_GetWaterPlaneLevelQuery(const WasmValue& input, GetWaterPlaneLevelQuer
 WasmValue Write_GetWaterPlaneLevelQuery(const GetWaterPlaneLevelQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -569,10 +569,10 @@ bool Read_IsPosInMapResult(const WasmValue& input, IsPosInMapResult& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_inMap = FindRecordField(*record, "inMap", error);
+	const auto* value_inMap = FindRecordField(*record, "in-map", error);
 	if (value_inMap == nullptr) return false;
 	if (!ReadScalar(*value_inMap, output.inMap, error)) { return false; }
-	const auto* value_inPlayArea = FindRecordField(*record, "inPlayArea", error);
+	const auto* value_inPlayArea = FindRecordField(*record, "in-play-area", error);
 	if (value_inPlayArea == nullptr) return false;
 	if (!ReadScalar(*value_inPlayArea, output.inPlayArea, error)) { return false; }
 	return true;
@@ -581,8 +581,8 @@ bool Read_IsPosInMapResult(const WasmValue& input, IsPosInMapResult& output, Nat
 WasmValue Write_IsPosInMapResult(const IsPosInMapResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("inMap", WriteScalar(value.inMap));
-	fields.emplace("inPlayArea", WriteScalar(value.inPlayArea));
+	fields.emplace("in-map", WriteScalar(value.inMap));
+	fields.emplace("in-play-area", WriteScalar(value.inPlayArea));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -626,14 +626,14 @@ NativeCalloutDispatch Dispatch_terrain_GetGroundExtremes(NativeInterface* native
 	NativeCallStorage storage;
 	GetGroundExtremesQuery query{};
 	GetGroundExtremesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->terrain->GetGroundExtremes(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("initMinHeight", WriteScalar(nativeResult.initMinHeight));
-	outputFields.emplace("initMaxHeight", WriteScalar(nativeResult.initMaxHeight));
-	outputFields.emplace("currMinHeight", WriteScalar(nativeResult.currMinHeight));
-	outputFields.emplace("currMaxHeight", WriteScalar(nativeResult.currMaxHeight));
+	outputFields.emplace("init-min-height", WriteScalar(nativeResult.initMinHeight));
+	outputFields.emplace("init-max-height", WriteScalar(nativeResult.initMaxHeight));
+	outputFields.emplace("curr-min-height", WriteScalar(nativeResult.currMinHeight));
+	outputFields.emplace("curr-max-height", WriteScalar(nativeResult.currMaxHeight));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -663,15 +663,15 @@ NativeCalloutDispatch Dispatch_terrain_GetGroundInfo(NativeInterface* nativeInte
 	nativeInterface->terrain->GetGroundInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("terrainTypeIndex", WriteScalar(nativeResult.terrainTypeIndex));
-	outputFields.emplace("terrainTypeName", WasmValue::String((nativeResult.terrainTypeName == nullptr) ? std::string{} : std::string(nativeResult.terrainTypeName)));
-	outputFields.emplace("metalExtraction", WriteScalar(nativeResult.metalExtraction));
+	outputFields.emplace("terrain-type-index", WriteScalar(nativeResult.terrainTypeIndex));
+	outputFields.emplace("terrain-type-name", WasmValue::String((nativeResult.terrainTypeName == nullptr) ? std::string{} : std::string(nativeResult.terrainTypeName)));
+	outputFields.emplace("metal-extraction", WriteScalar(nativeResult.metalExtraction));
 	outputFields.emplace("hardness", WriteScalar(nativeResult.hardness));
-	outputFields.emplace("tankSpeed", WriteScalar(nativeResult.tankSpeed));
-	outputFields.emplace("kbotSpeed", WriteScalar(nativeResult.kbotSpeed));
-	outputFields.emplace("hoverSpeed", WriteScalar(nativeResult.hoverSpeed));
-	outputFields.emplace("shipSpeed", WriteScalar(nativeResult.shipSpeed));
-	outputFields.emplace("receiveTracks", WriteScalar(nativeResult.receiveTracks));
+	outputFields.emplace("tank-speed", WriteScalar(nativeResult.tankSpeed));
+	outputFields.emplace("kbot-speed", WriteScalar(nativeResult.kbotSpeed));
+	outputFields.emplace("hover-speed", WriteScalar(nativeResult.hoverSpeed));
+	outputFields.emplace("ship-speed", WriteScalar(nativeResult.shipSpeed));
+	outputFields.emplace("receive-tracks", WriteScalar(nativeResult.receiveTracks));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -714,12 +714,12 @@ NativeCalloutDispatch Dispatch_terrain_GetHeightMapSize(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetHeightMapSizeQuery query{};
 	GetHeightMapSizeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->terrain->GetHeightMapSize(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("pointsX", WriteScalar(nativeResult.pointsX));
-	outputFields.emplace("pointsZ", WriteScalar(nativeResult.pointsZ));
+	outputFields.emplace("points-x", WriteScalar(nativeResult.pointsX));
+	outputFields.emplace("points-z", WriteScalar(nativeResult.pointsZ));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -744,18 +744,18 @@ NativeCalloutDispatch Dispatch_terrain_GetTerrainTypeData(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetTerrainTypeDataQuery query{};
 	GetTerrainTypeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "terrainTypeIndex", query.terrainTypeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "terrain-type-index", query.terrainTypeIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->terrain->GetTerrainTypeData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("index", WriteScalar(nativeResult.index));
 	outputFields.emplace("name", WasmValue::String((nativeResult.name == nullptr) ? std::string{} : std::string(nativeResult.name)));
 	outputFields.emplace("hardness", WriteScalar(nativeResult.hardness));
-	outputFields.emplace("tankSpeed", WriteScalar(nativeResult.tankSpeed));
-	outputFields.emplace("kbotSpeed", WriteScalar(nativeResult.kbotSpeed));
-	outputFields.emplace("hoverSpeed", WriteScalar(nativeResult.hoverSpeed));
-	outputFields.emplace("shipSpeed", WriteScalar(nativeResult.shipSpeed));
-	outputFields.emplace("receiveTracks", WriteScalar(nativeResult.receiveTracks));
+	outputFields.emplace("tank-speed", WriteScalar(nativeResult.tankSpeed));
+	outputFields.emplace("kbot-speed", WriteScalar(nativeResult.kbotSpeed));
+	outputFields.emplace("hover-speed", WriteScalar(nativeResult.hoverSpeed));
+	outputFields.emplace("ship-speed", WriteScalar(nativeResult.shipSpeed));
+	outputFields.emplace("receive-tracks", WriteScalar(nativeResult.receiveTracks));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -780,7 +780,7 @@ NativeCalloutDispatch Dispatch_terrain_GetWaterPlaneLevel(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetWaterPlaneLevelQuery query{};
 	GetWaterPlaneLevelResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->terrain->GetWaterPlaneLevel(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.level);
@@ -798,8 +798,8 @@ NativeCalloutDispatch Dispatch_terrain_IsPosInMap(NativeInterface* nativeInterfa
 	nativeInterface->terrain->IsPosInMap(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("inMap", WriteScalar(nativeResult.inMap));
-	outputFields.emplace("inPlayArea", WriteScalar(nativeResult.inPlayArea));
+	outputFields.emplace("in-map", WriteScalar(nativeResult.inMap));
+	outputFields.emplace("in-play-area", WriteScalar(nativeResult.inPlayArea));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }

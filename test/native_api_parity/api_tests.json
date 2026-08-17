@@ -28,6 +28,7 @@
     "api_tests/unsynced_control_calls_02.json",
     "api_tests/tracing_01.json",
     "api_tests/selection_01.json",
+    "api_tests/ui_visibility_01.json",
     "api_tests/units_01.json",
     "api_tests/units_02.json",
     "api_tests/units_03.json",

@@ -77,7 +77,7 @@
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetGroupList`", "native_getter": "`Selection.get_group_list`", "fields": "`count`"},
       "rust": {"check": "check_selection_value", "set": "set_noop"},
       "params": {},
-      "lua_runtime": {"call": "Spring.GetGroupList", "args": [], "returns": [{"field": "count", "index": 2}]}
+      "lua_runtime": {"call": "Spring.GetGroupList", "args": [], "returns": [{"field": "count", "index": 2, "transform": "table_count"}]}
     },
     {
       "id": "unit_group",

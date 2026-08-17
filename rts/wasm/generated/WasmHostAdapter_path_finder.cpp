@@ -12,7 +12,7 @@ bool Read_DeletePathQuery(const WasmValue& input, DeletePathQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_pathID = FindRecordField(*record, "pathID", error);
+	const auto* value_pathID = FindRecordField(*record, "path-id", error);
 	if (value_pathID == nullptr) return false;
 	if (!ReadScalar(*value_pathID, output.pathID, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_DeletePathQuery(const WasmValue& input, DeletePathQuery& output, Nativ
 WasmValue Write_DeletePathQuery(const DeletePathQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("pathID", WriteScalar(value.pathID));
+	fields.emplace("path-id", WriteScalar(value.pathID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -46,7 +46,7 @@ bool Read_FreePathNodeCostsArrayQuery(const WasmValue& input, FreePathNodeCostsA
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_overlayIndex = FindRecordField(*record, "overlayIndex", error);
+	const auto* value_overlayIndex = FindRecordField(*record, "overlay-index", error);
 	if (value_overlayIndex == nullptr) return false;
 	if (!ReadScalar(*value_overlayIndex, output.overlayIndex, error)) { return false; }
 	return true;
@@ -55,7 +55,7 @@ bool Read_FreePathNodeCostsArrayQuery(const WasmValue& input, FreePathNodeCostsA
 WasmValue Write_FreePathNodeCostsArrayQuery(const FreePathNodeCostsArrayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("overlayIndex", WriteScalar(value.overlayIndex));
+	fields.emplace("overlay-index", WriteScalar(value.overlayIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -80,13 +80,13 @@ bool Read_GetNextWayPointQuery(const WasmValue& input, GetNextWayPointQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_pathID = FindRecordField(*record, "pathID", error);
+	const auto* value_pathID = FindRecordField(*record, "path-id", error);
 	if (value_pathID == nullptr) return false;
 	if (!ReadScalar(*value_pathID, output.pathID, error)) { return false; }
-	const auto* value_callerPos = FindRecordField(*record, "callerPos", error);
+	const auto* value_callerPos = FindRecordField(*record, "caller-pos", error);
 	if (value_callerPos == nullptr) return false;
 	if (!Read_Float3(*value_callerPos, output.callerPos, storage, error)) { return false; }
-	const auto* value_minDist = FindRecordField(*record, "minDist", error);
+	const auto* value_minDist = FindRecordField(*record, "min-dist", error);
 	if (value_minDist == nullptr) return false;
 	if (!ReadScalar(*value_minDist, output.minDist, error)) { return false; }
 	return true;
@@ -95,9 +95,9 @@ bool Read_GetNextWayPointQuery(const WasmValue& input, GetNextWayPointQuery& out
 WasmValue Write_GetNextWayPointQuery(const GetNextWayPointQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("pathID", WriteScalar(value.pathID));
-	fields.emplace("callerPos", Write_Float3(value.callerPos));
-	fields.emplace("minDist", WriteScalar(value.minDist));
+	fields.emplace("path-id", WriteScalar(value.pathID));
+	fields.emplace("caller-pos", Write_Float3(value.callerPos));
+	fields.emplace("min-dist", WriteScalar(value.minDist));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -166,7 +166,7 @@ bool Read_GetPathNodeCostsQuery(const WasmValue& input, GetPathNodeCostsQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_overlayIndex = FindRecordField(*record, "overlayIndex", error);
+	const auto* value_overlayIndex = FindRecordField(*record, "overlay-index", error);
 	if (value_overlayIndex == nullptr) return false;
 	if (!ReadScalar(*value_overlayIndex, output.overlayIndex, error)) { return false; }
 	return true;
@@ -175,7 +175,7 @@ bool Read_GetPathNodeCostsQuery(const WasmValue& input, GetPathNodeCostsQuery& o
 WasmValue Write_GetPathNodeCostsQuery(const GetPathNodeCostsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("overlayIndex", WriteScalar(value.overlayIndex));
+	fields.emplace("overlay-index", WriteScalar(value.overlayIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -210,7 +210,7 @@ bool Read_GetPathWayPointsQuery(const WasmValue& input, GetPathWayPointsQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_pathID = FindRecordField(*record, "pathID", error);
+	const auto* value_pathID = FindRecordField(*record, "path-id", error);
 	if (value_pathID == nullptr) return false;
 	if (!ReadScalar(*value_pathID, output.pathID, error)) { return false; }
 	return true;
@@ -219,7 +219,7 @@ bool Read_GetPathWayPointsQuery(const WasmValue& input, GetPathWayPointsQuery& o
 WasmValue Write_GetPathWayPointsQuery(const GetPathWayPointsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("pathID", WriteScalar(value.pathID));
+	fields.emplace("path-id", WriteScalar(value.pathID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -268,13 +268,13 @@ bool Read_InitPathNodeCostsArrayQuery(const WasmValue& input, InitPathNodeCostsA
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_overlayIndex = FindRecordField(*record, "overlayIndex", error);
+	const auto* value_overlayIndex = FindRecordField(*record, "overlay-index", error);
 	if (value_overlayIndex == nullptr) return false;
 	if (!ReadScalar(*value_overlayIndex, output.overlayIndex, error)) { return false; }
-	const auto* value_sizeX = FindRecordField(*record, "sizeX", error);
+	const auto* value_sizeX = FindRecordField(*record, "size-x", error);
 	if (value_sizeX == nullptr) return false;
 	if (!ReadScalar(*value_sizeX, output.sizeX, error)) { return false; }
-	const auto* value_sizeZ = FindRecordField(*record, "sizeZ", error);
+	const auto* value_sizeZ = FindRecordField(*record, "size-z", error);
 	if (value_sizeZ == nullptr) return false;
 	if (!ReadScalar(*value_sizeZ, output.sizeZ, error)) { return false; }
 	return true;
@@ -283,9 +283,9 @@ bool Read_InitPathNodeCostsArrayQuery(const WasmValue& input, InitPathNodeCostsA
 WasmValue Write_InitPathNodeCostsArrayQuery(const InitPathNodeCostsArrayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("overlayIndex", WriteScalar(value.overlayIndex));
-	fields.emplace("sizeX", WriteScalar(value.sizeX));
-	fields.emplace("sizeZ", WriteScalar(value.sizeZ));
+	fields.emplace("overlay-index", WriteScalar(value.overlayIndex));
+	fields.emplace("size-x", WriteScalar(value.sizeX));
+	fields.emplace("size-z", WriteScalar(value.sizeZ));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -310,10 +310,10 @@ bool Read_RequestPathQuery(const WasmValue& input, RequestPathQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_moveDefID = FindRecordField(*record, "moveDefID", error);
+	const auto* value_moveDefID = FindRecordField(*record, "move-def-id", error);
 	if (value_moveDefID == nullptr) return false;
 	if (!ReadScalar(*value_moveDefID, output.moveDefID, error)) { return false; }
-	const auto* value_moveDefName = FindRecordField(*record, "moveDefName", error);
+	const auto* value_moveDefName = FindRecordField(*record, "move-def-name", error);
 	if (value_moveDefName == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_moveDefName).storage)) {
 		output.moveDefName = {};
@@ -324,10 +324,10 @@ bool Read_RequestPathQuery(const WasmValue& input, RequestPathQuery& output, Nat
 		if (!ReadString(*value_moveDefName, stored_string_output_moveDefName, error)) { return false; }
 		output.moveDefName = stored_string_output_moveDefName.c_str();
 	}
-	const auto* value_startPos = FindRecordField(*record, "startPos", error);
+	const auto* value_startPos = FindRecordField(*record, "start-pos", error);
 	if (value_startPos == nullptr) return false;
 	if (!Read_Float3(*value_startPos, output.startPos, storage, error)) { return false; }
-	const auto* value_endPos = FindRecordField(*record, "endPos", error);
+	const auto* value_endPos = FindRecordField(*record, "end-pos", error);
 	if (value_endPos == nullptr) return false;
 	if (!Read_Float3(*value_endPos, output.endPos, storage, error)) { return false; }
 	const auto* value_radius = FindRecordField(*record, "radius", error);
@@ -339,10 +339,10 @@ bool Read_RequestPathQuery(const WasmValue& input, RequestPathQuery& output, Nat
 WasmValue Write_RequestPathQuery(const RequestPathQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("moveDefID", WriteScalar(value.moveDefID));
-	fields.emplace("moveDefName", value.hasMoveDefName ? WasmValue::String((value.moveDefName == nullptr) ? std::string{} : std::string(value.moveDefName)) : WasmValue::Unit());
-	fields.emplace("startPos", Write_Float3(value.startPos));
-	fields.emplace("endPos", Write_Float3(value.endPos));
+	fields.emplace("move-def-id", WriteScalar(value.moveDefID));
+	fields.emplace("move-def-name", value.hasMoveDefName ? WasmValue::String((value.moveDefName == nullptr) ? std::string{} : std::string(value.moveDefName)) : WasmValue::Unit());
+	fields.emplace("start-pos", Write_Float3(value.startPos));
+	fields.emplace("end-pos", Write_Float3(value.endPos));
 	fields.emplace("radius", WriteScalar(value.radius));
 	return WasmValue::Record(std::move(fields));
 }
@@ -351,7 +351,7 @@ bool Read_RequestPathResult(const WasmValue& input, RequestPathResult& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_pathID = FindRecordField(*record, "pathID", error);
+	const auto* value_pathID = FindRecordField(*record, "path-id", error);
 	if (value_pathID == nullptr) return false;
 	if (!ReadScalar(*value_pathID, output.pathID, error)) { return false; }
 	return true;
@@ -360,7 +360,7 @@ bool Read_RequestPathResult(const WasmValue& input, RequestPathResult& output, N
 WasmValue Write_RequestPathResult(const RequestPathResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("pathID", WriteScalar(value.pathID));
+	fields.emplace("path-id", WriteScalar(value.pathID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -368,10 +368,10 @@ bool Read_SetPathNodeCostQuery(const WasmValue& input, SetPathNodeCostQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_overlayIndex = FindRecordField(*record, "overlayIndex", error);
+	const auto* value_overlayIndex = FindRecordField(*record, "overlay-index", error);
 	if (value_overlayIndex == nullptr) return false;
 	if (!ReadScalar(*value_overlayIndex, output.overlayIndex, error)) { return false; }
-	const auto* value_costIndex = FindRecordField(*record, "costIndex", error);
+	const auto* value_costIndex = FindRecordField(*record, "cost-index", error);
 	if (value_costIndex == nullptr) return false;
 	if (!ReadScalar(*value_costIndex, output.costIndex, error)) { return false; }
 	const auto* value_cost = FindRecordField(*record, "cost", error);
@@ -383,8 +383,8 @@ bool Read_SetPathNodeCostQuery(const WasmValue& input, SetPathNodeCostQuery& out
 WasmValue Write_SetPathNodeCostQuery(const SetPathNodeCostQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("overlayIndex", WriteScalar(value.overlayIndex));
-	fields.emplace("costIndex", WriteScalar(value.costIndex));
+	fields.emplace("overlay-index", WriteScalar(value.overlayIndex));
+	fields.emplace("cost-index", WriteScalar(value.costIndex));
 	fields.emplace("cost", WriteScalar(value.cost));
 	return WasmValue::Record(std::move(fields));
 }
@@ -410,7 +410,7 @@ bool Read_SetPathNodeCostsQuery(const WasmValue& input, SetPathNodeCostsQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_overlayIndex = FindRecordField(*record, "overlayIndex", error);
+	const auto* value_overlayIndex = FindRecordField(*record, "overlay-index", error);
 	if (value_overlayIndex == nullptr) return false;
 	if (!ReadScalar(*value_overlayIndex, output.overlayIndex, error)) { return false; }
 	return true;
@@ -419,7 +419,7 @@ bool Read_SetPathNodeCostsQuery(const WasmValue& input, SetPathNodeCostsQuery& o
 WasmValue Write_SetPathNodeCostsQuery(const SetPathNodeCostsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("overlayIndex", WriteScalar(value.overlayIndex));
+	fields.emplace("overlay-index", WriteScalar(value.overlayIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -450,7 +450,7 @@ NativeCalloutDispatch Dispatch_path_finder_DeletePath(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	DeletePathQuery query{};
 	DeletePathResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "pathID", query.pathID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "path-id", query.pathID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->DeletePath(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -463,7 +463,7 @@ NativeCalloutDispatch Dispatch_path_finder_FreePathNodeCostsArray(NativeInterfac
 	NativeCallStorage storage;
 	FreePathNodeCostsArrayQuery query{};
 	FreePathNodeCostsArrayResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "overlayIndex", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "overlay-index", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->FreePathNodeCostsArray(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -476,9 +476,9 @@ NativeCalloutDispatch Dispatch_path_finder_GetNextWayPoint(NativeInterface* nati
 	NativeCallStorage storage;
 	GetNextWayPointQuery query{};
 	GetNextWayPointResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "pathID", query.pathID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "callerPos", Read_Float3, query.callerPos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "minDist", query.minDist, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "path-id", query.pathID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 1u, 1u, 3u, 3u, "caller-pos", Read_Float3, query.callerPos, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "min-dist", query.minDist, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->GetNextWayPoint(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = nativeResult.hasWaypoint ? Write_Float3(nativeResult.waypoint) : WasmValue::Unit();
@@ -505,7 +505,7 @@ NativeCalloutDispatch Dispatch_path_finder_GetPathNodeCosts(NativeInterface* nat
 	NativeCallStorage storage;
 	GetPathNodeCostsQuery query{};
 	GetPathNodeCostsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "overlayIndex", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "overlay-index", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->GetPathNodeCosts(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.costs, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -518,7 +518,7 @@ NativeCalloutDispatch Dispatch_path_finder_GetPathWayPoints(NativeInterface* nat
 	NativeCallStorage storage;
 	GetPathWayPointsQuery query{};
 	GetPathWayPointsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "pathID", query.pathID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "path-id", query.pathID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->GetPathWayPoints(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -534,9 +534,9 @@ NativeCalloutDispatch Dispatch_path_finder_InitPathNodeCostsArray(NativeInterfac
 	NativeCallStorage storage;
 	InitPathNodeCostsArrayQuery query{};
 	InitPathNodeCostsArrayResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "overlayIndex", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "sizeX", query.sizeX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "sizeZ", query.sizeZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "overlay-index", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "size-x", query.sizeX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "size-z", query.sizeZ, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->InitPathNodeCostsArray(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -549,8 +549,8 @@ NativeCalloutDispatch Dispatch_path_finder_RequestPath(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RequestPathQuery query{};
 	RequestPathResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "moveDefID", query.moveDefID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_moveDefName = FindArgument(arguments, 1u, 1u, 5u, 5u, "moveDefName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "move-def-id", query.moveDefID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_moveDefName = FindArgument(arguments, 1u, 1u, 5u, 5u, "move-def-name", error);
 	if (value_moveDefName == nullptr) return NativeCalloutDispatch::handled;
 	if (std::holds_alternative<std::monostate>((*value_moveDefName).storage)) {
 		query.moveDefName = {};
@@ -561,8 +561,8 @@ NativeCalloutDispatch Dispatch_path_finder_RequestPath(NativeInterface* nativeIn
 		if (!ReadString(*value_moveDefName, stored_string_query_moveDefName, error)) { return NativeCalloutDispatch::handled; }
 		query.moveDefName = stored_string_query_moveDefName.c_str();
 	}
-	if (!ReadRecordArgument(arguments, 2u, 2u, 5u, 5u, "startPos", Read_Float3, query.startPos, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadRecordArgument(arguments, 3u, 3u, 5u, 5u, "endPos", Read_Float3, query.endPos, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 2u, 2u, 5u, 5u, "start-pos", Read_Float3, query.startPos, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 3u, 3u, 5u, 5u, "end-pos", Read_Float3, query.endPos, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "radius", query.radius, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->RequestPath(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -576,8 +576,8 @@ NativeCalloutDispatch Dispatch_path_finder_SetPathNodeCost(NativeInterface* nati
 	NativeCallStorage storage;
 	SetPathNodeCostQuery query{};
 	SetPathNodeCostResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "overlayIndex", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "costIndex", query.costIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "overlay-index", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "cost-index", query.costIndex, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "cost", query.cost, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->SetPathNodeCost(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -591,7 +591,7 @@ NativeCalloutDispatch Dispatch_path_finder_SetPathNodeCosts(NativeInterface* nat
 	NativeCallStorage storage;
 	SetPathNodeCostsQuery query{};
 	SetPathNodeCostsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "overlayIndex", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "overlay-index", query.overlayIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->pathFinder->SetPathNodeCosts(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

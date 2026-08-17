@@ -58,6 +58,7 @@ fn run() -> Result<()> {
     let callin_header = root.join("rts/NativeInterface/NativeInterfaceEventClient.h");
     callins::validate_names(&callin_path, &callin_header)?;
     let callin_model = callins::parse(&callin_path)?;
+    callins::validate_synced_environments(&callin_model, &root.join("rts/Lua/LuaHandleSynced.h"))?;
     let version = extract_api_version(&api_dir.join("Common.h"))?;
     let mut model = ApiModel {
         model_version: 1,

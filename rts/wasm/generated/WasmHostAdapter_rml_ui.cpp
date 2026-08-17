@@ -54,7 +54,7 @@ bool Read_RmlClearDocumentPathRequestsQuery(const WasmValue& input, RmlClearDocu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentPath = FindRecordField(*record, "documentPath", error);
+	const auto* value_documentPath = FindRecordField(*record, "document-path", error);
 	if (value_documentPath == nullptr) return false;
 	auto& stored_string_output_documentPath = storage.Make<std::string>();
 	if (!ReadString(*value_documentPath, stored_string_output_documentPath, error)) { return false; }
@@ -65,7 +65,7 @@ bool Read_RmlClearDocumentPathRequestsQuery(const WasmValue& input, RmlClearDocu
 WasmValue Write_RmlClearDocumentPathRequestsQuery(const RmlClearDocumentPathRequestsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentPath", WasmValue::String((value.documentPath == nullptr) ? std::string{} : std::string(value.documentPath)));
+	fields.emplace("document-path", WasmValue::String((value.documentPath == nullptr) ? std::string{} : std::string(value.documentPath)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -90,7 +90,7 @@ bool Read_RmlClearTranslationsQuery(const WasmValue& input, RmlClearTranslations
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -99,7 +99,7 @@ bool Read_RmlClearTranslationsQuery(const WasmValue& input, RmlClearTranslations
 WasmValue Write_RmlClearTranslationsQuery(const RmlClearTranslationsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -124,7 +124,7 @@ bool Read_RmlContextBoolQuery(const WasmValue& input, RmlContextBoolQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -136,7 +136,7 @@ bool Read_RmlContextBoolQuery(const WasmValue& input, RmlContextBoolQuery& outpu
 WasmValue Write_RmlContextBoolQuery(const RmlContextBoolQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -162,7 +162,7 @@ bool Read_RmlContextCreateDataModelQuery(const WasmValue& input, RmlContextCreat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -176,7 +176,7 @@ bool Read_RmlContextCreateDataModelQuery(const WasmValue& input, RmlContextCreat
 WasmValue Write_RmlContextCreateDataModelQuery(const RmlContextCreateDataModelQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -185,7 +185,7 @@ bool Read_RmlContextCreateDocumentQuery(const WasmValue& input, RmlContextCreate
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_tag = FindRecordField(*record, "tag", error);
@@ -199,7 +199,7 @@ bool Read_RmlContextCreateDocumentQuery(const WasmValue& input, RmlContextCreate
 WasmValue Write_RmlContextCreateDocumentQuery(const RmlContextCreateDocumentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("tag", WasmValue::String((value.tag == nullptr) ? std::string{} : std::string(value.tag)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -208,7 +208,7 @@ bool Read_RmlContextCreateDocumentResult(const WasmValue& input, RmlContextCreat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -220,7 +220,7 @@ bool Read_RmlContextCreateDocumentResult(const WasmValue& input, RmlContextCreat
 WasmValue Write_RmlContextCreateDocumentResult(const RmlContextCreateDocumentResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -229,10 +229,10 @@ bool Read_RmlContextDocumentQuery(const WasmValue& input, RmlContextDocumentQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	return true;
@@ -241,8 +241,8 @@ bool Read_RmlContextDocumentQuery(const WasmValue& input, RmlContextDocumentQuer
 WasmValue Write_RmlContextDocumentQuery(const RmlContextDocumentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -250,10 +250,10 @@ bool Read_RmlContextEventListenerRemoveQuery(const WasmValue& input, RmlContextE
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
-	const auto* value_eventListenerHandle = FindRecordField(*record, "eventListenerHandle", error);
+	const auto* value_eventListenerHandle = FindRecordField(*record, "event-listener-handle", error);
 	if (value_eventListenerHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventListenerHandle, output.eventListenerHandle, error)) { return false; }
 	const auto* value_event = FindRecordField(*record, "event", error);
@@ -261,7 +261,7 @@ bool Read_RmlContextEventListenerRemoveQuery(const WasmValue& input, RmlContextE
 	auto& stored_string_output_event = storage.Make<std::string>();
 	if (!ReadString(*value_event, stored_string_output_event, error)) { return false; }
 	output.event = stored_string_output_event.c_str();
-	const auto* value_inCapturePhase = FindRecordField(*record, "inCapturePhase", error);
+	const auto* value_inCapturePhase = FindRecordField(*record, "in-capture-phase", error);
 	if (value_inCapturePhase == nullptr) return false;
 	if (!ReadScalar(*value_inCapturePhase, output.inCapturePhase, error)) { return false; }
 	return true;
@@ -270,10 +270,10 @@ bool Read_RmlContextEventListenerRemoveQuery(const WasmValue& input, RmlContextE
 WasmValue Write_RmlContextEventListenerRemoveQuery(const RmlContextEventListenerRemoveQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
-	fields.emplace("eventListenerHandle", WriteScalar(value.eventListenerHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
+	fields.emplace("event-listener-handle", WriteScalar(value.eventListenerHandle));
 	fields.emplace("event", WasmValue::String((value.event == nullptr) ? std::string{} : std::string(value.event)));
-	fields.emplace("inCapturePhase", WriteScalar(value.inCapturePhase));
+	fields.emplace("in-capture-phase", WriteScalar(value.inCapturePhase));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -302,7 +302,7 @@ bool Read_RmlContextGetDocumentQuery(const WasmValue& input, RmlContextGetDocume
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -316,7 +316,7 @@ bool Read_RmlContextGetDocumentQuery(const WasmValue& input, RmlContextGetDocume
 WasmValue Write_RmlContextGetDocumentQuery(const RmlContextGetDocumentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -325,7 +325,7 @@ bool Read_RmlContextGetDocumentResult(const WasmValue& input, RmlContextGetDocum
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	const auto* value_exists = FindRecordField(*record, "exists", error);
@@ -337,7 +337,7 @@ bool Read_RmlContextGetDocumentResult(const WasmValue& input, RmlContextGetDocum
 WasmValue Write_RmlContextGetDocumentResult(const RmlContextGetDocumentResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	fields.emplace("exists", WriteScalar(value.exists));
 	return WasmValue::Record(std::move(fields));
 }
@@ -346,7 +346,7 @@ bool Read_RmlContextGetElementAtPointQuery(const WasmValue& input, RmlContextGet
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_x = FindRecordField(*record, "x", error);
@@ -355,7 +355,7 @@ bool Read_RmlContextGetElementAtPointQuery(const WasmValue& input, RmlContextGet
 	const auto* value_y = FindRecordField(*record, "y", error);
 	if (value_y == nullptr) return false;
 	if (!ReadScalar(*value_y, output.y, error)) { return false; }
-	const auto* value_ignoreElementHandle = FindRecordField(*record, "ignoreElementHandle", error);
+	const auto* value_ignoreElementHandle = FindRecordField(*record, "ignore-element-handle", error);
 	if (value_ignoreElementHandle == nullptr) return false;
 	if (!ReadScalar(*value_ignoreElementHandle, output.ignoreElementHandle, error)) { return false; }
 	return true;
@@ -364,10 +364,10 @@ bool Read_RmlContextGetElementAtPointQuery(const WasmValue& input, RmlContextGet
 WasmValue Write_RmlContextGetElementAtPointQuery(const RmlContextGetElementAtPointQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("y", WriteScalar(value.y));
-	fields.emplace("ignoreElementHandle", WriteScalar(value.ignoreElementHandle));
+	fields.emplace("ignore-element-handle", WriteScalar(value.ignoreElementHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -375,7 +375,7 @@ bool Read_RmlContextGetElementAtPointResult(const WasmValue& input, RmlContextGe
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_exists = FindRecordField(*record, "exists", error);
@@ -387,7 +387,7 @@ bool Read_RmlContextGetElementAtPointResult(const WasmValue& input, RmlContextGe
 WasmValue Write_RmlContextGetElementAtPointResult(const RmlContextGetElementAtPointResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("exists", WriteScalar(value.exists));
 	return WasmValue::Record(std::move(fields));
 }
@@ -396,7 +396,7 @@ bool Read_RmlContextGetElementResult(const WasmValue& input, RmlContextGetElemen
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_exists = FindRecordField(*record, "exists", error);
@@ -408,7 +408,7 @@ bool Read_RmlContextGetElementResult(const WasmValue& input, RmlContextGetElemen
 WasmValue Write_RmlContextGetElementResult(const RmlContextGetElementResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("exists", WriteScalar(value.exists));
 	return WasmValue::Record(std::move(fields));
 }
@@ -453,7 +453,7 @@ bool Read_RmlContextHandleQuery(const WasmValue& input, RmlContextHandleQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	return true;
@@ -462,7 +462,7 @@ bool Read_RmlContextHandleQuery(const WasmValue& input, RmlContextHandleQuery& o
 WasmValue Write_RmlContextHandleQuery(const RmlContextHandleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -470,13 +470,13 @@ bool Read_RmlContextKeyQuery(const WasmValue& input, RmlContextKeyQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_key = FindRecordField(*record, "key", error);
 	if (value_key == nullptr) return false;
 	if (!ReadScalar(*value_key, output.key, error)) { return false; }
-	const auto* value_keyModifierState = FindRecordField(*record, "keyModifierState", error);
+	const auto* value_keyModifierState = FindRecordField(*record, "key-modifier-state", error);
 	if (value_keyModifierState == nullptr) return false;
 	if (!ReadScalar(*value_keyModifierState, output.keyModifierState, error)) { return false; }
 	return true;
@@ -485,9 +485,9 @@ bool Read_RmlContextKeyQuery(const WasmValue& input, RmlContextKeyQuery& output,
 WasmValue Write_RmlContextKeyQuery(const RmlContextKeyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("key", WriteScalar(value.key));
-	fields.emplace("keyModifierState", WriteScalar(value.keyModifierState));
+	fields.emplace("key-modifier-state", WriteScalar(value.keyModifierState));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -495,10 +495,10 @@ bool Read_RmlContextLoadDocumentQuery(const WasmValue& input, RmlContextLoadDocu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
-	const auto* value_documentPath = FindRecordField(*record, "documentPath", error);
+	const auto* value_documentPath = FindRecordField(*record, "document-path", error);
 	if (value_documentPath == nullptr) return false;
 	auto& stored_string_output_documentPath = storage.Make<std::string>();
 	if (!ReadString(*value_documentPath, stored_string_output_documentPath, error)) { return false; }
@@ -509,8 +509,8 @@ bool Read_RmlContextLoadDocumentQuery(const WasmValue& input, RmlContextLoadDocu
 WasmValue Write_RmlContextLoadDocumentQuery(const RmlContextLoadDocumentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
-	fields.emplace("documentPath", WasmValue::String((value.documentPath == nullptr) ? std::string{} : std::string(value.documentPath)));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
+	fields.emplace("document-path", WasmValue::String((value.documentPath == nullptr) ? std::string{} : std::string(value.documentPath)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -518,7 +518,7 @@ bool Read_RmlContextLoadDocumentResult(const WasmValue& input, RmlContextLoadDoc
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -530,7 +530,7 @@ bool Read_RmlContextLoadDocumentResult(const WasmValue& input, RmlContextLoadDoc
 WasmValue Write_RmlContextLoadDocumentResult(const RmlContextLoadDocumentResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -539,13 +539,13 @@ bool Read_RmlContextMouseButtonQuery(const WasmValue& input, RmlContextMouseButt
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_button = FindRecordField(*record, "button", error);
 	if (value_button == nullptr) return false;
 	if (!ReadScalar(*value_button, output.button, error)) { return false; }
-	const auto* value_keyModifierState = FindRecordField(*record, "keyModifierState", error);
+	const auto* value_keyModifierState = FindRecordField(*record, "key-modifier-state", error);
 	if (value_keyModifierState == nullptr) return false;
 	if (!ReadScalar(*value_keyModifierState, output.keyModifierState, error)) { return false; }
 	return true;
@@ -554,9 +554,9 @@ bool Read_RmlContextMouseButtonQuery(const WasmValue& input, RmlContextMouseButt
 WasmValue Write_RmlContextMouseButtonQuery(const RmlContextMouseButtonQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("button", WriteScalar(value.button));
-	fields.emplace("keyModifierState", WriteScalar(value.keyModifierState));
+	fields.emplace("key-modifier-state", WriteScalar(value.keyModifierState));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -564,7 +564,7 @@ bool Read_RmlContextMouseMoveQuery(const WasmValue& input, RmlContextMouseMoveQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_x = FindRecordField(*record, "x", error);
@@ -573,7 +573,7 @@ bool Read_RmlContextMouseMoveQuery(const WasmValue& input, RmlContextMouseMoveQu
 	const auto* value_y = FindRecordField(*record, "y", error);
 	if (value_y == nullptr) return false;
 	if (!ReadScalar(*value_y, output.y, error)) { return false; }
-	const auto* value_keyModifierState = FindRecordField(*record, "keyModifierState", error);
+	const auto* value_keyModifierState = FindRecordField(*record, "key-modifier-state", error);
 	if (value_keyModifierState == nullptr) return false;
 	if (!ReadScalar(*value_keyModifierState, output.keyModifierState, error)) { return false; }
 	return true;
@@ -582,10 +582,10 @@ bool Read_RmlContextMouseMoveQuery(const WasmValue& input, RmlContextMouseMoveQu
 WasmValue Write_RmlContextMouseMoveQuery(const RmlContextMouseMoveQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("y", WriteScalar(value.y));
-	fields.emplace("keyModifierState", WriteScalar(value.keyModifierState));
+	fields.emplace("key-modifier-state", WriteScalar(value.keyModifierState));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -593,7 +593,7 @@ bool Read_RmlContextMouseWheelQuery(const WasmValue& input, RmlContextMouseWheel
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_x = FindRecordField(*record, "x", error);
@@ -602,7 +602,7 @@ bool Read_RmlContextMouseWheelQuery(const WasmValue& input, RmlContextMouseWheel
 	const auto* value_y = FindRecordField(*record, "y", error);
 	if (value_y == nullptr) return false;
 	if (!ReadScalar(*value_y, output.y, error)) { return false; }
-	const auto* value_keyModifierState = FindRecordField(*record, "keyModifierState", error);
+	const auto* value_keyModifierState = FindRecordField(*record, "key-modifier-state", error);
 	if (value_keyModifierState == nullptr) return false;
 	if (!ReadScalar(*value_keyModifierState, output.keyModifierState, error)) { return false; }
 	return true;
@@ -611,10 +611,10 @@ bool Read_RmlContextMouseWheelQuery(const WasmValue& input, RmlContextMouseWheel
 WasmValue Write_RmlContextMouseWheelQuery(const RmlContextMouseWheelQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("y", WriteScalar(value.y));
-	fields.emplace("keyModifierState", WriteScalar(value.keyModifierState));
+	fields.emplace("key-modifier-state", WriteScalar(value.keyModifierState));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -622,7 +622,7 @@ bool Read_RmlContextOpenDataModelQuery(const WasmValue& input, RmlContextOpenDat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -636,7 +636,7 @@ bool Read_RmlContextOpenDataModelQuery(const WasmValue& input, RmlContextOpenDat
 WasmValue Write_RmlContextOpenDataModelQuery(const RmlContextOpenDataModelQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -645,7 +645,7 @@ bool Read_RmlContextOpenDataModelResult(const WasmValue& input, RmlContextOpenDa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -657,7 +657,7 @@ bool Read_RmlContextOpenDataModelResult(const WasmValue& input, RmlContextOpenDa
 WasmValue Write_RmlContextOpenDataModelResult(const RmlContextOpenDataModelResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -666,13 +666,13 @@ bool Read_RmlContextPointerCaptureQuery(const WasmValue& input, RmlContextPointe
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
-	const auto* value_anchorX = FindRecordField(*record, "anchorX", error);
+	const auto* value_anchorX = FindRecordField(*record, "anchor-x", error);
 	if (value_anchorX == nullptr) return false;
 	if (!ReadScalar(*value_anchorX, output.anchorX, error)) { return false; }
-	const auto* value_anchorY = FindRecordField(*record, "anchorY", error);
+	const auto* value_anchorY = FindRecordField(*record, "anchor-y", error);
 	if (value_anchorY == nullptr) return false;
 	if (!ReadScalar(*value_anchorY, output.anchorY, error)) { return false; }
 	const auto* value_active = FindRecordField(*record, "active", error);
@@ -684,9 +684,9 @@ bool Read_RmlContextPointerCaptureQuery(const WasmValue& input, RmlContextPointe
 WasmValue Write_RmlContextPointerCaptureQuery(const RmlContextPointerCaptureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
-	fields.emplace("anchorX", WriteScalar(value.anchorX));
-	fields.emplace("anchorY", WriteScalar(value.anchorY));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
+	fields.emplace("anchor-x", WriteScalar(value.anchorX));
+	fields.emplace("anchor-y", WriteScalar(value.anchorY));
 	fields.emplace("active", WriteScalar(value.active));
 	return WasmValue::Record(std::move(fields));
 }
@@ -695,10 +695,10 @@ bool Read_RmlContextPointerDeltaResult(const WasmValue& input, RmlContextPointer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_deltaX = FindRecordField(*record, "deltaX", error);
+	const auto* value_deltaX = FindRecordField(*record, "delta-x", error);
 	if (value_deltaX == nullptr) return false;
 	if (!ReadScalar(*value_deltaX, output.deltaX, error)) { return false; }
-	const auto* value_deltaY = FindRecordField(*record, "deltaY", error);
+	const auto* value_deltaY = FindRecordField(*record, "delta-y", error);
 	if (value_deltaY == nullptr) return false;
 	if (!ReadScalar(*value_deltaY, output.deltaY, error)) { return false; }
 	const auto* value_status = FindRecordField(*record, "status", error);
@@ -710,8 +710,8 @@ bool Read_RmlContextPointerDeltaResult(const WasmValue& input, RmlContextPointer
 WasmValue Write_RmlContextPointerDeltaResult(const RmlContextPointerDeltaResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("deltaX", WriteScalar(value.deltaX));
-	fields.emplace("deltaY", WriteScalar(value.deltaY));
+	fields.emplace("delta-x", WriteScalar(value.deltaX));
+	fields.emplace("delta-y", WriteScalar(value.deltaY));
 	fields.emplace("status", WriteScalar(value.status));
 	return WasmValue::Record(std::move(fields));
 }
@@ -720,7 +720,7 @@ bool Read_RmlContextSetDimensionsQuery(const WasmValue& input, RmlContextSetDime
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_x = FindRecordField(*record, "x", error);
@@ -735,7 +735,7 @@ bool Read_RmlContextSetDimensionsQuery(const WasmValue& input, RmlContextSetDime
 WasmValue Write_RmlContextSetDimensionsQuery(const RmlContextSetDimensionsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("y", WriteScalar(value.y));
 	return WasmValue::Record(std::move(fields));
@@ -745,7 +745,7 @@ bool Read_RmlContextSetFloatQuery(const WasmValue& input, RmlContextSetFloatQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -757,7 +757,7 @@ bool Read_RmlContextSetFloatQuery(const WasmValue& input, RmlContextSetFloatQuer
 WasmValue Write_RmlContextSetFloatQuery(const RmlContextSetFloatQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -766,7 +766,7 @@ bool Read_RmlContextStringBoolQuery(const WasmValue& input, RmlContextStringBool
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -783,7 +783,7 @@ bool Read_RmlContextStringBoolQuery(const WasmValue& input, RmlContextStringBool
 WasmValue Write_RmlContextStringBoolQuery(const RmlContextStringBoolQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
@@ -793,7 +793,7 @@ bool Read_RmlContextStringQuery(const WasmValue& input, RmlContextStringQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -807,7 +807,7 @@ bool Read_RmlContextStringQuery(const WasmValue& input, RmlContextStringQuery& o
 WasmValue Write_RmlContextStringQuery(const RmlContextStringQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -816,7 +816,7 @@ bool Read_RmlContextTextInputQuery(const WasmValue& input, RmlContextTextInputQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_text = FindRecordField(*record, "text", error);
@@ -830,7 +830,7 @@ bool Read_RmlContextTextInputQuery(const WasmValue& input, RmlContextTextInputQu
 WasmValue Write_RmlContextTextInputQuery(const RmlContextTextInputQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("text", WasmValue::String((value.text == nullptr) ? std::string{} : std::string(value.text)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -858,7 +858,7 @@ bool Read_RmlCreateContextResult(const WasmValue& input, RmlCreateContextResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -870,7 +870,7 @@ bool Read_RmlCreateContextResult(const WasmValue& input, RmlCreateContextResult&
 WasmValue Write_RmlCreateContextResult(const RmlCreateContextResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -879,10 +879,10 @@ bool Read_RmlDataEventArgs(const WasmValue& input, RmlDataEventArgs& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventHandle = FindRecordField(*record, "eventHandle", error);
+	const auto* value_eventHandle = FindRecordField(*record, "event-handle", error);
 	if (value_eventHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventHandle, output.eventHandle, error)) { return false; }
-	const auto* value_targetElementHandle = FindRecordField(*record, "targetElementHandle", error);
+	const auto* value_targetElementHandle = FindRecordField(*record, "target-element-handle", error);
 	if (value_targetElementHandle == nullptr) return false;
 	if (!ReadScalar(*value_targetElementHandle, output.targetElementHandle, error)) { return false; }
 	const auto* value_values = FindRecordField(*record, "values", error);
@@ -904,8 +904,8 @@ bool Read_RmlDataEventArgs(const WasmValue& input, RmlDataEventArgs& output, Nat
 WasmValue Write_RmlDataEventArgs(const RmlDataEventArgs& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventHandle", WriteScalar(value.eventHandle));
-	fields.emplace("targetElementHandle", WriteScalar(value.targetElementHandle));
+	fields.emplace("event-handle", WriteScalar(value.eventHandle));
+	fields.emplace("target-element-handle", WriteScalar(value.targetElementHandle));
 	fields.emplace("values", WriteNativeList(value.values, value.count, [](const auto& value) { return Write_RmlDataValue(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -937,7 +937,7 @@ bool Read_RmlDataModelBindBoolQuery(const WasmValue& input, RmlDataModelBindBool
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -945,7 +945,7 @@ bool Read_RmlDataModelBindBoolQuery(const WasmValue& input, RmlDataModelBindBool
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_initialValue = FindRecordField(*record, "initialValue", error);
+	const auto* value_initialValue = FindRecordField(*record, "initial-value", error);
 	if (value_initialValue == nullptr) return false;
 	if (!ReadScalar(*value_initialValue, output.initialValue, error)) { return false; }
 	return true;
@@ -954,9 +954,9 @@ bool Read_RmlDataModelBindBoolQuery(const WasmValue& input, RmlDataModelBindBool
 WasmValue Write_RmlDataModelBindBoolQuery(const RmlDataModelBindBoolQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("initialValue", WriteScalar(value.initialValue));
+	fields.emplace("initial-value", WriteScalar(value.initialValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -964,7 +964,7 @@ bool Read_RmlDataModelBindColorQuery(const WasmValue& input, RmlDataModelBindCol
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -990,7 +990,7 @@ bool Read_RmlDataModelBindColorQuery(const WasmValue& input, RmlDataModelBindCol
 WasmValue Write_RmlDataModelBindColorQuery(const RmlDataModelBindColorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("red", WriteScalar(value.red));
 	fields.emplace("green", WriteScalar(value.green));
@@ -1003,7 +1003,7 @@ bool Read_RmlDataModelBindEventResult(const WasmValue& input, RmlDataModelBindEv
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventHandle = FindRecordField(*record, "eventHandle", error);
+	const auto* value_eventHandle = FindRecordField(*record, "event-handle", error);
 	if (value_eventHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventHandle, output.eventHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -1015,7 +1015,7 @@ bool Read_RmlDataModelBindEventResult(const WasmValue& input, RmlDataModelBindEv
 WasmValue Write_RmlDataModelBindEventResult(const RmlDataModelBindEventResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventHandle", WriteScalar(value.eventHandle));
+	fields.emplace("event-handle", WriteScalar(value.eventHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1024,7 +1024,7 @@ bool Read_RmlDataModelBindFloatQuery(const WasmValue& input, RmlDataModelBindFlo
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -1032,7 +1032,7 @@ bool Read_RmlDataModelBindFloatQuery(const WasmValue& input, RmlDataModelBindFlo
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_initialValue = FindRecordField(*record, "initialValue", error);
+	const auto* value_initialValue = FindRecordField(*record, "initial-value", error);
 	if (value_initialValue == nullptr) return false;
 	if (!ReadScalar(*value_initialValue, output.initialValue, error)) { return false; }
 	return true;
@@ -1041,9 +1041,9 @@ bool Read_RmlDataModelBindFloatQuery(const WasmValue& input, RmlDataModelBindFlo
 WasmValue Write_RmlDataModelBindFloatQuery(const RmlDataModelBindFloatQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("initialValue", WriteScalar(value.initialValue));
+	fields.emplace("initial-value", WriteScalar(value.initialValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1051,7 +1051,7 @@ bool Read_RmlDataModelBindIntQuery(const WasmValue& input, RmlDataModelBindIntQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -1059,7 +1059,7 @@ bool Read_RmlDataModelBindIntQuery(const WasmValue& input, RmlDataModelBindIntQu
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_initialValue = FindRecordField(*record, "initialValue", error);
+	const auto* value_initialValue = FindRecordField(*record, "initial-value", error);
 	if (value_initialValue == nullptr) return false;
 	if (!ReadScalar(*value_initialValue, output.initialValue, error)) { return false; }
 	return true;
@@ -1068,9 +1068,9 @@ bool Read_RmlDataModelBindIntQuery(const WasmValue& input, RmlDataModelBindIntQu
 WasmValue Write_RmlDataModelBindIntQuery(const RmlDataModelBindIntQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("initialValue", WriteScalar(value.initialValue));
+	fields.emplace("initial-value", WriteScalar(value.initialValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1078,7 +1078,7 @@ bool Read_RmlDataModelBindPercentQuery(const WasmValue& input, RmlDataModelBindP
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -1086,7 +1086,7 @@ bool Read_RmlDataModelBindPercentQuery(const WasmValue& input, RmlDataModelBindP
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_initialValue = FindRecordField(*record, "initialValue", error);
+	const auto* value_initialValue = FindRecordField(*record, "initial-value", error);
 	if (value_initialValue == nullptr) return false;
 	if (!ReadScalar(*value_initialValue, output.initialValue, error)) { return false; }
 	return true;
@@ -1095,9 +1095,9 @@ bool Read_RmlDataModelBindPercentQuery(const WasmValue& input, RmlDataModelBindP
 WasmValue Write_RmlDataModelBindPercentQuery(const RmlDataModelBindPercentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("initialValue", WriteScalar(value.initialValue));
+	fields.emplace("initial-value", WriteScalar(value.initialValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1105,7 +1105,7 @@ bool Read_RmlDataModelBindPixelsQuery(const WasmValue& input, RmlDataModelBindPi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -1113,7 +1113,7 @@ bool Read_RmlDataModelBindPixelsQuery(const WasmValue& input, RmlDataModelBindPi
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_initialValue = FindRecordField(*record, "initialValue", error);
+	const auto* value_initialValue = FindRecordField(*record, "initial-value", error);
 	if (value_initialValue == nullptr) return false;
 	if (!ReadScalar(*value_initialValue, output.initialValue, error)) { return false; }
 	return true;
@@ -1122,9 +1122,9 @@ bool Read_RmlDataModelBindPixelsQuery(const WasmValue& input, RmlDataModelBindPi
 WasmValue Write_RmlDataModelBindPixelsQuery(const RmlDataModelBindPixelsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("initialValue", WriteScalar(value.initialValue));
+	fields.emplace("initial-value", WriteScalar(value.initialValue));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1132,7 +1132,7 @@ bool Read_RmlDataModelBindResult(const WasmValue& input, RmlDataModelBindResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -1144,7 +1144,7 @@ bool Read_RmlDataModelBindResult(const WasmValue& input, RmlDataModelBindResult&
 WasmValue Write_RmlDataModelBindResult(const RmlDataModelBindResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1153,7 +1153,7 @@ bool Read_RmlDataModelBindRowsQuery(const WasmValue& input, RmlDataModelBindRows
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -1180,7 +1180,7 @@ bool Read_RmlDataModelBindRowsQuery(const WasmValue& input, RmlDataModelBindRows
 WasmValue Write_RmlDataModelBindRowsQuery(const RmlDataModelBindRowsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("fields", WriteNativeList(value.fields, value.fieldCount, [](const auto& value) { return Write_RmlDataFieldDef(value); }));
 	return WasmValue::Record(std::move(fields));
@@ -1190,7 +1190,7 @@ bool Read_RmlDataModelBindStringQuery(const WasmValue& input, RmlDataModelBindSt
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -1198,7 +1198,7 @@ bool Read_RmlDataModelBindStringQuery(const WasmValue& input, RmlDataModelBindSt
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_initialValue = FindRecordField(*record, "initialValue", error);
+	const auto* value_initialValue = FindRecordField(*record, "initial-value", error);
 	if (value_initialValue == nullptr) return false;
 	auto& stored_string_output_initialValue = storage.Make<std::string>();
 	if (!ReadString(*value_initialValue, stored_string_output_initialValue, error)) { return false; }
@@ -1209,9 +1209,9 @@ bool Read_RmlDataModelBindStringQuery(const WasmValue& input, RmlDataModelBindSt
 WasmValue Write_RmlDataModelBindStringQuery(const RmlDataModelBindStringQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("initialValue", WasmValue::String((value.initialValue == nullptr) ? std::string{} : std::string(value.initialValue)));
+	fields.emplace("initial-value", WasmValue::String((value.initialValue == nullptr) ? std::string{} : std::string(value.initialValue)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1219,7 +1219,7 @@ bool Read_RmlDataModelEventHandleQuery(const WasmValue& input, RmlDataModelEvent
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventHandle = FindRecordField(*record, "eventHandle", error);
+	const auto* value_eventHandle = FindRecordField(*record, "event-handle", error);
 	if (value_eventHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventHandle, output.eventHandle, error)) { return false; }
 	return true;
@@ -1228,7 +1228,7 @@ bool Read_RmlDataModelEventHandleQuery(const WasmValue& input, RmlDataModelEvent
 WasmValue Write_RmlDataModelEventHandleQuery(const RmlDataModelEventHandleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventHandle", WriteScalar(value.eventHandle));
+	fields.emplace("event-handle", WriteScalar(value.eventHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1397,7 +1397,7 @@ bool Read_RmlDataModelRowsResult(const WasmValue& input, RmlDataModelRowsResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_rowsHandle = FindRecordField(*record, "rowsHandle", error);
+	const auto* value_rowsHandle = FindRecordField(*record, "rows-handle", error);
 	if (value_rowsHandle == nullptr) return false;
 	if (!ReadScalar(*value_rowsHandle, output.rowsHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -1409,7 +1409,7 @@ bool Read_RmlDataModelRowsResult(const WasmValue& input, RmlDataModelRowsResult&
 WasmValue Write_RmlDataModelRowsResult(const RmlDataModelRowsResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("rowsHandle", WriteScalar(value.rowsHandle));
+	fields.emplace("rows-handle", WriteScalar(value.rowsHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1418,7 +1418,7 @@ bool Read_RmlDataModelSetRowsQuery(const WasmValue& input, RmlDataModelSetRowsQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_rowsHandle = FindRecordField(*record, "rowsHandle", error);
+	const auto* value_rowsHandle = FindRecordField(*record, "rows-handle", error);
 	if (value_rowsHandle == nullptr) return false;
 	if (!ReadScalar(*value_rowsHandle, output.rowsHandle, error)) { return false; }
 	const auto* value_values = FindRecordField(*record, "values", error);
@@ -1440,7 +1440,7 @@ bool Read_RmlDataModelSetRowsQuery(const WasmValue& input, RmlDataModelSetRowsQu
 WasmValue Write_RmlDataModelSetRowsQuery(const RmlDataModelSetRowsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("rowsHandle", WriteScalar(value.rowsHandle));
+	fields.emplace("rows-handle", WriteScalar(value.rowsHandle));
 	fields.emplace("values", WriteNativeList(value.values, value.rowCount, [](const auto& value) { return Write_RmlDataValue(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1449,7 +1449,7 @@ bool Read_RmlDataModelVariableBoolQuery(const WasmValue& input, RmlDataModelVari
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -1461,7 +1461,7 @@ bool Read_RmlDataModelVariableBoolQuery(const WasmValue& input, RmlDataModelVari
 WasmValue Write_RmlDataModelVariableBoolQuery(const RmlDataModelVariableBoolQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1470,7 +1470,7 @@ bool Read_RmlDataModelVariableColorQuery(const WasmValue& input, RmlDataModelVar
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	const auto* value_red = FindRecordField(*record, "red", error);
@@ -1491,7 +1491,7 @@ bool Read_RmlDataModelVariableColorQuery(const WasmValue& input, RmlDataModelVar
 WasmValue Write_RmlDataModelVariableColorQuery(const RmlDataModelVariableColorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	fields.emplace("red", WriteScalar(value.red));
 	fields.emplace("green", WriteScalar(value.green));
 	fields.emplace("blue", WriteScalar(value.blue));
@@ -1503,7 +1503,7 @@ bool Read_RmlDataModelVariableFloatQuery(const WasmValue& input, RmlDataModelVar
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -1515,7 +1515,7 @@ bool Read_RmlDataModelVariableFloatQuery(const WasmValue& input, RmlDataModelVar
 WasmValue Write_RmlDataModelVariableFloatQuery(const RmlDataModelVariableFloatQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1524,7 +1524,7 @@ bool Read_RmlDataModelVariableHandleQuery(const WasmValue& input, RmlDataModelVa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	return true;
@@ -1533,7 +1533,7 @@ bool Read_RmlDataModelVariableHandleQuery(const WasmValue& input, RmlDataModelVa
 WasmValue Write_RmlDataModelVariableHandleQuery(const RmlDataModelVariableHandleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1541,7 +1541,7 @@ bool Read_RmlDataModelVariableIntQuery(const WasmValue& input, RmlDataModelVaria
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -1553,7 +1553,7 @@ bool Read_RmlDataModelVariableIntQuery(const WasmValue& input, RmlDataModelVaria
 WasmValue Write_RmlDataModelVariableIntQuery(const RmlDataModelVariableIntQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1562,7 +1562,7 @@ bool Read_RmlDataModelVariablePercentQuery(const WasmValue& input, RmlDataModelV
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -1574,7 +1574,7 @@ bool Read_RmlDataModelVariablePercentQuery(const WasmValue& input, RmlDataModelV
 WasmValue Write_RmlDataModelVariablePercentQuery(const RmlDataModelVariablePercentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1583,7 +1583,7 @@ bool Read_RmlDataModelVariablePixelsQuery(const WasmValue& input, RmlDataModelVa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -1595,7 +1595,7 @@ bool Read_RmlDataModelVariablePixelsQuery(const WasmValue& input, RmlDataModelVa
 WasmValue Write_RmlDataModelVariablePixelsQuery(const RmlDataModelVariablePixelsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1604,7 +1604,7 @@ bool Read_RmlDataModelVariableStringQuery(const WasmValue& input, RmlDataModelVa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_variableHandle = FindRecordField(*record, "variableHandle", error);
+	const auto* value_variableHandle = FindRecordField(*record, "variable-handle", error);
 	if (value_variableHandle == nullptr) return false;
 	if (!ReadScalar(*value_variableHandle, output.variableHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -1618,7 +1618,7 @@ bool Read_RmlDataModelVariableStringQuery(const WasmValue& input, RmlDataModelVa
 WasmValue Write_RmlDataModelVariableStringQuery(const RmlDataModelVariableStringQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("variableHandle", WriteScalar(value.variableHandle));
+	fields.emplace("variable-handle", WriteScalar(value.variableHandle));
 	fields.emplace("value", WasmValue::String((value.value == nullptr) ? std::string{} : std::string(value.value)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1630,16 +1630,16 @@ bool Read_RmlDataValue(const WasmValue& input, RmlDataValue& output, NativeCallS
 	const auto* value_type = FindRecordField(*record, "type", error);
 	if (value_type == nullptr) return false;
 	if (!ReadScalar(*value_type, output.type, error)) { return false; }
-	const auto* value_boolValue = FindRecordField(*record, "boolValue", error);
+	const auto* value_boolValue = FindRecordField(*record, "bool-value", error);
 	if (value_boolValue == nullptr) return false;
 	if (!ReadScalar(*value_boolValue, output.boolValue, error)) { return false; }
-	const auto* value_intValue = FindRecordField(*record, "intValue", error);
+	const auto* value_intValue = FindRecordField(*record, "int-value", error);
 	if (value_intValue == nullptr) return false;
 	if (!ReadScalar(*value_intValue, output.intValue, error)) { return false; }
-	const auto* value_floatValue = FindRecordField(*record, "floatValue", error);
+	const auto* value_floatValue = FindRecordField(*record, "float-value", error);
 	if (value_floatValue == nullptr) return false;
 	if (!ReadScalar(*value_floatValue, output.floatValue, error)) { return false; }
-	const auto* value_stringValue = FindRecordField(*record, "stringValue", error);
+	const auto* value_stringValue = FindRecordField(*record, "string-value", error);
 	if (value_stringValue == nullptr) return false;
 	auto& stored_string_output_stringValue = storage.Make<std::string>();
 	if (!ReadString(*value_stringValue, stored_string_output_stringValue, error)) { return false; }
@@ -1663,10 +1663,10 @@ WasmValue Write_RmlDataValue(const RmlDataValue& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("type", WriteScalar(value.type));
-	fields.emplace("boolValue", WriteScalar(value.boolValue));
-	fields.emplace("intValue", WriteScalar(value.intValue));
-	fields.emplace("floatValue", WriteScalar(value.floatValue));
-	fields.emplace("stringValue", WasmValue::String((value.stringValue == nullptr) ? std::string{} : std::string(value.stringValue)));
+	fields.emplace("bool-value", WriteScalar(value.boolValue));
+	fields.emplace("int-value", WriteScalar(value.intValue));
+	fields.emplace("float-value", WriteScalar(value.floatValue));
+	fields.emplace("string-value", WasmValue::String((value.stringValue == nullptr) ? std::string{} : std::string(value.stringValue)));
 	fields.emplace("red", WriteScalar(value.red));
 	fields.emplace("green", WriteScalar(value.green));
 	fields.emplace("blue", WriteScalar(value.blue));
@@ -1695,10 +1695,10 @@ bool Read_RmlDocumentCreateElementQuery(const WasmValue& input, RmlDocumentCreat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
-	const auto* value_tagName = FindRecordField(*record, "tagName", error);
+	const auto* value_tagName = FindRecordField(*record, "tag-name", error);
 	if (value_tagName == nullptr) return false;
 	auto& stored_string_output_tagName = storage.Make<std::string>();
 	if (!ReadString(*value_tagName, stored_string_output_tagName, error)) { return false; }
@@ -1709,8 +1709,8 @@ bool Read_RmlDocumentCreateElementQuery(const WasmValue& input, RmlDocumentCreat
 WasmValue Write_RmlDocumentCreateElementQuery(const RmlDocumentCreateElementQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
-	fields.emplace("tagName", WasmValue::String((value.tagName == nullptr) ? std::string{} : std::string(value.tagName)));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
+	fields.emplace("tag-name", WasmValue::String((value.tagName == nullptr) ? std::string{} : std::string(value.tagName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1718,7 +1718,7 @@ bool Read_RmlDocumentCreateElementResult(const WasmValue& input, RmlDocumentCrea
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementPtrHandle = FindRecordField(*record, "elementPtrHandle", error);
+	const auto* value_elementPtrHandle = FindRecordField(*record, "element-ptr-handle", error);
 	if (value_elementPtrHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementPtrHandle, output.elementPtrHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -1730,7 +1730,7 @@ bool Read_RmlDocumentCreateElementResult(const WasmValue& input, RmlDocumentCrea
 WasmValue Write_RmlDocumentCreateElementResult(const RmlDocumentCreateElementResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementPtrHandle", WriteScalar(value.elementPtrHandle));
+	fields.emplace("element-ptr-handle", WriteScalar(value.elementPtrHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1739,7 +1739,7 @@ bool Read_RmlDocumentGetContextResult(const WasmValue& input, RmlDocumentGetCont
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_exists = FindRecordField(*record, "exists", error);
@@ -1751,7 +1751,7 @@ bool Read_RmlDocumentGetContextResult(const WasmValue& input, RmlDocumentGetCont
 WasmValue Write_RmlDocumentGetContextResult(const RmlDocumentGetContextResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("exists", WriteScalar(value.exists));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1779,7 +1779,7 @@ bool Read_RmlDocumentHandleQuery(const WasmValue& input, RmlDocumentHandleQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	return true;
@@ -1788,7 +1788,7 @@ bool Read_RmlDocumentHandleQuery(const WasmValue& input, RmlDocumentHandleQuery&
 WasmValue Write_RmlDocumentHandleQuery(const RmlDocumentHandleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1796,7 +1796,7 @@ bool Read_RmlDocumentInlineScriptQuery(const WasmValue& input, RmlDocumentInline
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	const auto* value_content = FindRecordField(*record, "content", error);
@@ -1804,12 +1804,12 @@ bool Read_RmlDocumentInlineScriptQuery(const WasmValue& input, RmlDocumentInline
 	auto& stored_string_output_content = storage.Make<std::string>();
 	if (!ReadString(*value_content, stored_string_output_content, error)) { return false; }
 	output.content = stored_string_output_content.c_str();
-	const auto* value_sourcePath = FindRecordField(*record, "sourcePath", error);
+	const auto* value_sourcePath = FindRecordField(*record, "source-path", error);
 	if (value_sourcePath == nullptr) return false;
 	auto& stored_string_output_sourcePath = storage.Make<std::string>();
 	if (!ReadString(*value_sourcePath, stored_string_output_sourcePath, error)) { return false; }
 	output.sourcePath = stored_string_output_sourcePath.c_str();
-	const auto* value_sourceLine = FindRecordField(*record, "sourceLine", error);
+	const auto* value_sourceLine = FindRecordField(*record, "source-line", error);
 	if (value_sourceLine == nullptr) return false;
 	if (!ReadScalar(*value_sourceLine, output.sourceLine, error)) { return false; }
 	return true;
@@ -1818,10 +1818,10 @@ bool Read_RmlDocumentInlineScriptQuery(const WasmValue& input, RmlDocumentInline
 WasmValue Write_RmlDocumentInlineScriptQuery(const RmlDocumentInlineScriptQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	fields.emplace("content", WasmValue::String((value.content == nullptr) ? std::string{} : std::string(value.content)));
-	fields.emplace("sourcePath", WasmValue::String((value.sourcePath == nullptr) ? std::string{} : std::string(value.sourcePath)));
-	fields.emplace("sourceLine", WriteScalar(value.sourceLine));
+	fields.emplace("source-path", WasmValue::String((value.sourcePath == nullptr) ? std::string{} : std::string(value.sourcePath)));
+	fields.emplace("source-line", WriteScalar(value.sourceLine));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1829,7 +1829,7 @@ bool Read_RmlDocumentSetTitleQuery(const WasmValue& input, RmlDocumentSetTitleQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	const auto* value_title = FindRecordField(*record, "title", error);
@@ -1843,7 +1843,7 @@ bool Read_RmlDocumentSetTitleQuery(const WasmValue& input, RmlDocumentSetTitleQu
 WasmValue Write_RmlDocumentSetTitleQuery(const RmlDocumentSetTitleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	fields.emplace("title", WasmValue::String((value.title == nullptr) ? std::string{} : std::string(value.title)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1885,7 +1885,7 @@ bool Read_RmlDocumentShowQuery(const WasmValue& input, RmlDocumentShowQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -1897,7 +1897,7 @@ bool Read_RmlDocumentShowQuery(const WasmValue& input, RmlDocumentShowQuery& out
 WasmValue Write_RmlDocumentShowQuery(const RmlDocumentShowQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	fields.emplace("options", Write_RmlDocumentShowOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1906,7 +1906,7 @@ bool Read_RmlDocumentStringQuery(const WasmValue& input, RmlDocumentStringQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -1920,7 +1920,7 @@ bool Read_RmlDocumentStringQuery(const WasmValue& input, RmlDocumentStringQuery&
 WasmValue Write_RmlDocumentStringQuery(const RmlDocumentStringQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	fields.emplace("value", WasmValue::String((value.value == nullptr) ? std::string{} : std::string(value.value)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1929,10 +1929,10 @@ bool Read_RmlElementAppendChildQuery(const WasmValue& input, RmlElementAppendChi
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_elementPtrHandle = FindRecordField(*record, "elementPtrHandle", error);
+	const auto* value_elementPtrHandle = FindRecordField(*record, "element-ptr-handle", error);
 	if (value_elementPtrHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementPtrHandle, output.elementPtrHandle, error)) { return false; }
 	return true;
@@ -1941,8 +1941,8 @@ bool Read_RmlElementAppendChildQuery(const WasmValue& input, RmlElementAppendChi
 WasmValue Write_RmlElementAppendChildQuery(const RmlElementAppendChildQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("elementPtrHandle", WriteScalar(value.elementPtrHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("element-ptr-handle", WriteScalar(value.elementPtrHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1967,10 +1967,10 @@ bool Read_RmlElementChildQuery(const WasmValue& input, RmlElementChildQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_childElementHandle = FindRecordField(*record, "childElementHandle", error);
+	const auto* value_childElementHandle = FindRecordField(*record, "child-element-handle", error);
 	if (value_childElementHandle == nullptr) return false;
 	if (!ReadScalar(*value_childElementHandle, output.childElementHandle, error)) { return false; }
 	return true;
@@ -1979,8 +1979,8 @@ bool Read_RmlElementChildQuery(const WasmValue& input, RmlElementChildQuery& out
 WasmValue Write_RmlElementChildQuery(const RmlElementChildQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("childElementHandle", WriteScalar(value.childElementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("child-element-handle", WriteScalar(value.childElementHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1988,7 +1988,7 @@ bool Read_RmlElementDispatchEventQuery(const WasmValue& input, RmlElementDispatc
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_event = FindRecordField(*record, "event", error);
@@ -2002,7 +2002,7 @@ bool Read_RmlElementDispatchEventQuery(const WasmValue& input, RmlElementDispatc
 WasmValue Write_RmlElementDispatchEventQuery(const RmlElementDispatchEventQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("event", WasmValue::String((value.event == nullptr) ? std::string{} : std::string(value.event)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2011,10 +2011,10 @@ bool Read_RmlElementEventListenerRemoveQuery(const WasmValue& input, RmlElementE
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_eventListenerHandle = FindRecordField(*record, "eventListenerHandle", error);
+	const auto* value_eventListenerHandle = FindRecordField(*record, "event-listener-handle", error);
 	if (value_eventListenerHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventListenerHandle, output.eventListenerHandle, error)) { return false; }
 	const auto* value_event = FindRecordField(*record, "event", error);
@@ -2022,7 +2022,7 @@ bool Read_RmlElementEventListenerRemoveQuery(const WasmValue& input, RmlElementE
 	auto& stored_string_output_event = storage.Make<std::string>();
 	if (!ReadString(*value_event, stored_string_output_event, error)) { return false; }
 	output.event = stored_string_output_event.c_str();
-	const auto* value_inCapturePhase = FindRecordField(*record, "inCapturePhase", error);
+	const auto* value_inCapturePhase = FindRecordField(*record, "in-capture-phase", error);
 	if (value_inCapturePhase == nullptr) return false;
 	if (!ReadScalar(*value_inCapturePhase, output.inCapturePhase, error)) { return false; }
 	return true;
@@ -2031,10 +2031,10 @@ bool Read_RmlElementEventListenerRemoveQuery(const WasmValue& input, RmlElementE
 WasmValue Write_RmlElementEventListenerRemoveQuery(const RmlElementEventListenerRemoveQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("eventListenerHandle", WriteScalar(value.eventListenerHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("event-listener-handle", WriteScalar(value.eventListenerHandle));
 	fields.emplace("event", WasmValue::String((value.event == nullptr) ? std::string{} : std::string(value.event)));
-	fields.emplace("inCapturePhase", WriteScalar(value.inCapturePhase));
+	fields.emplace("in-capture-phase", WriteScalar(value.inCapturePhase));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2042,10 +2042,10 @@ bool Read_RmlElementFormControlSelectAddQuery(const WasmValue& input, RmlElement
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_elementPtrHandle = FindRecordField(*record, "elementPtrHandle", error);
+	const auto* value_elementPtrHandle = FindRecordField(*record, "element-ptr-handle", error);
 	if (value_elementPtrHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementPtrHandle, output.elementPtrHandle, error)) { return false; }
 	const auto* value_before = FindRecordField(*record, "before", error);
@@ -2057,8 +2057,8 @@ bool Read_RmlElementFormControlSelectAddQuery(const WasmValue& input, RmlElement
 WasmValue Write_RmlElementFormControlSelectAddQuery(const RmlElementFormControlSelectAddQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("elementPtrHandle", WriteScalar(value.elementPtrHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("element-ptr-handle", WriteScalar(value.elementPtrHandle));
 	fields.emplace("before", WriteScalar(value.before));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2067,7 +2067,7 @@ bool Read_RmlElementFormControlSelectRemoveQuery(const WasmValue& input, RmlElem
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_index = FindRecordField(*record, "index", error);
@@ -2079,7 +2079,7 @@ bool Read_RmlElementFormControlSelectRemoveQuery(const WasmValue& input, RmlElem
 WasmValue Write_RmlElementFormControlSelectRemoveQuery(const RmlElementFormControlSelectRemoveQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("index", WriteScalar(value.index));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2088,7 +2088,7 @@ bool Read_RmlElementFormControlSelectionQuery(const WasmValue& input, RmlElement
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_start = FindRecordField(*record, "start", error);
@@ -2103,7 +2103,7 @@ bool Read_RmlElementFormControlSelectionQuery(const WasmValue& input, RmlElement
 WasmValue Write_RmlElementFormControlSelectionQuery(const RmlElementFormControlSelectionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("start", WriteScalar(value.start));
 	fields.emplace("end", WriteScalar(value.end));
 	return WasmValue::Record(std::move(fields));
@@ -2144,7 +2144,7 @@ bool Read_RmlElementFormSubmitQuery(const WasmValue& input, RmlElementFormSubmit
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -2163,7 +2163,7 @@ bool Read_RmlElementFormSubmitQuery(const WasmValue& input, RmlElementFormSubmit
 WasmValue Write_RmlElementFormSubmitQuery(const RmlElementFormSubmitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("value", WasmValue::String((value.value == nullptr) ? std::string{} : std::string(value.value)));
 	return WasmValue::Record(std::move(fields));
@@ -2173,7 +2173,7 @@ bool Read_RmlElementGetAttributeQuery(const WasmValue& input, RmlElementGetAttri
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -2187,7 +2187,7 @@ bool Read_RmlElementGetAttributeQuery(const WasmValue& input, RmlElementGetAttri
 WasmValue Write_RmlElementGetAttributeQuery(const RmlElementGetAttributeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2219,7 +2219,7 @@ bool Read_RmlElementGetByStringQuery(const WasmValue& input, RmlElementGetByStri
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -2233,7 +2233,7 @@ bool Read_RmlElementGetByStringQuery(const WasmValue& input, RmlElementGetByStri
 WasmValue Write_RmlElementGetByStringQuery(const RmlElementGetByStringQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("value", WasmValue::String((value.value == nullptr) ? std::string{} : std::string(value.value)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2242,7 +2242,7 @@ bool Read_RmlElementGetChildQuery(const WasmValue& input, RmlElementGetChildQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_index = FindRecordField(*record, "index", error);
@@ -2254,7 +2254,7 @@ bool Read_RmlElementGetChildQuery(const WasmValue& input, RmlElementGetChildQuer
 WasmValue Write_RmlElementGetChildQuery(const RmlElementGetChildQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("index", WriteScalar(value.index));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2263,7 +2263,7 @@ bool Read_RmlElementGetElementResult(const WasmValue& input, RmlElementGetElemen
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_exists = FindRecordField(*record, "exists", error);
@@ -2275,7 +2275,7 @@ bool Read_RmlElementGetElementResult(const WasmValue& input, RmlElementGetElemen
 WasmValue Write_RmlElementGetElementResult(const RmlElementGetElementResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("exists", WriteScalar(value.exists));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2366,7 +2366,7 @@ bool Read_RmlElementHandleListResult(const WasmValue& input, RmlElementHandleLis
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandles = FindRecordField(*record, "elementHandles", error);
+	const auto* value_elementHandles = FindRecordField(*record, "element-handles", error);
 	if (value_elementHandles == nullptr) return false;
 	const auto* list_elementHandles = std::get_if<WasmValueList>(&(*value_elementHandles).storage);
 	if (list_elementHandles == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -2385,7 +2385,7 @@ bool Read_RmlElementHandleListResult(const WasmValue& input, RmlElementHandleLis
 WasmValue Write_RmlElementHandleListResult(const RmlElementHandleListResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandles", WriteNativeList(value.elementHandles, value.elementHandleCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("element-handles", WriteNativeList(value.elementHandles, value.elementHandleCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2393,7 +2393,7 @@ bool Read_RmlElementHandleQuery(const WasmValue& input, RmlElementHandleQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	return true;
@@ -2402,7 +2402,7 @@ bool Read_RmlElementHandleQuery(const WasmValue& input, RmlElementHandleQuery& o
 WasmValue Write_RmlElementHandleQuery(const RmlElementHandleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2410,13 +2410,13 @@ bool Read_RmlElementInsertBeforeQuery(const WasmValue& input, RmlElementInsertBe
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_elementPtrHandle = FindRecordField(*record, "elementPtrHandle", error);
+	const auto* value_elementPtrHandle = FindRecordField(*record, "element-ptr-handle", error);
 	if (value_elementPtrHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementPtrHandle, output.elementPtrHandle, error)) { return false; }
-	const auto* value_adjacentElementHandle = FindRecordField(*record, "adjacentElementHandle", error);
+	const auto* value_adjacentElementHandle = FindRecordField(*record, "adjacent-element-handle", error);
 	if (value_adjacentElementHandle == nullptr) return false;
 	if (!ReadScalar(*value_adjacentElementHandle, output.adjacentElementHandle, error)) { return false; }
 	return true;
@@ -2425,9 +2425,9 @@ bool Read_RmlElementInsertBeforeQuery(const WasmValue& input, RmlElementInsertBe
 WasmValue Write_RmlElementInsertBeforeQuery(const RmlElementInsertBeforeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("elementPtrHandle", WriteScalar(value.elementPtrHandle));
-	fields.emplace("adjacentElementHandle", WriteScalar(value.adjacentElementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("element-ptr-handle", WriteScalar(value.elementPtrHandle));
+	fields.emplace("adjacent-element-handle", WriteScalar(value.adjacentElementHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2435,7 +2435,7 @@ bool Read_RmlElementPointQuery(const WasmValue& input, RmlElementPointQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_x = FindRecordField(*record, "x", error);
@@ -2450,7 +2450,7 @@ bool Read_RmlElementPointQuery(const WasmValue& input, RmlElementPointQuery& out
 WasmValue Write_RmlElementPointQuery(const RmlElementPointQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("y", WriteScalar(value.y));
 	return WasmValue::Record(std::move(fields));
@@ -2460,10 +2460,10 @@ bool Read_RmlElementProcessDefaultActionQuery(const WasmValue& input, RmlElement
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_eventHandle = FindRecordField(*record, "eventHandle", error);
+	const auto* value_eventHandle = FindRecordField(*record, "event-handle", error);
 	if (value_eventHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventHandle, output.eventHandle, error)) { return false; }
 	return true;
@@ -2472,8 +2472,8 @@ bool Read_RmlElementProcessDefaultActionQuery(const WasmValue& input, RmlElement
 WasmValue Write_RmlElementProcessDefaultActionQuery(const RmlElementProcessDefaultActionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("eventHandle", WriteScalar(value.eventHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("event-handle", WriteScalar(value.eventHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2481,13 +2481,13 @@ bool Read_RmlElementReplaceChildQuery(const WasmValue& input, RmlElementReplaceC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_elementPtrHandle = FindRecordField(*record, "elementPtrHandle", error);
+	const auto* value_elementPtrHandle = FindRecordField(*record, "element-ptr-handle", error);
 	if (value_elementPtrHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementPtrHandle, output.elementPtrHandle, error)) { return false; }
-	const auto* value_replacedElementHandle = FindRecordField(*record, "replacedElementHandle", error);
+	const auto* value_replacedElementHandle = FindRecordField(*record, "replaced-element-handle", error);
 	if (value_replacedElementHandle == nullptr) return false;
 	if (!ReadScalar(*value_replacedElementHandle, output.replacedElementHandle, error)) { return false; }
 	return true;
@@ -2496,9 +2496,9 @@ bool Read_RmlElementReplaceChildQuery(const WasmValue& input, RmlElementReplaceC
 WasmValue Write_RmlElementReplaceChildQuery(const RmlElementReplaceChildQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("elementPtrHandle", WriteScalar(value.elementPtrHandle));
-	fields.emplace("replacedElementHandle", WriteScalar(value.replacedElementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("element-ptr-handle", WriteScalar(value.elementPtrHandle));
+	fields.emplace("replaced-element-handle", WriteScalar(value.replacedElementHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2506,10 +2506,10 @@ bool Read_RmlElementScrollIntoViewQuery(const WasmValue& input, RmlElementScroll
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_alignWithTop = FindRecordField(*record, "alignWithTop", error);
+	const auto* value_alignWithTop = FindRecordField(*record, "align-with-top", error);
 	if (value_alignWithTop == nullptr) return false;
 	if (!ReadScalar(*value_alignWithTop, output.alignWithTop, error)) { return false; }
 	return true;
@@ -2518,8 +2518,8 @@ bool Read_RmlElementScrollIntoViewQuery(const WasmValue& input, RmlElementScroll
 WasmValue Write_RmlElementScrollIntoViewQuery(const RmlElementScrollIntoViewQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("alignWithTop", WriteScalar(value.alignWithTop));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("align-with-top", WriteScalar(value.alignWithTop));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2527,7 +2527,7 @@ bool Read_RmlElementSetAttributeQuery(const WasmValue& input, RmlElementSetAttri
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -2546,7 +2546,7 @@ bool Read_RmlElementSetAttributeQuery(const WasmValue& input, RmlElementSetAttri
 WasmValue Write_RmlElementSetAttributeQuery(const RmlElementSetAttributeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("value", WasmValue::String((value.value == nullptr) ? std::string{} : std::string(value.value)));
 	return WasmValue::Record(std::move(fields));
@@ -2556,7 +2556,7 @@ bool Read_RmlElementSetFloatQuery(const WasmValue& input, RmlElementSetFloatQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -2568,7 +2568,7 @@ bool Read_RmlElementSetFloatQuery(const WasmValue& input, RmlElementSetFloatQuer
 WasmValue Write_RmlElementSetFloatQuery(const RmlElementSetFloatQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2577,7 +2577,7 @@ bool Read_RmlElementSetIntQuery(const WasmValue& input, RmlElementSetIntQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -2589,7 +2589,7 @@ bool Read_RmlElementSetIntQuery(const WasmValue& input, RmlElementSetIntQuery& o
 WasmValue Write_RmlElementSetIntQuery(const RmlElementSetIntQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2598,7 +2598,7 @@ bool Read_RmlElementSetStringQuery(const WasmValue& input, RmlElementSetStringQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -2612,7 +2612,7 @@ bool Read_RmlElementSetStringQuery(const WasmValue& input, RmlElementSetStringQu
 WasmValue Write_RmlElementSetStringQuery(const RmlElementSetStringQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("value", WasmValue::String((value.value == nullptr) ? std::string{} : std::string(value.value)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2621,7 +2621,7 @@ bool Read_RmlElementStringBoolQuery(const WasmValue& input, RmlElementStringBool
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -2638,7 +2638,7 @@ bool Read_RmlElementStringBoolQuery(const WasmValue& input, RmlElementStringBool
 WasmValue Write_RmlElementStringBoolQuery(const RmlElementStringBoolQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
@@ -2680,7 +2680,7 @@ bool Read_RmlElementStringQuery(const WasmValue& input, RmlElementStringQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_value = FindRecordField(*record, "value", error);
@@ -2694,7 +2694,7 @@ bool Read_RmlElementStringQuery(const WasmValue& input, RmlElementStringQuery& o
 WasmValue Write_RmlElementStringQuery(const RmlElementStringQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("value", WasmValue::String((value.value == nullptr) ? std::string{} : std::string(value.value)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2703,7 +2703,7 @@ bool Read_RmlElementTabSetIndexQuery(const WasmValue& input, RmlElementTabSetInd
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_index = FindRecordField(*record, "index", error);
@@ -2715,7 +2715,7 @@ bool Read_RmlElementTabSetIndexQuery(const WasmValue& input, RmlElementTabSetInd
 WasmValue Write_RmlElementTabSetIndexQuery(const RmlElementTabSetIndexQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("index", WriteScalar(value.index));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2724,7 +2724,7 @@ bool Read_RmlElementTabSetIndexStringQuery(const WasmValue& input, RmlElementTab
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	const auto* value_index = FindRecordField(*record, "index", error);
@@ -2741,7 +2741,7 @@ bool Read_RmlElementTabSetIndexStringQuery(const WasmValue& input, RmlElementTab
 WasmValue Write_RmlElementTabSetIndexStringQuery(const RmlElementTabSetIndexStringQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	fields.emplace("index", WriteScalar(value.index));
 	fields.emplace("rml", WasmValue::String((value.rml == nullptr) ? std::string{} : std::string(value.rml)));
 	return WasmValue::Record(std::move(fields));
@@ -2751,7 +2751,7 @@ bool Read_RmlEventCurrentQuery(const WasmValue& input, RmlEventCurrentQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -2760,7 +2760,7 @@ bool Read_RmlEventCurrentQuery(const WasmValue& input, RmlEventCurrentQuery& out
 WasmValue Write_RmlEventCurrentQuery(const RmlEventCurrentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2768,13 +2768,13 @@ bool Read_RmlEventCurrentResult(const WasmValue& input, RmlEventCurrentResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventHandle = FindRecordField(*record, "eventHandle", error);
+	const auto* value_eventHandle = FindRecordField(*record, "event-handle", error);
 	if (value_eventHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventHandle, output.eventHandle, error)) { return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
-	const auto* value_documentHandle = FindRecordField(*record, "documentHandle", error);
+	const auto* value_documentHandle = FindRecordField(*record, "document-handle", error);
 	if (value_documentHandle == nullptr) return false;
 	if (!ReadScalar(*value_documentHandle, output.documentHandle, error)) { return false; }
 	const auto* value_exists = FindRecordField(*record, "exists", error);
@@ -2786,9 +2786,9 @@ bool Read_RmlEventCurrentResult(const WasmValue& input, RmlEventCurrentResult& o
 WasmValue Write_RmlEventCurrentResult(const RmlEventCurrentResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventHandle", WriteScalar(value.eventHandle));
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
-	fields.emplace("documentHandle", WriteScalar(value.documentHandle));
+	fields.emplace("event-handle", WriteScalar(value.eventHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
+	fields.emplace("document-handle", WriteScalar(value.documentHandle));
 	fields.emplace("exists", WriteScalar(value.exists));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2883,7 +2883,7 @@ bool Read_RmlEventHandleQuery(const WasmValue& input, RmlEventHandleQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventHandle = FindRecordField(*record, "eventHandle", error);
+	const auto* value_eventHandle = FindRecordField(*record, "event-handle", error);
 	if (value_eventHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventHandle, output.eventHandle, error)) { return false; }
 	return true;
@@ -2892,7 +2892,7 @@ bool Read_RmlEventHandleQuery(const WasmValue& input, RmlEventHandleQuery& outpu
 WasmValue Write_RmlEventHandleQuery(const RmlEventHandleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventHandle", WriteScalar(value.eventHandle));
+	fields.emplace("event-handle", WriteScalar(value.eventHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2900,7 +2900,7 @@ bool Read_RmlEventListenerCallbackResult(const WasmValue& input, RmlEventListene
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventListenerHandle = FindRecordField(*record, "eventListenerHandle", error);
+	const auto* value_eventListenerHandle = FindRecordField(*record, "event-listener-handle", error);
 	if (value_eventListenerHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventListenerHandle, output.eventListenerHandle, error)) { return false; }
 	const auto* value_success = FindRecordField(*record, "success", error);
@@ -2912,7 +2912,7 @@ bool Read_RmlEventListenerCallbackResult(const WasmValue& input, RmlEventListene
 WasmValue Write_RmlEventListenerCallbackResult(const RmlEventListenerCallbackResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventListenerHandle", WriteScalar(value.eventListenerHandle));
+	fields.emplace("event-listener-handle", WriteScalar(value.eventListenerHandle));
 	fields.emplace("success", WriteScalar(value.success));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2921,10 +2921,10 @@ bool Read_RmlEventListenerElementQuery(const WasmValue& input, RmlEventListenerE
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventListenerHandle = FindRecordField(*record, "eventListenerHandle", error);
+	const auto* value_eventListenerHandle = FindRecordField(*record, "event-listener-handle", error);
 	if (value_eventListenerHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventListenerHandle, output.eventListenerHandle, error)) { return false; }
-	const auto* value_elementHandle = FindRecordField(*record, "elementHandle", error);
+	const auto* value_elementHandle = FindRecordField(*record, "element-handle", error);
 	if (value_elementHandle == nullptr) return false;
 	if (!ReadScalar(*value_elementHandle, output.elementHandle, error)) { return false; }
 	return true;
@@ -2933,8 +2933,8 @@ bool Read_RmlEventListenerElementQuery(const WasmValue& input, RmlEventListenerE
 WasmValue Write_RmlEventListenerElementQuery(const RmlEventListenerElementQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventListenerHandle", WriteScalar(value.eventListenerHandle));
-	fields.emplace("elementHandle", WriteScalar(value.elementHandle));
+	fields.emplace("event-listener-handle", WriteScalar(value.eventListenerHandle));
+	fields.emplace("element-handle", WriteScalar(value.elementHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2942,10 +2942,10 @@ bool Read_RmlEventListenerEventQuery(const WasmValue& input, RmlEventListenerEve
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventListenerHandle = FindRecordField(*record, "eventListenerHandle", error);
+	const auto* value_eventListenerHandle = FindRecordField(*record, "event-listener-handle", error);
 	if (value_eventListenerHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventListenerHandle, output.eventListenerHandle, error)) { return false; }
-	const auto* value_eventHandle = FindRecordField(*record, "eventHandle", error);
+	const auto* value_eventHandle = FindRecordField(*record, "event-handle", error);
 	if (value_eventHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventHandle, output.eventHandle, error)) { return false; }
 	return true;
@@ -2954,8 +2954,8 @@ bool Read_RmlEventListenerEventQuery(const WasmValue& input, RmlEventListenerEve
 WasmValue Write_RmlEventListenerEventQuery(const RmlEventListenerEventQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventListenerHandle", WriteScalar(value.eventListenerHandle));
-	fields.emplace("eventHandle", WriteScalar(value.eventHandle));
+	fields.emplace("event-listener-handle", WriteScalar(value.eventListenerHandle));
+	fields.emplace("event-handle", WriteScalar(value.eventHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2963,7 +2963,7 @@ bool Read_RmlEventListenerHandleQuery(const WasmValue& input, RmlEventListenerHa
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventListenerHandle = FindRecordField(*record, "eventListenerHandle", error);
+	const auto* value_eventListenerHandle = FindRecordField(*record, "event-listener-handle", error);
 	if (value_eventListenerHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventListenerHandle, output.eventListenerHandle, error)) { return false; }
 	return true;
@@ -2972,7 +2972,7 @@ bool Read_RmlEventListenerHandleQuery(const WasmValue& input, RmlEventListenerHa
 WasmValue Write_RmlEventListenerHandleQuery(const RmlEventListenerHandleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventListenerHandle", WriteScalar(value.eventListenerHandle));
+	fields.emplace("event-listener-handle", WriteScalar(value.eventListenerHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2980,7 +2980,7 @@ bool Read_RmlEventParameterQuery(const WasmValue& input, RmlEventParameterQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventHandle = FindRecordField(*record, "eventHandle", error);
+	const auto* value_eventHandle = FindRecordField(*record, "event-handle", error);
 	if (value_eventHandle == nullptr) return false;
 	if (!ReadScalar(*value_eventHandle, output.eventHandle, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -2994,7 +2994,7 @@ bool Read_RmlEventParameterQuery(const WasmValue& input, RmlEventParameterQuery&
 WasmValue Write_RmlEventParameterQuery(const RmlEventParameterQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventHandle", WriteScalar(value.eventHandle));
+	fields.emplace("event-handle", WriteScalar(value.eventHandle));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3022,7 +3022,7 @@ bool Read_RmlGetContextResult(const WasmValue& input, RmlGetContextResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	const auto* value_exists = FindRecordField(*record, "exists", error);
@@ -3034,7 +3034,7 @@ bool Read_RmlGetContextResult(const WasmValue& input, RmlGetContextResult& outpu
 WasmValue Write_RmlGetContextResult(const RmlGetContextResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	fields.emplace("exists", WriteScalar(value.exists));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3043,7 +3043,7 @@ bool Read_RmlGetDocumentPathRequestsQuery(const WasmValue& input, RmlGetDocument
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_documentPath = FindRecordField(*record, "documentPath", error);
+	const auto* value_documentPath = FindRecordField(*record, "document-path", error);
 	if (value_documentPath == nullptr) return false;
 	auto& stored_string_output_documentPath = storage.Make<std::string>();
 	if (!ReadString(*value_documentPath, stored_string_output_documentPath, error)) { return false; }
@@ -3054,7 +3054,7 @@ bool Read_RmlGetDocumentPathRequestsQuery(const WasmValue& input, RmlGetDocument
 WasmValue Write_RmlGetDocumentPathRequestsQuery(const RmlGetDocumentPathRequestsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("documentPath", WasmValue::String((value.documentPath == nullptr) ? std::string{} : std::string(value.documentPath)));
+	fields.emplace("document-path", WasmValue::String((value.documentPath == nullptr) ? std::string{} : std::string(value.documentPath)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3094,7 +3094,7 @@ bool Read_RmlGetVersionQuery(const WasmValue& input, RmlGetVersionQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -3103,7 +3103,7 @@ bool Read_RmlGetVersionQuery(const WasmValue& input, RmlGetVersionQuery& output,
 WasmValue Write_RmlGetVersionQuery(const RmlGetVersionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3130,7 +3130,7 @@ bool Read_RmlIsReadyQuery(const WasmValue& input, RmlIsReadyQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -3139,7 +3139,7 @@ bool Read_RmlIsReadyQuery(const WasmValue& input, RmlIsReadyQuery& output, Nativ
 WasmValue Write_RmlIsReadyQuery(const RmlIsReadyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3164,7 +3164,7 @@ bool Read_RmlLoadFontFaceQuery(const WasmValue& input, RmlLoadFontFaceQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_filePath = FindRecordField(*record, "filePath", error);
+	const auto* value_filePath = FindRecordField(*record, "file-path", error);
 	if (value_filePath == nullptr) return false;
 	auto& stored_string_output_filePath = storage.Make<std::string>();
 	if (!ReadString(*value_filePath, stored_string_output_filePath, error)) { return false; }
@@ -3187,7 +3187,7 @@ bool Read_RmlLoadFontFaceQuery(const WasmValue& input, RmlLoadFontFaceQuery& out
 WasmValue Write_RmlLoadFontFaceQuery(const RmlLoadFontFaceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("filePath", WasmValue::String((value.filePath == nullptr) ? std::string{} : std::string(value.filePath)));
+	fields.emplace("file-path", WasmValue::String((value.filePath == nullptr) ? std::string{} : std::string(value.filePath)));
 	fields.emplace("fallback", WriteScalar(value.fallback));
 	fields.emplace("weight", value.hasWeight ? WriteScalar(value.weight) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
@@ -3220,7 +3220,7 @@ bool Read_RmlRegisterEventTypeOptions(const WasmValue& input, RmlRegisterEventTy
 	const auto* value_bubbles = FindRecordField(*record, "bubbles", error);
 	if (value_bubbles == nullptr) return false;
 	if (!ReadScalar(*value_bubbles, output.bubbles, error)) { return false; }
-	const auto* value_defaultPhase = FindRecordField(*record, "defaultPhase", error);
+	const auto* value_defaultPhase = FindRecordField(*record, "default-phase", error);
 	if (value_defaultPhase == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_defaultPhase).storage)) {
 		output.defaultPhase = {};
@@ -3237,7 +3237,7 @@ WasmValue Write_RmlRegisterEventTypeOptions(const RmlRegisterEventTypeOptions& v
 	WasmValueRecord fields;
 	fields.emplace("interruptible", WriteScalar(value.interruptible));
 	fields.emplace("bubbles", WriteScalar(value.bubbles));
-	fields.emplace("defaultPhase", value.hasDefaultPhase ? WriteScalar(value.defaultPhase) : WasmValue::Unit());
+	fields.emplace("default-phase", value.hasDefaultPhase ? WriteScalar(value.defaultPhase) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3245,7 +3245,7 @@ bool Read_RmlRegisterEventTypeQuery(const WasmValue& input, RmlRegisterEventType
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventType = FindRecordField(*record, "eventType", error);
+	const auto* value_eventType = FindRecordField(*record, "event-type", error);
 	if (value_eventType == nullptr) return false;
 	auto& stored_string_output_eventType = storage.Make<std::string>();
 	if (!ReadString(*value_eventType, stored_string_output_eventType, error)) { return false; }
@@ -3259,7 +3259,7 @@ bool Read_RmlRegisterEventTypeQuery(const WasmValue& input, RmlRegisterEventType
 WasmValue Write_RmlRegisterEventTypeQuery(const RmlRegisterEventTypeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventType", WasmValue::String((value.eventType == nullptr) ? std::string{} : std::string(value.eventType)));
+	fields.emplace("event-type", WasmValue::String((value.eventType == nullptr) ? std::string{} : std::string(value.eventType)));
 	fields.emplace("options", Write_RmlRegisterEventTypeOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3268,7 +3268,7 @@ bool Read_RmlRegisterEventTypeResult(const WasmValue& input, RmlRegisterEventTyp
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_eventID = FindRecordField(*record, "eventID", error);
+	const auto* value_eventID = FindRecordField(*record, "event-id", error);
 	if (value_eventID == nullptr) return false;
 	if (!ReadScalar(*value_eventID, output.eventID, error)) { return false; }
 	return true;
@@ -3277,7 +3277,7 @@ bool Read_RmlRegisterEventTypeResult(const WasmValue& input, RmlRegisterEventTyp
 WasmValue Write_RmlRegisterEventTypeResult(const RmlRegisterEventTypeResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("eventID", WriteScalar(value.eventID));
+	fields.emplace("event-id", WriteScalar(value.eventID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3321,7 +3321,7 @@ bool Read_RmlRemoveContextQuery(const WasmValue& input, RmlRemoveContextQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	return true;
@@ -3330,7 +3330,7 @@ bool Read_RmlRemoveContextQuery(const WasmValue& input, RmlRemoveContextQuery& o
 WasmValue Write_RmlRemoveContextQuery(const RmlRemoveContextQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3391,7 +3391,7 @@ bool Read_RmlSetDebugContextQuery(const WasmValue& input, RmlSetDebugContextQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_contextHandle = FindRecordField(*record, "contextHandle", error);
+	const auto* value_contextHandle = FindRecordField(*record, "context-handle", error);
 	if (value_contextHandle == nullptr) return false;
 	if (!ReadScalar(*value_contextHandle, output.contextHandle, error)) { return false; }
 	return true;
@@ -3400,7 +3400,7 @@ bool Read_RmlSetDebugContextQuery(const WasmValue& input, RmlSetDebugContextQuer
 WasmValue Write_RmlSetDebugContextQuery(const RmlSetDebugContextQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("contextHandle", WriteScalar(value.contextHandle));
+	fields.emplace("context-handle", WriteScalar(value.contextHandle));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3425,12 +3425,12 @@ bool Read_RmlSetMouseCursorAliasQuery(const WasmValue& input, RmlSetMouseCursorA
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_rmlName = FindRecordField(*record, "rmlName", error);
+	const auto* value_rmlName = FindRecordField(*record, "rml-name", error);
 	if (value_rmlName == nullptr) return false;
 	auto& stored_string_output_rmlName = storage.Make<std::string>();
 	if (!ReadString(*value_rmlName, stored_string_output_rmlName, error)) { return false; }
 	output.rmlName = stored_string_output_rmlName.c_str();
-	const auto* value_recoilName = FindRecordField(*record, "recoilName", error);
+	const auto* value_recoilName = FindRecordField(*record, "recoil-name", error);
 	if (value_recoilName == nullptr) return false;
 	auto& stored_string_output_recoilName = storage.Make<std::string>();
 	if (!ReadString(*value_recoilName, stored_string_output_recoilName, error)) { return false; }
@@ -3441,8 +3441,8 @@ bool Read_RmlSetMouseCursorAliasQuery(const WasmValue& input, RmlSetMouseCursorA
 WasmValue Write_RmlSetMouseCursorAliasQuery(const RmlSetMouseCursorAliasQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("rmlName", WasmValue::String((value.rmlName == nullptr) ? std::string{} : std::string(value.rmlName)));
-	fields.emplace("recoilName", WasmValue::String((value.recoilName == nullptr) ? std::string{} : std::string(value.recoilName)));
+	fields.emplace("rml-name", WasmValue::String((value.rmlName == nullptr) ? std::string{} : std::string(value.rmlName)));
+	fields.emplace("recoil-name", WasmValue::String((value.recoilName == nullptr) ? std::string{} : std::string(value.recoilName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3467,7 +3467,7 @@ bool Read_RmlSolLuaDataModelSetDirtyQuery(const WasmValue& input, RmlSolLuaDataM
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_dataModelHandle = FindRecordField(*record, "dataModelHandle", error);
+	const auto* value_dataModelHandle = FindRecordField(*record, "data-model-handle", error);
 	if (value_dataModelHandle == nullptr) return false;
 	if (!ReadScalar(*value_dataModelHandle, output.dataModelHandle, error)) { return false; }
 	const auto* value_property = FindRecordField(*record, "property", error);
@@ -3481,7 +3481,7 @@ bool Read_RmlSolLuaDataModelSetDirtyQuery(const WasmValue& input, RmlSolLuaDataM
 WasmValue Write_RmlSolLuaDataModelSetDirtyQuery(const RmlSolLuaDataModelSetDirtyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("dataModelHandle", WriteScalar(value.dataModelHandle));
+	fields.emplace("data-model-handle", WriteScalar(value.dataModelHandle));
 	fields.emplace("property", WasmValue::String((value.property == nullptr) ? std::string{} : std::string(value.property)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3602,7 +3602,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ClearDocumentPathRequests(NativeInterface*
 	NativeCallStorage storage;
 	RmlClearDocumentPathRequestsQuery query{};
 	RmlClearDocumentPathRequestsResult nativeResult{};
-	const WasmValue* value_documentPath = FindArgument(arguments, 0u, 0u, 1u, 1u, "documentPath", error);
+	const WasmValue* value_documentPath = FindArgument(arguments, 0u, 0u, 1u, 1u, "document-path", error);
 	if (value_documentPath == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_documentPath = storage.Make<std::string>();
 	if (!ReadString(*value_documentPath, stored_string_query_documentPath, error)) { return NativeCalloutDispatch::handled; }
@@ -3619,7 +3619,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ClearTranslations(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlClearTranslationsQuery query{};
 	RmlClearTranslationsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ClearTranslations(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3632,7 +3632,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextActivateTheme(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlContextStringBoolQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -3651,7 +3651,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextCreateDataModel(NativeInterface* na
 	NativeCallStorage storage;
 	RmlContextCreateDataModelQuery query{};
 	RmlContextOpenDataModelResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -3660,7 +3660,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextCreateDataModel(NativeInterface* na
 	nativeInterface->rmlUi->ContextCreateDataModel(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("dataModelHandle", WriteScalar(nativeResult.dataModelHandle));
+	outputFields.emplace("data-model-handle", WriteScalar(nativeResult.dataModelHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3672,7 +3672,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextCreateDocument(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlContextCreateDocumentQuery query{};
 	RmlContextCreateDocumentResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_tag = FindArgument(arguments, 1u, 1u, 2u, 2u, "tag", error);
 	if (value_tag == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_tag = storage.Make<std::string>();
@@ -3681,7 +3681,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextCreateDocument(NativeInterface* nat
 	nativeInterface->rmlUi->ContextCreateDocument(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("documentHandle", WriteScalar(nativeResult.documentHandle));
+	outputFields.emplace("document-handle", WriteScalar(nativeResult.documentHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3693,7 +3693,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextEnableMouseCursor(NativeInterface* 
 	NativeCallStorage storage;
 	RmlContextBoolQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextEnableMouseCursor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -3707,7 +3707,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetDensityIndependentPixelRatio(Nat
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextGetFloatResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextGetDensityIndependentPixelRatio(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -3720,7 +3720,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetDimensions(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextGetDimensionsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextGetDimensions(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -3736,7 +3736,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetDocument(NativeInterface* native
 	NativeCallStorage storage;
 	RmlContextGetDocumentQuery query{};
 	RmlContextGetDocumentResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -3745,7 +3745,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetDocument(NativeInterface* native
 	nativeInterface->rmlUi->ContextGetDocument(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("documentHandle", WriteScalar(nativeResult.documentHandle));
+	outputFields.emplace("document-handle", WriteScalar(nativeResult.documentHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3757,14 +3757,14 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetElementAtPoint(NativeInterface* 
 	NativeCallStorage storage;
 	RmlContextGetElementAtPointQuery query{};
 	RmlContextGetElementAtPointResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "x", query.x, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "y", query.y, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "ignoreElementHandle", query.ignoreElementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "ignore-element-handle", query.ignoreElementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextGetElementAtPoint(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3776,11 +3776,11 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetFocusElement(NativeInterface* na
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextGetFocusElement(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3792,11 +3792,11 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetHoverElement(NativeInterface* na
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextGetHoverElement(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3808,7 +3808,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetName(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextGetNameResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextGetName(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.name == nullptr) ? std::string{} : std::string(nativeResult.name));
@@ -3821,11 +3821,11 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextGetRootElement(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextGetRootElement(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3837,7 +3837,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextIsMouseInteracting(NativeInterface*
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextIsMouseInteracting(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3850,7 +3850,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextIsThemeActive(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlContextStringQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -3868,8 +3868,8 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextLoadDocument(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlContextLoadDocumentQuery query{};
 	RmlContextLoadDocumentResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_documentPath = FindArgument(arguments, 1u, 1u, 2u, 2u, "documentPath", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_documentPath = FindArgument(arguments, 1u, 1u, 2u, 2u, "document-path", error);
 	if (value_documentPath == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_documentPath = storage.Make<std::string>();
 	if (!ReadString(*value_documentPath, stored_string_query_documentPath, error)) { return NativeCalloutDispatch::handled; }
@@ -3877,7 +3877,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextLoadDocument(NativeInterface* nativ
 	nativeInterface->rmlUi->ContextLoadDocument(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("documentHandle", WriteScalar(nativeResult.documentHandle));
+	outputFields.emplace("document-handle", WriteScalar(nativeResult.documentHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3889,7 +3889,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextOpenDataModel(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlContextOpenDataModelQuery query{};
 	RmlContextOpenDataModelResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -3898,7 +3898,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextOpenDataModel(NativeInterface* nati
 	nativeInterface->rmlUi->ContextOpenDataModel(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("dataModelHandle", WriteScalar(nativeResult.dataModelHandle));
+	outputFields.emplace("data-model-handle", WriteScalar(nativeResult.dataModelHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -3910,9 +3910,9 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextProcessKeyDown(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlContextKeyQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "key", query.key, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "keyModifierState", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "key-modifier-state", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextProcessKeyDown(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3925,9 +3925,9 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextProcessKeyUp(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlContextKeyQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "key", query.key, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "keyModifierState", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "key-modifier-state", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextProcessKeyUp(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3940,9 +3940,9 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextProcessMouseButtonDown(NativeInterf
 	NativeCallStorage storage;
 	RmlContextMouseButtonQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "button", query.button, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "keyModifierState", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "key-modifier-state", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextProcessMouseButtonDown(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3955,9 +3955,9 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextProcessMouseButtonUp(NativeInterfac
 	NativeCallStorage storage;
 	RmlContextMouseButtonQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "button", query.button, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "keyModifierState", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "key-modifier-state", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextProcessMouseButtonUp(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3970,7 +3970,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextProcessMouseLeave(NativeInterface* 
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextProcessMouseLeave(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3983,10 +3983,10 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextProcessMouseMove(NativeInterface* n
 	NativeCallStorage storage;
 	RmlContextMouseMoveQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "x", query.x, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "y", query.y, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "keyModifierState", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "key-modifier-state", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextProcessMouseMove(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -3999,10 +3999,10 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextProcessMouseWheel(NativeInterface* 
 	NativeCallStorage storage;
 	RmlContextMouseWheelQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "x", query.x, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "y", query.y, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "keyModifierState", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "key-modifier-state", query.keyModifierState, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextProcessMouseWheel(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4015,7 +4015,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextProcessTextInput(NativeInterface* n
 	NativeCallStorage storage;
 	RmlContextTextInputQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_text = FindArgument(arguments, 1u, 1u, 2u, 2u, "text", error);
 	if (value_text == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_text = storage.Make<std::string>();
@@ -4033,8 +4033,8 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextPullDocumentToFront(NativeInterface
 	NativeCallStorage storage;
 	RmlContextDocumentQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextPullDocumentToFront(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4047,7 +4047,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextPullToFront(NativeInterface* native
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextPullToFront(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4060,8 +4060,8 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextPushDocumentToBack(NativeInterface*
 	NativeCallStorage storage;
 	RmlContextDocumentQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextPushDocumentToBack(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4074,7 +4074,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextRemoveDataModel(NativeInterface* na
 	NativeCallStorage storage;
 	RmlContextStringQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -4092,14 +4092,14 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextRemoveEventListener(NativeInterface
 	NativeCallStorage storage;
 	RmlContextEventListenerRemoveQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "eventListenerHandle", query.eventListenerHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "event-listener-handle", query.eventListenerHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_event = FindArgument(arguments, 2u, 2u, 4u, 4u, "event", error);
 	if (value_event == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_event = storage.Make<std::string>();
 	if (!ReadString(*value_event, stored_string_query_event, error)) { return NativeCalloutDispatch::handled; }
 	query.event = stored_string_query_event.c_str();
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "inCapturePhase", query.inCapturePhase, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "in-capture-phase", query.inCapturePhase, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextRemoveEventListener(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4112,7 +4112,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextRender(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextRender(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4125,7 +4125,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextSetDensityIndependentPixelRatio(Nat
 	NativeCallStorage storage;
 	RmlContextSetFloatQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextSetDensityIndependentPixelRatio(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4139,7 +4139,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextSetDimensions(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlContextSetDimensionsQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "x", query.x, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "y", query.y, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextSetDimensions(&query, &nativeResult);
@@ -4154,9 +4154,9 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextSetPointerCapture(NativeInterface* 
 	NativeCallStorage storage;
 	RmlContextPointerCaptureQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "anchorX", query.anchorX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "anchorY", query.anchorY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "anchor-x", query.anchorX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "anchor-y", query.anchorY, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "active", query.active, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextSetPointerCapture(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4170,12 +4170,12 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextTakePointerCaptureDelta(NativeInter
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextPointerDeltaResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextTakePointerCaptureDelta(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("deltaX", WriteScalar(nativeResult.deltaX));
-	outputFields.emplace("deltaY", WriteScalar(nativeResult.deltaY));
+	outputFields.emplace("delta-x", WriteScalar(nativeResult.deltaX));
+	outputFields.emplace("delta-y", WriteScalar(nativeResult.deltaY));
 	outputFields.emplace("status", WriteScalar(nativeResult.status));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4187,7 +4187,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextUnloadAllDocuments(NativeInterface*
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextUnloadAllDocuments(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4200,8 +4200,8 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextUnloadDocument(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlContextDocumentQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextUnloadDocument(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4214,7 +4214,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ContextUpdate(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	RmlContextHandleQuery query{};
 	RmlContextBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ContextUpdate(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4235,7 +4235,7 @@ NativeCalloutDispatch Dispatch_rml_ui_CreateContext(NativeInterface* nativeInter
 	nativeInterface->rmlUi->CreateContext(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("contextHandle", WriteScalar(nativeResult.contextHandle));
+	outputFields.emplace("context-handle", WriteScalar(nativeResult.contextHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4247,17 +4247,17 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindBool(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlDataModelBindBoolQuery query{};
 	RmlDataModelBindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_query_name, error)) { return NativeCalloutDispatch::handled; }
 	query.name = stored_string_query_name.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initialValue", query.initialValue, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initial-value", query.initialValue, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelBindBool(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("variableHandle", WriteScalar(nativeResult.variableHandle));
+	outputFields.emplace("variable-handle", WriteScalar(nativeResult.variableHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4269,7 +4269,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindColor(NativeInterface* native
 	NativeCallStorage storage;
 	RmlDataModelBindColorQuery query{};
 	RmlDataModelBindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 6u, 6u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -4282,7 +4282,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindColor(NativeInterface* native
 	nativeInterface->rmlUi->DataModelBindColor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("variableHandle", WriteScalar(nativeResult.variableHandle));
+	outputFields.emplace("variable-handle", WriteScalar(nativeResult.variableHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4294,17 +4294,17 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindFloat(NativeInterface* native
 	NativeCallStorage storage;
 	RmlDataModelBindFloatQuery query{};
 	RmlDataModelBindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_query_name, error)) { return NativeCalloutDispatch::handled; }
 	query.name = stored_string_query_name.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initialValue", query.initialValue, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initial-value", query.initialValue, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelBindFloat(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("variableHandle", WriteScalar(nativeResult.variableHandle));
+	outputFields.emplace("variable-handle", WriteScalar(nativeResult.variableHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4316,17 +4316,17 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindInt(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RmlDataModelBindIntQuery query{};
 	RmlDataModelBindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_query_name, error)) { return NativeCalloutDispatch::handled; }
 	query.name = stored_string_query_name.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initialValue", query.initialValue, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initial-value", query.initialValue, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelBindInt(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("variableHandle", WriteScalar(nativeResult.variableHandle));
+	outputFields.emplace("variable-handle", WriteScalar(nativeResult.variableHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4338,17 +4338,17 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindPercent(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlDataModelBindPercentQuery query{};
 	RmlDataModelBindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_query_name, error)) { return NativeCalloutDispatch::handled; }
 	query.name = stored_string_query_name.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initialValue", query.initialValue, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initial-value", query.initialValue, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelBindPercent(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("variableHandle", WriteScalar(nativeResult.variableHandle));
+	outputFields.emplace("variable-handle", WriteScalar(nativeResult.variableHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4360,17 +4360,17 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindPixels(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlDataModelBindPixelsQuery query{};
 	RmlDataModelBindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_query_name, error)) { return NativeCalloutDispatch::handled; }
 	query.name = stored_string_query_name.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initialValue", query.initialValue, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "initial-value", query.initialValue, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelBindPixels(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("variableHandle", WriteScalar(nativeResult.variableHandle));
+	outputFields.emplace("variable-handle", WriteScalar(nativeResult.variableHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4382,7 +4382,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindRows(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlDataModelBindRowsQuery query{};
 	RmlDataModelRowsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -4404,7 +4404,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindRows(NativeInterface* nativeI
 	nativeInterface->rmlUi->DataModelBindRows(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("rowsHandle", WriteScalar(nativeResult.rowsHandle));
+	outputFields.emplace("rows-handle", WriteScalar(nativeResult.rowsHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4416,13 +4416,13 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindString(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlDataModelBindStringQuery query{};
 	RmlDataModelBindResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_query_name, error)) { return NativeCalloutDispatch::handled; }
 	query.name = stored_string_query_name.c_str();
-	const WasmValue* value_initialValue = FindArgument(arguments, 2u, 2u, 3u, 3u, "initialValue", error);
+	const WasmValue* value_initialValue = FindArgument(arguments, 2u, 2u, 3u, 3u, "initial-value", error);
 	if (value_initialValue == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_initialValue = storage.Make<std::string>();
 	if (!ReadString(*value_initialValue, stored_string_query_initialValue, error)) { return NativeCalloutDispatch::handled; }
@@ -4430,7 +4430,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelBindString(NativeInterface* nativ
 	nativeInterface->rmlUi->DataModelBindString(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("variableHandle", WriteScalar(nativeResult.variableHandle));
+	outputFields.emplace("variable-handle", WriteScalar(nativeResult.variableHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4442,7 +4442,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelGetBool(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RmlDataModelVariableHandleQuery query{};
 	RmlDataModelGetBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelGetBool(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -4458,7 +4458,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelGetColor(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlDataModelVariableHandleQuery query{};
 	RmlDataModelGetColorResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelGetColor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -4477,7 +4477,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelGetFloat(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlDataModelVariableHandleQuery query{};
 	RmlDataModelGetFloatResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelGetFloat(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -4493,7 +4493,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelGetInt(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	RmlDataModelVariableHandleQuery query{};
 	RmlDataModelGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelGetInt(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -4509,7 +4509,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelGetPercent(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlDataModelVariableHandleQuery query{};
 	RmlDataModelGetPercentResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelGetPercent(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -4525,7 +4525,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelGetPixels(NativeInterface* native
 	NativeCallStorage storage;
 	RmlDataModelVariableHandleQuery query{};
 	RmlDataModelGetPixelsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelGetPixels(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -4541,7 +4541,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelGetString(NativeInterface* native
 	NativeCallStorage storage;
 	RmlDataModelVariableHandleQuery query{};
 	RmlDataModelGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelGetString(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -4557,7 +4557,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelSetBool(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RmlDataModelVariableBoolQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelSetBool(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4571,7 +4571,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelSetColor(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlDataModelVariableColorQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "red", query.red, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "green", query.green, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "blue", query.blue, error)) return NativeCalloutDispatch::handled;
@@ -4588,7 +4588,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelSetFloat(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlDataModelVariableFloatQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelSetFloat(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4602,7 +4602,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelSetInt(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	RmlDataModelVariableIntQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelSetInt(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4616,7 +4616,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelSetPercent(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlDataModelVariablePercentQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelSetPercent(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4630,7 +4630,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelSetPixels(NativeInterface* native
 	NativeCallStorage storage;
 	RmlDataModelVariablePixelsQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DataModelSetPixels(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4644,7 +4644,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelSetRows(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RmlDataModelSetRowsQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "rowsHandle", query.rowsHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "rows-handle", query.rowsHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_values = FindArgument(arguments, 1u, 1u, 2u, 2u, "values", error);
 	if (value_values == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_values = std::get_if<WasmValueList>(&(*value_values).storage);
@@ -4670,7 +4670,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DataModelSetString(NativeInterface* native
 	NativeCallStorage storage;
 	RmlDataModelVariableStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variableHandle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "variable-handle", query.variableHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -4688,7 +4688,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentAppendToStyleSheet(NativeInterface
 	NativeCallStorage storage;
 	RmlDocumentStringQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -4706,7 +4706,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentClose(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentClose(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4719,8 +4719,8 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentCreateElement(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlDocumentCreateElementQuery query{};
 	RmlDocumentCreateElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_tagName = FindArgument(arguments, 1u, 1u, 2u, 2u, "tagName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_tagName = FindArgument(arguments, 1u, 1u, 2u, 2u, "tag-name", error);
 	if (value_tagName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_tagName = storage.Make<std::string>();
 	if (!ReadString(*value_tagName, stored_string_query_tagName, error)) { return NativeCalloutDispatch::handled; }
@@ -4728,7 +4728,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentCreateElement(NativeInterface* nat
 	nativeInterface->rmlUi->DocumentCreateElement(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementPtrHandle", WriteScalar(nativeResult.elementPtrHandle));
+	outputFields.emplace("element-ptr-handle", WriteScalar(nativeResult.elementPtrHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4740,7 +4740,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentCreateTextNode(NativeInterface* na
 	NativeCallStorage storage;
 	RmlDocumentStringQuery query{};
 	RmlDocumentCreateElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -4749,7 +4749,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentCreateTextNode(NativeInterface* na
 	nativeInterface->rmlUi->DocumentCreateTextNode(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementPtrHandle", WriteScalar(nativeResult.elementPtrHandle));
+	outputFields.emplace("element-ptr-handle", WriteScalar(nativeResult.elementPtrHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4761,11 +4761,11 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentGetContext(NativeInterface* native
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentGetContextResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentGetContext(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("contextHandle", WriteScalar(nativeResult.contextHandle));
+	outputFields.emplace("context-handle", WriteScalar(nativeResult.contextHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4777,7 +4777,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentGetTitle(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentGetTitle(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -4790,7 +4790,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentGetUrl(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentGetUrl(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -4803,7 +4803,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentHide(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentHide(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4816,7 +4816,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentIsModal(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentIsModal(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4829,7 +4829,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentLoadExternalScript(NativeInterface
 	NativeCallStorage storage;
 	RmlDocumentStringQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -4847,18 +4847,18 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentLoadInlineScript(NativeInterface* 
 	NativeCallStorage storage;
 	RmlDocumentInlineScriptQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_content = FindArgument(arguments, 1u, 1u, 4u, 4u, "content", error);
 	if (value_content == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_content = storage.Make<std::string>();
 	if (!ReadString(*value_content, stored_string_query_content, error)) { return NativeCalloutDispatch::handled; }
 	query.content = stored_string_query_content.c_str();
-	const WasmValue* value_sourcePath = FindArgument(arguments, 2u, 2u, 4u, 4u, "sourcePath", error);
+	const WasmValue* value_sourcePath = FindArgument(arguments, 2u, 2u, 4u, 4u, "source-path", error);
 	if (value_sourcePath == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_sourcePath = storage.Make<std::string>();
 	if (!ReadString(*value_sourcePath, stored_string_query_sourcePath, error)) { return NativeCalloutDispatch::handled; }
 	query.sourcePath = stored_string_query_sourcePath.c_str();
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "sourceLine", query.sourceLine, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "source-line", query.sourceLine, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentLoadInlineScript(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4871,7 +4871,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentPullToFront(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentPullToFront(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4884,7 +4884,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentPushToBack(NativeInterface* native
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentPushToBack(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4897,7 +4897,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentReloadStyleSheet(NativeInterface* 
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentReloadStyleSheet(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4910,7 +4910,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentSetTitle(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RmlDocumentSetTitleQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_title = FindArgument(arguments, 1u, 1u, 2u, 2u, "title", error);
 	if (value_title == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_title = storage.Make<std::string>();
@@ -4928,7 +4928,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentShow(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlDocumentShowQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_RmlDocumentShowOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentShow(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -4942,7 +4942,7 @@ NativeCalloutDispatch Dispatch_rml_ui_DocumentUpdateDocument(NativeInterface* na
 	NativeCallStorage storage;
 	RmlDocumentHandleQuery query{};
 	RmlDocumentBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "documentHandle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "document-handle", query.documentHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->DocumentUpdateDocument(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -4955,12 +4955,12 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementAppendChild(NativeInterface* native
 	NativeCallStorage storage;
 	RmlElementAppendChildQuery query{};
 	RmlElementGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "elementPtrHandle", query.elementPtrHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "element-ptr-handle", query.elementPtrHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementAppendChild(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -4972,7 +4972,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementArePseudoClassesSet(NativeInterface
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -4990,7 +4990,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementBlur(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementBlur(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5003,7 +5003,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementClick(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementClick(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5016,11 +5016,11 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementClone(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlDocumentCreateElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementClone(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementPtrHandle", WriteScalar(nativeResult.elementPtrHandle));
+	outputFields.emplace("element-ptr-handle", WriteScalar(nativeResult.elementPtrHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5032,7 +5032,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementClosest(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5041,7 +5041,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementClosest(NativeInterface* nativeInte
 	nativeInterface->rmlUi->ElementClosest(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5053,7 +5053,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementDispatchEvent(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlElementDispatchEventQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_event = FindArgument(arguments, 1u, 1u, 2u, 2u, "event", error);
 	if (value_event == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_event = storage.Make<std::string>();
@@ -5071,7 +5071,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFocus(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFocus(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5084,7 +5084,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlInputGetSelection(Native
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementFormControlSelectionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlInputGetSelection(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -5102,7 +5102,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlInputSelect(NativeInterf
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlInputSelect(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5115,7 +5115,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlInputSetSelection(Native
 	NativeCallStorage storage;
 	RmlElementFormControlSelectionQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "start", query.start, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "end", query.end, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlInputSetSelection(&query, &nativeResult);
@@ -5130,8 +5130,8 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlSelectAdd(NativeInterfac
 	NativeCallStorage storage;
 	RmlElementFormControlSelectAddQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "elementPtrHandle", query.elementPtrHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "element-ptr-handle", query.elementPtrHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "before", query.before, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlSelectAdd(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -5145,7 +5145,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlSelectRemove(NativeInter
 	NativeCallStorage storage;
 	RmlElementFormControlSelectRemoveQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "index", query.index, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlSelectRemove(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -5159,7 +5159,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlSelectRemoveAll(NativeIn
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlSelectRemoveAll(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5172,7 +5172,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlTextAreaGetSelection(Nat
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementFormControlSelectionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlTextAreaGetSelection(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -5190,7 +5190,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlTextAreaSelect(NativeInt
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlTextAreaSelect(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5203,7 +5203,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormControlTextAreaSetSelection(Nat
 	NativeCallStorage storage;
 	RmlElementFormControlSelectionQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "start", query.start, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "end", query.end, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementFormControlTextAreaSetSelection(&query, &nativeResult);
@@ -5218,7 +5218,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementFormSubmit(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlElementFormSubmitQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -5241,7 +5241,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetActivePseudoClasses(NativeInterf
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementStringListResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetActivePseudoClasses(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.values, nativeResult.valueCount, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -5254,7 +5254,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetAttribute(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementGetAttributeQuery query{};
 	RmlElementGetAttributeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -5275,12 +5275,12 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetChild(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	RmlElementGetChildQuery query{};
 	RmlElementGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "index", query.index, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetChild(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5292,7 +5292,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetClassName(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetClassName(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -5305,7 +5305,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetElementById(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5314,7 +5314,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetElementById(NativeInterface* nat
 	nativeInterface->rmlUi->ElementGetElementById(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5326,7 +5326,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetElementsByClassName(NativeInterf
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementHandleListResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5344,7 +5344,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetElementsByClassNameCount(NativeI
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5362,7 +5362,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetElementsByTagName(NativeInterfac
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementHandleListResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5380,7 +5380,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetElementsByTagNameCount(NativeInt
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5398,7 +5398,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetId(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetId(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -5411,7 +5411,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetInnerRml(NativeInterface* native
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetInnerRml(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -5424,7 +5424,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetRect(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementGetRectResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetRect(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -5442,7 +5442,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetScrollLeft(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetScrollLeft(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -5455,7 +5455,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetScrollTop(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetScrollTop(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -5468,7 +5468,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetTagName(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetTagName(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -5481,7 +5481,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementGetValue(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementGetValue(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -5494,7 +5494,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementHasAttribute(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5512,7 +5512,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementHasChildNodes(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementHasChildNodes(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5525,13 +5525,13 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementInsertBefore(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementInsertBeforeQuery query{};
 	RmlElementGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "elementPtrHandle", query.elementPtrHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "adjacentElementHandle", query.adjacentElementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "element-ptr-handle", query.elementPtrHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "adjacent-element-handle", query.adjacentElementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementInsertBefore(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5543,7 +5543,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementIsClassSet(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5561,7 +5561,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementIsPointWithinElement(NativeInterfac
 	NativeCallStorage storage;
 	RmlElementPointQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "x", query.x, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "y", query.y, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementIsPointWithinElement(&query, &nativeResult);
@@ -5576,7 +5576,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementIsPseudoClassSet(NativeInterface* n
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5594,7 +5594,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementIsVisible(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RmlElementHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementIsVisible(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5607,7 +5607,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementMatches(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5625,8 +5625,8 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementProcessDefaultAction(NativeInterfac
 	NativeCallStorage storage;
 	RmlElementProcessDefaultActionQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementProcessDefaultAction(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5639,7 +5639,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementQuerySelector(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5648,7 +5648,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementQuerySelector(NativeInterface* nati
 	nativeInterface->rmlUi->ElementQuerySelector(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5660,7 +5660,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementQuerySelectorAll(NativeInterface* n
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementHandleListResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5678,7 +5678,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementQuerySelectorAllCount(NativeInterfa
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5696,7 +5696,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementRemoveAttribute(NativeInterface* na
 	NativeCallStorage storage;
 	RmlElementGetByStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5714,12 +5714,12 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementRemoveChild(NativeInterface* native
 	NativeCallStorage storage;
 	RmlElementChildQuery query{};
 	RmlDocumentCreateElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "childElementHandle", query.childElementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "child-element-handle", query.childElementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementRemoveChild(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementPtrHandle", WriteScalar(nativeResult.elementPtrHandle));
+	outputFields.emplace("element-ptr-handle", WriteScalar(nativeResult.elementPtrHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5731,14 +5731,14 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementRemoveEventListener(NativeInterface
 	NativeCallStorage storage;
 	RmlElementEventListenerRemoveQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "eventListenerHandle", query.eventListenerHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "event-listener-handle", query.eventListenerHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_event = FindArgument(arguments, 2u, 2u, 4u, 4u, "event", error);
 	if (value_event == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_event = storage.Make<std::string>();
 	if (!ReadString(*value_event, stored_string_query_event, error)) { return NativeCalloutDispatch::handled; }
 	query.event = stored_string_query_event.c_str();
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "inCapturePhase", query.inCapturePhase, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "in-capture-phase", query.inCapturePhase, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementRemoveEventListener(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5751,13 +5751,13 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementReplaceChild(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementReplaceChildQuery query{};
 	RmlDocumentCreateElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "elementPtrHandle", query.elementPtrHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "replacedElementHandle", query.replacedElementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "element-ptr-handle", query.elementPtrHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "replaced-element-handle", query.replacedElementHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementReplaceChild(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementPtrHandle", WriteScalar(nativeResult.elementPtrHandle));
+	outputFields.emplace("element-ptr-handle", WriteScalar(nativeResult.elementPtrHandle));
 	outputFields.emplace("success", WriteScalar(nativeResult.success));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5769,8 +5769,8 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementScrollIntoView(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlElementScrollIntoViewQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "alignWithTop", query.alignWithTop, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "align-with-top", query.alignWithTop, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementScrollIntoView(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -5783,7 +5783,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementSetAttribute(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementSetAttributeQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -5806,7 +5806,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementSetClass(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	RmlElementStringBoolQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -5825,7 +5825,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementSetClassName(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementSetStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5843,7 +5843,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementSetId(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlElementSetStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5861,7 +5861,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementSetInnerRml(NativeInterface* native
 	NativeCallStorage storage;
 	RmlElementSetStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_value = FindArgument(arguments, 1u, 1u, 2u, 2u, "value", error);
 	if (value_value == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_value = storage.Make<std::string>();
@@ -5879,7 +5879,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementSetPseudoClass(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlElementStringBoolQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -5898,7 +5898,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementSetScrollLeft(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlElementSetIntQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementSetScrollLeft(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -5912,7 +5912,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementSetScrollTop(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementSetIntQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementSetScrollTop(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -5926,7 +5926,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementTabSetRemoveTab(NativeInterface* na
 	NativeCallStorage storage;
 	RmlElementTabSetIndexQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "index", query.index, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->ElementTabSetRemoveTab(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -5940,7 +5940,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementTabSetSetPanel(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlElementTabSetIndexStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "index", query.index, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_rml = FindArgument(arguments, 2u, 2u, 3u, 3u, "rml", error);
 	if (value_rml == nullptr) return NativeCalloutDispatch::handled;
@@ -5959,7 +5959,7 @@ NativeCalloutDispatch Dispatch_rml_ui_ElementTabSetSetTab(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlElementTabSetIndexStringQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "elementHandle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "element-handle", query.elementHandle, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "index", query.index, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_rml = FindArgument(arguments, 2u, 2u, 3u, 3u, "rml", error);
 	if (value_rml == nullptr) return NativeCalloutDispatch::handled;
@@ -5978,13 +5978,13 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetCurrent(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	RmlEventCurrentQuery query{};
 	RmlEventCurrentResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventGetCurrent(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("eventHandle", WriteScalar(nativeResult.eventHandle));
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
-	outputFields.emplace("documentHandle", WriteScalar(nativeResult.documentHandle));
+	outputFields.emplace("event-handle", WriteScalar(nativeResult.eventHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("document-handle", WriteScalar(nativeResult.documentHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -5996,11 +5996,11 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetCurrentElement(NativeInterface* na
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlElementGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventGetCurrentElement(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -6012,7 +6012,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetParameterBool(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlEventParameterQuery query{};
 	RmlEventGetBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -6033,7 +6033,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetParameterFloat(NativeInterface* na
 	NativeCallStorage storage;
 	RmlEventParameterQuery query{};
 	RmlEventGetFloatResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -6054,7 +6054,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetParameterInt(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlEventParameterQuery query{};
 	RmlEventGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -6075,7 +6075,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetParameterString(NativeInterface* n
 	NativeCallStorage storage;
 	RmlEventParameterQuery query{};
 	RmlEventGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -6096,7 +6096,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetParameterType(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlEventParameterQuery query{};
 	RmlEventGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -6117,7 +6117,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetPhase(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlEventGetIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventGetPhase(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -6133,11 +6133,11 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetTargetElement(NativeInterface* nat
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlElementGetElementResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventGetTargetElement(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementHandle", WriteScalar(nativeResult.elementHandle));
+	outputFields.emplace("element-handle", WriteScalar(nativeResult.elementHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -6149,7 +6149,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventGetType(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlEventGetStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventGetType(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -6165,7 +6165,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventIsImmediatePropagating(NativeInterfac
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlEventGetBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventIsImmediatePropagating(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -6181,7 +6181,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventIsInterruptible(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlEventGetBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventIsInterruptible(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -6197,7 +6197,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventIsPropagating(NativeInterface* native
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlEventGetBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventIsPropagating(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -6213,7 +6213,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventStopImmediatePropagation(NativeInterf
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventStopImmediatePropagation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -6226,7 +6226,7 @@ NativeCalloutDispatch Dispatch_rml_ui_EventStopPropagation(NativeInterface* nati
 	NativeCallStorage storage;
 	RmlEventHandleQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "eventHandle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "event-handle", query.eventHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->EventStopPropagation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -6247,7 +6247,7 @@ NativeCalloutDispatch Dispatch_rml_ui_GetContext(NativeInterface* nativeInterfac
 	nativeInterface->rmlUi->GetContext(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("contextHandle", WriteScalar(nativeResult.contextHandle));
+	outputFields.emplace("context-handle", WriteScalar(nativeResult.contextHandle));
 	outputFields.emplace("exists", WriteScalar(nativeResult.exists));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -6259,7 +6259,7 @@ NativeCalloutDispatch Dispatch_rml_ui_GetDocumentPathRequests(NativeInterface* n
 	NativeCallStorage storage;
 	RmlGetDocumentPathRequestsQuery query{};
 	RmlGetDocumentPathRequestsResult nativeResult{};
-	const WasmValue* value_documentPath = FindArgument(arguments, 0u, 0u, 1u, 1u, "documentPath", error);
+	const WasmValue* value_documentPath = FindArgument(arguments, 0u, 0u, 1u, 1u, "document-path", error);
 	if (value_documentPath == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_documentPath = storage.Make<std::string>();
 	if (!ReadString(*value_documentPath, stored_string_query_documentPath, error)) { return NativeCalloutDispatch::handled; }
@@ -6276,7 +6276,7 @@ NativeCalloutDispatch Dispatch_rml_ui_GetVersion(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	RmlGetVersionQuery query{};
 	RmlGetVersionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->GetVersion(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.version == nullptr) ? std::string{} : std::string(nativeResult.version));
@@ -6289,7 +6289,7 @@ NativeCalloutDispatch Dispatch_rml_ui_IsReady(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	RmlIsReadyQuery query{};
 	RmlIsReadyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->IsReady(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.ready);
@@ -6302,7 +6302,7 @@ NativeCalloutDispatch Dispatch_rml_ui_LoadFontFace(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	RmlLoadFontFaceQuery query{};
 	RmlLoadFontFaceResult nativeResult{};
-	const WasmValue* value_filePath = FindArgument(arguments, 0u, 0u, 3u, 3u, "filePath", error);
+	const WasmValue* value_filePath = FindArgument(arguments, 0u, 0u, 3u, 3u, "file-path", error);
 	if (value_filePath == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_filePath = storage.Make<std::string>();
 	if (!ReadString(*value_filePath, stored_string_query_filePath, error)) { return NativeCalloutDispatch::handled; }
@@ -6329,7 +6329,7 @@ NativeCalloutDispatch Dispatch_rml_ui_RegiserEventType(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	RmlRegisterEventTypeQuery query{};
 	RmlRegisterEventTypeResult nativeResult{};
-	const WasmValue* value_eventType = FindArgument(arguments, 0u, 0u, 2u, 2u, "eventType", error);
+	const WasmValue* value_eventType = FindArgument(arguments, 0u, 0u, 2u, 2u, "event-type", error);
 	if (value_eventType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_eventType = storage.Make<std::string>();
 	if (!ReadString(*value_eventType, stored_string_query_eventType, error)) { return NativeCalloutDispatch::handled; }
@@ -6347,7 +6347,7 @@ NativeCalloutDispatch Dispatch_rml_ui_RegisterEventType(NativeInterface* nativeI
 	NativeCallStorage storage;
 	RmlRegisterEventTypeQuery query{};
 	RmlRegisterEventTypeResult nativeResult{};
-	const WasmValue* value_eventType = FindArgument(arguments, 0u, 0u, 2u, 2u, "eventType", error);
+	const WasmValue* value_eventType = FindArgument(arguments, 0u, 0u, 2u, 2u, "event-type", error);
 	if (value_eventType == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_eventType = storage.Make<std::string>();
 	if (!ReadString(*value_eventType, stored_string_query_eventType, error)) { return NativeCalloutDispatch::handled; }
@@ -6365,7 +6365,7 @@ NativeCalloutDispatch Dispatch_rml_ui_RemoveContext(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	RmlRemoveContextQuery query{};
 	RmlRemoveContextResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->RemoveContext(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -6395,7 +6395,7 @@ NativeCalloutDispatch Dispatch_rml_ui_SetDebugContext(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	RmlSetDebugContextQuery query{};
 	RmlSetDebugContextResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "contextHandle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "context-handle", query.contextHandle, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rmlUi->SetDebugContext(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -6425,12 +6425,12 @@ NativeCalloutDispatch Dispatch_rml_ui_SetMouseCursorAlias(NativeInterface* nativ
 	NativeCallStorage storage;
 	RmlSetMouseCursorAliasQuery query{};
 	RmlSetMouseCursorAliasResult nativeResult{};
-	const WasmValue* value_rmlName = FindArgument(arguments, 0u, 0u, 2u, 2u, "rmlName", error);
+	const WasmValue* value_rmlName = FindArgument(arguments, 0u, 0u, 2u, 2u, "rml-name", error);
 	if (value_rmlName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_rmlName = storage.Make<std::string>();
 	if (!ReadString(*value_rmlName, stored_string_query_rmlName, error)) { return NativeCalloutDispatch::handled; }
 	query.rmlName = stored_string_query_rmlName.c_str();
-	const WasmValue* value_recoilName = FindArgument(arguments, 1u, 1u, 2u, 2u, "recoilName", error);
+	const WasmValue* value_recoilName = FindArgument(arguments, 1u, 1u, 2u, 2u, "recoil-name", error);
 	if (value_recoilName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_recoilName = storage.Make<std::string>();
 	if (!ReadString(*value_recoilName, stored_string_query_recoilName, error)) { return NativeCalloutDispatch::handled; }
@@ -6447,7 +6447,7 @@ NativeCalloutDispatch Dispatch_rml_ui_SolLuaDataModelSetDirty(NativeInterface* n
 	NativeCallStorage storage;
 	RmlSolLuaDataModelSetDirtyQuery query{};
 	RmlElementBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "dataModelHandle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "data-model-handle", query.dataModelHandle, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_property = FindArgument(arguments, 1u, 1u, 2u, 2u, "property", error);
 	if (value_property == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_property = storage.Make<std::string>();

@@ -12,7 +12,7 @@ bool Read_AIInfo(const WasmValue& input, AIInfo& output, NativeCallStorage& stor
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_skirmishAIID = FindRecordField(*record, "skirmishAIID", error);
+	const auto* value_skirmishAIID = FindRecordField(*record, "skirmish-aiid", error);
 	if (value_skirmishAIID == nullptr) return false;
 	if (!ReadScalar(*value_skirmishAIID, output.skirmishAIID, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -20,10 +20,10 @@ bool Read_AIInfo(const WasmValue& input, AIInfo& output, NativeCallStorage& stor
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_hostingPlayerID = FindRecordField(*record, "hostingPlayerID", error);
+	const auto* value_hostingPlayerID = FindRecordField(*record, "hosting-player-id", error);
 	if (value_hostingPlayerID == nullptr) return false;
 	if (!ReadScalar(*value_hostingPlayerID, output.hostingPlayerID, error)) { return false; }
-	const auto* value_shortName = FindRecordField(*record, "shortName", error);
+	const auto* value_shortName = FindRecordField(*record, "short-name", error);
 	if (value_shortName == nullptr) return false;
 	auto& stored_string_output_shortName = storage.Make<std::string>();
 	if (!ReadString(*value_shortName, stored_string_output_shortName, error)) { return false; }
@@ -52,10 +52,10 @@ bool Read_AIInfo(const WasmValue& input, AIInfo& output, NativeCallStorage& stor
 WasmValue Write_AIInfo(const AIInfo& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("skirmishAIID", WriteScalar(value.skirmishAIID));
+	fields.emplace("skirmish-aiid", WriteScalar(value.skirmishAIID));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("hostingPlayerID", WriteScalar(value.hostingPlayerID));
-	fields.emplace("shortName", WasmValue::String((value.shortName == nullptr) ? std::string{} : std::string(value.shortName)));
+	fields.emplace("hosting-player-id", WriteScalar(value.hostingPlayerID));
+	fields.emplace("short-name", WasmValue::String((value.shortName == nullptr) ? std::string{} : std::string(value.shortName)));
 	fields.emplace("version", WasmValue::String((value.version == nullptr) ? std::string{} : std::string(value.version)));
 	fields.emplace("options", WriteNativeList(value.options, value.optionCount, [](const auto& value) { return Write_AIOption(value); }));
 	return WasmValue::Record(std::move(fields));
@@ -141,10 +141,10 @@ bool Read_ArePlayersAlliedQuery(const WasmValue& input, ArePlayersAlliedQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID1 = FindRecordField(*record, "playerID1", error);
+	const auto* value_playerID1 = FindRecordField(*record, "player-id1", error);
 	if (value_playerID1 == nullptr) return false;
 	if (!ReadScalar(*value_playerID1, output.playerID1, error)) { return false; }
-	const auto* value_playerID2 = FindRecordField(*record, "playerID2", error);
+	const auto* value_playerID2 = FindRecordField(*record, "player-id2", error);
 	if (value_playerID2 == nullptr) return false;
 	if (!ReadScalar(*value_playerID2, output.playerID2, error)) { return false; }
 	return true;
@@ -153,8 +153,8 @@ bool Read_ArePlayersAlliedQuery(const WasmValue& input, ArePlayersAlliedQuery& o
 WasmValue Write_ArePlayersAlliedQuery(const ArePlayersAlliedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID1", WriteScalar(value.playerID1));
-	fields.emplace("playerID2", WriteScalar(value.playerID2));
+	fields.emplace("player-id1", WriteScalar(value.playerID1));
+	fields.emplace("player-id2", WriteScalar(value.playerID2));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -179,10 +179,10 @@ bool Read_AreTeamsAlliedQuery(const WasmValue& input, AreTeamsAlliedQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID1 = FindRecordField(*record, "teamID1", error);
+	const auto* value_teamID1 = FindRecordField(*record, "team-id1", error);
 	if (value_teamID1 == nullptr) return false;
 	if (!ReadScalar(*value_teamID1, output.teamID1, error)) { return false; }
-	const auto* value_teamID2 = FindRecordField(*record, "teamID2", error);
+	const auto* value_teamID2 = FindRecordField(*record, "team-id2", error);
 	if (value_teamID2 == nullptr) return false;
 	if (!ReadScalar(*value_teamID2, output.teamID2, error)) { return false; }
 	return true;
@@ -191,8 +191,8 @@ bool Read_AreTeamsAlliedQuery(const WasmValue& input, AreTeamsAlliedQuery& outpu
 WasmValue Write_AreTeamsAlliedQuery(const AreTeamsAlliedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID1", WriteScalar(value.teamID1));
-	fields.emplace("teamID2", WriteScalar(value.teamID2));
+	fields.emplace("team-id1", WriteScalar(value.teamID1));
+	fields.emplace("team-id2", WriteScalar(value.teamID2));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -217,7 +217,7 @@ bool Read_GetAIInfoQuery(const WasmValue& input, GetAIInfoQuery& output, NativeC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -226,7 +226,7 @@ bool Read_GetAIInfoQuery(const WasmValue& input, GetAIInfoQuery& output, NativeC
 WasmValue Write_GetAIInfoQuery(const GetAIInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -237,7 +237,7 @@ bool Read_GetAIInfoResult(const WasmValue& input, GetAIInfoResult& output, Nativ
 	const auto* value_info = FindRecordField(*record, "info", error);
 	if (value_info == nullptr) return false;
 	if (!Read_AIInfo(*value_info, output.info, storage, error)) { return false; }
-	const auto* value_isAI = FindRecordField(*record, "isAI", error);
+	const auto* value_isAI = FindRecordField(*record, "is-ai", error);
 	if (value_isAI == nullptr) return false;
 	if (!ReadScalar(*value_isAI, output.isAI, error)) { return false; }
 	return true;
@@ -247,7 +247,7 @@ WasmValue Write_GetAIInfoResult(const GetAIInfoResult& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("info", Write_AIInfo(value.info));
-	fields.emplace("isAI", WriteScalar(value.isAI));
+	fields.emplace("is-ai", WriteScalar(value.isAI));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -255,7 +255,7 @@ bool Read_GetAllyTeamInfoQuery(const WasmValue& input, GetAllyTeamInfoQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -264,7 +264,7 @@ bool Read_GetAllyTeamInfoQuery(const WasmValue& input, GetAllyTeamInfoQuery& out
 WasmValue Write_GetAllyTeamInfoQuery(const GetAllyTeamInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -289,7 +289,7 @@ bool Read_GetAllyTeamListQuery(const WasmValue& input, GetAllyTeamListQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -298,7 +298,7 @@ bool Read_GetAllyTeamListQuery(const WasmValue& input, GetAllyTeamListQuery& out
 WasmValue Write_GetAllyTeamListQuery(const GetAllyTeamListQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -306,7 +306,7 @@ bool Read_GetAllyTeamListResult(const WasmValue& input, GetAllyTeamListResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeams = FindRecordField(*record, "allyTeams", error);
+	const auto* value_allyTeams = FindRecordField(*record, "ally-teams", error);
 	if (value_allyTeams == nullptr) return false;
 	const auto* list_allyTeams = std::get_if<WasmValueList>(&(*value_allyTeams).storage);
 	if (list_allyTeams == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -325,7 +325,7 @@ bool Read_GetAllyTeamListResult(const WasmValue& input, GetAllyTeamListResult& o
 WasmValue Write_GetAllyTeamListResult(const GetAllyTeamListResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeams", WriteNativeList(value.allyTeams, value.count, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("ally-teams", WriteNativeList(value.allyTeams, value.count, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -333,7 +333,7 @@ bool Read_GetPlayerControlledUnitQuery(const WasmValue& input, GetPlayerControll
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	return true;
@@ -342,7 +342,7 @@ bool Read_GetPlayerControlledUnitQuery(const WasmValue& input, GetPlayerControll
 WasmValue Write_GetPlayerControlledUnitQuery(const GetPlayerControlledUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -350,10 +350,10 @@ bool Read_GetPlayerControlledUnitResult(const WasmValue& input, GetPlayerControl
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_hasUnit = FindRecordField(*record, "hasUnit", error);
+	const auto* value_hasUnit = FindRecordField(*record, "has-unit", error);
 	if (value_hasUnit == nullptr) return false;
 	if (!ReadScalar(*value_hasUnit, output.hasUnit, error)) { return false; }
 	return true;
@@ -362,8 +362,8 @@ bool Read_GetPlayerControlledUnitResult(const WasmValue& input, GetPlayerControl
 WasmValue Write_GetPlayerControlledUnitResult(const GetPlayerControlledUnitResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("hasUnit", WriteScalar(value.hasUnit));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("has-unit", WriteScalar(value.hasUnit));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -371,10 +371,10 @@ bool Read_GetPlayerInfoQuery(const WasmValue& input, GetPlayerInfoQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
-	const auto* value_getPlayerOpts = FindRecordField(*record, "getPlayerOpts", error);
+	const auto* value_getPlayerOpts = FindRecordField(*record, "get-player-opts", error);
 	if (value_getPlayerOpts == nullptr) return false;
 	if (!ReadScalar(*value_getPlayerOpts, output.getPlayerOpts, error)) { return false; }
 	return true;
@@ -383,8 +383,8 @@ bool Read_GetPlayerInfoQuery(const WasmValue& input, GetPlayerInfoQuery& output,
 WasmValue Write_GetPlayerInfoQuery(const GetPlayerInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
-	fields.emplace("getPlayerOpts", WriteScalar(value.getPlayerOpts));
+	fields.emplace("player-id", WriteScalar(value.playerID));
+	fields.emplace("get-player-opts", WriteScalar(value.getPlayerOpts));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -409,7 +409,7 @@ bool Read_GetPlayerListInAllyTeamQuery(const WasmValue& input, GetPlayerListInAl
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -418,7 +418,7 @@ bool Read_GetPlayerListInAllyTeamQuery(const WasmValue& input, GetPlayerListInAl
 WasmValue Write_GetPlayerListInAllyTeamQuery(const GetPlayerListInAllyTeamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -453,7 +453,7 @@ bool Read_GetPlayerListInTeamQuery(const WasmValue& input, GetPlayerListInTeamQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -462,7 +462,7 @@ bool Read_GetPlayerListInTeamQuery(const WasmValue& input, GetPlayerListInTeamQu
 WasmValue Write_GetPlayerListInTeamQuery(const GetPlayerListInTeamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -497,7 +497,7 @@ bool Read_GetPlayerListQuery(const WasmValue& input, GetPlayerListQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_active = FindRecordField(*record, "active", error);
@@ -509,7 +509,7 @@ bool Read_GetPlayerListQuery(const WasmValue& input, GetPlayerListQuery& output,
 WasmValue Write_GetPlayerListQuery(const GetPlayerListQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("active", WriteScalar(value.active));
 	return WasmValue::Record(std::move(fields));
 }
@@ -545,7 +545,7 @@ bool Read_GetTeamAllyTeamIDQuery(const WasmValue& input, GetTeamAllyTeamIDQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -554,7 +554,7 @@ bool Read_GetTeamAllyTeamIDQuery(const WasmValue& input, GetTeamAllyTeamIDQuery&
 WasmValue Write_GetTeamAllyTeamIDQuery(const GetTeamAllyTeamIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -562,7 +562,7 @@ bool Read_GetTeamAllyTeamIDResult(const WasmValue& input, GetTeamAllyTeamIDResul
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -571,7 +571,7 @@ bool Read_GetTeamAllyTeamIDResult(const WasmValue& input, GetTeamAllyTeamIDResul
 WasmValue Write_GetTeamAllyTeamIDResult(const GetTeamAllyTeamIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -579,10 +579,10 @@ bool Read_GetTeamInfoQuery(const WasmValue& input, GetTeamInfoQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_getTeamKeys = FindRecordField(*record, "getTeamKeys", error);
+	const auto* value_getTeamKeys = FindRecordField(*record, "get-team-keys", error);
 	if (value_getTeamKeys == nullptr) return false;
 	if (!ReadScalar(*value_getTeamKeys, output.getTeamKeys, error)) { return false; }
 	return true;
@@ -591,8 +591,8 @@ bool Read_GetTeamInfoQuery(const WasmValue& input, GetTeamInfoQuery& output, Nat
 WasmValue Write_GetTeamInfoQuery(const GetTeamInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("getTeamKeys", WriteScalar(value.getTeamKeys));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("get-team-keys", WriteScalar(value.getTeamKeys));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -617,7 +617,7 @@ bool Read_GetTeamListQuery(const WasmValue& input, GetTeamListQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -626,7 +626,7 @@ bool Read_GetTeamListQuery(const WasmValue& input, GetTeamListQuery& output, Nat
 WasmValue Write_GetTeamListQuery(const GetTeamListQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -661,7 +661,7 @@ bool Read_GetTeamLuaAIQuery(const WasmValue& input, GetTeamLuaAIQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -670,7 +670,7 @@ bool Read_GetTeamLuaAIQuery(const WasmValue& input, GetTeamLuaAIQuery& output, N
 WasmValue Write_GetTeamLuaAIQuery(const GetTeamLuaAIQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -678,7 +678,7 @@ bool Read_GetTeamLuaAIResult(const WasmValue& input, GetTeamLuaAIResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_luaAI = FindRecordField(*record, "luaAI", error);
+	const auto* value_luaAI = FindRecordField(*record, "lua-ai", error);
 	if (value_luaAI == nullptr) return false;
 	auto& stored_string_output_luaAI = storage.Make<std::string>();
 	if (!ReadString(*value_luaAI, stored_string_output_luaAI, error)) { return false; }
@@ -689,7 +689,7 @@ bool Read_GetTeamLuaAIResult(const WasmValue& input, GetTeamLuaAIResult& output,
 WasmValue Write_GetTeamLuaAIResult(const GetTeamLuaAIResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("luaAI", WasmValue::String((value.luaAI == nullptr) ? std::string{} : std::string(value.luaAI)));
+	fields.emplace("lua-ai", WasmValue::String((value.luaAI == nullptr) ? std::string{} : std::string(value.luaAI)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -697,7 +697,7 @@ bool Read_GetTeamMaxUnitsQuery(const WasmValue& input, GetTeamMaxUnitsQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -706,7 +706,7 @@ bool Read_GetTeamMaxUnitsQuery(const WasmValue& input, GetTeamMaxUnitsQuery& out
 WasmValue Write_GetTeamMaxUnitsQuery(const GetTeamMaxUnitsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -714,7 +714,7 @@ bool Read_GetTeamMaxUnitsResult(const WasmValue& input, GetTeamMaxUnitsResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_maxUnits = FindRecordField(*record, "maxUnits", error);
+	const auto* value_maxUnits = FindRecordField(*record, "max-units", error);
 	if (value_maxUnits == nullptr) return false;
 	if (!ReadScalar(*value_maxUnits, output.maxUnits, error)) { return false; }
 	return true;
@@ -723,7 +723,7 @@ bool Read_GetTeamMaxUnitsResult(const WasmValue& input, GetTeamMaxUnitsResult& o
 WasmValue Write_GetTeamMaxUnitsResult(const GetTeamMaxUnitsResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("maxUnits", WriteScalar(value.maxUnits));
+	fields.emplace("max-units", WriteScalar(value.maxUnits));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -731,7 +731,7 @@ bool Read_GetTeamResourceStatsQuery(const WasmValue& input, GetTeamResourceStats
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_resource = FindRecordField(*record, "resource", error);
@@ -745,7 +745,7 @@ bool Read_GetTeamResourceStatsQuery(const WasmValue& input, GetTeamResourceStats
 WasmValue Write_GetTeamResourceStatsQuery(const GetTeamResourceStatsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("resource", WasmValue::String((value.resource == nullptr) ? std::string{} : std::string(value.resource)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -771,7 +771,7 @@ bool Read_GetTeamResourcesQuery(const WasmValue& input, GetTeamResourcesQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_resource = FindRecordField(*record, "resource", error);
@@ -785,7 +785,7 @@ bool Read_GetTeamResourcesQuery(const WasmValue& input, GetTeamResourcesQuery& o
 WasmValue Write_GetTeamResourcesQuery(const GetTeamResourcesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("resource", WasmValue::String((value.resource == nullptr) ? std::string{} : std::string(value.resource)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -811,13 +811,13 @@ bool Read_GetTeamStatsHistoryQuery(const WasmValue& input, GetTeamStatsHistoryQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_startIndex = FindRecordField(*record, "startIndex", error);
+	const auto* value_startIndex = FindRecordField(*record, "start-index", error);
 	if (value_startIndex == nullptr) return false;
 	if (!ReadScalar(*value_startIndex, output.startIndex, error)) { return false; }
-	const auto* value_endIndex = FindRecordField(*record, "endIndex", error);
+	const auto* value_endIndex = FindRecordField(*record, "end-index", error);
 	if (value_endIndex == nullptr) return false;
 	if (!ReadScalar(*value_endIndex, output.endIndex, error)) { return false; }
 	return true;
@@ -826,9 +826,9 @@ bool Read_GetTeamStatsHistoryQuery(const WasmValue& input, GetTeamStatsHistoryQu
 WasmValue Write_GetTeamStatsHistoryQuery(const GetTeamStatsHistoryQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("startIndex", WriteScalar(value.startIndex));
-	fields.emplace("endIndex", WriteScalar(value.endIndex));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("start-index", WriteScalar(value.startIndex));
+	fields.emplace("end-index", WriteScalar(value.endIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -863,7 +863,7 @@ bool Read_GetTeamUnitStatsQuery(const WasmValue& input, GetTeamUnitStatsQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -872,7 +872,7 @@ bool Read_GetTeamUnitStatsQuery(const WasmValue& input, GetTeamUnitStatsQuery& o
 WasmValue Write_GetTeamUnitStatsQuery(const GetTeamUnitStatsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -897,7 +897,7 @@ bool Read_PlayerInfo(const WasmValue& input, PlayerInfo& output, NativeCallStora
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -905,25 +905,25 @@ bool Read_PlayerInfo(const WasmValue& input, PlayerInfo& output, NativeCallStora
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_isActive = FindRecordField(*record, "isActive", error);
+	const auto* value_isActive = FindRecordField(*record, "is-active", error);
 	if (value_isActive == nullptr) return false;
 	if (!ReadScalar(*value_isActive, output.isActive, error)) { return false; }
-	const auto* value_isAI = FindRecordField(*record, "isAI", error);
+	const auto* value_isAI = FindRecordField(*record, "is-ai", error);
 	if (value_isAI == nullptr) return false;
 	if (!ReadScalar(*value_isAI, output.isAI, error)) { return false; }
-	const auto* value_isSpec = FindRecordField(*record, "isSpec", error);
+	const auto* value_isSpec = FindRecordField(*record, "is-spec", error);
 	if (value_isSpec == nullptr) return false;
 	if (!ReadScalar(*value_isSpec, output.isSpec, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
-	const auto* value_pingTime = FindRecordField(*record, "pingTime", error);
+	const auto* value_pingTime = FindRecordField(*record, "ping-time", error);
 	if (value_pingTime == nullptr) return false;
 	if (!ReadScalar(*value_pingTime, output.pingTime, error)) { return false; }
-	const auto* value_cpuUsage = FindRecordField(*record, "cpuUsage", error);
+	const auto* value_cpuUsage = FindRecordField(*record, "cpu-usage", error);
 	if (value_cpuUsage == nullptr) return false;
 	if (!ReadScalar(*value_cpuUsage, output.cpuUsage, error)) { return false; }
 	const auto* value_country = FindRecordField(*record, "country", error);
@@ -934,10 +934,10 @@ bool Read_PlayerInfo(const WasmValue& input, PlayerInfo& output, NativeCallStora
 	const auto* value_rank = FindRecordField(*record, "rank", error);
 	if (value_rank == nullptr) return false;
 	if (!ReadScalar(*value_rank, output.rank, error)) { return false; }
-	const auto* value_hasSkirmishAIsInTeam = FindRecordField(*record, "hasSkirmishAIsInTeam", error);
+	const auto* value_hasSkirmishAIsInTeam = FindRecordField(*record, "has-skirmish-a-is-in-team", error);
 	if (value_hasSkirmishAIsInTeam == nullptr) return false;
 	if (!ReadScalar(*value_hasSkirmishAIsInTeam, output.hasSkirmishAIsInTeam, error)) { return false; }
-	const auto* value_customKeys = FindRecordField(*record, "customKeys", error);
+	const auto* value_customKeys = FindRecordField(*record, "custom-keys", error);
 	if (value_customKeys == nullptr) return false;
 	auto& stored_string_output_customKeys = storage.Make<std::string>();
 	if (!ReadString(*value_customKeys, stored_string_output_customKeys, error)) { return false; }
@@ -951,19 +951,19 @@ bool Read_PlayerInfo(const WasmValue& input, PlayerInfo& output, NativeCallStora
 WasmValue Write_PlayerInfo(const PlayerInfo& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("isActive", WriteScalar(value.isActive));
-	fields.emplace("isAI", WriteScalar(value.isAI));
-	fields.emplace("isSpec", WriteScalar(value.isSpec));
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
-	fields.emplace("pingTime", WriteScalar(value.pingTime));
-	fields.emplace("cpuUsage", WriteScalar(value.cpuUsage));
+	fields.emplace("is-active", WriteScalar(value.isActive));
+	fields.emplace("is-ai", WriteScalar(value.isAI));
+	fields.emplace("is-spec", WriteScalar(value.isSpec));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
+	fields.emplace("ping-time", WriteScalar(value.pingTime));
+	fields.emplace("cpu-usage", WriteScalar(value.cpuUsage));
 	fields.emplace("country", WasmValue::String((value.country == nullptr) ? std::string{} : std::string(value.country)));
 	fields.emplace("rank", WriteScalar(value.rank));
-	fields.emplace("hasSkirmishAIsInTeam", WriteScalar(value.hasSkirmishAIsInTeam));
-	fields.emplace("customKeys", WasmValue::String((value.customKeys == nullptr) ? std::string{} : std::string(value.customKeys)));
+	fields.emplace("has-skirmish-a-is-in-team", WriteScalar(value.hasSkirmishAIsInTeam));
+	fields.emplace("custom-keys", WasmValue::String((value.customKeys == nullptr) ? std::string{} : std::string(value.customKeys)));
 	fields.emplace("desynced", WriteScalar(value.desynced));
 	return WasmValue::Record(std::move(fields));
 }
@@ -972,16 +972,16 @@ bool Read_TeamInfo(const WasmValue& input, TeamInfo& output, NativeCallStorage& 
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
-	const auto* value_leaderID = FindRecordField(*record, "leaderID", error);
+	const auto* value_leaderID = FindRecordField(*record, "leader-id", error);
 	if (value_leaderID == nullptr) return false;
 	if (!ReadScalar(*value_leaderID, output.leaderID, error)) { return false; }
-	const auto* value_isDead = FindRecordField(*record, "isDead", error);
+	const auto* value_isDead = FindRecordField(*record, "is-dead", error);
 	if (value_isDead == nullptr) return false;
 	if (!ReadScalar(*value_isDead, output.isDead, error)) { return false; }
 	const auto* value_side = FindRecordField(*record, "side", error);
@@ -992,7 +992,7 @@ bool Read_TeamInfo(const WasmValue& input, TeamInfo& output, NativeCallStorage& 
 	const auto* value_color = FindRecordField(*record, "color", error);
 	if (value_color == nullptr) return false;
 	if (!ReadScalar(*value_color, output.color, error)) { return false; }
-	const auto* value_customKeys = FindRecordField(*record, "customKeys", error);
+	const auto* value_customKeys = FindRecordField(*record, "custom-keys", error);
 	if (value_customKeys == nullptr) return false;
 	auto& stored_string_output_customKeys = storage.Make<std::string>();
 	if (!ReadString(*value_customKeys, stored_string_output_customKeys, error)) { return false; }
@@ -1003,13 +1003,13 @@ bool Read_TeamInfo(const WasmValue& input, TeamInfo& output, NativeCallStorage& 
 WasmValue Write_TeamInfo(const TeamInfo& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
-	fields.emplace("leaderID", WriteScalar(value.leaderID));
-	fields.emplace("isDead", WriteScalar(value.isDead));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
+	fields.emplace("leader-id", WriteScalar(value.leaderID));
+	fields.emplace("is-dead", WriteScalar(value.isDead));
 	fields.emplace("side", WasmValue::String((value.side == nullptr) ? std::string{} : std::string(value.side)));
 	fields.emplace("color", WriteScalar(value.color));
-	fields.emplace("customKeys", WasmValue::String((value.customKeys == nullptr) ? std::string{} : std::string(value.customKeys)));
+	fields.emplace("custom-keys", WasmValue::String((value.customKeys == nullptr) ? std::string{} : std::string(value.customKeys)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1017,58 +1017,58 @@ bool Read_TeamResources(const WasmValue& input, TeamResources& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_metalCurrent = FindRecordField(*record, "metalCurrent", error);
+	const auto* value_metalCurrent = FindRecordField(*record, "metal-current", error);
 	if (value_metalCurrent == nullptr) return false;
 	if (!ReadScalar(*value_metalCurrent, output.metalCurrent, error)) { return false; }
-	const auto* value_metalStorage = FindRecordField(*record, "metalStorage", error);
+	const auto* value_metalStorage = FindRecordField(*record, "metal-storage", error);
 	if (value_metalStorage == nullptr) return false;
 	if (!ReadScalar(*value_metalStorage, output.metalStorage, error)) { return false; }
-	const auto* value_metalPull = FindRecordField(*record, "metalPull", error);
+	const auto* value_metalPull = FindRecordField(*record, "metal-pull", error);
 	if (value_metalPull == nullptr) return false;
 	if (!ReadScalar(*value_metalPull, output.metalPull, error)) { return false; }
-	const auto* value_metalIncome = FindRecordField(*record, "metalIncome", error);
+	const auto* value_metalIncome = FindRecordField(*record, "metal-income", error);
 	if (value_metalIncome == nullptr) return false;
 	if (!ReadScalar(*value_metalIncome, output.metalIncome, error)) { return false; }
-	const auto* value_metalExpense = FindRecordField(*record, "metalExpense", error);
+	const auto* value_metalExpense = FindRecordField(*record, "metal-expense", error);
 	if (value_metalExpense == nullptr) return false;
 	if (!ReadScalar(*value_metalExpense, output.metalExpense, error)) { return false; }
-	const auto* value_metalShared = FindRecordField(*record, "metalShared", error);
+	const auto* value_metalShared = FindRecordField(*record, "metal-shared", error);
 	if (value_metalShared == nullptr) return false;
 	if (!ReadScalar(*value_metalShared, output.metalShared, error)) { return false; }
-	const auto* value_metalSent = FindRecordField(*record, "metalSent", error);
+	const auto* value_metalSent = FindRecordField(*record, "metal-sent", error);
 	if (value_metalSent == nullptr) return false;
 	if (!ReadScalar(*value_metalSent, output.metalSent, error)) { return false; }
-	const auto* value_metalReceived = FindRecordField(*record, "metalReceived", error);
+	const auto* value_metalReceived = FindRecordField(*record, "metal-received", error);
 	if (value_metalReceived == nullptr) return false;
 	if (!ReadScalar(*value_metalReceived, output.metalReceived, error)) { return false; }
-	const auto* value_metalExcess = FindRecordField(*record, "metalExcess", error);
+	const auto* value_metalExcess = FindRecordField(*record, "metal-excess", error);
 	if (value_metalExcess == nullptr) return false;
 	if (!ReadScalar(*value_metalExcess, output.metalExcess, error)) { return false; }
-	const auto* value_energyCurrent = FindRecordField(*record, "energyCurrent", error);
+	const auto* value_energyCurrent = FindRecordField(*record, "energy-current", error);
 	if (value_energyCurrent == nullptr) return false;
 	if (!ReadScalar(*value_energyCurrent, output.energyCurrent, error)) { return false; }
-	const auto* value_energyStorage = FindRecordField(*record, "energyStorage", error);
+	const auto* value_energyStorage = FindRecordField(*record, "energy-storage", error);
 	if (value_energyStorage == nullptr) return false;
 	if (!ReadScalar(*value_energyStorage, output.energyStorage, error)) { return false; }
-	const auto* value_energyPull = FindRecordField(*record, "energyPull", error);
+	const auto* value_energyPull = FindRecordField(*record, "energy-pull", error);
 	if (value_energyPull == nullptr) return false;
 	if (!ReadScalar(*value_energyPull, output.energyPull, error)) { return false; }
-	const auto* value_energyIncome = FindRecordField(*record, "energyIncome", error);
+	const auto* value_energyIncome = FindRecordField(*record, "energy-income", error);
 	if (value_energyIncome == nullptr) return false;
 	if (!ReadScalar(*value_energyIncome, output.energyIncome, error)) { return false; }
-	const auto* value_energyExpense = FindRecordField(*record, "energyExpense", error);
+	const auto* value_energyExpense = FindRecordField(*record, "energy-expense", error);
 	if (value_energyExpense == nullptr) return false;
 	if (!ReadScalar(*value_energyExpense, output.energyExpense, error)) { return false; }
-	const auto* value_energyShared = FindRecordField(*record, "energyShared", error);
+	const auto* value_energyShared = FindRecordField(*record, "energy-shared", error);
 	if (value_energyShared == nullptr) return false;
 	if (!ReadScalar(*value_energyShared, output.energyShared, error)) { return false; }
-	const auto* value_energySent = FindRecordField(*record, "energySent", error);
+	const auto* value_energySent = FindRecordField(*record, "energy-sent", error);
 	if (value_energySent == nullptr) return false;
 	if (!ReadScalar(*value_energySent, output.energySent, error)) { return false; }
-	const auto* value_energyReceived = FindRecordField(*record, "energyReceived", error);
+	const auto* value_energyReceived = FindRecordField(*record, "energy-received", error);
 	if (value_energyReceived == nullptr) return false;
 	if (!ReadScalar(*value_energyReceived, output.energyReceived, error)) { return false; }
-	const auto* value_energyExcess = FindRecordField(*record, "energyExcess", error);
+	const auto* value_energyExcess = FindRecordField(*record, "energy-excess", error);
 	if (value_energyExcess == nullptr) return false;
 	if (!ReadScalar(*value_energyExcess, output.energyExcess, error)) { return false; }
 	return true;
@@ -1077,24 +1077,24 @@ bool Read_TeamResources(const WasmValue& input, TeamResources& output, NativeCal
 WasmValue Write_TeamResources(const TeamResources& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("metalCurrent", WriteScalar(value.metalCurrent));
-	fields.emplace("metalStorage", WriteScalar(value.metalStorage));
-	fields.emplace("metalPull", WriteScalar(value.metalPull));
-	fields.emplace("metalIncome", WriteScalar(value.metalIncome));
-	fields.emplace("metalExpense", WriteScalar(value.metalExpense));
-	fields.emplace("metalShared", WriteScalar(value.metalShared));
-	fields.emplace("metalSent", WriteScalar(value.metalSent));
-	fields.emplace("metalReceived", WriteScalar(value.metalReceived));
-	fields.emplace("metalExcess", WriteScalar(value.metalExcess));
-	fields.emplace("energyCurrent", WriteScalar(value.energyCurrent));
-	fields.emplace("energyStorage", WriteScalar(value.energyStorage));
-	fields.emplace("energyPull", WriteScalar(value.energyPull));
-	fields.emplace("energyIncome", WriteScalar(value.energyIncome));
-	fields.emplace("energyExpense", WriteScalar(value.energyExpense));
-	fields.emplace("energyShared", WriteScalar(value.energyShared));
-	fields.emplace("energySent", WriteScalar(value.energySent));
-	fields.emplace("energyReceived", WriteScalar(value.energyReceived));
-	fields.emplace("energyExcess", WriteScalar(value.energyExcess));
+	fields.emplace("metal-current", WriteScalar(value.metalCurrent));
+	fields.emplace("metal-storage", WriteScalar(value.metalStorage));
+	fields.emplace("metal-pull", WriteScalar(value.metalPull));
+	fields.emplace("metal-income", WriteScalar(value.metalIncome));
+	fields.emplace("metal-expense", WriteScalar(value.metalExpense));
+	fields.emplace("metal-shared", WriteScalar(value.metalShared));
+	fields.emplace("metal-sent", WriteScalar(value.metalSent));
+	fields.emplace("metal-received", WriteScalar(value.metalReceived));
+	fields.emplace("metal-excess", WriteScalar(value.metalExcess));
+	fields.emplace("energy-current", WriteScalar(value.energyCurrent));
+	fields.emplace("energy-storage", WriteScalar(value.energyStorage));
+	fields.emplace("energy-pull", WriteScalar(value.energyPull));
+	fields.emplace("energy-income", WriteScalar(value.energyIncome));
+	fields.emplace("energy-expense", WriteScalar(value.energyExpense));
+	fields.emplace("energy-shared", WriteScalar(value.energyShared));
+	fields.emplace("energy-sent", WriteScalar(value.energySent));
+	fields.emplace("energy-received", WriteScalar(value.energyReceived));
+	fields.emplace("energy-excess", WriteScalar(value.energyExcess));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1102,61 +1102,61 @@ bool Read_TeamStatsHistoryPoint(const WasmValue& input, TeamStatsHistoryPoint& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_metalUsed = FindRecordField(*record, "metalUsed", error);
+	const auto* value_metalUsed = FindRecordField(*record, "metal-used", error);
 	if (value_metalUsed == nullptr) return false;
 	if (!ReadScalar(*value_metalUsed, output.metalUsed, error)) { return false; }
-	const auto* value_metalProduced = FindRecordField(*record, "metalProduced", error);
+	const auto* value_metalProduced = FindRecordField(*record, "metal-produced", error);
 	if (value_metalProduced == nullptr) return false;
 	if (!ReadScalar(*value_metalProduced, output.metalProduced, error)) { return false; }
-	const auto* value_metalExcess = FindRecordField(*record, "metalExcess", error);
+	const auto* value_metalExcess = FindRecordField(*record, "metal-excess", error);
 	if (value_metalExcess == nullptr) return false;
 	if (!ReadScalar(*value_metalExcess, output.metalExcess, error)) { return false; }
-	const auto* value_metalReceived = FindRecordField(*record, "metalReceived", error);
+	const auto* value_metalReceived = FindRecordField(*record, "metal-received", error);
 	if (value_metalReceived == nullptr) return false;
 	if (!ReadScalar(*value_metalReceived, output.metalReceived, error)) { return false; }
-	const auto* value_metalSent = FindRecordField(*record, "metalSent", error);
+	const auto* value_metalSent = FindRecordField(*record, "metal-sent", error);
 	if (value_metalSent == nullptr) return false;
 	if (!ReadScalar(*value_metalSent, output.metalSent, error)) { return false; }
-	const auto* value_energyUsed = FindRecordField(*record, "energyUsed", error);
+	const auto* value_energyUsed = FindRecordField(*record, "energy-used", error);
 	if (value_energyUsed == nullptr) return false;
 	if (!ReadScalar(*value_energyUsed, output.energyUsed, error)) { return false; }
-	const auto* value_energyProduced = FindRecordField(*record, "energyProduced", error);
+	const auto* value_energyProduced = FindRecordField(*record, "energy-produced", error);
 	if (value_energyProduced == nullptr) return false;
 	if (!ReadScalar(*value_energyProduced, output.energyProduced, error)) { return false; }
-	const auto* value_energyExcess = FindRecordField(*record, "energyExcess", error);
+	const auto* value_energyExcess = FindRecordField(*record, "energy-excess", error);
 	if (value_energyExcess == nullptr) return false;
 	if (!ReadScalar(*value_energyExcess, output.energyExcess, error)) { return false; }
-	const auto* value_energyReceived = FindRecordField(*record, "energyReceived", error);
+	const auto* value_energyReceived = FindRecordField(*record, "energy-received", error);
 	if (value_energyReceived == nullptr) return false;
 	if (!ReadScalar(*value_energyReceived, output.energyReceived, error)) { return false; }
-	const auto* value_energySent = FindRecordField(*record, "energySent", error);
+	const auto* value_energySent = FindRecordField(*record, "energy-sent", error);
 	if (value_energySent == nullptr) return false;
 	if (!ReadScalar(*value_energySent, output.energySent, error)) { return false; }
-	const auto* value_damageDealt = FindRecordField(*record, "damageDealt", error);
+	const auto* value_damageDealt = FindRecordField(*record, "damage-dealt", error);
 	if (value_damageDealt == nullptr) return false;
 	if (!ReadScalar(*value_damageDealt, output.damageDealt, error)) { return false; }
-	const auto* value_damageReceived = FindRecordField(*record, "damageReceived", error);
+	const auto* value_damageReceived = FindRecordField(*record, "damage-received", error);
 	if (value_damageReceived == nullptr) return false;
 	if (!ReadScalar(*value_damageReceived, output.damageReceived, error)) { return false; }
-	const auto* value_unitsProduced = FindRecordField(*record, "unitsProduced", error);
+	const auto* value_unitsProduced = FindRecordField(*record, "units-produced", error);
 	if (value_unitsProduced == nullptr) return false;
 	if (!ReadScalar(*value_unitsProduced, output.unitsProduced, error)) { return false; }
-	const auto* value_unitsDied = FindRecordField(*record, "unitsDied", error);
+	const auto* value_unitsDied = FindRecordField(*record, "units-died", error);
 	if (value_unitsDied == nullptr) return false;
 	if (!ReadScalar(*value_unitsDied, output.unitsDied, error)) { return false; }
-	const auto* value_unitsReceived = FindRecordField(*record, "unitsReceived", error);
+	const auto* value_unitsReceived = FindRecordField(*record, "units-received", error);
 	if (value_unitsReceived == nullptr) return false;
 	if (!ReadScalar(*value_unitsReceived, output.unitsReceived, error)) { return false; }
-	const auto* value_unitsSent = FindRecordField(*record, "unitsSent", error);
+	const auto* value_unitsSent = FindRecordField(*record, "units-sent", error);
 	if (value_unitsSent == nullptr) return false;
 	if (!ReadScalar(*value_unitsSent, output.unitsSent, error)) { return false; }
-	const auto* value_unitsCaptured = FindRecordField(*record, "unitsCaptured", error);
+	const auto* value_unitsCaptured = FindRecordField(*record, "units-captured", error);
 	if (value_unitsCaptured == nullptr) return false;
 	if (!ReadScalar(*value_unitsCaptured, output.unitsCaptured, error)) { return false; }
-	const auto* value_unitsOutCaptured = FindRecordField(*record, "unitsOutCaptured", error);
+	const auto* value_unitsOutCaptured = FindRecordField(*record, "units-out-captured", error);
 	if (value_unitsOutCaptured == nullptr) return false;
 	if (!ReadScalar(*value_unitsOutCaptured, output.unitsOutCaptured, error)) { return false; }
-	const auto* value_unitsKilled = FindRecordField(*record, "unitsKilled", error);
+	const auto* value_unitsKilled = FindRecordField(*record, "units-killed", error);
 	if (value_unitsKilled == nullptr) return false;
 	if (!ReadScalar(*value_unitsKilled, output.unitsKilled, error)) { return false; }
 	return true;
@@ -1165,25 +1165,25 @@ bool Read_TeamStatsHistoryPoint(const WasmValue& input, TeamStatsHistoryPoint& o
 WasmValue Write_TeamStatsHistoryPoint(const TeamStatsHistoryPoint& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("metalUsed", WriteScalar(value.metalUsed));
-	fields.emplace("metalProduced", WriteScalar(value.metalProduced));
-	fields.emplace("metalExcess", WriteScalar(value.metalExcess));
-	fields.emplace("metalReceived", WriteScalar(value.metalReceived));
-	fields.emplace("metalSent", WriteScalar(value.metalSent));
-	fields.emplace("energyUsed", WriteScalar(value.energyUsed));
-	fields.emplace("energyProduced", WriteScalar(value.energyProduced));
-	fields.emplace("energyExcess", WriteScalar(value.energyExcess));
-	fields.emplace("energyReceived", WriteScalar(value.energyReceived));
-	fields.emplace("energySent", WriteScalar(value.energySent));
-	fields.emplace("damageDealt", WriteScalar(value.damageDealt));
-	fields.emplace("damageReceived", WriteScalar(value.damageReceived));
-	fields.emplace("unitsProduced", WriteScalar(value.unitsProduced));
-	fields.emplace("unitsDied", WriteScalar(value.unitsDied));
-	fields.emplace("unitsReceived", WriteScalar(value.unitsReceived));
-	fields.emplace("unitsSent", WriteScalar(value.unitsSent));
-	fields.emplace("unitsCaptured", WriteScalar(value.unitsCaptured));
-	fields.emplace("unitsOutCaptured", WriteScalar(value.unitsOutCaptured));
-	fields.emplace("unitsKilled", WriteScalar(value.unitsKilled));
+	fields.emplace("metal-used", WriteScalar(value.metalUsed));
+	fields.emplace("metal-produced", WriteScalar(value.metalProduced));
+	fields.emplace("metal-excess", WriteScalar(value.metalExcess));
+	fields.emplace("metal-received", WriteScalar(value.metalReceived));
+	fields.emplace("metal-sent", WriteScalar(value.metalSent));
+	fields.emplace("energy-used", WriteScalar(value.energyUsed));
+	fields.emplace("energy-produced", WriteScalar(value.energyProduced));
+	fields.emplace("energy-excess", WriteScalar(value.energyExcess));
+	fields.emplace("energy-received", WriteScalar(value.energyReceived));
+	fields.emplace("energy-sent", WriteScalar(value.energySent));
+	fields.emplace("damage-dealt", WriteScalar(value.damageDealt));
+	fields.emplace("damage-received", WriteScalar(value.damageReceived));
+	fields.emplace("units-produced", WriteScalar(value.unitsProduced));
+	fields.emplace("units-died", WriteScalar(value.unitsDied));
+	fields.emplace("units-received", WriteScalar(value.unitsReceived));
+	fields.emplace("units-sent", WriteScalar(value.unitsSent));
+	fields.emplace("units-captured", WriteScalar(value.unitsCaptured));
+	fields.emplace("units-out-captured", WriteScalar(value.unitsOutCaptured));
+	fields.emplace("units-killed", WriteScalar(value.unitsKilled));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1197,10 +1197,10 @@ bool Read_TeamUnitStats(const WasmValue& input, TeamUnitStats& output, NativeCal
 	const auto* value_died = FindRecordField(*record, "died", error);
 	if (value_died == nullptr) return false;
 	if (!ReadScalar(*value_died, output.died, error)) { return false; }
-	const auto* value_capturedBy = FindRecordField(*record, "capturedBy", error);
+	const auto* value_capturedBy = FindRecordField(*record, "captured-by", error);
 	if (value_capturedBy == nullptr) return false;
 	if (!ReadScalar(*value_capturedBy, output.capturedBy, error)) { return false; }
-	const auto* value_capturedFrom = FindRecordField(*record, "capturedFrom", error);
+	const auto* value_capturedFrom = FindRecordField(*record, "captured-from", error);
 	if (value_capturedFrom == nullptr) return false;
 	if (!ReadScalar(*value_capturedFrom, output.capturedFrom, error)) { return false; }
 	const auto* value_received = FindRecordField(*record, "received", error);
@@ -1217,8 +1217,8 @@ WasmValue Write_TeamUnitStats(const TeamUnitStats& value)
 	WasmValueRecord fields;
 	fields.emplace("killed", WriteScalar(value.killed));
 	fields.emplace("died", WriteScalar(value.died));
-	fields.emplace("capturedBy", WriteScalar(value.capturedBy));
-	fields.emplace("capturedFrom", WriteScalar(value.capturedFrom));
+	fields.emplace("captured-by", WriteScalar(value.capturedBy));
+	fields.emplace("captured-from", WriteScalar(value.capturedFrom));
 	fields.emplace("received", WriteScalar(value.received));
 	fields.emplace("sent", WriteScalar(value.sent));
 	return WasmValue::Record(std::move(fields));
@@ -1234,8 +1234,8 @@ NativeCalloutDispatch Dispatch_teams_ArePlayersAllied(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	ArePlayersAlliedQuery query{};
 	ArePlayersAlliedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "playerID1", query.playerID1, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "playerID2", query.playerID2, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "player-id1", query.playerID1, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "player-id2", query.playerID2, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->ArePlayersAllied(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.allied);
@@ -1248,8 +1248,8 @@ NativeCalloutDispatch Dispatch_teams_AreTeamsAllied(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	AreTeamsAlliedQuery query{};
 	AreTeamsAlliedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID1", query.teamID1, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "teamID2", query.teamID2, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id1", query.teamID1, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "team-id2", query.teamID2, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->AreTeamsAllied(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.allied);
@@ -1262,12 +1262,12 @@ NativeCalloutDispatch Dispatch_teams_GetAIInfo(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	GetAIInfoQuery query{};
 	GetAIInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetAIInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("info", Write_AIInfo(nativeResult.info));
-	outputFields.emplace("isAI", WriteScalar(nativeResult.isAI));
+	outputFields.emplace("is-ai", WriteScalar(nativeResult.isAI));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1278,7 +1278,7 @@ NativeCalloutDispatch Dispatch_teams_GetAllyTeamInfo(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetAllyTeamInfoQuery query{};
 	GetAllyTeamInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetAllyTeamInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_AllyTeamInfo(nativeResult.info);
@@ -1291,7 +1291,7 @@ NativeCalloutDispatch Dispatch_teams_GetAllyTeamList(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetAllyTeamListQuery query{};
 	GetAllyTeamListResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetAllyTeamList(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.allyTeams, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1304,12 +1304,12 @@ NativeCalloutDispatch Dispatch_teams_GetPlayerControlledUnit(NativeInterface* na
 	NativeCallStorage storage;
 	GetPlayerControlledUnitQuery query{};
 	GetPlayerControlledUnitResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetPlayerControlledUnit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("unitID", WriteScalar(nativeResult.unitID));
-	outputFields.emplace("hasUnit", WriteScalar(nativeResult.hasUnit));
+	outputFields.emplace("unit-id", WriteScalar(nativeResult.unitID));
+	outputFields.emplace("has-unit", WriteScalar(nativeResult.hasUnit));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -1320,8 +1320,8 @@ NativeCalloutDispatch Dispatch_teams_GetPlayerInfo(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GetPlayerInfoQuery query{};
 	GetPlayerInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "getPlayerOpts", query.getPlayerOpts, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "get-player-opts", query.getPlayerOpts, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetPlayerInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_PlayerInfo(nativeResult.info);
@@ -1334,7 +1334,7 @@ NativeCalloutDispatch Dispatch_teams_GetPlayerList(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GetPlayerListQuery query{};
 	GetPlayerListResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "active", query.active, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetPlayerList(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -1348,7 +1348,7 @@ NativeCalloutDispatch Dispatch_teams_GetPlayerListInAllyTeam(NativeInterface* na
 	NativeCallStorage storage;
 	GetPlayerListInAllyTeamQuery query{};
 	GetPlayerListInAllyTeamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetPlayerListInAllyTeam(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.players, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1361,7 +1361,7 @@ NativeCalloutDispatch Dispatch_teams_GetPlayerListInTeam(NativeInterface* native
 	NativeCallStorage storage;
 	GetPlayerListInTeamQuery query{};
 	GetPlayerListInTeamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetPlayerListInTeam(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.players, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1374,7 +1374,7 @@ NativeCalloutDispatch Dispatch_teams_GetTeamAllyTeamID(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetTeamAllyTeamIDQuery query{};
 	GetTeamAllyTeamIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetTeamAllyTeamID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.allyTeamID);
@@ -1387,8 +1387,8 @@ NativeCalloutDispatch Dispatch_teams_GetTeamInfo(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GetTeamInfoQuery query{};
 	GetTeamInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "getTeamKeys", query.getTeamKeys, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "get-team-keys", query.getTeamKeys, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetTeamInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_TeamInfo(nativeResult.info);
@@ -1401,7 +1401,7 @@ NativeCalloutDispatch Dispatch_teams_GetTeamList(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GetTeamListQuery query{};
 	GetTeamListResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "allyTeamID", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "ally-team-id", query.allyTeamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetTeamList(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.teams, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1414,7 +1414,7 @@ NativeCalloutDispatch Dispatch_teams_GetTeamLuaAI(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetTeamLuaAIQuery query{};
 	GetTeamLuaAIResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetTeamLuaAI(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.luaAI == nullptr) ? std::string{} : std::string(nativeResult.luaAI));
@@ -1427,7 +1427,7 @@ NativeCalloutDispatch Dispatch_teams_GetTeamMaxUnits(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetTeamMaxUnitsQuery query{};
 	GetTeamMaxUnitsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetTeamMaxUnits(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.maxUnits);
@@ -1440,7 +1440,7 @@ NativeCalloutDispatch Dispatch_teams_GetTeamResourceStats(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetTeamResourceStatsQuery query{};
 	GetTeamResourceStatsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_resource = FindArgument(arguments, 1u, 1u, 2u, 2u, "resource", error);
 	if (value_resource == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resource = storage.Make<std::string>();
@@ -1458,7 +1458,7 @@ NativeCalloutDispatch Dispatch_teams_GetTeamResources(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetTeamResourcesQuery query{};
 	GetTeamResourcesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_resource = FindArgument(arguments, 1u, 1u, 2u, 2u, "resource", error);
 	if (value_resource == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_resource = storage.Make<std::string>();
@@ -1476,9 +1476,9 @@ NativeCalloutDispatch Dispatch_teams_GetTeamStatsHistory(NativeInterface* native
 	NativeCallStorage storage;
 	GetTeamStatsHistoryQuery query{};
 	GetTeamStatsHistoryResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "startIndex", query.startIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "endIndex", query.endIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "start-index", query.startIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "end-index", query.endIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetTeamStatsHistory(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.history, nativeResult.count, [](const auto& value) { return Write_TeamStatsHistoryPoint(value); });
@@ -1491,7 +1491,7 @@ NativeCalloutDispatch Dispatch_teams_GetTeamUnitStats(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetTeamUnitStatsQuery query{};
 	GetTeamUnitStatsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->teams->GetTeamUnitStats(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_TeamUnitStats(nativeResult.stats);

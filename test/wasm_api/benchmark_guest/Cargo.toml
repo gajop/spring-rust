@@ -1,0 +1,17 @@
+[package]
+name = "recoil-wasm-benchmark-guest"
+version = "0.1.0"
+edition = "2021"
+publish = false
+build = "build.rs"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = "0.60.0"
+wit-component = "0.254.0"
+
+[[bin]]
+name = "componentize"
+path = "src/bin/componentize.rs"

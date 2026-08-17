@@ -4,9 +4,11 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "WasmInterface/WasmInterfaceSystem.h"
+#include "generated/WasmCallinRegistry.h"
 
 namespace {
 	std::vector<std::uint8_t> MinimalCoreModule()
@@ -71,6 +73,84 @@ TEST_CASE("Wasm interface system keeps multiple instances deterministic")
 	CHECK(system.ModuleCount() == 3);
 	system.UnloadAll();
 	CHECK(system.ModuleCount() == 0);
+}
+
+TEST_CASE("Wasm synced messages are a one-way no-op without unsynced modules")
+{
+	WasmInterfaceSystem system;
+	REQUIRE(system.Runtime().IsAvailable());
+	std::string error;
+
+	CHECK(system.DispatchSyncedMessage("native-api-direct-message", error));
+	CHECK(error.empty());
+	CHECK(system.ModuleCount() == 0);
+}
+
+TEST_CASE("Wasm Allow callins are synced-only and deny by default")
+{
+	constexpr std::uint32_t syncedEnvironmentMask = 1u <<
+		static_cast<std::uint32_t>(WasmEnvironment::RulesSynced) |
+		1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaSynced);
+
+	for (const auto& descriptor : recoil::wasm::generated::kCallins) {
+		if (std::string_view(descriptor.name).starts_with("Allow")) {
+			CHECK((descriptor.environmentMask & ~syncedEnvironmentMask) == 0);
+			if (std::string_view(descriptor.result) == "BoolCallinResult")
+				CHECK(std::string_view(descriptor.aggregation) == "and-false");
+		}
+	}
+}
+
+TEST_CASE("Wasm callin aggregation matches Lua defaults across components")
+{
+	const auto booleanResult = [](bool value) {
+		return WasmValue::Record({{"value", WasmValue::Bool(value)}});
+	};
+	const auto readBoolean = [](const WasmValue& value) {
+		const auto* record = std::get_if<WasmValueRecord>(&value.storage);
+		REQUIRE(record != nullptr);
+		const auto iter = record->find("value");
+		REQUIRE(iter != record->end());
+		const auto* boolean = std::get_if<bool>(&iter->second.storage);
+		REQUIRE(boolean != nullptr);
+		return *boolean;
+	};
+
+	WasmValue aggregate;
+	std::string error;
+	bool haveResult = false;
+	CHECK(WasmInterfaceSystem::AggregateCallinResult("and-false", booleanResult(true),
+		haveResult, aggregate, error));
+	CHECK(readBoolean(aggregate));
+	CHECK(WasmInterfaceSystem::AggregateCallinResult("and-false", booleanResult(false),
+		haveResult, aggregate, error));
+	CHECK_FALSE(readBoolean(aggregate));
+	CHECK(WasmInterfaceSystem::AggregateCallinResult("and-false", booleanResult(true),
+		haveResult, aggregate, error));
+	CHECK_FALSE(readBoolean(aggregate));
+
+	haveResult = false;
+	aggregate = WasmValue::Unit();
+	CHECK(WasmInterfaceSystem::AggregateCallinResult("or-true", booleanResult(false),
+		haveResult, aggregate, error));
+	CHECK_FALSE(readBoolean(aggregate));
+	CHECK(WasmInterfaceSystem::AggregateCallinResult("or-true", booleanResult(true),
+		haveResult, aggregate, error));
+	CHECK(readBoolean(aggregate));
+
+	// No component result leaves the engine's native default in force.
+	haveResult = false;
+	aggregate = WasmValue::Unit();
+	CHECK_FALSE(haveResult);
+	CHECK(aggregate.IsUnit());
+
+	WasmInterfaceSystem system;
+	REQUIRE(system.Runtime().IsAvailable());
+	WasmValue result;
+	CHECK_FALSE(system.DispatchCallin("AllowCommand", {},
+		WasmEnvironment::RulesUnsynced, result, error));
+	CHECK(error.find("not available") != std::string::npos);
+	CHECK_FALSE(system.DispatchCallin("AllowCommand", {}, WasmEnvironment::UI, result, error));
 }
 
 TEST_CASE("Wasm manifest loading is atomic across multiple declarations")

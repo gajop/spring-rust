@@ -8,6 +8,7 @@
 #
 # MANUAL(module, function, reason)
 # EXCLUDE(module, function, reason)
+# SYNCED_ONLY(module, function, reason)
 
 MANUAL(rml_ui, DataModelBindEvent, synchronous guest callback and host resource)
 MANUAL(rml_ui, DataModelUnbindEvent, synchronous guest callback and host resource)
@@ -43,3 +44,4 @@ EXCLUDE(memory, FreeInt32Array, native pointer-management API is never exposed t
 EXCLUDE(memory, FreeInt3Array, native pointer-management API is never exposed to Wasm)
 EXCLUDE(memory, FreeStringArray, native pointer-management API is never exposed to Wasm)
 EXCLUDE(memory, FreeUInt32Array, native pointer-management API is never exposed to Wasm)
+SYNCED_ONLY(messages, SendToUnsynced, bridge from a deterministic synced module to the unsynced Lua handle)

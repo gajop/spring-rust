@@ -602,7 +602,7 @@ static void NativeGetUnitArrayCentroid(const GetUnitArrayCentroidQuery* query, G
 	uint32_t validCount = 0;
 
 	for (uint32_t i = 0; i < query->count; i++) {
-		const CUnit* unit = WasmUiVisibility::FindUnit(query->unitIDs[i]);
+		const CUnit* unit = WasmUiVisibility::FindUnit(query->unitIDs[i], WasmUiVisibility::UnitAccess::Visible);
 		if (unit != nullptr) {
 			centroid += unit->midPos;
 			validCount++;
@@ -640,7 +640,7 @@ static void NativeGetUnitNearestAlly(const GetUnitNearestAllyQuery* query, GetUn
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -663,7 +663,7 @@ static void NativeGetUnitNearestEnemy(const GetUnitNearestEnemyQuery* query, Get
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Ally);
 	if (unit == nullptr) {
 		result->error = &INVALID_UNIT_ERROR;
 		return;
@@ -719,8 +719,8 @@ static void NativeGetUnitSeparation(const GetUnitSeparationQuery* query, GetUnit
 		return;
 	}
 
-	const CUnit* unit1 = WasmUiVisibility::FindUnit(query->unitID1);
-	const CUnit* unit2 = WasmUiVisibility::FindUnit(query->unitID2);
+	const CUnit* unit1 = WasmUiVisibility::FindUnit(query->unitID1, WasmUiVisibility::UnitAccess::Visible);
+	const CUnit* unit2 = WasmUiVisibility::FindUnit(query->unitID2, WasmUiVisibility::UnitAccess::Visible);
 
 	if (unit1 == nullptr || unit2 == nullptr ||
 		!WasmUiVisibility::IsUnitInLos(unit1) || !WasmUiVisibility::IsUnitInLos(unit2)) {

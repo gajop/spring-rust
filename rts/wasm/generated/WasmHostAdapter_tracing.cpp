@@ -24,7 +24,7 @@ bool Read_Ray(const WasmValue& input, Ray& output, NativeCallStorage& storage, s
 	const auto* value_flags = FindRecordField(*record, "flags", error);
 	if (value_flags == nullptr) return false;
 	if (!ReadScalar(*value_flags, output.flags, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -37,7 +37,7 @@ WasmValue Write_Ray(const Ray& value)
 	fields.emplace("direction", Write_Float3(value.direction));
 	fields.emplace("length", WriteScalar(value.length));
 	fields.emplace("flags", WriteScalar(value.flags));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -119,16 +119,16 @@ bool Read_TraceRayFeaturesResult(const WasmValue& input, TraceRayFeaturesResult&
 	const auto* value_hit = FindRecordField(*record, "hit", error);
 	if (value_hit == nullptr) return false;
 	if (!ReadScalar(*value_hit, output.hit, error)) { return false; }
-	const auto* value_hitType = FindRecordField(*record, "hitType", error);
+	const auto* value_hitType = FindRecordField(*record, "hit-type", error);
 	if (value_hitType == nullptr) return false;
 	if (!ReadScalar(*value_hitType, output.hitType, error)) { return false; }
-	const auto* value_hitID = FindRecordField(*record, "hitID", error);
+	const auto* value_hitID = FindRecordField(*record, "hit-id", error);
 	if (value_hitID == nullptr) return false;
 	if (!ReadScalar(*value_hitID, output.hitID, error)) { return false; }
-	const auto* value_hitPos = FindRecordField(*record, "hitPos", error);
+	const auto* value_hitPos = FindRecordField(*record, "hit-pos", error);
 	if (value_hitPos == nullptr) return false;
 	if (!Read_Float3(*value_hitPos, output.hitPos, storage, error)) { return false; }
-	const auto* value_hitNormal = FindRecordField(*record, "hitNormal", error);
+	const auto* value_hitNormal = FindRecordField(*record, "hit-normal", error);
 	if (value_hitNormal == nullptr) return false;
 	if (!Read_Float3(*value_hitNormal, output.hitNormal, storage, error)) { return false; }
 	return true;
@@ -138,10 +138,10 @@ WasmValue Write_TraceRayFeaturesResult(const TraceRayFeaturesResult& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("hit", WriteScalar(value.hit));
-	fields.emplace("hitType", WriteScalar(value.hitType));
-	fields.emplace("hitID", WriteScalar(value.hitID));
-	fields.emplace("hitPos", Write_Float3(value.hitPos));
-	fields.emplace("hitNormal", Write_Float3(value.hitNormal));
+	fields.emplace("hit-type", WriteScalar(value.hitType));
+	fields.emplace("hit-id", WriteScalar(value.hitID));
+	fields.emplace("hit-pos", Write_Float3(value.hitPos));
+	fields.emplace("hit-normal", Write_Float3(value.hitNormal));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -149,7 +149,7 @@ bool Read_TraceRayGroundBetweenPositionsOptions(const WasmValue& input, TraceRay
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_testWater = FindRecordField(*record, "testWater", error);
+	const auto* value_testWater = FindRecordField(*record, "test-water", error);
 	if (value_testWater == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_testWater).storage)) {
 		output.testWater = {};
@@ -164,7 +164,7 @@ bool Read_TraceRayGroundBetweenPositionsOptions(const WasmValue& input, TraceRay
 WasmValue Write_TraceRayGroundBetweenPositionsOptions(const TraceRayGroundBetweenPositionsOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("testWater", value.hasTestWater ? WriteScalar(value.testWater) : WasmValue::Unit());
+	fields.emplace("test-water", value.hasTestWater ? WriteScalar(value.testWater) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -200,13 +200,13 @@ bool Read_TraceRayGroundBetweenPositionsResult(const WasmValue& input, TraceRayG
 	const auto* value_hit = FindRecordField(*record, "hit", error);
 	if (value_hit == nullptr) return false;
 	if (!ReadScalar(*value_hit, output.hit, error)) { return false; }
-	const auto* value_hitLength = FindRecordField(*record, "hitLength", error);
+	const auto* value_hitLength = FindRecordField(*record, "hit-length", error);
 	if (value_hitLength == nullptr) return false;
 	if (!ReadScalar(*value_hitLength, output.hitLength, error)) { return false; }
-	const auto* value_hitPos = FindRecordField(*record, "hitPos", error);
+	const auto* value_hitPos = FindRecordField(*record, "hit-pos", error);
 	if (value_hitPos == nullptr) return false;
 	if (!Read_Float3(*value_hitPos, output.hitPos, storage, error)) { return false; }
-	const auto* value_hitNormal = FindRecordField(*record, "hitNormal", error);
+	const auto* value_hitNormal = FindRecordField(*record, "hit-normal", error);
 	if (value_hitNormal == nullptr) return false;
 	if (!Read_Float3(*value_hitNormal, output.hitNormal, storage, error)) { return false; }
 	return true;
@@ -216,9 +216,9 @@ WasmValue Write_TraceRayGroundBetweenPositionsResult(const TraceRayGroundBetween
 {
 	WasmValueRecord fields;
 	fields.emplace("hit", WriteScalar(value.hit));
-	fields.emplace("hitLength", WriteScalar(value.hitLength));
-	fields.emplace("hitPos", Write_Float3(value.hitPos));
-	fields.emplace("hitNormal", Write_Float3(value.hitNormal));
+	fields.emplace("hit-length", WriteScalar(value.hitLength));
+	fields.emplace("hit-pos", Write_Float3(value.hitPos));
+	fields.emplace("hit-normal", Write_Float3(value.hitNormal));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -235,7 +235,7 @@ bool Read_TraceRayGroundInDirectionOptions(const WasmValue& input, TraceRayGroun
 		output.hasLength = true;
 		if (!ReadScalar(*value_length, output.length, error)) { return false; }
 	}
-	const auto* value_testWater = FindRecordField(*record, "testWater", error);
+	const auto* value_testWater = FindRecordField(*record, "test-water", error);
 	if (value_testWater == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_testWater).storage)) {
 		output.testWater = {};
@@ -251,7 +251,7 @@ WasmValue Write_TraceRayGroundInDirectionOptions(const TraceRayGroundInDirection
 {
 	WasmValueRecord fields;
 	fields.emplace("length", value.hasLength ? WriteScalar(value.length) : WasmValue::Unit());
-	fields.emplace("testWater", value.hasTestWater ? WriteScalar(value.testWater) : WasmValue::Unit());
+	fields.emplace("test-water", value.hasTestWater ? WriteScalar(value.testWater) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -287,13 +287,13 @@ bool Read_TraceRayGroundInDirectionResult(const WasmValue& input, TraceRayGround
 	const auto* value_hit = FindRecordField(*record, "hit", error);
 	if (value_hit == nullptr) return false;
 	if (!ReadScalar(*value_hit, output.hit, error)) { return false; }
-	const auto* value_hitLength = FindRecordField(*record, "hitLength", error);
+	const auto* value_hitLength = FindRecordField(*record, "hit-length", error);
 	if (value_hitLength == nullptr) return false;
 	if (!ReadScalar(*value_hitLength, output.hitLength, error)) { return false; }
-	const auto* value_hitPos = FindRecordField(*record, "hitPos", error);
+	const auto* value_hitPos = FindRecordField(*record, "hit-pos", error);
 	if (value_hitPos == nullptr) return false;
 	if (!Read_Float3(*value_hitPos, output.hitPos, storage, error)) { return false; }
-	const auto* value_hitNormal = FindRecordField(*record, "hitNormal", error);
+	const auto* value_hitNormal = FindRecordField(*record, "hit-normal", error);
 	if (value_hitNormal == nullptr) return false;
 	if (!Read_Float3(*value_hitNormal, output.hitNormal, storage, error)) { return false; }
 	return true;
@@ -303,9 +303,9 @@ WasmValue Write_TraceRayGroundInDirectionResult(const TraceRayGroundInDirectionR
 {
 	WasmValueRecord fields;
 	fields.emplace("hit", WriteScalar(value.hit));
-	fields.emplace("hitLength", WriteScalar(value.hitLength));
-	fields.emplace("hitPos", Write_Float3(value.hitPos));
-	fields.emplace("hitNormal", Write_Float3(value.hitNormal));
+	fields.emplace("hit-length", WriteScalar(value.hitLength));
+	fields.emplace("hit-pos", Write_Float3(value.hitPos));
+	fields.emplace("hit-normal", Write_Float3(value.hitNormal));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -313,13 +313,13 @@ bool Read_TraceRayHit(const WasmValue& input, TraceRayHit& output, NativeCallSto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_hitLength = FindRecordField(*record, "hitLength", error);
+	const auto* value_hitLength = FindRecordField(*record, "hit-length", error);
 	if (value_hitLength == nullptr) return false;
 	if (!ReadScalar(*value_hitLength, output.hitLength, error)) { return false; }
-	const auto* value_objectID = FindRecordField(*record, "objectID", error);
+	const auto* value_objectID = FindRecordField(*record, "object-id", error);
 	if (value_objectID == nullptr) return false;
 	if (!ReadScalar(*value_objectID, output.objectID, error)) { return false; }
-	const auto* value_objectType = FindRecordField(*record, "objectType", error);
+	const auto* value_objectType = FindRecordField(*record, "object-type", error);
 	if (value_objectType == nullptr) return false;
 	if (!ReadScalar(*value_objectType, output.objectType, error)) { return false; }
 	return true;
@@ -328,9 +328,9 @@ bool Read_TraceRayHit(const WasmValue& input, TraceRayHit& output, NativeCallSto
 WasmValue Write_TraceRayHit(const TraceRayHit& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("hitLength", WriteScalar(value.hitLength));
-	fields.emplace("objectID", WriteScalar(value.objectID));
-	fields.emplace("objectType", WriteScalar(value.objectType));
+	fields.emplace("hit-length", WriteScalar(value.hitLength));
+	fields.emplace("object-id", WriteScalar(value.objectID));
+	fields.emplace("object-type", WriteScalar(value.objectType));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -338,7 +338,7 @@ bool Read_TraceRayInDirectionOptions(const WasmValue& input, TraceRayInDirection
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_maxLength = FindRecordField(*record, "maxLength", error);
+	const auto* value_maxLength = FindRecordField(*record, "max-length", error);
 	if (value_maxLength == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_maxLength).storage)) {
 		output.maxLength = {};
@@ -353,7 +353,7 @@ bool Read_TraceRayInDirectionOptions(const WasmValue& input, TraceRayInDirection
 WasmValue Write_TraceRayInDirectionOptions(const TraceRayInDirectionOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("maxLength", value.hasMaxLength ? WriteScalar(value.maxLength) : WasmValue::Unit());
+	fields.emplace("max-length", value.hasMaxLength ? WriteScalar(value.maxLength) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -439,16 +439,16 @@ bool Read_TraceRayResult(const WasmValue& input, TraceRayResult& output, NativeC
 	const auto* value_hit = FindRecordField(*record, "hit", error);
 	if (value_hit == nullptr) return false;
 	if (!ReadScalar(*value_hit, output.hit, error)) { return false; }
-	const auto* value_hitType = FindRecordField(*record, "hitType", error);
+	const auto* value_hitType = FindRecordField(*record, "hit-type", error);
 	if (value_hitType == nullptr) return false;
 	if (!ReadScalar(*value_hitType, output.hitType, error)) { return false; }
-	const auto* value_hitID = FindRecordField(*record, "hitID", error);
+	const auto* value_hitID = FindRecordField(*record, "hit-id", error);
 	if (value_hitID == nullptr) return false;
 	if (!ReadScalar(*value_hitID, output.hitID, error)) { return false; }
-	const auto* value_hitPos = FindRecordField(*record, "hitPos", error);
+	const auto* value_hitPos = FindRecordField(*record, "hit-pos", error);
 	if (value_hitPos == nullptr) return false;
 	if (!Read_Float3(*value_hitPos, output.hitPos, storage, error)) { return false; }
-	const auto* value_hitNormal = FindRecordField(*record, "hitNormal", error);
+	const auto* value_hitNormal = FindRecordField(*record, "hit-normal", error);
 	if (value_hitNormal == nullptr) return false;
 	if (!Read_Float3(*value_hitNormal, output.hitNormal, storage, error)) { return false; }
 	return true;
@@ -458,10 +458,10 @@ WasmValue Write_TraceRayResult(const TraceRayResult& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("hit", WriteScalar(value.hit));
-	fields.emplace("hitType", WriteScalar(value.hitType));
-	fields.emplace("hitID", WriteScalar(value.hitID));
-	fields.emplace("hitPos", Write_Float3(value.hitPos));
-	fields.emplace("hitNormal", Write_Float3(value.hitNormal));
+	fields.emplace("hit-type", WriteScalar(value.hitType));
+	fields.emplace("hit-id", WriteScalar(value.hitID));
+	fields.emplace("hit-pos", Write_Float3(value.hitPos));
+	fields.emplace("hit-normal", Write_Float3(value.hitNormal));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -489,16 +489,16 @@ bool Read_TraceRayUnitsResult(const WasmValue& input, TraceRayUnitsResult& outpu
 	const auto* value_hit = FindRecordField(*record, "hit", error);
 	if (value_hit == nullptr) return false;
 	if (!ReadScalar(*value_hit, output.hit, error)) { return false; }
-	const auto* value_hitType = FindRecordField(*record, "hitType", error);
+	const auto* value_hitType = FindRecordField(*record, "hit-type", error);
 	if (value_hitType == nullptr) return false;
 	if (!ReadScalar(*value_hitType, output.hitType, error)) { return false; }
-	const auto* value_hitID = FindRecordField(*record, "hitID", error);
+	const auto* value_hitID = FindRecordField(*record, "hit-id", error);
 	if (value_hitID == nullptr) return false;
 	if (!ReadScalar(*value_hitID, output.hitID, error)) { return false; }
-	const auto* value_hitPos = FindRecordField(*record, "hitPos", error);
+	const auto* value_hitPos = FindRecordField(*record, "hit-pos", error);
 	if (value_hitPos == nullptr) return false;
 	if (!Read_Float3(*value_hitPos, output.hitPos, storage, error)) { return false; }
-	const auto* value_hitNormal = FindRecordField(*record, "hitNormal", error);
+	const auto* value_hitNormal = FindRecordField(*record, "hit-normal", error);
 	if (value_hitNormal == nullptr) return false;
 	if (!Read_Float3(*value_hitNormal, output.hitNormal, storage, error)) { return false; }
 	return true;
@@ -508,10 +508,10 @@ WasmValue Write_TraceRayUnitsResult(const TraceRayUnitsResult& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("hit", WriteScalar(value.hit));
-	fields.emplace("hitType", WriteScalar(value.hitType));
-	fields.emplace("hitID", WriteScalar(value.hitID));
-	fields.emplace("hitPos", Write_Float3(value.hitPos));
-	fields.emplace("hitNormal", Write_Float3(value.hitNormal));
+	fields.emplace("hit-type", WriteScalar(value.hitType));
+	fields.emplace("hit-id", WriteScalar(value.hitID));
+	fields.emplace("hit-pos", Write_Float3(value.hitPos));
+	fields.emplace("hit-normal", Write_Float3(value.hitNormal));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -530,10 +530,10 @@ NativeCalloutDispatch Dispatch_tracing_TraceRay(NativeInterface* nativeInterface
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("hit", WriteScalar(nativeResult.hit));
-	outputFields.emplace("hitType", WriteScalar(nativeResult.hitType));
-	outputFields.emplace("hitID", WriteScalar(nativeResult.hitID));
-	outputFields.emplace("hitPos", Write_Float3(nativeResult.hitPos));
-	outputFields.emplace("hitNormal", Write_Float3(nativeResult.hitNormal));
+	outputFields.emplace("hit-type", WriteScalar(nativeResult.hitType));
+	outputFields.emplace("hit-id", WriteScalar(nativeResult.hitID));
+	outputFields.emplace("hit-pos", Write_Float3(nativeResult.hitPos));
+	outputFields.emplace("hit-normal", Write_Float3(nativeResult.hitNormal));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -568,10 +568,10 @@ NativeCalloutDispatch Dispatch_tracing_TraceRayFeatures(NativeInterface* nativeI
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("hit", WriteScalar(nativeResult.hit));
-	outputFields.emplace("hitType", WriteScalar(nativeResult.hitType));
-	outputFields.emplace("hitID", WriteScalar(nativeResult.hitID));
-	outputFields.emplace("hitPos", Write_Float3(nativeResult.hitPos));
-	outputFields.emplace("hitNormal", Write_Float3(nativeResult.hitNormal));
+	outputFields.emplace("hit-type", WriteScalar(nativeResult.hitType));
+	outputFields.emplace("hit-id", WriteScalar(nativeResult.hitID));
+	outputFields.emplace("hit-pos", Write_Float3(nativeResult.hitPos));
+	outputFields.emplace("hit-normal", Write_Float3(nativeResult.hitNormal));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -589,9 +589,9 @@ NativeCalloutDispatch Dispatch_tracing_TraceRayGroundBetweenPositions(NativeInte
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("hit", WriteScalar(nativeResult.hit));
-	outputFields.emplace("hitLength", WriteScalar(nativeResult.hitLength));
-	outputFields.emplace("hitPos", Write_Float3(nativeResult.hitPos));
-	outputFields.emplace("hitNormal", Write_Float3(nativeResult.hitNormal));
+	outputFields.emplace("hit-length", WriteScalar(nativeResult.hitLength));
+	outputFields.emplace("hit-pos", Write_Float3(nativeResult.hitPos));
+	outputFields.emplace("hit-normal", Write_Float3(nativeResult.hitNormal));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -609,9 +609,9 @@ NativeCalloutDispatch Dispatch_tracing_TraceRayGroundInDirection(NativeInterface
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("hit", WriteScalar(nativeResult.hit));
-	outputFields.emplace("hitLength", WriteScalar(nativeResult.hitLength));
-	outputFields.emplace("hitPos", Write_Float3(nativeResult.hitPos));
-	outputFields.emplace("hitNormal", Write_Float3(nativeResult.hitNormal));
+	outputFields.emplace("hit-length", WriteScalar(nativeResult.hitLength));
+	outputFields.emplace("hit-pos", Write_Float3(nativeResult.hitPos));
+	outputFields.emplace("hit-normal", Write_Float3(nativeResult.hitNormal));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -647,10 +647,10 @@ NativeCalloutDispatch Dispatch_tracing_TraceRayUnits(NativeInterface* nativeInte
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("hit", WriteScalar(nativeResult.hit));
-	outputFields.emplace("hitType", WriteScalar(nativeResult.hitType));
-	outputFields.emplace("hitID", WriteScalar(nativeResult.hitID));
-	outputFields.emplace("hitPos", Write_Float3(nativeResult.hitPos));
-	outputFields.emplace("hitNormal", Write_Float3(nativeResult.hitNormal));
+	outputFields.emplace("hit-type", WriteScalar(nativeResult.hitType));
+	outputFields.emplace("hit-id", WriteScalar(nativeResult.hitID));
+	outputFields.emplace("hit-pos", Write_Float3(nativeResult.hitPos));
+	outputFields.emplace("hit-normal", Write_Float3(nativeResult.hitNormal));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }

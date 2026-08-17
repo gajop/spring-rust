@@ -12,10 +12,10 @@ bool Read_GetFeatureRulesParamQuery(const WasmValue& input, GetFeatureRulesParam
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -26,8 +26,8 @@ bool Read_GetFeatureRulesParamQuery(const WasmValue& input, GetFeatureRulesParam
 WasmValue Write_GetFeatureRulesParamQuery(const GetFeatureRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -60,7 +60,7 @@ bool Read_GetFeatureRulesParamsQuery(const WasmValue& input, GetFeatureRulesPara
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -69,7 +69,7 @@ bool Read_GetFeatureRulesParamsQuery(const WasmValue& input, GetFeatureRulesPara
 WasmValue Write_GetFeatureRulesParamsQuery(const GetFeatureRulesParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -109,7 +109,7 @@ bool Read_GetGameRulesParamQuery(const WasmValue& input, GetGameRulesParamQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -120,7 +120,7 @@ bool Read_GetGameRulesParamQuery(const WasmValue& input, GetGameRulesParamQuery&
 WasmValue Write_GetGameRulesParamQuery(const GetGameRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -153,7 +153,7 @@ bool Read_GetGameRulesParamsQuery(const WasmValue& input, GetGameRulesParamsQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -162,7 +162,7 @@ bool Read_GetGameRulesParamsQuery(const WasmValue& input, GetGameRulesParamsQuer
 WasmValue Write_GetGameRulesParamsQuery(const GetGameRulesParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -202,10 +202,10 @@ bool Read_GetPlayerRulesParamQuery(const WasmValue& input, GetPlayerRulesParamQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -216,8 +216,8 @@ bool Read_GetPlayerRulesParamQuery(const WasmValue& input, GetPlayerRulesParamQu
 WasmValue Write_GetPlayerRulesParamQuery(const GetPlayerRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("player-id", WriteScalar(value.playerID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -250,7 +250,7 @@ bool Read_GetPlayerRulesParamsQuery(const WasmValue& input, GetPlayerRulesParams
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	return true;
@@ -259,7 +259,7 @@ bool Read_GetPlayerRulesParamsQuery(const WasmValue& input, GetPlayerRulesParams
 WasmValue Write_GetPlayerRulesParamsQuery(const GetPlayerRulesParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -299,10 +299,10 @@ bool Read_GetTeamRulesParamQuery(const WasmValue& input, GetTeamRulesParamQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -313,8 +313,8 @@ bool Read_GetTeamRulesParamQuery(const WasmValue& input, GetTeamRulesParamQuery&
 WasmValue Write_GetTeamRulesParamQuery(const GetTeamRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -347,7 +347,7 @@ bool Read_GetTeamRulesParamsQuery(const WasmValue& input, GetTeamRulesParamsQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -356,7 +356,7 @@ bool Read_GetTeamRulesParamsQuery(const WasmValue& input, GetTeamRulesParamsQuer
 WasmValue Write_GetTeamRulesParamsQuery(const GetTeamRulesParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -396,10 +396,10 @@ bool Read_GetUnitRulesParamQuery(const WasmValue& input, GetUnitRulesParamQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -410,8 +410,8 @@ bool Read_GetUnitRulesParamQuery(const WasmValue& input, GetUnitRulesParamQuery&
 WasmValue Write_GetUnitRulesParamQuery(const GetUnitRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -444,7 +444,7 @@ bool Read_GetUnitRulesParamsQuery(const WasmValue& input, GetUnitRulesParamsQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -453,7 +453,7 @@ bool Read_GetUnitRulesParamsQuery(const WasmValue& input, GetUnitRulesParamsQuer
 WasmValue Write_GetUnitRulesParamsQuery(const GetUnitRulesParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -495,14 +495,14 @@ bool Read_RulesParamValue(const WasmValue& input, RulesParamValue& output, Nativ
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
 	const auto* value_type = FindRecordField(*record, "type", error);
 	if (value_type == nullptr) return false;
-	if (!ReadScalar(*value_type, output.type, error)) { return false; }
+	if (!ReadEnum_RulesParamType(*value_type, output.type, error)) { return false; }
 	return true;
 }
 
 WasmValue Write_RulesParamValue(const RulesParamValue& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("type", WriteScalar(value.type));
+	fields.emplace("type", WriteEnum_RulesParamType(value.type));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -510,10 +510,10 @@ bool Read_SetFeatureRulesParamQuery(const WasmValue& input, SetFeatureRulesParam
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -530,8 +530,8 @@ bool Read_SetFeatureRulesParamQuery(const WasmValue& input, SetFeatureRulesParam
 WasmValue Write_SetFeatureRulesParamQuery(const SetFeatureRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	fields.emplace("value", Write_RulesParamValue(value.value));
 	fields.emplace("los", WriteScalar(value.los));
 	return WasmValue::Record(std::move(fields));
@@ -558,7 +558,7 @@ bool Read_SetGameRulesParamQuery(const WasmValue& input, SetGameRulesParamQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -575,7 +575,7 @@ bool Read_SetGameRulesParamQuery(const WasmValue& input, SetGameRulesParamQuery&
 WasmValue Write_SetGameRulesParamQuery(const SetGameRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	fields.emplace("value", Write_RulesParamValue(value.value));
 	fields.emplace("los", WriteScalar(value.los));
 	return WasmValue::Record(std::move(fields));
@@ -602,10 +602,10 @@ bool Read_SetPlayerRulesParamQuery(const WasmValue& input, SetPlayerRulesParamQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -622,8 +622,8 @@ bool Read_SetPlayerRulesParamQuery(const WasmValue& input, SetPlayerRulesParamQu
 WasmValue Write_SetPlayerRulesParamQuery(const SetPlayerRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("player-id", WriteScalar(value.playerID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	fields.emplace("value", Write_RulesParamValue(value.value));
 	fields.emplace("los", WriteScalar(value.los));
 	return WasmValue::Record(std::move(fields));
@@ -650,10 +650,10 @@ bool Read_SetTeamRulesParamQuery(const WasmValue& input, SetTeamRulesParamQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -670,8 +670,8 @@ bool Read_SetTeamRulesParamQuery(const WasmValue& input, SetTeamRulesParamQuery&
 WasmValue Write_SetTeamRulesParamQuery(const SetTeamRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	fields.emplace("value", Write_RulesParamValue(value.value));
 	fields.emplace("los", WriteScalar(value.los));
 	return WasmValue::Record(std::move(fields));
@@ -698,10 +698,10 @@ bool Read_SetUnitRulesParamQuery(const WasmValue& input, SetUnitRulesParamQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_paramName = FindRecordField(*record, "paramName", error);
+	const auto* value_paramName = FindRecordField(*record, "param-name", error);
 	if (value_paramName == nullptr) return false;
 	auto& stored_string_output_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_output_paramName, error)) { return false; }
@@ -718,8 +718,8 @@ bool Read_SetUnitRulesParamQuery(const WasmValue& input, SetUnitRulesParamQuery&
 WasmValue Write_SetUnitRulesParamQuery(const SetUnitRulesParamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("paramName", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("param-name", WasmValue::String((value.paramName == nullptr) ? std::string{} : std::string(value.paramName)));
 	fields.emplace("value", Write_RulesParamValue(value.value));
 	fields.emplace("los", WriteScalar(value.los));
 	return WasmValue::Record(std::move(fields));
@@ -752,8 +752,8 @@ NativeCalloutDispatch Dispatch_rules_params_GetFeatureRulesParam(NativeInterface
 	NativeCallStorage storage;
 	GetFeatureRulesParamQuery query{};
 	GetFeatureRulesParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 2u, 2u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 2u, 2u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -774,7 +774,7 @@ NativeCalloutDispatch Dispatch_rules_params_GetFeatureRulesParams(NativeInterfac
 	NativeCallStorage storage;
 	GetFeatureRulesParamsQuery query{};
 	GetFeatureRulesParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rulesParams->GetFeatureRulesParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.names, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -787,7 +787,7 @@ NativeCalloutDispatch Dispatch_rules_params_GetGameRulesParam(NativeInterface* n
 	NativeCallStorage storage;
 	GetGameRulesParamQuery query{};
 	GetGameRulesParamResult nativeResult{};
-	const WasmValue* value_paramName = FindArgument(arguments, 0u, 0u, 1u, 1u, "paramName", error);
+	const WasmValue* value_paramName = FindArgument(arguments, 0u, 0u, 1u, 1u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -808,7 +808,7 @@ NativeCalloutDispatch Dispatch_rules_params_GetGameRulesParams(NativeInterface* 
 	NativeCallStorage storage;
 	GetGameRulesParamsQuery query{};
 	GetGameRulesParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rulesParams->GetGameRulesParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.names, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -821,8 +821,8 @@ NativeCalloutDispatch Dispatch_rules_params_GetPlayerRulesParam(NativeInterface*
 	NativeCallStorage storage;
 	GetPlayerRulesParamQuery query{};
 	GetPlayerRulesParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 2u, 2u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 2u, 2u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -843,7 +843,7 @@ NativeCalloutDispatch Dispatch_rules_params_GetPlayerRulesParams(NativeInterface
 	NativeCallStorage storage;
 	GetPlayerRulesParamsQuery query{};
 	GetPlayerRulesParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rulesParams->GetPlayerRulesParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.names, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -856,8 +856,8 @@ NativeCalloutDispatch Dispatch_rules_params_GetTeamRulesParam(NativeInterface* n
 	NativeCallStorage storage;
 	GetTeamRulesParamQuery query{};
 	GetTeamRulesParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 2u, 2u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 2u, 2u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -878,7 +878,7 @@ NativeCalloutDispatch Dispatch_rules_params_GetTeamRulesParams(NativeInterface* 
 	NativeCallStorage storage;
 	GetTeamRulesParamsQuery query{};
 	GetTeamRulesParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rulesParams->GetTeamRulesParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.names, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -891,8 +891,8 @@ NativeCalloutDispatch Dispatch_rules_params_GetUnitRulesParam(NativeInterface* n
 	NativeCallStorage storage;
 	GetUnitRulesParamQuery query{};
 	GetUnitRulesParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 2u, 2u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 2u, 2u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -913,7 +913,7 @@ NativeCalloutDispatch Dispatch_rules_params_GetUnitRulesParams(NativeInterface* 
 	NativeCallStorage storage;
 	GetUnitRulesParamsQuery query{};
 	GetUnitRulesParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->rulesParams->GetUnitRulesParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.names, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -926,8 +926,8 @@ NativeCalloutDispatch Dispatch_rules_params_SetFeatureRulesParam(NativeInterface
 	NativeCallStorage storage;
 	SetFeatureRulesParamQuery query{};
 	SetFeatureRulesParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 4u, 4u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 4u, 4u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -946,7 +946,7 @@ NativeCalloutDispatch Dispatch_rules_params_SetGameRulesParam(NativeInterface* n
 	NativeCallStorage storage;
 	SetGameRulesParamQuery query{};
 	SetGameRulesParamResult nativeResult{};
-	const WasmValue* value_paramName = FindArgument(arguments, 0u, 0u, 3u, 3u, "paramName", error);
+	const WasmValue* value_paramName = FindArgument(arguments, 0u, 0u, 3u, 3u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -965,8 +965,8 @@ NativeCalloutDispatch Dispatch_rules_params_SetPlayerRulesParam(NativeInterface*
 	NativeCallStorage storage;
 	SetPlayerRulesParamQuery query{};
 	SetPlayerRulesParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 4u, 4u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 4u, 4u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -985,8 +985,8 @@ NativeCalloutDispatch Dispatch_rules_params_SetTeamRulesParam(NativeInterface* n
 	NativeCallStorage storage;
 	SetTeamRulesParamQuery query{};
 	SetTeamRulesParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 4u, 4u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 4u, 4u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }
@@ -1005,8 +1005,8 @@ NativeCalloutDispatch Dispatch_rules_params_SetUnitRulesParam(NativeInterface* n
 	NativeCallStorage storage;
 	SetUnitRulesParamQuery query{};
 	SetUnitRulesParamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 4u, 4u, "paramName", error);
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	const WasmValue* value_paramName = FindArgument(arguments, 1u, 1u, 4u, 4u, "param-name", error);
 	if (value_paramName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_paramName = storage.Make<std::string>();
 	if (!ReadString(*value_paramName, stored_string_query_paramName, error)) { return NativeCalloutDispatch::handled; }

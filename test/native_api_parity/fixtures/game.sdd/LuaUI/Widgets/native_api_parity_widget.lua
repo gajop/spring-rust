@@ -1,10 +1,11 @@
 function widget:GetInfo()
+	local mode = Spring.GetModOptions() or {}
 	return {
 		name = "Native API Parity Widget",
 		desc = "Records unsynced widget API results for native parity tests",
 		author = "Spring",
 		layer = 0,
-		enabled = true,
+		enabled = tostring(mode.native_api_parity_mode or "") ~= "benchmark",
 	}
 end
 

@@ -12,7 +12,7 @@ bool Read_ClearFeaturesPreviousDrawFlagQuery(const WasmValue& input, ClearFeatur
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_ClearFeaturesPreviousDrawFlagQuery(const WasmValue& input, ClearFeatur
 WasmValue Write_ClearFeaturesPreviousDrawFlagQuery(const ClearFeaturesPreviousDrawFlagQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -46,25 +46,25 @@ bool Read_FeatureBlockingState(const WasmValue& input, FeatureBlockingState& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_isBlocking = FindRecordField(*record, "isBlocking", error);
+	const auto* value_isBlocking = FindRecordField(*record, "is-blocking", error);
 	if (value_isBlocking == nullptr) return false;
 	if (!ReadScalar(*value_isBlocking, output.isBlocking, error)) { return false; }
-	const auto* value_isSolidObjectCollidable = FindRecordField(*record, "isSolidObjectCollidable", error);
+	const auto* value_isSolidObjectCollidable = FindRecordField(*record, "is-solid-object-collidable", error);
 	if (value_isSolidObjectCollidable == nullptr) return false;
 	if (!ReadScalar(*value_isSolidObjectCollidable, output.isSolidObjectCollidable, error)) { return false; }
-	const auto* value_isProjectileCollidable = FindRecordField(*record, "isProjectileCollidable", error);
+	const auto* value_isProjectileCollidable = FindRecordField(*record, "is-projectile-collidable", error);
 	if (value_isProjectileCollidable == nullptr) return false;
 	if (!ReadScalar(*value_isProjectileCollidable, output.isProjectileCollidable, error)) { return false; }
-	const auto* value_isRaySegmentCollidable = FindRecordField(*record, "isRaySegmentCollidable", error);
+	const auto* value_isRaySegmentCollidable = FindRecordField(*record, "is-ray-segment-collidable", error);
 	if (value_isRaySegmentCollidable == nullptr) return false;
 	if (!ReadScalar(*value_isRaySegmentCollidable, output.isRaySegmentCollidable, error)) { return false; }
 	const auto* value_crushable = FindRecordField(*record, "crushable", error);
 	if (value_crushable == nullptr) return false;
 	if (!ReadScalar(*value_crushable, output.crushable, error)) { return false; }
-	const auto* value_blockEnemyPushing = FindRecordField(*record, "blockEnemyPushing", error);
+	const auto* value_blockEnemyPushing = FindRecordField(*record, "block-enemy-pushing", error);
 	if (value_blockEnemyPushing == nullptr) return false;
 	if (!ReadScalar(*value_blockEnemyPushing, output.blockEnemyPushing, error)) { return false; }
-	const auto* value_blockHeightChanges = FindRecordField(*record, "blockHeightChanges", error);
+	const auto* value_blockHeightChanges = FindRecordField(*record, "block-height-changes", error);
 	if (value_blockHeightChanges == nullptr) return false;
 	if (!ReadScalar(*value_blockHeightChanges, output.blockHeightChanges, error)) { return false; }
 	return true;
@@ -73,13 +73,13 @@ bool Read_FeatureBlockingState(const WasmValue& input, FeatureBlockingState& out
 WasmValue Write_FeatureBlockingState(const FeatureBlockingState& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("isBlocking", WriteScalar(value.isBlocking));
-	fields.emplace("isSolidObjectCollidable", WriteScalar(value.isSolidObjectCollidable));
-	fields.emplace("isProjectileCollidable", WriteScalar(value.isProjectileCollidable));
-	fields.emplace("isRaySegmentCollidable", WriteScalar(value.isRaySegmentCollidable));
+	fields.emplace("is-blocking", WriteScalar(value.isBlocking));
+	fields.emplace("is-solid-object-collidable", WriteScalar(value.isSolidObjectCollidable));
+	fields.emplace("is-projectile-collidable", WriteScalar(value.isProjectileCollidable));
+	fields.emplace("is-ray-segment-collidable", WriteScalar(value.isRaySegmentCollidable));
 	fields.emplace("crushable", WriteScalar(value.crushable));
-	fields.emplace("blockEnemyPushing", WriteScalar(value.blockEnemyPushing));
-	fields.emplace("blockHeightChanges", WriteScalar(value.blockHeightChanges));
+	fields.emplace("block-enemy-pushing", WriteScalar(value.blockEnemyPushing));
+	fields.emplace("block-height-changes", WriteScalar(value.blockHeightChanges));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -90,13 +90,13 @@ bool Read_FeatureHealth(const WasmValue& input, FeatureHealth& output, NativeCal
 	const auto* value_health = FindRecordField(*record, "health", error);
 	if (value_health == nullptr) return false;
 	if (!ReadScalar(*value_health, output.health, error)) { return false; }
-	const auto* value_maxHealth = FindRecordField(*record, "maxHealth", error);
+	const auto* value_maxHealth = FindRecordField(*record, "max-health", error);
 	if (value_maxHealth == nullptr) return false;
 	if (!ReadScalar(*value_maxHealth, output.maxHealth, error)) { return false; }
-	const auto* value_reclaimLeft = FindRecordField(*record, "reclaimLeft", error);
+	const auto* value_reclaimLeft = FindRecordField(*record, "reclaim-left", error);
 	if (value_reclaimLeft == nullptr) return false;
 	if (!ReadScalar(*value_reclaimLeft, output.reclaimLeft, error)) { return false; }
-	const auto* value_resurrectProgress = FindRecordField(*record, "resurrectProgress", error);
+	const auto* value_resurrectProgress = FindRecordField(*record, "resurrect-progress", error);
 	if (value_resurrectProgress == nullptr) return false;
 	if (!ReadScalar(*value_resurrectProgress, output.resurrectProgress, error)) { return false; }
 	return true;
@@ -106,9 +106,9 @@ WasmValue Write_FeatureHealth(const FeatureHealth& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("health", WriteScalar(value.health));
-	fields.emplace("maxHealth", WriteScalar(value.maxHealth));
-	fields.emplace("reclaimLeft", WriteScalar(value.reclaimLeft));
-	fields.emplace("resurrectProgress", WriteScalar(value.resurrectProgress));
+	fields.emplace("max-health", WriteScalar(value.maxHealth));
+	fields.emplace("reclaim-left", WriteScalar(value.reclaimLeft));
+	fields.emplace("resurrect-progress", WriteScalar(value.resurrectProgress));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -121,13 +121,13 @@ bool Read_FeatureLastHitPiece(const WasmValue& input, FeatureLastHitPiece& outpu
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_pieceNum = FindRecordField(*record, "pieceNum", error);
+	const auto* value_pieceNum = FindRecordField(*record, "piece-num", error);
 	if (value_pieceNum == nullptr) return false;
 	if (!ReadScalar(*value_pieceNum, output.pieceNum, error)) { return false; }
 	const auto* value_frame = FindRecordField(*record, "frame", error);
 	if (value_frame == nullptr) return false;
 	if (!ReadScalar(*value_frame, output.frame, error)) { return false; }
-	const auto* value_wasHit = FindRecordField(*record, "wasHit", error);
+	const auto* value_wasHit = FindRecordField(*record, "was-hit", error);
 	if (value_wasHit == nullptr) return false;
 	if (!ReadScalar(*value_wasHit, output.wasHit, error)) { return false; }
 	return true;
@@ -137,9 +137,9 @@ WasmValue Write_FeatureLastHitPiece(const FeatureLastHitPiece& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("pieceNum", WriteScalar(value.pieceNum));
+	fields.emplace("piece-num", WriteScalar(value.pieceNum));
 	fields.emplace("frame", WriteScalar(value.frame));
-	fields.emplace("wasHit", WriteScalar(value.wasHit));
+	fields.emplace("was-hit", WriteScalar(value.wasHit));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -150,10 +150,10 @@ bool Read_FeaturePositionExt(const WasmValue& input, FeaturePositionExt& output,
 	const auto* value_position = FindRecordField(*record, "position", error);
 	if (value_position == nullptr) return false;
 	if (!Read_Float3(*value_position, output.position, storage, error)) { return false; }
-	const auto* value_midPosition = FindRecordField(*record, "midPosition", error);
+	const auto* value_midPosition = FindRecordField(*record, "mid-position", error);
 	if (value_midPosition == nullptr) return false;
 	if (!Read_Float3(*value_midPosition, output.midPosition, storage, error)) { return false; }
-	const auto* value_aimPosition = FindRecordField(*record, "aimPosition", error);
+	const auto* value_aimPosition = FindRecordField(*record, "aim-position", error);
 	if (value_aimPosition == nullptr) return false;
 	if (!Read_Float3(*value_aimPosition, output.aimPosition, storage, error)) { return false; }
 	return true;
@@ -163,8 +163,8 @@ WasmValue Write_FeaturePositionExt(const FeaturePositionExt& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("position", Write_Float3(value.position));
-	fields.emplace("midPosition", Write_Float3(value.midPosition));
-	fields.emplace("aimPosition", Write_Float3(value.aimPosition));
+	fields.emplace("mid-position", Write_Float3(value.midPosition));
+	fields.emplace("aim-position", Write_Float3(value.aimPosition));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -175,19 +175,19 @@ bool Read_FeatureResources(const WasmValue& input, FeatureResources& output, Nat
 	const auto* value_metal = FindRecordField(*record, "metal", error);
 	if (value_metal == nullptr) return false;
 	if (!ReadScalar(*value_metal, output.metal, error)) { return false; }
-	const auto* value_defMetal = FindRecordField(*record, "defMetal", error);
+	const auto* value_defMetal = FindRecordField(*record, "def-metal", error);
 	if (value_defMetal == nullptr) return false;
 	if (!ReadScalar(*value_defMetal, output.defMetal, error)) { return false; }
 	const auto* value_energy = FindRecordField(*record, "energy", error);
 	if (value_energy == nullptr) return false;
 	if (!ReadScalar(*value_energy, output.energy, error)) { return false; }
-	const auto* value_defEnergy = FindRecordField(*record, "defEnergy", error);
+	const auto* value_defEnergy = FindRecordField(*record, "def-energy", error);
 	if (value_defEnergy == nullptr) return false;
 	if (!ReadScalar(*value_defEnergy, output.defEnergy, error)) { return false; }
-	const auto* value_reclaimLeft = FindRecordField(*record, "reclaimLeft", error);
+	const auto* value_reclaimLeft = FindRecordField(*record, "reclaim-left", error);
 	if (value_reclaimLeft == nullptr) return false;
 	if (!ReadScalar(*value_reclaimLeft, output.reclaimLeft, error)) { return false; }
-	const auto* value_reclaimTime = FindRecordField(*record, "reclaimTime", error);
+	const auto* value_reclaimTime = FindRecordField(*record, "reclaim-time", error);
 	if (value_reclaimTime == nullptr) return false;
 	if (!ReadScalar(*value_reclaimTime, output.reclaimTime, error)) { return false; }
 	return true;
@@ -197,11 +197,11 @@ WasmValue Write_FeatureResources(const FeatureResources& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("metal", WriteScalar(value.metal));
-	fields.emplace("defMetal", WriteScalar(value.defMetal));
+	fields.emplace("def-metal", WriteScalar(value.defMetal));
 	fields.emplace("energy", WriteScalar(value.energy));
-	fields.emplace("defEnergy", WriteScalar(value.defEnergy));
-	fields.emplace("reclaimLeft", WriteScalar(value.reclaimLeft));
-	fields.emplace("reclaimTime", WriteScalar(value.reclaimTime));
+	fields.emplace("def-energy", WriteScalar(value.defEnergy));
+	fields.emplace("reclaim-left", WriteScalar(value.reclaimLeft));
+	fields.emplace("reclaim-time", WriteScalar(value.reclaimTime));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -209,15 +209,15 @@ bool Read_FeatureResurrect(const WasmValue& input, FeatureResurrect& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_resurrectAs = FindRecordField(*record, "resurrectAs", error);
+	const auto* value_resurrectAs = FindRecordField(*record, "resurrect-as", error);
 	if (value_resurrectAs == nullptr) return false;
 	auto& stored_string_output_resurrectAs = storage.Make<std::string>();
 	if (!ReadString(*value_resurrectAs, stored_string_output_resurrectAs, error)) { return false; }
 	output.resurrectAs = stored_string_output_resurrectAs.c_str();
-	const auto* value_resurrectDefID = FindRecordField(*record, "resurrectDefID", error);
+	const auto* value_resurrectDefID = FindRecordField(*record, "resurrect-def-id", error);
 	if (value_resurrectDefID == nullptr) return false;
 	if (!ReadScalar(*value_resurrectDefID, output.resurrectDefID, error)) { return false; }
-	const auto* value_facingDir = FindRecordField(*record, "facingDir", error);
+	const auto* value_facingDir = FindRecordField(*record, "facing-dir", error);
 	if (value_facingDir == nullptr) return false;
 	if (!ReadScalar(*value_facingDir, output.facingDir, error)) { return false; }
 	return true;
@@ -226,9 +226,9 @@ bool Read_FeatureResurrect(const WasmValue& input, FeatureResurrect& output, Nat
 WasmValue Write_FeatureResurrect(const FeatureResurrect& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("resurrectAs", WasmValue::String((value.resurrectAs == nullptr) ? std::string{} : std::string(value.resurrectAs)));
-	fields.emplace("resurrectDefID", WriteScalar(value.resurrectDefID));
-	fields.emplace("facingDir", WriteScalar(value.facingDir));
+	fields.emplace("resurrect-as", WasmValue::String((value.resurrectAs == nullptr) ? std::string{} : std::string(value.resurrectAs)));
+	fields.emplace("resurrect-def-id", WriteScalar(value.resurrectDefID));
+	fields.emplace("facing-dir", WriteScalar(value.facingDir));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -267,16 +267,16 @@ bool Read_FeatureSelectionVolumeData(const WasmValue& input, FeatureSelectionVol
 	const auto* value_offsets = FindRecordField(*record, "offsets", error);
 	if (value_offsets == nullptr) return false;
 	if (!Read_Float3(*value_offsets, output.offsets, storage, error)) { return false; }
-	const auto* value_volumeType = FindRecordField(*record, "volumeType", error);
+	const auto* value_volumeType = FindRecordField(*record, "volume-type", error);
 	if (value_volumeType == nullptr) return false;
 	if (!ReadScalar(*value_volumeType, output.volumeType, error)) { return false; }
-	const auto* value_primaryAxis = FindRecordField(*record, "primaryAxis", error);
+	const auto* value_primaryAxis = FindRecordField(*record, "primary-axis", error);
 	if (value_primaryAxis == nullptr) return false;
 	if (!ReadScalar(*value_primaryAxis, output.primaryAxis, error)) { return false; }
-	const auto* value_useContHitTest = FindRecordField(*record, "useContHitTest", error);
+	const auto* value_useContHitTest = FindRecordField(*record, "use-cont-hit-test", error);
 	if (value_useContHitTest == nullptr) return false;
 	if (!ReadScalar(*value_useContHitTest, output.useContHitTest, error)) { return false; }
-	const auto* value_ignoreHits = FindRecordField(*record, "ignoreHits", error);
+	const auto* value_ignoreHits = FindRecordField(*record, "ignore-hits", error);
 	if (value_ignoreHits == nullptr) return false;
 	if (!ReadScalar(*value_ignoreHits, output.ignoreHits, error)) { return false; }
 	return true;
@@ -287,10 +287,10 @@ WasmValue Write_FeatureSelectionVolumeData(const FeatureSelectionVolumeData& val
 	WasmValueRecord fields;
 	fields.emplace("scales", Write_Float3(value.scales));
 	fields.emplace("offsets", Write_Float3(value.offsets));
-	fields.emplace("volumeType", WriteScalar(value.volumeType));
-	fields.emplace("primaryAxis", WriteScalar(value.primaryAxis));
-	fields.emplace("useContHitTest", WriteScalar(value.useContHitTest));
-	fields.emplace("ignoreHits", WriteScalar(value.ignoreHits));
+	fields.emplace("volume-type", WriteScalar(value.volumeType));
+	fields.emplace("primary-axis", WriteScalar(value.primaryAxis));
+	fields.emplace("use-cont-hit-test", WriteScalar(value.useContHitTest));
+	fields.emplace("ignore-hits", WriteScalar(value.ignoreHits));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -319,7 +319,7 @@ bool Read_GetAllFeaturesQuery(const WasmValue& input, GetAllFeaturesQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -328,7 +328,7 @@ bool Read_GetAllFeaturesQuery(const WasmValue& input, GetAllFeaturesQuery& outpu
 WasmValue Write_GetAllFeaturesQuery(const GetAllFeaturesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -363,7 +363,7 @@ bool Read_GetFeatureAllyTeamQuery(const WasmValue& input, GetFeatureAllyTeamQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -372,7 +372,7 @@ bool Read_GetFeatureAllyTeamQuery(const WasmValue& input, GetFeatureAllyTeamQuer
 WasmValue Write_GetFeatureAllyTeamQuery(const GetFeatureAllyTeamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -380,7 +380,7 @@ bool Read_GetFeatureAllyTeamResult(const WasmValue& input, GetFeatureAllyTeamRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -389,7 +389,7 @@ bool Read_GetFeatureAllyTeamResult(const WasmValue& input, GetFeatureAllyTeamRes
 WasmValue Write_GetFeatureAllyTeamResult(const GetFeatureAllyTeamResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -397,7 +397,7 @@ bool Read_GetFeatureAlwaysUpdateMatrixQuery(const WasmValue& input, GetFeatureAl
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -406,7 +406,7 @@ bool Read_GetFeatureAlwaysUpdateMatrixQuery(const WasmValue& input, GetFeatureAl
 WasmValue Write_GetFeatureAlwaysUpdateMatrixQuery(const GetFeatureAlwaysUpdateMatrixQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -431,7 +431,7 @@ bool Read_GetFeatureBlockingQuery(const WasmValue& input, GetFeatureBlockingQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -440,7 +440,7 @@ bool Read_GetFeatureBlockingQuery(const WasmValue& input, GetFeatureBlockingQuer
 WasmValue Write_GetFeatureBlockingQuery(const GetFeatureBlockingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -448,7 +448,7 @@ bool Read_GetFeatureBlockingResult(const WasmValue& input, GetFeatureBlockingRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_blockingState = FindRecordField(*record, "blockingState", error);
+	const auto* value_blockingState = FindRecordField(*record, "blocking-state", error);
 	if (value_blockingState == nullptr) return false;
 	if (!Read_FeatureBlockingState(*value_blockingState, output.blockingState, storage, error)) { return false; }
 	return true;
@@ -457,7 +457,7 @@ bool Read_GetFeatureBlockingResult(const WasmValue& input, GetFeatureBlockingRes
 WasmValue Write_GetFeatureBlockingResult(const GetFeatureBlockingResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("blockingState", Write_FeatureBlockingState(value.blockingState));
+	fields.emplace("blocking-state", Write_FeatureBlockingState(value.blockingState));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -465,7 +465,7 @@ bool Read_GetFeatureCollisionVolumeDataQuery(const WasmValue& input, GetFeatureC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -474,7 +474,7 @@ bool Read_GetFeatureCollisionVolumeDataQuery(const WasmValue& input, GetFeatureC
 WasmValue Write_GetFeatureCollisionVolumeDataQuery(const GetFeatureCollisionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -499,7 +499,7 @@ bool Read_GetFeatureDefIDQuery(const WasmValue& input, GetFeatureDefIDQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -508,7 +508,7 @@ bool Read_GetFeatureDefIDQuery(const WasmValue& input, GetFeatureDefIDQuery& out
 WasmValue Write_GetFeatureDefIDQuery(const GetFeatureDefIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -516,7 +516,7 @@ bool Read_GetFeatureDefIDResult(const WasmValue& input, GetFeatureDefIDResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_defID = FindRecordField(*record, "defID", error);
+	const auto* value_defID = FindRecordField(*record, "def-id", error);
 	if (value_defID == nullptr) return false;
 	if (!ReadScalar(*value_defID, output.defID, error)) { return false; }
 	return true;
@@ -525,7 +525,7 @@ bool Read_GetFeatureDefIDResult(const WasmValue& input, GetFeatureDefIDResult& o
 WasmValue Write_GetFeatureDefIDResult(const GetFeatureDefIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("defID", WriteScalar(value.defID));
+	fields.emplace("def-id", WriteScalar(value.defID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -533,7 +533,7 @@ bool Read_GetFeatureDirectionQuery(const WasmValue& input, GetFeatureDirectionQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -542,7 +542,7 @@ bool Read_GetFeatureDirectionQuery(const WasmValue& input, GetFeatureDirectionQu
 WasmValue Write_GetFeatureDirectionQuery(const GetFeatureDirectionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -567,7 +567,7 @@ bool Read_GetFeatureDrawFlagQuery(const WasmValue& input, GetFeatureDrawFlagQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -576,7 +576,7 @@ bool Read_GetFeatureDrawFlagQuery(const WasmValue& input, GetFeatureDrawFlagQuer
 WasmValue Write_GetFeatureDrawFlagQuery(const GetFeatureDrawFlagQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -601,7 +601,7 @@ bool Read_GetFeatureEngineDrawMaskQuery(const WasmValue& input, GetFeatureEngine
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -610,7 +610,7 @@ bool Read_GetFeatureEngineDrawMaskQuery(const WasmValue& input, GetFeatureEngine
 WasmValue Write_GetFeatureEngineDrawMaskQuery(const GetFeatureEngineDrawMaskQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -635,7 +635,7 @@ bool Read_GetFeatureFireTimeQuery(const WasmValue& input, GetFeatureFireTimeQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -644,7 +644,7 @@ bool Read_GetFeatureFireTimeQuery(const WasmValue& input, GetFeatureFireTimeQuer
 WasmValue Write_GetFeatureFireTimeQuery(const GetFeatureFireTimeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -652,7 +652,7 @@ bool Read_GetFeatureFireTimeResult(const WasmValue& input, GetFeatureFireTimeRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fireTime = FindRecordField(*record, "fireTime", error);
+	const auto* value_fireTime = FindRecordField(*record, "fire-time", error);
 	if (value_fireTime == nullptr) return false;
 	if (!ReadScalar(*value_fireTime, output.fireTime, error)) { return false; }
 	return true;
@@ -661,7 +661,7 @@ bool Read_GetFeatureFireTimeResult(const WasmValue& input, GetFeatureFireTimeRes
 WasmValue Write_GetFeatureFireTimeResult(const GetFeatureFireTimeResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fireTime", WriteScalar(value.fireTime));
+	fields.emplace("fire-time", WriteScalar(value.fireTime));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -669,7 +669,7 @@ bool Read_GetFeatureHeadingQuery(const WasmValue& input, GetFeatureHeadingQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -678,7 +678,7 @@ bool Read_GetFeatureHeadingQuery(const WasmValue& input, GetFeatureHeadingQuery&
 WasmValue Write_GetFeatureHeadingQuery(const GetFeatureHeadingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -703,7 +703,7 @@ bool Read_GetFeatureHealthQuery(const WasmValue& input, GetFeatureHealthQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -712,7 +712,7 @@ bool Read_GetFeatureHealthQuery(const WasmValue& input, GetFeatureHealthQuery& o
 WasmValue Write_GetFeatureHealthQuery(const GetFeatureHealthQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -737,7 +737,7 @@ bool Read_GetFeatureHeightQuery(const WasmValue& input, GetFeatureHeightQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -746,7 +746,7 @@ bool Read_GetFeatureHeightQuery(const WasmValue& input, GetFeatureHeightQuery& o
 WasmValue Write_GetFeatureHeightQuery(const GetFeatureHeightQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -771,7 +771,7 @@ bool Read_GetFeatureLastAttackedPieceQuery(const WasmValue& input, GetFeatureLas
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -780,7 +780,7 @@ bool Read_GetFeatureLastAttackedPieceQuery(const WasmValue& input, GetFeatureLas
 WasmValue Write_GetFeatureLastAttackedPieceQuery(const GetFeatureLastAttackedPieceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -805,7 +805,7 @@ bool Read_GetFeatureLuaDrawQuery(const WasmValue& input, GetFeatureLuaDrawQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -814,7 +814,7 @@ bool Read_GetFeatureLuaDrawQuery(const WasmValue& input, GetFeatureLuaDrawQuery&
 WasmValue Write_GetFeatureLuaDrawQuery(const GetFeatureLuaDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -822,7 +822,7 @@ bool Read_GetFeatureLuaDrawResult(const WasmValue& input, GetFeatureLuaDrawResul
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_luaDraw = FindRecordField(*record, "luaDraw", error);
+	const auto* value_luaDraw = FindRecordField(*record, "lua-draw", error);
 	if (value_luaDraw == nullptr) return false;
 	if (!ReadScalar(*value_luaDraw, output.luaDraw, error)) { return false; }
 	return true;
@@ -831,7 +831,7 @@ bool Read_GetFeatureLuaDrawResult(const WasmValue& input, GetFeatureLuaDrawResul
 WasmValue Write_GetFeatureLuaDrawResult(const GetFeatureLuaDrawResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("luaDraw", WriteScalar(value.luaDraw));
+	fields.emplace("lua-draw", WriteScalar(value.luaDraw));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -839,7 +839,7 @@ bool Read_GetFeatureMassQuery(const WasmValue& input, GetFeatureMassQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -848,7 +848,7 @@ bool Read_GetFeatureMassQuery(const WasmValue& input, GetFeatureMassQuery& outpu
 WasmValue Write_GetFeatureMassQuery(const GetFeatureMassQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -873,7 +873,7 @@ bool Read_GetFeatureNoDrawQuery(const WasmValue& input, GetFeatureNoDrawQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -882,7 +882,7 @@ bool Read_GetFeatureNoDrawQuery(const WasmValue& input, GetFeatureNoDrawQuery& o
 WasmValue Write_GetFeatureNoDrawQuery(const GetFeatureNoDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -890,7 +890,7 @@ bool Read_GetFeatureNoDrawResult(const WasmValue& input, GetFeatureNoDrawResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_noDraw = FindRecordField(*record, "noDraw", error);
+	const auto* value_noDraw = FindRecordField(*record, "no-draw", error);
 	if (value_noDraw == nullptr) return false;
 	if (!ReadScalar(*value_noDraw, output.noDraw, error)) { return false; }
 	return true;
@@ -899,7 +899,7 @@ bool Read_GetFeatureNoDrawResult(const WasmValue& input, GetFeatureNoDrawResult&
 WasmValue Write_GetFeatureNoDrawResult(const GetFeatureNoDrawResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("noDraw", WriteScalar(value.noDraw));
+	fields.emplace("no-draw", WriteScalar(value.noDraw));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -907,7 +907,7 @@ bool Read_GetFeatureNoSelectQuery(const WasmValue& input, GetFeatureNoSelectQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -916,7 +916,7 @@ bool Read_GetFeatureNoSelectQuery(const WasmValue& input, GetFeatureNoSelectQuer
 WasmValue Write_GetFeatureNoSelectQuery(const GetFeatureNoSelectQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -924,7 +924,7 @@ bool Read_GetFeatureNoSelectResult(const WasmValue& input, GetFeatureNoSelectRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_noSelect = FindRecordField(*record, "noSelect", error);
+	const auto* value_noSelect = FindRecordField(*record, "no-select", error);
 	if (value_noSelect == nullptr) return false;
 	if (!ReadScalar(*value_noSelect, output.noSelect, error)) { return false; }
 	return true;
@@ -933,7 +933,7 @@ bool Read_GetFeatureNoSelectResult(const WasmValue& input, GetFeatureNoSelectRes
 WasmValue Write_GetFeatureNoSelectResult(const GetFeatureNoSelectResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("noSelect", WriteScalar(value.noSelect));
+	fields.emplace("no-select", WriteScalar(value.noSelect));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -941,10 +941,10 @@ bool Read_GetFeaturePieceCollisionVolumeDataQuery(const WasmValue& input, GetFea
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
-	const auto* value_pieceNum = FindRecordField(*record, "pieceNum", error);
+	const auto* value_pieceNum = FindRecordField(*record, "piece-num", error);
 	if (value_pieceNum == nullptr) return false;
 	if (!ReadScalar(*value_pieceNum, output.pieceNum, error)) { return false; }
 	return true;
@@ -953,8 +953,8 @@ bool Read_GetFeaturePieceCollisionVolumeDataQuery(const WasmValue& input, GetFea
 WasmValue Write_GetFeaturePieceCollisionVolumeDataQuery(const GetFeaturePieceCollisionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
-	fields.emplace("pieceNum", WriteScalar(value.pieceNum));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
+	fields.emplace("piece-num", WriteScalar(value.pieceNum));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -979,7 +979,7 @@ bool Read_GetFeaturePositionExtQuery(const WasmValue& input, GetFeaturePositionE
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -988,7 +988,7 @@ bool Read_GetFeaturePositionExtQuery(const WasmValue& input, GetFeaturePositionE
 WasmValue Write_GetFeaturePositionExtQuery(const GetFeaturePositionExtQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1013,7 +1013,7 @@ bool Read_GetFeaturePositionQuery(const WasmValue& input, GetFeaturePositionQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1022,7 +1022,7 @@ bool Read_GetFeaturePositionQuery(const WasmValue& input, GetFeaturePositionQuer
 WasmValue Write_GetFeaturePositionQuery(const GetFeaturePositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1047,7 +1047,7 @@ bool Read_GetFeatureRadiusQuery(const WasmValue& input, GetFeatureRadiusQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1056,7 +1056,7 @@ bool Read_GetFeatureRadiusQuery(const WasmValue& input, GetFeatureRadiusQuery& o
 WasmValue Write_GetFeatureRadiusQuery(const GetFeatureRadiusQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1081,7 +1081,7 @@ bool Read_GetFeatureResourcesQuery(const WasmValue& input, GetFeatureResourcesQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1090,7 +1090,7 @@ bool Read_GetFeatureResourcesQuery(const WasmValue& input, GetFeatureResourcesQu
 WasmValue Write_GetFeatureResourcesQuery(const GetFeatureResourcesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1115,7 +1115,7 @@ bool Read_GetFeatureResurrectQuery(const WasmValue& input, GetFeatureResurrectQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1124,7 +1124,7 @@ bool Read_GetFeatureResurrectQuery(const WasmValue& input, GetFeatureResurrectQu
 WasmValue Write_GetFeatureResurrectQuery(const GetFeatureResurrectQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1135,7 +1135,7 @@ bool Read_GetFeatureResurrectResult(const WasmValue& input, GetFeatureResurrectR
 	const auto* value_resurrect = FindRecordField(*record, "resurrect", error);
 	if (value_resurrect == nullptr) return false;
 	if (!Read_FeatureResurrect(*value_resurrect, output.resurrect, storage, error)) { return false; }
-	const auto* value_canResurrect = FindRecordField(*record, "canResurrect", error);
+	const auto* value_canResurrect = FindRecordField(*record, "can-resurrect", error);
 	if (value_canResurrect == nullptr) return false;
 	if (!ReadScalar(*value_canResurrect, output.canResurrect, error)) { return false; }
 	return true;
@@ -1145,7 +1145,7 @@ WasmValue Write_GetFeatureResurrectResult(const GetFeatureResurrectResult& value
 {
 	WasmValueRecord fields;
 	fields.emplace("resurrect", Write_FeatureResurrect(value.resurrect));
-	fields.emplace("canResurrect", WriteScalar(value.canResurrect));
+	fields.emplace("can-resurrect", WriteScalar(value.canResurrect));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1153,7 +1153,7 @@ bool Read_GetFeatureRotationQuery(const WasmValue& input, GetFeatureRotationQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1162,7 +1162,7 @@ bool Read_GetFeatureRotationQuery(const WasmValue& input, GetFeatureRotationQuer
 WasmValue Write_GetFeatureRotationQuery(const GetFeatureRotationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1187,7 +1187,7 @@ bool Read_GetFeatureSelectionVolumeDataQuery(const WasmValue& input, GetFeatureS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1196,7 +1196,7 @@ bool Read_GetFeatureSelectionVolumeDataQuery(const WasmValue& input, GetFeatureS
 WasmValue Write_GetFeatureSelectionVolumeDataQuery(const GetFeatureSelectionVolumeDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1221,10 +1221,10 @@ bool Read_GetFeatureSeparationQuery(const WasmValue& input, GetFeatureSeparation
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID1 = FindRecordField(*record, "featureID1", error);
+	const auto* value_featureID1 = FindRecordField(*record, "feature-id1", error);
 	if (value_featureID1 == nullptr) return false;
 	if (!ReadScalar(*value_featureID1, output.featureID1, error)) { return false; }
-	const auto* value_featureID2 = FindRecordField(*record, "featureID2", error);
+	const auto* value_featureID2 = FindRecordField(*record, "feature-id2", error);
 	if (value_featureID2 == nullptr) return false;
 	if (!ReadScalar(*value_featureID2, output.featureID2, error)) { return false; }
 	const auto* value_positional = FindRecordField(*record, "positional", error);
@@ -1236,8 +1236,8 @@ bool Read_GetFeatureSeparationQuery(const WasmValue& input, GetFeatureSeparation
 WasmValue Write_GetFeatureSeparationQuery(const GetFeatureSeparationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID1", WriteScalar(value.featureID1));
-	fields.emplace("featureID2", WriteScalar(value.featureID2));
+	fields.emplace("feature-id1", WriteScalar(value.featureID1));
+	fields.emplace("feature-id2", WriteScalar(value.featureID2));
 	fields.emplace("positional", WriteScalar(value.positional));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1263,7 +1263,7 @@ bool Read_GetFeatureSmokeTimeQuery(const WasmValue& input, GetFeatureSmokeTimeQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1272,7 +1272,7 @@ bool Read_GetFeatureSmokeTimeQuery(const WasmValue& input, GetFeatureSmokeTimeQu
 WasmValue Write_GetFeatureSmokeTimeQuery(const GetFeatureSmokeTimeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1280,7 +1280,7 @@ bool Read_GetFeatureSmokeTimeResult(const WasmValue& input, GetFeatureSmokeTimeR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_smokeTime = FindRecordField(*record, "smokeTime", error);
+	const auto* value_smokeTime = FindRecordField(*record, "smoke-time", error);
 	if (value_smokeTime == nullptr) return false;
 	if (!ReadScalar(*value_smokeTime, output.smokeTime, error)) { return false; }
 	return true;
@@ -1289,7 +1289,7 @@ bool Read_GetFeatureSmokeTimeResult(const WasmValue& input, GetFeatureSmokeTimeR
 WasmValue Write_GetFeatureSmokeTimeResult(const GetFeatureSmokeTimeResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("smokeTime", WriteScalar(value.smokeTime));
+	fields.emplace("smoke-time", WriteScalar(value.smokeTime));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1297,7 +1297,7 @@ bool Read_GetFeatureTeamQuery(const WasmValue& input, GetFeatureTeamQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1306,7 +1306,7 @@ bool Read_GetFeatureTeamQuery(const WasmValue& input, GetFeatureTeamQuery& outpu
 WasmValue Write_GetFeatureTeamQuery(const GetFeatureTeamQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1314,7 +1314,7 @@ bool Read_GetFeatureTeamResult(const WasmValue& input, GetFeatureTeamResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -1323,7 +1323,7 @@ bool Read_GetFeatureTeamResult(const WasmValue& input, GetFeatureTeamResult& out
 WasmValue Write_GetFeatureTeamResult(const GetFeatureTeamResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1331,7 +1331,7 @@ bool Read_GetFeatureTransformMatrixQuery(const WasmValue& input, GetFeatureTrans
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1340,7 +1340,7 @@ bool Read_GetFeatureTransformMatrixQuery(const WasmValue& input, GetFeatureTrans
 WasmValue Write_GetFeatureTransformMatrixQuery(const GetFeatureTransformMatrixQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1365,7 +1365,7 @@ bool Read_GetFeatureVelocityQuery(const WasmValue& input, GetFeatureVelocityQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1374,7 +1374,7 @@ bool Read_GetFeatureVelocityQuery(const WasmValue& input, GetFeatureVelocityQuer
 WasmValue Write_GetFeatureVelocityQuery(const GetFeatureVelocityQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1455,16 +1455,16 @@ bool Read_GetFeaturesInRectangleQuery(const WasmValue& input, GetFeaturesInRecta
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_minX = FindRecordField(*record, "minX", error);
+	const auto* value_minX = FindRecordField(*record, "min-x", error);
 	if (value_minX == nullptr) return false;
 	if (!ReadScalar(*value_minX, output.minX, error)) { return false; }
-	const auto* value_minZ = FindRecordField(*record, "minZ", error);
+	const auto* value_minZ = FindRecordField(*record, "min-z", error);
 	if (value_minZ == nullptr) return false;
 	if (!ReadScalar(*value_minZ, output.minZ, error)) { return false; }
-	const auto* value_maxX = FindRecordField(*record, "maxX", error);
+	const auto* value_maxX = FindRecordField(*record, "max-x", error);
 	if (value_maxX == nullptr) return false;
 	if (!ReadScalar(*value_maxX, output.maxX, error)) { return false; }
-	const auto* value_maxZ = FindRecordField(*record, "maxZ", error);
+	const auto* value_maxZ = FindRecordField(*record, "max-z", error);
 	if (value_maxZ == nullptr) return false;
 	if (!ReadScalar(*value_maxZ, output.maxZ, error)) { return false; }
 	return true;
@@ -1473,10 +1473,10 @@ bool Read_GetFeaturesInRectangleQuery(const WasmValue& input, GetFeaturesInRecta
 WasmValue Write_GetFeaturesInRectangleQuery(const GetFeaturesInRectangleQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("minX", WriteScalar(value.minX));
-	fields.emplace("minZ", WriteScalar(value.minZ));
-	fields.emplace("maxX", WriteScalar(value.maxX));
-	fields.emplace("maxZ", WriteScalar(value.maxZ));
+	fields.emplace("min-x", WriteScalar(value.minX));
+	fields.emplace("min-z", WriteScalar(value.minZ));
+	fields.emplace("max-x", WriteScalar(value.maxX));
+	fields.emplace("max-z", WriteScalar(value.maxZ));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1559,7 +1559,7 @@ bool Read_GetRenderFeaturesDrawFlagChangedQuery(const WasmValue& input, GetRende
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sendMask = FindRecordField(*record, "sendMask", error);
+	const auto* value_sendMask = FindRecordField(*record, "send-mask", error);
 	if (value_sendMask == nullptr) return false;
 	if (!ReadScalar(*value_sendMask, output.sendMask, error)) { return false; }
 	return true;
@@ -1568,7 +1568,7 @@ bool Read_GetRenderFeaturesDrawFlagChangedQuery(const WasmValue& input, GetRende
 WasmValue Write_GetRenderFeaturesDrawFlagChangedQuery(const GetRenderFeaturesDrawFlagChangedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sendMask", WriteScalar(value.sendMask));
+	fields.emplace("send-mask", WriteScalar(value.sendMask));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1603,10 +1603,10 @@ bool Read_GetRenderFeaturesQuery(const WasmValue& input, GetRenderFeaturesQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_drawMask = FindRecordField(*record, "drawMask", error);
+	const auto* value_drawMask = FindRecordField(*record, "draw-mask", error);
 	if (value_drawMask == nullptr) return false;
 	if (!ReadScalar(*value_drawMask, output.drawMask, error)) { return false; }
-	const auto* value_sendMask = FindRecordField(*record, "sendMask", error);
+	const auto* value_sendMask = FindRecordField(*record, "send-mask", error);
 	if (value_sendMask == nullptr) return false;
 	if (!ReadScalar(*value_sendMask, output.sendMask, error)) { return false; }
 	return true;
@@ -1615,8 +1615,8 @@ bool Read_GetRenderFeaturesQuery(const WasmValue& input, GetRenderFeaturesQuery&
 WasmValue Write_GetRenderFeaturesQuery(const GetRenderFeaturesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("drawMask", WriteScalar(value.drawMask));
-	fields.emplace("sendMask", WriteScalar(value.sendMask));
+	fields.emplace("draw-mask", WriteScalar(value.drawMask));
+	fields.emplace("send-mask", WriteScalar(value.sendMask));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1651,7 +1651,7 @@ bool Read_ValidFeatureIDQuery(const WasmValue& input, ValidFeatureIDQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	return true;
@@ -1660,7 +1660,7 @@ bool Read_ValidFeatureIDQuery(const WasmValue& input, ValidFeatureIDQuery& outpu
 WasmValue Write_ValidFeatureIDQuery(const ValidFeatureIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1691,7 +1691,7 @@ NativeCalloutDispatch Dispatch_features_ClearFeaturesPreviousDrawFlag(NativeInte
 	NativeCallStorage storage;
 	ClearFeaturesPreviousDrawFlagQuery query{};
 	ClearFeaturesPreviousDrawFlagResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->ClearFeaturesPreviousDrawFlag(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -1704,7 +1704,7 @@ NativeCalloutDispatch Dispatch_features_GetAllFeatures(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetAllFeaturesQuery query{};
 	GetAllFeaturesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetAllFeatures(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.features, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -1717,7 +1717,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureAllyTeam(NativeInterface* nati
 	NativeCallStorage storage;
 	GetFeatureAllyTeamQuery query{};
 	GetFeatureAllyTeamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureAllyTeam(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.allyTeamID);
@@ -1730,7 +1730,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureAlwaysUpdateMatrix(NativeInter
 	NativeCallStorage storage;
 	GetFeatureAlwaysUpdateMatrixQuery query{};
 	GetFeatureAlwaysUpdateMatrixResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureAlwaysUpdateMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.update);
@@ -1743,7 +1743,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureBlocking(NativeInterface* nati
 	NativeCallStorage storage;
 	GetFeatureBlockingQuery query{};
 	GetFeatureBlockingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureBlocking(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_FeatureBlockingState(nativeResult.blockingState);
@@ -1756,7 +1756,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureCollisionVolumeData(NativeInte
 	NativeCallStorage storage;
 	GetFeatureCollisionVolumeDataQuery query{};
 	GetFeatureCollisionVolumeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureCollisionVolumeData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_CollisionVolumeData(nativeResult.volume);
@@ -1769,7 +1769,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureDefID(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetFeatureDefIDQuery query{};
 	GetFeatureDefIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureDefID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.defID);
@@ -1782,7 +1782,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureDirection(NativeInterface* nat
 	NativeCallStorage storage;
 	GetFeatureDirectionQuery query{};
 	GetFeatureDirectionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureDirection(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.direction);
@@ -1795,7 +1795,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureDrawFlag(NativeInterface* nati
 	NativeCallStorage storage;
 	GetFeatureDrawFlagQuery query{};
 	GetFeatureDrawFlagResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureDrawFlag(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.flag);
@@ -1808,7 +1808,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureEngineDrawMask(NativeInterface
 	NativeCallStorage storage;
 	GetFeatureEngineDrawMaskQuery query{};
 	GetFeatureEngineDrawMaskResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureEngineDrawMask(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.mask);
@@ -1821,7 +1821,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureFireTime(NativeInterface* nati
 	NativeCallStorage storage;
 	GetFeatureFireTimeQuery query{};
 	GetFeatureFireTimeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureFireTime(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.fireTime);
@@ -1834,7 +1834,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureHeading(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetFeatureHeadingQuery query{};
 	GetFeatureHeadingResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureHeading(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.heading);
@@ -1847,7 +1847,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureHealth(NativeInterface* native
 	NativeCallStorage storage;
 	GetFeatureHealthQuery query{};
 	GetFeatureHealthResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureHealth(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_FeatureHealth(nativeResult.health);
@@ -1860,7 +1860,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureHeight(NativeInterface* native
 	NativeCallStorage storage;
 	GetFeatureHeightQuery query{};
 	GetFeatureHeightResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureHeight(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.height);
@@ -1873,7 +1873,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureLastAttackedPiece(NativeInterf
 	NativeCallStorage storage;
 	GetFeatureLastAttackedPieceQuery query{};
 	GetFeatureLastAttackedPieceResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureLastAttackedPiece(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_FeatureLastHitPiece(nativeResult.piece);
@@ -1886,7 +1886,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureLuaDraw(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetFeatureLuaDrawQuery query{};
 	GetFeatureLuaDrawResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureLuaDraw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.luaDraw);
@@ -1899,7 +1899,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureMass(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetFeatureMassQuery query{};
 	GetFeatureMassResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureMass(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.mass);
@@ -1912,7 +1912,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureNoDraw(NativeInterface* native
 	NativeCallStorage storage;
 	GetFeatureNoDrawQuery query{};
 	GetFeatureNoDrawResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureNoDraw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.noDraw);
@@ -1925,7 +1925,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureNoSelect(NativeInterface* nati
 	NativeCallStorage storage;
 	GetFeatureNoSelectQuery query{};
 	GetFeatureNoSelectResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureNoSelect(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.noSelect);
@@ -1938,8 +1938,8 @@ NativeCalloutDispatch Dispatch_features_GetFeaturePieceCollisionVolumeData(Nativ
 	NativeCallStorage storage;
 	GetFeaturePieceCollisionVolumeDataQuery query{};
 	GetFeaturePieceCollisionVolumeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pieceNum", query.pieceNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "piece-num", query.pieceNum, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeaturePieceCollisionVolumeData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_CollisionVolumeData(nativeResult.volume);
@@ -1952,7 +1952,7 @@ NativeCalloutDispatch Dispatch_features_GetFeaturePosition(NativeInterface* nati
 	NativeCallStorage storage;
 	GetFeaturePositionQuery query{};
 	GetFeaturePositionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeaturePosition(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.position);
@@ -1965,7 +1965,7 @@ NativeCalloutDispatch Dispatch_features_GetFeaturePositionExt(NativeInterface* n
 	NativeCallStorage storage;
 	GetFeaturePositionExtQuery query{};
 	GetFeaturePositionExtResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeaturePositionExt(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_FeaturePositionExt(nativeResult.position);
@@ -1978,7 +1978,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureRadius(NativeInterface* native
 	NativeCallStorage storage;
 	GetFeatureRadiusQuery query{};
 	GetFeatureRadiusResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureRadius(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.radius);
@@ -1991,7 +1991,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureResources(NativeInterface* nat
 	NativeCallStorage storage;
 	GetFeatureResourcesQuery query{};
 	GetFeatureResourcesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureResources(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_FeatureResources(nativeResult.resources);
@@ -2004,12 +2004,12 @@ NativeCalloutDispatch Dispatch_features_GetFeatureResurrect(NativeInterface* nat
 	NativeCallStorage storage;
 	GetFeatureResurrectQuery query{};
 	GetFeatureResurrectResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureResurrect(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("resurrect", Write_FeatureResurrect(nativeResult.resurrect));
-	outputFields.emplace("canResurrect", WriteScalar(nativeResult.canResurrect));
+	outputFields.emplace("can-resurrect", WriteScalar(nativeResult.canResurrect));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -2020,7 +2020,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureRotation(NativeInterface* nati
 	NativeCallStorage storage;
 	GetFeatureRotationQuery query{};
 	GetFeatureRotationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureRotation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_FeatureRotation(nativeResult.rotation);
@@ -2033,7 +2033,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureSelectionVolumeData(NativeInte
 	NativeCallStorage storage;
 	GetFeatureSelectionVolumeDataQuery query{};
 	GetFeatureSelectionVolumeDataResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureSelectionVolumeData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_FeatureSelectionVolumeData(nativeResult.data);
@@ -2046,8 +2046,8 @@ NativeCalloutDispatch Dispatch_features_GetFeatureSeparation(NativeInterface* na
 	NativeCallStorage storage;
 	GetFeatureSeparationQuery query{};
 	GetFeatureSeparationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "featureID1", query.featureID1, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "featureID2", query.featureID2, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "feature-id1", query.featureID1, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "feature-id2", query.featureID2, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "positional", query.positional, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureSeparation(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -2061,7 +2061,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureSmokeTime(NativeInterface* nat
 	NativeCallStorage storage;
 	GetFeatureSmokeTimeQuery query{};
 	GetFeatureSmokeTimeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureSmokeTime(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.smokeTime);
@@ -2074,7 +2074,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureTeam(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetFeatureTeamQuery query{};
 	GetFeatureTeamResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureTeam(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.teamID);
@@ -2087,7 +2087,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureTransformMatrix(NativeInterfac
 	NativeCallStorage storage;
 	GetFeatureTransformMatrixQuery query{};
 	GetFeatureTransformMatrixResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureTransformMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_FeatureTransformMatrix(nativeResult.matrix);
@@ -2100,7 +2100,7 @@ NativeCalloutDispatch Dispatch_features_GetFeatureVelocity(NativeInterface* nati
 	NativeCallStorage storage;
 	GetFeatureVelocityQuery query{};
 	GetFeatureVelocityResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeatureVelocity(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.velocity);
@@ -2129,10 +2129,10 @@ NativeCalloutDispatch Dispatch_features_GetFeaturesInRectangle(NativeInterface* 
 	NativeCallStorage storage;
 	GetFeaturesInRectangleQuery query{};
 	GetFeaturesInRectangleResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "minX", query.minX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "minZ", query.minZ, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "maxX", query.maxX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "maxZ", query.maxZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "min-x", query.minX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "min-z", query.minZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "max-x", query.maxX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "max-z", query.maxZ, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetFeaturesInRectangle(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.features, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -2159,8 +2159,8 @@ NativeCalloutDispatch Dispatch_features_GetRenderFeatures(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetRenderFeaturesQuery query{};
 	GetRenderFeaturesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "drawMask", query.drawMask, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "sendMask", query.sendMask, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "draw-mask", query.drawMask, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "send-mask", query.sendMask, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetRenderFeatures(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.features, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -2173,7 +2173,7 @@ NativeCalloutDispatch Dispatch_features_GetRenderFeaturesDrawFlagChanged(NativeI
 	NativeCallStorage storage;
 	GetRenderFeaturesDrawFlagChangedQuery query{};
 	GetRenderFeaturesDrawFlagChangedResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "sendMask", query.sendMask, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "send-mask", query.sendMask, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->GetRenderFeaturesDrawFlagChanged(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.features, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -2186,7 +2186,7 @@ NativeCalloutDispatch Dispatch_features_ValidFeatureID(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	ValidFeatureIDQuery query{};
 	ValidFeatureIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->features->ValidFeatureID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.valid);

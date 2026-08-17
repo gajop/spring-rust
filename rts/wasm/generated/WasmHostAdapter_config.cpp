@@ -19,28 +19,28 @@ bool Read_ConfigParam(const WasmValue& input, ConfigParam& output, NativeCallSto
 	output.name = stored_string_output_name.c_str();
 	const auto* value_type = FindRecordField(*record, "type", error);
 	if (value_type == nullptr) return false;
-	if (!ReadScalar(*value_type, output.type, error)) { return false; }
+	if (!ReadEnum_ConfigValueType(*value_type, output.type, error)) { return false; }
 	const auto* value_description = FindRecordField(*record, "description", error);
 	if (value_description == nullptr) return false;
 	auto& stored_string_output_description = storage.Make<std::string>();
 	if (!ReadString(*value_description, stored_string_output_description, error)) { return false; }
 	output.description = stored_string_output_description.c_str();
-	const auto* value_defaultValue = FindRecordField(*record, "defaultValue", error);
+	const auto* value_defaultValue = FindRecordField(*record, "default-value", error);
 	if (value_defaultValue == nullptr) return false;
 	auto& stored_string_output_defaultValue = storage.Make<std::string>();
 	if (!ReadString(*value_defaultValue, stored_string_output_defaultValue, error)) { return false; }
 	output.defaultValue = stored_string_output_defaultValue.c_str();
-	const auto* value_minimumValue = FindRecordField(*record, "minimumValue", error);
+	const auto* value_minimumValue = FindRecordField(*record, "minimum-value", error);
 	if (value_minimumValue == nullptr) return false;
 	auto& stored_string_output_minimumValue = storage.Make<std::string>();
 	if (!ReadString(*value_minimumValue, stored_string_output_minimumValue, error)) { return false; }
 	output.minimumValue = stored_string_output_minimumValue.c_str();
-	const auto* value_maximumValue = FindRecordField(*record, "maximumValue", error);
+	const auto* value_maximumValue = FindRecordField(*record, "maximum-value", error);
 	if (value_maximumValue == nullptr) return false;
 	auto& stored_string_output_maximumValue = storage.Make<std::string>();
 	if (!ReadString(*value_maximumValue, stored_string_output_maximumValue, error)) { return false; }
 	output.maximumValue = stored_string_output_maximumValue.c_str();
-	const auto* value_readOnly = FindRecordField(*record, "readOnly", error);
+	const auto* value_readOnly = FindRecordField(*record, "read-only", error);
 	if (value_readOnly == nullptr) return false;
 	if (!ReadScalar(*value_readOnly, output.readOnly, error)) { return false; }
 	return true;
@@ -50,12 +50,12 @@ WasmValue Write_ConfigParam(const ConfigParam& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("type", WriteScalar(value.type));
+	fields.emplace("type", WriteEnum_ConfigValueType(value.type));
 	fields.emplace("description", WasmValue::String((value.description == nullptr) ? std::string{} : std::string(value.description)));
-	fields.emplace("defaultValue", WasmValue::String((value.defaultValue == nullptr) ? std::string{} : std::string(value.defaultValue)));
-	fields.emplace("minimumValue", WasmValue::String((value.minimumValue == nullptr) ? std::string{} : std::string(value.minimumValue)));
-	fields.emplace("maximumValue", WasmValue::String((value.maximumValue == nullptr) ? std::string{} : std::string(value.maximumValue)));
-	fields.emplace("readOnly", WriteScalar(value.readOnly));
+	fields.emplace("default-value", WasmValue::String((value.defaultValue == nullptr) ? std::string{} : std::string(value.defaultValue)));
+	fields.emplace("minimum-value", WasmValue::String((value.minimumValue == nullptr) ? std::string{} : std::string(value.minimumValue)));
+	fields.emplace("maximum-value", WasmValue::String((value.maximumValue == nullptr) ? std::string{} : std::string(value.maximumValue)));
+	fields.emplace("read-only", WriteScalar(value.readOnly));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -68,7 +68,7 @@ bool Read_GetConfigFloatQuery(const WasmValue& input, GetConfigFloatQuery& outpu
 	auto& stored_string_output_key = storage.Make<std::string>();
 	if (!ReadString(*value_key, stored_string_output_key, error)) { return false; }
 	output.key = stored_string_output_key.c_str();
-	const auto* value_defaultValue = FindRecordField(*record, "defaultValue", error);
+	const auto* value_defaultValue = FindRecordField(*record, "default-value", error);
 	if (value_defaultValue == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_defaultValue).storage)) {
 		output.defaultValue = {};
@@ -84,7 +84,7 @@ WasmValue Write_GetConfigFloatQuery(const GetConfigFloatQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
-	fields.emplace("defaultValue", value.hasDefault ? WriteScalar(value.defaultValue) : WasmValue::Unit());
+	fields.emplace("default-value", value.hasDefault ? WriteScalar(value.defaultValue) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -118,7 +118,7 @@ bool Read_GetConfigIntQuery(const WasmValue& input, GetConfigIntQuery& output, N
 	auto& stored_string_output_key = storage.Make<std::string>();
 	if (!ReadString(*value_key, stored_string_output_key, error)) { return false; }
 	output.key = stored_string_output_key.c_str();
-	const auto* value_defaultValue = FindRecordField(*record, "defaultValue", error);
+	const auto* value_defaultValue = FindRecordField(*record, "default-value", error);
 	if (value_defaultValue == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_defaultValue).storage)) {
 		output.defaultValue = {};
@@ -134,7 +134,7 @@ WasmValue Write_GetConfigIntQuery(const GetConfigIntQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
-	fields.emplace("defaultValue", value.hasDefault ? WriteScalar(value.defaultValue) : WasmValue::Unit());
+	fields.emplace("default-value", value.hasDefault ? WriteScalar(value.defaultValue) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -163,7 +163,7 @@ bool Read_GetConfigParamsQuery(const WasmValue& input, GetConfigParamsQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -172,7 +172,7 @@ bool Read_GetConfigParamsQuery(const WasmValue& input, GetConfigParamsQuery& out
 WasmValue Write_GetConfigParamsQuery(const GetConfigParamsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -212,7 +212,7 @@ bool Read_GetConfigStringQuery(const WasmValue& input, GetConfigStringQuery& out
 	auto& stored_string_output_key = storage.Make<std::string>();
 	if (!ReadString(*value_key, stored_string_output_key, error)) { return false; }
 	output.key = stored_string_output_key.c_str();
-	const auto* value_defaultValue = FindRecordField(*record, "defaultValue", error);
+	const auto* value_defaultValue = FindRecordField(*record, "default-value", error);
 	if (value_defaultValue == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_defaultValue).storage)) {
 		output.defaultValue = {};
@@ -230,7 +230,7 @@ WasmValue Write_GetConfigStringQuery(const GetConfigStringQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
-	fields.emplace("defaultValue", value.hasDefault ? WasmValue::String((value.defaultValue == nullptr) ? std::string{} : std::string(value.defaultValue)) : WasmValue::Unit());
+	fields.emplace("default-value", value.hasDefault ? WasmValue::String((value.defaultValue == nullptr) ? std::string{} : std::string(value.defaultValue)) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -261,7 +261,7 @@ bool Read_GetLogSectionsQuery(const WasmValue& input, GetLogSectionsQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -270,7 +270,7 @@ bool Read_GetLogSectionsQuery(const WasmValue& input, GetLogSectionsQuery& outpu
 WasmValue Write_GetLogSectionsQuery(const GetLogSectionsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -318,7 +318,7 @@ bool Read_SetConfigFloatQuery(const WasmValue& input, SetConfigFloatQuery& outpu
 	const auto* value_value = FindRecordField(*record, "value", error);
 	if (value_value == nullptr) return false;
 	if (!ReadScalar(*value_value, output.value, error)) { return false; }
-	const auto* value_useOverlay = FindRecordField(*record, "useOverlay", error);
+	const auto* value_useOverlay = FindRecordField(*record, "use-overlay", error);
 	if (value_useOverlay == nullptr) return false;
 	if (!ReadScalar(*value_useOverlay, output.useOverlay, error)) { return false; }
 	return true;
@@ -329,7 +329,7 @@ WasmValue Write_SetConfigFloatQuery(const SetConfigFloatQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
 	fields.emplace("value", WriteScalar(value.value));
-	fields.emplace("useOverlay", WriteScalar(value.useOverlay));
+	fields.emplace("use-overlay", WriteScalar(value.useOverlay));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -362,7 +362,7 @@ bool Read_SetConfigIntQuery(const WasmValue& input, SetConfigIntQuery& output, N
 	const auto* value_value = FindRecordField(*record, "value", error);
 	if (value_value == nullptr) return false;
 	if (!ReadScalar(*value_value, output.value, error)) { return false; }
-	const auto* value_useOverlay = FindRecordField(*record, "useOverlay", error);
+	const auto* value_useOverlay = FindRecordField(*record, "use-overlay", error);
 	if (value_useOverlay == nullptr) return false;
 	if (!ReadScalar(*value_useOverlay, output.useOverlay, error)) { return false; }
 	return true;
@@ -373,7 +373,7 @@ WasmValue Write_SetConfigIntQuery(const SetConfigIntQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
 	fields.emplace("value", WriteScalar(value.value));
-	fields.emplace("useOverlay", WriteScalar(value.useOverlay));
+	fields.emplace("use-overlay", WriteScalar(value.useOverlay));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -408,7 +408,7 @@ bool Read_SetConfigStringQuery(const WasmValue& input, SetConfigStringQuery& out
 	auto& stored_string_output_value = storage.Make<std::string>();
 	if (!ReadString(*value_value, stored_string_output_value, error)) { return false; }
 	output.value = stored_string_output_value.c_str();
-	const auto* value_useOverlay = FindRecordField(*record, "useOverlay", error);
+	const auto* value_useOverlay = FindRecordField(*record, "use-overlay", error);
 	if (value_useOverlay == nullptr) return false;
 	if (!ReadScalar(*value_useOverlay, output.useOverlay, error)) { return false; }
 	return true;
@@ -419,7 +419,7 @@ WasmValue Write_SetConfigStringQuery(const SetConfigStringQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("key", WasmValue::String((value.key == nullptr) ? std::string{} : std::string(value.key)));
 	fields.emplace("value", WasmValue::String((value.value == nullptr) ? std::string{} : std::string(value.value)));
-	fields.emplace("useOverlay", WriteScalar(value.useOverlay));
+	fields.emplace("use-overlay", WriteScalar(value.useOverlay));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -495,7 +495,7 @@ NativeCalloutDispatch Dispatch_config_GetConfigFloat(NativeInterface* nativeInte
 	auto& stored_string_query_key = storage.Make<std::string>();
 	if (!ReadString(*value_key, stored_string_query_key, error)) { return NativeCalloutDispatch::handled; }
 	query.key = stored_string_query_key.c_str();
-	const WasmValue* value_defaultValue = FindArgument(arguments, 1u, 1u, 2u, 2u, "defaultValue", error);
+	const WasmValue* value_defaultValue = FindArgument(arguments, 1u, 1u, 2u, 2u, "default-value", error);
 	if (value_defaultValue == nullptr) return NativeCalloutDispatch::handled;
 	if (std::holds_alternative<std::monostate>((*value_defaultValue).storage)) {
 		query.defaultValue = {};
@@ -524,7 +524,7 @@ NativeCalloutDispatch Dispatch_config_GetConfigInt(NativeInterface* nativeInterf
 	auto& stored_string_query_key = storage.Make<std::string>();
 	if (!ReadString(*value_key, stored_string_query_key, error)) { return NativeCalloutDispatch::handled; }
 	query.key = stored_string_query_key.c_str();
-	const WasmValue* value_defaultValue = FindArgument(arguments, 1u, 1u, 2u, 2u, "defaultValue", error);
+	const WasmValue* value_defaultValue = FindArgument(arguments, 1u, 1u, 2u, 2u, "default-value", error);
 	if (value_defaultValue == nullptr) return NativeCalloutDispatch::handled;
 	if (std::holds_alternative<std::monostate>((*value_defaultValue).storage)) {
 		query.defaultValue = {};
@@ -548,7 +548,7 @@ NativeCalloutDispatch Dispatch_config_GetConfigParams(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetConfigParamsQuery query{};
 	GetConfigParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->config->GetConfigParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.params, nativeResult.count, [](const auto& value) { return Write_ConfigParam(value); });
@@ -566,7 +566,7 @@ NativeCalloutDispatch Dispatch_config_GetConfigString(NativeInterface* nativeInt
 	auto& stored_string_query_key = storage.Make<std::string>();
 	if (!ReadString(*value_key, stored_string_query_key, error)) { return NativeCalloutDispatch::handled; }
 	query.key = stored_string_query_key.c_str();
-	const WasmValue* value_defaultValue = FindArgument(arguments, 1u, 1u, 2u, 2u, "defaultValue", error);
+	const WasmValue* value_defaultValue = FindArgument(arguments, 1u, 1u, 2u, 2u, "default-value", error);
 	if (value_defaultValue == nullptr) return NativeCalloutDispatch::handled;
 	if (std::holds_alternative<std::monostate>((*value_defaultValue).storage)) {
 		query.defaultValue = {};
@@ -592,7 +592,7 @@ NativeCalloutDispatch Dispatch_config_GetLogSections(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetLogSectionsQuery query{};
 	GetLogSectionsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->config->GetLogSections(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.sections, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -611,7 +611,7 @@ NativeCalloutDispatch Dispatch_config_SetConfigFloat(NativeInterface* nativeInte
 	if (!ReadString(*value_key, stored_string_query_key, error)) { return NativeCalloutDispatch::handled; }
 	query.key = stored_string_query_key.c_str();
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "value", query.value, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "useOverlay", query.useOverlay, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "use-overlay", query.useOverlay, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->config->SetConfigFloat(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -630,7 +630,7 @@ NativeCalloutDispatch Dispatch_config_SetConfigInt(NativeInterface* nativeInterf
 	if (!ReadString(*value_key, stored_string_query_key, error)) { return NativeCalloutDispatch::handled; }
 	query.key = stored_string_query_key.c_str();
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "value", query.value, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "useOverlay", query.useOverlay, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "use-overlay", query.useOverlay, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->config->SetConfigInt(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -653,7 +653,7 @@ NativeCalloutDispatch Dispatch_config_SetConfigString(NativeInterface* nativeInt
 	auto& stored_string_query_value = storage.Make<std::string>();
 	if (!ReadString(*value_value, stored_string_query_value, error)) { return NativeCalloutDispatch::handled; }
 	query.value = stored_string_query_value.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "useOverlay", query.useOverlay, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "use-overlay", query.useOverlay, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->config->SetConfigString(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

@@ -9,6 +9,7 @@ use crate::model::{ApiModel, LoweringStatus};
 pub enum Kind {
     Manual,
     Exclude,
+    SyncedOnly,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -34,7 +35,7 @@ pub fn parse(path: &Path) -> Result<Vec<Annotation>> {
         }
         let (kind, body) = line.split_once('(').ok_or_else(|| {
             anyhow!(
-                "{}:{}: expected MANUAL(...) or EXCLUDE(...)",
+                "{}:{}: expected MANUAL(...), EXCLUDE(...) or SYNCED_ONLY(...)",
                 path.display(),
                 line_number + 1
             )
@@ -55,6 +56,7 @@ pub fn parse(path: &Path) -> Result<Vec<Annotation>> {
         let kind = match kind {
             "MANUAL" => Kind::Manual,
             "EXCLUDE" => Kind::Exclude,
+            "SYNCED_ONLY" => Kind::SyncedOnly,
             _ => {
                 return Err(anyhow!(
                     "{}:{}: unknown annotation {kind}",
@@ -118,6 +120,12 @@ pub fn apply(model: &mut ApiModel, annotations: &[Annotation]) -> Result<Vec<(St
             }
             Kind::Exclude => {
                 excluded.push((module.name.clone(), function.name.clone()));
+            }
+            Kind::SyncedOnly => {
+                function
+                    .environments
+                    .retain(|environment| environment.is_synced());
+                function.notes.push(annotation.reason.clone());
             }
         }
     }

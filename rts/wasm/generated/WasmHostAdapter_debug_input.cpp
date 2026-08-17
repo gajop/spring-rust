@@ -12,7 +12,7 @@ bool Read_ClearEmulatedInputQuery(const WasmValue& input, ClearEmulatedInputQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fireReleases = FindRecordField(*record, "fireReleases", error);
+	const auto* value_fireReleases = FindRecordField(*record, "fire-releases", error);
 	if (value_fireReleases == nullptr) return false;
 	if (!ReadScalar(*value_fireReleases, output.fireReleases, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_ClearEmulatedInputQuery(const WasmValue& input, ClearEmulatedInputQuer
 WasmValue Write_ClearEmulatedInputQuery(const ClearEmulatedInputQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fireReleases", WriteScalar(value.fireReleases));
+	fields.emplace("fire-releases", WriteScalar(value.fireReleases));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -42,7 +42,7 @@ bool Read_EmulateKeyQuery(const WasmValue& input, EmulateKeyQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_keyCode = FindRecordField(*record, "keyCode", error);
+	const auto* value_keyCode = FindRecordField(*record, "key-code", error);
 	if (value_keyCode == nullptr) return false;
 	if (!ReadScalar(*value_keyCode, output.keyCode, error)) { return false; }
 	const auto* value_pressed = FindRecordField(*record, "pressed", error);
@@ -54,7 +54,7 @@ bool Read_EmulateKeyQuery(const WasmValue& input, EmulateKeyQuery& output, Nativ
 WasmValue Write_EmulateKeyQuery(const EmulateKeyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("keyCode", WriteScalar(value.keyCode));
+	fields.emplace("key-code", WriteScalar(value.keyCode));
 	fields.emplace("pressed", WriteScalar(value.pressed));
 	return WasmValue::Record(std::move(fields));
 }
@@ -174,7 +174,7 @@ bool Read_EmulateTextEditingQuery(const WasmValue& input, EmulateTextEditingQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_utf8Text = FindRecordField(*record, "utf8Text", error);
+	const auto* value_utf8Text = FindRecordField(*record, "utf8-text", error);
 	if (value_utf8Text == nullptr) return false;
 	auto& stored_string_output_utf8Text = storage.Make<std::string>();
 	if (!ReadString(*value_utf8Text, stored_string_output_utf8Text, error)) { return false; }
@@ -191,7 +191,7 @@ bool Read_EmulateTextEditingQuery(const WasmValue& input, EmulateTextEditingQuer
 WasmValue Write_EmulateTextEditingQuery(const EmulateTextEditingQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("utf8Text", WasmValue::String((value.utf8Text == nullptr) ? std::string{} : std::string(value.utf8Text)));
+	fields.emplace("utf8-text", WasmValue::String((value.utf8Text == nullptr) ? std::string{} : std::string(value.utf8Text)));
 	fields.emplace("start", WriteScalar(value.start));
 	fields.emplace("length", WriteScalar(value.length));
 	return WasmValue::Record(std::move(fields));
@@ -218,7 +218,7 @@ bool Read_EmulateTextInputQuery(const WasmValue& input, EmulateTextInputQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_utf8Text = FindRecordField(*record, "utf8Text", error);
+	const auto* value_utf8Text = FindRecordField(*record, "utf8-text", error);
 	if (value_utf8Text == nullptr) return false;
 	auto& stored_string_output_utf8Text = storage.Make<std::string>();
 	if (!ReadString(*value_utf8Text, stored_string_output_utf8Text, error)) { return false; }
@@ -229,7 +229,7 @@ bool Read_EmulateTextInputQuery(const WasmValue& input, EmulateTextInputQuery& o
 WasmValue Write_EmulateTextInputQuery(const EmulateTextInputQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("utf8Text", WasmValue::String((value.utf8Text == nullptr) ? std::string{} : std::string(value.utf8Text)));
+	fields.emplace("utf8-text", WasmValue::String((value.utf8Text == nullptr) ? std::string{} : std::string(value.utf8Text)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -260,7 +260,7 @@ NativeCalloutDispatch Dispatch_debug_input_ClearEmulatedInput(NativeInterface* n
 	NativeCallStorage storage;
 	ClearEmulatedInputQuery query{};
 	ClearEmulatedInputResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "fireReleases", query.fireReleases, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "fire-releases", query.fireReleases, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->debugInput->ClearEmulatedInput(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -273,7 +273,7 @@ NativeCalloutDispatch Dispatch_debug_input_EmulateKey(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	EmulateKeyQuery query{};
 	EmulateKeyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "keyCode", query.keyCode, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "key-code", query.keyCode, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pressed", query.pressed, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->debugInput->EmulateKey(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -328,7 +328,7 @@ NativeCalloutDispatch Dispatch_debug_input_EmulateTextEditing(NativeInterface* n
 	NativeCallStorage storage;
 	EmulateTextEditingQuery query{};
 	EmulateTextEditingResult nativeResult{};
-	const WasmValue* value_utf8Text = FindArgument(arguments, 0u, 0u, 3u, 3u, "utf8Text", error);
+	const WasmValue* value_utf8Text = FindArgument(arguments, 0u, 0u, 3u, 3u, "utf8-text", error);
 	if (value_utf8Text == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_utf8Text = storage.Make<std::string>();
 	if (!ReadString(*value_utf8Text, stored_string_query_utf8Text, error)) { return NativeCalloutDispatch::handled; }
@@ -347,7 +347,7 @@ NativeCalloutDispatch Dispatch_debug_input_EmulateTextInput(NativeInterface* nat
 	NativeCallStorage storage;
 	EmulateTextInputQuery query{};
 	EmulateTextInputResult nativeResult{};
-	const WasmValue* value_utf8Text = FindArgument(arguments, 0u, 0u, 1u, 1u, "utf8Text", error);
+	const WasmValue* value_utf8Text = FindArgument(arguments, 0u, 0u, 1u, 1u, "utf8-text", error);
 	if (value_utf8Text == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_utf8Text = storage.Make<std::string>();
 	if (!ReadString(*value_utf8Text, stored_string_query_utf8Text, error)) { return NativeCalloutDispatch::handled; }

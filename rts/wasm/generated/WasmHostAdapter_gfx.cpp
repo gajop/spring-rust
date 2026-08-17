@@ -12,7 +12,7 @@ bool Read_GfxActiveTextureQuery(const WasmValue& input, GfxActiveTextureQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texNum = FindRecordField(*record, "texNum", error);
+	const auto* value_texNum = FindRecordField(*record, "tex-num", error);
 	if (value_texNum == nullptr) return false;
 	if (!ReadScalar(*value_texNum, output.texNum, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_GfxActiveTextureQuery(const WasmValue& input, GfxActiveTextureQuery& o
 WasmValue Write_GfxActiveTextureQuery(const GfxActiveTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texNum", WriteScalar(value.texNum));
+	fields.emplace("tex-num", WriteScalar(value.texNum));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -39,7 +39,7 @@ bool Read_GfxActiveUniformEntry(const WasmValue& input, GfxActiveUniformEntry& o
 	auto& stored_string_output_type = storage.Make<std::string>();
 	if (!ReadString(*value_type, stored_string_output_type, error)) { return false; }
 	output.type = stored_string_output_type.c_str();
-	const auto* value_glType = FindRecordField(*record, "glType", error);
+	const auto* value_glType = FindRecordField(*record, "gl-type", error);
 	if (value_glType == nullptr) return false;
 	if (!ReadScalar(*value_glType, output.glType, error)) { return false; }
 	const auto* value_length = FindRecordField(*record, "length", error);
@@ -59,7 +59,7 @@ WasmValue Write_GfxActiveUniformEntry(const GfxActiveUniformEntry& value)
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	fields.emplace("type", WasmValue::String((value.type == nullptr) ? std::string{} : std::string(value.type)));
-	fields.emplace("glType", WriteScalar(value.glType));
+	fields.emplace("gl-type", WriteScalar(value.glType));
 	fields.emplace("length", WriteScalar(value.length));
 	fields.emplace("size", WriteScalar(value.size));
 	fields.emplace("location", WriteScalar(value.location));
@@ -139,7 +139,7 @@ bool Read_GfxAtlasTextureEntry(const WasmValue& input, GfxAtlasTextureEntry& out
 	const auto* value_y2 = FindRecordField(*record, "y2", error);
 	if (value_y2 == nullptr) return false;
 	if (!ReadScalar(*value_y2, output.y2, error)) { return false; }
-	const auto* value_pageNum = FindRecordField(*record, "pageNum", error);
+	const auto* value_pageNum = FindRecordField(*record, "page-num", error);
 	if (value_pageNum == nullptr) return false;
 	if (!ReadScalar(*value_pageNum, output.pageNum, error)) { return false; }
 	return true;
@@ -153,7 +153,7 @@ WasmValue Write_GfxAtlasTextureEntry(const GfxAtlasTextureEntry& value)
 	fields.emplace("x2", WriteScalar(value.x2));
 	fields.emplace("y1", WriteScalar(value.y1));
 	fields.emplace("y2", WriteScalar(value.y2));
-	fields.emplace("pageNum", WriteScalar(value.pageNum));
+	fields.emplace("page-num", WriteScalar(value.pageNum));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -161,12 +161,12 @@ bool Read_GfxAtlasTextureQuery(const WasmValue& input, GfxAtlasTextureQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_atlasName = FindRecordField(*record, "atlasName", error);
+	const auto* value_atlasName = FindRecordField(*record, "atlas-name", error);
 	if (value_atlasName == nullptr) return false;
 	auto& stored_string_output_atlasName = storage.Make<std::string>();
 	if (!ReadString(*value_atlasName, stored_string_output_atlasName, error)) { return false; }
 	output.atlasName = stored_string_output_atlasName.c_str();
-	const auto* value_textureName = FindRecordField(*record, "textureName", error);
+	const auto* value_textureName = FindRecordField(*record, "texture-name", error);
 	if (value_textureName == nullptr) return false;
 	auto& stored_string_output_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_output_textureName, error)) { return false; }
@@ -177,8 +177,8 @@ bool Read_GfxAtlasTextureQuery(const WasmValue& input, GfxAtlasTextureQuery& out
 WasmValue Write_GfxAtlasTextureQuery(const GfxAtlasTextureQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("atlasName", WasmValue::String((value.atlasName == nullptr) ? std::string{} : std::string(value.atlasName)));
-	fields.emplace("textureName", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
+	fields.emplace("atlas-name", WasmValue::String((value.atlasName == nullptr) ? std::string{} : std::string(value.atlasName)));
+	fields.emplace("texture-name", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -198,7 +198,7 @@ bool Read_GfxAtlasTextureResult(const WasmValue& input, GfxAtlasTextureResult& o
 	const auto* value_y2 = FindRecordField(*record, "y2", error);
 	if (value_y2 == nullptr) return false;
 	if (!ReadScalar(*value_y2, output.y2, error)) { return false; }
-	const auto* value_pageNum = FindRecordField(*record, "pageNum", error);
+	const auto* value_pageNum = FindRecordField(*record, "page-num", error);
 	if (value_pageNum == nullptr) return false;
 	if (!ReadScalar(*value_pageNum, output.pageNum, error)) { return false; }
 	return true;
@@ -211,7 +211,7 @@ WasmValue Write_GfxAtlasTextureResult(const GfxAtlasTextureResult& value)
 	fields.emplace("x2", WriteScalar(value.x2));
 	fields.emplace("y1", WriteScalar(value.y1));
 	fields.emplace("y2", WriteScalar(value.y2));
-	fields.emplace("pageNum", WriteScalar(value.pageNum));
+	fields.emplace("page-num", WriteScalar(value.pageNum));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -306,10 +306,10 @@ bool Read_GfxBlendEquationSeparateQuery(const WasmValue& input, GfxBlendEquation
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_modeRGB = FindRecordField(*record, "modeRGB", error);
+	const auto* value_modeRGB = FindRecordField(*record, "mode-rgb", error);
 	if (value_modeRGB == nullptr) return false;
 	if (!ReadScalar(*value_modeRGB, output.modeRGB, error)) { return false; }
-	const auto* value_modeAlpha = FindRecordField(*record, "modeAlpha", error);
+	const auto* value_modeAlpha = FindRecordField(*record, "mode-alpha", error);
 	if (value_modeAlpha == nullptr) return false;
 	if (!ReadScalar(*value_modeAlpha, output.modeAlpha, error)) { return false; }
 	return true;
@@ -318,8 +318,8 @@ bool Read_GfxBlendEquationSeparateQuery(const WasmValue& input, GfxBlendEquation
 WasmValue Write_GfxBlendEquationSeparateQuery(const GfxBlendEquationSeparateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("modeRGB", WriteScalar(value.modeRGB));
-	fields.emplace("modeAlpha", WriteScalar(value.modeAlpha));
+	fields.emplace("mode-rgb", WriteScalar(value.modeRGB));
+	fields.emplace("mode-alpha", WriteScalar(value.modeAlpha));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -348,16 +348,16 @@ bool Read_GfxBlendFuncSeparateQuery(const WasmValue& input, GfxBlendFuncSeparate
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_srcRGB = FindRecordField(*record, "srcRGB", error);
+	const auto* value_srcRGB = FindRecordField(*record, "src-rgb", error);
 	if (value_srcRGB == nullptr) return false;
 	if (!ReadScalar(*value_srcRGB, output.srcRGB, error)) { return false; }
-	const auto* value_dstRGB = FindRecordField(*record, "dstRGB", error);
+	const auto* value_dstRGB = FindRecordField(*record, "dst-rgb", error);
 	if (value_dstRGB == nullptr) return false;
 	if (!ReadScalar(*value_dstRGB, output.dstRGB, error)) { return false; }
-	const auto* value_srcAlpha = FindRecordField(*record, "srcAlpha", error);
+	const auto* value_srcAlpha = FindRecordField(*record, "src-alpha", error);
 	if (value_srcAlpha == nullptr) return false;
 	if (!ReadScalar(*value_srcAlpha, output.srcAlpha, error)) { return false; }
-	const auto* value_dstAlpha = FindRecordField(*record, "dstAlpha", error);
+	const auto* value_dstAlpha = FindRecordField(*record, "dst-alpha", error);
 	if (value_dstAlpha == nullptr) return false;
 	if (!ReadScalar(*value_dstAlpha, output.dstAlpha, error)) { return false; }
 	return true;
@@ -366,10 +366,10 @@ bool Read_GfxBlendFuncSeparateQuery(const WasmValue& input, GfxBlendFuncSeparate
 WasmValue Write_GfxBlendFuncSeparateQuery(const GfxBlendFuncSeparateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("srcRGB", WriteScalar(value.srcRGB));
-	fields.emplace("dstRGB", WriteScalar(value.dstRGB));
-	fields.emplace("srcAlpha", WriteScalar(value.srcAlpha));
-	fields.emplace("dstAlpha", WriteScalar(value.dstAlpha));
+	fields.emplace("src-rgb", WriteScalar(value.srcRGB));
+	fields.emplace("dst-rgb", WriteScalar(value.dstRGB));
+	fields.emplace("src-alpha", WriteScalar(value.srcAlpha));
+	fields.emplace("dst-alpha", WriteScalar(value.dstAlpha));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -377,34 +377,34 @@ bool Read_GfxBlitFBOQuery(const WasmValue& input, GfxBlitFBOQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_srcFBOID = FindRecordField(*record, "srcFBOID", error);
+	const auto* value_srcFBOID = FindRecordField(*record, "src-fboid", error);
 	if (value_srcFBOID == nullptr) return false;
 	if (!ReadScalar(*value_srcFBOID, output.srcFBOID, error)) { return false; }
-	const auto* value_dstFBOID = FindRecordField(*record, "dstFBOID", error);
+	const auto* value_dstFBOID = FindRecordField(*record, "dst-fboid", error);
 	if (value_dstFBOID == nullptr) return false;
 	if (!ReadScalar(*value_dstFBOID, output.dstFBOID, error)) { return false; }
-	const auto* value_x0Src = FindRecordField(*record, "x0Src", error);
+	const auto* value_x0Src = FindRecordField(*record, "x0-src", error);
 	if (value_x0Src == nullptr) return false;
 	if (!ReadScalar(*value_x0Src, output.x0Src, error)) { return false; }
-	const auto* value_y0Src = FindRecordField(*record, "y0Src", error);
+	const auto* value_y0Src = FindRecordField(*record, "y0-src", error);
 	if (value_y0Src == nullptr) return false;
 	if (!ReadScalar(*value_y0Src, output.y0Src, error)) { return false; }
-	const auto* value_x1Src = FindRecordField(*record, "x1Src", error);
+	const auto* value_x1Src = FindRecordField(*record, "x1-src", error);
 	if (value_x1Src == nullptr) return false;
 	if (!ReadScalar(*value_x1Src, output.x1Src, error)) { return false; }
-	const auto* value_y1Src = FindRecordField(*record, "y1Src", error);
+	const auto* value_y1Src = FindRecordField(*record, "y1-src", error);
 	if (value_y1Src == nullptr) return false;
 	if (!ReadScalar(*value_y1Src, output.y1Src, error)) { return false; }
-	const auto* value_x0Dst = FindRecordField(*record, "x0Dst", error);
+	const auto* value_x0Dst = FindRecordField(*record, "x0-dst", error);
 	if (value_x0Dst == nullptr) return false;
 	if (!ReadScalar(*value_x0Dst, output.x0Dst, error)) { return false; }
-	const auto* value_y0Dst = FindRecordField(*record, "y0Dst", error);
+	const auto* value_y0Dst = FindRecordField(*record, "y0-dst", error);
 	if (value_y0Dst == nullptr) return false;
 	if (!ReadScalar(*value_y0Dst, output.y0Dst, error)) { return false; }
-	const auto* value_x1Dst = FindRecordField(*record, "x1Dst", error);
+	const auto* value_x1Dst = FindRecordField(*record, "x1-dst", error);
 	if (value_x1Dst == nullptr) return false;
 	if (!ReadScalar(*value_x1Dst, output.x1Dst, error)) { return false; }
-	const auto* value_y1Dst = FindRecordField(*record, "y1Dst", error);
+	const auto* value_y1Dst = FindRecordField(*record, "y1-dst", error);
 	if (value_y1Dst == nullptr) return false;
 	if (!ReadScalar(*value_y1Dst, output.y1Dst, error)) { return false; }
 	const auto* value_mask = FindRecordField(*record, "mask", error);
@@ -419,16 +419,16 @@ bool Read_GfxBlitFBOQuery(const WasmValue& input, GfxBlitFBOQuery& output, Nativ
 WasmValue Write_GfxBlitFBOQuery(const GfxBlitFBOQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("srcFBOID", WriteScalar(value.srcFBOID));
-	fields.emplace("dstFBOID", WriteScalar(value.dstFBOID));
-	fields.emplace("x0Src", WriteScalar(value.x0Src));
-	fields.emplace("y0Src", WriteScalar(value.y0Src));
-	fields.emplace("x1Src", WriteScalar(value.x1Src));
-	fields.emplace("y1Src", WriteScalar(value.y1Src));
-	fields.emplace("x0Dst", WriteScalar(value.x0Dst));
-	fields.emplace("y0Dst", WriteScalar(value.y0Dst));
-	fields.emplace("x1Dst", WriteScalar(value.x1Dst));
-	fields.emplace("y1Dst", WriteScalar(value.y1Dst));
+	fields.emplace("src-fboid", WriteScalar(value.srcFBOID));
+	fields.emplace("dst-fboid", WriteScalar(value.dstFBOID));
+	fields.emplace("x0-src", WriteScalar(value.x0Src));
+	fields.emplace("y0-src", WriteScalar(value.y0Src));
+	fields.emplace("x1-src", WriteScalar(value.x1Src));
+	fields.emplace("y1-src", WriteScalar(value.y1Src));
+	fields.emplace("x0-dst", WriteScalar(value.x0Dst));
+	fields.emplace("y0-dst", WriteScalar(value.y0Dst));
+	fields.emplace("x1-dst", WriteScalar(value.x1Dst));
+	fields.emplace("y1-dst", WriteScalar(value.y1Dst));
 	fields.emplace("mask", WriteScalar(value.mask));
 	fields.emplace("filter", WriteScalar(value.filter));
 	return WasmValue::Record(std::move(fields));
@@ -789,22 +789,22 @@ bool Read_GfxCreateShaderOptions(const WasmValue& input, GfxCreateShaderOptions&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_hasGeoInputType = FindRecordField(*record, "hasGeoInputType", error);
+	const auto* value_hasGeoInputType = FindRecordField(*record, "has-geo-input-type", error);
 	if (value_hasGeoInputType == nullptr) return false;
 	if (!ReadScalar(*value_hasGeoInputType, output.hasGeoInputType, error)) { return false; }
-	const auto* value_geoInputType = FindRecordField(*record, "geoInputType", error);
+	const auto* value_geoInputType = FindRecordField(*record, "geo-input-type", error);
 	if (value_geoInputType == nullptr) return false;
 	if (!ReadScalar(*value_geoInputType, output.geoInputType, error)) { return false; }
-	const auto* value_hasGeoOutputType = FindRecordField(*record, "hasGeoOutputType", error);
+	const auto* value_hasGeoOutputType = FindRecordField(*record, "has-geo-output-type", error);
 	if (value_hasGeoOutputType == nullptr) return false;
 	if (!ReadScalar(*value_hasGeoOutputType, output.hasGeoOutputType, error)) { return false; }
-	const auto* value_geoOutputType = FindRecordField(*record, "geoOutputType", error);
+	const auto* value_geoOutputType = FindRecordField(*record, "geo-output-type", error);
 	if (value_geoOutputType == nullptr) return false;
 	if (!ReadScalar(*value_geoOutputType, output.geoOutputType, error)) { return false; }
-	const auto* value_hasGeoOutputVerts = FindRecordField(*record, "hasGeoOutputVerts", error);
+	const auto* value_hasGeoOutputVerts = FindRecordField(*record, "has-geo-output-verts", error);
 	if (value_hasGeoOutputVerts == nullptr) return false;
 	if (!ReadScalar(*value_hasGeoOutputVerts, output.hasGeoOutputVerts, error)) { return false; }
-	const auto* value_geoOutputVerts = FindRecordField(*record, "geoOutputVerts", error);
+	const auto* value_geoOutputVerts = FindRecordField(*record, "geo-output-verts", error);
 	if (value_geoOutputVerts == nullptr) return false;
 	if (!ReadScalar(*value_geoOutputVerts, output.geoOutputVerts, error)) { return false; }
 	return true;
@@ -813,12 +813,12 @@ bool Read_GfxCreateShaderOptions(const WasmValue& input, GfxCreateShaderOptions&
 WasmValue Write_GfxCreateShaderOptions(const GfxCreateShaderOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("hasGeoInputType", WriteScalar(value.hasGeoInputType));
-	fields.emplace("geoInputType", WriteScalar(value.geoInputType));
-	fields.emplace("hasGeoOutputType", WriteScalar(value.hasGeoOutputType));
-	fields.emplace("geoOutputType", WriteScalar(value.geoOutputType));
-	fields.emplace("hasGeoOutputVerts", WriteScalar(value.hasGeoOutputVerts));
-	fields.emplace("geoOutputVerts", WriteScalar(value.geoOutputVerts));
+	fields.emplace("has-geo-input-type", WriteScalar(value.hasGeoInputType));
+	fields.emplace("geo-input-type", WriteScalar(value.geoInputType));
+	fields.emplace("has-geo-output-type", WriteScalar(value.hasGeoOutputType));
+	fields.emplace("geo-output-type", WriteScalar(value.geoOutputType));
+	fields.emplace("has-geo-output-verts", WriteScalar(value.hasGeoOutputVerts));
+	fields.emplace("geo-output-verts", WriteScalar(value.geoOutputVerts));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -885,10 +885,10 @@ bool Read_GfxCreateShaderResult(const WasmValue& input, GfxCreateShaderResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_shaderID = FindRecordField(*record, "shaderID", error);
+	const auto* value_shaderID = FindRecordField(*record, "shader-id", error);
 	if (value_shaderID == nullptr) return false;
 	if (!ReadScalar(*value_shaderID, output.shaderID, error)) { return false; }
-	const auto* value_glProgramID = FindRecordField(*record, "glProgramID", error);
+	const auto* value_glProgramID = FindRecordField(*record, "gl-program-id", error);
 	if (value_glProgramID == nullptr) return false;
 	if (!ReadScalar(*value_glProgramID, output.glProgramID, error)) { return false; }
 	return true;
@@ -897,8 +897,8 @@ bool Read_GfxCreateShaderResult(const WasmValue& input, GfxCreateShaderResult& o
 WasmValue Write_GfxCreateShaderResult(const GfxCreateShaderResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("shaderID", WriteScalar(value.shaderID));
-	fields.emplace("glProgramID", WriteScalar(value.glProgramID));
+	fields.emplace("shader-id", WriteScalar(value.shaderID));
+	fields.emplace("gl-program-id", WriteScalar(value.glProgramID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -912,7 +912,7 @@ bool Read_GfxCreateTextureAtlasQuery(const WasmValue& input, GfxCreateTextureAtl
 	const auto* value_ysize = FindRecordField(*record, "ysize", error);
 	if (value_ysize == nullptr) return false;
 	if (!ReadScalar(*value_ysize, output.ysize, error)) { return false; }
-	const auto* value_allocType = FindRecordField(*record, "allocType", error);
+	const auto* value_allocType = FindRecordField(*record, "alloc-type", error);
 	if (value_allocType == nullptr) return false;
 	if (!ReadScalar(*value_allocType, output.allocType, error)) { return false; }
 	return true;
@@ -923,7 +923,7 @@ WasmValue Write_GfxCreateTextureAtlasQuery(const GfxCreateTextureAtlasQuery& val
 	WasmValueRecord fields;
 	fields.emplace("xsize", WriteScalar(value.xsize));
 	fields.emplace("ysize", WriteScalar(value.ysize));
-	fields.emplace("allocType", WriteScalar(value.allocType));
+	fields.emplace("alloc-type", WriteScalar(value.allocType));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -963,7 +963,7 @@ bool Read_GfxDepthTestOptions(const WasmValue& input, GfxDepthTestOptions& outpu
 	const auto* value_enable = FindRecordField(*record, "enable", error);
 	if (value_enable == nullptr) return false;
 	if (!ReadScalar(*value_enable, output.enable, error)) { return false; }
-	const auto* value_setFunc = FindRecordField(*record, "setFunc", error);
+	const auto* value_setFunc = FindRecordField(*record, "set-func", error);
 	if (value_setFunc == nullptr) return false;
 	if (!ReadScalar(*value_setFunc, output.setFunc, error)) { return false; }
 	const auto* value_func = FindRecordField(*record, "func", error);
@@ -976,7 +976,7 @@ WasmValue Write_GfxDepthTestOptions(const GfxDepthTestOptions& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("enable", WriteScalar(value.enable));
-	fields.emplace("setFunc", WriteScalar(value.setFunc));
+	fields.emplace("set-func", WriteScalar(value.setFunc));
 	fields.emplace("func", WriteScalar(value.func));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1002,13 +1002,13 @@ bool Read_GfxDispatchComputeQuery(const WasmValue& input, GfxDispatchComputeQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_numGroupX = FindRecordField(*record, "numGroupX", error);
+	const auto* value_numGroupX = FindRecordField(*record, "num-group-x", error);
 	if (value_numGroupX == nullptr) return false;
 	if (!ReadScalar(*value_numGroupX, output.numGroupX, error)) { return false; }
-	const auto* value_numGroupY = FindRecordField(*record, "numGroupY", error);
+	const auto* value_numGroupY = FindRecordField(*record, "num-group-y", error);
 	if (value_numGroupY == nullptr) return false;
 	if (!ReadScalar(*value_numGroupY, output.numGroupY, error)) { return false; }
-	const auto* value_numGroupZ = FindRecordField(*record, "numGroupZ", error);
+	const auto* value_numGroupZ = FindRecordField(*record, "num-group-z", error);
 	if (value_numGroupZ == nullptr) return false;
 	if (!ReadScalar(*value_numGroupZ, output.numGroupZ, error)) { return false; }
 	const auto* value_barriers = FindRecordField(*record, "barriers", error);
@@ -1020,9 +1020,9 @@ bool Read_GfxDispatchComputeQuery(const WasmValue& input, GfxDispatchComputeQuer
 WasmValue Write_GfxDispatchComputeQuery(const GfxDispatchComputeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("numGroupX", WriteScalar(value.numGroupX));
-	fields.emplace("numGroupY", WriteScalar(value.numGroupY));
-	fields.emplace("numGroupZ", WriteScalar(value.numGroupZ));
+	fields.emplace("num-group-x", WriteScalar(value.numGroupX));
+	fields.emplace("num-group-y", WriteScalar(value.numGroupY));
+	fields.emplace("num-group-z", WriteScalar(value.numGroupZ));
 	fields.emplace("barriers", WriteScalar(value.barriers));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1031,13 +1031,13 @@ bool Read_GfxDrawListAtUnitQuery(const WasmValue& input, GfxDrawListAtUnitQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_listID = FindRecordField(*record, "listID", error);
+	const auto* value_listID = FindRecordField(*record, "list-id", error);
 	if (value_listID == nullptr) return false;
 	if (!ReadScalar(*value_listID, output.listID, error)) { return false; }
-	const auto* value_useMidPos = FindRecordField(*record, "useMidPos", error);
+	const auto* value_useMidPos = FindRecordField(*record, "use-mid-pos", error);
 	if (value_useMidPos == nullptr) return false;
 	if (!ReadScalar(*value_useMidPos, output.useMidPos, error)) { return false; }
 	const auto* value_scale = FindRecordField(*record, "scale", error);
@@ -1055,9 +1055,9 @@ bool Read_GfxDrawListAtUnitQuery(const WasmValue& input, GfxDrawListAtUnitQuery&
 WasmValue Write_GfxDrawListAtUnitQuery(const GfxDrawListAtUnitQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("listID", WriteScalar(value.listID));
-	fields.emplace("useMidPos", WriteScalar(value.useMidPos));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("list-id", WriteScalar(value.listID));
+	fields.emplace("use-mid-pos", WriteScalar(value.useMidPos));
 	fields.emplace("scale", Write_Float3(value.scale));
 	fields.emplace("degrees", WriteScalar(value.degrees));
 	fields.emplace("rot", Write_Float3(value.rot));
@@ -1068,7 +1068,7 @@ bool Read_GfxEmptyQuery(const WasmValue& input, GfxEmptyQuery& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -1077,7 +1077,7 @@ bool Read_GfxEmptyQuery(const WasmValue& input, GfxEmptyQuery& output, NativeCal
 WasmValue Write_GfxEmptyQuery(const GfxEmptyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1098,10 +1098,10 @@ bool Read_GfxEngineModelUniformDataSizeResult(const WasmValue& input, GfxEngineM
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sizeInElements = FindRecordField(*record, "sizeInElements", error);
+	const auto* value_sizeInElements = FindRecordField(*record, "size-in-elements", error);
 	if (value_sizeInElements == nullptr) return false;
 	if (!ReadScalar(*value_sizeInElements, output.sizeInElements, error)) { return false; }
-	const auto* value_sizeInBytesOnCPU = FindRecordField(*record, "sizeInBytesOnCPU", error);
+	const auto* value_sizeInBytesOnCPU = FindRecordField(*record, "size-in-bytes-on-cpu", error);
 	if (value_sizeInBytesOnCPU == nullptr) return false;
 	if (!ReadScalar(*value_sizeInBytesOnCPU, output.sizeInBytesOnCPU, error)) { return false; }
 	return true;
@@ -1110,8 +1110,8 @@ bool Read_GfxEngineModelUniformDataSizeResult(const WasmValue& input, GfxEngineM
 WasmValue Write_GfxEngineModelUniformDataSizeResult(const GfxEngineModelUniformDataSizeResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sizeInElements", WriteScalar(value.sizeInElements));
-	fields.emplace("sizeInBytesOnCPU", WriteScalar(value.sizeInBytesOnCPU));
+	fields.emplace("size-in-elements", WriteScalar(value.sizeInElements));
+	fields.emplace("size-in-bytes-on-cpu", WriteScalar(value.sizeInBytesOnCPU));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1171,21 +1171,21 @@ bool Read_GfxFBOAttachment(const WasmValue& input, GfxFBOAttachment& output, Nat
 	const auto* value_attachment = FindRecordField(*record, "attachment", error);
 	if (value_attachment == nullptr) return false;
 	if (!ReadScalar(*value_attachment, output.attachment, error)) { return false; }
-	const auto* value_textureName = FindRecordField(*record, "textureName", error);
+	const auto* value_textureName = FindRecordField(*record, "texture-name", error);
 	if (value_textureName == nullptr) return false;
 	auto& stored_string_output_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_output_textureName, error)) { return false; }
 	output.textureName = stored_string_output_textureName.c_str();
-	const auto* value_textureTarget = FindRecordField(*record, "textureTarget", error);
+	const auto* value_textureTarget = FindRecordField(*record, "texture-target", error);
 	if (value_textureTarget == nullptr) return false;
 	if (!ReadScalar(*value_textureTarget, output.textureTarget, error)) { return false; }
-	const auto* value_mipLevel = FindRecordField(*record, "mipLevel", error);
+	const auto* value_mipLevel = FindRecordField(*record, "mip-level", error);
 	if (value_mipLevel == nullptr) return false;
 	if (!ReadScalar(*value_mipLevel, output.mipLevel, error)) { return false; }
-	const auto* value_rboID = FindRecordField(*record, "rboID", error);
+	const auto* value_rboID = FindRecordField(*record, "rbo-id", error);
 	if (value_rboID == nullptr) return false;
 	if (!ReadScalar(*value_rboID, output.rboID, error)) { return false; }
-	const auto* value_useRBO = FindRecordField(*record, "useRBO", error);
+	const auto* value_useRBO = FindRecordField(*record, "use-rbo", error);
 	if (value_useRBO == nullptr) return false;
 	if (!ReadScalar(*value_useRBO, output.useRBO, error)) { return false; }
 	return true;
@@ -1195,11 +1195,11 @@ WasmValue Write_GfxFBOAttachment(const GfxFBOAttachment& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("attachment", WriteScalar(value.attachment));
-	fields.emplace("textureName", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
-	fields.emplace("textureTarget", WriteScalar(value.textureTarget));
-	fields.emplace("mipLevel", WriteScalar(value.mipLevel));
-	fields.emplace("rboID", WriteScalar(value.rboID));
-	fields.emplace("useRBO", WriteScalar(value.useRBO));
+	fields.emplace("texture-name", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
+	fields.emplace("texture-target", WriteScalar(value.textureTarget));
+	fields.emplace("mip-level", WriteScalar(value.mipLevel));
+	fields.emplace("rbo-id", WriteScalar(value.rboID));
+	fields.emplace("use-rbo", WriteScalar(value.useRBO));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1207,27 +1207,27 @@ bool Read_GfxFBOAttachmentQuery(const WasmValue& input, GfxFBOAttachmentQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fboID = FindRecordField(*record, "fboID", error);
+	const auto* value_fboID = FindRecordField(*record, "fbo-id", error);
 	if (value_fboID == nullptr) return false;
 	if (!ReadScalar(*value_fboID, output.fboID, error)) { return false; }
 	const auto* value_attachment = FindRecordField(*record, "attachment", error);
 	if (value_attachment == nullptr) return false;
 	if (!ReadScalar(*value_attachment, output.attachment, error)) { return false; }
-	const auto* value_textureName = FindRecordField(*record, "textureName", error);
+	const auto* value_textureName = FindRecordField(*record, "texture-name", error);
 	if (value_textureName == nullptr) return false;
 	auto& stored_string_output_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_output_textureName, error)) { return false; }
 	output.textureName = stored_string_output_textureName.c_str();
-	const auto* value_textureTarget = FindRecordField(*record, "textureTarget", error);
+	const auto* value_textureTarget = FindRecordField(*record, "texture-target", error);
 	if (value_textureTarget == nullptr) return false;
 	if (!ReadScalar(*value_textureTarget, output.textureTarget, error)) { return false; }
-	const auto* value_mipLevel = FindRecordField(*record, "mipLevel", error);
+	const auto* value_mipLevel = FindRecordField(*record, "mip-level", error);
 	if (value_mipLevel == nullptr) return false;
 	if (!ReadScalar(*value_mipLevel, output.mipLevel, error)) { return false; }
-	const auto* value_rboID = FindRecordField(*record, "rboID", error);
+	const auto* value_rboID = FindRecordField(*record, "rbo-id", error);
 	if (value_rboID == nullptr) return false;
 	if (!ReadScalar(*value_rboID, output.rboID, error)) { return false; }
-	const auto* value_useRBO = FindRecordField(*record, "useRBO", error);
+	const auto* value_useRBO = FindRecordField(*record, "use-rbo", error);
 	if (value_useRBO == nullptr) return false;
 	if (!ReadScalar(*value_useRBO, output.useRBO, error)) { return false; }
 	return true;
@@ -1236,13 +1236,13 @@ bool Read_GfxFBOAttachmentQuery(const WasmValue& input, GfxFBOAttachmentQuery& o
 WasmValue Write_GfxFBOAttachmentQuery(const GfxFBOAttachmentQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fboID", WriteScalar(value.fboID));
+	fields.emplace("fbo-id", WriteScalar(value.fboID));
 	fields.emplace("attachment", WriteScalar(value.attachment));
-	fields.emplace("textureName", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
-	fields.emplace("textureTarget", WriteScalar(value.textureTarget));
-	fields.emplace("mipLevel", WriteScalar(value.mipLevel));
-	fields.emplace("rboID", WriteScalar(value.rboID));
-	fields.emplace("useRBO", WriteScalar(value.useRBO));
+	fields.emplace("texture-name", WasmValue::String((value.textureName == nullptr) ? std::string{} : std::string(value.textureName)));
+	fields.emplace("texture-target", WriteScalar(value.textureTarget));
+	fields.emplace("mip-level", WriteScalar(value.mipLevel));
+	fields.emplace("rbo-id", WriteScalar(value.rboID));
+	fields.emplace("use-rbo", WriteScalar(value.useRBO));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1266,7 +1266,7 @@ bool Read_GfxFBOCreateQuery(const WasmValue& input, GfxFBOCreateQuery& output, N
 	}
 	output.attachments = native_attachments.data();
 	if (!AssignCount(list_attachments->size(), output.attachmentCount, error)) { return false; }
-	const auto* value_drawBuffers = FindRecordField(*record, "drawBuffers", error);
+	const auto* value_drawBuffers = FindRecordField(*record, "draw-buffers", error);
 	if (value_drawBuffers == nullptr) return false;
 	const auto* list_drawBuffers = std::get_if<WasmValueList>(&(*value_drawBuffers).storage);
 	if (list_drawBuffers == nullptr) { error = "Wasm argument is not a list"; return false; }
@@ -1279,7 +1279,7 @@ bool Read_GfxFBOCreateQuery(const WasmValue& input, GfxFBOCreateQuery& output, N
 	}
 	output.drawBuffers = native_drawBuffers.data();
 	if (!AssignCount(list_drawBuffers->size(), output.drawBufferCount, error)) { return false; }
-	const auto* value_readBuffer = FindRecordField(*record, "readBuffer", error);
+	const auto* value_readBuffer = FindRecordField(*record, "read-buffer", error);
 	if (value_readBuffer == nullptr) return false;
 	if (!ReadScalar(*value_readBuffer, output.readBuffer, error)) { return false; }
 	return true;
@@ -1290,8 +1290,8 @@ WasmValue Write_GfxFBOCreateQuery(const GfxFBOCreateQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("target", WriteScalar(value.target));
 	fields.emplace("attachments", WriteNativeList(value.attachments, value.attachmentCount, [](const auto& value) { return Write_GfxFBOAttachment(value); }));
-	fields.emplace("drawBuffers", WriteNativeList(value.drawBuffers, value.drawBufferCount, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("readBuffer", WriteScalar(value.readBuffer));
+	fields.emplace("draw-buffers", WriteNativeList(value.drawBuffers, value.drawBufferCount, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("read-buffer", WriteScalar(value.readBuffer));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1299,7 +1299,7 @@ bool Read_GfxFBODrawBuffersQuery(const WasmValue& input, GfxFBODrawBuffersQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fboID = FindRecordField(*record, "fboID", error);
+	const auto* value_fboID = FindRecordField(*record, "fbo-id", error);
 	if (value_fboID == nullptr) return false;
 	if (!ReadScalar(*value_fboID, output.fboID, error)) { return false; }
 	const auto* value_buffers = FindRecordField(*record, "buffers", error);
@@ -1321,7 +1321,7 @@ bool Read_GfxFBODrawBuffersQuery(const WasmValue& input, GfxFBODrawBuffersQuery&
 WasmValue Write_GfxFBODrawBuffersQuery(const GfxFBODrawBuffersQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fboID", WriteScalar(value.fboID));
+	fields.emplace("fbo-id", WriteScalar(value.fboID));
 	fields.emplace("buffers", WriteNativeList(value.buffers, value.bufferCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1330,7 +1330,7 @@ bool Read_GfxFBOQuery(const WasmValue& input, GfxFBOQuery& output, NativeCallSto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fboID = FindRecordField(*record, "fboID", error);
+	const auto* value_fboID = FindRecordField(*record, "fbo-id", error);
 	if (value_fboID == nullptr) return false;
 	if (!ReadScalar(*value_fboID, output.fboID, error)) { return false; }
 	const auto* value_target = FindRecordField(*record, "target", error);
@@ -1342,7 +1342,7 @@ bool Read_GfxFBOQuery(const WasmValue& input, GfxFBOQuery& output, NativeCallSto
 WasmValue Write_GfxFBOQuery(const GfxFBOQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fboID", WriteScalar(value.fboID));
+	fields.emplace("fbo-id", WriteScalar(value.fboID));
 	fields.emplace("target", WriteScalar(value.target));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1351,7 +1351,7 @@ bool Read_GfxFBOReadBufferQuery(const WasmValue& input, GfxFBOReadBufferQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fboID = FindRecordField(*record, "fboID", error);
+	const auto* value_fboID = FindRecordField(*record, "fbo-id", error);
 	if (value_fboID == nullptr) return false;
 	if (!ReadScalar(*value_fboID, output.fboID, error)) { return false; }
 	const auto* value_buffer = FindRecordField(*record, "buffer", error);
@@ -1363,7 +1363,7 @@ bool Read_GfxFBOReadBufferQuery(const WasmValue& input, GfxFBOReadBufferQuery& o
 WasmValue Write_GfxFBOReadBufferQuery(const GfxFBOReadBufferQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fboID", WriteScalar(value.fboID));
+	fields.emplace("fbo-id", WriteScalar(value.fboID));
 	fields.emplace("buffer", WriteScalar(value.buffer));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1372,10 +1372,10 @@ bool Read_GfxFBOResult(const WasmValue& input, GfxFBOResult& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fboID = FindRecordField(*record, "fboID", error);
+	const auto* value_fboID = FindRecordField(*record, "fbo-id", error);
 	if (value_fboID == nullptr) return false;
 	if (!ReadScalar(*value_fboID, output.fboID, error)) { return false; }
-	const auto* value_rawID = FindRecordField(*record, "rawID", error);
+	const auto* value_rawID = FindRecordField(*record, "raw-id", error);
 	if (value_rawID == nullptr) return false;
 	if (!ReadScalar(*value_rawID, output.rawID, error)) { return false; }
 	return true;
@@ -1384,8 +1384,8 @@ bool Read_GfxFBOResult(const WasmValue& input, GfxFBOResult& output, NativeCallS
 WasmValue Write_GfxFBOResult(const GfxFBOResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fboID", WriteScalar(value.fboID));
-	fields.emplace("rawID", WriteScalar(value.rawID));
+	fields.emplace("fbo-id", WriteScalar(value.fboID));
+	fields.emplace("raw-id", WriteScalar(value.rawID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1414,13 +1414,13 @@ bool Read_GfxFeatureDrawOptions(const WasmValue& input, GfxFeatureDrawOptions& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_applyTransform = FindRecordField(*record, "applyTransform", error);
+	const auto* value_applyTransform = FindRecordField(*record, "apply-transform", error);
 	if (value_applyTransform == nullptr) return false;
 	if (!ReadScalar(*value_applyTransform, output.applyTransform, error)) { return false; }
-	const auto* value_doRawDraw = FindRecordField(*record, "doRawDraw", error);
+	const auto* value_doRawDraw = FindRecordField(*record, "do-raw-draw", error);
 	if (value_doRawDraw == nullptr) return false;
 	if (!ReadScalar(*value_doRawDraw, output.doRawDraw, error)) { return false; }
-	const auto* value_noLuaCall = FindRecordField(*record, "noLuaCall", error);
+	const auto* value_noLuaCall = FindRecordField(*record, "no-lua-call", error);
 	if (value_noLuaCall == nullptr) return false;
 	if (!ReadScalar(*value_noLuaCall, output.noLuaCall, error)) { return false; }
 	return true;
@@ -1429,9 +1429,9 @@ bool Read_GfxFeatureDrawOptions(const WasmValue& input, GfxFeatureDrawOptions& o
 WasmValue Write_GfxFeatureDrawOptions(const GfxFeatureDrawOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("applyTransform", WriteScalar(value.applyTransform));
-	fields.emplace("doRawDraw", WriteScalar(value.doRawDraw));
-	fields.emplace("noLuaCall", WriteScalar(value.noLuaCall));
+	fields.emplace("apply-transform", WriteScalar(value.applyTransform));
+	fields.emplace("do-raw-draw", WriteScalar(value.doRawDraw));
+	fields.emplace("no-lua-call", WriteScalar(value.noLuaCall));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1439,7 +1439,7 @@ bool Read_GfxFeatureDrawQuery(const WasmValue& input, GfxFeatureDrawQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_featureID = FindRecordField(*record, "featureID", error);
+	const auto* value_featureID = FindRecordField(*record, "feature-id", error);
 	if (value_featureID == nullptr) return false;
 	if (!ReadScalar(*value_featureID, output.featureID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -1451,7 +1451,7 @@ bool Read_GfxFeatureDrawQuery(const WasmValue& input, GfxFeatureDrawQuery& outpu
 WasmValue Write_GfxFeatureDrawQuery(const GfxFeatureDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("featureID", WriteScalar(value.featureID));
+	fields.emplace("feature-id", WriteScalar(value.featureID));
 	fields.emplace("options", Write_GfxFeatureDrawOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1486,7 +1486,7 @@ bool Read_GfxFixedStateResult(const WasmValue& input, GfxFixedStateResult& outpu
 	for (std::size_t index = 0; index < 8u; ++index) {
 		if (!ReadScalar((*array_values_bools)[index], output.bools[index], error)) { return false; }
 	}
-	const auto* value_boolCount = FindRecordField(*record, "boolCount", error);
+	const auto* value_boolCount = FindRecordField(*record, "bool-count", error);
 	if (value_boolCount == nullptr) return false;
 	if (!ReadScalar(*value_boolCount, output.boolCount, error)) { return false; }
 	const auto* value_ints = FindRecordField(*record, "ints", error);
@@ -1496,7 +1496,7 @@ bool Read_GfxFixedStateResult(const WasmValue& input, GfxFixedStateResult& outpu
 	for (std::size_t index = 0; index < 16u; ++index) {
 		if (!ReadScalar((*array_values_ints)[index], output.ints[index], error)) { return false; }
 	}
-	const auto* value_intCount = FindRecordField(*record, "intCount", error);
+	const auto* value_intCount = FindRecordField(*record, "int-count", error);
 	if (value_intCount == nullptr) return false;
 	if (!ReadScalar(*value_intCount, output.intCount, error)) { return false; }
 	const auto* value_floats = FindRecordField(*record, "floats", error);
@@ -1506,7 +1506,7 @@ bool Read_GfxFixedStateResult(const WasmValue& input, GfxFixedStateResult& outpu
 	for (std::size_t index = 0; index < 16u; ++index) {
 		if (!ReadScalar((*array_values_floats)[index], output.floats[index], error)) { return false; }
 	}
-	const auto* value_floatCount = FindRecordField(*record, "floatCount", error);
+	const auto* value_floatCount = FindRecordField(*record, "float-count", error);
 	if (value_floatCount == nullptr) return false;
 	if (!ReadScalar(*value_floatCount, output.floatCount, error)) { return false; }
 	return true;
@@ -1516,11 +1516,11 @@ WasmValue Write_GfxFixedStateResult(const GfxFixedStateResult& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("bools", WriteNativeArray(value.bools, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("boolCount", WriteScalar(value.boolCount));
+	fields.emplace("bool-count", WriteScalar(value.boolCount));
 	fields.emplace("ints", WriteNativeArray(value.ints, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("intCount", WriteScalar(value.intCount));
+	fields.emplace("int-count", WriteScalar(value.intCount));
 	fields.emplace("floats", WriteNativeArray(value.floats, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("floatCount", WriteScalar(value.floatCount));
+	fields.emplace("float-count", WriteScalar(value.floatCount));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1562,7 +1562,7 @@ bool Read_GfxFontAutoOutlineColorQuery(const WasmValue& input, GfxFontAutoOutlin
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
 	const auto* value_enable = FindRecordField(*record, "enable", error);
@@ -1574,7 +1574,7 @@ bool Read_GfxFontAutoOutlineColorQuery(const WasmValue& input, GfxFontAutoOutlin
 WasmValue Write_GfxFontAutoOutlineColorQuery(const GfxFontAutoOutlineColorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
+	fields.emplace("font-id", WriteScalar(value.fontID));
 	fields.emplace("enable", WriteScalar(value.enable));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1583,10 +1583,10 @@ bool Read_GfxFontBeginQuery(const WasmValue& input, GfxFontBeginQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
-	const auto* value_userDefinedBlending = FindRecordField(*record, "userDefinedBlending", error);
+	const auto* value_userDefinedBlending = FindRecordField(*record, "user-defined-blending", error);
 	if (value_userDefinedBlending == nullptr) return false;
 	if (!ReadScalar(*value_userDefinedBlending, output.userDefinedBlending, error)) { return false; }
 	return true;
@@ -1595,8 +1595,8 @@ bool Read_GfxFontBeginQuery(const WasmValue& input, GfxFontBeginQuery& output, N
 WasmValue Write_GfxFontBeginQuery(const GfxFontBeginQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
-	fields.emplace("userDefinedBlending", WriteScalar(value.userDefinedBlending));
+	fields.emplace("font-id", WriteScalar(value.fontID));
+	fields.emplace("user-defined-blending", WriteScalar(value.userDefinedBlending));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1604,7 +1604,7 @@ bool Read_GfxFontColorQuery(const WasmValue& input, GfxFontColorQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
 	const auto* value_r = FindRecordField(*record, "r", error);
@@ -1625,7 +1625,7 @@ bool Read_GfxFontColorQuery(const WasmValue& input, GfxFontColorQuery& output, N
 WasmValue Write_GfxFontColorQuery(const GfxFontColorQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
+	fields.emplace("font-id", WriteScalar(value.fontID));
 	fields.emplace("r", WriteScalar(value.r));
 	fields.emplace("g", WriteScalar(value.g));
 	fields.emplace("b", WriteScalar(value.b));
@@ -1655,22 +1655,22 @@ bool Read_GfxFontInfoResult(const WasmValue& input, GfxFontInfoResult& output, N
 	const auto* value_size = FindRecordField(*record, "size", error);
 	if (value_size == nullptr) return false;
 	if (!ReadScalar(*value_size, output.size, error)) { return false; }
-	const auto* value_lineHeight = FindRecordField(*record, "lineHeight", error);
+	const auto* value_lineHeight = FindRecordField(*record, "line-height", error);
 	if (value_lineHeight == nullptr) return false;
 	if (!ReadScalar(*value_lineHeight, output.lineHeight, error)) { return false; }
 	const auto* value_descender = FindRecordField(*record, "descender", error);
 	if (value_descender == nullptr) return false;
 	if (!ReadScalar(*value_descender, output.descender, error)) { return false; }
-	const auto* value_outlineWidth = FindRecordField(*record, "outlineWidth", error);
+	const auto* value_outlineWidth = FindRecordField(*record, "outline-width", error);
 	if (value_outlineWidth == nullptr) return false;
 	if (!ReadScalar(*value_outlineWidth, output.outlineWidth, error)) { return false; }
-	const auto* value_outlineWeight = FindRecordField(*record, "outlineWeight", error);
+	const auto* value_outlineWeight = FindRecordField(*record, "outline-weight", error);
 	if (value_outlineWeight == nullptr) return false;
 	if (!ReadScalar(*value_outlineWeight, output.outlineWeight, error)) { return false; }
-	const auto* value_textureWidth = FindRecordField(*record, "textureWidth", error);
+	const auto* value_textureWidth = FindRecordField(*record, "texture-width", error);
 	if (value_textureWidth == nullptr) return false;
 	if (!ReadScalar(*value_textureWidth, output.textureWidth, error)) { return false; }
-	const auto* value_textureHeight = FindRecordField(*record, "textureHeight", error);
+	const auto* value_textureHeight = FindRecordField(*record, "texture-height", error);
 	if (value_textureHeight == nullptr) return false;
 	if (!ReadScalar(*value_textureHeight, output.textureHeight, error)) { return false; }
 	return true;
@@ -1683,12 +1683,12 @@ WasmValue Write_GfxFontInfoResult(const GfxFontInfoResult& value)
 	fields.emplace("family", WasmValue::String((value.family == nullptr) ? std::string{} : std::string(value.family)));
 	fields.emplace("style", WasmValue::String((value.style == nullptr) ? std::string{} : std::string(value.style)));
 	fields.emplace("size", WriteScalar(value.size));
-	fields.emplace("lineHeight", WriteScalar(value.lineHeight));
+	fields.emplace("line-height", WriteScalar(value.lineHeight));
 	fields.emplace("descender", WriteScalar(value.descender));
-	fields.emplace("outlineWidth", WriteScalar(value.outlineWidth));
-	fields.emplace("outlineWeight", WriteScalar(value.outlineWeight));
-	fields.emplace("textureWidth", WriteScalar(value.textureWidth));
-	fields.emplace("textureHeight", WriteScalar(value.textureHeight));
+	fields.emplace("outline-width", WriteScalar(value.outlineWidth));
+	fields.emplace("outline-weight", WriteScalar(value.outlineWeight));
+	fields.emplace("texture-width", WriteScalar(value.textureWidth));
+	fields.emplace("texture-height", WriteScalar(value.textureHeight));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1696,7 +1696,7 @@ bool Read_GfxFontQuery(const WasmValue& input, GfxFontQuery& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
 	return true;
@@ -1705,7 +1705,7 @@ bool Read_GfxFontQuery(const WasmValue& input, GfxFontQuery& output, NativeCallS
 WasmValue Write_GfxFontQuery(const GfxFontQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
+	fields.emplace("font-id", WriteScalar(value.fontID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1713,7 +1713,7 @@ bool Read_GfxFontResult(const WasmValue& input, GfxFontResult& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
 	return true;
@@ -1722,7 +1722,7 @@ bool Read_GfxFontResult(const WasmValue& input, GfxFontResult& output, NativeCal
 WasmValue Write_GfxFontResult(const GfxFontResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
+	fields.emplace("font-id", WriteScalar(value.fontID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1730,10 +1730,10 @@ bool Read_GfxFontSubmitBufferedOptions(const WasmValue& input, GfxFontSubmitBuff
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_noBillboarding = FindRecordField(*record, "noBillboarding", error);
+	const auto* value_noBillboarding = FindRecordField(*record, "no-billboarding", error);
 	if (value_noBillboarding == nullptr) return false;
 	if (!ReadScalar(*value_noBillboarding, output.noBillboarding, error)) { return false; }
-	const auto* value_userDefinedBlending = FindRecordField(*record, "userDefinedBlending", error);
+	const auto* value_userDefinedBlending = FindRecordField(*record, "user-defined-blending", error);
 	if (value_userDefinedBlending == nullptr) return false;
 	if (!ReadScalar(*value_userDefinedBlending, output.userDefinedBlending, error)) { return false; }
 	return true;
@@ -1742,8 +1742,8 @@ bool Read_GfxFontSubmitBufferedOptions(const WasmValue& input, GfxFontSubmitBuff
 WasmValue Write_GfxFontSubmitBufferedOptions(const GfxFontSubmitBufferedOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("noBillboarding", WriteScalar(value.noBillboarding));
-	fields.emplace("userDefinedBlending", WriteScalar(value.userDefinedBlending));
+	fields.emplace("no-billboarding", WriteScalar(value.noBillboarding));
+	fields.emplace("user-defined-blending", WriteScalar(value.userDefinedBlending));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1751,7 +1751,7 @@ bool Read_GfxFontSubmitBufferedQuery(const WasmValue& input, GfxFontSubmitBuffer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -1763,7 +1763,7 @@ bool Read_GfxFontSubmitBufferedQuery(const WasmValue& input, GfxFontSubmitBuffer
 WasmValue Write_GfxFontSubmitBufferedQuery(const GfxFontSubmitBufferedQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
+	fields.emplace("font-id", WriteScalar(value.fontID));
 	fields.emplace("options", Write_GfxFontSubmitBufferedOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1772,7 +1772,7 @@ bool Read_GfxFontTextQuery(const WasmValue& input, GfxFontTextQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
 	const auto* value_text = FindRecordField(*record, "text", error);
@@ -1800,7 +1800,7 @@ bool Read_GfxFontTextQuery(const WasmValue& input, GfxFontTextQuery& output, Nat
 WasmValue Write_GfxFontTextQuery(const GfxFontTextQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
+	fields.emplace("font-id", WriteScalar(value.fontID));
 	fields.emplace("text", WasmValue::String((value.text == nullptr) ? std::string{} : std::string(value.text)));
 	fields.emplace("x", WriteScalar(value.x));
 	fields.emplace("y", WriteScalar(value.y));
@@ -1813,7 +1813,7 @@ bool Read_GfxFontWorldTextQuery(const WasmValue& input, GfxFontWorldTextQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
 	const auto* value_text = FindRecordField(*record, "text", error);
@@ -1838,7 +1838,7 @@ bool Read_GfxFontWorldTextQuery(const WasmValue& input, GfxFontWorldTextQuery& o
 WasmValue Write_GfxFontWorldTextQuery(const GfxFontWorldTextQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
+	fields.emplace("font-id", WriteScalar(value.fontID));
 	fields.emplace("text", WasmValue::String((value.text == nullptr) ? std::string{} : std::string(value.text)));
 	fields.emplace("pos", Write_Float3(value.pos));
 	fields.emplace("size", WriteScalar(value.size));
@@ -1850,7 +1850,7 @@ bool Read_GfxFontWrapTextQuery(const WasmValue& input, GfxFontWrapTextQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fontID = FindRecordField(*record, "fontID", error);
+	const auto* value_fontID = FindRecordField(*record, "font-id", error);
 	if (value_fontID == nullptr) return false;
 	if (!ReadScalar(*value_fontID, output.fontID, error)) { return false; }
 	const auto* value_text = FindRecordField(*record, "text", error);
@@ -1858,10 +1858,10 @@ bool Read_GfxFontWrapTextQuery(const WasmValue& input, GfxFontWrapTextQuery& out
 	auto& stored_string_output_text = storage.Make<std::string>();
 	if (!ReadString(*value_text, stored_string_output_text, error)) { return false; }
 	output.text = stored_string_output_text.c_str();
-	const auto* value_maxWidth = FindRecordField(*record, "maxWidth", error);
+	const auto* value_maxWidth = FindRecordField(*record, "max-width", error);
 	if (value_maxWidth == nullptr) return false;
 	if (!ReadScalar(*value_maxWidth, output.maxWidth, error)) { return false; }
-	const auto* value_maxHeight = FindRecordField(*record, "maxHeight", error);
+	const auto* value_maxHeight = FindRecordField(*record, "max-height", error);
 	if (value_maxHeight == nullptr) return false;
 	if (!ReadScalar(*value_maxHeight, output.maxHeight, error)) { return false; }
 	const auto* value_size = FindRecordField(*record, "size", error);
@@ -1873,10 +1873,10 @@ bool Read_GfxFontWrapTextQuery(const WasmValue& input, GfxFontWrapTextQuery& out
 WasmValue Write_GfxFontWrapTextQuery(const GfxFontWrapTextQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fontID", WriteScalar(value.fontID));
+	fields.emplace("font-id", WriteScalar(value.fontID));
 	fields.emplace("text", WasmValue::String((value.text == nullptr) ? std::string{} : std::string(value.text)));
-	fields.emplace("maxWidth", WriteScalar(value.maxWidth));
-	fields.emplace("maxHeight", WriteScalar(value.maxHeight));
+	fields.emplace("max-width", WriteScalar(value.maxWidth));
+	fields.emplace("max-height", WriteScalar(value.maxHeight));
 	fields.emplace("size", WriteScalar(value.size));
 	return WasmValue::Record(std::move(fields));
 }
@@ -1920,10 +1920,10 @@ bool Read_GfxFrustumQuery(const WasmValue& input, GfxFrustumQuery& output, Nativ
 	const auto* value_top = FindRecordField(*record, "top", error);
 	if (value_top == nullptr) return false;
 	if (!ReadScalar(*value_top, output.top, error)) { return false; }
-	const auto* value_nearVal = FindRecordField(*record, "nearVal", error);
+	const auto* value_nearVal = FindRecordField(*record, "near-val", error);
 	if (value_nearVal == nullptr) return false;
 	if (!ReadScalar(*value_nearVal, output.nearVal, error)) { return false; }
-	const auto* value_farVal = FindRecordField(*record, "farVal", error);
+	const auto* value_farVal = FindRecordField(*record, "far-val", error);
 	if (value_farVal == nullptr) return false;
 	if (!ReadScalar(*value_farVal, output.farVal, error)) { return false; }
 	return true;
@@ -1936,8 +1936,8 @@ WasmValue Write_GfxFrustumQuery(const GfxFrustumQuery& value)
 	fields.emplace("right", WriteScalar(value.right));
 	fields.emplace("bottom", WriteScalar(value.bottom));
 	fields.emplace("top", WriteScalar(value.top));
-	fields.emplace("nearVal", WriteScalar(value.nearVal));
-	fields.emplace("farVal", WriteScalar(value.farVal));
+	fields.emplace("near-val", WriteScalar(value.nearVal));
+	fields.emplace("far-val", WriteScalar(value.farVal));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -1945,7 +1945,7 @@ bool Read_GfxGeometryShaderParameterQuery(const WasmValue& input, GfxGeometrySha
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_shaderID = FindRecordField(*record, "shaderID", error);
+	const auto* value_shaderID = FindRecordField(*record, "shader-id", error);
 	if (value_shaderID == nullptr) return false;
 	if (!ReadScalar(*value_shaderID, output.shaderID, error)) { return false; }
 	const auto* value_param = FindRecordField(*record, "param", error);
@@ -1960,7 +1960,7 @@ bool Read_GfxGeometryShaderParameterQuery(const WasmValue& input, GfxGeometrySha
 WasmValue Write_GfxGeometryShaderParameterQuery(const GfxGeometryShaderParameterQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("shaderID", WriteScalar(value.shaderID));
+	fields.emplace("shader-id", WriteScalar(value.shaderID));
 	fields.emplace("param", WriteScalar(value.param));
 	fields.emplace("value", WriteScalar(value.value));
 	return WasmValue::Record(std::move(fields));
@@ -2011,7 +2011,7 @@ bool Read_GfxGetNumberQuery(const WasmValue& input, GfxGetNumberQuery& output, N
 	const auto* value_pname = FindRecordField(*record, "pname", error);
 	if (value_pname == nullptr) return false;
 	if (!ReadScalar(*value_pname, output.pname, error)) { return false; }
-	const auto* value_maxValues = FindRecordField(*record, "maxValues", error);
+	const auto* value_maxValues = FindRecordField(*record, "max-values", error);
 	if (value_maxValues == nullptr) return false;
 	if (!ReadScalar(*value_maxValues, output.maxValues, error)) { return false; }
 	return true;
@@ -2021,7 +2021,7 @@ WasmValue Write_GfxGetNumberQuery(const GfxGetNumberQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("pname", WriteScalar(value.pname));
-	fields.emplace("maxValues", WriteScalar(value.maxValues));
+	fields.emplace("max-values", WriteScalar(value.maxValues));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2089,7 +2089,7 @@ bool Read_GfxGroundCircleQuery(const WasmValue& input, GfxGroundCircleQuery& out
 	const auto* value_gravity = FindRecordField(*record, "gravity", error);
 	if (value_gravity == nullptr) return false;
 	if (!ReadScalar(*value_gravity, output.gravity, error)) { return false; }
-	const auto* value_weaponDefID = FindRecordField(*record, "weaponDefID", error);
+	const auto* value_weaponDefID = FindRecordField(*record, "weapon-def-id", error);
 	if (value_weaponDefID == nullptr) return false;
 	if (!ReadScalar(*value_weaponDefID, output.weaponDefID, error)) { return false; }
 	return true;
@@ -2104,7 +2104,7 @@ WasmValue Write_GfxGroundCircleQuery(const GfxGroundCircleQuery& value)
 	fields.emplace("ballistic", WriteScalar(value.ballistic));
 	fields.emplace("slope", WriteScalar(value.slope));
 	fields.emplace("gravity", WriteScalar(value.gravity));
-	fields.emplace("weaponDefID", WriteScalar(value.weaponDefID));
+	fields.emplace("weapon-def-id", WriteScalar(value.weaponDefID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2124,7 +2124,7 @@ bool Read_GfxGroundQuadQuery(const WasmValue& input, GfxGroundQuadQuery& output,
 	const auto* value_z1 = FindRecordField(*record, "z1", error);
 	if (value_z1 == nullptr) return false;
 	if (!ReadScalar(*value_z1, output.z1, error)) { return false; }
-	const auto* value_useTexCoords = FindRecordField(*record, "useTexCoords", error);
+	const auto* value_useTexCoords = FindRecordField(*record, "use-tex-coords", error);
 	if (value_useTexCoords == nullptr) return false;
 	if (!ReadScalar(*value_useTexCoords, output.useTexCoords, error)) { return false; }
 	const auto* value_tu0 = FindRecordField(*record, "tu0", error);
@@ -2149,7 +2149,7 @@ WasmValue Write_GfxGroundQuadQuery(const GfxGroundQuadQuery& value)
 	fields.emplace("z0", WriteScalar(value.z0));
 	fields.emplace("x1", WriteScalar(value.x1));
 	fields.emplace("z1", WriteScalar(value.z1));
-	fields.emplace("useTexCoords", WriteScalar(value.useTexCoords));
+	fields.emplace("use-tex-coords", WriteScalar(value.useTexCoords));
 	fields.emplace("tu0", WriteScalar(value.tu0));
 	fields.emplace("tv0", WriteScalar(value.tv0));
 	fields.emplace("tu1", WriteScalar(value.tu1));
@@ -2195,7 +2195,7 @@ bool Read_GfxLightOptions(const WasmValue& input, GfxLightOptions& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_setState = FindRecordField(*record, "setState", error);
+	const auto* value_setState = FindRecordField(*record, "set-state", error);
 	if (value_setState == nullptr) return false;
 	if (!ReadScalar(*value_setState, output.setState, error)) { return false; }
 	const auto* value_state = FindRecordField(*record, "state", error);
@@ -2207,7 +2207,7 @@ bool Read_GfxLightOptions(const WasmValue& input, GfxLightOptions& output, Nativ
 WasmValue Write_GfxLightOptions(const GfxLightOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("setState", WriteScalar(value.setState));
+	fields.emplace("set-state", WriteScalar(value.setState));
 	fields.emplace("state", WriteScalar(value.state));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2282,10 +2282,10 @@ bool Read_GfxLoadFontQuery(const WasmValue& input, GfxLoadFontQuery& output, Nat
 	const auto* value_size = FindRecordField(*record, "size", error);
 	if (value_size == nullptr) return false;
 	if (!ReadScalar(*value_size, output.size, error)) { return false; }
-	const auto* value_outlineWidth = FindRecordField(*record, "outlineWidth", error);
+	const auto* value_outlineWidth = FindRecordField(*record, "outline-width", error);
 	if (value_outlineWidth == nullptr) return false;
 	if (!ReadScalar(*value_outlineWidth, output.outlineWidth, error)) { return false; }
-	const auto* value_outlineWeight = FindRecordField(*record, "outlineWeight", error);
+	const auto* value_outlineWeight = FindRecordField(*record, "outline-weight", error);
 	if (value_outlineWeight == nullptr) return false;
 	if (!ReadScalar(*value_outlineWeight, output.outlineWeight, error)) { return false; }
 	return true;
@@ -2296,8 +2296,8 @@ WasmValue Write_GfxLoadFontQuery(const GfxLoadFontQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("path", WasmValue::String((value.path == nullptr) ? std::string{} : std::string(value.path)));
 	fields.emplace("size", WriteScalar(value.size));
-	fields.emplace("outlineWidth", WriteScalar(value.outlineWidth));
-	fields.emplace("outlineWeight", WriteScalar(value.outlineWeight));
+	fields.emplace("outline-width", WriteScalar(value.outlineWidth));
+	fields.emplace("outline-weight", WriteScalar(value.outlineWeight));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2439,7 +2439,7 @@ bool Read_GfxMultiTexCoordQuery(const WasmValue& input, GfxMultiTexCoordQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texNum = FindRecordField(*record, "texNum", error);
+	const auto* value_texNum = FindRecordField(*record, "tex-num", error);
 	if (value_texNum == nullptr) return false;
 	if (!ReadScalar(*value_texNum, output.texNum, error)) { return false; }
 	const auto* value_s = FindRecordField(*record, "s", error);
@@ -2463,7 +2463,7 @@ bool Read_GfxMultiTexCoordQuery(const WasmValue& input, GfxMultiTexCoordQuery& o
 WasmValue Write_GfxMultiTexCoordQuery(const GfxMultiTexCoordQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texNum", WriteScalar(value.texNum));
+	fields.emplace("tex-num", WriteScalar(value.texNum));
 	fields.emplace("s", WriteScalar(value.s));
 	fields.emplace("t", WriteScalar(value.t));
 	fields.emplace("r", WriteScalar(value.r));
@@ -2476,7 +2476,7 @@ bool Read_GfxMultiTexEnvQuery(const WasmValue& input, GfxMultiTexEnvQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texNum = FindRecordField(*record, "texNum", error);
+	const auto* value_texNum = FindRecordField(*record, "tex-num", error);
 	if (value_texNum == nullptr) return false;
 	if (!ReadScalar(*value_texNum, output.texNum, error)) { return false; }
 	const auto* value_target = FindRecordField(*record, "target", error);
@@ -2501,7 +2501,7 @@ bool Read_GfxMultiTexEnvQuery(const WasmValue& input, GfxMultiTexEnvQuery& outpu
 WasmValue Write_GfxMultiTexEnvQuery(const GfxMultiTexEnvQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texNum", WriteScalar(value.texNum));
+	fields.emplace("tex-num", WriteScalar(value.texNum));
 	fields.emplace("target", WriteScalar(value.target));
 	fields.emplace("pname", WriteScalar(value.pname));
 	fields.emplace("values", WriteNativeArray(value.values, [](const auto& value) { return WriteScalar(value); }));
@@ -2513,7 +2513,7 @@ bool Read_GfxMultiTexGenOptions(const WasmValue& input, GfxMultiTexGenOptions& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_setState = FindRecordField(*record, "setState", error);
+	const auto* value_setState = FindRecordField(*record, "set-state", error);
 	if (value_setState == nullptr) return false;
 	if (!ReadScalar(*value_setState, output.setState, error)) { return false; }
 	const auto* value_state = FindRecordField(*record, "state", error);
@@ -2525,7 +2525,7 @@ bool Read_GfxMultiTexGenOptions(const WasmValue& input, GfxMultiTexGenOptions& o
 WasmValue Write_GfxMultiTexGenOptions(const GfxMultiTexGenOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("setState", WriteScalar(value.setState));
+	fields.emplace("set-state", WriteScalar(value.setState));
 	fields.emplace("state", WriteScalar(value.state));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2534,7 +2534,7 @@ bool Read_GfxMultiTexGenQuery(const WasmValue& input, GfxMultiTexGenQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_texNum = FindRecordField(*record, "texNum", error);
+	const auto* value_texNum = FindRecordField(*record, "tex-num", error);
 	if (value_texNum == nullptr) return false;
 	if (!ReadScalar(*value_texNum, output.texNum, error)) { return false; }
 	const auto* value_target = FindRecordField(*record, "target", error);
@@ -2562,7 +2562,7 @@ bool Read_GfxMultiTexGenQuery(const WasmValue& input, GfxMultiTexGenQuery& outpu
 WasmValue Write_GfxMultiTexGenQuery(const GfxMultiTexGenQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("texNum", WriteScalar(value.texNum));
+	fields.emplace("tex-num", WriteScalar(value.texNum));
 	fields.emplace("target", WriteScalar(value.target));
 	fields.emplace("options", Write_GfxMultiTexGenOptions(value.options));
 	fields.emplace("pname", WriteScalar(value.pname));
@@ -2575,7 +2575,7 @@ bool Read_GfxObjectBufferUniformsQuery(const WasmValue& input, GfxObjectBufferUn
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_objectID = FindRecordField(*record, "objectID", error);
+	const auto* value_objectID = FindRecordField(*record, "object-id", error);
 	if (value_objectID == nullptr) return false;
 	if (!ReadScalar(*value_objectID, output.objectID, error)) { return false; }
 	const auto* value_values = FindRecordField(*record, "values", error);
@@ -2600,7 +2600,7 @@ bool Read_GfxObjectBufferUniformsQuery(const WasmValue& input, GfxObjectBufferUn
 WasmValue Write_GfxObjectBufferUniformsQuery(const GfxObjectBufferUniformsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("objectID", WriteScalar(value.objectID));
+	fields.emplace("object-id", WriteScalar(value.objectID));
 	fields.emplace("values", WriteNativeList(value.values, value.count, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("offset", WriteScalar(value.offset));
 	return WasmValue::Record(std::move(fields));
@@ -2630,7 +2630,7 @@ bool Read_GfxObjectLabelQuery(const WasmValue& input, GfxObjectLabelQuery& outpu
 	const auto* value_identifier = FindRecordField(*record, "identifier", error);
 	if (value_identifier == nullptr) return false;
 	if (!ReadScalar(*value_identifier, output.identifier, error)) { return false; }
-	const auto* value_objectID = FindRecordField(*record, "objectID", error);
+	const auto* value_objectID = FindRecordField(*record, "object-id", error);
 	if (value_objectID == nullptr) return false;
 	if (!ReadScalar(*value_objectID, output.objectID, error)) { return false; }
 	const auto* value_label = FindRecordField(*record, "label", error);
@@ -2645,7 +2645,7 @@ WasmValue Write_GfxObjectLabelQuery(const GfxObjectLabelQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("identifier", WriteScalar(value.identifier));
-	fields.emplace("objectID", WriteScalar(value.objectID));
+	fields.emplace("object-id", WriteScalar(value.objectID));
 	fields.emplace("label", WasmValue::String((value.label == nullptr) ? std::string{} : std::string(value.label)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2654,10 +2654,10 @@ bool Read_GfxObjectPieceQuery(const WasmValue& input, GfxObjectPieceQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_objectID = FindRecordField(*record, "objectID", error);
+	const auto* value_objectID = FindRecordField(*record, "object-id", error);
 	if (value_objectID == nullptr) return false;
 	if (!ReadScalar(*value_objectID, output.objectID, error)) { return false; }
-	const auto* value_pieceID = FindRecordField(*record, "pieceID", error);
+	const auto* value_pieceID = FindRecordField(*record, "piece-id", error);
 	if (value_pieceID == nullptr) return false;
 	if (!ReadScalar(*value_pieceID, output.pieceID, error)) { return false; }
 	return true;
@@ -2666,8 +2666,8 @@ bool Read_GfxObjectPieceQuery(const WasmValue& input, GfxObjectPieceQuery& outpu
 WasmValue Write_GfxObjectPieceQuery(const GfxObjectPieceQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("objectID", WriteScalar(value.objectID));
-	fields.emplace("pieceID", WriteScalar(value.pieceID));
+	fields.emplace("object-id", WriteScalar(value.objectID));
+	fields.emplace("piece-id", WriteScalar(value.pieceID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2675,10 +2675,10 @@ bool Read_GfxObjectShapeOptions(const WasmValue& input, GfxObjectShapeOptions& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_rawState = FindRecordField(*record, "rawState", error);
+	const auto* value_rawState = FindRecordField(*record, "raw-state", error);
 	if (value_rawState == nullptr) return false;
 	if (!ReadScalar(*value_rawState, output.rawState, error)) { return false; }
-	const auto* value_toScreen = FindRecordField(*record, "toScreen", error);
+	const auto* value_toScreen = FindRecordField(*record, "to-screen", error);
 	if (value_toScreen == nullptr) return false;
 	if (!ReadScalar(*value_toScreen, output.toScreen, error)) { return false; }
 	const auto* value_opaque = FindRecordField(*record, "opaque", error);
@@ -2690,8 +2690,8 @@ bool Read_GfxObjectShapeOptions(const WasmValue& input, GfxObjectShapeOptions& o
 WasmValue Write_GfxObjectShapeOptions(const GfxObjectShapeOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("rawState", WriteScalar(value.rawState));
-	fields.emplace("toScreen", WriteScalar(value.toScreen));
+	fields.emplace("raw-state", WriteScalar(value.rawState));
+	fields.emplace("to-screen", WriteScalar(value.toScreen));
 	fields.emplace("opaque", WriteScalar(value.opaque));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2700,10 +2700,10 @@ bool Read_GfxObjectShapeQuery(const WasmValue& input, GfxObjectShapeQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_defID = FindRecordField(*record, "defID", error);
+	const auto* value_defID = FindRecordField(*record, "def-id", error);
 	if (value_defID == nullptr) return false;
 	if (!ReadScalar(*value_defID, output.defID, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -2715,8 +2715,8 @@ bool Read_GfxObjectShapeQuery(const WasmValue& input, GfxObjectShapeQuery& outpu
 WasmValue Write_GfxObjectShapeQuery(const GfxObjectShapeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("defID", WriteScalar(value.defID));
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("def-id", WriteScalar(value.defID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	fields.emplace("options", Write_GfxObjectShapeOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2725,7 +2725,7 @@ bool Read_GfxObjectTextureStateQuery(const WasmValue& input, GfxObjectTextureSta
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_objectID = FindRecordField(*record, "objectID", error);
+	const auto* value_objectID = FindRecordField(*record, "object-id", error);
 	if (value_objectID == nullptr) return false;
 	if (!ReadScalar(*value_objectID, output.objectID, error)) { return false; }
 	const auto* value_push = FindRecordField(*record, "push", error);
@@ -2737,7 +2737,7 @@ bool Read_GfxObjectTextureStateQuery(const WasmValue& input, GfxObjectTextureSta
 WasmValue Write_GfxObjectTextureStateQuery(const GfxObjectTextureStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("objectID", WriteScalar(value.objectID));
+	fields.emplace("object-id", WriteScalar(value.objectID));
 	fields.emplace("push", WriteScalar(value.push));
 	return WasmValue::Record(std::move(fields));
 }
@@ -2758,10 +2758,10 @@ bool Read_GfxOrthoQuery(const WasmValue& input, GfxOrthoQuery& output, NativeCal
 	const auto* value_top = FindRecordField(*record, "top", error);
 	if (value_top == nullptr) return false;
 	if (!ReadScalar(*value_top, output.top, error)) { return false; }
-	const auto* value_nearVal = FindRecordField(*record, "nearVal", error);
+	const auto* value_nearVal = FindRecordField(*record, "near-val", error);
 	if (value_nearVal == nullptr) return false;
 	if (!ReadScalar(*value_nearVal, output.nearVal, error)) { return false; }
-	const auto* value_farVal = FindRecordField(*record, "farVal", error);
+	const auto* value_farVal = FindRecordField(*record, "far-val", error);
 	if (value_farVal == nullptr) return false;
 	if (!ReadScalar(*value_farVal, output.farVal, error)) { return false; }
 	return true;
@@ -2774,8 +2774,8 @@ WasmValue Write_GfxOrthoQuery(const GfxOrthoQuery& value)
 	fields.emplace("right", WriteScalar(value.right));
 	fields.emplace("bottom", WriteScalar(value.bottom));
 	fields.emplace("top", WriteScalar(value.top));
-	fields.emplace("nearVal", WriteScalar(value.nearVal));
-	fields.emplace("farVal", WriteScalar(value.farVal));
+	fields.emplace("near-val", WriteScalar(value.nearVal));
+	fields.emplace("far-val", WriteScalar(value.farVal));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2866,7 +2866,7 @@ bool Read_GfxPushDebugGroupQuery(const WasmValue& input, GfxPushDebugGroupQuery&
 	auto& stored_string_output_message = storage.Make<std::string>();
 	if (!ReadString(*value_message, stored_string_output_message, error)) { return false; }
 	output.message = stored_string_output_message.c_str();
-	const auto* value_sourceIsThirdParty = FindRecordField(*record, "sourceIsThirdParty", error);
+	const auto* value_sourceIsThirdParty = FindRecordField(*record, "source-is-third-party", error);
 	if (value_sourceIsThirdParty == nullptr) return false;
 	if (!ReadScalar(*value_sourceIsThirdParty, output.sourceIsThirdParty, error)) { return false; }
 	return true;
@@ -2877,7 +2877,7 @@ WasmValue Write_GfxPushDebugGroupQuery(const GfxPushDebugGroupQuery& value)
 	WasmValueRecord fields;
 	fields.emplace("id", WriteScalar(value.id));
 	fields.emplace("message", WasmValue::String((value.message == nullptr) ? std::string{} : std::string(value.message)));
-	fields.emplace("sourceIsThirdParty", WriteScalar(value.sourceIsThirdParty));
+	fields.emplace("source-is-third-party", WriteScalar(value.sourceIsThirdParty));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2918,7 +2918,7 @@ bool Read_GfxRBOInfoQuery(const WasmValue& input, GfxRBOInfoQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_rboID = FindRecordField(*record, "rboID", error);
+	const auto* value_rboID = FindRecordField(*record, "rbo-id", error);
 	if (value_rboID == nullptr) return false;
 	if (!ReadScalar(*value_rboID, output.rboID, error)) { return false; }
 	return true;
@@ -2927,7 +2927,7 @@ bool Read_GfxRBOInfoQuery(const WasmValue& input, GfxRBOInfoQuery& output, Nativ
 WasmValue Write_GfxRBOInfoQuery(const GfxRBOInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("rboID", WriteScalar(value.rboID));
+	fields.emplace("rbo-id", WriteScalar(value.rboID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -2972,16 +2972,16 @@ bool Read_GfxRawBindFBOQuery(const WasmValue& input, GfxRawBindFBOQuery& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_bindDefault = FindRecordField(*record, "bindDefault", error);
+	const auto* value_bindDefault = FindRecordField(*record, "bind-default", error);
 	if (value_bindDefault == nullptr) return false;
 	if (!ReadScalar(*value_bindDefault, output.bindDefault, error)) { return false; }
-	const auto* value_fboID = FindRecordField(*record, "fboID", error);
+	const auto* value_fboID = FindRecordField(*record, "fbo-id", error);
 	if (value_fboID == nullptr) return false;
 	if (!ReadScalar(*value_fboID, output.fboID, error)) { return false; }
 	const auto* value_target = FindRecordField(*record, "target", error);
 	if (value_target == nullptr) return false;
 	if (!ReadScalar(*value_target, output.target, error)) { return false; }
-	const auto* value_rawFboID = FindRecordField(*record, "rawFboID", error);
+	const auto* value_rawFboID = FindRecordField(*record, "raw-fbo-id", error);
 	if (value_rawFboID == nullptr) return false;
 	if (!ReadScalar(*value_rawFboID, output.rawFboID, error)) { return false; }
 	return true;
@@ -2990,10 +2990,10 @@ bool Read_GfxRawBindFBOQuery(const WasmValue& input, GfxRawBindFBOQuery& output,
 WasmValue Write_GfxRawBindFBOQuery(const GfxRawBindFBOQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("bindDefault", WriteScalar(value.bindDefault));
-	fields.emplace("fboID", WriteScalar(value.fboID));
+	fields.emplace("bind-default", WriteScalar(value.bindDefault));
+	fields.emplace("fbo-id", WriteScalar(value.fboID));
 	fields.emplace("target", WriteScalar(value.target));
-	fields.emplace("rawFboID", WriteScalar(value.rawFboID));
+	fields.emplace("raw-fbo-id", WriteScalar(value.rawFboID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3001,10 +3001,10 @@ bool Read_GfxRawBindFBOResult(const WasmValue& input, GfxRawBindFBOResult& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_previouslyBoundRawFboID = FindRecordField(*record, "previouslyBoundRawFboID", error);
+	const auto* value_previouslyBoundRawFboID = FindRecordField(*record, "previously-bound-raw-fbo-id", error);
 	if (value_previouslyBoundRawFboID == nullptr) return false;
 	if (!ReadScalar(*value_previouslyBoundRawFboID, output.previouslyBoundRawFboID, error)) { return false; }
-	const auto* value_hasPrevious = FindRecordField(*record, "hasPrevious", error);
+	const auto* value_hasPrevious = FindRecordField(*record, "has-previous", error);
 	if (value_hasPrevious == nullptr) return false;
 	if (!ReadScalar(*value_hasPrevious, output.hasPrevious, error)) { return false; }
 	return true;
@@ -3013,8 +3013,8 @@ bool Read_GfxRawBindFBOResult(const WasmValue& input, GfxRawBindFBOResult& outpu
 WasmValue Write_GfxRawBindFBOResult(const GfxRawBindFBOResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("previouslyBoundRawFboID", WriteScalar(value.previouslyBoundRawFboID));
-	fields.emplace("hasPrevious", WriteScalar(value.hasPrevious));
+	fields.emplace("previously-bound-raw-fbo-id", WriteScalar(value.previouslyBoundRawFboID));
+	fields.emplace("has-previous", WriteScalar(value.hasPrevious));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3189,7 +3189,7 @@ bool Read_GfxSaveImageQuery(const WasmValue& input, GfxSaveImageQuery& output, N
 	const auto* value_options = FindRecordField(*record, "options", error);
 	if (value_options == nullptr) return false;
 	if (!Read_GfxSaveImageOptions(*value_options, output.options, storage, error)) { return false; }
-	const auto* value_readBuffer = FindRecordField(*record, "readBuffer", error);
+	const auto* value_readBuffer = FindRecordField(*record, "read-buffer", error);
 	if (value_readBuffer == nullptr) return false;
 	if (!ReadScalar(*value_readBuffer, output.readBuffer, error)) { return false; }
 	return true;
@@ -3204,7 +3204,7 @@ WasmValue Write_GfxSaveImageQuery(const GfxSaveImageQuery& value)
 	fields.emplace("height", WriteScalar(value.height));
 	fields.emplace("filename", WasmValue::String((value.filename == nullptr) ? std::string{} : std::string(value.filename)));
 	fields.emplace("options", Write_GfxSaveImageOptions(value.options));
-	fields.emplace("readBuffer", WriteScalar(value.readBuffer));
+	fields.emplace("read-buffer", WriteScalar(value.readBuffer));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3283,7 +3283,7 @@ bool Read_GfxShaderQuery(const WasmValue& input, GfxShaderQuery& output, NativeC
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_shaderID = FindRecordField(*record, "shaderID", error);
+	const auto* value_shaderID = FindRecordField(*record, "shader-id", error);
 	if (value_shaderID == nullptr) return false;
 	if (!ReadScalar(*value_shaderID, output.shaderID, error)) { return false; }
 	return true;
@@ -3292,7 +3292,7 @@ bool Read_GfxShaderQuery(const WasmValue& input, GfxShaderQuery& output, NativeC
 WasmValue Write_GfxShaderQuery(const GfxShaderQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("shaderID", WriteScalar(value.shaderID));
+	fields.emplace("shader-id", WriteScalar(value.shaderID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3549,10 +3549,10 @@ bool Read_GfxSubroutineIndexQuery(const WasmValue& input, GfxSubroutineIndexQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_shaderID = FindRecordField(*record, "shaderID", error);
+	const auto* value_shaderID = FindRecordField(*record, "shader-id", error);
 	if (value_shaderID == nullptr) return false;
 	if (!ReadScalar(*value_shaderID, output.shaderID, error)) { return false; }
-	const auto* value_shaderType = FindRecordField(*record, "shaderType", error);
+	const auto* value_shaderType = FindRecordField(*record, "shader-type", error);
 	if (value_shaderType == nullptr) return false;
 	if (!ReadScalar(*value_shaderType, output.shaderType, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -3566,8 +3566,8 @@ bool Read_GfxSubroutineIndexQuery(const WasmValue& input, GfxSubroutineIndexQuer
 WasmValue Write_GfxSubroutineIndexQuery(const GfxSubroutineIndexQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("shaderID", WriteScalar(value.shaderID));
-	fields.emplace("shaderType", WriteScalar(value.shaderType));
+	fields.emplace("shader-id", WriteScalar(value.shaderID));
+	fields.emplace("shader-type", WriteScalar(value.shaderType));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3610,10 +3610,10 @@ bool Read_GfxTesselationShaderParameterQuery(const WasmValue& input, GfxTesselat
 	for (std::size_t index = 0; index < 4u; ++index) {
 		if (!ReadScalar((*array_values_values)[index], output.values[index], error)) { return false; }
 	}
-	const auto* value_valueCount = FindRecordField(*record, "valueCount", error);
+	const auto* value_valueCount = FindRecordField(*record, "value-count", error);
 	if (value_valueCount == nullptr) return false;
 	if (!ReadScalar(*value_valueCount, output.valueCount, error)) { return false; }
-	const auto* value_useFloatArray = FindRecordField(*record, "useFloatArray", error);
+	const auto* value_useFloatArray = FindRecordField(*record, "use-float-array", error);
 	if (value_useFloatArray == nullptr) return false;
 	if (!ReadScalar(*value_useFloatArray, output.useFloatArray, error)) { return false; }
 	return true;
@@ -3625,8 +3625,8 @@ WasmValue Write_GfxTesselationShaderParameterQuery(const GfxTesselationShaderPar
 	fields.emplace("param", WriteScalar(value.param));
 	fields.emplace("value", WriteScalar(value.value));
 	fields.emplace("values", WriteNativeArray(value.values, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("valueCount", WriteScalar(value.valueCount));
-	fields.emplace("useFloatArray", WriteScalar(value.useFloatArray));
+	fields.emplace("value-count", WriteScalar(value.valueCount));
+	fields.emplace("use-float-array", WriteScalar(value.useFloatArray));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -3667,7 +3667,7 @@ bool Read_GfxTexGenOptions(const WasmValue& input, GfxTexGenOptions& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_setState = FindRecordField(*record, "setState", error);
+	const auto* value_setState = FindRecordField(*record, "set-state", error);
 	if (value_setState == nullptr) return false;
 	if (!ReadScalar(*value_setState, output.setState, error)) { return false; }
 	const auto* value_state = FindRecordField(*record, "state", error);
@@ -3679,7 +3679,7 @@ bool Read_GfxTexGenOptions(const WasmValue& input, GfxTexGenOptions& output, Nat
 WasmValue Write_GfxTexGenOptions(const GfxTexGenOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("setState", WriteScalar(value.setState));
+	fields.emplace("set-state", WriteScalar(value.setState));
 	fields.emplace("state", WriteScalar(value.state));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3837,7 +3837,7 @@ bool Read_GfxTextureBindQuery(const WasmValue& input, GfxTextureBindQuery& outpu
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_texNum = FindRecordField(*record, "texNum", error);
+	const auto* value_texNum = FindRecordField(*record, "tex-num", error);
 	if (value_texNum == nullptr) return false;
 	if (!ReadScalar(*value_texNum, output.texNum, error)) { return false; }
 	const auto* value_enable = FindRecordField(*record, "enable", error);
@@ -3850,7 +3850,7 @@ WasmValue Write_GfxTextureBindQuery(const GfxTextureBindQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("texNum", WriteScalar(value.texNum));
+	fields.emplace("tex-num", WriteScalar(value.texNum));
 	fields.emplace("enable", WriteScalar(value.enable));
 	return WasmValue::Record(std::move(fields));
 }
@@ -3924,25 +3924,25 @@ bool Read_GfxTextureParams(const WasmValue& input, GfxTextureParams& output, Nat
 	const auto* value_border = FindRecordField(*record, "border", error);
 	if (value_border == nullptr) return false;
 	if (!ReadScalar(*value_border, output.border, error)) { return false; }
-	const auto* value_minFilter = FindRecordField(*record, "minFilter", error);
+	const auto* value_minFilter = FindRecordField(*record, "min-filter", error);
 	if (value_minFilter == nullptr) return false;
 	if (!ReadScalar(*value_minFilter, output.minFilter, error)) { return false; }
-	const auto* value_magFilter = FindRecordField(*record, "magFilter", error);
+	const auto* value_magFilter = FindRecordField(*record, "mag-filter", error);
 	if (value_magFilter == nullptr) return false;
 	if (!ReadScalar(*value_magFilter, output.magFilter, error)) { return false; }
-	const auto* value_wrapS = FindRecordField(*record, "wrapS", error);
+	const auto* value_wrapS = FindRecordField(*record, "wrap-s", error);
 	if (value_wrapS == nullptr) return false;
 	if (!ReadScalar(*value_wrapS, output.wrapS, error)) { return false; }
-	const auto* value_wrapT = FindRecordField(*record, "wrapT", error);
+	const auto* value_wrapT = FindRecordField(*record, "wrap-t", error);
 	if (value_wrapT == nullptr) return false;
 	if (!ReadScalar(*value_wrapT, output.wrapT, error)) { return false; }
-	const auto* value_wrapR = FindRecordField(*record, "wrapR", error);
+	const auto* value_wrapR = FindRecordField(*record, "wrap-r", error);
 	if (value_wrapR == nullptr) return false;
 	if (!ReadScalar(*value_wrapR, output.wrapR, error)) { return false; }
-	const auto* value_compareFunc = FindRecordField(*record, "compareFunc", error);
+	const auto* value_compareFunc = FindRecordField(*record, "compare-func", error);
 	if (value_compareFunc == nullptr) return false;
 	if (!ReadScalar(*value_compareFunc, output.compareFunc, error)) { return false; }
-	const auto* value_lodBias = FindRecordField(*record, "lodBias", error);
+	const auto* value_lodBias = FindRecordField(*record, "lod-bias", error);
 	if (value_lodBias == nullptr) return false;
 	if (!ReadScalar(*value_lodBias, output.lodBias, error)) { return false; }
 	const auto* value_aniso = FindRecordField(*record, "aniso", error);
@@ -3954,7 +3954,7 @@ bool Read_GfxTextureParams(const WasmValue& input, GfxTextureParams& output, Nat
 	const auto* value_fbo = FindRecordField(*record, "fbo", error);
 	if (value_fbo == nullptr) return false;
 	if (!ReadScalar(*value_fbo, output.fbo, error)) { return false; }
-	const auto* value_fboDepth = FindRecordField(*record, "fboDepth", error);
+	const auto* value_fboDepth = FindRecordField(*record, "fbo-depth", error);
 	if (value_fboDepth == nullptr) return false;
 	if (!ReadScalar(*value_fboDepth, output.fboDepth, error)) { return false; }
 	return true;
@@ -3966,17 +3966,17 @@ WasmValue Write_GfxTextureParams(const GfxTextureParams& value)
 	fields.emplace("target", WriteScalar(value.target));
 	fields.emplace("format", WriteScalar(value.format));
 	fields.emplace("border", WriteScalar(value.border));
-	fields.emplace("minFilter", WriteScalar(value.minFilter));
-	fields.emplace("magFilter", WriteScalar(value.magFilter));
-	fields.emplace("wrapS", WriteScalar(value.wrapS));
-	fields.emplace("wrapT", WriteScalar(value.wrapT));
-	fields.emplace("wrapR", WriteScalar(value.wrapR));
-	fields.emplace("compareFunc", WriteScalar(value.compareFunc));
-	fields.emplace("lodBias", WriteScalar(value.lodBias));
+	fields.emplace("min-filter", WriteScalar(value.minFilter));
+	fields.emplace("mag-filter", WriteScalar(value.magFilter));
+	fields.emplace("wrap-s", WriteScalar(value.wrapS));
+	fields.emplace("wrap-t", WriteScalar(value.wrapT));
+	fields.emplace("wrap-r", WriteScalar(value.wrapR));
+	fields.emplace("compare-func", WriteScalar(value.compareFunc));
+	fields.emplace("lod-bias", WriteScalar(value.lodBias));
 	fields.emplace("aniso", WriteScalar(value.aniso));
 	fields.emplace("samples", WriteScalar(value.samples));
 	fields.emplace("fbo", WriteScalar(value.fbo));
-	fields.emplace("fboDepth", WriteScalar(value.fboDepth));
+	fields.emplace("fbo-depth", WriteScalar(value.fboDepth));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4188,7 +4188,7 @@ bool Read_GfxUniformLocationQuery(const WasmValue& input, GfxUniformLocationQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_shaderID = FindRecordField(*record, "shaderID", error);
+	const auto* value_shaderID = FindRecordField(*record, "shader-id", error);
 	if (value_shaderID == nullptr) return false;
 	if (!ReadScalar(*value_shaderID, output.shaderID, error)) { return false; }
 	const auto* value_name = FindRecordField(*record, "name", error);
@@ -4202,7 +4202,7 @@ bool Read_GfxUniformLocationQuery(const WasmValue& input, GfxUniformLocationQuer
 WasmValue Write_GfxUniformLocationQuery(const GfxUniformLocationQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("shaderID", WriteScalar(value.shaderID));
+	fields.emplace("shader-id", WriteScalar(value.shaderID));
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4263,7 +4263,7 @@ bool Read_GfxUniformSubroutineQuery(const WasmValue& input, GfxUniformSubroutine
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_shaderType = FindRecordField(*record, "shaderType", error);
+	const auto* value_shaderType = FindRecordField(*record, "shader-type", error);
 	if (value_shaderType == nullptr) return false;
 	if (!ReadScalar(*value_shaderType, output.shaderType, error)) { return false; }
 	const auto* value_index = FindRecordField(*record, "index", error);
@@ -4275,7 +4275,7 @@ bool Read_GfxUniformSubroutineQuery(const WasmValue& input, GfxUniformSubroutine
 WasmValue Write_GfxUniformSubroutineQuery(const GfxUniformSubroutineQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("shaderType", WriteScalar(value.shaderType));
+	fields.emplace("shader-type", WriteScalar(value.shaderType));
 	fields.emplace("index", WriteScalar(value.index));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4284,16 +4284,16 @@ bool Read_GfxUnitDrawOptions(const WasmValue& input, GfxUnitDrawOptions& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_applyTransform = FindRecordField(*record, "applyTransform", error);
+	const auto* value_applyTransform = FindRecordField(*record, "apply-transform", error);
 	if (value_applyTransform == nullptr) return false;
 	if (!ReadScalar(*value_applyTransform, output.applyTransform, error)) { return false; }
-	const auto* value_doRawDraw = FindRecordField(*record, "doRawDraw", error);
+	const auto* value_doRawDraw = FindRecordField(*record, "do-raw-draw", error);
 	if (value_doRawDraw == nullptr) return false;
 	if (!ReadScalar(*value_doRawDraw, output.doRawDraw, error)) { return false; }
-	const auto* value_noLuaCall = FindRecordField(*record, "noLuaCall", error);
+	const auto* value_noLuaCall = FindRecordField(*record, "no-lua-call", error);
 	if (value_noLuaCall == nullptr) return false;
 	if (!ReadScalar(*value_noLuaCall, output.noLuaCall, error)) { return false; }
-	const auto* value_fullModel = FindRecordField(*record, "fullModel", error);
+	const auto* value_fullModel = FindRecordField(*record, "full-model", error);
 	if (value_fullModel == nullptr) return false;
 	if (!ReadScalar(*value_fullModel, output.fullModel, error)) { return false; }
 	return true;
@@ -4302,10 +4302,10 @@ bool Read_GfxUnitDrawOptions(const WasmValue& input, GfxUnitDrawOptions& output,
 WasmValue Write_GfxUnitDrawOptions(const GfxUnitDrawOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("applyTransform", WriteScalar(value.applyTransform));
-	fields.emplace("doRawDraw", WriteScalar(value.doRawDraw));
-	fields.emplace("noLuaCall", WriteScalar(value.noLuaCall));
-	fields.emplace("fullModel", WriteScalar(value.fullModel));
+	fields.emplace("apply-transform", WriteScalar(value.applyTransform));
+	fields.emplace("do-raw-draw", WriteScalar(value.doRawDraw));
+	fields.emplace("no-lua-call", WriteScalar(value.noLuaCall));
+	fields.emplace("full-model", WriteScalar(value.fullModel));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4313,7 +4313,7 @@ bool Read_GfxUnitDrawQuery(const WasmValue& input, GfxUnitDrawQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -4325,7 +4325,7 @@ bool Read_GfxUnitDrawQuery(const WasmValue& input, GfxUnitDrawQuery& output, Nat
 WasmValue Write_GfxUnitDrawQuery(const GfxUnitDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	fields.emplace("options", Write_GfxUnitDrawOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4366,7 +4366,7 @@ bool Read_GfxUploadTextureQuery(const WasmValue& input, GfxUploadTextureQuery& o
 	const auto* value_format = FindRecordField(*record, "format", error);
 	if (value_format == nullptr) return false;
 	if (!ReadScalar(*value_format, output.format, error)) { return false; }
-	const auto* value_pixelType = FindRecordField(*record, "pixelType", error);
+	const auto* value_pixelType = FindRecordField(*record, "pixel-type", error);
 	if (value_pixelType == nullptr) return false;
 	if (!ReadScalar(*value_pixelType, output.pixelType, error)) { return false; }
 	const auto* value_data = FindRecordField(*record, "data", error);
@@ -4391,7 +4391,7 @@ WasmValue Write_GfxUploadTextureQuery(const GfxUploadTextureQuery& value)
 	fields.emplace("height", WriteScalar(value.height));
 	fields.emplace("depth", WriteScalar(value.depth));
 	fields.emplace("format", WriteScalar(value.format));
-	fields.emplace("pixelType", WriteScalar(value.pixelType));
+	fields.emplace("pixel-type", WriteScalar(value.pixelType));
 	fields.emplace("data", WriteNativeList(value.data, value.dataSize, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4417,10 +4417,10 @@ bool Read_GfxVAOBufferQuery(const WasmValue& input, GfxVAOBufferQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vaoID = FindRecordField(*record, "vaoID", error);
+	const auto* value_vaoID = FindRecordField(*record, "vao-id", error);
 	if (value_vaoID == nullptr) return false;
 	if (!ReadScalar(*value_vaoID, output.vaoID, error)) { return false; }
-	const auto* value_vboID = FindRecordField(*record, "vboID", error);
+	const auto* value_vboID = FindRecordField(*record, "vbo-id", error);
 	if (value_vboID == nullptr) return false;
 	if (!ReadScalar(*value_vboID, output.vboID, error)) { return false; }
 	return true;
@@ -4429,8 +4429,8 @@ bool Read_GfxVAOBufferQuery(const WasmValue& input, GfxVAOBufferQuery& output, N
 WasmValue Write_GfxVAOBufferQuery(const GfxVAOBufferQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vaoID", WriteScalar(value.vaoID));
-	fields.emplace("vboID", WriteScalar(value.vboID));
+	fields.emplace("vao-id", WriteScalar(value.vaoID));
+	fields.emplace("vbo-id", WriteScalar(value.vboID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4438,22 +4438,22 @@ bool Read_GfxVAODrawArraysQuery(const WasmValue& input, GfxVAODrawArraysQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vaoID = FindRecordField(*record, "vaoID", error);
+	const auto* value_vaoID = FindRecordField(*record, "vao-id", error);
 	if (value_vaoID == nullptr) return false;
 	if (!ReadScalar(*value_vaoID, output.vaoID, error)) { return false; }
 	const auto* value_mode = FindRecordField(*record, "mode", error);
 	if (value_mode == nullptr) return false;
 	if (!ReadScalar(*value_mode, output.mode, error)) { return false; }
-	const auto* value_vertexCount = FindRecordField(*record, "vertexCount", error);
+	const auto* value_vertexCount = FindRecordField(*record, "vertex-count", error);
 	if (value_vertexCount == nullptr) return false;
 	if (!ReadScalar(*value_vertexCount, output.vertexCount, error)) { return false; }
-	const auto* value_vertexFirst = FindRecordField(*record, "vertexFirst", error);
+	const auto* value_vertexFirst = FindRecordField(*record, "vertex-first", error);
 	if (value_vertexFirst == nullptr) return false;
 	if (!ReadScalar(*value_vertexFirst, output.vertexFirst, error)) { return false; }
-	const auto* value_instanceCount = FindRecordField(*record, "instanceCount", error);
+	const auto* value_instanceCount = FindRecordField(*record, "instance-count", error);
 	if (value_instanceCount == nullptr) return false;
 	if (!ReadScalar(*value_instanceCount, output.instanceCount, error)) { return false; }
-	const auto* value_instanceFirst = FindRecordField(*record, "instanceFirst", error);
+	const auto* value_instanceFirst = FindRecordField(*record, "instance-first", error);
 	if (value_instanceFirst == nullptr) return false;
 	if (!ReadScalar(*value_instanceFirst, output.instanceFirst, error)) { return false; }
 	return true;
@@ -4462,12 +4462,12 @@ bool Read_GfxVAODrawArraysQuery(const WasmValue& input, GfxVAODrawArraysQuery& o
 WasmValue Write_GfxVAODrawArraysQuery(const GfxVAODrawArraysQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vaoID", WriteScalar(value.vaoID));
+	fields.emplace("vao-id", WriteScalar(value.vaoID));
 	fields.emplace("mode", WriteScalar(value.mode));
-	fields.emplace("vertexCount", WriteScalar(value.vertexCount));
-	fields.emplace("vertexFirst", WriteScalar(value.vertexFirst));
-	fields.emplace("instanceCount", WriteScalar(value.instanceCount));
-	fields.emplace("instanceFirst", WriteScalar(value.instanceFirst));
+	fields.emplace("vertex-count", WriteScalar(value.vertexCount));
+	fields.emplace("vertex-first", WriteScalar(value.vertexFirst));
+	fields.emplace("instance-count", WriteScalar(value.instanceCount));
+	fields.emplace("instance-first", WriteScalar(value.instanceFirst));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4475,25 +4475,25 @@ bool Read_GfxVAODrawElementsQuery(const WasmValue& input, GfxVAODrawElementsQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vaoID = FindRecordField(*record, "vaoID", error);
+	const auto* value_vaoID = FindRecordField(*record, "vao-id", error);
 	if (value_vaoID == nullptr) return false;
 	if (!ReadScalar(*value_vaoID, output.vaoID, error)) { return false; }
 	const auto* value_mode = FindRecordField(*record, "mode", error);
 	if (value_mode == nullptr) return false;
 	if (!ReadScalar(*value_mode, output.mode, error)) { return false; }
-	const auto* value_drawCount = FindRecordField(*record, "drawCount", error);
+	const auto* value_drawCount = FindRecordField(*record, "draw-count", error);
 	if (value_drawCount == nullptr) return false;
 	if (!ReadScalar(*value_drawCount, output.drawCount, error)) { return false; }
-	const auto* value_baseIndex = FindRecordField(*record, "baseIndex", error);
+	const auto* value_baseIndex = FindRecordField(*record, "base-index", error);
 	if (value_baseIndex == nullptr) return false;
 	if (!ReadScalar(*value_baseIndex, output.baseIndex, error)) { return false; }
-	const auto* value_instanceCount = FindRecordField(*record, "instanceCount", error);
+	const auto* value_instanceCount = FindRecordField(*record, "instance-count", error);
 	if (value_instanceCount == nullptr) return false;
 	if (!ReadScalar(*value_instanceCount, output.instanceCount, error)) { return false; }
-	const auto* value_baseVertex = FindRecordField(*record, "baseVertex", error);
+	const auto* value_baseVertex = FindRecordField(*record, "base-vertex", error);
 	if (value_baseVertex == nullptr) return false;
 	if (!ReadScalar(*value_baseVertex, output.baseVertex, error)) { return false; }
-	const auto* value_baseInstance = FindRecordField(*record, "baseInstance", error);
+	const auto* value_baseInstance = FindRecordField(*record, "base-instance", error);
 	if (value_baseInstance == nullptr) return false;
 	if (!ReadScalar(*value_baseInstance, output.baseInstance, error)) { return false; }
 	return true;
@@ -4502,13 +4502,13 @@ bool Read_GfxVAODrawElementsQuery(const WasmValue& input, GfxVAODrawElementsQuer
 WasmValue Write_GfxVAODrawElementsQuery(const GfxVAODrawElementsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vaoID", WriteScalar(value.vaoID));
+	fields.emplace("vao-id", WriteScalar(value.vaoID));
 	fields.emplace("mode", WriteScalar(value.mode));
-	fields.emplace("drawCount", WriteScalar(value.drawCount));
-	fields.emplace("baseIndex", WriteScalar(value.baseIndex));
-	fields.emplace("instanceCount", WriteScalar(value.instanceCount));
-	fields.emplace("baseVertex", WriteScalar(value.baseVertex));
-	fields.emplace("baseInstance", WriteScalar(value.baseInstance));
+	fields.emplace("draw-count", WriteScalar(value.drawCount));
+	fields.emplace("base-index", WriteScalar(value.baseIndex));
+	fields.emplace("instance-count", WriteScalar(value.instanceCount));
+	fields.emplace("base-vertex", WriteScalar(value.baseVertex));
+	fields.emplace("base-instance", WriteScalar(value.baseInstance));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4516,7 +4516,7 @@ bool Read_GfxVAORemoveSubmissionQuery(const WasmValue& input, GfxVAORemoveSubmis
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vaoID = FindRecordField(*record, "vaoID", error);
+	const auto* value_vaoID = FindRecordField(*record, "vao-id", error);
 	if (value_vaoID == nullptr) return false;
 	if (!ReadScalar(*value_vaoID, output.vaoID, error)) { return false; }
 	const auto* value_index = FindRecordField(*record, "index", error);
@@ -4528,7 +4528,7 @@ bool Read_GfxVAORemoveSubmissionQuery(const WasmValue& input, GfxVAORemoveSubmis
 WasmValue Write_GfxVAORemoveSubmissionQuery(const GfxVAORemoveSubmissionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vaoID", WriteScalar(value.vaoID));
+	fields.emplace("vao-id", WriteScalar(value.vaoID));
 	fields.emplace("index", WriteScalar(value.index));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4537,10 +4537,10 @@ bool Read_GfxVAOResult(const WasmValue& input, GfxVAOResult& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vaoID = FindRecordField(*record, "vaoID", error);
+	const auto* value_vaoID = FindRecordField(*record, "vao-id", error);
 	if (value_vaoID == nullptr) return false;
 	if (!ReadScalar(*value_vaoID, output.vaoID, error)) { return false; }
-	const auto* value_rawID = FindRecordField(*record, "rawID", error);
+	const auto* value_rawID = FindRecordField(*record, "raw-id", error);
 	if (value_rawID == nullptr) return false;
 	if (!ReadScalar(*value_rawID, output.rawID, error)) { return false; }
 	return true;
@@ -4549,8 +4549,8 @@ bool Read_GfxVAOResult(const WasmValue& input, GfxVAOResult& output, NativeCallS
 WasmValue Write_GfxVAOResult(const GfxVAOResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vaoID", WriteScalar(value.vaoID));
-	fields.emplace("rawID", WriteScalar(value.rawID));
+	fields.emplace("vao-id", WriteScalar(value.vaoID));
+	fields.emplace("raw-id", WriteScalar(value.rawID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4558,7 +4558,7 @@ bool Read_GfxVAOSubmissionQuery(const WasmValue& input, GfxVAOSubmissionQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vaoID = FindRecordField(*record, "vaoID", error);
+	const auto* value_vaoID = FindRecordField(*record, "vao-id", error);
 	if (value_vaoID == nullptr) return false;
 	if (!ReadScalar(*value_vaoID, output.vaoID, error)) { return false; }
 	const auto* value_ids = FindRecordField(*record, "ids", error);
@@ -4580,7 +4580,7 @@ bool Read_GfxVAOSubmissionQuery(const WasmValue& input, GfxVAOSubmissionQuery& o
 WasmValue Write_GfxVAOSubmissionQuery(const GfxVAOSubmissionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vaoID", WriteScalar(value.vaoID));
+	fields.emplace("vao-id", WriteScalar(value.vaoID));
 	fields.emplace("ids", WriteNativeList(value.ids, value.idCount, [](const auto& value) { return WriteScalar(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4618,16 +4618,16 @@ bool Read_GfxVBOBindRangeQuery(const WasmValue& input, GfxVBOBindRangeQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vboID = FindRecordField(*record, "vboID", error);
+	const auto* value_vboID = FindRecordField(*record, "vbo-id", error);
 	if (value_vboID == nullptr) return false;
 	if (!ReadScalar(*value_vboID, output.vboID, error)) { return false; }
-	const auto* value_bindingIndex = FindRecordField(*record, "bindingIndex", error);
+	const auto* value_bindingIndex = FindRecordField(*record, "binding-index", error);
 	if (value_bindingIndex == nullptr) return false;
 	if (!ReadScalar(*value_bindingIndex, output.bindingIndex, error)) { return false; }
-	const auto* value_elementOffset = FindRecordField(*record, "elementOffset", error);
+	const auto* value_elementOffset = FindRecordField(*record, "element-offset", error);
 	if (value_elementOffset == nullptr) return false;
 	if (!ReadScalar(*value_elementOffset, output.elementOffset, error)) { return false; }
-	const auto* value_elementCount = FindRecordField(*record, "elementCount", error);
+	const auto* value_elementCount = FindRecordField(*record, "element-count", error);
 	if (value_elementCount == nullptr) return false;
 	if (!ReadScalar(*value_elementCount, output.elementCount, error)) { return false; }
 	const auto* value_target = FindRecordField(*record, "target", error);
@@ -4642,10 +4642,10 @@ bool Read_GfxVBOBindRangeQuery(const WasmValue& input, GfxVBOBindRangeQuery& out
 WasmValue Write_GfxVBOBindRangeQuery(const GfxVBOBindRangeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vboID", WriteScalar(value.vboID));
-	fields.emplace("bindingIndex", WriteScalar(value.bindingIndex));
-	fields.emplace("elementOffset", WriteScalar(value.elementOffset));
-	fields.emplace("elementCount", WriteScalar(value.elementCount));
+	fields.emplace("vbo-id", WriteScalar(value.vboID));
+	fields.emplace("binding-index", WriteScalar(value.bindingIndex));
+	fields.emplace("element-offset", WriteScalar(value.elementOffset));
+	fields.emplace("element-count", WriteScalar(value.elementCount));
 	fields.emplace("target", WriteScalar(value.target));
 	fields.emplace("bind", WriteScalar(value.bind));
 	return WasmValue::Record(std::move(fields));
@@ -4655,13 +4655,13 @@ bool Read_GfxVBOCopyQuery(const WasmValue& input, GfxVBOCopyQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sourceVBOID = FindRecordField(*record, "sourceVBOID", error);
+	const auto* value_sourceVBOID = FindRecordField(*record, "source-vboid", error);
 	if (value_sourceVBOID == nullptr) return false;
 	if (!ReadScalar(*value_sourceVBOID, output.sourceVBOID, error)) { return false; }
-	const auto* value_destinationVBOID = FindRecordField(*record, "destinationVBOID", error);
+	const auto* value_destinationVBOID = FindRecordField(*record, "destination-vboid", error);
 	if (value_destinationVBOID == nullptr) return false;
 	if (!ReadScalar(*value_destinationVBOID, output.destinationVBOID, error)) { return false; }
-	const auto* value_copySizeInBytes = FindRecordField(*record, "copySizeInBytes", error);
+	const auto* value_copySizeInBytes = FindRecordField(*record, "copy-size-in-bytes", error);
 	if (value_copySizeInBytes == nullptr) return false;
 	if (!ReadScalar(*value_copySizeInBytes, output.copySizeInBytes, error)) { return false; }
 	return true;
@@ -4670,9 +4670,9 @@ bool Read_GfxVBOCopyQuery(const WasmValue& input, GfxVBOCopyQuery& output, Nativ
 WasmValue Write_GfxVBOCopyQuery(const GfxVBOCopyQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sourceVBOID", WriteScalar(value.sourceVBOID));
-	fields.emplace("destinationVBOID", WriteScalar(value.destinationVBOID));
-	fields.emplace("copySizeInBytes", WriteScalar(value.copySizeInBytes));
+	fields.emplace("source-vboid", WriteScalar(value.sourceVBOID));
+	fields.emplace("destination-vboid", WriteScalar(value.destinationVBOID));
+	fields.emplace("copy-size-in-bytes", WriteScalar(value.copySizeInBytes));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4680,22 +4680,22 @@ bool Read_GfxVBODefineQuery(const WasmValue& input, GfxVBODefineQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vboID = FindRecordField(*record, "vboID", error);
+	const auto* value_vboID = FindRecordField(*record, "vbo-id", error);
 	if (value_vboID == nullptr) return false;
 	if (!ReadScalar(*value_vboID, output.vboID, error)) { return false; }
-	const auto* value_elementsCount = FindRecordField(*record, "elementsCount", error);
+	const auto* value_elementsCount = FindRecordField(*record, "elements-count", error);
 	if (value_elementsCount == nullptr) return false;
 	if (!ReadScalar(*value_elementsCount, output.elementsCount, error)) { return false; }
-	const auto* value_elementArray = FindRecordField(*record, "elementArray", error);
+	const auto* value_elementArray = FindRecordField(*record, "element-array", error);
 	if (value_elementArray == nullptr) return false;
 	if (!ReadScalar(*value_elementArray, output.elementArray, error)) { return false; }
-	const auto* value_indexType = FindRecordField(*record, "indexType", error);
+	const auto* value_indexType = FindRecordField(*record, "index-type", error);
 	if (value_indexType == nullptr) return false;
 	if (!ReadScalar(*value_indexType, output.indexType, error)) { return false; }
-	const auto* value_useDefaultAttributes = FindRecordField(*record, "useDefaultAttributes", error);
+	const auto* value_useDefaultAttributes = FindRecordField(*record, "use-default-attributes", error);
 	if (value_useDefaultAttributes == nullptr) return false;
 	if (!ReadScalar(*value_useDefaultAttributes, output.useDefaultAttributes, error)) { return false; }
-	const auto* value_defaultAttributeCount = FindRecordField(*record, "defaultAttributeCount", error);
+	const auto* value_defaultAttributeCount = FindRecordField(*record, "default-attribute-count", error);
 	if (value_defaultAttributeCount == nullptr) return false;
 	if (!ReadScalar(*value_defaultAttributeCount, output.defaultAttributeCount, error)) { return false; }
 	const auto* value_attributes = FindRecordField(*record, "attributes", error);
@@ -4717,12 +4717,12 @@ bool Read_GfxVBODefineQuery(const WasmValue& input, GfxVBODefineQuery& output, N
 WasmValue Write_GfxVBODefineQuery(const GfxVBODefineQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vboID", WriteScalar(value.vboID));
-	fields.emplace("elementsCount", WriteScalar(value.elementsCount));
-	fields.emplace("elementArray", WriteScalar(value.elementArray));
-	fields.emplace("indexType", WriteScalar(value.indexType));
-	fields.emplace("useDefaultAttributes", WriteScalar(value.useDefaultAttributes));
-	fields.emplace("defaultAttributeCount", WriteScalar(value.defaultAttributeCount));
+	fields.emplace("vbo-id", WriteScalar(value.vboID));
+	fields.emplace("elements-count", WriteScalar(value.elementsCount));
+	fields.emplace("element-array", WriteScalar(value.elementArray));
+	fields.emplace("index-type", WriteScalar(value.indexType));
+	fields.emplace("use-default-attributes", WriteScalar(value.useDefaultAttributes));
+	fields.emplace("default-attribute-count", WriteScalar(value.defaultAttributeCount));
 	fields.emplace("attributes", WriteNativeList(value.attributes, value.attributeCount, [](const auto& value) { return Write_GfxVBOAttributeOptions(value); }));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4731,19 +4731,19 @@ bool Read_GfxVBODownloadQuery(const WasmValue& input, GfxVBODownloadQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vboID = FindRecordField(*record, "vboID", error);
+	const auto* value_vboID = FindRecordField(*record, "vbo-id", error);
 	if (value_vboID == nullptr) return false;
 	if (!ReadScalar(*value_vboID, output.vboID, error)) { return false; }
-	const auto* value_attributeIndex = FindRecordField(*record, "attributeIndex", error);
+	const auto* value_attributeIndex = FindRecordField(*record, "attribute-index", error);
 	if (value_attributeIndex == nullptr) return false;
 	if (!ReadScalar(*value_attributeIndex, output.attributeIndex, error)) { return false; }
-	const auto* value_elementOffset = FindRecordField(*record, "elementOffset", error);
+	const auto* value_elementOffset = FindRecordField(*record, "element-offset", error);
 	if (value_elementOffset == nullptr) return false;
 	if (!ReadScalar(*value_elementOffset, output.elementOffset, error)) { return false; }
-	const auto* value_elementCount = FindRecordField(*record, "elementCount", error);
+	const auto* value_elementCount = FindRecordField(*record, "element-count", error);
 	if (value_elementCount == nullptr) return false;
 	if (!ReadScalar(*value_elementCount, output.elementCount, error)) { return false; }
-	const auto* value_forceGPURead = FindRecordField(*record, "forceGPURead", error);
+	const auto* value_forceGPURead = FindRecordField(*record, "force-gpu-read", error);
 	if (value_forceGPURead == nullptr) return false;
 	if (!ReadScalar(*value_forceGPURead, output.forceGPURead, error)) { return false; }
 	return true;
@@ -4752,11 +4752,11 @@ bool Read_GfxVBODownloadQuery(const WasmValue& input, GfxVBODownloadQuery& outpu
 WasmValue Write_GfxVBODownloadQuery(const GfxVBODownloadQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vboID", WriteScalar(value.vboID));
-	fields.emplace("attributeIndex", WriteScalar(value.attributeIndex));
-	fields.emplace("elementOffset", WriteScalar(value.elementOffset));
-	fields.emplace("elementCount", WriteScalar(value.elementCount));
-	fields.emplace("forceGPURead", WriteScalar(value.forceGPURead));
+	fields.emplace("vbo-id", WriteScalar(value.vboID));
+	fields.emplace("attribute-index", WriteScalar(value.attributeIndex));
+	fields.emplace("element-offset", WriteScalar(value.elementOffset));
+	fields.emplace("element-count", WriteScalar(value.elementCount));
+	fields.emplace("force-gpu-read", WriteScalar(value.forceGPURead));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4791,7 +4791,7 @@ bool Read_GfxVBOInfoQuery(const WasmValue& input, GfxVBOInfoQuery& output, Nativ
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vboID = FindRecordField(*record, "vboID", error);
+	const auto* value_vboID = FindRecordField(*record, "vbo-id", error);
 	if (value_vboID == nullptr) return false;
 	if (!ReadScalar(*value_vboID, output.vboID, error)) { return false; }
 	return true;
@@ -4800,7 +4800,7 @@ bool Read_GfxVBOInfoQuery(const WasmValue& input, GfxVBOInfoQuery& output, Nativ
 WasmValue Write_GfxVBOInfoQuery(const GfxVBOInfoQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vboID", WriteScalar(value.vboID));
+	fields.emplace("vbo-id", WriteScalar(value.vboID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4808,22 +4808,22 @@ bool Read_GfxVBOInfoResult(const WasmValue& input, GfxVBOInfoResult& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_elementsCount = FindRecordField(*record, "elementsCount", error);
+	const auto* value_elementsCount = FindRecordField(*record, "elements-count", error);
 	if (value_elementsCount == nullptr) return false;
 	if (!ReadScalar(*value_elementsCount, output.elementsCount, error)) { return false; }
-	const auto* value_bufferSizeInBytes = FindRecordField(*record, "bufferSizeInBytes", error);
+	const auto* value_bufferSizeInBytes = FindRecordField(*record, "buffer-size-in-bytes", error);
 	if (value_bufferSizeInBytes == nullptr) return false;
 	if (!ReadScalar(*value_bufferSizeInBytes, output.bufferSizeInBytes, error)) { return false; }
-	const auto* value_gpuBufferSizeInBytes = FindRecordField(*record, "gpuBufferSizeInBytes", error);
+	const auto* value_gpuBufferSizeInBytes = FindRecordField(*record, "gpu-buffer-size-in-bytes", error);
 	if (value_gpuBufferSizeInBytes == nullptr) return false;
 	if (!ReadScalar(*value_gpuBufferSizeInBytes, output.gpuBufferSizeInBytes, error)) { return false; }
-	const auto* value_elemSizeInBytes = FindRecordField(*record, "elemSizeInBytes", error);
+	const auto* value_elemSizeInBytes = FindRecordField(*record, "elem-size-in-bytes", error);
 	if (value_elemSizeInBytes == nullptr) return false;
 	if (!ReadScalar(*value_elemSizeInBytes, output.elemSizeInBytes, error)) { return false; }
-	const auto* value_attributesCount = FindRecordField(*record, "attributesCount", error);
+	const auto* value_attributesCount = FindRecordField(*record, "attributes-count", error);
 	if (value_attributesCount == nullptr) return false;
 	if (!ReadScalar(*value_attributesCount, output.attributesCount, error)) { return false; }
-	const auto* value_primitiveRestartIndex = FindRecordField(*record, "primitiveRestartIndex", error);
+	const auto* value_primitiveRestartIndex = FindRecordField(*record, "primitive-restart-index", error);
 	if (value_primitiveRestartIndex == nullptr) return false;
 	if (!ReadScalar(*value_primitiveRestartIndex, output.primitiveRestartIndex, error)) { return false; }
 	return true;
@@ -4832,12 +4832,12 @@ bool Read_GfxVBOInfoResult(const WasmValue& input, GfxVBOInfoResult& output, Nat
 WasmValue Write_GfxVBOInfoResult(const GfxVBOInfoResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("elementsCount", WriteScalar(value.elementsCount));
-	fields.emplace("bufferSizeInBytes", WriteScalar(value.bufferSizeInBytes));
-	fields.emplace("gpuBufferSizeInBytes", WriteScalar(value.gpuBufferSizeInBytes));
-	fields.emplace("elemSizeInBytes", WriteScalar(value.elemSizeInBytes));
-	fields.emplace("attributesCount", WriteScalar(value.attributesCount));
-	fields.emplace("primitiveRestartIndex", WriteScalar(value.primitiveRestartIndex));
+	fields.emplace("elements-count", WriteScalar(value.elementsCount));
+	fields.emplace("buffer-size-in-bytes", WriteScalar(value.bufferSizeInBytes));
+	fields.emplace("gpu-buffer-size-in-bytes", WriteScalar(value.gpuBufferSizeInBytes));
+	fields.emplace("elem-size-in-bytes", WriteScalar(value.elemSizeInBytes));
+	fields.emplace("attributes-count", WriteScalar(value.attributesCount));
+	fields.emplace("primitive-restart-index", WriteScalar(value.primitiveRestartIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4845,7 +4845,7 @@ bool Read_GfxVBOInstanceDataQuery(const WasmValue& input, GfxVBOInstanceDataQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vboID = FindRecordField(*record, "vboID", error);
+	const auto* value_vboID = FindRecordField(*record, "vbo-id", error);
 	if (value_vboID == nullptr) return false;
 	if (!ReadScalar(*value_vboID, output.vboID, error)) { return false; }
 	const auto* value_ids = FindRecordField(*record, "ids", error);
@@ -4861,13 +4861,13 @@ bool Read_GfxVBOInstanceDataQuery(const WasmValue& input, GfxVBOInstanceDataQuer
 	}
 	output.ids = native_ids.data();
 	if (!AssignCount(list_ids->size(), output.idCount, error)) { return false; }
-	const auto* value_attributeIndex = FindRecordField(*record, "attributeIndex", error);
+	const auto* value_attributeIndex = FindRecordField(*record, "attribute-index", error);
 	if (value_attributeIndex == nullptr) return false;
 	if (!ReadScalar(*value_attributeIndex, output.attributeIndex, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_elementOffset = FindRecordField(*record, "elementOffset", error);
+	const auto* value_elementOffset = FindRecordField(*record, "element-offset", error);
 	if (value_elementOffset == nullptr) return false;
 	if (!ReadScalar(*value_elementOffset, output.elementOffset, error)) { return false; }
 	return true;
@@ -4876,11 +4876,11 @@ bool Read_GfxVBOInstanceDataQuery(const WasmValue& input, GfxVBOInstanceDataQuer
 WasmValue Write_GfxVBOInstanceDataQuery(const GfxVBOInstanceDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vboID", WriteScalar(value.vboID));
+	fields.emplace("vbo-id", WriteScalar(value.vboID));
 	fields.emplace("ids", WriteNativeList(value.ids, value.idCount, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("attributeIndex", WriteScalar(value.attributeIndex));
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("elementOffset", WriteScalar(value.elementOffset));
+	fields.emplace("attribute-index", WriteScalar(value.attributeIndex));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("element-offset", WriteScalar(value.elementOffset));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4891,7 +4891,7 @@ bool Read_GfxVBOQuery(const WasmValue& input, GfxVBOQuery& output, NativeCallSto
 	const auto* value_target = FindRecordField(*record, "target", error);
 	if (value_target == nullptr) return false;
 	if (!ReadScalar(*value_target, output.target, error)) { return false; }
-	const auto* value_freqUpdated = FindRecordField(*record, "freqUpdated", error);
+	const auto* value_freqUpdated = FindRecordField(*record, "freq-updated", error);
 	if (value_freqUpdated == nullptr) return false;
 	if (!ReadScalar(*value_freqUpdated, output.freqUpdated, error)) { return false; }
 	return true;
@@ -4901,7 +4901,7 @@ WasmValue Write_GfxVBOQuery(const GfxVBOQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("target", WriteScalar(value.target));
-	fields.emplace("freqUpdated", WriteScalar(value.freqUpdated));
+	fields.emplace("freq-updated", WriteScalar(value.freqUpdated));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4909,10 +4909,10 @@ bool Read_GfxVBOResult(const WasmValue& input, GfxVBOResult& output, NativeCallS
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vboID = FindRecordField(*record, "vboID", error);
+	const auto* value_vboID = FindRecordField(*record, "vbo-id", error);
 	if (value_vboID == nullptr) return false;
 	if (!ReadScalar(*value_vboID, output.vboID, error)) { return false; }
-	const auto* value_rawID = FindRecordField(*record, "rawID", error);
+	const auto* value_rawID = FindRecordField(*record, "raw-id", error);
 	if (value_rawID == nullptr) return false;
 	if (!ReadScalar(*value_rawID, output.rawID, error)) { return false; }
 	const auto* value_target = FindRecordField(*record, "target", error);
@@ -4924,8 +4924,8 @@ bool Read_GfxVBOResult(const WasmValue& input, GfxVBOResult& output, NativeCallS
 WasmValue Write_GfxVBOResult(const GfxVBOResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vboID", WriteScalar(value.vboID));
-	fields.emplace("rawID", WriteScalar(value.rawID));
+	fields.emplace("vbo-id", WriteScalar(value.vboID));
+	fields.emplace("raw-id", WriteScalar(value.rawID));
 	fields.emplace("target", WriteScalar(value.target));
 	return WasmValue::Record(std::move(fields));
 }
@@ -4934,7 +4934,7 @@ bool Read_GfxVBOUploadQuery(const WasmValue& input, GfxVBOUploadQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_vboID = FindRecordField(*record, "vboID", error);
+	const auto* value_vboID = FindRecordField(*record, "vbo-id", error);
 	if (value_vboID == nullptr) return false;
 	if (!ReadScalar(*value_vboID, output.vboID, error)) { return false; }
 	const auto* value_data = FindRecordField(*record, "data", error);
@@ -4950,16 +4950,16 @@ bool Read_GfxVBOUploadQuery(const WasmValue& input, GfxVBOUploadQuery& output, N
 	}
 	output.data = native_data.data();
 	if (!AssignCount(list_data->size(), output.dataCount, error)) { return false; }
-	const auto* value_attributeIndex = FindRecordField(*record, "attributeIndex", error);
+	const auto* value_attributeIndex = FindRecordField(*record, "attribute-index", error);
 	if (value_attributeIndex == nullptr) return false;
 	if (!ReadScalar(*value_attributeIndex, output.attributeIndex, error)) { return false; }
-	const auto* value_elementOffset = FindRecordField(*record, "elementOffset", error);
+	const auto* value_elementOffset = FindRecordField(*record, "element-offset", error);
 	if (value_elementOffset == nullptr) return false;
 	if (!ReadScalar(*value_elementOffset, output.elementOffset, error)) { return false; }
-	const auto* value_dataStartIndex = FindRecordField(*record, "dataStartIndex", error);
+	const auto* value_dataStartIndex = FindRecordField(*record, "data-start-index", error);
 	if (value_dataStartIndex == nullptr) return false;
 	if (!ReadScalar(*value_dataStartIndex, output.dataStartIndex, error)) { return false; }
-	const auto* value_dataFinishIndex = FindRecordField(*record, "dataFinishIndex", error);
+	const auto* value_dataFinishIndex = FindRecordField(*record, "data-finish-index", error);
 	if (value_dataFinishIndex == nullptr) return false;
 	if (!ReadScalar(*value_dataFinishIndex, output.dataFinishIndex, error)) { return false; }
 	return true;
@@ -4968,12 +4968,12 @@ bool Read_GfxVBOUploadQuery(const WasmValue& input, GfxVBOUploadQuery& output, N
 WasmValue Write_GfxVBOUploadQuery(const GfxVBOUploadQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("vboID", WriteScalar(value.vboID));
+	fields.emplace("vbo-id", WriteScalar(value.vboID));
 	fields.emplace("data", WriteNativeList(value.data, value.dataCount, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("attributeIndex", WriteScalar(value.attributeIndex));
-	fields.emplace("elementOffset", WriteScalar(value.elementOffset));
-	fields.emplace("dataStartIndex", WriteScalar(value.dataStartIndex));
-	fields.emplace("dataFinishIndex", WriteScalar(value.dataFinishIndex));
+	fields.emplace("attribute-index", WriteScalar(value.attributeIndex));
+	fields.emplace("element-offset", WriteScalar(value.elementOffset));
+	fields.emplace("data-start-index", WriteScalar(value.dataStartIndex));
+	fields.emplace("data-finish-index", WriteScalar(value.dataFinishIndex));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -4981,7 +4981,7 @@ bool Read_GfxVBOUploadResult(const WasmValue& input, GfxVBOUploadResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_bytesWritten = FindRecordField(*record, "bytesWritten", error);
+	const auto* value_bytesWritten = FindRecordField(*record, "bytes-written", error);
 	if (value_bytesWritten == nullptr) return false;
 	if (!ReadScalar(*value_bytesWritten, output.bytesWritten, error)) { return false; }
 	return true;
@@ -4990,7 +4990,7 @@ bool Read_GfxVBOUploadResult(const WasmValue& input, GfxVBOUploadResult& output,
 WasmValue Write_GfxVBOUploadResult(const GfxVBOUploadResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("bytesWritten", WriteScalar(value.bytesWritten));
+	fields.emplace("bytes-written", WriteScalar(value.bytesWritten));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5033,7 +5033,7 @@ bool Read_GfxValueResult(const WasmValue& input, GfxValueResult& output, NativeC
 	const auto* value_count = FindRecordField(*record, "count", error);
 	if (value_count == nullptr) return false;
 	if (!ReadScalar(*value_count, output.count, error)) { return false; }
-	const auto* value_boolValue = FindRecordField(*record, "boolValue", error);
+	const auto* value_boolValue = FindRecordField(*record, "bool-value", error);
 	if (value_boolValue == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_boolValue).storage)) {
 		output.boolValue = {};
@@ -5042,7 +5042,7 @@ bool Read_GfxValueResult(const WasmValue& input, GfxValueResult& output, NativeC
 		output.hasBool = true;
 		if (!ReadScalar(*value_boolValue, output.boolValue, error)) { return false; }
 	}
-	const auto* value_stringValue = FindRecordField(*record, "stringValue", error);
+	const auto* value_stringValue = FindRecordField(*record, "string-value", error);
 	if (value_stringValue == nullptr) return false;
 	auto& stored_string_output_stringValue = storage.Make<std::string>();
 	if (!ReadString(*value_stringValue, stored_string_output_stringValue, error)) { return false; }
@@ -5055,8 +5055,8 @@ WasmValue Write_GfxValueResult(const GfxValueResult& value)
 	WasmValueRecord fields;
 	fields.emplace("values", WriteNativeArray(value.values, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("count", WriteScalar(value.count));
-	fields.emplace("boolValue", value.hasBool ? WriteScalar(value.boolValue) : WasmValue::Unit());
-	fields.emplace("stringValue", WasmValue::String((value.stringValue == nullptr) ? std::string{} : std::string(value.stringValue)));
+	fields.emplace("bool-value", value.hasBool ? WriteScalar(value.boolValue) : WasmValue::Unit());
+	fields.emplace("string-value", WasmValue::String((value.stringValue == nullptr) ? std::string{} : std::string(value.stringValue)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5078,7 +5078,7 @@ bool Read_GfxVertexData(const WasmValue& input, GfxVertexData& output, NativeCal
 	for (std::size_t index = 0; index < 3u; ++index) {
 		if (!ReadScalar((*array_values_normal)[index], output.normal[index], error)) { return false; }
 	}
-	const auto* value_texCoord = FindRecordField(*record, "texCoord", error);
+	const auto* value_texCoord = FindRecordField(*record, "tex-coord", error);
 	if (value_texCoord == nullptr) return false;
 	const auto* array_values_texCoord = std::get_if<WasmValueList>(&(*value_texCoord).storage);
 	if (array_values_texCoord == nullptr || array_values_texCoord->size() != 2u) { error = "Wasm fixed array has the wrong length"; return false; }
@@ -5092,16 +5092,16 @@ bool Read_GfxVertexData(const WasmValue& input, GfxVertexData& output, NativeCal
 	for (std::size_t index = 0; index < 4u; ++index) {
 		if (!ReadScalar((*array_values_color)[index], output.color[index], error)) { return false; }
 	}
-	const auto* value_hasVertex = FindRecordField(*record, "hasVertex", error);
+	const auto* value_hasVertex = FindRecordField(*record, "has-vertex", error);
 	if (value_hasVertex == nullptr) return false;
 	if (!ReadScalar(*value_hasVertex, output.hasVertex, error)) { return false; }
-	const auto* value_hasNormal = FindRecordField(*record, "hasNormal", error);
+	const auto* value_hasNormal = FindRecordField(*record, "has-normal", error);
 	if (value_hasNormal == nullptr) return false;
 	if (!ReadScalar(*value_hasNormal, output.hasNormal, error)) { return false; }
-	const auto* value_hasTexCoord = FindRecordField(*record, "hasTexCoord", error);
+	const auto* value_hasTexCoord = FindRecordField(*record, "has-tex-coord", error);
 	if (value_hasTexCoord == nullptr) return false;
 	if (!ReadScalar(*value_hasTexCoord, output.hasTexCoord, error)) { return false; }
-	const auto* value_hasColor = FindRecordField(*record, "hasColor", error);
+	const auto* value_hasColor = FindRecordField(*record, "has-color", error);
 	if (value_hasColor == nullptr) return false;
 	if (!ReadScalar(*value_hasColor, output.hasColor, error)) { return false; }
 	return true;
@@ -5112,12 +5112,12 @@ WasmValue Write_GfxVertexData(const GfxVertexData& value)
 	WasmValueRecord fields;
 	fields.emplace("vertex", WriteNativeArray(value.vertex, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("normal", WriteNativeArray(value.normal, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("texCoord", WriteNativeArray(value.texCoord, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("tex-coord", WriteNativeArray(value.texCoord, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("color", WriteNativeArray(value.color, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("hasVertex", WriteScalar(value.hasVertex));
-	fields.emplace("hasNormal", WriteScalar(value.hasNormal));
-	fields.emplace("hasTexCoord", WriteScalar(value.hasTexCoord));
-	fields.emplace("hasColor", WriteScalar(value.hasColor));
+	fields.emplace("has-vertex", WriteScalar(value.hasVertex));
+	fields.emplace("has-normal", WriteScalar(value.hasNormal));
+	fields.emplace("has-tex-coord", WriteScalar(value.hasTexCoord));
+	fields.emplace("has-color", WriteScalar(value.hasColor));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5158,7 +5158,7 @@ bool Read_GfxViewRangeQuery(const WasmValue& input, GfxViewRangeQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_cameraType = FindRecordField(*record, "cameraType", error);
+	const auto* value_cameraType = FindRecordField(*record, "camera-type", error);
 	if (value_cameraType == nullptr) return false;
 	if (!ReadScalar(*value_cameraType, output.cameraType, error)) { return false; }
 	return true;
@@ -5167,7 +5167,7 @@ bool Read_GfxViewRangeQuery(const WasmValue& input, GfxViewRangeQuery& output, N
 WasmValue Write_GfxViewRangeQuery(const GfxViewRangeQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("cameraType", WriteScalar(value.cameraType));
+	fields.emplace("camera-type", WriteScalar(value.cameraType));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5175,16 +5175,16 @@ bool Read_GfxViewRangeResult(const WasmValue& input, GfxViewRangeResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_nearPlaneDist = FindRecordField(*record, "nearPlaneDist", error);
+	const auto* value_nearPlaneDist = FindRecordField(*record, "near-plane-dist", error);
 	if (value_nearPlaneDist == nullptr) return false;
 	if (!ReadScalar(*value_nearPlaneDist, output.nearPlaneDist, error)) { return false; }
-	const auto* value_farPlaneDist = FindRecordField(*record, "farPlaneDist", error);
+	const auto* value_farPlaneDist = FindRecordField(*record, "far-plane-dist", error);
 	if (value_farPlaneDist == nullptr) return false;
 	if (!ReadScalar(*value_farPlaneDist, output.farPlaneDist, error)) { return false; }
-	const auto* value_minViewRange = FindRecordField(*record, "minViewRange", error);
+	const auto* value_minViewRange = FindRecordField(*record, "min-view-range", error);
 	if (value_minViewRange == nullptr) return false;
 	if (!ReadScalar(*value_minViewRange, output.minViewRange, error)) { return false; }
-	const auto* value_maxViewRange = FindRecordField(*record, "maxViewRange", error);
+	const auto* value_maxViewRange = FindRecordField(*record, "max-view-range", error);
 	if (value_maxViewRange == nullptr) return false;
 	if (!ReadScalar(*value_maxViewRange, output.maxViewRange, error)) { return false; }
 	return true;
@@ -5193,10 +5193,10 @@ bool Read_GfxViewRangeResult(const WasmValue& input, GfxViewRangeResult& output,
 WasmValue Write_GfxViewRangeResult(const GfxViewRangeResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("nearPlaneDist", WriteScalar(value.nearPlaneDist));
-	fields.emplace("farPlaneDist", WriteScalar(value.farPlaneDist));
-	fields.emplace("minViewRange", WriteScalar(value.minViewRange));
-	fields.emplace("maxViewRange", WriteScalar(value.maxViewRange));
+	fields.emplace("near-plane-dist", WriteScalar(value.nearPlaneDist));
+	fields.emplace("far-plane-dist", WriteScalar(value.farPlaneDist));
+	fields.emplace("min-view-range", WriteScalar(value.minViewRange));
+	fields.emplace("max-view-range", WriteScalar(value.maxViewRange));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5204,10 +5204,10 @@ bool Read_GfxViewSizesResult(const WasmValue& input, GfxViewSizesResult& output,
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_viewSizeX = FindRecordField(*record, "viewSizeX", error);
+	const auto* value_viewSizeX = FindRecordField(*record, "view-size-x", error);
 	if (value_viewSizeX == nullptr) return false;
 	if (!ReadScalar(*value_viewSizeX, output.viewSizeX, error)) { return false; }
-	const auto* value_viewSizeY = FindRecordField(*record, "viewSizeY", error);
+	const auto* value_viewSizeY = FindRecordField(*record, "view-size-y", error);
 	if (value_viewSizeY == nullptr) return false;
 	if (!ReadScalar(*value_viewSizeY, output.viewSizeY, error)) { return false; }
 	return true;
@@ -5216,8 +5216,8 @@ bool Read_GfxViewSizesResult(const WasmValue& input, GfxViewSizesResult& output,
 WasmValue Write_GfxViewSizesResult(const GfxViewSizesResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("viewSizeX", WriteScalar(value.viewSizeX));
-	fields.emplace("viewSizeY", WriteScalar(value.viewSizeY));
+	fields.emplace("view-size-x", WriteScalar(value.viewSizeX));
+	fields.emplace("view-size-y", WriteScalar(value.viewSizeY));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -5260,7 +5260,7 @@ NativeCalloutDispatch Dispatch_gfx_ActiveTexture(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GfxActiveTextureQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "texNum", query.texNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "tex-num", query.texNum, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->ActiveTexture(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -5273,12 +5273,12 @@ NativeCalloutDispatch Dispatch_gfx_AddAtlasTexture(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GfxAtlasTextureQuery query{};
 	GfxEmptyResult nativeResult{};
-	const WasmValue* value_atlasName = FindArgument(arguments, 0u, 0u, 2u, 2u, "atlasName", error);
+	const WasmValue* value_atlasName = FindArgument(arguments, 0u, 0u, 2u, 2u, "atlas-name", error);
 	if (value_atlasName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_atlasName = storage.Make<std::string>();
 	if (!ReadString(*value_atlasName, stored_string_query_atlasName, error)) { return NativeCalloutDispatch::handled; }
 	query.atlasName = stored_string_query_atlasName.c_str();
-	const WasmValue* value_textureName = FindArgument(arguments, 1u, 1u, 2u, 2u, "textureName", error);
+	const WasmValue* value_textureName = FindArgument(arguments, 1u, 1u, 2u, 2u, "texture-name", error);
 	if (value_textureName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_query_textureName, error)) { return NativeCalloutDispatch::handled; }
@@ -5312,7 +5312,7 @@ NativeCalloutDispatch Dispatch_gfx_AddFeatureDefsToSubmissionVAO(NativeInterface
 	NativeCallStorage storage;
 	GfxVAOSubmissionQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 2u, 2u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -5338,7 +5338,7 @@ NativeCalloutDispatch Dispatch_gfx_AddFeaturesToSubmissionVAO(NativeInterface* n
 	NativeCallStorage storage;
 	GfxVAOSubmissionQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 2u, 2u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -5364,7 +5364,7 @@ NativeCalloutDispatch Dispatch_gfx_AddUnitDefsToSubmissionVAO(NativeInterface* n
 	NativeCallStorage storage;
 	GfxVAOSubmissionQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 2u, 2u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -5390,7 +5390,7 @@ NativeCalloutDispatch Dispatch_gfx_AddUnitsToSubmissionVAO(NativeInterface* nati
 	NativeCallStorage storage;
 	GfxVAOSubmissionQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 2u, 2u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -5444,8 +5444,8 @@ NativeCalloutDispatch Dispatch_gfx_AttachIndexBufferVAO(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GfxVAOBufferQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->AttachIndexBufferVAO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -5458,8 +5458,8 @@ NativeCalloutDispatch Dispatch_gfx_AttachInstanceBufferVAO(NativeInterface* nati
 	NativeCallStorage storage;
 	GfxVAOBufferQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->AttachInstanceBufferVAO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -5472,8 +5472,8 @@ NativeCalloutDispatch Dispatch_gfx_AttachVertexBufferVAO(NativeInterface* native
 	NativeCallStorage storage;
 	GfxVAOBufferQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->AttachVertexBufferVAO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -5499,7 +5499,7 @@ NativeCalloutDispatch Dispatch_gfx_Billboard(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->Billboard(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -5512,10 +5512,10 @@ NativeCalloutDispatch Dispatch_gfx_BindBufferRangeVBO(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxVBOBindRangeQuery query{};
 	GfxIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "bindingIndex", query.bindingIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "elementCount", query.elementCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "binding-index", query.bindingIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "element-count", query.elementCount, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "target", query.target, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "bind", query.bind, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->BindBufferRangeVBO(&query, &nativeResult);
@@ -5558,7 +5558,7 @@ NativeCalloutDispatch Dispatch_gfx_BindTexture(NativeInterface* nativeInterface,
 	auto& stored_string_query_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_query_name, error)) { return NativeCalloutDispatch::handled; }
 	query.name = stored_string_query_name.c_str();
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "texNum", query.texNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "tex-num", query.texNum, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "enable", query.enable, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->BindTexture(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -5585,8 +5585,8 @@ NativeCalloutDispatch Dispatch_gfx_BlendEquationSeparate(NativeInterface* native
 	NativeCallStorage storage;
 	GfxBlendEquationSeparateQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "modeRGB", query.modeRGB, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "modeAlpha", query.modeAlpha, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "mode-rgb", query.modeRGB, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "mode-alpha", query.modeAlpha, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->BlendEquationSeparate(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -5613,10 +5613,10 @@ NativeCalloutDispatch Dispatch_gfx_BlendFuncSeparate(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GfxBlendFuncSeparateQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "srcRGB", query.srcRGB, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "dstRGB", query.dstRGB, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "srcAlpha", query.srcAlpha, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "dstAlpha", query.dstAlpha, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "src-rgb", query.srcRGB, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "dst-rgb", query.dstRGB, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "src-alpha", query.srcAlpha, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "dst-alpha", query.dstAlpha, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->BlendFuncSeparate(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -5642,16 +5642,16 @@ NativeCalloutDispatch Dispatch_gfx_BlitFBO(NativeInterface* nativeInterface, con
 	NativeCallStorage storage;
 	GfxBlitFBOQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 12u, 12u, "srcFBOID", query.srcFBOID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 12u, 12u, "dstFBOID", query.dstFBOID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 12u, 12u, "x0Src", query.x0Src, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 12u, 12u, "y0Src", query.y0Src, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 12u, 12u, "x1Src", query.x1Src, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 12u, 12u, "y1Src", query.y1Src, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 12u, 12u, "x0Dst", query.x0Dst, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 7u, 7u, 12u, 12u, "y0Dst", query.y0Dst, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 8u, 8u, 12u, 12u, "x1Dst", query.x1Dst, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 9u, 9u, 12u, 12u, "y1Dst", query.y1Dst, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 12u, 12u, "src-fboid", query.srcFBOID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 12u, 12u, "dst-fboid", query.dstFBOID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 12u, 12u, "x0-src", query.x0Src, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 12u, 12u, "y0-src", query.y0Src, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 12u, 12u, "x1-src", query.x1Src, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 12u, 12u, "y1-src", query.y1Src, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 12u, 12u, "x0-dst", query.x0Dst, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 7u, 7u, 12u, 12u, "y0-dst", query.y0Dst, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 8u, 8u, 12u, 12u, "x1-dst", query.x1Dst, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 9u, 9u, 12u, 12u, "y1-dst", query.y1Dst, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 10u, 10u, 12u, 12u, "mask", query.mask, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 11u, 11u, 12u, 12u, "filter", query.filter, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->BlitFBO(&query, &nativeResult);
@@ -5740,7 +5740,7 @@ NativeCalloutDispatch Dispatch_gfx_ClearFallbackFonts(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->ClearFallbackFonts(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -5883,9 +5883,9 @@ NativeCalloutDispatch Dispatch_gfx_CopyToVBO(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxVBOCopyQuery query{};
 	GfxBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "sourceVBOID", query.sourceVBOID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "destinationVBOID", query.destinationVBOID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "copySizeInBytes", query.copySizeInBytes, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "source-vboid", query.sourceVBOID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "destination-vboid", query.destinationVBOID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "copy-size-in-bytes", query.copySizeInBytes, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->CopyToVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -5912,7 +5912,7 @@ NativeCalloutDispatch Dispatch_gfx_CreateFBO(NativeInterface* nativeInterface, c
 	}
 	query.attachments = native_attachments.data();
 	if (!AssignCount(list_attachments->size(), query.attachmentCount, error)) { return NativeCalloutDispatch::handled; }
-	const WasmValue* value_drawBuffers = FindArgument(arguments, 2u, 2u, 4u, 4u, "drawBuffers", error);
+	const WasmValue* value_drawBuffers = FindArgument(arguments, 2u, 2u, 4u, 4u, "draw-buffers", error);
 	if (value_drawBuffers == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_drawBuffers = std::get_if<WasmValueList>(&(*value_drawBuffers).storage);
 	if (list_drawBuffers == nullptr) { error = "Wasm argument is not a list"; return NativeCalloutDispatch::handled; }
@@ -5925,12 +5925,12 @@ NativeCalloutDispatch Dispatch_gfx_CreateFBO(NativeInterface* nativeInterface, c
 	}
 	query.drawBuffers = native_drawBuffers.data();
 	if (!AssignCount(list_drawBuffers->size(), query.drawBufferCount, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "readBuffer", query.readBuffer, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "read-buffer", query.readBuffer, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->CreateFBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("fboID", WriteScalar(nativeResult.fboID));
-	outputFields.emplace("rawID", WriteScalar(nativeResult.rawID));
+	outputFields.emplace("fbo-id", WriteScalar(nativeResult.fboID));
+	outputFields.emplace("raw-id", WriteScalar(nativeResult.rawID));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -5941,7 +5941,7 @@ NativeCalloutDispatch Dispatch_gfx_CreateQuery(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->CreateQuery(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -6010,8 +6010,8 @@ NativeCalloutDispatch Dispatch_gfx_CreateShader(NativeInterface* nativeInterface
 	nativeInterface->gfx->CreateShader(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("shaderID", WriteScalar(nativeResult.shaderID));
-	outputFields.emplace("glProgramID", WriteScalar(nativeResult.glProgramID));
+	outputFields.emplace("shader-id", WriteScalar(nativeResult.shaderID));
+	outputFields.emplace("gl-program-id", WriteScalar(nativeResult.glProgramID));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -6035,12 +6035,12 @@ NativeCalloutDispatch Dispatch_gfx_DefineVBO(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxVBODefineQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "elementsCount", query.elementsCount, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 7u, 7u, "elementArray", query.elementArray, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "indexType", query.indexType, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "useDefaultAttributes", query.useDefaultAttributes, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "defaultAttributeCount", query.defaultAttributeCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "elements-count", query.elementsCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 7u, 7u, "element-array", query.elementArray, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "index-type", query.indexType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "use-default-attributes", query.useDefaultAttributes, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "default-attribute-count", query.defaultAttributeCount, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_attributes = FindArgument(arguments, 6u, 6u, 7u, 7u, "attributes", error);
 	if (value_attributes == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_attributes = std::get_if<WasmValueList>(&(*value_attributes).storage);
@@ -6079,7 +6079,7 @@ NativeCalloutDispatch Dispatch_gfx_DeleteFont(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GfxFontQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->DeleteFont(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6131,7 +6131,7 @@ NativeCalloutDispatch Dispatch_gfx_DeleteShader(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxShaderQuery query{};
 	GfxBoolResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "shaderID", query.shaderID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "shader-id", query.shaderID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->DeleteShader(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -6260,9 +6260,9 @@ NativeCalloutDispatch Dispatch_gfx_DispatchCompute(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GfxDispatchComputeQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "numGroupX", query.numGroupX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "numGroupY", query.numGroupY, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "numGroupZ", query.numGroupZ, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "num-group-x", query.numGroupX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "num-group-y", query.numGroupY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "num-group-z", query.numGroupZ, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "barriers", query.barriers, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->DispatchCompute(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6276,11 +6276,11 @@ NativeCalloutDispatch Dispatch_gfx_DownloadVBO(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	GfxVBODownloadQuery query{};
 	GfxVBODownloadResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "attributeIndex", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "elementCount", query.elementCount, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "forceGPURead", query.forceGPURead, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "attribute-index", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "element-count", query.elementCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "force-gpu-read", query.forceGPURead, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->DownloadVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.values, nativeResult.count, [](const auto& value) { return WriteScalar(value); });
@@ -6293,12 +6293,12 @@ NativeCalloutDispatch Dispatch_gfx_DrawArraysVAO(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GfxVAODrawArraysQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "mode", query.mode, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "vertexCount", query.vertexCount, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "vertexFirst", query.vertexFirst, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "instanceCount", query.instanceCount, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "instanceFirst", query.instanceFirst, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "vertex-count", query.vertexCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "vertex-first", query.vertexFirst, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "instance-count", query.instanceCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "instance-first", query.instanceFirst, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->DrawArraysVAO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6311,13 +6311,13 @@ NativeCalloutDispatch Dispatch_gfx_DrawElementsVAO(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GfxVAODrawElementsQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "mode", query.mode, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 7u, 7u, "drawCount", query.drawCount, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "baseIndex", query.baseIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "instanceCount", query.instanceCount, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "baseVertex", query.baseVertex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "baseInstance", query.baseInstance, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 7u, 7u, "draw-count", query.drawCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "base-index", query.baseIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "instance-count", query.instanceCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "base-vertex", query.baseVertex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "base-instance", query.baseInstance, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->DrawElementsVAO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6336,7 +6336,7 @@ NativeCalloutDispatch Dispatch_gfx_DrawGroundCircle(NativeInterface* nativeInter
 	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "ballistic", query.ballistic, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "slope", query.slope, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "gravity", query.gravity, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "weaponDefID", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "weapon-def-id", query.weaponDefID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->DrawGroundCircle(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6353,7 +6353,7 @@ NativeCalloutDispatch Dispatch_gfx_DrawGroundQuad(NativeInterface* nativeInterfa
 	if (!ReadArgument(arguments, 1u, 1u, 9u, 9u, "z0", query.z0, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 9u, 9u, "x1", query.x1, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 9u, 9u, "z1", query.z1, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 9u, 9u, "useTexCoords", query.useTexCoords, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 9u, 9u, "use-tex-coords", query.useTexCoords, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 5u, 5u, 9u, 9u, "tu0", query.tu0, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 6u, 6u, 9u, 9u, "tv0", query.tv0, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 7u, 7u, 9u, 9u, "tu1", query.tu1, error)) return NativeCalloutDispatch::handled;
@@ -6370,9 +6370,9 @@ NativeCalloutDispatch Dispatch_gfx_DrawListAtUnit(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GfxDrawListAtUnitQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "listID", query.listID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "useMidPos", query.useMidPos, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "list-id", query.listID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "use-mid-pos", query.useMidPos, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 3u, 3u, 6u, 6u, "scale", Read_Float3, query.scale, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "degrees", query.degrees, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 5u, 5u, 6u, 6u, "rot", Read_Float3, query.rot, storage, error)) return NativeCalloutDispatch::handled;
@@ -6427,7 +6427,7 @@ NativeCalloutDispatch Dispatch_gfx_EndText(NativeInterface* nativeInterface, con
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->EndText(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6440,7 +6440,7 @@ NativeCalloutDispatch Dispatch_gfx_Feature(NativeInterface* nativeInterface, con
 	NativeCallStorage storage;
 	GfxFeatureDrawQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_GfxFeatureDrawOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->Feature(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6467,8 +6467,8 @@ NativeCalloutDispatch Dispatch_gfx_FeaturePiece(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxObjectPieceQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pieceID", query.pieceID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "piece-id", query.pieceID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FeaturePiece(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6481,8 +6481,8 @@ NativeCalloutDispatch Dispatch_gfx_FeaturePieceMatrix(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxObjectPieceQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pieceID", query.pieceID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "piece-id", query.pieceID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FeaturePieceMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6495,8 +6495,8 @@ NativeCalloutDispatch Dispatch_gfx_FeaturePieceMultMatrix(NativeInterface* nativ
 	NativeCallStorage storage;
 	GfxObjectPieceQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pieceID", query.pieceID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "piece-id", query.pieceID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FeaturePieceMultMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6509,7 +6509,7 @@ NativeCalloutDispatch Dispatch_gfx_FeatureRaw(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GfxFeatureDrawQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "featureID", query.featureID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "feature-id", query.featureID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_GfxFeatureDrawOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FeatureRaw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6523,8 +6523,8 @@ NativeCalloutDispatch Dispatch_gfx_FeatureShape(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxObjectShapeQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "defID", query.defID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "def-id", query.defID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "options", Read_GfxObjectShapeOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FeatureShape(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6538,7 +6538,7 @@ NativeCalloutDispatch Dispatch_gfx_FeatureShapeTextures(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GfxObjectTextureStateQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "push", query.push, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FeatureShapeTextures(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6552,7 +6552,7 @@ NativeCalloutDispatch Dispatch_gfx_FeatureTextures(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GfxObjectTextureStateQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "push", query.push, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FeatureTextures(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6583,7 +6583,7 @@ NativeCalloutDispatch Dispatch_gfx_Finish(NativeInterface* nativeInterface, cons
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->Finish(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6596,7 +6596,7 @@ NativeCalloutDispatch Dispatch_gfx_Flush(NativeInterface* nativeInterface, const
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->Flush(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6635,8 +6635,8 @@ NativeCalloutDispatch Dispatch_gfx_FontBegin(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxFontBeginQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "userDefinedBlending", query.userDefinedBlending, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "user-defined-blending", query.userDefinedBlending, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FontBegin(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6649,7 +6649,7 @@ NativeCalloutDispatch Dispatch_gfx_FontBindTexture(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GfxFontQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FontBindTexture(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6662,7 +6662,7 @@ NativeCalloutDispatch Dispatch_gfx_FontEnd(NativeInterface* nativeInterface, con
 	NativeCallStorage storage;
 	GfxFontQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FontEnd(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6675,7 +6675,7 @@ NativeCalloutDispatch Dispatch_gfx_FontGetTextHeight(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GfxFontTextQuery query{};
 	GfxTextHeightResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_text = FindArgument(arguments, 1u, 1u, 6u, 6u, "text", error);
 	if (value_text == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_text = storage.Make<std::string>();
@@ -6705,7 +6705,7 @@ NativeCalloutDispatch Dispatch_gfx_FontGetTextWidth(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	GfxFontTextQuery query{};
 	GfxFloatResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_text = FindArgument(arguments, 1u, 1u, 6u, 6u, "text", error);
 	if (value_text == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_text = storage.Make<std::string>();
@@ -6731,7 +6731,7 @@ NativeCalloutDispatch Dispatch_gfx_FontPrint(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxFontTextQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_text = FindArgument(arguments, 1u, 1u, 6u, 6u, "text", error);
 	if (value_text == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_text = storage.Make<std::string>();
@@ -6757,7 +6757,7 @@ NativeCalloutDispatch Dispatch_gfx_FontPrintWorld(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GfxFontWorldTextQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_text = FindArgument(arguments, 1u, 1u, 5u, 5u, "text", error);
 	if (value_text == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_text = storage.Make<std::string>();
@@ -6782,7 +6782,7 @@ NativeCalloutDispatch Dispatch_gfx_FontSetAutoOutlineColor(NativeInterface* nati
 	NativeCallStorage storage;
 	GfxFontAutoOutlineColorQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "enable", query.enable, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FontSetAutoOutlineColor(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6796,7 +6796,7 @@ NativeCalloutDispatch Dispatch_gfx_FontSetOutlineColor(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GfxFontColorQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "r", query.r, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "g", query.g, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "b", query.b, error)) return NativeCalloutDispatch::handled;
@@ -6813,7 +6813,7 @@ NativeCalloutDispatch Dispatch_gfx_FontSetTextColor(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	GfxFontColorQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "r", query.r, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "g", query.g, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "b", query.b, error)) return NativeCalloutDispatch::handled;
@@ -6830,7 +6830,7 @@ NativeCalloutDispatch Dispatch_gfx_FontSubmitBuffered(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxFontSubmitBufferedQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_GfxFontSubmitBufferedOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FontSubmitBuffered(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6844,14 +6844,14 @@ NativeCalloutDispatch Dispatch_gfx_FontWrapText(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxFontWrapTextQuery query{};
 	GfxFontWrapTextResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_text = FindArgument(arguments, 1u, 1u, 5u, 5u, "text", error);
 	if (value_text == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_text = storage.Make<std::string>();
 	if (!ReadString(*value_text, stored_string_query_text, error)) { return NativeCalloutDispatch::handled; }
 	query.text = stored_string_query_text.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "maxWidth", query.maxWidth, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "maxHeight", query.maxHeight, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "max-width", query.maxWidth, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "max-height", query.maxHeight, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "size", query.size, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->FontWrapText(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -6872,8 +6872,8 @@ NativeCalloutDispatch Dispatch_gfx_Frustum(NativeInterface* nativeInterface, con
 	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "right", query.right, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "bottom", query.bottom, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "top", query.top, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "nearVal", query.nearVal, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "farVal", query.farVal, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "near-val", query.nearVal, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "far-val", query.farVal, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->Frustum(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -6903,7 +6903,7 @@ NativeCalloutDispatch Dispatch_gfx_GetActiveUniforms(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GfxShaderQuery query{};
 	GfxActiveUniformsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "shaderID", query.shaderID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "shader-id", query.shaderID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetActiveUniforms(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.entries, nativeResult.count, [](const auto& value) { return Write_GfxActiveUniformEntry(value); });
@@ -6916,12 +6916,12 @@ NativeCalloutDispatch Dispatch_gfx_GetAtlasTexture(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GfxAtlasTextureQuery query{};
 	GfxAtlasTextureResult nativeResult{};
-	const WasmValue* value_atlasName = FindArgument(arguments, 0u, 0u, 2u, 2u, "atlasName", error);
+	const WasmValue* value_atlasName = FindArgument(arguments, 0u, 0u, 2u, 2u, "atlas-name", error);
 	if (value_atlasName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_atlasName = storage.Make<std::string>();
 	if (!ReadString(*value_atlasName, stored_string_query_atlasName, error)) { return NativeCalloutDispatch::handled; }
 	query.atlasName = stored_string_query_atlasName.c_str();
-	const WasmValue* value_textureName = FindArgument(arguments, 1u, 1u, 2u, 2u, "textureName", error);
+	const WasmValue* value_textureName = FindArgument(arguments, 1u, 1u, 2u, 2u, "texture-name", error);
 	if (value_textureName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_query_textureName, error)) { return NativeCalloutDispatch::handled; }
@@ -6933,7 +6933,7 @@ NativeCalloutDispatch Dispatch_gfx_GetAtlasTexture(NativeInterface* nativeInterf
 	outputFields.emplace("x2", WriteScalar(nativeResult.x2));
 	outputFields.emplace("y1", WriteScalar(nativeResult.y1));
 	outputFields.emplace("y2", WriteScalar(nativeResult.y2));
-	outputFields.emplace("pageNum", WriteScalar(nativeResult.pageNum));
+	outputFields.emplace("page-num", WriteScalar(nativeResult.pageNum));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -6959,8 +6959,8 @@ NativeCalloutDispatch Dispatch_gfx_GetAtmosphere(NativeInterface* nativeInterfac
 	WasmValueRecord outputFields;
 	outputFields.emplace("values", WriteNativeArray(nativeResult.values, [](const auto& value) { return WriteScalar(value); }));
 	outputFields.emplace("count", WriteScalar(nativeResult.count));
-	outputFields.emplace("boolValue", nativeResult.hasBool ? WriteScalar(nativeResult.boolValue) : WasmValue::Unit());
-	outputFields.emplace("stringValue", WasmValue::String((nativeResult.stringValue == nullptr) ? std::string{} : std::string(nativeResult.stringValue)));
+	outputFields.emplace("bool-value", nativeResult.hasBool ? WriteScalar(nativeResult.boolValue) : WasmValue::Unit());
+	outputFields.emplace("string-value", WasmValue::String((nativeResult.stringValue == nullptr) ? std::string{} : std::string(nativeResult.stringValue)));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -6971,7 +6971,7 @@ NativeCalloutDispatch Dispatch_gfx_GetConsoleCommands(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxConsoleCommandsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetConsoleCommands(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.entries, nativeResult.count, [](const auto& value) { return Write_GfxConsoleCommandEntry(value); });
@@ -7001,7 +7001,7 @@ NativeCalloutDispatch Dispatch_gfx_GetEngineModelUniformDataDef(NativeInterface*
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetEngineModelUniformDataDef(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -7014,12 +7014,12 @@ NativeCalloutDispatch Dispatch_gfx_GetEngineModelUniformDataSize(NativeInterface
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEngineModelUniformDataSizeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetEngineModelUniformDataSize(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("sizeInElements", WriteScalar(nativeResult.sizeInElements));
-	outputFields.emplace("sizeInBytesOnCPU", WriteScalar(nativeResult.sizeInBytesOnCPU));
+	outputFields.emplace("size-in-elements", WriteScalar(nativeResult.sizeInElements));
+	outputFields.emplace("size-in-bytes-on-cpu", WriteScalar(nativeResult.sizeInBytesOnCPU));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7030,7 +7030,7 @@ NativeCalloutDispatch Dispatch_gfx_GetEngineTextureNames(NativeInterface* native
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEngineTextureNamesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetEngineTextureNames(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.names, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -7065,11 +7065,11 @@ NativeCalloutDispatch Dispatch_gfx_GetFixedState(NativeInterface* nativeInterfac
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
 	outputFields.emplace("bools", WriteNativeArray(nativeResult.bools, [](const auto& value) { return WriteScalar(value); }));
-	outputFields.emplace("boolCount", WriteScalar(nativeResult.boolCount));
+	outputFields.emplace("bool-count", WriteScalar(nativeResult.boolCount));
 	outputFields.emplace("ints", WriteNativeArray(nativeResult.ints, [](const auto& value) { return WriteScalar(value); }));
-	outputFields.emplace("intCount", WriteScalar(nativeResult.intCount));
+	outputFields.emplace("int-count", WriteScalar(nativeResult.intCount));
 	outputFields.emplace("floats", WriteNativeArray(nativeResult.floats, [](const auto& value) { return WriteScalar(value); }));
-	outputFields.emplace("floatCount", WriteScalar(nativeResult.floatCount));
+	outputFields.emplace("float-count", WriteScalar(nativeResult.floatCount));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7080,7 +7080,7 @@ NativeCalloutDispatch Dispatch_gfx_GetFontInfo(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	GfxFontQuery query{};
 	GfxFontInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "fontID", query.fontID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "font-id", query.fontID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetFontInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -7088,12 +7088,12 @@ NativeCalloutDispatch Dispatch_gfx_GetFontInfo(NativeInterface* nativeInterface,
 	outputFields.emplace("family", WasmValue::String((nativeResult.family == nullptr) ? std::string{} : std::string(nativeResult.family)));
 	outputFields.emplace("style", WasmValue::String((nativeResult.style == nullptr) ? std::string{} : std::string(nativeResult.style)));
 	outputFields.emplace("size", WriteScalar(nativeResult.size));
-	outputFields.emplace("lineHeight", WriteScalar(nativeResult.lineHeight));
+	outputFields.emplace("line-height", WriteScalar(nativeResult.lineHeight));
 	outputFields.emplace("descender", WriteScalar(nativeResult.descender));
-	outputFields.emplace("outlineWidth", WriteScalar(nativeResult.outlineWidth));
-	outputFields.emplace("outlineWeight", WriteScalar(nativeResult.outlineWeight));
-	outputFields.emplace("textureWidth", WriteScalar(nativeResult.textureWidth));
-	outputFields.emplace("textureHeight", WriteScalar(nativeResult.textureHeight));
+	outputFields.emplace("outline-width", WriteScalar(nativeResult.outlineWidth));
+	outputFields.emplace("outline-weight", WriteScalar(nativeResult.outlineWeight));
+	outputFields.emplace("texture-width", WriteScalar(nativeResult.textureWidth));
+	outputFields.emplace("texture-height", WriteScalar(nativeResult.textureHeight));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7116,7 +7116,7 @@ NativeCalloutDispatch Dispatch_gfx_GetGlobalTexCoords(NativeInterface* nativeInt
 	outputFields.emplace("x2", WriteScalar(nativeResult.x2));
 	outputFields.emplace("y1", WriteScalar(nativeResult.y1));
 	outputFields.emplace("y2", WriteScalar(nativeResult.y2));
-	outputFields.emplace("pageNum", WriteScalar(nativeResult.pageNum));
+	outputFields.emplace("page-num", WriteScalar(nativeResult.pageNum));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7127,7 +7127,7 @@ NativeCalloutDispatch Dispatch_gfx_GetGlobalTexNames(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxAtlasTexturesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetGlobalTexNames(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.entries, nativeResult.count, [](const auto& value) { return Write_GfxAtlasTextureEntry(value); });
@@ -7168,8 +7168,8 @@ NativeCalloutDispatch Dispatch_gfx_GetMapRendering(NativeInterface* nativeInterf
 	WasmValueRecord outputFields;
 	outputFields.emplace("values", WriteNativeArray(nativeResult.values, [](const auto& value) { return WriteScalar(value); }));
 	outputFields.emplace("count", WriteScalar(nativeResult.count));
-	outputFields.emplace("boolValue", nativeResult.hasBool ? WriteScalar(nativeResult.boolValue) : WasmValue::Unit());
-	outputFields.emplace("stringValue", WasmValue::String((nativeResult.stringValue == nullptr) ? std::string{} : std::string(nativeResult.stringValue)));
+	outputFields.emplace("bool-value", nativeResult.hasBool ? WriteScalar(nativeResult.boolValue) : WasmValue::Unit());
+	outputFields.emplace("string-value", WasmValue::String((nativeResult.stringValue == nullptr) ? std::string{} : std::string(nativeResult.stringValue)));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7194,7 +7194,7 @@ NativeCalloutDispatch Dispatch_gfx_GetNumber(NativeInterface* nativeInterface, c
 	GfxGetNumberQuery query{};
 	GfxGetNumberResult nativeResult{};
 	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "pname", query.pname, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "maxValues", query.maxValues, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "max-values", query.maxValues, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetNumber(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -7223,7 +7223,7 @@ NativeCalloutDispatch Dispatch_gfx_GetRBOInfo(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GfxRBOInfoQuery query{};
 	GfxRBOInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "rboID", query.rboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "rbo-id", query.rboID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetRBOInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -7243,7 +7243,7 @@ NativeCalloutDispatch Dispatch_gfx_GetScreenViewTrans(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxTranslateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetScreenViewTrans(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
@@ -7260,7 +7260,7 @@ NativeCalloutDispatch Dispatch_gfx_GetShaderLog(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxStringResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetShaderLog(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.value == nullptr) ? std::string{} : std::string(nativeResult.value));
@@ -7273,7 +7273,7 @@ NativeCalloutDispatch Dispatch_gfx_GetShadowMapParams(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxShadowMapParamsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetShadowMapParams(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float4(nativeResult.params);
@@ -7299,8 +7299,8 @@ NativeCalloutDispatch Dispatch_gfx_GetSubroutineIndex(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxSubroutineIndexQuery query{};
 	GfxSubroutineIndexResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "shaderID", query.shaderID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "shaderType", query.shaderType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "shader-id", query.shaderID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "shader-type", query.shaderType, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 2u, 2u, 3u, 3u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -7336,8 +7336,8 @@ NativeCalloutDispatch Dispatch_gfx_GetSun(NativeInterface* nativeInterface, cons
 	WasmValueRecord outputFields;
 	outputFields.emplace("values", WriteNativeArray(nativeResult.values, [](const auto& value) { return WriteScalar(value); }));
 	outputFields.emplace("count", WriteScalar(nativeResult.count));
-	outputFields.emplace("boolValue", nativeResult.hasBool ? WriteScalar(nativeResult.boolValue) : WasmValue::Unit());
-	outputFields.emplace("stringValue", WasmValue::String((nativeResult.stringValue == nullptr) ? std::string{} : std::string(nativeResult.stringValue)));
+	outputFields.emplace("bool-value", nativeResult.hasBool ? WriteScalar(nativeResult.boolValue) : WasmValue::Unit());
+	outputFields.emplace("string-value", WasmValue::String((nativeResult.stringValue == nullptr) ? std::string{} : std::string(nativeResult.stringValue)));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7386,7 +7386,7 @@ NativeCalloutDispatch Dispatch_gfx_GetUniformLocation(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GfxUniformLocationQuery query{};
 	GfxUniformLocationResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "shaderID", query.shaderID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "shader-id", query.shaderID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_name = FindArgument(arguments, 1u, 1u, 2u, 2u, "name", error);
 	if (value_name == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_name = storage.Make<std::string>();
@@ -7404,12 +7404,12 @@ NativeCalloutDispatch Dispatch_gfx_GetVAO(NativeInterface* nativeInterface, cons
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxVAOResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetVAO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("vaoID", WriteScalar(nativeResult.vaoID));
-	outputFields.emplace("rawID", WriteScalar(nativeResult.rawID));
+	outputFields.emplace("vao-id", WriteScalar(nativeResult.vaoID));
+	outputFields.emplace("raw-id", WriteScalar(nativeResult.rawID));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7421,12 +7421,12 @@ NativeCalloutDispatch Dispatch_gfx_GetVBO(NativeInterface* nativeInterface, cons
 	GfxVBOQuery query{};
 	GfxVBOResult nativeResult{};
 	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "target", query.target, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "freqUpdated", query.freqUpdated, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "freq-updated", query.freqUpdated, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("vboID", WriteScalar(nativeResult.vboID));
-	outputFields.emplace("rawID", WriteScalar(nativeResult.rawID));
+	outputFields.emplace("vbo-id", WriteScalar(nativeResult.vboID));
+	outputFields.emplace("raw-id", WriteScalar(nativeResult.rawID));
 	outputFields.emplace("target", WriteScalar(nativeResult.target));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
@@ -7438,16 +7438,16 @@ NativeCalloutDispatch Dispatch_gfx_GetVBOInfo(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GfxVBOInfoQuery query{};
 	GfxVBOInfoResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetVBOInfo(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("elementsCount", WriteScalar(nativeResult.elementsCount));
-	outputFields.emplace("bufferSizeInBytes", WriteScalar(nativeResult.bufferSizeInBytes));
-	outputFields.emplace("gpuBufferSizeInBytes", WriteScalar(nativeResult.gpuBufferSizeInBytes));
-	outputFields.emplace("elemSizeInBytes", WriteScalar(nativeResult.elemSizeInBytes));
-	outputFields.emplace("attributesCount", WriteScalar(nativeResult.attributesCount));
-	outputFields.emplace("primitiveRestartIndex", WriteScalar(nativeResult.primitiveRestartIndex));
+	outputFields.emplace("elements-count", WriteScalar(nativeResult.elementsCount));
+	outputFields.emplace("buffer-size-in-bytes", WriteScalar(nativeResult.bufferSizeInBytes));
+	outputFields.emplace("gpu-buffer-size-in-bytes", WriteScalar(nativeResult.gpuBufferSizeInBytes));
+	outputFields.emplace("elem-size-in-bytes", WriteScalar(nativeResult.elemSizeInBytes));
+	outputFields.emplace("attributes-count", WriteScalar(nativeResult.attributesCount));
+	outputFields.emplace("primitive-restart-index", WriteScalar(nativeResult.primitiveRestartIndex));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7458,14 +7458,14 @@ NativeCalloutDispatch Dispatch_gfx_GetViewRange(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxViewRangeQuery query{};
 	GfxViewRangeResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "cameraType", query.cameraType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "camera-type", query.cameraType, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetViewRange(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("nearPlaneDist", WriteScalar(nativeResult.nearPlaneDist));
-	outputFields.emplace("farPlaneDist", WriteScalar(nativeResult.farPlaneDist));
-	outputFields.emplace("minViewRange", WriteScalar(nativeResult.minViewRange));
-	outputFields.emplace("maxViewRange", WriteScalar(nativeResult.maxViewRange));
+	outputFields.emplace("near-plane-dist", WriteScalar(nativeResult.nearPlaneDist));
+	outputFields.emplace("far-plane-dist", WriteScalar(nativeResult.farPlaneDist));
+	outputFields.emplace("min-view-range", WriteScalar(nativeResult.minViewRange));
+	outputFields.emplace("max-view-range", WriteScalar(nativeResult.maxViewRange));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7476,12 +7476,12 @@ NativeCalloutDispatch Dispatch_gfx_GetViewSizes(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxViewSizesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->GetViewSizes(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("viewSizeX", WriteScalar(nativeResult.viewSizeX));
-	outputFields.emplace("viewSizeY", WriteScalar(nativeResult.viewSizeY));
+	outputFields.emplace("view-size-x", WriteScalar(nativeResult.viewSizeX));
+	outputFields.emplace("view-size-y", WriteScalar(nativeResult.viewSizeY));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7507,8 +7507,8 @@ NativeCalloutDispatch Dispatch_gfx_GetWaterRendering(NativeInterface* nativeInte
 	WasmValueRecord outputFields;
 	outputFields.emplace("values", WriteNativeArray(nativeResult.values, [](const auto& value) { return WriteScalar(value); }));
 	outputFields.emplace("count", WriteScalar(nativeResult.count));
-	outputFields.emplace("boolValue", nativeResult.hasBool ? WriteScalar(nativeResult.boolValue) : WasmValue::Unit());
-	outputFields.emplace("stringValue", WasmValue::String((nativeResult.stringValue == nullptr) ? std::string{} : std::string(nativeResult.stringValue)));
+	outputFields.emplace("bool-value", nativeResult.hasBool ? WriteScalar(nativeResult.boolValue) : WasmValue::Unit());
+	outputFields.emplace("string-value", WasmValue::String((nativeResult.stringValue == nullptr) ? std::string{} : std::string(nativeResult.stringValue)));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -7536,7 +7536,7 @@ NativeCalloutDispatch Dispatch_gfx_InstanceDataFromFeatureDefsVBO(NativeInterfac
 	NativeCallStorage storage;
 	GfxVBOInstanceDataQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 5u, 5u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -7550,9 +7550,9 @@ NativeCalloutDispatch Dispatch_gfx_InstanceDataFromFeatureDefsVBO(NativeInterfac
 	}
 	query.ids = native_ids.data();
 	if (!AssignCount(list_ids->size(), query.idCount, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attributeIndex", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attribute-index", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->InstanceDataFromFeatureDefsVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -7565,7 +7565,7 @@ NativeCalloutDispatch Dispatch_gfx_InstanceDataFromFeaturesVBO(NativeInterface* 
 	NativeCallStorage storage;
 	GfxVBOInstanceDataQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 5u, 5u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -7579,9 +7579,9 @@ NativeCalloutDispatch Dispatch_gfx_InstanceDataFromFeaturesVBO(NativeInterface* 
 	}
 	query.ids = native_ids.data();
 	if (!AssignCount(list_ids->size(), query.idCount, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attributeIndex", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attribute-index", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->InstanceDataFromFeaturesVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -7594,7 +7594,7 @@ NativeCalloutDispatch Dispatch_gfx_InstanceDataFromUnitDefsVBO(NativeInterface* 
 	NativeCallStorage storage;
 	GfxVBOInstanceDataQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 5u, 5u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -7608,9 +7608,9 @@ NativeCalloutDispatch Dispatch_gfx_InstanceDataFromUnitDefsVBO(NativeInterface* 
 	}
 	query.ids = native_ids.data();
 	if (!AssignCount(list_ids->size(), query.idCount, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attributeIndex", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attribute-index", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->InstanceDataFromUnitDefsVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -7623,7 +7623,7 @@ NativeCalloutDispatch Dispatch_gfx_InstanceDataFromUnitsVBO(NativeInterface* nat
 	NativeCallStorage storage;
 	GfxVBOInstanceDataQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 5u, 5u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -7637,9 +7637,9 @@ NativeCalloutDispatch Dispatch_gfx_InstanceDataFromUnitsVBO(NativeInterface* nat
 	}
 	query.ids = native_ids.data();
 	if (!AssignCount(list_ids->size(), query.idCount, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attributeIndex", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attribute-index", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->InstanceDataFromUnitsVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -7652,7 +7652,7 @@ NativeCalloutDispatch Dispatch_gfx_IsValidFBO(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GfxFBOQuery query{};
 	GfxFBOStatusResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fboID", query.fboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fbo-id", query.fboID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "target", query.target, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->IsValidFBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -7738,8 +7738,8 @@ NativeCalloutDispatch Dispatch_gfx_LoadFont(NativeInterface* nativeInterface, co
 	if (!ReadString(*value_path, stored_string_query_path, error)) { return NativeCalloutDispatch::handled; }
 	query.path = stored_string_query_path.c_str();
 	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "size", query.size, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "outlineWidth", query.outlineWidth, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "outlineWeight", query.outlineWeight, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "outline-width", query.outlineWidth, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "outline-weight", query.outlineWeight, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->LoadFont(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.fontID);
@@ -7752,7 +7752,7 @@ NativeCalloutDispatch Dispatch_gfx_LoadIdentity(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->LoadIdentity(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -7819,7 +7819,7 @@ NativeCalloutDispatch Dispatch_gfx_MatrixDataFromProjectilesVBO(NativeInterface*
 	NativeCallStorage storage;
 	GfxVBOInstanceDataQuery query{};
 	GfxUIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_ids = FindArgument(arguments, 1u, 1u, 5u, 5u, "ids", error);
 	if (value_ids == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_ids = std::get_if<WasmValueList>(&(*value_ids).storage);
@@ -7833,9 +7833,9 @@ NativeCalloutDispatch Dispatch_gfx_MatrixDataFromProjectilesVBO(NativeInterface*
 	}
 	query.ids = native_ids.data();
 	if (!AssignCount(list_ids->size(), query.idCount, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attributeIndex", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "attribute-index", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->MatrixDataFromProjectilesVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -7906,7 +7906,7 @@ NativeCalloutDispatch Dispatch_gfx_MultiTexCoord(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GfxMultiTexCoordQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "texNum", query.texNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "tex-num", query.texNum, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "s", query.s, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "t", query.t, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "r", query.r, error)) return NativeCalloutDispatch::handled;
@@ -7924,7 +7924,7 @@ NativeCalloutDispatch Dispatch_gfx_MultiTexEnv(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	GfxMultiTexEnvQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "texNum", query.texNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 5u, 5u, "tex-num", query.texNum, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 5u, 5u, "target", query.target, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 5u, 5u, "pname", query.pname, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_values = FindArgument(arguments, 3u, 3u, 5u, 5u, "values", error);
@@ -7947,7 +7947,7 @@ NativeCalloutDispatch Dispatch_gfx_MultiTexGen(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	GfxMultiTexGenQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "texNum", query.texNum, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "tex-num", query.texNum, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "target", query.target, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 6u, 6u, "options", Read_GfxMultiTexGenOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "pname", query.pname, error)) return NativeCalloutDispatch::handled;
@@ -7987,7 +7987,7 @@ NativeCalloutDispatch Dispatch_gfx_ObjectLabel(NativeInterface* nativeInterface,
 	GfxObjectLabelQuery query{};
 	GfxEmptyResult nativeResult{};
 	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "identifier", query.identifier, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_label = FindArgument(arguments, 2u, 2u, 3u, 3u, "label", error);
 	if (value_label == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_label = storage.Make<std::string>();
@@ -8009,8 +8009,8 @@ NativeCalloutDispatch Dispatch_gfx_Ortho(NativeInterface* nativeInterface, const
 	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "right", query.right, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "bottom", query.bottom, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "top", query.top, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "nearVal", query.nearVal, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "farVal", query.farVal, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "near-val", query.nearVal, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "far-val", query.farVal, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->Ortho(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8099,7 +8099,7 @@ NativeCalloutDispatch Dispatch_gfx_PopAttrib(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->PopAttrib(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8112,7 +8112,7 @@ NativeCalloutDispatch Dispatch_gfx_PopDebugGroup(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->PopDebugGroup(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8125,7 +8125,7 @@ NativeCalloutDispatch Dispatch_gfx_PopMatrix(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->PopMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8157,7 +8157,7 @@ NativeCalloutDispatch Dispatch_gfx_PushDebugGroup(NativeInterface* nativeInterfa
 	auto& stored_string_query_message = storage.Make<std::string>();
 	if (!ReadString(*value_message, stored_string_query_message, error)) { return NativeCalloutDispatch::handled; }
 	query.message = stored_string_query_message.c_str();
-	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "sourceIsThirdParty", query.sourceIsThirdParty, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "source-is-third-party", query.sourceIsThirdParty, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->PushDebugGroup(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8170,7 +8170,7 @@ NativeCalloutDispatch Dispatch_gfx_PushMatrix(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->PushMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8183,15 +8183,15 @@ NativeCalloutDispatch Dispatch_gfx_RawBindFBO(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GfxRawBindFBOQuery query{};
 	GfxRawBindFBOResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "bindDefault", query.bindDefault, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "fboID", query.fboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 4u, 4u, "bind-default", query.bindDefault, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "fbo-id", query.fboID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "target", query.target, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "rawFboID", query.rawFboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "raw-fbo-id", query.rawFboID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->RawBindFBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("previouslyBoundRawFboID", WriteScalar(nativeResult.previouslyBoundRawFboID));
-	outputFields.emplace("hasPrevious", WriteScalar(nativeResult.hasPrevious));
+	outputFields.emplace("previously-bound-raw-fbo-id", WriteScalar(nativeResult.previouslyBoundRawFboID));
+	outputFields.emplace("has-previous", WriteScalar(nativeResult.hasPrevious));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -8238,7 +8238,7 @@ NativeCalloutDispatch Dispatch_gfx_RemoveFromSubmissionVAO(NativeInterface* nati
 	NativeCallStorage storage;
 	GfxVAORemoveSubmissionQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vaoID", query.vaoID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "vao-id", query.vaoID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "index", query.index, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->RemoveFromSubmissionVAO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -8252,7 +8252,7 @@ NativeCalloutDispatch Dispatch_gfx_ResetMatrices(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->ResetMatrices(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8265,7 +8265,7 @@ NativeCalloutDispatch Dispatch_gfx_ResetState(NativeInterface* nativeInterface, 
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->ResetState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8304,7 +8304,7 @@ NativeCalloutDispatch Dispatch_gfx_SaveImage(NativeInterface* nativeInterface, c
 	if (!ReadString(*value_filename, stored_string_query_filename, error)) { return NativeCalloutDispatch::handled; }
 	query.filename = stored_string_query_filename.c_str();
 	if (!ReadRecordArgument(arguments, 5u, 5u, 7u, 7u, "options", Read_GfxSaveImageOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "readBuffer", query.readBuffer, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "read-buffer", query.readBuffer, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->SaveImage(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.value);
@@ -8363,17 +8363,17 @@ NativeCalloutDispatch Dispatch_gfx_SetFBOAttachment(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	GfxFBOAttachmentQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "fboID", query.fboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 7u, 7u, "fbo-id", query.fboID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 7u, 7u, "attachment", query.attachment, error)) return NativeCalloutDispatch::handled;
-	const WasmValue* value_textureName = FindArgument(arguments, 2u, 2u, 7u, 7u, "textureName", error);
+	const WasmValue* value_textureName = FindArgument(arguments, 2u, 2u, 7u, 7u, "texture-name", error);
 	if (value_textureName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_textureName = storage.Make<std::string>();
 	if (!ReadString(*value_textureName, stored_string_query_textureName, error)) { return NativeCalloutDispatch::handled; }
 	query.textureName = stored_string_query_textureName.c_str();
-	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "textureTarget", query.textureTarget, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "mipLevel", query.mipLevel, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "rboID", query.rboID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "useRBO", query.useRBO, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 7u, 7u, "texture-target", query.textureTarget, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 7u, 7u, "mip-level", query.mipLevel, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 7u, 7u, "rbo-id", query.rboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 6u, 6u, 7u, 7u, "use-rbo", query.useRBO, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->SetFBOAttachment(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8386,7 +8386,7 @@ NativeCalloutDispatch Dispatch_gfx_SetFBODrawBuffers(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GfxFBODrawBuffersQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fboID", query.fboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fbo-id", query.fboID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_buffers = FindArgument(arguments, 1u, 1u, 2u, 2u, "buffers", error);
 	if (value_buffers == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_buffers = std::get_if<WasmValueList>(&(*value_buffers).storage);
@@ -8412,7 +8412,7 @@ NativeCalloutDispatch Dispatch_gfx_SetFBOReadBuffer(NativeInterface* nativeInter
 	NativeCallStorage storage;
 	GfxFBOReadBufferQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fboID", query.fboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "fbo-id", query.fboID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "buffer", query.buffer, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->SetFBOReadBuffer(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -8426,7 +8426,7 @@ NativeCalloutDispatch Dispatch_gfx_SetFeatureBufferUniforms(NativeInterface* nat
 	NativeCallStorage storage;
 	GfxObjectBufferUniformsQuery query{};
 	GfxObjectBufferUniformsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_values = FindArgument(arguments, 1u, 1u, 3u, 3u, "values", error);
 	if (value_values == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_values = std::get_if<WasmValueList>(&(*value_values).storage);
@@ -8453,7 +8453,7 @@ NativeCalloutDispatch Dispatch_gfx_SetGeometryShaderParameter(NativeInterface* n
 	NativeCallStorage storage;
 	GfxGeometryShaderParameterQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "shaderID", query.shaderID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "shader-id", query.shaderID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "param", query.param, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 2u, 2u, 3u, 3u, "value", query.value, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->SetGeometryShaderParameter(&query, &nativeResult);
@@ -8477,8 +8477,8 @@ NativeCalloutDispatch Dispatch_gfx_SetTesselationShaderParameter(NativeInterface
 	for (std::size_t index = 0; index < 4u; ++index) {
 		if (!ReadScalar((*array_values_values)[index], query.values[index], error)) { return NativeCalloutDispatch::handled; }
 	}
-	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "valueCount", query.valueCount, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "useFloatArray", query.useFloatArray, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 5u, 5u, "value-count", query.valueCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 5u, 5u, "use-float-array", query.useFloatArray, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->SetTesselationShaderParameter(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8491,7 +8491,7 @@ NativeCalloutDispatch Dispatch_gfx_SetUnitBufferUniforms(NativeInterface* native
 	NativeCallStorage storage;
 	GfxObjectBufferUniformsQuery query{};
 	GfxObjectBufferUniformsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_values = FindArgument(arguments, 1u, 1u, 3u, 3u, "values", error);
 	if (value_values == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_values = std::get_if<WasmValueList>(&(*value_values).storage);
@@ -8685,7 +8685,7 @@ NativeCalloutDispatch Dispatch_gfx_SwapBuffers(NativeInterface* nativeInterface,
 	NativeCallStorage storage;
 	GfxEmptyQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->SwapBuffers(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -8866,10 +8866,10 @@ NativeCalloutDispatch Dispatch_gfx_UnbindBufferRangeVBO(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GfxVBOBindRangeQuery query{};
 	GfxIntResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "bindingIndex", query.bindingIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "elementCount", query.elementCount, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 6u, 6u, "binding-index", query.bindingIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "element-count", query.elementCount, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "target", query.target, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "bind", query.bind, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UnbindBufferRangeVBO(&query, &nativeResult);
@@ -9005,7 +9005,7 @@ NativeCalloutDispatch Dispatch_gfx_UniformSubroutine(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GfxUniformSubroutineQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "shaderType", query.shaderType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "shader-type", query.shaderType, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "index", query.index, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UniformSubroutine(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -9019,7 +9019,7 @@ NativeCalloutDispatch Dispatch_gfx_Unit(NativeInterface* nativeInterface, const 
 	NativeCallStorage storage;
 	GfxUnitDrawQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_GfxUnitDrawOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->Unit(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -9046,8 +9046,8 @@ NativeCalloutDispatch Dispatch_gfx_UnitPiece(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxObjectPieceQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pieceID", query.pieceID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "piece-id", query.pieceID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UnitPiece(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -9060,8 +9060,8 @@ NativeCalloutDispatch Dispatch_gfx_UnitPieceMatrix(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GfxObjectPieceQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pieceID", query.pieceID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "piece-id", query.pieceID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UnitPieceMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -9074,8 +9074,8 @@ NativeCalloutDispatch Dispatch_gfx_UnitPieceMultMatrix(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GfxObjectPieceQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "pieceID", query.pieceID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "piece-id", query.pieceID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UnitPieceMultMatrix(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::Unit();
@@ -9088,7 +9088,7 @@ NativeCalloutDispatch Dispatch_gfx_UnitRaw(NativeInterface* nativeInterface, con
 	NativeCallStorage storage;
 	GfxUnitDrawQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 1u, 1u, 2u, 2u, "options", Read_GfxUnitDrawOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UnitRaw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -9102,8 +9102,8 @@ NativeCalloutDispatch Dispatch_gfx_UnitShape(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxObjectShapeQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "defID", query.defID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "teamID", query.teamID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "def-id", query.defID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "team-id", query.teamID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "options", Read_GfxObjectShapeOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UnitShape(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -9117,7 +9117,7 @@ NativeCalloutDispatch Dispatch_gfx_UnitShapeTextures(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GfxObjectTextureStateQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "push", query.push, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UnitShapeTextures(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -9131,7 +9131,7 @@ NativeCalloutDispatch Dispatch_gfx_UnitTextures(NativeInterface* nativeInterface
 	NativeCallStorage storage;
 	GfxObjectTextureStateQuery query{};
 	GfxEmptyResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "objectID", query.objectID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "object-id", query.objectID, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "push", query.push, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UnitTextures(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
@@ -9159,7 +9159,7 @@ NativeCalloutDispatch Dispatch_gfx_UploadTexture(NativeInterface* nativeInterfac
 	if (!ReadArgument(arguments, 7u, 7u, 12u, 12u, "height", query.height, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 8u, 8u, 12u, 12u, "depth", query.depth, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 9u, 9u, 12u, 12u, "format", query.format, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 10u, 10u, 12u, 12u, "pixelType", query.pixelType, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 10u, 10u, 12u, 12u, "pixel-type", query.pixelType, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_data = FindArgument(arguments, 11u, 11u, 12u, 12u, "data", error);
 	if (value_data == nullptr) return NativeCalloutDispatch::handled;
 	auto& native_data = storage.Make<std::vector<std::uint8_t>>();
@@ -9178,7 +9178,7 @@ NativeCalloutDispatch Dispatch_gfx_UploadVBO(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxVBOUploadQuery query{};
 	GfxVBOUploadResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "vboID", query.vboID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 6u, 6u, "vbo-id", query.vboID, error)) return NativeCalloutDispatch::handled;
 	const WasmValue* value_data = FindArgument(arguments, 1u, 1u, 6u, 6u, "data", error);
 	if (value_data == nullptr) return NativeCalloutDispatch::handled;
 	const auto* list_data = std::get_if<WasmValueList>(&(*value_data).storage);
@@ -9192,10 +9192,10 @@ NativeCalloutDispatch Dispatch_gfx_UploadVBO(NativeInterface* nativeInterface, c
 	}
 	query.data = native_data.data();
 	if (!AssignCount(list_data->size(), query.dataCount, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "attributeIndex", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "elementOffset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "dataStartIndex", query.dataStartIndex, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "dataFinishIndex", query.dataFinishIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 6u, 6u, "attribute-index", query.attributeIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 6u, 6u, "element-offset", query.elementOffset, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 6u, 6u, "data-start-index", query.dataStartIndex, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 5u, 5u, 6u, 6u, "data-finish-index", query.dataFinishIndex, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UploadVBO(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.bytesWritten);
@@ -9208,7 +9208,7 @@ NativeCalloutDispatch Dispatch_gfx_UseShader(NativeInterface* nativeInterface, c
 	NativeCallStorage storage;
 	GfxShaderQuery query{};
 	GfxUseShaderResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "shaderID", query.shaderID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "shader-id", query.shaderID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->gfx->UseShader(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.linked);

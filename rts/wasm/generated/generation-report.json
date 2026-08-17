@@ -1,14 +1,14 @@
 {
   "modules": 55,
-  "functions": 1353,
-  "automatic": 1143,
+  "functions": 1354,
+  "automatic": 1144,
   "annotated": 182,
   "manual": 28,
   "unsupported": 0,
   "per_environment": {
-    "gaia-synced": 741,
+    "gaia-synced": 743,
     "gaia-unsynced": 1150,
-    "rules-synced": 741,
+    "rules-synced": 743,
     "rules-unsynced": 1150,
     "ui": 1153
   }

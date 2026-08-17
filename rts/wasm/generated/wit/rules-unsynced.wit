@@ -54,7 +54,8 @@ world rules-unsynced {
   import ground-decals-rules-unsynced-gaia-unsynced-ui;
   import system-control-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import system-control-rules-unsynced-gaia-unsynced-ui;
-  import profiling;
+  import profiling-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
+  import profiling-rules-unsynced-gaia-unsynced-ui;
   import rml-ui;
   import vfs-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui;
   import vfs-rules-unsynced-gaia-unsynced-ui;

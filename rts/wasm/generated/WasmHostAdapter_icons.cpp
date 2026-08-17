@@ -12,12 +12,12 @@ bool Read_AddUnitIconQuery(const WasmValue& input, AddUnitIconQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_iconName = FindRecordField(*record, "iconName", error);
+	const auto* value_iconName = FindRecordField(*record, "icon-name", error);
 	if (value_iconName == nullptr) return false;
 	auto& stored_string_output_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_output_iconName, error)) { return false; }
 	output.iconName = stored_string_output_iconName.c_str();
-	const auto* value_texFile = FindRecordField(*record, "texFile", error);
+	const auto* value_texFile = FindRecordField(*record, "tex-file", error);
 	if (value_texFile == nullptr) return false;
 	auto& stored_string_output_texFile = storage.Make<std::string>();
 	if (!ReadString(*value_texFile, stored_string_output_texFile, error)) { return false; }
@@ -28,7 +28,7 @@ bool Read_AddUnitIconQuery(const WasmValue& input, AddUnitIconQuery& output, Nat
 	const auto* value_distance = FindRecordField(*record, "distance", error);
 	if (value_distance == nullptr) return false;
 	if (!ReadScalar(*value_distance, output.distance, error)) { return false; }
-	const auto* value_radiusAdjust = FindRecordField(*record, "radiusAdjust", error);
+	const auto* value_radiusAdjust = FindRecordField(*record, "radius-adjust", error);
 	if (value_radiusAdjust == nullptr) return false;
 	if (!ReadScalar(*value_radiusAdjust, output.radiusAdjust, error)) { return false; }
 	const auto* value_u0 = FindRecordField(*record, "u0", error);
@@ -49,11 +49,11 @@ bool Read_AddUnitIconQuery(const WasmValue& input, AddUnitIconQuery& output, Nat
 WasmValue Write_AddUnitIconQuery(const AddUnitIconQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("iconName", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
-	fields.emplace("texFile", WasmValue::String((value.texFile == nullptr) ? std::string{} : std::string(value.texFile)));
+	fields.emplace("icon-name", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
+	fields.emplace("tex-file", WasmValue::String((value.texFile == nullptr) ? std::string{} : std::string(value.texFile)));
 	fields.emplace("size", WriteScalar(value.size));
 	fields.emplace("distance", WriteScalar(value.distance));
-	fields.emplace("radiusAdjust", WriteScalar(value.radiusAdjust));
+	fields.emplace("radius-adjust", WriteScalar(value.radiusAdjust));
 	fields.emplace("u0", WriteScalar(value.u0));
 	fields.emplace("v0", WriteScalar(value.v0));
 	fields.emplace("u1", WriteScalar(value.u1));
@@ -82,7 +82,7 @@ bool Read_FreeUnitIconQuery(const WasmValue& input, FreeUnitIconQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_iconName = FindRecordField(*record, "iconName", error);
+	const auto* value_iconName = FindRecordField(*record, "icon-name", error);
 	if (value_iconName == nullptr) return false;
 	auto& stored_string_output_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_output_iconName, error)) { return false; }
@@ -93,7 +93,7 @@ bool Read_FreeUnitIconQuery(const WasmValue& input, FreeUnitIconQuery& output, N
 WasmValue Write_FreeUnitIconQuery(const FreeUnitIconQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("iconName", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
+	fields.emplace("icon-name", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -118,7 +118,7 @@ bool Read_GetAllIconDataArrayQuery(const WasmValue& input, GetAllIconDataArrayQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_fullData = FindRecordField(*record, "fullData", error);
+	const auto* value_fullData = FindRecordField(*record, "full-data", error);
 	if (value_fullData == nullptr) return false;
 	if (!ReadScalar(*value_fullData, output.fullData, error)) { return false; }
 	return true;
@@ -127,7 +127,7 @@ bool Read_GetAllIconDataArrayQuery(const WasmValue& input, GetAllIconDataArrayQu
 WasmValue Write_GetAllIconDataArrayQuery(const GetAllIconDataArrayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("fullData", WriteScalar(value.fullData));
+	fields.emplace("full-data", WriteScalar(value.fullData));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -162,12 +162,12 @@ bool Read_GetIconDataQuery(const WasmValue& input, GetIconDataQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_iconName = FindRecordField(*record, "iconName", error);
+	const auto* value_iconName = FindRecordField(*record, "icon-name", error);
 	if (value_iconName == nullptr) return false;
 	auto& stored_string_output_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_output_iconName, error)) { return false; }
 	output.iconName = stored_string_output_iconName.c_str();
-	const auto* value_fullData = FindRecordField(*record, "fullData", error);
+	const auto* value_fullData = FindRecordField(*record, "full-data", error);
 	if (value_fullData == nullptr) return false;
 	if (!ReadScalar(*value_fullData, output.fullData, error)) { return false; }
 	return true;
@@ -176,8 +176,8 @@ bool Read_GetIconDataQuery(const WasmValue& input, GetIconDataQuery& output, Nat
 WasmValue Write_GetIconDataQuery(const GetIconDataQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("iconName", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
-	fields.emplace("fullData", WriteScalar(value.fullData));
+	fields.emplace("icon-name", WasmValue::String((value.iconName == nullptr) ? std::string{} : std::string(value.iconName)));
+	fields.emplace("full-data", WriteScalar(value.fullData));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -207,7 +207,7 @@ bool Read_IconDataEntry(const WasmValue& input, IconDataEntry& output, NativeCal
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_atlasTexCoords = FindRecordField(*record, "atlasTexCoords", error);
+	const auto* value_atlasTexCoords = FindRecordField(*record, "atlas-tex-coords", error);
 	if (value_atlasTexCoords == nullptr) return false;
 	const auto* array_values_atlasTexCoords = std::get_if<WasmValueList>(&(*value_atlasTexCoords).storage);
 	if (array_values_atlasTexCoords == nullptr || array_values_atlasTexCoords->size() != 4u) { error = "Wasm fixed array has the wrong length"; return false; }
@@ -220,7 +220,7 @@ bool Read_IconDataEntry(const WasmValue& input, IconDataEntry& output, NativeCal
 	const auto* value_distance = FindRecordField(*record, "distance", error);
 	if (value_distance == nullptr) return false;
 	if (!ReadScalar(*value_distance, output.distance, error)) { return false; }
-	const auto* value_radiusAdjust = FindRecordField(*record, "radiusAdjust", error);
+	const auto* value_radiusAdjust = FindRecordField(*record, "radius-adjust", error);
 	if (value_radiusAdjust == nullptr) return false;
 	if (!ReadScalar(*value_radiusAdjust, output.radiusAdjust, error)) { return false; }
 	return true;
@@ -230,10 +230,10 @@ WasmValue Write_IconDataEntry(const IconDataEntry& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("atlasTexCoords", WriteNativeArray(value.atlasTexCoords, [](const auto& value) { return WriteScalar(value); }));
+	fields.emplace("atlas-tex-coords", WriteNativeArray(value.atlasTexCoords, [](const auto& value) { return WriteScalar(value); }));
 	fields.emplace("size", WriteScalar(value.size));
 	fields.emplace("distance", WriteScalar(value.distance));
-	fields.emplace("radiusAdjust", WriteScalar(value.radiusAdjust));
+	fields.emplace("radius-adjust", WriteScalar(value.radiusAdjust));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -241,7 +241,7 @@ bool Read_UnitIconGetDrawQuery(const WasmValue& input, UnitIconGetDrawQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
 	return true;
@@ -250,7 +250,7 @@ bool Read_UnitIconGetDrawQuery(const WasmValue& input, UnitIconGetDrawQuery& out
 WasmValue Write_UnitIconGetDrawQuery(const UnitIconGetDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -258,7 +258,7 @@ bool Read_UnitIconGetDrawResult(const WasmValue& input, UnitIconGetDrawResult& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_drawIcon = FindRecordField(*record, "drawIcon", error);
+	const auto* value_drawIcon = FindRecordField(*record, "draw-icon", error);
 	if (value_drawIcon == nullptr) return false;
 	if (!ReadScalar(*value_drawIcon, output.drawIcon, error)) { return false; }
 	return true;
@@ -267,7 +267,7 @@ bool Read_UnitIconGetDrawResult(const WasmValue& input, UnitIconGetDrawResult& o
 WasmValue Write_UnitIconGetDrawResult(const UnitIconGetDrawResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("drawIcon", WriteScalar(value.drawIcon));
+	fields.emplace("draw-icon", WriteScalar(value.drawIcon));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -275,10 +275,10 @@ bool Read_UnitIconSetDrawQuery(const WasmValue& input, UnitIconSetDrawQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_unitID = FindRecordField(*record, "unitID", error);
+	const auto* value_unitID = FindRecordField(*record, "unit-id", error);
 	if (value_unitID == nullptr) return false;
 	if (!ReadScalar(*value_unitID, output.unitID, error)) { return false; }
-	const auto* value_drawIcon = FindRecordField(*record, "drawIcon", error);
+	const auto* value_drawIcon = FindRecordField(*record, "draw-icon", error);
 	if (value_drawIcon == nullptr) return false;
 	if (!ReadScalar(*value_drawIcon, output.drawIcon, error)) { return false; }
 	return true;
@@ -287,8 +287,8 @@ bool Read_UnitIconSetDrawQuery(const WasmValue& input, UnitIconSetDrawQuery& out
 WasmValue Write_UnitIconSetDrawQuery(const UnitIconSetDrawQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("unitID", WriteScalar(value.unitID));
-	fields.emplace("drawIcon", WriteScalar(value.drawIcon));
+	fields.emplace("unit-id", WriteScalar(value.unitID));
+	fields.emplace("draw-icon", WriteScalar(value.drawIcon));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -319,19 +319,19 @@ NativeCalloutDispatch Dispatch_icons_AddUnitIcon(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	AddUnitIconQuery query{};
 	AddUnitIconResult nativeResult{};
-	const WasmValue* value_iconName = FindArgument(arguments, 0u, 0u, 9u, 9u, "iconName", error);
+	const WasmValue* value_iconName = FindArgument(arguments, 0u, 0u, 9u, 9u, "icon-name", error);
 	if (value_iconName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_query_iconName, error)) { return NativeCalloutDispatch::handled; }
 	query.iconName = stored_string_query_iconName.c_str();
-	const WasmValue* value_texFile = FindArgument(arguments, 1u, 1u, 9u, 9u, "texFile", error);
+	const WasmValue* value_texFile = FindArgument(arguments, 1u, 1u, 9u, 9u, "tex-file", error);
 	if (value_texFile == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_texFile = storage.Make<std::string>();
 	if (!ReadString(*value_texFile, stored_string_query_texFile, error)) { return NativeCalloutDispatch::handled; }
 	query.texFile = stored_string_query_texFile.c_str();
 	if (!ReadArgument(arguments, 2u, 2u, 9u, 9u, "size", query.size, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 3u, 3u, 9u, 9u, "distance", query.distance, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 4u, 4u, 9u, 9u, "radiusAdjust", query.radiusAdjust, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 4u, 4u, 9u, 9u, "radius-adjust", query.radiusAdjust, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 5u, 5u, 9u, 9u, "u0", query.u0, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 6u, 6u, 9u, 9u, "v0", query.v0, error)) return NativeCalloutDispatch::handled;
 	if (!ReadArgument(arguments, 7u, 7u, 9u, 9u, "u1", query.u1, error)) return NativeCalloutDispatch::handled;
@@ -348,7 +348,7 @@ NativeCalloutDispatch Dispatch_icons_FreeUnitIcon(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	FreeUnitIconQuery query{};
 	FreeUnitIconResult nativeResult{};
-	const WasmValue* value_iconName = FindArgument(arguments, 0u, 0u, 1u, 1u, "iconName", error);
+	const WasmValue* value_iconName = FindArgument(arguments, 0u, 0u, 1u, 1u, "icon-name", error);
 	if (value_iconName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_query_iconName, error)) { return NativeCalloutDispatch::handled; }
@@ -365,7 +365,7 @@ NativeCalloutDispatch Dispatch_icons_GetAllIconDataArray(NativeInterface* native
 	NativeCallStorage storage;
 	GetAllIconDataArrayQuery query{};
 	GetAllIconDataArrayResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "fullData", query.fullData, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "full-data", query.fullData, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->icons->GetAllIconDataArray(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.entries, nativeResult.count, [](const auto& value) { return Write_IconDataEntry(value); });
@@ -378,12 +378,12 @@ NativeCalloutDispatch Dispatch_icons_GetIconData(NativeInterface* nativeInterfac
 	NativeCallStorage storage;
 	GetIconDataQuery query{};
 	GetIconDataResult nativeResult{};
-	const WasmValue* value_iconName = FindArgument(arguments, 0u, 0u, 2u, 2u, "iconName", error);
+	const WasmValue* value_iconName = FindArgument(arguments, 0u, 0u, 2u, 2u, "icon-name", error);
 	if (value_iconName == nullptr) return NativeCalloutDispatch::handled;
 	auto& stored_string_query_iconName = storage.Make<std::string>();
 	if (!ReadString(*value_iconName, stored_string_query_iconName, error)) { return NativeCalloutDispatch::handled; }
 	query.iconName = stored_string_query_iconName.c_str();
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "fullData", query.fullData, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "full-data", query.fullData, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->icons->GetIconData(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_IconDataEntry(nativeResult.data);
@@ -396,7 +396,7 @@ NativeCalloutDispatch Dispatch_icons_UnitIconGetDraw(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	UnitIconGetDrawQuery query{};
 	UnitIconGetDrawResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->icons->UnitIconGetDraw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.drawIcon);
@@ -409,8 +409,8 @@ NativeCalloutDispatch Dispatch_icons_UnitIconSetDraw(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	UnitIconSetDrawQuery query{};
 	UnitIconSetDrawResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unitID", query.unitID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "drawIcon", query.drawIcon, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "unit-id", query.unitID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "draw-icon", query.drawIcon, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->icons->UnitIconSetDraw(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);

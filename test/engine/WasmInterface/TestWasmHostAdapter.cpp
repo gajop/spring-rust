@@ -94,8 +94,8 @@ TEST_CASE("generated Wasm adapter lowers lists and owns native results")
 	WasmValue result;
 	std::string error;
 	const std::vector<WasmValue> arguments = {WasmValue::Record({
-		{"teamID", WasmValue::I64(7)},
-		{"unitDefIDs", WasmValue::List({WasmValue::I64(3), WasmValue::I64(5)})},
+		{"team-id", WasmValue::I64(7)},
+		{"unit-def-i-ds", WasmValue::List({WasmValue::I64(3), WasmValue::I64(5)})},
 	})};
 
 	CHECK(recoil::wasm::generated::DispatchNativeCallout(
@@ -148,8 +148,8 @@ TEST_CASE("generated Wasm adapter lowers strings, options and fixed arrays")
 	CHECK(recoil::wasm::generated::DispatchNativeCallout(
 		&native, "units_info", "GetUnitBuildParams",
 		{WasmValue::Record({
-			{"unitID", WasmValue::I64(12)},
-			{"paramName", WasmValue::String("buildRange")},
+			{"unit-id", WasmValue::I64(12)},
+			{"param-name", WasmValue::String("buildRange")},
 		})}, result, error) == recoil::wasm::generated::NativeCalloutDispatch::handled);
 	CHECK(error.empty());
 	const auto* optionalValue = std::get_if<WasmValueRecord>(&result.storage);
@@ -245,7 +245,7 @@ TEST_CASE("generated Wasm adapter serializes native callin queries")
 	CHECK(error.empty());
 	const auto* frameRecord = std::get_if<WasmValueRecord>(&result.storage);
 	REQUIRE(frameRecord != nullptr);
-	CHECK(std::get<std::int64_t>(frameRecord->at("gameFrame").storage) == 1234);
+	CHECK(std::get<std::int64_t>(frameRecord->at("game-frame").storage) == 1234);
 
 	const std::vector<unsigned char> winners = {0, 2, 7};
 	GameOverEventQuery gameOverQuery = {
@@ -260,7 +260,7 @@ TEST_CASE("generated Wasm adapter serializes native callin queries")
 	const auto* gameOverRecord = std::get_if<WasmValueRecord>(&result.storage);
 	REQUIRE(gameOverRecord != nullptr);
 	const auto* winningTeams = std::get_if<WasmValueList>(
-		&gameOverRecord->at("winningAllyTeams").storage);
+		&gameOverRecord->at("winning-ally-teams").storage);
 	REQUIRE(winningTeams != nullptr);
 	REQUIRE(winningTeams->size() == winners.size());
 	CHECK(std::get<std::uint64_t>((*winningTeams)[1].storage) == 2);
@@ -273,7 +273,7 @@ TEST_CASE("generated Wasm adapter serializes native callin queries")
 	CHECK(error.empty());
 	const auto* unitCommandRecord = std::get_if<WasmValueRecord>(&result.storage);
 	REQUIRE(unitCommandRecord != nullptr);
-	CHECK(std::get<std::int64_t>(unitCommandRecord->at("unitID").storage) == 0);
+	CHECK(std::get<std::int64_t>(unitCommandRecord->at("unit-id").storage) == 0);
 
 	DownloadProgressQuery downloadProgressQuery = {
 		.downloadID = 9,
@@ -302,8 +302,8 @@ TEST_CASE("generated Wasm adapter serializes native callin queries")
 	CHECK(error.empty());
 	const auto* pongRecord = std::get_if<WasmValueRecord>(&result.storage);
 	REQUIRE(pongRecord != nullptr);
-	CHECK(std::get<std::int64_t>(pongRecord->at("packetSendTimeMillis").storage) == 4'000'000'000);
-	CHECK(std::get<std::int64_t>(pongRecord->at("packetRecvTimeMillis").storage) == 4'000'000'123);
+	CHECK(std::get<std::int64_t>(pongRecord->at("packet-send-time-millis").storage) == 4'000'000'000);
+	CHECK(std::get<std::int64_t>(pongRecord->at("packet-recv-time-millis").storage) == 4'000'000'123);
 
 	ArchiveCallinQuery archiveQuery = {
 		.archive = reinterpret_cast<void*>(static_cast<std::uintptr_t>(0x1234)),
@@ -315,7 +315,7 @@ TEST_CASE("generated Wasm adapter serializes native callin queries")
 	CHECK(error.empty());
 	const auto* loadArchiveRecord = std::get_if<WasmValueRecord>(&result.storage);
 	REQUIRE(loadArchiveRecord != nullptr);
-	CHECK(std::get<std::uint64_t>(loadArchiveRecord->at("_unused").storage) == 0);
+	CHECK(std::get<std::uint64_t>(loadArchiveRecord->at("unused").storage) == 0);
 
 	error.clear();
 	result = WasmValue::Unit();
@@ -324,7 +324,7 @@ TEST_CASE("generated Wasm adapter serializes native callin queries")
 	CHECK(error.empty());
 	const auto* archiveRecord = std::get_if<WasmValueRecord>(&result.storage);
 	REQUIRE(archiveRecord != nullptr);
-	CHECK(std::get<std::uint64_t>(archiveRecord->at("_unused").storage) == 0);
+	CHECK(std::get<std::uint64_t>(archiveRecord->at("unused").storage) == 0);
 }
 
 TEST_CASE("every canonical Wasm callin has a generated query serializer")

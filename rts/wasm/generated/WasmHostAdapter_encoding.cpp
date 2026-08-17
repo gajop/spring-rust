@@ -96,7 +96,7 @@ bool Read_EncodeBase64Query(const WasmValue& input, EncodeBase64Query& output, N
 	if (!ReadByteList(*value_text, native_text, error)) { return false; }
 	output.text = reinterpret_cast<decltype(output.text)>(native_text.data());
 	if (!AssignCount(native_text.size(), output.textLength, error)) { return false; }
-	const auto* value_stripPadding = FindRecordField(*record, "stripPadding", error);
+	const auto* value_stripPadding = FindRecordField(*record, "strip-padding", error);
 	if (value_stripPadding == nullptr) return false;
 	if (!ReadScalar(*value_stripPadding, output.stripPadding, error)) { return false; }
 	return true;
@@ -106,7 +106,7 @@ WasmValue Write_EncodeBase64Query(const EncodeBase64Query& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("text", WriteNativeList(value.text, value.textLength, [](const auto& value) { return WriteScalar(value); }));
-	fields.emplace("stripPadding", WriteScalar(value.stripPadding));
+	fields.emplace("strip-padding", WriteScalar(value.stripPadding));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -290,7 +290,7 @@ NativeCalloutDispatch Dispatch_encoding_EncodeBase64(NativeInterface* nativeInte
 	if (!ReadByteList(*value_text, native_text, error)) { return NativeCalloutDispatch::handled; }
 	query.text = reinterpret_cast<decltype(query.text)>(native_text.data());
 	if (!AssignCount(native_text.size(), query.textLength, error)) { return NativeCalloutDispatch::handled; }
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "stripPadding", query.stripPadding, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "strip-padding", query.stripPadding, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->encoding->EncodeBase64(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WasmValue::String((nativeResult.encoded == nullptr) ? std::string{} : std::string(nativeResult.encoded));

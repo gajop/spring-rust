@@ -12,7 +12,7 @@ bool Read_GetLocalAllyTeamIDQuery(const WasmValue& input, GetLocalAllyTeamIDQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -21,7 +21,7 @@ bool Read_GetLocalAllyTeamIDQuery(const WasmValue& input, GetLocalAllyTeamIDQuer
 WasmValue Write_GetLocalAllyTeamIDQuery(const GetLocalAllyTeamIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -29,7 +29,7 @@ bool Read_GetLocalAllyTeamIDResult(const WasmValue& input, GetLocalAllyTeamIDRes
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
 	return true;
@@ -38,7 +38,7 @@ bool Read_GetLocalAllyTeamIDResult(const WasmValue& input, GetLocalAllyTeamIDRes
 WasmValue Write_GetLocalAllyTeamIDResult(const GetLocalAllyTeamIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -46,7 +46,7 @@ bool Read_GetLocalPlayerIDQuery(const WasmValue& input, GetLocalPlayerIDQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -55,7 +55,7 @@ bool Read_GetLocalPlayerIDQuery(const WasmValue& input, GetLocalPlayerIDQuery& o
 WasmValue Write_GetLocalPlayerIDQuery(const GetLocalPlayerIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -63,7 +63,7 @@ bool Read_GetLocalPlayerIDResult(const WasmValue& input, GetLocalPlayerIDResult&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	return true;
@@ -72,7 +72,7 @@ bool Read_GetLocalPlayerIDResult(const WasmValue& input, GetLocalPlayerIDResult&
 WasmValue Write_GetLocalPlayerIDResult(const GetLocalPlayerIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -80,7 +80,7 @@ bool Read_GetLocalTeamIDQuery(const WasmValue& input, GetLocalTeamIDQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -89,7 +89,7 @@ bool Read_GetLocalTeamIDQuery(const WasmValue& input, GetLocalTeamIDQuery& outpu
 WasmValue Write_GetLocalTeamIDQuery(const GetLocalTeamIDQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -97,7 +97,7 @@ bool Read_GetLocalTeamIDResult(const WasmValue& input, GetLocalTeamIDResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
 	return true;
@@ -106,7 +106,7 @@ bool Read_GetLocalTeamIDResult(const WasmValue& input, GetLocalTeamIDResult& out
 WasmValue Write_GetLocalTeamIDResult(const GetLocalTeamIDResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("teamID", WriteScalar(value.teamID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -114,10 +114,10 @@ bool Read_GetPlayerRosterQuery(const WasmValue& input, GetPlayerRosterQuery& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_sortMode = FindRecordField(*record, "sortMode", error);
+	const auto* value_sortMode = FindRecordField(*record, "sort-mode", error);
 	if (value_sortMode == nullptr) return false;
 	if (!ReadScalar(*value_sortMode, output.sortMode, error)) { return false; }
-	const auto* value_showPathingPlayers = FindRecordField(*record, "showPathingPlayers", error);
+	const auto* value_showPathingPlayers = FindRecordField(*record, "show-pathing-players", error);
 	if (value_showPathingPlayers == nullptr) return false;
 	if (!ReadScalar(*value_showPathingPlayers, output.showPathingPlayers, error)) { return false; }
 	return true;
@@ -126,8 +126,8 @@ bool Read_GetPlayerRosterQuery(const WasmValue& input, GetPlayerRosterQuery& out
 WasmValue Write_GetPlayerRosterQuery(const GetPlayerRosterQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("sortMode", WriteScalar(value.sortMode));
-	fields.emplace("showPathingPlayers", WriteScalar(value.showPathingPlayers));
+	fields.emplace("sort-mode", WriteScalar(value.sortMode));
+	fields.emplace("show-pathing-players", WriteScalar(value.showPathingPlayers));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -162,7 +162,7 @@ bool Read_GetPlayerStatisticsQuery(const WasmValue& input, GetPlayerStatisticsQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
 	return true;
@@ -171,7 +171,7 @@ bool Read_GetPlayerStatisticsQuery(const WasmValue& input, GetPlayerStatisticsQu
 WasmValue Write_GetPlayerStatisticsQuery(const GetPlayerStatisticsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -196,10 +196,10 @@ bool Read_GetPlayerTrafficQuery(const WasmValue& input, GetPlayerTrafficQuery& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
-	const auto* value_packetID = FindRecordField(*record, "packetID", error);
+	const auto* value_packetID = FindRecordField(*record, "packet-id", error);
 	if (value_packetID == nullptr) return false;
 	if (!ReadScalar(*value_packetID, output.packetID, error)) { return false; }
 	return true;
@@ -208,8 +208,8 @@ bool Read_GetPlayerTrafficQuery(const WasmValue& input, GetPlayerTrafficQuery& o
 WasmValue Write_GetPlayerTrafficQuery(const GetPlayerTrafficQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
-	fields.emplace("packetID", WriteScalar(value.packetID));
+	fields.emplace("player-id", WriteScalar(value.playerID));
+	fields.emplace("packet-id", WriteScalar(value.packetID));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -244,7 +244,7 @@ bool Read_GetSpectatingStateQuery(const WasmValue& input, GetSpectatingStateQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -253,7 +253,7 @@ bool Read_GetSpectatingStateQuery(const WasmValue& input, GetSpectatingStateQuer
 WasmValue Write_GetSpectatingStateQuery(const GetSpectatingStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -278,19 +278,19 @@ bool Read_PlayerStats(const WasmValue& input, PlayerStats& output, NativeCallSto
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_mousePixels = FindRecordField(*record, "mousePixels", error);
+	const auto* value_mousePixels = FindRecordField(*record, "mouse-pixels", error);
 	if (value_mousePixels == nullptr) return false;
 	if (!ReadScalar(*value_mousePixels, output.mousePixels, error)) { return false; }
-	const auto* value_mouseClicks = FindRecordField(*record, "mouseClicks", error);
+	const auto* value_mouseClicks = FindRecordField(*record, "mouse-clicks", error);
 	if (value_mouseClicks == nullptr) return false;
 	if (!ReadScalar(*value_mouseClicks, output.mouseClicks, error)) { return false; }
-	const auto* value_keyPresses = FindRecordField(*record, "keyPresses", error);
+	const auto* value_keyPresses = FindRecordField(*record, "key-presses", error);
 	if (value_keyPresses == nullptr) return false;
 	if (!ReadScalar(*value_keyPresses, output.keyPresses, error)) { return false; }
-	const auto* value_unitCommands = FindRecordField(*record, "unitCommands", error);
+	const auto* value_unitCommands = FindRecordField(*record, "unit-commands", error);
 	if (value_unitCommands == nullptr) return false;
 	if (!ReadScalar(*value_unitCommands, output.unitCommands, error)) { return false; }
-	const auto* value_avgCommandSize = FindRecordField(*record, "avgCommandSize", error);
+	const auto* value_avgCommandSize = FindRecordField(*record, "avg-command-size", error);
 	if (value_avgCommandSize == nullptr) return false;
 	if (!ReadScalar(*value_avgCommandSize, output.avgCommandSize, error)) { return false; }
 	return true;
@@ -299,11 +299,11 @@ bool Read_PlayerStats(const WasmValue& input, PlayerStats& output, NativeCallSto
 WasmValue Write_PlayerStats(const PlayerStats& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("mousePixels", WriteScalar(value.mousePixels));
-	fields.emplace("mouseClicks", WriteScalar(value.mouseClicks));
-	fields.emplace("keyPresses", WriteScalar(value.keyPresses));
-	fields.emplace("unitCommands", WriteScalar(value.unitCommands));
-	fields.emplace("avgCommandSize", WriteScalar(value.avgCommandSize));
+	fields.emplace("mouse-pixels", WriteScalar(value.mousePixels));
+	fields.emplace("mouse-clicks", WriteScalar(value.mouseClicks));
+	fields.emplace("key-presses", WriteScalar(value.keyPresses));
+	fields.emplace("unit-commands", WriteScalar(value.unitCommands));
+	fields.emplace("avg-command-size", WriteScalar(value.avgCommandSize));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -311,19 +311,19 @@ bool Read_PlayerTraffic(const WasmValue& input, PlayerTraffic& output, NativeCal
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
-	const auto* value_packetsSent = FindRecordField(*record, "packetsSent", error);
+	const auto* value_packetsSent = FindRecordField(*record, "packets-sent", error);
 	if (value_packetsSent == nullptr) return false;
 	if (!ReadScalar(*value_packetsSent, output.packetsSent, error)) { return false; }
-	const auto* value_packetsReceived = FindRecordField(*record, "packetsReceived", error);
+	const auto* value_packetsReceived = FindRecordField(*record, "packets-received", error);
 	if (value_packetsReceived == nullptr) return false;
 	if (!ReadScalar(*value_packetsReceived, output.packetsReceived, error)) { return false; }
-	const auto* value_bytesSent = FindRecordField(*record, "bytesSent", error);
+	const auto* value_bytesSent = FindRecordField(*record, "bytes-sent", error);
 	if (value_bytesSent == nullptr) return false;
 	if (!ReadScalar(*value_bytesSent, output.bytesSent, error)) { return false; }
-	const auto* value_bytesReceived = FindRecordField(*record, "bytesReceived", error);
+	const auto* value_bytesReceived = FindRecordField(*record, "bytes-received", error);
 	if (value_bytesReceived == nullptr) return false;
 	if (!ReadScalar(*value_bytesReceived, output.bytesReceived, error)) { return false; }
 	return true;
@@ -332,11 +332,11 @@ bool Read_PlayerTraffic(const WasmValue& input, PlayerTraffic& output, NativeCal
 WasmValue Write_PlayerTraffic(const PlayerTraffic& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("playerID", WriteScalar(value.playerID));
-	fields.emplace("packetsSent", WriteScalar(value.packetsSent));
-	fields.emplace("packetsReceived", WriteScalar(value.packetsReceived));
-	fields.emplace("bytesSent", WriteScalar(value.bytesSent));
-	fields.emplace("bytesReceived", WriteScalar(value.bytesReceived));
+	fields.emplace("player-id", WriteScalar(value.playerID));
+	fields.emplace("packets-sent", WriteScalar(value.packetsSent));
+	fields.emplace("packets-received", WriteScalar(value.packetsReceived));
+	fields.emplace("bytes-sent", WriteScalar(value.bytesSent));
+	fields.emplace("bytes-received", WriteScalar(value.bytesReceived));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -349,28 +349,28 @@ bool Read_RosterEntry(const WasmValue& input, RosterEntry& output, NativeCallSto
 	auto& stored_string_output_name = storage.Make<std::string>();
 	if (!ReadString(*value_name, stored_string_output_name, error)) { return false; }
 	output.name = stored_string_output_name.c_str();
-	const auto* value_playerID = FindRecordField(*record, "playerID", error);
+	const auto* value_playerID = FindRecordField(*record, "player-id", error);
 	if (value_playerID == nullptr) return false;
 	if (!ReadScalar(*value_playerID, output.playerID, error)) { return false; }
-	const auto* value_teamID = FindRecordField(*record, "teamID", error);
+	const auto* value_teamID = FindRecordField(*record, "team-id", error);
 	if (value_teamID == nullptr) return false;
 	if (!ReadScalar(*value_teamID, output.teamID, error)) { return false; }
-	const auto* value_allyTeamID = FindRecordField(*record, "allyTeamID", error);
+	const auto* value_allyTeamID = FindRecordField(*record, "ally-team-id", error);
 	if (value_allyTeamID == nullptr) return false;
 	if (!ReadScalar(*value_allyTeamID, output.allyTeamID, error)) { return false; }
-	const auto* value_isAI = FindRecordField(*record, "isAI", error);
+	const auto* value_isAI = FindRecordField(*record, "is-ai", error);
 	if (value_isAI == nullptr) return false;
 	if (!ReadScalar(*value_isAI, output.isAI, error)) { return false; }
-	const auto* value_isSpec = FindRecordField(*record, "isSpec", error);
+	const auto* value_isSpec = FindRecordField(*record, "is-spec", error);
 	if (value_isSpec == nullptr) return false;
 	if (!ReadScalar(*value_isSpec, output.isSpec, error)) { return false; }
-	const auto* value_isActive = FindRecordField(*record, "isActive", error);
+	const auto* value_isActive = FindRecordField(*record, "is-active", error);
 	if (value_isActive == nullptr) return false;
 	if (!ReadScalar(*value_isActive, output.isActive, error)) { return false; }
-	const auto* value_pingTime = FindRecordField(*record, "pingTime", error);
+	const auto* value_pingTime = FindRecordField(*record, "ping-time", error);
 	if (value_pingTime == nullptr) return false;
 	if (!ReadScalar(*value_pingTime, output.pingTime, error)) { return false; }
-	const auto* value_cpuUsage = FindRecordField(*record, "cpuUsage", error);
+	const auto* value_cpuUsage = FindRecordField(*record, "cpu-usage", error);
 	if (value_cpuUsage == nullptr) return false;
 	if (!ReadScalar(*value_cpuUsage, output.cpuUsage, error)) { return false; }
 	const auto* value_country = FindRecordField(*record, "country", error);
@@ -388,14 +388,14 @@ WasmValue Write_RosterEntry(const RosterEntry& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("name", WasmValue::String((value.name == nullptr) ? std::string{} : std::string(value.name)));
-	fields.emplace("playerID", WriteScalar(value.playerID));
-	fields.emplace("teamID", WriteScalar(value.teamID));
-	fields.emplace("allyTeamID", WriteScalar(value.allyTeamID));
-	fields.emplace("isAI", WriteScalar(value.isAI));
-	fields.emplace("isSpec", WriteScalar(value.isSpec));
-	fields.emplace("isActive", WriteScalar(value.isActive));
-	fields.emplace("pingTime", WriteScalar(value.pingTime));
-	fields.emplace("cpuUsage", WriteScalar(value.cpuUsage));
+	fields.emplace("player-id", WriteScalar(value.playerID));
+	fields.emplace("team-id", WriteScalar(value.teamID));
+	fields.emplace("ally-team-id", WriteScalar(value.allyTeamID));
+	fields.emplace("is-ai", WriteScalar(value.isAI));
+	fields.emplace("is-spec", WriteScalar(value.isSpec));
+	fields.emplace("is-active", WriteScalar(value.isActive));
+	fields.emplace("ping-time", WriteScalar(value.pingTime));
+	fields.emplace("cpu-usage", WriteScalar(value.cpuUsage));
 	fields.emplace("country", WasmValue::String((value.country == nullptr) ? std::string{} : std::string(value.country)));
 	fields.emplace("rank", WriteScalar(value.rank));
 	return WasmValue::Record(std::move(fields));
@@ -411,7 +411,7 @@ NativeCalloutDispatch Dispatch_player_GetLocalAllyTeamID(NativeInterface* native
 	NativeCallStorage storage;
 	GetLocalAllyTeamIDQuery query{};
 	GetLocalAllyTeamIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->player->GetLocalAllyTeamID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.allyTeamID);
@@ -424,7 +424,7 @@ NativeCalloutDispatch Dispatch_player_GetLocalPlayerID(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetLocalPlayerIDQuery query{};
 	GetLocalPlayerIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->player->GetLocalPlayerID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.playerID);
@@ -437,7 +437,7 @@ NativeCalloutDispatch Dispatch_player_GetLocalTeamID(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetLocalTeamIDQuery query{};
 	GetLocalTeamIDResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->player->GetLocalTeamID(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.teamID);
@@ -450,8 +450,8 @@ NativeCalloutDispatch Dispatch_player_GetPlayerRoster(NativeInterface* nativeInt
 	NativeCallStorage storage;
 	GetPlayerRosterQuery query{};
 	GetPlayerRosterResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "sortMode", query.sortMode, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "showPathingPlayers", query.showPathingPlayers, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "sort-mode", query.sortMode, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "show-pathing-players", query.showPathingPlayers, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->player->GetPlayerRoster(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.entries, nativeResult.count, [](const auto& value) { return Write_RosterEntry(value); });
@@ -464,7 +464,7 @@ NativeCalloutDispatch Dispatch_player_GetPlayerStatistics(NativeInterface* nativ
 	NativeCallStorage storage;
 	GetPlayerStatisticsQuery query{};
 	GetPlayerStatisticsResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->player->GetPlayerStatistics(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_PlayerStats(nativeResult.stats);
@@ -477,8 +477,8 @@ NativeCalloutDispatch Dispatch_player_GetPlayerTraffic(NativeInterface* nativeIn
 	NativeCallStorage storage;
 	GetPlayerTrafficQuery query{};
 	GetPlayerTrafficResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "playerID", query.playerID, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "packetID", query.packetID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "player-id", query.playerID, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "packet-id", query.packetID, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->player->GetPlayerTraffic(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.traffic, nativeResult.count, [](const auto& value) { return Write_PlayerTraffic(value); });
@@ -491,7 +491,7 @@ NativeCalloutDispatch Dispatch_player_GetSpectatingState(NativeInterface* native
 	NativeCallStorage storage;
 	GetSpectatingStateQuery query{};
 	GetSpectatingStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->player->GetSpectatingState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.spectating);

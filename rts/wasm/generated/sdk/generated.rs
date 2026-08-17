@@ -45373,6 +45373,54 @@ impl FromValue for RectangleQuery {
 
 #[allow(dead_code, non_camel_case_types)]
 #[derive(Debug, Clone, PartialEq)]
+pub struct RecvFromSyncedQuery {
+    pub message: String,
+    pub message_length: u32,
+}
+
+impl IntoValue for RecvFromSyncedQuery {
+    fn into_value(self) -> Value {
+        let mut fields = std::collections::BTreeMap::new();
+        fields.insert("message".to_string(), self.message.into_value());
+        fields.insert("messageLength".to_string(), self.message_length.into_value());
+        Value::Record(fields)
+    }
+}
+
+#[allow(unused_variables)]
+impl FromValue for RecvFromSyncedQuery {
+    fn from_value(value: Value) -> Result<Self, ApiError> {
+        let Value::Record(mut fields) = value else { return Err(ApiError::with_detail(102, crate::ErrorCategory::Internal, "expected record")); };
+        Ok(Self {
+            message: FromValue::from_value(fields.remove("message").ok_or_else(|| generated_missing_field("message"))?)?,
+            message_length: FromValue::from_value(fields.remove("messageLength").ok_or_else(|| generated_missing_field("messageLength"))?)?,
+        })
+    }
+}
+
+#[allow(dead_code, non_camel_case_types)]
+#[derive(Debug, Clone, PartialEq)]
+pub struct RecvFromSyncedResult {
+}
+
+impl IntoValue for RecvFromSyncedResult {
+    fn into_value(self) -> Value {
+        let fields = std::collections::BTreeMap::new();
+        Value::Record(fields)
+    }
+}
+
+#[allow(unused_variables)]
+impl FromValue for RecvFromSyncedResult {
+    fn from_value(value: Value) -> Result<Self, ApiError> {
+        let Value::Record(fields) = value else { return Err(ApiError::with_detail(102, crate::ErrorCategory::Internal, "expected record")); };
+        Ok(Self {
+        })
+    }
+}
+
+#[allow(dead_code, non_camel_case_types)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReloadQuery {
     pub start_script: String,
 }
@@ -51903,6 +51951,54 @@ impl IntoValue for SendSpectatorChatResult {
 
 #[allow(unused_variables)]
 impl FromValue for SendSpectatorChatResult {
+    fn from_value(value: Value) -> Result<Self, ApiError> {
+        let Value::Record(mut fields) = value else { return Err(ApiError::with_detail(102, crate::ErrorCategory::Internal, "expected record")); };
+        Ok(Self {
+            success: FromValue::from_value(fields.remove("success").ok_or_else(|| generated_missing_field("success"))?)?,
+        })
+    }
+}
+
+#[allow(dead_code, non_camel_case_types)]
+#[derive(Debug, Clone, PartialEq)]
+pub struct SendToUnsyncedQuery {
+    pub message: String,
+}
+
+impl IntoValue for SendToUnsyncedQuery {
+    fn into_value(self) -> Value {
+        let mut fields = std::collections::BTreeMap::new();
+        fields.insert("message".to_string(), self.message.into_value());
+        Value::Record(fields)
+    }
+}
+
+#[allow(unused_variables)]
+impl FromValue for SendToUnsyncedQuery {
+    fn from_value(value: Value) -> Result<Self, ApiError> {
+        let Value::Record(mut fields) = value else { return Err(ApiError::with_detail(102, crate::ErrorCategory::Internal, "expected record")); };
+        Ok(Self {
+            message: FromValue::from_value(fields.remove("message").ok_or_else(|| generated_missing_field("message"))?)?,
+        })
+    }
+}
+
+#[allow(dead_code, non_camel_case_types)]
+#[derive(Debug, Clone, PartialEq)]
+pub struct SendToUnsyncedResult {
+    pub success: bool,
+}
+
+impl IntoValue for SendToUnsyncedResult {
+    fn into_value(self) -> Value {
+        let mut fields = std::collections::BTreeMap::new();
+        fields.insert("success".to_string(), self.success.into_value());
+        Value::Record(fields)
+    }
+}
+
+#[allow(unused_variables)]
+impl FromValue for SendToUnsyncedResult {
     fn from_value(value: Value) -> Result<Self, ApiError> {
         let Value::Record(mut fields) = value else { return Err(ApiError::with_detail(102, crate::ErrorCategory::Internal, "expected record")); };
         Ok(Self {
@@ -80910,6 +81006,12 @@ impl<'a, B: CalloutBackend> messages<'a, B> {
     pub fn send_spectator_chat(&mut self, message: String)-> Result<bool, ApiError> {
         let arguments = vec![message.into_value()];
         let value = self.backend.call("messages.SendSpectatorChat", &arguments)?;
+        FromValue::from_value(value)
+    }
+
+    pub fn send_to_unsynced(&mut self, message: String)-> Result<bool, ApiError> {
+        let arguments = vec![message.into_value()];
+        let value = self.backend.call("messages.SendToUnsynced", &arguments)?;
         FromValue::from_value(value)
     }
 

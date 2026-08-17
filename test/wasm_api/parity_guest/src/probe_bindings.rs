@@ -10,5 +10,6 @@ pub(crate) mod bindings {
 pub(crate) mod callin {
     pub(crate) use super::bindings::exports::recoil::spring_api::callins_rules_synced::{
         GameFrameQuery, GameFrameResult, Guest, SpringError, UpdateQuery, UpdateResult,
+
     };
 }

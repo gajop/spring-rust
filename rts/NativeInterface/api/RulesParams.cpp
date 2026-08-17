@@ -311,7 +311,7 @@ static void NativeGetUnitRulesParam(const GetUnitRulesParamQuery* query, GetUnit
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Visible);
 	if (unit == nullptr) {
 		result->error = &INVALID_ID_ERROR;
 		return;
@@ -340,7 +340,7 @@ static void NativeGetUnitRulesParams(const GetUnitRulesParamsQuery* query, GetUn
 		return;
 	}
 
-	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID);
+	const CUnit* unit = WasmUiVisibility::FindUnit(query->unitID, WasmUiVisibility::UnitAccess::Visible);
 	if (unit == nullptr) {
 		result->error = &INVALID_ID_ERROR;
 		return;

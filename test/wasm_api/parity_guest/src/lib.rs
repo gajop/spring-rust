@@ -19,6 +19,8 @@ use bindings::recoil::spring_api::units_info;
 use bindings::recoil::spring_api::units_query;
 use bindings::recoil::spring_api::weapon_defs;
 use callin::{GameFrameQuery, GameFrameResult, Guest, SpringError, UpdateQuery, UpdateResult};
+#[cfg(parity_has_synced_message)]
+use callin::RecvFromSyncedQuery;
 
 pub struct Fixture {
     pub unit_id: i32,
@@ -31,6 +33,13 @@ pub struct Fixture {
     pub weapon_def_name: String,
     pub team_id: i32,
     pub ally_team_id: i32,
+    // The UI guest discovers the LOS and radar-only enemy IDs from the
+    // visibility-filtered unit inventory and their typed LOS state. A hidden
+    // unit is intentionally not enumerable from UI, so hidden-state coverage
+    // remains in the Lua/native visibility fixture rather than inventing an
+    // ID that would make a Wasm probe vacuous.
+    pub enemy_los_unit_id: i32,
+    pub enemy_radar_unit_id: i32,
     pub player_id: i32,
     pub piece_projectile_id: i32,
     pub ground_x: f32,
@@ -51,7 +60,7 @@ fn discover_fixture() -> Result<Fixture, String> {
     let mut unit = None;
     let mut extractor_unit = None;
     let mut unit_candidates = Vec::new();
-    for candidate_id in unit_ids {
+    for candidate_id in unit_ids.iter().copied() {
         // LuaUI can enumerate radar-visible units whose definition is still
         // intentionally redacted.  Match Lua's `Spring.GetUnitDefID`/nil
         // behaviour by skipping those candidates rather than turning one
@@ -67,6 +76,7 @@ fn discover_fixture() -> Result<Fixture, String> {
         if candidate_def_id == fixture_unit_def_id
             && unit.is_none()
             && probe_context::unit_candidate_is_primary(candidate_id)
+            && units_info::get_unit_team(candidate_id).ok() == Some(0)
         {
             unit = Some((candidate_id, candidate_def_id));
         }
@@ -152,6 +162,11 @@ fn discover_fixture() -> Result<Fixture, String> {
             "native-api-test-extractor-unit-not-found:def={extractor_unit_def_id}:candidates={unit_candidates:?}"
         )
     })?;
+    let (enemy_los_unit_id, enemy_radar_unit_id) =
+        match probe_context::visibility_enemy_ids(&unit_ids, team_id, ally_team_id)? {
+            Some(ids) => ids,
+            None => (unit_id, unit_id),
+        };
     let piece_projectile_id =
         piece_projectile.ok_or_else(|| {
             format!(
@@ -182,6 +197,8 @@ fn discover_fixture() -> Result<Fixture, String> {
         weapon_def_name,
         team_id,
         ally_team_id,
+        enemy_los_unit_id,
+        enemy_radar_unit_id,
         player_id,
         piece_projectile_id,
         ground_x: (ground_position.x * 1000.0 + 0.5).floor() / 1000.0,
@@ -238,6 +255,11 @@ fn send_determinism(frame: i32) -> Result<(), SpringError> {
         deterministic_rng_signature(frame, count),
     );
     messages::send_lua_rules_msg(&message).map_err(|error| SpringError { code: error.code })?;
+    #[cfg(parity_is_synced)]
+    {
+        messages::send_to_unsynced("native_api_wasm_direct_probe")
+            .map_err(|error| SpringError { code: error.code })?;
+    }
     Ok(())
 }
 
@@ -299,6 +321,14 @@ fn run_generated_probe(current_frame: i32) {
 }
 
 impl Guest for ParityGuest {
+    #[cfg(parity_has_synced_message)]
+    fn recv_from_synced(query: RecvFromSyncedQuery) -> Result<(), SpringError> {
+        let message = query.message.replace('|', "_");
+        let marker = format!("WASM_DIRECT_SYNCED|{}|{}", query.message_length, message);
+        let _ = messages::send_lua_rules_msg(&marker);
+        Ok(())
+    }
+
     fn game_frame(query: GameFrameQuery) -> Result<GameFrameResult, SpringError> {
         LATEST_GAME_FRAME.store(query.game_frame, Ordering::Release);
         // Unsynced Update is the first callback that is guaranteed to run

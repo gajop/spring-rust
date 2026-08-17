@@ -75,7 +75,7 @@ bool Read_GetCameraDirectionQuery(const WasmValue& input, GetCameraDirectionQuer
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -84,7 +84,7 @@ bool Read_GetCameraDirectionQuery(const WasmValue& input, GetCameraDirectionQuer
 WasmValue Write_GetCameraDirectionQuery(const GetCameraDirectionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -109,7 +109,7 @@ bool Read_GetCameraFOVQuery(const WasmValue& input, GetCameraFOVQuery& output, N
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -118,7 +118,7 @@ bool Read_GetCameraFOVQuery(const WasmValue& input, GetCameraFOVQuery& output, N
 WasmValue Write_GetCameraFOVQuery(const GetCameraFOVQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -143,7 +143,7 @@ bool Read_GetCameraNamesQuery(const WasmValue& input, GetCameraNamesQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -152,7 +152,7 @@ bool Read_GetCameraNamesQuery(const WasmValue& input, GetCameraNamesQuery& outpu
 WasmValue Write_GetCameraNamesQuery(const GetCameraNamesQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -192,7 +192,7 @@ bool Read_GetCameraPositionQuery(const WasmValue& input, GetCameraPositionQuery&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value__unused = FindRecordField(*record, "_unused", error);
+	const auto* value__unused = FindRecordField(*record, "unused", error);
 	if (value__unused == nullptr) return false;
 	if (!ReadScalar(*value__unused, output._unused, error)) { return false; }
 	return true;
@@ -201,7 +201,7 @@ bool Read_GetCameraPositionQuery(const WasmValue& input, GetCameraPositionQuery&
 WasmValue Write_GetCameraPositionQuery(const GetCameraPositionQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("_unused", WriteScalar(value._unused));
+	fields.emplace("unused", WriteScalar(value._unused));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -226,7 +226,7 @@ bool Read_GetCameraStateQuery(const WasmValue& input, GetCameraStateQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_useTable = FindRecordField(*record, "useTable", error);
+	const auto* value_useTable = FindRecordField(*record, "use-table", error);
 	if (value_useTable == nullptr) return false;
 	if (!ReadScalar(*value_useTable, output.useTable, error)) { return false; }
 	return true;
@@ -235,7 +235,7 @@ bool Read_GetCameraStateQuery(const WasmValue& input, GetCameraStateQuery& outpu
 WasmValue Write_GetCameraStateQuery(const GetCameraStateQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("useTable", WriteScalar(value.useTable));
+	fields.emplace("use-table", WriteScalar(value.useTable));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -260,10 +260,10 @@ bool Read_GetPixelDirQuery(const WasmValue& input, GetPixelDirQuery& output, Nat
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_screenX = FindRecordField(*record, "screenX", error);
+	const auto* value_screenX = FindRecordField(*record, "screen-x", error);
 	if (value_screenX == nullptr) return false;
 	if (!ReadScalar(*value_screenX, output.screenX, error)) { return false; }
-	const auto* value_screenY = FindRecordField(*record, "screenY", error);
+	const auto* value_screenY = FindRecordField(*record, "screen-y", error);
 	if (value_screenY == nullptr) return false;
 	if (!ReadScalar(*value_screenY, output.screenY, error)) { return false; }
 	return true;
@@ -272,8 +272,8 @@ bool Read_GetPixelDirQuery(const WasmValue& input, GetPixelDirQuery& output, Nat
 WasmValue Write_GetPixelDirQuery(const GetPixelDirQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("screenX", WriteScalar(value.screenX));
-	fields.emplace("screenY", WriteScalar(value.screenY));
+	fields.emplace("screen-x", WriteScalar(value.screenX));
+	fields.emplace("screen-y", WriteScalar(value.screenY));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -301,13 +301,13 @@ bool Read_SetCameraStateQuery(const WasmValue& input, SetCameraStateQuery& outpu
 	const auto* value_state = FindRecordField(*record, "state", error);
 	if (value_state == nullptr) return false;
 	if (!Read_CameraState(*value_state, output.state, storage, error)) { return false; }
-	const auto* value_transitionTime = FindRecordField(*record, "transitionTime", error);
+	const auto* value_transitionTime = FindRecordField(*record, "transition-time", error);
 	if (value_transitionTime == nullptr) return false;
 	if (!ReadScalar(*value_transitionTime, output.transitionTime, error)) { return false; }
-	const auto* value_transitionTimeFactor = FindRecordField(*record, "transitionTimeFactor", error);
+	const auto* value_transitionTimeFactor = FindRecordField(*record, "transition-time-factor", error);
 	if (value_transitionTimeFactor == nullptr) return false;
 	if (!ReadScalar(*value_transitionTimeFactor, output.transitionTimeFactor, error)) { return false; }
-	const auto* value_transitionTimeExponent = FindRecordField(*record, "transitionTimeExponent", error);
+	const auto* value_transitionTimeExponent = FindRecordField(*record, "transition-time-exponent", error);
 	if (value_transitionTimeExponent == nullptr) return false;
 	if (!ReadScalar(*value_transitionTimeExponent, output.transitionTimeExponent, error)) { return false; }
 	return true;
@@ -317,9 +317,9 @@ WasmValue Write_SetCameraStateQuery(const SetCameraStateQuery& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("state", Write_CameraState(value.state));
-	fields.emplace("transitionTime", WriteScalar(value.transitionTime));
-	fields.emplace("transitionTimeFactor", WriteScalar(value.transitionTimeFactor));
-	fields.emplace("transitionTimeExponent", WriteScalar(value.transitionTimeExponent));
+	fields.emplace("transition-time", WriteScalar(value.transitionTime));
+	fields.emplace("transition-time-factor", WriteScalar(value.transitionTimeFactor));
+	fields.emplace("transition-time-exponent", WriteScalar(value.transitionTimeExponent));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -344,7 +344,7 @@ bool Read_SetCameraTargetOptions(const WasmValue& input, SetCameraTargetOptions&
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_transitionTime = FindRecordField(*record, "transitionTime", error);
+	const auto* value_transitionTime = FindRecordField(*record, "transition-time", error);
 	if (value_transitionTime == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_transitionTime).storage)) {
 		output.transitionTime = {};
@@ -353,7 +353,7 @@ bool Read_SetCameraTargetOptions(const WasmValue& input, SetCameraTargetOptions&
 		output.hasTransitionTime = true;
 		if (!ReadScalar(*value_transitionTime, output.transitionTime, error)) { return false; }
 	}
-	const auto* value_dirX = FindRecordField(*record, "dirX", error);
+	const auto* value_dirX = FindRecordField(*record, "dir-x", error);
 	if (value_dirX == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_dirX).storage)) {
 		output.dirX = {};
@@ -362,7 +362,7 @@ bool Read_SetCameraTargetOptions(const WasmValue& input, SetCameraTargetOptions&
 		output.hasDirX = true;
 		if (!ReadScalar(*value_dirX, output.dirX, error)) { return false; }
 	}
-	const auto* value_dirY = FindRecordField(*record, "dirY", error);
+	const auto* value_dirY = FindRecordField(*record, "dir-y", error);
 	if (value_dirY == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_dirY).storage)) {
 		output.dirY = {};
@@ -371,7 +371,7 @@ bool Read_SetCameraTargetOptions(const WasmValue& input, SetCameraTargetOptions&
 		output.hasDirY = true;
 		if (!ReadScalar(*value_dirY, output.dirY, error)) { return false; }
 	}
-	const auto* value_dirZ = FindRecordField(*record, "dirZ", error);
+	const auto* value_dirZ = FindRecordField(*record, "dir-z", error);
 	if (value_dirZ == nullptr) return false;
 	if (std::holds_alternative<std::monostate>((*value_dirZ).storage)) {
 		output.dirZ = {};
@@ -386,10 +386,10 @@ bool Read_SetCameraTargetOptions(const WasmValue& input, SetCameraTargetOptions&
 WasmValue Write_SetCameraTargetOptions(const SetCameraTargetOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("transitionTime", value.hasTransitionTime ? WriteScalar(value.transitionTime) : WasmValue::Unit());
-	fields.emplace("dirX", value.hasDirX ? WriteScalar(value.dirX) : WasmValue::Unit());
-	fields.emplace("dirY", value.hasDirY ? WriteScalar(value.dirY) : WasmValue::Unit());
-	fields.emplace("dirZ", value.hasDirZ ? WriteScalar(value.dirZ) : WasmValue::Unit());
+	fields.emplace("transition-time", value.hasTransitionTime ? WriteScalar(value.transitionTime) : WasmValue::Unit());
+	fields.emplace("dir-x", value.hasDirX ? WriteScalar(value.dirX) : WasmValue::Unit());
+	fields.emplace("dir-y", value.hasDirY ? WriteScalar(value.dirY) : WasmValue::Unit());
+	fields.emplace("dir-z", value.hasDirZ ? WriteScalar(value.dirZ) : WasmValue::Unit());
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -435,19 +435,19 @@ bool Read_TraceScreenRayOptions(const WasmValue& input, TraceScreenRayOptions& o
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_onlyCoords = FindRecordField(*record, "onlyCoords", error);
+	const auto* value_onlyCoords = FindRecordField(*record, "only-coords", error);
 	if (value_onlyCoords == nullptr) return false;
 	if (!ReadScalar(*value_onlyCoords, output.onlyCoords, error)) { return false; }
-	const auto* value_useMinimap = FindRecordField(*record, "useMinimap", error);
+	const auto* value_useMinimap = FindRecordField(*record, "use-minimap", error);
 	if (value_useMinimap == nullptr) return false;
 	if (!ReadScalar(*value_useMinimap, output.useMinimap, error)) { return false; }
-	const auto* value_includeSky = FindRecordField(*record, "includeSky", error);
+	const auto* value_includeSky = FindRecordField(*record, "include-sky", error);
 	if (value_includeSky == nullptr) return false;
 	if (!ReadScalar(*value_includeSky, output.includeSky, error)) { return false; }
-	const auto* value_ignoreWater = FindRecordField(*record, "ignoreWater", error);
+	const auto* value_ignoreWater = FindRecordField(*record, "ignore-water", error);
 	if (value_ignoreWater == nullptr) return false;
 	if (!ReadScalar(*value_ignoreWater, output.ignoreWater, error)) { return false; }
-	const auto* value_heightOffset = FindRecordField(*record, "heightOffset", error);
+	const auto* value_heightOffset = FindRecordField(*record, "height-offset", error);
 	if (value_heightOffset == nullptr) return false;
 	if (!ReadScalar(*value_heightOffset, output.heightOffset, error)) { return false; }
 	return true;
@@ -456,11 +456,11 @@ bool Read_TraceScreenRayOptions(const WasmValue& input, TraceScreenRayOptions& o
 WasmValue Write_TraceScreenRayOptions(const TraceScreenRayOptions& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("onlyCoords", WriteScalar(value.onlyCoords));
-	fields.emplace("useMinimap", WriteScalar(value.useMinimap));
-	fields.emplace("includeSky", WriteScalar(value.includeSky));
-	fields.emplace("ignoreWater", WriteScalar(value.ignoreWater));
-	fields.emplace("heightOffset", WriteScalar(value.heightOffset));
+	fields.emplace("only-coords", WriteScalar(value.onlyCoords));
+	fields.emplace("use-minimap", WriteScalar(value.useMinimap));
+	fields.emplace("include-sky", WriteScalar(value.includeSky));
+	fields.emplace("ignore-water", WriteScalar(value.ignoreWater));
+	fields.emplace("height-offset", WriteScalar(value.heightOffset));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -468,10 +468,10 @@ bool Read_TraceScreenRayQuery(const WasmValue& input, TraceScreenRayQuery& outpu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_screenX = FindRecordField(*record, "screenX", error);
+	const auto* value_screenX = FindRecordField(*record, "screen-x", error);
 	if (value_screenX == nullptr) return false;
 	if (!ReadScalar(*value_screenX, output.screenX, error)) { return false; }
-	const auto* value_screenY = FindRecordField(*record, "screenY", error);
+	const auto* value_screenY = FindRecordField(*record, "screen-y", error);
 	if (value_screenY == nullptr) return false;
 	if (!ReadScalar(*value_screenY, output.screenY, error)) { return false; }
 	const auto* value_options = FindRecordField(*record, "options", error);
@@ -483,8 +483,8 @@ bool Read_TraceScreenRayQuery(const WasmValue& input, TraceScreenRayQuery& outpu
 WasmValue Write_TraceScreenRayQuery(const TraceScreenRayQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("screenX", WriteScalar(value.screenX));
-	fields.emplace("screenY", WriteScalar(value.screenY));
+	fields.emplace("screen-x", WriteScalar(value.screenX));
+	fields.emplace("screen-y", WriteScalar(value.screenY));
 	fields.emplace("options", Write_TraceScreenRayOptions(value.options));
 	return WasmValue::Record(std::move(fields));
 }
@@ -493,13 +493,13 @@ bool Read_TraceScreenRayResult(const WasmValue& input, TraceScreenRayResult& out
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_hitType = FindRecordField(*record, "hitType", error);
+	const auto* value_hitType = FindRecordField(*record, "hit-type", error);
 	if (value_hitType == nullptr) return false;
 	if (!ReadScalar(*value_hitType, output.hitType, error)) { return false; }
-	const auto* value_hitID = FindRecordField(*record, "hitID", error);
+	const auto* value_hitID = FindRecordField(*record, "hit-id", error);
 	if (value_hitID == nullptr) return false;
 	if (!ReadScalar(*value_hitID, output.hitID, error)) { return false; }
-	const auto* value_hitPos = FindRecordField(*record, "hitPos", error);
+	const auto* value_hitPos = FindRecordField(*record, "hit-pos", error);
 	if (value_hitPos == nullptr) return false;
 	if (!Read_Float3(*value_hitPos, output.hitPos, storage, error)) { return false; }
 	return true;
@@ -508,9 +508,9 @@ bool Read_TraceScreenRayResult(const WasmValue& input, TraceScreenRayResult& out
 WasmValue Write_TraceScreenRayResult(const TraceScreenRayResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("hitType", WriteScalar(value.hitType));
-	fields.emplace("hitID", WriteScalar(value.hitID));
-	fields.emplace("hitPos", Write_Float3(value.hitPos));
+	fields.emplace("hit-type", WriteScalar(value.hitType));
+	fields.emplace("hit-id", WriteScalar(value.hitID));
+	fields.emplace("hit-pos", Write_Float3(value.hitPos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -518,7 +518,7 @@ bool Read_WorldToScreenCoordsQuery(const WasmValue& input, WorldToScreenCoordsQu
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_worldPos = FindRecordField(*record, "worldPos", error);
+	const auto* value_worldPos = FindRecordField(*record, "world-pos", error);
 	if (value_worldPos == nullptr) return false;
 	if (!Read_Float3(*value_worldPos, output.worldPos, storage, error)) { return false; }
 	return true;
@@ -527,7 +527,7 @@ bool Read_WorldToScreenCoordsQuery(const WasmValue& input, WorldToScreenCoordsQu
 WasmValue Write_WorldToScreenCoordsQuery(const WorldToScreenCoordsQuery& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("worldPos", Write_Float3(value.worldPos));
+	fields.emplace("world-pos", Write_Float3(value.worldPos));
 	return WasmValue::Record(std::move(fields));
 }
 
@@ -535,7 +535,7 @@ bool Read_WorldToScreenCoordsResult(const WasmValue& input, WorldToScreenCoordsR
 {
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
-	const auto* value_screenPos = FindRecordField(*record, "screenPos", error);
+	const auto* value_screenPos = FindRecordField(*record, "screen-pos", error);
 	if (value_screenPos == nullptr) return false;
 	if (!Read_Float3(*value_screenPos, output.screenPos, storage, error)) { return false; }
 	const auto* value_valid = FindRecordField(*record, "valid", error);
@@ -547,7 +547,7 @@ bool Read_WorldToScreenCoordsResult(const WasmValue& input, WorldToScreenCoordsR
 WasmValue Write_WorldToScreenCoordsResult(const WorldToScreenCoordsResult& value)
 {
 	WasmValueRecord fields;
-	fields.emplace("screenPos", Write_Float3(value.screenPos));
+	fields.emplace("screen-pos", Write_Float3(value.screenPos));
 	fields.emplace("valid", WriteScalar(value.valid));
 	return WasmValue::Record(std::move(fields));
 }
@@ -562,7 +562,7 @@ NativeCalloutDispatch Dispatch_camera_GetCameraDirection(NativeInterface* native
 	NativeCallStorage storage;
 	GetCameraDirectionQuery query{};
 	GetCameraDirectionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->GetCameraDirection(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.direction);
@@ -575,7 +575,7 @@ NativeCalloutDispatch Dispatch_camera_GetCameraFOV(NativeInterface* nativeInterf
 	NativeCallStorage storage;
 	GetCameraFOVQuery query{};
 	GetCameraFOVResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->GetCameraFOV(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.fov);
@@ -588,7 +588,7 @@ NativeCalloutDispatch Dispatch_camera_GetCameraNames(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetCameraNamesQuery query{};
 	GetCameraNamesResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->GetCameraNames(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteNativeList(nativeResult.names, nativeResult.count, [](const auto& value) { return WasmValue::String(value == nullptr ? std::string{} : std::string(value)); });
@@ -601,7 +601,7 @@ NativeCalloutDispatch Dispatch_camera_GetCameraPosition(NativeInterface* nativeI
 	NativeCallStorage storage;
 	GetCameraPositionQuery query{};
 	GetCameraPositionResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "_unused", query._unused, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 0u, 1u, "unused", query._unused, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->GetCameraPosition(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.position);
@@ -614,7 +614,7 @@ NativeCalloutDispatch Dispatch_camera_GetCameraState(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	GetCameraStateQuery query{};
 	GetCameraStateResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "useTable", query.useTable, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 1u, 1u, "use-table", query.useTable, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->GetCameraState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_CameraState(nativeResult.state);
@@ -627,8 +627,8 @@ NativeCalloutDispatch Dispatch_camera_GetPixelDir(NativeInterface* nativeInterfa
 	NativeCallStorage storage;
 	GetPixelDirQuery query{};
 	GetPixelDirResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "screenX", query.screenX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "screenY", query.screenY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 2u, 2u, "screen-x", query.screenX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 2u, 2u, "screen-y", query.screenY, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->GetPixelDir(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = Write_Float3(nativeResult.direction);
@@ -642,9 +642,9 @@ NativeCalloutDispatch Dispatch_camera_SetCameraState(NativeInterface* nativeInte
 	SetCameraStateQuery query{};
 	SetCameraStateResult nativeResult{};
 	if (!ReadRecordArgument(arguments, 0u, 0u, 4u, 4u, "state", Read_CameraState, query.state, storage, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "transitionTime", query.transitionTime, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "transitionTimeFactor", query.transitionTimeFactor, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "transitionTimeExponent", query.transitionTimeExponent, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 4u, 4u, "transition-time", query.transitionTime, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 2u, 2u, 4u, 4u, "transition-time-factor", query.transitionTimeFactor, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 3u, 3u, 4u, 4u, "transition-time-exponent", query.transitionTimeExponent, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->SetCameraState(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	result = WriteScalar(nativeResult.success);
@@ -671,15 +671,15 @@ NativeCalloutDispatch Dispatch_camera_TraceScreenRay(NativeInterface* nativeInte
 	NativeCallStorage storage;
 	TraceScreenRayQuery query{};
 	TraceScreenRayResult nativeResult{};
-	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "screenX", query.screenX, error)) return NativeCalloutDispatch::handled;
-	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "screenY", query.screenY, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 0u, 0u, 3u, 3u, "screen-x", query.screenX, error)) return NativeCalloutDispatch::handled;
+	if (!ReadArgument(arguments, 1u, 1u, 3u, 3u, "screen-y", query.screenY, error)) return NativeCalloutDispatch::handled;
 	if (!ReadRecordArgument(arguments, 2u, 2u, 3u, 3u, "options", Read_TraceScreenRayOptions, query.options, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->TraceScreenRay(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("hitType", WriteScalar(nativeResult.hitType));
-	outputFields.emplace("hitID", WriteScalar(nativeResult.hitID));
-	outputFields.emplace("hitPos", Write_Float3(nativeResult.hitPos));
+	outputFields.emplace("hit-type", WriteScalar(nativeResult.hitType));
+	outputFields.emplace("hit-id", WriteScalar(nativeResult.hitID));
+	outputFields.emplace("hit-pos", Write_Float3(nativeResult.hitPos));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;
 }
@@ -690,11 +690,11 @@ NativeCalloutDispatch Dispatch_camera_WorldToScreenCoords(NativeInterface* nativ
 	NativeCallStorage storage;
 	WorldToScreenCoordsQuery query{};
 	WorldToScreenCoordsResult nativeResult{};
-	if (!ReadRecordArgument(arguments, 0u, 0u, 1u, 1u, "worldPos", Read_Float3, query.worldPos, storage, error)) return NativeCalloutDispatch::handled;
+	if (!ReadRecordArgument(arguments, 0u, 0u, 1u, 1u, "world-pos", Read_Float3, query.worldPos, storage, error)) return NativeCalloutDispatch::handled;
 	nativeInterface->cameraApi->WorldToScreenCoords(&query, &nativeResult);
 	if (!CheckNativeError(nativeResult, error)) return NativeCalloutDispatch::handled;
 	WasmValueRecord outputFields;
-	outputFields.emplace("screenPos", Write_Float3(nativeResult.screenPos));
+	outputFields.emplace("screen-pos", Write_Float3(nativeResult.screenPos));
 	outputFields.emplace("valid", WriteScalar(nativeResult.valid));
 	result = WasmValue::Record(std::move(outputFields));
 	return NativeCalloutDispatch::handled;

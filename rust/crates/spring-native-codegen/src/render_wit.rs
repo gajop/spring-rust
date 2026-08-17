@@ -61,6 +61,19 @@ pub(crate) fn wit_identifier(name: &str) -> String {
         name
     }
 }
+
+/// Return the semantic field/variant name exposed by the Component Model.
+///
+/// WIT source escapes reserved identifiers with a leading `%`, but that
+/// escape is syntax rather than part of the runtime name carried by a
+/// component record or enum value.
+pub(crate) fn wit_runtime_identifier(name: &str) -> String {
+	let identifier = wit_identifier(name);
+	identifier
+		.strip_prefix('%')
+		.unwrap_or(identifier.as_str())
+		.to_owned()
+}
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::model::{ApiModel, ApiModule, Environment, FunctionModel, RecordModel, SemanticType};

@@ -4,6 +4,7 @@
 
 #include "LuaInclude.h"
 #include "LuaUtils.h"
+#include "Lua/LuaRules.h"
 
 #include "Game/GameController.h"
 #include "Game/GameHelper.h"
@@ -27,6 +28,7 @@
 #include "System/Rectangle.h"
 #include "Net/Protocol/NetMessageTypes.h"
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <string>
@@ -64,6 +66,7 @@ bool LuaDebugExtra::PushEntries(lua_State* L)
 	LuaPushNamedCFunc(L, "emulateMouseWheel",   EmulateMouseWheel);
 	LuaPushNamedCFunc(L, "emulateUnitMoveFailed", EmulateUnitMoveFailed);
 	LuaPushNamedCFunc(L, "emulateNativeApiParityCallins", EmulateNativeApiParityCallins);
+	LuaPushNamedCFunc(L, "emulateNativeApiParityUnimplementedCallin", EmulateNativeApiParityUnimplementedCallin);
 	LuaPushNamedCFunc(L, "clearEmulatedInput",  ClearEmulatedInputLua);
 
 	return true;
@@ -245,19 +248,38 @@ int LuaDebugExtra::EmulateUnitMoveFailed(lua_State* L)
  * @param unitID integer
  * @param featureID integer
  * @param projectileID integer
+ * @param benchmarkOnly boolean? If true, exercise only the non-rendering benchmark events.
  * @return nil
  */
 int LuaDebugExtra::EmulateNativeApiParityCallins(lua_State* L)
 {
 	const int unitID = luaL_checkint(L, 1);
-	const int featureID = luaL_checkint(L, 2);
-	const int projectileID = luaL_checkint(L, 3);
+	const bool benchmarkOnly = lua_toboolean(L, 4);
 
 	CUnit* unit = unitHandler.GetUnit(unitID);
+	if (unit == nullptr)
+		return 0;
+
+	if (benchmarkOnly) {
+		// Keep the bounded benchmark independent of the simulation clock while
+		// still entering the same event-handler dispatches as a real frame.
+		eventHandler.GameFrame(7);
+		eventHandler.Update();
+		BuildInfo buildInfo(unit->unitDef, unit->pos, 0);
+		eventHandler.UnitCreated(unit, unit);
+		eventHandler.AllowUnitCreation(unit->unitDef, unit, &buildInfo);
+		float newDamage = 12.0f;
+		float impulseMult = 1.0f;
+		eventHandler.UnitPreDamaged(unit, unit, 12.0f, -1, -1, false, &newDamage, &impulseMult);
+		return 0;
+	}
+
+	const int featureID = luaL_checkint(L, 2);
+	const int projectileID = luaL_checkint(L, 3);
 	CFeature* feature = featureHandler.GetFeature(featureID);
 	CProjectile* projectile = projectileHandler.GetProjectileBySyncedID(projectileID);
 
-	if (unit == nullptr || feature == nullptr || projectile == nullptr)
+	if (feature == nullptr || projectile == nullptr)
 		return 0;
 
 	// AddConsoleLine is intentionally not used as a delimiter here: console
@@ -491,6 +513,33 @@ int LuaDebugExtra::EmulateNativeApiParityCallins(lua_State* L)
 	eventHandler.DrawProjectile(projectile);
 	eventHandler.DrawMaterial(&LuaMaterial::defMat);
 	eventHandler.GameFrame(parityDriverEnd);
+
+	return 0;
+}
+
+
+/*** Exercise a missing GameFrame implementation for the benchmark fixture.
+ *
+ * The LuaRules handle intentionally has no GameFrame function in this mode, so
+ * the direct handle call measures the real Lua global lookup/missing-callin
+ * path. The event-handler call immediately afterwards drives the native and
+ * Wasm clients through the same engine event boundary without adding a Lua
+ * callback to the event list.
+ *
+ * @function debug.emulateNativeApiParityUnimplementedCallin
+ * @param iterations integer
+ * @return nil
+ */
+int LuaDebugExtra::EmulateNativeApiParityUnimplementedCallin(lua_State* L)
+{
+	const int iterations = std::max(1, luaL_checkint(L, 1));
+	if (luaRules == nullptr)
+		return 0;
+
+	for (int frame = 1; frame <= iterations; ++frame) {
+		luaRules->syncedLuaHandle.GameFrame(frame);
+		eventHandler.GameFrame(frame);
+	}
 
 	return 0;
 }
