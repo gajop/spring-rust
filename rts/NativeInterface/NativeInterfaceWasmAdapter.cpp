@@ -687,7 +687,8 @@ bool NativeInterfaceWasmAdapter::CalloutImpl(WasmModule* owner, std::string_view
 	const bool timerCall = module == "profiling" &&
 		(IsFunction(function, "GetTimer", "get-timer") ||
 		 IsFunction(function, "GetTimerMicros", "get-timer-micros"));
-	if (syncedEnvironment && timerCall && !spring::synced_timing::IsEnabled()) {
+	if (!spring::synced_timing::IsAllowed(
+		syncedEnvironment, timerCall, spring::synced_timing::IsEnabled())) {
 		error = "synced Wasm timers are disabled; set "
 			"SPRING_ENABLE_SYNCED_TIMERS=1 for diagnostic benchmarking";
 		return false;

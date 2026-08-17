@@ -91,6 +91,7 @@ pub struct LuaSignatures {
     pub matches: Vec<LuaMatch>,
     pub unmatched: Vec<String>,
     pub explicit_exclusions: BTreeMap<String, String>,
+    pub registered_exclusions: BTreeMap<String, String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -789,11 +790,23 @@ fn native_type_matches(expected: &SemanticType, actual: &str) -> bool {
 
 fn compare_lua(model: &ApiModel, lua: &LuaSignatures, errors: &mut Vec<String>) {
     let registered = lua.registered.iter().collect::<BTreeSet<_>>();
+    let documented = lua
+        .documented
+        .iter()
+        .map(|function| &function.name)
+        .collect::<BTreeSet<_>>();
     for function in &lua.documented {
         if !registered.contains(&function.name) {
             errors.push(format!(
                 "Lua documented function is not registered: {}",
                 function.name
+            ));
+        }
+    }
+    for function in &lua.registered {
+        if !documented.contains(function) && !lua.registered_exclusions.contains_key(function) {
+            errors.push(format!(
+                "Lua registered function is neither documented nor reviewed: {function}"
             ));
         }
     }

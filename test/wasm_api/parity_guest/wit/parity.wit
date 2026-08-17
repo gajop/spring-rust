@@ -5,7 +5,59 @@ package recoil:spring-api@1.0.0;
 interface cob-script {
   record spring-error { code: s32 }
 
+  record call-cob-script-value {
+    ret-code: s32,
+    ret-values: list<s32>,
+  }
+
+  record cob-function-ref {
+    name: string,
+    id: s32,
+  }
+
+  call-cob-script: func(unit-id: s32, %func: cob-function-ref, ret-args: u32, args: list<s32>) -> result<call-cob-script-value, spring-error>;
   get-cob-script-id: func(unit-id: s32, func-name: string) -> result<s32, spring-error>;
+}
+
+interface effects-control {
+  record spring-error { code: s32 }
+
+  record def-ref {
+    name: string,
+    id: s32,
+  }
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  record native-explosion-params {
+    damages: f32,
+    weapon-def-id: s32,
+    owner-id: s32,
+    hit-unit-id: s32,
+    hit-feature-id: s32,
+    crater-area-of-effect: f32,
+    damage-area-of-effect: f32,
+    edge-effectiveness: f32,
+    explosion-speed: f32,
+    gfx-mod: f32,
+    impact-only: bool,
+    ignore-owner: bool,
+    damage-ground: bool,
+    projectile-id: s32,
+  }
+
+  record spawn-ceg-value {
+    success: bool,
+    ceg-id: s32,
+  }
+
+  spawn-ceg: func(ceg: def-ref, pos: float3, dir: float3, radius: f32, damage: f32, dmg-mod: f32) -> result<spawn-ceg-value, spring-error>;
+  spawn-explosion: func(pos: float3, dir: float3, explosion-params: native-explosion-params) -> result<bool, spring-error>;
+  spawn-sfx: func(unit-id: s32, sfx-id: s32, pos: float3, dir: float3, radius: f32, damage: f32, absolute: bool) -> result<bool, spring-error>;
 }
 
 interface encoding {
@@ -22,7 +74,59 @@ interface encoding {
 interface feature-control {
   record spring-error { code: s32 }
 
+  record def-ref {
+    name: string,
+    id: s32,
+  }
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  record set-feature-blocking-options {
+    blocking: bool,
+    solid-objects: bool,
+    projectiles: bool,
+    quad-map-rays: bool,
+    crushable: bool,
+    block-enemy-pushing: bool,
+    block-height-changes: bool,
+  }
+
+  add-feature-damage: func(feature-id: s32, damage: f32, paralyze-time: f32, weapon-def-id: s32, attacker-id: s32, impulse: float3) -> result<bool, spring-error>;
+  create-feature: func(feature-def: def-ref, pos: float3, facing: s32, team-id: s32, feature-id: s32) -> result<s32, spring-error>;
+  create-feature-wreck: func(feature-id: s32, wreck-level: s32, do-smoke: bool) -> result<s32, spring-error>;
+  create-unit-wreck: func(unit-id: s32, wreck-level: s32, do-smoke: bool) -> result<s32, spring-error>;
+  destroy-feature: func(feature-id: s32) -> result<bool, spring-error>;
+  set-feature-always-visible: func(feature-id: s32, always-visible: bool) -> result<bool, spring-error>;
+  set-feature-blocking: func(feature-id: s32, options: set-feature-blocking-options) -> result<bool, spring-error>;
+  set-feature-collision-volume-data: func(feature-id: s32, scales: float3, offsets: float3, volume-type: s32, test-type: s32, primary-axis: s32) -> result<bool, spring-error>;
+  set-feature-direction: func(feature-id: s32, front-dir: float3, right-dir: float3) -> result<bool, spring-error>;
+  set-feature-fire-time: func(feature-id: s32, fire-time: f32) -> result<bool, spring-error>;
+  set-feature-heading-and-up-dir: func(feature-id: s32, heading: s32, up-dir: float3) -> result<bool, spring-error>;
+  set-feature-health: func(feature-id: s32, health: f32, check-destruction: bool) -> result<bool, spring-error>;
+  set-feature-mass: func(feature-id: s32, mass: f32) -> result<bool, spring-error>;
+  set-feature-max-health: func(feature-id: s32, max-health: f32) -> result<bool, spring-error>;
+  set-feature-mid-and-aim-pos: func(feature-id: s32, mid-pos: float3, aim-pos: float3, set-relative: bool) -> result<bool, spring-error>;
+  set-feature-move-ctrl: func(feature-id: s32, enable: bool, velocity-or-mask: float3, acceleration-or-impulse-mask: float3, movement-mask: float3) -> result<bool, spring-error>;
+  set-feature-no-select: func(feature-id: s32, no-select: bool) -> result<bool, spring-error>;
+  set-feature-physics: func(feature-id: s32, pos: float3, velocity: float3, rotation: float3, drag: float3) -> result<bool, spring-error>;
+  set-feature-piece-collision-volume-data: func(feature-id: s32, piece-index: s32, enable: bool, scales: float3, offsets: float3, volume-type: s32, primary-axis: s32) -> result<bool, spring-error>;
+  set-feature-piece-matrix: func(feature-id: s32, piece-index: s32, matrix: list<f32>) -> result<bool, spring-error>;
+  set-feature-piece-visible: func(feature-id: s32, piece-index: s32, visible: bool) -> result<bool, spring-error>;
+  set-feature-position: func(feature-id: s32, pos: float3, snap-to-ground: bool) -> result<bool, spring-error>;
   set-feature-radius-and-height: func(feature-id: s32, radius: f32, height: f32) -> result<bool, spring-error>;
+  set-feature-reclaim: func(feature-id: s32, reclaim-left: f32) -> result<bool, spring-error>;
+  set-feature-resources: func(feature-id: s32, metal: f32, energy: f32, reclaim-time: f32, reclaim-left: f32, feature-def-metal: f32, feature-def-energy: f32) -> result<bool, spring-error>;
+  set-feature-resurrect: func(feature-id: s32, unit-def: def-ref, facing: s32, progress: f32) -> result<bool, spring-error>;
+  set-feature-rotation: func(feature-id: s32, rotation: float3) -> result<bool, spring-error>;
+  set-feature-selection-volume-data: func(feature-id: s32, scales: float3, offsets: float3, volume-type: s32, primary-axis: s32, use-cont-hit-test: bool) -> result<bool, spring-error>;
+  set-feature-smoke-time: func(feature-id: s32, smoke-time: f32) -> result<bool, spring-error>;
+  set-feature-use-air-los: func(feature-id: s32, use-air-los: bool) -> result<bool, spring-error>;
+  set-feature-velocity: func(feature-id: s32, velocity: float3) -> result<bool, spring-error>;
+  transfer-feature: func(feature-id: s32, new-team-id: s32) -> result<bool, spring-error>;
 }
 
 interface feature-defs {
@@ -91,11 +195,39 @@ interface features {
     block-height-changes: bool,
   }
 
+  record feature-health {
+    health: f32,
+    max-health: f32,
+    reclaim-left: f32,
+    resurrect-progress: f32,
+  }
+
   record feature-last-hit-piece {
     name: string,
     piece-num: s32,
     frame: s32,
     was-hit: bool,
+  }
+
+  record feature-resources {
+    metal: f32,
+    def-metal: f32,
+    energy: f32,
+    def-energy: f32,
+    reclaim-left: f32,
+    reclaim-time: f32,
+  }
+
+  record feature-resurrect {
+    resurrect-as: string,
+    resurrect-def-id: s32,
+    facing-dir: s32,
+  }
+
+  record feature-rotation {
+    pitch: f32,
+    yaw: f32,
+    roll: f32,
   }
 
   record float3 {
@@ -104,18 +236,34 @@ interface features {
     z: f32,
   }
 
+  record get-feature-resurrect-value {
+    resurrect: feature-resurrect,
+    can-resurrect: bool,
+  }
+
   get-all-features: func(unused: u8) -> result<list<s32>, spring-error>;
   get-feature-ally-team: func(feature-id: s32) -> result<s32, spring-error>;
   get-feature-blocking: func(feature-id: s32) -> result<feature-blocking-state, spring-error>;
   get-feature-collision-volume-data: func(feature-id: s32) -> result<collision-volume-data, spring-error>;
   get-feature-def-id: func(feature-id: s32) -> result<s32, spring-error>;
+  get-feature-direction: func(feature-id: s32) -> result<float3, spring-error>;
+  get-feature-fire-time: func(feature-id: s32) -> result<f32, spring-error>;
   get-feature-heading: func(feature-id: s32) -> result<s32, spring-error>;
+  get-feature-health: func(feature-id: s32) -> result<feature-health, spring-error>;
   get-feature-height: func(feature-id: s32) -> result<f32, spring-error>;
   get-feature-last-attacked-piece: func(feature-id: s32) -> result<feature-last-hit-piece, spring-error>;
+  get-feature-mass: func(feature-id: s32) -> result<f32, spring-error>;
+  get-feature-no-select: func(feature-id: s32) -> result<bool, spring-error>;
   get-feature-piece-collision-volume-data: func(feature-id: s32, piece-num: s32) -> result<collision-volume-data, spring-error>;
+  get-feature-position: func(feature-id: s32) -> result<float3, spring-error>;
   get-feature-radius: func(feature-id: s32) -> result<f32, spring-error>;
+  get-feature-resources: func(feature-id: s32) -> result<feature-resources, spring-error>;
+  get-feature-resurrect: func(feature-id: s32) -> result<get-feature-resurrect-value, spring-error>;
+  get-feature-rotation: func(feature-id: s32) -> result<feature-rotation, spring-error>;
   get-feature-separation: func(feature-id1: s32, feature-id2: s32, positional: bool) -> result<f32, spring-error>;
+  get-feature-smoke-time: func(feature-id: s32) -> result<f32, spring-error>;
   get-feature-team: func(feature-id: s32) -> result<s32, spring-error>;
+  get-feature-velocity: func(feature-id: s32) -> result<float3, spring-error>;
   get-features-in-cylinder: func(x: f32, z: f32, radius: f32, height: f32) -> result<list<s32>, spring-error>;
   get-features-in-rectangle: func(min-x: f32, min-z: f32, max-x: f32, max-z: f32) -> result<list<s32>, spring-error>;
   get-features-in-sphere: func(center: float3, radius: f32) -> result<list<s32>, spring-error>;
@@ -256,7 +404,11 @@ interface game-config {
   }
 
   set-cheating-enabled: func(enabled: bool) -> result<bool, spring-error>;
+  set-experience-grade: func(exp-grade: f32, exp-power-scale: f32, exp-health-scale: f32, exp-reload-scale: f32) -> result<bool, spring-error>;
   set-god-mode: func(options: set-god-mode-options) -> result<bool, spring-error>;
+  set-no-pause: func(no-pause: bool) -> result<bool, spring-error>;
+  set-radar-error-params: func(ally-team-id: s32, ally-team-error-size: f32, base-error-size: f32, base-error-mult: f32) -> result<bool, spring-error>;
+  set-square-building-mask: func(x: s32, z: s32, mask: u16) -> result<bool, spring-error>;
 }
 
 interface los {
@@ -275,7 +427,15 @@ interface los {
     in-jammer: bool,
   }
 
+  record radar-error-params {
+    radar-error-size: f32,
+    base-radar-error-size: f32,
+    base-radar-error-mult: f32,
+  }
+
+  get-closest-valid-position: func(unit-def-id: s32, x: f32, z: f32, radius: f32) -> result<float3, spring-error>;
   get-position-los-state: func(pos: float3, ally-team-id: s32) -> result<position-los-state, spring-error>;
+  get-radar-error-params: func(ally-team-id: s32) -> result<radar-error-params, spring-error>;
   is-pos-in-air-los: func(pos: float3, ally-team-id: s32) -> result<bool, spring-error>;
   is-pos-in-los: func(pos: float3, ally-team-id: s32) -> result<bool, spring-error>;
   is-pos-in-radar: func(pos: float3, ally-team-id: s32) -> result<bool, spring-error>;
@@ -380,6 +540,24 @@ interface move-ctrl {
   get-unit-move-type-data: func(unit-id: s32) -> result<move-type-data, spring-error>;
 }
 
+interface path-finder {
+  record spring-error { code: s32 }
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  free-path-node-costs-array: func(overlay-index: u32) -> result<bool, spring-error>;
+  get-path-node-cost: func(x: u32, z: u32) -> result<f32, spring-error>;
+  get-path-node-costs: func(overlay-index: u32) -> result<list<f32>, spring-error>;
+  init-path-node-costs-array: func(overlay-index: u32, size-x: u32, size-z: u32) -> result<bool, spring-error>;
+  request-path: func(move-def-id: u32, move-def-name: option<string>, start-pos: float3, end-pos: float3, radius: f32) -> result<u32, spring-error>;
+  set-path-node-cost: func(overlay-index: u32, cost-index: u32, cost: f32) -> result<bool, spring-error>;
+  set-path-node-costs: func(overlay-index: u32) -> result<bool, spring-error>;
+}
+
 interface projectile-control {
   record spring-error { code: s32 }
 
@@ -389,13 +567,27 @@ interface projectile-control {
     z: f32,
   }
 
+  record projectile-target-ref {
+    target-id: s32,
+    target-type: s32,
+    pos: float3,
+    is-ground-target: bool,
+  }
+
   delete-projectile: func(projectile-id: s32) -> result<bool, spring-error>;
+  set-piece-projectile-params: func(projectile-id: s32, expl-flags: s32, spin-angle: f32, spin-speed: f32, spin-vec: float3) -> result<bool, spring-error>;
+  set-projectile-always-visible: func(projectile-id: s32, always-visible: bool) -> result<bool, spring-error>;
+  set-projectile-ceg: func(projectile-id: s32, ceg-name: string) -> result<s32, spring-error>;
   set-projectile-collision: func(projectile-id: s32) -> result<bool, spring-error>;
   set-projectile-damages: func(projectile-id: s32, unused: s32, damage-key: string, damage-value: f32) -> result<bool, spring-error>;
   set-projectile-gravity: func(projectile-id: s32, gravity: f32) -> result<bool, spring-error>;
+  set-projectile-ignore-tracking-error: func(projectile-id: s32, ignore: bool) -> result<bool, spring-error>;
   set-projectile-is-intercepted: func(projectile-id: s32, intercepted: bool) -> result<bool, spring-error>;
+  set-projectile-move-control: func(projectile-id: s32, enable: bool) -> result<bool, spring-error>;
   set-projectile-position: func(projectile-id: s32, pos: float3) -> result<bool, spring-error>;
+  set-projectile-target: func(projectile-id: s32, target: projectile-target-ref) -> result<bool, spring-error>;
   set-projectile-time-to-live: func(projectile-id: s32, time-to-live: s32) -> result<bool, spring-error>;
+  set-projectile-use-air-los: func(projectile-id: s32, use-air-los: bool) -> result<bool, spring-error>;
   set-projectile-velocity: func(projectile-id: s32, velocity: float3) -> result<bool, spring-error>;
 }
 
@@ -490,6 +682,70 @@ interface projectiles {
   get-projectiles-in-sphere: func(center: float3, radius: f32, options: get-projectiles-in-sphere-options) -> result<list<s32>, spring-error>;
 }
 
+interface rules-params {
+  record spring-error { code: s32 }
+
+  enum rules-param-type {
+    rulesparam-type-bool,
+    rulesparam-type-float,
+    rulesparam-type-string,
+  }
+
+  record get-feature-rules-param-value {
+    value: rules-param-value,
+    los: s32,
+    exists: bool,
+  }
+
+  record get-game-rules-param-value {
+    value: rules-param-value,
+    los: s32,
+    exists: bool,
+  }
+
+  record get-player-rules-param-value {
+    value: rules-param-value,
+    los: s32,
+    exists: bool,
+  }
+
+  record get-team-rules-param-value {
+    value: rules-param-value,
+    los: s32,
+    exists: bool,
+  }
+
+  record get-unit-rules-param-value {
+    value: rules-param-value,
+    los: s32,
+    exists: bool,
+  }
+
+  record rules-param-value {
+    %type: rules-param-type,
+    bool-value: bool,
+    float-value: f32,
+    string-value: string,
+  }
+
+  get-feature-rules-param: func(feature-id: s32, param-name: string) -> result<get-feature-rules-param-value, spring-error>;
+  get-game-rules-param: func(param-name: string) -> result<get-game-rules-param-value, spring-error>;
+  get-player-rules-param: func(player-id: s32, param-name: string) -> result<get-player-rules-param-value, spring-error>;
+  get-team-rules-param: func(team-id: s32, param-name: string) -> result<get-team-rules-param-value, spring-error>;
+  get-unit-rules-param: func(unit-id: s32, param-name: string) -> result<get-unit-rules-param-value, spring-error>;
+  set-feature-rules-param: func(feature-id: s32, param-name: string, value: rules-param-value, los: s32) -> result<bool, spring-error>;
+  set-game-rules-param: func(param-name: string, value: rules-param-value, los: s32) -> result<bool, spring-error>;
+  set-player-rules-param: func(player-id: s32, param-name: string, value: rules-param-value, los: s32) -> result<bool, spring-error>;
+  set-team-rules-param: func(team-id: s32, param-name: string, value: rules-param-value, los: s32) -> result<bool, spring-error>;
+  set-unit-rules-param: func(unit-id: s32, param-name: string, value: rules-param-value, los: s32) -> result<bool, spring-error>;
+}
+
+interface system-control {
+  record spring-error { code: s32 }
+
+  call-as-team: func(team-id: s32, callback: u32, user-data: u32) -> result<bool, spring-error>;
+}
+
 interface team-control {
   record spring-error { code: s32 }
 
@@ -499,12 +755,19 @@ interface team-control {
     z: f32,
   }
 
+  add-team-resource: func(team-id: s32, resource-type: string, amount: f32) -> result<bool, spring-error>;
   add-team-resource-excess-stats: func(team-id: s32, resource-type: string, amount: f32) -> result<bool, spring-error>;
   assign-player-to-team: func(player-id: s32, team-id: s32) -> result<bool, spring-error>;
+  game-over: func(winning-ally-teams: list<s32>) -> result<bool, spring-error>;
+  kill-team: func(team-id: s32) -> result<bool, spring-error>;
   set-ally: func(first-ally-team-id: s32, second-ally-team-id: s32, allied: bool) -> result<bool, spring-error>;
   set-ally-team-start-box: func(ally-team-id: s32, min-x: f32, min-z: f32, max-x: f32, max-z: f32) -> result<bool, spring-error>;
   set-global-los: func(ally-team-id: s32, enabled: bool) -> result<bool, spring-error>;
+  set-player-ready-state: func(player-id: s32, ready: bool) -> result<bool, spring-error>;
+  set-team-resource: func(team-id: s32, resource-type: string, amount: f32) -> result<bool, spring-error>;
   set-team-start-position: func(team-id: s32, pos: float3) -> result<bool, spring-error>;
+  transfer-team-max-units: func(from-team-id: s32, to-team-id: s32, amount: s32) -> result<bool, spring-error>;
+  use-team-resource: func(team-id: s32, resource-type: string, amount: f32) -> result<bool, spring-error>;
 }
 
 interface teams {
@@ -634,6 +897,7 @@ interface teams {
   get-team-lua-ai: func(team-id: s32) -> result<string, spring-error>;
   get-team-max-units: func(team-id: s32) -> result<s32, spring-error>;
   get-team-resource-stats: func(team-id: s32, %resource: string) -> result<team-resources, spring-error>;
+  get-team-resources: func(team-id: s32, %resource: string) -> result<team-resources, spring-error>;
   get-team-stats-history: func(team-id: s32, start-index: s32, end-index: s32) -> result<list<team-stats-history-point>, spring-error>;
   get-team-unit-stats: func(team-id: s32) -> result<team-unit-stats, spring-error>;
 }
@@ -690,6 +954,7 @@ interface terrain {
   get-grass: func(x: f32, z: f32) -> result<f32, spring-error>;
   get-ground-blocked: func(x1: f32, z1: f32, x2: f32, z2: f32) -> result<bool, spring-error>;
   get-ground-extremes: func(unused: u8) -> result<get-ground-extremes-value, spring-error>;
+  get-ground-height: func(x: f32, z: f32) -> result<f32, spring-error>;
   get-ground-info: func(x: f32, z: f32) -> result<get-ground-info-value, spring-error>;
   get-ground-normal: func(x: f32, z: f32, smoothed: bool) -> result<get-ground-normal-value, spring-error>;
   get-ground-orig-height: func(x: f32, z: f32) -> result<f32, spring-error>;
@@ -703,6 +968,28 @@ interface terrain {
 interface terrain-control {
   record spring-error { code: s32 }
 
+  add-grass: func(x: f32, z: f32, grass-value: u8) -> result<bool, spring-error>;
+  add-height-map: func(x: f32, z: f32, height: f32) -> result<bool, spring-error>;
+  add-original-height-map: func(x: f32, z: f32, height: f32) -> result<bool, spring-error>;
+  add-smooth-mesh: func(x: f32, z: f32, height: f32) -> result<bool, spring-error>;
+  adjust-height-map: func(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> result<bool, spring-error>;
+  adjust-original-height-map: func(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> result<bool, spring-error>;
+  adjust-smooth-mesh: func(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> result<bool, spring-error>;
+  level-height-map: func(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> result<bool, spring-error>;
+  level-original-height-map: func(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> result<bool, spring-error>;
+  level-smooth-mesh: func(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> result<bool, spring-error>;
+  rebuild-smooth-mesh: func(unused: u8) -> result<bool, spring-error>;
+  remove-grass: func(x: f32, z: f32) -> result<bool, spring-error>;
+  revert-height-map: func(x1: f32, z1: f32, x2: f32, z2: f32, orig-factor: f32) -> result<bool, spring-error>;
+  revert-original-height-map: func(x1: f32, z1: f32, x2: f32, z2: f32, orig-factor: f32) -> result<bool, spring-error>;
+  revert-smooth-mesh: func(x1: f32, z1: f32, x2: f32, z2: f32, orig-factor: f32) -> result<bool, spring-error>;
+  set-height-map: func(x: f32, z: f32, height: f32, terraform: f32) -> result<bool, spring-error>;
+  set-height-map-func: func(callback: u32, user-data: u32) -> result<bool, spring-error>;
+  set-map-square-terrain-type: func(x: s32, z: s32, terrain-type: s32) -> result<bool, spring-error>;
+  set-original-height-map: func(x: f32, z: f32, height: f32, factor: f32) -> result<bool, spring-error>;
+  set-original-height-map-func: func(callback: u32, user-data: u32) -> result<bool, spring-error>;
+  set-smooth-mesh: func(x: f32, z: f32, height: f32, terraform: f32) -> result<bool, spring-error>;
+  set-smooth-mesh-func: func(callback: u32, user-data: u32) -> result<bool, spring-error>;
   set-terrain-type-data: func(type-index: s32, tank-speed: f32, kbot-speed: f32, hover-speed: f32, ship-speed: f32, hardness: f32, receive-tracks: bool, name: string) -> result<bool, spring-error>;
   set-tidal: func(tidal: f32) -> result<bool, spring-error>;
   set-wind: func(min-wind: f32, max-wind: f32) -> result<bool, spring-error>;
@@ -759,14 +1046,193 @@ interface tracing {
 interface unit-control {
   record spring-error { code: s32 }
 
+  record bugger-off-options {
+    spherical: bool,
+    forced: bool,
+    exclude-unit-id: s32,
+  }
+
+  record create-unit-options {
+    build: bool,
+    flatten-ground: bool,
+    unit-id: s32,
+    builder-id: s32,
+  }
+
+  record def-ref {
+    name: string,
+    id: s32,
+  }
+
+  record destroy-unit-options {
+    selfd: bool,
+    reclaimed: bool,
+    attacker-id: s32,
+    recycle-id: bool,
+  }
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  record native-command {
+    cmd-id: s32,
+    params: list<f32>,
+    options: u32,
+    timeout: s32,
+  }
+
+  record native-command-description {
+    id: s32,
+    %type: s32,
+    queueing: bool,
+    hidden: bool,
+    disabled: bool,
+    show-unique: bool,
+    only-texture: bool,
+    name: string,
+    action: string,
+    iconname: string,
+    mouseicon: string,
+    tooltip: string,
+    params: list<string>,
+  }
+
+  record number-or-bool {
+    number: f32,
+    boolean: bool,
+    use-boolean: bool,
+  }
+
+  record set-unit-blocking-options {
+    blocking: bool,
+    solid-objects: bool,
+    projectiles: bool,
+    quad-map-rays: bool,
+    crushable: bool,
+    block-enemy-pushing: bool,
+    block-height-changes: bool,
+  }
+
+  record set-unit-leaves-ghost-options {
+    leaves-ghost: bool,
+    leave-dead-ghost: bool,
+  }
+
+  record set-unit-target-options {
+    manual-fire: bool,
+    user-target: bool,
+  }
+
+  record set-unit-use-weapons-options {
+    force-use-weapons: bool,
+    allow-use-weapons: bool,
+  }
+
+  record unit-cost-overrides {
+    build-time: f32,
+    metal-cost: f32,
+    energy-cost: f32,
+  }
+
+  record unit-health-value {
+    health: f32,
+    capture: f32,
+    paralyze: f32,
+    build: f32,
+    use-amounts: bool,
+  }
+
+  record unit-target-ref {
+    target-id: s32,
+    pos: float3,
+    is-ground-target: bool,
+  }
+
+  add-unit-damage: func(unit-id: s32, damage: f32, paralyze-time: f32, weapon-def-id: s32, attacker-id: s32, impulse: float3) -> result<bool, spring-error>;
   add-unit-experience: func(unit-id: s32, experience: f32) -> result<bool, spring-error>;
+  add-unit-impulse: func(unit-id: s32, impulse: float3, decay-rate: f32) -> result<bool, spring-error>;
+  add-unit-resource: func(unit-id: s32, resource-type: string, amount: f32) -> result<bool, spring-error>;
+  add-unit-seismic-ping: func(unit-id: s32, ping-size: f32) -> result<bool, spring-error>;
+  bugger-off: func(pos: float3, radius: f32, team-id: s32, options: bugger-off-options, exclude-unit-def-i-ds: list<s32>) -> result<bool, spring-error>;
+  clear-unit-goal: func(unit-id: s32, cancel-raw: bool) -> result<bool, spring-error>;
+  create-unit: func(unit-def: def-ref, pos: float3, facing: s32, team-id: s32, options: create-unit-options) -> result<s32, spring-error>;
+  destroy-unit: func(unit-id: s32, options: destroy-unit-options) -> result<bool, spring-error>;
+  edit-unit-cmd-desc: func(unit-id: s32, cmd-desc-index: u32, cmd-desc: native-command-description) -> result<bool, spring-error>;
+  force-unit-collision-update: func(unit-id: s32) -> result<bool, spring-error>;
   get-unit-feature-separation: func(unit-id: s32, feature-id: s32, ignore-y: bool) -> result<f32, spring-error>;
   get-unit-leaves-ghost: func(unit-id: s32) -> result<bool, spring-error>;
+  get-unit-physical-state: func(unit-id: s32) -> result<u32, spring-error>;
+  give-order-array-to-unit: func(unit-id: s32, commands: list<native-command>) -> result<bool, spring-error>;
+  give-order-array-to-unit-array: func(unit-i-ds: list<s32>, commands: list<native-command>, pairwise: bool) -> result<s32, spring-error>;
+  give-order-to-unit: func(unit-id: s32, cmd-id: s32, params: list<f32>, options: u32, timeout: s32) -> result<bool, spring-error>;
+  insert-unit-cmd-desc: func(unit-id: s32, cmd-desc-index: s32, cmd-desc: native-command-description) -> result<bool, spring-error>;
+  remove-unit-cmd-desc: func(unit-id: s32, cmd-desc-index: s32) -> result<bool, spring-error>;
+  set-unit-always-visible: func(unit-id: s32, always-visible: bool) -> result<bool, spring-error>;
+  set-unit-armored: func(unit-id: s32, armored-state: bool, armored-multiple: f32) -> result<bool, spring-error>;
+  set-unit-blocking: func(unit-id: s32, options: set-unit-blocking-options) -> result<bool, spring-error>;
+  set-unit-build-params: func(unit-id: s32, param-name: string, value: number-or-bool) -> result<bool, spring-error>;
+  set-unit-build-speed: func(unit-id: s32, build-speed: f32, repair-speed: f32, reclaim-speed: f32, resurrect-speed: f32, capture-speed: f32, terraform-speed: f32) -> result<bool, spring-error>;
+  set-unit-buildee-radius: func(unit-id: s32, radius: f32) -> result<bool, spring-error>;
+  set-unit-cloak: func(unit-id: s32, cloak: number-or-bool, cloak-arg: number-or-bool) -> result<bool, spring-error>;
+  set-unit-collision-volume-data: func(unit-id: s32, scales: float3, offsets: float3, volume-type: s32, test-type: s32, primary-axis: s32) -> result<bool, spring-error>;
+  set-unit-costs: func(unit-id: s32, costs: unit-cost-overrides) -> result<bool, spring-error>;
+  set-unit-crashing: func(unit-id: s32, want-crash: bool) -> result<bool, spring-error>;
+  set-unit-direction: func(unit-id: s32, front-dir: float3, right-dir: float3) -> result<bool, spring-error>;
   set-unit-experience: func(unit-id: s32, experience: f32) -> result<bool, spring-error>;
+  set-unit-flanking: func(unit-id: s32, %type: string, args: float3) -> result<bool, spring-error>;
+  set-unit-harvest-storage: func(unit-id: s32, stored-metal: f32, max-stored-metal: f32, stored-energy: f32, max-stored-energy: f32) -> result<bool, spring-error>;
+  set-unit-heading-and-up-dir: func(unit-id: s32, heading: s32, up-dir: float3) -> result<bool, spring-error>;
+  set-unit-health: func(unit-id: s32, value: unit-health-value) -> result<bool, spring-error>;
+  set-unit-land-goal: func(unit-id: s32, pos: float3, radius-sq: f32) -> result<bool, spring-error>;
+  set-unit-leaves-ghost: func(unit-id: s32, options: set-unit-leaves-ghost-options) -> result<bool, spring-error>;
+  set-unit-loading-transport: func(unit-id: s32, transport-id: s32) -> result<bool, spring-error>;
+  set-unit-los-mask: func(unit-id: s32, ally-team-id: s32, los-mask: u8) -> result<bool, spring-error>;
+  set-unit-los-state: func(unit-id: s32, ally-team-id: s32, los-state: u8) -> result<bool, spring-error>;
+  set-unit-mass: func(unit-id: s32, mass: f32) -> result<bool, spring-error>;
+  set-unit-max-health: func(unit-id: s32, max-health: f32) -> result<bool, spring-error>;
+  set-unit-max-range: func(unit-id: s32, max-range: f32) -> result<bool, spring-error>;
   set-unit-metal-extraction: func(unit-id: s32, depth: f32, range: f32) -> result<bool, spring-error>;
+  set-unit-mid-and-aim-pos: func(unit-id: s32, mid-pos: float3, aim-pos: float3, set-relative: bool) -> result<bool, spring-error>;
+  set-unit-move-goal: func(unit-id: s32, pos: float3, radius: f32, speed: f32, raw: bool) -> result<bool, spring-error>;
+  set-unit-nano-pieces: func(unit-id: s32, piece-indices: list<s32>) -> result<bool, spring-error>;
+  set-unit-neutral: func(unit-id: s32, neutral: bool) -> result<bool, spring-error>;
+  set-unit-physical-state-bit: func(unit-id: s32, state-bit: s32) -> result<bool, spring-error>;
+  set-unit-physics: func(unit-id: s32, pos: float3, velocity: float3, rotation: float3, drag: float3) -> result<bool, spring-error>;
+  set-unit-piece-collision-volume-data: func(unit-id: s32, piece-index: s32, enable: bool, scales: float3, offsets: float3, volume-type: s32, primary-axis: s32) -> result<bool, spring-error>;
+  set-unit-piece-matrix: func(unit-id: s32, piece-index: s32, matrix: list<f32>) -> result<bool, spring-error>;
+  set-unit-piece-parent: func(unit-id: s32, child-piece-index: s32, parent-piece-index: s32) -> result<bool, spring-error>;
+  set-unit-piece-visible: func(unit-id: s32, piece-index: s32, visible: bool) -> result<bool, spring-error>;
+  set-unit-pos-error-params: func(unit-id: s32, pos-error-vector: float3, pos-error-delta: float3, next-pos-error-update: s32, ally-team-id: s32, set-pos-error-bit: bool) -> result<bool, spring-error>;
+  set-unit-position: func(unit-id: s32, pos: float3) -> result<bool, spring-error>;
   set-unit-radius-and-height: func(unit-id: s32, radius: f32, height: f32) -> result<bool, spring-error>;
+  set-unit-resourcing: func(unit-id: s32, %type: string, amount: f32) -> result<bool, spring-error>;
+  set-unit-rotation: func(unit-id: s32, rotation: float3) -> result<bool, spring-error>;
+  set-unit-seismic-signature: func(unit-id: s32, seismic-signature: f32) -> result<bool, spring-error>;
   set-unit-sensor-radius: func(unit-id: s32, sensor-type: string, radius: s32) -> result<s32, spring-error>;
+  set-unit-shield-recharge-delay: func(unit-id: s32, weapon-num: s32, recharge-delay: f32) -> result<bool, spring-error>;
+  set-unit-shield-state: func(unit-id: s32, weapon-num: s32, enabled: bool, power: f32) -> result<bool, spring-error>;
+  set-unit-sonar-stealth: func(unit-id: s32, sonar-stealth: bool) -> result<bool, spring-error>;
+  set-unit-stealth: func(unit-id: s32, stealth: bool) -> result<bool, spring-error>;
+  set-unit-stockpile: func(unit-id: s32, stockpile: s32, build-percent: f32) -> result<bool, spring-error>;
   set-unit-storage: func(unit-id: s32, %resource: string, amount: f32) -> result<bool, spring-error>;
+  set-unit-target: func(unit-id: s32, target: unit-target-ref, options: set-unit-target-options, weapon-num: s32) -> result<bool, spring-error>;
+  set-unit-tooltip: func(unit-id: s32, tooltip: string) -> result<bool, spring-error>;
+  set-unit-use-air-los: func(unit-id: s32, use-air-los: bool) -> result<bool, spring-error>;
+  set-unit-use-weapons: func(unit-id: s32, options: set-unit-use-weapons-options) -> result<bool, spring-error>;
+  set-unit-velocity: func(unit-id: s32, velocity: float3) -> result<bool, spring-error>;
+  set-unit-weapon-damages: func(unit-id: s32, weapon-num: s32, damage-key: string, damage-value: f32) -> result<bool, spring-error>;
+  set-unit-weapon-state: func(unit-id: s32, weapon-num: s32, key: string, value: f32) -> result<bool, spring-error>;
+  transfer-unit: func(unit-id: s32, new-team-id: s32, given: bool, adjust-unit-limit: bool) -> result<bool, spring-error>;
+  unit-attach: func(transporter-id: s32, transportee-id: s32, piece-num: s32) -> result<bool, spring-error>;
+  unit-detach: func(transportee-id: s32) -> result<bool, spring-error>;
+  unit-detach-from-air: func(transportee-id: s32, pos: float3) -> result<bool, spring-error>;
+  unit-finish-command: func(unit-id: s32) -> result<bool, spring-error>;
+  unit-weapon-fire: func(unit-id: s32, weapon-num: s32) -> result<bool, spring-error>;
+  unit-weapon-hold-fire: func(unit-id: s32, weapon-num: s32) -> result<bool, spring-error>;
+  use-unit-resource: func(unit-id: s32, resource-type: string, amount: f32) -> result<bool, spring-error>;
 }
 
 interface unit-defs {
@@ -929,6 +1395,7 @@ interface units-commands {
   get-unit-command-count: func(unit-id: s32) -> result<u32, spring-error>;
   get-unit-commands: func(unit-id: s32, max-commands: u32) -> result<list<command-ffi>, spring-error>;
   get-unit-current-command: func(unit-id: s32, cmd-index: s32) -> result<option<command-ffi>, spring-error>;
+  give-order-to-unit-map: func(unit-i-ds: list<s32>, cmd-id: s32, params: list<f32>, options: u32, timeout: s32) -> result<s32, spring-error>;
 }
 
 interface units-info {
@@ -970,6 +1437,27 @@ interface units-info {
     was-hit: bool,
   }
 
+  record number-or-bool {
+    number: f32,
+    boolean: bool,
+    use-boolean: bool,
+  }
+
+  record unit-armored-state {
+    armored: bool,
+    armor-multiple: f32,
+  }
+
+  record unit-blocking-state {
+    is-blocking: bool,
+    is-solid-object-collidable: bool,
+    is-projectile-collidable: bool,
+    is-ray-segment-collidable: bool,
+    crushable: bool,
+    block-enemy-pushing: bool,
+    block-height-changes: bool,
+  }
+
   record unit-costs {
     metal-cost: f32,
     energy-cost: f32,
@@ -985,10 +1473,32 @@ interface units-info {
     mobility: f32,
   }
 
+  record unit-harvest-storage {
+    stored-metal: f32,
+    max-stored-metal: f32,
+    stored-energy: f32,
+    max-stored-energy: f32,
+  }
+
+  record unit-health {
+    health: f32,
+    max-health: f32,
+    paralyze-damage: f32,
+    capture-progress: f32,
+    build-progress: f32,
+  }
+
   record unit-last-attacker {
     attacker-id: s32,
     attacker-def-id: s32,
     attacker-team: s32,
+  }
+
+  record unit-los-state {
+    raw-mask: u8,
+    los: bool,
+    radar: bool,
+    typed: bool,
   }
 
   record unit-pos-error-params {
@@ -1005,6 +1515,12 @@ interface units-info {
     energy-use: f32,
     metal-income: f32,
     energy-income: f32,
+  }
+
+  record unit-rotation {
+    pitch: f32,
+    yaw: f32,
+    roll: f32,
   }
 
   record unit-sensor-radius {
@@ -1066,18 +1582,24 @@ interface units-info {
   }
 
   get-unit-ally-team: func(unit-id: s32) -> result<s32, spring-error>;
+  get-unit-armored: func(unit-id: s32) -> result<unit-armored-state, spring-error>;
   get-unit-base-position: func(unit-id: s32) -> result<float3, spring-error>;
+  get-unit-blocking: func(unit-id: s32) -> result<unit-blocking-state, spring-error>;
   get-unit-build-facing: func(unit-id: s32) -> result<s32, spring-error>;
+  get-unit-build-params: func(unit-id: s32, param-name: string) -> result<option<number-or-bool>, spring-error>;
   get-unit-buildee-radius: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-collision-volume-data: func(unit-id: s32) -> result<collision-volume-data, spring-error>;
   get-unit-cost-table: func(unit-id: s32) -> result<unit-costs, spring-error>;
+  get-unit-costs: func(unit-id: s32) -> result<unit-costs, spring-error>;
   get-unit-current-build-power: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-def-id: func(unit-id: s32) -> result<s32, spring-error>;
   get-unit-direction: func(unit-id: s32) -> result<float3, spring-error>;
   get-unit-effective-build-range: func(unit-id: s32, buildee-def-id: s32) -> result<f32, spring-error>;
   get-unit-experience: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-flanking: func(unit-id: s32) -> result<unit-flanking, spring-error>;
+  get-unit-harvest-storage: func(unit-id: s32) -> result<unit-harvest-storage, spring-error>;
   get-unit-heading: func(unit-id: s32, convert-to-radians: bool) -> result<f32, spring-error>;
+  get-unit-health: func(unit-id: s32) -> result<unit-health, spring-error>;
   get-unit-height: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-in-build-stance: func(unit-id: s32) -> result<bool, spring-error>;
   get-unit-is-active: func(unit-id: s32) -> result<bool, spring-error>;
@@ -1089,14 +1611,19 @@ interface units-info {
   get-unit-is-transporting: func(unit-id: s32) -> result<get-unit-is-transporting-value, spring-error>;
   get-unit-last-attacked-piece: func(unit-id: s32) -> result<last-hit-piece, spring-error>;
   get-unit-last-attacker: func(unit-id: s32) -> result<option<unit-last-attacker>, spring-error>;
+  get-unit-los-state: func(unit-id: s32, ally-team-id: s32, raw: bool) -> result<unit-los-state, spring-error>;
+  get-unit-mass: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-metal-extraction: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-move-def-id: func(unit-id: s32) -> result<s32, spring-error>;
   get-unit-nano-pieces: func(unit-id: s32) -> result<list<s32>, spring-error>;
+  get-unit-neutral: func(unit-id: s32) -> result<bool, spring-error>;
   get-unit-piece-collision-volume-data: func(unit-id: s32, piece-num: s32) -> result<collision-volume-data, spring-error>;
   get-unit-pos-error-params: func(unit-id: s32, ally-team-id: s32) -> result<unit-pos-error-params, spring-error>;
   get-unit-position: func(unit-id: s32, options: get-unit-position-options) -> result<float3, spring-error>;
   get-unit-radius: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-resources: func(unit-id: s32) -> result<unit-resources, spring-error>;
+  get-unit-rotation: func(unit-id: s32) -> result<unit-rotation, spring-error>;
+  get-unit-seismic-signature: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-self-d-time: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-sensor-radius: func(unit-id: s32, %type: string) -> result<unit-sensor-radius, spring-error>;
   get-unit-shield-state: func(unit-id: s32, weapon-num: s32) -> result<option<unit-shield-state>, spring-error>;
@@ -1107,6 +1634,7 @@ interface units-info {
   get-unit-tooltip: func(unit-id: s32) -> result<string, spring-error>;
   get-unit-transporter: func(unit-id: s32) -> result<s32, spring-error>;
   get-unit-vectors: func(unit-id: s32) -> result<unit-vectors, spring-error>;
+  get-unit-velocity: func(unit-id: s32) -> result<float3, spring-error>;
   get-unit-worker-task: func(unit-id: s32) -> result<unit-worker-task, spring-error>;
 }
 
@@ -1307,6 +1835,7 @@ interface units-weapons {
     weapon-dir: float3,
   }
 
+  get-unit-max-range: func(unit-id: s32) -> result<f32, spring-error>;
   get-unit-weapon-can-fire: func(unit-id: s32, weapon-num: s32) -> result<bool, spring-error>;
   get-unit-weapon-damages: func(unit-id: s32, weapon-num: s32) -> result<unit-weapon-damages, spring-error>;
   get-unit-weapon-have-free-line-of-fire: func(unit-id: s32, weapon-num: s32, target-id: s32, source-pos: float3, target-pos: float3, options: get-unit-weapon-have-free-line-of-fire-options) -> result<bool, spring-error>;
@@ -1481,6 +2010,7 @@ interface callins-rules-synced {
 
 world rules-synced {
   import cob-script;
+  import effects-control;
   import encoding;
   import feature-control;
   import feature-defs;
@@ -1492,8 +2022,11 @@ world rules-synced {
   import messages;
   import metal-map;
   import move-ctrl;
+  import path-finder;
   import projectile-control;
   import projectiles;
+  import rules-params;
+  import system-control;
   import team-control;
   import teams;
   import terrain;
@@ -1511,4 +2044,5 @@ world rules-synced {
   import vfs;
   import weapon-defs;
   export callins-rules-synced;
+  export callback-1: func(user-data: u32);
 }

@@ -85,6 +85,14 @@ Use deterministic per-instance budgets covering:
 
 Do not use wall-clock time as the synced execution budget.
 
+Games select the runtime policy through the mod options
+`wasm_instruction_fuel` and `wasm_host_work_limit`. A positive value enables
+the corresponding deterministic cap; `0`, `off`, `false`, and `unlimited`
+disable it. The benchmark harness sets both options to unlimited because a
+benchmark must measure completion rather than an accidental policy limit.
+Peers must use the same values for synced modules, and the selected policy is
+part of the synced runtime identity.
+
 Phase 2 must determine the exact safe integration with Wasmtime fuel/canonical lowering rather than assume that debiting fuel inside a host callback has the desired fault point.
 
 ## Host-call validation

@@ -494,15 +494,35 @@ bool Read_RulesParamValue(const WasmValue& input, RulesParamValue& output, Nativ
 	const auto* record = std::get_if<WasmValueRecord>(&input.storage);
 	if (record == nullptr) { error = "Wasm argument is not a record"; return false; }
 	const auto* value_type = FindRecordField(*record, "type", error);
-	if (value_type == nullptr) return false;
-	if (!ReadEnum_RulesParamType(*value_type, output.type, error)) { return false; }
-	return true;
+	if (value_type == nullptr || !ReadEnum_RulesParamType(*value_type, output.type, error)) return false;
+	switch (output.type) {
+		case RULESPARAM_TYPE_BOOL: {
+			const auto* value_bool = FindRecordField(*record, "bool-value", error);
+			return value_bool != nullptr && ReadScalar(*value_bool, output.boolValue, error);
+		}
+		case RULESPARAM_TYPE_FLOAT: {
+			const auto* value_float = FindRecordField(*record, "float-value", error);
+			return value_float != nullptr && ReadScalar(*value_float, output.floatValue, error);
+		}
+		case RULESPARAM_TYPE_STRING: {
+			const auto* value_string = FindRecordField(*record, "string-value", error);
+			if (value_string == nullptr) return false;
+			auto& stored_string = storage.Make<std::string>();
+			if (!ReadString(*value_string, stored_string, error)) return false;
+			output.stringValue = stored_string.c_str();
+			return true;
+		}
+		default: error = "unknown RulesParamValue type"; return false;
+	}
 }
 
 WasmValue Write_RulesParamValue(const RulesParamValue& value)
 {
 	WasmValueRecord fields;
 	fields.emplace("type", WriteEnum_RulesParamType(value.type));
+	fields.emplace("bool-value", value.type == RULESPARAM_TYPE_BOOL ? WriteScalar(value.boolValue) : WasmValue::Bool(false));
+	fields.emplace("float-value", value.type == RULESPARAM_TYPE_FLOAT ? WriteScalar(value.floatValue) : WasmValue::F64(0.0));
+	fields.emplace("string-value", value.type == RULESPARAM_TYPE_STRING && value.stringValue != nullptr ? WasmValue::String(std::string(value.stringValue)) : WasmValue::String(std::string{}));
 	return WasmValue::Record(std::move(fields));
 }
 

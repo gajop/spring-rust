@@ -46,6 +46,7 @@
         "check": "check_unit_health",
         "set": "set_unit_health"
       },
+      "wasm_mutating": true,
       "params": {
         "health": {
           "type": "f32",
@@ -75,6 +76,39 @@
             1
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitHealth",
+          "args": [
+            "fixture.unitID",
+            {
+              "health": "value.health",
+              "paralyze": "value.paralyzeDamage",
+              "capture": "value.captureProgress",
+              "build": "value.buildProgress"
+            }
+          ],
+          "wasm_args": [
+            "fixture.unitID",
+            {
+              "health": "value.health",
+              "capture": "value.captureProgress",
+              "paralyze": "value.paralyzeDamage",
+              "build": "value.buildProgress",
+              "useAmounts": true
+            }
+          ]
+        },
+        "call": "Spring.GetUnitHealth",
+        "args": ["fixture.unitID"],
+        "returns": [
+          "health",
+          "maxHealth",
+          "paralyzeDamage",
+          "captureProgress",
+          "buildProgress"
+        ]
       }
     },
     {
@@ -118,6 +152,7 @@
         "check": "check_unit_health",
         "set": "set_unit_max_health"
       },
+      "wasm_mutating": true,
       "params": {
         "maxHealth": {
           "type": "f32",
@@ -126,6 +161,15 @@
             1400
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitMaxHealth",
+          "args": ["fixture.unitID", "value.maxHealth"]
+        },
+        "call": "Spring.GetUnitHealth",
+        "args": ["fixture.unitID"],
+        "returns": ["maxHealth"]
       }
     },
     {
@@ -169,6 +213,7 @@
         "check": "check_unit_experience",
         "set": "set_unit_experience"
       },
+      "wasm_mutating": true,
       "params": {
         "experience": {
           "type": "f32",
@@ -177,6 +222,15 @@
             3
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitExperience",
+          "args": ["fixture.unitID", "value.experience"]
+        },
+        "call": "Spring.GetUnitExperience",
+        "args": ["fixture.unitID"],
+        "returns": ["experience"]
       }
     },
     {
@@ -220,10 +274,20 @@
         "check": "check_unit_neutral",
         "set": "set_unit_neutral"
       },
+      "wasm_mutating": true,
       "params": {
         "neutral": {
           "type": "bool"
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitNeutral",
+          "args": ["fixture.unitID", "value.neutral"]
+        },
+        "call": "Spring.GetUnitNeutral",
+        "args": ["fixture.unitID"],
+        "returns": ["neutral"]
       }
     },
     {
@@ -267,6 +331,7 @@
         "check": "check_unit_seismic_signature",
         "set": "set_unit_seismic_signature"
       },
+      "wasm_mutating": true,
       "params": {
         "seismicSignature": {
           "type": "f32",
@@ -275,6 +340,15 @@
             32
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitSeismicSignature",
+          "args": ["fixture.unitID", "value.seismicSignature"]
+        },
+        "call": "Spring.GetUnitSeismicSignature",
+        "args": ["fixture.unitID"],
+        "returns": ["seismicSignature"]
       }
     },
     {
@@ -318,6 +392,7 @@
         "check": "check_unit_mass",
         "set": "set_unit_mass"
       },
+      "wasm_mutating": true,
       "params": {
         "mass": {
           "type": "f32",
@@ -326,6 +401,15 @@
             300
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitMass",
+          "args": ["fixture.unitID", "value.mass"]
+        },
+        "call": "Spring.GetUnitMass",
+        "args": ["fixture.unitID"],
+        "returns": ["mass"]
       }
     },
     {
@@ -370,6 +454,7 @@
         "check": "check_unit_armored",
         "set": "set_unit_armored"
       },
+      "wasm_mutating": true,
       "params": {
         "armored": {
           "type": "bool"
@@ -381,6 +466,15 @@
             3
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitArmored",
+          "args": ["fixture.unitID", "value.armored", "value.armorMultiple"]
+        },
+        "call": "Spring.GetUnitArmored",
+        "args": ["fixture.unitID"],
+        "returns": ["armored", "armorMultiple"]
       }
     },
     {
@@ -426,6 +520,7 @@
         "check": "check_unit_costs",
         "set": "set_unit_costs"
       },
+      "wasm_mutating": true,
       "params": {
         "buildTime": {
           "type": "f32",
@@ -448,6 +543,30 @@
             500
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitCosts",
+          "args": [
+            "fixture.unitID",
+            {
+              "buildTime": "value.buildTime",
+              "metalCost": "value.metalCost",
+              "energyCost": "value.energyCost"
+            }
+          ],
+          "wasm_args": [
+            "fixture.unitID",
+            {
+              "buildTime": "value.buildTime",
+              "metalCost": "value.metalCost",
+              "energyCost": "value.energyCost"
+            }
+          ]
+        },
+        "call": "Spring.GetUnitCosts",
+        "args": ["fixture.unitID"],
+        "returns": ["buildTime", "metalCost", "energyCost"]
       }
     },
     {
@@ -465,11 +584,13 @@
           "Spring.GetUnitStorage"
         ]
       },
-        "native": {
-          "set": [
-            "UnitControl.set_unit_storage"
-          ],
-          "get": []
+      "native": {
+        "set": [
+          "UnitControl.set_unit_storage"
+        ],
+        "get": [
+          "UnitsInfo.get_unit_storage"
+        ]
       },
       "compare": {
         "mode": "fields",
@@ -479,17 +600,18 @@
           "energyStorage"
         ]
       },
-        "report": {
-          "lua_setter": "`Spring.SetUnitStorage`",
-          "native_setter": "`UnitControl.set_unit_storage`",
-          "lua_getter": "`Spring.GetUnitStorage`",
-          "native_getter": "n/a (`GetUnitStorage` reads unit-def storage in the installed ABI)",
-          "fields": "`metalStorage`, `energyStorage` through Lua readback"
-        },
+      "report": {
+        "lua_setter": "`Spring.SetUnitStorage`",
+        "native_setter": "`UnitControl.set_unit_storage`",
+        "lua_getter": "`Spring.GetUnitStorage`",
+        "native_getter": "`UnitsInfo.get_unit_storage`",
+        "fields": "`metalStorage`, `energyStorage`"
+      },
       "rust": {
         "check": "check_unit_storage",
         "set": "set_unit_storage"
       },
+      "wasm_mutating": true,
       "params": {
         "resource": {
           "type": "enum",
@@ -505,6 +627,15 @@
             1000
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitStorage",
+          "args": ["fixture.unitID", "value.resource", "value.amount"]
+        },
+        "call": "Spring.GetUnitStorage",
+        "args": ["fixture.unitID"],
+        "returns": ["metalStorage", "energyStorage"]
       }
     },
     {
@@ -548,6 +679,7 @@
         "check": "check_unit_max_range",
         "set": "set_unit_max_range"
       },
+      "wasm_mutating": true,
       "params": {
         "maxRange": {
           "type": "f32",
@@ -556,6 +688,15 @@
             1200
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitMaxRange",
+          "args": ["fixture.unitID", "value.maxRange"]
+        },
+        "call": "Spring.GetUnitMaxRange",
+        "args": ["fixture.unitID"],
+        "returns": ["maxRange"]
       }
     },
     {
@@ -601,6 +742,7 @@
         "check": "check_unit_position",
         "set": "set_unit_position"
       },
+      "wasm_mutating": true,
       "params": {
         "position": {
           "type": "float3",
@@ -611,6 +753,25 @@
             "z"
           ]
         }
+      },
+      "wasm_get_args": [
+        "fixture.unitID",
+        {"midPos": false, "aimPos": false}
+      ],
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitPosition",
+          "args": [
+            "fixture.unitID",
+            "value.x",
+            "value.y",
+            "value.z"
+          ],
+          "wasm_args": ["fixture.unitID", "value.position"]
+        },
+        "call": "Spring.GetUnitPosition",
+        "args": ["fixture.unitID"],
+        "returns": ["x", "y", "z"]
       }
     }
   ]

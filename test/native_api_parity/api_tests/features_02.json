@@ -44,6 +44,7 @@
         "check": "check_feature_position",
         "set": "set_feature_position"
       },
+      "wasm_mutating": true,
       "params": {
         "position": {
           "type": "float3",
@@ -63,6 +64,26 @@
             "true"
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeaturePosition",
+          "args": [
+            "fixture.featureID",
+            "value.x",
+            "value.y",
+            "value.z",
+            "value.snapToGround"
+          ],
+          "wasm_args": [
+            "fixture.featureID",
+            "value.position",
+            "value.snapToGround"
+          ]
+        },
+        "call": "Spring.GetFeaturePosition",
+        "args": ["fixture.featureID"],
+        "returns": ["x", "y", "z"]
       }
     },
     {
@@ -240,6 +261,7 @@
         "check": "check_feature_velocity",
         "set": "set_feature_velocity"
       },
+      "wasm_mutating": true,
       "params": {
         "velocity": {
           "type": "float3",
@@ -250,6 +272,21 @@
             "z"
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureVelocity",
+          "args": [
+            "fixture.featureID",
+            "value.x",
+            "value.y",
+            "value.z"
+          ],
+          "wasm_args": ["fixture.featureID", "value.velocity"]
+        },
+        "call": "Spring.GetFeatureVelocity",
+        "args": ["fixture.featureID"],
+        "returns": ["x", "y", "z"]
       }
     },
     {
@@ -281,10 +318,7 @@
         "fields": [
           "frontX",
           "frontY",
-          "frontZ",
-          "rightX",
-          "rightY",
-          "rightZ"
+          "frontZ"
         ]
       },
       "report": {
@@ -292,12 +326,13 @@
         "native_setter": "`FeatureControl.set_feature_direction`",
         "lua_getter": "`Spring.GetFeatureDirection`",
         "native_getter": "`features().get_feature_direction`",
-        "fields": "`frontX`, `frontY`, `frontZ`, `rightX`, `rightY`, `rightZ`"
+        "fields": "`frontX`, `frontY`, `frontZ`"
       },
       "rust": {
         "check": "check_feature_direction",
         "set": "set_feature_direction"
       },
+      "wasm_mutating": true,
       "params": {
         "front": {
           "type": "float3",
@@ -317,7 +352,45 @@
             "rightZ"
           ]
         }
-      }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureDirection",
+          "args": [
+            "fixture.featureID",
+            "value.frontX",
+            "value.frontY",
+            "value.frontZ",
+            "value.rightX",
+            "value.rightY",
+            "value.rightZ"
+          ],
+          "wasm_args": [
+            "fixture.featureID",
+            "value.front",
+            "value.right"
+          ]
+        },
+        "call": "Spring.GetFeatureDirection",
+        "args": ["fixture.featureID"],
+        "returns": [
+          "frontX",
+          "frontY",
+          "frontZ",
+          "rightX",
+          "rightY",
+          "rightZ"
+        ]
+      },
+      "wasm_sequence": [
+        {"call": "FeatureControl.set_feature_direction", "args": ["fixture.featureID", "value.front", "value.right"], "bind": "updated", "require_true": true},
+        {"call": "Features.get_feature_direction", "args": ["fixture.featureID"], "bind": "direction"}
+      ],
+      "wasm_returns": [
+        {"field": "frontX", "from": "direction", "path": ["x"]},
+        {"field": "frontY", "from": "direction", "path": ["y"]},
+        {"field": "frontZ", "from": "direction", "path": ["z"]}
+      ]
     },
     {
       "id": "feature_no_select",
@@ -360,10 +433,20 @@
         "check": "check_feature_no_select",
         "set": "set_feature_no_select"
       },
+      "wasm_mutating": true,
       "params": {
         "noSelect": {
           "type": "bool"
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureNoSelect",
+          "args": ["fixture.featureID", "value.noSelect"]
+        },
+        "call": "Spring.GetFeatureNoSelect",
+        "args": ["fixture.featureID"],
+        "returns": ["noSelect"]
       }
     },
     {

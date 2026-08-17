@@ -59,6 +59,7 @@
 #include "Game/GameSetup.h"
 #include "Game/Players/PlayerHandler.h"
 #include "Game/Players/Player.h"
+#include "Lua/LuaConfig.h"
 #include "Lua/LuaUI.h"
 #include "Map/ReadMap.h"
 #include "Map/MapDamage.h"
@@ -1213,7 +1214,10 @@ static void NativeSetUnitPosition(const SetUnitPositionQuery* query, SetUnitPosi
 	}
 
 	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
-	unit->Move(pos, false);
+	// Match Spring.SetUnitPosition: ForcedMove updates the blocking state
+	// around the relocation, whereas Move only changes coordinates and leaves
+	// a unit that was blocking at its old location logically blocked.
+	unit->ForcedMove(pos);
 	result->success = true;
 }
 
@@ -1740,7 +1744,10 @@ static void NativeEditUnitCmdDesc(const EditUnitCmdDescQuery* query, EditUnitCmd
 	}
 
 	const auto& cmdDescs = unit->commandAI->GetPossibleCommands();
-	if (query->cmdDescIndex >= cmdDescs.size()) {
+	// Command-description indices are 1-based at the Lua/native API boundary.
+	// Convert to the command AI's 0-based vector index before accessing it.
+	const int cmdDescIndex = static_cast<int>(query->cmdDescIndex) - CMD_INDEX_OFFSET;
+	if (cmdDescIndex < 0 || cmdDescIndex >= static_cast<int>(cmdDescs.size())) {
 		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid command description index");
 		return;
 	}
@@ -1751,13 +1758,13 @@ static void NativeEditUnitCmdDesc(const EditUnitCmdDescQuery* query, EditUnitCmd
 	}
 
 	// Make a copy of the existing command description
-	SCommandDescription cmdDesc = *cmdDescs[query->cmdDescIndex];
+	SCommandDescription cmdDesc = *cmdDescs[cmdDescIndex];
 
 	// Apply changes from native description
 	ApplyNativeCommandDescription(query->cmdDesc, cmdDesc);
 
 	// Update the command description
-	unit->commandAI->UpdateCommandDescription(query->cmdDescIndex, std::move(cmdDesc));
+	unit->commandAI->UpdateCommandDescription(cmdDescIndex, std::move(cmdDesc));
 
 	result->success = true;
 }
@@ -1787,8 +1794,16 @@ static void NativeInsertUnitCmdDesc(const InsertUnitCmdDescQuery* query, InsertU
 	SCommandDescription cmdDesc;
 	ApplyNativeCommandDescription(query->cmdDesc, cmdDesc);
 
-	// -1 means append at end
-	unsigned int cmdDescIdx = (query->cmdDescIndex < 0) ? -1u : static_cast<unsigned int>(query->cmdDescIndex);
+	// -1 means append at end; other command-description indices are 1-based
+	// at the Lua/native API boundary and 0-based inside the command AI.
+	int cmdDescIdx = -1;
+	if (query->cmdDescIndex >= 0) {
+		cmdDescIdx = query->cmdDescIndex - CMD_INDEX_OFFSET;
+		if (cmdDescIdx < 0 || cmdDescIdx > static_cast<int>(unit->commandAI->possibleCommands.size())) {
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid command description index");
+			return;
+		}
+	}
 
 	unit->commandAI->InsertCommandDescription(cmdDescIdx, std::move(cmdDesc));
 
@@ -1812,12 +1827,17 @@ static void NativeRemoveUnitCmdDesc(const RemoveUnitCmdDescQuery* query, RemoveU
 		return;
 	}
 
-	// -1 means remove last
-	unsigned int cmdDescIdx;
+	// -1 means remove last; other command-description indices are 1-based
+	// at the Lua/native API boundary and 0-based inside the command AI.
+	int cmdDescIdx;
 	if (query->cmdDescIndex < 0) {
-		cmdDescIdx = unit->commandAI->possibleCommands.size() - 1;
+		cmdDescIdx = static_cast<int>(unit->commandAI->possibleCommands.size()) - 1;
 	} else {
-		cmdDescIdx = static_cast<unsigned int>(query->cmdDescIndex);
+		cmdDescIdx = query->cmdDescIndex - CMD_INDEX_OFFSET;
+		if (cmdDescIdx < 0 || cmdDescIdx >= static_cast<int>(unit->commandAI->possibleCommands.size())) {
+			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid command description index");
+			return;
+		}
 	}
 
 	unit->commandAI->RemoveCommandDescription(cmdDescIdx);

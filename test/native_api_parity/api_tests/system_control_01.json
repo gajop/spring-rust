@@ -11,7 +11,22 @@
       "compare": {"mode": "fields", "fields": ["callbackCalled", "callbackTeam", "returnCount", "returnMarker", "returnFlag"]},
       "report": {"lua_setter": "`Global.CallAsTeam`", "native_setter": "`SystemControl.call_as_team`", "fields": "callback execution, team, and Lua return shape"},
       "rust": {"check": "check_system_control_value", "set": "set_system_control_value"},
-      "params": {}
+      "params": {},
+      "wasm_sequence": [
+        {"call": "SystemControl.call_as_team", "args": [0, 1, 0], "bind": "called", "require_true": true}
+      ],
+      "wasm_callback": {
+        "mode": "call_as_team",
+        "team": 0,
+        "marker": "native_api_parity_call_as_team_nil"
+      },
+      "wasm_returns": [
+        {"field": "callbackCalled", "callback": "called"},
+        {"field": "callbackTeam", "callback": "team"},
+        {"field": "returnCount", "callback": "return_count"},
+        {"field": "returnMarker", "callback": "marker"},
+        {"field": "returnFlag", "callback": "return_flag"}
+      ]
     },
     {
       "id": "is_replay",

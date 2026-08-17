@@ -51,6 +51,7 @@
         "check": "check_feature_collision_volume_data",
         "set": "set_feature_collision_volume_data"
       },
+      "wasm_mutating": true,
       "params": {
         "scaleX": {
           "type": "f32",
@@ -130,6 +131,14 @@
             "value.offsetX",
             "value.offsetY",
             "value.offsetZ",
+            "value.volumeType",
+            "value.testType",
+            "value.primaryAxis"
+          ],
+          "wasm_args": [
+            "fixture.featureID",
+            {"x": "value.scaleX", "y": "value.scaleY", "z": "value.scaleZ"},
+            {"x": "value.offsetX", "y": "value.offsetY", "z": "value.offsetZ"},
             "value.volumeType",
             "value.testType",
             "value.primaryAxis"
@@ -346,6 +355,7 @@
         "check": "check_feature_health",
         "set": "add_feature_damage"
       },
+      "wasm_mutating": true,
       "params": {
         "baseline": {
           "type": "f32",
@@ -383,6 +393,14 @@
               0,
               0,
               0
+            ],
+            "wasm_args": [
+              "fixture.featureID",
+              "value.damage",
+              0.0,
+              -1,
+              -1,
+              {"x": 0.0, "y": 0.0, "z": 0.0}
             ]
           }
         ],

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,8 @@
 #include "ComponentSemanticFixture.h"
 #include "ComponentRustFixture.h"
 #include "ComponentValueFixture.h"
+#include "NativeInterface/NativeInterface.h"
+#include "NativeInterface/NativeInterfaceWasmAdapter.h"
 #include "WasmInterface/WasmEnvironment.h"
 #include "WasmInterface/WasmHost.h"
 #include "WasmInterface/WasmModule.h"
@@ -20,6 +23,13 @@
 #include "WasmInterface/WasmRuntime.h"
 
 namespace {
+	void BenchmarkGetTeamUnitCount(const GetTeamUnitCountQuery* query,
+		GetTeamUnitCountResult* result)
+	{
+		result->error = nullptr;
+		result->count = static_cast<std::uint32_t>(query->teamID + 10);
+	}
+
 	std::vector<std::uint8_t> WrapNestedComponent(const std::vector<std::uint8_t>& child)
 	{
 		// Component section 4 contains a complete nested component.  Keeping the
@@ -832,6 +842,57 @@ TEST_CASE("Wasm transport performance gates")
 		WARN("ASAN build: performance budget is reported but not enforced");
 	} else {
 		CHECK(gfxPerCall <= gfxBudget);
+	}
+}
+
+TEST_CASE("Wasm generated adapter transport performance")
+{
+	using Clock = std::chrono::steady_clock;
+	using Nanoseconds = std::chrono::nanoseconds;
+	constexpr std::size_t iterations = 100;
+	constexpr auto simulationFrameBudget = Nanoseconds(33'000'000);
+	constexpr auto generatedAdapterBudget = simulationFrameBudget / 4'000;
+
+	UnitsQueryApi unitsQuery{};
+	unitsQuery.GetTeamUnitCount = BenchmarkGetTeamUnitCount;
+	NativeInterface nativeInterface{};
+	nativeInterface.unitsQuery = &unitsQuery;
+	NativeInterfaceWasmAdapter adapter(&nativeInterface);
+	WasmRuntimeConfig runtimeConfig;
+	runtimeConfig.instructionFuel = 1'000'000'000;
+	runtimeConfig.hostWorkLimit = 1'000'000'000;
+	WasmRuntime runtime(runtimeConfig);
+	WasmModule module(37, {
+		.name = "generated-adapter-performance",
+		.source = "generated-adapter-performance.wasm",
+		.environment = WasmEnvironment::RulesSynced,
+		.bytes = std::vector<std::uint8_t>(wasm_component_fixture::kComponentRustFixture,
+			wasm_component_fixture::kComponentRustFixture +
+				wasm_component_fixture::kComponentRustFixtureSize),
+	}, runtime, &adapter);
+	std::string error;
+	REQUIRE(module.Initialize(error));
+
+	const auto start = Clock::now();
+	bool succeeded = true;
+	for (std::size_t index = 0; index < iterations; ++index) {
+		std::vector<std::uint64_t> results;
+		if (!module.Callin("run", {7}, results, error) ||
+			results.size() != 1 || results.front() != 17) {
+			succeeded = false;
+			break;
+		}
+	}
+	const auto elapsed = Clock::now() - start;
+	REQUIRE(succeeded);
+	const auto perCall = elapsed / iterations;
+	INFO("generated NativeInterface Component call: " <<
+		std::chrono::duration_cast<Nanoseconds>(perCall).count() <<
+		" ns/call (budget " << generatedAdapterBudget.count() << " ns)");
+	if constexpr (kBuildUsesAsan) {
+		WARN("ASAN build: performance budget is reported but not enforced");
+	} else {
+		CHECK(perCall <= generatedAdapterBudget);
 	}
 }
 

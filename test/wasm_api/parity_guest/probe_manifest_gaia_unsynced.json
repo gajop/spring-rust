@@ -11,6 +11,7 @@
     "get_config_int_nil_default",
     "get_config_float_nil_default",
     "get_config_string_nil_default",
+    "get_config_params",
     "get_log_sections",
     "config_int",
     "config_float",
@@ -38,6 +39,8 @@
     "get_profiler_time_record_empty",
     "get_vid_mem_usage",
     "vfs_create_dir_existing",
+    "vfs_create_dir_invalid",
+    "vfs_extract_archive_invalid",
     "get_prev_frame_sync_checksum",
     "get_box_selection_by_engine",
     "get_build_facing",
@@ -108,14 +111,15 @@
     "clear_features_previous_draw_flag",
     "clear_units_previous_draw_flag",
     "set_share_level",
-    "share_resources"
+    "share_resources",
+    "solve_nurbscurve"
   ],
   "coverage": {
     "source_context": "unsynced_gadget",
     "source_test_count": 283,
-    "selected_count": 106,
+    "selected_count": 110,
     "selected_kind_counts": {
-      "readonly": 85,
+      "readonly": 89,
       "setter_getter": 21
     },
     "selected_ids": [
@@ -127,6 +131,7 @@
       "get_config_int_nil_default",
       "get_config_float_nil_default",
       "get_config_string_nil_default",
+      "get_config_params",
       "get_log_sections",
       "config_int",
       "config_float",
@@ -154,6 +159,8 @@
       "get_profiler_time_record_empty",
       "get_vid_mem_usage",
       "vfs_create_dir_existing",
+      "vfs_create_dir_invalid",
+      "vfs_extract_archive_invalid",
       "get_prev_frame_sync_checksum",
       "get_box_selection_by_engine",
       "get_build_facing",
@@ -224,13 +231,10 @@
       "clear_features_previous_draw_flag",
       "clear_units_previous_draw_flag",
       "set_share_level",
-      "share_resources"
+      "share_resources",
+      "solve_nurbscurve"
     ],
     "excluded": {
-      "expect_error": [
-        "vfs_create_dir_invalid",
-        "vfs_extract_archive_invalid"
-      ],
       "mutating_getter_or_unsupported": [
         "unit_set_selection_volume_data"
       ],
@@ -408,11 +412,7 @@
         "set_window_minimized",
         "set_window_maximized"
       ],
-      "unresolved_args": [
-        "solve_nurbscurve"
-      ],
       "unsupported_output": [
-        "get_config_params",
         "get_camera_vectors",
         "get_unit_selection_volume_data",
         "get_feature_selection_volume_data",

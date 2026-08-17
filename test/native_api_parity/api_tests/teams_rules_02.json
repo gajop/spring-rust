@@ -135,16 +135,15 @@
         "mode": "fields",
         "epsilon": 0.05,
         "fields": [
-          "value",
-          "listed"
+          "value"
         ]
       },
       "report": {
         "lua_setter": "`Spring.SetGameRulesParam`",
         "native_setter": "`RulesParams.set_game_rules_param`",
-        "lua_getter": "`Spring.GetGameRulesParam`, `Spring.GetGameRulesParams`",
+        "lua_getter": "`Spring.GetGameRulesParam`",
         "native_getter": "`RulesParams.get_game_rules_param`, `RulesParams.get_game_rules_params`",
-        "fields": "`value`, `listed`"
+        "fields": "`value`"
       },
       "rust": {
         "check": "check_rules_param",
@@ -166,6 +165,36 @@
             900
           ]
         }
+      },
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetGameRulesParam",
+          "args": [
+            "value.paramName",
+            "value.value",
+            {
+              "public": true
+            }
+          ],
+          "wasm_args": [
+            "value.paramName",
+            {
+              "type": "rulesparam-type-float",
+              "boolValue": false,
+              "floatValue": "value.value",
+              "stringValue": ""
+            },
+            32
+          ]
+        },
+        "call": "Spring.GetGameRulesParam",
+        "args": [
+          "value.paramName"
+        ],
+        "returns": [
+          "value"
+        ]
       }
     },
     {
@@ -208,6 +237,7 @@
         "check": "check_team_resources",
         "set": "set_team_resource"
       },
+      "wasm_mutating": true,
       "params": {
         "teamID": {
           "type": "i32",
@@ -227,6 +257,15 @@
             900
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetTeamResource",
+          "args": ["value.teamID", "value.resource", "value.amount"]
+        },
+        "call": "Spring.GetTeamResources",
+        "args": ["value.teamID", "value.resource"],
+        "returns": ["currentLevel", "storage"]
       }
     },
     {
@@ -256,16 +295,15 @@
         "mode": "fields",
         "epsilon": 0.05,
         "fields": [
-          "value",
-          "listed"
+          "value"
         ]
       },
       "report": {
         "lua_setter": "`Spring.SetTeamRulesParam`",
         "native_setter": "`RulesParams.set_team_rules_param`",
-        "lua_getter": "`Spring.GetTeamRulesParam`, `Spring.GetTeamRulesParams`",
+        "lua_getter": "`Spring.GetTeamRulesParam`",
         "native_getter": "`RulesParams.get_team_rules_param`, `RulesParams.get_team_rules_params`",
-        "fields": "`value`, `listed`"
+        "fields": "`value`"
       },
       "rust": {
         "check": "check_rules_param",
@@ -291,6 +329,39 @@
             900
           ]
         }
+      },
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetTeamRulesParam",
+          "args": [
+            "fixture.teamID",
+            "value.paramName",
+            "value.value",
+            {
+              "public": true
+            }
+          ],
+          "wasm_args": [
+            "fixture.teamID",
+            "value.paramName",
+            {
+              "type": "rulesparam-type-float",
+              "boolValue": false,
+              "floatValue": "value.value",
+              "stringValue": ""
+            },
+            32
+          ]
+        },
+        "call": "Spring.GetTeamRulesParam",
+        "args": [
+          "fixture.teamID",
+          "value.paramName"
+        ],
+        "returns": [
+          "value"
+        ]
       }
     },
     {
@@ -320,16 +391,15 @@
         "mode": "fields",
         "epsilon": 0.05,
         "fields": [
-          "value",
-          "listed"
+          "value"
         ]
       },
       "report": {
         "lua_setter": "`Spring.SetPlayerRulesParam`",
         "native_setter": "`RulesParams.set_player_rules_param`",
-        "lua_getter": "`Spring.GetPlayerRulesParam`, `Spring.GetPlayerRulesParams`",
+        "lua_getter": "`Spring.GetPlayerRulesParam`",
         "native_getter": "`RulesParams.get_player_rules_param`, `RulesParams.get_player_rules_params`",
-        "fields": "`value`, `listed`"
+        "fields": "`value`"
       },
       "rust": {
         "check": "check_rules_param",
@@ -355,6 +425,39 @@
             900
           ]
         }
+      },
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetPlayerRulesParam",
+          "args": [
+            0,
+            "value.paramName",
+            "value.value",
+            {
+              "public": true
+            }
+          ],
+          "wasm_args": [
+            0,
+            "value.paramName",
+            {
+              "type": "rulesparam-type-float",
+              "boolValue": false,
+              "floatValue": "value.value",
+              "stringValue": ""
+            },
+            32
+          ]
+        },
+        "call": "Spring.GetPlayerRulesParam",
+        "args": [
+          0,
+          "value.paramName"
+        ],
+        "returns": [
+          "value"
+        ]
       }
     },
     {

@@ -402,6 +402,17 @@ local function finishHeightmapCase()
 			})
 		end
 		beginWorkloads()
+	else
+		-- Each case owns an independent repeat set. Leaving the repeat index and
+		-- accumulators from the previous case in place makes the next case record
+		-- one sample into the previous case's five-sample array, which produces
+		-- identical-looking or effectively zero Lua rows.
+		heightmapRepeat = 1
+		heightmapSamples = {}
+		heightmapInnerSamples = {}
+		heightmapTotalNs = 0
+		heightmapInnerNs = 0
+		heightmapInnerCalls = 0
 	end
 end
 

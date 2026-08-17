@@ -239,6 +239,30 @@ CHECK_COVERAGE = {test["id"]: coverage_metadata(test) for test in API_TESTS}
 API_TEST_BY_ID = {test["id"]: test for test in API_TESTS}
 
 
+def native_comparable(test: dict) -> bool:
+    """Whether the direct native module shares the Lua test's read role.
+
+    NativeInterfaceEventClient is an all-access event client.  LuaUI/widget
+    tests intentionally use the local player's restricted visibility context,
+    so comparing those observations directly would turn a role difference into
+    a false parity failure.  A spec may override this default explicitly when
+    a widget-shaped API has role-independent semantics.
+    """
+    return bool(test.get("native_compare", test.get("context") != "widget"))
+
+
+def native_comparison_exclusions() -> set[str]:
+    return {
+        test_id for test_id, test in API_TEST_BY_ID.items() if not native_comparable(test)
+    }
+
+
+def native_comparable_row(row: dict) -> bool:
+    test_id = canonical_row_test_id(row_test_name(row))
+    test = API_TEST_BY_ID.get(test_id or "")
+    return test is None or native_comparable(test)
+
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -642,6 +666,17 @@ def run_spring(
     else:
         env["SPRING_NATIVE_MODULE"] = ""
 
+    if run_mode == "native":
+        # Keep executing widget tests in the native process, but do not ask a
+        # full-read native event client to prove LuaUI's restricted visibility
+        # contract.  The report names this role boundary; the UI Wasm run is
+        # the corresponding restricted-read parity gate.
+        automatic_skip = sorted(native_comparison_exclusions())
+        configured_skip = env.get("SPRING_NATIVE_PARITY_SKIP", "")
+        skip_values = [value for value in (configured_skip, *automatic_skip) if value]
+        if skip_values:
+            env["SPRING_NATIVE_PARITY_SKIP"] = ",".join(skip_values)
+
     spring_binary = args.spring if needs_graphics else args.spring_headless
     cmd = [
         str(spring_binary),
@@ -695,11 +730,14 @@ def compare_details(lua_dir: Path, native_dir: Path, compare_callins: bool = Tru
     for name in RESULT_STREAMS:
         lua_rows = load_jsonl(lua_dir / name)
         native_rows = load_jsonl(native_dir / name)
-        matches = comparable_rows(lua_rows) == comparable_rows(native_rows)
+        comparable_lua_rows = [row for row in lua_rows if native_comparable_row(row)]
+        comparable_native_rows = [row for row in native_rows if native_comparable_row(row)]
+        matches = comparable_rows(comparable_lua_rows) == comparable_rows(comparable_native_rows)
         streams.append({
             "name": name,
             "lua_rows": len(lua_rows),
             "native_rows": len(native_rows),
+            "excluded_rows": len(lua_rows) - len(comparable_lua_rows),
             "matches": matches,
         })
         if not matches:
@@ -791,7 +829,10 @@ def compare_details(lua_dir: Path, native_dir: Path, compare_callins: bool = Tru
 
 
 def compare_wasm_details(
-    lua_dir: Path, wasm_dir: Path, wasm_context: str = "synced_gadget"
+    lua_dir: Path,
+    wasm_dir: Path,
+    wasm_context: str = "synced_gadget",
+    args: argparse.Namespace | None = None,
 ) -> dict:
     """Compare the Component Model fixture's host observation to Lua.
 
@@ -841,7 +882,26 @@ def compare_wasm_details(
         else WASM_CONTEXT_MANIFESTS[wasm_context]
     )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    expected_ids = set(manifest["tests"])
+    manifest_ids = list(manifest["tests"])
+    manifest_selected_ids = set(manifest_ids)
+    expected_ids = set(manifest_selected_ids)
+    filtered_comparison = False
+    unknown_requested_ids: set[str] = set()
+    if args is not None and args.tests:
+        requested_ids = {
+            value.strip() for value in args.tests.split(",") if value.strip()
+        }
+        unknown_requested_ids = requested_ids - expected_ids
+        expected_ids &= requested_ids
+        filtered_comparison = True
+    elif args is not None and args.test_prefix is not None:
+        expected_ids = set(manifest_ids[: max(args.test_prefix, 0)])
+        filtered_comparison = True
+    if unknown_requested_ids:
+        print(
+            "requested Wasm probe tests are not in the selected manifest: "
+            + ", ".join(sorted(unknown_requested_ids))
+        )
     coverage = manifest.get("coverage", {})
     if not isinstance(coverage, dict):
         coverage = {}
@@ -856,8 +916,8 @@ def compare_wasm_details(
     coverage_ok = (
         manifest.get("version", 0) >= 2
         and coverage.get("source_test_count") == len(source_ids)
-        and coverage.get("selected_count") == len(expected_ids)
-        and set(selected_ids) == expected_ids
+        and coverage.get("selected_count") == len(manifest_selected_ids)
+        and set(selected_ids) == manifest_selected_ids
         and len(selected_ids) == len(set(selected_ids))
         and len(excluded_ids) == len(set(excluded_ids))
         and covered_ids == source_ids
@@ -922,18 +982,23 @@ def compare_wasm_details(
 
     api_missing_lua = sorted(expected_ids - set(lua_api_rows))
     api_missing_wasm = sorted(expected_ids - set(wasm_api_rows))
-    api_unexpected_lua = sorted(set(lua_api_rows) - expected_ids)
-    api_unexpected_wasm = sorted(set(wasm_api_rows) - expected_ids)
+    api_unexpected_lua = (
+        [] if filtered_comparison else sorted(set(lua_api_rows) - expected_ids)
+    )
+    api_unexpected_wasm = (
+        [] if filtered_comparison else sorted(set(wasm_api_rows) - expected_ids)
+    )
     api_mismatches = []
     api_error_matches = []
     for test_id in sorted(expected_ids & set(lua_api_rows) & set(wasm_api_rows)):
         expected_row = lua_api_rows[test_id]
         actual_row = normalize_wasm_api_row(test_id, wasm_api_rows[test_id])
         if expected_row.get("status") != "pass" or actual_row.get("status") != "pass":
+            test = API_TEST_BY_ID.get(test_id, {})
             if (
-                expected_row.get("status") == "error"
+                test.get("wasm_expected_error")
+                and expected_row.get("status") in {"error", "fail"}
                 and actual_row.get("status") == "error"
-                and expected_row.get("fields", {}).get("error") is True
             ):
                 api_error_matches.append(test_id)
                 continue
@@ -970,10 +1035,12 @@ def compare_wasm_details(
         ):
             api_mismatches.append({"testName": test_id, "expected": expected_row, "actual": actual_row})
 
+    accepted_error_ids = set(api_error_matches)
     vacuous_ids = sorted(
         test_id
-        for test_id, row in wasm_api_rows.items()
-        if row.get("status") != "pass"
+        for test_id in expected_ids
+        for row in [wasm_api_rows.get(test_id, {})]
+        if row.get("status") != "pass" and test_id not in accepted_error_ids
     )
     vacuous_fraction = len(vacuous_ids) / max(len(expected_ids), 1)
     vacuity_ok = vacuous_fraction <= WASM_VACUITY_THRESHOLD
@@ -993,7 +1060,7 @@ def compare_wasm_details(
         or api_unexpected_wasm
         or api_mismatches
     )
-    ok = deterministic_ok and api_ok
+    ok = deterministic_ok and api_ok and not unknown_requested_ids
     if not api_ok:
         print(
             "Wasm typed API probe mismatch: "
@@ -2239,20 +2306,29 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
     lines.extend([
         "## Result Streams",
         "",
-        "| Stream | Lua Rows | Native Rows | Match |",
-        "| --- | ---: | ---: | --- |",
+        "| Stream | Lua Rows | Native Rows | Native-excluded | Match |",
+        "| --- | ---: | ---: | ---: | --- |",
     ])
 
     if compare_info:
         for stream in compare_info["streams"]:
             lines.append(
                 f"| `{stream['name']}` | {stream['lua_rows']} | {stream['native_rows']} | "
+                f"{stream.get('excluded_rows', 'n/a')} | "
                 f"{'yes' if stream['matches'] else 'NO'} |"
             )
     else:
         stream_names = [WASM_PARITY_STREAM] if args.mode == "wasm" else RESULT_STREAMS
         for name in stream_names:
-            lines.append(f"| `{name}` | {len(load_jsonl(lua_dir / name))} | n/a | n/a |")
+            lines.append(f"| `{name}` | {len(load_jsonl(lua_dir / name))} | n/a | n/a | n/a |")
+
+    if compare_info and compare_info.get("kind") != "wasm":
+        lines.extend([
+            "",
+            "Widget-context rows are executed in both processes but excluded from the direct",
+            "Lua/native comparison because the native event client is full-read; LuaUI↔Wasm",
+            "uses the restricted visibility context and remains the UI parity comparison.",
+        ])
 
     if compare_info and compare_info.get("kind") == "wasm":
         lines.extend([
@@ -2365,8 +2441,8 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         "",
         "## Native Checks",
         "",
-        "| Check | Pass | Fail |",
-        "| --- | ---: | ---: |",
+        "| Check | Pass | Skip | Fail |",
+        "| --- | ---: | ---: | ---: |",
     ])
 
     native_rows = (
@@ -2382,24 +2458,32 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
         for row in native_rows:
             name = row_test_name(row) or "<unnamed>"
             status = str(row.get("status", ""))
-            native_counts.setdefault(name, {"pass": 0, "fail": 0})
+            native_counts.setdefault(name, {"pass": 0, "skip": 0, "fail": 0})
             if status == "pass":
                 native_counts[name]["pass"] += 1
+            elif status == "skip":
+                native_counts[name]["skip"] += 1
             elif status == "fail":
                 native_counts[name]["fail"] += 1
                 native_failures.append(row)
 
         for name, counts in native_counts.items():
-            lines.append(f"| `{name}` | {counts['pass']} | {counts['fail']} |")
+            lines.append(
+                f"| `{name}` | {counts['pass']} | {counts['skip']} | {counts['fail']} |"
+            )
 
         if native_failures:
             lines.extend(["", "### Native Failures", ""])
             for row in native_failures:
                 lines.append(f"- `{row_test_name(row) or '<unnamed>'}`: {row.get('message', '')}")
     else:
-        lines.append("| n/a | 0 | 0 |")
+        lines.append("| n/a | 0 | 0 | 0 |")
 
-    checked_names = set(result_names(native_rows))
+    checked_names = {
+        row_test_name(row)
+        for row in native_rows
+        if row.get("status") != "skip"
+    }
     summary = coverage_summary(checked_names, surface_recorded_ids)
     inventory = read_context_inventory(base_output)
     recorded_by_context = read_recorded_ids_by_context(base_output)
@@ -2686,7 +2770,9 @@ def main() -> int:
     if lua_dir and native_dir:
         compare_info = compare_details(lua_dir, native_dir, not args.skip_callin_compare)
     elif lua_dir and wasm_dir:
-        compare_info = compare_wasm_details(lua_dir, wasm_dir, args.wasm_context)
+        compare_info = compare_wasm_details(
+            lua_dir, wasm_dir, args.wasm_context, args
+        )
     else:
         compare_info = None
     write_report(base_output, args, compare_info)

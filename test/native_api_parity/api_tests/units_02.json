@@ -487,6 +487,7 @@
         "check": "check_unit_velocity",
         "set": "set_unit_velocity"
       },
+      "wasm_mutating": true,
       "params": {
         "velocity": {
           "type": "float3",
@@ -497,6 +498,21 @@
             "z"
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitVelocity",
+          "args": [
+            "fixture.unitID",
+            "value.x",
+            "value.y",
+            "value.z"
+          ],
+          "wasm_args": ["fixture.unitID", "value.velocity"]
+        },
+        "call": "Spring.GetUnitVelocity",
+        "args": ["fixture.unitID"],
+        "returns": ["x", "y", "z"]
       }
     },
     {

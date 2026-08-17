@@ -155,6 +155,28 @@ return {
 
 		"trace_ray_between_positions",
 
+		"unit_health",
+
+		"unit_max_health",
+
+		"unit_experience",
+
+		"unit_neutral",
+
+		"unit_seismic_signature",
+
+		"unit_mass",
+
+		"unit_armored",
+
+		"unit_costs",
+
+		"unit_storage",
+
+		"unit_max_range",
+
+		"unit_position",
+
 		"unit_def_id",
 
 		"unit_team",
@@ -174,6 +196,8 @@ return {
 		"unit_direction",
 
 		"unit_heading",
+
+		"unit_velocity",
 
 		"get_unit_is_active",
 
@@ -211,6 +235,8 @@ return {
 
 		"get_team_max_units",
 
+		"unit_rules_param",
+
 		"get_unit_cost_table",
 
 		"unit_metal_extraction",
@@ -233,13 +259,21 @@ return {
 
 		"get_unit_vectors",
 
+		"unit_collision_volume_data",
+
 		"unit_radius_after_set",
 
 		"unit_height_after_set",
 
 		"unit_sensor_radius",
 
+		"unit_cloak",
+
+		"unit_direction_after_set",
+
 		"get_team_units_counts",
+
+		"unit_add_damage",
 
 		"get_unit_nearest_ally",
 
@@ -361,11 +395,21 @@ return {
 
 		"get_position_los_state",
 
+		"radar_error_params",
+
+		"unit_los_state",
+
+		"unit_build_distance",
+
+		"unit_build_range3d",
+
 		"get_unit_worker_task",
 
 		"get_ally_team_info",
 
 		"get_unit_def_dimensions",
+
+		"map_square_terrain_type",
 
 		"get_player_controlled_unit",
 
@@ -373,11 +417,19 @@ return {
 
 		"get_unit_cmd_descs",
 
+		"unit_harvest_storage",
+
 		"get_unit_array_centroid",
 
 		"get_unit_map_centroid",
 
 		"get_unit_tooltip",
+
+		"unit_physical_state_bit",
+
+		"feature_fire_time",
+
+		"feature_smoke_time",
 
 		"side_data_by_name",
 
@@ -385,13 +437,23 @@ return {
 
 		"side_data_count",
 
+		"closest_valid_position",
+
 		"closest_build_pos",
 
 		"test_build_order",
 
+		"unit_rotation",
+
+		"feature_rotation",
+
 		"get_team_unit_stats",
 
 		"get_team_units_sorted",
+
+		"unit_buildee_radius",
+
+		"unit_blocking",
 
 		"get_feature_blocking",
 
@@ -411,6 +473,14 @@ return {
 
 		"get_ai_info_fixed_shape",
 
+		"feature_health",
+
+		"feature_max_health",
+
+		"feature_mass",
+
+		"feature_resources",
+
 		"get_feature_separation",
 
 		"get_features_in_rectangle",
@@ -419,11 +489,21 @@ return {
 
 		"get_features_in_cylinder",
 
+		"feature_reclaim",
+
+		"feature_resurrect",
+
+		"feature_position",
+
 		"feature_height",
 
 		"feature_radius",
 
 		"feature_heading",
+
+		"feature_velocity",
+
+		"feature_no_select",
 
 		"valid_feature_id",
 
@@ -435,11 +515,17 @@ return {
 
 		"get_feature_ally_team",
 
+		"feature_rules_param",
+
 		"get_feature_collision_volume_data",
+
+		"feature_collision_volume_data",
 
 		"feature_radius_after_set",
 
 		"feature_height_after_set",
+
+		"feature_add_damage",
 
 		"ground_orig_height",
 
@@ -591,15 +677,125 @@ return {
 
 		"get_team_ally_team_id",
 
+		"game_rules_param",
+
+		"team_resource",
+
+		"team_rules_param",
+
+		"player_rules_param",
+
 		"get_team_resource_stats",
 
 		"ally_team_start_box",
 
 		"team_start_position",
 
+		"team_add_resource",
+
+		"team_use_resource",
+
 		"get_team_damage_stats",
 
 		"get_team_stats_history",
+
+		"unit_add_impulse",
+
+		"unit_add_seismic_ping",
+
+		"unit_add_resource",
+
+		"unit_use_resource",
+
+		"unit_clear_goal",
+
+		"unit_force_collision_update",
+
+		"unit_set_build_speed",
+
+		"unit_set_flanking",
+
+		"unit_set_mid_and_aim_pos",
+
+		"unit_set_move_goal",
+
+		"unit_set_physics",
+
+		"unit_set_pos_error_params",
+
+		"unit_set_resourcing",
+
+		"unit_set_stealth",
+
+		"unit_set_sonar_stealth",
+
+		"unit_set_always_visible",
+
+		"unit_set_use_air_los",
+
+		"unit_set_crashing",
+
+		"unit_set_tooltip",
+
+		"unit_set_stockpile",
+
+		"unit_set_shield_state",
+
+		"unit_set_shield_recharge_delay",
+
+		"unit_weapon_fire",
+
+		"unit_weapon_hold_fire",
+
+		"unit_finish_command",
+
+		"unit_set_leaves_ghost",
+
+		"unit_set_use_weapons",
+
+		"unit_set_target_clear",
+
+		"unit_set_loading_transport_clear",
+
+		"unit_set_weapon_state",
+
+		"unit_set_weapon_damages",
+
+		"unit_set_heading_and_up_dir",
+
+		"unit_set_piece_collision_volume_data",
+
+		"unit_set_piece_visible",
+
+		"unit_set_piece_matrix",
+
+		"unit_set_piece_parent",
+
+		"unit_set_nano_pieces",
+
+		"unit_set_land_goal_not_air",
+
+		"feature_set_always_visible",
+
+		"feature_set_use_air_los",
+
+		"feature_set_move_ctrl",
+
+		"feature_set_physics",
+
+		"feature_set_heading_and_up_dir",
+
+		"feature_set_mid_and_aim_pos",
+
+		"feature_set_blocking",
+
+		"feature_set_selection_volume_data",
+
+		"feature_set_piece_visible",
+
+		"feature_set_piece_collision_volume_data",
+
+		"feature_set_piece_matrix",
 
 		"projectile_position",
 
@@ -661,11 +857,15 @@ return {
 
 		"projectile_gravity_after_set",
 
+		"projectile_target_after_set",
+
 		"projectile_intercepted_after_set",
 
 		"projectile_ttl_after_set",
 
 		"projectile_damage_after_set",
+
+		"piece_projectile_params_after_set",
 
 		"projectile_collision",
 
@@ -681,9 +881,29 @@ return {
 
 		"set_god_mode",
 
+		"set_experience_grade",
+
+		"set_no_pause",
+
+		"set_player_ready_state",
+
+		"set_square_building_mask",
+
+		"transfer_team_max_units",
+
 		"get_piece_projectile_name",
 
+		"spawn_explosion",
+
+		"spawn_ceg",
+
+		"spawn_sfx",
+
+		"request_path",
+
 		"get_cobscript_id_non_cob",
+
+		"call_cobscript_non_cob",
 
 	},
 	values = {
@@ -929,6 +1149,53 @@ return {
 			endZ = 0,
 			objectType = "both",
 		},
+		["unit_health"] = {
+			health = 500.0,
+			paralyzeDamage = 15.0,
+			captureProgress = 0.15,
+			buildProgress = 0.7,
+		},
+		["unit_max_health"] = {
+			maxHealth = 1050.0,
+		},
+		["unit_experience"] = {
+			experience = 1.5,
+		},
+		["unit_neutral"] = {
+			neutral = false,
+		},
+		["unit_seismic_signature"] = {
+			seismicSignature = 16.0,
+		},
+		["unit_mass"] = {
+			mass = 160.0,
+		},
+		["unit_armored"] = {
+			armored = false,
+			armorMultiple = 1.6,
+		},
+		["unit_costs"] = {
+			buildTime = 255.0,
+			metalCost = 255.0,
+			energyCost = 255.0,
+		},
+		["unit_storage"] = {
+			resource = "metal",
+			amount = 525.0,
+		},
+		["unit_max_range"] = {
+			maxRange = 650.0,
+		},
+		["unit_position"] = {
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["unit_velocity"] = {
+			x = 1.0,
+			y = 0.0,
+			z = 0.0,
+		},
 		["get_units_in_rectangle"] = {
 			minX = 0,
 			minZ = 0,
@@ -962,6 +1229,11 @@ return {
 			positional = true,
 			checkMap = false,
 		},
+		["unit_rules_param"] = {
+			scope = "unit",
+			paramName = "native_api_parity_unit_rules_param",
+			value = 455.0,
+		},
 		["unit_metal_extraction"] = {
 			depth = 1.05,
 			range = 144.0,
@@ -979,6 +1251,17 @@ return {
 			baseline = 1.0,
 			deltaExperience = 0.5,
 		},
+		["unit_collision_volume_data"] = {
+			scaleX = 40.0,
+			scaleY = 40.0,
+			scaleZ = 40.0,
+			offsetX = 0.0,
+			offsetY = 0.0,
+			offsetZ = 0.0,
+			volumeType = 0,
+			testType = 0,
+			primaryAxis = 0,
+		},
 		["unit_radius_after_set"] = {
 			radius = 44.0,
 			height = 64.0,
@@ -990,6 +1273,24 @@ return {
 		["unit_sensor_radius"] = {
 			sensorType = "los",
 			radius = 288,
+		},
+		["unit_cloak"] = {
+			cloak = false,
+		},
+		["unit_direction_after_set"] = {
+			frontX = 0.0,
+			frontY = 0.0,
+			frontZ = 1.0,
+			rightX = 1.0,
+			rightY = 0.0,
+			rightZ = 0.0,
+			x = 0.0,
+			y = 0.0,
+			z = 1.0,
+		},
+		["unit_add_damage"] = {
+			baseline = 800.0,
+			damage = 50.0,
 		},
 		["get_unit_nearest_ally"] = {
 			range = 4096,
@@ -1160,14 +1461,57 @@ return {
 			y = 128.0,
 			z = 1024.0,
 		},
+		["radar_error_params"] = {
+			radarErrorSize = 56.0,
+			baseRadarErrorSize = 26.0,
+			baseRadarErrorMult = 1.375,
+		},
+		["unit_los_state"] = {
+			rawMask = 7,
+		},
+		["unit_build_distance"] = {
+			paramName = "buildDistance",
+			value = 288.0,
+		},
+		["unit_build_range3d"] = {
+			paramName = "buildRange3D",
+			enabled = true,
+		},
+		["map_square_terrain_type"] = {
+			x = 1024.0,
+			z = 1024.0,
+			terrainTypeIndex = 1,
+			y = 128.0,
+		},
 		["get_player_controlled_unit"] = {
 			playerID = 0,
+		},
+		["unit_harvest_storage"] = {
+			storedMetal = 50.5,
+			maxStoredMetal = 200.0,
+			storedEnergy = 50.5,
+			maxStoredEnergy = 200.0,
+		},
+		["unit_physical_state_bit"] = {
+			stateBit = 11,
+		},
+		["feature_fire_time"] = {
+			fireTime = 6.5,
+		},
+		["feature_smoke_time"] = {
+			smokeTime = 6.5,
 		},
 		["side_data_by_name"] = {
 			sideName = "arm",
 		},
 		["side_data_by_index"] = {
 			sideIndex = 1,
+		},
+		["closest_valid_position"] = {
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+			radius = 64,
 		},
 		["closest_build_pos"] = {
 			x = 1024.0,
@@ -1183,9 +1527,49 @@ return {
 			z = 1024.0,
 			facing = 0,
 		},
+		["unit_rotation"] = {
+			pitch = 0.23,
+			yaw = 1.1,
+			roll = -0.17,
+		},
+		["feature_rotation"] = {
+			pitch = 0.23,
+			yaw = 1.1,
+			roll = -0.17,
+		},
+		["unit_buildee_radius"] = {
+			buildeeRadius = 50.0,
+		},
+		["unit_blocking"] = {
+			isBlocking = true,
+			isSolidObjectCollidable = true,
+			isProjectileCollidable = false,
+			isRaySegmentCollidable = true,
+			crushable = false,
+			blockEnemyPushing = false,
+			blockHeightChanges = true,
+		},
 		["unit_storage_fixed_getter"] = {
 			resource = "metal",
 			amount = 525.0,
+		},
+		["feature_health"] = {
+			health = 525.0,
+			checkDestruction = false,
+		},
+		["feature_max_health"] = {
+			maxHealth = 525.0,
+		},
+		["feature_mass"] = {
+			mass = 160.0,
+		},
+		["feature_resources"] = {
+			metal = 450.0,
+			energy = 450.0,
+			reclaimTime = 250.5,
+			reclaimLeft = 0.5,
+			featureDefMetal = 600.0,
+			featureDefEnergy = 600.0,
 		},
 		["get_feature_separation"] = {
 			positional = false,
@@ -1208,6 +1592,44 @@ return {
 			radius = 99999,
 			height = 99999,
 		},
+		["feature_reclaim"] = {
+			reclaimLeft = 0.5,
+		},
+		["feature_resurrect"] = {
+			unitDef = "native_api_test_unit",
+			facing = 1,
+			progress = 0.5,
+		},
+		["feature_position"] = {
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+			snapToGround = false,
+		},
+		["feature_velocity"] = {
+			x = 1.0,
+			y = 0.0,
+			z = 0.0,
+		},
+		["feature_no_select"] = {
+			noSelect = false,
+		},
+		["feature_rules_param"] = {
+			scope = "feature",
+			paramName = "native_api_parity_feature_rules_param",
+			value = 455.0,
+		},
+		["feature_collision_volume_data"] = {
+			scaleX = 40.0,
+			scaleY = 40.0,
+			scaleZ = 40.0,
+			offsetX = 0.0,
+			offsetY = 0.0,
+			offsetZ = 0.0,
+			volumeType = 0,
+			testType = 0,
+			primaryAxis = 0,
+		},
 		["feature_radius_after_set"] = {
 			radius = 44.0,
 			height = 64.0,
@@ -1215,6 +1637,10 @@ return {
 		["feature_height_after_set"] = {
 			radius = 44.0,
 			height = 64.0,
+		},
+		["feature_add_damage"] = {
+			baseline = 800.0,
+			damage = 50.0,
 		},
 		["ground_orig_height"] = {
 			x = 1024.0,
@@ -1344,6 +1770,26 @@ return {
 			playerID1 = 0,
 			playerID2 = 0,
 		},
+		["game_rules_param"] = {
+			scope = "game",
+			paramName = "native_api_parity_game_rules_param",
+			value = 455.0,
+		},
+		["team_resource"] = {
+			resource = "metal",
+			amount = 500.0,
+		},
+		["team_rules_param"] = {
+			scope = "team",
+			paramName = "native_api_parity_team_rules_param",
+			value = 455.0,
+		},
+		["player_rules_param"] = {
+			scope = "player",
+			playerID = 0,
+			paramName = "native_api_parity_player_rules_param",
+			value = 455.0,
+		},
 		["get_team_resource_stats"] = {
 			teamID = 0,
 			resource = "metal",
@@ -1359,9 +1805,321 @@ return {
 			y = 96,
 			z = 1000.0,
 		},
+		["team_add_resource"] = {
+			resource = "metal",
+			baseline = 200.0,
+			amount = 50.0,
+		},
+		["team_use_resource"] = {
+			resource = "metal",
+			baseline = 500.0,
+			amount = 75.0,
+		},
 		["get_team_stats_history"] = {
 			startIndex = 1,
 			endIndex = 1,
+		},
+		["unit_add_impulse"] = {
+			x = 1.0,
+			y = 0.0,
+			z = 0.0,
+			decayRate = 0.5,
+		},
+		["unit_add_seismic_ping"] = {
+			pingSize = 32.5,
+		},
+		["unit_add_resource"] = {
+			resource = "m",
+			amount = 5.0,
+		},
+		["unit_use_resource"] = {
+			resource = "m",
+			amount = 0,
+		},
+		["unit_clear_goal"] = {
+			cancelRaw = false,
+		},
+		["unit_set_build_speed"] = {
+			buildSpeed = 20.5,
+			repairSpeed = 20.5,
+			reclaimSpeed = 20.5,
+			captureSpeed = 20.5,
+			resurrectSpeed = 20.5,
+			terraformSpeed = 20.5,
+		},
+		["unit_set_flanking"] = {
+			type = "dir",
+			x = 0.0,
+			y = 1.0,
+			z = 0.0,
+		},
+		["unit_set_mid_and_aim_pos"] = {
+			midX = 1024.0,
+			midY = 128.0,
+			midZ = 1024.0,
+			aimX = 1024.0,
+			aimY = 128.0,
+			aimZ = 1024.0,
+			relative = false,
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["unit_set_move_goal"] = {
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+			radius = 16.0,
+			speed = 2.0,
+			raw = false,
+		},
+		["unit_set_physics"] = {
+			posX = 1024.0,
+			posY = 128.0,
+			posZ = 1024.0,
+			velX = 1.0,
+			velY = 0.0,
+			velZ = 0.0,
+			dragX = 1.0,
+			dragY = 0.0,
+			dragZ = 0.0,
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["unit_set_pos_error_params"] = {
+			errorX = 1.0,
+			errorY = 0.0,
+			errorZ = 0.0,
+			deltaX = 1.0,
+			deltaY = 0.0,
+			deltaZ = 0.0,
+			nextUpdate = 5,
+			allyTeamID = 0,
+			setBit = false,
+			x = 1.0,
+			y = 0.0,
+			z = 0.0,
+		},
+		["unit_set_resourcing"] = {
+			type = "uum",
+			amount = 10.0,
+		},
+		["unit_set_stealth"] = {
+			enabled = false,
+		},
+		["unit_set_sonar_stealth"] = {
+			enabled = false,
+		},
+		["unit_set_always_visible"] = {
+			enabled = false,
+		},
+		["unit_set_use_air_los"] = {
+			enabled = false,
+		},
+		["unit_set_crashing"] = {
+			wantCrash = false,
+		},
+		["unit_set_tooltip"] = {
+			tooltip = "native_api_parity_tooltip",
+		},
+		["unit_set_stockpile"] = {
+			stockpile = 1,
+			buildPercent = 0.5,
+		},
+		["unit_set_shield_state"] = {
+			weaponNum = 1,
+			enabled = false,
+			power = 5.0,
+		},
+		["unit_set_shield_recharge_delay"] = {
+			delay = 1.0,
+		},
+		["unit_weapon_fire"] = {
+			weaponNum = 1,
+		},
+		["unit_weapon_hold_fire"] = {
+			weaponNum = 1,
+		},
+		["unit_set_leaves_ghost"] = {
+			leavesGhost = true,
+			leaveDeadGhost = true,
+		},
+		["unit_set_use_weapons"] = {
+			forceUseWeapons = true,
+			allowUseWeapons = true,
+		},
+		["unit_set_target_clear"] = {
+			targetID = -1,
+			dgun = false,
+			userTarget = false,
+			weaponNum = -1,
+			pos = {["x"] = 0, ["y"] = 0, ["z"] = 0},
+			isGroundTarget = false,
+			manualFire = false,
+		},
+		["unit_set_loading_transport_clear"] = {
+			transportID = -1,
+		},
+		["unit_set_weapon_state"] = {
+			weaponNum = 1,
+			wasmWeaponNum = 0,
+			key = "range",
+			value = 256,
+		},
+		["unit_set_weapon_damages"] = {
+			weaponNum = 1,
+			wasmWeaponNum = 0,
+			damageKey = "impulseFactor",
+			damageValue = 1.5,
+		},
+		["unit_set_heading_and_up_dir"] = {
+			heading = 8192,
+			upX = 0,
+			upY = 1,
+			upZ = 0,
+			x = 0,
+			y = 1,
+			z = 0,
+		},
+		["unit_set_piece_collision_volume_data"] = {
+			pieceNum = 1,
+			enable = true,
+			scaleX = 8,
+			scaleY = 8,
+			scaleZ = 8,
+			offsetX = 0,
+			offsetY = 0,
+			offsetZ = 0,
+			volumeType = 2,
+			primaryAxis = 1,
+			x = 8,
+			y = 8,
+			z = 8,
+		},
+		["unit_set_piece_visible"] = {
+			pieceNum = 1,
+			visible = false,
+		},
+		["unit_set_piece_matrix"] = {
+			pieceNum = 1,
+			matrix = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		},
+		["unit_set_piece_parent"] = {
+			childPieceNum = 2,
+			parentPieceNum = 1,
+			expectError = true,
+		},
+		["unit_set_nano_pieces"] = {
+			pieceNum = 1,
+		},
+		["unit_set_land_goal_not_air"] = {
+			goalX = 1024,
+			goalY = 96,
+			goalZ = 1024,
+			goalRadius = 64,
+			x = 1024,
+			y = 96,
+			z = 1024,
+		},
+		["feature_set_always_visible"] = {
+			enabled = false,
+		},
+		["feature_set_use_air_los"] = {
+			useAirLos = false,
+		},
+		["feature_set_move_ctrl"] = {
+			enabled = false,
+			velocityX = 1.0,
+			velocityY = 0.0,
+			velocityZ = 0.0,
+			accelX = 1.0,
+			accelY = 0.0,
+			accelZ = 0.0,
+			movementX = 1.0,
+			movementY = 0.0,
+			movementZ = 0.0,
+			x = 1.0,
+			y = 0.0,
+			z = 0.0,
+		},
+		["feature_set_physics"] = {
+			posX = 1024.0,
+			posY = 128.0,
+			posZ = 1024.0,
+			velX = 1.0,
+			velY = 0.0,
+			velZ = 0.0,
+			dragX = 1.0,
+			dragY = 0.0,
+			dragZ = 0.0,
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["feature_set_heading_and_up_dir"] = {
+			heading = -1,
+			x = 0.0,
+			y = 1.0,
+			z = 0.0,
+		},
+		["feature_set_mid_and_aim_pos"] = {
+			midX = 1024.0,
+			midY = 128.0,
+			midZ = 1024.0,
+			aimX = 1024.0,
+			aimY = 128.0,
+			aimZ = 1024.0,
+			relative = false,
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["feature_set_blocking"] = {
+			blocking = true,
+			solidObjects = true,
+			projectiles = true,
+			quadMapRays = true,
+			crushable = true,
+			blockEnemyPushing = true,
+			blockHeightChanges = true,
+		},
+		["feature_set_selection_volume_data"] = {
+			scaleX = 1.0,
+			scaleY = 0.0,
+			scaleZ = 0.0,
+			offsetX = 1.0,
+			offsetY = 0.0,
+			offsetZ = 0.0,
+			volumeType = 2,
+			testType = 1,
+			primaryAxis = 2,
+			x = 1.0,
+			y = 0.0,
+			z = 0.0,
+		},
+		["feature_set_piece_visible"] = {
+			pieceNum = 1,
+			visible = false,
+		},
+		["feature_set_piece_collision_volume_data"] = {
+			pieceNum = 1,
+			enable = true,
+			scaleX = 1.0,
+			scaleY = 0.0,
+			scaleZ = 0.0,
+			offsetX = 1.0,
+			offsetY = 0.0,
+			offsetZ = 0.0,
+			volumeType = 2,
+			primaryAxis = 2,
+			x = 1.0,
+			y = 0.0,
+			z = 0.0,
+		},
+		["feature_set_piece_matrix"] = {
+			pieceNum = 1,
+			matrix = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		},
 		["projectile_damage_armor"] = {
 			tag = "0",
@@ -1418,6 +2176,14 @@ return {
 		["projectile_gravity_after_set"] = {
 			gravity = -0.125,
 		},
+		["projectile_target_after_set"] = {
+			targetX = 1024.0,
+			targetY = 128.0,
+			targetZ = 1024.0,
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
 		["projectile_intercepted_after_set"] = {
 			intercepted = true,
 		},
@@ -1427,6 +2193,17 @@ return {
 		["projectile_damage_after_set"] = {
 			tag = "impulseFactor",
 			damageValue = 4.25,
+		},
+		["piece_projectile_params_after_set"] = {
+			explFlags = 66,
+			spinAngle = 0.75,
+			spinSpeed = 2.5,
+			spinX = 0.0,
+			spinY = 1.0,
+			spinZ = 0.0,
+			x = 0.0,
+			y = 1.0,
+			z = 0.0,
 		},
 		["add_team_resource_excess_stats"] = {
 			resource = "metal",
@@ -1450,8 +2227,100 @@ return {
 			controlAllies = true,
 			controlEnemies = false,
 		},
+		["set_experience_grade"] = {
+			expGrade = 0.25,
+			expPowerScale = 1.1,
+			expHealthScale = 1.2,
+			expReloadScale = 1.3,
+		},
+		["set_no_pause"] = {
+			noPause = true,
+		},
+		["set_player_ready_state"] = {
+			playerID = 0,
+			ready = true,
+		},
+		["set_square_building_mask"] = {
+			x = 1,
+			z = 1,
+			mask = 1,
+		},
+		["transfer_team_max_units"] = {
+			fromTeamID = 0,
+			newTeamID = 0,
+			transferAmnt = 0,
+		},
+		["spawn_explosion"] = {
+			posX = 1024.0,
+			posY = 128.0,
+			posZ = 1024.0,
+			damages = 1,
+			weaponDef = -1,
+			owner = -1,
+			hitUnit = -1,
+			hitFeature = -1,
+			craterAreaOfEffect = 0,
+			damageAreaOfEffect = 0,
+			edgeEffectiveness = 0,
+			explosionSpeed = 0,
+			gfxMod = 0,
+			impactOnly = false,
+			ignoreOwner = false,
+			damageGround = false,
+			projectileID = -1,
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+			weaponDefId = -1,
+			ownerId = -1,
+			hitUnitId = -1,
+			hitFeatureId = -1,
+			projectileId = -1,
+		},
+		["spawn_ceg"] = {
+			cegName = "native_api_parity_missing_ceg",
+			posX = 1024.0,
+			posY = 128.0,
+			posZ = 1024.0,
+			radius = 0,
+			damage = 0,
+			dmgMod = 1,
+			name = "native_api_parity_missing_ceg",
+			id = -1,
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["spawn_sfx"] = {
+			sfxID = 2,
+			posX = 1024.0,
+			posY = 128.0,
+			posZ = 1024.0,
+			radius = 0,
+			damage = 0,
+			absolute = true,
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
+		},
+		["request_path"] = {
+			moveDefName = "KBOT1",
+			startX = 900,
+			startY = 96,
+			startZ = 900,
+			endX = 1120,
+			endY = 96,
+			endZ = 1120,
+			radius = 8,
+		},
 		["get_cobscript_id_non_cob"] = {
 			funcName = "NativeApiParityMissingCobFunction",
+		},
+		["call_cobscript_non_cob"] = {
+			funcName = "NativeApiParityMissingCobFunction",
+			retArgs = 0,
+			name = "NativeApiParityMissingCobFunction",
+			id = 0,
 		},
 	},
 }

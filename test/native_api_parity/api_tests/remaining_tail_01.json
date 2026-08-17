@@ -15,6 +15,7 @@
     },
     {
       "id": "kill_team",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",
       "requires": [],
@@ -23,19 +24,44 @@
       "compare": {"mode": "fields", "fields": ["isDead"]},
       "report": {"lua_setter": "`Spring.KillTeam`", "lua_getter": "`Spring.GetTeamInfo`", "native_setter": "`TeamControl.kill_team`", "native_getter": "`Teams.get_team_info`", "fields": "team death state"},
       "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
-      "params": {}
+      "params": {
+        "teamID": {"type": "i32", "fixture": "teamID"}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.KillTeam",
+          "args": ["fixture.teamID"],
+          "wasm_args": ["fixture.teamID"]
+        },
+        "call": "Spring.GetTeamInfo",
+        "args": ["fixture.teamID", false],
+        "returns": ["isDead"]
+      }
     },
     {
       "id": "game_over",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",
       "requires": [],
       "lua": {"set": ["Spring.GameOver"], "get": ["Spring.IsGameOver"]},
       "native": {"set": ["TeamControl.game_over"], "get": ["Game.is_game_over"]},
-      "compare": {"mode": "fields", "fields": ["accepted", "gameOver"]},
+      "compare": {"mode": "fields", "fields": ["gameOver"]},
       "report": {"lua_setter": "`Spring.GameOver`", "lua_getter": "`Spring.IsGameOver`", "native_setter": "`TeamControl.game_over`", "native_getter": "`Game.is_game_over`", "fields": "accepted winner and game-over state"},
       "rust": {"check": "check_remaining_tail", "set": "set_remaining_tail"},
-      "params": {}
+      "params": {
+        "winningAllyTeams": {"type": "object", "fixed": [0]}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.GameOver",
+          "args": ["value.winningAllyTeams"],
+          "wasm_args": ["value.winningAllyTeams"]
+        },
+        "call": "Spring.IsGameOver",
+        "args": [],
+        "returns": ["gameOver"]
+      }
     },
     {
       "id": "set_window_geometry",

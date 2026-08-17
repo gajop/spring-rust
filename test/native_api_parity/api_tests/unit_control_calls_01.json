@@ -2,7 +2,8 @@
   "version": 1,
   "tests": [
     {
-      "id": "unit_add_impulse",
+     "id": "unit_add_impulse",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.AddUnitImpulse"]},
       "native": {"set": [], "get": ["UnitControl.add_unit_impulse"]},
@@ -15,7 +16,8 @@
       "lua_runtime": {"call": "Spring.AddUnitImpulse", "args": ["fixture.unitID", "value.x", "value.y", "value.z", "value.decayRate"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_add_seismic_ping",
+     "id": "unit_add_seismic_ping",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.AddUnitSeismicPing"]},
       "native": {"set": [], "get": ["UnitControl.add_unit_seismic_ping"]},
@@ -25,7 +27,8 @@
       "lua_runtime": {"call": "Spring.AddUnitSeismicPing", "args": ["fixture.unitID", "value.pingSize"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_add_resource",
+     "id": "unit_add_resource",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.AddUnitResource"]},
       "native": {"set": [], "get": ["UnitControl.add_unit_resource"]},
@@ -35,7 +38,8 @@
       "lua_runtime": {"call": "Spring.AddUnitResource", "args": ["fixture.unitID", "value.resource", "value.amount"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_use_resource",
+     "id": "unit_use_resource",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.UseUnitResource"]},
       "native": {"set": [], "get": ["UnitControl.use_unit_resource"]},
@@ -45,7 +49,8 @@
       "lua_runtime": {"call": "Spring.UseUnitResource", "args": ["fixture.unitID", "value.resource", "value.amount"], "returns": ["ok"]}
     },
     {
-      "id": "unit_clear_goal",
+     "id": "unit_clear_goal",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.ClearUnitGoal"]},
       "native": {"set": [], "get": ["UnitControl.clear_unit_goal"]},
@@ -55,7 +60,8 @@
       "lua_runtime": {"call": "Spring.ClearUnitGoal", "args": ["fixture.unitID", "value.cancelRaw"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_force_collision_update",
+     "id": "unit_force_collision_update",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.ForceUnitCollisionUpdate"]},
       "native": {"set": [], "get": ["UnitControl.force_unit_collision_update"]},
@@ -65,7 +71,8 @@
       "lua_runtime": {"call": "Spring.ForceUnitCollisionUpdate", "args": ["fixture.unitID"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_build_speed",
+     "id": "unit_set_build_speed",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitBuildSpeed"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_build_speed"]},
@@ -80,6 +87,8 @@
     },
     {
       "id": "unit_set_flanking",
+      "wasm_mutating": true,
+      "wasm_args": ["fixture.unitID", "value.type", "value.direction"],
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitFlanking"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_flanking"]},
@@ -89,7 +98,8 @@
       "lua_runtime": {"call": "Spring.SetUnitFlanking", "args": ["fixture.unitID", "value.type", "value.frontX", "value.frontY", "value.frontZ"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_mid_and_aim_pos",
+     "id": "unit_set_mid_and_aim_pos",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitMidAndAimPos"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_mid_and_aim_pos"]},
@@ -103,7 +113,8 @@
       "lua_runtime": {"call": "Spring.SetUnitMidAndAimPos", "args": ["fixture.unitID", "value.midX", "value.midY", "value.midZ", "value.aimX", "value.aimY", "value.aimZ", "value.relative"], "returns": ["result"]}
     },
     {
-      "id": "unit_set_move_goal",
+     "id": "unit_set_move_goal",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitMoveGoal"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_move_goal"]},
@@ -114,6 +125,8 @@
     },
     {
       "id": "unit_set_physics",
+      "wasm_mutating": true,
+      "wasm_args": ["fixture.unitID", "value.pos", "value.velocity", "value.rotation", "value.drag"],
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitPhysics"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_physics"]},
@@ -129,6 +142,8 @@
     },
     {
       "id": "unit_set_pos_error_params",
+      "wasm_mutating": true,
+      "wasm_args": ["fixture.unitID", "value.errorVector", "value.errorDelta", "value.nextUpdate", "value.allyTeamID", "value.setBit"],
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitPosErrorParams"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_pos_error_params"]},
@@ -142,7 +157,8 @@
       "lua_runtime": {"call": "Spring.SetUnitPosErrorParams", "args": ["fixture.unitID", "value.errorX", "value.errorY", "value.errorZ", "value.deltaX", "value.deltaY", "value.deltaZ", "value.nextUpdate", "value.allyTeamID", "value.setBit"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_resourcing",
+     "id": "unit_set_resourcing",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitResourcing"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_resourcing"]},
@@ -152,7 +168,8 @@
       "lua_runtime": {"call": "Spring.SetUnitResourcing", "args": ["fixture.unitID", "value.type", "value.amount"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_stealth",
+     "id": "unit_set_stealth",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitStealth"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_stealth"]},
@@ -162,7 +179,8 @@
       "lua_runtime": {"call": "Spring.SetUnitStealth", "args": ["fixture.unitID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_sonar_stealth",
+     "id": "unit_set_sonar_stealth",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitSonarStealth"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_sonar_stealth"]},
@@ -172,7 +190,8 @@
       "lua_runtime": {"call": "Spring.SetUnitSonarStealth", "args": ["fixture.unitID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_always_visible",
+     "id": "unit_set_always_visible",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitAlwaysVisible"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_always_visible"]},
@@ -182,7 +201,8 @@
       "lua_runtime": {"call": "Spring.SetUnitAlwaysVisible", "args": ["fixture.unitID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_use_air_los",
+     "id": "unit_set_use_air_los",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitUseAirLos"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_use_air_los"]},
@@ -192,7 +212,8 @@
       "lua_runtime": {"call": "Spring.SetUnitUseAirLos", "args": ["fixture.unitID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_crashing",
+     "id": "unit_set_crashing",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitCrashing"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_crashing"]},
@@ -202,7 +223,8 @@
       "lua_runtime": {"call": "Spring.SetUnitCrashing", "args": ["fixture.unitID", "value.wantCrash"], "returns": ["result"]}
     },
     {
-      "id": "unit_set_tooltip",
+     "id": "unit_set_tooltip",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitTooltip"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_tooltip"]},
@@ -212,7 +234,8 @@
       "lua_runtime": {"call": "Spring.SetUnitTooltip", "args": ["fixture.unitID", "value.tooltip"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_stockpile",
+     "id": "unit_set_stockpile",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitStockpile"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_stockpile"]},
@@ -223,16 +246,19 @@
     },
     {
       "id": "unit_set_shield_state",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitShieldState"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_shield_state"]},
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_unit_control_call", "set": "set_noop"},
-      "params": {"enabled": {"type": "bool"}, "power": {"type": "f32", "range": [0, 10]}},
+      "params": {"weaponNum": {"type": "i32", "fixed": 1}, "enabled": {"type": "bool"}, "power": {"type": "f32", "range": [0, 10]}},
+      "wasm_args": ["fixture.unitID", "value.weaponNum", "value.enabled", "value.power"],
       "lua_runtime": {"call": "Spring.SetUnitShieldState", "args": ["fixture.unitID", "value.enabled", "value.power"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_set_shield_recharge_delay",
+     "id": "unit_set_shield_recharge_delay",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitShieldRechargeDelay"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_shield_recharge_delay"]},
@@ -242,7 +268,8 @@
       "lua_runtime": {"call": "Spring.SetUnitShieldRechargeDelay", "args": ["fixture.unitID", "value.delay"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_weapon_fire",
+     "id": "unit_weapon_fire",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.UnitWeaponFire"]},
       "native": {"set": [], "get": ["UnitControl.unit_weapon_fire"]},
@@ -252,7 +279,8 @@
       "lua_runtime": {"call": "Spring.UnitWeaponFire", "args": ["fixture.unitID", "value.weaponNum"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_weapon_hold_fire",
+     "id": "unit_weapon_hold_fire",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.UnitWeaponHoldFire"]},
       "native": {"set": [], "get": ["UnitControl.unit_weapon_hold_fire"]},
@@ -262,7 +290,8 @@
       "lua_runtime": {"call": "Spring.UnitWeaponHoldFire", "args": ["fixture.unitID", "value.weaponNum"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "unit_finish_command",
+     "id": "unit_finish_command",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.UnitFinishCommand"]},
       "native": {"set": [], "get": ["UnitControl.unit_finish_command"]},

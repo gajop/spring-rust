@@ -36,6 +36,8 @@
     "vfs_get_all_archives_count",
     "vfs_get_maps_count",
     "vfs_get_games_count",
+    "vfs_download_archive_invalid_category",
+    "vfs_download_archive_missing_name",
     "vfs_abort_download_missing",
     "vfs_scan_all_dirs",
     "get_units_in_screen_rectangle",
@@ -73,9 +75,9 @@
   "coverage": {
     "source_context": "widget",
     "source_test_count": 76,
-    "selected_count": 66,
+    "selected_count": 68,
     "selected_kind_counts": {
-      "readonly": 48,
+      "readonly": 50,
       "setter_getter": 18
     },
     "selected_ids": [
@@ -112,6 +114,8 @@
       "vfs_get_all_archives_count",
       "vfs_get_maps_count",
       "vfs_get_games_count",
+      "vfs_download_archive_invalid_category",
+      "vfs_download_archive_missing_name",
       "vfs_abort_download_missing",
       "vfs_scan_all_dirs",
       "get_units_in_screen_rectangle",
@@ -147,10 +151,6 @@
       "get_active_cmd_desc_fixed_fields"
     ],
     "excluded": {
-      "expect_error": [
-        "vfs_download_archive_invalid_category",
-        "vfs_download_archive_missing_name"
-      ],
       "mutating_getter_or_unsupported": [
         "give_order_selected",
         "give_order_to_unit_unsynced",

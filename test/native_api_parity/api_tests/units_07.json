@@ -42,6 +42,7 @@
         "check": "check_unit_states",
         "set": "set_unit_cloak"
       },
+      "wasm_mutating": true,
       "params": {
         "cloak": {
           "type": "bool"
@@ -54,6 +55,11 @@
             "fixture.unitID",
             "value.cloak",
             false
+          ],
+          "wasm_args": [
+            "fixture.unitID",
+            {"number": 0.0, "boolean": "value.cloak", "useBoolean": true},
+            {"number": 0.0, "boolean": false, "useBoolean": true}
           ]
         },
         "call": "Spring.GetUnitStates",
@@ -120,19 +126,10 @@
         "check": "check_unit_vectors",
         "set": "set_unit_direction"
       },
+      "wasm_mutating": true,
       "params": {
-        "orientation": {
-          "type": "float3",
-          "generator": "unit_orientation",
-          "expands_to": [
-            "frontX",
-            "frontY",
-            "frontZ",
-            "rightX",
-            "rightY",
-            "rightZ"
-          ]
-        }
+        "front": {"type": "float3", "generator": "front_vector", "expands_to": ["frontX", "frontY", "frontZ"], "expands_from": ["x", "y", "z"]},
+        "right": {"type": "float3", "generator": "right_vector", "expands_to": ["rightX", "rightY", "rightZ"], "expands_from": ["x", "y", "z"]}
       },
       "lua_runtime": {
         "set": {
@@ -145,6 +142,11 @@
             "value.rightX",
             "value.rightY",
             "value.rightZ"
+          ],
+          "wasm_args": [
+            "fixture.unitID",
+            {"x": "value.frontX", "y": "value.frontY", "z": "value.frontZ"},
+            {"x": "value.rightX", "y": "value.rightY", "z": "value.rightZ"}
           ]
         },
         "call": "Spring.GetUnitDirection",
@@ -263,6 +265,7 @@
         "check": "check_unit_health",
         "set": "add_unit_damage"
       },
+      "wasm_mutating": true,
       "params": {
         "baseline": {
           "type": "f32",
@@ -291,6 +294,10 @@
                 "paralyze": 0,
                 "build": 1
               }
+            ],
+            "wasm_args": [
+              "fixture.unitID",
+              {"health": "value.baseline", "capture": 0.0, "paralyze": 0.0, "build": 1.0, "useAmounts": true}
             ]
           },
           {
@@ -304,6 +311,14 @@
               0,
               0,
               0
+            ],
+            "wasm_args": [
+              "fixture.unitID",
+              "value.damage",
+              0.0,
+              -1,
+              -1,
+              {"x": 0.0, "y": 0.0, "z": 0.0}
             ]
           }
         ],

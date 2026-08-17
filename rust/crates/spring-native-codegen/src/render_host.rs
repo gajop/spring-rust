@@ -887,11 +887,16 @@ fn sanitize(value: &str) -> String {
 }
 
 fn render_record_reader(
-    output: &mut String,
-    record: &RecordModel,
-    _records: &BTreeMap<String, &RecordModel>,
+	output: &mut String,
+	record: &RecordModel,
+	_records: &BTreeMap<String, &RecordModel>,
 ) {
-    output.push_str(&format!(
+	if record.name == "RulesParamValue" {
+		render_rules_param_value_reader(output);
+		return;
+	}
+
+	output.push_str(&format!(
         "bool Read_{}(const WasmValue& input, {}& output, NativeCallStorage& storage, std::string& error)\n{{\n",
         sanitize(&record.name),
         record.name
@@ -955,11 +960,16 @@ fn render_enum_helpers(enum_model: &crate::model::EnumModel) -> String {
 }
 
 fn render_record_writer(
-    output: &mut String,
-    record: &RecordModel,
-    _records: &BTreeMap<String, &RecordModel>,
+	output: &mut String,
+	record: &RecordModel,
+	_records: &BTreeMap<String, &RecordModel>,
 ) {
-    output.push_str(&format!(
+	if record.name == "RulesParamValue" {
+		render_rules_param_value_writer(output);
+		return;
+	}
+
+	output.push_str(&format!(
         "WasmValue Write_{}(const {}& value)\n{{\n\tWasmValueRecord fields;\n",
         sanitize(&record.name),
         record.name
@@ -972,7 +982,57 @@ fn render_record_writer(
             write_field_expression(field, "value")
         ));
     }
-    output.push_str("\treturn WasmValue::Record(std::move(fields));\n}\n\n");
+	output.push_str("\treturn WasmValue::Record(std::move(fields));\n}\n\n");
+}
+
+fn render_rules_param_value_reader(output: &mut String) {
+	output.push_str(
+		"bool Read_RulesParamValue(const WasmValue& input, RulesParamValue& output, NativeCallStorage& storage, std::string& error)\n"
+	);
+	output.push_str(
+		"{\n\tconst auto* record = std::get_if<WasmValueRecord>(&input.storage);\n"
+	);
+	output.push_str(
+		"\tif (record == nullptr) { error = \"Wasm argument is not a record\"; return false; }\n"
+	);
+	output.push_str(
+		"\tconst auto* value_type = FindRecordField(*record, \"type\", error);\n"
+	);
+	output.push_str(
+		"\tif (value_type == nullptr || !ReadEnum_RulesParamType(*value_type, output.type, error)) return false;\n"
+	);
+	output.push_str("\tswitch (output.type) {\n");
+	output.push_str(
+		"\t\tcase RULESPARAM_TYPE_BOOL: {\n\t\t\tconst auto* value_bool = FindRecordField(*record, \"bool-value\", error);\n\t\t\treturn value_bool != nullptr && ReadScalar(*value_bool, output.boolValue, error);\n\t\t}\n"
+	);
+	output.push_str(
+		"\t\tcase RULESPARAM_TYPE_FLOAT: {\n\t\t\tconst auto* value_float = FindRecordField(*record, \"float-value\", error);\n\t\t\treturn value_float != nullptr && ReadScalar(*value_float, output.floatValue, error);\n\t\t}\n"
+	);
+	output.push_str(
+		"\t\tcase RULESPARAM_TYPE_STRING: {\n\t\t\tconst auto* value_string = FindRecordField(*record, \"string-value\", error);\n\t\t\tif (value_string == nullptr) return false;\n\t\t\tauto& stored_string = storage.Make<std::string>();\n\t\t\tif (!ReadString(*value_string, stored_string, error)) return false;\n\t\t\toutput.stringValue = stored_string.c_str();\n\t\t\treturn true;\n\t\t}\n"
+	);
+	output.push_str(
+		"\t\tdefault: error = \"unknown RulesParamValue type\"; return false;\n\t}\n}\n\n"
+	);
+}
+
+fn render_rules_param_value_writer(output: &mut String) {
+	output.push_str(
+		"WasmValue Write_RulesParamValue(const RulesParamValue& value)\n{\n\tWasmValueRecord fields;\n"
+	);
+	output.push_str(
+		"\tfields.emplace(\"type\", WriteEnum_RulesParamType(value.type));\n"
+	);
+	output.push_str(
+		"\tfields.emplace(\"bool-value\", value.type == RULESPARAM_TYPE_BOOL ? WriteScalar(value.boolValue) : WasmValue::Bool(false));\n"
+	);
+	output.push_str(
+		"\tfields.emplace(\"float-value\", value.type == RULESPARAM_TYPE_FLOAT ? WriteScalar(value.floatValue) : WasmValue::F64(0.0));\n"
+	);
+	output.push_str(
+		"\tfields.emplace(\"string-value\", value.type == RULESPARAM_TYPE_STRING && value.stringValue != nullptr ? WasmValue::String(std::string(value.stringValue)) : WasmValue::String(std::string{}));\n"
+	);
+	output.push_str("\treturn WasmValue::Record(std::move(fields));\n}\n\n");
 }
 
 fn render_read_value(

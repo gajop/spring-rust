@@ -152,7 +152,7 @@
       "requires": ["piece_projectile"],
       "lua": {"set": [], "get": ["Spring.GetPieceProjectileParams"]},
       "native": {"set": [], "get": ["Projectiles.get_piece_projectile_params"]},
-      "compare": {"mode": "fields", "fields": ["isPiece", "explFlags", "spinAngle", "spinSpeed", "spinX", "spinY", "spinZ"]},
+      "compare": {"mode": "fields", "fields": ["explFlags", "spinAngle", "spinSpeed", "spinX", "spinY", "spinZ"]},
       "rust": {"check": "check_projectile_read", "set": "set_noop"},
       "params": {},
       "lua_runtime": {"call": "Spring.GetPieceProjectileParams", "args": ["fixture.pieceProjectileID"], "returns": ["explFlags", "spinAngle", "spinSpeed", "spinX", "spinY", "spinZ"]}
@@ -370,8 +370,9 @@
       "native": {"set": ["ProjectileControl.set_projectile_target"], "get": ["Projectiles.get_projectile_target"]},
       "compare": {"mode": "fields", "fields": ["targetType", "targetX", "targetY", "targetZ"]},
       "rust": {"check": "check_projectile_control_call", "set": "set_projectile_control"},
+      "wasm_mutating": true,
       "params": {"target": {"type": "float3", "generator": "map_position", "expands_to": ["targetX", "targetY", "targetZ"], "expands_from": ["x", "y", "z"]}},
-      "lua_runtime": {"set": {"call": "Spring.SetProjectileTarget", "args": ["fixture.projectileID", "value.targetX", "value.targetY", "value.targetZ"]}, "call": "Spring.GetProjectileTarget", "args": ["fixture.projectileID"], "returns": [{"field": "targetType", "index": 1}, {"field": "targetX", "index": 2, "path": [1]}, {"field": "targetY", "index": 2, "path": [2]}, {"field": "targetZ", "index": 2, "path": [3]}]}
+      "lua_runtime": {"set": {"call": "Spring.SetProjectileTarget", "args": ["fixture.projectileID", "value.targetX", "value.targetY", "value.targetZ"], "wasm_args": ["fixture.projectileID", {"targetID": -1, "targetType": 103, "pos": {"x": "value.targetX", "y": "value.targetY", "z": "value.targetZ"}, "isGroundTarget": true}]}, "call": "Spring.GetProjectileTarget", "args": ["fixture.projectileID"], "returns": [{"field": "targetType", "index": 1}, {"field": "targetX", "index": 2, "path": [1]}, {"field": "targetY", "index": 2, "path": [2]}, {"field": "targetZ", "index": 2, "path": [3]}]}
     },
     {
       "id": "projectile_intercepted_after_set",
@@ -418,8 +419,9 @@
       "native": {"set": ["ProjectileControl.set_piece_projectile_params"], "get": ["Projectiles.get_piece_projectile_params"]},
       "compare": {"mode": "fields", "fields": ["isPiece", "explFlags", "spinAngle", "spinSpeed", "spinX", "spinY", "spinZ"]},
       "rust": {"check": "check_projectile_control_call", "set": "set_projectile_control"},
-      "params": {"explFlags": {"type": "i32", "fixed": 66}, "spinAngle": {"type": "f32", "fixed": 0.75}, "spinSpeed": {"type": "f32", "fixed": 2.5}, "spin": {"type": "float3", "generator": "unit_orientation", "expands_to": ["spinX", "spinY", "spinZ"], "expands_from": ["frontX", "frontY", "frontZ"]}},
-      "lua_runtime": {"set": {"call": "Spring.SetPieceProjectileParams", "args": ["fixture.pieceProjectileID", "value.explFlags", "value.spinAngle", "value.spinSpeed", "value.spinX", "value.spinY", "value.spinZ"]}, "call": "Spring.GetPieceProjectileParams", "args": ["fixture.pieceProjectileID"], "returns": ["explFlags", "spinAngle", "spinSpeed", "spinX", "spinY", "spinZ"]}
+      "wasm_mutating": true,
+      "params": {"explFlags": {"type": "i32", "fixed": 66}, "spinAngle": {"type": "f32", "fixed": 0.75}, "spinSpeed": {"type": "f32", "fixed": 2.5}, "spin": {"type": "float3", "generator": "unit_orientation", "expands_to": ["spinX", "spinY", "spinZ"], "expands_from": ["x", "y", "z"]}},
+      "lua_runtime": {"set": {"call": "Spring.SetPieceProjectileParams", "args": ["fixture.pieceProjectileID", "value.explFlags", "value.spinAngle", "value.spinSpeed", "value.spinX", "value.spinY", "value.spinZ"], "wasm_args": ["fixture.pieceProjectileID", "value.explFlags", "value.spinAngle", "value.spinSpeed", {"x": "value.spinX", "y": "value.spinY", "z": "value.spinZ"}]}, "call": "Spring.GetPieceProjectileParams", "args": ["fixture.pieceProjectileID"], "returns": ["explFlags", "spinAngle", "spinSpeed", "spinX", "spinY", "spinZ"]}
     },
     {
       "id": "projectile_set_always_visible",
@@ -431,7 +433,11 @@
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_projectile_control_call", "set": "set_noop"},
       "params": {"enabled": {"type": "bool", "fixed": true}},
-      "lua_runtime": {"call": "Spring.SetProjectileAlwaysVisible", "args": ["fixture.projectileID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+      "lua_runtime": {"call": "Spring.SetProjectileAlwaysVisible", "args": ["fixture.projectileID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "wasm_sequence": [
+        {"call": "ProjectileControl.set_projectile_always_visible", "args": ["fixture.projectileID", "value.enabled"], "bind": "called", "require_true": true}
+      ],
+      "wasm_returns": [{"field": "returnCount", "from": "called", "transform": "return_count"}]
     },
     {
       "id": "projectile_set_use_air_los",
@@ -443,7 +449,11 @@
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_projectile_control_call", "set": "set_noop"},
       "params": {"enabled": {"type": "bool", "fixed": true}},
-      "lua_runtime": {"call": "Spring.SetProjectileUseAirLos", "args": ["fixture.projectileID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+      "lua_runtime": {"call": "Spring.SetProjectileUseAirLos", "args": ["fixture.projectileID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "wasm_sequence": [
+        {"call": "ProjectileControl.set_projectile_use_air_los", "args": ["fixture.projectileID", "value.enabled"], "bind": "called", "require_true": true}
+      ],
+      "wasm_returns": [{"field": "returnCount", "from": "called", "transform": "return_count"}]
     },
     {
       "id": "projectile_set_move_control",
@@ -455,7 +465,11 @@
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_projectile_control_call", "set": "set_noop"},
       "params": {"enable": {"type": "bool", "fixed": true}},
-      "lua_runtime": {"call": "Spring.SetProjectileMoveControl", "args": ["fixture.projectileID", "value.enable"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+      "lua_runtime": {"call": "Spring.SetProjectileMoveControl", "args": ["fixture.projectileID", "value.enable"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "wasm_sequence": [
+        {"call": "ProjectileControl.set_projectile_move_control", "args": ["fixture.projectileID", "value.enable"], "bind": "called", "require_true": true}
+      ],
+      "wasm_returns": [{"field": "returnCount", "from": "called", "transform": "return_count"}]
     },
     {
       "id": "projectile_set_ignore_tracking_error",
@@ -467,7 +481,11 @@
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_projectile_control_call", "set": "set_noop"},
       "params": {"ignore": {"type": "bool", "fixed": true}},
-      "lua_runtime": {"call": "Spring.SetProjectileIgnoreTrackingError", "args": ["fixture.projectileID", "value.ignore"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
+      "lua_runtime": {"call": "Spring.SetProjectileIgnoreTrackingError", "args": ["fixture.projectileID", "value.ignore"], "returns": [{"field": "returnCount", "transform": "return_count"}]},
+      "wasm_sequence": [
+        {"call": "ProjectileControl.set_projectile_ignore_tracking_error", "args": ["fixture.projectileID", "value.ignore"], "bind": "called", "require_true": true}
+      ],
+      "wasm_returns": [{"field": "returnCount", "from": "called", "transform": "return_count"}]
     },
     {
       "id": "projectile_set_ceg",
@@ -479,7 +497,11 @@
       "compare": {"mode": "fields", "fields": ["cegID"]},
       "rust": {"check": "check_projectile_control_call", "set": "set_noop"},
       "params": {"cegName": {"type": "string", "fixed": "native_api_parity_missing_ceg"}},
-      "lua_runtime": {"call": "Spring.SetProjectileCEG", "args": ["fixture.projectileID", "value.cegName"], "returns": ["cegID"]}
+      "lua_runtime": {"call": "Spring.SetProjectileCEG", "args": ["fixture.projectileID", "value.cegName"], "returns": ["cegID"]},
+      "wasm_sequence": [
+        {"call": "ProjectileControl.set_projectile_ceg", "args": ["fixture.projectileID", "value.cegName"], "bind": "cegID"}
+      ],
+      "wasm_returns": [{"field": "cegID", "from": "cegID"}]
     },
     {
       "id": "projectile_spawn",

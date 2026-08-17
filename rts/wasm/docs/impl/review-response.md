@@ -22,8 +22,15 @@ file is retained unchanged. Measurements live only in
 - Callin aggregation has explicit deny/allow semantics and environment tests.
 - The synced-to-unsynced direct channel has an unattended fixture.
 - Synced timing is opt-in, deterministic, and fail-closed when unavailable.
+- Active Lua-loader registrations are checked against the documented surface;
+  compatibility aliases are explicit exclusions rather than silent omissions.
+- Result-bearing callin aggregation is exercised with compiled Component Model
+  guests, including the unload path.
 - The generated adapter unit test now uses the canonical WIT record names and
   passes.
+- The generated adapter has a dedicated transport-performance fixture.
+- Native/Wasm conversion now has an independent deterministic boundary corpus;
+  broader lowering-family coverage remains open.
 
 ## Original implementation plan
 
@@ -38,9 +45,8 @@ Phases 8 and 9 are original-plan deliverables, not deferrals.
 
 ## Remaining implementation work
 
-- Finish broad API coverage, mutation-heavy end-to-end coverage, Lua-loader
-  registration review, differential conversion fuzzing, and the adapter
-  performance fixture.
+- Finish broad API coverage, mutation-heavy end-to-end coverage, and broader
+  differential conversion coverage.
 - Complete broad post-change parity coverage and commit the implementation.
 
 ## Original design deferrals

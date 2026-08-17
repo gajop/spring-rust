@@ -296,16 +296,15 @@
         "mode": "fields",
         "epsilon": 0.05,
         "fields": [
-          "value",
-          "listed"
+          "value"
         ]
       },
       "report": {
         "lua_setter": "`Spring.SetUnitRulesParam`",
         "native_setter": "`RulesParams.set_unit_rules_param`",
-        "lua_getter": "`Spring.GetUnitRulesParam`, `Spring.GetUnitRulesParams`",
+        "lua_getter": "`Spring.GetUnitRulesParam`",
         "native_getter": "`RulesParams.get_unit_rules_param`, `RulesParams.get_unit_rules_params`",
-        "fields": "`value`, `listed`"
+        "fields": "`value`"
       },
       "rust": {
         "check": "check_rules_param",
@@ -331,6 +330,39 @@
             900
           ]
         }
+      },
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitRulesParam",
+          "args": [
+            "fixture.unitID",
+            "value.paramName",
+            "value.value",
+            {
+              "public": true
+            }
+          ],
+          "wasm_args": [
+            "fixture.unitID",
+            "value.paramName",
+            {
+              "type": "rulesparam-type-float",
+              "boolValue": false,
+              "floatValue": "value.value",
+              "stringValue": ""
+            },
+            32
+          ]
+        },
+        "call": "Spring.GetUnitRulesParam",
+        "args": [
+          "fixture.unitID",
+          "value.paramName"
+        ],
+        "returns": [
+          "value"
+        ]
       }
     },
     {

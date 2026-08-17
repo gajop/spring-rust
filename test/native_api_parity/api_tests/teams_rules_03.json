@@ -613,7 +613,12 @@
           "expense",
           "share"
         ]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TeamControl.set_team_share_level", "args": ["fixture.teamID", "value.resource", "value.share"], "bind": "updated", "require_true": true},
+        {"call": "Teams.get_team_resources", "args": ["fixture.teamID", "value.resource"], "bind": "resources"}
+      ],
+      "wasm_returns": [{"field": "share", "from": "resources", "path": ["share"]}]
     }
   ]
 }

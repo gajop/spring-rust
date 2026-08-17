@@ -67,6 +67,10 @@ return {
 
 		"vfs_get_games_count",
 
+		"vfs_download_archive_invalid_category",
+
+		"vfs_download_archive_missing_name",
+
 		"vfs_abort_download_missing",
 
 		"vfs_scan_all_dirs",
@@ -206,6 +210,14 @@ return {
 		},
 		["vfs_get_games_count"] = {
 			path = "",
+		},
+		["vfs_download_archive_invalid_category"] = {
+			filename = "native_api_parity_missing_archive",
+			category = "invalid",
+		},
+		["vfs_download_archive_missing_name"] = {
+			filename = "",
+			category = "map",
 		},
 		["vfs_abort_download_missing"] = {
 			id = -1,

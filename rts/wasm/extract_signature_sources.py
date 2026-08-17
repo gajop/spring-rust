@@ -81,6 +81,189 @@ def native_signatures(root: Path) -> list[dict]:
     return signatures
 
 
+def _strip_cpp_comments(source: str) -> str:
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    return re.sub(r"//[^\n]*", "", source)
+
+
+def _cpp_function_body(source: str, qualified_name: str) -> str | None:
+    """Return one C++ function body without needing a C++ parser."""
+    source = _strip_cpp_comments(source)
+    start = source.find(qualified_name)
+    if start < 0:
+        return None
+
+    opening = source.find("{", start)
+    if opening < 0:
+        return None
+
+    depth = 0
+    quote: str | None = None
+    escaped = False
+    for index in range(opening, len(source)):
+        character = source[index]
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == quote:
+                quote = None
+            continue
+        if character in {'"', "'"}:
+            quote = character
+        elif character == "{":
+            depth += 1
+        elif character == "}":
+            depth -= 1
+            if depth == 0:
+                return source[opening : index + 1]
+    return None
+
+
+def _lua_provider_source(root: Path, provider: str) -> str | None:
+    names = [provider]
+    if provider.startswith("C"):
+        # Several loader helpers are class methods whose source file follows
+        # the historical filename without the leading C (for example
+        # CLuaUI::LoadCFunctions lives in LuaUI.cpp).
+        names.append(provider[1:])
+    candidates = [
+        path
+        for name in names
+        for path in sorted((root / "rts").rglob(f"{name}.cpp"))
+    ]
+    candidates.extend(
+        path
+        for name in names
+        for path in sorted((root / "rts").rglob(f"{name}.h"))
+    )
+    for path in candidates:
+        try:
+            return path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+    return None
+
+
+def _registered_provider_functions(
+    root: Path,
+    provider: str,
+    method: str,
+    visited: set[tuple[str, str]],
+) -> set[str]:
+    key = (provider, method)
+    if key in visited:
+        return set()
+    visited.add(key)
+
+    source = _lua_provider_source(root, provider)
+    if source is None:
+        return set()
+    body = _cpp_function_body(source, f"{provider}::{method}")
+    if body is None:
+        return set()
+    body = _strip_cpp_comments(body)
+
+    functions: set[str] = set()
+    # A few providers first create a nested table (for example MoveCtrl or
+    # UnitScript) and then continue by adding compatibility functions to the
+    # parent Spring table.  Registrations before that rawset belong to the
+    # nested table, not to Spring itself.
+    nested_table_end = body.rfind("lua_rawset") if "lua_createtable" in body else -1
+
+    def is_parent_registration(match: re.Match[str]) -> bool:
+        return nested_table_end < 0 or match.start() > nested_table_end
+
+    cfunc = re.compile(r"\bREGISTER_(?:SCOPED_)?LUA_CFUNC\s*\(([^()]*)\)")
+    for match in cfunc.finditer(body):
+        if not is_parent_registration(match):
+            continue
+        # REGISTER_SCOPED_LUA_CFUNC has a scope argument; the function name
+        # is the final macro argument in both forms.
+        function = match.group(1).split(",")[-1].strip()
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", function):
+            functions.add(function)
+
+    named = re.compile(r'\bREGISTER_NAMED_LUA_CFUNC\s*\(\s*"([^"]+)"')
+    functions.update(
+        match.group(1) for match in named.finditer(body) if is_parent_registration(match)
+    )
+
+    pushed = re.compile(r'\bLuaPushNamedCFunc\s*\(\s*L\s*,\s*"([^"]+)"')
+    functions.update(
+        match.group(1) for match in pushed.finditer(body) if is_parent_registration(match)
+    )
+
+    # LuaObjectRendering uses a local macro rather than REGISTER_LUA_CFUNC.
+    # It is harmless for this parser to understand it when a loader reaches
+    # that provider through a nested Push* call.
+    pushed_macro = re.compile(r"\bPUSH_FUNCTION\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)")
+    functions.update(
+        match.group(1)
+        for match in pushed_macro.finditer(body)
+        if is_parent_registration(match)
+    )
+
+    nested = re.compile(
+        r"\b([A-Za-z_][A-Za-z0-9_]*)(?:<[^>\n]+>)?::(Push[A-Za-z_][A-Za-z0-9_]*)\s*\("
+    )
+    for match in nested.finditer(body):
+        nested_provider = match.group(1)
+        nested_method = match.group(2)
+        if (nested_provider, nested_method) == key:
+            continue
+        functions.update(
+            _registered_provider_functions(root, nested_provider, nested_method, visited)
+        )
+
+    return functions
+
+
+def collect_registered_spring_loader_functions(root: Path) -> list[str]:
+    """Collect Spring.* functions from the active gadget and LuaUI loaders.
+
+    Scanning every ``Lua*.cpp`` file also finds providers that are not loaded
+    into the Spring table (and old compatibility providers that are no longer
+    part of the current NativeInterface).  Follow the same loader entry points
+    used by the runtime, then recursively inspect only their Push* providers.
+    """
+    lua_dir = root / "rts" / "Lua"
+    loader_specs = [
+        (lua_dir / "LuaHandleSynced.cpp", "CUnsyncedLuaHandle::Init"),
+        (lua_dir / "LuaHandleSynced.cpp", "CSyncedLuaHandle::Init"),
+        (lua_dir / "LuaUI.cpp", "CLuaUI::CLuaUI"),
+    ]
+    provider_pattern = re.compile(
+        r'AddEntriesToTable\s*\(\s*L\s*,\s*"Spring"\s*,\s*'
+        r"([A-Za-z_][A-Za-z0-9_]*)(?:<[^>\n]+>)?::(Push[A-Za-z_][A-Za-z0-9_]*)"
+    )
+
+    providers: set[tuple[str, str]] = set()
+    for path, loader in loader_specs:
+        try:
+            source = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        body = _cpp_function_body(source, loader)
+        if body is None:
+            continue
+        providers.update(
+            (match.group(1), match.group(2)) for match in provider_pattern.finditer(body)
+        )
+
+    registered: set[str] = set()
+    for provider, method in providers:
+        registered.update(_registered_provider_functions(root, provider, method, set()))
+
+    # CLuaUI::LoadCFunctions creates the Spring table itself, so it is not an
+    # AddEntriesToTable provider even though its registration is active.
+    registered.update(
+        _registered_provider_functions(root, "CLuaUI", "LoadCFunctions", set())
+    )
+    return sorted(f"Spring.{function}" for function in registered)
+
+
 def lua_signatures(root: Path, native: list[dict]) -> dict:
     rust_root = root / "rust" / "crates" / "spring-native"
     sys.path.insert(0, str(rust_root))
@@ -100,7 +283,7 @@ def lua_signatures(root: Path, native: list[dict]) -> dict:
     ]
     documented.sort(key=lambda item: item["name"])
 
-    registered = sorted(extract_lua_api.collect_registered_spring_functions(root))
+    registered = collect_registered_spring_loader_functions(root)
     by_normalized: dict[str, list[dict]] = {}
     for function in native:
         by_normalized.setdefault(match_apis.normalize_name(function["name"]), []).append(
@@ -111,6 +294,18 @@ def lua_signatures(root: Path, native: list[dict]) -> dict:
     # the Lua-only module loader rather than NativeInterface.
     explicit_exclusions = {
         "Spring.InvokeNativeModule": "Lua-only module loader entry point",
+    }
+    # These registrations are active compatibility aliases or legacy Lua
+    # tables, but they have no independent entry in the current
+    # NativeInterface model.  Keep them explicit so a newly registered
+    # function cannot disappear from the audit silently.
+    registered_exclusions = {
+        "Spring.GetMyAllyTeamID": "compatibility alias of GetLocalAllyTeamID",
+        "Spring.GetMyPlayerID": "compatibility alias of GetLocalPlayerID",
+        "Spring.GetMyTeamID": "compatibility alias of GetLocalTeamID",
+        "Spring.GetUICommands": "legacy LuaUICommand surface",
+        "Spring.GetUnitCOBValue": "legacy UnitScript compatibility surface",
+        "Spring.SetUnitCOBValue": "legacy UnitScript compatibility surface",
     }
     matches = []
     unmatched = []
@@ -158,6 +353,7 @@ def lua_signatures(root: Path, native: list[dict]) -> dict:
         "matches": matches,
         "unmatched": sorted(unmatched),
         "explicit_exclusions": explicit_exclusions,
+        "registered_exclusions": registered_exclusions,
     }
 
 

@@ -2,7 +2,8 @@
   "version": 1,
   "tests": [
     {
-      "id": "feature_set_always_visible",
+     "id": "feature_set_always_visible",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeatureAlwaysVisible"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_always_visible"]},
@@ -12,7 +13,8 @@
       "lua_runtime": {"call": "Spring.SetFeatureAlwaysVisible", "args": ["fixture.featureID", "value.enabled"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "feature_set_use_air_los",
+     "id": "feature_set_use_air_los",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeatureUseAirLos"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_use_air_los"]},
@@ -23,6 +25,8 @@
     },
     {
       "id": "feature_set_move_ctrl",
+      "wasm_mutating": true,
+      "wasm_args": ["fixture.featureID", "value.enabled", "value.velocity", "value.accel", "value.movement"],
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeatureMoveCtrl"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_move_ctrl"]},
@@ -38,6 +42,8 @@
     },
     {
       "id": "feature_set_physics",
+      "wasm_mutating": true,
+      "wasm_args": ["fixture.featureID", "value.pos", "value.velocity", "value.rotation", "value.drag"],
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeaturePhysics"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_physics"]},
@@ -53,6 +59,8 @@
     },
     {
       "id": "feature_set_heading_and_up_dir",
+      "wasm_mutating": true,
+      "wasm_args": ["fixture.featureID", "value.heading", "value.up"],
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeatureHeadingAndUpDir"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_heading_and_up_dir"]},
@@ -62,7 +70,8 @@
       "lua_runtime": {"call": "Spring.SetFeatureHeadingAndUpDir", "args": ["fixture.featureID", "value.heading", "value.upX", "value.upY", "value.upZ"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "feature_set_mid_and_aim_pos",
+     "id": "feature_set_mid_and_aim_pos",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeatureMidAndAimPos"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_mid_and_aim_pos"]},
@@ -76,7 +85,8 @@
       "lua_runtime": {"call": "Spring.SetFeatureMidAndAimPos", "args": ["fixture.featureID", "value.midX", "value.midY", "value.midZ", "value.aimX", "value.aimY", "value.aimZ", "value.relative"], "returns": ["result"]}
     },
     {
-      "id": "feature_set_blocking",
+     "id": "feature_set_blocking",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeatureBlocking"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_blocking"]},
@@ -90,6 +100,11 @@
     },
     {
       "id": "feature_set_selection_volume_data",
+      "wasm_mutating": true,
+      "wasm_args": [
+        "fixture.featureID", "value.scale", "value.offset", "value.volumeType",
+        "value.primaryAxis", false
+      ],
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeatureSelectionVolumeData"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_selection_volume_data"]},
@@ -99,33 +114,43 @@
       "lua_runtime": {"call": "Spring.SetFeatureSelectionVolumeData", "args": ["fixture.featureID", "value.scaleX", "value.scaleY", "value.scaleZ", "value.offsetX", "value.offsetY", "value.offsetZ", "value.volumeType", "value.testType", "value.primaryAxis"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "feature_set_piece_visible",
+     "id": "feature_set_piece_visible",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeaturePieceVisible"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_piece_visible"]},
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_feature_control_call", "set": "set_noop"},
       "params": {"pieceNum": {"type": "i32", "fixed": 1}, "visible": {"type": "bool", "fixed": false}},
+      "wasm_args": ["fixture.featureID", 0, "value.visible"],
       "lua_runtime": {"call": "Spring.SetFeaturePieceVisible", "args": ["fixture.featureID", "value.pieceNum", "value.visible"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
       "id": "feature_set_piece_collision_volume_data",
+      "wasm_mutating": true,
+      "wasm_args": [
+        "fixture.featureID", "value.pieceNum", "value.enable",
+        "value.scale", "value.offset", "value.volumeType", "value.primaryAxis"
+      ],
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeaturePieceCollisionVolumeData"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_piece_collision_volume_data"]},
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_feature_control_call", "set": "set_noop"},
       "params": {"pieceNum": {"type": "i32", "fixed": 1}, "enable": {"type": "bool", "fixed": true}, "scale": {"type": "float3", "generator": "unit_velocity", "expands_to": ["scaleX", "scaleY", "scaleZ"], "expands_from": ["x", "y", "z"]}, "offset": {"type": "float3", "generator": "unit_velocity", "expands_to": ["offsetX", "offsetY", "offsetZ"], "expands_from": ["x", "y", "z"]}, "volumeType": {"type": "i32", "fixed": 2}, "primaryAxis": {"type": "i32", "fixed": 2}},
+      "wasm_args": ["fixture.featureID", 0, "value.enable", "value.scale", "value.offset", "value.volumeType", "value.primaryAxis"],
       "lua_runtime": {"call": "Spring.SetFeaturePieceCollisionVolumeData", "args": ["fixture.featureID", "value.pieceNum", "value.enable", "value.scaleX", "value.scaleY", "value.scaleZ", "value.offsetX", "value.offsetY", "value.offsetZ", "value.volumeType", "value.primaryAxis"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {
-      "id": "feature_set_piece_matrix",
+     "id": "feature_set_piece_matrix",
+      "wasm_mutating": true,
       "context": "synced_gadget", "kind": "readonly", "requires": ["feature"],
       "lua": {"set": [], "get": ["Spring.SetFeaturePieceMatrix"]},
       "native": {"set": [], "get": ["FeatureControl.set_feature_piece_matrix"]},
       "compare": {"mode": "fields", "fields": ["result"]},
       "rust": {"check": "check_feature_control_call", "set": "set_noop"},
       "params": {"pieceNum": {"type": "i32", "fixed": 1}, "matrix": {"type": "object", "fixed": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]}},
+      "wasm_args": ["fixture.featureID", 0, "value.matrix"],
       "lua_runtime": {"call": "Spring.SetFeaturePieceMatrix", "args": ["fixture.featureID", "value.pieceNum", "value.matrix"], "returns": ["result"]}
     }
   ]

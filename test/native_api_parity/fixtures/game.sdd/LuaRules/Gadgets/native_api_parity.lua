@@ -1074,6 +1074,8 @@ local function generatedReturnValue(returnSpec, returns)
 		value = returns.n or 0
 	elseif returnSpec.transform == "truthy" then
 		value = value ~= nil and value ~= false
+	elseif returnSpec.transform == "positive" then
+		value = type(value) == "number" and value > 0
 	elseif returnSpec.transform == "valid_id" then
 		value = type(value) == "number" and value >= 0
 	elseif returnSpec.transform == "string_len" then

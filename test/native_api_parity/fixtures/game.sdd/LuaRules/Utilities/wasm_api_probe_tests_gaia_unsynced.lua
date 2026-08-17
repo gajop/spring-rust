@@ -17,6 +17,8 @@ return {
 
 		"get_config_string_nil_default",
 
+		"get_config_params",
+
 		"get_log_sections",
 
 		"config_int",
@@ -70,6 +72,10 @@ return {
 		"get_vid_mem_usage",
 
 		"vfs_create_dir_existing",
+
+		"vfs_create_dir_invalid",
+
+		"vfs_extract_archive_invalid",
 
 		"get_prev_frame_sync_checksum",
 
@@ -213,6 +219,8 @@ return {
 
 		"share_resources",
 
+		"solve_nurbscurve",
+
 	},
 	values = {
 		["platform_architecture"] = {
@@ -298,6 +306,12 @@ return {
 		},
 		["vfs_create_dir_existing"] = {
 			path = "LuaRules",
+		},
+		["vfs_create_dir_invalid"] = {
+			path = "../native_api_parity_invalid",
+		},
+		["vfs_extract_archive_invalid"] = {
+			path = "native_api_parity_missing_archive_file",
 		},
 		["get_cmd_desc_index_missing"] = {
 			cmdID = -999999,
@@ -434,6 +448,13 @@ return {
 		["share_resources"] = {
 			resource = "metal",
 			amount = 0,
+		},
+		["solve_nurbscurve"] = {
+			degree = 2,
+			controlPoints = {0, 0, 0, 1, 256, 64, 128, 1, 512, 0, 256, 1},
+			points = {{["x"] = 0, ["y"] = 0, ["z"] = 0, ["w"] = 1}, {["x"] = 256, ["y"] = 64, ["z"] = 128, ["w"] = 1}, {["x"] = 512, ["y"] = 0, ["z"] = 256, ["w"] = 1}},
+			knots = {0, 0, 0, 1, 1, 1},
+			segments = 4,
 		},
 	},
 }

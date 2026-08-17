@@ -382,4 +382,10 @@ impl Guest for ParityGuest {
     }
 }
 
+impl bindings::Guest for ParityGuest {
+    fn callback_1(user_data: u32) {
+        generated::callback_1(user_data);
+    }
+}
+
 bindings::export!(ParityGuest with_types_in bindings);

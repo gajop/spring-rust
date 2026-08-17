@@ -106,6 +106,13 @@ MODULE_BY_NATIVE_CLASS = {
 NATIVE_TEST_FUNCTION_OVERRIDES = {
     "game_rules_info": ("game", "get_game_rules_info"),
     "vfs_zlib_decompress": ("vfs", "zlib_decompress"),
+    "give_order_to_unit_synced": ("unit_control", "give_order_to_unit"),
+    "give_order_to_unit_array_synced": ("units_commands", "give_order_to_unit_map"),
+    "give_order_to_unit_map_synced": ("unit_control", "give_order_array_to_unit_array"),
+    "give_order_array_to_unit_synced": ("unit_control", "give_order_array_to_unit"),
+    "give_order_array_to_unit_map_synced": ("unit_control", "give_order_array_to_unit_array"),
+    "give_order_array_to_unit_array_synced_pairwise": ("unit_control", "give_order_array_to_unit_array"),
+    "give_order_array_to_unit_array_synced_broadcast": ("unit_control", "give_order_array_to_unit_array"),
 }
 
 SCALAR_WIT_TYPES = {
@@ -240,7 +247,11 @@ def snake(value: str) -> str:
 
 
 def pascal(value: str) -> str:
-    return "".join(part.capitalize() for part in snake(value).split("_"))
+    return "".join(
+        part.capitalize()
+        for part in snake(value.replace("-", "_")).split("_")
+        if part
+    )
 
 
 def kebab(value: str) -> str:
@@ -268,6 +279,8 @@ def wit_type(type_info: dict) -> str:
     kind = type_kind(type_info)
     if kind == "scalar":
         return SCALAR_WIT_TYPES[type_info["name"]]
+    if kind == "enum":
+        return kebab(type_info["name"])
     if kind == "string":
         return "string"
     if kind == "bytes":
@@ -278,13 +291,20 @@ def wit_type(type_info: dict) -> str:
         return f"list<{wit_type(type_info['element'])}>"
     if kind == "option":
         return f"option<{wit_type(type_info.get('inner', type_info.get('element'))) }>"
+    # Native callbacks and opaque user-data pointers are represented by the
+    # component callback registry/handle ABI.  The generated host adapter
+    # consumes both as u32 values; keeping that lowering explicit lets the
+    # parity guest exercise callback ownership instead of dropping these rows
+    # as unsupported C types.
+    if kind in {"callback", "pointer", "opaque"}:
+        return "u32"
     if kind == "record":
         return kebab(type_info["name"])
     raise ValueError(f"unsupported probe WIT type: {type_info}")
 
 
 def simple_type(type_info: dict) -> bool:
-    return type_info.get("kind") in {"scalar", "string"}
+    return type_info.get("kind") in {"scalar", "enum", "string"}
 
 
 def records_field(record: dict, name: str) -> dict | None:
@@ -380,7 +400,7 @@ def rust_semantic_path(expression: str, path: list[str | int]) -> str:
 def type_supported_by_probe(type_info: dict, records: dict[str, dict], seen: set[str] | None = None) -> bool:
     """Whether a semantic type can be represented by the probe WIT world."""
     kind = type_info.get("kind")
-    if kind in {"scalar", "string", "bytes"}:
+    if kind in {"scalar", "enum", "string", "bytes", "callback", "pointer", "opaque"}:
         return True
     if kind in {"list", "fixed-array"}:
         return type_supported_by_probe(type_info["element"], records, seen)
@@ -500,7 +520,7 @@ def record_path(
 
 
 def runtime_args(test: dict) -> list:
-    runtime = test.get("lua_runtime", {})
+    runtime = test.get("lua_runtime") or {}
     if runtime.get("args") is not None:
         return runtime.get("args", [])
     if runtime.get("table") is not None:
@@ -565,7 +585,9 @@ def first_parameter_value(test: dict, *names: str) -> object | None:
         parameter = test.get("params", {}).get(name)
         if parameter is None:
             continue
-        if "fixed" in parameter:
+        if "wasm_fixed" in parameter:
+            return parameter["wasm_fixed"]
+        elif "fixed" in parameter:
             return parameter["fixed"]
         if "value" in parameter:
             return parameter["value"]
@@ -587,16 +609,30 @@ def projection_record_path(
     desired = field_name
     resolved_path = list(path)
 
-    if field_name == "value":
+    if record_name == "RulesParamValue" and field_name == "value":
+        declared_type = test.get("params", {}).get("value", {}).get("type")
+        desired = {
+            "bool": "boolValue",
+            "f32": "floatValue",
+            "float": "floatValue",
+            "string": "stringValue",
+        }.get(declared_type, desired)
+    elif field_name == "value":
         if record_name == "UnitSensorRadius":
             desired = str(first_parameter_value(test, "sensorType") or "los")
         elif record_name == "UnitWeaponState":
             desired = str(first_parameter_value(test, "key") or "range")
         elif record_name == "UnitWeaponDamages":
             desired = str(first_parameter_value(test, "key") or "paralyzeDamageTime")
+        elif record_name == "NumberOrBool":
+            desired = "boolean" if first_parameter_value(test, "paramName") == "buildRange3D" else "number"
+    elif record_name == "NumberOrBool" and field_name == "enabled":
+        desired = "boolean"
     elif record_name == "UnitSensorRadius" and field_name == "radius":
         desired = str(first_parameter_value(test, "sensorType") or "los")
     elif record_name == "TeamResources" and field_name in {
+        "currentLevel",
+        "storage",
         "used",
         "produced",
         "excessed",
@@ -606,6 +642,8 @@ def projection_record_path(
         resource = str(first_parameter_value(test, "resource") or "metal")
         resource_prefix = "energy" if resource == "energy" else "metal"
         resource_fields = {
+            "currentLevel": "Current",
+            "storage": "Storage",
             "used": "Current",
             "produced": "Storage",
             "excessed": "Pull",
@@ -655,6 +693,22 @@ def projection_record_path(
         resolved_path = ["targetPos", field_name[-1].lower()]
     elif record_name == "WindData" and field_name == "windStrength":
         resolved_path = ["current"]
+    elif record_name == "FeatureResurrect":
+        if field_name == "unitDef":
+            desired = "resurrectAs"
+        elif field_name == "facing":
+            desired = "facingDir"
+    elif record_name == "UnitVectors":
+        flattened = snake(field_name)
+        axis = flattened[-1:] if flattened and flattened[-1] in "xyz" else ""
+        prefix = flattened[:-1].rstrip("_") if axis else ""
+        vector_name = {
+            "front": "frontDir",
+            "up": "upDir",
+            "right": "rightDir",
+        }.get(prefix)
+        if vector_name is not None:
+            resolved_path = [vector_name, axis]
 
     # Lua flattens named camera/direction vectors returned by input APIs into
     # fields such as camPosX and dirZ, while the semantic ABI keeps each
@@ -678,6 +732,7 @@ def output_projection(
     test: dict,
     function: dict,
     records: dict[str, dict],
+    functions: dict[tuple[str, str], dict] | None = None,
 ) -> list[dict] | None:
     """Map Lua return specs to typed result expressions.
 
@@ -685,13 +740,22 @@ def output_projection(
     type, and a path relative to the generated WIT result value.  The Rust
     renderer turns the optional transform into the compact probe wire format.
     """
-    runtime = test.get("lua_runtime", {})
-    returns = list(runtime.get("returns", []))
+    runtime = test.get("lua_runtime") or {}
+    if test.get("wasm_sequence") is not None:
+        if functions is None:
+            return None
+        sequence = wasm_sequence_operations(test, functions, records)
+        if sequence is None:
+            return None
+        return sequence_output_projection(test, sequence, records)
+    returns = list(runtime.get("returns", test.get("wasm_returns", [])))
     for post_runtime in runtime.get("post", []):
         returns.extend(post_runtime.get("returns", []))
     if not returns:
         # A no-return native operation is still a useful parity row when the
         # Lua contract also has no return values (for example VFS.ScanAllDirs).
+        if test.get("wasm_expected_error"):
+            return []
         return [] if not test.get("compare", {}).get("fields") else None
     outputs = function["outputs"]
     projected = []
@@ -867,6 +931,7 @@ def output_projection(
                         return None
                 if transform not in {
                     None,
+                    "flat_float3_list",
                     "table_keys",
                     "table_int_keys",
                     "table_int_values",
@@ -963,10 +1028,15 @@ def output_projection(
     return projected
 
 
-def supported_output(test: dict, function: dict, records: dict[str, dict]) -> str | None:
+def supported_output(
+    test: dict,
+    function: dict,
+    records: dict[str, dict],
+    functions: dict[tuple[str, str], dict],
+) -> str | None:
     if not all(type_supported_by_probe(output["type"], records) for output in function["outputs"]):
         return None
-    projection = output_projection(test, function, records)
+    projection = output_projection(test, function, records, functions)
     return "projected" if projection is not None else None
 
 
@@ -981,7 +1051,12 @@ def load_tests() -> list[dict]:
 
 def load_model(
     model_path: Path = MODEL_PATH,
-) -> tuple[dict[tuple[str, str], dict], dict[str, dict], dict[str, dict]]:
+) -> tuple[
+    dict[tuple[str, str], dict],
+    dict[str, dict],
+    dict[str, dict],
+    dict[str, dict],
+]:
     model = json.loads(model_path.read_text(encoding="utf-8"))
     functions = {
         (module["name"], snake(function["name"])): function
@@ -993,8 +1068,13 @@ def load_model(
         for module in model["modules"]
         for record in module.get("records", [])
     }
+    enums = {
+        enum["name"]: enum
+        for module in model["modules"]
+        for enum in module.get("enums", [])
+    }
     modules = {module["name"]: module for module in model["modules"]}
-    return functions, records, modules
+    return functions, records, modules, enums
 
 
 def native_function(test: dict, functions: dict[tuple[str, str], dict]) -> tuple[str, str, dict] | None:
@@ -1007,6 +1087,11 @@ def native_function(test: dict, functions: dict[tuple[str, str], dict]) -> tuple
 
     native_get = test.get("native", {}).get("get", [])
     if not native_get:
+        sequence = test.get("wasm_sequence") or []
+        if sequence:
+            target = runtime_call_target(sequence[0].get("call", ""), functions)
+            if target is not None:
+                return target
         return None
     # Native parity metadata uses both the public class spelling
     # (`Game.get_wind`) and the Rust-facing accessor spelling
@@ -1063,7 +1148,9 @@ def deterministic_param_values(test: dict) -> dict[str, tuple[object, str]]:
     values: dict[str, tuple[object, str]] = {}
     for name, parameter in test.get("params", {}).items():
         declared_type = parameter.get("type", "string")
-        if "fixed" in parameter:
+        if "wasm_fixed" in parameter:
+            value = parameter["wasm_fixed"]
+        elif "fixed" in parameter:
             value = parameter["fixed"]
         elif "fixture" in parameter or "fixture_list" in parameter or "fixture_map" in parameter:
             continue
@@ -1074,6 +1161,10 @@ def deterministic_param_values(test: dict) -> dict[str, tuple[object, str]]:
         elif parameter.get("generator") in {"map_position", "map_point"}:
             value = {"x": 1024.0, "y": 128.0, "z": 1024.0}
         elif parameter.get("generator") in {"unit_velocity", "flat_velocity"}:
+            value = {"x": 1.0, "y": 0.0, "z": 0.0}
+        elif parameter.get("generator") in {"front_vector"}:
+            value = {"x": 0.0, "y": 0.0, "z": 1.0}
+        elif parameter.get("generator") in {"right_vector"}:
             value = {"x": 1.0, "y": 0.0, "z": 0.0}
         elif parameter.get("generator") == "unit_orientation":
             value = {"x": 0.0, "y": 1.0, "z": 0.0}
@@ -1099,6 +1190,37 @@ def deterministic_param_values(test: dict) -> dict[str, tuple[object, str]]:
                 if source_field in value:
                     values[field] = (value[source_field], "f32")
     return values
+
+
+def resolve_wasm_metadata_value(
+    value: object,
+    deterministic_values: dict[str, tuple[object, str]],
+) -> tuple[object, bool]:
+    """Resolve value references nested inside an explicit Wasm record."""
+    if isinstance(value, str):
+        if value == "nil":
+            return None, True
+        if value.startswith("value."):
+            value_info = deterministic_values.get(value.removeprefix("value."))
+            return (value_info[0], True) if value_info is not None else (None, False)
+        return value, True
+    if isinstance(value, list):
+        resolved = []
+        for item in value:
+            item_value, ok = resolve_wasm_metadata_value(item, deterministic_values)
+            if not ok:
+                return None, False
+            resolved.append(item_value)
+        return resolved, True
+    if isinstance(value, dict):
+        resolved = {}
+        for key, item in value.items():
+            item_value, ok = resolve_wasm_metadata_value(item, deterministic_values)
+            if not ok:
+                return None, False
+            resolved[key] = item_value
+        return resolved, True
+    return value, True
 
 
 def candidate_expression(
@@ -1131,15 +1253,24 @@ def candidate_expression(
         # Lua map spellings are lowered to the native list-of-IDs semantic
         # input for selection controls. The affected comparisons are
         # order-insensitive, so the metadata iteration order is sufficient.
-        rendered = []
-        for key, enabled in arg.items():
-            if enabled is not True:
-                continue
-            candidate = candidate_expression(key, test, deterministic_values)
-            if candidate[1] is None:
-                return None, None, None, None
-            rendered.append(candidate[1])
-        return None, "vec![" + ", ".join(rendered) + "]", arg, "local"
+        if all(isinstance(enabled, bool) for enabled in arg.values()):
+            rendered = []
+            for key, enabled in arg.items():
+                if enabled is not True:
+                    continue
+                candidate = candidate_expression(key, test, deterministic_values)
+                if candidate[1] is None:
+                    return None, None, None, None
+                rendered.append(candidate[1])
+            return None, "vec![" + ", ".join(rendered) + "]", arg, "local"
+
+        # Explicit Wasm translations may need a native record while the Lua
+        # spelling is a flattened argument list. Resolve its value references
+        # now and let candidate_to_type lower it against the target WIT record.
+        resolved, ok = resolve_wasm_metadata_value(arg, deterministic_values)
+        if not ok:
+            return None, None, None, None
+        return None, "{}", resolved, "record"
     if not isinstance(arg, str):
         return None, None, None, None
     if arg == "nil":
@@ -1151,6 +1282,14 @@ def candidate_expression(
     if separator and prefix == "local":
         local_name = snake(key)
         return key, f"local_{local_name}", None, "local"
+    if separator and prefix == "sequence":
+        parts = key.split(".")
+        if not parts or any(not part for part in parts):
+            return key, None, None, None
+        expression = f"sequence_{rust_identifier(parts[0])}"
+        for part in parts[1:]:
+            expression += f".{rust_identifier(part)}"
+        return key, expression, None, "sequence"
     if separator and prefix == "value":
         value_info = deterministic_values.get(key)
         if value_info is None:
@@ -1204,7 +1343,11 @@ def rust_untyped_literal(value: object) -> str:
 
 def rust_scalar_expression(value: object, type_info: dict) -> str | None:
     if isinstance(value, str):
-        if value.startswith("fixture.") or value.startswith("value.") or value == "nil":
+        if value.startswith("fixture."):
+            fixture_field = FIXTURE_FIELDS.get(value.removeprefix("fixture."))
+            if fixture_field is not None:
+                return f"fixture.{fixture_field}"
+        if value.startswith("value.") or value == "nil":
             return None
     if type_info["kind"] == "string":
         return json.dumps(value) if isinstance(value, str) else None
@@ -1230,8 +1373,25 @@ def rust_typed_expression(
 ) -> str | None:
     """Render a concrete metadata value for a semantic WIT type."""
     kind = type_info.get("kind")
-    if kind in {"scalar", "string"}:
+    if kind == "string":
+        expression = rust_scalar_expression(value, type_info)
+        return f"{expression}.to_string()" if expression is not None else None
+    if kind == "scalar":
         return rust_scalar_expression(value, type_info)
+    if kind == "enum":
+        if not isinstance(value, str):
+            return None
+        variant = value
+        if type_info.get("name") == "RulesParamType" and variant in {
+            "bool",
+            "float",
+            "string",
+        }:
+            variant = f"rulesparam-type-{variant}"
+        return (
+            f"crate::bindings::recoil::spring_api::{module}::"
+            f"{pascal(type_info['name'])}::{pascal(variant)}"
+        )
     if kind == "bytes":
         if isinstance(value, str):
             return f"({json.dumps(value)}).as_bytes().to_vec()"
@@ -1275,7 +1435,7 @@ def rust_typed_expression(
         expression = rust_typed_expression(field_value, field["type"], module, records)
         if expression is None:
             return None
-        fields.append(f"{snake(field['name'])}: {expression}")
+        fields.append(f"{rust_identifier(field['name'])}: {expression}")
     return f"crate::bindings::recoil::spring_api::{module}::{pascal(type_info['name'])} {{ " + ", ".join(fields) + " }"
 
 
@@ -1315,6 +1475,37 @@ def field_candidate_keys(field_name: str, parent_name: str | None = None) -> set
     """Return Lua metadata names that can populate a semantic record field."""
     field = snake(field_name)
     keys = {field}
+    # A row may need a distinct Wasm value when the Lua spelling uses a
+    # different index base (for example Lua weapon number 1 versus the native
+    # zero-based query).  Prefer an explicit `wasm<Field>` parameter over the
+    # ordinary deterministic value when the row supplies one.
+    keys.add(f"wasm_{field}")
+    # A few native names preserve the C ABI's descriptive suffixes while the
+    # parity metadata uses the shorter Lua-facing name.  Keep these aliases
+    # here so explicit ``wasm_args`` translations remain declarative instead
+    # of requiring duplicate parameters solely for record matching.
+    if field in {"scales", "offsets"}:
+        keys.add(field.removesuffix("s"))
+    if field.endswith("_or_mask"):
+        keys.add(field.removesuffix("_or_mask"))
+    if field.endswith("_or_impulse_mask"):
+        keys.add(field.removesuffix("_or_impulse_mask"))
+        if field == "acceleration_or_impulse_mask":
+            keys.add("accel")
+    if field.endswith("_mask"):
+        keys.add(field.removesuffix("_mask"))
+    if field == "up_dir":
+        keys.add("up")
+    elif field == "args":
+        keys.add("direction")
+    elif field == "next_pos_error_update":
+        keys.add("next_update")
+    elif field == "set_pos_error_bit":
+        keys.add("set_bit")
+    elif field.startswith("pos_error_"):
+        suffix = field.removeprefix("pos_error_")
+        keys.add(suffix)
+        keys.add(f"error_{suffix}")
     if field.endswith("_ids"):
         keys.add(field[:-1])
     if field == "exclude_weapon_projectiles":
@@ -1425,6 +1616,15 @@ def candidate_to_type(
         element = {"kind": "scalar", "name": "u8"} if kind == "bytes" else type_info["element"]
         if isinstance(raw, str) and element.get("kind") == "scalar" and element.get("name") == "u8":
             return f"({expression}).as_bytes().to_vec()"
+        # A list of records cannot use the provisional `vec![...]` expression
+        # produced by candidate_expression: its elements need the generated
+        # WIT record constructor.  Keep the provisional path for scalar lists
+        # because those may contain fixture references such as
+        # `fixture.unitID`, which are expressions rather than literals.
+        if isinstance(raw, list) and element.get("kind") == "record":
+            typed = rust_typed_expression(raw, type_info, module, records)
+            if typed is not None:
+                return typed
         if declared_type == "local" or expression.startswith("local_"):
             return expression
         if isinstance(raw, list):
@@ -1438,6 +1638,9 @@ def candidate_to_type(
         if isinstance(raw, dict):
             return rust_typed_expression(raw, type_info, module, records)
         return None
+
+    if kind == "enum":
+        return rust_typed_expression(raw, type_info, module, records)
 
     if kind == "string":
         if raw is not None:
@@ -1479,9 +1682,38 @@ def build_input_expression(
     future_inputs: list[dict] | None = None,
     top_level: bool = False,
     parent_name: str | None = None,
+    explicit_candidate_count: int | None = None,
+    allow_implicit_top_level: bool = False,
 ) -> str | None:
     kind = type_info.get("kind")
     candidate_index = find_candidate(candidates, used, input_name, parent_name)
+    if (
+        top_level
+        and not allow_implicit_top_level
+        and explicit_candidate_count is not None
+        and candidate_index is not None
+        and candidate_index >= explicit_candidate_count
+    ):
+        candidate_index = None
+    if kind == "record":
+        # An explicit ``wasm_args`` record is intentionally anonymous: its
+        # keys describe the target WIT fields, not the Lua parameter name.
+        # A deterministic scalar with the same metadata name (for example a
+        # Lua parameter named `value`) must not hide that record candidate.
+        # Prefer a directly named record, then consume an anonymous record
+        # before trying field-by-field matching.
+        if candidate_index is not None:
+            expression = candidate_to_type(candidates[candidate_index], type_info, module, records)
+            if expression is not None:
+                used.add(candidate_index)
+                return expression
+        for index, candidate in enumerate(candidates):
+            if index in used or not isinstance(candidate[2], dict):
+                continue
+            expression = candidate_to_type(candidate, type_info, module, records)
+            if expression is not None:
+                used.add(index)
+                return expression
     if candidate_index is not None and kind not in {"record", "option"}:
         candidate = candidates[candidate_index]
         expression = candidate_to_type(
@@ -1496,13 +1728,23 @@ def build_input_expression(
             used.add(candidate_index)
             return expression
 
-    if candidate_index is None and top_level and kind in {"scalar", "string"}:
+    if candidate_index is None and top_level and kind in {
+        "scalar",
+        "string",
+        "callback",
+        "pointer",
+        "opaque",
+    }:
         # Lua permits legacy/positional spellings whose semantic native names
         # are more precise (unitID -> unitID1/unitID2 is the common case).
         # Preserve declaration-order fallback after named matching.
-        for index, candidate in enumerate(candidates):
+        candidate_range = range(len(candidates))
+        if not allow_implicit_top_level and explicit_candidate_count is not None:
+            candidate_range = range(min(explicit_candidate_count, len(candidates)))
+        for index in candidate_range:
             if index in used:
                 continue
+            candidate = candidates[index]
             expression = candidate_to_type(
                 candidate,
                 type_info,
@@ -1582,6 +1824,8 @@ def build_input_expression(
                     test,
                     future_inputs=future_inputs,
                     parent_name=input_name,
+                    explicit_candidate_count=explicit_candidate_count,
+                    allow_implicit_top_level=allow_implicit_top_level,
                 )
             if expression is None and field["name"] == "planeCount" and "planes" in built_fields:
                 expression = f"({built_fields['planes']}.len() as u32)"
@@ -1628,10 +1872,22 @@ def probe_arguments(
 ) -> list[str] | None:
     records = records or {}
     deterministic_values = deterministic_param_values(test)
+    explicit_arg_specs = arg_specs is not None
+    if arg_specs is None:
+        # Most rows share the Lua call's positional values. A small number of
+        # APIs deliberately expose a more structured semantic Wasm input than
+        # their legacy Lua spelling (for example a Float3 record versus three
+        # goal coordinates). Keep that translation explicit in the parity row
+        # instead of weakening the generic record matcher.
+        arg_specs = test.get(
+            "wasm_args",
+            test.get("wasm_get_args", runtime_args(test)),
+        )
     candidates: list[tuple] = [
         candidate_expression(arg, test, deterministic_values)
-        for arg in (runtime_args(test) if arg_specs is None else arg_specs)
+        for arg in arg_specs
     ]
+    explicit_candidate_count = len(candidates)
     existing_keys = {snake(candidate[0]) for candidate in candidates if candidate[0] is not None}
     # Native semantic inputs sometimes make Lua defaults explicit (for
     # example stripPadding), or name a value only in the parity metadata
@@ -1670,6 +1926,8 @@ def probe_arguments(
             test,
             future_inputs=function["inputs"][input_index + 1 :],
             top_level=True,
+            explicit_candidate_count=explicit_candidate_count,
+            allow_implicit_top_level=not explicit_arg_specs,
         )
         if expression is None and type_info.get("kind") not in {"record", "option", "list", "fixed-array", "bytes"}:
             # A missing trailing semantic argument is an API default rather
@@ -1707,6 +1965,7 @@ SELECTION_EXCLUSION_REASONS = {
     "unresolved_setter",
     "unsupported_output",
     "unresolved_args",
+    "unresolved_sequence",
 }
 
 
@@ -1752,13 +2011,13 @@ def select_tests_with_coverage(
             reason = "deferred"
         elif test.get("kind") not in {"readonly", "setter_getter"}:
             reason = "unsupported_kind"
-        elif test.get("native_only"):
+        elif test.get("native_only") and test.get("wasm_sequence") is None:
             reason = "native_only"
         elif test.get("expect_error") and not test.get("wasm_expected_error"):
             reason = "expect_error"
         elif test.get("requires_rendering") and not include_rendering:
             reason = "rendering_disabled"
-        elif test.get("lua_runtime") is None:
+        elif test.get("lua_runtime") is None and test.get("wasm_returns") is None:
             reason = "no_lua_runtime"
         else:
             native = native_function(test, functions)
@@ -1766,10 +2025,24 @@ def select_tests_with_coverage(
                 reason = "no_native_function"
             else:
                 module, function_name, function = native
-                if function.get("mutating") or function.get("status") == "unsupported":
+                if (
+                    (
+                        function.get("mutating")
+                        and not test.get("wasm_expected_error")
+                        and test.get("wasm_sequence") is None
+                        and not test.get("wasm_mutating")
+                    )
+                    or function.get("status") == "unsupported"
+                ):
                     reason = "mutating_getter_or_unsupported"
                 elif (
+                    test.get("wasm_sequence") is not None
+                    and wasm_sequence_operations(test, functions, records) is None
+                ):
+                    reason = "unresolved_sequence"
+                elif (
                     test.get("kind") == "setter_getter"
+                    and test.get("wasm_sequence") is None
                     and wasm_set_operations(test, functions, records) is None
                 ):
                     # Resolve this even though render_rust() repeats the
@@ -1777,10 +2050,14 @@ def select_tests_with_coverage(
                     # non-portable/custom row, not a silently vacuous Wasm
                     # result.
                     reason = "unresolved_setter"
-                elif supported_output(test, function, records) is None:
+                elif supported_output(test, function, records, functions) is None:
                     reason = "unsupported_output"
                 else:
-                    arguments = probe_arguments(test, function, records, module)
+                    arguments = (
+                        []
+                        if test.get("wasm_sequence") is not None
+                        else probe_arguments(test, function, records, module)
+                    )
                     if arguments is None:
                         reason = "unresolved_args"
                     else:
@@ -1830,20 +2107,46 @@ def render_type_record(record: dict) -> list[str]:
     return lines
 
 
+def render_type_enum(enum: dict) -> list[str]:
+    lines = [f"  enum {kebab(enum['name'])} {{"]
+    for variant in enum.get("variants", {}):
+        lines.append(f"    {wit_identifier(variant)},")
+    lines.append("  }")
+    return lines
+
+
 def render_wit(
     selected: list[tuple[dict, str, str, dict, list[str]]],
     records: dict[str, dict],
     functions: dict[tuple[str, str], dict],
+    enums: dict[str, dict],
     context: str = "synced_gadget",
 ) -> str:
     world = CONTEXT_WORLD[context]
     by_module: dict[str, list[dict]] = {}
     for test, module, _, function, _ in selected:
         by_module.setdefault(module, []).append(function)
+        for (
+            sequence_module,
+            _sequence_name,
+            sequence_function,
+            _sequence_arguments,
+            _sequence_bind,
+        ) in wasm_sequence_operations(test, functions, records) or []:
+            by_module.setdefault(sequence_module, []).append(sequence_function)
         for setter_module, _setter_name, setter_function, _setter_arguments in wasm_set_operations(
             test, functions, records
         ) or []:
             by_module.setdefault(setter_module, []).append(setter_function)
+        callback = test.get("wasm_callback")
+        if callback is not None and callback.get("call"):
+            callback_target = runtime_call_target(callback.get("call", ""), functions)
+            if callback_target is None:
+                raise ValueError(
+                    f"cannot resolve Wasm callback target {callback.get('call')!r} for {test['id']}"
+                )
+            callback_module, _callback_name, callback_function = callback_target
+            by_module.setdefault(callback_module, []).append(callback_function)
 
     setup = {
         ("messages", "SendLuaRulesMsg"),
@@ -1898,6 +2201,7 @@ def render_wit(
         lines.extend([f"interface {kebab(module)} {{", "  record spring-error { code: s32 }", ""])
         module_functions = {function["name"]: function for function in by_module[module]}
         record_names: set[str] = set()
+        enum_names: set[str] = set()
 
         def add_record_type(type_info: dict) -> None:
             kind = type_info.get("kind")
@@ -1910,6 +2214,8 @@ def render_wit(
                 if record is not None:
                     for field in record["fields"]:
                         add_record_type(field["type"])
+            elif kind == "enum":
+                enum_names.add(type_info["name"])
             elif kind in {"list", "fixed-array", "option"}:
                 add_record_type(type_info.get("element", type_info.get("inner", {})))
 
@@ -1920,6 +2226,12 @@ def render_wit(
                 add_record_type(output_info["type"])
             if len(function["outputs"]) > 1:
                 record_names.add(f"{function['name']}Value")
+        for enum_name in sorted(enum_names):
+            enum = enums.get(enum_name)
+            if enum is None:
+                raise ValueError(f"missing generated probe enum {enum_name}")
+            lines.extend(render_type_enum(enum))
+            lines.append("")
         for record_name in sorted(record_names):
             record = records.get(record_name)
             if record is None:
@@ -1999,7 +2311,14 @@ def render_wit(
     )
     for module in sorted(by_module):
         lines.append(f"  import {kebab(module)};")
-    lines.extend([f"  export callins-{world};", "}", ""])
+    lines.extend(
+        [
+            f"  export callins-{world};",
+            "  export callback-1: func(user-data: u32);",
+            "}",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -2033,6 +2352,10 @@ def encode_list_function(
         return f'encode_numeric_list("{field}", &{expression})'
     if element["kind"] == "record":
         helper = f"encode_{snake(module)}_{snake(element['name'])}_list"
+        if transform == "flat_float3_list":
+            if element["name"] != "Float3":
+                raise ValueError("flat_float3_list requires a Float3 list")
+            helper = f"encode_{snake(module)}_{snake(element['name'])}_flat_list"
         return f'{helper}("{field}", &{expression})'
     raise ValueError(f"unsupported probe list element: {type_info}")
 
@@ -2126,9 +2449,189 @@ def runtime_call_target(
     return (module, snake(function_name), function) if function is not None else None
 
 
+def wasm_sequence_operations(
+    test: dict,
+    functions: dict[tuple[str, str], dict],
+    records: dict[str, dict],
+) -> list[tuple[str, str, dict, list[str], str]] | None:
+    """Resolve a declarative multi-call Wasm parity operation.
+
+    Some Lua APIs are intentionally exposed as several typed NativeInterface
+    calls even though the parity row is one logical operation.  The sequence
+    metadata keeps that ordering explicit and gives each successful result a
+    stable binding used by the result projection.
+    """
+    sequence = test.get("wasm_sequence")
+    if sequence is None:
+        return []
+    if not isinstance(sequence, list) or not sequence:
+        return None
+
+    operations = []
+    bindings: set[str] = set()
+    for step in sequence:
+        if not isinstance(step, dict):
+            return None
+        bind = step.get("bind")
+        if not isinstance(bind, str) or not bind or bind in bindings:
+            return None
+        condition = step.get("when")
+        if condition is not None:
+            if (
+                not isinstance(condition, str)
+                or not condition.startswith("sequence.")
+                or condition.removeprefix("sequence.") not in bindings
+            ):
+                return None
+        target = runtime_call_target(step.get("call", ""), functions)
+        if target is None:
+            return None
+        module, function_name, function = target
+        arguments = probe_arguments(
+            test,
+            function,
+            records,
+            module,
+            arg_specs=step.get("args", []),
+        )
+        if arguments is None or not function.get("outputs"):
+            return None
+        bindings.add(bind)
+        operations.append((module, function_name, function, arguments, bind))
+    return operations
+
+
+def sequence_output_projection(
+    test: dict,
+    sequence: list[tuple[str, str, dict, list[str], str]],
+    records: dict[str, dict],
+) -> list[dict] | None:
+    """Project flattened fields from bound scalar/list/record sequence values."""
+    runtime = test.get("lua_runtime") or {}
+    returns = test.get("wasm_returns")
+    if returns is None:
+        returns = runtime.get("returns", [])
+    if not isinstance(returns, list):
+        return None
+    operation_by_bind = {operation[4]: operation for operation in sequence}
+    projected = []
+    for return_info in returns:
+        if isinstance(return_info, dict) and return_info.get("callback") is not None:
+            field_name = return_info.get("field")
+            callback_value = return_info.get("callback")
+            if (
+                not field_name
+                or field_name not in test.get("compare", {}).get("fields", [])
+                or not isinstance(callback_value, str)
+            ):
+                continue
+            callback_projection = {
+                "called": ({"kind": "scalar", "name": "bool"}, "callback_called()"),
+                "team": ({"kind": "scalar", "name": "i32"}, "callback_team()"),
+                "return_count": ({"kind": "scalar", "name": "u32"}, "callback_return_count()"),
+                "marker": ({"kind": "string"}, "callback_return_marker()"),
+                "return_flag": ({"kind": "scalar", "name": "bool"}, "callback_return_flag()"),
+            }.get(callback_value)
+            if callback_projection is None:
+                return None
+            type_info, expression = callback_projection
+            projected.append(
+                {
+                    "field": field_name,
+                    "type": type_info,
+                    "expression": expression,
+                    "transform": None,
+                    "optional": False,
+                    "condition": return_info.get("when"),
+                }
+            )
+            continue
+        if isinstance(return_info, str):
+            field_name = return_info
+            source = field_name
+            path = []
+            transform = None
+        elif isinstance(return_info, dict):
+            field_name = return_info.get("field")
+            source = return_info.get("from", field_name)
+            path = return_info.get("path", [])
+            transform = return_info.get("transform")
+        else:
+            return None
+        if not field_name or field_name not in test.get("compare", {}).get("fields", []):
+            continue
+        if not isinstance(source, str) or source not in operation_by_bind:
+            return None
+        _module, _function_name, function, _arguments, bind = operation_by_bind[source]
+        outputs = function.get("outputs", [])
+        if not outputs:
+            return None
+        if len(outputs) == 1:
+            type_info = outputs[0]["type"]
+        else:
+            type_info = {
+                "kind": "record",
+                "name": f"{function['name']}Value",
+            }
+        expression = f"sequence_{rust_identifier(bind)}"
+        if path:
+            if type_info.get("kind") != "record":
+                return None
+            record = records.get(type_info.get("name"))
+            if record is None and len(outputs) > 1:
+                record = {"name": type_info["name"], "fields": outputs}
+            if record is None:
+                return None
+            projection_records = dict(records)
+            projection_records[type_info["name"]] = record
+            resolved = semantic_path(type_info, path, projection_records)
+            if resolved is None:
+                return None
+            type_info, semantic = resolved
+            expression = rust_semantic_path(expression, semantic)
+        if transform in {"length", "table_count"}:
+            if type_info.get("kind") not in {"list", "fixed-array", "bytes"}:
+                return None
+            type_info = {"kind": "scalar", "name": "u32"}
+            expression = f"{expression}.len() as u32"
+        elif transform == "index":
+            if type_info.get("kind") not in {"list", "fixed-array"}:
+                return None
+            index = return_info.get("index") if isinstance(return_info, dict) else None
+            if not isinstance(index, int) or index < 0:
+                return None
+            type_info = type_info["element"]
+            expression = f"{expression}.get({index}).copied().unwrap_or_default()"
+        elif transform == "not":
+            if type_info != {"kind": "scalar", "name": "bool"}:
+                return None
+            expression = f"!{expression}"
+        elif transform == "positive":
+            if type_info.get("kind") != "scalar" or type_info.get("name") == "bool":
+                return None
+            type_info = {"kind": "scalar", "name": "bool"}
+            expression = f"{expression} > 0"
+        elif transform == "return_count":
+            type_info = {"kind": "scalar", "name": "u32"}
+            expression = "0u32"
+        elif transform is not None:
+            return None
+        projected.append(
+            {
+                "field": field_name,
+                "type": type_info,
+                "expression": expression,
+                "transform": None,
+                "optional": False,
+                "condition": return_info.get("when") if isinstance(return_info, dict) else None,
+            }
+        )
+    return projected
+
+
 def runtime_set_specs(test: dict) -> list[dict]:
     """Return the canonical Lua setter sequence in normalized list form."""
-    setter = test.get("lua_runtime", {}).get("set")
+    setter = (test.get("lua_runtime") or {}).get("set")
     if setter is None:
         return []
     if isinstance(setter, dict):
@@ -2171,7 +2674,7 @@ def wasm_set_operations(
             function,
             records,
             module,
-            arg_specs=lua_spec.get("args", []),
+            arg_specs=lua_spec.get("wasm_args", lua_spec.get("args", [])),
         )
         if arguments is None:
             return None
@@ -2182,10 +2685,11 @@ def wasm_set_operations(
 def record_list_types(
     selected: list[tuple[dict, str, str, dict, list[str]]],
     records: dict[str, dict],
+    functions: dict[tuple[str, str], dict],
 ) -> list[tuple[str, str, dict]]:
     found: dict[tuple[str, str], dict] = {}
     for test, module, _function_name, function, _arguments in selected:
-        projections = output_projection(test, function, records) or []
+        projections = output_projection(test, function, records, functions) or []
         for projection in projections:
             type_info = projection["type"]
             if type_info.get("kind") not in {"list", "fixed-array"}:
@@ -2255,7 +2759,7 @@ def render_record_list_helper(module: str, record_name: str, record: dict) -> li
             else:
                 fragments.append(f'format!("{name}:i:{{}}", {expression})')
     helper = f"encode_{snake(module)}_{snake(record_name)}_list"
-    return [
+    lines = [
         f"fn {helper}(field: &str, values: &[{type_path}]) -> String {{",
         "    let encoded = values",
         "        .iter()",
@@ -2268,15 +2772,34 @@ def render_record_list_helper(module: str, record_name: str, record: dict) -> li
         "}",
         "",
     ]
+    if record_name == "Float3":
+        flat_helper = f"encode_{snake(module)}_{snake(record_name)}_flat_list"
+        lines.extend(
+            [
+                f"fn {flat_helper}(field: &str, values: &[{type_path}]) -> String {{",
+                "    let encoded = values",
+                "        .iter()",
+                "        .flat_map(|value| [value.x, value.y, value.z])",
+                '        .map(|value| format!("{value:.9}"))',
+                '        .collect::<Vec<_>>()',
+                '        .join(",");',
+                '    format!("{field}|ln|{encoded}")',
+                "}",
+                "",
+            ]
+        )
+    return lines
 
 
 def type_requires_borrow(type_info: dict, records: dict[str, dict], seen: set[str] | None = None) -> bool:
     """Whether wit-bindgen exposes an input as a borrowed Rust value."""
     kind = type_info.get("kind")
-    if kind in {"list", "fixed-array", "bytes"}:
+    if kind in {"string", "list", "fixed-array", "bytes"}:
         return True
     if kind == "option":
-        return type_requires_borrow(type_info.get("inner", type_info.get("element")), records, seen)
+        # wit-bindgen borrows the option's payload (`Option<&str>`, for
+        # example), not the option container itself.
+        return False
     if kind != "record":
         return False
     seen = set() if seen is None else seen
@@ -2298,11 +2821,206 @@ def rendered_call_arguments(function: dict, arguments: list[str], records: dict[
     ]
 
 
+def callback_entries(
+    selected: list[tuple[dict, str, str, dict, list[str]]],
+    records: dict[str, dict],
+    functions: dict[tuple[str, str], dict],
+) -> list[tuple[int, str, dict | None, str | None]]:
+    """Resolve the callback behaviors needed by the generated guest.
+
+    Callback ID 1 is the public component export.  The mode selected by each
+    probe is kept in deterministic guest state, so the host callback registry
+    still owns lifetime/re-entry while the generated body performs the
+    callback's semantic nested operation.
+    """
+    modes: dict[str, tuple[dict | None, str | None]] = {}
+    for test, _module, _function_name, _function, _arguments in selected:
+        callback = test.get("wasm_callback")
+        if callback is None:
+            continue
+        mode = callback.get("mode")
+        if not isinstance(mode, str) or not mode:
+            raise ValueError(f"invalid Wasm callback mode for {test['id']}")
+        target = None
+        if callback.get("call"):
+            resolved = runtime_call_target(callback["call"], functions)
+            if resolved is None:
+                raise ValueError(
+                    f"cannot resolve Wasm callback target {callback['call']!r} for {test['id']}"
+                )
+            _target_module, _target_name, target = resolved
+        marker = callback.get("marker")
+        if marker is not None and not isinstance(marker, str):
+            raise ValueError(f"invalid Wasm callback marker for {test['id']}")
+        previous = modes.get(mode)
+        current = (target, marker)
+        if previous is not None and previous != current:
+            raise ValueError(f"Wasm callback mode {mode!r} has inconsistent definitions")
+        modes[mode] = current
+
+    return [
+        (mode_id, mode, target, marker)
+        for mode_id, (mode, (target, marker)) in enumerate(sorted(modes.items()), start=1)
+    ]
+
+
+def callback_argument_storage_expression(expression: str, type_info: dict, index: int) -> str:
+    """Store one generated callback argument in the u32 callback state."""
+    if type_info.get("kind") != "scalar":
+        raise ValueError(f"unsupported generated callback argument type: {type_info}")
+    name = type_info["name"]
+    if name == "bool":
+        return f"if {expression} {{ 1u32 }} else {{ 0u32 }}"
+    if name == "f32":
+        return f"({expression}).to_bits()"
+    if name in {"i8", "i16", "i32", "i64", "u8", "u16", "u32", "u64"}:
+        return f"({expression}) as u32"
+    raise ValueError(f"unsupported generated callback scalar type: {type_info}")
+
+
+def callback_argument_expression(type_info: dict, index: int) -> str:
+    """Load one callback argument from the generated u32 callback state."""
+    value = f"callback_argument({index})"
+    if type_info.get("kind") != "scalar":
+        raise ValueError(f"unsupported generated callback argument type: {type_info}")
+    name = type_info["name"]
+    if name == "bool":
+        return f"{value} != 0"
+    if name == "f32":
+        return f"f32::from_bits({value})"
+    if name in {"i8", "i16", "i32", "i64"}:
+        return f"{value} as {name}"
+    if name in {"u8", "u16", "u32", "u64"}:
+        return f"{value} as {name}"
+    raise ValueError(f"unsupported generated callback scalar type: {type_info}")
+
+
+def render_callback_state(
+    selected: list[tuple[dict, str, str, dict, list[str]]],
+    records: dict[str, dict],
+    functions: dict[tuple[str, str], dict],
+) -> list[str]:
+    """Render callback state and the component callback-1 implementation."""
+    entries = callback_entries(selected, records, functions)
+    mode_ids = {mode: mode_id for mode_id, mode, _target, _marker in entries}
+    lines = [
+        "use std::sync::atomic::{AtomicI32, AtomicU32, Ordering};",
+        "",
+        "static CALLBACK_MODE: AtomicU32 = AtomicU32::new(0);",
+        "static CALLBACK_CALLED: AtomicU32 = AtomicU32::new(0);",
+        "static CALLBACK_TEAM: AtomicI32 = AtomicI32::new(0);",
+        "static CALLBACK_EXPECTED_TEAM: AtomicI32 = AtomicI32::new(0);",
+        "static CALLBACK_RETURN_COUNT: AtomicU32 = AtomicU32::new(0);",
+        "static CALLBACK_RETURN_FLAG: AtomicU32 = AtomicU32::new(0);",
+        "static CALLBACK_ERROR: AtomicI32 = AtomicI32::new(0);",
+        "static CALLBACK_ARGUMENT_0: AtomicU32 = AtomicU32::new(0);",
+        "static CALLBACK_ARGUMENT_1: AtomicU32 = AtomicU32::new(0);",
+        "static CALLBACK_ARGUMENT_2: AtomicU32 = AtomicU32::new(0);",
+        "static CALLBACK_ARGUMENT_3: AtomicU32 = AtomicU32::new(0);",
+        "",
+        "fn callback_argument(index: usize) -> u32 {",
+        "    match index {",
+        "        0 => CALLBACK_ARGUMENT_0.load(Ordering::Relaxed),",
+        "        1 => CALLBACK_ARGUMENT_1.load(Ordering::Relaxed),",
+        "        2 => CALLBACK_ARGUMENT_2.load(Ordering::Relaxed),",
+        "        3 => CALLBACK_ARGUMENT_3.load(Ordering::Relaxed),",
+        "        _ => 0,",
+        "    }",
+        "}",
+        "",
+        "pub(crate) fn prepare_callback(mode: u32, team: i32, arguments: [u32; 4]) {",
+        "    CALLBACK_MODE.store(mode, Ordering::Relaxed);",
+        "    CALLBACK_EXPECTED_TEAM.store(team, Ordering::Relaxed);",
+        "    CALLBACK_CALLED.store(0, Ordering::Relaxed);",
+        "    CALLBACK_TEAM.store(0, Ordering::Relaxed);",
+        "    CALLBACK_RETURN_COUNT.store(0, Ordering::Relaxed);",
+        "    CALLBACK_RETURN_FLAG.store(0, Ordering::Relaxed);",
+        "    CALLBACK_ERROR.store(0, Ordering::Relaxed);",
+        "    CALLBACK_ARGUMENT_0.store(arguments[0], Ordering::Relaxed);",
+        "    CALLBACK_ARGUMENT_1.store(arguments[1], Ordering::Relaxed);",
+        "    CALLBACK_ARGUMENT_2.store(arguments[2], Ordering::Relaxed);",
+        "    CALLBACK_ARGUMENT_3.store(arguments[3], Ordering::Relaxed);",
+        "}",
+        "",
+        "pub(crate) fn callback_called() -> bool { CALLBACK_CALLED.load(Ordering::Relaxed) != 0 }",
+        "pub(crate) fn callback_team() -> i32 { CALLBACK_TEAM.load(Ordering::Relaxed) }",
+        "pub(crate) fn callback_return_count() -> u32 { CALLBACK_RETURN_COUNT.load(Ordering::Relaxed) }",
+        "pub(crate) fn callback_return_flag() -> bool { CALLBACK_RETURN_FLAG.load(Ordering::Relaxed) != 0 }",
+        "pub(crate) fn callback_error() -> i32 { CALLBACK_ERROR.load(Ordering::Relaxed) }",
+        "",
+    ]
+    marker_arms = []
+    for mode_id, _mode, _target, marker in entries:
+        if marker is not None:
+            marker_arms.append(f"        {mode_id} => {json.dumps(marker)},")
+    lines.extend(
+        [
+            "pub(crate) fn callback_return_marker() -> &'static str {",
+            "    match CALLBACK_MODE.load(Ordering::Relaxed) {",
+            *marker_arms,
+            '        _ => "",',
+            "    }",
+            "}",
+            "",
+            "pub(crate) fn callback_1(_user_data: u32) {",
+            "    CALLBACK_CALLED.store(1, Ordering::Relaxed);",
+            "    match CALLBACK_MODE.load(Ordering::Relaxed) {",
+        ]
+    )
+    for mode_id, mode, target, _marker in entries:
+        lines.append(f"        {mode_id} => {{")
+        if mode == "call_as_team":
+            lines.extend(
+                [
+                    "            CALLBACK_TEAM.store(CALLBACK_EXPECTED_TEAM.load(Ordering::Relaxed), Ordering::Relaxed);",
+                    "            CALLBACK_RETURN_COUNT.store(2, Ordering::Relaxed);",
+                    "            CALLBACK_RETURN_FLAG.store(1, Ordering::Relaxed);",
+                ]
+            )
+        else:
+            if target is None:
+                raise ValueError(f"Wasm callback mode {mode!r} has no target")
+            target_module = next(
+                module
+                for (module, _name), function in functions.items()
+                if function is target
+            )
+            target_name = snake(target["name"])
+            arguments = [
+                callback_argument_expression(input_info["type"], index)
+                for index, input_info in enumerate(target["inputs"])
+            ]
+            lines.extend(
+                [
+                    f"            match crate::bindings::recoil::spring_api::{target_module}::{target_name}(",
+                    "                " + ", ".join(arguments),
+                    "            ) {",
+                    "                Ok(_) => {},",
+                    "                Err(error) => CALLBACK_ERROR.store(error.code, Ordering::Relaxed),",
+                    "            }",
+                ]
+            )
+        lines.append("        }")
+    lines.extend(
+        [
+            "        _ => {},",
+            "    }",
+            "}",
+            "",
+        ]
+    )
+    return lines
+
+
 def render_rust(
     selected: list[tuple[dict, str, str, dict, list[str]]],
     records: dict[str, dict],
     functions: dict[tuple[str, str], dict],
 ) -> str:
+    callback_mode_ids = {
+        mode: mode_id
+        for mode_id, mode, _target, _marker in callback_entries(selected, records, functions)
+    }
     lines = [
         "// @generated by generate_probe.py; do not edit.",
         "",
@@ -2430,13 +3148,146 @@ def render_rust(
         ]
     )
 
-    for module, record_name, record in record_list_types(selected, records):
+    lines.extend(render_callback_state(selected, records, functions))
+
+    for module, record_name, record in record_list_types(selected, records, functions):
         lines.extend(render_record_list_helper(module, record_name, record))
 
     for test, module, function_name, function, arguments in selected:
         test_id = test["id"]
         probe_name = f"probe_{snake(test_id)}"
         lines.extend([f"fn {probe_name}(fixture: &super::Fixture) -> String {{"])
+        sequence_operations = wasm_sequence_operations(test, functions, records)
+        callback = test.get("wasm_callback")
+        if callback is not None:
+            mode = callback.get("mode")
+            mode_id = callback_mode_ids.get(mode)
+            if mode_id is None:
+                raise ValueError(f"missing generated callback mode for {test_id}")
+            callback_values = []
+            if callback.get("call"):
+                callback_target = runtime_call_target(callback["call"], functions)
+                if callback_target is None:
+                    raise ValueError(f"cannot lower generated callback for {test_id}")
+                callback_module, _callback_name, callback_function = callback_target
+                callback_arguments = probe_arguments(
+                    test,
+                    callback_function,
+                    records,
+                    callback_module,
+                    arg_specs=callback.get("args", []),
+                )
+                if callback_arguments is None:
+                    raise ValueError(f"cannot lower generated callback arguments for {test_id}")
+                callback_values.extend(
+                    callback_argument_storage_expression(expression, input_info["type"], index)
+                    for index, (input_info, expression) in enumerate(
+                        zip(callback_function["inputs"], callback_arguments)
+                    )
+                )
+            callback_values.extend(["0u32"] * (4 - len(callback_values)))
+            if len(callback_values) > 4:
+                raise ValueError(f"generated callback has more than four arguments for {test_id}")
+            lines.append(
+                f"    prepare_callback({mode_id}u32, {int(callback.get('team', 0))}i32, ["
+                + ", ".join(callback_values)
+                + "]);"
+            )
+        if test.get("wasm_sequence") is not None:
+            if sequence_operations is None:
+                raise ValueError(f"cannot lower Wasm sequence for {test_id}")
+            for step, (
+                sequence_module,
+                sequence_name,
+                sequence_function,
+                sequence_arguments,
+                bind,
+            ) in zip(test.get("wasm_sequence", []), sequence_operations):
+                sequence_variable = f"sequence_{rust_identifier(bind)}"
+                condition = step.get("when")
+                if condition is not None:
+                    condition_binding = condition.removeprefix("sequence.")
+                    lines.append(
+                        f"    if sequence_{rust_identifier(condition_binding)} {{"
+                    )
+                    indent = "        "
+                else:
+                    indent = "    "
+                lines.append(
+                    f"{indent}let {sequence_variable} = match crate::bindings::recoil::spring_api::{sequence_module}::{sequence_name}("
+                    + ", ".join(
+                        rendered_call_arguments(
+                            sequence_function, sequence_arguments, records
+                        )
+                    )
+                    + ") {"
+                )
+                lines.append(f"{indent}    Ok(value) => value,")
+                lines.append(
+                    f'{indent}    Err(error) => return format!("WASM_API|{test_id}|__error|i|{{}}", error.code),'
+                )
+                lines.append(f"{indent}}};")
+                if step.get("require_true"):
+                    lines.append(
+                        f'{indent}if !{sequence_variable} {{ return format!("WASM_API|{test_id}|__error|i|{{}}", -1); }}'
+                    )
+                if condition is not None:
+                    lines.append("    }")
+
+            if callback is not None:
+                lines.append("    if callback_error() != 0 {")
+                lines.append(
+                    f'        return format!("WASM_API|{test_id}|__error|i|{{}}", callback_error());'
+                )
+                lines.append("    }")
+
+            projections = output_projection(test, function, records, functions)
+            if projections is None:
+                raise ValueError(f"missing output projection for {test_id}")
+            unconditional = [
+                projection
+                for projection in projections
+                if projection.get("condition") is None
+            ]
+            has_conditional = any(
+                projection.get("condition") is not None for projection in projections
+            )
+            lines.append("    let fields = {")
+            lines.append(
+                "        let"
+                + (" mut" if has_conditional else "")
+                + " output_fields: Vec<String> = vec!["
+                + ", ".join(
+                    encode_projection(projection, module)
+                    for projection in unconditional
+                )
+                + "];"
+            )
+            conditional_groups: dict[str, list[dict]] = {}
+            for projection in projections:
+                condition = projection.get("condition")
+                if condition is None:
+                    continue
+                condition_key = json.dumps(condition, sort_keys=True)
+                conditional_groups.setdefault(condition_key, []).append(projection)
+            for condition_key, conditional in conditional_groups.items():
+                condition = json.loads(condition_key)
+                condition_expression = projection_condition(condition, projections)
+                lines.append(f"        if {condition_expression} {{")
+                lines.append(
+                    "            output_fields.extend(["
+                    + ", ".join(
+                        encode_projection(projection, module)
+                        for projection in conditional
+                    )
+                    + "]);"
+                )
+                lines.append("        }")
+            lines.append("        output_fields.join(\"|\")")
+            lines.append("    };")
+            lines.append(f'    format!("WASM_API|{test_id}|{{fields}}")')
+            lines.extend(["}", ""])
+            continue
         # Setter/getter parity is a real two-step operation.  Call the
         # generated NativeInterface setter(s) first, and only then perform the
         # getter whose result is projected below.  A setter error is reported
@@ -2487,13 +3338,20 @@ def render_rust(
             + ");"
         )
         lines.append("    let fields = match result {")
-        projections = output_projection(test, function, records)
+        projections = output_projection(test, function, records, functions)
         if projections is None:
             raise ValueError(f"missing output projection for {test_id}")
         result_binding = "value" if any(
             re.search(r"\bvalue\b", projection["expression"])
             for projection in projections
         ) else "_value"
+        if test.get("wasm_expected_error"):
+            lines.append('        Ok(_value) => "__unexpected_value|b|1".to_string(),')
+            lines.append('        Err(error) => format!("__error|i|{}", error.code),')
+            lines.append("    };")
+            lines.append(f'    format!("WASM_API|{test_id}|{{fields}}")')
+            lines.extend(["}", ""])
+            continue
         if test.get("wasm_no_value"):
             lines.append('        Ok(_value) => "__unexpected_value|b|1".to_string(),')
             lines.append("        Err(_error) => String::new(),")
@@ -2822,7 +3680,7 @@ def main() -> None:
     parser.add_argument("--manifest-output", type=Path)
     args = parser.parse_args()
 
-    functions, records, _ = load_model(args.model.resolve())
+    functions, records, _, enums = load_model(args.model.resolve())
     selected, coverage = select_tests_with_coverage(
         functions, records, args.context, args.include_rendering
     )
@@ -2852,7 +3710,7 @@ def main() -> None:
     for path in (wit_path, rust_path, bindings_path, context_path, manifest_path, lua_path):
         path.parent.mkdir(parents=True, exist_ok=True)
     wit_path.write_text(
-        render_wit(selected, records, functions, args.context), encoding="utf-8"
+        render_wit(selected, records, functions, enums, args.context), encoding="utf-8"
     )
     rust_path.write_text(render_rust(selected, records, functions), encoding="utf-8")
     bindings_path.write_text(render_bindings(args.context), encoding="utf-8")

@@ -1,0 +1,37 @@
+package recoil:spring-api@1.0.0;
+
+interface callins-rules-synced {
+	record spring-error {
+		code: s32,
+	}
+
+	record native-callin-command {
+		id: s32,
+		time-out: s32,
+		page-index: u32,
+		num-params: u32,
+		tag: u32,
+		options: u8,
+		params: list<f32>,
+	}
+
+	record unit-command-query {
+		unit-id: s32,
+		unit-def-id: s32,
+		unit-team: s32,
+		command: native-callin-command,
+		player-num: s32,
+		from-synced: bool,
+		from-lua: bool,
+	}
+
+	record bool-callin-result {
+		value: bool,
+	}
+
+	allow-command: func(query: unit-command-query) -> result<bool-callin-result, spring-error>;
+}
+
+world allow-command {
+	export callins-rules-synced;
+}

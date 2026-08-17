@@ -23,8 +23,31 @@
         "fields": "`success`"
       },
       "rust": {"check": "check_unit_cmd_desc_lifecycle", "set": "set_unit_cmd_desc_lifecycle"},
-      "params": {},
-      "lua_runtime": null
+      "params": {
+        "cmdID": {"type": "i32", "fixed": 34567},
+        "cmdType": {"type": "i32", "fixed": 21},
+        "action": {"type": "string", "fixed": "native_api_parity_cmd"},
+        "editedAction": {"type": "string", "fixed": "native_api_parity_cmd_edited"}
+      },
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.InsertUnitCmdDesc", "args": ["fixture.unitID", {"id": "value.cmdID", "type": "value.cmdType", "queueing": false, "hidden": false, "disabled": false, "showUnique": false, "onlyTexture": false, "name": "Native parity command", "action": "value.action", "iconname": "", "mouseicon": "", "tooltip": "Native parity command", "params": ["native_api_parity"]}], "bind": "inserted"},
+          {"call": "Spring.FindUnitCmdDesc", "args": ["fixture.unitID", "value.cmdID"], "bind": "found"},
+          {"call": "Spring.EditUnitCmdDesc", "args": ["fixture.unitID", "sequence.found.cmdIndex", {"id": "value.cmdID", "type": "value.cmdType", "queueing": false, "hidden": false, "disabled": false, "showUnique": false, "onlyTexture": false, "name": "Native parity command", "action": "value.editedAction", "iconname": "", "mouseicon": "", "tooltip": "Native parity command", "params": ["native_api_parity"]}], "bind": "edited"},
+          {"call": "Spring.RemoveUnitCmdDesc", "args": ["fixture.unitID", "sequence.found.cmdIndex"], "bind": "removed"},
+          {"call": "Spring.FindUnitCmdDesc", "args": ["fixture.unitID", "value.cmdID"], "bind": "after"}
+        ],
+        "returns": [
+          {"field": "success", "from": "after", "path": ["found"], "transform": "not"}
+        ]
+      },
+      "wasm_sequence": [
+        {"call": "UnitControl.insert_unit_cmd_desc", "args": ["fixture.unitID", -1, {"id": "value.cmdID", "type": "value.cmdType", "queueing": false, "hidden": false, "disabled": false, "showUnique": false, "onlyTexture": false, "name": "Native parity command", "action": "value.action", "iconname": "", "mouseicon": "", "tooltip": "Native parity command", "params": ["native_api_parity"]}], "bind": "inserted", "require_true": true},
+        {"call": "UnitsCommands.find_unit_cmd_desc", "args": ["fixture.unitID", "value.cmdID"], "bind": "found"},
+        {"call": "UnitControl.edit_unit_cmd_desc", "args": ["fixture.unitID", "sequence.found.cmdIndex", {"id": "value.cmdID", "type": "value.cmdType", "queueing": false, "hidden": false, "disabled": false, "showUnique": false, "onlyTexture": false, "name": "Native parity command", "action": "value.editedAction", "iconname": "", "mouseicon": "", "tooltip": "Native parity command", "params": ["native_api_parity"]}], "bind": "edited", "require_true": true},
+        {"call": "UnitControl.remove_unit_cmd_desc", "args": ["fixture.unitID", "sequence.found.cmdIndex"], "bind": "removed", "require_true": true},
+        {"call": "UnitsCommands.find_unit_cmd_desc", "args": ["fixture.unitID", "value.cmdID"], "bind": "after"}
+      ]
     },
     {
       "id": "solve_nurbscurve",
@@ -45,13 +68,19 @@
       "params": {
         "degree": {"type": "i32", "fixed": 2},
         "controlPoints": {"type": "object", "fixed": [0, 0, 0, 1, 256, 64, 128, 1, 512, 0, 256, 1]},
+        "points": {"type": "object", "fixed": [
+          {"x": 0, "y": 0, "z": 0, "w": 1},
+          {"x": 256, "y": 64, "z": 128, "w": 1},
+          {"x": 512, "y": 0, "z": 256, "w": 1}
+        ]},
         "knots": {"type": "object", "fixed": [0, 0, 0, 1, 1, 1]},
         "segments": {"type": "i32", "fixed": 4}
       },
+      "wasm_args": ["value.degree", "value.points", "value.knots", "value.segments"],
       "lua_runtime": {
         "call": "Spring.SolveNURBSCurve",
         "args": ["value.degree", "value.controlPoints", "value.knots", "value.segments"],
-        "returns": [{"field": "points", "index": 1}]
+        "returns": [{"field": "points", "index": 1, "transform": "flat_float3_list"}]
       }
     },
     {
@@ -76,8 +105,19 @@
         "fields": "`height`"
       },
       "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
-      "params": {},
-      "lua_runtime": null
+      "params": {
+        "x": {"type": "f32", "fixed": 1600},
+        "z": {"type": "f32", "fixed": 1600},
+        "height": {"type": "f32", "wasm_fixed": 106},
+        "factor": {"type": "f32", "fixed": 0.5}
+      },
+      "lua_runtime": null,
+      "wasm_sequence": [
+        {"call": "TerrainControl.set_original_height_map_func", "args": [1, 0], "bind": "registered"},
+        {"call": "Terrain.get_ground_orig_height", "args": ["value.x", "value.z"], "bind": "height"}
+      ],
+      "wasm_callback": {"mode": "set_original_height_map", "call": "TerrainControl.set_original_height_map", "args": ["value.x", "value.z", "value.height", "value.factor"], "team": 0},
+      "wasm_returns": [{"field": "height", "from": "height"}]
     },
     {
       "id": "set_smooth_mesh",
@@ -101,8 +141,19 @@
         "fields": "`height`"
       },
       "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
-      "params": {},
-      "lua_runtime": null
+      "params": {
+        "x": {"type": "f32", "fixed": 1600},
+        "z": {"type": "f32", "fixed": 1600},
+        "height": {"type": "f32", "wasm_fixed": 106},
+        "terraform": {"type": "f32", "fixed": 0.5}
+      },
+      "lua_runtime": null,
+      "wasm_sequence": [
+        {"call": "TerrainControl.set_smooth_mesh_func", "args": [1, 0], "bind": "registered"},
+        {"call": "Terrain.get_smooth_mesh_height", "args": ["value.x", "value.z"], "bind": "height"}
+      ],
+      "wasm_callback": {"mode": "set_smooth_mesh", "call": "TerrainControl.set_smooth_mesh", "args": ["value.x", "value.z", "value.height", "value.terraform"], "team": 0},
+      "wasm_returns": [{"field": "height", "from": "height"}]
     }
   ]
 }

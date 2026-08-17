@@ -14,7 +14,13 @@
         "x": {"type": "f32", "fixed": 1600},
         "z": {"type": "f32", "fixed": 1600},
         "delta": {"type": "f32", "fixed": 2}
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.set_height_map_func", "args": [1, 0], "bind": "registered"},
+        {"call": "Terrain.get_ground_height", "args": ["value.x", "value.z"], "bind": "height"}
+      ],
+      "wasm_callback": {"mode": "add_height_map", "call": "TerrainControl.add_height_map", "args": ["value.x", "value.z", "value.delta"], "team": 0},
+      "wasm_returns": [{"field": "height", "from": "height"}]
     },
     {
       "id": "add_original_height_map",
@@ -29,7 +35,13 @@
         "x": {"type": "f32", "fixed": 1600},
         "z": {"type": "f32", "fixed": 1600},
         "delta": {"type": "f32", "fixed": 2}
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.set_original_height_map_func", "args": [1, 0], "bind": "registered"},
+        {"call": "Terrain.get_ground_orig_height", "args": ["value.x", "value.z"], "bind": "height"}
+      ],
+      "wasm_callback": {"mode": "add_original_height_map", "call": "TerrainControl.add_original_height_map", "args": ["value.x", "value.z", "value.delta"], "team": 0},
+      "wasm_returns": [{"field": "height", "from": "height"}]
     },
     {
       "id": "add_smooth_mesh",
@@ -44,7 +56,13 @@
         "x": {"type": "f32", "fixed": 1600},
         "z": {"type": "f32", "fixed": 1600},
         "delta": {"type": "f32", "fixed": 2}
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.set_smooth_mesh_func", "args": [1, 0], "bind": "registered"},
+        {"call": "Terrain.get_smooth_mesh_height", "args": ["value.x", "value.z"], "bind": "height"}
+      ],
+      "wasm_callback": {"mode": "add_smooth_mesh", "call": "TerrainControl.add_smooth_mesh", "args": ["value.x", "value.z", "value.delta"], "team": 0},
+      "wasm_returns": [{"field": "height", "from": "height"}]
     },
     {
       "id": "add_team_resource_excess_stats",
@@ -91,7 +109,17 @@
         "call": "Spring.GetTeamResources",
         "args": ["value.teamID", "value.resource"],
         "returns": ["currentLevel", "storage", "pull", "income", "expense", "share"]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TeamControl.set_team_resource", "args": ["value.teamID", "value.resource", "value.baseline"], "bind": "set", "require_true": true},
+        {"call": "TeamControl.share_team_resource", "args": ["value.teamID", "value.targetTeamID", "value.resource", "value.amount"], "bind": "shared", "require_true": true},
+        {"call": "Teams.get_team_resources", "args": ["value.teamID", "value.resource"], "bind": "resources"}
+      ],
+      "wasm_returns": [
+        {"field": "currentLevel", "from": "resources", "path": ["currentLevel"]},
+        {"field": "storage", "from": "resources", "path": ["storage"]},
+        {"field": "share", "from": "resources", "path": ["share"]}
+      ]
     },
     {
       "id": "set_ally",
@@ -178,11 +206,12 @@
     },
     {
       "id": "set_experience_grade",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",
       "requires": [],
-      "lua": {"set": ["Spring.SetExperienceGrade"]},
-      "native": {"set": ["GameConfig.set_experience_grade"]},
+      "lua": {"set": ["Spring.SetExperienceGrade"], "get": ["Spring.SetExperienceGrade"]},
+      "native": {"set": ["GameConfig.set_experience_grade"], "get": ["GameConfig.set_experience_grade"]},
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
       "params": {
@@ -190,21 +219,35 @@
         "expPowerScale": {"type": "f32", "fixed": 1.1},
         "expHealthScale": {"type": "f32", "fixed": 1.2},
         "expReloadScale": {"type": "f32", "fixed": 1.3}
+      },
+      "lua_runtime": {
+        "set": {"call": "Spring.SetExperienceGrade", "args": ["value.expGrade", "value.expPowerScale", "value.expHealthScale", "value.expReloadScale"]},
+        "call": "Spring.SetExperienceGrade",
+        "args": ["value.expGrade", "value.expPowerScale", "value.expHealthScale", "value.expReloadScale"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
       }
     },
     {
       "id": "set_no_pause",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",
       "requires": [],
-      "lua": {"set": ["Spring.SetNoPause"]},
-      "native": {"set": ["GameConfig.set_no_pause"]},
+      "lua": {"set": ["Spring.SetNoPause"], "get": ["Spring.SetNoPause"]},
+      "native": {"set": ["GameConfig.set_no_pause"], "get": ["GameConfig.set_no_pause"]},
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
-      "params": {"noPause": {"type": "bool", "fixed": true}}
+      "params": {"noPause": {"type": "bool", "fixed": true}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetNoPause", "args": ["value.noPause"]},
+        "call": "Spring.SetNoPause",
+        "args": ["value.noPause"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      }
     },
     {
-      "id": "set_player_ready_state",
+     "id": "set_player_ready_state",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",
       "requires": [],
@@ -221,18 +264,26 @@
       }
     },
     {
-      "id": "set_square_building_mask",
+     "id": "set_square_building_mask",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",
       "requires": [],
-      "lua": {"set": ["Spring.SetSquareBuildingMask"]},
-      "native": {"set": ["GameConfig.set_square_building_mask"]},
+      "lua": {"set": ["Spring.SetSquareBuildingMask"], "get": ["Spring.SetSquareBuildingMask"]},
+      "native": {"set": ["GameConfig.set_square_building_mask"], "get": ["GameConfig.set_square_building_mask"]},
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_remaining_synced", "set": "set_remaining_synced"},
-      "params": {"x": {"type": "i32", "fixed": 1}, "z": {"type": "i32", "fixed": 1}, "mask": {"type": "i32", "fixed": 1}}
+      "params": {"x": {"type": "i32", "fixed": 1}, "z": {"type": "i32", "fixed": 1}, "mask": {"type": "i32", "fixed": 1}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetSquareBuildingMask", "args": ["value.x", "value.z", "value.mask"]},
+        "call": "Spring.SetSquareBuildingMask",
+        "args": ["value.x", "value.z", "value.mask"],
+        "returns": [{"field": "returnCount", "transform": "return_count"}]
+      }
     },
     {
-      "id": "transfer_team_max_units",
+     "id": "transfer_team_max_units",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",
       "requires": [],

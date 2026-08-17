@@ -50709,12 +50709,18 @@ impl FromValue for RoundResult {
 #[derive(Debug, Clone, PartialEq)]
 pub struct RulesParamValue {
     pub r#type: crate::RulesParamType,
+    pub bool_value: bool,
+    pub float_value: f32,
+    pub string_value: String,
 }
 
 impl IntoValue for RulesParamValue {
     fn into_value(self) -> Value {
         let mut fields = std::collections::BTreeMap::new();
         fields.insert("type".to_string(), self.r#type.into_value());
+        fields.insert("boolValue".to_string(), self.bool_value.into_value());
+        fields.insert("floatValue".to_string(), self.float_value.into_value());
+        fields.insert("stringValue".to_string(), self.string_value.into_value());
         Value::Record(fields)
     }
 }
@@ -50725,6 +50731,9 @@ impl FromValue for RulesParamValue {
         let Value::Record(mut fields) = value else { return Err(ApiError::with_detail(102, crate::ErrorCategory::Internal, "expected record")); };
         Ok(Self {
             r#type: FromValue::from_value(fields.remove("type").ok_or_else(|| generated_missing_field("type"))?)?,
+            bool_value: FromValue::from_value(fields.remove("boolValue").ok_or_else(|| generated_missing_field("boolValue"))?)?,
+            float_value: FromValue::from_value(fields.remove("floatValue").ok_or_else(|| generated_missing_field("floatValue"))?)?,
+            string_value: FromValue::from_value(fields.remove("stringValue").ok_or_else(|| generated_missing_field("stringValue"))?)?,
         })
     }
 }

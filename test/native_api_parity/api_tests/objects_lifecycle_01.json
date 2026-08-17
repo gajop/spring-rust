@@ -11,7 +11,21 @@
       "compare": {"mode": "fields", "fields": ["created"]},
       "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.destroy_unit`", "fields": "temporary unit creation and cleanup"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateUnit", "args": ["native_api_test_unit", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID", false, false], "bind": "createdUnit"},
+          {"call": "Spring.ValidUnitID", "args": ["sequence.createdUnit"], "bind": "created"},
+          {"call": "Spring.DestroyUnit", "args": ["sequence.createdUnit", false, true, "nil", true], "bind": "destroyed"}
+        ],
+        "returns": [{"field": "created", "from": "created"}]
+      },
+      "wasm_sequence": [
+        {"call": "UnitControl.create_unit", "args": [{"name": "native_api_test_unit", "id": "fixture.unitDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", {"build": false, "flattenGround": false, "unitID": -1, "builderID": -1}], "bind": "createdUnit"},
+        {"call": "UnitsQuery.valid_unit_id", "args": ["sequence.createdUnit"], "bind": "created", "require_true": true},
+        {"call": "UnitControl.destroy_unit", "args": ["sequence.createdUnit", {"selfd": false, "reclaimed": true, "attackerID": -1, "recycleID": true}], "bind": "destroyed", "require_true": true}
+      ]
     },
     {
       "id": "destroy_unit",
@@ -23,7 +37,21 @@
       "compare": {"mode": "fields", "fields": ["destroyed"]},
       "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.DestroyUnit`, `Spring.ValidUnitID`", "native_getter": "`UnitControl.create_unit`, `UnitControl.destroy_unit`, `UnitsQuery.valid_unit_id`", "fields": "unit destruction state"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateUnit", "args": ["native_api_test_unit", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID", false, false], "bind": "createdUnit"},
+          {"call": "Spring.DestroyUnit", "args": ["sequence.createdUnit", false, true, "nil", true], "bind": "destroyed"},
+          {"call": "Spring.ValidUnitID", "args": ["sequence.createdUnit"], "bind": "valid"}
+        ],
+        "returns": [{"field": "destroyed", "from": "valid", "transform": "not"}]
+      },
+      "wasm_sequence": [
+        {"call": "UnitControl.create_unit", "args": [{"name": "native_api_test_unit", "id": "fixture.unitDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", {"build": false, "flattenGround": false, "unitID": -1, "builderID": -1}], "bind": "createdUnit"},
+        {"call": "UnitControl.destroy_unit", "args": ["sequence.createdUnit", {"selfd": false, "reclaimed": true, "attackerID": -1, "recycleID": true}], "bind": "destroyed", "require_true": true},
+        {"call": "UnitsQuery.valid_unit_id", "args": ["sequence.createdUnit"], "bind": "valid"}
+      ]
     },
     {
       "id": "transfer_unit",
@@ -35,7 +63,23 @@
       "compare": {"mode": "fields", "fields": ["success", "teamAfter"]},
       "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.TransferUnit`, `Spring.GetUnitTeam`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.transfer_unit`, `UnitsInfo.get_unit_team`, `UnitControl.destroy_unit`", "fields": "transfer result and resulting team"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateUnit", "args": ["native_api_test_unit", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID", false, false], "bind": "createdUnit"},
+          {"call": "Spring.TransferUnit", "args": ["sequence.createdUnit", "fixture.teamID", true, false], "bind": "success"},
+          {"call": "Spring.GetUnitTeam", "args": ["sequence.createdUnit"], "bind": "teamAfter"},
+          {"call": "Spring.DestroyUnit", "args": ["sequence.createdUnit", false, true, "nil", true], "bind": "destroyed"}
+        ],
+        "returns": ["success", "teamAfter"]
+      },
+      "wasm_sequence": [
+        {"call": "UnitControl.create_unit", "args": [{"name": "native_api_test_unit", "id": "fixture.unitDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", {"build": false, "flattenGround": false, "unitID": -1, "builderID": -1}], "bind": "createdUnit"},
+        {"call": "UnitControl.transfer_unit", "args": ["sequence.createdUnit", "fixture.teamID", true, false], "bind": "success", "require_true": true},
+        {"call": "UnitsInfo.get_unit_team", "args": ["sequence.createdUnit"], "bind": "teamAfter"},
+        {"call": "UnitControl.destroy_unit", "args": ["sequence.createdUnit", {"selfd": false, "reclaimed": true, "attackerID": -1, "recycleID": true}], "bind": "destroyed", "require_true": true}
+      ]
     },
     {
       "id": "create_feature_cleanup",
@@ -47,7 +91,21 @@
       "compare": {"mode": "fields", "fields": ["created"]},
       "report": {"lua_getter": "`Spring.CreateFeature`, `Spring.DestroyFeature`", "native_getter": "`FeatureControl.create_feature`, `FeatureControl.destroy_feature`", "fields": "temporary feature creation and cleanup"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateFeature", "args": ["native_api_test_feature", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID"], "bind": "createdFeature"},
+          {"call": "Spring.ValidFeatureID", "args": ["sequence.createdFeature"], "bind": "created"},
+          {"call": "Spring.DestroyFeature", "args": ["sequence.createdFeature"], "bind": "destroyed"}
+        ],
+        "returns": [{"field": "created", "from": "created"}]
+      },
+      "wasm_sequence": [
+        {"call": "FeatureControl.create_feature", "args": [{"name": "native_api_test_feature", "id": "fixture.featureDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", -1], "bind": "createdFeature"},
+        {"call": "Features.valid_feature_id", "args": ["sequence.createdFeature"], "bind": "created"},
+        {"call": "FeatureControl.destroy_feature", "args": ["sequence.createdFeature"], "bind": "destroyed", "when": "sequence.created"}
+      ]
     },
     {
       "id": "destroy_feature",
@@ -59,7 +117,21 @@
       "compare": {"mode": "fields", "fields": ["destroyed"]},
       "report": {"lua_getter": "`Spring.CreateFeature`, `Spring.DestroyFeature`, `Spring.ValidFeatureID`", "native_getter": "`FeatureControl.create_feature`, `FeatureControl.destroy_feature`, `Features.valid_feature_id`", "fields": "feature destruction state"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateFeature", "args": ["native_api_test_feature", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID"], "bind": "createdFeature"},
+          {"call": "Spring.DestroyFeature", "args": ["sequence.createdFeature"], "bind": "destroyed"},
+          {"call": "Spring.ValidFeatureID", "args": ["sequence.createdFeature"], "bind": "valid"}
+        ],
+        "returns": [{"field": "destroyed", "from": "valid", "transform": "not"}]
+      },
+      "wasm_sequence": [
+        {"call": "FeatureControl.create_feature", "args": [{"name": "native_api_test_feature", "id": "fixture.featureDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", -1], "bind": "createdFeature"},
+        {"call": "FeatureControl.destroy_feature", "args": ["sequence.createdFeature"], "bind": "destroyed", "require_true": true},
+        {"call": "Features.valid_feature_id", "args": ["sequence.createdFeature"], "bind": "valid"}
+      ]
     },
     {
       "id": "transfer_feature",
@@ -71,7 +143,23 @@
       "compare": {"mode": "fields", "fields": ["teamAfter"]},
       "report": {"lua_getter": "`Spring.CreateFeature`, `Spring.TransferFeature`, `Spring.GetFeatureTeam`, `Spring.DestroyFeature`", "native_getter": "`FeatureControl.create_feature`, `FeatureControl.transfer_feature`, `Features.get_feature_team`, `FeatureControl.destroy_feature`", "fields": "resulting feature team"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateFeature", "args": ["native_api_test_feature", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID"], "bind": "createdFeature"},
+          {"call": "Spring.TransferFeature", "args": ["sequence.createdFeature", "fixture.teamID"], "bind": "transferred"},
+          {"call": "Spring.GetFeatureTeam", "args": ["sequence.createdFeature"], "bind": "teamAfter"},
+          {"call": "Spring.DestroyFeature", "args": ["sequence.createdFeature"], "bind": "destroyed"}
+        ],
+        "returns": ["teamAfter"]
+      },
+      "wasm_sequence": [
+        {"call": "FeatureControl.create_feature", "args": [{"name": "native_api_test_feature", "id": "fixture.featureDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", -1], "bind": "createdFeature"},
+        {"call": "FeatureControl.transfer_feature", "args": ["sequence.createdFeature", "fixture.teamID"], "bind": "transferred", "require_true": true},
+        {"call": "Features.get_feature_team", "args": ["sequence.createdFeature"], "bind": "teamAfter"},
+        {"call": "FeatureControl.destroy_feature", "args": ["sequence.createdFeature"], "bind": "destroyed", "require_true": true}
+      ]
     },
     {
       "id": "create_unit_wreck_cleanup",
@@ -83,7 +171,21 @@
       "compare": {"mode": "fields", "fields": ["created"]},
       "report": {"lua_getter": "`Spring.CreateUnitWreck`, `Spring.DestroyFeature`", "native_getter": "`FeatureControl.create_unit_wreck`, `FeatureControl.destroy_feature`", "fields": "unit wreck creation and cleanup"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateUnitWreck", "args": ["fixture.unitID", 1, false], "bind": "createdFeature"},
+          {"call": "Spring.ValidFeatureID", "args": ["sequence.createdFeature"], "bind": "created"},
+          {"call": "Spring.DestroyFeature", "args": ["sequence.createdFeature"], "bind": "destroyed"}
+        ],
+        "returns": [{"field": "created", "from": "created"}]
+      },
+      "wasm_sequence": [
+        {"call": "FeatureControl.create_unit_wreck", "args": ["fixture.unitID", 1, false], "bind": "createdFeature"},
+        {"call": "Features.valid_feature_id", "args": ["sequence.createdFeature"], "bind": "created"},
+        {"call": "FeatureControl.destroy_feature", "args": ["sequence.createdFeature"], "bind": "destroyed", "when": "sequence.created"}
+      ]
     },
     {
       "id": "create_feature_wreck_cleanup",
@@ -95,7 +197,21 @@
       "compare": {"mode": "fields", "fields": ["created"]},
       "report": {"lua_getter": "`Spring.CreateFeatureWreck`, `Spring.DestroyFeature`", "native_getter": "`FeatureControl.create_feature_wreck`, `FeatureControl.destroy_feature`", "fields": "feature wreck creation and cleanup"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateFeatureWreck", "args": ["fixture.featureID", 1, false], "bind": "createdFeature"},
+          {"call": "Spring.ValidFeatureID", "args": ["sequence.createdFeature"], "bind": "created"},
+          {"call": "Spring.DestroyFeature", "args": ["sequence.createdFeature"], "bind": "destroyed"}
+        ],
+        "returns": [{"field": "created", "from": "created"}]
+      },
+      "wasm_sequence": [
+        {"call": "FeatureControl.create_feature_wreck", "args": ["fixture.featureID", 1, false], "bind": "createdFeature"},
+        {"call": "Features.valid_feature_id", "args": ["sequence.createdFeature"], "bind": "created"},
+        {"call": "FeatureControl.destroy_feature", "args": ["sequence.createdFeature"], "bind": "destroyed", "when": "sequence.created"}
+      ]
     },
     {
       "id": "unit_attach",
@@ -107,7 +223,25 @@
       "compare": {"mode": "fields", "fields": ["attached"]},
       "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.UnitAttach`, `Spring.GetUnitTransporter`, `Spring.UnitDetach`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.unit_attach`, `UnitsInfo.get_unit_transporter`, `UnitControl.unit_detach`, `UnitControl.destroy_unit`", "fields": "transport attachment state"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateUnit", "args": ["native_api_test_unit", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID", false, false], "bind": "passenger"},
+          {"call": "Spring.UnitAttach", "args": ["fixture.unitID", "sequence.passenger", 0, true], "bind": "attached"},
+          {"call": "Spring.GetUnitTransporter", "args": ["sequence.passenger"], "bind": "transporter"},
+          {"call": "Spring.UnitDetach", "args": ["sequence.passenger"], "bind": "detached"},
+          {"call": "Spring.DestroyUnit", "args": ["sequence.passenger", false, true, "nil", true], "bind": "destroyed"}
+        ],
+        "returns": ["attached"]
+      },
+      "wasm_sequence": [
+        {"call": "UnitControl.create_unit", "args": [{"name": "native_api_test_unit", "id": "fixture.unitDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", {"build": false, "flattenGround": false, "unitID": -1, "builderID": -1}], "bind": "passenger"},
+        {"call": "UnitControl.unit_attach", "args": ["fixture.unitID", "sequence.passenger", 0], "bind": "attached"},
+        {"call": "UnitsInfo.get_unit_transporter", "args": ["sequence.passenger"], "bind": "transporter"},
+        {"call": "UnitControl.unit_detach", "args": ["sequence.passenger"], "bind": "detached"},
+        {"call": "UnitControl.destroy_unit", "args": ["sequence.passenger", {"selfd": false, "reclaimed": true, "attackerID": -1, "recycleID": true}], "bind": "destroyed", "require_true": true}
+      ]
     },
     {
       "id": "unit_detach",
@@ -119,7 +253,25 @@
       "compare": {"mode": "fields", "fields": ["detached"]},
       "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.UnitAttach`, `Spring.UnitDetach`, `Spring.GetUnitTransporter`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.unit_attach`, `UnitControl.unit_detach`, `UnitsInfo.get_unit_transporter`, `UnitControl.destroy_unit`", "fields": "transport detachment state"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateUnit", "args": ["native_api_test_unit", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID", false, false], "bind": "passenger"},
+          {"call": "Spring.UnitAttach", "args": ["fixture.unitID", "sequence.passenger", 0, true], "bind": "attached"},
+          {"call": "Spring.UnitDetach", "args": ["sequence.passenger"], "bind": "detached"},
+          {"call": "Spring.GetUnitTransporter", "args": ["sequence.passenger"], "bind": "transporter"},
+          {"call": "Spring.DestroyUnit", "args": ["sequence.passenger", false, true, "nil", true], "bind": "destroyed"}
+        ],
+        "returns": [{"field": "detached", "from": "detached"}]
+      },
+      "wasm_sequence": [
+        {"call": "UnitControl.create_unit", "args": [{"name": "native_api_test_unit", "id": "fixture.unitDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", {"build": false, "flattenGround": false, "unitID": -1, "builderID": -1}], "bind": "passenger"},
+        {"call": "UnitControl.unit_attach", "args": ["fixture.unitID", "sequence.passenger", 0], "bind": "attached"},
+        {"call": "UnitControl.unit_detach", "args": ["sequence.passenger"], "bind": "detached"},
+        {"call": "UnitsInfo.get_unit_transporter", "args": ["sequence.passenger"], "bind": "transporter"},
+        {"call": "UnitControl.destroy_unit", "args": ["sequence.passenger", {"selfd": false, "reclaimed": true, "attackerID": -1, "recycleID": true}], "bind": "destroyed", "require_true": true}
+      ]
     },
     {
       "id": "unit_detach_from_air",
@@ -131,7 +283,25 @@
       "compare": {"mode": "fields", "fields": ["detached"]},
       "report": {"lua_getter": "`Spring.CreateUnit`, `Spring.UnitAttach`, `Spring.UnitDetachFromAir`, `Spring.GetUnitTransporter`, `Spring.DestroyUnit`", "native_getter": "`UnitControl.create_unit`, `UnitControl.unit_attach`, `UnitControl.unit_detach_from_air`, `UnitsInfo.get_unit_transporter`, `UnitControl.destroy_unit`", "fields": "air detachment state"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.CreateUnit", "args": ["native_api_test_unit", "fixture.groundX", 96, "fixture.groundZ", 0, "fixture.teamID", false, false], "bind": "passenger"},
+          {"call": "Spring.UnitAttach", "args": ["fixture.unitID", "sequence.passenger", 0, true], "bind": "attached"},
+          {"call": "Spring.UnitDetachFromAir", "args": ["sequence.passenger", "fixture.groundX", 96, "fixture.groundZ"], "bind": "detached"},
+          {"call": "Spring.GetUnitTransporter", "args": ["sequence.passenger"], "bind": "transporter"},
+          {"call": "Spring.DestroyUnit", "args": ["sequence.passenger", false, true, "nil", true], "bind": "destroyed"}
+        ],
+        "returns": [{"field": "detached", "from": "detached"}]
+      },
+      "wasm_sequence": [
+        {"call": "UnitControl.create_unit", "args": [{"name": "native_api_test_unit", "id": "fixture.unitDefID"}, {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 0, "fixture.teamID", {"build": false, "flattenGround": false, "unitID": -1, "builderID": -1}], "bind": "passenger"},
+        {"call": "UnitControl.unit_attach", "args": ["fixture.unitID", "sequence.passenger", 0], "bind": "attached"},
+        {"call": "UnitControl.unit_detach_from_air", "args": ["sequence.passenger", {"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}], "bind": "detached"},
+        {"call": "UnitsInfo.get_unit_transporter", "args": ["sequence.passenger"], "bind": "transporter"},
+        {"call": "UnitControl.destroy_unit", "args": ["sequence.passenger", {"selfd": false, "reclaimed": true, "attackerID": -1, "recycleID": true}], "bind": "destroyed", "require_true": true}
+      ]
     },
     {
       "id": "bugger_off",
@@ -143,7 +313,17 @@
       "compare": {"mode": "fields", "fields": ["called"]},
       "report": {"lua_getter": "`Spring.BuggerOff`", "native_getter": "`UnitControl.bugger_off`", "fields": "successful invocation"},
       "rust": {"check": "check_object_lifecycle", "set": "set_noop"},
-      "params": {}
+      "params": {},
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.BuggerOff", "args": ["fixture.groundX", 96, "fixture.groundZ", 128, "fixture.teamID", true, true, -1], "bind": "called"}
+        ],
+        "returns": ["called"]
+      },
+      "wasm_sequence": [
+        {"call": "UnitControl.bugger_off", "args": [{"x": "fixture.groundX", "y": 96, "z": "fixture.groundZ"}, 128, "fixture.teamID", {"spherical": true, "forced": true, "excludeUnitID": -1}, []], "bind": "called"}
+      ]
     }
   ]
 }

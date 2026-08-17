@@ -92,7 +92,7 @@
         "message": {"type": "string", "fixed": "native-api-parity-log"},
         "maxLines": {"type": "i32", "fixed": 8}
       },
-      "lua_runtime": {"set": {"call": "Spring.Log", "args": ["value.section", "value.levelName", "value.message"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
+      "lua_runtime": {"set": {"call": "Spring.Log", "args": ["value.section", "value.levelName", "value.message"], "wasm_args": ["value.section", "value.level", "value.message"]}, "call": "Spring.GetConsoleBuffer", "args": ["value.maxLines"], "returns": [{"field": "count", "index": 1, "transform": "table_count"}]}
     },
     {
       "id": "send_message_to_player_console_buffer_count",

@@ -101,6 +101,9 @@ interface rules-params-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui 
 
   record rules-param-value {
     %type: rules-param-type,
+    bool-value: bool,
+    float-value: f32,
+    string-value: string,
   }
 
   enum rules-param-type {

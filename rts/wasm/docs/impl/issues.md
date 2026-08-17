@@ -17,15 +17,16 @@ values and [review-response.md](review-response.md) for the review mapping.
 - Deterministic synced timing and opt-in benchmark instrumentation.
 - Automatic generation of the benchmark matrix.
 - Direct synced-to-unsynced messaging coverage.
+- Active Lua-loader registrations are audited against the documented surface,
+  with compatibility aliases recorded as explicit exclusions.
 
 ## Required implementation work
 
 These are incomplete original-plan deliverables, not intentional deferrals:
 
 - Complete broad API and mutation-heavy end-to-end coverage.
-- Review Lua registrations not represented by the extractor.
-- Add differential conversion fuzzing and the generated-adapter performance
-  fixture.
+- Expand the bounded differential conversion corpus across the remaining
+  shared lowering families.
 - Complete broad post-change parity coverage and platform gates where
   available.
 - Commit the finished change set.

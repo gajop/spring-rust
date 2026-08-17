@@ -20,7 +20,15 @@
         "args": ["value.x", "value.z", "value.grass"],
         "returns": [{"field": "returnCount", "transform": "return_count"}],
         "post": [{"call": "Spring.GetGrass", "args": ["value.x", "value.z"], "returns": ["postGrassLevel"]}]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.add_grass", "args": ["value.x", "value.z", "value.grass"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_grass", "args": ["value.x", "value.z"], "bind": "postGrassLevel"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postGrassLevel", "from": "postGrassLevel"}
+      ]
     },
     {
       "id": "terrain_remove_grass",
@@ -38,7 +46,15 @@
         "args": ["value.x", "value.z"],
         "returns": [{"field": "returnCount", "transform": "return_count"}],
         "post": [{"call": "Spring.GetGrass", "args": ["value.x", "value.z"], "returns": ["postGrassLevel"]}]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.remove_grass", "args": ["value.x", "value.z"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_grass", "args": ["value.x", "value.z"], "bind": "postGrassLevel"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postGrassLevel", "from": "postGrassLevel"}
+      ]
     },
     {
       "id": "terrain_level_height_map",
@@ -64,7 +80,21 @@
           {"call": "Spring.GetGroundNormal", "args": ["value.x1", "value.z1", false], "returns": ["postNormalX", "postNormalY", "postNormalZ"]},
           {"call": "Spring.GetGroundHeight", "args": [880, 919.315979], "returns": ["postAffectedGroundHeight"]}
         ]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.level_height_map", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_ground_height", "args": ["value.x1", "value.z1"], "bind": "postGroundHeight"},
+        {"call": "Terrain.get_ground_normal", "args": ["value.x1", "value.z1", false], "bind": "postNormal"},
+        {"call": "Terrain.get_ground_height", "args": [880, 919.315979], "bind": "postAffectedGroundHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postGroundHeight", "from": "postGroundHeight"},
+        {"field": "postNormalX", "from": "postNormal", "path": ["normal", "x"]},
+        {"field": "postNormalY", "from": "postNormal", "path": ["normal", "y"]},
+        {"field": "postNormalZ", "from": "postNormal", "path": ["normal", "z"]},
+        {"field": "postAffectedGroundHeight", "from": "postAffectedGroundHeight"}
+      ]
     },
     {
       "id": "terrain_adjust_height_map",
@@ -89,7 +119,19 @@
           {"call": "Spring.GetGroundHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundHeight"]},
           {"call": "Spring.GetGroundNormal", "args": ["value.x1", "value.z1", false], "returns": ["postNormalX", "postNormalY", "postNormalZ"]}
         ]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.adjust_height_map", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_ground_height", "args": ["value.x1", "value.z1"], "bind": "postGroundHeight"},
+        {"call": "Terrain.get_ground_normal", "args": ["value.x1", "value.z1", false], "bind": "postNormal"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postGroundHeight", "from": "postGroundHeight"},
+        {"field": "postNormalX", "from": "postNormal", "path": ["normal", "x"]},
+        {"field": "postNormalY", "from": "postNormal", "path": ["normal", "y"]},
+        {"field": "postNormalZ", "from": "postNormal", "path": ["normal", "z"]}
+      ]
     },
     {
       "id": "terrain_revert_height_map",
@@ -115,7 +157,21 @@
           {"call": "Spring.GetGroundNormal", "args": ["value.x1", "value.z1", false], "returns": ["postNormalX", "postNormalY", "postNormalZ"]},
           {"call": "Spring.GetGroundHeight", "args": [880, 919.315979], "returns": ["postAffectedGroundHeight"]}
         ]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.revert_height_map", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.factor"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_ground_height", "args": ["value.x1", "value.z1"], "bind": "postGroundHeight"},
+        {"call": "Terrain.get_ground_normal", "args": ["value.x1", "value.z1", false], "bind": "postNormal"},
+        {"call": "Terrain.get_ground_height", "args": [880, 919.315979], "bind": "postAffectedGroundHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postGroundHeight", "from": "postGroundHeight"},
+        {"field": "postNormalX", "from": "postNormal", "path": ["normal", "x"]},
+        {"field": "postNormalY", "from": "postNormal", "path": ["normal", "y"]},
+        {"field": "postNormalZ", "from": "postNormal", "path": ["normal", "z"]},
+        {"field": "postAffectedGroundHeight", "from": "postAffectedGroundHeight"}
+      ]
     },
     {
       "id": "terrain_level_original_height_map",
@@ -137,7 +193,15 @@
         "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
         "returns": [{"field": "returnCount", "transform": "return_count"}],
         "post": [{"call": "Spring.GetGroundOrigHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundOrigHeight"]}]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.level_original_height_map", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_ground_orig_height", "args": ["value.x1", "value.z1"], "bind": "postGroundOrigHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postGroundOrigHeight", "from": "postGroundOrigHeight"}
+      ]
     },
     {
       "id": "terrain_adjust_original_height_map",
@@ -159,7 +223,15 @@
         "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
         "returns": [{"field": "returnCount", "transform": "return_count"}],
         "post": [{"call": "Spring.GetGroundOrigHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundOrigHeight"]}]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.adjust_original_height_map", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_ground_orig_height", "args": ["value.x1", "value.z1"], "bind": "postGroundOrigHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postGroundOrigHeight", "from": "postGroundOrigHeight"}
+      ]
     },
     {
       "id": "terrain_revert_original_height_map",
@@ -184,7 +256,17 @@
           {"call": "Spring.GetGroundOrigHeight", "args": ["value.x1", "value.z1"], "returns": ["postGroundOrigHeight"]},
           {"call": "Spring.GetGroundOrigHeight", "args": [880, 919.315979], "returns": ["postAffectedGroundOrigHeight"]}
         ]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.revert_original_height_map", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.factor"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_ground_orig_height", "args": ["value.x1", "value.z1"], "bind": "postGroundOrigHeight"},
+        {"call": "Terrain.get_ground_orig_height", "args": [880, 919.315979], "bind": "postAffectedGroundOrigHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postGroundOrigHeight", "from": "postGroundOrigHeight"},
+        {"field": "postAffectedGroundOrigHeight", "from": "postAffectedGroundOrigHeight"}
+      ]
     },
     {
       "id": "terrain_level_smooth_mesh",
@@ -206,7 +288,15 @@
         "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
         "returns": [{"field": "returnCount", "transform": "return_count"}],
         "post": [{"call": "Spring.GetSmoothMeshHeight", "args": ["value.x1", "value.z1"], "returns": ["postSmoothMeshHeight"]}]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.level_smooth_mesh", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_smooth_mesh_height", "args": ["value.x1", "value.z1"], "bind": "postSmoothMeshHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postSmoothMeshHeight", "from": "postSmoothMeshHeight"}
+      ]
     },
     {
       "id": "terrain_adjust_smooth_mesh",
@@ -228,7 +318,15 @@
         "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"],
         "returns": [{"field": "returnCount", "transform": "return_count"}],
         "post": [{"call": "Spring.GetSmoothMeshHeight", "args": ["value.x1", "value.z1"], "returns": ["postSmoothMeshHeight"]}]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.adjust_smooth_mesh", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.height"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_smooth_mesh_height", "args": ["value.x1", "value.z1"], "bind": "postSmoothMeshHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postSmoothMeshHeight", "from": "postSmoothMeshHeight"}
+      ]
     },
     {
       "id": "terrain_revert_smooth_mesh",
@@ -250,7 +348,15 @@
         "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.factor"],
         "returns": [{"field": "returnCount", "transform": "return_count"}],
         "post": [{"call": "Spring.GetSmoothMeshHeight", "args": ["value.x1", "value.z1"], "returns": ["postSmoothMeshHeight"]}]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.revert_smooth_mesh", "args": ["value.x1", "value.z1", "value.x2", "value.z2", "value.factor"], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_smooth_mesh_height", "args": ["value.x1", "value.z1"], "bind": "postSmoothMeshHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postSmoothMeshHeight", "from": "postSmoothMeshHeight"}
+      ]
     },
     {
       "id": "terrain_rebuild_smooth_mesh",
@@ -268,7 +374,15 @@
         "args": [],
         "returns": [{"field": "returnCount", "transform": "return_count"}],
         "post": [{"call": "Spring.GetSmoothMeshHeight", "args": [904, 904], "returns": ["postSmoothMeshHeight"]}]
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.rebuild_smooth_mesh", "args": [], "bind": "returnCount", "require_true": true},
+        {"call": "Terrain.get_smooth_mesh_height", "args": [904, 904], "bind": "postSmoothMeshHeight"}
+      ],
+      "wasm_returns": [
+        {"field": "returnCount", "from": "returnCount", "transform": "return_count"},
+        {"field": "postSmoothMeshHeight", "from": "postSmoothMeshHeight"}
+      ]
     },
     {
       "id": "set_tidal",

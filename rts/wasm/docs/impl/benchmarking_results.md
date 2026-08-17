@@ -2,36 +2,36 @@
 
 | Profile | Scale | Test | Lua | Native | Wasm | Wasm vs Lua | Wasm vs native |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: |
-| `callins` | 1 | `callin_empty` | 4477.350 ns | 212.119 ns | 2373.983 ns | 0.53× | 11.19× |
-| `callins` | 1 | `callin_gameframe` | 4468.829 ns | 185.303 ns | 2460.201 ns | 0.55× | 13.28× |
-| `callins` | 1 | `callin_update` | 229.482 ns | 164.100 ns | 1808.848 ns | 7.88× | 11.02× |
-| `callins` | 1 | `callin_unitcreated` | 221.889 ns | 71.351 ns | 2737.863 ns | 12.34× | 38.37× |
-| `callins` | 1 | `callin_unitpredamaged` | 278.700 ns | 612.674 ns | 3079.115 ns | 11.05× | 5.03× |
-| `callins` | 1 | `callin_allowunitcreation` | 225.226 ns | 586.710 ns | 1913.087 ns | 8.49× | 3.26× |
-| `callins` | 1 | `callin_unimplemented` | 30.063 ns | 16.575 ns | 2288.173 ns | 76.11× | 138.05× |
-| `callins` | 1 | `callin_4modules` | 4325.991 ns | 671.594 ns | 4993.491 ns | 1.15× | 7.44× |
-| `callouts` | 1 | `callout_scalar` | 30.255 ns ± 0.172 ns | 4.902 ns ± 0.354 ns | 451.830 ns ± 9.840 ns | 14.93× | 92.17× |
-| `callouts` | 1 | `callout_vec3` | 58.420 ns ± 0.505 ns | 5.413 ns ± 0.464 ns | 1472.150 ns ± 41.390 ns | 25.20× | 271.97× |
-| `callouts` | 1 | `callout_string` | 77.257 ns ± 0.777 ns | 29.387 ns ± 1.564 ns | 632.460 ns ± 36.480 ns | 8.19× | 21.52× |
-| `callouts` | 1 | `callout_smalllist` | 613.964 ns ± 16.427 ns | 20.944 ns ± 0.406 ns | 1920.100 ns ± 38.500 ns | 3.13× | 91.68× |
-| `callouts` | 1 | `callout_biglist` | 7381.917 ns ± 3475.190 ns | 492.638 ns ± 2.862 ns | 8388.000 ns ± 223.000 ns | 1.14× | 17.03× |
-| `callouts` | 1 | `callout_spatial` | 720.930 ns ± 112.295 ns | 225.523 ns ± 12.930 ns | 2537.600 ns ± 40.100 ns | 3.52× | 11.25× |
-| `callouts` | 1 | `callout_mutate` | 187.802 ns ± 36.709 ns | 36.039 ns ± 0.958 ns | 1078.730 ns ± 28.250 ns | 5.74× | 29.93× |
-| `heightmap` | 1 | `hm_callback_empty` | 0.000523 ms ± 0.000015 ms | 0.000033 ms ± 0.000001 ms | 9.793000 ms ± 0.039000 ms | 18716.79× | 299424.27× |
-| `heightmap` | 1 | `hm_brush_small` | 0.000523 ms ± 0.086003 ms | 0.006356 ms ± 0.000100 ms | 688.303000 ms ± 13.117000 ms | 1315513.55× | 108285.84× |
-| `heightmap` | 1 | `hm_brush_medium` | 0.000523 ms ± 2.154379 ms | 0.096341 ms ± 0.002828 ms | 1099.285000 ms ± 26.034000 ms | 2100999.58× | 11410.31× |
-| `heightmap` | 1 | `hm_brush_large` | 0.000523 ms ± 42.180424 ms | 1.536168 ms ± 0.057364 ms | 1698.790000 ms ± 40.667000 ms | 3246798.67× | 1105.86× |
-| `heightmap` | 1 | `hm_region_op` | 0.000523 ms ± 0.422165 ms | 0.000816 ms ± 0.000082 ms | 0.001524 ms ± 0.000040 ms | 2.91× | 1.87× |
-| `workloads` | 1 | `wl_unit_scan` | 0.419707 ms ± 0.016103 ms | 0.004674 ms ± 0.000442 ms | 0.896000 ms ± 0.127000 ms | 2.13× | 191.69× |
-| `workloads` | 1 | `wl_area_effect` | 0.440578 ms ± 0.109015 ms | 0.037416 ms ± 0.000962 ms | 0.621000 ms ± 0.302000 ms | 1.41× | 16.60× |
-| `workloads` | 1 | `wl_rules_params` | 0.601502 ms ± 0.155449 ms | 0.019739 ms ± 0.000494 ms | 0.702000 ms ± 0.101000 ms | 1.17× | 35.56× |
-| `workloads` | 1 | `wl_commands` | 0.580711 ms ± 0.284653 ms | 1.507944 ms ± 0.018984 ms | 1.617000 ms ± 0.149000 ms | 2.78× | 1.07× |
-| `workloads` | 1 | `wl_compute` | 1.610241 ms ± 0.247230 ms | 0.186351 ms ± 0.002816 ms | 0.324000 ms ± 0.048000 ms | 0.20× | 1.74× |
-| `memory` | 1 | `mem_per_call_small` | 0 B / 0 alloc / 3.889 ms total | 0 B / 0 alloc / 5.628 ns/call | 0 B / 0 alloc / 147.940 ms total | — | — |
-| `memory` | 1 | `mem_per_call_list` | 16063999 B / 2000 alloc / 7.435 ms total | 0 B / 0 alloc / 494.490 ns/call | 0 B / 0 alloc / 8.527 ms total | — | — |
-| `memory` | 1 | `gc_pause` | 554 KB GC / 0.503 ms | 554 KB GC / 0.515 ms | 554 KB GC / 0.488 ms | 0.97× | 0.95× |
-| `memory` | 1 | `frame_spike` | p99 0.078000 ms / worst 0.146000 ms | p99 0.005743 ms / worst 0.019356 ms | p99 0.524000 ms / worst 0.965000 ms | 6.72× | 91.24× |
-| `memory` | 1 | `mem_growth` | peak 18328584 B / steady 18328584 B | peak 2127431 B / steady 2127431 B | peak 2151959 B / steady 2111675 B | 0.12× | 1.01× |
-| `draw` | 1 | `callin_drawworld` | 19354931.000 ns | 1517.500 ns | 2025068931.000 ns | 104.63× | 1334477.06× |
-| `draw` | 1 | `callout_draw` | 74.230 ns | 5.854 ns | 970.890 ns | 13.08× | 165.85× |
-| `draw` | 1 | `wl_ui_draw` | 0.299000 ms | 0.022122 ms | 3.875500 ms | 12.96× | 175.19× |
+| `callins` | 1 | `callin_empty` | 4413.693 ns | 199.828 ns | 2493.757 ns | 0.57× | 12.48× |
+| `callins` | 1 | `callin_gameframe` | 4390.799 ns | 187.730 ns | 2471.748 ns | 0.56× | 13.17× |
+| `callins` | 1 | `callin_update` | 222.275 ns | 159.570 ns | 2192.134 ns | 9.86× | 13.74× |
+| `callins` | 1 | `callin_unitcreated` | 224.470 ns | 70.426 ns | 3036.916 ns | 13.53× | 43.12× |
+| `callins` | 1 | `callin_unitpredamaged` | 268.328 ns | 604.950 ns | 3392.569 ns | 12.64× | 5.61× |
+| `callins` | 1 | `callin_allowunitcreation` | 222.491 ns | 585.527 ns | 2041.486 ns | 9.18× | 3.49× |
+| `callins` | 1 | `callin_unimplemented` | 27.928 ns | 16.478 ns | 2471.938 ns | 88.51× | 150.01× |
+| `callins` | 1 | `callin_4modules` | 4262.226 ns | 675.249 ns | 5273.020 ns | 1.24× | 7.81× |
+| `callouts` | 1 | `callout_scalar` | 27.330 ns ± 0.446 ns | 5.446 ns ± 1.580 ns | 561.170 ns ± 12.300 ns | 20.53× | 103.04× |
+| `callouts` | 1 | `callout_vec3` | 54.941 ns ± 0.474 ns | 6.118 ns ± 0.502 ns | 1627.960 ns ± 20.380 ns | 29.63× | 266.10× |
+| `callouts` | 1 | `callout_string` | 69.442 ns ± 1.287 ns | 27.115 ns ± 0.967 ns | 753.240 ns ± 16.960 ns | 10.85× | 27.78× |
+| `callouts` | 1 | `callout_smalllist` | 630.773 ns ± 27.240 ns | 20.293 ns ± 0.619 ns | 2069.700 ns ± 43.800 ns | 3.28× | 101.99× |
+| `callouts` | 1 | `callout_biglist` | 8270.025 ns ± 3701.687 ns | 495.645 ns ± 4.264 ns | 7773.000 ns ± 389.000 ns | 0.94× | 15.68× |
+| `callouts` | 1 | `callout_spatial` | 623.155 ns ± 231.576 ns | 228.436 ns ± 7.737 ns | 2657.500 ns ± 179.200 ns | 4.26× | 11.63× |
+| `callouts` | 1 | `callout_mutate` | 184.844 ns ± 35.472 ns | 33.884 ns ± 0.864 ns | 1281.380 ns ± 48.580 ns | 6.93× | 37.82× |
+| `heightmap` | 1 | `hm_callback_empty` | 0.000514 ms ± 0.000007 ms | 0.000032 ms ± 0.000001 ms | 11.432000 ms ± 0.393000 ms | 22229.14× | 352944.08× |
+| `heightmap` | 1 | `hm_brush_small` | 0.069169 ms ± 0.000135 ms | 0.006274 ms ± 0.000026 ms | 847.702000 ms ± 3.555000 ms | 12255.52× | 135113.76× |
+| `heightmap` | 1 | `hm_brush_medium` | 1.131372 ms ± 0.054042 ms | 0.096987 ms ± 0.004881 ms | 1341.581000 ms ± 54.646000 ms | 1185.80× | 13832.55× |
+| `heightmap` | 1 | `hm_brush_large` | 17.413496 ms ± 0.216892 ms | 1.505448 ms ± 0.019056 ms | 2105.312000 ms ± 24.687000 ms | 120.90× | 1398.46× |
+| `heightmap` | 1 | `hm_region_op` | 0.000797 ms ± 0.000107 ms | 0.000600 ms ± 0.000248 ms | 0.001464 ms ± 0.000034 ms | 1.84× | 2.44× |
+| `workloads` | 1 | `wl_unit_scan` | 0.407190 ms ± 0.069749 ms | 0.004532 ms ± 0.000331 ms | 1.000000 ms ± 1.060000 ms | 2.46× | 220.63× |
+| `workloads` | 1 | `wl_area_effect` | 0.429511 ms ± 0.081320 ms | 0.039598 ms ± 0.001886 ms | 0.636000 ms ± 0.288000 ms | 1.48× | 16.06× |
+| `workloads` | 1 | `wl_rules_params` | 0.598722 ms ± 0.130434 ms | 0.020492 ms ± 0.000759 ms | 0.800000 ms ± 0.370000 ms | 1.34× | 39.04× |
+| `workloads` | 1 | `wl_commands` | 0.569897 ms ± 0.153589 ms | 1.486629 ms ± 0.010550 ms | 1.786000 ms ± 0.542000 ms | 3.13× | 1.20× |
+| `workloads` | 1 | `wl_compute` | 1.443987 ms ± 0.245667 ms | 0.185930 ms ± 0.003531 ms | 0.324000 ms ± 1.954000 ms | 0.22× | 1.74× |
+| `memory` | 1 | `mem_per_call_small` | 0 B / 0 alloc / 3.454 ms total | 0 B / 0 alloc / 5.803 ns/call | 0 B / 0 alloc / 161.951 ms total | — | — |
+| `memory` | 1 | `mem_per_call_list` | 16064000 B / 2000 alloc / 7.619 ms total | 0 B / 0 alloc / 495.714 ns/call | 0 B / 0 alloc / 7.930 ms total | — | — |
+| `memory` | 1 | `gc_pause` | 554 KB GC / 0.465 ms | 554 KB GC / 0.479 ms | 554 KB GC / 0.468 ms | 1.01× | 0.98× |
+| `memory` | 1 | `frame_spike` | p99 0.066000 ms / worst 0.110000 ms | p99 0.004988 ms / worst 0.023085 ms | p99 0.592000 ms / worst 1.092000 ms | 8.97× | 118.68× |
+| `memory` | 1 | `mem_growth` | peak 18328644 B / steady 18328644 B | peak 2127535 B / steady 2127535 B | peak 2152063 B / steady 2111779 B | 0.12× | 1.01× |
+| `draw` | 1 | `callin_drawworld` | 19940160.000 ns | 1689.000 ns | 2437530532.000 ns | 122.24× | 1443179.71× |
+| `draw` | 1 | `callout_draw` | 76.740 ns | 6.447 ns | 1168.620 ns | 15.23× | 181.26× |
+| `draw` | 1 | `wl_ui_draw` | 0.307000 ms | 0.024342 ms | 4.723875 ms | 15.39× | 194.06× |

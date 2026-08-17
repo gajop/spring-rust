@@ -2,8 +2,11 @@
 
 #include <catch_amalgamated.hpp>
 
+#include <cmath>
 #include <cstdint>
+#include <limits>
 #include <string>
+#include <vector>
 
 #include "NativeInterface/NativeInterface.h"
 #include "NativeInterface/NativeInterfaceWasmAdapter.h"
@@ -17,21 +20,75 @@ namespace {
 	bool listCallSeen = false;
 	std::int32_t listTeamID = -1;
 	std::vector<std::int32_t> listUnitDefIDs;
+	bool buildParamsCallSeen = false;
+	bool matrixCallSeen = false;
+	bool normalizeCallSeen = false;
 
 	void FakeGetTeamUnitsByDefs(const GetTeamUnitsByDefsQuery* query,
 		GetTeamUnitsByDefsResult* result)
 	{
 		listCallSeen = true;
 		listTeamID = query->teamID;
-		listUnitDefIDs.assign(query->unitDefIDs, query->unitDefIDs + query->defCount);
+		if (query->defCount == 0)
+			listUnitDefIDs.clear();
+		else
+			listUnitDefIDs.assign(query->unitDefIDs, query->unitDefIDs + query->defCount);
+		result->error = nullptr;
 		static std::int32_t units[] = {101, 202};
 		result->units = units;
 		result->count = 2;
 	}
 
+	bool ReferenceI32(const WasmValue& value, std::int32_t& output)
+	{
+		if (const auto* signedValue = std::get_if<std::int64_t>(&value.storage)) {
+			if (*signedValue < std::numeric_limits<std::int32_t>::lowest() ||
+				*signedValue > std::numeric_limits<std::int32_t>::max())
+				return false;
+			output = static_cast<std::int32_t>(*signedValue);
+			return true;
+		}
+		if (const auto* unsignedValue = std::get_if<std::uint64_t>(&value.storage)) {
+			if (*unsignedValue > static_cast<std::uint64_t>(
+				std::numeric_limits<std::int32_t>::max()))
+				return false;
+			output = static_cast<std::int32_t>(*unsignedValue);
+			return true;
+		}
+		return false;
+	}
+
+	bool ReferenceGetTeamUnitsByDefs(const std::vector<WasmValue>& arguments,
+		std::int32_t& teamID, std::vector<std::int32_t>& unitDefIDs)
+	{
+		if (arguments.size() != 1)
+			return false;
+		const auto* record = std::get_if<WasmValueRecord>(&arguments.front().storage);
+		if (record == nullptr)
+			return false;
+		const auto team = record->find("team-id");
+		const auto defs = record->find("unit-def-i-ds");
+		if (team == record->end() || defs == record->end() ||
+			!ReferenceI32(team->second, teamID))
+			return false;
+		const auto* list = std::get_if<WasmValueList>(&defs->second.storage);
+		if (list == nullptr)
+			return false;
+		unitDefIDs.clear();
+		unitDefIDs.reserve(list->size());
+		for (const auto& value : *list) {
+			std::int32_t unitDefID = 0;
+			if (!ReferenceI32(value, unitDefID))
+				return false;
+			unitDefIDs.push_back(unitDefID);
+		}
+		return true;
+	}
+
 	void FakeGetUnitBuildParams(const GetUnitBuildParamsQuery* query,
 		GetUnitBuildParamsResult* result)
 	{
+		buildParamsCallSeen = true;
 		REQUIRE(std::string(query->paramName) == "buildRange");
 		result->value = NumberOrBool{3.5f, false, false};
 		result->hasValue = true;
@@ -40,6 +97,7 @@ namespace {
 	void FakeGetMatrixData(const GfxGetMatrixDataQuery* query,
 		GfxGetMatrixDataResult* result)
 	{
+		matrixCallSeen = true;
 		REQUIRE(query->mode == 4);
 		for (std::size_t index = 0; index < 16; ++index)
 			result->values[index] = static_cast<float>(index) + 0.5f;
@@ -62,6 +120,7 @@ namespace {
 
 	void FakeNormalize(const NormalizeQuery* query, NormalizeResult* result)
 	{
+		normalizeCallSeen = true;
 		REQUIRE(query != nullptr);
 		REQUIRE(query->vec != nullptr);
 		query->vec->x = 0.6f;
@@ -79,6 +138,69 @@ namespace {
 		static std::int32_t values[] = {17, 19};
 		result->retValues = values;
 		result->retCount = std::min<std::uint32_t>(query->retArgs, 2);
+	}
+
+	bool ReferenceF64(const WasmValue& value, double& output)
+	{
+		if (const auto* floating = std::get_if<double>(&value.storage)) {
+			if (!std::isfinite(*floating))
+				return false;
+			output = *floating;
+			return true;
+		}
+		if (const auto* signedValue = std::get_if<std::int64_t>(&value.storage)) {
+			output = static_cast<double>(*signedValue);
+			return true;
+		}
+		if (const auto* unsignedValue = std::get_if<std::uint64_t>(&value.storage)) {
+			output = static_cast<double>(*unsignedValue);
+			return true;
+		}
+		return false;
+	}
+
+	bool ReferenceGetUnitBuildParams(const std::vector<WasmValue>& arguments)
+	{
+		if (arguments.size() != 1)
+			return false;
+		const auto* record = std::get_if<WasmValueRecord>(&arguments.front().storage);
+		if (record == nullptr)
+			return false;
+		const auto unit = record->find("unit-id");
+		const auto name = record->find("param-name");
+		std::int32_t unitID = 0;
+		return unit != record->end() && name != record->end() &&
+			ReferenceI32(unit->second, unitID) &&
+			std::get_if<std::string>(&name->second.storage) != nullptr;
+	}
+
+	bool ReferenceGetMatrixData(const std::vector<WasmValue>& arguments)
+	{
+		if (arguments.size() != 1)
+			return false;
+		const auto* record = std::get_if<WasmValueRecord>(&arguments.front().storage);
+		if (record == nullptr)
+			return false;
+		const auto mode = record->find("mode");
+		std::int32_t modeValue = 0;
+		return mode != record->end() && ReferenceI32(mode->second, modeValue) &&
+			modeValue == 4;
+	}
+
+	bool ReferenceNormalize(const std::vector<WasmValue>& arguments)
+	{
+		if (arguments.size() != 1)
+			return false;
+		const auto* record = std::get_if<WasmValueRecord>(&arguments.front().storage);
+		if (record == nullptr)
+			return false;
+		for (const char* name : {"x", "y", "z"}) {
+			const auto value = record->find(name);
+			double numericValue = 0.0;
+			if (value == record->end() || !ReferenceF64(value->second, numericValue))
+				return false;
+		}
+		return true;
 	}
 }
 
@@ -110,6 +232,143 @@ TEST_CASE("generated Wasm adapter lowers lists and owns native results")
 	REQUIRE(units->size() == 2);
 	CHECK(std::get<std::int64_t>((*units)[0].storage) == 101);
 	CHECK(std::get<std::int64_t>((*units)[1].storage) == 202);
+}
+
+TEST_CASE("generated Wasm conversion agrees with an independent bounded corpus")
+{
+	UnitsQueryApi api{};
+	api.GetTeamUnitsByDefs = FakeGetTeamUnitsByDefs;
+	NativeInterface native{};
+	native.unitsQuery = &api;
+
+	std::uint32_t state = 0x9e3779b9u;
+	const auto next = [&state]() {
+		state = state * 1664525u + 1013904223u;
+		return state;
+	};
+	for (std::size_t index = 0; index < 128; ++index) {
+		const bool malformedTeam = index % 11 == 0;
+		const bool malformedList = index % 13 == 0;
+		const std::int32_t expectedTeam = static_cast<std::int32_t>(next() % 8) - 2;
+		WasmValue team = index % 3 == 0
+			? WasmValue::U64(static_cast<std::uint64_t>(expectedTeam))
+			: WasmValue::I64(expectedTeam);
+		if (malformedTeam)
+			team = WasmValue::F64(static_cast<double>(expectedTeam));
+
+		WasmValueList definitions;
+		std::vector<std::int32_t> expectedDefinitions;
+		const std::size_t definitionCount = next() % 5;
+		for (std::size_t definitionIndex = 0; definitionIndex < definitionCount;
+			++definitionIndex) {
+			const auto definition = static_cast<std::int32_t>(next() % 100) - 50;
+			expectedDefinitions.push_back(definition);
+			definitions.push_back(definitionIndex % 2 == 0
+				? WasmValue::I64(definition)
+				: WasmValue::U64(static_cast<std::uint64_t>(definition)));
+		}
+		if (malformedList)
+			definitions.push_back(WasmValue::String("not-an-id"));
+
+		std::vector<WasmValue> arguments = {WasmValue::Record({
+			{"team-id", std::move(team)},
+			{"unit-def-i-ds", WasmValue::List(std::move(definitions))},
+		})};
+		std::int32_t referenceTeam = 0;
+		std::vector<std::int32_t> referenceDefinitions;
+		const bool referenceAccepted = ReferenceGetTeamUnitsByDefs(arguments,
+			referenceTeam, referenceDefinitions);
+		WasmValue result;
+		std::string error;
+		listCallSeen = false;
+		listUnitDefIDs.clear();
+		const auto dispatch = recoil::wasm::generated::DispatchNativeCallout(
+			&native, "units_query", "GetTeamUnitsByDefs", arguments, result, error);
+		CHECK(dispatch == recoil::wasm::generated::NativeCalloutDispatch::handled);
+		CHECK(listCallSeen == referenceAccepted);
+		if (referenceAccepted) {
+			CHECK(error.empty());
+			CHECK(listTeamID == referenceTeam);
+			CHECK(listUnitDefIDs == referenceDefinitions);
+		} else {
+			CHECK_FALSE(error.empty());
+		}
+	}
+}
+
+TEST_CASE("generated Wasm conversion covers independent record and array corpus")
+{
+	UnitsInfoApi unitsInfo{};
+	unitsInfo.GetUnitBuildParams = FakeGetUnitBuildParams;
+	GfxApi gfx{};
+	gfx.GetMatrixData = FakeGetMatrixData;
+	MathExtraApi mathExtra{};
+	mathExtra.Normalize = FakeNormalize;
+	NativeInterface native{};
+	native.unitsInfo = &unitsInfo;
+	native.gfx = &gfx;
+	native.mathExtra = &mathExtra;
+	NativeInterfaceWasmAdapter adapter(&native);
+
+	std::uint32_t state = 0x243f6a88u;
+	const auto next = [&state]() {
+		state = state * 1103515245u + 12345u;
+		return state;
+	};
+	for (std::size_t index = 0; index < 96; ++index) {
+		const auto numeric = static_cast<std::int64_t>(next() % 31) - 15;
+		const auto numericValue = index % 2 == 0
+			? WasmValue::I64(numeric)
+			: WasmValue::F64(static_cast<double>(numeric) + 0.25);
+		const bool malformed = index % 9 == 0;
+		const std::vector<WasmValue> buildArguments = {WasmValue::Record({
+			{"unit-id", malformed ? WasmValue::String("not-an-id") : numericValue},
+			{"param-name", WasmValue::String("buildRange")},
+		})};
+		const bool buildAccepted = ReferenceGetUnitBuildParams(buildArguments);
+		buildParamsCallSeen = false;
+		WasmValue result;
+		std::string error;
+		CHECK(recoil::wasm::generated::DispatchNativeCallout(
+			&native, "units_info", "GetUnitBuildParams", buildArguments,
+			result, error) == recoil::wasm::generated::NativeCalloutDispatch::handled);
+		CHECK(buildParamsCallSeen == buildAccepted);
+		CHECK(error.empty() == buildAccepted);
+
+		const std::vector<WasmValue> matrixArguments = {WasmValue::Record({
+			{"mode", index % 7 == 0 ? WasmValue::String("not-a-mode") :
+				(index % 2 == 0 ? WasmValue::I64(4) : WasmValue::U64(4))},
+		})};
+		const bool matrixAccepted = ReferenceGetMatrixData(matrixArguments);
+		matrixCallSeen = false;
+		error.clear();
+		result = WasmValue::Unit();
+		CHECK(recoil::wasm::generated::DispatchNativeCallout(
+			&native, "gfx", "GetMatrixData", matrixArguments, result, error) ==
+			recoil::wasm::generated::NativeCalloutDispatch::handled);
+		CHECK(matrixCallSeen == matrixAccepted);
+		CHECK(error.empty() == matrixAccepted);
+
+		WasmValueList vectorValues = {
+			index % 11 == 0 ? WasmValue::String("not-a-number") :
+				WasmValue::F64(static_cast<double>(numeric) + 0.25),
+			WasmValue::F64(1.5),
+			WasmValue::F64(-2.0),
+		};
+		const std::vector<WasmValue> normalizeArguments = {WasmValue::Record({
+			{"x", vectorValues[0]},
+			{"y", vectorValues[1]},
+			{"z", vectorValues[2]},
+		})};
+		const bool normalizeAccepted = ReferenceNormalize(normalizeArguments);
+		normalizeCallSeen = false;
+		error.clear();
+		result = WasmValue::Unit();
+		CHECK(adapter.Callout("math_extra", "Normalize", normalizeArguments,
+			result, error) == normalizeAccepted);
+		CHECK(normalizeCallSeen == normalizeAccepted);
+		CHECK(error.empty() == normalizeAccepted);
+	}
 }
 
 TEST_CASE("every registry manual callout reaches the explicit native fallback")

@@ -3,6 +3,8 @@
   "tests": [
     {
       "id": "spawn_explosion",
+      "wasm_mutating": true,
+      "wasm_args": ["value.pos", "value.dir", "value.explosionParams"],
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": [],
@@ -26,7 +28,23 @@
         "impactOnly": {"type": "bool", "fixed": false},
         "ignoreOwner": {"type": "bool", "fixed": false},
         "damageGround": {"type": "bool", "fixed": false},
-        "projectileID": {"type": "i32", "fixed": -1}
+        "projectileID": {"type": "i32", "fixed": -1},
+        "explosionParams": {"type": "object", "fixed": {
+          "damages": 1,
+          "weaponDefId": -1,
+          "ownerId": -1,
+          "hitUnitId": -1,
+          "hitFeatureId": -1,
+          "craterAreaOfEffect": 0,
+          "damageAreaOfEffect": 0,
+          "edgeEffectiveness": 0,
+          "explosionSpeed": 0,
+          "gfxMod": 0,
+          "impactOnly": false,
+          "ignoreOwner": false,
+          "damageGround": false,
+          "projectileId": -1
+        }}
       },
       "lua_runtime": {
         "call": "Spring.SpawnExplosion",
@@ -36,6 +54,11 @@
     },
     {
       "id": "spawn_ceg",
+      "wasm_mutating": true,
+      "wasm_args": [
+        "value.ceg",
+        "value.pos", "value.dir", "value.radius", "value.damage", "value.dmgMod"
+      ],
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": [],
@@ -45,6 +68,7 @@
       "rust": {"check": "check_effects_path_value", "set": "set_noop"},
       "params": {
         "cegName": {"type": "string", "fixed": "native_api_parity_missing_ceg"},
+        "ceg": {"type": "object", "fixed": {"name": "native_api_parity_missing_ceg", "id": -1}},
         "pos": {"type": "float3", "generator": "map_position", "expands_to": ["posX", "posY", "posZ"], "expands_from": ["x", "y", "z"]},
         "dir": {"type": "float3", "generator": "unit_orientation", "expands_to": ["dirX", "dirY", "dirZ"], "expands_from": ["frontX", "frontY", "frontZ"]},
         "radius": {"type": "f32", "fixed": 0},
@@ -55,6 +79,11 @@
     },
     {
       "id": "spawn_sfx",
+      "wasm_mutating": true,
+      "wasm_args": [
+        "fixture.unitID", "value.sfxID", "value.pos", "value.dir",
+        "value.radius", "value.damage", "value.absolute"
+      ],
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -78,7 +107,7 @@
       "kind": "readonly",
       "requires": [],
       "lua": {"set": [], "get": ["Spring.InitPathNodeCostsArray", "Spring.FreePathNodeCostsArray", "Spring.SetPathNodeCosts", "Spring.GetPathNodeCosts", "Spring.SetPathNodeCost", "Spring.GetPathNodeCost"]},
-      "native": {"set": [], "get": ["PathFinder.init_path_node_costs_array", "PathFinder.free_path_node_costs_array", "PathFinder.set_path_node_costs", "PathFinder.get_path_node_costs", "PathFinder.set_path_node_cost", "PathFinder.get_path_node_cost"]},
+      "native": {"set": [], "get": ["PathFinder.get_path_node_costs", "PathFinder.init_path_node_costs_array", "PathFinder.free_path_node_costs_array", "PathFinder.set_path_node_costs", "PathFinder.set_path_node_cost", "PathFinder.get_path_node_cost"]},
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["init", "setCost", "active", "costCount", "costValue", "activeCost", "free"]},
       "rust": {"check": "check_effects_path_value", "set": "set_noop"},
       "params": {
@@ -90,7 +119,33 @@
         "nodeZ": {"type": "i32", "fixed": 0},
         "cost": {"type": "f32", "fixed": 17.25}
       },
-      "lua_runtime": null
+      "lua_runtime": {
+        "sequence": [
+          {"call": "Spring.InitPathNodeCostsArray", "args": ["value.overlayIndex", "value.sizeX", "value.sizeZ"], "bind": "init"},
+          {"call": "Spring.SetPathNodeCost", "args": ["value.overlayIndex", "value.costIndex", "value.cost"], "bind": "setCost"},
+          {"call": "Spring.SetPathNodeCosts", "args": ["value.overlayIndex"], "bind": "active"},
+          {"call": "Spring.GetPathNodeCosts", "args": ["value.overlayIndex"], "bind": "costs"},
+          {"call": "Spring.GetPathNodeCost", "args": ["value.nodeX", "value.nodeZ"], "bind": "activeCost"},
+          {"call": "Spring.FreePathNodeCostsArray", "args": ["value.overlayIndex"], "bind": "free"}
+        ],
+        "returns": [
+          {"field": "init", "from": "init"},
+          {"field": "setCost", "from": "setCost"},
+          {"field": "active", "from": "active"},
+          {"field": "costCount", "from": "costs", "transform": "length"},
+          {"field": "costValue", "from": "costs", "transform": "index", "index": 0},
+          {"field": "activeCost", "from": "activeCost"},
+          {"field": "free", "from": "free"}
+        ]
+      },
+      "wasm_sequence": [
+        {"call": "PathFinder.init_path_node_costs_array", "args": ["value.overlayIndex", "value.sizeX", "value.sizeZ"], "bind": "init", "require_true": true},
+        {"call": "PathFinder.set_path_node_cost", "args": ["value.overlayIndex", "value.costIndex", "value.cost"], "bind": "setCost", "require_true": true},
+        {"call": "PathFinder.set_path_node_costs", "args": ["value.overlayIndex"], "bind": "active", "require_true": true},
+        {"call": "PathFinder.get_path_node_costs", "args": ["value.overlayIndex"], "bind": "costs"},
+        {"call": "PathFinder.get_path_node_cost", "args": ["value.nodeX", "value.nodeZ"], "bind": "activeCost"},
+        {"call": "PathFinder.free_path_node_costs_array", "args": ["value.overlayIndex"], "bind": "free", "require_true": true}
+      ]
     },
     {
       "id": "request_path",
@@ -101,8 +156,33 @@
       "native": {"set": [], "get": ["PathFinder.request_path"]},
       "compare": {"mode": "fields", "fields": ["valid"]},
       "rust": {"check": "check_effects_path_value", "set": "set_noop"},
-      "params": {},
-      "lua_runtime": null
+      "params": {
+        "moveDefName": {"type": "string", "fixed": "KBOT1"},
+        "startX": {"type": "f32", "fixed": 900},
+        "startY": {"type": "f32", "fixed": 96},
+        "startZ": {"type": "f32", "fixed": 900},
+        "endX": {"type": "f32", "fixed": 1120},
+        "endY": {"type": "f32", "fixed": 96},
+        "endZ": {"type": "f32", "fixed": 1120},
+        "radius": {"type": "f32", "fixed": 8}
+      },
+      "wasm_args": [
+        0,
+        "value.moveDefName",
+        {"x": "value.startX", "y": "value.startY", "z": "value.startZ"},
+        {"x": "value.endX", "y": "value.endY", "z": "value.endZ"},
+        "value.radius"
+      ],
+      "lua_runtime": {
+        "call": "Spring.RequestPath",
+        "args": [
+          "value.moveDefName",
+          "value.startX", "value.startY", "value.startZ",
+          "value.endX", "value.endY", "value.endZ",
+          "value.radius"
+        ],
+        "returns": [{"field": "valid", "transform": "truthy"}]
+      }
     }
   ]
 }

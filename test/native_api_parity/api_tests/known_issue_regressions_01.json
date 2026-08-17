@@ -31,11 +31,22 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["radarErrorSize", "baseRadarErrorSize", "baseRadarErrorMult"]},
       "report": {"lua_setter": "`Spring.SetRadarErrorParams`", "native_setter": "`GameConfig.set_radar_error_params`", "lua_getter": "`Spring.GetRadarErrorParams`", "native_getter": "`Los.get_radar_error_params`", "fields": "`radarErrorSize`, `baseRadarErrorSize`, `baseRadarErrorMult`"},
       "rust": {"check": "check_radar_error_params", "set": "set_radar_error_params"},
+      "wasm_mutating": true,
       "params": {
         "allyTeamID": {"type": "i32", "fixture": "allyTeamID"},
         "radarErrorSize": {"type": "f32", "range": [16, 96]},
         "baseRadarErrorSize": {"type": "f32", "range": [4, 48]},
         "baseRadarErrorMult": {"type": "f32", "range": [0.25, 2.5]}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetRadarErrorParams",
+          "args": ["fixture.allyTeamID", "value.radarErrorSize", "value.baseRadarErrorSize", "value.baseRadarErrorMult"],
+          "wasm_args": ["fixture.allyTeamID", "value.radarErrorSize", "value.baseRadarErrorSize", "value.baseRadarErrorMult"]
+        },
+        "call": "Spring.GetRadarErrorParams",
+        "args": ["fixture.allyTeamID"],
+        "returns": ["radarErrorSize", "baseRadarErrorSize", "baseRadarErrorMult"]
       }
     },
     {
@@ -45,12 +56,30 @@
       "requires": ["unit"],
       "lua": {"set": ["Spring.SetUnitLosMask", "Spring.SetUnitLosState"], "get": ["Spring.GetUnitLosState"]},
       "native": {"set": ["UnitControl.set_unit_los_mask", "UnitControl.set_unit_los_state"], "get": ["UnitsInfo.get_unit_los_state"]},
-      "compare": {"mode": "fields", "fields": ["rawMask", "los", "radar", "typed"]},
-      "report": {"lua_setter": "`Spring.SetUnitLosMask`, `Spring.SetUnitLosState`", "native_setter": "`UnitControl.set_unit_los_mask`, `UnitControl.set_unit_los_state`", "lua_getter": "`Spring.GetUnitLosState`", "native_getter": "`UnitsInfo.get_unit_los_state`", "fields": "`rawMask`, `los`, `radar`, `typed`"},
+      "compare": {"mode": "fields", "fields": ["rawMask"]},
+      "report": {"lua_setter": "`Spring.SetUnitLosMask`, `Spring.SetUnitLosState`", "native_setter": "`UnitControl.set_unit_los_mask`, `UnitControl.set_unit_los_state`", "lua_getter": "`Spring.GetUnitLosState` (raw)", "native_getter": "`UnitsInfo.get_unit_los_state`", "fields": "`rawMask`"},
       "rust": {"check": "check_unit_los_state", "set": "set_unit_los_state"},
+      "wasm_mutating": true,
       "params": {
         "allyTeamID": {"type": "i32", "fixture": "allyTeamID"},
         "rawMask": {"type": "i32", "range": [0, 15]}
+      },
+      "lua_runtime": {
+        "set": [
+          {
+            "call": "Spring.SetUnitLosMask",
+            "args": ["fixture.unitID", "fixture.allyTeamID", 15],
+            "wasm_args": ["fixture.unitID", "fixture.allyTeamID", 15]
+          },
+          {
+            "call": "Spring.SetUnitLosState",
+            "args": ["fixture.unitID", "fixture.allyTeamID", "value.rawMask"]
+          }
+        ],
+        "call": "Spring.GetUnitLosState",
+        "args": ["fixture.unitID", "fixture.allyTeamID", true],
+        "wasm_get_args": ["fixture.unitID", "fixture.allyTeamID", true],
+        "returns": ["rawMask"]
       }
     },
     {
@@ -63,9 +92,28 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["hasValue", "value"]},
       "report": {"lua_setter": "`Spring.SetUnitBuildParams`", "native_setter": "`UnitControl.set_unit_build_params`", "lua_getter": "`Spring.GetUnitBuildParams`", "native_getter": "`UnitsInfo.get_unit_build_params`", "fields": "`hasValue`, `value`"},
       "rust": {"check": "check_unit_build_param", "set": "set_unit_build_param"},
+      "wasm_mutating": true,
       "params": {
         "paramName": {"type": "string", "fixed": "buildDistance"},
         "value": {"type": "f32", "range": [64, 512]}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitBuildParams",
+          "args": ["fixture.unitID", "value.paramName", "value.value"],
+          "wasm_args": [
+            "fixture.unitID",
+            "value.paramName",
+            {"number": "value.value", "boolean": false, "useBoolean": false}
+          ]
+        },
+        "call": "Spring.GetUnitBuildParams",
+        "args": ["fixture.unitID", "value.paramName"],
+        "wasm_get_args": ["fixture.unitID", "value.paramName"],
+        "returns": [
+          {"field": "hasValue", "transform": "truthy"},
+          "value"
+        ]
       }
     },
     {
@@ -78,9 +126,28 @@
       "compare": {"mode": "fields", "fields": ["hasValue", "enabled"]},
       "report": {"lua_setter": "`Spring.SetUnitBuildParams`", "native_setter": "`UnitControl.set_unit_build_params`", "lua_getter": "`Spring.GetUnitBuildParams`", "native_getter": "`UnitsInfo.get_unit_build_params`", "fields": "`hasValue`, `enabled`"},
       "rust": {"check": "check_unit_build_param", "set": "set_unit_build_param"},
+      "wasm_mutating": true,
       "params": {
         "paramName": {"type": "string", "fixed": "buildRange3D"},
-        "enabled": {"type": "bool", "range": [0, 1]}
+        "enabled": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitBuildParams",
+          "args": ["fixture.unitID", "value.paramName", "value.enabled"],
+          "wasm_args": [
+            "fixture.unitID",
+            "value.paramName",
+            {"number": 0.0, "boolean": "value.enabled", "useBoolean": true}
+          ]
+        },
+        "call": "Spring.GetUnitBuildParams",
+        "args": ["fixture.unitID", "value.paramName"],
+        "wasm_get_args": ["fixture.unitID", "value.paramName"],
+        "returns": [
+          {"field": "hasValue", "transform": "truthy"},
+          {"field": "enabled"}
+        ]
       }
     },
     {
@@ -152,8 +219,19 @@
       "compare": {"mode": "fields", "fields": ["terrainTypeIndex"]},
       "report": {"lua_setter": "`Spring.SetMapSquareTerrainType`", "native_setter": "`TerrainControl.set_map_square_terrain_type`", "lua_getter": "`Spring.GetGroundInfo`", "native_getter": "`Terrain.get_ground_info`", "fields": "`terrainTypeIndex`"},
       "rust": {"check": "check_terrain_info", "set": "set_map_square_terrain_type"},
+      "wasm_mutating": true,
       "params": {
+        "point": {"type": "float2", "generator": "map_point", "expands_to": ["x", "z"]},
         "terrainTypeIndex": {"type": "i32", "fixed": 1}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetMapSquareTerrainType",
+          "args": ["value.x", "value.z", "value.terrainTypeIndex"]
+        },
+        "call": "Spring.GetGroundInfo",
+        "args": ["value.x", "value.z"],
+        "returns": ["terrainTypeIndex"]
       }
     },
     {
@@ -223,11 +301,32 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["storedMetal", "maxStoredMetal", "storedEnergy", "maxStoredEnergy"]},
       "report": {"lua_setter": "`Spring.SetUnitHarvestStorage`", "native_setter": "`UnitControl.set_unit_harvest_storage`", "lua_getter": "`Spring.GetUnitHarvestStorage`", "native_getter": "`UnitsInfo.get_unit_harvest_storage`", "fields": "`storedMetal`, `maxStoredMetal`, `storedEnergy`, `maxStoredEnergy`"},
       "rust": {"check": "check_unit_harvest_storage", "set": "set_unit_harvest_storage"},
+      "wasm_mutating": true,
       "params": {
         "storedMetal": {"type": "f32", "range": [1, 100]},
         "maxStoredMetal": {"type": "f32", "range": [150, 250]},
         "storedEnergy": {"type": "f32", "range": [1, 100]},
         "maxStoredEnergy": {"type": "f32", "range": [150, 250]}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitHarvestStorage",
+          "args": [
+            "fixture.unitID",
+            "value.storedMetal",
+            "value.maxStoredMetal",
+            "value.storedEnergy",
+            "value.maxStoredEnergy"
+          ]
+        },
+        "call": "Spring.GetUnitHarvestStorage",
+        "args": ["fixture.unitID"],
+        "returns": [
+          "storedMetal",
+          "maxStoredMetal",
+          "storedEnergy",
+          "maxStoredEnergy"
+        ]
       }
     },
     {
@@ -295,7 +394,14 @@
       "compare": {"mode": "fields", "fields": ["physicalState"]},
       "report": {"lua_setter": "`Spring.SetUnitPhysicalStateBit`", "native_setter": "`UnitControl.set_unit_physical_state_bit`", "lua_getter": "`Spring.GetUnitPhysicalState`", "native_getter": "`UnitControl.get_unit_physical_state`", "fields": "`physicalState`"},
       "rust": {"check": "check_unit_physical_state", "set": "set_unit_physical_state_bit"},
-      "params": {"stateBit": {"type": "i32", "fixed": 11}}
+      "wasm_mutating": true,
+      "params": {"stateBit": {"type": "i32", "fixed": 11}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetUnitPhysicalStateBit", "args": ["fixture.unitID", "value.stateBit"]},
+        "call": "Spring.GetUnitPhysicalState",
+        "args": ["fixture.unitID"],
+        "returns": ["physicalState"]
+      }
     },
     {
       "id": "feature_fire_time",
@@ -307,7 +413,14 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["fireTime"]},
       "report": {"lua_setter": "`Spring.SetFeatureFireTime`", "native_setter": "`FeatureControl.set_feature_fire_time`", "lua_getter": "`Spring.GetFeatureFireTime`", "native_getter": "`Features.get_feature_fire_time`", "fields": "`fireTime`"},
       "rust": {"check": "check_feature_time", "set": "set_feature_time"},
-      "params": {"fireTime": {"type": "f32", "range": [1, 12]}}
+      "wasm_mutating": true,
+      "params": {"fireTime": {"type": "f32", "range": [1, 12]}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetFeatureFireTime", "args": ["fixture.featureID", "value.fireTime"]},
+        "call": "Spring.GetFeatureFireTime",
+        "args": ["fixture.featureID"],
+        "returns": ["fireTime"]
+      }
     },
     {
       "id": "feature_smoke_time",
@@ -319,7 +432,14 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["smokeTime"]},
       "report": {"lua_setter": "`Spring.SetFeatureSmokeTime`", "native_setter": "`FeatureControl.set_feature_smoke_time`", "lua_getter": "`Spring.GetFeatureSmokeTime`", "native_getter": "`Features.get_feature_smoke_time`", "fields": "`smokeTime`"},
       "rust": {"check": "check_feature_time", "set": "set_feature_time"},
-      "params": {"smokeTime": {"type": "f32", "range": [1, 12]}}
+      "wasm_mutating": true,
+      "params": {"smokeTime": {"type": "f32", "range": [1, 12]}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetFeatureSmokeTime", "args": ["fixture.featureID", "value.smokeTime"]},
+        "call": "Spring.GetFeatureSmokeTime",
+        "args": ["fixture.featureID"],
+        "returns": ["smokeTime"]
+      }
     },
     {
       "id": "side_data_by_name",
@@ -364,13 +484,23 @@
       "id": "closest_valid_position",
       "context": "synced_gadget",
       "kind": "readonly",
+      "wasm_no_value": true,
       "requires": ["ground_point"],
       "lua": {"set": [], "get": ["Spring.GetClosestValidPosition"]},
       "native": {"set": [], "get": ["Los.get_closest_valid_position"]},
-      "compare": {"mode": "fields", "fields": ["hasPosition"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetClosestValidPosition`", "native_getter": "`Los.get_closest_valid_position`", "fields": "`hasPosition`"},
+      "compare": {"mode": "fields", "fields": []},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetClosestValidPosition`", "native_getter": "`Los.get_closest_valid_position`", "fields": "expected no value"},
       "rust": {"check": "check_closest_valid_position", "set": "set_noop"},
-      "params": {}
+      "params": {
+        "unitDefID": {"type": "i32", "fixture": "unitDefID"},
+        "point": {"type": "float3", "generator": "map_position", "expands_to": ["x", "y", "z"]},
+        "radius": {"type": "f32", "fixed": 64}
+      },
+      "lua_runtime": {
+        "call": "Spring.GetClosestValidPosition",
+        "args": ["fixture.unitDefID", "value.x", "value.z", "value.radius"],
+        "returns": []
+      }
     },
     {
       "id": "closest_build_pos",
@@ -428,10 +558,28 @@
       "requires": ["unit"],
       "lua": {"set": ["Spring.SetUnitRotation"], "get": ["Spring.GetUnitRotation", "Spring.GetUnitDirection"]},
       "native": {"set": ["UnitControl.set_unit_rotation"], "get": ["UnitsInfo.get_unit_rotation", "UnitsInfo.get_unit_direction"]},
-      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["pitch", "yaw", "roll", "frontX", "frontY", "frontZ"]},
-      "report": {"lua_setter": "`Spring.SetUnitRotation`", "native_setter": "`UnitControl.set_unit_rotation`", "lua_getter": "`Spring.GetUnitRotation`, `Spring.GetUnitDirection`", "native_getter": "`UnitsInfo.get_unit_rotation`, `UnitsInfo.get_unit_direction`", "fields": "`pitch`, `yaw`, `roll`, `frontX`, `frontY`, `frontZ`"},
+      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["pitch", "yaw", "roll"]},
+      "report": {"lua_setter": "`Spring.SetUnitRotation`", "native_setter": "`UnitControl.set_unit_rotation`", "lua_getter": "`Spring.GetUnitRotation`", "native_getter": "`UnitsInfo.get_unit_rotation`", "fields": "`pitch`, `yaw`, `roll`"},
       "rust": {"check": "check_unit_rotation", "set": "set_unit_rotation"},
-      "params": {}
+      "wasm_mutating": true,
+      "params": {
+        "pitch": {"type": "f32", "fixed": 0.23},
+        "yaw": {"type": "f32", "fixed": 1.1},
+        "roll": {"type": "f32", "fixed": -0.17}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitRotation",
+          "args": ["fixture.unitID", "value.pitch", "value.yaw", "value.roll"],
+          "wasm_args": [
+            "fixture.unitID",
+            {"x": "value.pitch", "y": "value.yaw", "z": "value.roll"}
+          ]
+        },
+        "call": "Spring.GetUnitRotation",
+        "args": ["fixture.unitID"],
+        "returns": ["pitch", "yaw", "roll"]
+      }
     },
     {
       "id": "feature_rotation",
@@ -443,7 +591,25 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["pitch", "yaw", "roll"]},
       "report": {"lua_setter": "`Spring.SetFeatureRotation`", "native_setter": "`FeatureControl.set_feature_rotation`", "lua_getter": "`Spring.GetFeatureRotation`", "native_getter": "`Features.get_feature_rotation`", "fields": "`pitch`, `yaw`, `roll`"},
       "rust": {"check": "check_feature_rotation", "set": "set_feature_rotation"},
-      "params": {}
+      "wasm_mutating": true,
+      "params": {
+        "pitch": {"type": "f32", "fixed": 0.23},
+        "yaw": {"type": "f32", "fixed": 1.1},
+        "roll": {"type": "f32", "fixed": -0.17}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureRotation",
+          "args": ["fixture.featureID", "value.pitch", "value.yaw", "value.roll"],
+          "wasm_args": [
+            "fixture.featureID",
+            {"x": "value.pitch", "y": "value.yaw", "z": "value.roll"}
+          ]
+        },
+        "call": "Spring.GetFeatureRotation",
+        "args": ["fixture.featureID"],
+        "returns": ["pitch", "yaw", "roll"]
+      }
     },
     {
       "id": "get_team_unit_stats",
@@ -489,7 +655,14 @@
       "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["buildeeRadius"]},
       "report": {"lua_setter": "`Spring.SetUnitBuildeeRadius`", "native_setter": "`UnitControl.set_unit_buildee_radius`", "lua_getter": "`Spring.GetUnitBuildeeRadius`", "native_getter": "`UnitsInfo.get_unit_buildee_radius`", "fields": "`buildeeRadius`"},
       "rust": {"check": "check_unit_info_f32", "set": "set_unit_buildee_radius"},
-      "params": {"buildeeRadius": {"type": "f32", "range": [4, 96]}}
+      "wasm_mutating": true,
+      "params": {"buildeeRadius": {"type": "f32", "range": [4, 96]}},
+      "lua_runtime": {
+        "set": {"call": "Spring.SetUnitBuildeeRadius", "args": ["fixture.unitID", "value.buildeeRadius"]},
+        "call": "Spring.GetUnitBuildeeRadius",
+        "args": ["fixture.unitID"],
+        "returns": ["buildeeRadius"]
+      }
     },
     {
       "id": "unit_blocking",
@@ -501,7 +674,54 @@
       "compare": {"mode": "fields", "fields": ["isBlocking", "isSolidObjectCollidable", "isProjectileCollidable", "isRaySegmentCollidable", "crushable", "blockEnemyPushing", "blockHeightChanges"]},
       "report": {"lua_setter": "`Spring.SetUnitBlocking`", "native_setter": "`UnitControl.set_unit_blocking`", "lua_getter": "`Spring.GetUnitBlocking`", "native_getter": "`UnitsInfo.get_unit_blocking`", "fields": "`isBlocking`, `isSolidObjectCollidable`, `isProjectileCollidable`, `isRaySegmentCollidable`, `crushable`, `blockEnemyPushing`, `blockHeightChanges`"},
       "rust": {"check": "check_unit_blocking", "set": "set_unit_blocking"},
-      "params": {}
+      "wasm_mutating": true,
+      "params": {
+        "isBlocking": {"type": "bool", "fixed": true},
+        "isSolidObjectCollidable": {"type": "bool", "fixed": true},
+        "isProjectileCollidable": {"type": "bool", "fixed": false},
+        "isRaySegmentCollidable": {"type": "bool", "fixed": true},
+        "crushable": {"type": "bool", "fixed": false},
+        "blockEnemyPushing": {"type": "bool", "fixed": false},
+        "blockHeightChanges": {"type": "bool", "fixed": true}
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetUnitBlocking",
+          "args": [
+            "fixture.unitID",
+            "value.isBlocking",
+            "value.isSolidObjectCollidable",
+            "value.isProjectileCollidable",
+            "value.isRaySegmentCollidable",
+            "value.crushable",
+            "value.blockEnemyPushing",
+            "value.blockHeightChanges"
+          ],
+          "wasm_args": [
+            "fixture.unitID",
+            {
+              "blocking": "value.isBlocking",
+              "solidObjects": "value.isSolidObjectCollidable",
+              "projectiles": "value.isProjectileCollidable",
+              "quadMapRays": "value.isRaySegmentCollidable",
+              "crushable": "value.crushable",
+              "blockEnemyPushing": "value.blockEnemyPushing",
+              "blockHeightChanges": "value.blockHeightChanges"
+            }
+          ]
+        },
+        "call": "Spring.GetUnitBlocking",
+        "args": ["fixture.unitID"],
+        "returns": [
+          "isBlocking",
+          "isSolidObjectCollidable",
+          "isProjectileCollidable",
+          "isRaySegmentCollidable",
+          "crushable",
+          "blockEnemyPushing",
+          "blockHeightChanges"
+        ]
+      }
     },
     {
       "id": "get_feature_blocking",

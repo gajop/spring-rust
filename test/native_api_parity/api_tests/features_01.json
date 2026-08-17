@@ -42,6 +42,7 @@
         "check": "check_feature_health",
         "set": "set_feature_health"
       },
+      "wasm_mutating": true,
       "params": {
         "health": {
           "type": "f32",
@@ -54,6 +55,15 @@
           "type": "bool",
           "fixed": false
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureHealth",
+          "args": ["fixture.featureID", "value.health", "value.checkDestruction"]
+        },
+        "call": "Spring.GetFeatureHealth",
+        "args": ["fixture.featureID"],
+        "returns": ["health"]
       }
     },
     {
@@ -85,7 +95,6 @@
         "mode": "fields",
         "epsilon": 0.05,
         "fields": [
-          "maxHealth",
           "health"
         ]
       },
@@ -94,12 +103,13 @@
         "native_setter": "`FeatureControl.set_feature_max_health` + `FeatureControl.set_feature_health`",
         "lua_getter": "`Spring.GetFeatureHealth`",
         "native_getter": "`features().get_feature_health`",
-        "fields": "`maxHealth` via clamped `health`"
+        "fields": "`health` after max-health update"
       },
       "rust": {
         "check": "check_feature_health",
         "set": "set_feature_max_health"
       },
+      "wasm_mutating": true,
       "params": {
         "maxHealth": {
           "type": "f32",
@@ -108,6 +118,21 @@
             900
           ]
         }
+      },
+      "lua_runtime": {
+        "set": [
+          {
+            "call": "Spring.SetFeatureMaxHealth",
+            "args": ["fixture.featureID", "value.maxHealth"]
+          },
+          {
+            "call": "Spring.SetFeatureHealth",
+            "args": ["fixture.featureID", "value.maxHealth", false]
+          }
+        ],
+        "call": "Spring.GetFeatureHealth",
+        "args": ["fixture.featureID"],
+        "returns": ["health"]
       }
     },
     {
@@ -151,6 +176,7 @@
         "check": "check_feature_mass",
         "set": "set_feature_mass"
       },
+      "wasm_mutating": true,
       "params": {
         "mass": {
           "type": "f32",
@@ -159,6 +185,15 @@
             300
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureMass",
+          "args": ["fixture.featureID", "value.mass"]
+        },
+        "call": "Spring.GetFeatureMass",
+        "args": ["fixture.featureID"],
+        "returns": ["mass"]
       }
     },
     {
@@ -205,6 +240,7 @@
         "check": "check_feature_resources",
         "set": "set_feature_resources"
       },
+      "wasm_mutating": true,
       "params": {
         "metal": {
           "type": "f32",
@@ -248,6 +284,30 @@
             900
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureResources",
+          "args": [
+            "fixture.featureID",
+            "value.metal",
+            "value.energy",
+            "value.reclaimTime",
+            "value.reclaimLeft",
+            "value.featureDefMetal",
+            "value.featureDefEnergy"
+          ]
+        },
+        "call": "Spring.GetFeatureResources",
+        "args": ["fixture.featureID"],
+        "returns": [
+          "metal",
+          "featureDefMetal",
+          "energy",
+          "featureDefEnergy",
+          "reclaimLeft",
+          "reclaimTime"
+        ]
       }
     },
     {
@@ -546,7 +606,7 @@
           "FeatureControl.set_feature_reclaim"
         ],
         "get": [
-          "features().get_feature_health"
+          "features().get_feature_resources"
         ]
       },
       "compare": {
@@ -560,7 +620,7 @@
         "lua_setter": "`Spring.SetFeatureReclaim`",
         "native_setter": "`FeatureControl.set_feature_reclaim`",
         "lua_getter": "`Spring.GetFeatureResources`",
-        "native_getter": "`features().get_feature_health`",
+        "native_getter": "`features().get_feature_resources`",
         "fields": "`reclaimLeft`"
       },
       "rust": {
@@ -575,6 +635,26 @@
             1
           ]
         }
+      },
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureReclaim",
+          "args": [
+            "fixture.featureID",
+            "value.reclaimLeft"
+          ]
+        },
+        "call": "Spring.GetFeatureResources",
+        "args": [
+          "fixture.featureID"
+        ],
+        "returns": [
+          {
+            "field": "reclaimLeft",
+            "index": 5
+          }
+        ]
       }
     },
     {
@@ -619,6 +699,7 @@
         "check": "check_feature_resurrect",
         "set": "set_feature_resurrect"
       },
+      "wasm_mutating": true,
       "params": {
         "unitDef": {
           "type": "string",
@@ -638,6 +719,24 @@
             1
           ]
         }
+      },
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureResurrect",
+          "args": ["fixture.featureID", "value.unitDef", "value.facing", "value.progress"],
+          "wasm_args": [
+            "fixture.featureID",
+            {"name": "", "id": "fixture.unitDefID"},
+            "value.facing",
+            "value.progress"
+          ]
+        },
+        "call": "Spring.GetFeatureResurrect",
+        "args": ["fixture.featureID"],
+        "returns": [
+          {"field": "unitDef", "path": ["resurrectAs"]},
+          {"field": "facing", "path": ["facingDir"]}
+        ]
       }
     }
   ]

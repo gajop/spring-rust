@@ -30,16 +30,15 @@
         "mode": "fields",
         "epsilon": 0.05,
         "fields": [
-          "value",
-          "listed"
+          "value"
         ]
       },
       "report": {
         "lua_setter": "`Spring.SetFeatureRulesParam`",
         "native_setter": "`RulesParams.set_feature_rules_param`",
-        "lua_getter": "`Spring.GetFeatureRulesParam`, `Spring.GetFeatureRulesParams`",
+        "lua_getter": "`Spring.GetFeatureRulesParam`",
         "native_getter": "`RulesParams.get_feature_rules_param`, `RulesParams.get_feature_rules_params`",
-        "fields": "`value`, `listed`"
+        "fields": "`value`"
       },
       "rust": {
         "check": "check_rules_param",
@@ -65,6 +64,39 @@
             900
           ]
         }
+      },
+      "wasm_mutating": true,
+      "lua_runtime": {
+        "set": {
+          "call": "Spring.SetFeatureRulesParam",
+          "args": [
+            "fixture.featureID",
+            "value.paramName",
+            "value.value",
+            {
+              "public": true
+            }
+          ],
+          "wasm_args": [
+            "fixture.featureID",
+            "value.paramName",
+            {
+              "type": "rulesparam-type-float",
+              "boolValue": false,
+              "floatValue": "value.value",
+              "stringValue": ""
+            },
+            32
+          ]
+        },
+        "call": "Spring.GetFeatureRulesParam",
+        "args": [
+          "fixture.featureID",
+          "value.paramName"
+        ],
+        "returns": [
+          "value"
+        ]
       }
     },
     {

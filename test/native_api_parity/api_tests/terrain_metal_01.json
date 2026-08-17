@@ -54,7 +54,8 @@
         },
         "height": {
           "type": "f32",
-          "generator": "raised_ground_height"
+          "generator": "raised_ground_height",
+          "wasm_fixed": 112
         },
         "terraform": {
           "type": "f32",
@@ -63,7 +64,20 @@
             1
           ]
         }
-      }
+      },
+      "wasm_sequence": [
+        {"call": "TerrainControl.set_height_map_func", "args": [1, 0], "bind": "registered"},
+        {"call": "Terrain.get_ground_height", "args": ["value.x", "value.z"], "bind": "height"}
+      ],
+      "wasm_callback": {
+        "mode": "set_height_map",
+        "call": "TerrainControl.set_height_map",
+        "args": ["value.x", "value.z", "value.height", "value.terraform"],
+        "team": 0
+      },
+      "wasm_returns": [
+        {"field": "height", "from": "height"}
+      ]
     },
     {
       "id": "ground_orig_height",

@@ -765,7 +765,47 @@ fn normalize_known_string_shapes(
 /// by the function-level `result<..., spring-error>` in WIT and must not be
 /// mistaken for a pointer/count list when the raw record is emitted.
 fn normalize_record_fields(record: &crate::StructDef) -> Vec<FieldModel> {
-    normalize_fields(
+	// RulesParamValue is a tagged C union.  Clang exposes the discriminant but
+	// not the anonymous union members as ordinary record fields, while the
+	// native ABI still requires the active payload to cross the Wasm boundary.
+	// Keep the C layout unchanged and describe all union arms in the transport
+	// model; the generated host adapter selects the arm from `type`.
+	if record.name == "RulesParamValue" {
+		return vec![
+			FieldModel {
+				name: "type".to_string(),
+				ty: SemanticType::Enum {
+					name: "RulesParamType".to_string(),
+				},
+				status: LoweringStatus::Automatic,
+				metadata: Vec::new(),
+			},
+			FieldModel {
+				name: "boolValue".to_string(),
+				ty: SemanticType::Scalar {
+					name: "bool".to_string(),
+				},
+				status: LoweringStatus::Automatic,
+				metadata: Vec::new(),
+			},
+			FieldModel {
+				name: "floatValue".to_string(),
+				ty: SemanticType::Scalar {
+					name: "f32".to_string(),
+				},
+				status: LoweringStatus::Automatic,
+				metadata: Vec::new(),
+			},
+			FieldModel {
+				name: "stringValue".to_string(),
+				ty: SemanticType::String,
+				status: LoweringStatus::Automatic,
+				metadata: Vec::new(),
+			},
+		];
+	}
+
+	normalize_fields(
         &record
             .fields
             .iter()

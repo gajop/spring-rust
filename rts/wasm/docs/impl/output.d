@@ -24,8 +24,8 @@ Phase status:
 
 Open original-plan work:
   - finish broad API and mutation-heavy end-to-end coverage;
-  - review Lua-loader coverage and add conversion fuzzing;
-  - add the generated-adapter performance fixture;
+  - expand the bounded conversion corpus across the remaining lowering
+    families;
   - complete broad post-change parity coverage;
   - commit the implementation.
 

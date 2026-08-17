@@ -7,6 +7,9 @@ interface rules-params-rules-synced-gaia-synced {
 
   record rules-param-value {
     %type: rules-param-type,
+    bool-value: bool,
+    float-value: f32,
+    string-value: string,
   }
 
   record set-feature-rules-param-query {

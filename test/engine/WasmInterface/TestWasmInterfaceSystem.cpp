@@ -2,11 +2,15 @@
 
 #include <catch_amalgamated.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "ComponentAggregationFalseFixture.h"
+#include "ComponentAggregationTrueFixture.h"
+#include "System/SyncedTiming.h"
 #include "WasmInterface/WasmInterfaceSystem.h"
 #include "generated/WasmCallinRegistry.h"
 
@@ -86,6 +90,25 @@ TEST_CASE("Wasm synced messages are a one-way no-op without unsynced modules")
 	CHECK(system.ModuleCount() == 0);
 }
 
+TEST_CASE("synced timing requires an explicit opt-in value")
+{
+	CHECK_FALSE(spring::synced_timing::IsAllowed(true, true, false));
+	CHECK(spring::synced_timing::IsAllowed(true, true, true));
+	CHECK(spring::synced_timing::IsAllowed(true, false, false));
+	CHECK(spring::synced_timing::IsAllowed(false, true, false));
+
+	CHECK_FALSE(spring::synced_timing::IsEnabledSetting(""));
+	CHECK_FALSE(spring::synced_timing::IsEnabledSetting("0"));
+	CHECK_FALSE(spring::synced_timing::IsEnabledSetting("enabled"));
+	CHECK(spring::synced_timing::IsEnabledSetting("1"));
+	CHECK(spring::synced_timing::IsEnabledSetting("true"));
+	CHECK(spring::synced_timing::IsEnabledSetting("TRUE"));
+	CHECK(spring::synced_timing::IsEnabledSetting("yes"));
+	CHECK(spring::synced_timing::IsEnabledSetting("YES"));
+	CHECK(spring::synced_timing::IsEnabledSetting("on"));
+	CHECK(spring::synced_timing::IsEnabledSetting("ON"));
+}
+
 TEST_CASE("Wasm Allow callins are synced-only and deny by default")
 {
 	constexpr std::uint32_t syncedEnvironmentMask = 1u <<
@@ -151,6 +174,78 @@ TEST_CASE("Wasm callin aggregation matches Lua defaults across components")
 		WasmEnvironment::RulesUnsynced, result, error));
 	CHECK(error.find("not available") != std::string::npos);
 	CHECK_FALSE(system.DispatchCallin("AllowCommand", {}, WasmEnvironment::UI, result, error));
+	error.clear();
+	CHECK(system.DispatchCallin("AllowCommand", {}, WasmEnvironment::RulesSynced,
+		result, error));
+	CHECK(error.empty());
+	CHECK(result.IsUnit());
+}
+
+TEST_CASE("Wasm callin aggregation combines compiled components")
+{
+	const auto command = WasmValue::Record({
+		{"unit-id", WasmValue::I64(1)},
+		{"unit-def-id", WasmValue::I64(2)},
+		{"unit-team", WasmValue::I64(3)},
+		{"command", WasmValue::Record({
+			{"id", WasmValue::I64(4)},
+			{"time-out", WasmValue::I64(0)},
+			{"page-index", WasmValue::U64(0)},
+			{"num-params", WasmValue::U64(0)},
+			{"tag", WasmValue::U64(0)},
+			{"options", WasmValue::U64(0)},
+			{"params", WasmValue::List({})},
+		})},
+		{"player-num", WasmValue::I64(5)},
+		{"from-synced", WasmValue::Bool(true)},
+		{"from-lua", WasmValue::Bool(false)},
+	});
+	const auto readAllow = [](const WasmValue& value) {
+		const auto* record = std::get_if<WasmValueRecord>(&value.storage);
+		REQUIRE(record != nullptr);
+		const auto iter = record->find("value");
+		REQUIRE(iter != record->end());
+		const auto* boolean = std::get_if<bool>(&iter->second.storage);
+		REQUIRE(boolean != nullptr);
+		return *boolean;
+	};
+	const auto copyFixture = [](const std::uint8_t* bytes, std::size_t size) {
+		return std::vector<std::uint8_t>(bytes, bytes + size);
+	};
+
+	WasmInterfaceSystem system;
+	REQUIRE(system.Runtime().IsAvailable());
+	std::string error;
+	REQUIRE(system.LoadModule({
+		.name = "allow-false",
+		.source = "allow-false.component.wasm",
+		.environment = WasmEnvironment::RulesSynced,
+		.order = 0,
+		.bytes = copyFixture(wasm_component_fixture::kComponentAggregationFalseFixture,
+			wasm_component_fixture::kComponentAggregationFalseFixtureSize),
+	}, error));
+	REQUIRE(system.LoadModule({
+		.name = "allow-true",
+		.source = "allow-true.component.wasm",
+		.environment = WasmEnvironment::RulesSynced,
+		.order = 1,
+		.bytes = copyFixture(wasm_component_fixture::kComponentAggregationTrueFixture,
+			wasm_component_fixture::kComponentAggregationTrueFixtureSize),
+	}, error));
+
+	WasmValue result;
+	REQUIRE(system.DispatchCallin("AllowCommand", {command},
+		WasmEnvironment::RulesSynced, result, error));
+	CHECK(error.empty());
+	CHECK_FALSE(readAllow(result));
+
+	REQUIRE(system.UnloadModule("allow-false"));
+	result = WasmValue::Unit();
+	error.clear();
+	REQUIRE(system.DispatchCallin("AllowCommand", {command},
+		WasmEnvironment::RulesSynced, result, error));
+	CHECK(error.empty());
+	CHECK(readAllow(result));
 }
 
 TEST_CASE("Wasm manifest loading is atomic across multiple declarations")

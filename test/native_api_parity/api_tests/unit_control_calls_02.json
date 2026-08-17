@@ -2,7 +2,8 @@
   "version": 1,
   "tests": [
     {
-      "id": "unit_set_leaves_ghost",
+     "id": "unit_set_leaves_ghost",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -21,7 +22,8 @@
       }
     },
     {
-      "id": "unit_set_use_weapons",
+     "id": "unit_set_use_weapons",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -41,6 +43,13 @@
     },
     {
       "id": "unit_set_target_clear",
+      "wasm_mutating": true,
+      "wasm_args": [
+        "fixture.unitID",
+        "value.target",
+        "value.options",
+        "value.weaponNum"
+      ],
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -52,7 +61,9 @@
         "targetID": {"type": "i32", "fixed": -1},
         "dgun": {"type": "bool", "fixed": false},
         "userTarget": {"type": "bool", "fixed": false},
-        "weaponNum": {"type": "i32", "fixed": -1}
+        "weaponNum": {"type": "i32", "fixed": -1},
+        "target": {"type": "object", "fixed": {"targetID": -1, "pos": {"x": 0, "y": 0, "z": 0}, "isGroundTarget": false}},
+        "options": {"type": "object", "fixed": {"manualFire": false, "userTarget": false}}
       },
       "lua_runtime": {
         "call": "Spring.SetUnitTarget",
@@ -61,7 +72,8 @@
       }
     },
     {
-      "id": "unit_set_loading_transport_clear",
+     "id": "unit_set_loading_transport_clear",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -77,7 +89,8 @@
       }
     },
     {
-      "id": "unit_set_weapon_state",
+     "id": "unit_set_weapon_state",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -87,9 +100,11 @@
       "rust": {"check": "check_unit_control_call", "set": "set_noop"},
       "params": {
         "weaponNum": {"type": "i32", "fixed": 1},
+        "wasmWeaponNum": {"type": "i32", "fixed": 0},
         "key": {"type": "string", "fixed": "range"},
         "value": {"type": "f32", "fixed": 256}
       },
+      "wasm_args": ["fixture.unitID", "value.wasmWeaponNum", "value.key", "value.value"],
       "lua_runtime": {
         "call": "Spring.SetUnitWeaponState",
         "args": ["fixture.unitID", "value.weaponNum", "value.key", "value.value"],
@@ -97,7 +112,8 @@
       }
     },
     {
-      "id": "unit_set_weapon_damages",
+     "id": "unit_set_weapon_damages",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -107,9 +123,11 @@
       "rust": {"check": "check_unit_control_call", "set": "set_noop"},
       "params": {
         "weaponNum": {"type": "i32", "fixed": 1},
+        "wasmWeaponNum": {"type": "i32", "fixed": 0},
         "damageKey": {"type": "string", "fixed": "impulseFactor"},
         "damageValue": {"type": "f32", "fixed": 1.5}
       },
+      "wasm_args": ["fixture.unitID", "value.wasmWeaponNum", "value.damageKey", "value.damageValue"],
       "lua_runtime": {
         "call": "Spring.SetUnitWeaponDamages",
         "args": ["fixture.unitID", "value.weaponNum", "value.damageKey", "value.damageValue"],
@@ -118,6 +136,8 @@
     },
     {
       "id": "unit_set_heading_and_up_dir",
+      "wasm_mutating": true,
+      "wasm_args": ["fixture.unitID", "value.heading", "value.upDir"],
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -136,7 +156,8 @@
       }
     },
     {
-      "id": "unit_add_object_decal",
+     "id": "unit_add_object_decal",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -153,7 +174,8 @@
       }
     },
     {
-      "id": "unit_remove_object_decal",
+     "id": "unit_remove_object_decal",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -197,6 +219,11 @@
     },
     {
       "id": "unit_set_piece_collision_volume_data",
+      "wasm_mutating": true,
+      "wasm_args": [
+        "fixture.unitID", 0, "value.enable", "value.scale", "value.offset",
+        "value.volumeType", "value.primaryAxis"
+      ],
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -213,6 +240,8 @@
         "offsetX": {"type": "f32", "fixed": 0},
         "offsetY": {"type": "f32", "fixed": 0},
         "offsetZ": {"type": "f32", "fixed": 0},
+        "scale": {"type": "float3", "fixed": {"x": 8, "y": 8, "z": 8}},
+        "offset": {"type": "float3", "fixed": {"x": 0, "y": 0, "z": 0}},
         "volumeType": {"type": "i32", "fixed": 2},
         "primaryAxis": {"type": "i32", "fixed": 1}
       },
@@ -223,7 +252,8 @@
       }
     },
     {
-      "id": "unit_set_piece_visible",
+     "id": "unit_set_piece_visible",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -232,6 +262,7 @@
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_unit_control_call", "set": "set_noop"},
       "params": {"pieceNum": {"type": "i32", "fixed": 1}, "visible": {"type": "bool", "fixed": false}},
+      "wasm_args": ["fixture.unitID", 0, "value.visible"],
       "lua_runtime": {
         "call": "Spring.SetUnitPieceVisible",
         "args": ["fixture.unitID", "value.pieceNum", "value.visible"],
@@ -239,7 +270,8 @@
       }
     },
     {
-      "id": "unit_set_piece_matrix",
+     "id": "unit_set_piece_matrix",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -251,6 +283,7 @@
         "pieceNum": {"type": "i32", "fixed": 1},
         "matrix": {"type": "object", "fixed": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]}
       },
+      "wasm_args": ["fixture.unitID", 0, "value.matrix"],
       "lua_runtime": {
         "call": "Spring.SetUnitPieceMatrix",
         "args": ["fixture.unitID", "value.pieceNum", "value.matrix"],
@@ -262,6 +295,7 @@
       "context": "synced_gadget",
       "kind": "readonly",
       "expect_error": true,
+      "wasm_expected_error": true,
       "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitPieceParent"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_piece_parent"]},
@@ -275,7 +309,8 @@
       }
     },
     {
-      "id": "unit_set_nano_pieces",
+     "id": "unit_set_nano_pieces",
+      "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": ["unit"],
@@ -284,6 +319,7 @@
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "rust": {"check": "check_unit_control_call", "set": "set_noop"},
       "params": {"pieceNum": {"type": "i32", "fixed": 1}},
+      "wasm_args": ["fixture.unitID", [0]],
       "lua_runtime": {
         "call": "Spring.SetUnitNanoPieces",
         "args": ["fixture.unitID", ["value.pieceNum"]],
@@ -295,6 +331,7 @@
       "context": "synced_gadget",
       "kind": "readonly",
       "expect_error": true,
+      "wasm_expected_error": true,
       "requires": ["unit"],
       "lua": {"set": [], "get": ["Spring.SetUnitLandGoal"]},
       "native": {"set": [], "get": ["UnitControl.set_unit_land_goal"]},
@@ -302,11 +339,13 @@
       "report": {"lua_getter": "`Spring.SetUnitLandGoal`", "native_getter": "`UnitControl.set_unit_land_goal`", "fields": "non-air-unit error"},
       "rust": {"check": "check_unit_control_call", "set": "set_noop"},
       "params": {
+        "pos": {"type": "float3", "fixed": {"x": 1024, "y": 96, "z": 1024}},
         "goalX": {"type": "f32", "fixed": 1024},
         "goalY": {"type": "f32", "fixed": 96},
         "goalZ": {"type": "f32", "fixed": 1024},
         "goalRadius": {"type": "f32", "fixed": 64}
       },
+      "wasm_args": ["fixture.unitID", "value.pos", "value.goalRadius"],
       "lua_runtime": {
         "call": "Spring.SetUnitLandGoal",
         "args": ["fixture.unitID", "value.goalX", "value.goalY", "value.goalZ", "value.goalRadius"],
