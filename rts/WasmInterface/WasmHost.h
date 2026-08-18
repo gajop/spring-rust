@@ -15,7 +15,9 @@
 // pointer into a Wasm store or the NativeInterface scratch area is retained.
 struct WasmValue;
 using WasmValueList = std::vector<WasmValue>;
-using WasmValueRecord = std::map<std::string, WasmValue>;
+// Transparent comparator so a field lookup can take a string_view without
+// building a std::string first.
+using WasmValueRecord = std::map<std::string, WasmValue, std::less<>>;
 
 // Component variants/resources cannot be represented by a flat C++ union.
 // Keep the semantic boundary owned and recursive while avoiding a raw
@@ -102,4 +104,27 @@ public:
 	{
 		return Callout(module, function, arguments, result, error);
 	}
+
+	// Resolve an import's target once at bind time; the cookie is opaque so this
+	// header stays free of NativeInterface types.  nullptr means resolve by name.
+	virtual const void* ResolveCallout(std::string_view module, std::string_view function)
+	{
+		(void)module;
+		(void)function;
+		return nullptr;
+	}
+
+	virtual bool Callout(WasmModule& owner, const void* resolved, std::string_view module,
+		std::string_view function, const std::vector<WasmValue>& arguments,
+		WasmValue& result, std::string& error)
+	{
+		(void)resolved;
+		return Callout(owner, module, function, arguments, result, error);
+	}
+
+	// Opaque NativeInterface* for alternative hosts that reach the native API
+	// without going through the WasmValue transport.  void* keeps this header
+	// free of NativeInterface types; nullptr means the adapter has none, which
+	// is the case for the small fakes used by focused runtime tests.
+	virtual void* NativeInterfaceHandle() { return nullptr; }
 };

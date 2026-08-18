@@ -111,6 +111,8 @@ endmacro()
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystem.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmDispatch.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHost.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHostShims.cpp"
 			"${ENGINE_SOURCE_DIR}/NativeInterface/NativeInterfaceWasmAdapter.cpp"
 			"${ENGINE_SOURCE_DIR}/NativeInterface/WasmUiVisibility.cpp"
 			${wasm_host_adapter_sources}
@@ -141,6 +143,8 @@ endmacro()
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModule.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmResources.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHost.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHostShims.cpp"
 			"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
 			${test_List_sources}
 			${test_Catch_main}

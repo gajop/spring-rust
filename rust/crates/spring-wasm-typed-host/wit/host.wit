@@ -1,0 +1,254 @@
+package recoil:spring-api@1.0.0;
+
+// Scoped to the callouts and callins the benchmark table needs.  Interface,
+// function and record names are copied verbatim from the generated benchmark
+// world so a component built against the full world instantiates against this
+// linker; everything not declared here is defined as a trap.
+
+interface messages {
+  record spring-error { code: s32 }
+
+  send-lua-rules-msg: func(message: string) -> result<bool, spring-error>;
+}
+
+interface profiling {
+  record spring-error { code: s32 }
+
+  record get-lua-mem-usage-value {
+    handle-alloced-kb: f32,
+    handle-allocs-k: f32,
+    global-alloced-kb: f32,
+    global-allocs-k: f32,
+    unsynced-alloced-kb: f32,
+    unsynced-allocs-k: f32,
+    synced-alloced-kb: f32,
+    synced-allocs-k: f32,
+  }
+
+  get-timer-micros: func(unused: u8) -> result<u64, spring-error>;
+  // Unsynced world only; the synced guest never imports these.
+  get-lua-mem-usage: func(unused: u8) -> result<get-lua-mem-usage-value, spring-error>;
+  get-synced-gc-info: func(collect: bool) -> result<f32, spring-error>;
+}
+
+interface rules-params {
+  record spring-error { code: s32 }
+
+  enum rules-param-type {
+    rulesparam-type-bool,
+    rulesparam-type-float,
+    rulesparam-type-string,
+  }
+
+  record rules-param-value {
+    %type: rules-param-type,
+    bool-value: bool,
+    float-value: f32,
+    string-value: string,
+  }
+
+  record get-unit-rules-param-value {
+    value: rules-param-value,
+    los: s32,
+    exists: bool,
+  }
+
+  get-unit-rules-param: func(unit-id: s32, param-name: string) -> result<get-unit-rules-param-value, spring-error>;
+  set-unit-rules-param: func(unit-id: s32, param-name: string, value: rules-param-value, los: s32) -> result<bool, spring-error>;
+}
+
+interface terrain {
+  record spring-error { code: s32 }
+
+  get-ground-orig-height: func(x: f32, z: f32) -> result<f32, spring-error>;
+}
+
+interface terrain-control {
+  record spring-error { code: s32 }
+
+  level-height-map: func(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> result<bool, spring-error>;
+  set-height-map: func(x: f32, z: f32, height: f32, terraform: f32) -> result<bool, spring-error>;
+  set-height-map-func: func(callback: u32, user-data: u32) -> result<bool, spring-error>;
+}
+
+interface unit-control {
+  record spring-error { code: s32 }
+
+  give-order-to-unit: func(unit-id: s32, cmd-id: s32, params: list<f32>, options: u32, timeout: s32) -> result<bool, spring-error>;
+}
+
+interface unit-defs {
+  record spring-error { code: s32 }
+
+  get-unit-def-name: func(unit-def-id: s32) -> result<string, spring-error>;
+}
+
+interface units-commands {
+  record spring-error { code: s32 }
+
+  record command-ffi {
+    cmd-id: s32,
+    options: u8,
+    tag: s32,
+    ai-command-id: s32,
+    time-out: f32,
+    params: list<f32>,
+  }
+
+  get-unit-commands: func(unit-id: s32, max-commands: u32) -> result<list<command-ffi>, spring-error>;
+}
+
+interface units-info {
+  record spring-error { code: s32 }
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  record get-unit-position-options {
+    mid-pos: bool,
+    aim-pos: bool,
+  }
+
+  record unit-health {
+    health: f32,
+    max-health: f32,
+    paralyze-damage: f32,
+    capture-progress: f32,
+    build-progress: f32,
+  }
+
+  get-unit-def-id: func(unit-id: s32) -> result<s32, spring-error>;
+  get-unit-health: func(unit-id: s32) -> result<unit-health, spring-error>;
+  get-unit-position: func(unit-id: s32, options: get-unit-position-options) -> result<float3, spring-error>;
+}
+
+interface units-query {
+  record spring-error { code: s32 }
+
+  get-team-units: func(team-id: s32) -> result<list<s32>, spring-error>;
+  get-units-in-cylinder: func(x: f32, z: f32, radius: f32, allegiance: s32) -> result<list<s32>, spring-error>;
+}
+
+interface callins-rules-synced {
+  record spring-error { code: s32 }
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  record allow-unit-creation-query {
+    unit-def-id: s32,
+    builder-id: s32,
+    builder-team: s32,
+    has-build-info: bool,
+    build-pos: float3,
+    build-facing: s32,
+  }
+
+  record allow-unit-creation-result {
+    allow: bool,
+    drop-order: bool,
+  }
+
+  record damage-callin-result {
+    new-damage: f32,
+    impulse-mult: f32,
+  }
+
+  record game-frame-query {
+    game-frame: s32,
+  }
+
+  record game-frame-result {
+    unused: u8,
+  }
+
+  record unit-created-query {
+    unit-id: s32,
+    unit-def-id: s32,
+    unit-team: s32,
+    builder-id: s32,
+  }
+
+  record unit-damaged-query {
+    unit-id: s32,
+    unit-def-id: s32,
+    unit-team: s32,
+    damage: f32,
+    paralyzer: bool,
+    weapon-def-id: s32,
+    projectile-id: s32,
+    attacker-id: s32,
+    attacker-def-id: s32,
+    attacker-team: s32,
+  }
+
+  record update-query {
+    delta-seconds: f32,
+  }
+
+  record update-result {
+    unused: u8,
+  }
+
+  allow-unit-creation: func(query: allow-unit-creation-query) -> result<allow-unit-creation-result, spring-error>;
+  game-frame: func(query: game-frame-query) -> result<game-frame-result, spring-error>;
+  game-frame-post: func(query: game-frame-query) -> result<game-frame-result, spring-error>;
+  unit-created: func(query: unit-created-query) -> result<_, spring-error>;
+  unit-pre-damaged: func(query: unit-damaged-query) -> result<damage-callin-result, spring-error>;
+  update: func(query: update-query) -> result<update-result, spring-error>;
+}
+
+interface callins-rules-unsynced {
+  record spring-error { code: s32 }
+
+  record game-frame-query {
+    game-frame: s32,
+  }
+
+  record game-frame-result {
+    unused: u8,
+  }
+
+  record update-query {
+    delta-seconds: f32,
+  }
+
+  record update-result {
+    unused: u8,
+  }
+
+  game-frame: func(query: game-frame-query) -> result<game-frame-result, spring-error>;
+  game-frame-post: func(query: game-frame-query) -> result<game-frame-result, spring-error>;
+  update: func(query: update-query) -> result<update-result, spring-error>;
+}
+
+world benchmark-rules-synced {
+  import messages;
+  import profiling;
+  import rules-params;
+  import terrain;
+  import terrain-control;
+  import unit-control;
+  import unit-defs;
+  import units-commands;
+  import units-info;
+  import units-query;
+  export callins-rules-synced;
+  export callback-1: func(user-data: u32);
+}
+
+// The unsynced guest imports a strict subset of the synced one, so the host
+// trait impls are shared; only the exported callin interface differs.
+world benchmark-rules-unsynced {
+  import messages;
+  import profiling;
+  import units-info;
+  import units-query;
+  export callins-rules-unsynced;
+}

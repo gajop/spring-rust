@@ -73,6 +73,7 @@ public:
 	bool DispatchSyncedMessage(std::string_view message, std::string& error);
 
 	std::size_t ModuleCount() const;
+	bool HasModules(WasmEnvironment environment) const;
 	const WasmRuntime& Runtime() const { return *runtime; }
 
 	// Match configuration must enumerate these values for every synced module.

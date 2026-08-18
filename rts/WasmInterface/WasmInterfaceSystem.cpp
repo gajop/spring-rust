@@ -2,9 +2,13 @@
 
 #include "WasmInterfaceSystem.h"
 
+#include "WasmTypedHost.h"
+
 #include <algorithm>
 #include <cctype>
 #include <iterator>
+#include <map>
+#include <unordered_map>
 #include <limits>
 #include <utility>
 
@@ -32,12 +36,33 @@ namespace {
 
 	const recoil::wasm::generated::CallinDescriptor* FindCallin(std::string_view name)
 	{
-		const auto* begin = std::begin(recoil::wasm::generated::kCallins);
-		const auto* end = std::end(recoil::wasm::generated::kCallins);
-		const auto iter = std::find_if(begin, end, [name](const auto& callin) {
-			return name == callin.name;
-		});
-		return iter == end ? nullptr : &*iter;
+		// The inventory is fixed, and this sits on every engine event.
+		static const std::unordered_map<std::string_view,
+			const recoil::wasm::generated::CallinDescriptor*> index = [] {
+			std::unordered_map<std::string_view,
+				const recoil::wasm::generated::CallinDescriptor*> entries;
+			for (const auto& callin : recoil::wasm::generated::kCallins)
+				entries.emplace(callin.name, &callin);
+			return entries;
+		}();
+		const auto iter = index.find(name);
+		return iter == index.end() ? nullptr : iter->second;
+	}
+
+	// One callin resolves to the same export path in the same environment for
+	// the life of the process.
+	const std::string& CallinExportPath(
+		const recoil::wasm::generated::CallinDescriptor* descriptor,
+		WasmEnvironment environment)
+	{
+		static std::map<std::pair<const void*, WasmEnvironment>, std::string> paths;
+		const auto key = std::make_pair(static_cast<const void*>(descriptor), environment);
+		const auto iter = paths.find(key);
+		if (iter != paths.end())
+			return iter->second;
+		return paths.emplace(key, "recoil:spring-api/callins-" +
+			ToWitName(WasmEnvironmentMatrix::Name(environment)) + "@1.0.0/" +
+			ToWitName(descriptor->name)).first->second;
 	}
 
 	bool UnwrapCallinResult(const WasmValue& value, WasmValue& payload,
@@ -211,6 +236,23 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 	})) {
 		error = "duplicate Wasm module name: " + descriptor.name;
 		return false;
+	}
+
+	// The typed Rust host runs the same component bytes over its own Wasmtime
+	// instance.  It is loaded alongside rather than instead of the C API module
+	// so the environment matrix, manifest checks and module bookkeeping stay on
+	// one path; only callin dispatch is rerouted.
+	if (WasmTypedHost::Enabled() && hostAdapter != nullptr &&
+		descriptor.environment != WasmEnvironment::UI) {
+		const bool synced = WasmEnvironmentMatrix::Policy(descriptor.environment).synced;
+		std::string rustError;
+		if (!WasmTypedHost::Instance().Load(descriptor.bytes,
+			static_cast<NativeInterface*>(hostAdapter->NativeInterfaceHandle()), synced,
+			rustError)) {
+			error = "could not start the Rust Wasm host: " + rustError;
+			LOG_L(L_ERROR, "%s", error.c_str());
+			return false;
+		}
 	}
 
 	auto module = std::make_unique<WasmModule>(nextInstanceID++, std::move(descriptor), *runtime,
@@ -406,12 +448,17 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 			std::string(WasmEnvironmentMatrix::Name(environment));
 		return false;
 	}
-	const std::string exportPath = "recoil:spring-api/callins-" +
-		ToWitName(WasmEnvironmentMatrix::Name(environment)) + "@1.0.0/" +
-		ToWitName(descriptor->name);
+	// Nothing below applies when this environment holds no module, and the
+	// export path costs several allocations to build.
+	const auto matches = [environment](const std::unique_ptr<WasmModule>& module) {
+		return module->Descriptor().environment == environment;
+	};
+	if (std::none_of(modules.begin(), modules.end(), matches))
+		return true;
+	const std::string& exportPath = CallinExportPath(descriptor, environment);
 	bool haveResult = false;
 	for (const auto& module : modules) {
-		if (module->Descriptor().environment != environment)
+		if (!matches(module))
 			continue;
 		WasmValue rawResult;
 		if (!module->Callin(exportPath, arguments, rawResult, error)) {
@@ -510,6 +557,13 @@ bool WasmInterfaceSystem::DispatchSyncedMessage(std::string_view message,
 std::size_t WasmInterfaceSystem::ModuleCount() const
 {
 	return modules.size();
+}
+
+bool WasmInterfaceSystem::HasModules(WasmEnvironment environment) const
+{
+	return std::any_of(modules.begin(), modules.end(), [environment](const auto& module) {
+		return module->Descriptor().environment == environment;
+	});
 }
 
 std::vector<std::string> WasmInterfaceSystem::SyncedConfiguration() const

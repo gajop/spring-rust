@@ -1,0 +1,44 @@
+[package]
+name = "spring-wasm-typed-host"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Feature set chosen to match the prebuilt C API release the engine links (see
+# rts/wasm/wasmtime.version and the SDK's include/wasmtime/conf.h): the crate
+# default additionally turns on component-model-async and stack-switching,
+# which the C API build does not have and which add per-call work to every
+# component entry.  With defaults a component callin measures 348 ns instead
+# of 67, so this list is load-bearing for the comparison, not hygiene.
+wasmtime = { version = "=42.0.1", default-features = false, features = [
+    "anyhow",
+    "async",
+    "backtrace",
+    "cache",
+    "gc",
+    "gc-drc",
+    "gc-null",
+    "wat",
+    "profiling",
+    "parallel-compilation",
+    "cranelift",
+    "pooling-allocator",
+    "demangle",
+    "addr2line",
+    "coredump",
+    "debug-builtins",
+    "runtime",
+    "component-model",
+    "threads",
+    "std",
+] }
+anyhow = "1"
+
+[profile.release]
+opt-level = 3
+
+[workspace]

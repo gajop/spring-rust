@@ -181,6 +181,11 @@ out/
 /rust/target
 /rust/Cargo.lock
 
+# The typed Wasm host is a standalone workspace (it pins wasmtime features that
+# must not leak into the main lockfile), so it builds into its own target dir.
+# Its Cargo.lock is tracked on purpose: the pin is load-bearing for benchmarks.
+/rust/crates/spring-wasm-typed-host/target
+
 # Wasm and native parity harness build/run products
 /test/wasm_api/**/target
 /test/wasm_api/benchmark_guest/wit

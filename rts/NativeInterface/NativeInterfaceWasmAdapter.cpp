@@ -48,7 +48,7 @@ namespace {
 
 	const WasmValue* FindField(const WasmValueRecord& record, std::string_view name)
 	{
-		const auto iter = record.find(std::string(name));
+		const auto iter = record.find(name);
 		if (iter != record.end())
 			return &iter->second;
 		const std::string witName = ToWitFieldName(name);
@@ -654,19 +654,34 @@ namespace {
 bool NativeInterfaceWasmAdapter::Callout(std::string_view module, std::string_view function,
 	const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	return CalloutImpl(nullptr, module, function, arguments, result, error);
+	return CalloutImpl(nullptr, nullptr, module, function, arguments, result, error);
 }
 
 bool NativeInterfaceWasmAdapter::Callout(WasmModule& owner, std::string_view module,
 	std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result,
 	std::string& error)
 {
-	return CalloutImpl(&owner, module, function, arguments, result, error);
+	return CalloutImpl(&owner, nullptr, module, function, arguments, result, error);
 }
 
-bool NativeInterfaceWasmAdapter::CalloutImpl(WasmModule* owner, std::string_view module,
-	std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result,
-	std::string& error)
+bool NativeInterfaceWasmAdapter::Callout(WasmModule& owner, const void* resolved,
+	std::string_view module, std::string_view function,
+	const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
+{
+	return CalloutImpl(&owner, resolved, module, function, arguments, result, error);
+}
+
+const void* NativeInterfaceWasmAdapter::ResolveCallout(std::string_view module,
+	std::string_view function)
+{
+	// Only the generated table binds ahead of time; the manual branches in
+	// CalloutImpl still match by name.
+	return recoil::wasm::generated::ResolveNativeCallout(module, function);
+}
+
+bool NativeInterfaceWasmAdapter::CalloutImpl(WasmModule* owner, const void* resolved,
+	std::string_view module, std::string_view function,
+	const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
 	if (nativeInterface == nullptr) {
 		error = "NativeInterface Wasm adapter has no host interface";
@@ -713,8 +728,12 @@ bool NativeInterfaceWasmAdapter::CalloutImpl(WasmModule* owner, std::string_view
 		}
 	}
 
-	const auto generatedResult = recoil::wasm::generated::DispatchNativeCallout(
-		nativeInterface, module, function, arguments, result, error);
+	const auto* target = resolved != nullptr ?
+		static_cast<const recoil::wasm::generated::NativeCalloutTarget*>(resolved) :
+		recoil::wasm::generated::ResolveNativeCallout(module, function);
+	const auto generatedResult = target == nullptr ?
+		recoil::wasm::generated::NativeCalloutDispatch::notHandled :
+		target->invoke(nativeInterface, arguments, result, error);
 	if (generatedResult == recoil::wasm::generated::NativeCalloutDispatch::handled) {
 		if (trackCreatedContext && error.empty()) {
 			const auto* record = std::get_if<WasmValueRecord>(&result.storage);

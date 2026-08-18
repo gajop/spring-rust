@@ -23,11 +23,16 @@ public:
 	bool Callout(WasmModule& owner, std::string_view module, std::string_view function,
 		const std::vector<WasmValue>& arguments, WasmValue& result,
 		std::string& error) override;
+	const void* ResolveCallout(std::string_view module, std::string_view function) override;
+	bool Callout(WasmModule& owner, const void* resolved, std::string_view module,
+		std::string_view function, const std::vector<WasmValue>& arguments,
+		WasmValue& result, std::string& error) override;
+	void* NativeInterfaceHandle() override { return nativeInterface; }
 
 private:
-	bool CalloutImpl(WasmModule* owner, std::string_view module, std::string_view function,
-		const std::vector<WasmValue>& arguments, WasmValue& result,
-		std::string& error);
+	bool CalloutImpl(WasmModule* owner, const void* resolved, std::string_view module,
+		std::string_view function, const std::vector<WasmValue>& arguments,
+		WasmValue& result, std::string& error);
 
 	NativeInterface* nativeInterface = nullptr;
 };

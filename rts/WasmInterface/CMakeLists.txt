@@ -9,6 +9,8 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmDispatch.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmResources.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmRuntime.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmTypedHost.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmTypedHostShims.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterfaceSystem.cpp
 	PARENT_SCOPE
 )

@@ -426,8 +426,12 @@ private:
 	// semantic record writers and fan it out to the synced or unsynced Wasm
 	// gadget worlds. Opaque/manual query shapes must be explicitly represented
 	// by the generated serializer or rejected by the code-generation gate.
+	// `nativeResult`, when given, is the caller's native callin result struct.
+	// The typed Rust host writes into it directly instead of building a
+	// WasmValue, which is the whole point of that path; the C API path ignores
+	// it and keeps using `result`.
 	bool DispatchWasmCallin(std::string_view name, const void* query, bool synced,
-		WasmValue* result = nullptr);
+		WasmValue* result = nullptr, void* nativeResult = nullptr);
 	bool DispatchWasmBoolCallin(std::string_view name, const void* query, bool synced,
 		bool& result);
 	bool DispatchWasmStringCallin(std::string_view name, const void* query, bool synced,
