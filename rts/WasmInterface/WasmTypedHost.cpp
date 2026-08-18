@@ -155,10 +155,14 @@ bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query, voi
 	if (query == nullptr)
 		return false;
 
+	const Callin callin = Resolve(name);
+	if (callin == Callin::None)
+		return false;
+
 	bool handled = false;
 	for (const auto& host : Hosts()) {
 		std::string hostError;
-		if (!host->Invoke(name, query, result, hostError))
+		if (!host->Invoke(callin, query, result, hostError))
 			return false;
 		handled = true;
 		// Keep fanning out on failure so one broken module does not silently
@@ -169,27 +173,48 @@ bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query, voi
 	return handled;
 }
 
-bool WasmTypedHost::Invoke(std::string_view name, const void* query, void* result,
+// Deliberately scoped to the callins the benchmark table needs; anything else
+// is not handled here and the caller keeps its existing path.
+WasmTypedHost::Callin WasmTypedHost::Resolve(std::string_view name)
+{
+	if (name == "GameFrame")
+		return Callin::GameFrame;
+	if (name == "GameFramePost")
+		return Callin::GameFramePost;
+	if (name == "Update")
+		return Callin::Update;
+	if (name == "UnitCreated")
+		return Callin::UnitCreated;
+	if (name == "UnitPreDamaged")
+		return Callin::UnitPreDamaged;
+	if (name == "AllowUnitCreation")
+		return Callin::AllowUnitCreation;
+	if (name == "DrawWorld")
+		return Callin::DrawWorld;
+	return Callin::None;
+}
+
+bool WasmTypedHost::Invoke(Callin callin, const void* query, void* result,
 	std::string& error) const
 {
 	const SpringTypedHostLibrary& library = Library();
 
 	char* hostError = nullptr;
 	std::int32_t status = 0;
-	if (name == "GameFrame") {
+	if (callin == Callin::GameFrame) {
 		const auto* typed = static_cast<const GameFrameQuery*>(query);
 		status = library.callinGameFrame(host, typed->gameFrame, &hostError);
-	} else if (name == "GameFramePost") {
+	} else if (callin == Callin::GameFramePost) {
 		const auto* typed = static_cast<const GameFrameQuery*>(query);
 		status = library.callinGameFramePost(host, typed->gameFrame, &hostError);
-	} else if (name == "Update") {
+	} else if (callin == Callin::Update) {
 		const auto* typed = static_cast<const UpdateQuery*>(query);
 		status = library.callinUpdate(host, typed->deltaSeconds, &hostError);
-	} else if (name == "UnitCreated") {
+	} else if (callin == Callin::UnitCreated) {
 		const auto* typed = static_cast<const UnitCreatedQuery*>(query);
 		status = library.callinUnitCreated(host, typed->unitID, typed->unitDefID,
 			typed->unitTeam, typed->builderID, &hostError);
-	} else if (name == "UnitPreDamaged") {
+	} else if (callin == Callin::UnitPreDamaged) {
 		const auto* typed = static_cast<const UnitDamagedQuery*>(query);
 		auto* typedResult = static_cast<DamageCallinResult*>(result);
 		float newDamage = typed->damage;
@@ -202,7 +227,7 @@ bool WasmTypedHost::Invoke(std::string_view name, const void* query, void* resul
 			typedResult->newDamage = newDamage;
 			typedResult->impulseMult = impulseMult;
 		}
-	} else if (name == "AllowUnitCreation") {
+	} else if (callin == Callin::AllowUnitCreation) {
 		const auto* typed = static_cast<const AllowUnitCreationQuery*>(query);
 		auto* typedResult = static_cast<AllowUnitCreationResult*>(result);
 		bool allow = true;
@@ -215,11 +240,9 @@ bool WasmTypedHost::Invoke(std::string_view name, const void* query, void* resul
 			typedResult->allow = allow;
 			typedResult->dropOrder = dropOrder;
 		}
-	} else if (name == "DrawWorld") {
+	} else if (callin == Callin::DrawWorld) {
 		status = library.callinDrawWorld(host, &hostError);
 	} else {
-		// Deliberately scoped to the callins the benchmark table needs; anything
-		// else is not handled here and the caller keeps its existing path.
 		return false;
 	}
 

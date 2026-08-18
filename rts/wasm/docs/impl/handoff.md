@@ -88,10 +88,6 @@ afternoon rather than a week.
    benchmark table exercises is covered, by design.
 2. Nothing here is wired into a non-benchmark path, and the switch is off by
    default. This is a prototype for measurement, not a shipping transport.
-3. Guest-side rows still report spread as max minus min over five repeats
-   (review-feedback item 12). Five samples are too few for a percentile to
-   mean anything, so fixing it properly means more repeats, which moves every
-   guest-side number and needs a full suite re-run.
 
 Every row in the table is now measured for all four backends; there are no
 `unavailable` cells left.

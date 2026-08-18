@@ -8,6 +8,11 @@ same two guests against two hosts, the Wasmtime C API and the Wasmtime Rust
 API, and checks guest return values so an optimised-away loop cannot pass as a
 fast one.
 
+The Rust side of that harness had drifted: the guest WIT grew `get-vec3-opts`
+and the Rust host never implemented it, so the whole Rust half failed to
+instantiate and printed a linker error instead of numbers. Repaired, and the
+figures below reproduce.
+
 ## Guest to host (callout)
 
 | Transport | scalar | `result<s32, e>` | `result<vec3, e>` |
@@ -146,10 +151,34 @@ one boundary crossing. Wasm pays per instance where Lua pays per callback. A
 shipping transport that expects many modules would need to care about this;
 the C API path has the same shape, only worse in absolute terms.
 
-`callin_drawworld` is 7046 ns typed against 796 ns for Lua. Both Wasm paths are
-far above Lua and native here, and the spread is enormous (±5106 ns typed,
-±6515 ns dynamic), so the row says the draw callin is expensive on Wasm without
-supporting a sharper claim than that. It has not been investigated.
+`callin_drawworld` is 7046 ns typed against 796 ns for Lua. This one was
+investigated, and it is not a dispatch cost. It is the cost of a cold entry.
+
+Timing the component call from inside the host puts it at 6351 to 6775 ns,
+matching the engine-side token, so the cost is inside `call_draw_world` and not
+in the dispatch layer. Repeating the identical call immediately afterwards,
+with the guest short-circuiting so neither call does any work, costs **216 ns**:
+
+| | median |
+| --- | ---: |
+| first call of the frame | 6085 to 7154 ns |
+| same call, immediately repeated | 216 ns |
+
+DrawWorld runs once per rendered frame, and a frame of rendering evicts the
+JIT code, the store and the component instance state from cache. The 216 ns
+warm figure sits alongside the 139 ns `callin_empty` of the sim context, which
+is the transport behaving normally.
+
+The ambient effect is visible without Wasm at all: native's `callin_drawworld`
+is 435 ns against its own 30 ns `callin_empty`, a 14x inflation from the same
+cause. Wasm pays more because its working set is larger.
+
+The practical cost model is therefore **one cold entry per frame plus cheap
+warm entries**, not a cold entry per callin. A UI module taking several draw
+callins per frame pays roughly 6 us once and about 0.2 us for each additional
+one. Nothing in the host configuration changes this: `wasm_backtrace(false)`,
+`native_unwind_info(false)` and the pooling allocator were all measured and all
+land within noise.
 
 `callin_unimplemented` is excluded from these comparisons. The guest exports
 nothing, and the row is unstable across runs on every backend: the C API path

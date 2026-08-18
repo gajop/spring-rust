@@ -132,8 +132,21 @@ private:
 	WasmTypedHost(std::string moduleName, void* host)
 		: moduleName(std::move(moduleName)), host(host) {}
 
-	bool Invoke(std::string_view name, const void* query, void* result,
-		std::string& error) const;
+	// Resolved once per engine event rather than once per host, so a
+	// four-module fan-out walks the name chain once.
+	enum class Callin : std::uint8_t {
+		None,
+		GameFrame,
+		GameFramePost,
+		Update,
+		UnitCreated,
+		UnitPreDamaged,
+		AllowUnitCreation,
+		DrawWorld,
+	};
+	static Callin Resolve(std::string_view name);
+
+	bool Invoke(Callin callin, const void* query, void* result, std::string& error) const;
 
 	std::string moduleName;
 	void* host = nullptr;

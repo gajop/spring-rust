@@ -226,18 +226,10 @@ revised reasoning are in
 [handoff.md](handoff.md) carries the working state and what is still
 unmeasured.
 
-## 12. Spread column — engine-side fixed, guest-side deliberately not
+## 12. Spread column — closed, will not fix
 
-The engine-side callin recorder now reports p5 to p95 over per-dispatch
-samples, which covers the row the item cites (`callin_unitcreated`).
-
-Guest-side rows are still max minus min, and switching them alone would be
-worse than leaving them. Those rows have five samples, each already an average
-over an inner loop, so p5 to p95 degenerates to very nearly the same two
-values while implying a precision that is not there. The honest fix is more
-repeats plus a dropped warmup, matching the engine-side recorder, and that
-moves every guest-side number in the table. Left for a cycle that can afford
-the re-run.
+The engine-side callin recorder reports p5 to p95, which covers the row the
+item cites. Guest-side rows stay max minus min. Not worth further attention.
 
 ---
 

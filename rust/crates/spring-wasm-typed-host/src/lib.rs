@@ -107,6 +107,18 @@ pub struct TypedHost {
     instance: Callins,
 }
 
+/// One engine for the process, shared by every module's host.  The C API path
+/// shares a single runtime across modules, so a per-host engine would both
+/// compile the same component once per module and give the comparison a
+/// handicap the other transport does not carry.
+fn shared_engine() -> Result<&'static Engine> {
+    static ENGINE: std::sync::OnceLock<Result<Engine, String>> = std::sync::OnceLock::new();
+    ENGINE
+        .get_or_init(|| engine().map_err(|error| format!("{error:#}")))
+        .as_ref()
+        .map_err(|error| wasmtime::Error::msg(error.clone()))
+}
+
 /// Mirrors rts/WasmInterface/WasmRuntime.cpp so both hosts measure the same
 /// Cranelift and trap configuration.
 fn engine() -> Result<Engine> {
@@ -130,9 +142,9 @@ impl TypedHost {
         shims: *const ffi::ShimTable,
         world: World,
     ) -> Result<Self> {
-        let engine = engine()?;
-        let component = Component::from_binary(&engine, component_bytes)?;
-        let mut linker = Linker::<HostState>::new(&engine);
+        let engine = shared_engine()?;
+        let component = Component::from_binary(engine, component_bytes)?;
+        let mut linker = Linker::<HostState>::new(engine);
         // define_unknown_imports_as_traps works at instance granularity: an
         // interface this host implements only part of still counts as unknown,
         // and defining it wholesale collides with the real definitions.  So
@@ -158,7 +170,7 @@ impl TypedHost {
         define_terrain_control(&mut linker)?;
         define_gfx(&mut linker)?;
         linker.allow_shadowing(false);
-        let mut store = Store::new(&engine, HostState { native, shims, callback: None });
+        let mut store = Store::new(engine, HostState { native, shims, callback: None });
         let raw = linker.instantiate(&mut store, &component)?;
         let instance = match world {
             World::RulesSynced => bindings::BenchmarkRulesSynced::new(&mut store, &raw)

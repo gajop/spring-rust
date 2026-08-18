@@ -25,6 +25,15 @@ struct Vec3 {
 
 #[derive(Clone, Copy, ComponentType, Lift, Lower)]
 #[component(record)]
+struct PositionOptions {
+    #[component(name = "mid-pos")]
+    mid_pos: bool,
+    #[component(name = "aim-pos")]
+    aim_pos: bool,
+}
+
+#[derive(Clone, Copy, ComponentType, Lift, Lower)]
+#[component(record)]
 struct Sample {
     a: i32,
     b: i32,
@@ -102,6 +111,18 @@ fn main() -> Result<()> {
             let base = (x + 1) as f32;
             Ok((Ok::<Vec3, SpringError>(Vec3 { x: base, y: base, z: base }),))
         })?;
+        host.func_wrap(
+            "get-vec3-opts",
+            |_store, (x, options): (i32, PositionOptions)| {
+                let base = (x + 1) as f32;
+                let bump = f32::from(u8::from(options.mid_pos || options.aim_pos));
+                Ok((Ok::<Vec3, SpringError>(Vec3 {
+                    x: base + bump,
+                    y: base,
+                    z: base,
+                }),))
+            },
+        )?;
     }
     let mut component_store = Store::new(&engine, ());
     let component_instance =
@@ -112,6 +133,8 @@ fn main() -> Result<()> {
         .get_typed_func::<(i32,), (i32,)>(&mut component_store, "run-callout-result")?;
     let component_callout_vec3 = component_instance
         .get_typed_func::<(i32,), (i32,)>(&mut component_store, "run-callout-vec3")?;
+    let component_callout_vec3_opts = component_instance
+        .get_typed_func::<(i32,), (i32,)>(&mut component_store, "run-callout-vec3-opts")?;
     let component_spin = component_instance
         .get_typed_func::<(i32,), (i32,)>(&mut component_store, "run-spin")?;
     let component_noop =
@@ -155,6 +178,7 @@ fn main() -> Result<()> {
     let mut callout_component = Vec::new();
     let mut callout_component_result = Vec::new();
     let mut callout_component_vec3 = Vec::new();
+    let mut callout_component_vec3_opts = Vec::new();
     for _ in 0..repeats {
         spin_core.push(drive_core(&core_spin, &mut core_store, iterations)?);
         spin_component.push(drive_component(&component_spin, &mut component_store, iterations)?);
@@ -171,6 +195,11 @@ fn main() -> Result<()> {
             &mut component_store,
             iterations,
         )?);
+        callout_component_vec3_opts.push(drive_component(
+            &component_callout_vec3_opts,
+            &mut component_store,
+            iterations,
+        )?);
     }
 
     println!("guest -> host (callout), per call");
@@ -178,6 +207,11 @@ fn main() -> Result<()> {
     report("component, Rust typed func_wrap", callout_component, iterations);
     report("component, Rust typed result<>", callout_component_result, iterations);
     report("component, Rust typed vec3", callout_component_vec3, iterations);
+    report(
+        "component, Rust typed vec3+record arg",
+        callout_component_vec3_opts,
+        iterations,
+    );
     report("guest loop only (core)", spin_core, iterations);
     report("guest loop only (component)", spin_component, iterations);
 
