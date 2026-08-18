@@ -9,6 +9,29 @@ interface messages {
   record spring-error { code: s32 }
 
   send-lua-rules-msg: func(message: string) -> result<bool, spring-error>;
+  // UI world only; declaring it for the other worlds is harmless because a
+  // component only imports what it actually calls.
+  send-lua-ui-msg: func(message: string, mode: string) -> result<bool, spring-error>;
+}
+
+// The UI guest calls only these two of the 237 gfx callouts, and a component
+// records imports only for what survives dead-code elimination, so a scoped
+// interface is enough.
+interface gfx {
+  record spring-error { code: s32 }
+
+  vertex: func(x: f32, y: f32, z: f32, w: f32, count: u32) -> result<_, spring-error>;
+  begin-end: func(primitive: u32, callback: u32, user-data: u32) -> result<_, spring-error>;
+}
+
+interface callins-ui {
+  record spring-error { code: s32 }
+
+  record simple-callin-query {
+    unused: u8,
+  }
+
+  draw-world: func(query: simple-callin-query) -> result<_, spring-error>;
 }
 
 interface profiling {
@@ -251,4 +274,14 @@ world benchmark-rules-unsynced {
   import units-info;
   import units-query;
   export callins-rules-unsynced;
+}
+
+// Third world for the draw profile.  The UI guest draws through a host call
+// that re-enters the guest, so callback-1 is exported here too.
+world benchmark-ui {
+  import gfx;
+  import messages;
+  import profiling;
+  export callins-ui;
+  export callback-1: func(user-data: u32);
 }

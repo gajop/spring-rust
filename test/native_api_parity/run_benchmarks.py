@@ -219,10 +219,6 @@ def build_native() -> None:
         raise RuntimeError(f"native benchmark module was not produced: {NATIVE_SO}")
 
 
-def unavailable_row(backend: str, test: str, reason: str) -> dict:
-    return {"backend": backend, "test": test, "status": "unavailable", "reason": reason}
-
-
 def build_typed_host() -> None:
     """The engine build image has no cargo, so the typed Rust host is built
     here and loaded with dlopen, the same way the native module is."""
@@ -1088,20 +1084,6 @@ def main() -> int:
     run_root = args.output_root / datetime.now().strftime("%Y%m%d-%H%M%S")
     rows_by_backend = {}
     for backend in BACKENDS:
-        # The typed host implements the rules-synced and rules-unsynced worlds
-        # but not the UI one, so it is never started for the draw profile.
-        # Running it anyway would time the C API path under a typed label.
-        if backend == "wasm_rust_typed" and benchmark_case == "draw":
-            rows_by_backend[backend] = [
-                unavailable_row(
-                    backend,
-                    test,
-                    "the typed Rust host does not implement the UI world",
-                )
-                for test in expected_tests
-            ]
-            continue
-
         if benchmark_case == "draw":
             rows_by_backend[backend] = run_backend(
                 backend,

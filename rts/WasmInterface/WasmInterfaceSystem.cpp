@@ -242,12 +242,15 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 	// instance.  It is loaded alongside rather than instead of the C API module
 	// so the environment matrix, manifest checks and module bookkeeping stay on
 	// one path; only callin dispatch is rerouted.
-	if (WasmTypedHost::Enabled() && hostAdapter != nullptr &&
-		descriptor.environment != WasmEnvironment::UI) {
-		const bool synced = WasmEnvironmentMatrix::Policy(descriptor.environment).synced;
+	if (WasmTypedHost::Enabled() && hostAdapter != nullptr) {
+		const SpringTypedWorld world = descriptor.environment == WasmEnvironment::UI
+			? SpringTypedWorld::UI
+			: WasmEnvironmentMatrix::Policy(descriptor.environment).synced
+				? SpringTypedWorld::RulesSynced
+				: SpringTypedWorld::RulesUnsynced;
 		std::string typedError;
 		if (!WasmTypedHost::Load(descriptor.name, descriptor.bytes,
-			static_cast<NativeInterface*>(hostAdapter->NativeInterfaceHandle()), synced,
+			static_cast<NativeInterface*>(hostAdapter->NativeInterfaceHandle()), world,
 			typedError)) {
 			error = "could not start the typed Wasm host: " + typedError;
 			LOG_L(L_ERROR, "%s", error.c_str());

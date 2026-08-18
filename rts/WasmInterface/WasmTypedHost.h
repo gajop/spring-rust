@@ -59,6 +59,18 @@ struct SpringTypedShimTable {
 	std::int32_t (*terrain_control_set_height_map_func)(void*, void (*)(void*), void*, bool*);
 	std::int32_t (*profiling_get_lua_mem_usage)(void*, std::uint8_t, float*);
 	std::int32_t (*profiling_get_synced_gc_info)(void*, bool, float*);
+	std::int32_t (*messages_send_lua_ui_msg)(void*, const char*, std::size_t, const char*,
+		std::size_t, bool*);
+	std::int32_t (*gfx_vertex)(void*, float, float, float, float, std::uint32_t);
+	std::int32_t (*gfx_begin_end)(void*, std::uint32_t, void (*)(void*), void*);
+};
+
+// Selects which world the host instantiates. The three benchmark guests export
+// different callin interfaces, so this is not derivable from the bytes.
+enum class SpringTypedWorld : std::uint8_t {
+	RulesSynced = 0,
+	RulesUnsynced = 1,
+	UI = 2,
 };
 
 const SpringTypedShimTable& TypedHostShimTable();
@@ -70,7 +82,7 @@ struct SpringTypedHostLibrary {
 	void* handle = nullptr;
 
 	void* (*hostNew)(const std::uint8_t*, std::size_t, void*, const SpringTypedShimTable*,
-		bool, char**) = nullptr;
+		std::uint8_t, char**) = nullptr;
 	void (*hostFree)(void*) = nullptr;
 	void (*stringFree)(char*) = nullptr;
 	std::int32_t (*callinGameFrame)(void*, std::int32_t, char**) = nullptr;
@@ -83,6 +95,7 @@ struct SpringTypedHostLibrary {
 		float*, float*, char**) = nullptr;
 	std::int32_t (*callinAllowUnitCreation)(void*, std::int32_t, std::int32_t, std::int32_t,
 		bool, float, float, float, std::int32_t, bool*, bool*, char**) = nullptr;
+	std::int32_t (*callinDrawWorld)(void*, char**) = nullptr;
 };
 
 // One host per loaded Wasm module, mirroring how the C API path gives each
@@ -94,12 +107,11 @@ public:
 	// what every non-benchmark run uses.
 	static bool Enabled();
 
-	// `synced` selects the world the host instantiates; the two guests export
-	// different callin interfaces. The host is owned by the registry and keyed
-	// by module name, so it dies with the module rather than with the process.
+	// The host is owned by the registry and keyed by module name, so it dies
+	// with the module rather than with the process.
 	static bool Load(std::string moduleName,
 		const std::vector<std::uint8_t>& componentBytes,
-		NativeInterface* nativeInterface, bool synced, std::string& error);
+		NativeInterface* nativeInterface, SpringTypedWorld world, std::string& error);
 	static void Unload(std::string_view moduleName);
 	static void UnloadAll();
 	static bool AnyActive();

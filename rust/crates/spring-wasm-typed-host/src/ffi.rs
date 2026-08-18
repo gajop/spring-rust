@@ -172,6 +172,28 @@ pub struct ShimTable {
 
     pub profiling_get_synced_gc_info:
         unsafe extern "C" fn(native: *mut c_void, collect: bool, out: *mut f32) -> i32,
+    pub messages_send_lua_ui_msg: unsafe extern "C" fn(
+        native: *mut c_void,
+        message: *const c_char,
+        message_len: usize,
+        mode: *const c_char,
+        mode_len: usize,
+        out: *mut bool,
+    ) -> i32,
+    pub gfx_vertex: unsafe extern "C" fn(
+        native: *mut c_void,
+        x: f32,
+        y: f32,
+        z: f32,
+        w: f32,
+        count: u32,
+    ) -> i32,
+    pub gfx_begin_end: unsafe extern "C" fn(
+        native: *mut c_void,
+        primitive: u32,
+        trampoline: unsafe extern "C" fn(*mut c_void),
+        trampoline_context: *mut c_void,
+    ) -> i32,
 }
 
 /// Erases a closure to the C thunk signature the native API expects.

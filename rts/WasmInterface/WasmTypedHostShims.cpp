@@ -86,6 +86,59 @@ std::int32_t spring_wasm_typed_messages_send_lua_rules_msg(void* native,
 	return 0;
 }
 
+std::int32_t spring_wasm_typed_messages_send_lua_ui_msg(void* native,
+	const char* message, std::size_t messageLength, const char* mode,
+	std::size_t modeLength, bool* out)
+{
+	auto* nativeInterface = static_cast<NativeInterface*>(native);
+	if (nativeInterface == nullptr || nativeInterface->messages == nullptr ||
+		nativeInterface->messages->SendLuaUIMsg == nullptr)
+		return kUnavailable;
+	// Two strings at once, so the shared scratch buffer will not do.
+	auto& owned = StringScratch();
+	owned.assign(message, messageLength);
+	const std::string ownedMode(mode, modeLength);
+	SendLuaUIQuery query{};
+	SendLuaUIResult result{};
+	query.message = owned.c_str();
+	query.mode = ownedMode.c_str();
+	nativeInterface->messages->SendLuaUIMsg(&query, &result);
+	if (const auto status = NativeStatus(result); status != 0)
+		return status;
+	*out = result.success;
+	return 0;
+}
+
+// ---------------------------------------------------------------------- gfx
+
+std::int32_t spring_wasm_typed_gfx_vertex(void* native, float x, float y, float z,
+	float w, std::uint32_t count)
+{
+	auto* nativeInterface = static_cast<NativeInterface*>(native);
+	if (nativeInterface == nullptr || nativeInterface->gfx == nullptr ||
+		nativeInterface->gfx->Vertex == nullptr)
+		return kUnavailable;
+	GfxVertexQuery query{x, y, z, w, count};
+	GfxEmptyResult result{};
+	nativeInterface->gfx->Vertex(&query, &result);
+	return NativeStatus(result);
+}
+
+// Re-enters the guest through `trampoline`, the same shape the heightmap
+// callback uses.
+std::int32_t spring_wasm_typed_gfx_begin_end(void* native, std::uint32_t primitive,
+	NativeCallback trampoline, void* trampolineContext)
+{
+	auto* nativeInterface = static_cast<NativeInterface*>(native);
+	if (nativeInterface == nullptr || nativeInterface->gfx == nullptr ||
+		nativeInterface->gfx->BeginEnd == nullptr)
+		return kUnavailable;
+	GfxBeginEndQuery query{primitive, trampoline, trampolineContext};
+	GfxEmptyResult result{};
+	nativeInterface->gfx->BeginEnd(&query, &result);
+	return NativeStatus(result);
+}
+
 // ----------------------------------------------------------------- profiling
 
 std::int32_t spring_wasm_typed_profiling_get_timer_micros(void* native,
@@ -555,6 +608,9 @@ const SpringTypedShimTable& TypedHostShimTable()
 		.terrain_control_set_height_map_func = &spring_wasm_typed_terrain_control_set_height_map_func,
 		.profiling_get_lua_mem_usage = &spring_wasm_typed_profiling_get_lua_mem_usage,
 		.profiling_get_synced_gc_info = &spring_wasm_typed_profiling_get_synced_gc_info,
+		.messages_send_lua_ui_msg = &spring_wasm_typed_messages_send_lua_ui_msg,
+		.gfx_vertex = &spring_wasm_typed_gfx_vertex,
+		.gfx_begin_end = &spring_wasm_typed_gfx_begin_end,
 	};
 	return table;
 }

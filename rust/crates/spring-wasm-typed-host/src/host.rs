@@ -55,6 +55,25 @@ impl api::messages::Host for HostState {
         };
         check!(api::messages, code, out)
     }
+
+    fn send_lua_ui_msg(
+        &mut self,
+        message: String,
+        mode: String,
+    ) -> Result<bool, api::messages::SpringError> {
+        let mut out = false;
+        let code = unsafe {
+            (self.shims().messages_send_lua_ui_msg)(
+                self.native,
+                message.as_ptr() as *const c_char,
+                message.len(),
+                mode.as_ptr() as *const c_char,
+                mode.len(),
+                &mut out,
+            )
+        };
+        check!(api::messages, code, out)
+    }
 }
 
 impl api::profiling::Host for HostState {

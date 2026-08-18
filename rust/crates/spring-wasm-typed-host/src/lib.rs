@@ -28,6 +28,19 @@ pub(crate) mod unsynced_bindings {
     });
 }
 
+/// Third world for the draw profile.  Reuses the shared messages and profiling
+/// import types; gfx and the callin interface are its own.
+pub(crate) mod ui_bindings {
+    wasmtime::component::bindgen!({
+        path: "wit",
+        world: "benchmark-ui",
+        with: {
+            "recoil:spring-api/messages": crate::bindings::recoil::spring_api::messages,
+            "recoil:spring-api/profiling": crate::bindings::recoil::spring_api::profiling,
+        },
+    });
+}
+
 mod ffi;
 mod host;
 
@@ -66,7 +79,27 @@ unsafe impl Send for HostState {}
 enum Callins {
     Synced(bindings::BenchmarkRulesSynced),
     Unsynced(unsynced_bindings::BenchmarkRulesUnsynced),
+    Ui(ui_bindings::BenchmarkUi),
     None,
+}
+
+/// Mirrors `SpringTypedWorld` in rts/WasmInterface/WasmTypedHost.h.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum World {
+    RulesSynced,
+    RulesUnsynced,
+    Ui,
+}
+
+impl World {
+    fn from_raw(value: u8) -> Option<Self> {
+        match value {
+            0 => Some(Self::RulesSynced),
+            1 => Some(Self::RulesUnsynced),
+            2 => Some(Self::Ui),
+            _ => None,
+        }
+    }
 }
 
 pub struct TypedHost {
@@ -95,7 +128,7 @@ impl TypedHost {
         component_bytes: &[u8],
         native: *mut c_void,
         shims: *const ffi::ShimTable,
-        synced: bool,
+        world: World,
     ) -> Result<Self> {
         let engine = engine()?;
         let component = Component::from_binary(&engine, component_bytes)?;
@@ -123,17 +156,22 @@ impl TypedHost {
         api::units_info::add_to_linker::<_, HasHostState>(&mut linker, |state| state)?;
         api::units_query::add_to_linker::<_, HasHostState>(&mut linker, |state| state)?;
         define_terrain_control(&mut linker)?;
+        define_gfx(&mut linker)?;
         linker.allow_shadowing(false);
         let mut store = Store::new(&engine, HostState { native, shims, callback: None });
         let raw = linker.instantiate(&mut store, &component)?;
-        let instance = if synced {
-            bindings::BenchmarkRulesSynced::new(&mut store, &raw)
+        let instance = match world {
+            World::RulesSynced => bindings::BenchmarkRulesSynced::new(&mut store, &raw)
                 .map(Callins::Synced)
-                .unwrap_or(Callins::None)
-        } else {
-            unsynced_bindings::BenchmarkRulesUnsynced::new(&mut store, &raw)
-                .map(Callins::Unsynced)
-                .unwrap_or(Callins::None)
+                .unwrap_or(Callins::None),
+            World::RulesUnsynced => {
+                unsynced_bindings::BenchmarkRulesUnsynced::new(&mut store, &raw)
+                    .map(Callins::Unsynced)
+                    .unwrap_or(Callins::None)
+            }
+            World::Ui => ui_bindings::BenchmarkUi::new(&mut store, &raw)
+                .map(Callins::Ui)
+                .unwrap_or(Callins::None),
         };
         // Absent for guests that export no callback, which is fine: only the
         // heightmap rows use it.
@@ -213,6 +251,48 @@ fn define_terrain_control(linker: &mut Linker<HostState>) -> Result<()> {
     Ok(())
 }
 
+type GfxError = ui_bindings::recoil::spring_api::gfx::SpringError;
+
+/// Both gfx functions the UI guest imports.  begin-end re-enters the guest the
+/// same way set-height-map-func does, so neither can go through bindgen's Host
+/// trait, and defining an instance replaces it wholesale.
+fn define_gfx(linker: &mut Linker<HostState>) -> Result<()> {
+    let mut instance = linker.instance("recoil:spring-api/gfx@1.0.0")?;
+    instance.func_wrap(
+        "vertex",
+        |store: wasmtime::StoreContextMut<'_, HostState>,
+         (x, y, z, w, count): (f32, f32, f32, f32, u32)|
+         -> Result<(core::result::Result<(), GfxError>,)> {
+            let (native, shims) = (store.data().native, store.data().shims);
+            let code = unsafe { ((*shims).gfx_vertex)(native, x, y, z, w, count) };
+            Ok((if code == 0 { Ok(()) } else { Err(GfxError { code }) },))
+        },
+    )?;
+    instance.func_wrap(
+        "begin-end",
+        |mut store: wasmtime::StoreContextMut<'_, HostState>,
+         (primitive, _callback, user_data): (u32, u32, u32)|
+         -> Result<(core::result::Result<(), GfxError>,)> {
+            let native = store.data().native;
+            let shims = store.data().shims;
+            let Some(guest) = store.data().callback else {
+                return Ok((Err(GfxError { code: -1 }),));
+            };
+            // The engine calls back once, between glBegin and glEnd; every
+            // vertex the guest emits inside it lands in that primitive.
+            let mut invoke = || {
+                if guest.call(&mut store, (user_data,)).is_ok() {
+                    let _ = guest.post_return(&mut store);
+                }
+            };
+            let (thunk, context) = ffi::as_trampoline(&mut invoke);
+            let code = unsafe { ((*shims).gfx_begin_end)(native, primitive, thunk, context) };
+            Ok((if code == 0 { Ok(()) } else { Err(GfxError { code }) },))
+        },
+    )?;
+    Ok(())
+}
+
 struct HasHostState;
 
 impl wasmtime::component::HasData for HasHostState {
@@ -255,15 +335,19 @@ pub unsafe extern "C" fn spring_wasm_typed_host_new(
     component_len: usize,
     native: *mut c_void,
     shims: *const ffi::ShimTable,
-    synced: bool,
+    world: u8,
     error_out: *mut *mut c_char,
 ) -> *mut TypedHost {
     if component_bytes.is_null() || component_len == 0 || shims.is_null() {
         set_error(error_out, &wasmtime::Error::msg("empty component or missing shim table"));
         return core::ptr::null_mut();
     }
+    let Some(world) = World::from_raw(world) else {
+        set_error(error_out, &wasmtime::Error::msg("unknown world selector"));
+        return core::ptr::null_mut();
+    };
     let bytes = core::slice::from_raw_parts(component_bytes, component_len);
-    match TypedHost::new(bytes, native, shims, synced) {
+    match TypedHost::new(bytes, native, shims, world) {
         Ok(host) => Box::into_raw(Box::new(host)),
         Err(error) => {
             set_error(error_out, &error);
@@ -298,6 +382,7 @@ macro_rules! finish {
 
 use bindings::exports::recoil::spring_api::callins_rules_synced as sync_callins;
 use unsynced_bindings::exports::recoil::spring_api::callins_rules_unsynced as unsync_callins;
+use ui_bindings::exports::recoil::spring_api::callins_ui as ui_callins;
 
 #[no_mangle]
 pub unsafe extern "C" fn spring_wasm_typed_callin_game_frame(
@@ -319,7 +404,7 @@ pub unsafe extern "C" fn spring_wasm_typed_callin_game_frame(
                 .recoil_spring_api_callins_rules_unsynced()
                 .call_game_frame(&mut host.store, unsync_callins::GameFrameQuery { game_frame })
         ),
-        Callins::None => 0,
+        Callins::Ui(_) | Callins::None => 0,
     }
 }
 
@@ -346,7 +431,7 @@ pub unsafe extern "C" fn spring_wasm_typed_callin_game_frame_post(
                     unsync_callins::GameFrameQuery { game_frame }
                 )
         ),
-        Callins::None => 0,
+        Callins::Ui(_) | Callins::None => 0,
     }
 }
 
@@ -370,7 +455,7 @@ pub unsafe extern "C" fn spring_wasm_typed_callin_update(
                 .recoil_spring_api_callins_rules_unsynced()
                 .call_update(&mut host.store, unsync_callins::UpdateQuery { delta_seconds })
         ),
-        Callins::None => 0,
+        Callins::Ui(_) | Callins::None => 0,
     }
 }
 
@@ -504,4 +589,22 @@ pub unsafe extern "C" fn spring_wasm_typed_callin_allow_unit_creation(
             -1
         }
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn spring_wasm_typed_callin_draw_world(
+    host: *mut TypedHost,
+    error_out: *mut *mut c_char,
+) -> i32 {
+    let Some(host) = host.as_mut() else { return -1 };
+    let Callins::Ui(bindings) = &host.instance else {
+        return 0;
+    };
+    let query = ui_callins::SimpleCallinQuery { unused: 0 };
+    finish!(
+        error_out,
+        bindings
+            .recoil_spring_api_callins_ui()
+            .call_draw_world(&mut host.store, query)
+    )
 }

@@ -73,6 +73,7 @@ bool OpenLibrary(std::string& error)
 	resolve(library.callinUnitCreated, "spring_wasm_typed_callin_unit_created");
 	resolve(library.callinUnitPreDamaged, "spring_wasm_typed_callin_unit_pre_damaged");
 	resolve(library.callinAllowUnitCreation, "spring_wasm_typed_callin_allow_unit_creation");
+	resolve(library.callinDrawWorld, "spring_wasm_typed_callin_draw_world");
 	if (!error.empty()) {
 		dlclose(handle);
 		library = SpringTypedHostLibrary{};
@@ -100,7 +101,7 @@ WasmTypedHost::~WasmTypedHost()
 
 bool WasmTypedHost::Load(std::string moduleName,
 	const std::vector<std::uint8_t>& componentBytes, NativeInterface* nativeInterface,
-	bool synced, std::string& error)
+	SpringTypedWorld world, std::string& error)
 {
 	if (!OpenLibrary(error))
 		return false;
@@ -111,7 +112,7 @@ bool WasmTypedHost::Load(std::string moduleName,
 
 	char* hostError = nullptr;
 	void* host = Library().hostNew(componentBytes.data(), componentBytes.size(),
-		nativeInterface, &TypedHostShimTable(), synced, &hostError);
+		nativeInterface, &TypedHostShimTable(), static_cast<std::uint8_t>(world), &hostError);
 	if (host == nullptr) {
 		error = "the typed Wasm host could not instantiate the component";
 		if (hostError != nullptr) {
@@ -214,6 +215,8 @@ bool WasmTypedHost::Invoke(std::string_view name, const void* query, void* resul
 			typedResult->allow = allow;
 			typedResult->dropOrder = dropOrder;
 		}
+	} else if (name == "DrawWorld") {
+		status = library.callinDrawWorld(host, &hostError);
 	} else {
 		// Deliberately scoped to the callins the benchmark table needs; anything
 		// else is not handled here and the caller keeps its existing path.
