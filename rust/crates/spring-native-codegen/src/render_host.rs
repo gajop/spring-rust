@@ -136,6 +136,17 @@ pub fn render_native_adapter_header() -> String {
     output.push_str("#include \"WasmInterface/WasmHost.h\"\n\n");
     output.push_str("namespace recoil::wasm::generated {\n");
     output.push_str("enum class NativeCalloutDispatch : std::uint8_t { notHandled, handled };\n\n");
+    output.push_str(concat!(
+        "// A callout target is fixed once its import is bound.  Resolving it once\n",
+        "// keeps the per-call path off the name chains.  It is an object, not a\n",
+        "// bare function pointer, so layers that must not see NativeInterface\n",
+        "// types can carry it as an opaque cookie.\n",
+        "using NativeCalloutFunction = NativeCalloutDispatch (*)(NativeInterface* nativeInterface,\n",
+        "\tconst std::vector<WasmValue>& arguments, WasmValue& result, std::string& error);\n\n",
+        "struct NativeCalloutTarget { NativeCalloutFunction invoke; };\n\n",
+        "const NativeCalloutTarget* ResolveNativeCallout(std::string_view module,\n",
+        "\tstd::string_view function);\n",
+    ));
     output.push_str(
         "NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,\n",
     );
@@ -407,21 +418,30 @@ pub fn render_native_adapter_module(model: &ApiModel, module: &ApiModule) -> Str
     }
     output.push_str("}\n\nnamespace recoil::wasm::generated {\n\n");
     let dispatcher = module_dispatch_identifier(&module.name);
+    let resolver = module_resolve_identifier(&module.name);
+    output.push_str(&format!(
+        "const NativeCalloutTarget* {}(std::string_view);\n",
+        resolver
+    ));
     output.push_str(&format!(
         "NativeCalloutDispatch {}(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);\n",
         dispatcher
     ));
     output.push_str(&format!(
-        "NativeCalloutDispatch {}(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)\n{{\n",
-        dispatcher
+        "const NativeCalloutTarget* {}(std::string_view function)\n{{\n",
+        resolver
     ));
     for (function, function_id) in generated_functions {
         output.push_str(&format!(
-            "\tif (detail::FunctionEquals(function, \"{}\")) return {}(nativeInterface, arguments, result, error);\n",
+            "\tif (detail::FunctionEquals(function, \"{}\")) {{ static constexpr NativeCalloutTarget target{{&{}}}; return &target; }}\n",
             function, function_id
         ));
     }
-    output.push_str("\treturn NativeCalloutDispatch::notHandled;\n}\n}\n");
+    output.push_str("\treturn nullptr;\n}\n\n");
+    output.push_str(&format!(
+        "NativeCalloutDispatch {}(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)\n{{\n\tconst NativeCalloutTarget* target = {}(function);\n\tif (target == nullptr) return NativeCalloutDispatch::notHandled;\n\treturn target->invoke(nativeInterface, arguments, result, error);\n}}\n}}\n",
+        dispatcher, resolver
+    ));
     output
 }
 
@@ -441,17 +461,15 @@ pub fn render_native_adapter_common(model: &ApiModel) -> String {
     for module in &model.modules {
         if native_api_path(&module.name).is_some() {
             output.push_str(&format!(
-                "NativeCalloutDispatch {}(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);\n",
-                module_dispatch_identifier(&module.name)
+                "const NativeCalloutTarget* {}(std::string_view);\n",
+                module_resolve_identifier(&module.name)
             ));
         }
     }
     output.push('\n');
     output.push_str(concat!(
-        "NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,\n",
-        "\tstd::string_view module, std::string_view function,\n",
-        "\tconst std::vector<WasmValue>& arguments, WasmValue& result,\n",
-        "\tstd::string& error)\n{\n",
+        "const NativeCalloutTarget* ResolveNativeCallout(std::string_view module,\n",
+        "\tstd::string_view function)\n{\n",
     ));
     for module in &model.modules {
         if native_api_path(&module.name).is_some() {
@@ -460,22 +478,31 @@ pub fn render_native_adapter_common(model: &ApiModel) -> String {
             // generated worlds use suffixed interface names when a module has
             // multiple environment variants.  Both names resolve to the same
             // module translation unit.
-            output.push_str(&format!(
-                "\tif (module == \"{}\") return {}(nativeInterface, function, arguments, result, error);\n",
-                module.name,
-                module_dispatch_identifier(&module.name)
-            ));
+            let mut names = vec![module.name.clone()];
             for (interface, _) in render_wit::interface_variants(module) {
+                let variant = component_module_name(&interface);
+                if !names.contains(&variant) {
+                    names.push(variant);
+                }
+            }
+            for name in names {
                 output.push_str(&format!(
-                    "\tif (module == \"{}\") return {}(nativeInterface, function, arguments, result, error);\n",
-                    component_module_name(&interface),
-                    module_dispatch_identifier(&module.name)
+                    "\tif (module == \"{}\") return {}(function);\n",
+                    name,
+                    module_resolve_identifier(&module.name)
                 ));
             }
         }
     }
     output.push_str(concat!(
-        "\treturn NativeCalloutDispatch::notHandled;\n}\n\n",
+        "\treturn nullptr;\n}\n\n",
+        "NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,\n",
+        "\tstd::string_view module, std::string_view function,\n",
+        "\tconst std::vector<WasmValue>& arguments, WasmValue& result,\n",
+        "\tstd::string& error)\n{\n",
+        "\tconst NativeCalloutTarget* target = ResolveNativeCallout(module, function);\n",
+        "\tif (target == nullptr) return NativeCalloutDispatch::notHandled;\n",
+        "\treturn target->invoke(nativeInterface, arguments, result, error);\n}\n\n",
         "bool SerializeCallinQuery(std::string_view name, const void* query,\n",
         "\tWasmValue& result, std::string& error)\n{\n",
     ));
@@ -517,6 +544,10 @@ pub fn render_native_adapter_common(model: &ApiModel) -> String {
 
 fn module_dispatch_identifier(module: &str) -> String {
     format!("DispatchNativeCalloutModule_{}", sanitize(module))
+}
+
+fn module_resolve_identifier(module: &str) -> String {
+    format!("ResolveNativeCalloutModule_{}", sanitize(module))
 }
 
 fn component_module_name(interface: &str) -> String {
@@ -702,7 +733,7 @@ std::string ToWitFieldName(std::string_view value)
 
 const WasmValue* FindRecordField(const WasmValueRecord& record, std::string_view name, std::string& error)
 {
-	const auto iter = record.find(std::string(name));
+	const auto iter = record.find(name);
 	if (iter != record.end())
 		return &iter->second;
 	const std::string witName = ToWitFieldName(name);
@@ -718,7 +749,7 @@ const WasmValue* FindArgument(const std::vector<WasmValue>& arguments, std::size
 {
 	if (arguments.size() == 1) {
 		if (const auto* record = std::get_if<WasmValueRecord>(&arguments.front().storage)) {
-			const auto iter = record->find(std::string(name));
+			const auto iter = record->find(name);
 			if (iter != record->end()) return &iter->second;
 			// WIT represents a single record input as that record itself, while
 			// older hand-authored callers represented the whole query as an outer

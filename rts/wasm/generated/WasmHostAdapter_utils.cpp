@@ -505,16 +505,24 @@ NativeCalloutDispatch Dispatch_utils_TestMoveOrder(NativeInterface* nativeInterf
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_utils(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_utils(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_utils(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "ClosestBuildPos")) { static constexpr NativeCalloutTarget target{&Dispatch_utils_ClosestBuildPos}; return &target; }
+	if (detail::FunctionEquals(function, "GetCEGID")) { static constexpr NativeCalloutTarget target{&Dispatch_utils_GetCEGID}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefDimensions")) { static constexpr NativeCalloutTarget target{&Dispatch_utils_GetFeatureDefDimensions}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefDimensions")) { static constexpr NativeCalloutTarget target{&Dispatch_utils_GetUnitDefDimensions}; return &target; }
+	if (detail::FunctionEquals(function, "Pos2BuildPos")) { static constexpr NativeCalloutTarget target{&Dispatch_utils_Pos2BuildPos}; return &target; }
+	if (detail::FunctionEquals(function, "TestBuildOrder")) { static constexpr NativeCalloutTarget target{&Dispatch_utils_TestBuildOrder}; return &target; }
+	if (detail::FunctionEquals(function, "TestMoveOrder")) { static constexpr NativeCalloutTarget target{&Dispatch_utils_TestMoveOrder}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_utils(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "ClosestBuildPos")) return Dispatch_utils_ClosestBuildPos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCEGID")) return Dispatch_utils_GetCEGID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefDimensions")) return Dispatch_utils_GetFeatureDefDimensions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefDimensions")) return Dispatch_utils_GetUnitDefDimensions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Pos2BuildPos")) return Dispatch_utils_Pos2BuildPos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TestBuildOrder")) return Dispatch_utils_TestBuildOrder(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TestMoveOrder")) return Dispatch_utils_TestMoveOrder(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_utils(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

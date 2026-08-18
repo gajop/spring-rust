@@ -704,19 +704,27 @@ NativeCalloutDispatch Dispatch_camera_WorldToScreenCoords(NativeInterface* nativ
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_camera(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_camera(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_camera(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetCameraDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_GetCameraDirection}; return &target; }
+	if (detail::FunctionEquals(function, "GetCameraFOV")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_GetCameraFOV}; return &target; }
+	if (detail::FunctionEquals(function, "GetCameraNames")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_GetCameraNames}; return &target; }
+	if (detail::FunctionEquals(function, "GetCameraPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_GetCameraPosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetCameraState")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_GetCameraState}; return &target; }
+	if (detail::FunctionEquals(function, "GetPixelDir")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_GetPixelDir}; return &target; }
+	if (detail::FunctionEquals(function, "SetCameraState")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_SetCameraState}; return &target; }
+	if (detail::FunctionEquals(function, "SetCameraTarget")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_SetCameraTarget}; return &target; }
+	if (detail::FunctionEquals(function, "TraceScreenRay")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_TraceScreenRay}; return &target; }
+	if (detail::FunctionEquals(function, "WorldToScreenCoords")) { static constexpr NativeCalloutTarget target{&Dispatch_camera_WorldToScreenCoords}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_camera(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetCameraDirection")) return Dispatch_camera_GetCameraDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCameraFOV")) return Dispatch_camera_GetCameraFOV(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCameraNames")) return Dispatch_camera_GetCameraNames(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCameraPosition")) return Dispatch_camera_GetCameraPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCameraState")) return Dispatch_camera_GetCameraState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPixelDir")) return Dispatch_camera_GetPixelDir(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetCameraState")) return Dispatch_camera_SetCameraState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetCameraTarget")) return Dispatch_camera_SetCameraTarget(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TraceScreenRay")) return Dispatch_camera_TraceScreenRay(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "WorldToScreenCoords")) return Dispatch_camera_WorldToScreenCoords(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_camera(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

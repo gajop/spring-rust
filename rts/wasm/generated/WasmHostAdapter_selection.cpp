@@ -918,25 +918,33 @@ NativeCalloutDispatch Dispatch_selection_SetUnitGroup(NativeInterface* nativeInt
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_selection(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_selection(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_selection(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "DeselectUnit")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_DeselectUnit}; return &target; }
+	if (detail::FunctionEquals(function, "DeselectUnitArray")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_DeselectUnitArray}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroupList")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetGroupList}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroupUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetGroupUnits}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroupUnitsCount")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetGroupUnitsCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroupUnitsCounts")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetGroupUnitsCounts}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroupUnitsSorted")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetGroupUnitsSorted}; return &target; }
+	if (detail::FunctionEquals(function, "GetSelectedGroup")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetSelectedGroup}; return &target; }
+	if (detail::FunctionEquals(function, "GetSelectedUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetSelectedUnits}; return &target; }
+	if (detail::FunctionEquals(function, "GetSelectedUnitsCount")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetSelectedUnitsCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetSelectedUnitsCounts")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetSelectedUnitsCounts}; return &target; }
+	if (detail::FunctionEquals(function, "GetSelectedUnitsSorted")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetSelectedUnitsSorted}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitGroup")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_GetUnitGroup}; return &target; }
+	if (detail::FunctionEquals(function, "SelectUnit")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_SelectUnit}; return &target; }
+	if (detail::FunctionEquals(function, "SelectUnitArray")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_SelectUnitArray}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitGroup")) { static constexpr NativeCalloutTarget target{&Dispatch_selection_SetUnitGroup}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_selection(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "DeselectUnit")) return Dispatch_selection_DeselectUnit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeselectUnitArray")) return Dispatch_selection_DeselectUnitArray(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroupList")) return Dispatch_selection_GetGroupList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroupUnits")) return Dispatch_selection_GetGroupUnits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroupUnitsCount")) return Dispatch_selection_GetGroupUnitsCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroupUnitsCounts")) return Dispatch_selection_GetGroupUnitsCounts(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroupUnitsSorted")) return Dispatch_selection_GetGroupUnitsSorted(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSelectedGroup")) return Dispatch_selection_GetSelectedGroup(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSelectedUnits")) return Dispatch_selection_GetSelectedUnits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSelectedUnitsCount")) return Dispatch_selection_GetSelectedUnitsCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSelectedUnitsCounts")) return Dispatch_selection_GetSelectedUnitsCounts(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSelectedUnitsSorted")) return Dispatch_selection_GetSelectedUnitsSorted(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitGroup")) return Dispatch_selection_GetUnitGroup(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SelectUnit")) return Dispatch_selection_SelectUnit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SelectUnitArray")) return Dispatch_selection_SelectUnitArray(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitGroup")) return Dispatch_selection_SetUnitGroup(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_selection(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

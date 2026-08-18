@@ -502,16 +502,24 @@ NativeCalloutDispatch Dispatch_player_GetSpectatingState(NativeInterface* native
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_player(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_player(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_player(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetLocalAllyTeamID")) { static constexpr NativeCalloutTarget target{&Dispatch_player_GetLocalAllyTeamID}; return &target; }
+	if (detail::FunctionEquals(function, "GetLocalPlayerID")) { static constexpr NativeCalloutTarget target{&Dispatch_player_GetLocalPlayerID}; return &target; }
+	if (detail::FunctionEquals(function, "GetLocalTeamID")) { static constexpr NativeCalloutTarget target{&Dispatch_player_GetLocalTeamID}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerRoster")) { static constexpr NativeCalloutTarget target{&Dispatch_player_GetPlayerRoster}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerStatistics")) { static constexpr NativeCalloutTarget target{&Dispatch_player_GetPlayerStatistics}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerTraffic")) { static constexpr NativeCalloutTarget target{&Dispatch_player_GetPlayerTraffic}; return &target; }
+	if (detail::FunctionEquals(function, "GetSpectatingState")) { static constexpr NativeCalloutTarget target{&Dispatch_player_GetSpectatingState}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_player(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetLocalAllyTeamID")) return Dispatch_player_GetLocalAllyTeamID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetLocalPlayerID")) return Dispatch_player_GetLocalPlayerID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetLocalTeamID")) return Dispatch_player_GetLocalTeamID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerRoster")) return Dispatch_player_GetPlayerRoster(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerStatistics")) return Dispatch_player_GetPlayerStatistics(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerTraffic")) return Dispatch_player_GetPlayerTraffic(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSpectatingState")) return Dispatch_player_GetSpectatingState(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_player(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

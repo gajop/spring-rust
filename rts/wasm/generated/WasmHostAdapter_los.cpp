@@ -595,19 +595,27 @@ NativeCalloutDispatch Dispatch_los_IsUnitInRadar(NativeInterface* nativeInterfac
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_los(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_los(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_los(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetClosestValidPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_los_GetClosestValidPosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetPositionLosState")) { static constexpr NativeCalloutTarget target{&Dispatch_los_GetPositionLosState}; return &target; }
+	if (detail::FunctionEquals(function, "GetRadarErrorParams")) { static constexpr NativeCalloutTarget target{&Dispatch_los_GetRadarErrorParams}; return &target; }
+	if (detail::FunctionEquals(function, "IsPosInAirLos")) { static constexpr NativeCalloutTarget target{&Dispatch_los_IsPosInAirLos}; return &target; }
+	if (detail::FunctionEquals(function, "IsPosInLos")) { static constexpr NativeCalloutTarget target{&Dispatch_los_IsPosInLos}; return &target; }
+	if (detail::FunctionEquals(function, "IsPosInRadar")) { static constexpr NativeCalloutTarget target{&Dispatch_los_IsPosInRadar}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitInAirLos")) { static constexpr NativeCalloutTarget target{&Dispatch_los_IsUnitInAirLos}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitInJammer")) { static constexpr NativeCalloutTarget target{&Dispatch_los_IsUnitInJammer}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitInLos")) { static constexpr NativeCalloutTarget target{&Dispatch_los_IsUnitInLos}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitInRadar")) { static constexpr NativeCalloutTarget target{&Dispatch_los_IsUnitInRadar}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_los(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetClosestValidPosition")) return Dispatch_los_GetClosestValidPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPositionLosState")) return Dispatch_los_GetPositionLosState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetRadarErrorParams")) return Dispatch_los_GetRadarErrorParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsPosInAirLos")) return Dispatch_los_IsPosInAirLos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsPosInLos")) return Dispatch_los_IsPosInLos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsPosInRadar")) return Dispatch_los_IsPosInRadar(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitInAirLos")) return Dispatch_los_IsUnitInAirLos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitInJammer")) return Dispatch_los_IsUnitInJammer(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitInLos")) return Dispatch_los_IsUnitInLos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitInRadar")) return Dispatch_los_IsUnitInRadar(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_los(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

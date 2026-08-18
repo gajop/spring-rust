@@ -1418,28 +1418,36 @@ NativeCalloutDispatch Dispatch_unit_defs_ValidUnitDefID(NativeInterface* nativeI
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_unit_defs(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_unit_defs(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_unit_defs(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetUnitDefByID")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefByID}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefClassify")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefClassify}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefCosts")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefCosts}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefCount")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefCustomParam")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefCustomParam}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefCustomParamKeys")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefCustomParamKeys}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefHealth")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefHealth}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefHumanName")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefHumanName}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefIDByName")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefIDByName}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefIDs")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefIDs}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefName")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefName}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefParamBool")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefParamBool}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefParamFloat")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefParamFloat}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefParamInt")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefParamInt}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefParamKeys")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefParamKeys}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefParamString")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefParamString}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefParamType")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefParamType}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefSpeed")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_GetUnitDefSpeed}; return &target; }
+	if (detail::FunctionEquals(function, "ValidUnitDefID")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_defs_ValidUnitDefID}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_unit_defs(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetUnitDefByID")) return Dispatch_unit_defs_GetUnitDefByID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefClassify")) return Dispatch_unit_defs_GetUnitDefClassify(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefCosts")) return Dispatch_unit_defs_GetUnitDefCosts(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefCount")) return Dispatch_unit_defs_GetUnitDefCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefCustomParam")) return Dispatch_unit_defs_GetUnitDefCustomParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefCustomParamKeys")) return Dispatch_unit_defs_GetUnitDefCustomParamKeys(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefHealth")) return Dispatch_unit_defs_GetUnitDefHealth(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefHumanName")) return Dispatch_unit_defs_GetUnitDefHumanName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefIDByName")) return Dispatch_unit_defs_GetUnitDefIDByName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefIDs")) return Dispatch_unit_defs_GetUnitDefIDs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefName")) return Dispatch_unit_defs_GetUnitDefName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefParamBool")) return Dispatch_unit_defs_GetUnitDefParamBool(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefParamFloat")) return Dispatch_unit_defs_GetUnitDefParamFloat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefParamInt")) return Dispatch_unit_defs_GetUnitDefParamInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefParamKeys")) return Dispatch_unit_defs_GetUnitDefParamKeys(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefParamString")) return Dispatch_unit_defs_GetUnitDefParamString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefParamType")) return Dispatch_unit_defs_GetUnitDefParamType(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefSpeed")) return Dispatch_unit_defs_GetUnitDefSpeed(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ValidUnitDefID")) return Dispatch_unit_defs_ValidUnitDefID(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_unit_defs(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -1906,40 +1906,48 @@ NativeCalloutDispatch Dispatch_ground_decals_SetGroundDecalUserData(NativeInterf
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_ground_decals(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_ground_decals(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_ground_decals(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "CreateGroundDecal")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_CreateGroundDecal}; return &target; }
+	if (detail::FunctionEquals(function, "DestroyGroundDecal")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_DestroyGroundDecal}; return &target; }
+	if (detail::FunctionEquals(function, "GetAllGroundDecals")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetAllGroundDecals}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalAlpha")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalAlpha}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalCreationFrame")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalCreationFrame}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalGlowParams")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalGlowParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalMiddlePos")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalMiddlePos}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalMisc")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalMisc}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalNormal")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalNormal}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalOwner")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalOwner}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalQuadPos")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalQuadPos}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalRotation")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalRotation}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalSizeAndHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalSizeAndHeight}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalTexture}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalTextureParams")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalTextureParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalTextures")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalTextures}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalTint")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalTint}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalType")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalType}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundDecalUserData")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_GetGroundDecalUserData}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalAlpha")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalAlpha}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalCreationFrame")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalCreationFrame}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalGlowParams")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalGlowParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalMisc")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalMisc}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalNormal")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalNormal}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalPosAndDims")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalPosAndDims}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalQuadPosAndHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalQuadPosAndHeight}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalRotation")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalRotation}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalTexture}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalTextureParams")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalTextureParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalTint")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalTint}; return &target; }
+	if (detail::FunctionEquals(function, "SetGroundDecalUserData")) { static constexpr NativeCalloutTarget target{&Dispatch_ground_decals_SetGroundDecalUserData}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_ground_decals(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "CreateGroundDecal")) return Dispatch_ground_decals_CreateGroundDecal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DestroyGroundDecal")) return Dispatch_ground_decals_DestroyGroundDecal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAllGroundDecals")) return Dispatch_ground_decals_GetAllGroundDecals(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalAlpha")) return Dispatch_ground_decals_GetGroundDecalAlpha(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalCreationFrame")) return Dispatch_ground_decals_GetGroundDecalCreationFrame(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalGlowParams")) return Dispatch_ground_decals_GetGroundDecalGlowParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalMiddlePos")) return Dispatch_ground_decals_GetGroundDecalMiddlePos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalMisc")) return Dispatch_ground_decals_GetGroundDecalMisc(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalNormal")) return Dispatch_ground_decals_GetGroundDecalNormal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalOwner")) return Dispatch_ground_decals_GetGroundDecalOwner(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalQuadPos")) return Dispatch_ground_decals_GetGroundDecalQuadPos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalRotation")) return Dispatch_ground_decals_GetGroundDecalRotation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalSizeAndHeight")) return Dispatch_ground_decals_GetGroundDecalSizeAndHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalTexture")) return Dispatch_ground_decals_GetGroundDecalTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalTextureParams")) return Dispatch_ground_decals_GetGroundDecalTextureParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalTextures")) return Dispatch_ground_decals_GetGroundDecalTextures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalTint")) return Dispatch_ground_decals_GetGroundDecalTint(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalType")) return Dispatch_ground_decals_GetGroundDecalType(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundDecalUserData")) return Dispatch_ground_decals_GetGroundDecalUserData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalAlpha")) return Dispatch_ground_decals_SetGroundDecalAlpha(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalCreationFrame")) return Dispatch_ground_decals_SetGroundDecalCreationFrame(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalGlowParams")) return Dispatch_ground_decals_SetGroundDecalGlowParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalMisc")) return Dispatch_ground_decals_SetGroundDecalMisc(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalNormal")) return Dispatch_ground_decals_SetGroundDecalNormal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalPosAndDims")) return Dispatch_ground_decals_SetGroundDecalPosAndDims(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalQuadPosAndHeight")) return Dispatch_ground_decals_SetGroundDecalQuadPosAndHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalRotation")) return Dispatch_ground_decals_SetGroundDecalRotation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalTexture")) return Dispatch_ground_decals_SetGroundDecalTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalTextureParams")) return Dispatch_ground_decals_SetGroundDecalTextureParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalTint")) return Dispatch_ground_decals_SetGroundDecalTint(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGroundDecalUserData")) return Dispatch_ground_decals_SetGroundDecalUserData(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_ground_decals(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

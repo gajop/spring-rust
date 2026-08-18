@@ -396,14 +396,22 @@ NativeCalloutDispatch Dispatch_move_ctrl_SetMoveCtrlGravity(NativeInterface* nat
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_move_ctrl(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_move_ctrl(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_move_ctrl(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetUnitEstimatedPath")) { static constexpr NativeCalloutTarget target{&Dispatch_move_ctrl_GetUnitEstimatedPath}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitMoveTypeData")) { static constexpr NativeCalloutTarget target{&Dispatch_move_ctrl_GetUnitMoveTypeData}; return &target; }
+	if (detail::FunctionEquals(function, "IsMoveCtrlEnabled")) { static constexpr NativeCalloutTarget target{&Dispatch_move_ctrl_IsMoveCtrlEnabled}; return &target; }
+	if (detail::FunctionEquals(function, "MoveCtrl")) { static constexpr NativeCalloutTarget target{&Dispatch_move_ctrl_MoveCtrl}; return &target; }
+	if (detail::FunctionEquals(function, "SetMoveCtrlGravity")) { static constexpr NativeCalloutTarget target{&Dispatch_move_ctrl_SetMoveCtrlGravity}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_move_ctrl(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetUnitEstimatedPath")) return Dispatch_move_ctrl_GetUnitEstimatedPath(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitMoveTypeData")) return Dispatch_move_ctrl_GetUnitMoveTypeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsMoveCtrlEnabled")) return Dispatch_move_ctrl_IsMoveCtrlEnabled(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MoveCtrl")) return Dispatch_move_ctrl_MoveCtrl(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMoveCtrlGravity")) return Dispatch_move_ctrl_SetMoveCtrlGravity(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_move_ctrl(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

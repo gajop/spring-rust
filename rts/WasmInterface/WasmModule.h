@@ -73,9 +73,11 @@ public:
 	bool Callin(std::string_view name, const std::vector<WasmValue>& arguments,
 		WasmValue& result, std::string& error);
 
+	// `resolved`: adapter cookie from ResolveCallout, or nullptr to resolve by name.
 	bool InvokeCallout(std::string_view module, std::string_view function,
 		const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error,
-		bool keepImportEntered = false);
+		bool keepImportEntered = false, const void* resolved = nullptr);
+	const void* ResolveCallout(std::string_view module, std::string_view function) const;
 	// Component host callbacks may return a value whose canonical lowering runs
 	// guest code after the C++ callback returns. Keep the import guard alive
 	// until the enclosing component call has returned from Wasmtime.

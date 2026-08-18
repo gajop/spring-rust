@@ -102,15 +102,23 @@ NativeCalloutDispatch Dispatch_game_config_SetSquareBuildingMask(NativeInterface
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_game_config(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_game_config(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_game_config(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "SetCheatingEnabled")) { static constexpr NativeCalloutTarget target{&Dispatch_game_config_SetCheatingEnabled}; return &target; }
+	if (detail::FunctionEquals(function, "SetExperienceGrade")) { static constexpr NativeCalloutTarget target{&Dispatch_game_config_SetExperienceGrade}; return &target; }
+	if (detail::FunctionEquals(function, "SetGodMode")) { static constexpr NativeCalloutTarget target{&Dispatch_game_config_SetGodMode}; return &target; }
+	if (detail::FunctionEquals(function, "SetNoPause")) { static constexpr NativeCalloutTarget target{&Dispatch_game_config_SetNoPause}; return &target; }
+	if (detail::FunctionEquals(function, "SetRadarErrorParams")) { static constexpr NativeCalloutTarget target{&Dispatch_game_config_SetRadarErrorParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetSquareBuildingMask")) { static constexpr NativeCalloutTarget target{&Dispatch_game_config_SetSquareBuildingMask}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_game_config(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "SetCheatingEnabled")) return Dispatch_game_config_SetCheatingEnabled(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetExperienceGrade")) return Dispatch_game_config_SetExperienceGrade(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGodMode")) return Dispatch_game_config_SetGodMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetNoPause")) return Dispatch_game_config_SetNoPause(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetRadarErrorParams")) return Dispatch_game_config_SetRadarErrorParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetSquareBuildingMask")) return Dispatch_game_config_SetSquareBuildingMask(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_game_config(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -1130,26 +1130,34 @@ NativeCalloutDispatch Dispatch_projectiles_GetProjectilesInSphere(NativeInterfac
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_projectiles(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_projectiles(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_projectiles(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetAllProjectiles")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetAllProjectiles}; return &target; }
+	if (detail::FunctionEquals(function, "GetPieceProjectileParams")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetPieceProjectileParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileAllyTeamID")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileAllyTeamID}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileDamages")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileDamages}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileDefID")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileDefID}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileDirection}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileGravity")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileGravity}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileIsIntercepted")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileIsIntercepted}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileOwnerID")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileOwnerID}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectilePosition")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectilePosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileTarget")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileTarget}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileTeamID")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileTeamID}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileTimeToLive")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileTimeToLive}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileType")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileType}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectileVelocity")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectileVelocity}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectilesInRectangle")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectilesInRectangle}; return &target; }
+	if (detail::FunctionEquals(function, "GetProjectilesInSphere")) { static constexpr NativeCalloutTarget target{&Dispatch_projectiles_GetProjectilesInSphere}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_projectiles(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetAllProjectiles")) return Dispatch_projectiles_GetAllProjectiles(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPieceProjectileParams")) return Dispatch_projectiles_GetPieceProjectileParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileAllyTeamID")) return Dispatch_projectiles_GetProjectileAllyTeamID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileDamages")) return Dispatch_projectiles_GetProjectileDamages(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileDefID")) return Dispatch_projectiles_GetProjectileDefID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileDirection")) return Dispatch_projectiles_GetProjectileDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileGravity")) return Dispatch_projectiles_GetProjectileGravity(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileIsIntercepted")) return Dispatch_projectiles_GetProjectileIsIntercepted(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileOwnerID")) return Dispatch_projectiles_GetProjectileOwnerID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectilePosition")) return Dispatch_projectiles_GetProjectilePosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileTarget")) return Dispatch_projectiles_GetProjectileTarget(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileTeamID")) return Dispatch_projectiles_GetProjectileTeamID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileTimeToLive")) return Dispatch_projectiles_GetProjectileTimeToLive(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileType")) return Dispatch_projectiles_GetProjectileType(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectileVelocity")) return Dispatch_projectiles_GetProjectileVelocity(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectilesInRectangle")) return Dispatch_projectiles_GetProjectilesInRectangle(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProjectilesInSphere")) return Dispatch_projectiles_GetProjectilesInSphere(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_projectiles(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

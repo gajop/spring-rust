@@ -272,24 +272,32 @@ NativeCalloutDispatch Dispatch_team_control_UseTeamResource(NativeInterface* nat
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_team_control(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_team_control(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_team_control(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AddTeamResource")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_AddTeamResource}; return &target; }
+	if (detail::FunctionEquals(function, "AddTeamResourceExcessStats")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_AddTeamResourceExcessStats}; return &target; }
+	if (detail::FunctionEquals(function, "AssignPlayerToTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_AssignPlayerToTeam}; return &target; }
+	if (detail::FunctionEquals(function, "GameOver")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_GameOver}; return &target; }
+	if (detail::FunctionEquals(function, "KillTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_KillTeam}; return &target; }
+	if (detail::FunctionEquals(function, "SetAlly")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_SetAlly}; return &target; }
+	if (detail::FunctionEquals(function, "SetAllyTeamStartBox")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_SetAllyTeamStartBox}; return &target; }
+	if (detail::FunctionEquals(function, "SetGlobalLos")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_SetGlobalLos}; return &target; }
+	if (detail::FunctionEquals(function, "SetPlayerReadyState")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_SetPlayerReadyState}; return &target; }
+	if (detail::FunctionEquals(function, "SetTeamResource")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_SetTeamResource}; return &target; }
+	if (detail::FunctionEquals(function, "SetTeamShareLevel")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_SetTeamShareLevel}; return &target; }
+	if (detail::FunctionEquals(function, "SetTeamStartPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_SetTeamStartPosition}; return &target; }
+	if (detail::FunctionEquals(function, "ShareTeamResource")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_ShareTeamResource}; return &target; }
+	if (detail::FunctionEquals(function, "TransferTeamMaxUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_TransferTeamMaxUnits}; return &target; }
+	if (detail::FunctionEquals(function, "UseTeamResource")) { static constexpr NativeCalloutTarget target{&Dispatch_team_control_UseTeamResource}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_team_control(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AddTeamResource")) return Dispatch_team_control_AddTeamResource(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddTeamResourceExcessStats")) return Dispatch_team_control_AddTeamResourceExcessStats(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AssignPlayerToTeam")) return Dispatch_team_control_AssignPlayerToTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GameOver")) return Dispatch_team_control_GameOver(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "KillTeam")) return Dispatch_team_control_KillTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetAlly")) return Dispatch_team_control_SetAlly(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetAllyTeamStartBox")) return Dispatch_team_control_SetAllyTeamStartBox(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGlobalLos")) return Dispatch_team_control_SetGlobalLos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetPlayerReadyState")) return Dispatch_team_control_SetPlayerReadyState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetTeamResource")) return Dispatch_team_control_SetTeamResource(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetTeamShareLevel")) return Dispatch_team_control_SetTeamShareLevel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetTeamStartPosition")) return Dispatch_team_control_SetTeamStartPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ShareTeamResource")) return Dispatch_team_control_ShareTeamResource(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TransferTeamMaxUnits")) return Dispatch_team_control_TransferTeamMaxUnits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UseTeamResource")) return Dispatch_team_control_UseTeamResource(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_team_control(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

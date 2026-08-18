@@ -602,20 +602,28 @@ NativeCalloutDispatch Dispatch_sound_StopSoundStream(NativeInterface* nativeInte
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_sound(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_sound(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_sound(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetSoundDevices")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_GetSoundDevices}; return &target; }
+	if (detail::FunctionEquals(function, "GetSoundEffectParams")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_GetSoundEffectParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetSoundStreamTime")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_GetSoundStreamTime}; return &target; }
+	if (detail::FunctionEquals(function, "LoadSoundDef")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_LoadSoundDef}; return &target; }
+	if (detail::FunctionEquals(function, "PauseSoundStream")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_PauseSoundStream}; return &target; }
+	if (detail::FunctionEquals(function, "PlaySoundFile")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_PlaySoundFile}; return &target; }
+	if (detail::FunctionEquals(function, "PlaySoundStream")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_PlaySoundStream}; return &target; }
+	if (detail::FunctionEquals(function, "PreloadSoundItem")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_PreloadSoundItem}; return &target; }
+	if (detail::FunctionEquals(function, "SetSoundEffectParams")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_SetSoundEffectParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetSoundStreamVolume")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_SetSoundStreamVolume}; return &target; }
+	if (detail::FunctionEquals(function, "StopSoundStream")) { static constexpr NativeCalloutTarget target{&Dispatch_sound_StopSoundStream}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_sound(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetSoundDevices")) return Dispatch_sound_GetSoundDevices(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSoundEffectParams")) return Dispatch_sound_GetSoundEffectParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSoundStreamTime")) return Dispatch_sound_GetSoundStreamTime(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadSoundDef")) return Dispatch_sound_LoadSoundDef(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PauseSoundStream")) return Dispatch_sound_PauseSoundStream(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PlaySoundFile")) return Dispatch_sound_PlaySoundFile(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PlaySoundStream")) return Dispatch_sound_PlaySoundStream(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PreloadSoundItem")) return Dispatch_sound_PreloadSoundItem(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetSoundEffectParams")) return Dispatch_sound_SetSoundEffectParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetSoundStreamVolume")) return Dispatch_sound_SetSoundStreamVolume(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "StopSoundStream")) return Dispatch_sound_StopSoundStream(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_sound(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

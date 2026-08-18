@@ -17,10 +17,15 @@ inline bool IsEnabledSetting(std::string_view setting)
 		setting == "yes" || setting == "YES" || setting == "on" || setting == "ON";
 }
 
+// Read once: this is a process-level diagnostic opt-in, and the check sits on
+// the per-callout path where a getenv scan is a measurable cost.
 inline bool IsEnabled()
 {
-	const char* value = std::getenv("SPRING_ENABLE_SYNCED_TIMERS");
-	return value != nullptr && IsEnabledSetting(value);
+	static const bool enabled = [] {
+		const char* value = std::getenv("SPRING_ENABLE_SYNCED_TIMERS");
+		return value != nullptr && IsEnabledSetting(value);
+	}();
+	return enabled;
 }
 
 inline bool IsAllowed(bool syncedEnvironment, bool timerCall, bool enabled)

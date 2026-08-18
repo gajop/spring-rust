@@ -401,15 +401,23 @@ NativeCalloutDispatch Dispatch_markers_MarkerErasePosition(NativeInterface* nati
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_markers(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_markers(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_markers(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AddWorldIcon")) { static constexpr NativeCalloutTarget target{&Dispatch_markers_AddWorldIcon}; return &target; }
+	if (detail::FunctionEquals(function, "AddWorldText")) { static constexpr NativeCalloutTarget target{&Dispatch_markers_AddWorldText}; return &target; }
+	if (detail::FunctionEquals(function, "AddWorldUnit")) { static constexpr NativeCalloutTarget target{&Dispatch_markers_AddWorldUnit}; return &target; }
+	if (detail::FunctionEquals(function, "MarkerAddLine")) { static constexpr NativeCalloutTarget target{&Dispatch_markers_MarkerAddLine}; return &target; }
+	if (detail::FunctionEquals(function, "MarkerAddPoint")) { static constexpr NativeCalloutTarget target{&Dispatch_markers_MarkerAddPoint}; return &target; }
+	if (detail::FunctionEquals(function, "MarkerErasePosition")) { static constexpr NativeCalloutTarget target{&Dispatch_markers_MarkerErasePosition}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_markers(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AddWorldIcon")) return Dispatch_markers_AddWorldIcon(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddWorldText")) return Dispatch_markers_AddWorldText(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddWorldUnit")) return Dispatch_markers_AddWorldUnit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MarkerAddLine")) return Dispatch_markers_MarkerAddLine(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MarkerAddPoint")) return Dispatch_markers_MarkerAddPoint(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MarkerErasePosition")) return Dispatch_markers_MarkerErasePosition(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_markers(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

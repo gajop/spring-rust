@@ -1313,30 +1313,38 @@ NativeCalloutDispatch Dispatch_units_pieces_GetUnitScriptPiece(NativeInterface* 
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_pieces(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_units_pieces(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_pieces(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetFeaturePieceDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetFeaturePieceDirection}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePieceInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetFeaturePieceInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePieceList")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetFeaturePieceList}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePieceMap")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetFeaturePieceMap}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePieceMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetFeaturePieceMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePiecePosDir")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetFeaturePiecePosDir}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePiecePosition")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetFeaturePiecePosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureRootPiece")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetFeatureRootPiece}; return &target; }
+	if (detail::FunctionEquals(function, "GetModelPieceList")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetModelPieceList}; return &target; }
+	if (detail::FunctionEquals(function, "GetModelPieceMap")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetModelPieceMap}; return &target; }
+	if (detail::FunctionEquals(function, "GetModelRootPiece")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetModelRootPiece}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPieceDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitPieceDirection}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPieceInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitPieceInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPieceList")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitPieceList}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPieceMap")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitPieceMap}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPieceMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitPieceMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPiecePosDir")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitPiecePosDir}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPiecePosition")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitPiecePosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitRootPiece")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitRootPiece}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitScriptNames")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitScriptNames}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitScriptPiece")) { static constexpr NativeCalloutTarget target{&Dispatch_units_pieces_GetUnitScriptPiece}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_units_pieces(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetFeaturePieceDirection")) return Dispatch_units_pieces_GetFeaturePieceDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePieceInfo")) return Dispatch_units_pieces_GetFeaturePieceInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePieceList")) return Dispatch_units_pieces_GetFeaturePieceList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePieceMap")) return Dispatch_units_pieces_GetFeaturePieceMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePieceMatrix")) return Dispatch_units_pieces_GetFeaturePieceMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePiecePosDir")) return Dispatch_units_pieces_GetFeaturePiecePosDir(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePiecePosition")) return Dispatch_units_pieces_GetFeaturePiecePosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureRootPiece")) return Dispatch_units_pieces_GetFeatureRootPiece(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetModelPieceList")) return Dispatch_units_pieces_GetModelPieceList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetModelPieceMap")) return Dispatch_units_pieces_GetModelPieceMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetModelRootPiece")) return Dispatch_units_pieces_GetModelRootPiece(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPieceDirection")) return Dispatch_units_pieces_GetUnitPieceDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPieceInfo")) return Dispatch_units_pieces_GetUnitPieceInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPieceList")) return Dispatch_units_pieces_GetUnitPieceList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPieceMap")) return Dispatch_units_pieces_GetUnitPieceMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPieceMatrix")) return Dispatch_units_pieces_GetUnitPieceMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPiecePosDir")) return Dispatch_units_pieces_GetUnitPiecePosDir(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPiecePosition")) return Dispatch_units_pieces_GetUnitPiecePosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitRootPiece")) return Dispatch_units_pieces_GetUnitRootPiece(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitScriptNames")) return Dispatch_units_pieces_GetUnitScriptNames(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitScriptPiece")) return Dispatch_units_pieces_GetUnitScriptPiece(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_units_pieces(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

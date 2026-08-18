@@ -1240,24 +1240,32 @@ NativeCalloutDispatch Dispatch_units_commands_GiveOrderToUnitMap(NativeInterface
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_commands(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_units_commands(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_commands(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "FindUnitCmdDesc")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_FindUnitCmdDesc}; return &target; }
+	if (detail::FunctionEquals(function, "GetCommandQueue")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetCommandQueue}; return &target; }
+	if (detail::FunctionEquals(function, "GetFactoryBuggerOff")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetFactoryBuggerOff}; return &target; }
+	if (detail::FunctionEquals(function, "GetFactoryCommandCount")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetFactoryCommandCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetFactoryCommands")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetFactoryCommands}; return &target; }
+	if (detail::FunctionEquals(function, "GetFactoryCounts")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetFactoryCounts}; return &target; }
+	if (detail::FunctionEquals(function, "GetFullBuildQueue")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetFullBuildQueue}; return &target; }
+	if (detail::FunctionEquals(function, "GetRealBuildQueue")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetRealBuildQueue}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCmdDescs")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetUnitCmdDescs}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCommandCount")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetUnitCommandCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCommands")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetUnitCommands}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCurrentCommand")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GetUnitCurrentCommand}; return &target; }
+	if (detail::FunctionEquals(function, "GiveOrder")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GiveOrder}; return &target; }
+	if (detail::FunctionEquals(function, "GiveOrderArrayToUnitMap")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GiveOrderArrayToUnitMap}; return &target; }
+	if (detail::FunctionEquals(function, "GiveOrderToUnitMap")) { static constexpr NativeCalloutTarget target{&Dispatch_units_commands_GiveOrderToUnitMap}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_units_commands(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "FindUnitCmdDesc")) return Dispatch_units_commands_FindUnitCmdDesc(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCommandQueue")) return Dispatch_units_commands_GetCommandQueue(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFactoryBuggerOff")) return Dispatch_units_commands_GetFactoryBuggerOff(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFactoryCommandCount")) return Dispatch_units_commands_GetFactoryCommandCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFactoryCommands")) return Dispatch_units_commands_GetFactoryCommands(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFactoryCounts")) return Dispatch_units_commands_GetFactoryCounts(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFullBuildQueue")) return Dispatch_units_commands_GetFullBuildQueue(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetRealBuildQueue")) return Dispatch_units_commands_GetRealBuildQueue(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCmdDescs")) return Dispatch_units_commands_GetUnitCmdDescs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCommandCount")) return Dispatch_units_commands_GetUnitCommandCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCommands")) return Dispatch_units_commands_GetUnitCommands(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCurrentCommand")) return Dispatch_units_commands_GetUnitCurrentCommand(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GiveOrder")) return Dispatch_units_commands_GiveOrder(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GiveOrderArrayToUnitMap")) return Dispatch_units_commands_GiveOrderArrayToUnitMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GiveOrderToUnitMap")) return Dispatch_units_commands_GiveOrderToUnitMap(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_units_commands(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -251,25 +251,33 @@ NativeCalloutDispatch Dispatch_projectile_control_SpawnProjectile(NativeInterfac
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_projectile_control(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_projectile_control(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_projectile_control(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "DeleteProjectile")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_DeleteProjectile}; return &target; }
+	if (detail::FunctionEquals(function, "SetPieceProjectileParams")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetPieceProjectileParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileAlwaysVisible")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileAlwaysVisible}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileCEG")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileCEG}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileCollision")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileCollision}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileDamages")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileDamages}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileGravity")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileGravity}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileIgnoreTrackingError")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileIgnoreTrackingError}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileIsIntercepted")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileIsIntercepted}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileMoveControl")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileMoveControl}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectilePosition")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectilePosition}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileTarget")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileTarget}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileTimeToLive")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileTimeToLive}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileUseAirLos")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileUseAirLos}; return &target; }
+	if (detail::FunctionEquals(function, "SetProjectileVelocity")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SetProjectileVelocity}; return &target; }
+	if (detail::FunctionEquals(function, "SpawnProjectile")) { static constexpr NativeCalloutTarget target{&Dispatch_projectile_control_SpawnProjectile}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_projectile_control(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "DeleteProjectile")) return Dispatch_projectile_control_DeleteProjectile(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetPieceProjectileParams")) return Dispatch_projectile_control_SetPieceProjectileParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileAlwaysVisible")) return Dispatch_projectile_control_SetProjectileAlwaysVisible(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileCEG")) return Dispatch_projectile_control_SetProjectileCEG(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileCollision")) return Dispatch_projectile_control_SetProjectileCollision(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileDamages")) return Dispatch_projectile_control_SetProjectileDamages(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileGravity")) return Dispatch_projectile_control_SetProjectileGravity(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileIgnoreTrackingError")) return Dispatch_projectile_control_SetProjectileIgnoreTrackingError(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileIsIntercepted")) return Dispatch_projectile_control_SetProjectileIsIntercepted(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileMoveControl")) return Dispatch_projectile_control_SetProjectileMoveControl(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectilePosition")) return Dispatch_projectile_control_SetProjectilePosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileTarget")) return Dispatch_projectile_control_SetProjectileTarget(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileTimeToLive")) return Dispatch_projectile_control_SetProjectileTimeToLive(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileUseAirLos")) return Dispatch_projectile_control_SetProjectileUseAirLos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetProjectileVelocity")) return Dispatch_projectile_control_SetProjectileVelocity(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SpawnProjectile")) return Dispatch_projectile_control_SpawnProjectile(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_projectile_control(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

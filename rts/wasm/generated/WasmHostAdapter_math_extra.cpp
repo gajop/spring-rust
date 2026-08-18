@@ -738,22 +738,30 @@ NativeCalloutDispatch Dispatch_math_extra_SmoothStep(NativeInterface* nativeInte
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_math_extra(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_math_extra(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_math_extra(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "BitAnd")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_BitAnd}; return &target; }
+	if (detail::FunctionEquals(function, "BitBits")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_BitBits}; return &target; }
+	if (detail::FunctionEquals(function, "BitInv")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_BitInv}; return &target; }
+	if (detail::FunctionEquals(function, "BitOr")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_BitOr}; return &target; }
+	if (detail::FunctionEquals(function, "BitXor")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_BitXor}; return &target; }
+	if (detail::FunctionEquals(function, "Clamp")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_Clamp}; return &target; }
+	if (detail::FunctionEquals(function, "Diag")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_Diag}; return &target; }
+	if (detail::FunctionEquals(function, "Erf")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_Erf}; return &target; }
+	if (detail::FunctionEquals(function, "Hypot")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_Hypot}; return &target; }
+	if (detail::FunctionEquals(function, "Mix")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_Mix}; return &target; }
+	if (detail::FunctionEquals(function, "Round")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_Round}; return &target; }
+	if (detail::FunctionEquals(function, "Sgn")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_Sgn}; return &target; }
+	if (detail::FunctionEquals(function, "SmoothStep")) { static constexpr NativeCalloutTarget target{&Dispatch_math_extra_SmoothStep}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_math_extra(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "BitAnd")) return Dispatch_math_extra_BitAnd(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BitBits")) return Dispatch_math_extra_BitBits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BitInv")) return Dispatch_math_extra_BitInv(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BitOr")) return Dispatch_math_extra_BitOr(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BitXor")) return Dispatch_math_extra_BitXor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Clamp")) return Dispatch_math_extra_Clamp(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Diag")) return Dispatch_math_extra_Diag(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Erf")) return Dispatch_math_extra_Erf(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Hypot")) return Dispatch_math_extra_Hypot(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Mix")) return Dispatch_math_extra_Mix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Round")) return Dispatch_math_extra_Round(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Sgn")) return Dispatch_math_extra_Sgn(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SmoothStep")) return Dispatch_math_extra_SmoothStep(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_math_extra(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

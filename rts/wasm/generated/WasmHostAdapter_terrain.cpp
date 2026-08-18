@@ -808,22 +808,30 @@ NativeCalloutDispatch Dispatch_terrain_IsPosInMap(NativeInterface* nativeInterfa
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_terrain(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_terrain(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_terrain(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetGrass")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetGrass}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundBlocked")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetGroundBlocked}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundExtremes")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetGroundExtremes}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetGroundHeight}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetGroundInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundNormal")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetGroundNormal}; return &target; }
+	if (detail::FunctionEquals(function, "GetGroundOrigHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetGroundOrigHeight}; return &target; }
+	if (detail::FunctionEquals(function, "GetHeightMapSize")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetHeightMapSize}; return &target; }
+	if (detail::FunctionEquals(function, "GetSmoothMeshHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetSmoothMeshHeight}; return &target; }
+	if (detail::FunctionEquals(function, "GetTerrainTypeData")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetTerrainTypeData}; return &target; }
+	if (detail::FunctionEquals(function, "GetWaterLevel")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetWaterLevel}; return &target; }
+	if (detail::FunctionEquals(function, "GetWaterPlaneLevel")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_GetWaterPlaneLevel}; return &target; }
+	if (detail::FunctionEquals(function, "IsPosInMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_IsPosInMap}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_terrain(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetGrass")) return Dispatch_terrain_GetGrass(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundBlocked")) return Dispatch_terrain_GetGroundBlocked(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundExtremes")) return Dispatch_terrain_GetGroundExtremes(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundHeight")) return Dispatch_terrain_GetGroundHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundInfo")) return Dispatch_terrain_GetGroundInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundNormal")) return Dispatch_terrain_GetGroundNormal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGroundOrigHeight")) return Dispatch_terrain_GetGroundOrigHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetHeightMapSize")) return Dispatch_terrain_GetHeightMapSize(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSmoothMeshHeight")) return Dispatch_terrain_GetSmoothMeshHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTerrainTypeData")) return Dispatch_terrain_GetTerrainTypeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWaterLevel")) return Dispatch_terrain_GetWaterLevel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWaterPlaneLevel")) return Dispatch_terrain_GetWaterPlaneLevel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsPosInMap")) return Dispatch_terrain_IsPosInMap(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_terrain(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

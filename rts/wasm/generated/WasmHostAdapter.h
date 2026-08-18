@@ -14,6 +14,17 @@
 namespace recoil::wasm::generated {
 enum class NativeCalloutDispatch : std::uint8_t { notHandled, handled };
 
+// A callout target is fixed once its import is bound.  Resolving it once
+// keeps the per-call path off the name chains.  It is an object, not a
+// bare function pointer, so layers that must not see NativeInterface
+// types can carry it as an opaque cookie.
+using NativeCalloutFunction = NativeCalloutDispatch (*)(NativeInterface* nativeInterface,
+	const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error);
+
+struct NativeCalloutTarget { NativeCalloutFunction invoke; };
+
+const NativeCalloutTarget* ResolveNativeCallout(std::string_view module,
+	std::string_view function);
 NativeCalloutDispatch DispatchNativeCallout(NativeInterface* nativeInterface,
 	std::string_view module, std::string_view function,
 	const std::vector<WasmValue>& arguments, WasmValue& result,

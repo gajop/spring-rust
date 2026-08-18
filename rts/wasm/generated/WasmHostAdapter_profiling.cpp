@@ -624,19 +624,27 @@ NativeCalloutDispatch Dispatch_profiling_GetVidMemUsage(NativeInterface* nativeI
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_profiling(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_profiling(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_profiling(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "DiffTimers")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_DiffTimers}; return &target; }
+	if (detail::FunctionEquals(function, "GetDrawSeconds")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetDrawSeconds}; return &target; }
+	if (detail::FunctionEquals(function, "GetFrameTimer")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetFrameTimer}; return &target; }
+	if (detail::FunctionEquals(function, "GetLuaMemUsage")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetLuaMemUsage}; return &target; }
+	if (detail::FunctionEquals(function, "GetProfilerRecordNames")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetProfilerRecordNames}; return &target; }
+	if (detail::FunctionEquals(function, "GetProfilerTimeRecord")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetProfilerTimeRecord}; return &target; }
+	if (detail::FunctionEquals(function, "GetSyncedGCInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetSyncedGCInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetTimer")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetTimer}; return &target; }
+	if (detail::FunctionEquals(function, "GetTimerMicros")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetTimerMicros}; return &target; }
+	if (detail::FunctionEquals(function, "GetVidMemUsage")) { static constexpr NativeCalloutTarget target{&Dispatch_profiling_GetVidMemUsage}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_profiling(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "DiffTimers")) return Dispatch_profiling_DiffTimers(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetDrawSeconds")) return Dispatch_profiling_GetDrawSeconds(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFrameTimer")) return Dispatch_profiling_GetFrameTimer(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetLuaMemUsage")) return Dispatch_profiling_GetLuaMemUsage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProfilerRecordNames")) return Dispatch_profiling_GetProfilerRecordNames(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetProfilerTimeRecord")) return Dispatch_profiling_GetProfilerTimeRecord(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSyncedGCInfo")) return Dispatch_profiling_GetSyncedGCInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTimer")) return Dispatch_profiling_GetTimer(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTimerMicros")) return Dispatch_profiling_GetTimerMicros(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVidMemUsage")) return Dispatch_profiling_GetVidMemUsage(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_profiling(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

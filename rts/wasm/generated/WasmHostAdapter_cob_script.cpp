@@ -34,10 +34,18 @@ NativeCalloutDispatch Dispatch_cob_script_GetCOBScriptID(NativeInterface* native
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_cob_script(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_cob_script(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_cob_script(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetCOBScriptID")) { static constexpr NativeCalloutTarget target{&Dispatch_cob_script_GetCOBScriptID}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_cob_script(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetCOBScriptID")) return Dispatch_cob_script_GetCOBScriptID(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_cob_script(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

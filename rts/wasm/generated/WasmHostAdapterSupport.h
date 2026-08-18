@@ -187,7 +187,7 @@ inline std::string ToWitFieldName(std::string_view value)
 
 inline const WasmValue* FindRecordField(const WasmValueRecord& record, std::string_view name, std::string& error)
 {
-	const auto iter = record.find(std::string(name));
+	const auto iter = record.find(name);
 	if (iter != record.end())
 		return &iter->second;
 	const std::string witName = ToWitFieldName(name);
@@ -203,7 +203,7 @@ inline const WasmValue* FindArgument(const std::vector<WasmValue>& arguments, st
 {
 	if (arguments.size() == 1) {
 		if (const auto* record = std::get_if<WasmValueRecord>(&arguments.front().storage)) {
-			const auto iter = record->find(std::string(name));
+			const auto iter = record->find(name);
 			if (iter != record->end()) return &iter->second;
 			// WIT represents a single record input as that record itself, while
 			// older hand-authored callers represented the whole query as an outer

@@ -371,33 +371,41 @@ NativeCalloutDispatch Dispatch_unit_rendering_IsUnitVisible(NativeInterface* nat
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_unit_rendering(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_unit_rendering(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_unit_rendering(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetCameraRotation")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetCameraRotation}; return &target; }
+	if (detail::FunctionEquals(function, "GetCameraVectors")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetCameraVectors}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturesInScreenRectangle")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetFeaturesInScreenRectangle}; return &target; }
+	if (detail::FunctionEquals(function, "GetFrustumPlanes")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetFrustumPlanes}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitAlwaysUpdateMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitAlwaysUpdateMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDrawFlag")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitDrawFlag}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitEngineDrawMask")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitEngineDrawMask}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIcon")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitIcon}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIconData")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitIconData}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitLuaDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitLuaDraw}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitNoDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitNoDraw}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitNoGroup")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitNoGroup}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitNoMinimap")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitNoMinimap}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitNoSelect")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitNoSelect}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitSelectionVolumeData")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitSelectionVolumeData}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitTransformMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitTransformMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitViewPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitViewPosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitsInScreenRectangle")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetUnitsInScreenRectangle}; return &target; }
+	if (detail::FunctionEquals(function, "GetVisibleFeatures")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetVisibleFeatures}; return &target; }
+	if (detail::FunctionEquals(function, "GetVisibleProjectiles")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetVisibleProjectiles}; return &target; }
+	if (detail::FunctionEquals(function, "GetVisibleUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_GetVisibleUnits}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitIcon")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_IsUnitIcon}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitInView")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_IsUnitInView}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitVisible")) { static constexpr NativeCalloutTarget target{&Dispatch_unit_rendering_IsUnitVisible}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_unit_rendering(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetCameraRotation")) return Dispatch_unit_rendering_GetCameraRotation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCameraVectors")) return Dispatch_unit_rendering_GetCameraVectors(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturesInScreenRectangle")) return Dispatch_unit_rendering_GetFeaturesInScreenRectangle(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFrustumPlanes")) return Dispatch_unit_rendering_GetFrustumPlanes(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitAlwaysUpdateMatrix")) return Dispatch_unit_rendering_GetUnitAlwaysUpdateMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDrawFlag")) return Dispatch_unit_rendering_GetUnitDrawFlag(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitEngineDrawMask")) return Dispatch_unit_rendering_GetUnitEngineDrawMask(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIcon")) return Dispatch_unit_rendering_GetUnitIcon(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIconData")) return Dispatch_unit_rendering_GetUnitIconData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitLuaDraw")) return Dispatch_unit_rendering_GetUnitLuaDraw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitNoDraw")) return Dispatch_unit_rendering_GetUnitNoDraw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitNoGroup")) return Dispatch_unit_rendering_GetUnitNoGroup(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitNoMinimap")) return Dispatch_unit_rendering_GetUnitNoMinimap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitNoSelect")) return Dispatch_unit_rendering_GetUnitNoSelect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitSelectionVolumeData")) return Dispatch_unit_rendering_GetUnitSelectionVolumeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitTransformMatrix")) return Dispatch_unit_rendering_GetUnitTransformMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitViewPosition")) return Dispatch_unit_rendering_GetUnitViewPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitsInScreenRectangle")) return Dispatch_unit_rendering_GetUnitsInScreenRectangle(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVisibleFeatures")) return Dispatch_unit_rendering_GetVisibleFeatures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVisibleProjectiles")) return Dispatch_unit_rendering_GetVisibleProjectiles(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVisibleUnits")) return Dispatch_unit_rendering_GetVisibleUnits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitIcon")) return Dispatch_unit_rendering_IsUnitIcon(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitInView")) return Dispatch_unit_rendering_IsUnitInView(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitVisible")) return Dispatch_unit_rendering_IsUnitVisible(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_unit_rendering(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

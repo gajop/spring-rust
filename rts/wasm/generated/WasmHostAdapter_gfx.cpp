@@ -9252,235 +9252,243 @@ NativeCalloutDispatch Dispatch_gfx_Viewport(NativeInterface* nativeInterface, co
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_gfx(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_gfx(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_gfx(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "ActiveTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ActiveTexture}; return &target; }
+	if (detail::FunctionEquals(function, "AddAtlasTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AddAtlasTexture}; return &target; }
+	if (detail::FunctionEquals(function, "AddFallbackFont")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AddFallbackFont}; return &target; }
+	if (detail::FunctionEquals(function, "AddFeatureDefsToSubmissionVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AddFeatureDefsToSubmissionVAO}; return &target; }
+	if (detail::FunctionEquals(function, "AddFeaturesToSubmissionVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AddFeaturesToSubmissionVAO}; return &target; }
+	if (detail::FunctionEquals(function, "AddUnitDefsToSubmissionVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AddUnitDefsToSubmissionVAO}; return &target; }
+	if (detail::FunctionEquals(function, "AddUnitsToSubmissionVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AddUnitsToSubmissionVAO}; return &target; }
+	if (detail::FunctionEquals(function, "AlphaTest")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AlphaTest}; return &target; }
+	if (detail::FunctionEquals(function, "AlphaToCoverage")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AlphaToCoverage}; return &target; }
+	if (detail::FunctionEquals(function, "AttachIndexBufferVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AttachIndexBufferVAO}; return &target; }
+	if (detail::FunctionEquals(function, "AttachInstanceBufferVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AttachInstanceBufferVAO}; return &target; }
+	if (detail::FunctionEquals(function, "AttachVertexBufferVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_AttachVertexBufferVAO}; return &target; }
+	if (detail::FunctionEquals(function, "BeginText")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BeginText}; return &target; }
+	if (detail::FunctionEquals(function, "Billboard")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Billboard}; return &target; }
+	if (detail::FunctionEquals(function, "BindBufferRangeVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BindBufferRangeVBO}; return &target; }
+	if (detail::FunctionEquals(function, "BindImageTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BindImageTexture}; return &target; }
+	if (detail::FunctionEquals(function, "BindTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BindTexture}; return &target; }
+	if (detail::FunctionEquals(function, "BlendEquation")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BlendEquation}; return &target; }
+	if (detail::FunctionEquals(function, "BlendEquationSeparate")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BlendEquationSeparate}; return &target; }
+	if (detail::FunctionEquals(function, "BlendFunc")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BlendFunc}; return &target; }
+	if (detail::FunctionEquals(function, "BlendFuncSeparate")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BlendFuncSeparate}; return &target; }
+	if (detail::FunctionEquals(function, "Blending")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Blending}; return &target; }
+	if (detail::FunctionEquals(function, "BlitFBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_BlitFBO}; return &target; }
+	if (detail::FunctionEquals(function, "CallList")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_CallList}; return &target; }
+	if (detail::FunctionEquals(function, "ChangeTextureParams")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ChangeTextureParams}; return &target; }
+	if (detail::FunctionEquals(function, "Clear")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Clear}; return &target; }
+	if (detail::FunctionEquals(function, "ClearAttachmentFBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ClearAttachmentFBO}; return &target; }
+	if (detail::FunctionEquals(function, "ClearFallbackFonts")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ClearFallbackFonts}; return &target; }
+	if (detail::FunctionEquals(function, "ClearSubmissionVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ClearSubmissionVAO}; return &target; }
+	if (detail::FunctionEquals(function, "ClearVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ClearVBO}; return &target; }
+	if (detail::FunctionEquals(function, "ClipDistance")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ClipDistance}; return &target; }
+	if (detail::FunctionEquals(function, "ClipPlane")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ClipPlane}; return &target; }
+	if (detail::FunctionEquals(function, "Color")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Color}; return &target; }
+	if (detail::FunctionEquals(function, "ColorMask")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ColorMask}; return &target; }
+	if (detail::FunctionEquals(function, "ConfigMiniMap")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ConfigMiniMap}; return &target; }
+	if (detail::FunctionEquals(function, "CopyToTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_CopyToTexture}; return &target; }
+	if (detail::FunctionEquals(function, "CopyToVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_CopyToVBO}; return &target; }
+	if (detail::FunctionEquals(function, "CreateFBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_CreateFBO}; return &target; }
+	if (detail::FunctionEquals(function, "CreateQuery")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_CreateQuery}; return &target; }
+	if (detail::FunctionEquals(function, "CreateRBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_CreateRBO}; return &target; }
+	if (detail::FunctionEquals(function, "CreateShader")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_CreateShader}; return &target; }
+	if (detail::FunctionEquals(function, "Culling")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Culling}; return &target; }
+	if (detail::FunctionEquals(function, "DefineVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DefineVBO}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteFBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteFBO}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteFont")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteFont}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteList")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteList}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteQuery")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteQuery}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteRBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteRBO}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteShader")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteShader}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteTexture}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteTextureAtlas")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteTextureAtlas}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteTextureFBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteTextureFBO}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteVAO}; return &target; }
+	if (detail::FunctionEquals(function, "DeleteVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DeleteVBO}; return &target; }
+	if (detail::FunctionEquals(function, "DepthClamp")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DepthClamp}; return &target; }
+	if (detail::FunctionEquals(function, "DepthMask")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DepthMask}; return &target; }
+	if (detail::FunctionEquals(function, "DepthTest")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DepthTest}; return &target; }
+	if (detail::FunctionEquals(function, "DispatchCompute")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DispatchCompute}; return &target; }
+	if (detail::FunctionEquals(function, "DownloadVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DownloadVBO}; return &target; }
+	if (detail::FunctionEquals(function, "DrawArraysVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DrawArraysVAO}; return &target; }
+	if (detail::FunctionEquals(function, "DrawElementsVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DrawElementsVAO}; return &target; }
+	if (detail::FunctionEquals(function, "DrawGroundCircle")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DrawGroundCircle}; return &target; }
+	if (detail::FunctionEquals(function, "DrawGroundQuad")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DrawGroundQuad}; return &target; }
+	if (detail::FunctionEquals(function, "DrawListAtUnit")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DrawListAtUnit}; return &target; }
+	if (detail::FunctionEquals(function, "DrawMiniMap")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DrawMiniMap}; return &target; }
+	if (detail::FunctionEquals(function, "DumpDefinitionVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_DumpDefinitionVBO}; return &target; }
+	if (detail::FunctionEquals(function, "EdgeFlag")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_EdgeFlag}; return &target; }
+	if (detail::FunctionEquals(function, "EndText")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_EndText}; return &target; }
+	if (detail::FunctionEquals(function, "Feature")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Feature}; return &target; }
+	if (detail::FunctionEquals(function, "FeatureMultMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FeatureMultMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "FeaturePiece")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FeaturePiece}; return &target; }
+	if (detail::FunctionEquals(function, "FeaturePieceMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FeaturePieceMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "FeaturePieceMultMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FeaturePieceMultMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "FeatureRaw")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FeatureRaw}; return &target; }
+	if (detail::FunctionEquals(function, "FeatureShape")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FeatureShape}; return &target; }
+	if (detail::FunctionEquals(function, "FeatureShapeTextures")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FeatureShapeTextures}; return &target; }
+	if (detail::FunctionEquals(function, "FeatureTextures")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FeatureTextures}; return &target; }
+	if (detail::FunctionEquals(function, "FinalizeTextureAtlas")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FinalizeTextureAtlas}; return &target; }
+	if (detail::FunctionEquals(function, "Finish")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Finish}; return &target; }
+	if (detail::FunctionEquals(function, "Flush")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Flush}; return &target; }
+	if (detail::FunctionEquals(function, "Fog")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Fog}; return &target; }
+	if (detail::FunctionEquals(function, "FogCoord")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FogCoord}; return &target; }
+	if (detail::FunctionEquals(function, "FontBegin")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontBegin}; return &target; }
+	if (detail::FunctionEquals(function, "FontBindTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontBindTexture}; return &target; }
+	if (detail::FunctionEquals(function, "FontEnd")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontEnd}; return &target; }
+	if (detail::FunctionEquals(function, "FontGetTextHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontGetTextHeight}; return &target; }
+	if (detail::FunctionEquals(function, "FontGetTextWidth")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontGetTextWidth}; return &target; }
+	if (detail::FunctionEquals(function, "FontPrint")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontPrint}; return &target; }
+	if (detail::FunctionEquals(function, "FontPrintWorld")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontPrintWorld}; return &target; }
+	if (detail::FunctionEquals(function, "FontSetAutoOutlineColor")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontSetAutoOutlineColor}; return &target; }
+	if (detail::FunctionEquals(function, "FontSetOutlineColor")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontSetOutlineColor}; return &target; }
+	if (detail::FunctionEquals(function, "FontSetTextColor")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontSetTextColor}; return &target; }
+	if (detail::FunctionEquals(function, "FontSubmitBuffered")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontSubmitBuffered}; return &target; }
+	if (detail::FunctionEquals(function, "FontWrapText")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_FontWrapText}; return &target; }
+	if (detail::FunctionEquals(function, "Frustum")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Frustum}; return &target; }
+	if (detail::FunctionEquals(function, "GenerateMipmap")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GenerateMipmap}; return &target; }
+	if (detail::FunctionEquals(function, "GetActiveUniforms")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetActiveUniforms}; return &target; }
+	if (detail::FunctionEquals(function, "GetAtlasTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetAtlasTexture}; return &target; }
+	if (detail::FunctionEquals(function, "GetAtmosphere")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetAtmosphere}; return &target; }
+	if (detail::FunctionEquals(function, "GetConsoleCommands")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetConsoleCommands}; return &target; }
+	if (detail::FunctionEquals(function, "GetEngineAtlasTextures")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetEngineAtlasTextures}; return &target; }
+	if (detail::FunctionEquals(function, "GetEngineModelUniformDataDef")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetEngineModelUniformDataDef}; return &target; }
+	if (detail::FunctionEquals(function, "GetEngineModelUniformDataSize")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetEngineModelUniformDataSize}; return &target; }
+	if (detail::FunctionEquals(function, "GetEngineTextureNames")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetEngineTextureNames}; return &target; }
+	if (detail::FunctionEquals(function, "GetEngineUniformBufferDef")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetEngineUniformBufferDef}; return &target; }
+	if (detail::FunctionEquals(function, "GetFixedState")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetFixedState}; return &target; }
+	if (detail::FunctionEquals(function, "GetFontInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetFontInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetGlobalTexCoords")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetGlobalTexCoords}; return &target; }
+	if (detail::FunctionEquals(function, "GetGlobalTexNames")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetGlobalTexNames}; return &target; }
+	if (detail::FunctionEquals(function, "GetIDVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetIDVBO}; return &target; }
+	if (detail::FunctionEquals(function, "GetMapRendering")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetMapRendering}; return &target; }
+	if (detail::FunctionEquals(function, "GetMatrixData")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetMatrixData}; return &target; }
+	if (detail::FunctionEquals(function, "GetNumber")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetNumber}; return &target; }
+	if (detail::FunctionEquals(function, "GetQuery")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetQuery}; return &target; }
+	if (detail::FunctionEquals(function, "GetRBOInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetRBOInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetScreenViewTrans")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetScreenViewTrans}; return &target; }
+	if (detail::FunctionEquals(function, "GetShaderLog")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetShaderLog}; return &target; }
+	if (detail::FunctionEquals(function, "GetShadowMapParams")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetShadowMapParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetString")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetString}; return &target; }
+	if (detail::FunctionEquals(function, "GetSubroutineIndex")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetSubroutineIndex}; return &target; }
+	if (detail::FunctionEquals(function, "GetSun")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetSun}; return &target; }
+	if (detail::FunctionEquals(function, "GetTextHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetTextHeight}; return &target; }
+	if (detail::FunctionEquals(function, "GetTextWidth")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetTextWidth}; return &target; }
+	if (detail::FunctionEquals(function, "GetUniformLocation")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetUniformLocation}; return &target; }
+	if (detail::FunctionEquals(function, "GetVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetVAO}; return &target; }
+	if (detail::FunctionEquals(function, "GetVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetVBO}; return &target; }
+	if (detail::FunctionEquals(function, "GetVBOInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetVBOInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetViewRange")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetViewRange}; return &target; }
+	if (detail::FunctionEquals(function, "GetViewSizes")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetViewSizes}; return &target; }
+	if (detail::FunctionEquals(function, "GetWaterRendering")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_GetWaterRendering}; return &target; }
+	if (detail::FunctionEquals(function, "HasExtension")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_HasExtension}; return &target; }
+	if (detail::FunctionEquals(function, "InstanceDataFromFeatureDefsVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_InstanceDataFromFeatureDefsVBO}; return &target; }
+	if (detail::FunctionEquals(function, "InstanceDataFromFeaturesVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_InstanceDataFromFeaturesVBO}; return &target; }
+	if (detail::FunctionEquals(function, "InstanceDataFromUnitDefsVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_InstanceDataFromUnitDefsVBO}; return &target; }
+	if (detail::FunctionEquals(function, "InstanceDataFromUnitsVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_InstanceDataFromUnitsVBO}; return &target; }
+	if (detail::FunctionEquals(function, "IsValidFBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_IsValidFBO}; return &target; }
+	if (detail::FunctionEquals(function, "Light")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Light}; return &target; }
+	if (detail::FunctionEquals(function, "Lighting")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Lighting}; return &target; }
+	if (detail::FunctionEquals(function, "LineStipple")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_LineStipple}; return &target; }
+	if (detail::FunctionEquals(function, "LineWidth")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_LineWidth}; return &target; }
+	if (detail::FunctionEquals(function, "LoadFont")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_LoadFont}; return &target; }
+	if (detail::FunctionEquals(function, "LoadIdentity")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_LoadIdentity}; return &target; }
+	if (detail::FunctionEquals(function, "LoadMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_LoadMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "LogicOp")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_LogicOp}; return &target; }
+	if (detail::FunctionEquals(function, "Material")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Material}; return &target; }
+	if (detail::FunctionEquals(function, "MatrixDataFromProjectilesVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_MatrixDataFromProjectilesVBO}; return &target; }
+	if (detail::FunctionEquals(function, "MatrixMode")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_MatrixMode}; return &target; }
+	if (detail::FunctionEquals(function, "MemoryBarrier")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_MemoryBarrier}; return &target; }
+	if (detail::FunctionEquals(function, "ModelsVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ModelsVBO}; return &target; }
+	if (detail::FunctionEquals(function, "MultMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_MultMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "MultiTexCoord")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_MultiTexCoord}; return &target; }
+	if (detail::FunctionEquals(function, "MultiTexEnv")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_MultiTexEnv}; return &target; }
+	if (detail::FunctionEquals(function, "MultiTexGen")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_MultiTexGen}; return &target; }
+	if (detail::FunctionEquals(function, "Normal")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Normal}; return &target; }
+	if (detail::FunctionEquals(function, "ObjectLabel")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ObjectLabel}; return &target; }
+	if (detail::FunctionEquals(function, "Ortho")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Ortho}; return &target; }
+	if (detail::FunctionEquals(function, "PointParameter")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PointParameter}; return &target; }
+	if (detail::FunctionEquals(function, "PointSize")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PointSize}; return &target; }
+	if (detail::FunctionEquals(function, "PointSprite")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PointSprite}; return &target; }
+	if (detail::FunctionEquals(function, "PolygonMode")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PolygonMode}; return &target; }
+	if (detail::FunctionEquals(function, "PolygonOffset")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PolygonOffset}; return &target; }
+	if (detail::FunctionEquals(function, "PopAttrib")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PopAttrib}; return &target; }
+	if (detail::FunctionEquals(function, "PopDebugGroup")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PopDebugGroup}; return &target; }
+	if (detail::FunctionEquals(function, "PopMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PopMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "PushAttrib")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PushAttrib}; return &target; }
+	if (detail::FunctionEquals(function, "PushDebugGroup")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PushDebugGroup}; return &target; }
+	if (detail::FunctionEquals(function, "PushMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_PushMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "RawBindFBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_RawBindFBO}; return &target; }
+	if (detail::FunctionEquals(function, "ReadPixels")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ReadPixels}; return &target; }
+	if (detail::FunctionEquals(function, "Rect")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Rect}; return &target; }
+	if (detail::FunctionEquals(function, "RemoveFromSubmissionVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_RemoveFromSubmissionVAO}; return &target; }
+	if (detail::FunctionEquals(function, "ResetMatrices")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ResetMatrices}; return &target; }
+	if (detail::FunctionEquals(function, "ResetState")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ResetState}; return &target; }
+	if (detail::FunctionEquals(function, "Rotate")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Rotate}; return &target; }
+	if (detail::FunctionEquals(function, "SaveImage")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SaveImage}; return &target; }
+	if (detail::FunctionEquals(function, "Scale")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Scale}; return &target; }
+	if (detail::FunctionEquals(function, "Scissor")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Scissor}; return &target; }
+	if (detail::FunctionEquals(function, "SecondaryColor")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SecondaryColor}; return &target; }
+	if (detail::FunctionEquals(function, "SetFBOAttachment")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SetFBOAttachment}; return &target; }
+	if (detail::FunctionEquals(function, "SetFBODrawBuffers")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SetFBODrawBuffers}; return &target; }
+	if (detail::FunctionEquals(function, "SetFBOReadBuffer")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SetFBOReadBuffer}; return &target; }
+	if (detail::FunctionEquals(function, "SetFeatureBufferUniforms")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SetFeatureBufferUniforms}; return &target; }
+	if (detail::FunctionEquals(function, "SetGeometryShaderParameter")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SetGeometryShaderParameter}; return &target; }
+	if (detail::FunctionEquals(function, "SetTesselationShaderParameter")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SetTesselationShaderParameter}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitBufferUniforms")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SetUnitBufferUniforms}; return &target; }
+	if (detail::FunctionEquals(function, "ShadeModel")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_ShadeModel}; return &target; }
+	if (detail::FunctionEquals(function, "Shape")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Shape}; return &target; }
+	if (detail::FunctionEquals(function, "SlaveMiniMap")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SlaveMiniMap}; return &target; }
+	if (detail::FunctionEquals(function, "StencilFunc")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_StencilFunc}; return &target; }
+	if (detail::FunctionEquals(function, "StencilFuncSeparate")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_StencilFuncSeparate}; return &target; }
+	if (detail::FunctionEquals(function, "StencilMask")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_StencilMask}; return &target; }
+	if (detail::FunctionEquals(function, "StencilMaskSeparate")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_StencilMaskSeparate}; return &target; }
+	if (detail::FunctionEquals(function, "StencilOp")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_StencilOp}; return &target; }
+	if (detail::FunctionEquals(function, "StencilOpSeparate")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_StencilOpSeparate}; return &target; }
+	if (detail::FunctionEquals(function, "StencilTest")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_StencilTest}; return &target; }
+	if (detail::FunctionEquals(function, "SubmitVAO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SubmitVAO}; return &target; }
+	if (detail::FunctionEquals(function, "SwapBuffers")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_SwapBuffers}; return &target; }
+	if (detail::FunctionEquals(function, "TexCoord")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_TexCoord}; return &target; }
+	if (detail::FunctionEquals(function, "TexEnv")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_TexEnv}; return &target; }
+	if (detail::FunctionEquals(function, "TexGen")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_TexGen}; return &target; }
+	if (detail::FunctionEquals(function, "TexRect")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_TexRect}; return &target; }
+	if (detail::FunctionEquals(function, "Text")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Text}; return &target; }
+	if (detail::FunctionEquals(function, "TextEnv")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_TextEnv}; return &target; }
+	if (detail::FunctionEquals(function, "TextureInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_TextureInfo}; return &target; }
+	if (detail::FunctionEquals(function, "Translate")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Translate}; return &target; }
+	if (detail::FunctionEquals(function, "UnbindBufferRangeVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnbindBufferRangeVBO}; return &target; }
+	if (detail::FunctionEquals(function, "Uniform")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Uniform}; return &target; }
+	if (detail::FunctionEquals(function, "UniformArrayFloat")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UniformArrayFloat}; return &target; }
+	if (detail::FunctionEquals(function, "UniformArrayInt")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UniformArrayInt}; return &target; }
+	if (detail::FunctionEquals(function, "UniformInt")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UniformInt}; return &target; }
+	if (detail::FunctionEquals(function, "UniformMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UniformMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "UniformSubroutine")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UniformSubroutine}; return &target; }
+	if (detail::FunctionEquals(function, "Unit")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Unit}; return &target; }
+	if (detail::FunctionEquals(function, "UnitMultMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnitMultMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "UnitPiece")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnitPiece}; return &target; }
+	if (detail::FunctionEquals(function, "UnitPieceMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnitPieceMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "UnitPieceMultMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnitPieceMultMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "UnitRaw")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnitRaw}; return &target; }
+	if (detail::FunctionEquals(function, "UnitShape")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnitShape}; return &target; }
+	if (detail::FunctionEquals(function, "UnitShapeTextures")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnitShapeTextures}; return &target; }
+	if (detail::FunctionEquals(function, "UnitTextures")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UnitTextures}; return &target; }
+	if (detail::FunctionEquals(function, "UploadTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UploadTexture}; return &target; }
+	if (detail::FunctionEquals(function, "UploadVBO")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UploadVBO}; return &target; }
+	if (detail::FunctionEquals(function, "UseShader")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_UseShader}; return &target; }
+	if (detail::FunctionEquals(function, "Vertex")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Vertex}; return &target; }
+	if (detail::FunctionEquals(function, "Viewport")) { static constexpr NativeCalloutTarget target{&Dispatch_gfx_Viewport}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_gfx(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "ActiveTexture")) return Dispatch_gfx_ActiveTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddAtlasTexture")) return Dispatch_gfx_AddAtlasTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddFallbackFont")) return Dispatch_gfx_AddFallbackFont(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddFeatureDefsToSubmissionVAO")) return Dispatch_gfx_AddFeatureDefsToSubmissionVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddFeaturesToSubmissionVAO")) return Dispatch_gfx_AddFeaturesToSubmissionVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddUnitDefsToSubmissionVAO")) return Dispatch_gfx_AddUnitDefsToSubmissionVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddUnitsToSubmissionVAO")) return Dispatch_gfx_AddUnitsToSubmissionVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AlphaTest")) return Dispatch_gfx_AlphaTest(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AlphaToCoverage")) return Dispatch_gfx_AlphaToCoverage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AttachIndexBufferVAO")) return Dispatch_gfx_AttachIndexBufferVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AttachInstanceBufferVAO")) return Dispatch_gfx_AttachInstanceBufferVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AttachVertexBufferVAO")) return Dispatch_gfx_AttachVertexBufferVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BeginText")) return Dispatch_gfx_BeginText(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Billboard")) return Dispatch_gfx_Billboard(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BindBufferRangeVBO")) return Dispatch_gfx_BindBufferRangeVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BindImageTexture")) return Dispatch_gfx_BindImageTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BindTexture")) return Dispatch_gfx_BindTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BlendEquation")) return Dispatch_gfx_BlendEquation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BlendEquationSeparate")) return Dispatch_gfx_BlendEquationSeparate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BlendFunc")) return Dispatch_gfx_BlendFunc(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BlendFuncSeparate")) return Dispatch_gfx_BlendFuncSeparate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Blending")) return Dispatch_gfx_Blending(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "BlitFBO")) return Dispatch_gfx_BlitFBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CallList")) return Dispatch_gfx_CallList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ChangeTextureParams")) return Dispatch_gfx_ChangeTextureParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Clear")) return Dispatch_gfx_Clear(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ClearAttachmentFBO")) return Dispatch_gfx_ClearAttachmentFBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ClearFallbackFonts")) return Dispatch_gfx_ClearFallbackFonts(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ClearSubmissionVAO")) return Dispatch_gfx_ClearSubmissionVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ClearVBO")) return Dispatch_gfx_ClearVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ClipDistance")) return Dispatch_gfx_ClipDistance(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ClipPlane")) return Dispatch_gfx_ClipPlane(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Color")) return Dispatch_gfx_Color(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ColorMask")) return Dispatch_gfx_ColorMask(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ConfigMiniMap")) return Dispatch_gfx_ConfigMiniMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CopyToTexture")) return Dispatch_gfx_CopyToTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CopyToVBO")) return Dispatch_gfx_CopyToVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CreateFBO")) return Dispatch_gfx_CreateFBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CreateQuery")) return Dispatch_gfx_CreateQuery(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CreateRBO")) return Dispatch_gfx_CreateRBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CreateShader")) return Dispatch_gfx_CreateShader(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Culling")) return Dispatch_gfx_Culling(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DefineVBO")) return Dispatch_gfx_DefineVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteFBO")) return Dispatch_gfx_DeleteFBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteFont")) return Dispatch_gfx_DeleteFont(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteList")) return Dispatch_gfx_DeleteList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteQuery")) return Dispatch_gfx_DeleteQuery(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteRBO")) return Dispatch_gfx_DeleteRBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteShader")) return Dispatch_gfx_DeleteShader(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteTexture")) return Dispatch_gfx_DeleteTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteTextureAtlas")) return Dispatch_gfx_DeleteTextureAtlas(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteTextureFBO")) return Dispatch_gfx_DeleteTextureFBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteVAO")) return Dispatch_gfx_DeleteVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeleteVBO")) return Dispatch_gfx_DeleteVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DepthClamp")) return Dispatch_gfx_DepthClamp(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DepthMask")) return Dispatch_gfx_DepthMask(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DepthTest")) return Dispatch_gfx_DepthTest(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DispatchCompute")) return Dispatch_gfx_DispatchCompute(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DownloadVBO")) return Dispatch_gfx_DownloadVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DrawArraysVAO")) return Dispatch_gfx_DrawArraysVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DrawElementsVAO")) return Dispatch_gfx_DrawElementsVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DrawGroundCircle")) return Dispatch_gfx_DrawGroundCircle(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DrawGroundQuad")) return Dispatch_gfx_DrawGroundQuad(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DrawListAtUnit")) return Dispatch_gfx_DrawListAtUnit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DrawMiniMap")) return Dispatch_gfx_DrawMiniMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DumpDefinitionVBO")) return Dispatch_gfx_DumpDefinitionVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EdgeFlag")) return Dispatch_gfx_EdgeFlag(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EndText")) return Dispatch_gfx_EndText(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Feature")) return Dispatch_gfx_Feature(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FeatureMultMatrix")) return Dispatch_gfx_FeatureMultMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FeaturePiece")) return Dispatch_gfx_FeaturePiece(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FeaturePieceMatrix")) return Dispatch_gfx_FeaturePieceMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FeaturePieceMultMatrix")) return Dispatch_gfx_FeaturePieceMultMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FeatureRaw")) return Dispatch_gfx_FeatureRaw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FeatureShape")) return Dispatch_gfx_FeatureShape(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FeatureShapeTextures")) return Dispatch_gfx_FeatureShapeTextures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FeatureTextures")) return Dispatch_gfx_FeatureTextures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FinalizeTextureAtlas")) return Dispatch_gfx_FinalizeTextureAtlas(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Finish")) return Dispatch_gfx_Finish(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Flush")) return Dispatch_gfx_Flush(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Fog")) return Dispatch_gfx_Fog(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FogCoord")) return Dispatch_gfx_FogCoord(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontBegin")) return Dispatch_gfx_FontBegin(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontBindTexture")) return Dispatch_gfx_FontBindTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontEnd")) return Dispatch_gfx_FontEnd(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontGetTextHeight")) return Dispatch_gfx_FontGetTextHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontGetTextWidth")) return Dispatch_gfx_FontGetTextWidth(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontPrint")) return Dispatch_gfx_FontPrint(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontPrintWorld")) return Dispatch_gfx_FontPrintWorld(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontSetAutoOutlineColor")) return Dispatch_gfx_FontSetAutoOutlineColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontSetOutlineColor")) return Dispatch_gfx_FontSetOutlineColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontSetTextColor")) return Dispatch_gfx_FontSetTextColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontSubmitBuffered")) return Dispatch_gfx_FontSubmitBuffered(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FontWrapText")) return Dispatch_gfx_FontWrapText(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Frustum")) return Dispatch_gfx_Frustum(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GenerateMipmap")) return Dispatch_gfx_GenerateMipmap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetActiveUniforms")) return Dispatch_gfx_GetActiveUniforms(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAtlasTexture")) return Dispatch_gfx_GetAtlasTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAtmosphere")) return Dispatch_gfx_GetAtmosphere(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetConsoleCommands")) return Dispatch_gfx_GetConsoleCommands(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetEngineAtlasTextures")) return Dispatch_gfx_GetEngineAtlasTextures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetEngineModelUniformDataDef")) return Dispatch_gfx_GetEngineModelUniformDataDef(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetEngineModelUniformDataSize")) return Dispatch_gfx_GetEngineModelUniformDataSize(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetEngineTextureNames")) return Dispatch_gfx_GetEngineTextureNames(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetEngineUniformBufferDef")) return Dispatch_gfx_GetEngineUniformBufferDef(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFixedState")) return Dispatch_gfx_GetFixedState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFontInfo")) return Dispatch_gfx_GetFontInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGlobalTexCoords")) return Dispatch_gfx_GetGlobalTexCoords(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGlobalTexNames")) return Dispatch_gfx_GetGlobalTexNames(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetIDVBO")) return Dispatch_gfx_GetIDVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMapRendering")) return Dispatch_gfx_GetMapRendering(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMatrixData")) return Dispatch_gfx_GetMatrixData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetNumber")) return Dispatch_gfx_GetNumber(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetQuery")) return Dispatch_gfx_GetQuery(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetRBOInfo")) return Dispatch_gfx_GetRBOInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetScreenViewTrans")) return Dispatch_gfx_GetScreenViewTrans(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetShaderLog")) return Dispatch_gfx_GetShaderLog(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetShadowMapParams")) return Dispatch_gfx_GetShadowMapParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetString")) return Dispatch_gfx_GetString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSubroutineIndex")) return Dispatch_gfx_GetSubroutineIndex(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSun")) return Dispatch_gfx_GetSun(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTextHeight")) return Dispatch_gfx_GetTextHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTextWidth")) return Dispatch_gfx_GetTextWidth(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUniformLocation")) return Dispatch_gfx_GetUniformLocation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVAO")) return Dispatch_gfx_GetVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVBO")) return Dispatch_gfx_GetVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVBOInfo")) return Dispatch_gfx_GetVBOInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetViewRange")) return Dispatch_gfx_GetViewRange(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetViewSizes")) return Dispatch_gfx_GetViewSizes(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWaterRendering")) return Dispatch_gfx_GetWaterRendering(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "HasExtension")) return Dispatch_gfx_HasExtension(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "InstanceDataFromFeatureDefsVBO")) return Dispatch_gfx_InstanceDataFromFeatureDefsVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "InstanceDataFromFeaturesVBO")) return Dispatch_gfx_InstanceDataFromFeaturesVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "InstanceDataFromUnitDefsVBO")) return Dispatch_gfx_InstanceDataFromUnitDefsVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "InstanceDataFromUnitsVBO")) return Dispatch_gfx_InstanceDataFromUnitsVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsValidFBO")) return Dispatch_gfx_IsValidFBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Light")) return Dispatch_gfx_Light(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Lighting")) return Dispatch_gfx_Lighting(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LineStipple")) return Dispatch_gfx_LineStipple(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LineWidth")) return Dispatch_gfx_LineWidth(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadFont")) return Dispatch_gfx_LoadFont(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadIdentity")) return Dispatch_gfx_LoadIdentity(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadMatrix")) return Dispatch_gfx_LoadMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LogicOp")) return Dispatch_gfx_LogicOp(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Material")) return Dispatch_gfx_Material(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MatrixDataFromProjectilesVBO")) return Dispatch_gfx_MatrixDataFromProjectilesVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MatrixMode")) return Dispatch_gfx_MatrixMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MemoryBarrier")) return Dispatch_gfx_MemoryBarrier(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ModelsVBO")) return Dispatch_gfx_ModelsVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MultMatrix")) return Dispatch_gfx_MultMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MultiTexCoord")) return Dispatch_gfx_MultiTexCoord(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MultiTexEnv")) return Dispatch_gfx_MultiTexEnv(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "MultiTexGen")) return Dispatch_gfx_MultiTexGen(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Normal")) return Dispatch_gfx_Normal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ObjectLabel")) return Dispatch_gfx_ObjectLabel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Ortho")) return Dispatch_gfx_Ortho(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PointParameter")) return Dispatch_gfx_PointParameter(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PointSize")) return Dispatch_gfx_PointSize(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PointSprite")) return Dispatch_gfx_PointSprite(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PolygonMode")) return Dispatch_gfx_PolygonMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PolygonOffset")) return Dispatch_gfx_PolygonOffset(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PopAttrib")) return Dispatch_gfx_PopAttrib(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PopDebugGroup")) return Dispatch_gfx_PopDebugGroup(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PopMatrix")) return Dispatch_gfx_PopMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PushAttrib")) return Dispatch_gfx_PushAttrib(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PushDebugGroup")) return Dispatch_gfx_PushDebugGroup(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PushMatrix")) return Dispatch_gfx_PushMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RawBindFBO")) return Dispatch_gfx_RawBindFBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ReadPixels")) return Dispatch_gfx_ReadPixels(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Rect")) return Dispatch_gfx_Rect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RemoveFromSubmissionVAO")) return Dispatch_gfx_RemoveFromSubmissionVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ResetMatrices")) return Dispatch_gfx_ResetMatrices(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ResetState")) return Dispatch_gfx_ResetState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Rotate")) return Dispatch_gfx_Rotate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SaveImage")) return Dispatch_gfx_SaveImage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Scale")) return Dispatch_gfx_Scale(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Scissor")) return Dispatch_gfx_Scissor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SecondaryColor")) return Dispatch_gfx_SecondaryColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFBOAttachment")) return Dispatch_gfx_SetFBOAttachment(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFBODrawBuffers")) return Dispatch_gfx_SetFBODrawBuffers(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFBOReadBuffer")) return Dispatch_gfx_SetFBOReadBuffer(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFeatureBufferUniforms")) return Dispatch_gfx_SetFeatureBufferUniforms(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGeometryShaderParameter")) return Dispatch_gfx_SetGeometryShaderParameter(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetTesselationShaderParameter")) return Dispatch_gfx_SetTesselationShaderParameter(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitBufferUniforms")) return Dispatch_gfx_SetUnitBufferUniforms(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ShadeModel")) return Dispatch_gfx_ShadeModel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Shape")) return Dispatch_gfx_Shape(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SlaveMiniMap")) return Dispatch_gfx_SlaveMiniMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "StencilFunc")) return Dispatch_gfx_StencilFunc(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "StencilFuncSeparate")) return Dispatch_gfx_StencilFuncSeparate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "StencilMask")) return Dispatch_gfx_StencilMask(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "StencilMaskSeparate")) return Dispatch_gfx_StencilMaskSeparate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "StencilOp")) return Dispatch_gfx_StencilOp(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "StencilOpSeparate")) return Dispatch_gfx_StencilOpSeparate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "StencilTest")) return Dispatch_gfx_StencilTest(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SubmitVAO")) return Dispatch_gfx_SubmitVAO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SwapBuffers")) return Dispatch_gfx_SwapBuffers(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TexCoord")) return Dispatch_gfx_TexCoord(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TexEnv")) return Dispatch_gfx_TexEnv(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TexGen")) return Dispatch_gfx_TexGen(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TexRect")) return Dispatch_gfx_TexRect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Text")) return Dispatch_gfx_Text(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TextEnv")) return Dispatch_gfx_TextEnv(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TextureInfo")) return Dispatch_gfx_TextureInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Translate")) return Dispatch_gfx_Translate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnbindBufferRangeVBO")) return Dispatch_gfx_UnbindBufferRangeVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Uniform")) return Dispatch_gfx_Uniform(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UniformArrayFloat")) return Dispatch_gfx_UniformArrayFloat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UniformArrayInt")) return Dispatch_gfx_UniformArrayInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UniformInt")) return Dispatch_gfx_UniformInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UniformMatrix")) return Dispatch_gfx_UniformMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UniformSubroutine")) return Dispatch_gfx_UniformSubroutine(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Unit")) return Dispatch_gfx_Unit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitMultMatrix")) return Dispatch_gfx_UnitMultMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitPiece")) return Dispatch_gfx_UnitPiece(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitPieceMatrix")) return Dispatch_gfx_UnitPieceMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitPieceMultMatrix")) return Dispatch_gfx_UnitPieceMultMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitRaw")) return Dispatch_gfx_UnitRaw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitShape")) return Dispatch_gfx_UnitShape(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitShapeTextures")) return Dispatch_gfx_UnitShapeTextures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitTextures")) return Dispatch_gfx_UnitTextures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UploadTexture")) return Dispatch_gfx_UploadTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UploadVBO")) return Dispatch_gfx_UploadVBO(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UseShader")) return Dispatch_gfx_UseShader(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Vertex")) return Dispatch_gfx_Vertex(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Viewport")) return Dispatch_gfx_Viewport(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_gfx(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

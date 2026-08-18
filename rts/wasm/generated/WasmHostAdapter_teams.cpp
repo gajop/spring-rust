@@ -1502,28 +1502,36 @@ NativeCalloutDispatch Dispatch_teams_GetTeamUnitStats(NativeInterface* nativeInt
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_teams(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_teams(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_teams(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "ArePlayersAllied")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_ArePlayersAllied}; return &target; }
+	if (detail::FunctionEquals(function, "AreTeamsAllied")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_AreTeamsAllied}; return &target; }
+	if (detail::FunctionEquals(function, "GetAIInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetAIInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetAllyTeamInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetAllyTeamInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetAllyTeamList")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetAllyTeamList}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerControlledUnit")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetPlayerControlledUnit}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetPlayerInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerList")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetPlayerList}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerListInAllyTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetPlayerListInAllyTeam}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerListInTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetPlayerListInTeam}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamAllyTeamID")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamAllyTeamID}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamList")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamList}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamLuaAI")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamLuaAI}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamMaxUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamMaxUnits}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamResourceStats")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamResourceStats}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamResources")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamResources}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamStatsHistory")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamStatsHistory}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamUnitStats")) { static constexpr NativeCalloutTarget target{&Dispatch_teams_GetTeamUnitStats}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_teams(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "ArePlayersAllied")) return Dispatch_teams_ArePlayersAllied(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AreTeamsAllied")) return Dispatch_teams_AreTeamsAllied(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAIInfo")) return Dispatch_teams_GetAIInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAllyTeamInfo")) return Dispatch_teams_GetAllyTeamInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAllyTeamList")) return Dispatch_teams_GetAllyTeamList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerControlledUnit")) return Dispatch_teams_GetPlayerControlledUnit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerInfo")) return Dispatch_teams_GetPlayerInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerList")) return Dispatch_teams_GetPlayerList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerListInAllyTeam")) return Dispatch_teams_GetPlayerListInAllyTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerListInTeam")) return Dispatch_teams_GetPlayerListInTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamAllyTeamID")) return Dispatch_teams_GetTeamAllyTeamID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamInfo")) return Dispatch_teams_GetTeamInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamList")) return Dispatch_teams_GetTeamList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamLuaAI")) return Dispatch_teams_GetTeamLuaAI(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamMaxUnits")) return Dispatch_teams_GetTeamMaxUnits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamResourceStats")) return Dispatch_teams_GetTeamResourceStats(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamResources")) return Dispatch_teams_GetTeamResources(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamStatsHistory")) return Dispatch_teams_GetTeamStatsHistory(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamUnitStats")) return Dispatch_teams_GetTeamUnitStats(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_teams(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

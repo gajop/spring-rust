@@ -3443,60 +3443,68 @@ NativeCalloutDispatch Dispatch_vfs_ZlibDecompress(NativeInterface* nativeInterfa
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_vfs(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_vfs(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_vfs(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AbortDownload")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_AbortDownload}; return &target; }
+	if (detail::FunctionEquals(function, "CalculateHash")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_CalculateHash}; return &target; }
+	if (detail::FunctionEquals(function, "CompressFolder")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_CompressFolder}; return &target; }
+	if (detail::FunctionEquals(function, "CreateDir")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_CreateDir}; return &target; }
+	if (detail::FunctionEquals(function, "DirList")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_DirList}; return &target; }
+	if (detail::FunctionEquals(function, "DownloadArchive")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_DownloadArchive}; return &target; }
+	if (detail::FunctionEquals(function, "ExtractModArchiveFile")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_ExtractModArchiveFile}; return &target; }
+	if (detail::FunctionEquals(function, "FileExists")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_FileExists}; return &target; }
+	if (detail::FunctionEquals(function, "GetAllArchives")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetAllArchives}; return &target; }
+	if (detail::FunctionEquals(function, "GetArchiveChecksum")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetArchiveChecksum}; return &target; }
+	if (detail::FunctionEquals(function, "GetArchiveContainingFile")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetArchiveContainingFile}; return &target; }
+	if (detail::FunctionEquals(function, "GetArchiveDependencies")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetArchiveDependencies}; return &target; }
+	if (detail::FunctionEquals(function, "GetArchiveInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetArchiveInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetArchivePath")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetArchivePath}; return &target; }
+	if (detail::FunctionEquals(function, "GetArchiveReplaces")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetArchiveReplaces}; return &target; }
+	if (detail::FunctionEquals(function, "GetArchives")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetArchives}; return &target; }
+	if (detail::FunctionEquals(function, "GetAvailableAIs")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetAvailableAIs}; return &target; }
+	if (detail::FunctionEquals(function, "GetFileAbsolutePath")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetFileAbsolutePath}; return &target; }
+	if (detail::FunctionEquals(function, "GetFileInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetFileInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetFileSize")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetFileSize}; return &target; }
+	if (detail::FunctionEquals(function, "GetGames")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetGames}; return &target; }
+	if (detail::FunctionEquals(function, "GetLoadedArchives")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetLoadedArchives}; return &target; }
+	if (detail::FunctionEquals(function, "GetMapSquareTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetMapSquareTexture}; return &target; }
+	if (detail::FunctionEquals(function, "GetMapSquareTextureInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetMapSquareTextureInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetMaps")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetMaps}; return &target; }
+	if (detail::FunctionEquals(function, "GetNameFromRapidTag")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_GetNameFromRapidTag}; return &target; }
+	if (detail::FunctionEquals(function, "HasArchive")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_HasArchive}; return &target; }
+	if (detail::FunctionEquals(function, "IsDirectory")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_IsDirectory}; return &target; }
+	if (detail::FunctionEquals(function, "ListDir")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_ListDir}; return &target; }
+	if (detail::FunctionEquals(function, "LoadFile")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_LoadFile}; return &target; }
+	if (detail::FunctionEquals(function, "PackF32")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_PackF32}; return &target; }
+	if (detail::FunctionEquals(function, "PackS16")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_PackS16}; return &target; }
+	if (detail::FunctionEquals(function, "PackS32")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_PackS32}; return &target; }
+	if (detail::FunctionEquals(function, "PackS8")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_PackS8}; return &target; }
+	if (detail::FunctionEquals(function, "PackU16")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_PackU16}; return &target; }
+	if (detail::FunctionEquals(function, "PackU32")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_PackU32}; return &target; }
+	if (detail::FunctionEquals(function, "PackU8")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_PackU8}; return &target; }
+	if (detail::FunctionEquals(function, "ReadFile")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_ReadFile}; return &target; }
+	if (detail::FunctionEquals(function, "ReadFileAsString")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_ReadFileAsString}; return &target; }
+	if (detail::FunctionEquals(function, "ScanAllDirs")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_ScanAllDirs}; return &target; }
+	if (detail::FunctionEquals(function, "SetMapSquareTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_SetMapSquareTexture}; return &target; }
+	if (detail::FunctionEquals(function, "SubDirs")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_SubDirs}; return &target; }
+	if (detail::FunctionEquals(function, "UnpackF32")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_UnpackF32}; return &target; }
+	if (detail::FunctionEquals(function, "UnpackS16")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_UnpackS16}; return &target; }
+	if (detail::FunctionEquals(function, "UnpackS32")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_UnpackS32}; return &target; }
+	if (detail::FunctionEquals(function, "UnpackS8")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_UnpackS8}; return &target; }
+	if (detail::FunctionEquals(function, "UnpackU16")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_UnpackU16}; return &target; }
+	if (detail::FunctionEquals(function, "UnpackU32")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_UnpackU32}; return &target; }
+	if (detail::FunctionEquals(function, "UnpackU8")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_UnpackU8}; return &target; }
+	if (detail::FunctionEquals(function, "ZlibCompress")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_ZlibCompress}; return &target; }
+	if (detail::FunctionEquals(function, "ZlibDecompress")) { static constexpr NativeCalloutTarget target{&Dispatch_vfs_ZlibDecompress}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_vfs(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AbortDownload")) return Dispatch_vfs_AbortDownload(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CalculateHash")) return Dispatch_vfs_CalculateHash(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CompressFolder")) return Dispatch_vfs_CompressFolder(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CreateDir")) return Dispatch_vfs_CreateDir(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DirList")) return Dispatch_vfs_DirList(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DownloadArchive")) return Dispatch_vfs_DownloadArchive(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ExtractModArchiveFile")) return Dispatch_vfs_ExtractModArchiveFile(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FileExists")) return Dispatch_vfs_FileExists(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAllArchives")) return Dispatch_vfs_GetAllArchives(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetArchiveChecksum")) return Dispatch_vfs_GetArchiveChecksum(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetArchiveContainingFile")) return Dispatch_vfs_GetArchiveContainingFile(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetArchiveDependencies")) return Dispatch_vfs_GetArchiveDependencies(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetArchiveInfo")) return Dispatch_vfs_GetArchiveInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetArchivePath")) return Dispatch_vfs_GetArchivePath(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetArchiveReplaces")) return Dispatch_vfs_GetArchiveReplaces(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetArchives")) return Dispatch_vfs_GetArchives(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAvailableAIs")) return Dispatch_vfs_GetAvailableAIs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFileAbsolutePath")) return Dispatch_vfs_GetFileAbsolutePath(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFileInfo")) return Dispatch_vfs_GetFileInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFileSize")) return Dispatch_vfs_GetFileSize(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGames")) return Dispatch_vfs_GetGames(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetLoadedArchives")) return Dispatch_vfs_GetLoadedArchives(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMapSquareTexture")) return Dispatch_vfs_GetMapSquareTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMapSquareTextureInfo")) return Dispatch_vfs_GetMapSquareTextureInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMaps")) return Dispatch_vfs_GetMaps(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetNameFromRapidTag")) return Dispatch_vfs_GetNameFromRapidTag(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "HasArchive")) return Dispatch_vfs_HasArchive(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsDirectory")) return Dispatch_vfs_IsDirectory(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ListDir")) return Dispatch_vfs_ListDir(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadFile")) return Dispatch_vfs_LoadFile(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PackF32")) return Dispatch_vfs_PackF32(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PackS16")) return Dispatch_vfs_PackS16(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PackS32")) return Dispatch_vfs_PackS32(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PackS8")) return Dispatch_vfs_PackS8(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PackU16")) return Dispatch_vfs_PackU16(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PackU32")) return Dispatch_vfs_PackU32(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PackU8")) return Dispatch_vfs_PackU8(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ReadFile")) return Dispatch_vfs_ReadFile(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ReadFileAsString")) return Dispatch_vfs_ReadFileAsString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ScanAllDirs")) return Dispatch_vfs_ScanAllDirs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMapSquareTexture")) return Dispatch_vfs_SetMapSquareTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SubDirs")) return Dispatch_vfs_SubDirs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnpackF32")) return Dispatch_vfs_UnpackF32(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnpackS16")) return Dispatch_vfs_UnpackS16(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnpackS32")) return Dispatch_vfs_UnpackS32(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnpackS8")) return Dispatch_vfs_UnpackS8(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnpackU16")) return Dispatch_vfs_UnpackU16(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnpackU32")) return Dispatch_vfs_UnpackU32(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnpackU8")) return Dispatch_vfs_UnpackU8(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ZlibCompress")) return Dispatch_vfs_ZlibCompress(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ZlibDecompress")) return Dispatch_vfs_ZlibDecompress(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_vfs(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -1282,29 +1282,37 @@ NativeCalloutDispatch Dispatch_input_IsAboveMiniMap(NativeInterface* nativeInter
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_input(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_input(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_input(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetActionHotKeys")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetActionHotKeys}; return &target; }
+	if (detail::FunctionEquals(function, "GetActiveCommand")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetActiveCommand}; return &target; }
+	if (detail::FunctionEquals(function, "GetActivePage")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetActivePage}; return &target; }
+	if (detail::FunctionEquals(function, "GetDefaultCommand")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetDefaultCommand}; return &target; }
+	if (detail::FunctionEquals(function, "GetInvertQueueKey")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetInvertQueueKey}; return &target; }
+	if (detail::FunctionEquals(function, "GetKeyBindings")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetKeyBindings}; return &target; }
+	if (detail::FunctionEquals(function, "GetKeyCode")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetKeyCode}; return &target; }
+	if (detail::FunctionEquals(function, "GetKeyFromScanSymbol")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetKeyFromScanSymbol}; return &target; }
+	if (detail::FunctionEquals(function, "GetKeyState")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetKeyState}; return &target; }
+	if (detail::FunctionEquals(function, "GetKeySymbol")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetKeySymbol}; return &target; }
+	if (detail::FunctionEquals(function, "GetModKeyState")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetModKeyState}; return &target; }
+	if (detail::FunctionEquals(function, "GetMouseButtonsPressed")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetMouseButtonsPressed}; return &target; }
+	if (detail::FunctionEquals(function, "GetMouseCursor")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetMouseCursor}; return &target; }
+	if (detail::FunctionEquals(function, "GetMouseStartPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetMouseStartPosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetMouseState")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetMouseState}; return &target; }
+	if (detail::FunctionEquals(function, "GetPressedKeys")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetPressedKeys}; return &target; }
+	if (detail::FunctionEquals(function, "GetPressedScans")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetPressedScans}; return &target; }
+	if (detail::FunctionEquals(function, "GetScanSymbol")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetScanSymbol}; return &target; }
+	if (detail::FunctionEquals(function, "GetSelectionBox")) { static constexpr NativeCalloutTarget target{&Dispatch_input_GetSelectionBox}; return &target; }
+	if (detail::FunctionEquals(function, "IsAboveMiniMap")) { static constexpr NativeCalloutTarget target{&Dispatch_input_IsAboveMiniMap}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_input(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetActionHotKeys")) return Dispatch_input_GetActionHotKeys(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetActiveCommand")) return Dispatch_input_GetActiveCommand(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetActivePage")) return Dispatch_input_GetActivePage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetDefaultCommand")) return Dispatch_input_GetDefaultCommand(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetInvertQueueKey")) return Dispatch_input_GetInvertQueueKey(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetKeyBindings")) return Dispatch_input_GetKeyBindings(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetKeyCode")) return Dispatch_input_GetKeyCode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetKeyFromScanSymbol")) return Dispatch_input_GetKeyFromScanSymbol(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetKeyState")) return Dispatch_input_GetKeyState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetKeySymbol")) return Dispatch_input_GetKeySymbol(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetModKeyState")) return Dispatch_input_GetModKeyState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMouseButtonsPressed")) return Dispatch_input_GetMouseButtonsPressed(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMouseCursor")) return Dispatch_input_GetMouseCursor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMouseStartPosition")) return Dispatch_input_GetMouseStartPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMouseState")) return Dispatch_input_GetMouseState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPressedKeys")) return Dispatch_input_GetPressedKeys(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPressedScans")) return Dispatch_input_GetPressedScans(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetScanSymbol")) return Dispatch_input_GetScanSymbol(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSelectionBox")) return Dispatch_input_GetSelectionBox(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsAboveMiniMap")) return Dispatch_input_IsAboveMiniMap(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_input(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -421,15 +421,23 @@ NativeCalloutDispatch Dispatch_icons_UnitIconSetDraw(NativeInterface* nativeInte
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_icons(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_icons(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_icons(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AddUnitIcon")) { static constexpr NativeCalloutTarget target{&Dispatch_icons_AddUnitIcon}; return &target; }
+	if (detail::FunctionEquals(function, "FreeUnitIcon")) { static constexpr NativeCalloutTarget target{&Dispatch_icons_FreeUnitIcon}; return &target; }
+	if (detail::FunctionEquals(function, "GetAllIconDataArray")) { static constexpr NativeCalloutTarget target{&Dispatch_icons_GetAllIconDataArray}; return &target; }
+	if (detail::FunctionEquals(function, "GetIconData")) { static constexpr NativeCalloutTarget target{&Dispatch_icons_GetIconData}; return &target; }
+	if (detail::FunctionEquals(function, "UnitIconGetDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_icons_UnitIconGetDraw}; return &target; }
+	if (detail::FunctionEquals(function, "UnitIconSetDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_icons_UnitIconSetDraw}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_icons(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AddUnitIcon")) return Dispatch_icons_AddUnitIcon(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FreeUnitIcon")) return Dispatch_icons_FreeUnitIcon(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAllIconDataArray")) return Dispatch_icons_GetAllIconDataArray(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetIconData")) return Dispatch_icons_GetIconData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitIconGetDraw")) return Dispatch_icons_UnitIconGetDraw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UnitIconSetDraw")) return Dispatch_icons_UnitIconSetDraw(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_icons(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

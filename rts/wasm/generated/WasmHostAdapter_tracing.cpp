@@ -659,16 +659,24 @@ NativeCalloutDispatch Dispatch_tracing_TraceRayUnits(NativeInterface* nativeInte
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_tracing(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_tracing(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_tracing(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "TraceRay")) { static constexpr NativeCalloutTarget target{&Dispatch_tracing_TraceRay}; return &target; }
+	if (detail::FunctionEquals(function, "TraceRayBetweenPositions")) { static constexpr NativeCalloutTarget target{&Dispatch_tracing_TraceRayBetweenPositions}; return &target; }
+	if (detail::FunctionEquals(function, "TraceRayFeatures")) { static constexpr NativeCalloutTarget target{&Dispatch_tracing_TraceRayFeatures}; return &target; }
+	if (detail::FunctionEquals(function, "TraceRayGroundBetweenPositions")) { static constexpr NativeCalloutTarget target{&Dispatch_tracing_TraceRayGroundBetweenPositions}; return &target; }
+	if (detail::FunctionEquals(function, "TraceRayGroundInDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_tracing_TraceRayGroundInDirection}; return &target; }
+	if (detail::FunctionEquals(function, "TraceRayInDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_tracing_TraceRayInDirection}; return &target; }
+	if (detail::FunctionEquals(function, "TraceRayUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_tracing_TraceRayUnits}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_tracing(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "TraceRay")) return Dispatch_tracing_TraceRay(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TraceRayBetweenPositions")) return Dispatch_tracing_TraceRayBetweenPositions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TraceRayFeatures")) return Dispatch_tracing_TraceRayFeatures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TraceRayGroundBetweenPositions")) return Dispatch_tracing_TraceRayGroundBetweenPositions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TraceRayGroundInDirection")) return Dispatch_tracing_TraceRayGroundInDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TraceRayInDirection")) return Dispatch_tracing_TraceRayInDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "TraceRayUnits")) return Dispatch_tracing_TraceRayUnits(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_tracing(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

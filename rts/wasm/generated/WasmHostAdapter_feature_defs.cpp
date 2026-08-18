@@ -630,19 +630,27 @@ NativeCalloutDispatch Dispatch_feature_defs_ValidFeatureDefID(NativeInterface* n
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_feature_defs(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_feature_defs(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_feature_defs(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetFeatureDefByID")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefByID}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefCount")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefCustomParam")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefCustomParam}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefCustomParamKeys")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefCustomParamKeys}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefEnergy")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefEnergy}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefIDByName")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefIDByName}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefIDs")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefIDs}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefMetal")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefMetal}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefName")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_GetFeatureDefName}; return &target; }
+	if (detail::FunctionEquals(function, "ValidFeatureDefID")) { static constexpr NativeCalloutTarget target{&Dispatch_feature_defs_ValidFeatureDefID}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_feature_defs(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetFeatureDefByID")) return Dispatch_feature_defs_GetFeatureDefByID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefCount")) return Dispatch_feature_defs_GetFeatureDefCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefCustomParam")) return Dispatch_feature_defs_GetFeatureDefCustomParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefCustomParamKeys")) return Dispatch_feature_defs_GetFeatureDefCustomParamKeys(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefEnergy")) return Dispatch_feature_defs_GetFeatureDefEnergy(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefIDByName")) return Dispatch_feature_defs_GetFeatureDefIDByName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefIDs")) return Dispatch_feature_defs_GetFeatureDefIDs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefMetal")) return Dispatch_feature_defs_GetFeatureDefMetal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefName")) return Dispatch_feature_defs_GetFeatureDefName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ValidFeatureDefID")) return Dispatch_feature_defs_ValidFeatureDefID(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_feature_defs(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

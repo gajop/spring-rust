@@ -2114,42 +2114,50 @@ NativeCalloutDispatch Dispatch_game_IsNoCostEnabled(NativeInterface* nativeInter
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_game(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_game(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_game(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AreHelperAIsEnabled")) { static constexpr NativeCalloutTarget target{&Dispatch_game_AreHelperAIsEnabled}; return &target; }
+	if (detail::FunctionEquals(function, "FixedAllies")) { static constexpr NativeCalloutTarget target{&Dispatch_game_FixedAllies}; return &target; }
+	if (detail::FunctionEquals(function, "GetAllyTeamStartBox")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetAllyTeamStartBox}; return &target; }
+	if (detail::FunctionEquals(function, "GetFacingFromHeading")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetFacingFromHeading}; return &target; }
+	if (detail::FunctionEquals(function, "GetGaiaTeamID")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGaiaTeamID}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameFrame")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGameFrame}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameMapInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGameMapInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameModInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGameModInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameRulesInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGameRulesInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameRulesResourceInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGameRulesResourceInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameSeconds")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGameSeconds}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameSetupInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGameSetupInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetGlobalLos")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetGlobalLos}; return &target; }
+	if (detail::FunctionEquals(function, "GetHeadingFromFacing")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetHeadingFromFacing}; return &target; }
+	if (detail::FunctionEquals(function, "GetHeadingFromVector")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetHeadingFromVector}; return &target; }
+	if (detail::FunctionEquals(function, "GetMapOption")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetMapOption}; return &target; }
+	if (detail::FunctionEquals(function, "GetMapOptions")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetMapOptions}; return &target; }
+	if (detail::FunctionEquals(function, "GetMapStartPositions")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetMapStartPositions}; return &target; }
+	if (detail::FunctionEquals(function, "GetModOption")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetModOption}; return &target; }
+	if (detail::FunctionEquals(function, "GetModOptions")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetModOptions}; return &target; }
+	if (detail::FunctionEquals(function, "GetSideData")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetSideData}; return &target; }
+	if (detail::FunctionEquals(function, "GetSideDataByIndex")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetSideDataByIndex}; return &target; }
+	if (detail::FunctionEquals(function, "GetSideDataCount")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetSideDataCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamStartPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetTeamStartPosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetTidal")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetTidal}; return &target; }
+	if (detail::FunctionEquals(function, "GetVectorFromHeading")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetVectorFromHeading}; return &target; }
+	if (detail::FunctionEquals(function, "GetWind")) { static constexpr NativeCalloutTarget target{&Dispatch_game_GetWind}; return &target; }
+	if (detail::FunctionEquals(function, "IsCheatingEnabled")) { static constexpr NativeCalloutTarget target{&Dispatch_game_IsCheatingEnabled}; return &target; }
+	if (detail::FunctionEquals(function, "IsDevLuaEnabled")) { static constexpr NativeCalloutTarget target{&Dispatch_game_IsDevLuaEnabled}; return &target; }
+	if (detail::FunctionEquals(function, "IsEditDefsEnabled")) { static constexpr NativeCalloutTarget target{&Dispatch_game_IsEditDefsEnabled}; return &target; }
+	if (detail::FunctionEquals(function, "IsGameOver")) { static constexpr NativeCalloutTarget target{&Dispatch_game_IsGameOver}; return &target; }
+	if (detail::FunctionEquals(function, "IsGodModeEnabled")) { static constexpr NativeCalloutTarget target{&Dispatch_game_IsGodModeEnabled}; return &target; }
+	if (detail::FunctionEquals(function, "IsNoCostEnabled")) { static constexpr NativeCalloutTarget target{&Dispatch_game_IsNoCostEnabled}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_game(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AreHelperAIsEnabled")) return Dispatch_game_AreHelperAIsEnabled(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FixedAllies")) return Dispatch_game_FixedAllies(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAllyTeamStartBox")) return Dispatch_game_GetAllyTeamStartBox(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFacingFromHeading")) return Dispatch_game_GetFacingFromHeading(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGaiaTeamID")) return Dispatch_game_GetGaiaTeamID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameFrame")) return Dispatch_game_GetGameFrame(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameMapInfo")) return Dispatch_game_GetGameMapInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameModInfo")) return Dispatch_game_GetGameModInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameRulesInfo")) return Dispatch_game_GetGameRulesInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameRulesResourceInfo")) return Dispatch_game_GetGameRulesResourceInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameSeconds")) return Dispatch_game_GetGameSeconds(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameSetupInfo")) return Dispatch_game_GetGameSetupInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGlobalLos")) return Dispatch_game_GetGlobalLos(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetHeadingFromFacing")) return Dispatch_game_GetHeadingFromFacing(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetHeadingFromVector")) return Dispatch_game_GetHeadingFromVector(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMapOption")) return Dispatch_game_GetMapOption(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMapOptions")) return Dispatch_game_GetMapOptions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMapStartPositions")) return Dispatch_game_GetMapStartPositions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetModOption")) return Dispatch_game_GetModOption(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetModOptions")) return Dispatch_game_GetModOptions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSideData")) return Dispatch_game_GetSideData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSideDataByIndex")) return Dispatch_game_GetSideDataByIndex(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetSideDataCount")) return Dispatch_game_GetSideDataCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamStartPosition")) return Dispatch_game_GetTeamStartPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTidal")) return Dispatch_game_GetTidal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVectorFromHeading")) return Dispatch_game_GetVectorFromHeading(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWind")) return Dispatch_game_GetWind(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsCheatingEnabled")) return Dispatch_game_IsCheatingEnabled(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsDevLuaEnabled")) return Dispatch_game_IsDevLuaEnabled(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsEditDefsEnabled")) return Dispatch_game_IsEditDefsEnabled(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsGameOver")) return Dispatch_game_IsGameOver(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsGodModeEnabled")) return Dispatch_game_IsGodModeEnabled(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsNoCostEnabled")) return Dispatch_game_IsNoCostEnabled(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_game(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

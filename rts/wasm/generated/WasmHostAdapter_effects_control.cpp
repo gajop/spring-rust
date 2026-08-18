@@ -71,12 +71,20 @@ NativeCalloutDispatch Dispatch_effects_control_SpawnSFX(NativeInterface* nativeI
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_effects_control(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_effects_control(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_effects_control(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "SpawnCEG")) { static constexpr NativeCalloutTarget target{&Dispatch_effects_control_SpawnCEG}; return &target; }
+	if (detail::FunctionEquals(function, "SpawnExplosion")) { static constexpr NativeCalloutTarget target{&Dispatch_effects_control_SpawnExplosion}; return &target; }
+	if (detail::FunctionEquals(function, "SpawnSFX")) { static constexpr NativeCalloutTarget target{&Dispatch_effects_control_SpawnSFX}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_effects_control(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "SpawnCEG")) return Dispatch_effects_control_SpawnCEG(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SpawnExplosion")) return Dispatch_effects_control_SpawnExplosion(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SpawnSFX")) return Dispatch_effects_control_SpawnSFX(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_effects_control(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

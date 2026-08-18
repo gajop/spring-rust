@@ -3525,66 +3525,74 @@ NativeCalloutDispatch Dispatch_units_info_GetUnitWorkerTask(NativeInterface* nat
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_info(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_units_info(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_info(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "ClearUnitsPreviousDrawFlag")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_ClearUnitsPreviousDrawFlag}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitAllyTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitAllyTeam}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitArmored")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitArmored}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitBasePosition")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitBasePosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitBlocking")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitBlocking}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitBuildFacing")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitBuildFacing}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitBuildParams")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitBuildParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitBuildeeRadius")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitBuildeeRadius}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCollisionVolumeData")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitCollisionVolumeData}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCostTable")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitCostTable}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCosts")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitCosts}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCrashing")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitCrashing}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitCurrentBuildPower")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitCurrentBuildPower}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDefID")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitDefID}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitDirection}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitEffectiveBuildRange")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitEffectiveBuildRange}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitExperience")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitExperience}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitFlanking")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitFlanking}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitHarvestStorage")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitHarvestStorage}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitHeading")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitHeading}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitHealth")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitHealth}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitHeight}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitInBuildStance")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitInBuildStance}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIsActive")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitIsActive}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIsBeingBuilt")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitIsBeingBuilt}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIsBuilding")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitIsBuilding}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIsCloaked")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitIsCloaked}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIsDead")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitIsDead}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIsStunned")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitIsStunned}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitIsTransporting")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitIsTransporting}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitLastAttackedPiece")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitLastAttackedPiece}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitLastAttacker")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitLastAttacker}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitLosState")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitLosState}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitMass")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitMass}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitMetalExtraction")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitMetalExtraction}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitMoveDefID")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitMoveDefID}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitNanoPieces")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitNanoPieces}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitNeutral")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitNeutral}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPieceCollisionVolumeData")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitPieceCollisionVolumeData}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPosErrorParams")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitPosErrorParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitPosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitRadius")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitRadius}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitResources")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitResources}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitRotation")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitRotation}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitSeismicSignature")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitSeismicSignature}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitSelfDTime")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitSelfDTime}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitSensorRadius")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitSensorRadius}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitShieldState")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitShieldState}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitStates")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitStates}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitStockpile")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitStockpile}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitStorage")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitStorage}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitTeam}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitTooltip")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitTooltip}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitTransporter")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitTransporter}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitVectors")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitVectors}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitVelocity")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitVelocity}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWorkerTask")) { static constexpr NativeCalloutTarget target{&Dispatch_units_info_GetUnitWorkerTask}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_units_info(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "ClearUnitsPreviousDrawFlag")) return Dispatch_units_info_ClearUnitsPreviousDrawFlag(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitAllyTeam")) return Dispatch_units_info_GetUnitAllyTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitArmored")) return Dispatch_units_info_GetUnitArmored(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitBasePosition")) return Dispatch_units_info_GetUnitBasePosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitBlocking")) return Dispatch_units_info_GetUnitBlocking(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitBuildFacing")) return Dispatch_units_info_GetUnitBuildFacing(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitBuildParams")) return Dispatch_units_info_GetUnitBuildParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitBuildeeRadius")) return Dispatch_units_info_GetUnitBuildeeRadius(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCollisionVolumeData")) return Dispatch_units_info_GetUnitCollisionVolumeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCostTable")) return Dispatch_units_info_GetUnitCostTable(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCosts")) return Dispatch_units_info_GetUnitCosts(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCrashing")) return Dispatch_units_info_GetUnitCrashing(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitCurrentBuildPower")) return Dispatch_units_info_GetUnitCurrentBuildPower(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDefID")) return Dispatch_units_info_GetUnitDefID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitDirection")) return Dispatch_units_info_GetUnitDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitEffectiveBuildRange")) return Dispatch_units_info_GetUnitEffectiveBuildRange(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitExperience")) return Dispatch_units_info_GetUnitExperience(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitFlanking")) return Dispatch_units_info_GetUnitFlanking(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitHarvestStorage")) return Dispatch_units_info_GetUnitHarvestStorage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitHeading")) return Dispatch_units_info_GetUnitHeading(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitHealth")) return Dispatch_units_info_GetUnitHealth(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitHeight")) return Dispatch_units_info_GetUnitHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitInBuildStance")) return Dispatch_units_info_GetUnitInBuildStance(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIsActive")) return Dispatch_units_info_GetUnitIsActive(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIsBeingBuilt")) return Dispatch_units_info_GetUnitIsBeingBuilt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIsBuilding")) return Dispatch_units_info_GetUnitIsBuilding(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIsCloaked")) return Dispatch_units_info_GetUnitIsCloaked(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIsDead")) return Dispatch_units_info_GetUnitIsDead(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIsStunned")) return Dispatch_units_info_GetUnitIsStunned(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitIsTransporting")) return Dispatch_units_info_GetUnitIsTransporting(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitLastAttackedPiece")) return Dispatch_units_info_GetUnitLastAttackedPiece(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitLastAttacker")) return Dispatch_units_info_GetUnitLastAttacker(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitLosState")) return Dispatch_units_info_GetUnitLosState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitMass")) return Dispatch_units_info_GetUnitMass(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitMetalExtraction")) return Dispatch_units_info_GetUnitMetalExtraction(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitMoveDefID")) return Dispatch_units_info_GetUnitMoveDefID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitNanoPieces")) return Dispatch_units_info_GetUnitNanoPieces(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitNeutral")) return Dispatch_units_info_GetUnitNeutral(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPieceCollisionVolumeData")) return Dispatch_units_info_GetUnitPieceCollisionVolumeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPosErrorParams")) return Dispatch_units_info_GetUnitPosErrorParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPosition")) return Dispatch_units_info_GetUnitPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitRadius")) return Dispatch_units_info_GetUnitRadius(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitResources")) return Dispatch_units_info_GetUnitResources(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitRotation")) return Dispatch_units_info_GetUnitRotation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitSeismicSignature")) return Dispatch_units_info_GetUnitSeismicSignature(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitSelfDTime")) return Dispatch_units_info_GetUnitSelfDTime(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitSensorRadius")) return Dispatch_units_info_GetUnitSensorRadius(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitShieldState")) return Dispatch_units_info_GetUnitShieldState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitStates")) return Dispatch_units_info_GetUnitStates(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitStockpile")) return Dispatch_units_info_GetUnitStockpile(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitStorage")) return Dispatch_units_info_GetUnitStorage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitTeam")) return Dispatch_units_info_GetUnitTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitTooltip")) return Dispatch_units_info_GetUnitTooltip(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitTransporter")) return Dispatch_units_info_GetUnitTransporter(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitVectors")) return Dispatch_units_info_GetUnitVectors(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitVelocity")) return Dispatch_units_info_GetUnitVelocity(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWorkerTask")) return Dispatch_units_info_GetUnitWorkerTask(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_units_info(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

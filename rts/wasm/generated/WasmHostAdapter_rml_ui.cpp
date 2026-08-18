@@ -6497,182 +6497,190 @@ NativeCalloutDispatch Dispatch_rml_ui_Vector2iNew(NativeInterface* nativeInterfa
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_rml_ui(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_rml_ui(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_rml_ui(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AddTranslationString")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_AddTranslationString}; return &target; }
+	if (detail::FunctionEquals(function, "ClearDocumentPathRequests")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ClearDocumentPathRequests}; return &target; }
+	if (detail::FunctionEquals(function, "ClearTranslations")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ClearTranslations}; return &target; }
+	if (detail::FunctionEquals(function, "ContextActivateTheme")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextActivateTheme}; return &target; }
+	if (detail::FunctionEquals(function, "ContextCreateDataModel")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextCreateDataModel}; return &target; }
+	if (detail::FunctionEquals(function, "ContextCreateDocument")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextCreateDocument}; return &target; }
+	if (detail::FunctionEquals(function, "ContextEnableMouseCursor")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextEnableMouseCursor}; return &target; }
+	if (detail::FunctionEquals(function, "ContextGetDensityIndependentPixelRatio")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextGetDensityIndependentPixelRatio}; return &target; }
+	if (detail::FunctionEquals(function, "ContextGetDimensions")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextGetDimensions}; return &target; }
+	if (detail::FunctionEquals(function, "ContextGetDocument")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextGetDocument}; return &target; }
+	if (detail::FunctionEquals(function, "ContextGetElementAtPoint")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextGetElementAtPoint}; return &target; }
+	if (detail::FunctionEquals(function, "ContextGetFocusElement")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextGetFocusElement}; return &target; }
+	if (detail::FunctionEquals(function, "ContextGetHoverElement")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextGetHoverElement}; return &target; }
+	if (detail::FunctionEquals(function, "ContextGetName")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextGetName}; return &target; }
+	if (detail::FunctionEquals(function, "ContextGetRootElement")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextGetRootElement}; return &target; }
+	if (detail::FunctionEquals(function, "ContextIsMouseInteracting")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextIsMouseInteracting}; return &target; }
+	if (detail::FunctionEquals(function, "ContextIsThemeActive")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextIsThemeActive}; return &target; }
+	if (detail::FunctionEquals(function, "ContextLoadDocument")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextLoadDocument}; return &target; }
+	if (detail::FunctionEquals(function, "ContextOpenDataModel")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextOpenDataModel}; return &target; }
+	if (detail::FunctionEquals(function, "ContextProcessKeyDown")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextProcessKeyDown}; return &target; }
+	if (detail::FunctionEquals(function, "ContextProcessKeyUp")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextProcessKeyUp}; return &target; }
+	if (detail::FunctionEquals(function, "ContextProcessMouseButtonDown")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextProcessMouseButtonDown}; return &target; }
+	if (detail::FunctionEquals(function, "ContextProcessMouseButtonUp")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextProcessMouseButtonUp}; return &target; }
+	if (detail::FunctionEquals(function, "ContextProcessMouseLeave")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextProcessMouseLeave}; return &target; }
+	if (detail::FunctionEquals(function, "ContextProcessMouseMove")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextProcessMouseMove}; return &target; }
+	if (detail::FunctionEquals(function, "ContextProcessMouseWheel")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextProcessMouseWheel}; return &target; }
+	if (detail::FunctionEquals(function, "ContextProcessTextInput")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextProcessTextInput}; return &target; }
+	if (detail::FunctionEquals(function, "ContextPullDocumentToFront")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextPullDocumentToFront}; return &target; }
+	if (detail::FunctionEquals(function, "ContextPullToFront")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextPullToFront}; return &target; }
+	if (detail::FunctionEquals(function, "ContextPushDocumentToBack")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextPushDocumentToBack}; return &target; }
+	if (detail::FunctionEquals(function, "ContextRemoveDataModel")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextRemoveDataModel}; return &target; }
+	if (detail::FunctionEquals(function, "ContextRemoveEventListener")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextRemoveEventListener}; return &target; }
+	if (detail::FunctionEquals(function, "ContextRender")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextRender}; return &target; }
+	if (detail::FunctionEquals(function, "ContextSetDensityIndependentPixelRatio")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextSetDensityIndependentPixelRatio}; return &target; }
+	if (detail::FunctionEquals(function, "ContextSetDimensions")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextSetDimensions}; return &target; }
+	if (detail::FunctionEquals(function, "ContextSetPointerCapture")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextSetPointerCapture}; return &target; }
+	if (detail::FunctionEquals(function, "ContextTakePointerCaptureDelta")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextTakePointerCaptureDelta}; return &target; }
+	if (detail::FunctionEquals(function, "ContextUnloadAllDocuments")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextUnloadAllDocuments}; return &target; }
+	if (detail::FunctionEquals(function, "ContextUnloadDocument")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextUnloadDocument}; return &target; }
+	if (detail::FunctionEquals(function, "ContextUpdate")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ContextUpdate}; return &target; }
+	if (detail::FunctionEquals(function, "CreateContext")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_CreateContext}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelBindBool")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelBindBool}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelBindColor")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelBindColor}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelBindFloat")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelBindFloat}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelBindInt")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelBindInt}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelBindPercent")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelBindPercent}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelBindPixels")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelBindPixels}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelBindRows")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelBindRows}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelBindString")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelBindString}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelGetBool")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelGetBool}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelGetColor")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelGetColor}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelGetFloat")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelGetFloat}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelGetInt")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelGetInt}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelGetPercent")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelGetPercent}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelGetPixels")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelGetPixels}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelGetString")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelGetString}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelSetBool")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelSetBool}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelSetColor")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelSetColor}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelSetFloat")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelSetFloat}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelSetInt")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelSetInt}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelSetPercent")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelSetPercent}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelSetPixels")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelSetPixels}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelSetRows")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelSetRows}; return &target; }
+	if (detail::FunctionEquals(function, "DataModelSetString")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DataModelSetString}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentAppendToStyleSheet")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentAppendToStyleSheet}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentClose")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentClose}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentCreateElement")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentCreateElement}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentCreateTextNode")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentCreateTextNode}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentGetContext")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentGetContext}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentGetTitle")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentGetTitle}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentGetUrl")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentGetUrl}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentHide")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentHide}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentIsModal")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentIsModal}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentLoadExternalScript")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentLoadExternalScript}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentLoadInlineScript")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentLoadInlineScript}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentPullToFront")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentPullToFront}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentPushToBack")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentPushToBack}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentReloadStyleSheet")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentReloadStyleSheet}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentSetTitle")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentSetTitle}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentShow")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentShow}; return &target; }
+	if (detail::FunctionEquals(function, "DocumentUpdateDocument")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_DocumentUpdateDocument}; return &target; }
+	if (detail::FunctionEquals(function, "ElementAppendChild")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementAppendChild}; return &target; }
+	if (detail::FunctionEquals(function, "ElementArePseudoClassesSet")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementArePseudoClassesSet}; return &target; }
+	if (detail::FunctionEquals(function, "ElementBlur")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementBlur}; return &target; }
+	if (detail::FunctionEquals(function, "ElementClick")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementClick}; return &target; }
+	if (detail::FunctionEquals(function, "ElementClone")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementClone}; return &target; }
+	if (detail::FunctionEquals(function, "ElementClosest")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementClosest}; return &target; }
+	if (detail::FunctionEquals(function, "ElementDispatchEvent")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementDispatchEvent}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFocus")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFocus}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlInputGetSelection")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlInputGetSelection}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlInputSelect")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlInputSelect}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlInputSetSelection")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlInputSetSelection}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlSelectAdd")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlSelectAdd}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlSelectRemove")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlSelectRemove}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlSelectRemoveAll")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlSelectRemoveAll}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlTextAreaGetSelection")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlTextAreaGetSelection}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlTextAreaSelect")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlTextAreaSelect}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormControlTextAreaSetSelection")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormControlTextAreaSetSelection}; return &target; }
+	if (detail::FunctionEquals(function, "ElementFormSubmit")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementFormSubmit}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetActivePseudoClasses")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetActivePseudoClasses}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetAttribute")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetAttribute}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetChild")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetChild}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetClassName")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetClassName}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetElementById")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetElementById}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetElementsByClassName")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetElementsByClassName}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetElementsByClassNameCount")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetElementsByClassNameCount}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetElementsByTagName")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetElementsByTagName}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetElementsByTagNameCount")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetElementsByTagNameCount}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetId")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetId}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetInnerRml")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetInnerRml}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetRect")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetRect}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetScrollLeft")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetScrollLeft}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetScrollTop")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetScrollTop}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetTagName")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetTagName}; return &target; }
+	if (detail::FunctionEquals(function, "ElementGetValue")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementGetValue}; return &target; }
+	if (detail::FunctionEquals(function, "ElementHasAttribute")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementHasAttribute}; return &target; }
+	if (detail::FunctionEquals(function, "ElementHasChildNodes")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementHasChildNodes}; return &target; }
+	if (detail::FunctionEquals(function, "ElementInsertBefore")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementInsertBefore}; return &target; }
+	if (detail::FunctionEquals(function, "ElementIsClassSet")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementIsClassSet}; return &target; }
+	if (detail::FunctionEquals(function, "ElementIsPointWithinElement")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementIsPointWithinElement}; return &target; }
+	if (detail::FunctionEquals(function, "ElementIsPseudoClassSet")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementIsPseudoClassSet}; return &target; }
+	if (detail::FunctionEquals(function, "ElementIsVisible")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementIsVisible}; return &target; }
+	if (detail::FunctionEquals(function, "ElementMatches")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementMatches}; return &target; }
+	if (detail::FunctionEquals(function, "ElementProcessDefaultAction")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementProcessDefaultAction}; return &target; }
+	if (detail::FunctionEquals(function, "ElementQuerySelector")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementQuerySelector}; return &target; }
+	if (detail::FunctionEquals(function, "ElementQuerySelectorAll")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementQuerySelectorAll}; return &target; }
+	if (detail::FunctionEquals(function, "ElementQuerySelectorAllCount")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementQuerySelectorAllCount}; return &target; }
+	if (detail::FunctionEquals(function, "ElementRemoveAttribute")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementRemoveAttribute}; return &target; }
+	if (detail::FunctionEquals(function, "ElementRemoveChild")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementRemoveChild}; return &target; }
+	if (detail::FunctionEquals(function, "ElementRemoveEventListener")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementRemoveEventListener}; return &target; }
+	if (detail::FunctionEquals(function, "ElementReplaceChild")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementReplaceChild}; return &target; }
+	if (detail::FunctionEquals(function, "ElementScrollIntoView")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementScrollIntoView}; return &target; }
+	if (detail::FunctionEquals(function, "ElementSetAttribute")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementSetAttribute}; return &target; }
+	if (detail::FunctionEquals(function, "ElementSetClass")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementSetClass}; return &target; }
+	if (detail::FunctionEquals(function, "ElementSetClassName")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementSetClassName}; return &target; }
+	if (detail::FunctionEquals(function, "ElementSetId")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementSetId}; return &target; }
+	if (detail::FunctionEquals(function, "ElementSetInnerRml")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementSetInnerRml}; return &target; }
+	if (detail::FunctionEquals(function, "ElementSetPseudoClass")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementSetPseudoClass}; return &target; }
+	if (detail::FunctionEquals(function, "ElementSetScrollLeft")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementSetScrollLeft}; return &target; }
+	if (detail::FunctionEquals(function, "ElementSetScrollTop")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementSetScrollTop}; return &target; }
+	if (detail::FunctionEquals(function, "ElementTabSetRemoveTab")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementTabSetRemoveTab}; return &target; }
+	if (detail::FunctionEquals(function, "ElementTabSetSetPanel")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementTabSetSetPanel}; return &target; }
+	if (detail::FunctionEquals(function, "ElementTabSetSetTab")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_ElementTabSetSetTab}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetCurrent")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetCurrent}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetCurrentElement")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetCurrentElement}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetParameterBool")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetParameterBool}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetParameterFloat")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetParameterFloat}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetParameterInt")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetParameterInt}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetParameterString")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetParameterString}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetParameterType")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetParameterType}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetPhase")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetPhase}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetTargetElement")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetTargetElement}; return &target; }
+	if (detail::FunctionEquals(function, "EventGetType")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventGetType}; return &target; }
+	if (detail::FunctionEquals(function, "EventIsImmediatePropagating")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventIsImmediatePropagating}; return &target; }
+	if (detail::FunctionEquals(function, "EventIsInterruptible")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventIsInterruptible}; return &target; }
+	if (detail::FunctionEquals(function, "EventIsPropagating")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventIsPropagating}; return &target; }
+	if (detail::FunctionEquals(function, "EventStopImmediatePropagation")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventStopImmediatePropagation}; return &target; }
+	if (detail::FunctionEquals(function, "EventStopPropagation")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_EventStopPropagation}; return &target; }
+	if (detail::FunctionEquals(function, "GetContext")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_GetContext}; return &target; }
+	if (detail::FunctionEquals(function, "GetDocumentPathRequests")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_GetDocumentPathRequests}; return &target; }
+	if (detail::FunctionEquals(function, "GetVersion")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_GetVersion}; return &target; }
+	if (detail::FunctionEquals(function, "IsReady")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_IsReady}; return &target; }
+	if (detail::FunctionEquals(function, "LoadFontFace")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_LoadFontFace}; return &target; }
+	if (detail::FunctionEquals(function, "RegiserEventType")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_RegiserEventType}; return &target; }
+	if (detail::FunctionEquals(function, "RegisterEventType")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_RegisterEventType}; return &target; }
+	if (detail::FunctionEquals(function, "RemoveContext")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_RemoveContext}; return &target; }
+	if (detail::FunctionEquals(function, "RemoveContextByName")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_RemoveContextByName}; return &target; }
+	if (detail::FunctionEquals(function, "SetDebugContext")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_SetDebugContext}; return &target; }
+	if (detail::FunctionEquals(function, "SetDebugContextByName")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_SetDebugContextByName}; return &target; }
+	if (detail::FunctionEquals(function, "SetMouseCursorAlias")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_SetMouseCursorAlias}; return &target; }
+	if (detail::FunctionEquals(function, "SolLuaDataModelSetDirty")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_SolLuaDataModelSetDirty}; return &target; }
+	if (detail::FunctionEquals(function, "Vector2fNew")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_Vector2fNew}; return &target; }
+	if (detail::FunctionEquals(function, "Vector2iNew")) { static constexpr NativeCalloutTarget target{&Dispatch_rml_ui_Vector2iNew}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_rml_ui(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AddTranslationString")) return Dispatch_rml_ui_AddTranslationString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ClearDocumentPathRequests")) return Dispatch_rml_ui_ClearDocumentPathRequests(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ClearTranslations")) return Dispatch_rml_ui_ClearTranslations(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextActivateTheme")) return Dispatch_rml_ui_ContextActivateTheme(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextCreateDataModel")) return Dispatch_rml_ui_ContextCreateDataModel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextCreateDocument")) return Dispatch_rml_ui_ContextCreateDocument(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextEnableMouseCursor")) return Dispatch_rml_ui_ContextEnableMouseCursor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextGetDensityIndependentPixelRatio")) return Dispatch_rml_ui_ContextGetDensityIndependentPixelRatio(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextGetDimensions")) return Dispatch_rml_ui_ContextGetDimensions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextGetDocument")) return Dispatch_rml_ui_ContextGetDocument(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextGetElementAtPoint")) return Dispatch_rml_ui_ContextGetElementAtPoint(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextGetFocusElement")) return Dispatch_rml_ui_ContextGetFocusElement(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextGetHoverElement")) return Dispatch_rml_ui_ContextGetHoverElement(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextGetName")) return Dispatch_rml_ui_ContextGetName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextGetRootElement")) return Dispatch_rml_ui_ContextGetRootElement(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextIsMouseInteracting")) return Dispatch_rml_ui_ContextIsMouseInteracting(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextIsThemeActive")) return Dispatch_rml_ui_ContextIsThemeActive(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextLoadDocument")) return Dispatch_rml_ui_ContextLoadDocument(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextOpenDataModel")) return Dispatch_rml_ui_ContextOpenDataModel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextProcessKeyDown")) return Dispatch_rml_ui_ContextProcessKeyDown(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextProcessKeyUp")) return Dispatch_rml_ui_ContextProcessKeyUp(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextProcessMouseButtonDown")) return Dispatch_rml_ui_ContextProcessMouseButtonDown(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextProcessMouseButtonUp")) return Dispatch_rml_ui_ContextProcessMouseButtonUp(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextProcessMouseLeave")) return Dispatch_rml_ui_ContextProcessMouseLeave(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextProcessMouseMove")) return Dispatch_rml_ui_ContextProcessMouseMove(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextProcessMouseWheel")) return Dispatch_rml_ui_ContextProcessMouseWheel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextProcessTextInput")) return Dispatch_rml_ui_ContextProcessTextInput(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextPullDocumentToFront")) return Dispatch_rml_ui_ContextPullDocumentToFront(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextPullToFront")) return Dispatch_rml_ui_ContextPullToFront(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextPushDocumentToBack")) return Dispatch_rml_ui_ContextPushDocumentToBack(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextRemoveDataModel")) return Dispatch_rml_ui_ContextRemoveDataModel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextRemoveEventListener")) return Dispatch_rml_ui_ContextRemoveEventListener(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextRender")) return Dispatch_rml_ui_ContextRender(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextSetDensityIndependentPixelRatio")) return Dispatch_rml_ui_ContextSetDensityIndependentPixelRatio(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextSetDimensions")) return Dispatch_rml_ui_ContextSetDimensions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextSetPointerCapture")) return Dispatch_rml_ui_ContextSetPointerCapture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextTakePointerCaptureDelta")) return Dispatch_rml_ui_ContextTakePointerCaptureDelta(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextUnloadAllDocuments")) return Dispatch_rml_ui_ContextUnloadAllDocuments(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextUnloadDocument")) return Dispatch_rml_ui_ContextUnloadDocument(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ContextUpdate")) return Dispatch_rml_ui_ContextUpdate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "CreateContext")) return Dispatch_rml_ui_CreateContext(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelBindBool")) return Dispatch_rml_ui_DataModelBindBool(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelBindColor")) return Dispatch_rml_ui_DataModelBindColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelBindFloat")) return Dispatch_rml_ui_DataModelBindFloat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelBindInt")) return Dispatch_rml_ui_DataModelBindInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelBindPercent")) return Dispatch_rml_ui_DataModelBindPercent(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelBindPixels")) return Dispatch_rml_ui_DataModelBindPixels(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelBindRows")) return Dispatch_rml_ui_DataModelBindRows(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelBindString")) return Dispatch_rml_ui_DataModelBindString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelGetBool")) return Dispatch_rml_ui_DataModelGetBool(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelGetColor")) return Dispatch_rml_ui_DataModelGetColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelGetFloat")) return Dispatch_rml_ui_DataModelGetFloat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelGetInt")) return Dispatch_rml_ui_DataModelGetInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelGetPercent")) return Dispatch_rml_ui_DataModelGetPercent(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelGetPixels")) return Dispatch_rml_ui_DataModelGetPixels(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelGetString")) return Dispatch_rml_ui_DataModelGetString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelSetBool")) return Dispatch_rml_ui_DataModelSetBool(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelSetColor")) return Dispatch_rml_ui_DataModelSetColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelSetFloat")) return Dispatch_rml_ui_DataModelSetFloat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelSetInt")) return Dispatch_rml_ui_DataModelSetInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelSetPercent")) return Dispatch_rml_ui_DataModelSetPercent(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelSetPixels")) return Dispatch_rml_ui_DataModelSetPixels(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelSetRows")) return Dispatch_rml_ui_DataModelSetRows(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DataModelSetString")) return Dispatch_rml_ui_DataModelSetString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentAppendToStyleSheet")) return Dispatch_rml_ui_DocumentAppendToStyleSheet(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentClose")) return Dispatch_rml_ui_DocumentClose(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentCreateElement")) return Dispatch_rml_ui_DocumentCreateElement(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentCreateTextNode")) return Dispatch_rml_ui_DocumentCreateTextNode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentGetContext")) return Dispatch_rml_ui_DocumentGetContext(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentGetTitle")) return Dispatch_rml_ui_DocumentGetTitle(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentGetUrl")) return Dispatch_rml_ui_DocumentGetUrl(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentHide")) return Dispatch_rml_ui_DocumentHide(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentIsModal")) return Dispatch_rml_ui_DocumentIsModal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentLoadExternalScript")) return Dispatch_rml_ui_DocumentLoadExternalScript(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentLoadInlineScript")) return Dispatch_rml_ui_DocumentLoadInlineScript(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentPullToFront")) return Dispatch_rml_ui_DocumentPullToFront(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentPushToBack")) return Dispatch_rml_ui_DocumentPushToBack(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentReloadStyleSheet")) return Dispatch_rml_ui_DocumentReloadStyleSheet(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentSetTitle")) return Dispatch_rml_ui_DocumentSetTitle(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentShow")) return Dispatch_rml_ui_DocumentShow(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DocumentUpdateDocument")) return Dispatch_rml_ui_DocumentUpdateDocument(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementAppendChild")) return Dispatch_rml_ui_ElementAppendChild(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementArePseudoClassesSet")) return Dispatch_rml_ui_ElementArePseudoClassesSet(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementBlur")) return Dispatch_rml_ui_ElementBlur(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementClick")) return Dispatch_rml_ui_ElementClick(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementClone")) return Dispatch_rml_ui_ElementClone(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementClosest")) return Dispatch_rml_ui_ElementClosest(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementDispatchEvent")) return Dispatch_rml_ui_ElementDispatchEvent(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFocus")) return Dispatch_rml_ui_ElementFocus(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlInputGetSelection")) return Dispatch_rml_ui_ElementFormControlInputGetSelection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlInputSelect")) return Dispatch_rml_ui_ElementFormControlInputSelect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlInputSetSelection")) return Dispatch_rml_ui_ElementFormControlInputSetSelection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlSelectAdd")) return Dispatch_rml_ui_ElementFormControlSelectAdd(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlSelectRemove")) return Dispatch_rml_ui_ElementFormControlSelectRemove(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlSelectRemoveAll")) return Dispatch_rml_ui_ElementFormControlSelectRemoveAll(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlTextAreaGetSelection")) return Dispatch_rml_ui_ElementFormControlTextAreaGetSelection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlTextAreaSelect")) return Dispatch_rml_ui_ElementFormControlTextAreaSelect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormControlTextAreaSetSelection")) return Dispatch_rml_ui_ElementFormControlTextAreaSetSelection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementFormSubmit")) return Dispatch_rml_ui_ElementFormSubmit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetActivePseudoClasses")) return Dispatch_rml_ui_ElementGetActivePseudoClasses(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetAttribute")) return Dispatch_rml_ui_ElementGetAttribute(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetChild")) return Dispatch_rml_ui_ElementGetChild(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetClassName")) return Dispatch_rml_ui_ElementGetClassName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetElementById")) return Dispatch_rml_ui_ElementGetElementById(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetElementsByClassName")) return Dispatch_rml_ui_ElementGetElementsByClassName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetElementsByClassNameCount")) return Dispatch_rml_ui_ElementGetElementsByClassNameCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetElementsByTagName")) return Dispatch_rml_ui_ElementGetElementsByTagName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetElementsByTagNameCount")) return Dispatch_rml_ui_ElementGetElementsByTagNameCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetId")) return Dispatch_rml_ui_ElementGetId(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetInnerRml")) return Dispatch_rml_ui_ElementGetInnerRml(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetRect")) return Dispatch_rml_ui_ElementGetRect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetScrollLeft")) return Dispatch_rml_ui_ElementGetScrollLeft(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetScrollTop")) return Dispatch_rml_ui_ElementGetScrollTop(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetTagName")) return Dispatch_rml_ui_ElementGetTagName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementGetValue")) return Dispatch_rml_ui_ElementGetValue(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementHasAttribute")) return Dispatch_rml_ui_ElementHasAttribute(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementHasChildNodes")) return Dispatch_rml_ui_ElementHasChildNodes(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementInsertBefore")) return Dispatch_rml_ui_ElementInsertBefore(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementIsClassSet")) return Dispatch_rml_ui_ElementIsClassSet(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementIsPointWithinElement")) return Dispatch_rml_ui_ElementIsPointWithinElement(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementIsPseudoClassSet")) return Dispatch_rml_ui_ElementIsPseudoClassSet(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementIsVisible")) return Dispatch_rml_ui_ElementIsVisible(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementMatches")) return Dispatch_rml_ui_ElementMatches(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementProcessDefaultAction")) return Dispatch_rml_ui_ElementProcessDefaultAction(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementQuerySelector")) return Dispatch_rml_ui_ElementQuerySelector(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementQuerySelectorAll")) return Dispatch_rml_ui_ElementQuerySelectorAll(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementQuerySelectorAllCount")) return Dispatch_rml_ui_ElementQuerySelectorAllCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementRemoveAttribute")) return Dispatch_rml_ui_ElementRemoveAttribute(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementRemoveChild")) return Dispatch_rml_ui_ElementRemoveChild(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementRemoveEventListener")) return Dispatch_rml_ui_ElementRemoveEventListener(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementReplaceChild")) return Dispatch_rml_ui_ElementReplaceChild(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementScrollIntoView")) return Dispatch_rml_ui_ElementScrollIntoView(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementSetAttribute")) return Dispatch_rml_ui_ElementSetAttribute(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementSetClass")) return Dispatch_rml_ui_ElementSetClass(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementSetClassName")) return Dispatch_rml_ui_ElementSetClassName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementSetId")) return Dispatch_rml_ui_ElementSetId(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementSetInnerRml")) return Dispatch_rml_ui_ElementSetInnerRml(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementSetPseudoClass")) return Dispatch_rml_ui_ElementSetPseudoClass(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementSetScrollLeft")) return Dispatch_rml_ui_ElementSetScrollLeft(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementSetScrollTop")) return Dispatch_rml_ui_ElementSetScrollTop(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementTabSetRemoveTab")) return Dispatch_rml_ui_ElementTabSetRemoveTab(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementTabSetSetPanel")) return Dispatch_rml_ui_ElementTabSetSetPanel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ElementTabSetSetTab")) return Dispatch_rml_ui_ElementTabSetSetTab(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetCurrent")) return Dispatch_rml_ui_EventGetCurrent(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetCurrentElement")) return Dispatch_rml_ui_EventGetCurrentElement(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetParameterBool")) return Dispatch_rml_ui_EventGetParameterBool(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetParameterFloat")) return Dispatch_rml_ui_EventGetParameterFloat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetParameterInt")) return Dispatch_rml_ui_EventGetParameterInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetParameterString")) return Dispatch_rml_ui_EventGetParameterString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetParameterType")) return Dispatch_rml_ui_EventGetParameterType(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetPhase")) return Dispatch_rml_ui_EventGetPhase(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetTargetElement")) return Dispatch_rml_ui_EventGetTargetElement(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventGetType")) return Dispatch_rml_ui_EventGetType(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventIsImmediatePropagating")) return Dispatch_rml_ui_EventIsImmediatePropagating(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventIsInterruptible")) return Dispatch_rml_ui_EventIsInterruptible(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventIsPropagating")) return Dispatch_rml_ui_EventIsPropagating(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventStopImmediatePropagation")) return Dispatch_rml_ui_EventStopImmediatePropagation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EventStopPropagation")) return Dispatch_rml_ui_EventStopPropagation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetContext")) return Dispatch_rml_ui_GetContext(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetDocumentPathRequests")) return Dispatch_rml_ui_GetDocumentPathRequests(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVersion")) return Dispatch_rml_ui_GetVersion(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsReady")) return Dispatch_rml_ui_IsReady(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadFontFace")) return Dispatch_rml_ui_LoadFontFace(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RegiserEventType")) return Dispatch_rml_ui_RegiserEventType(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RegisterEventType")) return Dispatch_rml_ui_RegisterEventType(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RemoveContext")) return Dispatch_rml_ui_RemoveContext(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RemoveContextByName")) return Dispatch_rml_ui_RemoveContextByName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDebugContext")) return Dispatch_rml_ui_SetDebugContext(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDebugContextByName")) return Dispatch_rml_ui_SetDebugContextByName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMouseCursorAlias")) return Dispatch_rml_ui_SetMouseCursorAlias(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SolLuaDataModelSetDirty")) return Dispatch_rml_ui_SolLuaDataModelSetDirty(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Vector2fNew")) return Dispatch_rml_ui_Vector2fNew(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Vector2iNew")) return Dispatch_rml_ui_Vector2iNew(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_rml_ui(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

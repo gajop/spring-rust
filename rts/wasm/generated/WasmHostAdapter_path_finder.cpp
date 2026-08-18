@@ -602,19 +602,27 @@ NativeCalloutDispatch Dispatch_path_finder_SetPathNodeCosts(NativeInterface* nat
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_path_finder(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_path_finder(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_path_finder(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "DeletePath")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_DeletePath}; return &target; }
+	if (detail::FunctionEquals(function, "FreePathNodeCostsArray")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_FreePathNodeCostsArray}; return &target; }
+	if (detail::FunctionEquals(function, "GetNextWayPoint")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_GetNextWayPoint}; return &target; }
+	if (detail::FunctionEquals(function, "GetPathNodeCost")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_GetPathNodeCost}; return &target; }
+	if (detail::FunctionEquals(function, "GetPathNodeCosts")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_GetPathNodeCosts}; return &target; }
+	if (detail::FunctionEquals(function, "GetPathWayPoints")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_GetPathWayPoints}; return &target; }
+	if (detail::FunctionEquals(function, "InitPathNodeCostsArray")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_InitPathNodeCostsArray}; return &target; }
+	if (detail::FunctionEquals(function, "RequestPath")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_RequestPath}; return &target; }
+	if (detail::FunctionEquals(function, "SetPathNodeCost")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_SetPathNodeCost}; return &target; }
+	if (detail::FunctionEquals(function, "SetPathNodeCosts")) { static constexpr NativeCalloutTarget target{&Dispatch_path_finder_SetPathNodeCosts}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_path_finder(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "DeletePath")) return Dispatch_path_finder_DeletePath(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "FreePathNodeCostsArray")) return Dispatch_path_finder_FreePathNodeCostsArray(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetNextWayPoint")) return Dispatch_path_finder_GetNextWayPoint(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPathNodeCost")) return Dispatch_path_finder_GetPathNodeCost(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPathNodeCosts")) return Dispatch_path_finder_GetPathNodeCosts(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPathWayPoints")) return Dispatch_path_finder_GetPathWayPoints(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "InitPathNodeCostsArray")) return Dispatch_path_finder_InitPathNodeCostsArray(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RequestPath")) return Dispatch_path_finder_RequestPath(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetPathNodeCost")) return Dispatch_path_finder_SetPathNodeCost(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetPathNodeCosts")) return Dispatch_path_finder_SetPathNodeCosts(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_path_finder(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

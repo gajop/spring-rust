@@ -2289,29 +2289,37 @@ NativeCalloutDispatch Dispatch_unsynced_read_SolveNURBSCurve(NativeInterface* na
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_unsynced_read(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_unsynced_read(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_unsynced_read(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetActiveCmdDesc")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetActiveCmdDesc}; return &target; }
+	if (detail::FunctionEquals(function, "GetActiveCmdDescs")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetActiveCmdDescs}; return &target; }
+	if (detail::FunctionEquals(function, "GetBoxSelectionByEngine")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetBoxSelectionByEngine}; return &target; }
+	if (detail::FunctionEquals(function, "GetBuildFacing")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetBuildFacing}; return &target; }
+	if (detail::FunctionEquals(function, "GetBuildSpacing")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetBuildSpacing}; return &target; }
+	if (detail::FunctionEquals(function, "GetClipboard")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetClipboard}; return &target; }
+	if (detail::FunctionEquals(function, "GetCmdDescIndex")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetCmdDescIndex}; return &target; }
+	if (detail::FunctionEquals(function, "GetCustomPaletteColor")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetCustomPaletteColor}; return &target; }
+	if (detail::FunctionEquals(function, "GetDrawSelectionInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetDrawSelectionInfo}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePaletteIndex")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetFeaturePaletteIndex}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameSecondsInterpolated")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetGameSecondsInterpolated}; return &target; }
+	if (detail::FunctionEquals(function, "GetLastMessagePositions")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetLastMessagePositions}; return &target; }
+	if (detail::FunctionEquals(function, "GetNanoProjectileParams")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetNanoProjectileParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetPieceProjectileName")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetPieceProjectileName}; return &target; }
+	if (detail::FunctionEquals(function, "GetPrevFrameSyncChecksum")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetPrevFrameSyncChecksum}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamDamageStats")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetTeamDamageStats}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitPaletteIndex")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_GetUnitPaletteIndex}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitAllied")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_IsUnitAllied}; return &target; }
+	if (detail::FunctionEquals(function, "IsUnitSelected")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_IsUnitSelected}; return &target; }
+	if (detail::FunctionEquals(function, "SolveNURBSCurve")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_read_SolveNURBSCurve}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_unsynced_read(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetActiveCmdDesc")) return Dispatch_unsynced_read_GetActiveCmdDesc(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetActiveCmdDescs")) return Dispatch_unsynced_read_GetActiveCmdDescs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetBoxSelectionByEngine")) return Dispatch_unsynced_read_GetBoxSelectionByEngine(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetBuildFacing")) return Dispatch_unsynced_read_GetBuildFacing(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetBuildSpacing")) return Dispatch_unsynced_read_GetBuildSpacing(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetClipboard")) return Dispatch_unsynced_read_GetClipboard(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCmdDescIndex")) return Dispatch_unsynced_read_GetCmdDescIndex(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCustomPaletteColor")) return Dispatch_unsynced_read_GetCustomPaletteColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetDrawSelectionInfo")) return Dispatch_unsynced_read_GetDrawSelectionInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePaletteIndex")) return Dispatch_unsynced_read_GetFeaturePaletteIndex(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameSecondsInterpolated")) return Dispatch_unsynced_read_GetGameSecondsInterpolated(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetLastMessagePositions")) return Dispatch_unsynced_read_GetLastMessagePositions(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetNanoProjectileParams")) return Dispatch_unsynced_read_GetNanoProjectileParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPieceProjectileName")) return Dispatch_unsynced_read_GetPieceProjectileName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPrevFrameSyncChecksum")) return Dispatch_unsynced_read_GetPrevFrameSyncChecksum(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamDamageStats")) return Dispatch_unsynced_read_GetTeamDamageStats(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitPaletteIndex")) return Dispatch_unsynced_read_GetUnitPaletteIndex(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitAllied")) return Dispatch_unsynced_read_IsUnitAllied(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUnitSelected")) return Dispatch_unsynced_read_IsUnitSelected(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SolveNURBSCurve")) return Dispatch_unsynced_read_SolveNURBSCurve(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_unsynced_read(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -606,19 +606,27 @@ NativeCalloutDispatch Dispatch_weapon_defs_ValidWeaponDefID(NativeInterface* nat
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_weapon_defs(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_weapon_defs(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_weapon_defs(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetWeaponDefByID")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefByID}; return &target; }
+	if (detail::FunctionEquals(function, "GetWeaponDefCount")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetWeaponDefCustomParam")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefCustomParam}; return &target; }
+	if (detail::FunctionEquals(function, "GetWeaponDefCustomParamKeys")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefCustomParamKeys}; return &target; }
+	if (detail::FunctionEquals(function, "GetWeaponDefDamage")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefDamage}; return &target; }
+	if (detail::FunctionEquals(function, "GetWeaponDefID")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefID}; return &target; }
+	if (detail::FunctionEquals(function, "GetWeaponDefIDs")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefIDs}; return &target; }
+	if (detail::FunctionEquals(function, "GetWeaponDefName")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefName}; return &target; }
+	if (detail::FunctionEquals(function, "GetWeaponDefRange")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_GetWeaponDefRange}; return &target; }
+	if (detail::FunctionEquals(function, "ValidWeaponDefID")) { static constexpr NativeCalloutTarget target{&Dispatch_weapon_defs_ValidWeaponDefID}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_weapon_defs(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetWeaponDefByID")) return Dispatch_weapon_defs_GetWeaponDefByID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWeaponDefCount")) return Dispatch_weapon_defs_GetWeaponDefCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWeaponDefCustomParam")) return Dispatch_weapon_defs_GetWeaponDefCustomParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWeaponDefCustomParamKeys")) return Dispatch_weapon_defs_GetWeaponDefCustomParamKeys(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWeaponDefDamage")) return Dispatch_weapon_defs_GetWeaponDefDamage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWeaponDefID")) return Dispatch_weapon_defs_GetWeaponDefID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWeaponDefIDs")) return Dispatch_weapon_defs_GetWeaponDefIDs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWeaponDefName")) return Dispatch_weapon_defs_GetWeaponDefName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWeaponDefRange")) return Dispatch_weapon_defs_GetWeaponDefRange(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ValidWeaponDefID")) return Dispatch_weapon_defs_ValidWeaponDefID(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_weapon_defs(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -865,20 +865,28 @@ NativeCalloutDispatch Dispatch_units_weapons_GetUnitWeaponVectors(NativeInterfac
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_weapons(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_units_weapons(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_weapons(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetUnitMaxRange")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitMaxRange}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponCanFire")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponCanFire}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponCount")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponDamages")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponDamages}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponHaveFreeLineOfFire")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponHaveFreeLineOfFire}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponState")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponState}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponTarget")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponTarget}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponTestRange")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponTestRange}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponTestTarget")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponTestTarget}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponTryTarget")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponTryTarget}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitWeaponVectors")) { static constexpr NativeCalloutTarget target{&Dispatch_units_weapons_GetUnitWeaponVectors}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_units_weapons(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetUnitMaxRange")) return Dispatch_units_weapons_GetUnitMaxRange(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponCanFire")) return Dispatch_units_weapons_GetUnitWeaponCanFire(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponCount")) return Dispatch_units_weapons_GetUnitWeaponCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponDamages")) return Dispatch_units_weapons_GetUnitWeaponDamages(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponHaveFreeLineOfFire")) return Dispatch_units_weapons_GetUnitWeaponHaveFreeLineOfFire(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponState")) return Dispatch_units_weapons_GetUnitWeaponState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponTarget")) return Dispatch_units_weapons_GetUnitWeaponTarget(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponTestRange")) return Dispatch_units_weapons_GetUnitWeaponTestRange(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponTestTarget")) return Dispatch_units_weapons_GetUnitWeaponTestTarget(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponTryTarget")) return Dispatch_units_weapons_GetUnitWeaponTryTarget(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitWeaponVectors")) return Dispatch_units_weapons_GetUnitWeaponVectors(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_units_weapons(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

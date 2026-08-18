@@ -227,13 +227,21 @@ NativeCalloutDispatch Dispatch_metal_map_SetMetalAmount(NativeInterface* nativeI
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_metal_map(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_metal_map(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_metal_map(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetMetalAmount")) { static constexpr NativeCalloutTarget target{&Dispatch_metal_map_GetMetalAmount}; return &target; }
+	if (detail::FunctionEquals(function, "GetMetalExtraction")) { static constexpr NativeCalloutTarget target{&Dispatch_metal_map_GetMetalExtraction}; return &target; }
+	if (detail::FunctionEquals(function, "GetMetalMapSize")) { static constexpr NativeCalloutTarget target{&Dispatch_metal_map_GetMetalMapSize}; return &target; }
+	if (detail::FunctionEquals(function, "SetMetalAmount")) { static constexpr NativeCalloutTarget target{&Dispatch_metal_map_SetMetalAmount}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_metal_map(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetMetalAmount")) return Dispatch_metal_map_GetMetalAmount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMetalExtraction")) return Dispatch_metal_map_GetMetalExtraction(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMetalMapSize")) return Dispatch_metal_map_GetMetalMapSize(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMetalAmount")) return Dispatch_metal_map_SetMetalAmount(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_metal_map(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

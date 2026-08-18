@@ -370,31 +370,39 @@ NativeCalloutDispatch Dispatch_terrain_control_SetWind(NativeInterface* nativeIn
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_terrain_control(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_terrain_control(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_terrain_control(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AddGrass")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_AddGrass}; return &target; }
+	if (detail::FunctionEquals(function, "AddHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_AddHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "AddOriginalHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_AddOriginalHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "AddSmoothMesh")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_AddSmoothMesh}; return &target; }
+	if (detail::FunctionEquals(function, "AdjustHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_AdjustHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "AdjustOriginalHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_AdjustOriginalHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "AdjustSmoothMesh")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_AdjustSmoothMesh}; return &target; }
+	if (detail::FunctionEquals(function, "LevelHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_LevelHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "LevelOriginalHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_LevelOriginalHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "LevelSmoothMesh")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_LevelSmoothMesh}; return &target; }
+	if (detail::FunctionEquals(function, "RebuildSmoothMesh")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_RebuildSmoothMesh}; return &target; }
+	if (detail::FunctionEquals(function, "RemoveGrass")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_RemoveGrass}; return &target; }
+	if (detail::FunctionEquals(function, "RevertHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_RevertHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "RevertOriginalHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_RevertOriginalHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "RevertSmoothMesh")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_RevertSmoothMesh}; return &target; }
+	if (detail::FunctionEquals(function, "SetHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_SetHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "SetMapSquareTerrainType")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_SetMapSquareTerrainType}; return &target; }
+	if (detail::FunctionEquals(function, "SetOriginalHeightMap")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_SetOriginalHeightMap}; return &target; }
+	if (detail::FunctionEquals(function, "SetSmoothMesh")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_SetSmoothMesh}; return &target; }
+	if (detail::FunctionEquals(function, "SetTerrainTypeData")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_SetTerrainTypeData}; return &target; }
+	if (detail::FunctionEquals(function, "SetTidal")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_SetTidal}; return &target; }
+	if (detail::FunctionEquals(function, "SetWind")) { static constexpr NativeCalloutTarget target{&Dispatch_terrain_control_SetWind}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_terrain_control(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AddGrass")) return Dispatch_terrain_control_AddGrass(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddHeightMap")) return Dispatch_terrain_control_AddHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddOriginalHeightMap")) return Dispatch_terrain_control_AddOriginalHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddSmoothMesh")) return Dispatch_terrain_control_AddSmoothMesh(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AdjustHeightMap")) return Dispatch_terrain_control_AdjustHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AdjustOriginalHeightMap")) return Dispatch_terrain_control_AdjustOriginalHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AdjustSmoothMesh")) return Dispatch_terrain_control_AdjustSmoothMesh(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LevelHeightMap")) return Dispatch_terrain_control_LevelHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LevelOriginalHeightMap")) return Dispatch_terrain_control_LevelOriginalHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LevelSmoothMesh")) return Dispatch_terrain_control_LevelSmoothMesh(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RebuildSmoothMesh")) return Dispatch_terrain_control_RebuildSmoothMesh(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RemoveGrass")) return Dispatch_terrain_control_RemoveGrass(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RevertHeightMap")) return Dispatch_terrain_control_RevertHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RevertOriginalHeightMap")) return Dispatch_terrain_control_RevertOriginalHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RevertSmoothMesh")) return Dispatch_terrain_control_RevertSmoothMesh(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetHeightMap")) return Dispatch_terrain_control_SetHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMapSquareTerrainType")) return Dispatch_terrain_control_SetMapSquareTerrainType(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetOriginalHeightMap")) return Dispatch_terrain_control_SetOriginalHeightMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetSmoothMesh")) return Dispatch_terrain_control_SetSmoothMesh(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetTerrainTypeData")) return Dispatch_terrain_control_SetTerrainTypeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetTidal")) return Dispatch_terrain_control_SetTidal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetWind")) return Dispatch_terrain_control_SetWind(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_terrain_control(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

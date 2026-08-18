@@ -1220,30 +1220,38 @@ NativeCalloutDispatch Dispatch_messages_SendToUnsynced(NativeInterface* nativeIn
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_messages(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_messages(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_messages(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "Echo")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_Echo}; return &target; }
+	if (detail::FunctionEquals(function, "GetConsoleBuffer")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_GetConsoleBuffer}; return &target; }
+	if (detail::FunctionEquals(function, "GetCurrentTooltip")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_GetCurrentTooltip}; return &target; }
+	if (detail::FunctionEquals(function, "IsUserWriting")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_IsUserWriting}; return &target; }
+	if (detail::FunctionEquals(function, "Log")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_Log}; return &target; }
+	if (detail::FunctionEquals(function, "SendAllyChat")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendAllyChat}; return &target; }
+	if (detail::FunctionEquals(function, "SendCommands")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendCommands}; return &target; }
+	if (detail::FunctionEquals(function, "SendLuaGaiaMsg")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendLuaGaiaMsg}; return &target; }
+	if (detail::FunctionEquals(function, "SendLuaMenuMsg")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendLuaMenuMsg}; return &target; }
+	if (detail::FunctionEquals(function, "SendLuaRulesMsg")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendLuaRulesMsg}; return &target; }
+	if (detail::FunctionEquals(function, "SendLuaUIMsg")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendLuaUIMsg}; return &target; }
+	if (detail::FunctionEquals(function, "SendMessage")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendMessage}; return &target; }
+	if (detail::FunctionEquals(function, "SendMessageToAllyTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendMessageToAllyTeam}; return &target; }
+	if (detail::FunctionEquals(function, "SendMessageToPlayer")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendMessageToPlayer}; return &target; }
+	if (detail::FunctionEquals(function, "SendMessageToSpectators")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendMessageToSpectators}; return &target; }
+	if (detail::FunctionEquals(function, "SendMessageToTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendMessageToTeam}; return &target; }
+	if (detail::FunctionEquals(function, "SendPrivateChat")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendPrivateChat}; return &target; }
+	if (detail::FunctionEquals(function, "SendPublicChat")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendPublicChat}; return &target; }
+	if (detail::FunctionEquals(function, "SendSkirmishAIMessage")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendSkirmishAIMessage}; return &target; }
+	if (detail::FunctionEquals(function, "SendSpectatorChat")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendSpectatorChat}; return &target; }
+	if (detail::FunctionEquals(function, "SendToUnsynced")) { static constexpr NativeCalloutTarget target{&Dispatch_messages_SendToUnsynced}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_messages(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "Echo")) return Dispatch_messages_Echo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetConsoleBuffer")) return Dispatch_messages_GetConsoleBuffer(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetCurrentTooltip")) return Dispatch_messages_GetCurrentTooltip(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsUserWriting")) return Dispatch_messages_IsUserWriting(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Log")) return Dispatch_messages_Log(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendAllyChat")) return Dispatch_messages_SendAllyChat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendCommands")) return Dispatch_messages_SendCommands(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendLuaGaiaMsg")) return Dispatch_messages_SendLuaGaiaMsg(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendLuaMenuMsg")) return Dispatch_messages_SendLuaMenuMsg(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendLuaRulesMsg")) return Dispatch_messages_SendLuaRulesMsg(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendLuaUIMsg")) return Dispatch_messages_SendLuaUIMsg(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendMessage")) return Dispatch_messages_SendMessage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendMessageToAllyTeam")) return Dispatch_messages_SendMessageToAllyTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendMessageToPlayer")) return Dispatch_messages_SendMessageToPlayer(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendMessageToSpectators")) return Dispatch_messages_SendMessageToSpectators(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendMessageToTeam")) return Dispatch_messages_SendMessageToTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendPrivateChat")) return Dispatch_messages_SendPrivateChat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendPublicChat")) return Dispatch_messages_SendPublicChat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendSkirmishAIMessage")) return Dispatch_messages_SendSkirmishAIMessage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendSpectatorChat")) return Dispatch_messages_SendSpectatorChat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SendToUnsynced")) return Dispatch_messages_SendToUnsynced(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_messages(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -1320,33 +1320,41 @@ NativeCalloutDispatch Dispatch_display_SetTeamColor(NativeInterface* nativeInter
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_display(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_display(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_display(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetDrawFrame")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetDrawFrame}; return &target; }
+	if (detail::FunctionEquals(function, "GetDualViewGeometry")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetDualViewGeometry}; return &target; }
+	if (detail::FunctionEquals(function, "GetFPS")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetFPS}; return &target; }
+	if (detail::FunctionEquals(function, "GetFrameTimeOffset")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetFrameTimeOffset}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameSpeed")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetGameSpeed}; return &target; }
+	if (detail::FunctionEquals(function, "GetLastUpdateSeconds")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetLastUpdateSeconds}; return &target; }
+	if (detail::FunctionEquals(function, "GetLosViewColors")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetLosViewColors}; return &target; }
+	if (detail::FunctionEquals(function, "GetMapDrawMode")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetMapDrawMode}; return &target; }
+	if (detail::FunctionEquals(function, "GetMiniMapDualScreen")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetMiniMapDualScreen}; return &target; }
+	if (detail::FunctionEquals(function, "GetMiniMapGeometry")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetMiniMapGeometry}; return &target; }
+	if (detail::FunctionEquals(function, "GetMiniMapRotation")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetMiniMapRotation}; return &target; }
+	if (detail::FunctionEquals(function, "GetNumDisplays")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetNumDisplays}; return &target; }
+	if (detail::FunctionEquals(function, "GetScreenGeometry")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetScreenGeometry}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamColor")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetTeamColor}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamOrigColor")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetTeamOrigColor}; return &target; }
+	if (detail::FunctionEquals(function, "GetViewGeometry")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetViewGeometry}; return &target; }
+	if (detail::FunctionEquals(function, "GetWaterMode")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetWaterMode}; return &target; }
+	if (detail::FunctionEquals(function, "GetWindowGeometry")) { static constexpr NativeCalloutTarget target{&Dispatch_display_GetWindowGeometry}; return &target; }
+	if (detail::FunctionEquals(function, "HaveAdvShading")) { static constexpr NativeCalloutTarget target{&Dispatch_display_HaveAdvShading}; return &target; }
+	if (detail::FunctionEquals(function, "HaveShadows")) { static constexpr NativeCalloutTarget target{&Dispatch_display_HaveShadows}; return &target; }
+	if (detail::FunctionEquals(function, "IsAABBInView")) { static constexpr NativeCalloutTarget target{&Dispatch_display_IsAABBInView}; return &target; }
+	if (detail::FunctionEquals(function, "IsGUIHidden")) { static constexpr NativeCalloutTarget target{&Dispatch_display_IsGUIHidden}; return &target; }
+	if (detail::FunctionEquals(function, "IsSphereInView")) { static constexpr NativeCalloutTarget target{&Dispatch_display_IsSphereInView}; return &target; }
+	if (detail::FunctionEquals(function, "SetTeamColor")) { static constexpr NativeCalloutTarget target{&Dispatch_display_SetTeamColor}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_display(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetDrawFrame")) return Dispatch_display_GetDrawFrame(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetDualViewGeometry")) return Dispatch_display_GetDualViewGeometry(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFPS")) return Dispatch_display_GetFPS(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFrameTimeOffset")) return Dispatch_display_GetFrameTimeOffset(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameSpeed")) return Dispatch_display_GetGameSpeed(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetLastUpdateSeconds")) return Dispatch_display_GetLastUpdateSeconds(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetLosViewColors")) return Dispatch_display_GetLosViewColors(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMapDrawMode")) return Dispatch_display_GetMapDrawMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMiniMapDualScreen")) return Dispatch_display_GetMiniMapDualScreen(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMiniMapGeometry")) return Dispatch_display_GetMiniMapGeometry(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMiniMapRotation")) return Dispatch_display_GetMiniMapRotation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetNumDisplays")) return Dispatch_display_GetNumDisplays(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetScreenGeometry")) return Dispatch_display_GetScreenGeometry(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamColor")) return Dispatch_display_GetTeamColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamOrigColor")) return Dispatch_display_GetTeamOrigColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetViewGeometry")) return Dispatch_display_GetViewGeometry(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWaterMode")) return Dispatch_display_GetWaterMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWindowGeometry")) return Dispatch_display_GetWindowGeometry(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "HaveAdvShading")) return Dispatch_display_HaveAdvShading(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "HaveShadows")) return Dispatch_display_HaveShadows(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsAABBInView")) return Dispatch_display_IsAABBInView(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsGUIHidden")) return Dispatch_display_IsGUIHidden(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsSphereInView")) return Dispatch_display_IsSphereInView(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetTeamColor")) return Dispatch_display_SetTeamColor(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_display(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

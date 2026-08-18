@@ -4639,91 +4639,99 @@ NativeCalloutDispatch Dispatch_unsynced_ctrl_WarpMouse(NativeInterface* nativeIn
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_unsynced_ctrl(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_unsynced_ctrl(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_unsynced_ctrl(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AssignMouseCursor")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_AssignMouseCursor}; return &target; }
+	if (detail::FunctionEquals(function, "DeselectUnitMap")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_DeselectUnitMap}; return &target; }
+	if (detail::FunctionEquals(function, "DrawUnitCommands")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_DrawUnitCommands}; return &target; }
+	if (detail::FunctionEquals(function, "ForceLayoutUpdate")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_ForceLayoutUpdate}; return &target; }
+	if (detail::FunctionEquals(function, "ForceTesselationUpdate")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_ForceTesselationUpdate}; return &target; }
+	if (detail::FunctionEquals(function, "GetWaterTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_GetWaterTexture}; return &target; }
+	if (detail::FunctionEquals(function, "LoadCmdColorsConfig")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_LoadCmdColorsConfig}; return &target; }
+	if (detail::FunctionEquals(function, "LoadCtrlPanelConfig")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_LoadCtrlPanelConfig}; return &target; }
+	if (detail::FunctionEquals(function, "LoadModelTextures")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_LoadModelTextures}; return &target; }
+	if (detail::FunctionEquals(function, "PauseDollyCamera")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_PauseDollyCamera}; return &target; }
+	if (detail::FunctionEquals(function, "PreloadFeatureDefModel")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_PreloadFeatureDefModel}; return &target; }
+	if (detail::FunctionEquals(function, "PreloadUnitDefModel")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_PreloadUnitDefModel}; return &target; }
+	if (detail::FunctionEquals(function, "ReplaceMouseCursor")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_ReplaceMouseCursor}; return &target; }
+	if (detail::FunctionEquals(function, "ResumeDollyCamera")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_ResumeDollyCamera}; return &target; }
+	if (detail::FunctionEquals(function, "RunDollyCamera")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_RunDollyCamera}; return &target; }
+	if (detail::FunctionEquals(function, "SDLSetTextInputRect")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SDLSetTextInputRect}; return &target; }
+	if (detail::FunctionEquals(function, "SDLStartTextInput")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SDLStartTextInput}; return &target; }
+	if (detail::FunctionEquals(function, "SDLStopTextInput")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SDLStopTextInput}; return &target; }
+	if (detail::FunctionEquals(function, "SelectUnitMap")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SelectUnitMap}; return &target; }
+	if (detail::FunctionEquals(function, "SetActiveCommand")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetActiveCommand}; return &target; }
+	if (detail::FunctionEquals(function, "SetAtmosphere")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetAtmosphere}; return &target; }
+	if (detail::FunctionEquals(function, "SetAutoShowMetal")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetAutoShowMetal}; return &target; }
+	if (detail::FunctionEquals(function, "SetBoxSelectionByEngine")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetBoxSelectionByEngine}; return &target; }
+	if (detail::FunctionEquals(function, "SetBuildFacing")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetBuildFacing}; return &target; }
+	if (detail::FunctionEquals(function, "SetBuildSpacing")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetBuildSpacing}; return &target; }
+	if (detail::FunctionEquals(function, "SetCameraOffset")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetCameraOffset}; return &target; }
+	if (detail::FunctionEquals(function, "SetClipboard")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetClipboard}; return &target; }
+	if (detail::FunctionEquals(function, "SetCustomCommandDrawData")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetCustomCommandDrawData}; return &target; }
+	if (detail::FunctionEquals(function, "SetCustomPaletteColor")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetCustomPaletteColor}; return &target; }
+	if (detail::FunctionEquals(function, "SetDollyCameraCurve")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDollyCameraCurve}; return &target; }
+	if (detail::FunctionEquals(function, "SetDollyCameraLookCurve")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDollyCameraLookCurve}; return &target; }
+	if (detail::FunctionEquals(function, "SetDollyCameraLookPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDollyCameraLookPosition}; return &target; }
+	if (detail::FunctionEquals(function, "SetDollyCameraLookUnit")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDollyCameraLookUnit}; return &target; }
+	if (detail::FunctionEquals(function, "SetDollyCameraMode")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDollyCameraMode}; return &target; }
+	if (detail::FunctionEquals(function, "SetDollyCameraPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDollyCameraPosition}; return &target; }
+	if (detail::FunctionEquals(function, "SetDollyCameraRelativeMode")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDollyCameraRelativeMode}; return &target; }
+	if (detail::FunctionEquals(function, "SetDrawGround")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDrawGround}; return &target; }
+	if (detail::FunctionEquals(function, "SetDrawGroundDeferred")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDrawGroundDeferred}; return &target; }
+	if (detail::FunctionEquals(function, "SetDrawModelsDeferred")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDrawModelsDeferred}; return &target; }
+	if (detail::FunctionEquals(function, "SetDrawSelectionInfo")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDrawSelectionInfo}; return &target; }
+	if (detail::FunctionEquals(function, "SetDrawSky")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDrawSky}; return &target; }
+	if (detail::FunctionEquals(function, "SetDrawWater")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetDrawWater}; return &target; }
+	if (detail::FunctionEquals(function, "SetEngineBuildSquareRendering")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetEngineBuildSquareRendering}; return &target; }
+	if (detail::FunctionEquals(function, "SetFeatureAlwaysUpdateMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetFeatureAlwaysUpdateMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "SetFeatureEngineDrawMask")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetFeatureEngineDrawMask}; return &target; }
+	if (detail::FunctionEquals(function, "SetFeatureFade")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetFeatureFade}; return &target; }
+	if (detail::FunctionEquals(function, "SetFeatureNoDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetFeatureNoDraw}; return &target; }
+	if (detail::FunctionEquals(function, "SetFeaturePaletteIndex")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetFeaturePaletteIndex}; return &target; }
+	if (detail::FunctionEquals(function, "SetLastMessagePosition")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetLastMessagePosition}; return &target; }
+	if (detail::FunctionEquals(function, "SetLosViewColors")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetLosViewColors}; return &target; }
+	if (detail::FunctionEquals(function, "SetMapRenderingParams")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetMapRenderingParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetMapShader")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetMapShader}; return &target; }
+	if (detail::FunctionEquals(function, "SetMapShadingTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetMapShadingTexture}; return &target; }
+	if (detail::FunctionEquals(function, "SetMiniMapRotation")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetMiniMapRotation}; return &target; }
+	if (detail::FunctionEquals(function, "SetMouseCursor")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetMouseCursor}; return &target; }
+	if (detail::FunctionEquals(function, "SetNanoProjectileParams")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetNanoProjectileParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetShockFrontFactors")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetShockFrontFactors}; return &target; }
+	if (detail::FunctionEquals(function, "SetSkyBoxTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetSkyBoxTexture}; return &target; }
+	if (detail::FunctionEquals(function, "SetSunDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetSunDirection}; return &target; }
+	if (detail::FunctionEquals(function, "SetSunLighting")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetSunLighting}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitAlwaysUpdateMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitAlwaysUpdateMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitDefIcon")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitDefIcon}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitDefImage")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitDefImage}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitEngineDrawMask")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitEngineDrawMask}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitIcon")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitIcon}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitIconDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitIconDraw}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitLeaveTracks")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitLeaveTracks}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitNoDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitNoDraw}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitNoGroup")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitNoGroup}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitNoMinimap")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitNoMinimap}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitNoSelect")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitNoSelect}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitPaletteIndex")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetUnitPaletteIndex}; return &target; }
+	if (detail::FunctionEquals(function, "SetVideoCapturingMode")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetVideoCapturingMode}; return &target; }
+	if (detail::FunctionEquals(function, "SetVideoCapturingTimeOffset")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetVideoCapturingTimeOffset}; return &target; }
+	if (detail::FunctionEquals(function, "SetWMCaption")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetWMCaption}; return &target; }
+	if (detail::FunctionEquals(function, "SetWMIcon")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetWMIcon}; return &target; }
+	if (detail::FunctionEquals(function, "SetWaterParams")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetWaterParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetWaterTexture")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetWaterTexture}; return &target; }
+	if (detail::FunctionEquals(function, "SetWindowGeometry")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetWindowGeometry}; return &target; }
+	if (detail::FunctionEquals(function, "SetWindowMaximized")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetWindowMaximized}; return &target; }
+	if (detail::FunctionEquals(function, "SetWindowMinimized")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_SetWindowMinimized}; return &target; }
+	if (detail::FunctionEquals(function, "WarpMouse")) { static constexpr NativeCalloutTarget target{&Dispatch_unsynced_ctrl_WarpMouse}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_unsynced_ctrl(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AssignMouseCursor")) return Dispatch_unsynced_ctrl_AssignMouseCursor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DeselectUnitMap")) return Dispatch_unsynced_ctrl_DeselectUnitMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DrawUnitCommands")) return Dispatch_unsynced_ctrl_DrawUnitCommands(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ForceLayoutUpdate")) return Dispatch_unsynced_ctrl_ForceLayoutUpdate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ForceTesselationUpdate")) return Dispatch_unsynced_ctrl_ForceTesselationUpdate(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWaterTexture")) return Dispatch_unsynced_ctrl_GetWaterTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadCmdColorsConfig")) return Dispatch_unsynced_ctrl_LoadCmdColorsConfig(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadCtrlPanelConfig")) return Dispatch_unsynced_ctrl_LoadCtrlPanelConfig(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "LoadModelTextures")) return Dispatch_unsynced_ctrl_LoadModelTextures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PauseDollyCamera")) return Dispatch_unsynced_ctrl_PauseDollyCamera(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PreloadFeatureDefModel")) return Dispatch_unsynced_ctrl_PreloadFeatureDefModel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "PreloadUnitDefModel")) return Dispatch_unsynced_ctrl_PreloadUnitDefModel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ReplaceMouseCursor")) return Dispatch_unsynced_ctrl_ReplaceMouseCursor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ResumeDollyCamera")) return Dispatch_unsynced_ctrl_ResumeDollyCamera(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RunDollyCamera")) return Dispatch_unsynced_ctrl_RunDollyCamera(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SDLSetTextInputRect")) return Dispatch_unsynced_ctrl_SDLSetTextInputRect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SDLStartTextInput")) return Dispatch_unsynced_ctrl_SDLStartTextInput(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SDLStopTextInput")) return Dispatch_unsynced_ctrl_SDLStopTextInput(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SelectUnitMap")) return Dispatch_unsynced_ctrl_SelectUnitMap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetActiveCommand")) return Dispatch_unsynced_ctrl_SetActiveCommand(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetAtmosphere")) return Dispatch_unsynced_ctrl_SetAtmosphere(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetAutoShowMetal")) return Dispatch_unsynced_ctrl_SetAutoShowMetal(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetBoxSelectionByEngine")) return Dispatch_unsynced_ctrl_SetBoxSelectionByEngine(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetBuildFacing")) return Dispatch_unsynced_ctrl_SetBuildFacing(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetBuildSpacing")) return Dispatch_unsynced_ctrl_SetBuildSpacing(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetCameraOffset")) return Dispatch_unsynced_ctrl_SetCameraOffset(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetClipboard")) return Dispatch_unsynced_ctrl_SetClipboard(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetCustomCommandDrawData")) return Dispatch_unsynced_ctrl_SetCustomCommandDrawData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetCustomPaletteColor")) return Dispatch_unsynced_ctrl_SetCustomPaletteColor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDollyCameraCurve")) return Dispatch_unsynced_ctrl_SetDollyCameraCurve(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDollyCameraLookCurve")) return Dispatch_unsynced_ctrl_SetDollyCameraLookCurve(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDollyCameraLookPosition")) return Dispatch_unsynced_ctrl_SetDollyCameraLookPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDollyCameraLookUnit")) return Dispatch_unsynced_ctrl_SetDollyCameraLookUnit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDollyCameraMode")) return Dispatch_unsynced_ctrl_SetDollyCameraMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDollyCameraPosition")) return Dispatch_unsynced_ctrl_SetDollyCameraPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDollyCameraRelativeMode")) return Dispatch_unsynced_ctrl_SetDollyCameraRelativeMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDrawGround")) return Dispatch_unsynced_ctrl_SetDrawGround(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDrawGroundDeferred")) return Dispatch_unsynced_ctrl_SetDrawGroundDeferred(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDrawModelsDeferred")) return Dispatch_unsynced_ctrl_SetDrawModelsDeferred(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDrawSelectionInfo")) return Dispatch_unsynced_ctrl_SetDrawSelectionInfo(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDrawSky")) return Dispatch_unsynced_ctrl_SetDrawSky(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetDrawWater")) return Dispatch_unsynced_ctrl_SetDrawWater(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetEngineBuildSquareRendering")) return Dispatch_unsynced_ctrl_SetEngineBuildSquareRendering(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFeatureAlwaysUpdateMatrix")) return Dispatch_unsynced_ctrl_SetFeatureAlwaysUpdateMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFeatureEngineDrawMask")) return Dispatch_unsynced_ctrl_SetFeatureEngineDrawMask(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFeatureFade")) return Dispatch_unsynced_ctrl_SetFeatureFade(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFeatureNoDraw")) return Dispatch_unsynced_ctrl_SetFeatureNoDraw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFeaturePaletteIndex")) return Dispatch_unsynced_ctrl_SetFeaturePaletteIndex(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetLastMessagePosition")) return Dispatch_unsynced_ctrl_SetLastMessagePosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetLosViewColors")) return Dispatch_unsynced_ctrl_SetLosViewColors(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMapRenderingParams")) return Dispatch_unsynced_ctrl_SetMapRenderingParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMapShader")) return Dispatch_unsynced_ctrl_SetMapShader(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMapShadingTexture")) return Dispatch_unsynced_ctrl_SetMapShadingTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMiniMapRotation")) return Dispatch_unsynced_ctrl_SetMiniMapRotation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMouseCursor")) return Dispatch_unsynced_ctrl_SetMouseCursor(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetNanoProjectileParams")) return Dispatch_unsynced_ctrl_SetNanoProjectileParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetShockFrontFactors")) return Dispatch_unsynced_ctrl_SetShockFrontFactors(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetSkyBoxTexture")) return Dispatch_unsynced_ctrl_SetSkyBoxTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetSunDirection")) return Dispatch_unsynced_ctrl_SetSunDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetSunLighting")) return Dispatch_unsynced_ctrl_SetSunLighting(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitAlwaysUpdateMatrix")) return Dispatch_unsynced_ctrl_SetUnitAlwaysUpdateMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitDefIcon")) return Dispatch_unsynced_ctrl_SetUnitDefIcon(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitDefImage")) return Dispatch_unsynced_ctrl_SetUnitDefImage(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitEngineDrawMask")) return Dispatch_unsynced_ctrl_SetUnitEngineDrawMask(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitIcon")) return Dispatch_unsynced_ctrl_SetUnitIcon(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitIconDraw")) return Dispatch_unsynced_ctrl_SetUnitIconDraw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitLeaveTracks")) return Dispatch_unsynced_ctrl_SetUnitLeaveTracks(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitNoDraw")) return Dispatch_unsynced_ctrl_SetUnitNoDraw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitNoGroup")) return Dispatch_unsynced_ctrl_SetUnitNoGroup(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitNoMinimap")) return Dispatch_unsynced_ctrl_SetUnitNoMinimap(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitNoSelect")) return Dispatch_unsynced_ctrl_SetUnitNoSelect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitPaletteIndex")) return Dispatch_unsynced_ctrl_SetUnitPaletteIndex(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetVideoCapturingMode")) return Dispatch_unsynced_ctrl_SetVideoCapturingMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetVideoCapturingTimeOffset")) return Dispatch_unsynced_ctrl_SetVideoCapturingTimeOffset(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetWMCaption")) return Dispatch_unsynced_ctrl_SetWMCaption(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetWMIcon")) return Dispatch_unsynced_ctrl_SetWMIcon(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetWaterParams")) return Dispatch_unsynced_ctrl_SetWaterParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetWaterTexture")) return Dispatch_unsynced_ctrl_SetWaterTexture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetWindowGeometry")) return Dispatch_unsynced_ctrl_SetWindowGeometry(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetWindowMaximized")) return Dispatch_unsynced_ctrl_SetWindowMaximized(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetWindowMinimized")) return Dispatch_unsynced_ctrl_SetWindowMinimized(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "WarpMouse")) return Dispatch_unsynced_ctrl_WarpMouse(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_unsynced_ctrl(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

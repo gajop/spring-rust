@@ -525,16 +525,24 @@ NativeCalloutDispatch Dispatch_lights_UpdateModelLight(NativeInterface* nativeIn
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_lights(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_lights(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_lights(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "AddLightTrackingTarget")) { static constexpr NativeCalloutTarget target{&Dispatch_lights_AddLightTrackingTarget}; return &target; }
+	if (detail::FunctionEquals(function, "AddMapLight")) { static constexpr NativeCalloutTarget target{&Dispatch_lights_AddMapLight}; return &target; }
+	if (detail::FunctionEquals(function, "AddModelLight")) { static constexpr NativeCalloutTarget target{&Dispatch_lights_AddModelLight}; return &target; }
+	if (detail::FunctionEquals(function, "SetMapLightTrackingState")) { static constexpr NativeCalloutTarget target{&Dispatch_lights_SetMapLightTrackingState}; return &target; }
+	if (detail::FunctionEquals(function, "SetModelLightTrackingState")) { static constexpr NativeCalloutTarget target{&Dispatch_lights_SetModelLightTrackingState}; return &target; }
+	if (detail::FunctionEquals(function, "UpdateMapLight")) { static constexpr NativeCalloutTarget target{&Dispatch_lights_UpdateMapLight}; return &target; }
+	if (detail::FunctionEquals(function, "UpdateModelLight")) { static constexpr NativeCalloutTarget target{&Dispatch_lights_UpdateModelLight}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_lights(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "AddLightTrackingTarget")) return Dispatch_lights_AddLightTrackingTarget(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddMapLight")) return Dispatch_lights_AddMapLight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "AddModelLight")) return Dispatch_lights_AddModelLight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetMapLightTrackingState")) return Dispatch_lights_SetMapLightTrackingState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetModelLightTrackingState")) return Dispatch_lights_SetModelLightTrackingState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UpdateMapLight")) return Dispatch_lights_UpdateMapLight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "UpdateModelLight")) return Dispatch_lights_UpdateModelLight(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_lights(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

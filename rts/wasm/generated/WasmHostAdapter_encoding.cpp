@@ -353,15 +353,23 @@ NativeCalloutDispatch Dispatch_encoding_IsValidBase64Url(NativeInterface* native
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_encoding(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_encoding(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_encoding(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "DecodeBase64")) { static constexpr NativeCalloutTarget target{&Dispatch_encoding_DecodeBase64}; return &target; }
+	if (detail::FunctionEquals(function, "DecodeBase64Url")) { static constexpr NativeCalloutTarget target{&Dispatch_encoding_DecodeBase64Url}; return &target; }
+	if (detail::FunctionEquals(function, "EncodeBase64")) { static constexpr NativeCalloutTarget target{&Dispatch_encoding_EncodeBase64}; return &target; }
+	if (detail::FunctionEquals(function, "EncodeBase64Url")) { static constexpr NativeCalloutTarget target{&Dispatch_encoding_EncodeBase64Url}; return &target; }
+	if (detail::FunctionEquals(function, "IsValidBase64")) { static constexpr NativeCalloutTarget target{&Dispatch_encoding_IsValidBase64}; return &target; }
+	if (detail::FunctionEquals(function, "IsValidBase64Url")) { static constexpr NativeCalloutTarget target{&Dispatch_encoding_IsValidBase64Url}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_encoding(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "DecodeBase64")) return Dispatch_encoding_DecodeBase64(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "DecodeBase64Url")) return Dispatch_encoding_DecodeBase64Url(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EncodeBase64")) return Dispatch_encoding_EncodeBase64(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EncodeBase64Url")) return Dispatch_encoding_EncodeBase64Url(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsValidBase64")) return Dispatch_encoding_IsValidBase64(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsValidBase64Url")) return Dispatch_encoding_IsValidBase64Url(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_encoding(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

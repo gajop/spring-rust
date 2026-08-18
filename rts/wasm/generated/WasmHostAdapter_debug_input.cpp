@@ -362,16 +362,24 @@ NativeCalloutDispatch Dispatch_debug_input_EmulateTextInput(NativeInterface* nat
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_debug_input(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_debug_input(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_debug_input(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "ClearEmulatedInput")) { static constexpr NativeCalloutTarget target{&Dispatch_debug_input_ClearEmulatedInput}; return &target; }
+	if (detail::FunctionEquals(function, "EmulateKey")) { static constexpr NativeCalloutTarget target{&Dispatch_debug_input_EmulateKey}; return &target; }
+	if (detail::FunctionEquals(function, "EmulateMouseButton")) { static constexpr NativeCalloutTarget target{&Dispatch_debug_input_EmulateMouseButton}; return &target; }
+	if (detail::FunctionEquals(function, "EmulateMouseMove")) { static constexpr NativeCalloutTarget target{&Dispatch_debug_input_EmulateMouseMove}; return &target; }
+	if (detail::FunctionEquals(function, "EmulateMouseWheel")) { static constexpr NativeCalloutTarget target{&Dispatch_debug_input_EmulateMouseWheel}; return &target; }
+	if (detail::FunctionEquals(function, "EmulateTextEditing")) { static constexpr NativeCalloutTarget target{&Dispatch_debug_input_EmulateTextEditing}; return &target; }
+	if (detail::FunctionEquals(function, "EmulateTextInput")) { static constexpr NativeCalloutTarget target{&Dispatch_debug_input_EmulateTextInput}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_debug_input(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "ClearEmulatedInput")) return Dispatch_debug_input_ClearEmulatedInput(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EmulateKey")) return Dispatch_debug_input_EmulateKey(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EmulateMouseButton")) return Dispatch_debug_input_EmulateMouseButton(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EmulateMouseMove")) return Dispatch_debug_input_EmulateMouseMove(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EmulateMouseWheel")) return Dispatch_debug_input_EmulateMouseWheel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EmulateTextEditing")) return Dispatch_debug_input_EmulateTextEditing(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "EmulateTextInput")) return Dispatch_debug_input_EmulateTextInput(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_debug_input(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

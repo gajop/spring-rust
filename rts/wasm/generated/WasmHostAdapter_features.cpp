@@ -2197,47 +2197,55 @@ NativeCalloutDispatch Dispatch_features_ValidFeatureID(NativeInterface* nativeIn
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_features(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_features(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_features(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "ClearFeaturesPreviousDrawFlag")) { static constexpr NativeCalloutTarget target{&Dispatch_features_ClearFeaturesPreviousDrawFlag}; return &target; }
+	if (detail::FunctionEquals(function, "GetAllFeatures")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetAllFeatures}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureAllyTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureAllyTeam}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureAlwaysUpdateMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureAlwaysUpdateMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureBlocking")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureBlocking}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureCollisionVolumeData")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureCollisionVolumeData}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDefID")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureDefID}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDirection")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureDirection}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureDrawFlag")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureDrawFlag}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureEngineDrawMask")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureEngineDrawMask}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureFireTime")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureFireTime}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureHeading")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureHeading}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureHealth")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureHealth}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureHeight")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureHeight}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureLastAttackedPiece")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureLastAttackedPiece}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureLuaDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureLuaDraw}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureMass")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureMass}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureNoDraw")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureNoDraw}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureNoSelect")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureNoSelect}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePieceCollisionVolumeData")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeaturePieceCollisionVolumeData}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePosition")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeaturePosition}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturePositionExt")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeaturePositionExt}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureRadius")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureRadius}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureResources")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureResources}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureResurrect")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureResurrect}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureRotation")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureRotation}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureSelectionVolumeData")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureSelectionVolumeData}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureSeparation")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureSeparation}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureSmokeTime")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureSmokeTime}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureTeam")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureTeam}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureTransformMatrix")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureTransformMatrix}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureVelocity")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeatureVelocity}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturesInCylinder")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeaturesInCylinder}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturesInRectangle")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeaturesInRectangle}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeaturesInSphere")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetFeaturesInSphere}; return &target; }
+	if (detail::FunctionEquals(function, "GetRenderFeatures")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetRenderFeatures}; return &target; }
+	if (detail::FunctionEquals(function, "GetRenderFeaturesDrawFlagChanged")) { static constexpr NativeCalloutTarget target{&Dispatch_features_GetRenderFeaturesDrawFlagChanged}; return &target; }
+	if (detail::FunctionEquals(function, "ValidFeatureID")) { static constexpr NativeCalloutTarget target{&Dispatch_features_ValidFeatureID}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_features(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "ClearFeaturesPreviousDrawFlag")) return Dispatch_features_ClearFeaturesPreviousDrawFlag(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetAllFeatures")) return Dispatch_features_GetAllFeatures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureAllyTeam")) return Dispatch_features_GetFeatureAllyTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureAlwaysUpdateMatrix")) return Dispatch_features_GetFeatureAlwaysUpdateMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureBlocking")) return Dispatch_features_GetFeatureBlocking(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureCollisionVolumeData")) return Dispatch_features_GetFeatureCollisionVolumeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDefID")) return Dispatch_features_GetFeatureDefID(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDirection")) return Dispatch_features_GetFeatureDirection(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureDrawFlag")) return Dispatch_features_GetFeatureDrawFlag(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureEngineDrawMask")) return Dispatch_features_GetFeatureEngineDrawMask(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureFireTime")) return Dispatch_features_GetFeatureFireTime(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureHeading")) return Dispatch_features_GetFeatureHeading(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureHealth")) return Dispatch_features_GetFeatureHealth(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureHeight")) return Dispatch_features_GetFeatureHeight(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureLastAttackedPiece")) return Dispatch_features_GetFeatureLastAttackedPiece(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureLuaDraw")) return Dispatch_features_GetFeatureLuaDraw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureMass")) return Dispatch_features_GetFeatureMass(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureNoDraw")) return Dispatch_features_GetFeatureNoDraw(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureNoSelect")) return Dispatch_features_GetFeatureNoSelect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePieceCollisionVolumeData")) return Dispatch_features_GetFeaturePieceCollisionVolumeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePosition")) return Dispatch_features_GetFeaturePosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturePositionExt")) return Dispatch_features_GetFeaturePositionExt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureRadius")) return Dispatch_features_GetFeatureRadius(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureResources")) return Dispatch_features_GetFeatureResources(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureResurrect")) return Dispatch_features_GetFeatureResurrect(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureRotation")) return Dispatch_features_GetFeatureRotation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureSelectionVolumeData")) return Dispatch_features_GetFeatureSelectionVolumeData(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureSeparation")) return Dispatch_features_GetFeatureSeparation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureSmokeTime")) return Dispatch_features_GetFeatureSmokeTime(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureTeam")) return Dispatch_features_GetFeatureTeam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureTransformMatrix")) return Dispatch_features_GetFeatureTransformMatrix(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureVelocity")) return Dispatch_features_GetFeatureVelocity(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturesInCylinder")) return Dispatch_features_GetFeaturesInCylinder(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturesInRectangle")) return Dispatch_features_GetFeaturesInRectangle(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeaturesInSphere")) return Dispatch_features_GetFeaturesInSphere(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetRenderFeatures")) return Dispatch_features_GetRenderFeatures(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetRenderFeaturesDrawFlagChanged")) return Dispatch_features_GetRenderFeaturesDrawFlagChanged(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ValidFeatureID")) return Dispatch_features_ValidFeatureID(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_features(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

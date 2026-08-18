@@ -112,11 +112,19 @@ NativeCalloutDispatch Dispatch_platform_IsHeadless(NativeInterface* nativeInterf
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_platform(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_platform(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_platform(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetArchitecture")) { static constexpr NativeCalloutTarget target{&Dispatch_platform_GetArchitecture}; return &target; }
+	if (detail::FunctionEquals(function, "IsHeadless")) { static constexpr NativeCalloutTarget target{&Dispatch_platform_IsHeadless}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_platform(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetArchitecture")) return Dispatch_platform_GetArchitecture(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsHeadless")) return Dispatch_platform_IsHeadless(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_platform(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

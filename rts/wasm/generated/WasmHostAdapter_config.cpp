@@ -682,18 +682,26 @@ NativeCalloutDispatch Dispatch_config_SetLogSectionFilterLevel(NativeInterface* 
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_config(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_config(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_config(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetConfigFloat")) { static constexpr NativeCalloutTarget target{&Dispatch_config_GetConfigFloat}; return &target; }
+	if (detail::FunctionEquals(function, "GetConfigInt")) { static constexpr NativeCalloutTarget target{&Dispatch_config_GetConfigInt}; return &target; }
+	if (detail::FunctionEquals(function, "GetConfigParams")) { static constexpr NativeCalloutTarget target{&Dispatch_config_GetConfigParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetConfigString")) { static constexpr NativeCalloutTarget target{&Dispatch_config_GetConfigString}; return &target; }
+	if (detail::FunctionEquals(function, "GetLogSections")) { static constexpr NativeCalloutTarget target{&Dispatch_config_GetLogSections}; return &target; }
+	if (detail::FunctionEquals(function, "SetConfigFloat")) { static constexpr NativeCalloutTarget target{&Dispatch_config_SetConfigFloat}; return &target; }
+	if (detail::FunctionEquals(function, "SetConfigInt")) { static constexpr NativeCalloutTarget target{&Dispatch_config_SetConfigInt}; return &target; }
+	if (detail::FunctionEquals(function, "SetConfigString")) { static constexpr NativeCalloutTarget target{&Dispatch_config_SetConfigString}; return &target; }
+	if (detail::FunctionEquals(function, "SetLogSectionFilterLevel")) { static constexpr NativeCalloutTarget target{&Dispatch_config_SetLogSectionFilterLevel}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_config(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetConfigFloat")) return Dispatch_config_GetConfigFloat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetConfigInt")) return Dispatch_config_GetConfigInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetConfigParams")) return Dispatch_config_GetConfigParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetConfigString")) return Dispatch_config_GetConfigString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetLogSections")) return Dispatch_config_GetLogSections(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetConfigFloat")) return Dispatch_config_SetConfigFloat(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetConfigInt")) return Dispatch_config_SetConfigInt(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetConfigString")) return Dispatch_config_SetConfigString(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetLogSectionFilterLevel")) return Dispatch_config_SetLogSectionFilterLevel(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_config(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

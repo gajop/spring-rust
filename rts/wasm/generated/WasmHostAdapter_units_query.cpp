@@ -1603,30 +1603,38 @@ NativeCalloutDispatch Dispatch_units_query_ValidUnitID(NativeInterface* nativeIn
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_query(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_units_query(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_units_query(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetAllUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetAllUnits}; return &target; }
+	if (detail::FunctionEquals(function, "GetClosestEnemyUnit")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetClosestEnemyUnit}; return &target; }
+	if (detail::FunctionEquals(function, "GetRenderUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetRenderUnits}; return &target; }
+	if (detail::FunctionEquals(function, "GetRenderUnitsDrawFlagChanged")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetRenderUnitsDrawFlagChanged}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamUnitCount")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetTeamUnitCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamUnitDefCount")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetTeamUnitDefCount}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamUnits")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetTeamUnits}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamUnitsByDefs")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetTeamUnitsByDefs}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamUnitsCounts")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetTeamUnitsCounts}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamUnitsSorted")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetTeamUnitsSorted}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitArrayCentroid")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitArrayCentroid}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitMapCentroid")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitMapCentroid}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitNearestAlly")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitNearestAlly}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitNearestEnemy")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitNearestEnemy}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitSeparation")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitSeparation}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitsInBox")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitsInBox}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitsInCylinder")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitsInCylinder}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitsInPlanes")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitsInPlanes}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitsInRectangle")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitsInRectangle}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitsInSphere")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_GetUnitsInSphere}; return &target; }
+	if (detail::FunctionEquals(function, "ValidUnitID")) { static constexpr NativeCalloutTarget target{&Dispatch_units_query_ValidUnitID}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_units_query(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetAllUnits")) return Dispatch_units_query_GetAllUnits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetClosestEnemyUnit")) return Dispatch_units_query_GetClosestEnemyUnit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetRenderUnits")) return Dispatch_units_query_GetRenderUnits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetRenderUnitsDrawFlagChanged")) return Dispatch_units_query_GetRenderUnitsDrawFlagChanged(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamUnitCount")) return Dispatch_units_query_GetTeamUnitCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamUnitDefCount")) return Dispatch_units_query_GetTeamUnitDefCount(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamUnits")) return Dispatch_units_query_GetTeamUnits(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamUnitsByDefs")) return Dispatch_units_query_GetTeamUnitsByDefs(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamUnitsCounts")) return Dispatch_units_query_GetTeamUnitsCounts(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamUnitsSorted")) return Dispatch_units_query_GetTeamUnitsSorted(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitArrayCentroid")) return Dispatch_units_query_GetUnitArrayCentroid(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitMapCentroid")) return Dispatch_units_query_GetUnitMapCentroid(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitNearestAlly")) return Dispatch_units_query_GetUnitNearestAlly(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitNearestEnemy")) return Dispatch_units_query_GetUnitNearestEnemy(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitSeparation")) return Dispatch_units_query_GetUnitSeparation(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitsInBox")) return Dispatch_units_query_GetUnitsInBox(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitsInCylinder")) return Dispatch_units_query_GetUnitsInCylinder(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitsInPlanes")) return Dispatch_units_query_GetUnitsInPlanes(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitsInRectangle")) return Dispatch_units_query_GetUnitsInRectangle(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitsInSphere")) return Dispatch_units_query_GetUnitsInSphere(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ValidUnitID")) return Dispatch_units_query_ValidUnitID(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_units_query(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

@@ -1043,24 +1043,32 @@ NativeCalloutDispatch Dispatch_rules_params_SetUnitRulesParam(NativeInterface* n
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_rules_params(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_rules_params(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_rules_params(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "GetFeatureRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetFeatureRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "GetFeatureRulesParams")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetFeatureRulesParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetGameRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameRulesParams")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetGameRulesParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetPlayerRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "GetPlayerRulesParams")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetPlayerRulesParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetTeamRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "GetTeamRulesParams")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetTeamRulesParams}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetUnitRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "GetUnitRulesParams")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_GetUnitRulesParams}; return &target; }
+	if (detail::FunctionEquals(function, "SetFeatureRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_SetFeatureRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "SetGameRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_SetGameRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "SetPlayerRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_SetPlayerRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "SetTeamRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_SetTeamRulesParam}; return &target; }
+	if (detail::FunctionEquals(function, "SetUnitRulesParam")) { static constexpr NativeCalloutTarget target{&Dispatch_rules_params_SetUnitRulesParam}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_rules_params(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "GetFeatureRulesParam")) return Dispatch_rules_params_GetFeatureRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetFeatureRulesParams")) return Dispatch_rules_params_GetFeatureRulesParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameRulesParam")) return Dispatch_rules_params_GetGameRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameRulesParams")) return Dispatch_rules_params_GetGameRulesParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerRulesParam")) return Dispatch_rules_params_GetPlayerRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetPlayerRulesParams")) return Dispatch_rules_params_GetPlayerRulesParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamRulesParam")) return Dispatch_rules_params_GetTeamRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetTeamRulesParams")) return Dispatch_rules_params_GetTeamRulesParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitRulesParam")) return Dispatch_rules_params_GetUnitRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetUnitRulesParams")) return Dispatch_rules_params_GetUnitRulesParams(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetFeatureRulesParam")) return Dispatch_rules_params_SetFeatureRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetGameRulesParam")) return Dispatch_rules_params_SetGameRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetPlayerRulesParam")) return Dispatch_rules_params_SetPlayerRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetTeamRulesParam")) return Dispatch_rules_params_SetTeamRulesParam(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetUnitRulesParam")) return Dispatch_rules_params_SetUnitRulesParam(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_rules_params(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }

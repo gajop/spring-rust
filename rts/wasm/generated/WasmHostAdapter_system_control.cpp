@@ -1213,30 +1213,38 @@ NativeCalloutDispatch Dispatch_system_control_Yield(NativeInterface* nativeInter
 
 namespace recoil::wasm::generated {
 
+const NativeCalloutTarget* ResolveNativeCalloutModule_system_control(std::string_view);
 NativeCalloutDispatch DispatchNativeCalloutModule_system_control(NativeInterface*, std::string_view, const std::vector<WasmValue>&, WasmValue&, std::string&);
+const NativeCalloutTarget* ResolveNativeCalloutModule_system_control(std::string_view function)
+{
+	if (detail::FunctionEquals(function, "ClearWatchDogTimer")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_ClearWatchDogTimer}; return &target; }
+	if (detail::FunctionEquals(function, "GarbageCollectCtrl")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GarbageCollectCtrl}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameName")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetGameName}; return &target; }
+	if (detail::FunctionEquals(function, "GetGameState")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetGameState}; return &target; }
+	if (detail::FunctionEquals(function, "GetGatherMode")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetGatherMode}; return &target; }
+	if (detail::FunctionEquals(function, "GetMenuName")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetMenuName}; return &target; }
+	if (detail::FunctionEquals(function, "GetReplayFilePath")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetReplayFilePath}; return &target; }
+	if (detail::FunctionEquals(function, "GetReplayLength")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetReplayLength}; return &target; }
+	if (detail::FunctionEquals(function, "GetReplayRecordingFilePath")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetReplayRecordingFilePath}; return &target; }
+	if (detail::FunctionEquals(function, "GetVideoCapturingMode")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetVideoCapturingMode}; return &target; }
+	if (detail::FunctionEquals(function, "GetWindowDisplayMode")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_GetWindowDisplayMode}; return &target; }
+	if (detail::FunctionEquals(function, "IsReplay")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_IsReplay}; return &target; }
+	if (detail::FunctionEquals(function, "Ping")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_Ping}; return &target; }
+	if (detail::FunctionEquals(function, "Quit")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_Quit}; return &target; }
+	if (detail::FunctionEquals(function, "Reload")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_Reload}; return &target; }
+	if (detail::FunctionEquals(function, "RequestStartPosition")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_RequestStartPosition}; return &target; }
+	if (detail::FunctionEquals(function, "Restart")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_Restart}; return &target; }
+	if (detail::FunctionEquals(function, "SetShareLevel")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_SetShareLevel}; return &target; }
+	if (detail::FunctionEquals(function, "ShareResources")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_ShareResources}; return &target; }
+	if (detail::FunctionEquals(function, "Start")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_Start}; return &target; }
+	if (detail::FunctionEquals(function, "Yield")) { static constexpr NativeCalloutTarget target{&Dispatch_system_control_Yield}; return &target; }
+	return nullptr;
+}
+
 NativeCalloutDispatch DispatchNativeCalloutModule_system_control(NativeInterface* nativeInterface, std::string_view function, const std::vector<WasmValue>& arguments, WasmValue& result, std::string& error)
 {
-	if (detail::FunctionEquals(function, "ClearWatchDogTimer")) return Dispatch_system_control_ClearWatchDogTimer(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GarbageCollectCtrl")) return Dispatch_system_control_GarbageCollectCtrl(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameName")) return Dispatch_system_control_GetGameName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGameState")) return Dispatch_system_control_GetGameState(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetGatherMode")) return Dispatch_system_control_GetGatherMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetMenuName")) return Dispatch_system_control_GetMenuName(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetReplayFilePath")) return Dispatch_system_control_GetReplayFilePath(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetReplayLength")) return Dispatch_system_control_GetReplayLength(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetReplayRecordingFilePath")) return Dispatch_system_control_GetReplayRecordingFilePath(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetVideoCapturingMode")) return Dispatch_system_control_GetVideoCapturingMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "GetWindowDisplayMode")) return Dispatch_system_control_GetWindowDisplayMode(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "IsReplay")) return Dispatch_system_control_IsReplay(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Ping")) return Dispatch_system_control_Ping(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Quit")) return Dispatch_system_control_Quit(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Reload")) return Dispatch_system_control_Reload(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "RequestStartPosition")) return Dispatch_system_control_RequestStartPosition(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Restart")) return Dispatch_system_control_Restart(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "SetShareLevel")) return Dispatch_system_control_SetShareLevel(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "ShareResources")) return Dispatch_system_control_ShareResources(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Start")) return Dispatch_system_control_Start(nativeInterface, arguments, result, error);
-	if (detail::FunctionEquals(function, "Yield")) return Dispatch_system_control_Yield(nativeInterface, arguments, result, error);
-	return NativeCalloutDispatch::notHandled;
+	const NativeCalloutTarget* target = ResolveNativeCalloutModule_system_control(function);
+	if (target == nullptr) return NativeCalloutDispatch::notHandled;
+	return target->invoke(nativeInterface, arguments, result, error);
 }
 }
