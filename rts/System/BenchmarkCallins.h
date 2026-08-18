@@ -2,19 +2,27 @@
 
 #pragma once
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <iomanip>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 
 namespace spring::benchmark_callins {
 
 using Clock = std::chrono::steady_clock;
+
+// The first dispatches carry one-time work (unit creation, the draw matrix), so
+// report a median over per-dispatch samples rather than a mean.
+constexpr std::size_t kWarmupSamples = 1;
+constexpr std::size_t kMinimumSamples = 32;
 
 struct Token {
 	std::string test;
@@ -23,8 +31,7 @@ struct Token {
 };
 
 struct Stats {
-	uint64_t count = 0;
-	uint64_t totalNanoseconds = 0;
+	std::vector<uint64_t> samples;
 };
 
 inline bool IsEnabled()
@@ -46,7 +53,12 @@ inline bool IsBackend(std::string_view backend)
 		const char* value = std::getenv("SPRING_NATIVE_BENCHMARK_BACKEND");
 		return value == nullptr ? std::string{} : std::string(value);
 	}();
-	return configured == backend;
+	if (configured == backend)
+		return true;
+	// The typed Rust host is a second Wasm transport reached through the same
+	// call sites, so it records the same "wasm" tokens.  The rows are told
+	// apart by the backend label Flush writes, not by the token.
+	return backend == "wasm" && configured == "wasm_rust_typed";
 }
 
 inline bool IsCase(std::string_view benchmarkCase)
@@ -99,8 +111,13 @@ inline bool IsTrackedTest(std::string_view test)
 		return test == "callin_unimplemented";
 	if (IsVariant("fourmodules"))
 		return test == "callin_4modules";
+	// Update is dispatched unsynced-only. Its row comes from a dedicated run
+	// against an unsynced guest; recording it elsewhere times an engine path
+	// that reaches no module.
+	if (IsVariant("update"))
+		return test == "callin_update";
 	return test == "callin_empty" || test == "callin_gameframe" ||
-		test == "callin_update" || test == "callin_drawworld" ||
+		test == "callin_drawworld" ||
 		test == "callin_unitcreated" || test == "callin_unitpredamaged" ||
 		test == "callin_allowunitcreation";
 }
@@ -143,9 +160,31 @@ inline void End(Token token)
 
 	const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
 		Clock::now() - token.start).count();
-	auto& sample = Samples()[token.test];
-	sample.count++;
-	sample.totalNanoseconds += static_cast<uint64_t>(elapsed);
+	Samples()[token.test].samples.push_back(static_cast<uint64_t>(elapsed));
+}
+
+// Cost of the clock reads that bracket a single dispatch. Reported alongside
+// the row, not subtracted from it: it bounds how much of a small median is
+// measurement bias.
+inline double ClockOverheadNanoseconds()
+{
+	double best = std::numeric_limits<double>::max();
+	for (int index = 0; index < 1000; ++index) {
+		const auto start = Clock::now();
+		const auto end = Clock::now();
+		best = std::min(best, static_cast<double>(
+			std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()));
+	}
+	return best;
+}
+
+inline double Percentile(const std::vector<uint64_t>& sorted, double fraction)
+{
+	if (sorted.empty())
+		return 0.0;
+	const std::size_t index = static_cast<std::size_t>(
+		fraction * static_cast<double>(sorted.size() - 1));
+	return static_cast<double>(sorted[std::min(index, sorted.size() - 1)]);
 }
 
 inline void Flush()
@@ -166,23 +205,39 @@ inline void Flush()
 	if (!file)
 		return;
 
+	const double clockOverhead = ClockOverheadNanoseconds();
 	for (const auto& [test, sample] : Samples()) {
-		if (sample.count == 0)
+		if (sample.samples.empty())
 			continue;
-		const double perCallbackNanoseconds = static_cast<double>(sample.totalNanoseconds) /
-			static_cast<double>(sample.count);
 		// Native modules are separate event clients, so a four-module run
 		// records one token per client. Report the per-engine-event fan-out
 		// cost, matching the single dispatch token used by Lua and Wasm.
 		const double fanout = std::string_view(backend) == "native" &&
 			IsVariant("fourmodules") ? 4.0 : 1.0;
-		const double meanNanoseconds = perCallbackNanoseconds * fanout;
+		if (sample.samples.size() <= kWarmupSamples ||
+			sample.samples.size() - kWarmupSamples < kMinimumSamples) {
+			file << "{\"backend\":\"" << backend
+				 << "\",\"test\":\"" << test
+				 << "\",\"status\":\"unavailable\",\"iterations\":" << sample.samples.size()
+				 << ",\"reason\":\"only " << sample.samples.size()
+				 << " dispatches were recorded; a callin row needs at least "
+				 << (kMinimumSamples + kWarmupSamples) << "\"}\n";
+			continue;
+		}
+		std::vector<uint64_t> sorted(
+			sample.samples.begin() + kWarmupSamples, sample.samples.end());
+		std::sort(sorted.begin(), sorted.end());
+		const double median = Percentile(sorted, 0.5) * fanout;
+		// Central 90%: per-dispatch samples always contain scheduling outliers.
+		const double spread = (Percentile(sorted, 0.95) - Percentile(sorted, 0.05)) * fanout;
 		file << "{\"backend\":\"" << backend
 			 << "\",\"test\":\"" << test
-			 << "\",\"status\":\"pass\",\"iterations\":" << sample.count
-			 << ",\"meanNs\":" << std::fixed << std::setprecision(3) << meanNanoseconds
-			 << ",\"totalMeanNs\":" << sample.totalNanoseconds
-			 << ",\"measurement\":\"actual engine callin boundary\"}\n";
+			 << "\",\"status\":\"pass\",\"iterations\":" << sorted.size()
+			 << ",\"medianNs\":" << std::fixed << std::setprecision(3) << median
+			 << ",\"spreadNs\":" << spread
+			 << ",\"p99Ns\":" << Percentile(sorted, 0.99) * fanout
+			 << ",\"clockOverheadNs\":" << clockOverhead
+			 << ",\"measurement\":\"actual engine callin boundary; median of per-dispatch samples\"}\n";
 	}
 	file.flush();
 	flushed = true;

@@ -67,6 +67,21 @@ BENCHMARK_COMPONENT_MEMORY = BENCHMARK_COMPONENT.with_name(
 BENCHMARK_COMPONENT_DRAW = BENCHMARK_COMPONENT.with_name(
     "recoil_wasm_benchmark_guest.draw.component.wasm"
 )
+# Update is dispatched unsynced-only, so the callin profile times it against an
+# unsynced guest.  A synced guest never receives it.
+BENCHMARK_COMPONENT_UPDATE = BENCHMARK_COMPONENT.with_name(
+    "recoil_wasm_benchmark_guest.update.component.wasm"
+)
+TYPED_HOST_CRATE = ROOT / "rust" / "crates" / "spring-wasm-typed-host" / "Cargo.toml"
+TYPED_HOST_LIBRARY = (
+    ROOT
+    / "rust"
+    / "crates"
+    / "spring-wasm-typed-host"
+    / "target"
+    / "release"
+    / "libspring_wasm_typed_host.so"
+)
 BENCHMARK_STAMP = (
     ROOT
     / "test"
@@ -76,7 +91,12 @@ BENCHMARK_STAMP = (
     / "benchmark-profile.json"
 )
 
-BACKENDS = ("lua", "native", "wasm")
+# Both Wasm backends run the same component bytes over the Component Model;
+# they differ only in how the host binds to it.  "wasm" is Wasmtime's dynamic C
+# API, "wasm_rust_typed" its Rust static bindings.  The name spells out all
+# three axes because native modules are usually written in Rust too, so "rust"
+# alone would name the wrong difference.
+BACKENDS = ("lua", "native", "wasm", "wasm_rust_typed")
 CALLOUT_TESTS = (
     "callout_scalar",
     "callout_vec3",
@@ -118,7 +138,6 @@ CALLIN_TESTS = (
 	"callin_4modules",
 )
 CALLIN_COMMON_TESTS = (
-	"callin_update",
 	"callin_unitcreated",
 	"callin_unitpredamaged",
 	"callin_allowunitcreation",
@@ -198,6 +217,21 @@ def build_native() -> None:
     )
     if not NATIVE_SO.is_file():
         raise RuntimeError(f"native benchmark module was not produced: {NATIVE_SO}")
+
+
+def unavailable_row(backend: str, test: str, reason: str) -> dict:
+    return {"backend": backend, "test": test, "status": "unavailable", "reason": reason}
+
+
+def build_typed_host() -> None:
+    """The engine build image has no cargo, so the typed Rust host is built
+    here and loaded with dlopen, the same way the native module is."""
+    run_checked(
+        ["cargo", "build", "--manifest-path", str(TYPED_HOST_CRATE), "--release"],
+        cwd=ROOT,
+    )
+    if not TYPED_HOST_LIBRARY.is_file():
+        raise RuntimeError(f"Rust Wasm host was not produced: {TYPED_HOST_LIBRARY}")
 
 
 def prepare_benchmark_context(context: str) -> None:
@@ -367,9 +401,9 @@ def run_backend(
     backend_output.mkdir(parents=True, exist_ok=True)
     workdir = Path(tempfile.mkdtemp(prefix=f"wasm-benchmark-{backend}-"))
     try:
-        wasm_module = wasm_component if backend == "wasm" else None
+        wasm_module = wasm_component if backend.startswith("wasm") else None
         datadir, _ = prepare_datadir(workdir, None, wasm_module, wasm_context)
-        if backend == "wasm" and wasm_module_count > 1:
+        if backend.startswith("wasm") and wasm_module_count > 1:
             wasm_directory = datadir / "games" / "native_api_parity.sdd" / "LuaRules" / "wasm"
             manifest_lines = [
                 f"module(parity-{index}, LuaRules/wasm/parity.wasm, "
@@ -406,6 +440,11 @@ def run_backend(
         # write-directory. A benchmark result is valid only when this process
         # produced every row it reports.
         (benchmark_dir / f"benchmark_{backend}.jsonl").unlink(missing_ok=True)
+        # The guest labels its own rows "wasm" because it is the same component
+        # on either transport, so a wasm_rust run splits its output between the
+        # engine-side file and the guest-side one.
+        if backend == "wasm_rust_typed":
+            (benchmark_dir / "benchmark_wasm.jsonl").unlink(missing_ok=True)
         env = os.environ.copy()
         env["SPRING_ENABLE_SYNCED_TIMERS"] = "1"
         data_dirs = [datadir, BASE_CONTENT]
@@ -418,6 +457,12 @@ def run_backend(
         env["SPRING_NATIVE_MODULE"] = (
             str(NATIVE_SO) if backend == "native" and load_native_module else ""
         )
+        if backend == "wasm_rust_typed":
+            env["SPRING_WASM_TYPED_HOST"] = "1"
+            env["SPRING_WASM_TYPED_HOST_LIBRARY"] = str(TYPED_HOST_LIBRARY)
+        else:
+            env.pop("SPRING_WASM_TYPED_HOST", None)
+            env.pop("SPRING_WASM_TYPED_HOST_LIBRARY", None)
         env["SPRING_NATIVE_BENCHMARK_SCALE"] = str(scale)
         env["SPRING_NATIVE_BENCHMARK_CASE"] = benchmark_case
         env["SPRING_NATIVE_BENCHMARK_ITERATIONS"] = str(benchmark_iterations)
@@ -467,13 +512,23 @@ def run_backend(
             raise RuntimeError(f"{backend} benchmark exited {return_code}:\n{tail}")
 
         result_path = benchmark_dir / f"benchmark_{backend}.jsonl"
-        if not result_path.is_file():
+        result_paths = [result_path]
+        if backend == "wasm_rust_typed":
+            result_paths.append(benchmark_dir / "benchmark_wasm.jsonl")
+        if not any(path.is_file() for path in result_paths):
             raise RuntimeError(f"{backend} benchmark produced no result file: {result_path}")
-        rows = [
-            json.loads(line)
-            for line in result_path.read_text(encoding="utf-8").splitlines()
-            if line.strip()
-        ]
+        rows = []
+        for path in result_paths:
+            if not path.is_file():
+                continue
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                # Relabel the guest-written rows; they were produced through
+                # the Rust host in this run.
+                row["backend"] = backend
+                rows.append(row)
         if benchmark_case == "draw":
             # The process also runs the fixture's normal LuaRules lifecycle;
             # its engine-side callin recorder therefore emits unrelated
@@ -506,13 +561,19 @@ def validate_rows(backend: str, rows: list[dict], expected_tests: tuple[str, ...
         if next(row for row in rows if row.get("test") == name).get("status")
         == "unavailable"
     )
-    if missing or extra or duplicates or failures or unavailable:
+    if missing or extra or duplicates or failures:
         raise RuntimeError(
             f"{backend} benchmark row validation failed: missing={missing}, "
-            f"extra={extra}, duplicates={duplicates}, unavailable={unavailable}, "
-            f"failures={failures}"
+            f"extra={extra}, duplicates={duplicates}, failures={failures}"
         )
-    print(f"[{backend}] {len(names)} tests", flush=True)
+    # An unmeasurable row belongs in the table as a gap, not as a number.
+    for name in unavailable:
+        row = next(row for row in rows if row.get("test") == name)
+        print(
+            f"[{backend}] UNAVAILABLE {name}: {row.get('reason', 'no reason given')}",
+            flush=True,
+        )
+    print(f"[{backend}] {len(names)} tests, {len(unavailable)} unavailable", flush=True)
 
 
 def numeric_metric(row: dict, test: str) -> tuple[float, str] | None:
@@ -556,6 +617,8 @@ def spread_metric(row: dict, test: str) -> tuple[float, str] | None:
 
 
 def format_timed_metric(row: dict, test: str) -> str:
+    if row.get("status") == "unavailable":
+        return "unavailable"
     value = format_metric(numeric_metric(row, test))
     spread = format_metric(spread_metric(row, test))
     return value if spread == "—" else f"{value} ± {spread}"
@@ -563,7 +626,7 @@ def format_timed_metric(row: dict, test: str) -> str:
 
 def format_memory_metric(row: dict, test: str) -> str:
     if row.get("status") == "unavailable":
-        return "—"
+        return "unavailable"
     if test in {"mem_per_call_small", "mem_per_call_list"}:
         bytes_value = float(row.get("bytes", 0.0))
         allocations = float(row.get("allocations", 0.0))
@@ -669,9 +732,13 @@ def render_report(summaries: list[dict]) -> str:
     lines = [
         "<!-- This file is generated by test/native_api_parity/run_benchmarks.py. -->",
         "",
-        "| Profile | Scale | Test | Lua | Native | Wasm | Lua vs native | "
-        "Wasm vs Lua | Wasm vs native |",
-        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        # Ratios are stated against the typed Rust host: it is the transport
+        # a shipping implementation would use, so what matters is how it
+        # compares to Lua and native, not how the dynamic C API does.
+        "| Profile | Scale | Test | Lua | Native | Wasm (C API, dynamic, CM) | "
+        "Wasm (Rust, typed, CM) | Lua vs native | Typed vs Lua | "
+        "Typed vs native | Typed vs dynamic |",
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for summary in summaries:
         profile = str(summary["profile"])
@@ -694,10 +761,11 @@ def render_report(summaries: list[dict]) -> str:
                 ]
             lines.append(
                 f"| `{profile}` | {float(summary['scale']):g} | `{test}` | {values[0]} | "
-                f"{values[1]} | {values[2]} | "
+                f"{values[1]} | {values[2]} | {values[3]} | "
                 f"{ratio_for_test(test, rows['lua'], rows['native'])} | "
-                f"{ratio_for_test(test, rows['wasm'], rows['lua'])} | "
-                f"{ratio_for_test(test, rows['wasm'], rows['native'])} |"
+                f"{ratio_for_test(test, rows['wasm_rust_typed'], rows['lua'])} | "
+                f"{ratio_for_test(test, rows['wasm_rust_typed'], rows['native'])} | "
+                f"{ratio_for_test(test, rows['wasm_rust_typed'], rows['wasm'])} |"
             )
     lines.append("")
     return "\n".join(lines)
@@ -714,7 +782,8 @@ def validate_report_shape(report: str) -> None:
         raise RuntimeError("benchmark report must separate its marker from the table")
     if not lines[2].startswith("| Profile | Scale | Test |"):
         raise RuntimeError("benchmark report has an unexpected table header")
-    if not lines[3].startswith("| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |"):
+    if not lines[3].startswith(
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"):
         raise RuntimeError("benchmark report has an unexpected table separator")
     if any(line and not line.startswith("|") for line in lines[4:]):
         raise RuntimeError("benchmark report may contain only generated table rows")
@@ -945,6 +1014,7 @@ def main() -> int:
         raise RuntimeError(f"spring not found: {args.spring}")
     if not args.skip_build:
         build_native()
+        build_typed_host()
         if benchmark_case == "callins":
             for variant, component in (
                 ("empty", BENCHMARK_COMPONENT_EMPTY),
@@ -953,6 +1023,8 @@ def main() -> int:
             ):
                 os.environ["SPRING_BENCHMARK_CALLIN_VARIANT"] = variant
                 build_wasm(component)
+            os.environ["SPRING_BENCHMARK_CALLIN_VARIANT"] = "empty"
+            build_wasm(BENCHMARK_COMPONENT_UPDATE, "unsynced_gadget")
             write_build_stamp(
                 benchmark_case,
                 scale,
@@ -993,6 +1065,7 @@ def main() -> int:
             BENCHMARK_COMPONENT_EMPTY.is_file()
             and BENCHMARK_COMPONENT_GAMEFRAME.is_file()
             and BENCHMARK_COMPONENT_UNIMPLEMENTED.is_file()
+            and BENCHMARK_COMPONENT_UPDATE.is_file()
         )
         if benchmark_case == "callins"
         else BENCHMARK_COMPONENT_MEMORY.is_file()
@@ -1015,6 +1088,20 @@ def main() -> int:
     run_root = args.output_root / datetime.now().strftime("%Y%m%d-%H%M%S")
     rows_by_backend = {}
     for backend in BACKENDS:
+        # The typed host implements the rules-synced and rules-unsynced worlds
+        # but not the UI one, so it is never started for the draw profile.
+        # Running it anyway would time the C API path under a typed label.
+        if backend == "wasm_rust_typed" and benchmark_case == "draw":
+            rows_by_backend[backend] = [
+                unavailable_row(
+                    backend,
+                    test,
+                    "the typed Rust host does not implement the UI world",
+                )
+                for test in expected_tests
+            ]
+            continue
+
         if benchmark_case == "draw":
             rows_by_backend[backend] = run_backend(
                 backend,
@@ -1120,7 +1207,16 @@ def main() -> int:
             wasm_context=benchmark_context,
             load_native_module=False,
         )
-        four_module_rows = run_backend(
+        # The Rust host is a single instance per process, so a four-module run
+        # would dispatch once and report it as four.  An absent row beats a
+        # mislabelled one.
+        four_module_rows = [
+            unavailable_row(
+                backend,
+                "callin_4modules",
+                "the typed Rust host holds one component instance per process",
+            )
+        ] if backend == "wasm_rust_typed" else run_backend(
             backend,
             run_root,
             args.seed,
@@ -1138,6 +1234,26 @@ def main() -> int:
             wasm_context=benchmark_context,
             wasm_module_count=4,
         )
+        # Update reaches unsynced environments only, so it is timed against an
+        # unsynced guest.  Run against a synced guest it measures the engine
+        # path for a dispatch no module receives.
+        update_rows = run_backend(
+            backend,
+            run_root,
+            args.seed,
+            timeout,
+            args.spring_headless,
+            args.skip_build,
+            scale,
+            benchmark_case,
+            benchmark_iterations,
+            benchmark_repeats,
+            ("callin_update",),
+            callin_variant="update",
+            wasm_component=BENCHMARK_COMPONENT_UPDATE,
+            output_name=f"{backend}-update",
+            wasm_context="unsynced_gadget",
+        )
         selected_gameframe = next(
             row for row in gameframe_rows if row.get("test") == "callin_gameframe"
         )
@@ -1149,6 +1265,9 @@ def main() -> int:
         ]
         rows_by_backend[backend] += [
             row for row in four_module_rows if row.get("test") != "complete"
+        ]
+        rows_by_backend[backend] += [
+            row for row in update_rows if row.get("test") != "complete"
         ]
     summary = make_summary(
         run_root,

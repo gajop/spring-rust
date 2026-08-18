@@ -111,69 +111,86 @@ fn main() {
         "interface profiling-rules-synced-rules-unsynced-gaia-synced-gaia-unsynced-ui",
         "interface profiling",
     );
-    let rules_params = r#"interface rules-params {
-  record spring-error { code: s32 }
-
-  record rules-param-value {
-    %type: rules-param-type,
-  }
-
-  enum rules-param-type {
-    rulesparam-type-bool,
-    rulesparam-type-float,
-    rulesparam-type-string,
-  }
-
-  record get-unit-rules-param-value {
-    value: rules-param-value,
-    los: s32,
-    exists: bool,
-  }
-
-  /// read-only
-  get-unit-rules-param: func(unit-id: s32, param-name: string) -> result<get-unit-rules-param-value, spring-error>;
-
-  /// mutating
-  set-unit-rules-param: func(unit-id: s32, param-name: string, value: rules-param-value, los: s32) -> result<bool, spring-error>;
-}
-"#;
-    let terrain = r#"interface terrain-control {
-  record spring-error { code: s32 }
-
-  set-terrain-type-data: func(type-index: s32, tank-speed: f32, kbot-speed: f32, hover-speed: f32, ship-speed: f32, hardness: f32, receive-tracks: bool, name: string) -> result<bool, spring-error>;
-  set-tidal: func(tidal: f32) -> result<bool, spring-error>;
-  set-wind: func(min-wind: f32, max-wind: f32) -> result<bool, spring-error>;
-  set-height-map: func(x: f32, z: f32, height: f32, terraform: f32) -> result<bool, spring-error>;
-  set-height-map-func: func(callback: u32, user-data: u32) -> result<bool, spring-error>;
-  level-height-map: func(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> result<bool, spring-error>;
-}
-"#;
-    let old_terrain = "interface terrain-control {\n  record spring-error { code: s32 }\n\n  set-terrain-type-data: func(type-index: s32, tank-speed: f32, kbot-speed: f32, hover-speed: f32, ship-speed: f32, hardness: f32, receive-tracks: bool, name: string) -> result<bool, spring-error>;\n  set-tidal: func(tidal: f32) -> result<bool, spring-error>;\n  set-wind: func(min-wind: f32, max-wind: f32) -> result<bool, spring-error>;\n}\n";
-    base = base.replace(old_terrain, terrain);
-    base = base.replace(
-        "interface unit-control {\n  record spring-error { code: s32 }\n",
-        "interface unit-control {\n  record spring-error { code: s32 }\n\n  /// mutating\n  give-order-to-unit: func(unit-id: s32, cmd-id: s32, params: list<f32>, options: u32, timeout: s32) -> result<bool, spring-error>;\n",
-    );
-    base = base.replace(
-        "interface units-info {\n  record spring-error { code: s32 }\n",
-        "interface units-info {\n  record spring-error { code: s32 }\n\n  record unit-health {\n    health: f32,\n    max-health: f32,\n    paralyze-damage: f32,\n    capture-progress: f32,\n    build-progress: f32,\n  }\n",
-    );
-    base = base.replace(
-        "  get-unit-height: func(unit-id: s32) -> result<f32, spring-error>;\n",
-        "  get-unit-health: func(unit-id: s32) -> result<unit-health, spring-error>;\n  get-unit-height: func(unit-id: s32) -> result<f32, spring-error>;\n",
-    );
+    // The parity WIT already carries every interface this benchmark calls, so
+    // each patch below is conditional: re-declaring one the model has since
+    // grown is a duplicate-item parse error.
     base = base.replace("world rules-synced {", "world benchmark-rules-synced {");
-    base = base.replace(
-        "  import messages;\n",
-        "  import messages;\n  import profiling;\n  import rules-params;\n",
-    );
-    let callin_exports = if benchmark_callin_variant == "unimplemented" {
-        "  export callback-1: func(user-data: u32);\n}"
-    } else {
-        "  export callins-rules-synced;\n  export callback-1: func(user-data: u32);\n}"
-    };
-    base = base.replace("  export callins-rules-synced;\n}", callin_exports);
-    let output = format!("package recoil:spring-api@1.0.0;\n\n{profiling}\n{rules_params}\n{base}");
+    // Profiling is unsynced-only upstream, but the timer is what every
+    // measurement here is built on.
+    if !base.contains("  import profiling;\n") {
+        base = base.replace("  import messages;\n", "  import messages;\n  import profiling;\n");
+    }
+    if !base.contains("export callback-1") {
+        base = base.replace(
+            "  export callins-rules-synced;\n}",
+            "  export callins-rules-synced;\n  export callback-1: func(user-data: u32);\n}",
+        );
+    }
+    // The parity probe only needs the three lifecycle callins, but the callin
+    // profile also times UnitCreated, UnitPreDamaged and AllowUnitCreation.  A
+    // row for a callin the guest does not export measures engine overhead, not
+    // dispatch, so declare them here.  Shapes are copied from the engine's
+    // generated rts/wasm/generated/wit/callins-rules-synced.wit.
+    if !base.contains("  unit-created: func(") {
+        base = base.replace(
+            "  update: func(query: update-query) -> result<update-result, spring-error>;\n}",
+            r#"  update: func(query: update-query) -> result<update-result, spring-error>;
+
+  record float3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  record allow-unit-creation-query {
+    unit-def-id: s32,
+    builder-id: s32,
+    builder-team: s32,
+    has-build-info: bool,
+    build-pos: float3,
+    build-facing: s32,
+  }
+
+  record allow-unit-creation-result {
+    allow: bool,
+    drop-order: bool,
+  }
+
+  record damage-callin-result {
+    new-damage: f32,
+    impulse-mult: f32,
+  }
+
+  record unit-created-query {
+    unit-id: s32,
+    unit-def-id: s32,
+    unit-team: s32,
+    builder-id: s32,
+  }
+
+  record unit-damaged-query {
+    unit-id: s32,
+    unit-def-id: s32,
+    unit-team: s32,
+    damage: f32,
+    paralyzer: bool,
+    weapon-def-id: s32,
+    projectile-id: s32,
+    attacker-id: s32,
+    attacker-def-id: s32,
+    attacker-team: s32,
+  }
+
+  allow-unit-creation: func(query: allow-unit-creation-query) -> result<allow-unit-creation-result, spring-error>;
+  unit-created: func(query: unit-created-query) -> result<_, spring-error>;
+  unit-pre-damaged: func(query: unit-damaged-query) -> result<damage-callin-result, spring-error>;
+}"#,
+        );
+    }
+    if benchmark_callin_variant == "unimplemented" {
+        base = base.replace("  export callins-rules-synced;\n", "");
+    }
+    let output = format!("package recoil:spring-api@1.0.0;\n\n{profiling}\n{base}");
     let wit_dir = manifest.join("wit");
     fs::create_dir_all(&wit_dir).expect("create benchmark WIT directory");
     if benchmark_context != "unsynced_gadget" && benchmark_context != "ui" {

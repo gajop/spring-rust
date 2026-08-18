@@ -4,33 +4,43 @@
 macro_rules! generated_callin_trace_methods {
     () => {
     fn download_failed(&mut self, download_id: i32, error_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(download_id));
         trace_args.push(self.trace_i32(error_id));
+        }
         let callback_result = {
         let _ = (download_id, error_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DownloadFailed", trace_args, trace_results);
+            self.record_callin_args_result("DownloadFailed", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn download_finished(&mut self, download_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(download_id));
+        }
         let callback_result = {
         let _ = download_id;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DownloadFinished", trace_args, trace_results);
+            self.record_callin_args_result("DownloadFinished", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -40,19 +50,24 @@ macro_rules! generated_callin_trace_methods {
         downloaded: i64,
         total: i64,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(download_id));
         trace_args.push(self.trace_i64(downloaded));
         trace_args.push(self.trace_i64(total));
+        }
         let callback_result = {
         let _ = (download_id, downloaded, total);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DownloadProgress", trace_args, trace_results);
+            self.record_callin_args_result("DownloadProgress", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -62,207 +77,275 @@ macro_rules! generated_callin_trace_methods {
         archive_name: &str,
         archive_type: &str,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(download_id));
         trace_args.push(self.trace_str(archive_name));
         trace_args.push(self.trace_str(archive_type));
+        }
         let callback_result = {
         let _ = (download_id, archive_name, archive_type);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DownloadQueued", trace_args, trace_results);
+            self.record_callin_args_result("DownloadQueued", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn download_started(&mut self, download_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(download_id));
+        }
         let callback_result = {
         let _ = download_id;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DownloadStarted", trace_args, trace_results);
+            self.record_callin_args_result("DownloadStarted", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn feature_created(&mut self, feature_id: i32, ally_team_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(feature_id));
         trace_args.push(self.trace_i32(ally_team_id));
+        }
         let callback_result = {
         let _ = (feature_id, ally_team_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("FeatureCreated", trace_args, trace_results);
+            self.record_callin_args_result("FeatureCreated", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn feature_destroyed(&mut self, feature_id: i32, ally_team_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(feature_id));
         trace_args.push(self.trace_i32(ally_team_id));
+        }
         let callback_result = {
         let _ = (feature_id, ally_team_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("FeatureDestroyed", trace_args, trace_results);
+            self.record_callin_args_result("FeatureDestroyed", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn game_id(&mut self, game_id: &[u8]) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_game_id(game_id));
+        }
         let callback_result = {
         let _ = game_id;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GameID", trace_args, trace_results);
+            self.record_callin_args_result("GameID", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn game_paused(&mut self, player_id: i32, paused: bool) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(player_id));
         trace_args.push(self.trace_bool(paused));
+        }
         let callback_result = {
         let _ = (player_id, paused);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GamePaused", trace_args, trace_results);
+            self.record_callin_args_result("GamePaused", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn game_preload(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GamePreload", trace_args, trace_results);
+            self.record_callin_args_result("GamePreload", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn game_start(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GameStart", trace_args, trace_results);
+            self.record_callin_args_result("GameStart", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn game_over(&mut self, winning_ally_teams: &[u8]) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_byte_table(winning_ally_teams));
+        }
         let callback_result = {
         let _ = winning_ally_teams;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GameOver", trace_args, trace_results);
+            self.record_callin_args_result("GameOver", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn game_frame(&mut self, game_frame: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(game_frame));
+        }
         let callback_result = {
-        if std::env::var("SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT")            .as_deref() == Ok("gameframe") {
+        if benchmark_callin_variant_is("gameframe") {
             std::hint::black_box(game_frame);
         }
 
         let _ = game_frame;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GameFrame", trace_args, trace_results);
+            self.record_callin_args_result("GameFrame", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn game_frame_post(&mut self, game_frame: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(game_frame));
+        }
         let callback_result = {
         let _ = game_frame;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GameFramePost", trace_args, trace_results);
+            self.record_callin_args_result("GameFramePost", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn update(&mut self, delta_seconds: f32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_f32(delta_seconds));
+        }
         let callback_result = {
         let _ = delta_seconds;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("Update", trace_args, trace_results);
+            self.record_callin_args_result("Update", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_genesis(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawGenesis", trace_args, trace_results);
+            self.record_callin_args_result("DrawGenesis", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_world(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
-        if std::env::var("SPRING_NATIVE_BENCHMARK_CASE")            .as_deref() == Ok("draw") {
+        if benchmark_case_is("draw") {
             if let Err(error) = self.benchmark_draw_world() {
                 return Err(spring_native::Error::new(1, error));
             }
@@ -270,37 +353,49 @@ macro_rules! generated_callin_trace_methods {
 
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawWorld", trace_args, trace_results);
+            self.record_callin_args_result("DrawWorld", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_world_pre_unit(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawWorldPreUnit", trace_args, trace_results);
+            self.record_callin_args_result("DrawWorldPreUnit", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_pre_decals(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawPreDecals", trace_args, trace_results);
+            self.record_callin_args_result("DrawPreDecals", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -311,11 +406,14 @@ macro_rules! generated_callin_trace_methods {
         draw_reflection: bool,
         draw_refraction: bool,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_bool(draw_above_water));
         trace_args.push(self.trace_bool(draw_below_water));
         trace_args.push(self.trace_bool(draw_reflection));
         trace_args.push(self.trace_bool(draw_refraction));
+        }
         let callback_result = {
         let _ = (
             draw_above_water,
@@ -325,247 +423,334 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawWorldPreParticles", trace_args, trace_results);
+            self.record_callin_args_result("DrawWorldPreParticles", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_water_post(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawWaterPost", trace_args, trace_results);
+            self.record_callin_args_result("DrawWaterPost", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_world_shadow(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawWorldShadow", trace_args, trace_results);
+            self.record_callin_args_result("DrawWorldShadow", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_shadow_pass_transparent(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawShadowPassTransparent", trace_args, trace_results);
+            self.record_callin_args_result("DrawShadowPassTransparent", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_world_reflection(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawWorldReflection", trace_args, trace_results);
+            self.record_callin_args_result("DrawWorldReflection", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_world_refraction(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawWorldRefraction", trace_args, trace_results);
+            self.record_callin_args_result("DrawWorldRefraction", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_ground_pre_forward(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawGroundPreForward", trace_args, trace_results);
+            self.record_callin_args_result("DrawGroundPreForward", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_ground_post_forward(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawGroundPostForward", trace_args, trace_results);
+            self.record_callin_args_result("DrawGroundPostForward", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_ground_pre_deferred(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawGroundPreDeferred", trace_args, trace_results);
+            self.record_callin_args_result("DrawGroundPreDeferred", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_ground_deferred(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawGroundDeferred", trace_args, trace_results);
+            self.record_callin_args_result("DrawGroundDeferred", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_ground_post_deferred(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawGroundPostDeferred", trace_args, trace_results);
+            self.record_callin_args_result("DrawGroundPostDeferred", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_units_post_deferred(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawUnitsPostDeferred", trace_args, trace_results);
+            self.record_callin_args_result("DrawUnitsPostDeferred", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_features_post_deferred(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawFeaturesPostDeferred", trace_args, trace_results);
+            self.record_callin_args_result("DrawFeaturesPostDeferred", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_screen_effects(&mut self, view_size_x: i32, view_size_y: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(view_size_x));
         trace_args.push(self.trace_i32(view_size_y));
+        }
         let callback_result = {
         let _ = (view_size_x, view_size_y);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawScreenEffects", trace_args, trace_results);
+            self.record_callin_args_result("DrawScreenEffects", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_screen_post(&mut self, view_size_x: i32, view_size_y: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(view_size_x));
         trace_args.push(self.trace_i32(view_size_y));
+        }
         let callback_result = {
         let _ = (view_size_x, view_size_y);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawScreenPost", trace_args, trace_results);
+            self.record_callin_args_result("DrawScreenPost", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_in_minimap(&mut self, size_x: i32, size_y: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(size_x));
         trace_args.push(self.trace_i32(size_y));
+        }
         let callback_result = {
         let _ = (size_x, size_y);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawInMiniMap", trace_args, trace_results);
+            self.record_callin_args_result("DrawInMiniMap", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_in_minimap_background(&mut self, size_x: i32, size_y: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(size_x));
         trace_args.push(self.trace_i32(size_y));
+        }
         let callback_result = {
         let _ = (size_x, size_y);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawInMiniMapBackground", trace_args, trace_results);
+            self.record_callin_args_result("DrawInMiniMapBackground", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn minimap_rotation_changed(&mut self, new_rot: f32, old_rot: f32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_f32(new_rot));
         trace_args.push(self.trace_f32(old_rot));
+        }
         let callback_result = {
         let _ = (new_rot, old_rot);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MiniMapRotationChanged", trace_args, trace_results);
+            self.record_callin_args_result("MiniMapRotationChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -575,19 +760,24 @@ macro_rules! generated_callin_trace_methods {
         is_maximized: bool,
         is_slaved: bool,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_bool(is_minimized));
         trace_args.push(self.trace_bool(is_maximized));
         trace_args.push(self.trace_bool(is_slaved));
+        }
         let callback_result = {
         let _ = (is_minimized, is_maximized, is_slaved);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MiniMapStateChanged", trace_args, trace_results);
+            self.record_callin_args_result("MiniMapStateChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -602,7 +792,9 @@ macro_rules! generated_callin_trace_methods {
         old_dim_x: i32,
         old_dim_y: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(new_pos_x));
         trace_args.push(self.trace_i32(new_pos_y));
         trace_args.push(self.trace_i32(new_dim_x));
@@ -611,98 +803,126 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_i32(old_pos_y));
         trace_args.push(self.trace_i32(old_dim_x));
         trace_args.push(self.trace_i32(old_dim_y));
+        }
         let callback_result = {
         let _ = (
             new_pos_x, new_pos_y, new_dim_x, new_dim_y, old_pos_x, old_pos_y, old_dim_x, old_dim_y,
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MiniMapGeometryChanged", trace_args, trace_results);
+            self.record_callin_args_result("MiniMapGeometryChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_unit(&mut self, unit_id: i32, draw_mode: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(draw_mode));
+        }
         let callback_result = {
         let _ = (unit_id, draw_mode);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawUnit", trace_args, trace_results);
+            self.record_callin_args_result("DrawUnit", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_feature(&mut self, feature_id: i32, draw_mode: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(feature_id));
         trace_args.push(self.trace_i32(draw_mode));
+        }
         let callback_result = {
         let _ = (feature_id, draw_mode);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawFeature", trace_args, trace_results);
+            self.record_callin_args_result("DrawFeature", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_shield(&mut self, unit_id: i32, weapon_id: i32, draw_mode: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(weapon_id));
         trace_args.push(self.trace_i32(draw_mode));
+        }
         let callback_result = {
         let _ = (unit_id, weapon_id, draw_mode);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawShield", trace_args, trace_results);
+            self.record_callin_args_result("DrawShield", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_projectile(&mut self, projectile_id: i32, draw_mode: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(projectile_id));
         trace_args.push(self.trace_i32(draw_mode));
+        }
         let callback_result = {
         let _ = (projectile_id, draw_mode);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawProjectile", trace_args, trace_results);
+            self.record_callin_args_result("DrawProjectile", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_material(&mut self, uuid: i32, draw_mode: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(uuid));
         trace_args.push(self.trace_i32(draw_mode));
+        }
         let callback_result = {
         let _ = (uuid, draw_mode);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawMaterial", trace_args, trace_results);
+            self.record_callin_args_result("DrawMaterial", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -714,123 +934,163 @@ macro_rules! generated_callin_trace_methods {
         facing: i32,
         statuses: &[u8],
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(x));
         trace_args.push(self.trace_i32(z));
         trace_args.push(self.trace_i32(facing));
         trace_args.push(self.trace_byte_table(statuses));
+        }
         let callback_result = {
         let _ = (unit_def_id, x, z, facing, statuses);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawBuildSquare", trace_args, trace_results);
+            self.record_callin_args_result("DrawBuildSquare", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_shadow_units_lua(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawShadowUnitsLua", trace_args, trace_results);
+            self.record_callin_args_result("DrawShadowUnitsLua", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn draw_shadow_features_lua(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DrawShadowFeaturesLua", trace_args, trace_results);
+            self.record_callin_args_result("DrawShadowFeaturesLua", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn player_added(&mut self, player_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(player_id));
+        }
         let callback_result = {
         let _ = player_id;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("PlayerAdded", trace_args, trace_results);
+            self.record_callin_args_result("PlayerAdded", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn player_changed(&mut self, player_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(player_id));
+        }
         let callback_result = {
         let _ = player_id;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("PlayerChanged", trace_args, trace_results);
+            self.record_callin_args_result("PlayerChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn player_removed(&mut self, player_id: i32, reason: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(player_id));
         trace_args.push(self.trace_i32(reason));
+        }
         let callback_result = {
         let _ = (player_id, reason);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("PlayerRemoved", trace_args, trace_results);
+            self.record_callin_args_result("PlayerRemoved", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn team_changed(&mut self, team_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(team_id));
+        }
         let callback_result = {
         let _ = team_id;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("TeamChanged", trace_args, trace_results);
+            self.record_callin_args_result("TeamChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn team_died(&mut self, team_id: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(team_id));
+        }
         let callback_result = {
         let _ = team_id;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("TeamDied", trace_args, trace_results);
+            self.record_callin_args_result("TeamDied", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -841,7 +1101,9 @@ macro_rules! generated_callin_trace_methods {
         unit_team: i32,
         builder_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
@@ -850,15 +1112,18 @@ macro_rules! generated_callin_trace_methods {
         } else {
             trace_args.push(self.trace_nil());
         }
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team, builder_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitCreated", trace_args, trace_results);
+            self.record_callin_args_result("UnitCreated", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -872,7 +1137,9 @@ macro_rules! generated_callin_trace_methods {
         attacker_team: Option<i32>,
         weapon_def_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
@@ -880,6 +1147,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(attacker_def_id.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value)));
         trace_args.push(attacker_team.map_or_else(|| self.trace_nil(), |value| self.trace_i32(value)));
         trace_args.push(self.trace_i32(weapon_def_id));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -892,11 +1160,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitDestroyed", trace_args, trace_results);
+            self.record_callin_args_result("UnitDestroyed", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -908,21 +1178,26 @@ macro_rules! generated_callin_trace_methods {
         experience: f32,
         old_experience: f32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_f32(experience));
         trace_args.push(self.trace_f32(old_experience));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team, experience, old_experience);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitExperience", trace_args, trace_results);
+            self.record_callin_args_result("UnitExperience", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -932,19 +1207,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitFinished", trace_args, trace_results);
+            self.record_callin_args_result("UnitFinished", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -954,19 +1234,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitReverseBuilt", trace_args, trace_results);
+            self.record_callin_args_result("UnitReverseBuilt", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -979,13 +1264,16 @@ macro_rules! generated_callin_trace_methods {
         iteration_period: f32,
         part: f32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_f32(time_since_last_build));
         trace_args.push(self.trace_f32(iteration_period));
         trace_args.push(self.trace_f32(part));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -997,11 +1285,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitConstructionDecayed", trace_args, trace_results);
+            self.record_callin_args_result("UnitConstructionDecayed", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1014,13 +1304,16 @@ macro_rules! generated_callin_trace_methods {
         factory_def_id: i32,
         user_orders: bool,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(factory_id));
         trace_args.push(self.trace_i32(factory_def_id));
         trace_args.push(self.trace_bool(user_orders));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -1032,11 +1325,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitFromFactory", trace_args, trace_results);
+            self.record_callin_args_result("UnitFromFactory", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1047,37 +1342,47 @@ macro_rules! generated_callin_trace_methods {
         new_team: i32,
         old_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(new_team));
         trace_args.push(self.trace_i32(old_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, new_team, old_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitGiven", trace_args, trace_results);
+            self.record_callin_args_result("UnitGiven", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn unit_idle(&mut self, unit_id: i32, unit_def_id: i32, unit_team: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitIdle", trace_args, trace_results);
+            self.record_callin_args_result("UnitIdle", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1091,7 +1396,9 @@ macro_rules! generated_callin_trace_methods {
         from_synced: bool,
         from_lua: bool,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
@@ -1099,6 +1406,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_i32(player_num));
         trace_args.push(self.trace_bool(from_synced));
         trace_args.push(self.trace_bool(from_lua));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -1111,11 +1419,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitCommand", trace_args, trace_results);
+            self.record_callin_args_result("UnitCommand", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1126,20 +1436,25 @@ macro_rules! generated_callin_trace_methods {
         unit_team: i32,
         command: crate::sys::NativeCallinCommand,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.extend(self.trace_command(&command));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team, command);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("CommandFallback", trace_args, trace_results);
+            self.record_callin_args_result("CommandFallback", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1153,7 +1468,9 @@ macro_rules! generated_callin_trace_methods {
         from_synced: bool,
         from_lua: bool,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
@@ -1161,6 +1478,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_i32(player_num));
         trace_args.push(self.trace_bool(from_synced));
         trace_args.push(self.trace_bool(from_lua));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -1173,11 +1491,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowCommand", trace_args, trace_results);
+            self.record_callin_args_result("AllowCommand", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1189,13 +1509,16 @@ macro_rules! generated_callin_trace_methods {
         build_pos: Option<crate::sys::Float3>,
         build_facing: i32,
     ) -> Result<(bool, bool), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(builder_id));
         trace_args.push(self.trace_i32(builder_team));
         if let Some(value) = build_pos.as_ref() {
             trace_args.extend(self.trace_float3(value));
             trace_args.push(self.trace_i32(build_facing));
+        }
         }
         let callback_result = {
         let _ = (
@@ -1207,11 +1530,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok((true, true))
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok((first, second)) => vec![self.trace_bool(*first), self.trace_bool(*second)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitCreation", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitCreation", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1223,21 +1548,26 @@ macro_rules! generated_callin_trace_methods {
         new_team: i32,
         capture: bool,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(old_team));
         trace_args.push(self.trace_i32(new_team));
         trace_args.push(self.trace_bool(capture));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, old_team, new_team, capture);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitTransfer", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitTransfer", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1249,21 +1579,26 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         part: f32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(builder_id));
         trace_args.push(self.trace_i32(builder_team));
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_f32(part));
+        }
         let callback_result = {
         let _ = (builder_id, builder_team, unit_id, unit_def_id, part);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitBuildStep", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitBuildStep", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1275,21 +1610,26 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         part: f32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(builder_id));
         trace_args.push(self.trace_i32(builder_team));
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_f32(part));
+        }
         let callback_result = {
         let _ = (builder_id, builder_team, unit_id, unit_def_id, part);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitCaptureStep", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitCaptureStep", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1302,13 +1642,16 @@ macro_rules! generated_callin_trace_methods {
         transportee_def_id: i32,
         transportee_team: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(transporter_id));
         trace_args.push(self.trace_i32(transporter_def_id));
         trace_args.push(self.trace_i32(transporter_team));
         trace_args.push(self.trace_i32(transportee_id));
         trace_args.push(self.trace_i32(transportee_def_id));
         trace_args.push(self.trace_i32(transportee_team));
+        }
         let callback_result = {
         let _ = (
             transporter_id,
@@ -1320,11 +1663,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitTransport", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitTransport", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1339,7 +1684,9 @@ macro_rules! generated_callin_trace_methods {
         position: crate::sys::Float3,
         allowed: bool,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(transporter_id));
         trace_args.push(self.trace_i32(transporter_def_id));
         trace_args.push(self.trace_i32(transporter_team));
@@ -1347,6 +1694,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_i32(transportee_def_id));
         trace_args.push(self.trace_i32(transportee_team));
         trace_args.extend(self.trace_float3(&position));
+        }
         let callback_result = {
         let _ = (
             transporter_id,
@@ -1360,11 +1708,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(allowed)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitTransportLoad", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitTransportLoad", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1379,7 +1729,9 @@ macro_rules! generated_callin_trace_methods {
         position: crate::sys::Float3,
         allowed: bool,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(transporter_id));
         trace_args.push(self.trace_i32(transporter_def_id));
         trace_args.push(self.trace_i32(transporter_team));
@@ -1387,6 +1739,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_i32(transportee_def_id));
         trace_args.push(self.trace_i32(transportee_team));
         trace_args.extend(self.trace_float3(&position));
+        }
         let callback_result = {
         let _ = (
             transporter_id,
@@ -1400,27 +1753,34 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(allowed)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitTransportUnload", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitTransportUnload", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn allow_unit_cloak(&mut self, unit_id: i32, enemy_id: Option<i32>) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_optional_i32(enemy_id));
+        }
         let callback_result = {
         let _ = (unit_id, enemy_id);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitCloak", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitCloak", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1430,19 +1790,24 @@ macro_rules! generated_callin_trace_methods {
         object_id: Option<i32>,
         weapon_num: Option<i32>,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_optional_i32(object_id));
         trace_args.push(self.trace_optional_i32(weapon_num));
+        }
         let callback_result = {
         let _ = (unit_id, object_id, weapon_num);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitDecloak", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitDecloak", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1452,18 +1817,23 @@ macro_rules! generated_callin_trace_methods {
         target_id: i32,
         allowed: bool,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(target_id));
+        }
         let callback_result = {
         let _ = (unit_id, target_id, allowed);
         Ok(allowed)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowUnitKamikaze", trace_args, trace_results);
+            self.record_callin_args_result("AllowUnitKamikaze", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1474,20 +1844,25 @@ macro_rules! generated_callin_trace_methods {
         unit_team: i32,
         command: crate::sys::NativeCallinCommand,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.extend(self.trace_command(&command));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team, command);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitCmdDone", trace_args, trace_results);
+            self.record_callin_args_result("UnitCmdDone", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1504,7 +1879,9 @@ macro_rules! generated_callin_trace_methods {
         attacker_def_id: Option<i32>,
         attacker_team: Option<i32>,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
@@ -1515,6 +1892,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_optional_i32(attacker_id));
         trace_args.push(self.trace_optional_i32(attacker_def_id));
         trace_args.push(self.trace_optional_i32(attacker_team));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -1530,11 +1908,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitDamaged", trace_args, trace_results);
+            self.record_callin_args_result("UnitDamaged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1544,19 +1924,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitHarvestStorageFull", trace_args, trace_results);
+            self.record_callin_args_result("UnitHarvestStorageFull", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1568,21 +1953,26 @@ macro_rules! generated_callin_trace_methods {
         unit_id: i32,
         unit_def_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.extend(self.trace_float3(&pos));
         trace_args.push(self.trace_f32(strength));
         trace_args.push(self.trace_i32(ally_team));
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
+        }
         let callback_result = {
         let _ = (pos, strength, ally_team, unit_id, unit_def_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitSeismicPing", trace_args, trace_results);
+            self.record_callin_args_result("UnitSeismicPing", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1593,20 +1983,25 @@ macro_rules! generated_callin_trace_methods {
         ally_team: i32,
         unit_def_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(ally_team));
         trace_args.push(self.trace_i32(unit_def_id));
+        }
         let callback_result = {
         let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitEnteredRadar", trace_args, trace_results);
+            self.record_callin_args_result("UnitEnteredRadar", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1617,20 +2012,25 @@ macro_rules! generated_callin_trace_methods {
         ally_team: i32,
         unit_def_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(ally_team));
         trace_args.push(self.trace_i32(unit_def_id));
+        }
         let callback_result = {
         let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitEnteredLos", trace_args, trace_results);
+            self.record_callin_args_result("UnitEnteredLos", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1641,20 +2041,25 @@ macro_rules! generated_callin_trace_methods {
         ally_team: i32,
         unit_def_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(ally_team));
         trace_args.push(self.trace_i32(unit_def_id));
+        }
         let callback_result = {
         let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitLeftRadar", trace_args, trace_results);
+            self.record_callin_args_result("UnitLeftRadar", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1665,20 +2070,25 @@ macro_rules! generated_callin_trace_methods {
         ally_team: i32,
         unit_def_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(ally_team));
         trace_args.push(self.trace_i32(unit_def_id));
+        }
         let callback_result = {
         let _ = (unit_id, unit_team, ally_team, unit_def_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitLeftLos", trace_args, trace_results);
+            self.record_callin_args_result("UnitLeftLos", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1688,19 +2098,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitEnteredUnderwater", trace_args, trace_results);
+            self.record_callin_args_result("UnitEnteredUnderwater", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1710,19 +2125,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitEnteredWater", trace_args, trace_results);
+            self.record_callin_args_result("UnitEnteredWater", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1732,19 +2152,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitEnteredAir", trace_args, trace_results);
+            self.record_callin_args_result("UnitEnteredAir", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1754,19 +2179,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitLeftUnderwater", trace_args, trace_results);
+            self.record_callin_args_result("UnitLeftUnderwater", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1776,19 +2206,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitLeftWater", trace_args, trace_results);
+            self.record_callin_args_result("UnitLeftWater", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1798,19 +2233,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitLeftAir", trace_args, trace_results);
+            self.record_callin_args_result("UnitLeftAir", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1822,12 +2262,15 @@ macro_rules! generated_callin_trace_methods {
         transport_id: i32,
         transport_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(transport_id));
         trace_args.push(self.trace_i32(transport_team));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -1838,11 +2281,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitLoaded", trace_args, trace_results);
+            self.record_callin_args_result("UnitLoaded", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1853,20 +2298,25 @@ macro_rules! generated_callin_trace_methods {
         unit_team: i32,
         stunned: bool,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_bool(stunned));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team, stunned);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitStunned", trace_args, trace_results);
+            self.record_callin_args_result("UnitStunned", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1877,20 +2327,25 @@ macro_rules! generated_callin_trace_methods {
         old_team: i32,
         new_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(old_team));
         trace_args.push(self.trace_i32(new_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, old_team, new_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitTaken", trace_args, trace_results);
+            self.record_callin_args_result("UnitTaken", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1902,12 +2357,15 @@ macro_rules! generated_callin_trace_methods {
         transport_id: i32,
         transport_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(transport_id));
         trace_args.push(self.trace_i32(transport_team));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -1918,11 +2376,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitUnloaded", trace_args, trace_results);
+            self.record_callin_args_result("UnitUnloaded", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1932,19 +2392,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitCloaked", trace_args, trace_results);
+            self.record_callin_args_result("UnitCloaked", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1954,19 +2419,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitDecloaked", trace_args, trace_results);
+            self.record_callin_args_result("UnitDecloaked", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1976,19 +2446,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitMoveFailed", trace_args, trace_results);
+            self.record_callin_args_result("UnitMoveFailed", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -1998,35 +2473,45 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitArrivedAtGoal", trace_args, trace_results);
+            self.record_callin_args_result("UnitArrivedAtGoal", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn unit_unit_collision(&mut self, collider_id: i32, collidee_id: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(collider_id));
         trace_args.push(self.trace_i32(collidee_id));
+        }
         let callback_result = {
         let _ = (collider_id, collidee_id);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitUnitCollision", trace_args, trace_results);
+            self.record_callin_args_result("UnitUnitCollision", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2035,18 +2520,23 @@ macro_rules! generated_callin_trace_methods {
         collider_id: i32,
         collidee_id: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(collider_id));
         trace_args.push(self.trace_i32(collidee_id));
+        }
         let callback_result = {
         let _ = (collider_id, collidee_id);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitFeatureCollision", trace_args, trace_results);
+            self.record_callin_args_result("UnitFeatureCollision", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2056,19 +2546,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         unit_team: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("RenderUnitDestroyed", trace_args, trace_results);
+            self.record_callin_args_result("RenderUnitDestroyed", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2084,7 +2579,9 @@ macro_rules! generated_callin_trace_methods {
         attacker_def_id: Option<i32>,
         attacker_team: Option<i32>,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(feature_id));
         trace_args.push(self.trace_i32(feature_def_id));
         trace_args.push(self.trace_i32(feature_team));
@@ -2094,6 +2591,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_optional_i32(attacker_id));
         trace_args.push(self.trace_optional_i32(attacker_def_id));
         trace_args.push(self.trace_optional_i32(attacker_team));
+        }
         let callback_result = {
         let _ = (
             feature_id,
@@ -2108,11 +2606,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("FeatureDamaged", trace_args, trace_results);
+            self.record_callin_args_result("FeatureDamaged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2122,19 +2622,24 @@ macro_rules! generated_callin_trace_methods {
         team_id: i32,
         position: crate::sys::Float3,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(feature_def_id));
         trace_args.push(self.trace_i32(team_id));
         trace_args.extend(self.trace_float3(&position));
+        }
         let callback_result = {
         let _ = (feature_def_id, team_id, position);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowFeatureCreation", trace_args, trace_results);
+            self.record_callin_args_result("AllowFeatureCreation", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2146,21 +2651,26 @@ macro_rules! generated_callin_trace_methods {
         feature_def_id: i32,
         part: f32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(builder_id));
         trace_args.push(self.trace_i32(builder_team));
         trace_args.push(self.trace_i32(feature_id));
         trace_args.push(self.trace_i32(feature_def_id));
         trace_args.push(self.trace_f32(part));
+        }
         let callback_result = {
         let _ = (builder_id, builder_team, feature_id, feature_def_id, part);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowFeatureBuildStep", trace_args, trace_results);
+            self.record_callin_args_result("AllowFeatureBuildStep", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2170,19 +2680,24 @@ macro_rules! generated_callin_trace_methods {
         resource_type: &str,
         level: f32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(team_id));
         trace_args.push(self.trace_str(resource_type));
         trace_args.push(self.trace_f32(level));
+        }
         let callback_result = {
         let _ = (team_id, resource_type, level);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowResourceLevel", trace_args, trace_results);
+            self.record_callin_args_result("AllowResourceLevel", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2193,20 +2708,25 @@ macro_rules! generated_callin_trace_methods {
         resource_type: &str,
         amount: f32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(old_team));
         trace_args.push(self.trace_i32(new_team));
         trace_args.push(self.trace_str(resource_type));
         trace_args.push(self.trace_f32(amount));
+        }
         let callback_result = {
         let _ = (old_team, new_team, resource_type, amount);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowResourceTransfer", trace_args, trace_results);
+            self.record_callin_args_result("AllowResourceTransfer", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2214,17 +2734,22 @@ macro_rules! generated_callin_trace_methods {
         &mut self,
         entries: &[crate::sys::ResourceExcessEntry],
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_resource_excess(entries));
+        }
         let callback_result = {
         let _ = entries;
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("ResourceExcess", trace_args, trace_results);
+            self.record_callin_args_result("ResourceExcess", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2235,20 +2760,25 @@ macro_rules! generated_callin_trace_methods {
         unit_team: i32,
         player_id: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(player_id));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team, player_id);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowDirectUnitControl", trace_args, trace_results);
+            self.record_callin_args_result("AllowDirectUnitControl", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2258,19 +2788,24 @@ macro_rules! generated_callin_trace_methods {
         unit_def_id: i32,
         action: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(action));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, action);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowBuilderHoldFire", trace_args, trace_results);
+            self.record_callin_args_result("AllowBuilderHoldFire", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2282,21 +2817,26 @@ macro_rules! generated_callin_trace_methods {
         clamped_pos: crate::sys::Float3,
         raw_pick_pos: crate::sys::Float3,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(player_id));
         trace_args.push(self.trace_i32(team_id));
         trace_args.push(self.trace_u8(ready_state));
         trace_args.extend(self.trace_float3(&clamped_pos));
         trace_args.extend(self.trace_float3(&raw_pick_pos));
+        }
         let callback_result = {
         let _ = (player_id, team_id, ready_state, clamped_pos, raw_pick_pos);
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowStartPosition", trace_args, trace_results);
+            self.record_callin_args_result("AllowStartPosition", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2309,13 +2849,16 @@ macro_rules! generated_callin_trace_methods {
         build_unit_def_id: i32,
         build_unit_team: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(build_unit_id));
         trace_args.push(self.trace_i32(build_unit_def_id));
         trace_args.push(self.trace_i32(build_unit_team));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -2327,11 +2870,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("TerraformComplete", trace_args, trace_results);
+            self.record_callin_args_result("TerraformComplete", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2342,20 +2887,25 @@ macro_rules! generated_callin_trace_methods {
         unit_team: i32,
         data: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(data));
+        }
         let callback_result = {
         let _ = (unit_id, unit_def_id, unit_team, data);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MoveCtrlNotify", trace_args, trace_results);
+            self.record_callin_args_result("MoveCtrlNotify", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2365,19 +2915,24 @@ macro_rules! generated_callin_trace_methods {
         attacker_weapon_num: i32,
         attacker_weapon_def_id: i32,
     ) -> Result<i32, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(attacker_id));
         trace_args.push(self.trace_i32(attacker_weapon_num));
         trace_args.push(self.trace_i32(attacker_weapon_def_id));
+        }
         let callback_result = {
         let _ = (attacker_id, attacker_weapon_num, attacker_weapon_def_id);
         Ok(-1)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_i32(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowWeaponTargetCheck", trace_args, trace_results);
+            self.record_callin_args_result("AllowWeaponTargetCheck", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2389,12 +2944,15 @@ macro_rules! generated_callin_trace_methods {
         attacker_weapon_def_id: i32,
         target_priority: Option<f32>,
     ) -> Result<(bool, f32), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(attacker_id));
         trace_args.push(self.trace_i32(target_id));
         trace_args.push(self.trace_i32(attacker_weapon_num));
         trace_args.push(self.trace_i32(attacker_weapon_def_id));
         trace_args.push(self.trace_optional_f32(target_priority));
+        }
         let callback_result = {
         let _ = (
             attacker_id,
@@ -2404,11 +2962,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok((true, target_priority.unwrap_or_default()))
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok((first, second)) => vec![self.trace_bool(*first), self.trace_f32(*second)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowWeaponTarget", trace_args, trace_results);
+            self.record_callin_args_result("AllowWeaponTarget", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2418,10 +2978,13 @@ macro_rules! generated_callin_trace_methods {
         interceptor_weapon_id: i32,
         interceptor_target_id: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(interceptor_unit_id));
         trace_args.push(self.trace_i32(interceptor_weapon_id));
         trace_args.push(self.trace_i32(interceptor_target_id));
+        }
         let callback_result = {
         let _ = (
             interceptor_unit_id,
@@ -2430,11 +2993,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(true)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AllowWeaponInterceptTarget", trace_args, trace_results);
+            self.record_callin_args_result("AllowWeaponInterceptTarget", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2453,7 +3018,9 @@ macro_rules! generated_callin_trace_methods {
         new_damage: f32,
         impulse_mult: f32,
     ) -> Result<(f32, f32), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
@@ -2464,6 +3031,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_optional_i32(attacker_id));
         trace_args.push(self.trace_optional_i32(attacker_def_id));
         trace_args.push(self.trace_optional_i32(attacker_team));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -2479,11 +3047,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok((new_damage, impulse_mult))
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok((first, second)) => vec![self.trace_f32(*first), self.trace_f32(*second)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnitPreDamaged", trace_args, trace_results);
+            self.record_callin_args_result("UnitPreDamaged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2501,7 +3071,9 @@ macro_rules! generated_callin_trace_methods {
         new_damage: f32,
         impulse_mult: f32,
     ) -> Result<(f32, f32), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(feature_id));
         trace_args.push(self.trace_i32(feature_def_id));
         trace_args.push(self.trace_i32(feature_team));
@@ -2511,6 +3083,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_optional_i32(attacker_id));
         trace_args.push(self.trace_optional_i32(attacker_def_id));
         trace_args.push(self.trace_optional_i32(attacker_team));
+        }
         let callback_result = {
         let _ = (
             feature_id,
@@ -2525,11 +3098,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok((new_damage, impulse_mult))
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok((first, second)) => vec![self.trace_f32(*first), self.trace_f32(*second)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("FeaturePreDamaged", trace_args, trace_results);
+            self.record_callin_args_result("FeaturePreDamaged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2545,7 +3120,9 @@ macro_rules! generated_callin_trace_methods {
         start_pos: crate::sys::Float3,
         hit_pos: crate::sys::Float3,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(projectile_id));
         trace_args.push(self.trace_i32(projectile_owner_id));
         trace_args.push(self.trace_i32(shield_weapon_num));
@@ -2555,6 +3132,7 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(if beam_emitter_unit_id < 0 { self.trace_nil() } else { self.trace_i32(beam_emitter_unit_id) });
         trace_args.extend(self.trace_float3(&start_pos));
         trace_args.extend(self.trace_float3(&hit_pos));
+        }
         let callback_result = {
         let _ = (
             projectile_id,
@@ -2569,11 +3147,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("ShieldPreDamaged", trace_args, trace_results);
+            self.record_callin_args_result("ShieldPreDamaged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2583,19 +3163,24 @@ macro_rules! generated_callin_trace_methods {
         owner_id: i32,
         weapon_def_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(projectile_id));
         trace_args.push(self.trace_i32(owner_id));
         trace_args.push(self.trace_i32(weapon_def_id));
+        }
         let callback_result = {
         let _ = (projectile_id, owner_id, weapon_def_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("ProjectileCreated", trace_args, trace_results);
+            self.record_callin_args_result("ProjectileCreated", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2605,75 +3190,100 @@ macro_rules! generated_callin_trace_methods {
         owner_id: i32,
         weapon_def_id: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(projectile_id));
         trace_args.push(self.trace_i32(owner_id));
         trace_args.push(self.trace_i32(weapon_def_id));
+        }
         let callback_result = {
         let _ = (projectile_id, owner_id, weapon_def_id);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("ProjectileDestroyed", trace_args, trace_results);
+            self.record_callin_args_result("ProjectileDestroyed", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn view_resize(&mut self, geometry: ViewGeometry) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_geometry(&geometry));
+        }
         let callback_result = {
         let _ = geometry;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("ViewResize", trace_args, trace_results);
+            self.record_callin_args_result("ViewResize", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn sun_changed(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("SunChanged", trace_args, trace_results);
+            self.record_callin_args_result("SunChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn fonts_changed(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("FontsChanged", trace_args, trace_results);
+            self.record_callin_args_result("FontsChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn game_progress(&mut self, game_frame: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(game_frame));
+        }
         let callback_result = {
         let _ = game_frame;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GameProgress", trace_args, trace_results);
+            self.record_callin_args_result("GameProgress", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2686,13 +3296,16 @@ macro_rules! generated_callin_trace_methods {
         old_count: i32,
         new_count: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(unit_id));
         trace_args.push(self.trace_i32(unit_def_id));
         trace_args.push(self.trace_i32(unit_team));
         trace_args.push(self.trace_i32(weapon_num));
         trace_args.push(self.trace_i32(old_count));
         trace_args.push(self.trace_i32(new_count));
+        }
         let callback_result = {
         let _ = (
             unit_id,
@@ -2704,11 +3317,13 @@ macro_rules! generated_callin_trace_methods {
         );
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("StockpileChanged", trace_args, trace_results);
+            self.record_callin_args_result("StockpileChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2719,63 +3334,83 @@ macro_rules! generated_callin_trace_methods {
         x2: i32,
         z2: i32,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(x1));
         trace_args.push(self.trace_i32(z1));
         trace_args.push(self.trace_i32(x2));
         trace_args.push(self.trace_i32(z2));
+        }
         let callback_result = {
         let _ = (x1, z1, x2, z2);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("UnsyncedHeightMapUpdate", trace_args, trace_results);
+            self.record_callin_args_result("UnsyncedHeightMapUpdate", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn camera_rotation_changed(&mut self, rot: crate::sys::Float3) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.extend(self.trace_float3(&rot));
+        }
         let callback_result = {
         let _ = rot;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("CameraRotationChanged", trace_args, trace_results);
+            self.record_callin_args_result("CameraRotationChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn camera_position_changed(&mut self, pos: crate::sys::Float3) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.extend(self.trace_float3(&pos));
+        }
         let callback_result = {
         let _ = pos;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("CameraPositionChanged", trace_args, trace_results);
+            self.record_callin_args_result("CameraPositionChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn key_map_changed(&mut self) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("KeyMapChanged", trace_args, trace_results);
+            self.record_callin_args_result("KeyMapChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2792,7 +3427,9 @@ macro_rules! generated_callin_trace_methods {
         scan_code: i32,
         actions: &[KeyAction<'_>],
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(key_code));
         trace_args.push(self.trace_table(vec![
             (self.trace_str("alt"), self.trace_bool(alt)),
@@ -2805,17 +3442,20 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_i32(utf32_char));
         trace_args.push(self.trace_i32(scan_code));
         trace_args.push(self.trace_actions(actions));
+        }
         let callback_result = {
         let _ = (
             key_code, alt, ctrl, meta, shift, is_repeat, label, utf32_char, scan_code, actions,
         );
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("KeyPress", trace_args, trace_results);
+            self.record_callin_args_result("KeyPress", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2831,7 +3471,9 @@ macro_rules! generated_callin_trace_methods {
         scan_code: i32,
         actions: &[KeyAction<'_>],
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(key_code));
         trace_args.push(self.trace_table(vec![
             (self.trace_str("alt"), self.trace_bool(alt)),
@@ -2843,133 +3485,171 @@ macro_rules! generated_callin_trace_methods {
         trace_args.push(self.trace_i32(utf32_char));
         trace_args.push(self.trace_i32(scan_code));
         trace_args.push(self.trace_actions(actions));
+        }
         let callback_result = {
         let _ = (
             key_code, alt, ctrl, meta, shift, label, utf32_char, scan_code, actions,
         );
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("KeyRelease", trace_args, trace_results);
+            self.record_callin_args_result("KeyRelease", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn text_input(&mut self, utf8: &str) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_str(utf8));
+        }
         let callback_result = {
         let _ = utf8;
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("TextInput", trace_args, trace_results);
+            self.record_callin_args_result("TextInput", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn text_editing(&mut self, utf8: &str, start: u32, length: u32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_str(utf8));
         trace_args.push(self.trace_u32(start));
         trace_args.push(self.trace_u32(length));
+        }
         let callback_result = {
         let _ = (utf8, start, length);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("TextEditing", trace_args, trace_results);
+            self.record_callin_args_result("TextEditing", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn mouse_move(&mut self, x: i32, y: i32, dx: i32, dy: i32, button: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(x));
         trace_args.push(self.trace_i32(y));
         trace_args.push(self.trace_i32(dx));
         trace_args.push(self.trace_i32(dy));
         trace_args.push(self.trace_i32(button));
+        }
         let callback_result = {
         let _ = (x, y, dx, dy, button);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MouseMove", trace_args, trace_results);
+            self.record_callin_args_result("MouseMove", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn mouse_press(&mut self, x: i32, y: i32, button: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(x));
         trace_args.push(self.trace_i32(y));
         trace_args.push(self.trace_i32(button));
+        }
         let callback_result = {
         Ok(true)
         };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MousePress", trace_args, trace_results);
+            self.record_callin_args_result("MousePress", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn mouse_release(&mut self, x: i32, y: i32, button: i32) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(x));
         trace_args.push(self.trace_i32(y));
         trace_args.push(self.trace_i32(button));
+        }
         let callback_result = {
         let _ = (x, y, button);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MouseRelease", trace_args, trace_results);
+            self.record_callin_args_result("MouseRelease", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn mouse_wheel(&mut self, up: bool, value: f32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_bool(up));
         trace_args.push(self.trace_f32(value));
+        }
         let callback_result = {
         let _ = (up, value);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MouseWheel", trace_args, trace_results);
+            self.record_callin_args_result("MouseWheel", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn is_above(&mut self, x: i32, y: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(x));
         trace_args.push(self.trace_i32(y));
+        }
         let callback_result = {
         let _ = (x, y);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("IsAbove", trace_args, trace_results);
+            self.record_callin_args_result("IsAbove", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -2981,35 +3661,45 @@ macro_rules! generated_callin_trace_methods {
         action: &str,
         tooltip: &str,
     ) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         if cmd_id >= 0 {
             trace_args.push(self.trace_i32(cmd_id));
             trace_args.push(self.trace_i32(cmd_type));
+        }
         }
         let callback_result = {
         let _ = (cmd_id, cmd_type, name, action, tooltip);
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("ActiveCommandChanged", trace_args, trace_results);
+            self.record_callin_args_result("ActiveCommandChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn command_notify(&mut self, command: crate::sys::NativeCallinCommand) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.extend(self.trace_command_without_tag(&command));
+        }
         let callback_result = {
         let _ = command;
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("CommandNotify", trace_args, trace_results);
+            self.record_callin_args_result("CommandNotify", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -3019,33 +3709,43 @@ macro_rules! generated_callin_trace_methods {
         section: &str,
         level: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_str(message));
         trace_args.push(self.trace_i32(level));
+        }
         let callback_result = {
         let _ = (message, section, level);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("AddConsoleLine", trace_args, trace_results);
+            self.record_callin_args_result("AddConsoleLine", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn group_changed(&mut self, group_id: i32) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(group_id));
+        }
         let callback_result = {
         let _ = group_id;
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GroupChanged", trace_args, trace_results);
+            self.record_callin_args_result("GroupChanged", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -3055,7 +3755,9 @@ macro_rules! generated_callin_trace_methods {
         feature_id: i32,
         current_command: i32,
     ) -> Result<Option<i32>, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         if unit_id >= 0 {
             trace_args.push(self.trace_str("unit"));
             trace_args.push(self.trace_i32(unit_id));
@@ -3067,15 +3769,18 @@ macro_rules! generated_callin_trace_methods {
             trace_args.push(self.trace_nil());
         }
         trace_args.push(self.trace_i32(current_command));
+        }
         let callback_result = {
         let _ = (unit_id, feature_id, current_command);
         Ok(None)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_optional_i32(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("DefaultCommand", trace_args, trace_results);
+            self.record_callin_args_result("DefaultCommand", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -3087,7 +3792,9 @@ macro_rules! generated_callin_trace_methods {
         pos1: Option<crate::sys::Float3>,
         label: Option<&str>,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(player_id));
         match draw_type {
             0 => {
@@ -3107,15 +3814,18 @@ macro_rules! generated_callin_trace_methods {
             }
             _ => {}
         }
+        }
         let callback_result = {
         let _ = (player_id, draw_type, pos0, pos1, label);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("MapDrawCmd", trace_args, trace_results);
+            self.record_callin_args_result("MapDrawCmd", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -3126,74 +3836,94 @@ macro_rules! generated_callin_trace_methods {
         owner_id: Option<i32>,
         projectile_id: i32,
     ) -> Result<bool, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(weapon_def_id));
         trace_args.extend(self.trace_float3(&pos));
         trace_args.push(self.trace_optional_i32(owner_id));
         trace_args.push(self.trace_i32(projectile_id));
+        }
         let callback_result = {
         let _ = (weapon_def_id, pos, owner_id, projectile_id);
         Ok(false)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_bool(*value)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("Explosion", trace_args, trace_results);
+            self.record_callin_args_result("Explosion", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn load(&mut self, archive: *mut std::ffi::c_void) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         if archive.is_null() {
             trace_args.push(self.trace_nil());
         } else {
             trace_args.push(self.trace_opaque());
         }
+        }
         let callback_result = {
         let _ = archive;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("Load", trace_args, trace_results);
+            self.record_callin_args_result("Load", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn save(&mut self, archive: *mut std::ffi::c_void) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         if archive.is_null() {
             trace_args.push(self.trace_nil());
         } else {
             trace_args.push(self.trace_opaque());
         }
+        }
         let callback_result = {
         let _ = archive;
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("Save", trace_args, trace_results);
+            self.record_callin_args_result("Save", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn get_tooltip(&mut self, x: i32, y: i32) -> Result<Option<String>, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_i32(x));
         trace_args.push(self.trace_i32(y));
+        }
         let callback_result = {
         let _ = (x, y);
         Ok(None)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_optional_str(value.as_deref())],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GetTooltip", trace_args, trace_results);
+            self.record_callin_args_result("GetTooltip", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -3204,22 +3934,27 @@ macro_rules! generated_callin_trace_methods {
         feature_id: i32,
         ground_pos: crate::sys::Float3,
     ) -> Result<Option<String>, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         match kind {
             1 => { trace_args.push(self.trace_str("unit")); trace_args.push(self.trace_i32(unit_id)); }
             2 => { trace_args.push(self.trace_str("feature")); trace_args.push(self.trace_i32(feature_id)); }
             3 => { trace_args.push(self.trace_str("ground")); trace_args.extend(self.trace_float3(&ground_pos)); }
             _ => trace_args.push(self.trace_str("selection")),
         }
+        }
         let callback_result = {
         let _ = (kind, unit_id, feature_id, ground_pos);
         Ok(None)
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(value) => vec![self.trace_optional_str(value.as_deref())],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("WorldTooltip", trace_args, trace_results);
+            self.record_callin_args_result("WorldTooltip", trace_args, trace_results);
+        }
         callback_result
     }
 
@@ -3229,32 +3964,42 @@ macro_rules! generated_callin_trace_methods {
         ready: bool,
         player_states: &[GameSetupPlayerState<'_>],
     ) -> Result<Option<bool>, Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
         trace_args.push(self.trace_str(state));
         trace_args.push(self.trace_bool(ready));
         trace_args.push(self.trace_game_setup_states(player_states));
+        }
         let callback_result = {
         Ok(Some(true))
         };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(Some(value)) => vec![self.trace_bool(true), self.trace_bool(*value)],
             Ok(None) => vec![self.trace_bool(false), self.trace_bool(ready)],
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("GameSetup", trace_args, trace_results);
+            self.record_callin_args_result("GameSetup", trace_args, trace_results);
+        }
         callback_result
     }
 
     fn shutdown(&mut self) -> Result<(), Error> {
+        let record_trace = record_callins_enabled();
         let mut trace_args = Vec::new();
+        if record_trace {
+        }
         let callback_result = {
         Ok(())
             };
+        if record_trace {
         let trace_results = match &callback_result {
             Ok(()) => Vec::new(),
             Err(_) => vec![self.trace_error()],
         };
-        self.record_callin_args_result("Shutdown", trace_args, trace_results);
+            self.record_callin_args_result("Shutdown", trace_args, trace_results);
+        }
         callback_result
     }
 

@@ -1,0 +1,20 @@
+[package]
+name = "recoil-hostcall-bench-guest"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-component = "0.254.0"
+wit-bindgen = "0.60.0"
+
+[[bin]]
+name = "componentize"
+path = "src/bin/componentize.rs"
+
+[profile.release]
+opt-level = 3
+lto = true

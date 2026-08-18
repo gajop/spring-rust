@@ -1,5 +1,6 @@
 use serde_json::Value;
 use spring_native::prelude::*;
+use support::{benchmark_callin_variant_is, benchmark_case_is, record_callins_enabled};
 use std::{
     env,
     ffi::{CStr, CString},
@@ -45,6 +46,28 @@ fn benchmark_iterations(default: usize) -> usize {
 
 fn scaled_count(value: usize, scale: f64) -> usize {
     ((value as f64 * scale).round() as usize).max(1)
+}
+
+/// Smallest step the process clock can actually report.
+fn clock_quantum_ns() -> f64 {
+    let mut best = u128::MAX;
+    for _ in 0..5 {
+        let start = Instant::now();
+        loop {
+            let elapsed = start.elapsed().as_nanos();
+            if elapsed > 0 {
+                best = best.min(elapsed);
+                break;
+            }
+        }
+    }
+    (best.max(1) as f64).min(1_000_000.0)
+}
+
+/// Quantization error over `regions` timed regions grows with sqrt(regions),
+/// so the minimum trustworthy duration does too.
+fn resolution_floor_ns(quantum_ns: f64, regions: usize) -> f64 {
+    50.0 * quantum_ns * (regions.max(1) as f64).sqrt()
 }
 
 fn scaled_terrain_count(value: usize, scale: f64) -> usize {
@@ -358,6 +381,10 @@ impl NativeApiParity {
     where
         F: FnMut() -> Result<(), String>,
     {
+        let iterations = match self.resolve_iterations(name, iterations, &mut operation)? {
+            Some(resolved) => resolved,
+            None => return Ok(()),
+        };
         let (median, spread, samples) = self.benchmark_samples(iterations, &mut operation)?;
         self.write_benchmark_row(serde_json::json!({
             "backend": "native",
@@ -372,6 +399,52 @@ impl NativeApiParity {
             "scale": benchmark_scale(),
             "measurement": "NativeInterface callout loop",
         }))
+    }
+
+    /// Grow the loop until a sample clears the resolution floor; None when the
+    /// row could not be measured at all.
+    fn resolve_iterations<F>(
+        &self,
+        name: &str,
+        iterations: usize,
+        operation: &mut F,
+    ) -> Result<Option<usize>, String>
+    where
+        F: FnMut() -> Result<(), String>,
+    {
+        let floor_ns = resolution_floor_ns(clock_quantum_ns(), 1);
+        let mut calls = iterations;
+        let mut elapsed_ns;
+        loop {
+            let start = Instant::now();
+            for _ in 0..calls {
+                operation()?;
+            }
+            elapsed_ns = start.elapsed().as_nanos() as f64;
+            if elapsed_ns >= floor_ns || calls >= iterations.saturating_mul(1_024) {
+                break;
+            }
+            let growth = if elapsed_ns <= 0.0 {
+                16.0
+            } else {
+                (floor_ns / elapsed_ns).ceil().max(2.0)
+            };
+            calls = ((calls as f64 * growth).ceil() as usize).max(calls + 1);
+        }
+        if elapsed_ns < floor_ns {
+            self.write_benchmark_row(serde_json::json!({
+                "backend": "native",
+                "test": name,
+                "status": "unavailable",
+                "iterations": calls,
+                "scale": benchmark_scale(),
+                "reason": format!(
+                    "sample of {elapsed_ns:.0} ns is below the {floor_ns:.0} ns timer-resolution floor"
+                ),
+            }))?;
+            return Ok(None);
+        }
+        Ok(Some(calls))
     }
 
     fn benchmark_samples<F>(
@@ -412,8 +485,10 @@ impl NativeApiParity {
         ] {
             let size = scaled_brush_size(nominal_size, scale);
             let invocations = scaled_terrain_count(nominal_invocations, scale);
+            let floor_ns = resolution_floor_ns(clock_quantum_ns(), 1);
             let mut totals = Vec::new();
             let mut inner = Vec::new();
+            let mut sample_ns = 0.0f64;
             for _ in 0..5 {
                 let mut calls = 0usize;
                 let total_start = Instant::now();
@@ -436,12 +511,26 @@ impl NativeApiParity {
                     result.map_err(|err| format!("{name}: SetHeightMapFunc failed: {err:?}"))?;
                     inner_elapsed += inner_start.elapsed();
                 }
-                totals.push(total_start.elapsed().as_secs_f64() * 1000.0 / invocations as f64);
+                sample_ns = total_start.elapsed().as_nanos() as f64;
+                totals.push(sample_ns / 1_000_000.0 / invocations as f64);
                 inner.push(if calls == 0 {
                     0.0
                 } else {
                     inner_elapsed.as_nanos() as f64 / calls as f64
                 });
+            }
+            if sample_ns < floor_ns {
+                self.write_benchmark_row(serde_json::json!({
+                    "backend": "native",
+                    "test": name,
+                    "status": "unavailable",
+                    "invocations": invocations,
+                    "scale": scale,
+                    "reason": format!(
+                        "sample of {sample_ns:.0} ns is below the {floor_ns:.0} ns timer-resolution floor"
+                    ),
+                }))?;
+                continue;
             }
             let mut sorted = totals.clone();
             sorted.sort_by(|left, right| left.total_cmp(right));
@@ -465,7 +554,9 @@ impl NativeApiParity {
             }))?;
         }
         let invocations = scaled_terrain_count(1_000, scale);
+        let floor_ns = resolution_floor_ns(clock_quantum_ns(), 1);
         let mut samples = Vec::new();
+        let mut sample_ns = 0.0f64;
         for _ in 0..5 {
             let start = Instant::now();
             for _ in 0..invocations {
@@ -475,7 +566,20 @@ impl NativeApiParity {
                     .level_height_map(8.0, 8.0, 248.0, 248.0, terrain_height)
                     .map_err(|err| format!("hm_region_op failed: {err:?}"))?;
             }
-            samples.push(start.elapsed().as_secs_f64() * 1000.0 / invocations as f64);
+            sample_ns = start.elapsed().as_nanos() as f64;
+            samples.push(sample_ns / 1_000_000.0 / invocations as f64);
+        }
+        if sample_ns < floor_ns {
+            return self.write_benchmark_row(serde_json::json!({
+                "backend": "native",
+                "test": "hm_region_op",
+                "status": "unavailable",
+                "invocations": invocations,
+                "scale": scale,
+                "reason": format!(
+                    "sample of {sample_ns:.0} ns is below the {floor_ns:.0} ns timer-resolution floor"
+                ),
+            }));
         }
         let mut sorted = samples.clone();
         sorted.sort_by(|left, right| left.total_cmp(right));
@@ -901,15 +1005,22 @@ impl NativeApiParity {
             }
             Ok(())
         })?;
+        // Each unit is ordered next to itself, as the Lua baseline does. A
+        // shared far-away destination would measure pathfinding distance
+        // instead of the command call.
         self.benchmark_measure("wl_commands", scaled_count(5_000, scale), || {
             for unit in units.iter().take(command_limit) {
+                let unit_position = interface
+                    .units_info()
+                    .get_unit_position(*unit, spring_native::GetUnitPositionOptions::default())
+                    .map_err(|err| format!("{err:?}"))?;
                 interface
                     .synced_ctrl()
                     .unit()
                     .give_order_to_unit(
                         *unit,
                         10,
-                        &[position.x + 8.0, position.y, position.z + 8.0],
+                        &[unit_position.x + 8.0, unit_position.y, unit_position.z + 8.0],
                         0,
                         0,
                     )

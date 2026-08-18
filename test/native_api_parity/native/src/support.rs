@@ -24,9 +24,23 @@ fn rounded_float(value: f32) -> f64 {
 // Serialize JSONL writes so a row cannot be interleaved with another callback.
 static RECORD_LOCK: Mutex<()> = Mutex::new(());
 
-fn record_callins_enabled() -> bool {
+pub(crate) fn record_callins_enabled() -> bool {
     static ENABLED: OnceLock<bool> = OnceLock::new();
     *ENABLED.get_or_init(|| std::env::var("SPRING_NATIVE_BENCHMARK").is_err())
+}
+
+// Read once: these sit on the per-dispatch callin path, where an environment
+// scan is larger than the dispatch being measured.
+pub(crate) fn benchmark_callin_variant_is(variant: &str) -> bool {
+    static VARIANT: OnceLock<String> = OnceLock::new();
+    VARIANT.get_or_init(|| {
+        std::env::var("SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT").unwrap_or_default()
+    }) == variant
+}
+
+pub(crate) fn benchmark_case_is(name: &str) -> bool {
+    static CASE: OnceLock<String> = OnceLock::new();
+    CASE.get_or_init(|| std::env::var("SPRING_NATIVE_BENCHMARK_CASE").unwrap_or_default()) == name
 }
 
 impl NativeApiParity {

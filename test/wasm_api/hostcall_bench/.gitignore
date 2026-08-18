@@ -1,0 +1,4 @@
+core.wasm
+bench_component.wasm
+host_c/bench_hostcall
+target/

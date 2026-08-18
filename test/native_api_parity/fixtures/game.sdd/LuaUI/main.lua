@@ -77,17 +77,22 @@ if tostring(parityOptions.native_api_parity_mode or "") == "benchmark" then
 			complete = true
 		end
 
-		if backend == "lua" or backend == "native" then
-			function DrawWorld()
-				if not complete then
-					if backend == "lua" then
-						runLuaDraw()
-					elseif not nativeStarted then
-						nativeStarted = true
-						Spring.InvokeNativeModule(Common.encode({testName = "benchmark", command = "draw"}))
-					end
+		-- The draw workload runs inside the first DrawWorld dispatches, so keep
+		-- rendering afterwards: callin_drawworld needs empty draw frames to time.
+		local DRAW_TAIL_FRAMES = 600
+		local drawTailFrames = 0
+
+		function DrawWorld()
+			if not complete then
+				if backend == "lua" then
+					runLuaDraw()
+				elseif backend == "native" and not nativeStarted then
+					nativeStarted = true
+					Spring.InvokeNativeModule(Common.encode({testName = "benchmark", command = "draw"}))
 				end
+				return
 			end
+			drawTailFrames = drawTailFrames + 1
 		end
 
 		function RecvLuaMsg(message)
@@ -109,7 +114,7 @@ if tostring(parityOptions.native_api_parity_mode or "") == "benchmark" then
 		end
 
 		function GameFrame()
-			if complete then
+			if complete and drawTailFrames >= DRAW_TAIL_FRAMES then
 				Spring.Quit()
 			end
 		end

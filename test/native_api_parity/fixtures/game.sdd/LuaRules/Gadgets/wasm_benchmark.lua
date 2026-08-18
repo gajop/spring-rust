@@ -83,6 +83,46 @@ local function monotonicSeconds()
 	return Spring.GetTimerMicros() / 1000000
 end
 
+-- Lua numbers are floats, so timer resolution is the float step at the current
+-- timer magnitude (not 1us) and degrades as the process runs. Measure it.
+local function clockQuantumNs()
+	local best
+	for _ = 1, 5 do
+		local start = monotonicSeconds()
+		local now = start
+		while now == start do
+			now = monotonicSeconds()
+		end
+		local delta = (now - start) * 1000000000
+		if best == nil or delta < best then best = delta end
+	end
+	return best or 1000
+end
+
+-- Quantization error over N timed regions grows with sqrt(N), so the minimum
+-- trustworthy duration does too.
+local MINIMUM_QUANTA = 50
+local function resolutionFloorNs(quantumNs, regions)
+	return MINIMUM_QUANTA * quantumNs * math.sqrt(math.max(regions or 1, 1))
+end
+
+local function reportUnresolved(name, elapsedNs, floorNs, iterations, extra)
+	local payload = {
+		backend = "lua",
+		test = name,
+		status = "unavailable",
+		iterations = iterations,
+		scale = benchmarkScale,
+		reason = string.format(
+			"sample of %.0f ns is below the %.0f ns timer-resolution floor",
+			elapsedNs, floorNs),
+	}
+	if extra then
+		for key, value in pairs(extra) do payload[key] = value end
+	end
+	appendJSON(outputPath("lua"), payload)
+end
+
 local function median(values)
 	local sorted = {}
 	for index, value in ipairs(values) do
@@ -103,14 +143,30 @@ local function spread(values)
 end
 
 local function measure(name, iterations, callback, extra)
+	local floorNs = resolutionFloorNs(clockQuantumNs(), 1)
+	-- Grow the loop until a sample clears the floor; the discarded pass is warmup.
+	local calls = iterations
+	local elapsed
+	while true do
+		local start = monotonicSeconds()
+		callback(calls)
+		elapsed = (monotonicSeconds() - start) * 1000000000
+		if elapsed >= floorNs or calls >= iterations * 1024 then break end
+		local growth = elapsed > 0 and math.ceil(floorNs / elapsed) or 16
+		calls = math.max(calls + 1, math.ceil(calls * math.max(growth, 2)))
+	end
+	if elapsed < floorNs then
+		reportUnresolved(name, elapsed, floorNs, calls, extra)
+		return
+	end
 	local samples = {}
 	local totalSamples = {}
 	local checksum = 0
 	for repeatIndex = 1, repeats do
 		local start = monotonicSeconds()
-		local value = callback(iterations)
-		local elapsed = (monotonicSeconds() - start) * 1000000000
-		samples[repeatIndex] = elapsed / iterations
+		local value = callback(calls)
+		elapsed = (monotonicSeconds() - start) * 1000000000
+		samples[repeatIndex] = elapsed / calls
 		totalSamples[repeatIndex] = elapsed
 		if type(value) == "number" then
 			checksum = checksum + value
@@ -124,7 +180,7 @@ local function measure(name, iterations, callback, extra)
 		backend = "lua",
 		test = name,
 		status = "pass",
-		iterations = iterations,
+		iterations = calls,
 		medianNs = median(samples),
 		spreadNs = spread(samples),
 		totalMedianNs = median(totalSamples),
@@ -178,6 +234,7 @@ local calloutIndex = 0
 local calloutRepeat = 0
 local calloutCalls = 0
 local calloutTotalNs = 0
+local calloutRegions = 0
 local calloutSamples = nil
 local calloutChecksum = 0
 
@@ -244,17 +301,28 @@ local function beginCallouts()
 	calloutRepeat = 1
 	calloutCalls = 0
 	calloutTotalNs = 0
+	calloutRegions = 0
 	calloutSamples = {}
 	calloutChecksum = 0
 end
 
+local advanceCallout
+
 local function finishCallout()
 	local case = calloutCases[calloutIndex]
+	local floorNs = resolutionFloorNs(clockQuantumNs(), calloutRegions)
+	if calloutTotalNs < floorNs then
+		reportUnresolved(case.name, calloutTotalNs, floorNs, case.iterations,
+			{ nominalIterations = case.nominalIterations, regions = calloutRegions })
+		advanceCallout()
+		return
+	end
 	calloutSamples[calloutRepeat] = calloutTotalNs / case.iterations
 	if calloutRepeat < repeats then
 		calloutRepeat = calloutRepeat + 1
 		calloutCalls = 0
 		calloutTotalNs = 0
+		calloutRegions = 0
 		calloutChecksum = 0
 		return
 	end
@@ -273,11 +341,17 @@ local function finishCallout()
 		nominalIterations = case.nominalIterations,
 		measurement = "Lua API call loop sliced across GameFrame callbacks",
 	})
+	advanceCallout()
+end
+
+advanceCallout = function()
 	calloutIndex = calloutIndex + 1
 	calloutRepeat = 1
 	calloutCalls = 0
 	calloutTotalNs = 0
+	calloutRegions = 0
 	calloutChecksum = 0
+	calloutSamples = {}
 	if calloutIndex > #calloutCases then
 		calloutIndex = 0
 		calloutCases = nil
@@ -308,6 +382,7 @@ local function stepCallouts()
 	local start = monotonicSeconds()
 	local value = case.callback(count, calloutCalls)
 	calloutTotalNs = calloutTotalNs + (monotonicSeconds() - start) * 1000000000
+	calloutRegions = calloutRegions + 1
 	calloutCalls = calloutCalls + count
 	if type(value) == "number" then
 		calloutChecksum = calloutChecksum + value
@@ -336,8 +411,10 @@ local heightmapInvocation = 0
 local heightmapSamples = nil
 local heightmapInnerSamples = nil
 local heightmapTotalNs = 0
+local heightmapRegions = 0
 local heightmapInnerNs = 0
 local heightmapInnerCalls = 0
+local heightmapInnerRegions = 0
 
 beginHeightmap = function()
 	heightmapCaseIndex = 1
@@ -346,21 +423,40 @@ beginHeightmap = function()
 	heightmapSamples = {}
 	heightmapInnerSamples = {}
 	heightmapTotalNs = 0
+	heightmapRegions = 0
 	heightmapInnerNs = 0
 	heightmapInnerCalls = 0
+	heightmapInnerRegions = 0
 end
+
+local advanceHeightmapCase
 
 local function finishHeightmapCase()
 	local case = heightmapCases[heightmapCaseIndex]
+	local floorNs = resolutionFloorNs(clockQuantumNs(), heightmapRegions)
+	if heightmapTotalNs < floorNs then
+		reportUnresolved(case.name, heightmapTotalNs, floorNs, case.invocations, {
+			nominalInvocations = case.nominalInvocations,
+			nominalSize = case.nominalSize,
+			regions = heightmapRegions,
+		})
+		advanceHeightmapCase()
+		return
+	end
 	heightmapSamples[heightmapRepeat] = heightmapTotalNs / case.invocations
-	heightmapInnerSamples[heightmapRepeat] = case.size > 0
+	-- The inner region is timed per callback and carries its own floor.
+	local innerFloorNs = resolutionFloorNs(clockQuantumNs(), heightmapInnerRegions)
+	heightmapInnerSamples[heightmapRepeat] =
+		(case.size > 0 and heightmapInnerNs >= innerFloorNs)
 		and heightmapInnerNs / math.max(heightmapInnerCalls, 1) or 0
 	if heightmapRepeat < repeats then
 		heightmapRepeat = heightmapRepeat + 1
 		heightmapInvocation = 0
 		heightmapTotalNs = 0
+		heightmapRegions = 0
 		heightmapInnerNs = 0
 		heightmapInnerCalls = 0
+		heightmapInnerRegions = 0
 		return
 	end
 	appendJSON(outputPath("lua"), {
@@ -377,6 +473,10 @@ local function finishHeightmapCase()
 		nominalInvocations = case.nominalInvocations,
 		measurement = "Lua callback boundary with zero terraform; terrain rebuild excluded",
 	})
+	advanceHeightmapCase()
+end
+
+advanceHeightmapCase = function()
 	heightmapCaseIndex = heightmapCaseIndex + 1
 	heightmapInvocation = 0
 	if heightmapCaseIndex > #heightmapCases then
@@ -411,8 +511,10 @@ local function finishHeightmapCase()
 		heightmapSamples = {}
 		heightmapInnerSamples = {}
 		heightmapTotalNs = 0
+		heightmapRegions = 0
 		heightmapInnerNs = 0
 		heightmapInnerCalls = 0
+		heightmapInnerRegions = 0
 	end
 end
 
@@ -429,8 +531,10 @@ local function stepHeightmap()
 	local x, z = 8, 8
 	local terrainHeight = Spring.GetGroundHeight(x, z) or 96
 	local invocations = math.min(case.batch, case.invocations - heightmapInvocation)
+	-- Time the whole batch: one SetHeightMapFunc call is shorter than the Lua
+	-- timer's float step.
+	local batchStart = monotonicSeconds()
 	for _ = 1, invocations do
-		local callStart = monotonicSeconds()
 		if case.region then
 			Spring.LevelHeightMap(x, z, 256, 256, terrainHeight)
 		else
@@ -445,14 +549,16 @@ local function stepHeightmap()
 					end
 				end
 				heightmapInnerNs = heightmapInnerNs + (monotonicSeconds() - innerStart) * 1000000000
+				heightmapInnerRegions = heightmapInnerRegions + 1
 			end)
 			if result == nil then
 				error("SetHeightMapFunc returned nil")
 			end
 		end
-		heightmapTotalNs = heightmapTotalNs + (monotonicSeconds() - callStart) * 1000000000
 		heightmapInvocation = heightmapInvocation + 1
 	end
+	heightmapTotalNs = heightmapTotalNs + (monotonicSeconds() - batchStart) * 1000000000
+	heightmapRegions = heightmapRegions + 1
 	if heightmapInvocation == case.invocations then
 		finishHeightmapCase()
 	end
@@ -582,6 +688,25 @@ local function finishWorkload()
 	local medianValue = sorted[math.floor((#sorted + 1) / 2)]
 	local low = sorted[1]
 	local high = sorted[#sorted]
+	local floorNs = resolutionFloorNs(clockQuantumNs(), 1) / workloadBatchFrames
+	if medianValue < floorNs then
+		reportUnresolved(workloadCallbacks[workloadIndex].name,
+			medianValue * workloadBatchFrames, floorNs * workloadBatchFrames,
+			workloadFrames, { nominalIterations = 5000 })
+		workloadIndex = workloadIndex + 1
+		workloadFrame = 0
+		workloadSamples = {}
+		workloadChecksum = 0
+		workloadBatchStart = 0
+		workloadBatchCount = 0
+		if workloadIndex > #workloadCallbacks then
+			workloadIndex = 0
+			workloadSamples = nil
+			benchmarkComplete = true
+			appendJSON(outputPath("lua"), {backend = "lua", test = "complete", status = "pass", seed = benchmarkSeed})
+		end
+		return
+	end
 	appendJSON(outputPath("lua"), {
 		backend = "lua",
 		test = workloadCallbacks[workloadIndex].name,
@@ -873,7 +998,9 @@ end
 					Spring.InvokeNativeModule(Common.encode({testName = "benchmark", command = "run", seed = benchmarkSeed, repeats = repeats}))
 				end
 		end
-		if benchmarkComplete then
+		-- LuaUI owns the quit for the draw profile: callin_drawworld is measured
+		-- from the empty DrawWorld frames that follow the workload.
+		if benchmarkComplete and benchmarkCase ~= "draw" then
 			Spring.Quit()
 		end
 	end
@@ -950,10 +1077,12 @@ function gadget:GameFrame(frame)
 		stepHeightmap()
 	elseif backend == "lua" and workloadIndex ~= 0 then
 		stepWorkload()
-	elseif backend == "native" and benchmarkCase ~= "heightmap" and frame > 10 then
+	elseif backend == "native" and benchmarkCase ~= "heightmap"
+		and benchmarkCase ~= "draw" and frame > 10 then
+		-- The draw profile quits from LuaUI once its DrawWorld tail is recorded.
 		Spring.Quit()
 	end
-	if benchmarkComplete then
+	if benchmarkComplete and benchmarkCase ~= "draw" then
 		Spring.Quit()
 	end
 end

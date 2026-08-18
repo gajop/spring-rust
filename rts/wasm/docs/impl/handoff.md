@@ -1,157 +1,107 @@
-# Handoff: Wasm benchmark work
+# Handoff: Wasm (Rust, typed, CM) host
 
 Date: 2026-08-18
 
-## Task
+The measurements and what they mean are in
+[../considerations/measured_costs.md](../considerations/measured_costs.md),
+"End to end through Rust static bindings". The current numbers are in
+[benchmarking_results.md](benchmarking_results.md), which the suite generates.
+This file is only the working state.
 
-Benchmarks only. Do not work on parity coverage, do not chase the 39% unsynced
-number, do not touch LuaUI. Two jobs in order:
+## What exists
 
-1. Fix the benchmark harness bugs listed below.
-2. Fix the Wasm callout dispatch cost, then re-measure.
+- `rust/crates/spring-wasm-typed-host/` — `bindgen!` over a scoped WIT
+  (`wit/host.wit`) declaring two worlds, the 10 host-trait impls, and a C ABI.
+  Built as a `cdylib`.
+- `rts/WasmInterface/WasmTypedHostShims.cpp` — one C++ shim per callout, POD in,
+  POD out, straight to the `NativeInterface` function, plus the shim table.
+- `rts/WasmInterface/WasmTypedHost.{h,cpp}` — dlopen loader and typed callin
+  dispatch.
+- Seam: `WasmInterfaceSystem::LoadModule` starts the host,
+  `NativeInterfaceEventClient::DispatchWasmCallin` reroutes to it. Both behind
+  `SPRING_WASM_TYPED_HOST`, inert otherwise; `test_WasmInterface` is 2552
+  assertions green with the switch off.
+- Harness: `wasm_rust_typed` is a fourth backend with its own report column.
+  The name spells out all three axes (Rust, typed bindings, Component Model)
+  because native modules are usually Rust too, so "rust" alone would name the
+  wrong difference.
 
-## Repo state
+Covered: the rules-synced and rules-unsynced worlds, 17 callouts, 6 callins,
+and the heightmap guest callback. That spans scalars, records in and out,
+strings, small and large lists, mutations, a variant, and a host-to-guest
+callback, so it is a real feasibility test rather than a toy.
 
-- Repo: `/home/gajop/projects/spring-projects/spring-bar`, branch `rust-wip`.
-- Working tree clean. Branch is ahead of `origin/rust-wip` and unpushed.
-- Backup ref before a history rewrite: `backup/pre-date-rewrite-20260818`.
-- Build command: `./docker-build-v2/build.sh linux`. Native cmake configure is
-  broken (FindThreads / `--icf=all`), so always use the docker script.
-- ASAN build is for correctness only. Performance budgets are reported but not
-  enforced under ASAN (`TestWasmInterface.cpp` lines 717, 761, 784, 832).
-  Benchmarks must run release, no ASAN.
+## Facts that cost time
 
-Recent commits:
+**The engine build image has no cargo.** Static linking is not available. The
+host is built on the machine by `run_benchmarks.py` and dlopen'd, like the
+native benchmark module. That is why the crate takes a shim table of function
+pointers instead of importing engine symbols by name.
 
-```
-7eabf5fcbd  Add Lua vs native ratio column to the benchmark report
-472ae31fdd  Expand Wasm parity coverage and fix native API index/move semantics
-bf1bbb33fc  Finalize Wasm benchmark reporting and ownership
-473b1da485  Complete Wasm API parity and benchmarking
-4aa9c0d5d2  Complete Wasm environment parity implementation
-```
+**`define_unknown_imports_as_traps` works at instance granularity.** An
+interface this host implements only part of still counts as unknown, and
+defining it wholesale collides with the real definitions. Call it *first* with
+`allow_shadowing(true)` and let the implemented callouts shadow their traps.
+The other order fails with ``map entry `...` defined twice``, and only for
+guests that actually import the partial interface, so the callin profile passes
+and the callout profile does not.
 
-## Key files
+**`Linker::instance()` replaces an interface, it does not append.** A
+hand-written import therefore has to carry every function the guest imports
+from that interface, not just the one being special-cased, and the world-level
+`add_to_linker` has to be split per interface so it does not overwrite it.
 
-| Path | What |
-| --- | --- |
-| `rts/wasm/docs/benchmarking.md` | The spec. 33 tests across 5 layers. Do not edit it to match the implementation. |
-| `rts/wasm/docs/impl/benchmarking_results.md` | Generated results table. Generator-owned, table only. |
-| `test/native_api_parity/run_benchmarks.py` | The harness. |
-| `rts/wasm/docs/impl/review-feedback.md` | Standing review findings. |
+**The scoped WIT must match what the guest imports.** Declaring more functions
+than the component imports is harmless; declaring fewer fails instantiation
+with "function implementation is missing".
 
-## Job 1: benchmark harness bugs
+**Re-entering the guest needs the store, which the Host trait does not give
+you.** `bindgen`'s trait hands out only `&mut HostState`. Define that import by
+hand with `func_wrap`, which receives `StoreContextMut`. Component Model
+reentrance is permitted here; the heightmap callback works.
 
-Evidence is in `test/native_api_parity/out/benchmark/suite-20260817-222112-694815/`
-(bounded run, per-profile scale 0.01 to 0.1).
+**Make the callin export optional.** The `unimplemented` variant guest exports
+no callin interface on purpose, so use `Linker::instantiate` plus
+`Bindings::new(..).ok()` rather than the generated `instantiate`.
 
-**1a. The heightmap profile is broken at low scale.**
+**The guest labels its own rows `"wasm"`** because it is the same component on
+either transport. A `wasm_rust_typed` run splits output between
+`benchmark_wasm_rust_typed.jsonl` (engine-side callin rows) and `benchmark_wasm.jsonl`
+(guest-sent rows); the harness ingests both and relabels.
 
-Every heightmap row has `invocations: 1` regardless of `nominalInvocations`
-(10,000 / 1,000 / 100 / 10). Every Wasm heightmap row reports exactly
-`medianMs: 0.002` with spread 0.000 to 0.001, because the Wasm clock quantum is
-roughly 1 to 2 microseconds and the scaled workload is below it.
+**Pin the crate features.** Defaults add `component-model-async` and
+`stack-switching`, which the C API build lacks, and a component callin measures
+348 ns instead of 67.
 
-`innerNs` is then derived by dividing that constant by the inner-call count,
-which yields 2000 ns, 125 ns, 7.8 ns for small, medium, large. Per-call cost
-appearing to fall 256x as the brush grows is a division artifact. Native shows
-the same pattern more weakly (132 ns vs 31.8 ns).
+## Still open
 
-Fix: require a minimum measured duration per sample (say 50x the clock quantum)
-and raise the iteration or invocation count until it is met, or mark the row
-unavailable. Never divide a quantized constant to produce a per-call figure.
+1. `callin_4modules` is marked unavailable for `wasm_rust_typed`: the host holds one
+   component instance per process, so a four-module run would dispatch once and
+   report it as four. Fixing it means a host per module rather than a singleton.
+2. The `draw` profile needs the UI world, which is not implemented. Its three
+   rows are marked unavailable for `wasm_rust_typed`.
+3. The remaining 1,337 callouts are unimplemented and trap. Only what the
+   benchmark table exercises is covered, by design.
+4. Nothing here is wired into a non-benchmark path, and the switch is off by
+   default. This is a prototype for measurement, not a shipping transport.
 
-**1b. `callin_drawworld` runs 2 iterations.**
+## Carried over from the previous cycle
 
-That is the source of the 2.44 second Wasm value and Lua's 19.9 ms in the
-committed table. Both are noise. Give the draw profile enough iterations or
-drop the row.
+1. ASAN plus CTest have never been run against the callout and callin changes.
+2. `test_WasmAllocator` fails one case with SIGILL inside JIT guest code.
+3. `verify_codegen.py` fails on gaia_synced probe drift, predating this work.
 
-**1c. No timer-resolution guard anywhere.**
+## Build and run
 
-Lua's clock quantum is 19.07 ns (every Lua value in the older table was a
-multiple of it). Wasm's is roughly 1 to 2 microseconds. Nothing checks the
-measured quantity against the granularity. Add that check once, centrally, and
-both 1a and 1b stop being possible.
-
-**1d. `hm_callback_empty` violates its own scale invariance.**
-
-It has zero inner calls, so per-invocation cost must not move with scale. It
-reads 0.002 ms in the bounded run and 11.432 ms in the committed scale-1 table.
-A 5,700x swing means at least one run is wrong. Treat the committed heightmap
-column as untrusted until this is explained.
-
-Note the scale-1 summaries are gone. Only bounded runs (0.01 / 0.1) survive
-under `out/benchmark/`, so the committed table cannot be cross-checked. Re-run
-at scale 1 after fixing the above.
-
-## Job 2: why Wasm callouts are slow
-
-This is the real finding. It is not inherent to Wasm or the Component Model.
-
-Every callout re-resolves its target by string comparison on every call:
-
-1. `CanonicalModule()` in `rts/wasm/generated/WasmCalloutRegistry.h` linear-scans
-   about 60 interface descriptors doing string compares.
-2. The per-module dispatcher (tail of each `rts/wasm/generated/WasmHostAdapter_<module>.cpp`)
-   is a linear `if` chain, up to about 80 candidates for `units_info`.
-3. Each comparison calls `detail::FunctionEquals` at
-   `rts/wasm/generated/WasmHostAdapterSupport.h:465`, which compares character by
-   character through `std::tolower`. That is a locale-aware, non-inlined call
-   per character.
-
-The target is already known at bind time. `rts/WasmInterface/WasmModule.cpp:1406-1409`
-builds a `WasmHostFunctionData` at import registration holding `moduleName` and
-`functionName`, and the trampoline registered at line 1418 hands those strings
-back down to be re-parsed on every invocation.
-
-The same trampoline also, per call:
-
-- heap-allocates a `std::vector<WasmValue>`;
-- constructs a `std::string error`;
-- issues a `wasmtime_component_func_type_param_nth` type query per argument.
-
-This matches the measured shape: 561 ns scalar, 1,628 ns vec3 (longer name,
-more result fields), and `callin_unimplemented` at 2,472 ns against native's
-16 ns because dispatch never short-circuits.
-
-**Fix**
-
-Resolve the dispatch target once at import registration and store a function
-pointer or a stable index in `WasmHostFunctionData`. The call path then becomes
-an indirect call with no string work. This is a generator change (emit a
-per-module dispatch table plus a lookup used only at bind time) and a small
-runtime change in `WasmModule.cpp`.
-
-Secondary, after the above lands and is measured: reuse a per-module scratch
-buffer for the argument vector instead of allocating per call, and cache the
-parameter types at bind time rather than querying per call.
-
-**Do not** conclude anything about Component Model overhead until this is fixed.
-The current numbers are measuring string comparison, not transport.
-
-## Context worth keeping
-
-`wl_compute` (a numeric loop with zero engine calls) has Wasm at 0.324 ms
-against Lua's 1.444 ms, 4.5x faster. The VM is fast. The binding is slow. That
-test exists specifically to separate those two, and it is doing its job.
-
-Frame budget for judging results: 33 ms at 30 Hz sim, 16 ms at 60 fps, 7 ms at
-144 fps. Target for hot-path callouts is roughly 0.5 microseconds.
-
-## Verification
-
-After changes:
-
-1. `./docker-build-v2/build.sh linux` (release, no ASAN) for the benchmark.
-2. Re-run the full suite at scale 1 and regenerate
-   `rts/wasm/docs/impl/benchmarking_results.md`.
-3. Confirm the report keeps the three ratio columns: `Lua vs native`,
-   `Wasm vs Lua`, `Wasm vs native`.
-4. `python3 rts/wasm/verify_codegen.py` if the generator changed.
-5. Separately, an ASAN build plus CTest for correctness.
+- Engine: `./docker-build-v2/build.sh --compile linux`.
+- Typed host: built automatically by `run_benchmarks.py`; standalone with
+  `cargo build --release --manifest-path rust/crates/spring-wasm-typed-host/Cargo.toml`.
+- Full suite: `python3 test/native_api_parity/run_benchmarks.py --suite`.
+- One profile: `--callins --scale 1 --no-report --summary-json <path>`.
+- Benchmarks need a release build with no ASAN and the machine to itself. The
+  draw profile opens a window.
 
 ## Working preferences
 
-Plain language. No em dashes. Concise. Skip the editorializing, state what was
-done and what the numbers say.
+Plain language. No em dashes. Concise. Few comments in code. Measure rather
+than project; projections in this area have already been wrong.

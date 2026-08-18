@@ -24,7 +24,8 @@ mod synced {
     use std::sync::{Mutex, OnceLock};
 
     use bindings::exports::recoil::spring_api::callins_rules_synced::{
-        GameFrameQuery, GameFrameResult, SpringError,
+        AllowUnitCreationQuery, AllowUnitCreationResult, DamageCallinResult, GameFrameQuery,
+        GameFrameResult, SpringError, UnitCreatedQuery, UnitDamagedQuery,
     };
     use bindings::recoil::spring_api::{
         messages, profiling, rules_params, terrain, terrain_control, unit_control, unit_defs,
@@ -124,31 +125,94 @@ mod synced {
         profiling::get_timer_micros(0u8).map_err(|error| SpringError { code: error.code })
     }
 
+    /// Smallest step the host clock can actually report.
+    fn clock_quantum_ns() -> Result<f64, SpringError> {
+        let mut best = u64::MAX;
+        for _ in 0..5 {
+            let start = timer_micros()?;
+            let mut now = start;
+            while now == start {
+                now = timer_micros()?;
+            }
+            best = best.min(now - start);
+        }
+        Ok(best.max(1) as f64 * 1_000.0)
+    }
+
+    /// Quantization error over `regions` timed regions grows with sqrt(regions),
+    /// so the minimum trustworthy duration does too.
+    fn resolution_floor_ns(quantum_ns: f64, regions: usize) -> f64 {
+        50.0 * quantum_ns * (regions.max(1) as f64).sqrt()
+    }
+
+    /// An empty String does not allocate, so this adds no heap traffic.
+    fn rules_param_float() -> rules_params::RulesParamValue {
+        rules_params::RulesParamValue {
+            type_: rules_params::RulesParamType::RulesparamTypeFloat,
+            bool_value: false,
+            float_value: 1.0,
+            string_value: String::new(),
+        }
+    }
+
     fn send_row(row: &str) {
         let _ = messages::send_lua_rules_msg(&format!("WASM_BENCH|{row}"));
+    }
+
+    fn send_unresolved_row(name: &str, elapsed_ns: f64, floor_ns: f64, units: usize) {
+        send_row(&format!(
+            "{{\"backend\":\"wasm\",\"test\":\"{name}\",\"status\":\"unavailable\",\"iterations\":{units},\"scale\":{},\"reason\":\"sample of {elapsed_ns:.0} ns is below the {floor_ns:.0} ns timer-resolution floor\"}}",
+            benchmark_scale()
+        ));
     }
 
     fn measure<F>(name: &str, iterations: usize, mut operation: F) -> Result<(), SpringError>
     where
         F: FnMut() -> Result<(), SpringError>,
     {
+        let quantum_ns = clock_quantum_ns()?;
+        let floor_ns = resolution_floor_ns(quantum_ns, 1);
+        // Grow the loop until a sample clears the resolution floor.
+        let mut calls = iterations;
+        let mut elapsed_ns;
+        loop {
+            let start = timer_micros()?;
+            for _ in 0..calls {
+                operation()?;
+            }
+            elapsed_ns = timer_micros()?.saturating_sub(start) as f64 * 1_000.0;
+            if elapsed_ns >= floor_ns || calls >= iterations.saturating_mul(1_024) {
+                break;
+            }
+            let growth = if elapsed_ns <= 0.0 {
+                16.0
+            } else {
+                (floor_ns / elapsed_ns).ceil().max(2.0)
+            };
+            calls = ((calls as f64 * growth).ceil() as usize).max(calls + 1);
+        }
+        if elapsed_ns < floor_ns {
+            send_unresolved_row(name, elapsed_ns, floor_ns, calls);
+            return Ok(());
+        }
+
         let mut samples = Vec::new();
         for _ in 0..benchmark_repeats() {
             let start = timer_micros()?;
-            for _ in 0..iterations {
+            for _ in 0..calls {
                 operation()?;
             }
             let end = timer_micros()?;
-            samples.push((end.saturating_sub(start) as f64 * 1000.0) / iterations as f64);
+            samples.push((end.saturating_sub(start) as f64 * 1000.0) / calls as f64);
         }
         let mut sorted = samples.clone();
         sorted.sort_by(|left, right| left.total_cmp(right));
         let median = sorted[(sorted.len() - 1) / 2];
         let spread = sorted[sorted.len() - 1] - sorted[0];
         send_row(&format!(
-		"{{\"backend\":\"wasm\",\"test\":\"{name}\",\"status\":\"pass\",\"iterations\":{iterations},\"medianNs\":{median:.3},\"spreadNs\":{spread:.3},\"totalMedianNs\":{:.3},\"totalSpreadNs\":{:.3},\"scale\":{},\"measurement\":\"Component Model callout loop\"}}",
-		median * iterations as f64,
-		spread * iterations as f64,
+		"{{\"backend\":\"wasm\",\"test\":\"{name}\",\"status\":\"pass\",\"iterations\":{calls},\"medianNs\":{median:.3},\"spreadNs\":{spread:.3},\"totalMedianNs\":{:.3},\"totalSpreadNs\":{:.3},\"quantumNs\":{quantum_ns:.0},\"scale\":{},\"measurement\":\"Component Model callout loop\"}}",
+		median * calls as f64,
+		spread * calls as f64,
 		benchmark_scale()
     ));
         Ok(())
@@ -230,6 +294,53 @@ mod synced {
         }
     }
 
+    /// Samples are milliseconds *per invocation*, matching Lua and native.
+    fn measure_terrain<F>(
+        name: &str,
+        invocations: usize,
+        mut invoke: F,
+    ) -> Result<Option<(usize, Vec<f64>)>, SpringError>
+    where
+        F: FnMut() -> Result<(), SpringError>,
+    {
+        let quantum_ns = clock_quantum_ns()?;
+        let floor_ns = resolution_floor_ns(quantum_ns, 1);
+        let mut count = invocations;
+        let mut elapsed_ns;
+        loop {
+            let start = timer_micros()?;
+            for _ in 0..count {
+                invoke()?;
+            }
+            elapsed_ns = timer_micros()?.saturating_sub(start) as f64 * 1_000.0;
+            if elapsed_ns >= floor_ns || count >= invocations.saturating_mul(1_024) {
+                break;
+            }
+            let growth = if elapsed_ns <= 0.0 {
+                16.0
+            } else {
+                (floor_ns / elapsed_ns).ceil().max(2.0)
+            };
+            count = ((count as f64 * growth).ceil() as usize).max(count + 1);
+        }
+        if elapsed_ns < floor_ns {
+            send_unresolved_row(name, elapsed_ns, floor_ns, count);
+            return Ok(None);
+        }
+
+        let mut samples = Vec::new();
+        for _ in 0..5 {
+            let start = timer_micros()?;
+            for _ in 0..count {
+                invoke()?;
+            }
+            let end = timer_micros()?;
+            samples.push(end.saturating_sub(start) as f64 / 1000.0 / count as f64);
+        }
+        samples.sort_by(|left, right| left.total_cmp(right));
+        Ok(Some((count, samples)))
+    }
+
     fn run_heightmap(scale: f64) -> Result<(), SpringError> {
         let terrain_height = terrain::get_ground_orig_height(8.0, 8.0)
             .map_err(|error| SpringError { code: error.code })?;
@@ -240,50 +351,47 @@ mod synced {
             ("hm_brush_large", 512usize, 10usize),
         ] {
             let size = scaled_brush_size(nominal_size, scale);
-            let invocations = scaled_terrain_count(nominal_invocations, scale);
             BRUSH_SIZE.store(size, Ordering::Relaxed);
-            let mut samples = Vec::new();
-            for _ in 0..5 {
-                let start = timer_micros()?;
-                for _ in 0..invocations {
+            let measured = measure_terrain(
+                name,
+                scaled_terrain_count(nominal_invocations, scale),
+                || {
                     terrain_control::set_height_map_func(1, 0)
-                        .map_err(|error| SpringError { code: error.code })?;
-                }
-                let end = timer_micros()?;
-                samples.push(end.saturating_sub(start) as f64 / 1000.0);
-            }
-            let mut sorted = samples.clone();
-            sorted.sort_by(|left, right| left.total_cmp(right));
+                        .map(|_| ())
+                        .map_err(|error| SpringError { code: error.code })
+                },
+            )?;
+            let Some((invocations, sorted)) = measured else {
+                continue;
+            };
             let median_ms = sorted[(sorted.len() - 1) / 2];
             let spread_ms = sorted[sorted.len() - 1] - sorted[0];
             let inner_calls = size * size;
             let inner_ns = if inner_calls == 0 {
                 0.0
             } else {
-                median_ms * 1_000_000.0 / invocations as f64 / inner_calls as f64
+                median_ms * 1_000_000.0 / inner_calls as f64
             };
             send_row(&format!(
             "{{\"backend\":\"wasm\",\"test\":\"{name}\",\"status\":\"pass\",\"invocations\":{invocations},\"innerCalls\":{inner_calls},\"medianMs\":{median_ms:.6},\"spreadMs\":{spread_ms:.6},\"innerNs\":{inner_ns:.3},\"scale\":{scale},\"nominalSize\":{nominal_size},\"nominalInvocations\":{nominal_invocations},\"measurement\":\"Component callback boundary with zero terraform; terrain rebuild excluded\"}}"
         ));
         }
-        let invocations = scaled_terrain_count(1_000, scale);
-        let mut samples = Vec::new();
-        for _ in 0..5 {
-            let start = timer_micros()?;
-            for _ in 0..invocations {
+        let measured = measure_terrain(
+            "hm_region_op",
+            scaled_terrain_count(1_000, scale),
+            || {
                 terrain_control::level_height_map(8.0, 8.0, 248.0, 248.0, terrain_height)
-                    .map_err(|error| SpringError { code: error.code })?;
-            }
-            let end = timer_micros()?;
-            samples.push(end.saturating_sub(start) as f64 / 1000.0 / invocations as f64);
+                    .map(|_| ())
+                    .map_err(|error| SpringError { code: error.code })
+            },
+        )?;
+        if let Some((invocations, sorted)) = measured {
+            send_row(&format!(
+            "{{\"backend\":\"wasm\",\"test\":\"hm_region_op\",\"status\":\"pass\",\"invocations\":{invocations},\"medianMs\":{:.6},\"spreadMs\":{:.6},\"innerNs\":0,\"scale\":{scale},\"nominalInvocations\":1000,\"measurement\":\"Component region boundary with unchanged height; terrain rebuild excluded\"}}",
+            sorted[(sorted.len() - 1) / 2],
+            sorted[sorted.len() - 1] - sorted[0]
+        ));
         }
-        let mut sorted = samples.clone();
-        sorted.sort_by(|left, right| left.total_cmp(right));
-        send_row(&format!(
-        "{{\"backend\":\"wasm\",\"test\":\"hm_region_op\",\"status\":\"pass\",\"invocations\":{invocations},\"medianMs\":{:.6},\"spreadMs\":{:.6},\"innerNs\":0,\"scale\":{scale},\"nominalInvocations\":1000,\"measurement\":\"Component region boundary with unchanged height; terrain rebuild excluded\"}}",
-        sorted[(sorted.len() - 1) / 2],
-        sorted[sorted.len() - 1] - sorted[0]
-    ));
         Ok(())
     }
 
@@ -394,9 +502,7 @@ mod synced {
                     rules_params::set_unit_rules_param(
                         *unit,
                         "bench",
-                        rules_params::RulesParamValue {
-                            type_: rules_params::RulesParamType::RulesparamTypeFloat,
-                        },
+                        &rules_param_float(),
                         -1,
                     )
                     .map_err(|error| SpringError { code: error.code })?;
@@ -412,10 +518,22 @@ mod synced {
             let (elapsed, checksum) = measure_workload(|| {
                 let mut checksum = 0.0;
                 for unit in units.iter().take(command_limit) {
+                    let unit_position = units_info::get_unit_position(
+                        *unit,
+                        units_info::GetUnitPositionOptions {
+                            mid_pos: false,
+                            aim_pos: false,
+                        },
+                    )
+                    .map_err(|error| SpringError { code: error.code })?;
                     unit_control::give_order_to_unit(
                         *unit,
                         10,
-                        &[position.x + 8.0, position.y, position.z + 8.0],
+                        &[
+                            unit_position.x + 8.0,
+                            unit_position.y,
+                            unit_position.z + 8.0,
+                        ],
                         0,
                         0,
                     )
@@ -545,9 +663,7 @@ mod synced {
                 rules_params::set_unit_rules_param(
                     unit_id,
                     "bench",
-                    rules_params::RulesParamValue {
-                        type_: rules_params::RulesParamType::RulesparamTypeFloat,
-                    },
+                    &rules_param_float(),
                     -1,
                 )
                 .map(|_| ())
@@ -612,9 +728,7 @@ mod synced {
                 rules_params::set_unit_rules_param(
                     *unit,
                     "bench",
-                    rules_params::RulesParamValue {
-                        type_: rules_params::RulesParamType::RulesparamTypeFloat,
-                    },
+                    &rules_param_float(),
                     -1,
                 )
                 .map_err(|error| SpringError { code: error.code })?;
@@ -623,12 +737,25 @@ mod synced {
             }
             Ok(())
         })?;
+        // Each unit is ordered next to itself, as the Lua baseline does.
         measure("wl_commands", scaled_count(5_000, scale), || {
             for unit in units.iter().take(command_limit) {
+                let unit_position = units_info::get_unit_position(
+                    *unit,
+                    units_info::GetUnitPositionOptions {
+                        mid_pos: false,
+                        aim_pos: false,
+                    },
+                )
+                .map_err(|error| SpringError { code: error.code })?;
                 unit_control::give_order_to_unit(
                     *unit,
                     10,
-                    &[position.x + 8.0, position.y, position.z + 8.0],
+                    &[
+                        unit_position.x + 8.0,
+                        unit_position.y,
+                        unit_position.z + 8.0,
+                    ],
                     0,
                     0,
                 )
@@ -735,6 +862,28 @@ mod synced {
                     unused: 0,
                 },
             )
+        }
+
+        fn unit_created(query: UnitCreatedQuery) -> Result<(), SpringError> {
+            std::hint::black_box(query.unit_id);
+            Ok(())
+        }
+
+        fn unit_pre_damaged(query: UnitDamagedQuery) -> Result<DamageCallinResult, SpringError> {
+            Ok(DamageCallinResult {
+                new_damage: query.damage,
+                impulse_mult: 1.0,
+            })
+        }
+
+        fn allow_unit_creation(
+            query: AllowUnitCreationQuery,
+        ) -> Result<AllowUnitCreationResult, SpringError> {
+            std::hint::black_box(query.unit_def_id);
+            Ok(AllowUnitCreationResult {
+                allow: true,
+                drop_order: false,
+            })
         }
     }
 

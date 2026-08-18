@@ -190,7 +190,11 @@ def _push(param_name: str, param_type: str) -> list[str]:
 def trace_statements(name: str, params: list[tuple[str, str]]) -> list[str]:
     names = [param_name for param_name, _ in params]
     by_name = dict(params)
-    lines = ["        let mut trace_args = Vec::new();"]
+    lines = [
+        "        let record_trace = record_callins_enabled();",
+        "        let mut trace_args = Vec::new();",
+        "        if record_trace {",
+    ]
 
     if name == "unit_created":
         for param_name, param_type in params[:3]:
@@ -466,16 +470,14 @@ def method_item(name: str, signature: str, params: list[tuple[str, str]], text: 
         body = "\n        Ok(Some(true))\n"
     elif name == "game_frame":
         body = (
-            "\n        if std::env::var(\"SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT\")"
-            "            .as_deref() == Ok(\"gameframe\") {\n"
+            "\n        if benchmark_callin_variant_is(\"gameframe\") {\n"
             "            std::hint::black_box(game_frame);\n"
             "        }\n"
             + body
         )
     elif name == "draw_world":
         body = (
-            "\n        if std::env::var(\"SPRING_NATIVE_BENCHMARK_CASE\")"
-            "            .as_deref() == Ok(\"draw\") {\n"
+            "\n        if benchmark_case_is(\"draw\") {\n"
             "            if let Err(error) = self.benchmark_draw_world() {\n"
             "                return Err(spring_native::Error::new(1, error));\n"
             "            }\n"
@@ -485,11 +487,14 @@ def method_item(name: str, signature: str, params: list[tuple[str, str]], text: 
     return (
         f"{signature} {{\n"
         f"{trace}\n"
+        "        }\n"
         "        let callback_result = {"
         f"{body}"
         "        };\n"
+        "        if record_trace {\n"
         f"{result_trace}\n"
-        f'        self.record_callin_args_result("{callback_name}", trace_args, trace_results);\n'
+        f'            self.record_callin_args_result("{callback_name}", trace_args, trace_results);\n'
+        "        }\n"
         "        callback_result\n"
         "    }\n"
     )

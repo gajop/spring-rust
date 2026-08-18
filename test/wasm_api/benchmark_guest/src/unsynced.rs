@@ -28,6 +28,10 @@ fn count(value: usize) -> usize {
     ((value as f64 * scale()).round() as usize).max(1)
 }
 
+fn benchmark_case() -> Option<&'static str> {
+    option_env!("SPRING_BENCHMARK_CASE").filter(|value| !value.is_empty())
+}
+
 fn timer_micros() -> Result<u64, SpringError> {
     profiling::get_timer_micros(0u8).map_err(|error| SpringError { code: error.code })
 }
@@ -150,6 +154,12 @@ impl Guest for BenchmarkUnsyncedGuest {
     }
 
     fn update(_query: UpdateQuery) -> Result<UpdateResult, SpringError> {
+        if benchmark_case() == Some("callins") {
+            // Update is dispatched unsynced-only, so this is the environment
+            // where the engine-side recorder times a real guest dispatch. Keep
+            // the body empty for the same reason game_frame keeps its own empty.
+            return Ok(UpdateResult { unused: 0 });
+        }
         if !RAN.load(Ordering::Acquire) {
             let has_units = units_query::get_team_units(0)
                 .map(|units| !units.is_empty())

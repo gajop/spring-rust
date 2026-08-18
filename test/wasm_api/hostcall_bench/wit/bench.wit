@@ -1,0 +1,46 @@
+package recoil:hostcall-bench@1.0.0;
+
+interface types {
+  record spring-error { code: s32 }
+
+  record vec3 {
+    x: f32,
+    y: f32,
+    z: f32,
+  }
+
+  record position-options {
+    mid-pos: bool,
+    aim-pos: bool,
+  }
+
+  record sample {
+    a: s32,
+    b: s32,
+    c: s32,
+    d: s32,
+  }
+}
+
+interface host {
+  use types.{spring-error, vec3, position-options};
+
+  add-i32: func(x: s32) -> s32;
+  add-i32-result: func(x: s32) -> result<s32, spring-error>;
+  get-vec3: func(x: s32) -> result<vec3, spring-error>;
+  get-vec3-opts: func(x: s32, options: position-options) -> result<vec3, spring-error>;
+}
+
+world bench {
+  use types.{sample};
+
+  import host;
+
+  export run-callout: func(iters: s32) -> s32;
+  export run-callout-result: func(iters: s32) -> s32;
+  export run-callout-vec3: func(iters: s32) -> s32;
+  export run-callout-vec3-opts: func(iters: s32) -> s32;
+  export run-spin: func(iters: s32) -> s32;
+  export noop: func(x: s32) -> s32;
+  export noop-record: func(value: sample) -> s32;
+}
