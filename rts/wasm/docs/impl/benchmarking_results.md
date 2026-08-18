@@ -2,36 +2,36 @@
 
 | Profile | Scale | Test | Lua | Native | Wasm (C API, dynamic, CM) | Wasm (Rust, typed, CM) | Lua vs native | Typed vs Lua | Typed vs native | Typed vs dynamic |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `callins` | 1 | `callin_empty` | 316.000 ns ± 100.000 ns | 21.000 ns ± 5.000 ns | 1070.000 ns ± 133.000 ns | 151.000 ns ± 66.000 ns | 15.05× | 0.48× | 7.19× | 0.14× |
-| `callins` | 1 | `callin_gameframe` | 313.000 ns ± 72.000 ns | 24.000 ns ± 9.000 ns | 1066.000 ns ± 145.000 ns | 135.000 ns ± 34.000 ns | 13.04× | 0.43× | 5.62× | 0.13× |
-| `callins` | 1 | `callin_update` | 227.000 ns ± 54.000 ns | 20.000 ns ± 4.000 ns | 1059.000 ns ± 146.000 ns | 134.000 ns ± 33.000 ns | 11.35× | 0.59× | 6.70× | 0.13× |
-| `callins` | 1 | `callin_unitcreated` | 200.000 ns ± 135.000 ns | 23.000 ns ± 5.000 ns | 1385.000 ns ± 180.000 ns | 159.000 ns ± 113.000 ns | 8.70× | 0.80× | 6.91× | 0.11× |
-| `callins` | 1 | `callin_unitpredamaged` | 273.000 ns ± 79.000 ns | 24.000 ns ± 3.000 ns | 3144.000 ns ± 204.000 ns | 154.000 ns ± 65.000 ns | 11.38× | 0.56× | 6.42× | 0.05× |
-| `callins` | 1 | `callin_allowunitcreation` | 218.000 ns ± 82.000 ns | 21.000 ns ± 21.000 ns | 2770.000 ns ± 210.000 ns | 160.000 ns ± 75.000 ns | 10.38× | 0.73× | 7.62× | 0.06× |
-| `callins` | 1 | `callin_unimplemented` | 62.000 ns ± 31.000 ns | 78.000 ns ± 41.000 ns | 1070.000 ns ± 405.000 ns | 126.000 ns ± 33.000 ns | 0.79× | 2.03× | 1.62× | 0.12× |
-| `callins` | 1 | `callin_4modules` | 347.000 ns ± 52.000 ns | 80.000 ns ± 20.000 ns | 3489.000 ns ± 439.000 ns | unavailable | 4.34× | — | — | — |
-| `callouts` | 1 | `callout_scalar` | 30.651 ns ± 0.668 ns | 6.925 ns ± 0.102 ns | 175.350 ns ± 11.140 ns | 41.550 ns ± 2.410 ns | 4.43× | 1.36× | 6.00× | 0.24× |
-| `callouts` | 1 | `callout_vec3` | 57.769 ns ± 0.439 ns | 6.489 ns ± 0.694 ns | 885.560 ns ± 29.020 ns | 54.910 ns ± 3.260 ns | 8.90× | 0.95× | 8.46× | 0.06× |
-| `callouts` | 1 | `callout_string` | 78.111 ns ± 2.027 ns | 28.763 ns ± 0.363 ns | 332.840 ns ± 5.720 ns | 99.540 ns ± 4.180 ns | 2.72× | 1.27× | 3.46× | 0.30× |
-| `callouts` | 1 | `callout_smalllist` | 595.987 ns ± 18.394 ns | 21.472 ns ± 0.225 ns | 1399.650 ns ± 90.700 ns | 218.950 ns ± 3.700 ns | 27.76× | 0.37× | 10.20× | 0.16× |
-| `callouts` | 1 | `callout_biglist` | 7994.175 ns ± 1091.481 ns | 492.924 ns ± 3.464 ns | 6768.000 ns ± 54.000 ns | 592.000 ns ± 13.000 ns | 16.22× | 0.07× | 1.20× | 0.09× |
-| `callouts` | 1 | `callout_spatial` | 570.631 ns ± 18.477 ns | 221.648 ns ± 11.341 ns | 1948.200 ns ± 96.200 ns | 318.200 ns ± 13.800 ns | 2.57× | 0.56× | 1.44× | 0.16× |
-| `callouts` | 1 | `callout_mutate` | 206.046 ns ± 81.761 ns | 36.291 ns ± 0.365 ns | 1058.940 ns ± 46.630 ns | 96.890 ns ± 0.800 ns | 5.68× | 0.47× | 2.67× | 0.09× |
-| `heightmap` | 1 | `hm_callback_empty` | 0.000238 ms ± 0.000006 ms | 0.000032 ms ± 0.000001 ms | 0.000725 ms ± 0.000004 ms | 0.000129 ms ± 0.000002 ms | 7.39× | 0.54× | 4.01× | 0.18× |
-| `heightmap` | 1 | `hm_brush_small` | 0.080090 ms ± 0.001486 ms | 0.006360 ms ± 0.000139 ms | 0.322405 ms ± 0.011328 ms | 0.054843 ms ± 0.002948 ms | 12.59× | 0.68× | 8.62× | 0.17× |
-| `heightmap` | 1 | `hm_brush_medium` | 1.298001 ms ± 0.006838 ms | 0.095150 ms ± 0.003183 ms | 5.127510 ms ± 0.126260 ms | 0.844430 ms ± 0.022300 ms | 13.64× | 0.65× | 8.87× | 0.16× |
-| `heightmap` | 1 | `hm_brush_large` | 19.959498 ms ± 0.871206 ms | 1.504753 ms ± 0.014043 ms | 83.353800 ms ± 2.438700 ms | 13.927600 ms ± 0.668000 ms | 13.26× | 0.70× | 9.26× | 0.17× |
-| `heightmap` | 1 | `hm_region_op` | 0.001025 ms ± 0.000035 ms | 0.000811 ms ± 0.000023 ms | 0.000945 ms ± 0.000007 ms | 0.000862 ms ± 0.000249 ms | 1.26× | 0.84× | 1.06× | 0.91× |
-| `workloads` | 1 | `wl_unit_scan` | 0.413611 ms ± 0.023983 ms | 0.004904 ms ± 0.000609 ms | 0.553000 ms ± 0.533000 ms | 0.047000 ms ± 0.097000 ms | 84.35× | 0.11× | 9.58× | 0.08× |
-| `workloads` | 1 | `wl_area_effect` | 0.431991 ms ± 0.087938 ms | 0.038039 ms ± 0.001385 ms | 0.455000 ms ± 0.320000 ms | 0.064000 ms ± 0.073000 ms | 11.36× | 0.15× | 1.68× | 0.14× |
-| `workloads` | 1 | `wl_rules_params` | 0.583763 ms ± 0.200586 ms | 0.020322 ms ± 0.000890 ms | 0.735000 ms ± 0.546000 ms | 0.073000 ms ± 0.113000 ms | 28.73× | 0.13× | 3.59× | 0.10× |
-| `workloads` | 1 | `wl_commands` | 0.573168 ms ± 0.303507 ms | 0.028950 ms ± 0.000822 ms | 0.877000 ms ± 0.509000 ms | 0.546000 ms ± 0.480000 ms | 19.80× | 0.95× | 18.86× | 0.62× |
-| `workloads` | 1 | `wl_compute` | 1.679630 ms ± 0.133152 ms | 0.186950 ms ± 0.005821 ms | 0.323000 ms ± 0.283000 ms | 0.323000 ms ± 0.318000 ms | 8.98× | 0.19× | 1.73× | 1.00× |
-| `memory` | 1 | `mem_per_call_small` | 0 B / 0 alloc / 3.695 ms total | 0 B / 0 alloc / 5.662 ns/call | 0 B / 0 alloc / 92.140 ms total | 0 B / 0 alloc / 5.423 ms total | — | — | — | — |
-| `memory` | 1 | `mem_per_call_list` | 16064000 B / 2000 alloc / 7.058 ms total | 0 B / 0 alloc / 496.462 ns/call | 0 B / 0 alloc / 7.142 ms total | 0 B / 0 alloc / 0.604 ms total | — | — | — | — |
-| `memory` | 1 | `gc_pause` | 559 KB GC / 0.464 ms | 559 KB GC / 0.448 ms | 559 KB GC / 0.467 ms | 560 KB GC / 0.453 ms | 1.04× | 0.98× | 1.01× | 0.97× |
-| `memory` | 1 | `frame_spike` | p99 0.076000 ms / worst 0.099000 ms | p99 0.005214 ms / worst 0.014292 ms | p99 0.300000 ms / worst 0.667000 ms | p99 0.027000 ms / worst 0.035000 ms | 14.58× | 0.36× | 5.18× | 0.09× |
-| `memory` | 1 | `mem_growth` | peak 18335176 B / steady 18335176 B | peak 2134022 B / steady 2134022 B | peak 2158547 B / steady 2118265 B | peak 2158612 B / steady 2118332 B | 8.59× | 0.12× | 1.01× | 1.00× |
-| `draw` | 1 | `callin_drawworld` | 756.000 ns ± 692.000 ns | 408.000 ns ± 703.000 ns | 12178.000 ns ± 7494.000 ns | unavailable | 1.85× | — | — | — |
-| `draw` | 1 | `callout_draw` | 75.060 ns | 6.052 ns | 337.881 ns | unavailable | 12.40× | — | — | — |
-| `draw` | 1 | `wl_ui_draw` | 0.295000 ms | 0.024001 ms | 1.388125 ms | unavailable | 12.29× | — | — | — |
+| `callins` | 1 | `callin_empty` | 319.000 ns ± 72.000 ns | 30.000 ns ± 5.000 ns | 1098.000 ns ± 159.000 ns | 139.000 ns ± 31.000 ns | 10.63× | 0.44× | 4.63× | 0.13× |
+| `callins` | 1 | `callin_gameframe` | 314.000 ns ± 66.000 ns | 30.000 ns ± 16.000 ns | 1062.000 ns ± 248.000 ns | 145.000 ns ± 30.000 ns | 10.47× | 0.46× | 4.83× | 0.14× |
+| `callins` | 1 | `callin_update` | 227.000 ns ± 47.000 ns | 27.000 ns ± 4.000 ns | 1039.000 ns ± 152.000 ns | 145.000 ns ± 39.000 ns | 8.41× | 0.64× | 5.37× | 0.14× |
+| `callins` | 1 | `callin_unitcreated` | 208.000 ns ± 182.000 ns | 23.000 ns ± 14.000 ns | 1369.000 ns ± 237.000 ns | 137.000 ns ± 138.000 ns | 9.04× | 0.66× | 5.96× | 0.10× |
+| `callins` | 1 | `callin_unitpredamaged` | 267.000 ns ± 63.000 ns | 24.000 ns ± 4.000 ns | 3117.000 ns ± 247.000 ns | 146.000 ns ± 29.000 ns | 11.12× | 0.55× | 6.08× | 0.05× |
+| `callins` | 1 | `callin_allowunitcreation` | 219.000 ns ± 66.000 ns | 21.000 ns ± 5.000 ns | 2744.000 ns ± 253.000 ns | 152.000 ns ± 45.000 ns | 10.43× | 0.69× | 7.24× | 0.06× |
+| `callins` | 1 | `callin_unimplemented` | 156.000 ns ± 37.000 ns | 72.000 ns ± 53.000 ns | 193.000 ns ± 950.000 ns | 24.000 ns ± 106.000 ns | 2.17× | 0.15× | 0.33× | 0.12× |
+| `callins` | 1 | `callin_4modules` | 360.000 ns ± 63.000 ns | 88.000 ns ± 48.000 ns | 3536.000 ns ± 398.000 ns | 558.000 ns ± 115.000 ns | 4.09× | 1.55× | 6.34× | 0.16× |
+| `callouts` | 1 | `callout_scalar` | 30.429 ns ± 0.706 ns | 6.332 ns ± 0.029 ns | 188.690 ns ± 3.480 ns | 41.420 ns ± 1.350 ns | 4.81× | 1.36× | 6.54× | 0.22× |
+| `callouts` | 1 | `callout_vec3` | 63.751 ns ± 2.117 ns | 6.210 ns ± 0.750 ns | 841.040 ns ± 30.600 ns | 57.140 ns ± 0.290 ns | 10.27× | 0.90× | 9.20× | 0.07× |
+| `callouts` | 1 | `callout_string` | 73.361 ns ± 2.165 ns | 27.255 ns ± 1.347 ns | 324.760 ns ± 7.100 ns | 117.140 ns ± 1.120 ns | 2.69× | 1.60× | 4.30× | 0.36× |
+| `callouts` | 1 | `callout_smalllist` | 608.325 ns ± 23.818 ns | 21.634 ns ± 1.294 ns | 1397.250 ns ± 3.950 ns | 236.200 ns ± 3.400 ns | 28.12× | 0.39× | 10.92× | 0.17× |
+| `callouts` | 1 | `callout_biglist` | 7906.438 ns ± 713.348 ns | 481.928 ns ± 10.820 ns | 7098.000 ns ± 61.000 ns | 623.000 ns ± 2.000 ns | 16.41× | 0.08× | 1.29× | 0.09× |
+| `callouts` | 1 | `callout_spatial` | 735.140 ns ± 194.645 ns | 217.427 ns ± 11.613 ns | 1965.400 ns ± 21.500 ns | 336.800 ns ± 4.000 ns | 3.38× | 0.46× | 1.55× | 0.17× |
+| `callouts` | 1 | `callout_mutate` | 213.349 ns ± 84.035 ns | 35.686 ns ± 0.399 ns | 1095.790 ns ± 48.660 ns | 102.070 ns ± 1.220 ns | 5.98× | 0.48× | 2.86× | 0.09× |
+| `heightmap` | 1 | `hm_callback_empty` | 0.000235 ms ± 0.000013 ms | 0.000033 ms ± 0.000002 ms | 0.000733 ms ± 0.000036 ms | 0.000124 ms ± 0.000001 ms | 7.03× | 0.53× | 3.71× | 0.17× |
+| `heightmap` | 1 | `hm_brush_small` | 0.076123 ms ± 0.001254 ms | 0.006430 ms ± 0.000033 ms | 0.331398 ms ± 0.006886 ms | 0.055338 ms ± 0.000874 ms | 11.84× | 0.73× | 8.61× | 0.17× |
+| `heightmap` | 1 | `hm_brush_medium` | 1.201539 ms ± 0.017717 ms | 0.094711 ms ± 0.005975 ms | 5.316460 ms ± 0.069620 ms | 0.871970 ms ± 0.032700 ms | 12.69× | 0.73× | 9.21× | 0.16× |
+| `heightmap` | 1 | `hm_brush_large` | 18.652796 ms ± 0.458882 ms | 1.495215 ms ± 0.039995 ms | 83.000500 ms ± 1.803900 ms | 13.914200 ms ± 0.347500 ms | 12.47× | 0.75× | 9.31× | 0.17× |
+| `heightmap` | 1 | `hm_region_op` | 0.000782 ms ± 0.000148 ms | 0.000715 ms ± 0.000299 ms | 0.000951 ms ± 0.000048 ms | 0.000840 ms ± 0.000018 ms | 1.09× | 1.07× | 1.17× | 0.88× |
+| `workloads` | 1 | `wl_unit_scan` | 0.415461 ms ± 0.064077 ms | 0.004841 ms ± 0.000110 ms | 0.544000 ms ± 0.415000 ms | 0.048000 ms ± 0.095000 ms | 85.82× | 0.12× | 9.92× | 0.09× |
+| `workloads` | 1 | `wl_area_effect` | 0.437188 ms ± 0.101657 ms | 0.038641 ms ± 0.001166 ms | 0.450000 ms ± 0.263000 ms | 0.063000 ms ± 0.081000 ms | 11.31× | 0.14× | 1.63× | 0.14× |
+| `workloads` | 1 | `wl_rules_params` | 0.597019 ms ± 0.128722 ms | 0.020691 ms ± 0.000948 ms | 0.734000 ms ± 1.124000 ms | 0.075000 ms ± 0.154000 ms | 28.85× | 0.13× | 3.62× | 0.10× |
+| `workloads` | 1 | `wl_commands` | 0.558004 ms ± 0.142145 ms | 0.030012 ms ± 0.001479 ms | 0.863000 ms ± 0.675000 ms | 0.532000 ms ± 0.568000 ms | 18.59× | 0.95× | 17.73× | 0.62× |
+| `workloads` | 1 | `wl_compute` | 1.475677 ms ± 0.236073 ms | 0.188116 ms ± 0.003945 ms | 0.323000 ms ± 0.384000 ms | 0.323000 ms ± 0.270000 ms | 7.84× | 0.22× | 1.72× | 1.00× |
+| `memory` | 1 | `mem_per_call_small` | 0 B / 0 alloc / 3.618 ms total | 0 B / 0 alloc / 5.640 ns/call | 0 B / 0 alloc / 92.933 ms total | 0 B / 0 alloc / 5.952 ms total | — | — | — | — |
+| `memory` | 1 | `mem_per_call_list` | 16064000 B / 2000 alloc / 7.002 ms total | 0 B / 0 alloc / 492.733 ns/call | 0 B / 0 alloc / 7.002 ms total | 0 B / 0 alloc / 0.624 ms total | — | — | — | — |
+| `memory` | 1 | `gc_pause` | 559 KB GC / 0.473 ms | 559 KB GC / 0.470 ms | 559 KB GC / 0.454 ms | 560 KB GC / 0.550 ms | 1.01× | 1.16× | 1.17× | 1.21× |
+| `memory` | 1 | `frame_spike` | p99 0.072000 ms / worst 0.111000 ms | p99 0.005147 ms / worst 0.013291 ms | p99 0.307000 ms / worst 0.842000 ms | p99 0.027000 ms / worst 0.073000 ms | 13.99× | 0.38× | 5.25× | 0.09× |
+| `memory` | 1 | `mem_growth` | peak 18335176 B / steady 18335176 B | peak 2134022 B / steady 2134022 B | peak 2158547 B / steady 2118265 B | peak 2158624 B / steady 2118344 B | 8.59× | 0.12× | 1.01× | 1.00× |
+| `draw` | 1 | `callin_drawworld` | 796.000 ns ± 748.000 ns | 435.000 ns ± 716.000 ns | 12222.000 ns ± 6515.000 ns | 7046.000 ns ± 5106.000 ns | 1.83× | 8.85× | 16.20× | 0.58× |
+| `draw` | 1 | `callout_draw` | 80.130 ns | 6.113 ns | 354.895 ns | 41.501 ns | 13.11× | 0.52× | 6.79× | 0.12× |
+| `draw` | 1 | `wl_ui_draw` | 0.322000 ms | 0.023953 ms | 1.453000 ms | 0.161125 ms | 13.44× | 0.50× | 6.73× | 0.11× |

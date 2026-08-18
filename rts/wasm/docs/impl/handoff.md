@@ -26,10 +26,13 @@ This file is only the working state.
   because native modules are usually Rust too, so "rust" alone would name the
   wrong difference.
 
-Covered: the rules-synced and rules-unsynced worlds, 17 callouts, 6 callins,
-and the heightmap guest callback. That spans scalars, records in and out,
-strings, small and large lists, mutations, a variant, and a host-to-guest
-callback, so it is a real feasibility test rather than a toy.
+Covered: the rules-synced, rules-unsynced and UI worlds, 20 callouts, 7
+callins, and two host-to-guest callbacks (heightmap and glBegin/glEnd). That
+spans scalars, records in and out, strings, small and large lists, mutations,
+a variant, and reentrance, so it is a real feasibility test rather than a toy.
+
+Hosts are kept per module, keyed by module name, so a four-module run enters
+four component instances and the fan-out row is a real measurement.
 
 ## Facts that cost time
 
@@ -73,17 +76,25 @@ either transport. A `wasm_rust_typed` run splits output between
 `stack-switching`, which the C API build lacks, and a component callin measures
 348 ns instead of 67.
 
+**A component imports only what the guest actually calls.** Dead-code
+elimination runs before componentization, so a world that says `import gfx`
+yields a component importing the two gfx functions the guest calls, not all
+237. That is why a scoped WIT works at all, and why the UI world was an
+afternoon rather than a week.
+
 ## Still open
 
-1. `callin_4modules` is marked unavailable for `wasm_rust_typed`: the host holds one
-   component instance per process, so a four-module run would dispatch once and
-   report it as four. Fixing it means a host per module rather than a singleton.
-2. The `draw` profile needs the UI world, which is not implemented. Its three
-   rows are marked unavailable for `wasm_rust_typed`.
-3. The remaining 1,337 callouts are unimplemented and trap. Only what the
+1. The remaining 1,335 callouts are unimplemented and trap. Only what the
    benchmark table exercises is covered, by design.
-4. Nothing here is wired into a non-benchmark path, and the switch is off by
+2. Nothing here is wired into a non-benchmark path, and the switch is off by
    default. This is a prototype for measurement, not a shipping transport.
+3. Guest-side rows still report spread as max minus min over five repeats
+   (review-feedback item 12). Five samples are too few for a percentile to
+   mean anything, so fixing it properly means more repeats, which moves every
+   guest-side number and needs a full suite re-run.
+
+Every row in the table is now measured for all four backends; there are no
+`unavailable` cells left.
 
 ## Carried over from the previous cycle
 

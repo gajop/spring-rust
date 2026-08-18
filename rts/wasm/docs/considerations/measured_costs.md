@@ -83,31 +83,39 @@ isolates the transport. Both run in the same suite as separate backends, so
 `impl/benchmarking_results.md` carries the current numbers and these are a
 snapshot of the shape.
 
+It covers all three worlds (rules-synced, rules-unsynced, UI), so every row in
+the table is measured on all four backends and none is reported unavailable.
+
 Callouts, scale 1, ns:
 
 | Row | C API dynamic | Rust typed CM | Lua |
 | --- | ---: | ---: | ---: |
-| `callout_scalar` | 175.4 | 41.6 | 30.7 |
-| `callout_vec3` | 885.6 | 54.9 | 57.8 |
-| `callout_string` | 332.8 | 99.5 | 78.1 |
-| `callout_smalllist` | 1399.7 | 219.0 | 596.0 |
-| `callout_biglist` | 6768.0 | 592.0 | 7994.2 |
-| `callout_spatial` | 1948.2 | 318.2 | 570.6 |
-| `callout_mutate` | 1058.9 | 96.9 | 206.0 |
+| `callout_scalar` | 188.7 | 41.4 | 30.4 |
+| `callout_vec3` | 841.0 | 57.1 | 63.8 |
+| `callout_string` | 324.8 | 117.1 | 73.4 |
+| `callout_smalllist` | 1397.3 | 236.2 | 608.3 |
+| `callout_biglist` | 7098.0 | 623.0 | 7906.4 |
+| `callout_spatial` | 1965.4 | 336.8 | 735.1 |
+| `callout_mutate` | 1095.8 | 102.1 | 213.3 |
+| `callout_draw` | 354.9 | 41.5 | 80.1 |
 
 Callins, scale 1, ns:
 
 | Row | C API dynamic | Rust typed CM | Lua |
 | --- | ---: | ---: | ---: |
-| `callin_empty` | 1070 | 151 | 316 |
-| `callin_update` | 1059 | 134 | 227 |
-| `callin_unitcreated` | 1385 | 159 | 200 |
-| `callin_allowunitcreation` | 2770 | 160 | 218 |
-| `callin_unitpredamaged` | 3144 | 154 | 273 |
+| `callin_empty` | 1098 | 139 | 319 |
+| `callin_update` | 1039 | 145 | 227 |
+| `callin_unitcreated` | 1369 | 137 | 208 |
+| `callin_allowunitcreation` | 2744 | 152 | 219 |
+| `callin_unitpredamaged` | 3117 | 146 | 267 |
+| `callin_4modules` | 3536 | 558 | 360 |
+| `callin_drawworld` | 12222 | 7046 | 796 |
 
 The guest callback case behaves the same way. `hm_brush_large` drives a
-heightmap edit session in which the host calls back into the guest: 83.4 ms on
-the C API, 13.9 ms typed, against 19.9 ms for Lua.
+heightmap edit session in which the host calls back into the guest: 83.0 ms on
+the C API, 13.9 ms typed, against 18.7 ms for Lua. The UI world's
+glBegin/glEnd callback is the same shape and gives `wl_ui_draw` at 0.161 ms
+typed against 1.453 ms on the C API and 0.322 ms for Lua.
 
 Three things to read from this.
 
@@ -122,13 +130,31 @@ carries one field or ten, against 1059 to 3144 ns over the same range on the C
 API. The dynamic path pays per field in both directions; the typed path pays
 per call.
 
-**Against Lua the sign flips.** The C API path is slower than Lua on every row
-above. The typed host is faster than Lua on every implemented callin and on
-five of seven callouts, losing only on `callout_scalar` and `callout_string`,
-where the absolute numbers are small enough that the remaining per-call entry
-dominates. The one callin exception is `callin_unimplemented`, where the guest
-exports nothing and Lua's 62 ns is hard to beat; that row is also unstable
-across runs and should not be read closely.
+**Against Lua the sign flips, but not everywhere.** The C API path is slower
+than Lua on every row above. The typed host is faster than Lua on every
+single-module sim callin and on six of eight callouts, losing on
+`callout_scalar` and `callout_string`, where the absolute numbers are small
+enough that the remaining per-call entry dominates.
+
+Two callin rows go the other way, and both are about fan-out rather than about
+the transport:
+
+`callin_4modules` is 558 ns typed against 360 ns for Lua. Four modules cost
+four component entries, 4.0x the 139 ns single-module row, while Lua's four
+gadgets cost 1.13x its own single-module row because they share one state and
+one boundary crossing. Wasm pays per instance where Lua pays per callback. A
+shipping transport that expects many modules would need to care about this;
+the C API path has the same shape, only worse in absolute terms.
+
+`callin_drawworld` is 7046 ns typed against 796 ns for Lua. Both Wasm paths are
+far above Lua and native here, and the spread is enormous (±5106 ns typed,
+±6515 ns dynamic), so the row says the draw callin is expensive on Wasm without
+supporting a sharper claim than that. It has not been investigated.
+
+`callin_unimplemented` is excluded from these comparisons. The guest exports
+nothing, and the row is unstable across runs on every backend: the C API path
+has measured 2472, 182, 1070 and 193 ns, and the typed path 126 and 24 ns. It
+should not be read closely.
 
 Being faster than Lua is the relevant comparison for a shipping transport, so
 `benchmarking_results.md` states its ratios against the typed host rather than

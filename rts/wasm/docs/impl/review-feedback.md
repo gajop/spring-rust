@@ -226,7 +226,34 @@ revised reasoning are in
 [handoff.md](handoff.md) carries the working state and what is still
 unmeasured.
 
-## 12. Spread column — not yet addressed
+## 12. Spread column — engine-side fixed, guest-side deliberately not
 
-Still max minus min for the guest-side rows. The engine-side callin recorder
-already reports p5 to p95.
+The engine-side callin recorder now reports p5 to p95 over per-dispatch
+samples, which covers the row the item cites (`callin_unitcreated`).
+
+Guest-side rows are still max minus min, and switching them alone would be
+worse than leaving them. Those rows have five samples, each already an average
+over an inner loop, so p5 to p95 degenerates to very nearly the same two
+values while implying a precision that is not there. The honest fix is more
+repeats plus a dropped warmup, matching the engine-side recorder, and that
+moves every guest-side number in the table. Left for a cycle that can afford
+the re-run.
+
+---
+
+# Round 4 follow-up
+
+Date: 2026-08-18
+
+Two rows published as `unavailable` in the round 4 table are now measured, so
+the table has no unavailable cells left.
+
+`callin_4modules`: the typed host was a process singleton, so a four-module run
+entered one instance. Hosts are now per module, keyed by module name. The row
+measures 531 ns against 146 ns for a single module, a 3.6x fan-out. This also
+fixed a lifetime bug, since the singleton outlived the module list.
+
+`draw`: the UI world is implemented. It was expected to be large because the
+guest's world imports `gfx` wholesale, but dead-code elimination runs before
+componentization, so the draw component imports two of the 237 gfx callouts.
+The guest is unchanged, so the rows measure what they measured before.
