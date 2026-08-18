@@ -245,11 +245,11 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 	if (WasmTypedHost::Enabled() && hostAdapter != nullptr &&
 		descriptor.environment != WasmEnvironment::UI) {
 		const bool synced = WasmEnvironmentMatrix::Policy(descriptor.environment).synced;
-		std::string rustError;
-		if (!WasmTypedHost::Instance().Load(descriptor.bytes,
+		std::string typedError;
+		if (!WasmTypedHost::Load(descriptor.name, descriptor.bytes,
 			static_cast<NativeInterface*>(hostAdapter->NativeInterfaceHandle()), synced,
-			rustError)) {
-			error = "could not start the Rust Wasm host: " + rustError;
+			typedError)) {
+			error = "could not start the typed Wasm host: " + typedError;
 			LOG_L(L_ERROR, "%s", error.c_str());
 			return false;
 		}
@@ -359,12 +359,16 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 	if (iter == modules.end())
 		return false;
 	modules.erase(iter);
+	if (WasmTypedHost::Enabled())
+		WasmTypedHost::Unload(moduleName);
 	return true;
 }
 
 void WasmInterfaceSystem::UnloadAll()
 {
 	modules.clear();
+	if (WasmTypedHost::Enabled())
+		WasmTypedHost::UnloadAll();
 }
 
 void WasmInterfaceSystem::Update()

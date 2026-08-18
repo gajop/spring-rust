@@ -486,19 +486,14 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 	// it replaces this dispatch rather than running alongside it.  It handles
 	// only the callins the benchmark table needs and reports false otherwise,
 	// leaving those on the C API path.
-	if (WasmTypedHost::Enabled()) {
-		auto& rustHost = WasmTypedHost::Instance();
-		if (rustHost.Active()) {
-			std::string rustError;
-			if (rustHost.DispatchCallin(name, query, nativeResult, rustError)) {
-				if (!rustError.empty()) {
-					LOG_L(L_WARNING, "%s", rustError.c_str());
-					return false;
-				}
-				// The result, when there is one, went straight into
-				// `nativeResult`; there is no WasmValue to read.
-				return false;
-			}
+	if (WasmTypedHost::Enabled() && WasmTypedHost::AnyActive()) {
+		std::string typedError;
+		if (WasmTypedHost::DispatchCallin(name, query, nativeResult, typedError)) {
+			if (!typedError.empty())
+				LOG_L(L_WARNING, "%s", typedError.c_str());
+			// The result, when there is one, went straight into `nativeResult`;
+			// there is no WasmValue to read.
+			return false;
 		}
 	}
 
@@ -1485,7 +1480,7 @@ std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDe
 	bool hasWasmFields = wasmRecord != nullptr &&
 		ReadWasmBoolField(*wasmRecord, "allow", wasmAllow) &&
 		ReadWasmBoolField(*wasmRecord, "dropOrder", wasmDropOrder);
-	if (!hasWasmFields && WasmTypedHost::Enabled() && WasmTypedHost::Instance().Active()) {
+	if (!hasWasmFields && WasmTypedHost::Enabled() && WasmTypedHost::AnyActive()) {
 		wasmAllow = rustResult.allow;
 		wasmDropOrder = rustResult.dropOrder;
 		hasWasmFields = true;
@@ -2314,7 +2309,7 @@ bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* 
 	bool hasWasmFields = wasmRecord != nullptr &&
 		ReadWasmFloatField(*wasmRecord, "newDamage", wasmDamage) &&
 		ReadWasmFloatField(*wasmRecord, "impulseMult", wasmImpulse);
-	if (!hasWasmFields && WasmTypedHost::Enabled() && WasmTypedHost::Instance().Active()) {
+	if (!hasWasmFields && WasmTypedHost::Enabled() && WasmTypedHost::AnyActive()) {
 		wasmDamage = rustResult.newDamage;
 		wasmImpulse = rustResult.impulseMult;
 		hasWasmFields = true;

@@ -63,35 +63,11 @@ struct SpringTypedShimTable {
 
 const SpringTypedShimTable& TypedHostShimTable();
 
-// One instance per process. The benchmark loads a single module, and the point
-// of the comparison is the transport rather than multi-module fan-out, which
-// callin_4modules already measures on the C path.
-class WasmTypedHost {
-public:
-	// Enabled by SPRING_WASM_TYPED_HOST. Off by default so the C API path is
-	// what every non-benchmark run uses.
-	static bool Enabled();
-	static WasmTypedHost& Instance();
-
-	// `synced` selects the world the host instantiates; the two guests export
-	// different callin interfaces.
-	bool Load(const std::vector<std::uint8_t>& componentBytes,
-		NativeInterface* nativeInterface, bool synced, std::string& error);
-	void Unload();
-	bool Active() const { return host != nullptr; }
-
-	// Returns false when the callin has no typed entry point here, so the
-	// caller can fall back. `query` is the native callin query struct.
-	bool DispatchCallin(std::string_view name, const void* query, void* result,
-		std::string& error);
-
-	~WasmTypedHost();
-
-private:
-	WasmTypedHost() = default;
-
-	void* library = nullptr;
-	void* host = nullptr;
+// The dlopen'd library and its resolved entry points, shared by every host.
+// Separated from the hosts themselves so loading four modules opens the library
+// once and each module still gets its own component instance.
+struct SpringTypedHostLibrary {
+	void* handle = nullptr;
 
 	void* (*hostNew)(const std::uint8_t*, std::size_t, void*, const SpringTypedShimTable*,
 		bool, char**) = nullptr;
@@ -107,4 +83,46 @@ private:
 		float*, float*, char**) = nullptr;
 	std::int32_t (*callinAllowUnitCreation)(void*, std::int32_t, std::int32_t, std::int32_t,
 		bool, float, float, float, std::int32_t, bool*, bool*, char**) = nullptr;
+};
+
+// One host per loaded Wasm module, mirroring how the C API path gives each
+// module its own instance. A callin fans out to all of them, so a four-module
+// run costs four guest entries rather than one reported as four.
+class WasmTypedHost {
+public:
+	// Enabled by SPRING_WASM_TYPED_HOST. Off by default so the C API path is
+	// what every non-benchmark run uses.
+	static bool Enabled();
+
+	// `synced` selects the world the host instantiates; the two guests export
+	// different callin interfaces. The host is owned by the registry and keyed
+	// by module name, so it dies with the module rather than with the process.
+	static bool Load(std::string moduleName,
+		const std::vector<std::uint8_t>& componentBytes,
+		NativeInterface* nativeInterface, bool synced, std::string& error);
+	static void Unload(std::string_view moduleName);
+	static void UnloadAll();
+	static bool AnyActive();
+
+	// Fans out to every loaded host. Returns false when the callin has no typed
+	// entry point, so the caller can fall back; `query` is the native callin
+	// query struct. Result-carrying callins let the last host win, matching
+	// nothing in particular because the benchmark only fans out a void callin.
+	static bool DispatchCallin(std::string_view name, const void* query, void* result,
+		std::string& error);
+
+	~WasmTypedHost();
+
+	WasmTypedHost(const WasmTypedHost&) = delete;
+	WasmTypedHost& operator=(const WasmTypedHost&) = delete;
+
+private:
+	WasmTypedHost(std::string moduleName, void* host)
+		: moduleName(std::move(moduleName)), host(host) {}
+
+	bool Invoke(std::string_view name, const void* query, void* result,
+		std::string& error) const;
+
+	std::string moduleName;
+	void* host = nullptr;
 };

@@ -1207,16 +1207,7 @@ def main() -> int:
             wasm_context=benchmark_context,
             load_native_module=False,
         )
-        # The Rust host is a single instance per process, so a four-module run
-        # would dispatch once and report it as four.  An absent row beats a
-        # mislabelled one.
-        four_module_rows = [
-            unavailable_row(
-                backend,
-                "callin_4modules",
-                "the typed Rust host holds one component instance per process",
-            )
-        ] if backend == "wasm_rust_typed" else run_backend(
+        four_module_rows = run_backend(
             backend,
             run_root,
             args.seed,

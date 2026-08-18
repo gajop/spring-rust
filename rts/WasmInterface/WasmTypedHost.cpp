@@ -2,7 +2,9 @@
 
 #include "WasmTypedHost.h"
 
+#include <algorithm>
 #include <cstdlib>
+#include <memory>
 
 #include <dlfcn.h>
 
@@ -21,6 +23,67 @@ bool TruthyEnvironment(const char* name)
 		setting == "yes" || setting == "YES" || setting == "on" || setting == "ON";
 }
 
+SpringTypedHostLibrary& Library()
+{
+	static SpringTypedHostLibrary library;
+	return library;
+}
+
+std::vector<std::unique_ptr<WasmTypedHost>>& Hosts()
+{
+	static std::vector<std::unique_ptr<WasmTypedHost>> hosts;
+	return hosts;
+}
+
+// Opens the library and resolves every entry point once. A missing symbol means
+// the library and this engine were built from different revisions of the C ABI;
+// fail loudly rather than dispatching into a null pointer later.
+bool OpenLibrary(std::string& error)
+{
+	SpringTypedHostLibrary& library = Library();
+	if (library.handle != nullptr)
+		return true;
+
+	const char* path = std::getenv("SPRING_WASM_TYPED_HOST_LIBRARY");
+	if (path == nullptr || *path == '\0') {
+		error = "SPRING_WASM_TYPED_HOST is set but SPRING_WASM_TYPED_HOST_LIBRARY is not";
+		return false;
+	}
+	void* handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+	if (handle == nullptr) {
+		error = std::string("could not load the typed Wasm host: ") + dlerror();
+		return false;
+	}
+
+	const auto resolve = [&](auto& target, const char* name) {
+		if (error.empty()) {
+			void* symbol = dlsym(handle, name);
+			if (symbol == nullptr)
+				error = std::string("the typed Wasm host is missing ") + name;
+			else
+				target = reinterpret_cast<std::remove_reference_t<decltype(target)>>(symbol);
+		}
+	};
+	resolve(library.hostNew, "spring_wasm_typed_host_new");
+	resolve(library.hostFree, "spring_wasm_typed_host_free");
+	resolve(library.stringFree, "spring_wasm_typed_string_free");
+	resolve(library.callinGameFrame, "spring_wasm_typed_callin_game_frame");
+	resolve(library.callinGameFramePost, "spring_wasm_typed_callin_game_frame_post");
+	resolve(library.callinUpdate, "spring_wasm_typed_callin_update");
+	resolve(library.callinUnitCreated, "spring_wasm_typed_callin_unit_created");
+	resolve(library.callinUnitPreDamaged, "spring_wasm_typed_callin_unit_pre_damaged");
+	resolve(library.callinAllowUnitCreation, "spring_wasm_typed_callin_allow_unit_creation");
+	if (!error.empty()) {
+		dlclose(handle);
+		library = SpringTypedHostLibrary{};
+		return false;
+	}
+
+	library.handle = handle;
+	LOG("typed Wasm host active: %s", path);
+	return true;
+}
+
 } // namespace
 
 bool WasmTypedHost::Enabled()
@@ -29,125 +92,108 @@ bool WasmTypedHost::Enabled()
 	return enabled;
 }
 
-WasmTypedHost& WasmTypedHost::Instance()
-{
-	static WasmTypedHost instance;
-	return instance;
-}
-
 WasmTypedHost::~WasmTypedHost()
 {
-	Unload();
+	if (host != nullptr && Library().hostFree != nullptr)
+		Library().hostFree(host);
 }
 
-bool WasmTypedHost::Load(const std::vector<std::uint8_t>& componentBytes,
-	NativeInterface* nativeInterface, bool synced, std::string& error)
+bool WasmTypedHost::Load(std::string moduleName,
+	const std::vector<std::uint8_t>& componentBytes, NativeInterface* nativeInterface,
+	bool synced, std::string& error)
 {
-	if (host != nullptr)
-		return true;
-
-	const char* path = std::getenv("SPRING_WASM_TYPED_HOST_LIBRARY");
-	if (path == nullptr || *path == '\0') {
-		error = "SPRING_WASM_TYPED_HOST is set but SPRING_WASM_TYPED_HOST_LIBRARY is not";
+	if (!OpenLibrary(error))
 		return false;
-	}
-	if (library == nullptr) {
-		library = dlopen(path, RTLD_NOW | RTLD_LOCAL);
-		if (library == nullptr) {
-			error = std::string("could not load the Rust Wasm host: ") + dlerror();
-			return false;
-		}
-	}
 
-	// A missing symbol means the library and this engine were built from
-	// different revisions of the C ABI; fail loudly rather than dispatching
-	// into a null pointer later.
-	const auto resolve = [&](auto& target, const char* name) {
-		if (error.empty()) {
-			void* symbol = dlsym(library, name);
-			if (symbol == nullptr)
-				error = std::string("the Rust Wasm host is missing ") + name;
-			else
-				target = reinterpret_cast<std::remove_reference_t<decltype(target)>>(symbol);
-		}
-	};
-	resolve(hostNew, "spring_wasm_typed_host_new");
-	resolve(hostFree, "spring_wasm_typed_host_free");
-	resolve(stringFree, "spring_wasm_typed_string_free");
-	resolve(callinGameFrame, "spring_wasm_typed_callin_game_frame");
-	resolve(callinGameFramePost, "spring_wasm_typed_callin_game_frame_post");
-	resolve(callinUpdate, "spring_wasm_typed_callin_update");
-	resolve(callinUnitCreated, "spring_wasm_typed_callin_unit_created");
-	resolve(callinUnitPreDamaged, "spring_wasm_typed_callin_unit_pre_damaged");
-	resolve(callinAllowUnitCreation, "spring_wasm_typed_callin_allow_unit_creation");
-	if (!error.empty()) {
-		Unload();
-		return false;
-	}
+	// Reloading a module replaces its host rather than accumulating one per
+	// load, matching how the module list treats a duplicate name.
+	Unload(moduleName);
 
 	char* hostError = nullptr;
-	host = hostNew(componentBytes.data(), componentBytes.size(), nativeInterface,
-		&TypedHostShimTable(), synced, &hostError);
+	void* host = Library().hostNew(componentBytes.data(), componentBytes.size(),
+		nativeInterface, &TypedHostShimTable(), synced, &hostError);
 	if (host == nullptr) {
-		error = "the Rust Wasm host could not instantiate the component";
+		error = "the typed Wasm host could not instantiate the component";
 		if (hostError != nullptr) {
 			error += std::string(": ") + hostError;
-			stringFree(hostError);
+			Library().stringFree(hostError);
 		}
 		return false;
 	}
-	LOG("Rust Wasm host active: %s", path);
+
+	Hosts().emplace_back(new WasmTypedHost(std::move(moduleName), host));
 	return true;
 }
 
-void WasmTypedHost::Unload()
+void WasmTypedHost::Unload(std::string_view moduleName)
 {
-	if (host != nullptr && hostFree != nullptr) {
-		hostFree(host);
-		host = nullptr;
-	}
-	if (library != nullptr) {
-		dlclose(library);
-		library = nullptr;
-	}
-	hostNew = nullptr;
-	hostFree = nullptr;
-	stringFree = nullptr;
-	callinGameFrame = nullptr;
-	callinGameFramePost = nullptr;
-	callinUpdate = nullptr;
-	callinUnitCreated = nullptr;
-	callinUnitPreDamaged = nullptr;
-	callinAllowUnitCreation = nullptr;
+	auto& hosts = Hosts();
+	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
+		return host->moduleName == moduleName;
+	}), hosts.end());
 }
 
-bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query,
-	void* result, std::string& error)
+void WasmTypedHost::UnloadAll()
 {
-	if (host == nullptr || query == nullptr)
+	Hosts().clear();
+
+	SpringTypedHostLibrary& library = Library();
+	if (library.handle != nullptr)
+		dlclose(library.handle);
+	library = SpringTypedHostLibrary{};
+}
+
+bool WasmTypedHost::AnyActive()
+{
+	return !Hosts().empty();
+}
+
+bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query, void* result,
+	std::string& error)
+{
+	if (query == nullptr)
 		return false;
+
+	bool handled = false;
+	for (const auto& host : Hosts()) {
+		std::string hostError;
+		if (!host->Invoke(name, query, result, hostError))
+			return false;
+		handled = true;
+		// Keep fanning out on failure so one broken module does not silently
+		// hide the others, but report the first error to the caller.
+		if (!hostError.empty() && error.empty())
+			error = hostError;
+	}
+	return handled;
+}
+
+bool WasmTypedHost::Invoke(std::string_view name, const void* query, void* result,
+	std::string& error) const
+{
+	const SpringTypedHostLibrary& library = Library();
 
 	char* hostError = nullptr;
 	std::int32_t status = 0;
 	if (name == "GameFrame") {
 		const auto* typed = static_cast<const GameFrameQuery*>(query);
-		status = callinGameFrame(host, typed->gameFrame, &hostError);
+		status = library.callinGameFrame(host, typed->gameFrame, &hostError);
 	} else if (name == "GameFramePost") {
 		const auto* typed = static_cast<const GameFrameQuery*>(query);
-		status = callinGameFramePost(host, typed->gameFrame, &hostError);
+		status = library.callinGameFramePost(host, typed->gameFrame, &hostError);
 	} else if (name == "Update") {
 		const auto* typed = static_cast<const UpdateQuery*>(query);
-		status = callinUpdate(host, typed->deltaSeconds, &hostError);
+		status = library.callinUpdate(host, typed->deltaSeconds, &hostError);
 	} else if (name == "UnitCreated") {
 		const auto* typed = static_cast<const UnitCreatedQuery*>(query);
-		status = callinUnitCreated(host, typed->unitID, typed->unitDefID,
+		status = library.callinUnitCreated(host, typed->unitID, typed->unitDefID,
 			typed->unitTeam, typed->builderID, &hostError);
 	} else if (name == "UnitPreDamaged") {
 		const auto* typed = static_cast<const UnitDamagedQuery*>(query);
 		auto* typedResult = static_cast<DamageCallinResult*>(result);
 		float newDamage = typed->damage;
 		float impulseMult = 1.0f;
-		status = callinUnitPreDamaged(host, typed->unitID, typed->unitDefID,
+		status = library.callinUnitPreDamaged(host, typed->unitID, typed->unitDefID,
 			typed->unitTeam, typed->damage, typed->paralyzer, typed->weaponDefID,
 			typed->projectileID, typed->attackerID, typed->attackerDefID,
 			typed->attackerTeam, &newDamage, &impulseMult, &hostError);
@@ -160,7 +206,7 @@ bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query,
 		auto* typedResult = static_cast<AllowUnitCreationResult*>(result);
 		bool allow = true;
 		bool dropOrder = false;
-		status = callinAllowUnitCreation(host, typed->unitDefID, typed->builderID,
+		status = library.callinAllowUnitCreation(host, typed->unitDefID, typed->builderID,
 			typed->builderTeam, typed->hasBuildInfo, typed->buildPos.x,
 			typed->buildPos.y, typed->buildPos.z, typed->buildFacing, &allow,
 			&dropOrder, &hostError);
@@ -175,11 +221,11 @@ bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query,
 	}
 
 	if (hostError != nullptr) {
-		error = std::string("Rust Wasm host callin failed: ") + hostError;
-		stringFree(hostError);
+		error = std::string("typed Wasm host callin failed: ") + hostError;
+		library.stringFree(hostError);
 		return true;
 	}
 	if (status != 0)
-		error = "Rust Wasm host callin returned error " + std::to_string(status);
+		error = "typed Wasm host callin returned error " + std::to_string(status);
 	return true;
 }
