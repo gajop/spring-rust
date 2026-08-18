@@ -155,42 +155,60 @@ mutator that does very little, so the linear term is multiplied by a small
 number and this row does not constrain the choice. It is recorded because it
 would matter to a design that wanted many small modules, which this is not.
 
-`callin_drawworld` is 5896 ns typed against 650 ns for Lua. This one was
-investigated, and it is not a dispatch cost. It is the cost of a cold entry.
+`callin_drawworld` is 5896 ns typed against 650 ns for Lua. It is a cold entry
+rather than a dispatch cost, and it is genuinely worse for Wasm than for the
+other backends. Comparing each backend against its own `callin_empty`, in
+absolute terms rather than as a ratio:
 
-Timing the component call from inside the host puts it at 6351 to 6775 ns,
-matching the engine-side token, so the cost is inside `call_draw_world` and not
-in the dispatch layer. Repeating the identical call immediately afterwards,
-with the guest short-circuiting so neither call does any work, costs **216 ns**:
+| Backend | `callin_empty` | `callin_drawworld` | extra |
+| --- | ---: | ---: | ---: |
+| Lua | 319 | 650 | +331 |
+| Native | 30 | 420 | +390 |
+| Rust typed CM | 141 | 5896 | +5755 |
+| C API dynamic | 1111 | 12193 | +11082 |
+
+Lua and native pay about a third of a microsecond for being called from the
+render path. The typed host pays nearly six. This is not a shared ambient
+effect that happens to show up as a large ratio; Wasm really is 15 times worse
+here, because its working set is far larger than a Lua closure or a function
+pointer.
+
+The mechanism was confirmed rather than assumed. Timing the component call from
+inside the host matches the engine-side token, so the cost is inside
+`call_draw_world`. Calling it three times in a row then gives:
 
 | | median |
 | --- | ---: |
-| first call of the frame | 6085 to 7154 ns |
-| same call, immediately repeated | 216 ns |
+| the frame's first call | 5896 ns |
+| immediately repeated | 226 ns |
+| repeated after walking a 64 MB buffer | 4199 ns |
 
-DrawWorld runs once per rendered frame, and a frame of rendering evicts the
-JIT code, the store and the component instance state from cache. The 216 ns
-warm figure sits alongside the 141 ns `callin_empty` of the sim context, which
-is the transport behaving normally.
+A synthetic cache walk with no rendering anywhere near it reproduces most of
+the cost, which is what makes cache and TLB eviction the mechanism rather than
+a guess. A frame of rendering evicts more thoroughly than a linear walk does,
+which accounts for the rest.
 
-The ambient effect is visible without Wasm at all: native's `callin_drawworld`
-is 420 ns against its own 30 ns `callin_empty`, a 14x inflation from the same
-cause. Wasm pays more because its working set is larger.
+**The 226 ns figure is a diagnostic, not a cost model.** It is the same call
+microseconds later in the same frame, which is not what a once-per-frame draw
+callin does. A callin dispatched once per frame pays the cold price every
+frame. Warmth only helps a module that crosses the boundary several times in
+quick succession.
 
-The practical cost model is therefore **one cold entry per stretch of Wasm
-work, plus cheap warm entries**, not a cold entry per callin. Draw callins
-bunched together in a frame pay the 6 us once; callins separated by a lot of
-rendering can each go cold again.
+That case is the normal one for drawing, though, and the table already measures
+it. `wl_ui_draw` is a real draw workload: one DrawWorld entry followed by many
+callouts. It costs 0.163 ms typed against 0.306 ms for Lua, so the composite
+wins by 1.9x with the cold entry included. `callout_draw`, the crossings inside
+that entry, is 42 ns. The isolated `callin_drawworld` row measures the fixed
+overhead with no work attached to amortise it, which is the least flattering
+framing available for Wasm.
 
-**In absolute terms this does not matter.** A 6 us cold entry once per frame is
-0.036% of a 16.7 ms frame at 60 fps, and the part of it Lua would not also have
-paid is about 5 us. Even four separately-cold draw callins per frame come to
-roughly 0.14% of the frame. The row looks alarming as a ratio and is negligible
-as a cost, which is why it is not worth fixing. Nothing in the host
-configuration moves it anyway: `wasm_backtrace(false)`,
-`native_unwind_info(false)` and the pooling allocator were all measured and all
-land within noise. If it ever did matter, the thing to try is shrinking the
-guest's linear memory footprint to cut TLB pressure, not host tuning.
+In absolute terms the fixed overhead is small: 5.9 us once per frame is 0.035%
+of a 16.7 ms frame at 60 fps, of which about 5.5 us is what Lua would not have
+paid. Ten draw callins spread far enough apart to each go cold would still be
+under half a percent of the frame. No host configuration moves it:
+`wasm_backtrace(false)`, `native_unwind_info(false)` and the pooling allocator
+were all measured and all land within noise. The lever, if it ever mattered,
+would be shrinking the guest's linear memory to cut TLB pressure.
 
 `callin_unimplemented` is excluded from these comparisons. The guest exports
 nothing, and the row is unstable across runs on every backend: the C API path
@@ -225,10 +243,14 @@ is one module per game plus perhaps a small map or mutator module, so this
 multiplies a number that stays near one. It would matter to a design built
 around many small modules.
 
-**There is a cold entry after heavy unrelated work.** About 6 us the first time
-a rendered frame enters Wasm, then about 0.2 us per further crossing while it
-stays warm. That is 0.036% of a 16.7 ms frame, so it is a curiosity rather than
-a cost. Lua does not pay it because it never goes cold.
+**Entering Wasm cold costs about 6 us.** Anything called once per frame from
+the render path pays that every frame, because a frame of rendering evicts the
+instance from cache; only bursts of crossings get the 0.2 us warm price. Lua
+and native pay about 0.4 us for the same transition, so this is a real Wasm
+cost and not a shared effect. It is also small in absolute terms, 0.035% of a
+16.7 ms frame, and it is fixed overhead: the moment a draw callin does actual
+work the composite wins anyway, with `wl_ui_draw` at 0.163 ms against Lua's
+0.306 ms.
 
 Neither is reachable by more host work. The optimisation pass found no
 configuration headroom, and the remaining per-call overhead above the transport
