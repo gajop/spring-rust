@@ -147,9 +147,13 @@ the transport:
 `callin_4modules` is 557 ns typed against 364 ns for Lua. Four modules cost
 four component entries, 3.9x the 141 ns single-module row, while Lua's four
 gadgets cost 1.14x its own single-module row because they share one state and
-one boundary crossing. Wasm pays per instance where Lua pays per callback. A
-shipping transport that expects many modules would need to care about this;
-the C API path has the same shape, only worse in absolute terms.
+one boundary crossing. Wasm pays per instance where Lua pays per callback; the
+C API path has the same shape, only worse in absolute terms.
+
+The expected deployment is one module per game, possibly one more for a map or
+mutator that does very little, so the linear term is multiplied by a small
+number and this row does not constrain the choice. It is recorded because it
+would matter to a design that wanted many small modules, which this is not.
 
 `callin_drawworld` is 5896 ns typed against 650 ns for Lua. This one was
 investigated, and it is not a dispatch cost. It is the cost of a cold entry.
@@ -173,12 +177,20 @@ The ambient effect is visible without Wasm at all: native's `callin_drawworld`
 is 420 ns against its own 30 ns `callin_empty`, a 14x inflation from the same
 cause. Wasm pays more because its working set is larger.
 
-The practical cost model is therefore **one cold entry per frame plus cheap
-warm entries**, not a cold entry per callin. A UI module taking several draw
-callins per frame pays roughly 6 us once and about 0.2 us for each additional
-one. Nothing in the host configuration changes this: `wasm_backtrace(false)`,
+The practical cost model is therefore **one cold entry per stretch of Wasm
+work, plus cheap warm entries**, not a cold entry per callin. Draw callins
+bunched together in a frame pay the 6 us once; callins separated by a lot of
+rendering can each go cold again.
+
+**In absolute terms this does not matter.** A 6 us cold entry once per frame is
+0.036% of a 16.7 ms frame at 60 fps, and the part of it Lua would not also have
+paid is about 5 us. Even four separately-cold draw callins per frame come to
+roughly 0.14% of the frame. The row looks alarming as a ratio and is negligible
+as a cost, which is why it is not worth fixing. Nothing in the host
+configuration moves it anyway: `wasm_backtrace(false)`,
 `native_unwind_info(false)` and the pooling allocator were all measured and all
-land within noise.
+land within noise. If it ever did matter, the thing to try is shrinking the
+guest's linear memory footprint to cut TLB pressure, not host tuning.
 
 `callin_unimplemented` is excluded from these comparisons. The guest exports
 nothing, and the row is unstable across runs on every backend: the C API path
@@ -203,22 +215,28 @@ exactly where it should, with the amount of work done per crossing:
 8013.
 
 Two costs are structural rather than tunable, and both come from the thing
-being bought, namely a separate instance with its own memory:
+being bought, namely a separate instance with its own memory. Neither is a
+reason to decide against it, and both are recorded so they are not rediscovered
+as surprises:
 
 **Fan-out is linear.** Four modules cost 3.9x one module; four Lua gadgets cost
-1.14x, because they share one state and one crossing. Many small modules pay
-for every one. A few substantial modules do not care. Which shape the game
-actually has is the question worth answering before this becomes hard to
-reverse.
+1.14x, because they share one state and one crossing. The intended deployment
+is one module per game plus perhaps a small map or mutator module, so this
+multiplies a number that stays near one. It would matter to a design built
+around many small modules.
 
-**There is a cold entry per frame.** About 6 us the first time anything enters
-Wasm in a rendered frame, then about 0.2 us for each further crossing in that
-frame. Lua does not pay this because it never goes cold.
+**There is a cold entry after heavy unrelated work.** About 6 us the first time
+a rendered frame enters Wasm, then about 0.2 us per further crossing while it
+stays warm. That is 0.036% of a 16.7 ms frame, so it is a curiosity rather than
+a cost. Lua does not pay it because it never goes cold.
 
 Neither is reachable by more host work. The optimisation pass found no
 configuration headroom, and the remaining per-call overhead above the transport
 floor (141 ns measured against a 67 ns floor for a component callin) is engine
 dispatch, not the binding style.
+
+The recommendation is to commit to the typed Component Model host and drop the
+dynamic C API as a candidate.
 
 ## Notes that cost time to rediscover
 

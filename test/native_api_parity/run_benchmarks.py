@@ -732,8 +732,8 @@ def render_report(summaries: list[dict]) -> str:
         # a shipping implementation would use, so what matters is how it
         # compares to Lua and native, not how the dynamic C API does.
         "| Profile | Scale | Test | Lua | Native | Wasm (C API, dynamic, CM) | "
-        "Wasm (Rust, typed, CM) | Lua vs native | Typed vs Lua | "
-        "Typed vs native | Typed vs dynamic |",
+        "Wasm (Rust, typed, CM) | Lua vs native | Lua vs typed | "
+        "Typed vs native | Dynamic vs typed |",
         "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for summary in summaries:
@@ -759,9 +759,9 @@ def render_report(summaries: list[dict]) -> str:
                 f"| `{profile}` | {float(summary['scale']):g} | `{test}` | {values[0]} | "
                 f"{values[1]} | {values[2]} | {values[3]} | "
                 f"{ratio_for_test(test, rows['lua'], rows['native'])} | "
-                f"{ratio_for_test(test, rows['wasm_rust_typed'], rows['lua'])} | "
+                f"{ratio_for_test(test, rows['lua'], rows['wasm_rust_typed'])} | "
                 f"{ratio_for_test(test, rows['wasm_rust_typed'], rows['native'])} | "
-                f"{ratio_for_test(test, rows['wasm_rust_typed'], rows['wasm'])} |"
+                f"{ratio_for_test(test, rows['wasm'], rows['wasm_rust_typed'])} |"
             )
     lines.append("")
     return "\n".join(lines)
