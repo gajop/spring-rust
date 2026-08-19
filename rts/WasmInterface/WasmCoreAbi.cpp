@@ -40,7 +40,6 @@ bool Memory::BindFromCaller(wasmtime_caller_t* caller, std::string& error)
 		error = "core Wasm import has no caller while resolving memory";
 		return false;
 	}
-
 	wasmtime_extern_t item{};
 	if (!wasmtime_caller_export_get(caller, "memory", 6, &item) ||
 		item.kind != WASMTIME_EXTERN_MEMORY) {
@@ -73,15 +72,20 @@ std::size_t Memory::Size() const
 	return wasmtime_memory_data_size(storeContext, &linearMemory);
 }
 
-bool Memory::Range(std::uint32_t offset, std::size_t bytes, std::uint8_t*& base) const
+bool Memory::Contains(std::uint32_t offset, std::size_t bytes) const
 {
 	if (!bound || storeContext == nullptr)
 		return false;
 	const std::size_t size = wasmtime_memory_data_size(storeContext, &linearMemory);
 	const std::size_t begin = static_cast<std::size_t>(offset);
-	if (begin > size || bytes > size - begin)
+	return begin <= size && bytes <= size - begin;
+}
+
+bool Memory::Range(std::uint32_t offset, std::size_t bytes, std::uint8_t*& base) const
+{
+	if (!Contains(offset, bytes))
 		return false;
-	base = wasmtime_memory_data(storeContext, &linearMemory) + begin;
+	base = wasmtime_memory_data(storeContext, &linearMemory) + static_cast<std::size_t>(offset);
 	return true;
 }
 
@@ -149,7 +153,6 @@ bool RawExport::Resolve(wasmtime_context_t* context, const wasmtime_instance_t& 
 {
 	present = false;
 	slotCount = 0;
-
 	wasmtime_extern_t item{};
 	if (!wasmtime_instance_export_get(context, &instance, name, nameLength, &item)) {
 		if (optional)
@@ -168,7 +171,6 @@ bool RawExport::Resolve(wasmtime_context_t* context, const wasmtime_instance_t& 
 		error = "core Wasm export has the wrong signature: " + std::string(name, nameLength);
 		return false;
 	}
-
 	function = item.of.func;
 	slotCount = std::max(params.size(), results.size());
 	present = true;
@@ -185,7 +187,6 @@ bool RawExport::Call(wasmtime_context_t* context, wasmtime_val_raw_t* slots,
 		error = "core Wasm export raw slot count does not match its bound signature";
 		return false;
 	}
-
 	wasm_trap_t* trap = nullptr;
 	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(
 			context, &function, slots, providedSlotCount, &trap);
