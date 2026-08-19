@@ -42,6 +42,15 @@ impl ApiError {
 pub type Result<T> = core::result::Result<T, ApiError>;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+pub struct UnitHealth {
+    pub health: f32,
+    pub max_health: f32,
+    pub paralyze_damage: f32,
+    pub capture_progress: f32,
+    pub build_progress: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DamageResult {
     pub new_damage: f32,
     pub impulse_mult: f32,
@@ -77,6 +86,37 @@ const fn packed_status(value: u64) -> i32 {
     (value >> 32) as u32 as i32
 }
 
+#[inline]
+fn unpack_i32(packed: i64) -> Result<i32> {
+    let packed = packed as u64;
+    let status = packed_status(packed);
+    if status == 0 {
+        Ok(packed_value(packed))
+    } else {
+        Err(ApiError::new(status))
+    }
+}
+
+#[inline]
+fn unpack_bool(packed: i64) -> Result<bool> {
+    match unpack_i32(packed)? {
+        0 => Ok(false),
+        1 => Ok(true),
+        _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+    }
+}
+
+#[inline]
+fn unpack_f32(packed: i64) -> Result<f32> {
+    let packed = packed as u64;
+    let status = packed_status(packed);
+    if status == 0 {
+        Ok(f32::from_bits(packed as u32))
+    } else {
+        Err(ApiError::new(status))
+    }
+}
+
 #[doc(hidden)]
 #[inline]
 pub fn __pack_f32_pair(first: f32, second: f32) -> i64 {
@@ -96,28 +136,28 @@ mod raw {
     extern "C" {
         #[link_name = "get-unit-def-id"]
         pub fn get_unit_def_id(unit_id: i32) -> i64;
-
+        #[link_name = "get-unit-team"]
+        pub fn get_unit_team(unit_id: i32) -> i64;
+        #[link_name = "get-unit-is-dead"]
+        pub fn get_unit_is_dead(unit_id: i32) -> i64;
+        #[link_name = "get-unit-experience"]
+        pub fn get_unit_experience(unit_id: i32) -> i64;
         #[link_name = "get-unit-position"]
         pub fn get_unit_position(unit_id: i32, flags: i32, output: i32) -> i32;
+        #[link_name = "get-unit-velocity"]
+        pub fn get_unit_velocity(unit_id: i32, output: i32) -> i32;
+        #[link_name = "get-unit-health"]
+        pub fn get_unit_health(unit_id: i32, output: i32) -> i32;
     }
 }
 
-/// Return the unit definition id using a single scalar Wasm crossing.
 #[inline]
 pub fn get_unit_def_id(unit_id: i32) -> Result<i32> {
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: the import signature is generated together with the host
-        // binding. The host returns one packed i64 and touches no guest memory.
-        let packed = unsafe { raw::get_unit_def_id(unit_id) } as u64;
-        let status = packed_status(packed);
-        if status == 0 {
-            Ok(packed_value(packed))
-        } else {
-            Err(ApiError::new(status))
-        }
+        // SAFETY: signature is generated together with the host binding.
+        return unpack_i32(unsafe { raw::get_unit_def_id(unit_id) });
     }
-
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = unit_id;
@@ -125,11 +165,48 @@ pub fn get_unit_def_id(unit_id: i32) -> Result<i32> {
     }
 }
 
-/// Read a unit position into guest-owned stack memory.
-///
-/// `mid_pos` and `aim_pos` map directly to the existing NativeInterface
-/// options. The host writes exactly three little-endian f32 values after
-/// validating the destination range against this instance's linear memory.
+#[inline]
+pub fn get_unit_team(unit_id: i32) -> Result<i32> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        // SAFETY: signature is generated together with the host binding.
+        return unpack_i32(unsafe { raw::get_unit_team(unit_id) });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = unit_id;
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn get_unit_is_dead(unit_id: i32) -> Result<bool> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        // SAFETY: signature is generated together with the host binding.
+        return unpack_bool(unsafe { raw::get_unit_is_dead(unit_id) });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = unit_id;
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn get_unit_experience(unit_id: i32) -> Result<f32> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        // SAFETY: signature is generated together with the host binding.
+        return unpack_f32(unsafe { raw::get_unit_experience(unit_id) });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = unit_id;
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
 #[inline]
 pub fn get_unit_position(unit_id: i32, mid_pos: bool, aim_pos: bool) -> Result<[f32; 3]> {
     #[cfg(target_arch = "wasm32")]
@@ -144,10 +221,8 @@ pub fn get_unit_position(unit_id: i32, mid_pos: bool, aim_pos: bool) -> Result<[
         }
         let pointer = output.as_mut_ptr() as usize;
         debug_assert!(pointer <= u32::MAX as usize);
-
-        // SAFETY: wasm32 pointers are linear-memory offsets. `output` owns 12
-        // writable bytes for the duration of the synchronous import. The host
-        // validates the complete range before copying the three f32 values.
+        // SAFETY: `output` owns 12 writable bytes for the synchronous import;
+        // the host validates the full wasm32 range before writing.
         let status = unsafe {
             raw::get_unit_position(unit_id, flags as i32, pointer as u32 as i32)
         };
@@ -157,7 +232,6 @@ pub fn get_unit_position(unit_id: i32, mid_pos: bool, aim_pos: bool) -> Result<[
             Err(ApiError::new(status))
         }
     }
-
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, mid_pos, aim_pos);
@@ -165,7 +239,55 @@ pub fn get_unit_position(unit_id: i32, mid_pos: bool, aim_pos: bool) -> Result<[
     }
 }
 
-/// Export `GameFrame(i32) -> ()`.
+#[inline]
+pub fn get_unit_velocity(unit_id: i32) -> Result<[f32; 3]> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let mut output = [0.0f32; 3];
+        let pointer = output.as_mut_ptr() as usize;
+        debug_assert!(pointer <= u32::MAX as usize);
+        // SAFETY: same caller-owned fixed-buffer convention as position.
+        let status = unsafe { raw::get_unit_velocity(unit_id, pointer as u32 as i32) };
+        if status == 0 {
+            Ok(output)
+        } else {
+            Err(ApiError::new(status))
+        }
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = unit_id;
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn get_unit_health(unit_id: i32) -> Result<UnitHealth> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let mut output = [0.0f32; 5];
+        let pointer = output.as_mut_ptr() as usize;
+        debug_assert!(pointer <= u32::MAX as usize);
+        // SAFETY: `output` owns exactly the 20 bytes written by the host.
+        let status = unsafe { raw::get_unit_health(unit_id, pointer as u32 as i32) };
+        if status != 0 {
+            return Err(ApiError::new(status));
+        }
+        Ok(UnitHealth {
+            health: output[0],
+            max_health: output[1],
+            paralyze_damage: output[2],
+            capture_progress: output[3],
+            build_progress: output[4],
+        })
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = unit_id;
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
 #[macro_export]
 macro_rules! export_game_frame {
     ($handler:path) => {
@@ -177,7 +299,6 @@ macro_rules! export_game_frame {
     };
 }
 
-/// Export `GameFramePost(i32) -> ()`.
 #[macro_export]
 macro_rules! export_game_frame_post {
     ($handler:path) => {
@@ -189,7 +310,6 @@ macro_rules! export_game_frame_post {
     };
 }
 
-/// Export the unsynced per-render-frame `Update(f32) -> ()` callin.
 #[macro_export]
 macro_rules! export_update {
     ($handler:path) => {
@@ -201,7 +321,6 @@ macro_rules! export_update {
     };
 }
 
-/// Export `UnitCreated(i32, i32, i32, i32) -> ()`.
 #[macro_export]
 macro_rules! export_unit_created {
     ($handler:path) => {
@@ -218,10 +337,6 @@ macro_rules! export_unit_created {
     };
 }
 
-/// Export the hot synced damage-control callin without an out-pointer.
-///
-/// The guest handler returns [`DamageResult`]. The transport packs both f32
-/// bit-patterns into one i64 Core-Wasm result; the host unpacks them directly.
 #[macro_export]
 macro_rules! export_unit_pre_damaged {
     ($handler:path) => {
@@ -256,10 +371,6 @@ macro_rules! export_unit_pre_damaged {
     };
 }
 
-/// Export `AllowUnitCreation` with a one-i32 result bitset.
-///
-/// Result bit 0 is `allow`, bit 1 is `drop_order`; all other bits are reserved
-/// and rejected by the host.
 #[macro_export]
 macro_rules! export_allow_unit_creation {
     ($handler:path) => {
@@ -288,7 +399,6 @@ macro_rules! export_allow_unit_creation {
     };
 }
 
-/// Export the zero-argument `DrawWorld() -> ()` callin.
 #[macro_export]
 macro_rules! export_draw_world {
     ($handler:path) => {
