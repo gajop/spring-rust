@@ -24,9 +24,13 @@ inline constexpr std::string_view GetUnitDefIDImport = "get-unit-def-id";
 inline constexpr std::string_view GetUnitPositionImport = "get-unit-position";
 inline constexpr std::string_view GameFrameExport = "spring:callin/game-frame";
 
+inline constexpr std::uint32_t SyncedEnvironmentMask =
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesSynced)) |
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaSynced));
+
 inline constexpr ImportDescriptor kImports[] = {
-	{UnitsInfoModule, GetUnitDefIDImport, 31u},
-	{UnitsInfoModule, GetUnitPositionImport, 31u},
+	{UnitsInfoModule, GetUnitDefIDImport, SyncedEnvironmentMask},
+	{UnitsInfoModule, GetUnitPositionImport, SyncedEnvironmentMask},
 };
 
 inline const ImportDescriptor* FindImport(std::string_view module, std::string_view name)
