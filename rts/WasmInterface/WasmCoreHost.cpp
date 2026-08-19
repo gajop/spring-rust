@@ -32,6 +32,13 @@ std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 	return hosts;
 }
 
+bool KnownCallin(std::string_view name)
+{
+	return name == "GameFrame" || name == "GameFramePost" || name == "Update" ||
+		name == "UnitCreated" || name == "UnitPreDamaged" ||
+		name == "AllowUnitCreation" || name == "DrawWorld";
+}
+
 } // namespace
 
 struct WasmCoreHost::Backend {
@@ -93,14 +100,11 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 {
 	if (!Enabled())
 		return false;
-	if (environment != WasmEnvironment::RulesSynced && environment != WasmEnvironment::GaiaSynced) {
-		error = "Core Wasm host currently supports synced gadget environments only";
-		return false;
-	}
 	if (nativeInterface == nullptr) {
 		error = "Core Wasm host has no NativeInterface";
 		return false;
 	}
+
 	const WasmValidationResult validation = recoil::wasm::core::ValidateModule(
 		moduleBytes, environment, RECOIL_WASM_INTERFACE_VERSION_NUMBER, runtime.Config());
 	if (!validation.valid) {
@@ -209,16 +213,151 @@ bool WasmCoreHost::AnyActive()
 
 bool WasmCoreHost::InvokeGameFrame(const void* query, std::string& error)
 {
-	if (backend == nullptr || backend->faulted) {
-		error = backend == nullptr ? "Core Wasm host has no backend" : backend->faultReason;
-		return false;
-	}
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	if (!backend->bindings.HasGameFrame())
-		return true;
 	const auto* typed = static_cast<const GameFrameQuery*>(query);
 	if (typed == nullptr) {
 		error = "Core Wasm GameFrame query is null";
+		return false;
+	}
+	return backend->bindings.GameFrame(wasmtime_store_context(backend->store),
+		typed->gameFrame, error);
+#else
+	(void)query;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::InvokeGameFramePost(const void* query, std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* typed = static_cast<const GameFramePostQuery*>(query);
+	if (typed == nullptr) {
+		error = "Core Wasm GameFramePost query is null";
+		return false;
+	}
+	return backend->bindings.GameFramePost(wasmtime_store_context(backend->store),
+		typed->gameFrame, error);
+#else
+	(void)query;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::InvokeUpdate(const void* query, std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* typed = static_cast<const UpdateQuery*>(query);
+	if (typed == nullptr) {
+		error = "Core Wasm Update query is null";
+		return false;
+	}
+	return backend->bindings.Update(wasmtime_store_context(backend->store),
+		typed->deltaSeconds, error);
+#else
+	(void)query;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::InvokeUnitCreated(const void* query, std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* typed = static_cast<const UnitCreatedQuery*>(query);
+	if (typed == nullptr) {
+		error = "Core Wasm UnitCreated query is null";
+		return false;
+	}
+	return backend->bindings.UnitCreated(wasmtime_store_context(backend->store),
+		typed->unitID, typed->unitDefID, typed->unitTeam, typed->builderID, error);
+#else
+	(void)query;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::InvokeUnitPreDamaged(const void* query, void* result,
+	std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* typed = static_cast<const UnitDamagedQuery*>(query);
+	auto* typedResult = static_cast<DamageCallinResult*>(result);
+	if (typed == nullptr) {
+		error = "Core Wasm UnitPreDamaged query is null";
+		return false;
+	}
+	float newDamage = typed->damage;
+	float impulseMult = 1.0f;
+	if (!backend->bindings.UnitPreDamaged(wasmtime_store_context(backend->store),
+		typed->unitID, typed->unitDefID, typed->unitTeam, typed->damage, typed->paralyzer,
+		typed->weaponDefID, typed->projectileID, typed->attackerID,
+		typed->attackerDefID, typed->attackerTeam, newDamage, impulseMult, error))
+		return false;
+	if (typedResult != nullptr) {
+		typedResult->newDamage = newDamage;
+		typedResult->impulseMult = impulseMult;
+	}
+	return true;
+#else
+	(void)query;
+	(void)result;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::InvokeAllowUnitCreation(const void* query, void* result,
+	std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* typed = static_cast<const AllowUnitCreationQuery*>(query);
+	auto* typedResult = static_cast<AllowUnitCreationResult*>(result);
+	if (typed == nullptr) {
+		error = "Core Wasm AllowUnitCreation query is null";
+		return false;
+	}
+	bool allow = typedResult == nullptr ? true : typedResult->allow;
+	bool dropOrder = typedResult == nullptr ? false : typedResult->dropOrder;
+	if (!backend->bindings.AllowUnitCreation(wasmtime_store_context(backend->store),
+		typed->unitDefID, typed->builderID, typed->builderTeam, typed->hasBuildInfo,
+		typed->buildPos.x, typed->buildPos.y, typed->buildPos.z, typed->buildFacing,
+		allow, dropOrder, error))
+		return false;
+	if (typedResult != nullptr) {
+		typedResult->allow = allow;
+		typedResult->dropOrder = dropOrder;
+	}
+	return true;
+#else
+	(void)query;
+	(void)result;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::InvokeDrawWorld(std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	return backend->bindings.DrawWorld(wasmtime_store_context(backend->store), error);
+#else
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::Invoke(std::string_view name, const void* query, void* result,
+	std::string& error)
+{
+	if (backend == nullptr) {
+		error = "Core Wasm host has no backend";
+		return false;
+	}
+	if (backend->faulted) {
+		error = backend->faultReason;
 		return false;
 	}
 	if (!backend->budget.ChargeHost(1)) {
@@ -227,35 +366,57 @@ bool WasmCoreHost::InvokeGameFrame(const void* query, std::string& error)
 		backend->faultReason = error;
 		return false;
 	}
-	if (!backend->bindings.GameFrame(wasmtime_store_context(backend->store),
-		typed->gameFrame, error)) {
-		backend->faulted = true;
-		backend->faultReason = error;
+
+	bool success = false;
+	if (name == "GameFrame")
+		success = InvokeGameFrame(query, error);
+	else if (name == "GameFramePost")
+		success = InvokeGameFramePost(query, error);
+	else if (name == "Update")
+		success = InvokeUpdate(query, error);
+	else if (name == "UnitCreated")
+		success = InvokeUnitCreated(query, error);
+	else if (name == "UnitPreDamaged")
+		success = InvokeUnitPreDamaged(query, result, error);
+	else if (name == "AllowUnitCreation")
+		success = InvokeAllowUnitCreation(query, result, error);
+	else if (name == "DrawWorld")
+		success = InvokeDrawWorld(error);
+	else
 		return false;
+
+	if (!success) {
+		backend->faulted = true;
+		backend->faultReason = error.empty() ? "Core Wasm callin failed" : error;
 	}
-	return true;
-#else
-	(void)query;
-	error = "Wasmtime is unavailable for the Core Wasm host";
-	return false;
-#endif
+	return success;
 }
 
-bool WasmCoreHost::DispatchCallin(std::string_view name, const void* query, void*,
+bool WasmCoreHost::DispatchCallin(std::string_view name, const void* query, void* result,
 	std::string& error)
 {
-	if (name != "GameFrame" || query == nullptr)
+	if (!KnownCallin(name))
 		return false;
 
 	bool handled = false;
 	for (const auto& host : Hosts()) {
+		if (host->backend == nullptr)
+			continue;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-		if (host->backend == nullptr || !host->backend->bindings.HasGameFrame())
+		bool present = false;
+		if (name == "GameFrame") present = host->backend->bindings.HasGameFrame();
+		else if (name == "GameFramePost") present = host->backend->bindings.HasGameFramePost();
+		else if (name == "Update") present = host->backend->bindings.HasUpdate();
+		else if (name == "UnitCreated") present = host->backend->bindings.HasUnitCreated();
+		else if (name == "UnitPreDamaged") present = host->backend->bindings.HasUnitPreDamaged();
+		else if (name == "AllowUnitCreation") present = host->backend->bindings.HasAllowUnitCreation();
+		else if (name == "DrawWorld") present = host->backend->bindings.HasDrawWorld();
+		if (!present)
 			continue;
 #endif
 		handled = true;
 		std::string hostError;
-		if (!host->InvokeGameFrame(query, hostError) && error.empty())
+		if (!host->Invoke(name, query, result, hostError) && error.empty())
 			error = hostError;
 	}
 	return handled;
