@@ -25,6 +25,8 @@ bool RegisterUnitsQueryImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterUnitDefsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterBenchmarkImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
 	const wasmtime_instance_t& instance, std::string& error);
 
@@ -46,7 +48,9 @@ public:
 			return false;
 		if (!RegisterUnitsQueryImports(linker, &host, error))
 			return false;
-		return RegisterUnitDefsImports(linker, &host, error);
+		if (!RegisterUnitDefsImports(linker, &host, error))
+			return false;
+		return RegisterBenchmarkImports(linker, &host, error);
 	}
 
 	bool Bind(wasmtime_context_t* context, const wasmtime_instance_t& instance,
