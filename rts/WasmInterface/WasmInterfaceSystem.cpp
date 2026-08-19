@@ -266,22 +266,16 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 			error = "Core Wasm requires the NativeInterface host adapter";
 			return false;
 		}
-		const WasmValidationResult validation = runtime->ValidateModule(
-			descriptor.bytes, descriptor.environment,
-			WasmEnvironmentMatrix::Name(descriptor.environment), descriptor.interfaceVersion);
-		if (!validation.valid) {
-			error = validation.error;
-			return false;
-		}
+		WasmModuleIdentity identity;
 		std::string coreError;
 		if (!WasmCoreHost::Load(descriptor.name, descriptor.bytes,
 				static_cast<NativeInterface*>(hostAdapter->NativeInterfaceHandle()),
-				descriptor.environment, *runtime, coreError)) {
+				descriptor.environment, *runtime, identity, coreError)) {
 			error = "could not start the Core Wasm host: " + coreError;
 			LOG_L(L_ERROR, "%s", error.c_str());
 			return false;
 		}
-		coreModules.push_back({std::move(descriptor), validation.identity});
+		coreModules.push_back({std::move(descriptor), std::move(identity)});
 		std::stable_sort(coreModules.begin(), coreModules.end(),
 			[](const CoreModuleRecord& left, const CoreModuleRecord& right) {
 				return DescriptorLess(left.descriptor, right.descriptor);
@@ -429,6 +423,7 @@ void WasmInterfaceSystem::UnloadAll()
 {
 	modules.clear();
 	coreModules.clear();
+	WasmCoreHost::UnloadAll();
 	WasmTypedHost::UnloadAll();
 }
 
