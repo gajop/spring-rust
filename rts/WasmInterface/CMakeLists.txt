@@ -9,6 +9,7 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsQueryBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitDefsBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsCommandsBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitControlBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreBenchmarkBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreHost.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreValidation.cpp
