@@ -31,7 +31,7 @@ public:
 	static bool ModuleFaulted(std::string_view moduleName);
 
 	// Production dispatch: invoke exactly one already-ordered module. Missing
-	// optional exports are reported as handled/no-op; an unknown module fails.
+	// optional exports are handled as no-ops; an unknown module/callin fails.
 	static bool DispatchModule(std::string_view moduleName, std::string_view name,
 		const void* query, void* result, std::string& error);
 
@@ -69,6 +69,7 @@ private:
 	WasmCoreHost(std::string moduleName, WasmEnvironment environment,
 		std::unique_ptr<Backend> backend);
 
+	static WasmCoreHost* Find(std::string_view moduleName);
 	bool HasCallin(std::string_view name) const;
 	bool Invoke(std::string_view name, const void* query, void* result, std::string& error);
 	bool InvokeGameFrame(const void* query, std::string& error);
