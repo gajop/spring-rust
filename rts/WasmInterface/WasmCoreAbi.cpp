@@ -141,15 +141,19 @@ bool FunctionHasSignature(wasmtime_context_t* context, const wasmtime_func_t& fu
 	return matches;
 }
 
-bool I32ToVoidExport::Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
-	const char* name, std::size_t nameLength, bool optional, std::string& error)
+bool RawExport::Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
+	const char* name, std::size_t nameLength,
+	std::span<const wasm_valkind_t> params,
+	std::span<const wasm_valkind_t> results,
+	bool optional, std::string& error)
 {
+	present = false;
+	slotCount = 0;
+
 	wasmtime_extern_t item{};
 	if (!wasmtime_instance_export_get(context, &instance, name, nameLength, &item)) {
-		if (optional) {
-			present = false;
+		if (optional)
 			return true;
-		}
 		error = "required core Wasm export is missing: " + std::string(name, nameLength);
 		return false;
 	}
@@ -158,29 +162,33 @@ bool I32ToVoidExport::Resolve(wasmtime_context_t* context, const wasmtime_instan
 		error = "core Wasm export is not a function: " + std::string(name, nameLength);
 		return false;
 	}
-
-	const wasm_valkind_t params[] = {WASM_I32};
-	if (!FunctionHasSignature(context, item.of.func, params, 1, nullptr, 0)) {
+	if (!FunctionHasSignature(context, item.of.func, params.data(), params.size(),
+		results.data(), results.size())) {
 		wasmtime_extern_delete(&item);
 		error = "core Wasm export has the wrong signature: " + std::string(name, nameLength);
 		return false;
 	}
+
 	function = item.of.func;
+	slotCount = std::max(params.size(), results.size());
 	present = true;
 	wasmtime_extern_delete(&item);
 	return true;
 }
 
-bool I32ToVoidExport::Call(wasmtime_context_t* context, std::int32_t value,
-	std::string& error) const
+bool RawExport::Call(wasmtime_context_t* context, wasmtime_val_raw_t* slots,
+	std::size_t providedSlotCount, std::string& error) const
 {
 	if (!present)
 		return true;
-	wasmtime_val_raw_t slot{};
-	slot.i32 = value;
+	if (providedSlotCount != slotCount || (slotCount != 0 && slots == nullptr)) {
+		error = "core Wasm export raw slot count does not match its bound signature";
+		return false;
+	}
+
 	wasm_trap_t* trap = nullptr;
-	if (wasmtime_error_t* callError =
-			wasmtime_func_call_unchecked(context, &function, &slot, 1, &trap);
+	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(
+			context, &function, slots, providedSlotCount, &trap);
 		callError != nullptr) {
 		error = "core Wasm export call failed: " + ErrorMessage(callError);
 		if (trap != nullptr)
@@ -192,6 +200,24 @@ bool I32ToVoidExport::Call(wasmtime_context_t* context, std::int32_t value,
 		return false;
 	}
 	return true;
+}
+
+bool I32ToVoidExport::Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
+	const char* name, std::size_t nameLength, bool optional, std::string& error)
+{
+	const wasm_valkind_t params[] = {WASM_I32};
+	return raw.Resolve(context, instance, name, nameLength,
+		std::span<const wasm_valkind_t>(params, 1), {}, optional, error);
+}
+
+bool I32ToVoidExport::Call(wasmtime_context_t* context, std::int32_t value,
+	std::string& error) const
+{
+	if (!raw.Present())
+		return true;
+	wasmtime_val_raw_t slot{};
+	slot.i32 = value;
+	return raw.Call(context, &slot, 1, error);
 }
 
 #endif
