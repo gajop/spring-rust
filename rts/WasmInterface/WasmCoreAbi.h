@@ -87,10 +87,6 @@ public:
 
 	bool IsBound() const { return bound; }
 
-	// Synced validation requires max == min, so the memory can never grow. Once
-	// instantiated, the Wasmtime base pointer and byte length can therefore be
-	// reused directly on every host call without querying the runtime again.
-	// Do not enable this for a growable unsynced memory.
 	void MarkStable() { stable = true; }
 	bool IsStable() const { return stable; }
 
@@ -104,11 +100,8 @@ public:
 	bool Write(std::uint32_t offset, const void* source, std::size_t bytes) const;
 	bool ReadI32SliceLE(std::uint32_t offset, std::span<std::int32_t> values) const;
 	bool WriteI32SliceLE(std::uint32_t offset, std::span<const std::int32_t> values) const;
+	bool ReadF32SliceLE(std::uint32_t offset, std::span<float> values) const;
 
-	// Synchronous imports sometimes need to encode a variable record directly
-	// into guest memory. Validate the range once, then let a wire codec operate
-	// on the returned span without repeating a Wasmtime/bounds query per field.
-	// The view must not escape the current host callback.
 	bool MutableView(std::uint32_t offset, std::size_t bytes,
 		std::span<std::uint8_t>& view) const
 	{
