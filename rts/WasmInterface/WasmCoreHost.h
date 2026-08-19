@@ -50,7 +50,6 @@ private:
 	bool InvokeUnitPreDamaged(const void* query, void* result, std::string& error);
 	bool InvokeAllowUnitCreation(const void* query, void* result, std::string& error);
 	bool InvokeDrawWorld(std::string& error);
-	bool CallFailed(std::string error);
 
 	std::string moduleName;
 	WasmEnvironment environment;
