@@ -1,3 +1,4 @@
+#![no_std]
 #![forbid(unsafe_op_in_unsafe_fn)]
 
 //! Fast core-WebAssembly transport for Spring modules.
@@ -125,8 +126,6 @@ pub fn get_unit_position(unit_id: i32, mid_pos: bool, aim_pos: bool) -> Result<[
 
 /// Export the standard `game-frame(i32) -> ()` callin without exposing ABI
 /// details to module code.
-///
-/// The generated export name is intentionally stable and transport-specific.
 #[macro_export]
 macro_rules! export_game_frame {
     ($handler:path) => {
@@ -137,6 +136,9 @@ macro_rules! export_game_frame {
         }
     };
 }
+
+#[cfg(test)]
+extern crate std;
 
 #[cfg(test)]
 mod tests {
