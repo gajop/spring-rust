@@ -22,7 +22,32 @@ inline std::int32_t NativeErrorCode(const Error* error)
 
 class ImportGuard {
 public:
+	ImportGuard(HostState* state, std::uint64_t work)
+	{
+		Initialize(state, work, ownedError);
+	}
+
 	ImportGuard(HostState* state, std::uint64_t work, std::string& error)
+	{
+		Initialize(state, work, error);
+	}
+
+	~ImportGuard()
+	{
+		if (entered && budget != nullptr)
+			budget->LeaveImport();
+	}
+
+	ImportGuard(const ImportGuard&) = delete;
+	ImportGuard& operator=(const ImportGuard&) = delete;
+	ImportGuard(ImportGuard&&) = delete;
+	ImportGuard& operator=(ImportGuard&&) = delete;
+
+	bool Ok() const { return entered; }
+	std::string_view Error() const { return ownedError; }
+
+private:
+	void Initialize(HostState* state, std::uint64_t work, std::string& error)
 	{
 		if (state == nullptr) {
 			error = "core Wasm generated host state is null";
@@ -47,17 +72,9 @@ public:
 		}
 	}
 
-	~ImportGuard()
-	{
-		if (entered && budget != nullptr)
-			budget->LeaveImport();
-	}
-
-	bool Ok() const { return entered; }
-
-private:
 	WasmExecutionBudget* budget = nullptr;
 	bool entered = false;
+	std::string ownedError;
 };
 
 inline bool EnsureMemory(HostState* state, wasmtime_caller_t* caller, std::string& error)
