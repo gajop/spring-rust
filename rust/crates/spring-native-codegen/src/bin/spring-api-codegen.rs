@@ -12,15 +12,13 @@ use std::{
     path::{Path, PathBuf},
 };
 
-// The Core ABI planner lives beside the library renderers but is kept out of
-// the public crate surface until its generated bindings replace the current
-// handwritten vertical slice. Give it the same `crate::model` path it would
-// have as a library module so the move later is mechanical.
 mod model {
     pub use spring_native_codegen::model::*;
 }
 #[path = "../render_core_wasm.rs"]
 mod render_core_wasm;
+#[path = "../render_core_wasm_host.rs"]
+mod render_core_wasm_host;
 
 fn main() {
     if let Err(error) = run() {
@@ -132,10 +130,8 @@ fn run() -> Result<()> {
         &(serde_json::to_string_pretty(&model.callins)? + "\n"),
     )?;
 
-    // Core-Wasm planning artifacts are generated from the exact same semantic
-    // model as WIT/native adapters. They deliberately describe candidate
-    // lowerings; the executable runtime registry remains the narrower list of
-    // callbacks actually compiled into WasmCoreBindings.cpp.
+    // Runtime-neutral Core ABI plan plus the conservative executable callback
+    // subset. The latter excludes variable ownership/lifetime shapes.
     write(
         &arguments.output.join("core-abi.json"),
         &render_core_wasm::render_json(&model)?,
@@ -143,6 +139,14 @@ fn run() -> Result<()> {
     write(
         &arguments.output.join("WasmCoreAbiInventory.h"),
         &render_core_wasm::render_inventory_header(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedBindings.h"),
+        &render_core_wasm_host::render_header(),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedBindings.cpp"),
+        &render_core_wasm_host::render_cpp(&model),
     )?;
 
     let wit_dir = arguments.output.join("wit");
