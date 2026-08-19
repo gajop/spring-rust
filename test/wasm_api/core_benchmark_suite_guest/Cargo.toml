@@ -1,0 +1,17 @@
+[package]
+name = "recoil-wasm-core-benchmark-suite-guest"
+version = "0.1.0"
+edition = "2021"
+publish = false
+build = "build.rs"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+spring-wasm-core = { path = "../../../rust/crates/spring-wasm-core", features = ["alloc"] }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
