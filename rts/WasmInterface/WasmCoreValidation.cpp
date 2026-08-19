@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <span>
 #include <string>
+#include <vector>
 
 #include "System/Sync/SHA512.hpp"
 #include "WasmCoreRegistry.h"
@@ -53,11 +54,94 @@ struct Reader {
 	}
 };
 
+struct FunctionType {
+	std::vector<std::uint8_t> params;
+	std::vector<std::uint8_t> results;
+};
+
 std::string HashModule(const std::vector<std::uint8_t>& bytes)
 {
 	sha512::raw_digest digest{};
 	sha512::calc_digest(bytes, digest);
 	return sha512::dump_digest(digest);
+}
+
+std::string_view ValueTypeName(std::uint8_t type)
+{
+	switch (type) {
+		case 0x7f: return "i32";
+		case 0x7e: return "i64";
+		case 0x7d: return "f32";
+		case 0x7c: return "f64";
+		default: return {};
+	}
+}
+
+bool ReadNumericTypeVector(Reader& reader, std::vector<std::uint8_t>& output,
+	std::string& error)
+{
+	std::uint64_t count = 0;
+	if (!reader.ReadLeb(count) || count > 64) {
+		error = "Core Wasm function type has an invalid value count";
+		return false;
+	}
+	output.clear();
+	output.reserve(static_cast<std::size_t>(count));
+	for (std::uint64_t index = 0; index < count; ++index) {
+		std::uint8_t type = 0;
+		if (!reader.ReadByte(type)) {
+			error = "truncated Core Wasm function value type";
+			return false;
+		}
+		if (ValueTypeName(type).empty()) {
+			error = "Spring Core ABI functions may use only i32/i64/f32/f64";
+			return false;
+		}
+		output.push_back(type);
+	}
+	return true;
+}
+
+bool ValidateTypeSection(Reader& section, std::vector<FunctionType>& types,
+	std::string& error)
+{
+	std::uint64_t count = 0;
+	if (!section.ReadLeb(count) || count > 65536) {
+		error = "Core Wasm type count exceeds supported maximum";
+		return false;
+	}
+	types.clear();
+	types.reserve(static_cast<std::size_t>(count));
+	for (std::uint64_t index = 0; index < count; ++index) {
+		std::uint8_t form = 0;
+		if (!section.ReadByte(form) || form != 0x60) {
+			error = "Spring Core ABI profile accepts only plain function types";
+			return false;
+		}
+		FunctionType type;
+		if (!ReadNumericTypeVector(section, type.params, error) ||
+			!ReadNumericTypeVector(section, type.results, error))
+			return false;
+		types.push_back(std::move(type));
+	}
+	return section.offset == section.bytes.size();
+}
+
+std::string SignatureString(const FunctionType& type)
+{
+	std::string result;
+	for (std::size_t index = 0; index < type.params.size(); ++index) {
+		if (index != 0)
+			result.push_back(',');
+		result += ValueTypeName(type.params[index]);
+	}
+	result += "->";
+	for (std::size_t index = 0; index < type.results.size(); ++index) {
+		if (index != 0)
+			result.push_back(',');
+		result += ValueTypeName(type.results[index]);
+	}
+	return result;
 }
 
 bool ReadLimits(Reader& reader, std::uint64_t configuredMaximum, bool memory,
@@ -72,7 +156,7 @@ bool ReadLimits(Reader& reader, std::uint64_t configuredMaximum, bool memory,
 	}
 
 	// Bit 0 means a maximum is present. Bit 1 is shared memory. Bit 2 is
-	// memory64. The Spring Core ABI is wasm32-only; tables have no shared flag.
+	// memory64 and is deliberately rejected by the wasm32 Spring ABI.
 	const std::uint64_t allowedFlags = memory ? 0x03u : 0x01u;
 	if ((flags & ~allowedFlags) != 0) {
 		error = memory ? "Core Wasm memory64/unsupported memory flags are not allowed" :
@@ -110,8 +194,8 @@ bool ReadLimits(Reader& reader, std::uint64_t configuredMaximum, bool memory,
 }
 
 bool ValidateImportSection(Reader& section, WasmEnvironment environment,
-	const WasmRuntimeConfig& config, std::vector<std::string>& imports,
-	std::string& error)
+	const WasmRuntimeConfig& config, const std::vector<FunctionType>& types,
+	std::vector<std::string>& imports, std::string& error)
 {
 	std::uint64_t count = 0;
 	if (!section.ReadLeb(count) || count > config.maxImports) {
@@ -126,16 +210,21 @@ bool ValidateImportSection(Reader& section, WasmEnvironment environment,
 			error = "truncated Core Wasm import";
 			return false;
 		}
-		// Spring Core ABI imports are functions only. Reject memory/table/global
-		// imports before parsing their type so generic host authority can never
-		// enter through the Core transport.
-		if (kind != 0 || !ImportAllowed(module, name, environment)) {
+		const ImportDescriptor* descriptor = FindImport(module, name);
+		if (kind != 0 || descriptor == nullptr || !ImportAllowed(module, name, environment)) {
 			error = "unknown or unavailable Core Wasm import: " + module + "." + name;
 			return false;
 		}
 		std::uint64_t typeIndex = 0;
-		if (!section.ReadLeb(typeIndex)) {
-			error = "truncated Core Wasm function import type";
+		if (!section.ReadLeb(typeIndex) || typeIndex >= types.size()) {
+			error = "Core Wasm import references an invalid function type: " +
+				module + "." + name;
+			return false;
+		}
+		const std::string actualSignature = SignatureString(types[static_cast<std::size_t>(typeIndex)]);
+		if (actualSignature != descriptor->signature) {
+			error = "Core Wasm import signature mismatch for " + module + "." + name +
+				": expected " + std::string(descriptor->signature) + ", got " + actualSignature;
 			return false;
 		}
 		imports.push_back(module + "." + name);
@@ -157,8 +246,6 @@ bool ValidateTableSection(Reader& section, const WasmRuntimeConfig& config,
 			error = "truncated Core Wasm table type";
 			return false;
 		}
-		// funcref and externref are the only reference types supported by this
-		// ABI profile. More exotic GC/reference proposals are intentionally out.
 		if (elementType != 0x70 && elementType != 0x6f) {
 			error = "unsupported Core Wasm table element type";
 			return false;
@@ -240,6 +327,7 @@ WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
 	const bool synced = WasmEnvironmentMatrix::Policy(environment).synced;
 	bool hasMemory = false;
 	bool exportsMemory = false;
+	std::vector<FunctionType> types;
 	std::span<const std::uint8_t> module(bytes.data(), bytes.size());
 	Reader reader{module.subspan(8)};
 	std::uint32_t sectionCount = 0;
@@ -258,8 +346,12 @@ WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
 		Reader section{reader.bytes.subspan(reader.offset, static_cast<std::size_t>(sectionSize))};
 		reader.offset += static_cast<std::size_t>(sectionSize);
 
-		if (sectionID == 2) {
-			if (!ValidateImportSection(section, environment, config, result.imports, result.error))
+		if (sectionID == 1) {
+			if (!ValidateTypeSection(section, types, result.error))
+				return result;
+		} else if (sectionID == 2) {
+			if (!ValidateImportSection(section, environment, config, types,
+				result.imports, result.error))
 				return result;
 		} else if (sectionID == 4) {
 			if (!ValidateTableSection(section, config, synced, result.error))
