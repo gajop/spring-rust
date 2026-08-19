@@ -11,10 +11,10 @@
 #endif
 
 #if defined(__clang__)
-#define SPRING_WASM_IMPORT(module_name, import_name) \
-	__attribute__((import_module(module_name), import_name(import_name)))
-#define SPRING_WASM_EXPORT(export_name) \
-	__attribute__((export_name(export_name)))
+#define SPRING_WASM_IMPORT(module_literal, import_literal) \
+	__attribute__((import_module(module_literal), import_name(import_literal)))
+#define SPRING_WASM_EXPORT(export_literal) \
+	__attribute__((export_name(export_literal)))
 #else
 #error "The Core-Wasm C SDK currently requires Clang wasm attributes"
 #endif
