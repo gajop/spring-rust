@@ -102,6 +102,8 @@ public:
 	bool Contains(std::uint32_t offset, std::size_t bytes) const;
 	bool Read(std::uint32_t offset, void* destination, std::size_t bytes) const;
 	bool Write(std::uint32_t offset, const void* source, std::size_t bytes) const;
+	bool ReadI32SliceLE(std::uint32_t offset, std::span<std::int32_t> values) const;
+	bool WriteI32SliceLE(std::uint32_t offset, std::span<const std::int32_t> values) const;
 
 	template<typename T>
 	bool ReadPod(std::uint32_t offset, T& value) const
