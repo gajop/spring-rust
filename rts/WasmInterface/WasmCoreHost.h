@@ -13,15 +13,12 @@
 
 struct NativeInterface;
 
-// Native C++ Wasmtime/Core host. Instances use the WasmInterfaceSystem's exact
-// WasmRuntime so synced feature configuration, limits, fuel, and compiler
-// identity are shared with the normal module path.
 class WasmCoreHost {
 public:
 	static bool Enabled();
 	static bool Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
 		NativeInterface* nativeInterface, WasmEnvironment environment,
-		const WasmRuntime& runtime, std::string& error);
+		const WasmRuntime& runtime, WasmModuleIdentity& identity, std::string& error);
 	static void Unload(std::string_view moduleName);
 	static void UnloadAll();
 	static bool AnyActive();
