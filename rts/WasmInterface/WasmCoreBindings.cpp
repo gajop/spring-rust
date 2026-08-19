@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <string_view>
 
 namespace recoil::wasm::core {
@@ -175,6 +176,15 @@ bool DefineUnchecked(wasmtime_linker_t* linker, const char* moduleName,
 	return false;
 }
 
+bool ResolveRaw(RawExport& target, wasmtime_context_t* context,
+	const wasmtime_instance_t& instance, const char* name,
+	std::span<const wasm_valkind_t> params,
+	std::span<const wasm_valkind_t> results, std::string& error)
+{
+	return target.Resolve(context, instance, name, std::char_traits<char>::length(name),
+		params, results, true, error);
+}
+
 } // namespace
 
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error)
@@ -213,9 +223,150 @@ bool InstanceBindings::Bind(wasmtime_context_t* context, const wasmtime_instance
 {
 	if (!BindGuestMemory(host, context, instance, error))
 		return false;
+
 	constexpr char gameFrameName[] = "spring:callin/game-frame";
-	return gameFrame.Resolve(context, instance, gameFrameName, sizeof(gameFrameName) - 1,
-		true, error);
+	if (!gameFrame.Resolve(context, instance, gameFrameName, sizeof(gameFrameName) - 1,
+		true, error))
+		return false;
+
+	constexpr char gameFramePostName[] = "spring:callin/game-frame-post";
+	if (!gameFramePost.Resolve(context, instance, gameFramePostName,
+		sizeof(gameFramePostName) - 1, true, error))
+		return false;
+
+	{
+		const wasm_valkind_t params[] = {WASM_F32};
+		if (!ResolveRaw(update, context, instance, "spring:callin/update",
+			std::span<const wasm_valkind_t>(params, 1), {}, error))
+			return false;
+	}
+	{
+		const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32};
+		if (!ResolveRaw(unitCreated, context, instance, "spring:callin/unit-created",
+			std::span<const wasm_valkind_t>(params, 4), {}, error))
+			return false;
+	}
+	{
+		const wasm_valkind_t params[] = {
+			WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_I32,
+			WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32,
+		};
+		const wasm_valkind_t results[] = {WASM_I64};
+		if (!ResolveRaw(unitPreDamaged, context, instance, "spring:callin/unit-pre-damaged",
+			std::span<const wasm_valkind_t>(params, 10),
+			std::span<const wasm_valkind_t>(results, 1), error))
+			return false;
+	}
+	{
+		const wasm_valkind_t params[] = {
+			WASM_I32, WASM_I32, WASM_I32, WASM_I32,
+			WASM_F32, WASM_F32, WASM_F32, WASM_I32,
+		};
+		const wasm_valkind_t results[] = {WASM_I32};
+		if (!ResolveRaw(allowUnitCreation, context, instance,
+			"spring:callin/allow-unit-creation",
+			std::span<const wasm_valkind_t>(params, 8),
+			std::span<const wasm_valkind_t>(results, 1), error))
+			return false;
+	}
+	if (!ResolveRaw(drawWorld, context, instance, "spring:callin/draw-world", {}, {}, error))
+		return false;
+
+	return true;
+}
+
+bool InstanceBindings::GameFrame(wasmtime_context_t* context, std::int32_t frame,
+	std::string& error) const
+{
+	return gameFrame.Call(context, frame, error);
+}
+
+bool InstanceBindings::GameFramePost(wasmtime_context_t* context, std::int32_t frame,
+	std::string& error) const
+{
+	return gameFramePost.Call(context, frame, error);
+}
+
+bool InstanceBindings::Update(wasmtime_context_t* context, float deltaSeconds,
+	std::string& error) const
+{
+	if (!update.Present())
+		return true;
+	wasmtime_val_raw_t slot{};
+	slot.f32 = deltaSeconds;
+	return update.Call(context, &slot, 1, error);
+}
+
+bool InstanceBindings::UnitCreated(wasmtime_context_t* context, std::int32_t unitID,
+	std::int32_t unitDefID, std::int32_t unitTeam, std::int32_t builderID,
+	std::string& error) const
+{
+	if (!unitCreated.Present())
+		return true;
+	std::array<wasmtime_val_raw_t, 4> slots{};
+	slots[0].i32 = unitID;
+	slots[1].i32 = unitDefID;
+	slots[2].i32 = unitTeam;
+	slots[3].i32 = builderID;
+	return unitCreated.Call(context, slots.data(), slots.size(), error);
+}
+
+bool InstanceBindings::UnitPreDamaged(wasmtime_context_t* context, std::int32_t unitID,
+	std::int32_t unitDefID, std::int32_t unitTeam, float damage, bool paralyzer,
+	std::int32_t weaponDefID, std::int32_t projectileID, std::int32_t attackerID,
+	std::int32_t attackerDefID, std::int32_t attackerTeam,
+	float& newDamage, float& impulseMult, std::string& error) const
+{
+	if (!unitPreDamaged.Present())
+		return true;
+	std::array<wasmtime_val_raw_t, 10> slots{};
+	slots[0].i32 = unitID;
+	slots[1].i32 = unitDefID;
+	slots[2].i32 = unitTeam;
+	slots[3].f32 = damage;
+	slots[4].i32 = paralyzer ? 1 : 0;
+	slots[5].i32 = weaponDefID;
+	slots[6].i32 = projectileID;
+	slots[7].i32 = attackerID;
+	slots[8].i32 = attackerDefID;
+	slots[9].i32 = attackerTeam;
+	if (!unitPreDamaged.Call(context, slots.data(), slots.size(), error))
+		return false;
+	UnpackF32Pair(static_cast<std::uint64_t>(slots[0].i64), newDamage, impulseMult);
+	return true;
+}
+
+bool InstanceBindings::AllowUnitCreation(wasmtime_context_t* context,
+	std::int32_t unitDefID, std::int32_t builderID, std::int32_t builderTeam,
+	bool hasBuildInfo, float buildX, float buildY, float buildZ,
+	std::int32_t buildFacing, bool& allow, bool& dropOrder, std::string& error) const
+{
+	if (!allowUnitCreation.Present())
+		return true;
+	std::array<wasmtime_val_raw_t, 8> slots{};
+	slots[0].i32 = unitDefID;
+	slots[1].i32 = builderID;
+	slots[2].i32 = builderTeam;
+	slots[3].i32 = hasBuildInfo ? 1 : 0;
+	slots[4].f32 = buildX;
+	slots[5].f32 = buildY;
+	slots[6].f32 = buildZ;
+	slots[7].i32 = buildFacing;
+	if (!allowUnitCreation.Call(context, slots.data(), slots.size(), error))
+		return false;
+	const std::uint32_t flags = static_cast<std::uint32_t>(slots[0].i32);
+	if ((flags & ~0x3u) != 0) {
+		error = "core Wasm allow-unit-creation returned invalid result flags";
+		return false;
+	}
+	allow = (flags & 0x1u) != 0;
+	dropOrder = (flags & 0x2u) != 0;
+	return true;
+}
+
+bool InstanceBindings::DrawWorld(wasmtime_context_t* context, std::string& error) const
+{
+	return drawWorld.Call(context, nullptr, 0, error);
 }
 
 #endif
