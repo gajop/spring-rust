@@ -21,6 +21,8 @@ struct HostState {
 };
 
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
+bool RegisterUnitsQueryImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
 	const wasmtime_instance_t& instance, std::string& error);
 
@@ -32,15 +34,15 @@ public:
 		host.native = nativeInterface;
 		host.budget = executionBudget;
 		host.fixedMemory = fixedMemory;
-		// Mark before Bind: the synced validator guarantees max == min, and Bind
-		// records the post-instantiation base/size that remain valid thereafter.
 		if (fixedMemory)
 			host.memory.MarkStable();
 	}
 
 	bool RegisterImports(wasmtime_linker_t* linker, std::string& error)
 	{
-		return RegisterFastImports(linker, &host, error);
+		if (!RegisterFastImports(linker, &host, error))
+			return false;
+		return RegisterUnitsQueryImports(linker, &host, error);
 	}
 
 	bool Bind(wasmtime_context_t* context, const wasmtime_instance_t& instance,
