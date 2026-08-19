@@ -17,7 +17,8 @@ class WasmCoreHost {
 public:
 	static bool Enabled();
 	static bool Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
-		NativeInterface* nativeInterface, WasmEnvironment environment,
+		NativeInterface* nativeInterface, WasmEnvironment environment, std::uint32_t order,
+		std::string archive, std::string_view interfaceVersion,
 		const WasmRuntime& runtime, WasmModuleIdentity& identity, std::string& error);
 	static void Unload(std::string_view moduleName);
 	static void UnloadAll();
@@ -32,12 +33,16 @@ public:
 
 private:
 	struct Backend;
-	WasmCoreHost(std::string moduleName, WasmEnvironment environment,
-		std::unique_ptr<Backend> backend);
+	WasmCoreHost(std::string moduleName, WasmEnvironment environment, std::uint32_t order,
+		std::string archive, std::unique_ptr<Backend> backend);
 
 	bool InvokeGameFrame(const void* query, std::string& error);
+	static bool DispatchLess(const std::unique_ptr<WasmCoreHost>& left,
+		const std::unique_ptr<WasmCoreHost>& right);
 
 	std::string moduleName;
 	WasmEnvironment environment;
+	std::uint32_t order = 0;
+	std::string archive;
 	std::unique_ptr<Backend> backend;
 };
