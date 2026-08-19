@@ -12,6 +12,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
+// The Core ABI planner lives beside the library renderers but is kept out of
+// the public crate surface until its generated bindings replace the current
+// handwritten vertical slice. Give it the same `crate::model` path it would
+// have as a library module so the move later is mechanical.
+mod model {
+    pub use spring_native_codegen::model::*;
+}
+#[path = "../render_core_wasm.rs"]
+mod render_core_wasm;
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("spring-api-codegen: {error:#}");
@@ -122,6 +132,19 @@ fn run() -> Result<()> {
         &(serde_json::to_string_pretty(&model.callins)? + "\n"),
     )?;
 
+    // Core-Wasm planning artifacts are generated from the exact same semantic
+    // model as WIT/native adapters. They deliberately describe candidate
+    // lowerings; the executable runtime registry remains the narrower list of
+    // callbacks actually compiled into WasmCoreBindings.cpp.
+    write(
+        &arguments.output.join("core-abi.json"),
+        &render_core_wasm::render_json(&model)?,
+    )?;
+    write(
+        &arguments.output.join("WasmCoreAbiInventory.h"),
+        &render_core_wasm::render_inventory_header(&model),
+    )?;
+
     let wit_dir = arguments.output.join("wit");
     fs::create_dir_all(&wit_dir)?;
     remove_old_wit_files(&wit_dir)?;
@@ -163,8 +186,15 @@ fn run() -> Result<()> {
     )?;
 
     let summary = model.summary();
+    let core_summary = render_core_wasm::plan(&model);
     let mut report = serde_json::to_string_pretty(&summary)?;
     report.push('\n');
+    report.push_str(&format!(
+        "\n# core-wasm planning\nautomatic={} manual={} unsupported={}\n",
+        core_summary.automatic_count,
+        core_summary.manual_count,
+        core_summary.unsupported_count,
+    ));
     if let Err(error) = validation {
         report.push_str("\n# report-mode validation findings\n");
         report.push_str(&error.to_string());
@@ -172,8 +202,13 @@ fn run() -> Result<()> {
     }
     write(&arguments.output.join("generation-report.json"), &report)?;
     eprintln!(
-        "generated {} modules / {} functions ({} unsupported)",
-        summary.modules, summary.functions, summary.unsupported
+        "generated {} modules / {} functions ({} unsupported); Core plan: {} automatic / {} manual / {} unsupported",
+        summary.modules,
+        summary.functions,
+        summary.unsupported,
+        core_summary.automatic_count,
+        core_summary.manual_count,
+        core_summary.unsupported_count,
     );
     Ok(())
 }
