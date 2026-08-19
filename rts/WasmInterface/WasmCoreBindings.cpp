@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cstdint>
+#include <string_view>
 
 namespace recoil::wasm::core {
 
@@ -144,6 +145,16 @@ bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
 	const wasmtime_instance_t& instance, std::string& error)
 {
 	return state.memory.BindFromInstance(context, instance, error);
+}
+
+bool InstanceBindings::Bind(wasmtime_context_t* context, const wasmtime_instance_t& instance,
+	std::string& error)
+{
+	if (!BindGuestMemory(host, context, instance, error))
+		return false;
+	constexpr char gameFrameName[] = "spring:callin/game-frame";
+	return gameFrame.Resolve(context, instance, gameFrameName, sizeof(gameFrameName) - 1,
+		true, error);
 }
 
 #endif
