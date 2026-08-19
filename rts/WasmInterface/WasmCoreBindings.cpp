@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <string_view>
 
 namespace recoil::wasm::core {
@@ -30,6 +31,17 @@ bool EnsureMemory(HostState* state, wasmtime_caller_t* caller, std::string& erro
 	if (state->memory.IsBound())
 		return true;
 	return state->memory.BindFromCaller(caller, error);
+}
+
+void EncodeF32LE(float value, std::uint8_t* output)
+{
+	static_assert(sizeof(float) == sizeof(std::uint32_t));
+	std::uint32_t bits = 0;
+	std::memcpy(&bits, &value, sizeof(bits));
+	output[0] = static_cast<std::uint8_t>(bits);
+	output[1] = static_cast<std::uint8_t>(bits >> 8);
+	output[2] = static_cast<std::uint8_t>(bits >> 16);
+	output[3] = static_cast<std::uint8_t>(bits >> 24);
 }
 
 wasm_trap_t* GetUnitDefID(void* environment, wasmtime_caller_t*,
@@ -84,12 +96,11 @@ wasm_trap_t* GetUnitPosition(void* environment, wasmtime_caller_t* caller,
 	}
 
 	const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
-	const std::array<float, 3> wire = {
-		result.position.x,
-		result.position.y,
-		result.position.z,
-	};
-	if (!state->memory.Write(output, wire.data(), sizeof(wire))) {
+	std::array<std::uint8_t, 12> wire{};
+	EncodeF32LE(result.position.x, wire.data() + 0);
+	EncodeF32LE(result.position.y, wire.data() + 4);
+	EncodeF32LE(result.position.z, wire.data() + 8);
+	if (!state->memory.Write(output, wire.data(), wire.size())) {
 		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 		return nullptr;
 	}
