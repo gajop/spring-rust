@@ -14,12 +14,6 @@
 #include <wasmtime.h>
 #endif
 
-// Low-level ABI helpers for the generated core-Wasm transport.
-//
-// This layer intentionally has no semantic WasmValue representation. Hot
-// callouts/callins cross as core Wasm scalars plus explicitly validated linear
-// memory. All signature validation is done once when functions are bound; the
-// steady-state path uses Wasmtime's unchecked entry points.
 namespace recoil::wasm::core {
 
 inline constexpr std::uint32_t ABI_VERSION = 1;
@@ -41,13 +35,15 @@ enum class Status : std::int32_t {
 	Internal = 999,
 };
 
-// Fallible scalar results use one i64 slot. The low 32 bits contain the value
-// and the high 32 bits contain the signed engine error code. This avoids an
-// out-pointer and memory access for the most common scalar query shape.
+constexpr std::uint64_t PackU32(std::uint32_t value, std::int32_t status)
+{
+	return static_cast<std::uint64_t>(value) |
+		(static_cast<std::uint64_t>(static_cast<std::uint32_t>(status)) << 32);
+}
+
 constexpr std::uint64_t PackI32(std::int32_t value, std::int32_t status)
 {
-	return static_cast<std::uint64_t>(static_cast<std::uint32_t>(value)) |
-		(static_cast<std::uint64_t>(static_cast<std::uint32_t>(status)) << 32);
+	return PackU32(static_cast<std::uint32_t>(value), status);
 }
 
 constexpr std::int32_t UnpackI32Value(std::uint64_t packed)
@@ -60,9 +56,6 @@ constexpr std::int32_t UnpackStatus(std::uint64_t packed)
 	return static_cast<std::int32_t>(static_cast<std::uint32_t>(packed >> 32));
 }
 
-// Two f32 values fit in a single Core-Wasm i64 result. This is useful for hot
-// callins such as UnitPreDamaged where returning through linear memory would be
-// strictly more expensive and would add another bounds check/cache touch.
 inline std::uint64_t PackF32Pair(float first, float second)
 {
 	const std::uint32_t low = std::bit_cast<std::uint32_t>(first);
@@ -91,15 +84,12 @@ public:
 	}
 
 	bool IsBound() const { return bound; }
-
-	// Bind an exported memory lazily. This is mainly for imports executed from a
-	// module start function before the host has had a chance to cache the memory
-	// after instantiation. Normal steady-state calls never perform this lookup.
 	bool BindFromCaller(wasmtime_caller_t* caller, std::string& error);
 	bool BindFromInstance(wasmtime_context_t* context, const wasmtime_instance_t& instance,
 		std::string& error);
 
 	std::size_t Size() const;
+	bool Contains(std::uint32_t offset, std::size_t bytes) const;
 	bool Read(std::uint32_t offset, void* destination, std::size_t bytes) const;
 	bool Write(std::uint32_t offset, const void* source, std::size_t bytes) const;
 
@@ -133,9 +123,6 @@ bool FunctionHasSignature(wasmtime_context_t* context, const wasmtime_func_t& fu
 	const wasm_valkind_t* params, std::size_t paramCount,
 	const wasm_valkind_t* results, std::size_t resultCount);
 
-// Generic cached export used by generated callin bindings. Resolve performs
-// the export lookup and exact type check once. Call performs no reflection and
-// no allocation; the caller provides the fixed raw slot array on its stack.
 class RawExport {
 public:
 	bool Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
@@ -155,8 +142,6 @@ private:
 	bool present = false;
 };
 
-// Convenience wrapper retained for the overwhelmingly common frame/event
-// shape. Generated code can use RawExport directly for richer signatures.
 class I32ToVoidExport {
 public:
 	bool Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
