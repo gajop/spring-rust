@@ -55,8 +55,11 @@ struct WasmCoreHost::Backend {
 		: runtime(CoreRuntimeConfig())
 		, budget(runtime.Config().instructionFuel, runtime.Config().hostWorkLimit,
 			runtime.Config().resultBytesLimit)
+#if defined(RECOIL_WASMTIME_AVAILABLE)
 		, bindings(nativeInterface, &budget)
+#endif
 	{
+		(void)nativeInterface;
 	}
 
 	~Backend()
@@ -79,8 +82,6 @@ struct WasmCoreHost::Backend {
 	wasmtime_linker_t* linker = nullptr;
 	wasmtime_module_t* module = nullptr;
 	wasmtime_instance_t instance{};
-#else
-	int bindings = 0;
 #endif
 	bool faulted = false;
 	std::string faultReason;
@@ -272,10 +273,8 @@ bool WasmCoreHost::DispatchCallin(std::string_view name, const void* query, void
 #endif
 		handled = true;
 		std::string hostError;
-		if (!host->InvokeGameFrame(query, hostError)) {
-			if (error.empty())
-				error = hostError;
-		}
+		if (!host->InvokeGameFrame(query, hostError) && error.empty())
+			error = hostError;
 	}
 	return handled;
 }
