@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Build and run the focused Core-Wasm GameFrame engine benchmark.
+"""Focused end-to-end Wasmtime/Core engine benchmark.
 
-This intentionally reports only callin_gameframe. The normal callin fixture also
-emits a few shared rows; until their Core ABI exports exist they are not part of
-this transport comparison.
+Runs two otherwise identical synced guests:
+  1. GameFrame -> one volatile guest-memory store.
+  2. GameFrame -> one GetUnitDefID Core import -> one volatile store.
+
+The difference is a useful engine-level scalar callout/round-trip estimate while
+the absolute first row measures the Core host->guest callin path.
 """
 
 from __future__ import annotations
@@ -20,22 +23,39 @@ sys.path.insert(0, str(ROOT / "test" / "native_api_parity"))
 
 import run_benchmarks as bench  # noqa: E402
 
-CRATE = ROOT / "test" / "wasm_api" / "core_benchmark_guest" / "Cargo.toml"
-WASM = (
-    ROOT
-    / "test"
-    / "wasm_api"
-    / "core_benchmark_guest"
+BASE_CRATE_DIR = ROOT / "test" / "wasm_api" / "core_benchmark_guest"
+ROUNDTRIP_CRATE_DIR = ROOT / "test" / "wasm_api" / "core_roundtrip_guest"
+BASE_WASM = (
+    BASE_CRATE_DIR
     / "target"
     / "wasm32-unknown-unknown"
     / "release"
     / "recoil_wasm_core_benchmark_guest.wasm"
 )
+ROUNDTRIP_WASM = (
+    ROUNDTRIP_CRATE_DIR
+    / "target"
+    / "wasm32-unknown-unknown"
+    / "release"
+    / "recoil_wasm_core_roundtrip_guest.wasm"
+)
 
 
-def run(command: list[str]) -> None:
+def run(command: list[str], cwd: Path = ROOT) -> None:
     print("+", " ".join(command), flush=True)
-    subprocess.run(command, cwd=ROOT, check=True)
+    subprocess.run(command, cwd=cwd, check=True)
+
+
+def build_crate(directory: Path, output: Path) -> None:
+    # Running Cargo from the crate directory is intentional: it makes Cargo
+    # read this guest's .cargo/config.toml, which passes wasm-ld
+    # --no-growable-memory. The synced validator requires max == min.
+    run(
+        ["cargo", "build", "--target", "wasm32-unknown-unknown", "--release"],
+        cwd=directory,
+    )
+    if not output.is_file():
+        raise RuntimeError(f"Core benchmark guest was not produced: {output}")
 
 
 def build() -> None:
@@ -48,17 +68,34 @@ def build() -> None:
     ).stdout.splitlines()
     if "wasm32-unknown-unknown" not in installed:
         run(["rustup", "target", "add", "wasm32-unknown-unknown"])
-    run([
-        "cargo",
-        "build",
-        "--manifest-path",
-        str(CRATE),
-        "--target",
-        "wasm32-unknown-unknown",
-        "--release",
-    ])
-    if not WASM.is_file():
-        raise RuntimeError(f"Core benchmark guest was not produced: {WASM}")
+    build_crate(BASE_CRATE_DIR, BASE_WASM)
+    build_crate(ROUNDTRIP_CRATE_DIR, ROUNDTRIP_WASM)
+
+
+def run_guest(args: argparse.Namespace, wasm: Path, output_name: str) -> dict:
+    expected = ("callin_gameframe",) + bench.CALLIN_COMMON_TESTS
+    rows = bench.run_backend(
+        "wasm",
+        args.output_root,
+        args.seed,
+        args.timeout,
+        args.spring,
+        True,
+        args.scale,
+        "callins",
+        1_000_000,
+        args.repeats,
+        expected,
+        callin_variant="gameframe",
+        wasm_component=wasm,
+        output_name=output_name,
+        wasm_context="synced_gadget",
+        load_native_module=False,
+    )
+    row = next((row for row in rows if row.get("test") == "callin_gameframe"), None)
+    if row is None:
+        raise RuntimeError(f"{output_name} produced no callin_gameframe row")
+    return row
 
 
 def main() -> int:
@@ -78,8 +115,9 @@ def main() -> int:
 
     if not args.skip_build:
         build()
-    if not WASM.is_file():
-        raise RuntimeError(f"missing Core benchmark guest: {WASM}")
+    for wasm in (BASE_WASM, ROUNDTRIP_WASM):
+        if not wasm.is_file():
+            raise RuntimeError(f"missing Core benchmark guest: {wasm}")
 
     bench.prepare_benchmark_context("synced_gadget")
     old_core = os.environ.get("SPRING_WASM_CORE_HOST")
@@ -87,29 +125,8 @@ def main() -> int:
     os.environ["SPRING_WASM_CORE_HOST"] = "1"
     os.environ.pop("SPRING_WASM_TYPED_HOST", None)
     try:
-        # The fixture records the three common callins as well. They currently
-        # fall through the legacy Core instance and are not used here; accepting
-        # the rows lets us reuse the exact production benchmark launcher while
-        # reporting only the implemented direct GameFrame path.
-        expected = ("callin_gameframe",) + bench.CALLIN_COMMON_TESTS
-        rows = bench.run_backend(
-            "wasm",
-            args.output_root,
-            args.seed,
-            args.timeout,
-            args.spring,
-            args.skip_build,
-            args.scale,
-            "callins",
-            1_000_000,
-            args.repeats,
-            expected,
-            callin_variant="gameframe",
-            wasm_component=WASM,
-            output_name="wasm_core-gameframe",
-            wasm_context="synced_gadget",
-            load_native_module=False,
-        )
+        baseline = run_guest(args, BASE_WASM, "wasm_core-gameframe")
+        roundtrip = run_guest(args, ROUNDTRIP_WASM, "wasm_core-roundtrip")
     finally:
         if old_core is None:
             os.environ.pop("SPRING_WASM_CORE_HOST", None)
@@ -118,12 +135,17 @@ def main() -> int:
         if old_typed is not None:
             os.environ["SPRING_WASM_TYPED_HOST"] = old_typed
 
-    row = next((row for row in rows if row.get("test") == "callin_gameframe"), None)
-    if row is None:
-        raise RuntimeError("Core benchmark produced no callin_gameframe row")
-    print(json.dumps(row, indent=2, sort_keys=True))
-    if "medianNs" in row:
-        print(f"Core Wasmtime GameFrame: {float(row['medianNs']):.1f} ns")
+    print("baseline:")
+    print(json.dumps(baseline, indent=2, sort_keys=True))
+    print("roundtrip:")
+    print(json.dumps(roundtrip, indent=2, sort_keys=True))
+
+    base_ns = float(baseline.get("medianNs", "nan"))
+    roundtrip_ns = float(roundtrip.get("medianNs", "nan"))
+    if base_ns == base_ns and roundtrip_ns == roundtrip_ns:
+        print(f"Core Wasmtime GameFrame: {base_ns:.1f} ns")
+        print(f"Core GameFrame + GetUnitDefID: {roundtrip_ns:.1f} ns")
+        print(f"Incremental scalar callout: {roundtrip_ns - base_ns:.1f} ns")
     return 0
 
 
