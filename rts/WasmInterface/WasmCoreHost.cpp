@@ -32,6 +32,15 @@ std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 	return hosts;
 }
 
+WasmCoreHost* FindHost(std::string_view moduleName)
+{
+	const auto& hosts = Hosts();
+	const auto iter = std::find_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
+		return host != nullptr && host->HasModule(moduleName);
+	});
+	return iter == hosts.end() ? nullptr : iter->get();
+}
+
 bool KnownCallin(std::string_view name)
 {
 	return name == "GameFrame" || name == "GameFramePost" || name == "Update" ||
@@ -42,15 +51,18 @@ bool KnownCallin(std::string_view name)
 } // namespace
 
 struct WasmCoreHost::Backend {
-	Backend(NativeInterface* nativeInterface, const WasmRuntime& runtime)
+	Backend(NativeInterface* nativeInterface, const WasmRuntime& runtime,
+		WasmEnvironment environment)
 		: runtime(&runtime)
 		, budget(runtime.Config().instructionFuel, runtime.Config().hostWorkLimit,
 			runtime.Config().resultBytesLimit)
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-		, bindings(nativeInterface, &budget)
+		, bindings(nativeInterface, &budget,
+			WasmEnvironmentMatrix::Policy(environment).synced)
 #endif
 	{
 		(void)nativeInterface;
+		(void)environment;
 	}
 
 	~Backend()
@@ -100,6 +112,10 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 {
 	if (!Enabled())
 		return false;
+	if (moduleName.empty()) {
+		error = "Core Wasm module name is empty";
+		return false;
+	}
 	if (nativeInterface == nullptr) {
 		error = "Core Wasm host has no NativeInterface";
 		return false;
@@ -117,7 +133,7 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		return false;
 	}
 
-	auto backend = std::make_unique<Backend>(nativeInterface, runtime);
+	auto backend = std::make_unique<Backend>(nativeInterface, runtime, environment);
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	auto* engine = static_cast<wasm_engine_t*>(runtime.BackendEngine());
@@ -197,7 +213,7 @@ void WasmCoreHost::Unload(std::string_view moduleName)
 {
 	auto& hosts = Hosts();
 	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
-		return host->moduleName == moduleName;
+		return host != nullptr && host->moduleName == moduleName;
 	}), hosts.end());
 }
 
@@ -209,6 +225,143 @@ void WasmCoreHost::UnloadAll()
 bool WasmCoreHost::AnyActive()
 {
 	return !Hosts().empty();
+}
+
+bool WasmCoreHost::AnyActive(WasmEnvironment environment)
+{
+	return std::any_of(Hosts().begin(), Hosts().end(), [environment](const auto& host) {
+		return host != nullptr && host->environment == environment;
+	});
+}
+
+bool WasmCoreHost::HasModule(std::string_view moduleName)
+{
+	return this->moduleName == moduleName;
+}
+
+bool WasmCoreHost::HasModule(std::string_view moduleName)
+{
+	return FindHost(moduleName) != nullptr;
+}
+
+bool WasmCoreHost::ModuleFaulted(std::string_view moduleName)
+{
+	const WasmCoreHost* host = FindHost(moduleName);
+	return host != nullptr && host->backend != nullptr && host->backend->faulted;
+}
+
+void WasmCoreHost::Fault(std::string reason)
+{
+	if (backend == nullptr)
+		return;
+	backend->faulted = true;
+	backend->faultReason = reason.empty() ? "Core Wasm module faulted" : std::move(reason);
+}
+
+bool WasmCoreHost::FaultModule(std::string_view moduleName, std::string reason)
+{
+	WasmCoreHost* host = FindHost(moduleName);
+	if (host == nullptr)
+		return false;
+	host->Fault(std::move(reason));
+	return true;
+}
+
+std::size_t WasmCoreHost::RemoveFaultedUnsynced()
+{
+	auto& hosts = Hosts();
+	const std::size_t before = hosts.size();
+	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [](const auto& host) {
+		return host != nullptr && host->backend != nullptr && host->backend->faulted &&
+			!WasmEnvironmentMatrix::Policy(host->environment).synced;
+	}), hosts.end());
+	return before - hosts.size();
+}
+
+bool WasmCoreHost::ResetBudgetImpl(std::string& error)
+{
+	if (backend == nullptr || backend->runtime == nullptr) {
+		error = "Core Wasm module has no execution backend";
+		return false;
+	}
+	const WasmRuntimeConfig& config = backend->runtime->Config();
+	backend->budget.Reset(config.instructionFuel, config.hostWorkLimit,
+		config.resultBytesLimit);
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (config.instructionFuel != 0) {
+		if (wasmtime_error_t* fuelError = wasmtime_context_set_fuel(
+				wasmtime_store_context(backend->store), config.instructionFuel);
+			fuelError != nullptr) {
+			error = "Core Wasm host could not reset fuel: " +
+				recoil::wasm::core::ErrorMessage(fuelError);
+			return false;
+		}
+	}
+#else
+	(void)config;
+#endif
+	return true;
+}
+
+bool WasmCoreHost::FuelRemainingImpl(std::uint64_t& fuel, std::string& error) const
+{
+	fuel = 0;
+	if (backend == nullptr || backend->runtime == nullptr) {
+		error = "Core Wasm module has no execution backend";
+		return false;
+	}
+	if (backend->runtime->Config().instructionFuel == 0)
+		return true;
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (wasmtime_error_t* fuelError = wasmtime_context_get_fuel(
+			wasmtime_store_context(backend->store), &fuel);
+		fuelError != nullptr) {
+		error = "Core Wasm host could not query fuel: " +
+			recoil::wasm::core::ErrorMessage(fuelError);
+		return false;
+	}
+	return true;
+#else
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::ResetBudget(std::string_view moduleName, std::string& error)
+{
+	WasmCoreHost* host = FindHost(moduleName);
+	if (host == nullptr) {
+		error = "Core Wasm module not found: " + std::string(moduleName);
+		return false;
+	}
+	return host->ResetBudgetImpl(error);
+}
+
+bool WasmCoreHost::FuelRemaining(std::string_view moduleName, std::uint64_t& fuel,
+	std::string& error)
+{
+	const WasmCoreHost* host = FindHost(moduleName);
+	if (host == nullptr) {
+		error = "Core Wasm module not found: " + std::string(moduleName);
+		return false;
+	}
+	return host->FuelRemainingImpl(fuel, error);
+}
+
+bool WasmCoreHost::HasCallin(std::string_view name) const
+{
+	if (backend == nullptr || !KnownCallin(name))
+		return false;
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (name == "GameFrame") return backend->bindings.HasGameFrame();
+	if (name == "GameFramePost") return backend->bindings.HasGameFramePost();
+	if (name == "Update") return backend->bindings.HasUpdate();
+	if (name == "UnitCreated") return backend->bindings.HasUnitCreated();
+	if (name == "UnitPreDamaged") return backend->bindings.HasUnitPreDamaged();
+	if (name == "AllowUnitCreation") return backend->bindings.HasAllowUnitCreation();
+	if (name == "DrawWorld") return backend->bindings.HasDrawWorld();
+#endif
+	return false;
 }
 
 bool WasmCoreHost::InvokeGameFrame(const void* query, std::string& error)
@@ -360,10 +513,15 @@ bool WasmCoreHost::Invoke(std::string_view name, const void* query, void* result
 		error = backend->faultReason;
 		return false;
 	}
+	if (!KnownCallin(name)) {
+		error = "unsupported Core Wasm callin: " + std::string(name);
+		return false;
+	}
+	if (!HasCallin(name))
+		return true; // optional export
 	if (!backend->budget.ChargeHost(1)) {
 		error = "Core Wasm callin host-work budget exhausted";
-		backend->faulted = true;
-		backend->faultReason = error;
+		Fault(error);
 		return false;
 	}
 
@@ -382,14 +540,40 @@ bool WasmCoreHost::Invoke(std::string_view name, const void* query, void* result
 		success = InvokeAllowUnitCreation(query, result, error);
 	else if (name == "DrawWorld")
 		success = InvokeDrawWorld(error);
-	else
-		return false;
 
-	if (!success) {
-		backend->faulted = true;
-		backend->faultReason = error.empty() ? "Core Wasm callin failed" : error;
-	}
+	if (!success)
+		Fault(error.empty() ? "Core Wasm callin failed" : error);
 	return success;
+}
+
+bool WasmCoreHost::DispatchModule(std::string_view moduleName, std::string_view name,
+	const void* query, void* result, std::string& error)
+{
+	WasmCoreHost* host = FindHost(moduleName);
+	if (host == nullptr) {
+		error = "Core Wasm module not found: " + std::string(moduleName);
+		return false;
+	}
+	return host->Invoke(name, query, result, error);
+}
+
+bool WasmCoreHost::DispatchEnvironment(WasmEnvironment environment, std::string_view name,
+	const void* query, void* result, std::string& error)
+{
+	if (!KnownCallin(name)) {
+		error = "unsupported Core Wasm callin: " + std::string(name);
+		return false;
+	}
+	bool handled = false;
+	for (const auto& host : Hosts()) {
+		if (host == nullptr || host->environment != environment || !host->HasCallin(name))
+			continue;
+		handled = true;
+		std::string hostError;
+		if (!host->Invoke(name, query, result, hostError) && error.empty())
+			error = hostError;
+	}
+	return handled;
 }
 
 bool WasmCoreHost::DispatchCallin(std::string_view name, const void* query, void* result,
@@ -397,23 +581,10 @@ bool WasmCoreHost::DispatchCallin(std::string_view name, const void* query, void
 {
 	if (!KnownCallin(name))
 		return false;
-
 	bool handled = false;
 	for (const auto& host : Hosts()) {
-		if (host->backend == nullptr)
+		if (host == nullptr || !host->HasCallin(name))
 			continue;
-#if defined(RECOIL_WASMTIME_AVAILABLE)
-		bool present = false;
-		if (name == "GameFrame") present = host->backend->bindings.HasGameFrame();
-		else if (name == "GameFramePost") present = host->backend->bindings.HasGameFramePost();
-		else if (name == "Update") present = host->backend->bindings.HasUpdate();
-		else if (name == "UnitCreated") present = host->backend->bindings.HasUnitCreated();
-		else if (name == "UnitPreDamaged") present = host->backend->bindings.HasUnitPreDamaged();
-		else if (name == "AllowUnitCreation") present = host->backend->bindings.HasAllowUnitCreation();
-		else if (name == "DrawWorld") present = host->backend->bindings.HasDrawWorld();
-		if (!present)
-			continue;
-#endif
 		handled = true;
 		std::string hostError;
 		if (!host->Invoke(name, query, result, hostError) && error.empty())
