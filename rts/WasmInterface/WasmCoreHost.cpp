@@ -32,15 +32,6 @@ std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 	return hosts;
 }
 
-WasmCoreHost* FindHost(std::string_view moduleName)
-{
-	const auto& hosts = Hosts();
-	const auto iter = std::find_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
-		return host != nullptr && host->HasModule(moduleName);
-	});
-	return iter == hosts.end() ? nullptr : iter->get();
-}
-
 bool KnownCallin(std::string_view name)
 {
 	return name == "GameFrame" || name == "GameFramePost" || name == "Update" ||
@@ -99,6 +90,15 @@ WasmCoreHost::WasmCoreHost(std::string moduleName, WasmEnvironment environment,
 }
 
 WasmCoreHost::~WasmCoreHost() = default;
+
+WasmCoreHost* WasmCoreHost::Find(std::string_view moduleName)
+{
+	const auto& hosts = Hosts();
+	const auto iter = std::find_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
+		return host != nullptr && host->moduleName == moduleName;
+	});
+	return iter == hosts.end() ? nullptr : iter->get();
+}
 
 bool WasmCoreHost::Enabled()
 {
@@ -236,17 +236,12 @@ bool WasmCoreHost::AnyActive(WasmEnvironment environment)
 
 bool WasmCoreHost::HasModule(std::string_view moduleName)
 {
-	return this->moduleName == moduleName;
-}
-
-bool WasmCoreHost::HasModule(std::string_view moduleName)
-{
-	return FindHost(moduleName) != nullptr;
+	return Find(moduleName) != nullptr;
 }
 
 bool WasmCoreHost::ModuleFaulted(std::string_view moduleName)
 {
-	const WasmCoreHost* host = FindHost(moduleName);
+	const WasmCoreHost* host = Find(moduleName);
 	return host != nullptr && host->backend != nullptr && host->backend->faulted;
 }
 
@@ -260,7 +255,7 @@ void WasmCoreHost::Fault(std::string reason)
 
 bool WasmCoreHost::FaultModule(std::string_view moduleName, std::string reason)
 {
-	WasmCoreHost* host = FindHost(moduleName);
+	WasmCoreHost* host = Find(moduleName);
 	if (host == nullptr)
 		return false;
 	host->Fault(std::move(reason));
@@ -329,7 +324,7 @@ bool WasmCoreHost::FuelRemainingImpl(std::uint64_t& fuel, std::string& error) co
 
 bool WasmCoreHost::ResetBudget(std::string_view moduleName, std::string& error)
 {
-	WasmCoreHost* host = FindHost(moduleName);
+	WasmCoreHost* host = Find(moduleName);
 	if (host == nullptr) {
 		error = "Core Wasm module not found: " + std::string(moduleName);
 		return false;
@@ -340,7 +335,7 @@ bool WasmCoreHost::ResetBudget(std::string_view moduleName, std::string& error)
 bool WasmCoreHost::FuelRemaining(std::string_view moduleName, std::uint64_t& fuel,
 	std::string& error)
 {
-	const WasmCoreHost* host = FindHost(moduleName);
+	const WasmCoreHost* host = Find(moduleName);
 	if (host == nullptr) {
 		error = "Core Wasm module not found: " + std::string(moduleName);
 		return false;
@@ -549,7 +544,7 @@ bool WasmCoreHost::Invoke(std::string_view name, const void* query, void* result
 bool WasmCoreHost::DispatchModule(std::string_view moduleName, std::string_view name,
 	const void* query, void* result, std::string& error)
 {
-	WasmCoreHost* host = FindHost(moduleName);
+	WasmCoreHost* host = Find(moduleName);
 	if (host == nullptr) {
 		error = "Core Wasm module not found: " + std::string(moduleName);
 		return false;
