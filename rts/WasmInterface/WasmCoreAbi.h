@@ -105,6 +105,20 @@ public:
 	bool ReadI32SliceLE(std::uint32_t offset, std::span<std::int32_t> values) const;
 	bool WriteI32SliceLE(std::uint32_t offset, std::span<const std::int32_t> values) const;
 
+	// Synchronous imports sometimes need to encode a variable record directly
+	// into guest memory. Validate the range once, then let a wire codec operate
+	// on the returned span without repeating a Wasmtime/bounds query per field.
+	// The view must not escape the current host callback.
+	bool MutableView(std::uint32_t offset, std::size_t bytes,
+		std::span<std::uint8_t>& view) const
+	{
+		std::uint8_t* base = nullptr;
+		if (!Range(offset, bytes, base))
+			return false;
+		view = std::span<std::uint8_t>(base, bytes);
+		return true;
+	}
+
 	template<typename T>
 	bool ReadPod(std::uint32_t offset, T& value) const
 	{
