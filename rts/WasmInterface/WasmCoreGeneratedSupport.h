@@ -71,14 +71,4 @@ inline bool EnsureMemory(HostState* state, wasmtime_caller_t* caller, std::strin
 	return state->memory.BindFromCaller(caller, error);
 }
 
-inline wasm_trap_t* BudgetTrap(HostState* state, std::uint64_t work,
-	std::unique_ptr<ImportGuard>& guard)
-{
-	std::string error;
-	guard = std::make_unique<ImportGuard>(state, work, error);
-	if (guard->Ok())
-		return nullptr;
-	return Trap(error);
-}
-
 } // namespace recoil::wasm::core::generated
