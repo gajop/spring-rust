@@ -29,9 +29,6 @@ public:
 		std::string& error);
 	using ArchiveModuleBytesProvider = std::function<bool(std::string_view archive,
 		std::string_view path, std::vector<std::uint8_t>& bytes, std::string& error)>;
-	// Parse and load declarations from all participating archives as one
-	// transaction. Module names are global, while each module's bytes remain
-	// relative to the archive that declared it.
 	bool LoadManifests(const std::vector<WasmManifestSource>& sources,
 		const ArchiveModuleBytesProvider& bytesProvider, std::string& error);
 	bool UnloadModule(std::string_view moduleName);
@@ -40,14 +37,8 @@ public:
 
 	bool DispatchCallin(const WasmCallinEvent& event, WasmEnvironment environment,
 		std::string& error);
-	// Dispatch the generated Component Model callin world. The callin name is
-	// the canonical NativeInterface spelling; the system maps it to the
-	// environment-specific WIT export path.
 	bool DispatchCallin(std::string_view name, const std::vector<WasmValue>& arguments,
 		WasmEnvironment environment, std::string& error);
-	// Dispatch a semantic callin and return its aggregated payload. The result
-	// is the generated callin result record (not the outer result<..., error>
-	// envelope). For fire-and-forget callins the result is unit.
 	bool DispatchCallin(std::string_view name, const std::vector<WasmValue>& arguments,
 		WasmEnvironment environment, WasmValue& result, std::string& error);
 	bool DispatchCallin(std::string_view name, const std::vector<WasmValue>& arguments,
@@ -61,29 +52,27 @@ public:
 	bool DispatchCallin(std::string_view name,
 		const std::vector<CallinInvocation>& invocations, WasmValue& result,
 		std::string& error);
-	// Combine one already-unwrapped callin payload with the aggregate. This is
-	// public so focused registry tests can exercise the exact fan-out rules
-	// without depending on a compiled guest module.
 	static bool AggregateCallinResult(std::string_view aggregation,
 		const WasmValue& value, bool& haveResult, WasmValue& result,
 		std::string& error);
-	// Deliver an opaque message from a synced module to local unsynced Wasm
-	// instances. The delivery is one-way and its result cannot affect synced
-	// state; module faults remain isolated to their unsynced environment.
 	bool DispatchSyncedMessage(std::string_view message, std::string& error);
 
 	std::size_t ModuleCount() const;
 	bool HasModules(WasmEnvironment environment) const;
 	const WasmRuntime& Runtime() const { return *runtime; }
-
-	// Match configuration must enumerate these values for every synced module.
 	std::vector<std::string> SyncedConfiguration() const;
 
 private:
+	struct CoreModuleRecord {
+		WasmModuleDescriptor descriptor;
+		WasmModuleIdentity identity;
+	};
+
 	void FaultSyncedModules(WasmEnvironment environment, std::string_view reason);
 
 	std::unique_ptr<WasmRuntime> runtime;
 	WasmHostAdapter* hostAdapter = nullptr;
 	std::vector<std::unique_ptr<WasmModule>> modules;
+	std::vector<CoreModuleRecord> coreModules;
 	WasmInstanceID nextInstanceID = 1;
 };
