@@ -19,6 +19,7 @@ struct ImportDescriptor {
 inline constexpr std::string_view UnitsInfoModule = "spring:units-info";
 inline constexpr std::string_view UnitsQueryModule = "spring:units-query";
 inline constexpr std::string_view UnitDefsModule = "spring:unit-defs";
+inline constexpr std::string_view UnitsCommandsModule = "spring:units-commands";
 inline constexpr std::string_view ProfilingModule = "spring:profiling";
 inline constexpr std::string_view MessagesModule = "spring:messages";
 inline constexpr std::string_view RulesParamsModule = "spring:rules-params";
@@ -64,15 +65,15 @@ inline constexpr ImportDescriptor kImports[] = {
 	{UnitsQueryModule, "get-unit-nearest-enemy", "i32,f32,i32->i64", AllEnvironmentMask},
 	{UnitsQueryModule, "get-unit-separation", "i32,i32,i32->i64", AllEnvironmentMask},
 
-	// Core strings are raw bytes. `capacity` is measured in bytes, there is no
-	// NUL terminator, and BufferOverflow reports the exact required byte count.
 	{UnitDefsModule, "get-unit-def-name", "i32,i32,i32->i64", AllEnvironmentMask},
 	{UnitDefsModule, "get-unit-def-human-name", "i32,i32,i32->i64", AllEnvironmentMask},
 
-	// Benchmark instrumentation and the benchmark-critical semantic calls.
-	// Masks mirror WasmCalloutRegistry.h for the corresponding NativeInterface
-	// functions; the f32 RulesParam names make the specialized wire shape
-	// explicit rather than pretending it is the full tagged RulesParam ABI.
+	// Nested commands are serialized as one little-endian caller-owned byte
+	// buffer: count, then fixed command fields and inline f32 parameters.
+	{UnitsCommandsModule, "get-unit-command-count", "i32->i64", AllEnvironmentMask},
+	{UnitsCommandsModule, "get-unit-commands", "i32,i32,i32,i32->i64", AllEnvironmentMask},
+
+	// Benchmark instrumentation and benchmark-critical semantic calls.
 	{ProfilingModule, "get-timer-micros", "->i64", AllEnvironmentMask},
 	{MessagesModule, "send-lua-rules-msg", "i32,i32->i64", AllEnvironmentMask},
 	{MessagesModule, "send-lua-ui-msg", "i32,i32,i32,i32->i64", AllEnvironmentMask},
