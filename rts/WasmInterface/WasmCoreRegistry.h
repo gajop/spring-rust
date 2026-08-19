@@ -20,6 +20,7 @@ inline constexpr std::string_view UnitsInfoModule = "spring:units-info";
 inline constexpr std::string_view UnitsQueryModule = "spring:units-query";
 inline constexpr std::string_view UnitDefsModule = "spring:unit-defs";
 inline constexpr std::string_view UnitsCommandsModule = "spring:units-commands";
+inline constexpr std::string_view UnitControlModule = "spring:unit-control";
 inline constexpr std::string_view ProfilingModule = "spring:profiling";
 inline constexpr std::string_view MessagesModule = "spring:messages";
 inline constexpr std::string_view RulesParamsModule = "spring:rules-params";
@@ -68,12 +69,13 @@ inline constexpr ImportDescriptor kImports[] = {
 	{UnitDefsModule, "get-unit-def-name", "i32,i32,i32->i64", AllEnvironmentMask},
 	{UnitDefsModule, "get-unit-def-human-name", "i32,i32,i32->i64", AllEnvironmentMask},
 
-	// Nested commands are serialized as one little-endian caller-owned byte
-	// buffer: count, then fixed command fields and inline f32 parameters.
 	{UnitsCommandsModule, "get-unit-command-count", "i32->i64", AllEnvironmentMask},
 	{UnitsCommandsModule, "get-unit-commands", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 
-	// Benchmark instrumentation and benchmark-critical semantic calls.
+	// Input-list mutation: params are copied and little-endian decoded before
+	// NativeInterface is invoked. Capability mask matches generated UnitControl.
+	{UnitControlModule, "give-order-to-unit", "i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
+
 	{ProfilingModule, "get-timer-micros", "->i64", AllEnvironmentMask},
 	{MessagesModule, "send-lua-rules-msg", "i32,i32->i64", AllEnvironmentMask},
 	{MessagesModule, "send-lua-ui-msg", "i32,i32,i32,i32->i64", AllEnvironmentMask},
