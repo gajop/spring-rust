@@ -9,9 +9,11 @@
 
 mod benchmark;
 mod unit_defs;
+mod units_commands;
 mod units_query;
 pub use benchmark::*;
 pub use unit_defs::*;
+pub use units_commands::*;
 pub use units_query::*;
 
 pub const ABI_VERSION: u32 = 1;
