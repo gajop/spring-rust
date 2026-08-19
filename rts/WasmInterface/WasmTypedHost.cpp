@@ -24,13 +24,6 @@ bool TruthyEnvironment(const char* name)
 		setting == "yes" || setting == "YES" || setting == "on" || setting == "ON";
 }
 
-bool IsCoreModule(const std::vector<std::uint8_t>& bytes)
-{
-	return bytes.size() >= 8 && bytes[0] == 0x00 && bytes[1] == 'a' &&
-		bytes[2] == 's' && bytes[3] == 'm' && bytes[4] == 0x01 &&
-		bytes[5] == 0x00 && bytes[6] == 0x00 && bytes[7] == 0x00;
-}
-
 SpringTypedHostLibrary& Library()
 {
 	static SpringTypedHostLibrary library;
@@ -113,18 +106,6 @@ bool WasmTypedHost::Load(std::string moduleName,
 	const std::vector<std::uint8_t>& componentBytes, NativeInterface* nativeInterface,
 	SpringTypedWorld world, std::string& error)
 {
-	if (WasmCoreHost::Enabled() && IsCoreModule(componentBytes)) {
-		if (world != SpringTypedWorld::RulesSynced) {
-			error = "Core Wasm benchmark host currently supports the synced rules world only";
-			return false;
-		}
-		return WasmCoreHost::Load(std::move(moduleName), componentBytes, nativeInterface,
-			WasmEnvironment::RulesSynced, error);
-	}
-
-	// Core mode is orthogonal to the normal C-API Component path. If the Rust
-	// typed host is not selected, a component simply continues through the
-	// existing WasmModule implementation.
 	if (!TypedEnabled())
 		return true;
 	if (!OpenLibrary(error))
@@ -270,7 +251,7 @@ bool WasmTypedHost::Invoke(Callin callin, const void* query, void* result,
 
 	if (hostError != nullptr) {
 		error = std::string("typed Wasm host callin failed: ") + hostError;
-		library.stringFree(hostError);
+		Library().stringFree(hostError);
 		return true;
 	}
 	if (status != 0)
