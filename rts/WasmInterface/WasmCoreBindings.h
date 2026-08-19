@@ -6,6 +6,7 @@
 
 #include "NativeInterface/NativeInterface.h"
 #include "WasmCoreAbi.h"
+#include "WasmResources.h"
 
 namespace recoil::wasm::core {
 
@@ -14,6 +15,7 @@ namespace recoil::wasm::core {
 struct HostState {
 	NativeInterface* native = nullptr;
 	Memory memory;
+	WasmExecutionBudget* budget = nullptr;
 };
 
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
@@ -25,9 +27,11 @@ bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
 // no string lookup, allocation, or semantic value conversion.
 class InstanceBindings {
 public:
-	explicit InstanceBindings(NativeInterface* nativeInterface)
+	explicit InstanceBindings(NativeInterface* nativeInterface,
+		WasmExecutionBudget* executionBudget = nullptr)
 	{
 		host.native = nativeInterface;
+		host.budget = executionBudget;
 	}
 
 	bool RegisterImports(wasmtime_linker_t* linker, std::string& error)
