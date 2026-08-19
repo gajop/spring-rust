@@ -3,6 +3,7 @@
 #include "WasmCoreBindings.h"
 
 #include <array>
+#include <bit>
 #include <cstdint>
 #include <cstring>
 #include <span>
@@ -77,12 +78,21 @@ bool EnsureMemory(HostState* state, wasmtime_caller_t* caller, std::string& erro
 void EncodeF32LE(float value, std::uint8_t* output)
 {
 	static_assert(sizeof(float) == sizeof(std::uint32_t));
-	std::uint32_t bits = 0;
-	std::memcpy(&bits, &value, sizeof(bits));
+	const std::uint32_t bits = std::bit_cast<std::uint32_t>(value);
 	output[0] = static_cast<std::uint8_t>(bits);
 	output[1] = static_cast<std::uint8_t>(bits >> 8);
 	output[2] = static_cast<std::uint8_t>(bits >> 16);
 	output[3] = static_cast<std::uint8_t>(bits >> 24);
+}
+
+template<std::size_t N>
+bool WriteF32s(Memory& memory, std::uint32_t output,
+	const std::array<float, N>& values)
+{
+	std::array<std::uint8_t, N * 4> wire{};
+	for (std::size_t index = 0; index < N; ++index)
+		EncodeF32LE(values[index], wire.data() + index * 4);
+	return memory.Write(output, wire.data(), wire.size());
 }
 
 wasm_trap_t* GetUnitDefID(void* environment, wasmtime_caller_t*,
@@ -94,17 +104,80 @@ wasm_trap_t* GetUnitDefID(void* environment, wasmtime_caller_t*,
 		return Trap("GetUnitDefID host binding is unavailable");
 	if (slots == nullptr || slotCount != 1)
 		return Trap("GetUnitDefID core ABI signature mismatch");
-
 	std::string budgetError;
 	ImportBudgetGuard budgetGuard(state, 2, budgetError);
 	if (!budgetGuard.Ok())
 		return Trap(budgetError);
-
 	GetUnitDefIDQuery query{};
 	query.unitID = slots[0].i32;
 	GetUnitDefIDResult result{};
 	state->native->unitsInfo->GetUnitDefID(&query, &result);
 	slots[0].i64 = static_cast<std::int64_t>(PackI32(result.unitDefID, NativeErrorCode(result.error)));
+	return nullptr;
+}
+
+wasm_trap_t* GetUnitTeam(void* environment, wasmtime_caller_t*,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || state->native == nullptr || state->native->unitsInfo == nullptr ||
+		state->native->unitsInfo->GetUnitTeam == nullptr)
+		return Trap("GetUnitTeam host binding is unavailable");
+	if (slots == nullptr || slotCount != 1)
+		return Trap("GetUnitTeam core ABI signature mismatch");
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 2, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
+	GetUnitTeamQuery query{};
+	query.unitID = slots[0].i32;
+	GetUnitTeamResult result{};
+	state->native->unitsInfo->GetUnitTeam(&query, &result);
+	slots[0].i64 = static_cast<std::int64_t>(PackI32(result.teamID, NativeErrorCode(result.error)));
+	return nullptr;
+}
+
+wasm_trap_t* GetUnitIsDead(void* environment, wasmtime_caller_t*,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || state->native == nullptr || state->native->unitsInfo == nullptr ||
+		state->native->unitsInfo->GetUnitIsDead == nullptr)
+		return Trap("GetUnitIsDead host binding is unavailable");
+	if (slots == nullptr || slotCount != 1)
+		return Trap("GetUnitIsDead core ABI signature mismatch");
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 2, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
+	GetUnitIsDeadQuery query{};
+	query.unitID = slots[0].i32;
+	GetUnitIsDeadResult result{};
+	state->native->unitsInfo->GetUnitIsDead(&query, &result);
+	slots[0].i64 = static_cast<std::int64_t>(PackI32(result.isDead ? 1 : 0,
+		NativeErrorCode(result.error)));
+	return nullptr;
+}
+
+wasm_trap_t* GetUnitExperience(void* environment, wasmtime_caller_t*,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || state->native == nullptr || state->native->unitsInfo == nullptr ||
+		state->native->unitsInfo->GetUnitExperience == nullptr)
+		return Trap("GetUnitExperience host binding is unavailable");
+	if (slots == nullptr || slotCount != 1)
+		return Trap("GetUnitExperience core ABI signature mismatch");
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 2, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
+	GetUnitExperienceQuery query{};
+	query.unitID = slots[0].i32;
+	GetUnitExperienceResult result{};
+	state->native->unitsInfo->GetUnitExperience(&query, &result);
+	const std::int32_t bits = std::bit_cast<std::int32_t>(result.experience);
+	slots[0].i64 = static_cast<std::int64_t>(PackI32(bits, NativeErrorCode(result.error)));
 	return nullptr;
 }
 
@@ -117,45 +190,113 @@ wasm_trap_t* GetUnitPosition(void* environment, wasmtime_caller_t* caller,
 		return Trap("GetUnitPosition host binding is unavailable");
 	if (slots == nullptr || slotCount != 3)
 		return Trap("GetUnitPosition core ABI signature mismatch");
-
 	std::string budgetError;
 	ImportBudgetGuard budgetGuard(state, 4, budgetError);
 	if (!budgetGuard.Ok())
 		return Trap(budgetError);
-
 	std::string memoryError;
 	if (!EnsureMemory(state, caller, memoryError))
 		return Trap(memoryError);
-
 	const std::uint32_t flags = static_cast<std::uint32_t>(slots[1].i32);
 	if ((flags & ~(POSITION_MID | POSITION_AIM)) != 0) {
 		slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 		return nullptr;
 	}
-
 	GetUnitPositionQuery query{};
 	query.unitID = slots[0].i32;
 	query.options.midPos = (flags & POSITION_MID) != 0;
 	query.options.aimPos = (flags & POSITION_AIM) != 0;
 	GetUnitPositionResult result{};
 	state->native->unitsInfo->GetUnitPosition(&query, &result);
-
 	const std::int32_t errorCode = NativeErrorCode(result.error);
 	if (errorCode != 0) {
 		slots[0].i32 = errorCode;
 		return nullptr;
 	}
-
 	const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
-	std::array<std::uint8_t, 12> wire{};
-	EncodeF32LE(result.position.x, wire.data() + 0);
-	EncodeF32LE(result.position.y, wire.data() + 4);
-	EncodeF32LE(result.position.z, wire.data() + 8);
-	if (!state->memory.Write(output, wire.data(), wire.size())) {
+	const std::array<float, 3> values = {
+		result.position.x, result.position.y, result.position.z,
+	};
+	if (!WriteF32s(state->memory, output, values)) {
 		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
 		return nullptr;
 	}
+	slots[0].i32 = 0;
+	return nullptr;
+}
 
+wasm_trap_t* GetUnitVelocity(void* environment, wasmtime_caller_t* caller,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || state->native == nullptr || state->native->unitsInfo == nullptr ||
+		state->native->unitsInfo->GetUnitVelocity == nullptr)
+		return Trap("GetUnitVelocity host binding is unavailable");
+	if (slots == nullptr || slotCount != 2)
+		return Trap("GetUnitVelocity core ABI signature mismatch");
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 3, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
+	std::string memoryError;
+	if (!EnsureMemory(state, caller, memoryError))
+		return Trap(memoryError);
+	GetUnitVelocityQuery query{};
+	query.unitID = slots[0].i32;
+	GetUnitVelocityResult result{};
+	state->native->unitsInfo->GetUnitVelocity(&query, &result);
+	const std::int32_t errorCode = NativeErrorCode(result.error);
+	if (errorCode != 0) {
+		slots[0].i32 = errorCode;
+		return nullptr;
+	}
+	const std::array<float, 3> values = {
+		result.velocity.x, result.velocity.y, result.velocity.z,
+	};
+	if (!WriteF32s(state->memory, static_cast<std::uint32_t>(slots[1].i32), values)) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+		return nullptr;
+	}
+	slots[0].i32 = 0;
+	return nullptr;
+}
+
+wasm_trap_t* GetUnitHealth(void* environment, wasmtime_caller_t* caller,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || state->native == nullptr || state->native->unitsInfo == nullptr ||
+		state->native->unitsInfo->GetUnitHealth == nullptr)
+		return Trap("GetUnitHealth host binding is unavailable");
+	if (slots == nullptr || slotCount != 2)
+		return Trap("GetUnitHealth core ABI signature mismatch");
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 3, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
+	std::string memoryError;
+	if (!EnsureMemory(state, caller, memoryError))
+		return Trap(memoryError);
+	GetUnitHealthQuery query{};
+	query.unitID = slots[0].i32;
+	GetUnitHealthResult result{};
+	state->native->unitsInfo->GetUnitHealth(&query, &result);
+	const std::int32_t errorCode = NativeErrorCode(result.error);
+	if (errorCode != 0) {
+		slots[0].i32 = errorCode;
+		return nullptr;
+	}
+	const std::array<float, 5> values = {
+		result.health.health,
+		result.health.maxHealth,
+		result.health.paralyzeDamage,
+		result.health.captureProgress,
+		result.health.buildProgress,
+	};
+	if (!WriteF32s(state->memory, static_cast<std::uint32_t>(slots[1].i32), values)) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+		return nullptr;
+	}
 	slots[0].i32 = 0;
 	return nullptr;
 }
@@ -194,18 +335,32 @@ bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::strin
 		return false;
 	}
 
-	{
-		const wasm_valkind_t params[] = {WASM_I32};
-		const wasm_valkind_t results[] = {WASM_I64};
-		if (!DefineUnchecked(linker, "spring:units-info", "get-unit-def-id",
-				MakeFuncType(params, 1, results, 1), GetUnitDefID, state, error))
-			return false;
-	}
+	const wasm_valkind_t i32ToI64Params[] = {WASM_I32};
+	const wasm_valkind_t i64Result[] = {WASM_I64};
+	if (!DefineUnchecked(linker, "spring:units-info", "get-unit-def-id",
+			MakeFuncType(i32ToI64Params, 1, i64Result, 1), GetUnitDefID, state, error) ||
+		!DefineUnchecked(linker, "spring:units-info", "get-unit-team",
+			MakeFuncType(i32ToI64Params, 1, i64Result, 1), GetUnitTeam, state, error) ||
+		!DefineUnchecked(linker, "spring:units-info", "get-unit-is-dead",
+			MakeFuncType(i32ToI64Params, 1, i64Result, 1), GetUnitIsDead, state, error) ||
+		!DefineUnchecked(linker, "spring:units-info", "get-unit-experience",
+			MakeFuncType(i32ToI64Params, 1, i64Result, 1), GetUnitExperience, state, error))
+		return false;
+
 	{
 		const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
 		const wasm_valkind_t results[] = {WASM_I32};
 		if (!DefineUnchecked(linker, "spring:units-info", "get-unit-position",
 				MakeFuncType(params, 3, results, 1), GetUnitPosition, state, error))
+			return false;
+	}
+	{
+		const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+		const wasm_valkind_t results[] = {WASM_I32};
+		if (!DefineUnchecked(linker, "spring:units-info", "get-unit-velocity",
+				MakeFuncType(params, 2, results, 1), GetUnitVelocity, state, error) ||
+			!DefineUnchecked(linker, "spring:units-info", "get-unit-health",
+				MakeFuncType(params, 2, results, 1), GetUnitHealth, state, error))
 			return false;
 	}
 
@@ -228,12 +383,10 @@ bool InstanceBindings::Bind(wasmtime_context_t* context, const wasmtime_instance
 	if (!gameFrame.Resolve(context, instance, gameFrameName, sizeof(gameFrameName) - 1,
 		true, error))
 		return false;
-
 	constexpr char gameFramePostName[] = "spring:callin/game-frame-post";
 	if (!gameFramePost.Resolve(context, instance, gameFramePostName,
 		sizeof(gameFramePostName) - 1, true, error))
 		return false;
-
 	{
 		const wasm_valkind_t params[] = {WASM_F32};
 		if (!ResolveRaw(update, context, instance, "spring:callin/update",
@@ -271,7 +424,6 @@ bool InstanceBindings::Bind(wasmtime_context_t* context, const wasmtime_instance
 	}
 	if (!ResolveRaw(drawWorld, context, instance, "spring:callin/draw-world", {}, {}, error))
 		return false;
-
 	return true;
 }
 
