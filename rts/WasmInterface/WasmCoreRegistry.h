@@ -9,15 +9,6 @@
 
 namespace recoil::wasm::core {
 
-// Generated-shaped inventory for the Core ABI. The code generator should emit
-// this from the same semantic model as WasmCalloutRegistry; validation and
-// linker registration both consume these exact names/capability masks.
-//
-// Signature grammar is intentionally tiny and deterministic:
-//   i32,i32->i32
-//   i32->i64
-//   ->
-// Only Core numeric types used by the Spring ABI are accepted.
 struct ImportDescriptor {
 	std::string_view module;
 	std::string_view name;
@@ -26,13 +17,7 @@ struct ImportDescriptor {
 };
 
 inline constexpr std::string_view UnitsInfoModule = "spring:units-info";
-inline constexpr std::string_view GetUnitDefIDImport = "get-unit-def-id";
-inline constexpr std::string_view GetUnitTeamImport = "get-unit-team";
-inline constexpr std::string_view GetUnitIsDeadImport = "get-unit-is-dead";
-inline constexpr std::string_view GetUnitExperienceImport = "get-unit-experience";
-inline constexpr std::string_view GetUnitPositionImport = "get-unit-position";
-inline constexpr std::string_view GetUnitVelocityImport = "get-unit-velocity";
-inline constexpr std::string_view GetUnitHealthImport = "get-unit-health";
+inline constexpr std::string_view UnitsQueryModule = "spring:units-query";
 
 inline constexpr std::string_view GameFrameExport = "spring:callin/game-frame";
 inline constexpr std::string_view GameFramePostExport = "spring:callin/game-frame-post";
@@ -50,13 +35,26 @@ inline constexpr std::uint32_t AllEnvironmentMask =
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::UI));
 
 inline constexpr ImportDescriptor kImports[] = {
-	{UnitsInfoModule, GetUnitDefIDImport, "i32->i64", AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitTeamImport, "i32->i64", AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitIsDeadImport, "i32->i64", AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitExperienceImport, "i32->i64", AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitPositionImport, "i32,i32,i32->i32", AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitVelocityImport, "i32,i32->i32", AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitHealthImport, "i32,i32->i32", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-def-id", "i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-team", "i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-is-dead", "i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-experience", "i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-position", "i32,i32,i32->i32", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-velocity", "i32,i32->i32", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-health", "i32,i32->i32", AllEnvironmentMask},
+
+	{UnitsQueryModule, "valid-unit-id", "i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-all-units", "i32,i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-team-units", "i32,i32,i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-team-unit-def-count", "i32,i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-team-unit-count", "i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-units-in-rectangle", "f32,f32,f32,f32,i32,i32,i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-units-in-box", "f32,f32,f32,f32,f32,f32,i32,i32,i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-units-in-sphere", "f32,f32,f32,f32,i32,i32,i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-units-in-cylinder", "f32,f32,f32,i32,i32,i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-unit-nearest-ally", "i32,f32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-unit-nearest-enemy", "i32,f32,i32->i64", AllEnvironmentMask},
+	{UnitsQueryModule, "get-unit-separation", "i32,i32,i32->i64", AllEnvironmentMask},
 };
 
 inline const ImportDescriptor* FindImport(std::string_view module, std::string_view name)
