@@ -65,18 +65,30 @@ bool Memory::BindFromInstance(wasmtime_context_t* context, const wasmtime_instan
 	return true;
 }
 
-std::size_t Memory::Size() const
+std::uint8_t* Memory::CurrentBase() const
+{
+	if (!bound || storeContext == nullptr)
+		return nullptr;
+	return stable ? cachedBase : wasmtime_memory_data(storeContext, &linearMemory);
+}
+
+std::size_t Memory::CurrentSize() const
 {
 	if (!bound || storeContext == nullptr)
 		return 0;
-	return wasmtime_memory_data_size(storeContext, &linearMemory);
+	return stable ? cachedSize : wasmtime_memory_data_size(storeContext, &linearMemory);
+}
+
+std::size_t Memory::Size() const
+{
+	return CurrentSize();
 }
 
 bool Memory::Contains(std::uint32_t offset, std::size_t bytes) const
 {
 	if (!bound || storeContext == nullptr)
 		return false;
-	const std::size_t size = wasmtime_memory_data_size(storeContext, &linearMemory);
+	const std::size_t size = CurrentSize();
 	const std::size_t begin = static_cast<std::size_t>(offset);
 	return begin <= size && bytes <= size - begin;
 }
@@ -85,7 +97,10 @@ bool Memory::Range(std::uint32_t offset, std::size_t bytes, std::uint8_t*& base)
 {
 	if (!Contains(offset, bytes))
 		return false;
-	base = wasmtime_memory_data(storeContext, &linearMemory) + static_cast<std::size_t>(offset);
+	std::uint8_t* memory = CurrentBase();
+	if (memory == nullptr && CurrentSize() != 0)
+		return false;
+	base = memory + static_cast<std::size_t>(offset);
 	return true;
 }
 
