@@ -11,6 +11,7 @@
 #include "NativeInterface/api/Callins.h"
 #include "WasmCoreAbi.h"
 #include "WasmCoreBindings.h"
+#include "WasmCoreValidation.h"
 #include "WasmResources.h"
 
 namespace {
@@ -23,13 +24,6 @@ bool TruthyEnvironment(const char* name)
 	const std::string_view setting(value);
 	return setting == "1" || setting == "true" || setting == "TRUE" ||
 		setting == "yes" || setting == "YES" || setting == "on" || setting == "ON";
-}
-
-bool IsCoreModule(const std::vector<std::uint8_t>& bytes)
-{
-	return bytes.size() >= 8 && bytes[0] == 0x00 && bytes[1] == 'a' &&
-		bytes[2] == 's' && bytes[3] == 'm' && bytes[4] == 0x01 &&
-		bytes[5] == 0x00 && bytes[6] == 0x00 && bytes[7] == 0x00;
 }
 
 std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
@@ -95,14 +89,10 @@ bool WasmCoreHost::Enabled()
 
 bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
 	NativeInterface* nativeInterface, WasmEnvironment environment,
-	const WasmRuntime& runtime, std::string& error)
+	const WasmRuntime& runtime, WasmModuleIdentity& identity, std::string& error)
 {
 	if (!Enabled())
 		return false;
-	if (!IsCoreModule(moduleBytes)) {
-		error = "Core Wasm host requires a core module";
-		return false;
-	}
 	if (environment != WasmEnvironment::RulesSynced && environment != WasmEnvironment::GaiaSynced) {
 		error = "Core Wasm host currently supports synced gadget environments only";
 		return false;
@@ -111,12 +101,13 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		error = "Core Wasm host has no NativeInterface";
 		return false;
 	}
-	const WasmValidationResult validation = runtime.ValidateModule(
-		moduleBytes, environment, WasmEnvironmentMatrix::Name(environment));
+	const WasmValidationResult validation = recoil::wasm::core::ValidateModule(
+		moduleBytes, environment, RECOIL_WASM_INTERFACE_VERSION_NUMBER, runtime.Config());
 	if (!validation.valid) {
 		error = "Core Wasm validation failed: " + validation.error;
 		return false;
 	}
+	identity = validation.identity;
 	if (!runtime.IsAvailable()) {
 		error = "Wasmtime is unavailable for the Core Wasm host";
 		return false;
