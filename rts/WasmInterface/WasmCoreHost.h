@@ -13,22 +13,19 @@
 
 struct NativeInterface;
 
-// Native C++ Wasmtime/Core host used by the end-to-end transport benchmark and
-// as the staging backend for the shipping Core ABI. It deliberately mirrors
-// WasmTypedHost's alternate-host seam so the existing NativeInterface event
-// conversion and benchmark timing do not need another special path.
+// Native C++ Wasmtime/Core host. Instances use the WasmInterfaceSystem's exact
+// WasmRuntime so synced feature configuration, limits, fuel, and compiler
+// identity are shared with the normal module path.
 class WasmCoreHost {
 public:
 	static bool Enabled();
 	static bool Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
-		NativeInterface* nativeInterface, WasmEnvironment environment, std::string& error);
+		NativeInterface* nativeInterface, WasmEnvironment environment,
+		const WasmRuntime& runtime, std::string& error);
 	static void Unload(std::string_view moduleName);
 	static void UnloadAll();
 	static bool AnyActive();
 
-	// Returns true when this transport owns the named callin. An empty error is
-	// success; a non-empty error means the guest trapped/faulted and remains
-	// owned by this transport rather than falling through to another instance.
 	static bool DispatchCallin(std::string_view name, const void* query, void* result,
 		std::string& error);
 
