@@ -7,6 +7,9 @@
 //! layer where wasm32 pointers are passed to host imports as 32-bit linear-
 //! memory offsets. The host validates every offset/length before dereferencing.
 
+mod units_query;
+pub use units_query::*;
+
 pub const ABI_VERSION: u32 = 1;
 pub const POSITION_MID: u32 = 1 << 0;
 pub const POSITION_AIM: u32 = 1 << 1;
@@ -155,7 +158,6 @@ mod raw {
 pub fn get_unit_def_id(unit_id: i32) -> Result<i32> {
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: signature is generated together with the host binding.
         return unpack_i32(unsafe { raw::get_unit_def_id(unit_id) });
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -169,7 +171,6 @@ pub fn get_unit_def_id(unit_id: i32) -> Result<i32> {
 pub fn get_unit_team(unit_id: i32) -> Result<i32> {
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: signature is generated together with the host binding.
         return unpack_i32(unsafe { raw::get_unit_team(unit_id) });
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -183,7 +184,6 @@ pub fn get_unit_team(unit_id: i32) -> Result<i32> {
 pub fn get_unit_is_dead(unit_id: i32) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: signature is generated together with the host binding.
         return unpack_bool(unsafe { raw::get_unit_is_dead(unit_id) });
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -197,7 +197,6 @@ pub fn get_unit_is_dead(unit_id: i32) -> Result<bool> {
 pub fn get_unit_experience(unit_id: i32) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: signature is generated together with the host binding.
         return unpack_f32(unsafe { raw::get_unit_experience(unit_id) });
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -221,8 +220,6 @@ pub fn get_unit_position(unit_id: i32, mid_pos: bool, aim_pos: bool) -> Result<[
         }
         let pointer = output.as_mut_ptr() as usize;
         debug_assert!(pointer <= u32::MAX as usize);
-        // SAFETY: `output` owns 12 writable bytes for the synchronous import;
-        // the host validates the full wasm32 range before writing.
         let status = unsafe {
             raw::get_unit_position(unit_id, flags as i32, pointer as u32 as i32)
         };
@@ -246,7 +243,6 @@ pub fn get_unit_velocity(unit_id: i32) -> Result<[f32; 3]> {
         let mut output = [0.0f32; 3];
         let pointer = output.as_mut_ptr() as usize;
         debug_assert!(pointer <= u32::MAX as usize);
-        // SAFETY: same caller-owned fixed-buffer convention as position.
         let status = unsafe { raw::get_unit_velocity(unit_id, pointer as u32 as i32) };
         if status == 0 {
             Ok(output)
@@ -268,7 +264,6 @@ pub fn get_unit_health(unit_id: i32) -> Result<UnitHealth> {
         let mut output = [0.0f32; 5];
         let pointer = output.as_mut_ptr() as usize;
         debug_assert!(pointer <= u32::MAX as usize);
-        // SAFETY: `output` owns exactly the 20 bytes written by the host.
         let status = unsafe { raw::get_unit_health(unit_id, pointer as u32 as i32) };
         if status != 0 {
             return Err(ApiError::new(status));
