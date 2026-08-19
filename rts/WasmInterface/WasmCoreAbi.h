@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <string>
 #include <type_traits>
 
@@ -58,6 +60,23 @@ constexpr std::int32_t UnpackStatus(std::uint64_t packed)
 	return static_cast<std::int32_t>(static_cast<std::uint32_t>(packed >> 32));
 }
 
+// Two f32 values fit in a single Core-Wasm i64 result. This is useful for hot
+// callins such as UnitPreDamaged where returning through linear memory would be
+// strictly more expensive and would add another bounds check/cache touch.
+inline std::uint64_t PackF32Pair(float first, float second)
+{
+	const std::uint32_t low = std::bit_cast<std::uint32_t>(first);
+	const std::uint32_t high = std::bit_cast<std::uint32_t>(second);
+	return static_cast<std::uint64_t>(low) |
+		(static_cast<std::uint64_t>(high) << 32);
+}
+
+inline void UnpackF32Pair(std::uint64_t packed, float& first, float& second)
+{
+	first = std::bit_cast<float>(static_cast<std::uint32_t>(packed));
+	second = std::bit_cast<float>(static_cast<std::uint32_t>(packed >> 32));
+}
+
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 
 class Memory {
@@ -106,21 +125,6 @@ private:
 	bool bound = false;
 };
 
-// Cached statically-validated guest export. The actual call uses a fixed raw
-// slot array and wasmtime_func_call_unchecked, so there is no per-call type
-// construction, heap allocation, export lookup, or Wasmtime value boxing.
-class I32ToVoidExport {
-public:
-	bool Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
-		const char* name, std::size_t nameLength, bool optional, std::string& error);
-	bool Call(wasmtime_context_t* context, std::int32_t value, std::string& error) const;
-	bool Present() const { return present; }
-
-private:
-	wasmtime_func_t function{};
-	bool present = false;
-};
-
 std::string ErrorMessage(wasmtime_error_t* error);
 std::string TrapMessage(wasm_trap_t* trap);
 wasm_functype_t* MakeFuncType(const wasm_valkind_t* params, std::size_t paramCount,
@@ -128,6 +132,41 @@ wasm_functype_t* MakeFuncType(const wasm_valkind_t* params, std::size_t paramCou
 bool FunctionHasSignature(wasmtime_context_t* context, const wasmtime_func_t& function,
 	const wasm_valkind_t* params, std::size_t paramCount,
 	const wasm_valkind_t* results, std::size_t resultCount);
+
+// Generic cached export used by generated callin bindings. Resolve performs
+// the export lookup and exact type check once. Call performs no reflection and
+// no allocation; the caller provides the fixed raw slot array on its stack.
+class RawExport {
+public:
+	bool Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
+		const char* name, std::size_t nameLength,
+		std::span<const wasm_valkind_t> params,
+		std::span<const wasm_valkind_t> results,
+		bool optional, std::string& error);
+	bool Call(wasmtime_context_t* context, wasmtime_val_raw_t* slots,
+		std::size_t slotCount, std::string& error) const;
+
+	bool Present() const { return present; }
+	std::size_t SlotCount() const { return slotCount; }
+
+private:
+	wasmtime_func_t function{};
+	std::size_t slotCount = 0;
+	bool present = false;
+};
+
+// Convenience wrapper retained for the overwhelmingly common frame/event
+// shape. Generated code can use RawExport directly for richer signatures.
+class I32ToVoidExport {
+public:
+	bool Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
+		const char* name, std::size_t nameLength, bool optional, std::string& error);
+	bool Call(wasmtime_context_t* context, std::int32_t value, std::string& error) const;
+	bool Present() const { return raw.Present(); }
+
+private:
+	RawExport raw;
+};
 
 #endif
 
