@@ -11,6 +11,8 @@
 
 #include "WasmEnvironment.h"
 
+class WasmCoreHost;
+
 // The runtime version is part of synced module identity/configuration.
 inline constexpr std::string_view RECOIL_WASMTIME_VERSION = "42.0.1";
 inline constexpr std::string_view RECOIL_WASM_INTERFACE_PREFIX =
@@ -91,6 +93,7 @@ public:
 
 private:
 	friend class WasmModule;
+	friend class WasmCoreHost;
 
 	struct BackendState;
 	void* BackendEngine() const;
