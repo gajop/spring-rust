@@ -12,9 +12,16 @@ namespace recoil::wasm::core {
 // Generated-shaped inventory for the Core ABI. The code generator should emit
 // this from the same semantic model as WasmCalloutRegistry; validation and
 // linker registration both consume these exact names/capability masks.
+//
+// Signature grammar is intentionally tiny and deterministic:
+//   i32,i32->i32
+//   i32->i64
+//   ->
+// Only Core numeric types used by the Spring ABI are accepted.
 struct ImportDescriptor {
 	std::string_view module;
 	std::string_view name;
+	std::string_view signature;
 	std::uint32_t environmentMask;
 };
 
@@ -43,13 +50,13 @@ inline constexpr std::uint32_t AllEnvironmentMask =
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::UI));
 
 inline constexpr ImportDescriptor kImports[] = {
-	{UnitsInfoModule, GetUnitDefIDImport, AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitTeamImport, AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitIsDeadImport, AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitExperienceImport, AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitPositionImport, AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitVelocityImport, AllEnvironmentMask},
-	{UnitsInfoModule, GetUnitHealthImport, AllEnvironmentMask},
+	{UnitsInfoModule, GetUnitDefIDImport, "i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, GetUnitTeamImport, "i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, GetUnitIsDeadImport, "i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, GetUnitExperienceImport, "i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, GetUnitPositionImport, "i32,i32,i32->i32", AllEnvironmentMask},
+	{UnitsInfoModule, GetUnitVelocityImport, "i32,i32->i32", AllEnvironmentMask},
+	{UnitsInfoModule, GetUnitHealthImport, "i32,i32->i32", AllEnvironmentMask},
 };
 
 inline const ImportDescriptor* FindImport(std::string_view module, std::string_view name)
