@@ -13,10 +13,10 @@
 
 struct NativeInterface;
 
-// Alternate native C++ host for the Spring Core-Wasm ABI. It owns one isolated
-// Wasmtime store/linker/instance per guest and exposes only generated Spring
-// imports. WasmInterfaceSystem keeps normal module identity/order bookkeeping;
-// this class owns execution state and the low-level fast call paths.
+// Native C++ host for the Spring Core-Wasm ABI. Each guest owns a separate
+// Wasmtime store/linker/instance. The public static registry is keyed by the
+// engine module name; production callers should prefer DispatchModule so
+// WasmInterfaceSystem remains responsible for environment/order/aggregation.
 class WasmCoreHost {
 public:
 	static bool Enabled();
@@ -26,11 +26,38 @@ public:
 	static void Unload(std::string_view moduleName);
 	static void UnloadAll();
 	static bool AnyActive();
+	static bool AnyActive(WasmEnvironment environment);
+	static bool HasModule(std::string_view moduleName);
+	static bool ModuleFaulted(std::string_view moduleName);
 
-	// NativeInterfaceEventClient dispatch seam. Returns true when the callin is
-	// a Core ABI callin understood by at least one active Core guest. `error` is
-	// populated on guest failure/trap; synced integration can treat that as fatal.
+	// Production dispatch: invoke exactly one already-ordered module. Missing
+	// optional exports are reported as handled/no-op; an unknown module fails.
+	static bool DispatchModule(std::string_view moduleName, std::string_view name,
+		const void* query, void* result, std::string& error);
+
+	// Convenience fan-out restricted to one environment. This intentionally
+	// does not implement callin aggregation; callers needing Lua-compatible
+	// aggregation should iterate modules in WasmInterfaceSystem and use
+	// DispatchModule for each one.
+	static bool DispatchEnvironment(WasmEnvironment environment, std::string_view name,
+		const void* query, void* result, std::string& error);
+
+	// Legacy benchmark seam: fan out to every active Core guest irrespective of
+	// environment. Keep this only for existing alternate-host benchmarks.
 	static bool DispatchCallin(std::string_view name, const void* query, void* result,
+		std::string& error);
+
+	// Fault state is sticky. Synced integration can retain a faulted host for
+	// match-fatal reporting; unsynced integration can remove it at a safe point.
+	static bool FaultModule(std::string_view moduleName, std::string reason);
+	static std::size_t RemoveFaultedUnsynced();
+
+	// Explicit deterministic accounting boundaries. ResetBudget restores both
+	// the Spring host-work counter and Wasmtime fuel to the configured module
+	// limits. It is never called implicitly by the host: the engine decides
+	// whether the period is a frame, game tick, callback batch, or whole match.
+	static bool ResetBudget(std::string_view moduleName, std::string& error);
+	static bool FuelRemaining(std::string_view moduleName, std::uint64_t& fuel,
 		std::string& error);
 
 	~WasmCoreHost();
@@ -42,6 +69,7 @@ private:
 	WasmCoreHost(std::string moduleName, WasmEnvironment environment,
 		std::unique_ptr<Backend> backend);
 
+	bool HasCallin(std::string_view name) const;
 	bool Invoke(std::string_view name, const void* query, void* result, std::string& error);
 	bool InvokeGameFrame(const void* query, std::string& error);
 	bool InvokeGameFramePost(const void* query, std::string& error);
@@ -50,6 +78,9 @@ private:
 	bool InvokeUnitPreDamaged(const void* query, void* result, std::string& error);
 	bool InvokeAllowUnitCreation(const void* query, void* result, std::string& error);
 	bool InvokeDrawWorld(std::string& error);
+	bool ResetBudgetImpl(std::string& error);
+	bool FuelRemainingImpl(std::uint64_t& fuel, std::string& error) const;
+	void Fault(std::string reason);
 
 	std::string moduleName;
 	WasmEnvironment environment;
