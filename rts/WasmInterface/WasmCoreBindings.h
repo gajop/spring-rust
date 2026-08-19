@@ -17,22 +17,21 @@ struct HostState {
 	NativeInterface* native = nullptr;
 	Memory memory;
 	WasmExecutionBudget* budget = nullptr;
+	bool fixedMemory = false;
 };
 
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
 bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
 	const wasmtime_instance_t& instance, std::string& error);
 
-// Per-instance fast-path state. All import/export resolution and signature
-// checking happens during RegisterImports/Bind. Frame-time dispatch performs
-// no string lookup, allocation, or semantic value conversion.
 class InstanceBindings {
 public:
 	explicit InstanceBindings(NativeInterface* nativeInterface,
-		WasmExecutionBudget* executionBudget = nullptr)
+		WasmExecutionBudget* executionBudget = nullptr, bool fixedMemory = false)
 	{
 		host.native = nativeInterface;
 		host.budget = executionBudget;
+		host.fixedMemory = fixedMemory;
 	}
 
 	bool RegisterImports(wasmtime_linker_t* linker, std::string& error)
