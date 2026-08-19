@@ -6,6 +6,7 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmHost.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreAbi.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreHost.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmModule.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmModuleManifest.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmDispatch.cpp
