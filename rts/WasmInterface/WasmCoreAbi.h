@@ -81,9 +81,19 @@ public:
 		storeContext = context;
 		linearMemory = memory;
 		bound = true;
+		cachedBase = wasmtime_memory_data(storeContext, &linearMemory);
+		cachedSize = wasmtime_memory_data_size(storeContext, &linearMemory);
 	}
 
 	bool IsBound() const { return bound; }
+
+	// Synced validation requires max == min, so the memory can never grow. Once
+	// instantiated, the Wasmtime base pointer and byte length can therefore be
+	// reused directly on every host call without querying the runtime again.
+	// Do not enable this for a growable unsynced memory.
+	void MarkStable() { stable = true; }
+	bool IsStable() const { return stable; }
+
 	bool BindFromCaller(wasmtime_caller_t* caller, std::string& error);
 	bool BindFromInstance(wasmtime_context_t* context, const wasmtime_instance_t& instance,
 		std::string& error);
@@ -109,10 +119,15 @@ public:
 
 private:
 	bool Range(std::uint32_t offset, std::size_t bytes, std::uint8_t*& base) const;
+	std::uint8_t* CurrentBase() const;
+	std::size_t CurrentSize() const;
 
 	wasmtime_context_t* storeContext = nullptr;
 	wasmtime_memory_t linearMemory{};
+	std::uint8_t* cachedBase = nullptr;
+	std::size_t cachedSize = 0;
 	bool bound = false;
+	bool stable = false;
 };
 
 std::string ErrorMessage(wasmtime_error_t* error);
