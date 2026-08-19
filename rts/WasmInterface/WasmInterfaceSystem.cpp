@@ -2,6 +2,7 @@
 
 #include "WasmInterfaceSystem.h"
 
+#include "WasmCoreHost.h"
 #include "WasmTypedHost.h"
 
 #include <algorithm>
@@ -16,6 +17,24 @@
 #include "wasm/generated/WasmCallinRegistry.h"
 
 namespace {
+	bool IsCoreModule(const std::vector<std::uint8_t>& bytes)
+	{
+		return bytes.size() >= 8 && bytes[0] == 0x00 && bytes[1] == 'a' &&
+			bytes[2] == 's' && bytes[3] == 'm' && bytes[4] == 0x01 &&
+			bytes[5] == 0x00 && bytes[6] == 0x00 && bytes[7] == 0x00;
+	}
+
+	bool DescriptorLess(const WasmModuleDescriptor& left, const WasmModuleDescriptor& right)
+	{
+		if (left.environment != right.environment)
+			return static_cast<unsigned>(left.environment) < static_cast<unsigned>(right.environment);
+		if (left.order != right.order)
+			return left.order < right.order;
+		if (left.archive != right.archive)
+			return left.archive < right.archive;
+		return left.name < right.name;
+	}
+
 	std::string ToWitName(std::string_view value)
 	{
 		std::string result;
@@ -36,7 +55,6 @@ namespace {
 
 	const recoil::wasm::generated::CallinDescriptor* FindCallin(std::string_view name)
 	{
-		// The inventory is fixed, and this sits on every engine event.
 		static const std::unordered_map<std::string_view,
 			const recoil::wasm::generated::CallinDescriptor*> index = [] {
 			std::unordered_map<std::string_view,
@@ -49,8 +67,6 @@ namespace {
 		return iter == index.end() ? nullptr : iter->second;
 	}
 
-	// One callin resolves to the same export path in the same environment for
-	// the life of the process.
 	const std::string& CallinExportPath(
 		const recoil::wasm::generated::CallinDescriptor* descriptor,
 		WasmEnvironment environment)
@@ -212,7 +228,7 @@ WasmInterfaceSystem::WasmInterfaceSystem(WasmHostAdapter* hostAdapter,
 	, hostAdapter(hostAdapter)
 {
 	LOG("Wasm interface system initialized (policy backend: %s)",
-		runtime->IsAvailable() ? "Wasmtime Component Model" : "unavailable");
+		runtime->IsAvailable() ? "Wasmtime" : "unavailable");
 }
 
 WasmInterfaceSystem::~WasmInterfaceSystem()
@@ -228,21 +244,53 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 	}
 	if (!WasmEnvironmentMatrix::IsRuntimeEnabled(descriptor.environment)) {
 		error = "Wasm module environment is disabled: " +
-		std::string(WasmEnvironmentMatrix::Name(descriptor.environment));
+			std::string(WasmEnvironmentMatrix::Name(descriptor.environment));
 		return false;
 	}
-	if (std::any_of(modules.begin(), modules.end(), [&descriptor](const auto& module) {
-		return module->Descriptor().name == descriptor.name;
-	})) {
+	const bool duplicateComponent = std::any_of(modules.begin(), modules.end(),
+		[&descriptor](const auto& module) {
+			return module->Descriptor().name == descriptor.name;
+		});
+	const bool duplicateCore = std::any_of(coreModules.begin(), coreModules.end(),
+		[&descriptor](const CoreModuleRecord& module) {
+			return module.descriptor.name == descriptor.name;
+		});
+	if (duplicateComponent || duplicateCore) {
 		error = "duplicate Wasm module name: " + descriptor.name;
 		return false;
 	}
 
-	// The typed Rust host runs the same component bytes over its own Wasmtime
-	// instance.  It is loaded alongside rather than instead of the C API module
-	// so the environment matrix, manifest checks and module bookkeeping stay on
-	// one path; only callin dispatch is rerouted.
-	if (WasmTypedHost::Enabled() && hostAdapter != nullptr) {
+	const bool coreModule = IsCoreModule(descriptor.bytes);
+	if (coreModule && WasmCoreHost::Enabled()) {
+		if (hostAdapter == nullptr || hostAdapter->NativeInterfaceHandle() == nullptr) {
+			error = "Core Wasm requires the NativeInterface host adapter";
+			return false;
+		}
+		const WasmValidationResult validation = runtime->ValidateModule(
+			descriptor.bytes, descriptor.environment,
+			WasmEnvironmentMatrix::Name(descriptor.environment), descriptor.interfaceVersion);
+		if (!validation.valid) {
+			error = validation.error;
+			return false;
+		}
+		std::string coreError;
+		if (!WasmCoreHost::Load(descriptor.name, descriptor.bytes,
+				static_cast<NativeInterface*>(hostAdapter->NativeInterfaceHandle()),
+				descriptor.environment, *runtime, coreError)) {
+			error = "could not start the Core Wasm host: " + coreError;
+			LOG_L(L_ERROR, "%s", error.c_str());
+			return false;
+		}
+		coreModules.push_back({std::move(descriptor), validation.identity});
+		std::stable_sort(coreModules.begin(), coreModules.end(),
+			[](const CoreModuleRecord& left, const CoreModuleRecord& right) {
+				return DescriptorLess(left.descriptor, right.descriptor);
+			});
+		return true;
+	}
+
+	const std::string moduleName = descriptor.name;
+	if (!coreModule && WasmTypedHost::TypedEnabled() && hostAdapter != nullptr) {
 		const SpringTypedWorld world = descriptor.environment == WasmEnvironment::UI
 			? SpringTypedWorld::UI
 			: WasmEnvironmentMatrix::Policy(descriptor.environment).synced
@@ -261,19 +309,14 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 	auto module = std::make_unique<WasmModule>(nextInstanceID++, std::move(descriptor), *runtime,
 		hostAdapter);
 	if (!module->Initialize(error)) {
+		if (WasmTypedHost::TypedEnabled())
+			WasmTypedHost::Unload(moduleName);
 		LOG_L(L_ERROR, "Failed to initialize Wasm module: %s", error.c_str());
 		return false;
 	}
 	modules.push_back(std::move(module));
 	std::stable_sort(modules.begin(), modules.end(), [](const auto& left, const auto& right) {
-		if (left->Descriptor().environment != right->Descriptor().environment)
-			return static_cast<unsigned>(left->Descriptor().environment) <
-				static_cast<unsigned>(right->Descriptor().environment);
-		if (left->Descriptor().order != right->Descriptor().order)
-			return left->Descriptor().order < right->Descriptor().order;
-		if (left->Descriptor().archive != right->Descriptor().archive)
-		return left->Descriptor().archive < right->Descriptor().archive;
-		return left->Descriptor().name < right->Descriptor().name;
+		return DescriptorLess(left->Descriptor(), right->Descriptor());
 	});
 	return true;
 }
@@ -317,9 +360,15 @@ bool WasmInterfaceSystem::LoadManifests(const std::vector<WasmManifestSource>& s
 				error = "Wasm manifests contain duplicate module " + declaration.name;
 				return false;
 			}
-			if (std::any_of(modules.begin(), modules.end(), [&declaration](const auto& module) {
-				return module->Descriptor().name == declaration.name;
-			})) {
+			const bool loadedComponent = std::any_of(modules.begin(), modules.end(),
+				[&declaration](const auto& module) {
+					return module->Descriptor().name == declaration.name;
+				});
+			const bool loadedCore = std::any_of(coreModules.begin(), coreModules.end(),
+				[&declaration](const CoreModuleRecord& module) {
+					return module.descriptor.name == declaration.name;
+				});
+			if (loadedComponent || loadedCore) {
 				error = "Wasm manifests duplicate loaded module " + declaration.name;
 				return false;
 			}
@@ -356,29 +405,35 @@ bool WasmInterfaceSystem::LoadManifests(const std::vector<WasmManifestSource>& s
 
 bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 {
+	const auto coreIter = std::find_if(coreModules.begin(), coreModules.end(),
+		[moduleName](const CoreModuleRecord& module) {
+			return module.descriptor.name == moduleName;
+		});
+	if (coreIter != coreModules.end()) {
+		coreModules.erase(coreIter);
+		WasmCoreHost::Unload(moduleName);
+		return true;
+	}
+
 	const auto iter = std::find_if(modules.begin(), modules.end(), [moduleName](const auto& module) {
 		return module->Descriptor().name == moduleName;
 	});
 	if (iter == modules.end())
 		return false;
 	modules.erase(iter);
-	if (WasmTypedHost::Enabled())
-		WasmTypedHost::Unload(moduleName);
+	WasmTypedHost::Unload(moduleName);
 	return true;
 }
 
 void WasmInterfaceSystem::UnloadAll()
 {
 	modules.clear();
-	if (WasmTypedHost::Enabled())
-		WasmTypedHost::UnloadAll();
+	coreModules.clear();
+	WasmTypedHost::UnloadAll();
 }
 
 void WasmInterfaceSystem::Update()
 {
-	// Reload/unload is performed at explicit safe lifecycle points. A faulted
-	// unsynced instance can be removed without affecting other instances; a
-	// synced fault is retained for match-fatal reporting.
 	modules.erase(std::remove_if(modules.begin(), modules.end(), [](const auto& module) {
 		if (module->State() != WasmModuleState::Faulted ||
 			WasmEnvironmentMatrix::Policy(module->Descriptor().environment).synced)
@@ -415,9 +470,6 @@ bool WasmInterfaceSystem::DispatchCallin(const WasmCallinEvent& event,
 		return false;
 	}
 	WasmCallinEvent canonicalEvent = event;
-	// The generated WIT surface preserves aliases as distinct exports.  Use the
-	// source callin name at the guest boundary; `canonical` remains the shared
-	// query/result/aggregation description for host-side dispatch.
 	canonicalEvent.name = descriptor->name;
 	for (const auto& module : modules) {
 		if (module->Descriptor().environment != environment)
@@ -455,8 +507,6 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 			std::string(WasmEnvironmentMatrix::Name(environment));
 		return false;
 	}
-	// Nothing below applies when this environment holds no module, and the
-	// export path costs several allocations to build.
 	const auto matches = [environment](const std::unique_ptr<WasmModule>& module) {
 		return module->Descriptor().environment == environment;
 	};
@@ -519,10 +569,6 @@ bool WasmInterfaceSystem::DispatchCallin(std::string_view name,
 	for (const CallinInvocation& invocation : invocations) {
 		const WasmEnvironment environment = invocation.environment;
 		const std::uint32_t environmentBit = 1u << static_cast<std::uint32_t>(environment);
-		// Fan-out callers intentionally provide the candidate environments for
-		// an engine event.  The canonical callin inventory is the final filter;
-		// an event that is not meaningful in one candidate environment must not
-		// turn an otherwise valid dispatch into an error.
 		if ((descriptor->environmentMask & environmentBit) == 0)
 			continue;
 		WasmValue environmentResult;
@@ -563,14 +609,21 @@ bool WasmInterfaceSystem::DispatchSyncedMessage(std::string_view message,
 
 std::size_t WasmInterfaceSystem::ModuleCount() const
 {
-	return modules.size();
+	return modules.size() + coreModules.size();
 }
 
 bool WasmInterfaceSystem::HasModules(WasmEnvironment environment) const
 {
-	return std::any_of(modules.begin(), modules.end(), [environment](const auto& module) {
-		return module->Descriptor().environment == environment;
-	});
+	const bool component = std::any_of(modules.begin(), modules.end(),
+		[environment](const auto& module) {
+			return module->Descriptor().environment == environment;
+		});
+	if (component)
+		return true;
+	return std::any_of(coreModules.begin(), coreModules.end(),
+		[environment](const CoreModuleRecord& module) {
+			return module.descriptor.environment == environment;
+		});
 }
 
 std::vector<std::string> WasmInterfaceSystem::SyncedConfiguration() const
@@ -586,5 +639,15 @@ std::vector<std::string> WasmInterfaceSystem::SyncedConfiguration() const
 			runtime->ConfigurationIdentity() + "|interface=" +
 			module->Descriptor().interfaceVersion);
 	}
+	for (const CoreModuleRecord& module : coreModules) {
+		if (!WasmEnvironmentMatrix::Policy(module.descriptor.environment).synced)
+			continue;
+		result.push_back(module.descriptor.name + "|" +
+			WasmEnvironmentMatrix::Name(module.descriptor.environment) + "|" +
+			std::to_string(module.descriptor.order) + "|" + module.descriptor.archive + "|" +
+			module.identity.sha512 + "|" + runtime->ConfigurationIdentity() + "|interface=" +
+			module.descriptor.interfaceVersion + "|abi=core-v1");
+	}
+	std::sort(result.begin(), result.end());
 	return result;
 }
