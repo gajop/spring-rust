@@ -22,6 +22,46 @@ std::int32_t NativeErrorCode(const Error* error)
 	return error == nullptr ? 0 : error->code;
 }
 
+class ImportBudgetGuard {
+public:
+	ImportBudgetGuard(HostState* state, std::uint64_t work, std::string& error)
+	{
+		if (state == nullptr) {
+			error = "core Wasm host state is null";
+			return;
+		}
+		budget = state->budget;
+		if (budget == nullptr) {
+			entered = true;
+			return;
+		}
+		const bool allowReentry = budget->CallbackDepth() != 0 &&
+			budget->CallbackReentryAllowed();
+		if (!budget->EnterImport(allowReentry)) {
+			error = "Wasm import re-entry denied";
+			return;
+		}
+		entered = true;
+		if (!budget->ChargeHost(work)) {
+			budget->LeaveImport();
+			entered = false;
+			error = "Wasm callout host-work budget exhausted";
+		}
+	}
+
+	~ImportBudgetGuard()
+	{
+		if (entered && budget != nullptr)
+			budget->LeaveImport();
+	}
+
+	bool Ok() const { return entered; }
+
+private:
+	WasmExecutionBudget* budget = nullptr;
+	bool entered = false;
+};
+
 bool EnsureMemory(HostState* state, wasmtime_caller_t* caller, std::string& error)
 {
 	if (state == nullptr) {
@@ -54,6 +94,11 @@ wasm_trap_t* GetUnitDefID(void* environment, wasmtime_caller_t*,
 	if (slots == nullptr || slotCount != 1)
 		return Trap("GetUnitDefID core ABI signature mismatch");
 
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 2, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
+
 	GetUnitDefIDQuery query{};
 	query.unitID = slots[0].i32;
 	GetUnitDefIDResult result{};
@@ -71,6 +116,11 @@ wasm_trap_t* GetUnitPosition(void* environment, wasmtime_caller_t* caller,
 		return Trap("GetUnitPosition host binding is unavailable");
 	if (slots == nullptr || slotCount != 3)
 		return Trap("GetUnitPosition core ABI signature mismatch");
+
+	std::string budgetError;
+	ImportBudgetGuard budgetGuard(state, 4, budgetError);
+	if (!budgetGuard.Ok())
+		return Trap(budgetError);
 
 	std::string memoryError;
 	if (!EnsureMemory(state, caller, memoryError))
