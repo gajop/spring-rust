@@ -32,16 +32,6 @@ bool IsCoreModule(const std::vector<std::uint8_t>& bytes)
 		bytes[5] == 0x00 && bytes[6] == 0x00 && bytes[7] == 0x00;
 }
 
-WasmRuntimeConfig CoreRuntimeConfig()
-{
-	WasmRuntimeConfig config;
-	config.allowThreads = false;
-	config.allowRelaxedSimd = false;
-	config.allowWasi = false;
-	config.allowAotDeserialization = false;
-	return config;
-}
-
 std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 {
 	static std::vector<std::unique_ptr<WasmCoreHost>> hosts;
@@ -51,8 +41,8 @@ std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 } // namespace
 
 struct WasmCoreHost::Backend {
-	explicit Backend(NativeInterface* nativeInterface)
-		: runtime(CoreRuntimeConfig())
+	Backend(NativeInterface* nativeInterface, const WasmRuntime& runtime)
+		: runtime(&runtime)
 		, budget(runtime.Config().instructionFuel, runtime.Config().hostWorkLimit,
 			runtime.Config().resultBytesLimit)
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -74,7 +64,7 @@ struct WasmCoreHost::Backend {
 #endif
 	}
 
-	WasmRuntime runtime;
+	const WasmRuntime* runtime = nullptr;
 	WasmExecutionBudget budget;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	recoil::wasm::core::InstanceBindings bindings;
@@ -104,7 +94,8 @@ bool WasmCoreHost::Enabled()
 }
 
 bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
-	NativeInterface* nativeInterface, WasmEnvironment environment, std::string& error)
+	NativeInterface* nativeInterface, WasmEnvironment environment,
+	const WasmRuntime& runtime, std::string& error)
 {
 	if (!Enabled())
 		return false;
@@ -120,32 +111,32 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		error = "Core Wasm host has no NativeInterface";
 		return false;
 	}
-
-	auto backend = std::make_unique<Backend>(nativeInterface);
-	const WasmValidationResult validation = backend->runtime.ValidateModule(
+	const WasmValidationResult validation = runtime.ValidateModule(
 		moduleBytes, environment, WasmEnvironmentMatrix::Name(environment));
 	if (!validation.valid) {
 		error = "Core Wasm validation failed: " + validation.error;
 		return false;
 	}
-	if (!backend->runtime.IsAvailable()) {
+	if (!runtime.IsAvailable()) {
 		error = "Wasmtime is unavailable for the Core Wasm host";
 		return false;
 	}
 
+	auto backend = std::make_unique<Backend>(nativeInterface, runtime);
+
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	auto* engine = static_cast<wasm_engine_t*>(backend->runtime.BackendEngine());
+	auto* engine = static_cast<wasm_engine_t*>(runtime.BackendEngine());
 	backend->store = wasmtime_store_new(engine, nullptr, nullptr);
 	if (backend->store == nullptr) {
 		error = "Core Wasm host could not create a store";
 		return false;
 	}
 	wasmtime_store_limiter(backend->store,
-		static_cast<std::int64_t>(backend->runtime.Config().maxMemoryPages) * 65536,
-		static_cast<std::int64_t>(backend->runtime.Config().maxTableElements), 2, 2, 2);
-	if (backend->runtime.Config().instructionFuel != 0) {
+		static_cast<std::int64_t>(runtime.Config().maxMemoryPages) * 65536,
+		static_cast<std::int64_t>(runtime.Config().maxTableElements), 2, 2, 2);
+	if (runtime.Config().instructionFuel != 0) {
 		if (wasmtime_error_t* fuelError = wasmtime_context_set_fuel(
-				wasmtime_store_context(backend->store), backend->runtime.Config().instructionFuel);
+				wasmtime_store_context(backend->store), runtime.Config().instructionFuel);
 			fuelError != nullptr) {
 			error = "Core Wasm host could not configure fuel: " +
 				recoil::wasm::core::ErrorMessage(fuelError);
