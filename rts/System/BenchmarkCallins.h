@@ -55,10 +55,11 @@ inline bool IsBackend(std::string_view backend)
 	}();
 	if (configured == backend)
 		return true;
-	// The typed Rust host is a second Wasm transport reached through the same
-	// call sites, so it records the same "wasm" tokens.  The rows are told
-	// apart by the backend label Flush writes, not by the token.
-	return backend == "wasm" && configured == "wasm_rust_typed";
+	// Both Wasm alternate hosts are reached through the same engine call sites
+	// and therefore record the same "wasm" token. Flush labels the row with the
+	// configured transport so Component-typed and Core remain distinct columns.
+	return backend == "wasm" &&
+		(configured == "wasm_rust_typed" || configured == "wasm_core");
 }
 
 inline bool IsCase(std::string_view benchmarkCase)
