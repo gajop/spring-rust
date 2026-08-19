@@ -18,6 +18,7 @@ struct ImportDescriptor {
 
 inline constexpr std::string_view UnitsInfoModule = "spring:units-info";
 inline constexpr std::string_view UnitsQueryModule = "spring:units-query";
+inline constexpr std::string_view UnitDefsModule = "spring:unit-defs";
 
 inline constexpr std::string_view GameFrameExport = "spring:callin/game-frame";
 inline constexpr std::string_view GameFramePostExport = "spring:callin/game-frame-post";
@@ -55,6 +56,11 @@ inline constexpr ImportDescriptor kImports[] = {
 	{UnitsQueryModule, "get-unit-nearest-ally", "i32,f32->i64", AllEnvironmentMask},
 	{UnitsQueryModule, "get-unit-nearest-enemy", "i32,f32,i32->i64", AllEnvironmentMask},
 	{UnitsQueryModule, "get-unit-separation", "i32,i32,i32->i64", AllEnvironmentMask},
+
+	// Core strings are raw bytes. `capacity` is measured in bytes, there is no
+	// NUL terminator, and BufferOverflow reports the exact required byte count.
+	{UnitDefsModule, "get-unit-def-name", "i32,i32,i32->i64", AllEnvironmentMask},
+	{UnitDefsModule, "get-unit-def-human-name", "i32,i32,i32->i64", AllEnvironmentMask},
 };
 
 inline const ImportDescriptor* FindImport(std::string_view module, std::string_view name)
