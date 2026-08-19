@@ -19,6 +19,10 @@ struct ImportDescriptor {
 inline constexpr std::string_view UnitsInfoModule = "spring:units-info";
 inline constexpr std::string_view UnitsQueryModule = "spring:units-query";
 inline constexpr std::string_view UnitDefsModule = "spring:unit-defs";
+inline constexpr std::string_view ProfilingModule = "spring:profiling";
+inline constexpr std::string_view MessagesModule = "spring:messages";
+inline constexpr std::string_view RulesParamsModule = "spring:rules-params";
+inline constexpr std::string_view TerrainModule = "spring:terrain";
 
 inline constexpr std::string_view GameFrameExport = "spring:callin/game-frame";
 inline constexpr std::string_view GameFramePostExport = "spring:callin/game-frame-post";
@@ -34,6 +38,9 @@ inline constexpr std::uint32_t AllEnvironmentMask =
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaSynced)) |
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaUnsynced)) |
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::UI));
+inline constexpr std::uint32_t SyncedEnvironmentMask =
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesSynced)) |
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaSynced));
 
 inline constexpr ImportDescriptor kImports[] = {
 	{UnitsInfoModule, "get-unit-def-id", "i32->i64", AllEnvironmentMask},
@@ -61,6 +68,17 @@ inline constexpr ImportDescriptor kImports[] = {
 	// NUL terminator, and BufferOverflow reports the exact required byte count.
 	{UnitDefsModule, "get-unit-def-name", "i32,i32,i32->i64", AllEnvironmentMask},
 	{UnitDefsModule, "get-unit-def-human-name", "i32,i32,i32->i64", AllEnvironmentMask},
+
+	// Benchmark instrumentation and the benchmark-critical semantic calls.
+	// Masks mirror WasmCalloutRegistry.h for the corresponding NativeInterface
+	// functions; the f32 RulesParam names make the specialized wire shape
+	// explicit rather than pretending it is the full tagged RulesParam ABI.
+	{ProfilingModule, "get-timer-micros", "->i64", AllEnvironmentMask},
+	{MessagesModule, "send-lua-rules-msg", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-lua-ui-msg", "i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{RulesParamsModule, "set-unit-rules-param-f32", "i32,i32,i32,f32,i32->i64", SyncedEnvironmentMask},
+	{RulesParamsModule, "get-unit-rules-param-f32", "i32,i32,i32->i64", AllEnvironmentMask},
+	{TerrainModule, "get-ground-orig-height", "f32,f32->i64", AllEnvironmentMask},
 };
 
 inline const ImportDescriptor* FindImport(std::string_view module, std::string_view name)
