@@ -1,0 +1,199 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
+#include "WasmCoreAbi.h"
+
+#include <algorithm>
+
+namespace recoil::wasm::core {
+
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+
+std::string ErrorMessage(wasmtime_error_t* error)
+{
+	if (error == nullptr)
+		return {};
+	wasm_name_t message;
+	wasmtime_error_message(error, &message);
+	std::string result(message.data, message.size);
+	wasm_name_delete(&message);
+	wasmtime_error_delete(error);
+	return result;
+}
+
+std::string TrapMessage(wasm_trap_t* trap)
+{
+	if (trap == nullptr)
+		return {};
+	wasm_message_t message;
+	wasm_trap_message(trap, &message);
+	std::string result(message.data, message.size);
+	wasm_name_delete(&message);
+	wasm_trap_delete(trap);
+	return result;
+}
+
+bool Memory::BindFromCaller(wasmtime_caller_t* caller, std::string& error)
+{
+	if (bound)
+		return true;
+	if (caller == nullptr) {
+		error = "core Wasm import has no caller while resolving memory";
+		return false;
+	}
+
+	wasmtime_extern_t item{};
+	if (!wasmtime_caller_export_get(caller, "memory", 6, &item) ||
+		item.kind != WASMTIME_EXTERN_MEMORY) {
+		error = "core Wasm module must export linear memory as `memory`";
+		return false;
+	}
+	Bind(wasmtime_caller_context(caller), item.of.memory);
+	wasmtime_extern_delete(&item);
+	return true;
+}
+
+bool Memory::BindFromInstance(wasmtime_context_t* context, const wasmtime_instance_t& instance,
+	std::string& error)
+{
+	wasmtime_extern_t item{};
+	if (!wasmtime_instance_export_get(context, &instance, "memory", 6, &item) ||
+		item.kind != WASMTIME_EXTERN_MEMORY) {
+		error = "core Wasm module must export linear memory as `memory`";
+		return false;
+	}
+	Bind(context, item.of.memory);
+	wasmtime_extern_delete(&item);
+	return true;
+}
+
+std::size_t Memory::Size() const
+{
+	if (!bound || storeContext == nullptr)
+		return 0;
+	return wasmtime_memory_data_size(storeContext, &linearMemory);
+}
+
+bool Memory::Range(std::uint32_t offset, std::size_t bytes, std::uint8_t*& base) const
+{
+	if (!bound || storeContext == nullptr)
+		return false;
+	const std::size_t size = wasmtime_memory_data_size(storeContext, &linearMemory);
+	const std::size_t begin = static_cast<std::size_t>(offset);
+	if (begin > size || bytes > size - begin)
+		return false;
+	base = wasmtime_memory_data(storeContext, &linearMemory) + begin;
+	return true;
+}
+
+bool Memory::Read(std::uint32_t offset, void* destination, std::size_t bytes) const
+{
+	if (bytes != 0 && destination == nullptr)
+		return false;
+	std::uint8_t* source = nullptr;
+	if (!Range(offset, bytes, source))
+		return false;
+	if (bytes != 0)
+		std::memcpy(destination, source, bytes);
+	return true;
+}
+
+bool Memory::Write(std::uint32_t offset, const void* source, std::size_t bytes) const
+{
+	if (bytes != 0 && source == nullptr)
+		return false;
+	std::uint8_t* destination = nullptr;
+	if (!Range(offset, bytes, destination))
+		return false;
+	if (bytes != 0)
+		std::memcpy(destination, source, bytes);
+	return true;
+}
+
+wasm_functype_t* MakeFuncType(const wasm_valkind_t* params, std::size_t paramCount,
+	const wasm_valkind_t* results, std::size_t resultCount)
+{
+	wasm_valtype_vec_t paramTypes;
+	wasm_valtype_vec_t resultTypes;
+	wasm_valtype_vec_new_uninitialized(&paramTypes, paramCount);
+	wasm_valtype_vec_new_uninitialized(&resultTypes, resultCount);
+	for (std::size_t index = 0; index < paramCount; ++index)
+		paramTypes.data[index] = wasm_valtype_new(params[index]);
+	for (std::size_t index = 0; index < resultCount; ++index)
+		resultTypes.data[index] = wasm_valtype_new(results[index]);
+	return wasm_functype_new(&paramTypes, &resultTypes);
+}
+
+bool FunctionHasSignature(wasmtime_context_t* context, const wasmtime_func_t& function,
+	const wasm_valkind_t* params, std::size_t paramCount,
+	const wasm_valkind_t* results, std::size_t resultCount)
+{
+	wasm_functype_t* type = wasmtime_func_type(context, &function);
+	if (type == nullptr)
+		return false;
+	const wasm_valtype_vec_t* actualParams = wasm_functype_params(type);
+	const wasm_valtype_vec_t* actualResults = wasm_functype_results(type);
+	bool matches = actualParams->size == paramCount && actualResults->size == resultCount;
+	for (std::size_t index = 0; matches && index < paramCount; ++index)
+		matches = wasm_valtype_kind(actualParams->data[index]) == params[index];
+	for (std::size_t index = 0; matches && index < resultCount; ++index)
+		matches = wasm_valtype_kind(actualResults->data[index]) == results[index];
+	wasm_functype_delete(type);
+	return matches;
+}
+
+bool I32ToVoidExport::Resolve(wasmtime_context_t* context, const wasmtime_instance_t& instance,
+	const char* name, std::size_t nameLength, bool optional, std::string& error)
+{
+	wasmtime_extern_t item{};
+	if (!wasmtime_instance_export_get(context, &instance, name, nameLength, &item)) {
+		if (optional) {
+			present = false;
+			return true;
+		}
+		error = "required core Wasm export is missing: " + std::string(name, nameLength);
+		return false;
+	}
+	if (item.kind != WASMTIME_EXTERN_FUNC) {
+		wasmtime_extern_delete(&item);
+		error = "core Wasm export is not a function: " + std::string(name, nameLength);
+		return false;
+	}
+
+	const wasm_valkind_t params[] = {WASM_I32};
+	if (!FunctionHasSignature(context, item.of.func, params, 1, nullptr, 0)) {
+		wasmtime_extern_delete(&item);
+		error = "core Wasm export has the wrong signature: " + std::string(name, nameLength);
+		return false;
+	}
+	function = item.of.func;
+	present = true;
+	wasmtime_extern_delete(&item);
+	return true;
+}
+
+bool I32ToVoidExport::Call(wasmtime_context_t* context, std::int32_t value,
+	std::string& error) const
+{
+	if (!present)
+		return true;
+	wasmtime_val_raw_t slot{};
+	slot.i32 = value;
+	wasm_trap_t* trap = nullptr;
+	if (wasmtime_error_t* callError =
+			wasmtime_func_call_unchecked(context, &function, &slot, 1, &trap);
+		callError != nullptr) {
+		error = "core Wasm export call failed: " + ErrorMessage(callError);
+		if (trap != nullptr)
+			error += ": " + TrapMessage(trap);
+		return false;
+	}
+	if (trap != nullptr) {
+		error = "core Wasm export trapped: " + TrapMessage(trap);
+		return false;
+	}
+	return true;
+}
+
+#endif
+
+} // namespace recoil::wasm::core
