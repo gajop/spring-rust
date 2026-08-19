@@ -101,7 +101,9 @@ bool Memory::Range(std::uint32_t offset, std::size_t bytes, std::uint8_t*& base)
 	std::uint8_t* memory = CurrentBase();
 	if (memory == nullptr && CurrentSize() != 0)
 		return false;
-	base = memory + static_cast<std::size_t>(offset);
+	base = bytes == 0 && memory == nullptr
+		? nullptr
+		: memory + static_cast<std::size_t>(offset);
 	return true;
 }
 
@@ -173,6 +175,30 @@ bool Memory::WriteI32SliceLE(std::uint32_t offset, std::span<const std::int32_t>
 		item[1] = static_cast<std::uint8_t>(raw >> 8);
 		item[2] = static_cast<std::uint8_t>(raw >> 16);
 		item[3] = static_cast<std::uint8_t>(raw >> 24);
+	}
+	return true;
+}
+
+bool Memory::ReadF32SliceLE(std::uint32_t offset, std::span<float> values) const
+{
+	if (values.size() > std::numeric_limits<std::size_t>::max() / sizeof(float))
+		return false;
+	const std::size_t bytes = values.size() * sizeof(float);
+	std::uint8_t* source = nullptr;
+	if (!Range(offset, bytes, source))
+		return false;
+	if constexpr (std::endian::native == std::endian::little) {
+		if (bytes != 0)
+			std::memcpy(values.data(), source, bytes);
+		return true;
+	}
+	for (std::size_t index = 0; index < values.size(); ++index) {
+		const std::uint8_t* item = source + index * 4;
+		const std::uint32_t raw = static_cast<std::uint32_t>(item[0]) |
+			(static_cast<std::uint32_t>(item[1]) << 8) |
+			(static_cast<std::uint32_t>(item[2]) << 16) |
+			(static_cast<std::uint32_t>(item[3]) << 24);
+		values[index] = std::bit_cast<float>(raw);
 	}
 	return true;
 }
