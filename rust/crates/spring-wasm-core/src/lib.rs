@@ -7,7 +7,11 @@
 //! layer where wasm32 pointers are passed to host imports as 32-bit linear-
 //! memory offsets. The host validates every offset/length before dereferencing.
 
+mod benchmark;
+mod unit_defs;
 mod units_query;
+pub use benchmark::*;
+pub use unit_defs::*;
 pub use units_query::*;
 
 pub const ABI_VERSION: u32 = 1;
