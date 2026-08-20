@@ -9,6 +9,8 @@
 #include <span>
 #include <string_view>
 
+#include "NativeInterface/WasmUiVisibility.h"
+
 namespace recoil::wasm::core {
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -27,6 +29,7 @@ std::int32_t NativeErrorCode(const Error* error)
 class ImportBudgetGuard {
 public:
 	ImportBudgetGuard(HostState* state, std::uint64_t work, std::string& error)
+		: uiContext(state != nullptr && state->environment == WasmEnvironment::UI)
 	{
 		if (state == nullptr) {
 			error = "core Wasm host state is null";
@@ -60,6 +63,7 @@ public:
 	bool Ok() const { return entered; }
 
 private:
+	WasmUiVisibility::ScopedContext uiContext;
 	WasmExecutionBudget* budget = nullptr;
 	bool entered = false;
 };
