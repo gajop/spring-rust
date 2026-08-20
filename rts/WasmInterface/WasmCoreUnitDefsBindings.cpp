@@ -50,7 +50,7 @@ void ReturnBytes(wasmtime_val_raw_t* slots, HostState* state, const Error* nativ
 		return;
 	}
 	const std::uint32_t required = static_cast<std::uint32_t>(length);
-	if (required > capacity) {
+	if (!generated::CheckResultBytes(state, required) || required > capacity) {
 		slots[0].i64 = static_cast<std::int64_t>(
 			PackU32(required, static_cast<std::int32_t>(Status::BufferOverflow)));
 		return;
