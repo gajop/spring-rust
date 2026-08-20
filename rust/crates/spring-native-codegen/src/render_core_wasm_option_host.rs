@@ -343,11 +343,19 @@ fn render_read_field(
             output.push_str(&render_read_type(inner, destination, records, indent));
             output
         }
-        SemanticType::Record { name } => records[name]
-            .fields
-            .iter()
-            .map(|nested| render_read_field(nested, &format!("{destination}.{}", nested.name), destination, records, indent))
-            .collect::<String>(),
+        SemanticType::Record { name } => {
+            let mut output = records[name]
+                .fields
+                .iter()
+                .map(|nested| render_read_field(nested, &format!("{destination}.{}", nested.name), destination, records, indent))
+                .collect::<String>();
+            let (_, alignment) = fixed_layout(&field.ty, records)
+                .expect("eligible option record must have a fixed layout");
+            output.push_str(&format!(
+                "{pad}if (!reader.Align({alignment}u)) return Trap(\"generated option record alignment overflow\");\n"
+            ));
+            output
+        }
         other => render_read_type(other, destination, records, indent),
     }
 }
@@ -371,11 +379,19 @@ fn render_read_type(
         },
         SemanticType::Enum { .. } => scalar_read("I32", "std::int32_t", destination, &pad),
         SemanticType::Handle { .. } => scalar_read("U64", "std::uint64_t", destination, &pad),
-        SemanticType::Record { name } => records[name]
-            .fields
-            .iter()
-            .map(|field| render_read_field(field, &format!("{destination}.{}", field.name), destination, records, indent))
-            .collect::<String>(),
+        SemanticType::Record { name } => {
+            let mut output = records[name]
+                .fields
+                .iter()
+                .map(|field| render_read_field(field, &format!("{destination}.{}", field.name), destination, records, indent))
+                .collect::<String>();
+            let (_, alignment) = fixed_layout(ty, records)
+                .expect("eligible option record must have a fixed layout");
+            output.push_str(&format!(
+                "{pad}if (!reader.Align({alignment}u)) return Trap(\"generated option record alignment overflow\");\n"
+            ));
+            output
+        }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreReadIndex{indent}");
             let nested = render_read_type(element, &format!("{destination}[{index}]"), records, indent + 1);
@@ -405,11 +421,19 @@ fn render_write_field(
             output.push_str(&format!("{pad}}}\n"));
             output
         }
-        SemanticType::Record { name } => records[name]
-            .fields
-            .iter()
-            .map(|nested| render_write_field(nested, &format!("{value}.{}", nested.name), value, records, indent))
-            .collect::<String>(),
+        SemanticType::Record { name } => {
+            let mut output = records[name]
+                .fields
+                .iter()
+                .map(|nested| render_write_field(nested, &format!("{value}.{}", nested.name), value, records, indent))
+                .collect::<String>();
+            let (_, alignment) = fixed_layout(&field.ty, records)
+                .expect("eligible option record must have a fixed layout");
+            output.push_str(&format!(
+                "{pad}if (!writer.Align({alignment}u)) return Trap(\"generated option record alignment overflow\");\n"
+            ));
+            output
+        }
         other => render_write_type(other, value, records, indent),
     }
 }
@@ -432,11 +456,19 @@ fn render_write_type(
         }
         SemanticType::Enum { .. } => format!("{pad}if (!writer.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
         SemanticType::Handle { .. } => format!("{pad}if (!writer.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
-        SemanticType::Record { name } => records[name]
-            .fields
-            .iter()
-            .map(|field| render_write_field(field, &format!("{value}.{}", field.name), value, records, indent))
-            .collect::<String>(),
+        SemanticType::Record { name } => {
+            let mut output = records[name]
+                .fields
+                .iter()
+                .map(|field| render_write_field(field, &format!("{value}.{}", field.name), value, records, indent))
+                .collect::<String>();
+            let (_, alignment) = fixed_layout(ty, records)
+                .expect("eligible option record must have a fixed layout");
+            output.push_str(&format!(
+                "{pad}if (!writer.Align({alignment}u)) return Trap(\"generated option record alignment overflow\");\n"
+            ));
+            output
+        }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
             let nested = render_write_type(element, &format!("{value}[{index}]"), records, indent + 1);
