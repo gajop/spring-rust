@@ -24,8 +24,18 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmTypedHost.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmTypedHostShims.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterfaceSystem.cpp
-	PARENT_SCOPE
 )
+
+# Core API codegen writes this translation unit into the checked-in generated
+# tree. Keep the engine build usable before the first regeneration, then pick
+# up the broad generated Core surface automatically after codegen is run.
+set(RECOIL_WASM_CORE_GENERATED_SOURCE
+	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedBindings.cpp)
+if(EXISTS ${RECOIL_WASM_CORE_GENERATED_SOURCE})
+	list(APPEND sources_engine_WasmInterface ${RECOIL_WASM_CORE_GENERATED_SOURCE})
+endif()
+
+set(sources_engine_WasmInterface ${sources_engine_WasmInterface} PARENT_SCOPE)
 
 list(APPEND engineCommonLibraries ${RECOIL_WASMTIME_TARGET})
 set(engineCommonLibraries "${engineCommonLibraries}" PARENT_SCOPE)
