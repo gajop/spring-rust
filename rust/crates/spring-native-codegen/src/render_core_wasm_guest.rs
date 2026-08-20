@@ -516,10 +516,10 @@ fn render_fixed_input_wrapper(
                      {pad}        if status != 0 {{\n\
                      {pad}            return Err(ApiError::new(status));\n\
                      {pad}        }}\n\
+                     {pad}        let wire = output_wire;\n\
                      {pad}        let mut cursor = 0usize;\n\
-                     {pad}        let value = {{ let wire = output_wire; {value} }};\n\
-                     {pad}        let wire = &output_wire;\n\
-                     {pad}        if !super::__core_wire::finish(wire, &mut cursor, {alignment}) {{\n\
+                     {pad}        let value = {value};\n\
+                     {pad}        if !super::__core_wire::finish(&wire, &mut cursor, {alignment}) {{\n\
                      {pad}            return Err(ApiError::new(ErrorCode::Internal as i32));\n\
                      {pad}        }}\n\
                      {pad}        return Ok(value);\n"
