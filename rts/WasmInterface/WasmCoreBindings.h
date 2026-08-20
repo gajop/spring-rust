@@ -22,6 +22,14 @@ struct HostState {
 	bool callbackDispatchBound = false;
 };
 
+#if __has_include("../wasm/generated/WasmCoreGeneratedBindings.h")
+#define RECOIL_WASM_CORE_GENERATED_BINDINGS 1
+namespace generated {
+bool RegisterGeneratedImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+}
+#endif
+
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
 bool RegisterUnitsQueryImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
@@ -56,6 +64,19 @@ public:
 
 	bool RegisterImports(wasmtime_linker_t* linker, std::string& error)
 	{
+		if (linker == nullptr) {
+			error = "cannot register Core imports without a linker";
+			return false;
+		}
+
+		// Generated bindings form the broad baseline. Specialized bindings are
+		// registered afterwards and intentionally replace matching generated
+		// definitions when they use a tighter ABI or custom callback semantics.
+		wasmtime_linker_allow_shadowing(linker, true);
+#if defined(RECOIL_WASM_CORE_GENERATED_BINDINGS)
+		if (!generated::RegisterGeneratedImports(linker, &host, error))
+			return false;
+#endif
 		if (!RegisterFastImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitsQueryImports(linker, &host, error))
