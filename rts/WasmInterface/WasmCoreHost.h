@@ -68,7 +68,14 @@ public:
 	// Pointer + numeric-callin overload is the steady-state hot path. String
 	// overloads remain only for legacy/diagnostic callers.
 	static bool DispatchModule(WasmCoreHost* host, WasmCoreCallin callin,
-		const void* query, void* result, std::string& error);
+		const void* query, void* result, std::string& error)
+	{
+		if (host == nullptr) {
+			error = "Core Wasm module handle is null";
+			return false;
+		}
+		return host->Invoke(callin, query, result, error);
+	}
 	static bool DispatchModule(std::string_view moduleName, WasmCoreCallin callin,
 		const void* query, void* result, std::string& error);
 	static bool DispatchModule(std::string_view moduleName, std::string_view name,
