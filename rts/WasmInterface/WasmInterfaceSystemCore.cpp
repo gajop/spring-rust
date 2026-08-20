@@ -40,28 +40,34 @@ bool Is(std::string_view value, const char* expected)
 	return value == expected;
 }
 
-bool ResolveCoreDispatchSide(std::string_view name, bool& synced)
+bool ResolveCoreDispatchSide(WasmCoreCallin callin, bool& synced)
 {
-	if (name == "GameFrame" || name == "GameFramePost" ||
-		name == "UnitCreated" || name == "UnitPreDamaged" ||
-		name == "AllowUnitCreation") {
-		synced = true;
-		return true;
-	}
-	if (name == "Update" || name == "AddConsoleLine" ||
-		name == "CommandNotify" || name == "DrawWorld") {
-		synced = false;
-		return true;
+	switch (callin) {
+		case WasmCoreCallin::GameFrame:
+		case WasmCoreCallin::GameFramePost:
+		case WasmCoreCallin::UnitCreated:
+		case WasmCoreCallin::UnitPreDamaged:
+		case WasmCoreCallin::AllowUnitCreation:
+			synced = true;
+			return true;
+		case WasmCoreCallin::Update:
+		case WasmCoreCallin::AddConsoleLine:
+		case WasmCoreCallin::CommandNotify:
+		case WasmCoreCallin::DrawWorld:
+			synced = false;
+			return true;
+		case WasmCoreCallin::Invalid:
+			return false;
 	}
 	return false;
 }
 
 bool DispatchCoreModule(const WasmInterfaceSystem::CoreCallinInvocation& invocation,
-	const WasmModuleDescriptor& module, std::string_view name, void* result,
-	std::string& error)
+	const WasmModuleDescriptor& module, WasmCoreCallin callin, std::string_view name,
+	void* result, std::string& error)
 {
 	std::string moduleError;
-	if (WasmCoreHost::DispatchModule(module.name, name, invocation.query, result, moduleError))
+	if (WasmCoreHost::DispatchModule(module.name, callin, invocation.query, result, moduleError))
 		return true;
 	error = "Core Wasm callin " + std::string(name) + " failed in module " +
 		module.name + ": " + moduleError;
@@ -92,8 +98,9 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	if (system == nullptr || !WasmCoreHost::AnyActive())
 		return true;
 
+	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
 	bool synced = false;
-	if (!ResolveCoreDispatchSide(name, synced))
+	if (!ResolveCoreDispatchSide(callin, synced))
 		return true;
 
 	static constexpr std::array<WasmEnvironment, 2> syncedEnvironments{
@@ -116,7 +123,7 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	if (system->HasCoreModules(WasmEnvironment::UI)) {
 		bool includeUi = true;
 		const void* uiQuery = query;
-		if (name == "UnitCreated") {
+		if (callin == WasmCoreCallin::UnitCreated) {
 			const auto* typed = static_cast<const UnitCreatedQuery*>(query);
 			if (typed == nullptr) {
 				error = "Core UnitCreated dispatch received a null query";
@@ -181,9 +188,14 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 	if (valueResult != nullptr)
 		*valueResult = WasmValue::Unit();
 
+	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
+	if (callin == WasmCoreCallin::Invalid) {
+		error = "unknown Core Wasm callin: " + std::string(name);
+		return false;
+	}
 	const auto* descriptor = FindCoreCallin(name);
 	if (descriptor == nullptr) {
-		error = "unknown Core Wasm callin: " + std::string(name);
+		error = "unknown generated Core Wasm callin: " + std::string(name);
 		return false;
 	}
 
@@ -220,12 +232,12 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 
 		for (const CoreModuleRecord& module : coreModules) {
 			if (module.descriptor.environment != invocation.environment ||
-				!WasmCoreHost::ModuleHasCallin(module.descriptor.name, name))
+				!WasmCoreHost::ModuleHasCallin(module.descriptor.name, callin))
 				continue;
 
 			handled = true;
 			if (Is(aggregation, "ignore")) {
-				if (!DispatchCoreModule(invocation, module.descriptor, name, nullptr, error))
+				if (!DispatchCoreModule(invocation, module.descriptor, callin, name, nullptr, error))
 					return false;
 				continue;
 			}
@@ -236,7 +248,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 					.error = nullptr,
 					.value = Is(aggregation, "and-false"),
 				};
-				if (!DispatchCoreModule(invocation, module.descriptor, name, &moduleResult, error))
+				if (!DispatchCoreModule(invocation, module.descriptor, callin, name, &moduleResult, error))
 					return false;
 				if (!invocation.contributesResult)
 					continue;
@@ -254,7 +266,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 					return false;
 				}
 				DamageCallinResult moduleResult = damageDefault;
-				if (!DispatchCoreModule(invocation, module.descriptor, name, &moduleResult, error))
+				if (!DispatchCoreModule(invocation, module.descriptor, callin, name, &moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					damageAggregate = moduleResult;
@@ -265,7 +277,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 
 			if (Is(resultType, "AllowUnitCreationResult") && Is(aggregation, "first")) {
 				AllowUnitCreationResult moduleResult = creationDefault;
-				if (!DispatchCoreModule(invocation, module.descriptor, name, &moduleResult, error))
+				if (!DispatchCoreModule(invocation, module.descriptor, callin, name, &moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					creationAggregate = moduleResult;
