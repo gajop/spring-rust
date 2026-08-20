@@ -71,6 +71,7 @@ pub fn render_cpp(model: &ApiModel) -> String {
 #include <cstdint>
 #include <span>
 #include <string_view>
+#include <type_traits>
 
 #include "NativeInterface/NativeInterface.h"
 #include "WasmInterface/WasmCoreAbi.h"
@@ -272,19 +273,15 @@ fn render_callback(
     }
 
     if fixed_input {
-        let (bytes, alignment) = aggregate_input_layout(&function.inputs, records)
+        let (bytes, _) = aggregate_input_layout(&function.inputs, records)
             .expect("eligible fixed input must have a wire layout");
         let input_index = direct_input_count;
         body.push_str(&format!(
-            "    const std::uint32_t input = static_cast<std::uint32_t>(slots[{input_index}].i32);\n    std::span<const std::uint8_t> inputWire;\n    if (!state->memory.View(input, {bytes}u, inputWire)) {{\n{error_return}    }}\n",
+            "    const std::uint32_t input = static_cast<std::uint32_t>(slots[{input_index}].i32);\n    std::span<const std::uint8_t> inputWire;\n    if (!state->memory.View(input, {bytes}u, inputWire)) {{\n{error_return}    }}\n    WireReader reader(inputWire);\n",
             input_index = input_index,
             bytes = bytes,
             error_return = render_error_return(plan, "Status::OutOfBounds", 2),
         ));
-        body.push_str(&format!(
-            "    WireReader reader(inputWire);\n",
-        ));
-        let _ = alignment;
     }
 
     if let ResultStrategy::FixedOutputBuffer { bytes, .. } = plan.result_strategy {
@@ -385,23 +382,23 @@ fn render_error_return(plan: &FunctionPlan, status: &str, indent: usize) -> Stri
     }
 }
 
+fn native_cast(destination: &str, value: &str) -> String {
+    format!(
+        "static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})"
+    )
+}
+
 fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
             "bool" => format!("slots[{slot}].i32 != 0"),
             "f32" => format!("slots[{slot}].f32"),
             "f64" => format!("slots[{slot}].f64"),
-            "i64" | "u64" | "isize" | "usize" => {
-                format!("static_cast<decltype({destination})>(slots[{slot}].i64)")
-            }
-            _ => format!("static_cast<decltype({destination})>(slots[{slot}].i32)"),
+            "i64" | "u64" | "isize" | "usize" => native_cast(destination, &format!("slots[{slot}].i64")),
+            _ => native_cast(destination, &format!("slots[{slot}].i32")),
         },
-        SemanticType::Enum { .. } => {
-            format!("static_cast<decltype({destination})>(slots[{slot}].i32)")
-        }
-        SemanticType::Handle { .. } => {
-            format!("static_cast<decltype({destination})>(slots[{slot}].i64)")
-        }
+        SemanticType::Enum { .. } => native_cast(destination, &format!("slots[{slot}].i32")),
+        SemanticType::Handle { .. } => native_cast(destination, &format!("slots[{slot}].i64")),
         _ => unreachable!(),
     }
 }
@@ -439,27 +436,30 @@ fn render_wire_read(
             "f64" => format!(
                 "{pad}if (!reader.F64({destination})) return Trap(\"generated Core wire underflow\");\n"
             ),
-            "i64" => format!(
-                "{pad}{{ std::int64_t coreRaw = 0; if (!reader.I64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<decltype({destination})>(coreRaw); }}\n"
+            "i64" | "isize" => format!(
+                "{pad}{{ std::int64_t coreRaw = 0; if (!reader.I64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+                cast = native_cast(destination, "coreRaw"),
             ),
             "u64" | "usize" => format!(
-                "{pad}{{ std::uint64_t coreRaw = 0; if (!reader.U64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<decltype({destination})>(coreRaw); }}\n"
-            ),
-            "isize" => format!(
-                "{pad}{{ std::int64_t coreRaw = 0; if (!reader.I64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<decltype({destination})>(coreRaw); }}\n"
+                "{pad}{{ std::uint64_t coreRaw = 0; if (!reader.U64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+                cast = native_cast(destination, "coreRaw"),
             ),
             "i8" | "i16" | "i32" => format!(
-                "{pad}{{ std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<decltype({destination})>(coreRaw); }}\n"
+                "{pad}{{ std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+                cast = native_cast(destination, "coreRaw"),
             ),
             _ => format!(
-                "{pad}{{ std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<decltype({destination})>(coreRaw); }}\n"
+                "{pad}{{ std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+                cast = native_cast(destination, "coreRaw"),
             ),
         },
         SemanticType::Enum { .. } => format!(
-            "{pad}{{ std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<decltype({destination})>(coreRaw); }}\n"
+            "{pad}{{ std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+            cast = native_cast(destination, "coreRaw"),
         ),
         SemanticType::Handle { .. } => format!(
-            "{pad}{{ std::uint64_t coreRaw = 0; if (!reader.U64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = static_cast<decltype({destination})>(coreRaw); }}\n"
+            "{pad}{{ std::uint64_t coreRaw = 0; if (!reader.U64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n",
+            cast = native_cast(destination, "coreRaw"),
         ),
         SemanticType::Record { name } => {
             let record = &records[name];
