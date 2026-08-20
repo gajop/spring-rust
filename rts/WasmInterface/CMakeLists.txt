@@ -25,6 +25,7 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmTypedHost.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmTypedHostShims.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterfaceSystem.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterfaceSystemCore.cpp
 )
 
 # Codegen also emits variable-input/combined-I/O scaffolding, but those paths
