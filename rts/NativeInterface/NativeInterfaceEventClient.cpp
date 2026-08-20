@@ -1606,9 +1606,6 @@ bool NativeInterfaceEventClient::AllowUnitTransport(const CUnit* transporter, co
 }
 
 bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter, const CUnit* transportee, const float3& loadPos, bool allowed) {
-	if (m_AllowUnitTransportLoadFuncPtr == nullptr)
-		return allowed;
-
 	AllowUnitTransportPositionQuery query = {
 		.units = {
 			.transporterID = transporter->id,
@@ -1632,9 +1629,6 @@ bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter
 }
 
 bool NativeInterfaceEventClient::AllowUnitTransportUnload(const CUnit* transporter, const CUnit* transportee, const float3& unloadPos, bool allowed) {
-	if (m_AllowUnitTransportUnloadFuncPtr == nullptr)
-		return allowed;
-
 	AllowUnitTransportPositionQuery query = {
 		.units = {
 			.transporterID = transporter->id,
@@ -1674,9 +1668,6 @@ bool NativeInterfaceEventClient::AllowUnitCloak(const CUnit* unit, const CUnit* 
 }
 
 bool NativeInterfaceEventClient::AllowUnitDecloak(const CUnit* unit, const CSolidObject* object, const CWeapon* weapon) {
-	if (m_AllowUnitDecloakFuncPtr == nullptr)
-		return true;
-
 	AllowUnitDecloakQuery query = {
 		.unitID = unit->id,
 		.hasObject = (object != nullptr),
