@@ -30,6 +30,14 @@ bool RegisterGeneratedImports(wasmtime_linker_t* linker, HostState* state,
 }
 #endif
 
+#if __has_include("../wasm/generated/WasmCoreGeneratedOptionBindings.h")
+#define RECOIL_WASM_CORE_GENERATED_OPTION_BINDINGS 1
+namespace generated {
+bool RegisterGeneratedOptionImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+}
+#endif
+
 #if __has_include("../wasm/generated/WasmCoreGeneratedVariableBindings.h")
 #define RECOIL_WASM_CORE_GENERATED_VARIABLE_BINDINGS 1
 namespace generated {
@@ -91,6 +99,10 @@ public:
 		wasmtime_linker_allow_shadowing(linker, true);
 #if defined(RECOIL_WASM_CORE_GENERATED_BINDINGS)
 		if (!generated::RegisterGeneratedImports(linker, &host, error))
+			return false;
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_OPTION_BINDINGS)
+		if (!generated::RegisterGeneratedOptionImports(linker, &host, error))
 			return false;
 #endif
 #if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_BINDINGS)
