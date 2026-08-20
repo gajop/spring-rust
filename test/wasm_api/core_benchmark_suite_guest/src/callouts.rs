@@ -155,6 +155,39 @@ fn run_transport_ceiling(
         },
     )?;
 
+    // Real list<string> transport. Probe once, allocate guest storage once,
+    // then reuse both descriptor and byte buffers. The timed path performs no
+    // Vec<String> construction and no UTF-8 validation.
+    let mut empty_ranges: [spring::StringRange; 0] = [];
+    let mut empty_string_bytes: [u8; 0] = [];
+    let string_list_required = match spring::get_unit_script_names_into(
+        unit_id,
+        &mut empty_ranges,
+        &mut empty_string_bytes,
+    )? {
+        spring::StringListFill::Complete(view) => spring::StringListRequirements {
+            strings: view.len(),
+            bytes: view.packed_bytes().len(),
+        },
+        spring::StringListFill::Insufficient(required) => required,
+    };
+    let mut string_ranges = vec![spring::StringRange::default(); string_list_required.strings.max(1)];
+    let mut string_bytes = vec![0u8; string_list_required.bytes.max(1)];
+    common::measure(
+        "core_ceiling_string_list_out_reuse",
+        common::scaled_count(10_000, scale),
+        || match spring::get_unit_script_names_into(unit_id, &mut string_ranges, &mut string_bytes)? {
+            spring::StringListFill::Complete(view) => {
+                black_box(view.ranges());
+                black_box(view.packed_bytes());
+                Ok(())
+            }
+            spring::StringListFill::Insufficient(_) => {
+                Err(spring::ApiError::new(spring::ErrorCode::BufferOverflow as i32))
+            }
+        },
+    )?;
+
     Ok(())
 }
 
