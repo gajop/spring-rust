@@ -35,6 +35,8 @@ bool RegisterTerrainControlImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterGfxImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterProfilingImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterBenchmarkImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
@@ -67,6 +69,8 @@ public:
 		if (!RegisterTerrainControlImports(linker, &host, error))
 			return false;
 		if (!RegisterGfxImports(linker, &host, error))
+			return false;
+		if (!RegisterProfilingImports(linker, &host, error))
 			return false;
 		return RegisterBenchmarkImports(linker, &host, error);
 	}
