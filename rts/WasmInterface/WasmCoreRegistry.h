@@ -81,8 +81,6 @@ inline constexpr ImportDescriptor kImports[] = {
 
 	{UnitControlModule, "give-order-to-unit", "i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 
-	// Callback-taking calls use a numeric guest callback ID and opaque u32 user
-	// data. The host invokes the cached spring:callback/dispatch(i32,i32) export.
 	{TerrainControlModule, "set-height-map", "f32,f32,f32,f32->i64", SyncedEnvironmentMask},
 	{TerrainControlModule, "level-height-map", "f32,f32,f32,f32,f32->i64", SyncedEnvironmentMask},
 	{TerrainControlModule, "set-height-map-func", "i32,i32->i64", SyncedEnvironmentMask},
@@ -90,6 +88,8 @@ inline constexpr ImportDescriptor kImports[] = {
 	{GfxModule, "begin-end", "i32,i32,i32->i32", UnsyncedEnvironmentMask},
 
 	{ProfilingModule, "get-timer-micros", "->i64", AllEnvironmentMask},
+	{ProfilingModule, "get-lua-mem-usage", "i32->i32", UnsyncedEnvironmentMask},
+	{ProfilingModule, "get-synced-gc-info", "i32->i64", UnsyncedEnvironmentMask},
 	{MessagesModule, "send-lua-rules-msg", "i32,i32->i64", AllEnvironmentMask},
 	{MessagesModule, "send-lua-ui-msg", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{RulesParamsModule, "set-unit-rules-param-f32", "i32,i32,i32,f32,i32->i64", SyncedEnvironmentMask},
