@@ -48,6 +48,10 @@ private:
 	RawExport commandNotify;
 	std::uint32_t scratchOffset = 0;
 	std::uint32_t scratchCapacity = 0;
+	// A variable callin may re-enter host code. A second variable event while
+	// the outer guest is still consuming this shared region would corrupt its
+	// payload, so reject that uncommon nested path deterministically.
+	mutable bool scratchInUse = false;
 };
 
 #endif
