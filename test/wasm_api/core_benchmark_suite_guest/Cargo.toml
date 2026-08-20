@@ -6,6 +6,7 @@ publish = false
 build = "build.rs"
 
 [lib]
+path = "src/entry.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
