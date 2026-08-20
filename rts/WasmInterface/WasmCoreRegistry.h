@@ -142,7 +142,18 @@ inline constexpr ImportDescriptor kImports[] = {
 
 	{RulesParamsModule, "set-unit-rules-param-f32", "i32,i32,i32,f32,i32->i64", SyncedEnvironmentMask},
 	{RulesParamsModule, "get-unit-rules-param-f32", "i32,i32,i32->i64", AllEnvironmentMask},
+
+	{TerrainModule, "is-pos-in-map", "f32,f32->i64", AllEnvironmentMask},
+	{TerrainModule, "get-ground-height", "f32,f32->i64", AllEnvironmentMask},
 	{TerrainModule, "get-ground-orig-height", "f32,f32->i64", AllEnvironmentMask},
+	{TerrainModule, "get-smooth-mesh-height", "f32,f32->i64", AllEnvironmentMask},
+	{TerrainModule, "get-water-plane-level", "->i64", AllEnvironmentMask},
+	{TerrainModule, "get-water-level", "f32,f32->i64", AllEnvironmentMask},
+	{TerrainModule, "get-ground-normal", "f32,f32,i32,i32->i32", AllEnvironmentMask},
+	{TerrainModule, "get-ground-extremes", "i32->i32", AllEnvironmentMask},
+	{TerrainModule, "get-height-map-size", "i32->i32", AllEnvironmentMask},
+	{TerrainModule, "get-ground-blocked", "f32,f32,f32,f32->i64", AllEnvironmentMask},
+	{TerrainModule, "get-grass", "f32,f32->i64", AllEnvironmentMask},
 
 	{ConfigModule, "get-log-sections-flat", "i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
 
