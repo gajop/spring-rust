@@ -15,6 +15,7 @@
 #include "WasmRuntime.h"
 
 class WasmCoreHost;
+enum class WasmCoreCallin : std::uint8_t;
 
 class WasmInterfaceSystem {
 public:
@@ -68,6 +69,12 @@ public:
 		std::span<const CoreCallinInvocation> invocations,
 		WasmValue* valueResult, void* nativeResult, bool& handled,
 		std::string& error);
+	// Internal hot overload: the outer event seam has already resolved the
+	// string to the compact callin ID, so do not resolve it again.
+	bool DispatchCoreCallin(WasmCoreCallin callin, std::string_view diagnosticName,
+		std::span<const CoreCallinInvocation> invocations,
+		WasmValue* valueResult, void* nativeResult, bool& handled,
+		std::string& error);
 
 	static bool DispatchActiveCoreCallin(std::string_view name, const void* query,
 		void* nativeResult, bool& handled, std::string& error);
@@ -85,8 +92,6 @@ private:
 	struct CoreModuleRecord {
 		WasmModuleDescriptor descriptor;
 		WasmModuleIdentity identity;
-		// Resolved lazily on first hot dispatch so LoadModule need not depend on
-		// host internals. Stable until the matching module is unloaded.
 		WasmCoreHost* host = nullptr;
 	};
 
