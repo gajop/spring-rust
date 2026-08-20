@@ -71,6 +71,13 @@ public:
 		WasmValue* valueResult, void* nativeResult, bool& handled,
 		std::string& error);
 
+	// The engine owns one live interface system. The alternative typed-host
+	// shim reaches this registered instance so Core callins can retain their
+	// pre-WasmValue fast path while still using the system's sorted module list,
+	// environment selection and aggregation rules.
+	static bool DispatchActiveCoreCallin(std::string_view name, const void* query,
+		void* nativeResult, bool& handled, std::string& error);
+
 	bool DispatchSyncedMessage(std::string_view message, std::string& error);
 
 	std::size_t ModuleCount() const;
@@ -86,6 +93,17 @@ private:
 		WasmModuleIdentity identity;
 	};
 
+	class CoreDispatchRegistration {
+	public:
+		explicit CoreDispatchRegistration(WasmInterfaceSystem* owner);
+		~CoreDispatchRegistration();
+		CoreDispatchRegistration(const CoreDispatchRegistration&) = delete;
+		CoreDispatchRegistration& operator=(const CoreDispatchRegistration&) = delete;
+	private:
+		WasmInterfaceSystem* owner = nullptr;
+		WasmInterfaceSystem* previous = nullptr;
+	};
+
 	void FaultSyncedModules(WasmEnvironment environment, std::string_view reason);
 
 	std::unique_ptr<WasmRuntime> runtime;
@@ -93,4 +111,5 @@ private:
 	std::vector<std::unique_ptr<WasmModule>> modules;
 	std::vector<CoreModuleRecord> coreModules;
 	WasmInstanceID nextInstanceID = 1;
+	CoreDispatchRegistration coreDispatchRegistration{this};
 };
