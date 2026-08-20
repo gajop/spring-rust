@@ -89,8 +89,8 @@ impl<'a> StringListView<'a> {
 #[cfg(feature = "alloc")]
 #[derive(Debug, Default)]
 pub struct StringListBuffer {
-    ranges: Vec<StringRange>,
-    bytes: Vec<u8>,
+    pub(crate) ranges: Vec<StringRange>,
+    pub(crate) bytes: Vec<u8>,
     used_strings: usize,
     used_bytes: usize,
 }
@@ -140,7 +140,7 @@ impl StringListBuffer {
     }
 
     #[inline]
-    fn ensure(&mut self, required: StringListRequirements) {
+    pub(crate) fn ensure(&mut self, required: StringListRequirements) {
         if self.ranges.len() < required.strings {
             self.ranges.resize(required.strings, StringRange::default());
         }
@@ -150,7 +150,7 @@ impl StringListBuffer {
     }
 
     #[inline]
-    fn commit(&mut self, required: StringListRequirements) {
+    pub(crate) fn commit(&mut self, required: StringListRequirements) {
         self.used_strings = required.strings;
         self.used_bytes = required.bytes;
     }
