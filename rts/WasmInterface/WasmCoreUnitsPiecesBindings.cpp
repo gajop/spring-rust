@@ -6,8 +6,14 @@
 #include <cstring>
 #include <limits>
 #include <span>
+#include <string_view>
 
 #include "NativeInterface/WasmUiVisibility.h"
+#include "Rendering/Models/3DModelPiece.hpp"
+#include "Sim/Misc/GlobalSynced.h"
+#include "Sim/Units/Scripts/UnitScript.h"
+#include "Sim/Units/Unit.h"
+#include "Sim/Units/UnitHandler.h"
 #include "WasmCoreGeneratedSupport.h"
 
 namespace recoil::wasm::core {
@@ -49,12 +55,15 @@ wasm_trap_t* GetUnitScriptNames(void* environment, wasmtime_caller_t* caller,
 
 	const std::int32_t unitID = slots[0].i32;
 	// Piece/script names reveal model/type details. Match the existing
-	// UnitsInfo detail policy: UI may query them only for a typed unit. The
-	// rules/gaia hot path pays only this environment branch; no extra lookup.
-	if (state->environment == WasmEnvironment::UI &&
-		WasmUiVisibility::FindUnit(unitID, WasmUiVisibility::UnitAccess::Typed) == nullptr) {
-		slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
-		return nullptr;
+	// UnitsInfo detail policy: UI may query them only for a typed unit. Reuse
+	// the visibility lookup below instead of looking the unit up twice.
+	const CUnit* unit = nullptr;
+	if (state->environment == WasmEnvironment::UI) {
+		unit = WasmUiVisibility::FindUnit(unitID, WasmUiVisibility::UnitAccess::Typed);
+		if (unit == nullptr) {
+			slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+			return nullptr;
+		}
 	}
 
 	const std::uint32_t descriptorPtr = static_cast<std::uint32_t>(slots[1].i32);
@@ -81,28 +90,39 @@ wasm_trap_t* GetUnitScriptNames(void* environment, wasmtime_caller_t* caller,
 		return nullptr;
 	}
 
-	GetUnitScriptNamesQuery query{.unitID = unitID};
-	GetUnitScriptNamesResult result{};
-	state->native->unitsPieces->GetUnitScriptNames(&query, &result);
-	if (result.error != nullptr) {
-		slots[0].i32 = result.error->code;
+	// This binding used to call NativeInterface::GetUnitScriptNames, which
+	// copied every model-owned std::string into a 1 KiB thread-local scratch
+	// buffer before this function copied the bytes again into guest memory.
+	// Script pieces reference model-owned S3DModelPiece objects whose names
+	// outlive this call, so Core can read those stable strings directly.
+	if (gs == nullptr) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::NotAvailable);
 		return nullptr;
 	}
-	if (result.count != 0 && result.names == nullptr) {
-		slots[0].i32 = static_cast<std::int32_t>(Status::Internal);
+	if (unit == nullptr)
+		unit = unitHandler.GetUnit(unitID);
+	if (unit == nullptr) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 		return nullptr;
 	}
 
+	const std::size_t count = unit->script == nullptr ? 0 : unit->script->pieces.size();
+	if (count > std::numeric_limits<std::uint32_t>::max()) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::Internal);
+		return nullptr;
+	}
+	const std::uint32_t requiredCount = static_cast<std::uint32_t>(count);
+
 	std::uint64_t requiredBytes64 = 0;
-	bool fits = result.count <= descriptorCapacity;
+	bool fits = requiredCount <= descriptorCapacity;
 	std::uint32_t writtenBytes = 0;
-	for (std::uint32_t index = 0; index < result.count; ++index) {
-		const char* name = result.names[index];
-		if (name == nullptr) {
-			slots[0].i32 = static_cast<std::int32_t>(Status::Internal);
-			return nullptr;
-		}
-		const std::size_t length = std::strlen(name);
+	for (std::uint32_t index = 0; index < requiredCount; ++index) {
+		const LocalModelPiece* piece = unit->script->pieces[index];
+		const S3DModelPiece* original = piece == nullptr ? nullptr : piece->original;
+		const std::string_view name = original == nullptr
+			? std::string_view{}
+			: std::string_view(original->name);
+		const std::size_t length = name.size();
 		if (length > std::numeric_limits<std::uint32_t>::max() ||
 			requiredBytes64 + length > std::numeric_limits<std::uint32_t>::max()) {
 			requiredBytes64 = std::numeric_limits<std::uint32_t>::max();
@@ -123,12 +143,12 @@ wasm_trap_t* GetUnitScriptNames(void* environment, wasmtime_caller_t* caller,
 		WriteU32LE(descriptor + 0, offset);
 		WriteU32LE(descriptor + 4, static_cast<std::uint32_t>(length));
 		if (length != 0)
-			std::memcpy(bytes.data() + offset, name, length);
+			std::memcpy(bytes.data() + offset, name.data(), length);
 		writtenBytes = requiredBytes;
 	}
 
 	const std::uint32_t requiredBytes = static_cast<std::uint32_t>(requiredBytes64);
-	WriteU32LE(meta.data() + 0, result.count);
+	WriteU32LE(meta.data() + 0, requiredCount);
 	WriteU32LE(meta.data() + 4, requiredBytes);
 	if (!fits || writtenBytes != requiredBytes) {
 		slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
