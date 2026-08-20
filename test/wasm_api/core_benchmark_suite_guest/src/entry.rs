@@ -5,10 +5,11 @@ use spring_wasm_core as spring;
 
 mod common;
 
-#[cfg(all(
-    not(any(benchmark_context_unsynced, benchmark_context_ui)),
-    any(benchmark_callin_consoleline, benchmark_callin_commandnotify)
-))]
+// The representative variable-callin exports are transport fixtures, not tied
+// to a particular world. AddConsoleLine and CommandNotify are dispatched by
+// NativeInterface through the unsynced worlds, so they must remain available
+// when the benchmark guest is projected as an unsynced gadget.
+#[cfg(any(benchmark_callin_consoleline, benchmark_callin_commandnotify))]
 mod variable_callins;
 
 #[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
