@@ -3,10 +3,8 @@
 // Script names use the reviewed flat list<string> ABI: one descriptor table
 // plus one packed byte blob, both caller-owned and reusable.
 
-use super::{
-    decode_string_list_result, mut_slice_parts, ApiError, ErrorCode, Result,
-    StringListFill, StringRange,
-};
+use super::config::{decode_string_list_result, mut_slice_parts};
+use super::{ApiError, ErrorCode, Result, StringListFill, StringRange};
 
 #[cfg(target_arch = "wasm32")]
 mod raw {
