@@ -21,6 +21,8 @@ mod render_core_wasm;
 mod render_core_wasm_host;
 #[path = "../render_core_wasm_variable_host.rs"]
 mod render_core_wasm_variable_host;
+#[path = "../render_core_wasm_variable_output_host.rs"]
+mod render_core_wasm_variable_output_host;
 #[path = "../render_core_wasm_registry.rs"]
 mod render_core_wasm_registry;
 
@@ -134,9 +136,9 @@ fn run() -> Result<()> {
         &(serde_json::to_string_pretty(&model.callins)? + "\n"),
     )?;
 
-    // Runtime-neutral Core ABI plan plus executable fixed and variable-input
-    // callback subsets. The validator registry is derived only from callbacks
-    // emitted below, never from the broader planning inventory.
+    // Runtime-neutral Core ABI plan plus executable fixed, variable-input and
+    // variable-output callback subsets. The validator registry is derived only
+    // from callbacks emitted below, never from the broader planning inventory.
     write(
         &arguments.output.join("core-abi.json"),
         &render_core_wasm::render_json(&model)?,
@@ -164,6 +166,14 @@ fn run() -> Result<()> {
     write(
         &arguments.output.join("WasmCoreGeneratedVariableBindings.cpp"),
         &render_core_wasm_variable_host::render_cpp(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableOutputBindings.h"),
+        &render_core_wasm_variable_output_host::render_header(),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableOutputBindings.cpp"),
+        &render_core_wasm_variable_output_host::render_cpp(&model),
     )?;
 
     let wit_dir = arguments.output.join("wit");
