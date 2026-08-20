@@ -684,14 +684,22 @@ def ratio_for_test(
 
 def cpu_model() -> str:
     try:
-        return subprocess.run(
+        output = subprocess.run(
             ["lscpu", "-p=CPU,MODELNAME"],
             check=True,
             capture_output=True,
             text=True,
-        ).stdout.split("#")[0].strip().splitlines()[0].split(",", 1)[1]
-    except (FileNotFoundError, IndexError, subprocess.CalledProcessError):
+        ).stdout
+    except (FileNotFoundError, subprocess.CalledProcessError):
         return "unknown"
+    # The parsable format leads with '#' comment lines. Filter them out rather
+    # than splitting on '#', which yields the empty string before the first
+    # comment and loses every real row.
+    rows = [line for line in output.splitlines() if line and not line.startswith("#")]
+    if not rows:
+        return "unknown"
+    _, _, model = rows[0].partition(",")
+    return model.strip() or "unknown"
 
 
 def make_summary(

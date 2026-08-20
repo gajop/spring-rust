@@ -41,6 +41,9 @@ inline constexpr std::string_view RulesParamsModule = "spring:rules-params";
 inline constexpr std::string_view TerrainModule = "spring:terrain";
 inline constexpr std::string_view ConfigModule = "spring:config";
 inline constexpr std::string_view BenchmarkModule = "spring:benchmark";
+// Nondeterministic by design and available to synced guests; see
+// WasmCoreDesyncBindings.cpp.
+inline constexpr std::string_view DesyncModule = "spring:desync";
 
 inline constexpr std::string_view GameFrameExport = "spring:callin/game-frame";
 inline constexpr std::string_view GameFramePostExport = "spring:callin/game-frame-post";
@@ -165,6 +168,11 @@ inline constexpr ImportDescriptor kImports[] = {
 
 	{ConfigModule, "get-log-sections-flat", "i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
 
+	// The desync group trades determinism for a clock in synced code. The same
+	// timers stay unsynced-only under spring:profiling.
+	{DesyncModule, "get-timer", "->i64", AllEnvironmentMask},
+	{DesyncModule, "get-timer-micros", "->i64", AllEnvironmentMask},
+	{DesyncModule, "diff-timers", "i64,i64,i32,i32->i64", AllEnvironmentMask},
 	{BenchmarkModule, "consume-string", "i32,i32->i64", AllEnvironmentMask},
 	{BenchmarkModule, "consume-f32-list", "i32,i32->i64", AllEnvironmentMask},
 };

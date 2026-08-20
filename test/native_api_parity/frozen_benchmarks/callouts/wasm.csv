@@ -1,0 +1,9 @@
+backend,test,status,scale,iterations,benchmarkCase,measurement,medianNs,quantumNs,spreadNs,totalMedianNs,totalSpreadNs
+wasm,callout_scalar,pass,1,100000,,Component Model callout loop,178.12,1000,5.19,17812000.0,519000.0
+wasm,callout_vec3,pass,1,100000,,Component Model callout loop,905.1,1000,52.86,90510000.0,5286000.0
+wasm,callout_string,pass,1,50000,,Component Model callout loop,334.8,1000,6.04,16740000.0,302000.0
+wasm,callout_smalllist,pass,1,20000,,Component Model callout loop,1484.65,1000,55.55,29693000.0,1111000.0
+wasm,callout_biglist,pass,1,1000,,Component Model callout loop,7109.0,1000,160.0,7109000.0,160000.0
+wasm,callout_spatial,pass,1,10000,,Component Model callout loop,1859.6,1000,110.5,18596000.0,1105000.0
+wasm,callout_mutate,pass,1,100000,,Component Model callout loop,1126.36,1000,27.79,112636000.0,2779000.0
+wasm,complete,pass,1,,callouts,,,,,,

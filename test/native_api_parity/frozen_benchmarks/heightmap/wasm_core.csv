@@ -1,0 +1,7 @@
+backend,test,status,scale,benchmarkCase,innerCalls,innerNs,invocations,measurement,medianMs,nominalInvocations,nominalSize,spreadMs
+wasm_core,hm_callback_empty,pass,1,,0,0.0,10000,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,2.7e-05,10000,0,1e-06
+wasm_core,hm_brush_small,pass,1,,1024,10.466,1000,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,0.010717,1000,32,0.000455
+wasm_core,hm_brush_medium,pass,1,,16384,10.248,100,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,0.16791,100,128,0.00523
+wasm_core,hm_brush_large,pass,1,,262144,10.106,10,Core Wasm callback boundary with zero terraform; terrain rebuild excluded,2.6493,10,512,0.0645
+wasm_core,hm_region_op,pass,1,,,0,1000,Core Wasm region boundary with unchanged height; terrain rebuild excluded,0.000731,1000,,0.000269
+wasm_core,complete,pass,1,heightmap,,,,,,,,

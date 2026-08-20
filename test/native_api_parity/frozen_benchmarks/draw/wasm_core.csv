@@ -1,0 +1,5 @@
+backend,test,status,scale,iterations,batches,clockOverheadNs,lines,measurement,medianMs,medianNs,p99Ns,spreadNs
+wasm_core,callin_drawworld,pass,,601,,16.0,,"engine callin boundary, cold cache; median of per-dispatch samples",,4844.0,9204.0,3436.0
+wasm_core,callout_draw,pass,1,100000,8,,,,,16.804,,
+wasm_core,wl_ui_draw,pass,1,,8,,2000,,0.066875,,,
+wasm_core,complete,pass,,,,,,,,,,

@@ -1,0 +1,9 @@
+backend,test,status,scale,iterations,benchmarkCase,measurement,medianNs,samplesNs,spreadNs,totalMedianNs,totalSpreadNs
+native,callout_scalar,pass,1.0,100000,,NativeInterface callout loop,5.77327,"[6.00392, 5.87327, 5.60726, 5.77327, 5.62802]",0.3966599999999998,577327.0,39665.99999999998
+native,callout_vec3,pass,1.0,100000,,NativeInterface callout loop,5.83683,"[5.84125, 5.56836, 5.83683, 5.71596, 5.83808]",0.2728899999999994,583683.0,27288.99999999994
+native,callout_string,pass,1.0,50000,,NativeInterface callout loop,28.58292,"[28.58292, 28.43606, 28.74784, 28.78772, 28.06668]",0.7210399999999986,1429146.0,36051.99999999993
+native,callout_smalllist,pass,1.0,20000,,NativeInterface callout loop,21.39625,"[21.37225, 21.41215, 21.39625, 21.4792, 21.33475]",0.14444999999999908,427924.99999999994,2888.999999999982
+native,callout_biglist,pass,1.0,1000,,NativeInterface callout loop,493.233,"[491.338, 493.338, 490.855, 493.233, 493.739]",2.8839999999999577,493233.0,2883.9999999999577
+native,callout_spatial,pass,1.0,10000,,NativeInterface callout loop,219.0215,"[222.2637, 222.2783, 219.0215, 215.142, 214.7234]",7.5549000000000035,2190215.0,75549.00000000003
+native,callout_mutate,pass,1.0,100000,,NativeInterface callout loop,35.52767,"[35.52767, 35.58109, 35.52119, 35.47946, 35.57211]",0.10163000000000011,3552767.0,10163.000000000011
+native,complete,pass,1.0,,callouts,,,,,,

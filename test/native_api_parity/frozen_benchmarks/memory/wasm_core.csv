@@ -1,0 +1,7 @@
+backend,test,status,scale,allocations,benchmarkCase,bytes,elapsedMs,frames,gcKB,p99Ms,peakBytes,steadyBytes,totalPauseMs,worstMs
+wasm_core,mem_per_call_small,pass,1,0.0,,0.0,1.928,,,,,,,
+wasm_core,mem_per_call_list,pass,1,0.0,,0.0,1.032,,,,,,,
+wasm_core,gc_pause,pass,1,,,,,,560.0,,,,0.481,
+wasm_core,frame_spike,pass,1,,,,,5000,,0.011,,,,0.028
+wasm_core,mem_growth,pass,1,,,,,,,,2159203.0,2119642.0,,
+wasm_core,complete,pass,1,,memory,,,,,,,,,

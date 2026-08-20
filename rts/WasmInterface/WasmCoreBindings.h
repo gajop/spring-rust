@@ -80,6 +80,8 @@ bool RegisterConfigImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterBenchmarkImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterDesyncImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
 	const wasmtime_instance_t& instance, std::string& error);
 
@@ -150,7 +152,9 @@ public:
 			return false;
 		if (!RegisterConfigImports(linker, &host, error))
 			return false;
-		return RegisterBenchmarkImports(linker, &host, error);
+		if (!RegisterBenchmarkImports(linker, &host, error))
+			return false;
+		return RegisterDesyncImports(linker, &host, error);
 	}
 
 	bool Bind(wasmtime_context_t* context, const wasmtime_instance_t& instance,

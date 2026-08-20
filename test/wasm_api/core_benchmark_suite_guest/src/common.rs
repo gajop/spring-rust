@@ -38,7 +38,7 @@ pub fn scaled_count(value: usize, factor: f64) -> usize {
 }
 
 pub fn timer_micros() -> spring::Result<u64> {
-    spring::get_timer_micros()
+    spring::desync::get_timer_micros()
 }
 
 pub fn clock_quantum_ns() -> spring::Result<f64> {

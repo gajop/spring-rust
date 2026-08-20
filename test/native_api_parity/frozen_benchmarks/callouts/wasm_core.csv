@@ -1,0 +1,9 @@
+backend,test,status,scale,iterations,benchmarkCase,measurement,medianNs,quantumNs,spreadNs,totalMedianNs,totalSpreadNs
+wasm_core,callout_scalar,pass,1,100000,,Core Wasm callout loop,10.34,1000,0.28,1034000.0,28000.0
+wasm_core,callout_vec3,pass,1,100000,,Core Wasm callout loop,16.89,1000,0.39,1689000.0,39000.0
+wasm_core,callout_string,pass,1,50000,,Core Wasm callout loop,61.68,1000,2.26,3084000.0,113000.0
+wasm_core,callout_smalllist,pass,1,20000,,Core Wasm callout loop,92.4,1000,0.45,1848000.0,9000.0
+wasm_core,callout_biglist,pass,1,1000,,Core Wasm callout loop,1006.0,1000,2.0,1006000.0,2000.0
+wasm_core,callout_spatial,pass,1,10000,,Core Wasm callout loop,468.7,1000,15.7,4687000.0,157000.0
+wasm_core,callout_mutate,pass,1,100000,,Core Wasm callout loop,39.3,1000,0.71,3930000.0,71000.0
+wasm_core,complete,pass,1,,callouts,,,,,,

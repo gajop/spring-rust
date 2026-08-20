@@ -9,6 +9,9 @@
 
 mod benchmark;
 mod config;
+/// Nondeterministic imports usable from synced code. Namespaced on purpose:
+/// importing anything here makes a synced guest desync. See `desync.rs`.
+pub mod desync;
 mod messages;
 mod profiling;
 mod rules_params;

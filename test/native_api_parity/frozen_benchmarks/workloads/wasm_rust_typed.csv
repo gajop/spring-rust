@@ -1,0 +1,7 @@
+backend,test,status,scale,iterations,benchmarkCase,checksum,measurement,medianNs,spreadNs
+wasm_rust_typed,wl_unit_scan,pass,1,5000,,1289600000.0,Component workload measured per GameFrame callback,48000.0,71000.0
+wasm_rust_typed,wl_area_effect,pass,1,5000,,37985000.0,Component workload measured per GameFrame callback,67000.0,79000.0
+wasm_rust_typed,wl_rules_params,pass,1,5000,,163200000.0,Component workload measured per GameFrame callback,78000.0,217000.0
+wasm_rust_typed,wl_commands,pass,1,5000,,1000000.0,Component workload measured per GameFrame callback,548000.0,510000.0
+wasm_rust_typed,wl_compute,pass,1,5000,,43750000.0,Component workload measured per GameFrame callback,325000.0,317000.0
+wasm_rust_typed,complete,pass,1,,workloads,,,,

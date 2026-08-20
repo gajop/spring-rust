@@ -24,6 +24,7 @@ fn owned_cylinder(x: f32, z: f32, radius: f32, allegiance: i32) -> spring::Resul
     Err(spring::ApiError::new(spring::ErrorCode::BufferOverflow as i32))
 }
 
+#[cfg(feature = "transport_ceiling")]
 fn run_transport_ceiling(
     unit_id: i32,
     unit_def_id: i32,
@@ -251,7 +252,11 @@ pub fn run(scalar_only: bool) -> spring::Result<()> {
             .map(|_| ())
     })?;
 
+    #[cfg(feature = "transport_ceiling")]
     run_transport_ceiling(unit_id, unit_def_id, position, scale)?;
+    #[cfg(not(feature = "transport_ceiling"))]
+    let _ = (unit_def_id, position);
+
     common::send_complete("callouts");
     Ok(())
 }

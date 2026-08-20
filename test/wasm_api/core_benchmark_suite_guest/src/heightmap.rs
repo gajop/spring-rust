@@ -17,7 +17,7 @@ fn scaled_brush_size(value: usize, scale: f64) -> usize {
 }
 
 fn timer_micros() -> spring::Result<u64> {
-    spring::get_timer_micros()
+    spring::desync::get_timer_micros()
 }
 
 fn clock_quantum_ns() -> spring::Result<f64> {

@@ -1,0 +1,7 @@
+backend,test,status,scale,benchmarkCase,innerCalls,innerNs,invocations,measurement,medianMs,nominalInvocations,nominalSize,spreadMs
+wasm,hm_callback_empty,pass,1,,0,0.0,10000,Component callback boundary with zero terraform; terrain rebuild excluded,0.000715,10000,0,2e-06
+wasm,hm_brush_small,pass,1,,1024,325.394,1000,Component callback boundary with zero terraform; terrain rebuild excluded,0.333203,1000,32,0.009666
+wasm,hm_brush_medium,pass,1,,16384,321.949,100,Component callback boundary with zero terraform; terrain rebuild excluded,5.27481,100,128,0.11895
+wasm,hm_brush_large,pass,1,,262144,320.578,10,Component callback boundary with zero terraform; terrain rebuild excluded,84.0375,10,512,7.1383
+wasm,hm_region_op,pass,1,,,0,1000,Component region boundary with unchanged height; terrain rebuild excluded,0.000931,1000,,2.2e-05
+wasm,complete,pass,1,heightmap,,,,,,,,

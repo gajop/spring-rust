@@ -9,6 +9,12 @@ build = "build.rs"
 path = "src/entry.rs"
 crate-type = ["cdylib"]
 
+[features]
+# Core-only transport-floor rows. They have no peer in the other backends, so
+# they are noise in the comparison table and are off by default; enable them
+# when investigating how far a Core path sits above its own floor.
+transport_ceiling = []
+
 [dependencies]
 spring-wasm-core = { path = "../../../rust/crates/spring-wasm-core", features = ["alloc"] }
 

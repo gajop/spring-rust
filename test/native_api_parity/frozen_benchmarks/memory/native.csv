@@ -1,0 +1,7 @@
+backend,test,status,scale,iterations,allocations,benchmarkCase,bytes,frames,gcKB,measurement,medianNs,p99Ms,peakBytes,samplesNs,spreadNs,steadyBytes,totalPauseMs,worstMs
+native,mem_per_call_small,pass,1.0,100000,0.0,,0.0,,,Profiling.get_lua_mem_usage,6.17884,,,"[5.74634, 6.42398, 7.95724, 5.79, 6.17884]",2.2108999999999996,,,
+native,mem_per_call_list,pass,1.0,1000,0.0,,0.0,,,Profiling.get_lua_mem_usage,494.452,,,"[497.601, 505.28, 494.452, 491.323, 492.979]",13.956999999999994,,,
+native,gc_pause,pass,1.0,,,,,,560.0,Profiling.get_synced_gcinfo,,,,,,,0.502844,
+native,frame_spike,pass,1.0,,,,,5000,,bounded workload samples,,0.005315,,,,,,0.024064
+native,mem_growth,pass,1.0,,,,,,,Profiling.get_lua_mem_usage,,,2135292.0,,,2135292.0,,
+native,complete,pass,1.0,,,memory,,,,,,,,,,,,

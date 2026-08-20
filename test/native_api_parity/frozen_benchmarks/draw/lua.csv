@@ -1,0 +1,5 @@
+backend,test,status,scale,iterations,clockOverheadNs,lines,measurement,medianMs,medianNs,p99Ns,spreadNs
+lua,callout_draw,pass,1,100000,,,,,82.1300049,,
+lua,wl_ui_draw,pass,1,,,2000,,0.32699999,,,
+lua,complete,pass,,,,,,,,,
+lua,callin_drawworld,pass,,601,16.0,,"engine callin boundary, cold cache; median of per-dispatch samples",,2462.0,7773.0,3448.0

@@ -1,0 +1,9 @@
+backend,test,status,iterations,clockOverheadNs,measurement,medianNs,p99Ns,spreadNs
+wasm,callin_unitpredamaged,pass,4999,18.0,"engine callin boundary, cold cache; median of per-dispatch samples",20979.0,37016.0,6512.0
+wasm,callin_allowunitcreation,pass,4999,18.0,"engine callin boundary, cold cache; median of per-dispatch samples",19231.0,32240.0,6275.0
+wasm,callin_unitcreated,pass,5999,18.0,"engine callin boundary, cold cache; median of per-dispatch samples",14035.0,25306.0,5054.0
+wasm,callin_empty,pass,5033,18.0,"engine callin boundary, cold cache; median of per-dispatch samples",13267.0,23786.0,4775.0
+wasm,callin_gameframe,pass,5033,25.0,"engine callin boundary, cold cache; median of per-dispatch samples",12952.0,18522.0,4182.0
+wasm,callin_unimplemented,pass,9999,26.0,"engine callin boundary, cold cache; median of per-dispatch samples",3493.0,6823.0,3201.0
+wasm,callin_4modules,pass,5033,14.0,"engine callin boundary, cold cache; median of per-dispatch samples",24488.0,31378.0,5162.0
+wasm,callin_update,pass,5004,11.0,"engine callin boundary, cold cache; median of per-dispatch samples",13254.0,19378.0,4346.0

@@ -1,0 +1,7 @@
+backend,test,status,scale,allocations,bytes,elapsedMs,frames,gcKB,p99Ms,peakBytes,steadyBytes,totalPauseMs,worstMs
+wasm_rust_typed,mem_per_call_small,pass,1,0.0,0.0,5.34,,,,,,,
+wasm_rust_typed,mem_per_call_list,pass,1,0.0,0.0,0.642,,,,,,,
+wasm_rust_typed,gc_pause,pass,1,,,,,560.0,,,,0.496,
+wasm_rust_typed,frame_spike,pass,1,,,,5000,,0.027,,,,0.062
+wasm_rust_typed,mem_growth,pass,1,,,,,,,2159894.0,2119614.0,,
+wasm_rust_typed,complete,pass,,,,,,,,,,,

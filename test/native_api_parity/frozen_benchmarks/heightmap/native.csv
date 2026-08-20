@@ -1,0 +1,7 @@
+backend,test,status,scale,benchmarkCase,innerCalls,innerNs,invocations,measurement,medianMs,nominalInvocations,nominalSize,spreadMs
+native,hm_callback_empty,pass,1.0,,0,0.0,10000,Native callback boundary with zero terraform; terrain rebuild excluded,3.3155000000000004e-05,10000,0,7.667000000000006e-07
+native,hm_brush_small,pass,1.0,,1024,6.1181142578125,1000,Native callback boundary with zero terraform; terrain rebuild excluded,0.006279559,1000,32,8.665699999999953e-05
+native,hm_brush_medium,pass,1.0,,16384,5.97804931640625,100,Native callback boundary with zero terraform; terrain rebuild excluded,0.09795987,100,128,0.00207918
+native,hm_brush_large,pass,1.0,,262144,5.927698135375977,10,Native callback boundary with zero terraform; terrain rebuild excluded,1.5539291,10,512,0.016752700000000065
+native,hm_region_op,pass,1.0,,,0.0,1000,Native region boundary with unchanged height; terrain rebuild excluded,0.000664548,1000,,0.0002558679999999999
+native,complete,pass,1.0,heightmap,,,,,,,,
