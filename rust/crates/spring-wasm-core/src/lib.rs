@@ -9,12 +9,14 @@
 
 mod benchmark;
 mod config;
+mod messages;
 mod unit_defs;
 mod units_commands;
 mod units_pieces;
 mod units_query;
 pub use benchmark::*;
 pub use config::*;
+pub use messages::*;
 pub use unit_defs::*;
 pub use units_commands::*;
 pub use units_pieces::*;
