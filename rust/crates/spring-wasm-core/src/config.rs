@@ -50,7 +50,6 @@ impl<'a> StringListView<'a> {
         self.ranges
     }
 
-    /// Return one raw string payload without UTF-8 validation.
     #[inline]
     pub fn get_bytes(&self, index: usize) -> Option<&'a [u8]> {
         let range = *self.ranges.get(index)?;
@@ -62,18 +61,16 @@ impl<'a> StringListView<'a> {
     /// Interpret one item as UTF-8. Validation is deliberately per-use rather
     /// than imposed on the transport hot path.
     #[inline]
-    pub fn get_str(&self, index: usize) -> core::result::Result<&'a str, core::str::Utf8Error> {
-        core::str::from_utf8(self.get_bytes(index).unwrap_or(&[]))
+    pub fn get_str(
+        &self,
+        index: usize,
+    ) -> Option<core::result::Result<&'a str, core::str::Utf8Error>> {
+        Some(core::str::from_utf8(self.get_bytes(index)?))
     }
 
     #[inline]
     pub fn iter_bytes(&self) -> impl ExactSizeIterator<Item = &'a [u8]> + '_ {
-        (0..self.len()).map(move |index| {
-            // Host descriptors are validated against the returned byte extent
-            // when constructing the view; retain the check here instead of
-            // introducing unchecked guest-side indexing.
-            self.get_bytes(index).unwrap_or(&[])
-        })
+        (0..self.len()).map(move |index| self.get_bytes(index).unwrap_or(&[]))
     }
 }
 
