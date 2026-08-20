@@ -12,6 +12,7 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitControlBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreTerrainControlBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreGfxBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreProfilingBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreBenchmarkBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreHost.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreValidation.cpp
