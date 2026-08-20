@@ -8,10 +8,12 @@
 //! memory offsets. The host validates every offset/length before dereferencing.
 
 mod benchmark;
+mod config;
 mod unit_defs;
 mod units_commands;
 mod units_query;
 pub use benchmark::*;
+pub use config::*;
 pub use unit_defs::*;
 pub use units_commands::*;
 pub use units_query::*;
