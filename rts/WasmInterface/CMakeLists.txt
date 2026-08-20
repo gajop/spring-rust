@@ -6,6 +6,7 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmHost.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreAbi.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsInfoVariableBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsQueryBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitsQueryBorrowedBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreUnitDefsBindings.cpp
