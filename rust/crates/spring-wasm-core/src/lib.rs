@@ -15,6 +15,7 @@ mod unit_defs;
 mod units_commands;
 mod units_pieces;
 mod units_query;
+mod units_query_borrowed;
 pub use benchmark::*;
 pub use config::*;
 pub use messages::*;
@@ -23,6 +24,7 @@ pub use unit_defs::*;
 pub use units_commands::*;
 pub use units_pieces::*;
 pub use units_query::*;
+pub use units_query_borrowed::*;
 
 /// Generated production-fast Core imports and direct wrappers. This stays
 /// namespaced so specialized hand-written hot APIs remain the normal surface.
