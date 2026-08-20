@@ -64,6 +64,8 @@ bool RegisterUnitControlImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterTerrainControlImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterTerrainReadImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterGfxImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterProfilingImports(wasmtime_linker_t* linker, HostState* state,
@@ -131,6 +133,8 @@ public:
 		if (!RegisterUnitControlImports(linker, &host, error))
 			return false;
 		if (!RegisterTerrainControlImports(linker, &host, error))
+			return false;
+		if (!RegisterTerrainReadImports(linker, &host, error))
 			return false;
 		if (!RegisterGfxImports(linker, &host, error))
 			return false;
