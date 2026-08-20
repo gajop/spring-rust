@@ -34,6 +34,22 @@ Keep Typed Component Model as a raw reference column, but decision ratios are on
 
 Do not add Typed-vs-Core ratios.
 
+## Variable callins
+
+Variable-shape engine-to-guest callins have a dedicated runner:
+
+```bash
+python3 test/native_api_parity/run_variable_callins_core.py \
+  --spring-headless ./spring-headless
+```
+
+It measures `AddConsoleLine` and `CommandNotify` in two ways:
+
+- `callin_string_event` / `callin_command_event`: identical outer `CEventHandler` boundaries for Lua and Core. These rows are the decision comparison and may publish Lua/Core ratios.
+- `callin_string` / `callin_command`: inner transport diagnostics. Lua starts after argument pushing while Core includes scratch lowering, so these rows must not publish Lua/Core ratios.
+
+The Core variable-callin path uses one guest-owned scratch buffer negotiated at bind time. Steady-state lowering performs bounded writes followed by one unchecked host-to-guest call and does not allocate host heap storage.
+
 ## Core transport-ceiling rows
 
 The callout profile also emits `core_ceiling_*` rows. These are Core-only absolute measurements and intentionally do not participate in cross-backend validation or ratios.
