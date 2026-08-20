@@ -32,7 +32,7 @@ CORE_RAW = (
     / "release"
     / "recoil_wasm_core_benchmark_suite_guest.wasm"
 )
-CORE_DEFAULT = CORE_RAW
+CORE_DEFAULT = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.default.wasm")
 CORE_EMPTY = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.empty.wasm")
 CORE_GAMEFRAME = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.gameframe.wasm")
 CORE_UNIMPLEMENTED = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.unimplemented.wasm")
@@ -40,7 +40,7 @@ CORE_UPDATE = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.update.
 CORE_MEMORY = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.memory.wasm")
 CORE_DRAW = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.draw.wasm")
 
-# Append Core so historical columns retain their order.
+# Append Core so historical raw backend columns retain their order.
 base.BACKENDS = (*base.BACKENDS, "wasm_core")
 
 _ORIGINAL_BUILD_WASM = base.build_wasm
@@ -85,8 +85,7 @@ def build_core_wasm(destination: Path, context: str = "synced_gadget") -> None:
     if not CORE_RAW.is_file():
         raise RuntimeError(f"Core Wasm benchmark module was not produced: {CORE_RAW}")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    if destination != CORE_RAW:
-        shutil.copy2(CORE_RAW, destination)
+    shutil.copy2(CORE_RAW, destination)
     if not destination.is_file():
         raise RuntimeError(f"Core Wasm benchmark variant was not produced: {destination}")
 
@@ -323,9 +322,8 @@ def render_report(summaries: list[dict]) -> str:
         "",
         "| Profile | Scale | Test | Lua | Native | Wasm (C API, dynamic, CM) | "
         "Wasm (Rust, typed, CM) | Wasm (C API, unchecked, Core) | "
-        "Lua vs native | Lua vs typed | Typed vs native | Dynamic vs typed | "
-        "Core vs native | Typed vs Core |",
-        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "Lua vs native | Lua vs Core | Core vs native | Dynamic vs Core |",
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for summary in summaries:
         profile = str(summary["profile"])
@@ -347,11 +345,9 @@ def render_report(summaries: list[dict]) -> str:
                 f"| `{profile}` | {float(summary['scale']):g} | `{test}` | {values[0]} | "
                 f"{values[1]} | {values[2]} | {values[3]} | {values[4]} | "
                 f"{base.ratio_for_test(test, rows['lua'], rows['native'])} | "
-                f"{base.ratio_for_test(test, rows['lua'], rows['wasm_rust_typed'])} | "
-                f"{base.ratio_for_test(test, rows['wasm_rust_typed'], rows['native'])} | "
-                f"{base.ratio_for_test(test, rows['wasm'], rows['wasm_rust_typed'])} | "
+                f"{base.ratio_for_test(test, rows['lua'], rows['wasm_core'])} | "
                 f"{base.ratio_for_test(test, rows['wasm_core'], rows['native'])} | "
-                f"{base.ratio_for_test(test, rows['wasm_rust_typed'], rows['wasm_core'])} |"
+                f"{base.ratio_for_test(test, rows['wasm'], rows['wasm_core'])} |"
             )
     lines.append("")
     return "\n".join(lines)
@@ -368,8 +364,7 @@ def validate_report_shape(report: str) -> None:
     if not lines[2].startswith("| Profile | Scale | Test |"):
         raise RuntimeError("benchmark report has an unexpected table header")
     expected_separator = (
-        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | "
-        "---: | ---: | ---: | ---: |"
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"
     )
     if not lines[3].startswith(expected_separator):
         raise RuntimeError("benchmark report has an unexpected Core-aware table separator")
