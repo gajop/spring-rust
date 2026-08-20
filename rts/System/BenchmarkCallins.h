@@ -116,6 +116,8 @@ inline bool IsTrackedTest(std::string_view test)
 		return test == "callin_string";
 	if (IsVariant("commandnotify"))
 		return test == "callin_command";
+	if (IsVariant("variable"))
+		return test == "callin_string" || test == "callin_command";
 	// Update is dispatched unsynced-only. Its row comes from a dedicated run
 	// against an unsynced guest; recording it elsewhere times an engine path
 	// that reaches no module.
