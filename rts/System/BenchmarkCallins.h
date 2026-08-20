@@ -112,6 +112,10 @@ inline bool IsTrackedTest(std::string_view test)
 		return test == "callin_unimplemented";
 	if (IsVariant("fourmodules"))
 		return test == "callin_4modules";
+	if (IsVariant("consoleline"))
+		return test == "callin_string";
+	if (IsVariant("commandnotify"))
+		return test == "callin_command";
 	// Update is dispatched unsynced-only. Its row comes from a dedicated run
 	// against an unsynced guest; recording it elsewhere times an engine path
 	// that reaches no module.
@@ -140,11 +144,21 @@ inline std::string_view EventTestName(std::string_view event)
 		return "callin_unitpredamaged";
 	if (event == "AllowUnitCreation")
 		return "callin_allowunitcreation";
+	if (event == "AddConsoleLine")
+		return "callin_string";
+	if (event == "CommandNotify")
+		return "callin_command";
 	return {};
 }
 
 inline Token Begin(std::string_view backend, std::string_view test)
 {
+	// Lua's generic call wrapper sees source event names. Canonicalize them here
+	// so new representative callins do not need one-off timing branches in the
+	// large LuaHandle implementation.
+	const std::string_view eventTest = EventTestName(test);
+	if (!eventTest.empty())
+		test = eventTest;
 	if (!IsEnabled() || !IsBackend(backend) || !IsTrackedTest(test))
 		return {};
 	return {
