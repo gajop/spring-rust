@@ -1,10 +1,35 @@
 use std::hint::black_box;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Mutex, OnceLock};
 
 use spring_wasm_core as spring;
 
 static RAN: AtomicBool = AtomicBool::new(false);
 static DRAW_RAN: AtomicBool = AtomicBool::new(false);
+
+struct WorkloadBenchmarkState {
+    units: Vec<i32>,
+    frame: usize,
+    frames: usize,
+    samples_ns: Vec<Vec<f64>>,
+    checksums: Vec<f64>,
+}
+
+struct WorkloadResults {
+    frames: usize,
+    samples_ns: Vec<Vec<f64>>,
+    checksums: Vec<f64>,
+}
+
+static WORKLOAD_STATE: OnceLock<Mutex<Option<WorkloadBenchmarkState>>> = OnceLock::new();
+
+const WORKLOAD_NAMES: [&str; 5] = [
+    "wl_unit_scan",
+    "wl_area_effect",
+    "wl_rules_params",
+    "wl_commands",
+    "wl_compute",
+];
 
 fn benchmark_scale() -> f64 {
     option_env!("SPRING_BENCHMARK_SCALE")
@@ -218,6 +243,152 @@ fn run_callouts(scale: f64, scalar_only: bool) -> spring::Result<()> {
     Ok(())
 }
 
+fn measure_workload<F>(operation: F) -> spring::Result<(f64, f64)>
+where
+    F: FnOnce() -> spring::Result<f64>,
+{
+    let start = timer_micros()?;
+    let checksum = operation()?;
+    let end = timer_micros()?;
+    Ok((end.saturating_sub(start) as f64 * 1_000.0, checksum))
+}
+
+fn start_workloads(scale: f64) -> spring::Result<()> {
+    let cell = WORKLOAD_STATE.get_or_init(|| Mutex::new(None));
+    let mut guard = cell
+        .lock()
+        .map_err(|_| spring::ApiError::new(spring::ErrorCode::InvalidState as i32))?;
+    if guard.is_some() {
+        return Ok(());
+    }
+    let units = spring::get_team_units(0)?;
+    if units.is_empty() {
+        return Err(spring::ApiError::new(spring::ErrorCode::NotFound as i32));
+    }
+    let frames = scaled_count(5_000, scale);
+    *guard = Some(WorkloadBenchmarkState {
+        units,
+        frame: 0,
+        frames,
+        samples_ns: (0..WORKLOAD_NAMES.len())
+            .map(|_| Vec::with_capacity(frames))
+            .collect(),
+        checksums: vec![0.0; WORKLOAD_NAMES.len()],
+    });
+    Ok(())
+}
+
+fn run_workload_step(scale: f64) -> spring::Result<bool> {
+    start_workloads(scale)?;
+    let cell = WORKLOAD_STATE.get_or_init(|| Mutex::new(None));
+    let completed = {
+        let mut guard = cell
+            .lock()
+            .map_err(|_| spring::ApiError::new(spring::ErrorCode::InvalidState as i32))?;
+        let state = guard
+            .as_mut()
+            .ok_or(spring::ApiError::new(spring::ErrorCode::InvalidState as i32))?;
+        let unit_limit = state.units.len().min(1_000);
+        let area_limit = state.units.len().min(100);
+        let command_limit = state.units.len().min(200);
+        let units = &state.units;
+
+        let (elapsed, checksum) = measure_workload(|| {
+            let mut checksum = 0.0;
+            for unit in units.iter().take(unit_limit) {
+                let position = spring::get_unit_position(*unit, false, false)?;
+                checksum += f64::from(position[0] + position[1] + position[2]);
+                let _ = spring::get_unit_health(*unit)?;
+                checksum += f64::from(spring::get_unit_def_id(*unit)?);
+            }
+            Ok(checksum)
+        })?;
+        state.samples_ns[0].push(elapsed);
+        state.checksums[0] += checksum;
+
+        let (elapsed, checksum) = measure_workload(|| {
+            let mut checksum = 0.0;
+            for unit in units.iter().take(area_limit) {
+                let position = spring::get_unit_position(*unit, false, false)?;
+                let nearby = owned_cylinder(position[0], position[2], 300.0, -1)?;
+                checksum += nearby.len() as f64;
+            }
+            Ok(checksum)
+        })?;
+        state.samples_ns[1].push(elapsed);
+        state.checksums[1] += checksum;
+
+        let (elapsed, checksum) = measure_workload(|| {
+            let mut checksum = 0.0;
+            for (index, unit) in units.iter().take(unit_limit).enumerate() {
+                spring::set_unit_rules_param_f32(*unit, "bench", 1.0, -1)?;
+                let _ = spring::get_unit_rules_param_f32(*unit, "bench")?;
+                checksum += index as f64;
+            }
+            Ok(checksum)
+        })?;
+        state.samples_ns[2].push(elapsed);
+        state.checksums[2] += checksum;
+
+        let (elapsed, checksum) = measure_workload(|| {
+            let mut checksum = 0.0;
+            for unit in units.iter().take(command_limit) {
+                let position = spring::get_unit_position(*unit, false, false)?;
+                spring::give_order_to_unit(
+                    *unit,
+                    10,
+                    &[position[0] + 8.0, position[1], position[2] + 8.0],
+                    0,
+                    0,
+                )?;
+                checksum += 1.0;
+            }
+            Ok(checksum)
+        })?;
+        state.samples_ns[3].push(elapsed);
+        state.checksums[3] += checksum;
+
+        let (elapsed, checksum) = measure_workload(|| {
+            let mut value = 0.0f32;
+            for index in 1..=100_000 {
+                value = (value + index as f32 * 0.25) % 1_000_003.0;
+            }
+            black_box(value);
+            Ok(f64::from(value))
+        })?;
+        state.samples_ns[4].push(elapsed);
+        state.checksums[4] += checksum;
+
+        state.frame += 1;
+        if state.frame < state.frames {
+            None
+        } else {
+            Some(WorkloadResults {
+                frames: state.frames,
+                samples_ns: std::mem::take(&mut state.samples_ns),
+                checksums: state.checksums.clone(),
+            })
+        }
+    };
+
+    let Some(results) = completed else {
+        return Ok(false);
+    };
+    for (index, name) in WORKLOAD_NAMES.iter().enumerate() {
+        let mut sorted = results.samples_ns[index].clone();
+        sorted.sort_by(|left, right| left.total_cmp(right));
+        let median = sorted[(sorted.len() - 1) / 2];
+        let spread = sorted[sorted.len() - 1] - sorted[0];
+        send_row(&format!(
+            "{{\"backend\":\"wasm_core\",\"test\":\"{name}\",\"status\":\"pass\",\"iterations\":{},\"medianNs\":{median:.3},\"spreadNs\":{spread:.3},\"checksum\":{:.3},\"scale\":{scale},\"measurement\":\"Core Wasm workload measured per GameFrame callback\"}}",
+            results.frames,
+            results.checksums[index]
+        ));
+    }
+    send_complete("workloads");
+    Ok(true)
+}
+
 fn send_profile_unavailable(profile: &str) {
     let tests: &[&str] = match profile {
         "heightmap" => &[
@@ -226,13 +397,6 @@ fn send_profile_unavailable(profile: &str) {
             "hm_brush_medium",
             "hm_brush_large",
             "hm_region_op",
-        ],
-        "workloads" => &[
-            "wl_unit_scan",
-            "wl_area_effect",
-            "wl_rules_params",
-            "wl_commands",
-            "wl_compute",
         ],
         "memory" => &[
             "mem_per_call_small",
@@ -263,10 +427,6 @@ fn run_synced_once(frame: i32) {
             send_profile_unavailable("heightmap");
             Ok(())
         }
-        Some("workloads") => {
-            send_profile_unavailable("workloads");
-            Ok(())
-        }
         Some("callins") => Ok(()),
         Some(other) => {
             send_profile_unavailable(other);
@@ -286,6 +446,23 @@ fn on_game_frame(frame: i32) {
     if benchmark_case() == Some("callins") {
         if callin_variant() == Some("gameframe") {
             black_box(frame);
+        }
+        return;
+    }
+    if benchmark_case() == Some("workloads") {
+        if frame < 3 || RAN.load(Ordering::Acquire) {
+            return;
+        }
+        match run_workload_step(benchmark_scale()) {
+            Ok(true) => RAN.store(true, Ordering::Release),
+            Ok(false) => {}
+            Err(error) => {
+                RAN.store(true, Ordering::Release);
+                send_row(&format!(
+                    "{{\"backend\":\"wasm_core\",\"test\":\"complete\",\"status\":\"error\",\"code\":{}}}",
+                    error.code
+                ));
+            }
         }
         return;
     }
@@ -365,9 +542,6 @@ fn on_draw_world() {
     if benchmark_case() != Some("draw") || DRAW_RAN.swap(true, Ordering::AcqRel) {
         return;
     }
-    // DrawWorld itself is timed by the engine-side callin recorder. The two
-    // callout/workload rows remain explicit gaps until Gfx callback re-entry is
-    // implemented for Core rather than measuring a different operation.
     send_draw_unavailable(
         "callout_draw",
         "Core Gfx BeginEnd callback re-entry ABI is not implemented yet",
