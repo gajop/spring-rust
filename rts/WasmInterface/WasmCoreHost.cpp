@@ -447,8 +447,11 @@ bool WasmCoreHost::InvokeUnitPreDamaged(const void* query, void* result,
 		error = "Core Wasm UnitPreDamaged query is null";
 		return false;
 	}
-	float newDamage = typed->damage;
-	float impulseMult = 1.0f;
+	// Preserve the incoming engine result defaults. NativeInterfaceEventClient
+	// may already have a modified newDamage/impulseMult from an earlier event
+	// client before Core Wasm is reached.
+	float newDamage = typedResult == nullptr ? typed->damage : typedResult->newDamage;
+	float impulseMult = typedResult == nullptr ? 1.0f : typedResult->impulseMult;
 	if (!backend->bindings.UnitPreDamaged(wasmtime_store_context(backend->store),
 		typed->unitID, typed->unitDefID, typed->unitTeam, typed->damage, typed->paralyzer,
 		typed->weaponDefID, typed->projectileID, typed->attackerID,
