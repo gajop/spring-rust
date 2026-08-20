@@ -63,11 +63,11 @@ bool ResolveCoreDispatchSide(WasmCoreCallin callin, bool& synced)
 }
 
 bool DispatchCoreModule(const WasmInterfaceSystem::CoreCallinInvocation& invocation,
-	const WasmModuleDescriptor& module, WasmCoreCallin callin, std::string_view name,
-	void* result, std::string& error)
+	WasmCoreHost* host, const WasmModuleDescriptor& module, WasmCoreCallin callin,
+	std::string_view name, void* result, std::string& error)
 {
 	std::string moduleError;
-	if (WasmCoreHost::DispatchModule(module.name, callin, invocation.query, result, moduleError))
+	if (WasmCoreHost::DispatchModule(host, callin, invocation.query, result, moduleError))
 		return true;
 	error = "Core Wasm callin " + std::string(name) + " failed in module " +
 		module.name + ": " + moduleError;
@@ -108,9 +108,6 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
 		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
 
-	// At most rules + gaia + UI are eligible for one engine event. Keep this
-	// entirely on the stack: a heap allocation would dominate the ~10 ns Core
-	// host->guest transport floor we are trying to preserve.
 	std::array<CoreCallinInvocation, 3> invocations{};
 	std::size_t invocationCount = 0;
 	const auto& primary = synced ? syncedEnvironments : unsyncedEnvironments;
@@ -151,9 +148,6 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 		std::span<const CoreCallinInvocation>(invocations.data(), invocationCount),
 		nullptr, nativeResult, handled, error);
 	if (!synced) {
-		// Unsynced faults are isolated/removable. Keep the system's descriptor
-		// inventory in sync with the host registry immediately so a faulted UI or
-		// unsynced gadget cannot remain visible to HasCoreModules/ModuleCount.
 		WasmCoreHost::RemoveFaultedUnsynced();
 		system->coreModules.erase(std::remove_if(system->coreModules.begin(),
 			system->coreModules.end(), [](const CoreModuleRecord& module) {
@@ -230,14 +224,18 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		if ((descriptor->environmentMask & environmentBit) == 0)
 			continue;
 
-		for (const CoreModuleRecord& module : coreModules) {
-			if (module.descriptor.environment != invocation.environment ||
-				!WasmCoreHost::ModuleHasCallin(module.descriptor.name, callin))
+		for (CoreModuleRecord& module : coreModules) {
+			if (module.descriptor.environment != invocation.environment)
+				continue;
+			if (module.host == nullptr)
+				module.host = WasmCoreHost::ModuleHandle(module.descriptor.name);
+			if (!WasmCoreHost::ModuleHasCallin(module.host, callin))
 				continue;
 
 			handled = true;
 			if (Is(aggregation, "ignore")) {
-				if (!DispatchCoreModule(invocation, module.descriptor, callin, name, nullptr, error))
+				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
+						callin, name, nullptr, error))
 					return false;
 				continue;
 			}
@@ -248,7 +246,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 					.error = nullptr,
 					.value = Is(aggregation, "and-false"),
 				};
-				if (!DispatchCoreModule(invocation, module.descriptor, callin, name, &moduleResult, error))
+				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
+						callin, name, &moduleResult, error))
 					return false;
 				if (!invocation.contributesResult)
 					continue;
@@ -266,7 +265,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 					return false;
 				}
 				DamageCallinResult moduleResult = damageDefault;
-				if (!DispatchCoreModule(invocation, module.descriptor, callin, name, &moduleResult, error))
+				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
+						callin, name, &moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					damageAggregate = moduleResult;
@@ -277,7 +277,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 
 			if (Is(resultType, "AllowUnitCreationResult") && Is(aggregation, "first")) {
 				AllowUnitCreationResult moduleResult = creationDefault;
-				if (!DispatchCoreModule(invocation, module.descriptor, callin, name, &moduleResult, error))
+				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
+						callin, name, &moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					creationAggregate = moduleResult;
