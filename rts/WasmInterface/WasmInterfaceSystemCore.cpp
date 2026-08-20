@@ -101,12 +101,15 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
 		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
 
-	std::vector<CoreCallinInvocation> invocations;
-	invocations.reserve(3);
+	// At most rules + gaia + UI are eligible for one engine event. Keep this
+	// entirely on the stack: a heap allocation would dominate the ~10 ns Core
+	// host->guest transport floor we are trying to preserve.
+	std::array<CoreCallinInvocation, 3> invocations{};
+	std::size_t invocationCount = 0;
 	const auto& primary = synced ? syncedEnvironments : unsyncedEnvironments;
 	for (const WasmEnvironment environment : primary) {
 		if (system->HasCoreModules(environment))
-			invocations.push_back({environment, query, true});
+			invocations[invocationCount++] = {environment, query, true};
 	}
 
 	std::optional<UnitCreatedQuery> uiUnitCreated;
@@ -131,14 +134,15 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 			}
 		}
 		if (includeUi)
-			invocations.push_back({WasmEnvironment::UI, uiQuery, true});
+			invocations[invocationCount++] = {WasmEnvironment::UI, uiQuery, true};
 	}
 
-	if (invocations.empty())
+	if (invocationCount == 0)
 		return true;
 
-	const bool success = system->DispatchCoreCallin(name, invocations, nullptr,
-		nativeResult, handled, error);
+	const bool success = system->DispatchCoreCallin(name,
+		std::span<const CoreCallinInvocation>(invocations.data(), invocationCount),
+		nullptr, nativeResult, handled, error);
 	if (!synced) {
 		// Unsynced faults are isolated/removable. Keep the system's descriptor
 		// inventory in sync with the host registry immediately so a faulted UI or
@@ -169,7 +173,7 @@ bool WasmInterfaceSystem::HasComponentModules(WasmEnvironment environment) const
 }
 
 bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
-	const std::vector<CoreCallinInvocation>& invocations,
+	std::span<const CoreCallinInvocation> invocations,
 	WasmValue* valueResult, void* nativeResult, bool& handled,
 	std::string& error)
 {
