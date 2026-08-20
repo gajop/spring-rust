@@ -16,6 +16,13 @@ pub use unit_defs::*;
 pub use units_commands::*;
 pub use units_query::*;
 
+/// Generated production-fast Core imports and direct wrappers. This stays
+/// namespaced so specialized hand-written hot APIs remain the normal surface.
+#[doc(hidden)]
+pub mod generated {
+    include!(concat!(env!("OUT_DIR"), "/core_generated.rs"));
+}
+
 pub const ABI_VERSION: u32 = 1;
 pub const POSITION_MID: u32 = 1 << 0;
 pub const POSITION_AIM: u32 = 1 << 1;
