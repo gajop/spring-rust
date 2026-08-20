@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 
 class CFeature;
 class CProjectile;
@@ -40,6 +41,24 @@ public:
 
 private:
 	ContextState previous;
+};
+
+// Unlike ScopedContext(false), this leaves an existing perspective untouched
+// when disabled. Core host imports use it so non-UI modules neither pay for a
+// thread-local context swap nor accidentally widen a nested UI perspective.
+class ConditionalScopedContext {
+public:
+	explicit ConditionalScopedContext(bool enabled)
+	{
+		if (enabled)
+			context.emplace(true);
+	}
+
+	ConditionalScopedContext(const ConditionalScopedContext&) = delete;
+	ConditionalScopedContext& operator=(const ConditionalScopedContext&) = delete;
+
+private:
+	std::optional<ScopedContext> context;
 };
 
 bool Active();
