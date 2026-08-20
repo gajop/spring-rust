@@ -23,23 +23,6 @@ WasmInterfaceSystem*& ActiveCoreSystem()
 constexpr std::size_t CORE_CALLIN_COUNT =
 	static_cast<std::size_t>(WasmCoreCallin::DrawWorld) + 1;
 
-const recoil::wasm::generated::CallinDescriptor* FindCoreCallin(WasmCoreCallin callin)
-{
-	static const std::array<const recoil::wasm::generated::CallinDescriptor*, CORE_CALLIN_COUNT>
-		index = [] {
-			std::array<const recoil::wasm::generated::CallinDescriptor*, CORE_CALLIN_COUNT> entries{};
-			for (const auto& descriptor : recoil::wasm::generated::kCallins) {
-				const WasmCoreCallin key = WasmCoreHost::ResolveCallin(descriptor.name);
-				const std::size_t slot = static_cast<std::size_t>(key);
-				if (key != WasmCoreCallin::Invalid && slot < entries.size())
-					entries[slot] = &descriptor;
-			}
-			return entries;
-		}();
-	const std::size_t slot = static_cast<std::size_t>(callin);
-	return slot < index.size() ? index[slot] : nullptr;
-}
-
 enum class CoreAggregation : std::uint8_t {
 	Ignore,
 	OrTrue,
@@ -73,6 +56,36 @@ CoreResultKind ResolveResultKind(std::string_view value, CoreAggregation aggrega
 	if (value == "DamageCallinResult") return CoreResultKind::Damage;
 	if (value == "AllowUnitCreationResult") return CoreResultKind::AllowUnitCreation;
 	return CoreResultKind::Unsupported;
+}
+
+struct CoreCallinPolicy {
+	const recoil::wasm::generated::CallinDescriptor* descriptor = nullptr;
+	CoreAggregation aggregation = CoreAggregation::Unsupported;
+	CoreResultKind resultKind = CoreResultKind::Unsupported;
+};
+
+const CoreCallinPolicy* FindCoreCallinPolicy(WasmCoreCallin callin)
+{
+	static const std::array<CoreCallinPolicy, CORE_CALLIN_COUNT> index = [] {
+		std::array<CoreCallinPolicy, CORE_CALLIN_COUNT> entries{};
+		for (const auto& descriptor : recoil::wasm::generated::kCallins) {
+			const WasmCoreCallin key = WasmCoreHost::ResolveCallin(descriptor.name);
+			const std::size_t slot = static_cast<std::size_t>(key);
+			if (key == WasmCoreCallin::Invalid || slot >= entries.size())
+				continue;
+			const CoreAggregation aggregation = ResolveAggregation(descriptor.aggregation);
+			entries[slot] = {
+				.descriptor = &descriptor,
+				.aggregation = aggregation,
+				.resultKind = ResolveResultKind(descriptor.result, aggregation),
+			};
+		}
+		return entries;
+	}();
+	const std::size_t slot = static_cast<std::size_t>(callin);
+	if (slot >= index.size() || index[slot].descriptor == nullptr)
+		return nullptr;
+	return &index[slot];
 }
 
 bool ResolveCoreDispatchSide(WasmCoreCallin callin, bool& synced)
@@ -237,14 +250,15 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 		return false;
 	}
 
-	const auto* descriptor = FindCoreCallin(callin);
-	if (descriptor == nullptr) {
+	const CoreCallinPolicy* policy = FindCoreCallinPolicy(callin);
+	if (policy == nullptr) {
 		error = "Core Wasm callin has no generated descriptor: " +
 			std::string(diagnosticName);
 		return false;
 	}
-	const CoreAggregation aggregation = ResolveAggregation(descriptor->aggregation);
-	const CoreResultKind resultKind = ResolveResultKind(descriptor->result, aggregation);
+	const auto* descriptor = policy->descriptor;
+	const CoreAggregation aggregation = policy->aggregation;
+	const CoreResultKind resultKind = policy->resultKind;
 	if (aggregation == CoreAggregation::Unsupported || resultKind == CoreResultKind::Unsupported) {
 		error = "native Core aggregation is not implemented for callin " +
 			std::string(diagnosticName) + " (result " + descriptor->result +
