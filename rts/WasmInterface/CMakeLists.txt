@@ -34,6 +34,7 @@ foreach(RECOIL_WASM_CORE_GENERATED_SOURCE
 	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedOptionBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedVariableBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedVariableOutputBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedVariableIoBindings.cpp
 )
 	if(EXISTS ${RECOIL_WASM_CORE_GENERATED_SOURCE})
 		list(APPEND sources_engine_WasmInterface ${RECOIL_WASM_CORE_GENERATED_SOURCE})
