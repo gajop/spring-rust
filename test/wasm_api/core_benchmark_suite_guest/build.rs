@@ -21,11 +21,16 @@ fn main() {
     println!("cargo:rustc-link-arg=--no-growable-memory");
 
     println!("cargo:rustc-check-cfg=cfg(benchmark_callin_unimplemented)");
+    println!("cargo:rustc-check-cfg=cfg(benchmark_callin_consoleline)");
+    println!("cargo:rustc-check-cfg=cfg(benchmark_callin_commandnotify)");
     println!("cargo:rustc-check-cfg=cfg(benchmark_context_unsynced)");
     println!("cargo:rustc-check-cfg=cfg(benchmark_context_ui)");
 
-    if env::var("SPRING_BENCHMARK_CALLIN_VARIANT").as_deref() == Ok("unimplemented") {
-        println!("cargo:rustc-cfg=benchmark_callin_unimplemented");
+    match env::var("SPRING_BENCHMARK_CALLIN_VARIANT").as_deref() {
+        Ok("unimplemented") => println!("cargo:rustc-cfg=benchmark_callin_unimplemented"),
+        Ok("consoleline") => println!("cargo:rustc-cfg=benchmark_callin_consoleline"),
+        Ok("commandnotify") => println!("cargo:rustc-cfg=benchmark_callin_commandnotify"),
+        _ => {}
     }
     match env::var("SPRING_BENCHMARK_CONTEXT").as_deref() {
         Ok("unsynced_gadget") => println!("cargo:rustc-cfg=benchmark_context_unsynced"),
