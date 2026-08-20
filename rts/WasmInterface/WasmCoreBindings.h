@@ -63,6 +63,8 @@ bool RegisterGfxImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterProfilingImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterConfigImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterBenchmarkImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
@@ -89,9 +91,6 @@ public:
 			return false;
 		}
 
-		// Compile/register only generated classes accepted by the executable
-		// fast-path registry. Allocation-heavy variable-input renderers remain
-		// codegen scaffolding until they have reviewed low-allocation lowering.
 		wasmtime_linker_allow_shadowing(linker, true);
 #if defined(RECOIL_WASM_CORE_GENERATED_BINDINGS)
 		if (!generated::RegisterGeneratedImports(linker, &host, error))
@@ -105,10 +104,6 @@ public:
 		if (!generated::RegisterGeneratedVariableOutputImports(linker, &host, error))
 			return false;
 #endif
-		// Rules/gaia keep the hand-specialized scalar floor. UI deliberately
-		// retains the generated definitions so every scalar import crosses the
-		// visibility-aware guard rather than shadowing it with a legacy fast
-		// callback that predates per-module read perspectives.
 		if (host.environment != WasmEnvironment::UI &&
 			!RegisterFastImports(linker, &host, error))
 			return false;
@@ -125,6 +120,8 @@ public:
 		if (!RegisterGfxImports(linker, &host, error))
 			return false;
 		if (!RegisterProfilingImports(linker, &host, error))
+			return false;
+		if (!RegisterConfigImports(linker, &host, error))
 			return false;
 		return RegisterBenchmarkImports(linker, &host, error);
 	}
