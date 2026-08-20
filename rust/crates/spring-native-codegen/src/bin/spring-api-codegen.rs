@@ -19,6 +19,8 @@ mod model {
 mod render_core_wasm;
 #[path = "../render_core_wasm_host.rs"]
 mod render_core_wasm_host;
+#[path = "../render_core_wasm_registry.rs"]
+mod render_core_wasm_registry;
 
 fn main() {
     if let Err(error) = run() {
@@ -130,8 +132,9 @@ fn run() -> Result<()> {
         &(serde_json::to_string_pretty(&model.callins)? + "\n"),
     )?;
 
-    // Runtime-neutral Core ABI plan plus the conservative executable callback
-    // subset. The latter excludes variable ownership/lifetime shapes.
+    // Runtime-neutral Core ABI plan plus the executable callback subset. The
+    // validator registry is deliberately derived from executable callbacks,
+    // not from the broader diagnostic/planned inventory.
     write(
         &arguments.output.join("core-abi.json"),
         &render_core_wasm::render_json(&model)?,
@@ -139,6 +142,10 @@ fn run() -> Result<()> {
     write(
         &arguments.output.join("WasmCoreAbiInventory.h"),
         &render_core_wasm::render_inventory_header(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedRegistry.h"),
+        &render_core_wasm_registry::render(&model),
     )?;
     write(
         &arguments.output.join("WasmCoreGeneratedBindings.h"),
