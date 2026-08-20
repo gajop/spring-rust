@@ -6,7 +6,6 @@
 #include <array>
 #include <optional>
 #include <string_view>
-#include <unordered_map>
 
 #include "NativeInterface/WasmUiVisibility.h"
 #include "NativeInterface/api/Callins.h"
@@ -21,18 +20,24 @@ WasmInterfaceSystem*& ActiveCoreSystem()
 	return system;
 }
 
-const recoil::wasm::generated::CallinDescriptor* FindCoreCallin(std::string_view name)
+constexpr std::size_t CORE_CALLIN_COUNT =
+	static_cast<std::size_t>(WasmCoreCallin::DrawWorld) + 1;
+
+const recoil::wasm::generated::CallinDescriptor* FindCoreCallin(WasmCoreCallin callin)
 {
-	static const std::unordered_map<std::string_view,
-		const recoil::wasm::generated::CallinDescriptor*> index = [] {
-		std::unordered_map<std::string_view,
-			const recoil::wasm::generated::CallinDescriptor*> entries;
-		for (const auto& callin : recoil::wasm::generated::kCallins)
-			entries.emplace(callin.name, &callin);
-		return entries;
-	}();
-	const auto iter = index.find(name);
-	return iter == index.end() ? nullptr : iter->second;
+	static const std::array<const recoil::wasm::generated::CallinDescriptor*, CORE_CALLIN_COUNT>
+		index = [] {
+			std::array<const recoil::wasm::generated::CallinDescriptor*, CORE_CALLIN_COUNT> entries{};
+			for (const auto& descriptor : recoil::wasm::generated::kCallins) {
+				const WasmCoreCallin key = WasmCoreHost::ResolveCallin(descriptor.name);
+				const std::size_t slot = static_cast<std::size_t>(key);
+				if (key != WasmCoreCallin::Invalid && slot < entries.size())
+					entries[slot] = &descriptor;
+			}
+			return entries;
+		}();
+	const std::size_t slot = static_cast<std::size_t>(callin);
+	return slot < index.size() ? index[slot] : nullptr;
 }
 
 bool Is(std::string_view value, const char* expected)
@@ -187,9 +192,9 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		error = "unknown Core Wasm callin: " + std::string(name);
 		return false;
 	}
-	const auto* descriptor = FindCoreCallin(name);
+	const auto* descriptor = FindCoreCallin(callin);
 	if (descriptor == nullptr) {
-		error = "unknown generated Core Wasm callin: " + std::string(name);
+		error = "Core Wasm callin has no generated descriptor: " + std::string(name);
 		return false;
 	}
 
