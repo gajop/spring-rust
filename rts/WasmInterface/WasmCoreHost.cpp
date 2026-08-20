@@ -12,6 +12,7 @@
 #include "WasmCoreAbi.h"
 #include "WasmCoreBindings.h"
 #include "WasmCoreValidation.h"
+#include "WasmCoreVariableCallins.h"
 #include "WasmResources.h"
 
 namespace {
@@ -36,7 +37,8 @@ bool KnownCallin(std::string_view name)
 {
 	return name == "GameFrame" || name == "GameFramePost" || name == "Update" ||
 		name == "UnitCreated" || name == "UnitPreDamaged" ||
-		name == "AllowUnitCreation" || name == "DrawWorld";
+		name == "AllowUnitCreation" || name == "AddConsoleLine" ||
+		name == "CommandNotify" || name == "DrawWorld";
 }
 
 } // namespace
@@ -72,6 +74,7 @@ struct WasmCoreHost::Backend {
 	WasmExecutionBudget budget;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	recoil::wasm::core::InstanceBindings bindings;
+	recoil::wasm::core::VariableCallinBindings variableCallins;
 	wasmtime_store_t* store = nullptr;
 	wasmtime_linker_t* linker = nullptr;
 	wasmtime_module_t* module = nullptr;
@@ -193,9 +196,14 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		error = "Core Wasm start trapped: " + recoil::wasm::core::TrapMessage(trap);
 		return false;
 	}
-	if (!backend->bindings.Bind(wasmtime_store_context(backend->store),
-		backend->instance, error)) {
+	auto* context = wasmtime_store_context(backend->store);
+	if (!backend->bindings.Bind(context, backend->instance, error)) {
 		error = "Core Wasm binding failed: " + error;
+		return false;
+	}
+	if (!backend->variableCallins.Bind(context, backend->instance,
+			backend->bindings.Host().memory, error)) {
+		error = "Core Wasm variable callin binding failed: " + error;
 		return false;
 	}
 #else
@@ -354,6 +362,8 @@ bool WasmCoreHost::HasCallin(std::string_view name) const
 	if (name == "UnitCreated") return backend->bindings.HasUnitCreated();
 	if (name == "UnitPreDamaged") return backend->bindings.HasUnitPreDamaged();
 	if (name == "AllowUnitCreation") return backend->bindings.HasAllowUnitCreation();
+	if (name == "AddConsoleLine") return backend->variableCallins.HasAddConsoleLine();
+	if (name == "CommandNotify") return backend->variableCallins.HasCommandNotify();
 	if (name == "DrawWorld") return backend->bindings.HasDrawWorld();
 #endif
 	return false;
@@ -487,6 +497,54 @@ bool WasmCoreHost::InvokeAllowUnitCreation(const void* query, void* result,
 #endif
 }
 
+bool WasmCoreHost::InvokeAddConsoleLine(const void* query, void* result,
+	std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* typed = static_cast<const AddConsoleLineQuery*>(query);
+	if (typed == nullptr) {
+		error = "Core Wasm AddConsoleLine query is null";
+		return false;
+	}
+	BoolCallinResult fallback{};
+	auto* typedResult = static_cast<BoolCallinResult*>(result);
+	if (typedResult == nullptr)
+		typedResult = &fallback;
+	return backend->variableCallins.AddConsoleLine(
+		wasmtime_store_context(backend->store), backend->bindings.Host().memory,
+		*typed, *typedResult, error);
+#else
+	(void)query;
+	(void)result;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
+bool WasmCoreHost::InvokeCommandNotify(const void* query, void* result,
+	std::string& error)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* typed = static_cast<const CommandNotifyQuery*>(query);
+	if (typed == nullptr) {
+		error = "Core Wasm CommandNotify query is null";
+		return false;
+	}
+	BoolCallinResult fallback{};
+	auto* typedResult = static_cast<BoolCallinResult*>(result);
+	if (typedResult == nullptr)
+		typedResult = &fallback;
+	return backend->variableCallins.CommandNotify(
+		wasmtime_store_context(backend->store), backend->bindings.Host().memory,
+		*typed, *typedResult, error);
+#else
+	(void)query;
+	(void)result;
+	error = "Wasmtime is unavailable for the Core Wasm host";
+	return false;
+#endif
+}
+
 bool WasmCoreHost::InvokeDrawWorld(std::string& error)
 {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -533,6 +591,10 @@ bool WasmCoreHost::Invoke(std::string_view name, const void* query, void* result
 		success = InvokeUnitPreDamaged(query, result, error);
 	else if (name == "AllowUnitCreation")
 		success = InvokeAllowUnitCreation(query, result, error);
+	else if (name == "AddConsoleLine")
+		success = InvokeAddConsoleLine(query, result, error);
+	else if (name == "CommandNotify")
+		success = InvokeCommandNotify(query, result, error);
 	else if (name == "DrawWorld")
 		success = InvokeDrawWorld(error);
 
