@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -67,7 +68,7 @@ public:
 		bool contributesResult = true;
 	};
 	bool DispatchCoreCallin(std::string_view name,
-		const std::vector<CoreCallinInvocation>& invocations,
+		std::span<const CoreCallinInvocation> invocations,
 		WasmValue* valueResult, void* nativeResult, bool& handled,
 		std::string& error);
 
