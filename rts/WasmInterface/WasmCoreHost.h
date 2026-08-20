@@ -78,6 +78,8 @@ private:
 	bool InvokeUnitCreated(const void* query, std::string& error);
 	bool InvokeUnitPreDamaged(const void* query, void* result, std::string& error);
 	bool InvokeAllowUnitCreation(const void* query, void* result, std::string& error);
+	bool InvokeAddConsoleLine(const void* query, void* result, std::string& error);
+	bool InvokeCommandNotify(const void* query, void* result, std::string& error);
 	bool InvokeDrawWorld(std::string& error);
 	bool ResetBudgetImpl(std::string& error);
 	bool FuelRemainingImpl(std::uint64_t& fuel, std::string& error) const;
