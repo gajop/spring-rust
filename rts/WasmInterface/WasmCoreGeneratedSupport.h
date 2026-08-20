@@ -77,9 +77,10 @@ private:
 		}
 	}
 
-	// Match the Component adapter's capability boundary without adding a heap
-	// allocation to the hostcall fast path.
-	WasmUiVisibility::ScopedContext uiContext;
+	// UI modules install the same perspective as the Component adapter. For
+	// non-UI modules this is a literal no-op, preserving any outer restricted
+	// context and avoiding a thread-local save/restore on the hot path.
+	WasmUiVisibility::ConditionalScopedContext uiContext;
 	WasmExecutionBudget* budget = nullptr;
 	bool entered = false;
 	std::string ownedError;
