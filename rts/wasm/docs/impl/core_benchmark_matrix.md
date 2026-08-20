@@ -1,166 +1,196 @@
 # Core-Wasm benchmark matrix
 
-The purpose of these benchmarks is not to compare generic Wasm throughput. They
-measure the costs that matter to Spring: frequent host/guest crossings, native
-API marshalling, and cache-cold re-entry after renderer work.
+These benchmarks measure the costs that matter to Spring: frequent host/guest crossings, NativeInterface marshalling, variable payloads, callbacks/re-entry, and cache-cold entry after renderer work.
 
-Existing measurements on the project provide the initial floor:
+Existing project measurements provide the initial naked floor:
 
 - raw Wasmtime Core guest -> host unchecked: about 4 ns/call;
 - raw Wasmtime Core host -> guest unchecked: about 11 ns/call;
 - Rust typed Core measurements are in the same performance class;
 - typed Component Model crossings were several times more expensive.
 
-Do not compare new engine measurements directly to the naked 4/11 ns numbers:
-the engine paths deliberately include Spring host-work/re-entry policy and the
-actual NativeInterface function.
+Do not compare engine measurements directly to naked 4/11 ns calls: engine paths intentionally include Spring dispatch/safety policy and actual NativeInterface work.
 
-## Build variants
+## Decision comparisons
 
-Benchmark the exact same guest/module under:
+Raw columns may include Lua, native, dynamic Component Model, typed Component Model, and Core Wasm.
 
-1. `Core/raw`: existing naked Wasmtime Core microbenchmark.
-2. `Core/Spring scalar`: `get-unit-def-id` or `get-unit-team`.
-3. `Core/Spring scalar-f32`: `get-unit-experience`.
-4. `Core/Spring fixed POD`: `get-unit-position`, `get-unit-health`.
-5. `Core/Spring list`: `get-team-units` with pre-sized output.
-6. `Core/Spring list probe+fill`: zero-capacity size probe followed by exact fill.
-7. `Core/Spring bytes`: unit-def name with pre-sized output.
-8. Component C dynamic, if retained for reference.
-9. Component Rust typed, if retained for reference.
-10. Native C++ direct call.
-11. Lua equivalent where meaningful.
+Decision ratios are only:
 
-For Wasmtime Core, measure both fuel disabled and fuel enabled with the intended
-production fuel configuration. Fuel instrumentation affects guest execution,
-not merely crossings, and should never be inferred from a boundary-only test.
+- Lua vs native;
+- Lua vs Core;
+- Core vs native;
+- dynamic Component Model vs Core.
 
-## Guest -> host callouts
+Typed Component Model remains a historical/reference column, not a decision ratio.
 
-Use dependency chains so the compiler/CPU cannot overlap independent calls.
-Report median, p95 and ns/call for at least:
+## Representative ABI-shape matrix
+
+Do not add a benchmark for every API. Add one when it exercises a materially different transport shape.
+
+### Guest -> host callouts
+
+1. **Direct scalar:** `get-unit-def-id` / `get-unit-team` (`i32 -> packed i64`).
+2. **Direct float result:** `get-unit-experience` (`i32 -> packed f32/status`).
+3. **Fixed POD result:** `get-unit-position` (12 bytes), `get-unit-health` (20 bytes).
+4. **Flat small list:** pre-sized team-unit output.
+5. **Flat large list:** same ABI with enough elements for copy cost to dominate.
+6. **Probe + fill list:** zero-capacity size query then exact fill.
+7. **Raw byte/string output:** unit-def name into caller-owned storage.
+8. **Nested list/records:** `GetUnitCommands` including command records and parameter arrays.
+9. **Spatial list:** real area/radius query into reused output storage.
+10. **Variable input + mutation:** RulesParam/string or command-order path.
+11. **Callback/re-entry:** heightmap and Gfx callback paths.
+12. **Mixed variable input/output:** add only when a production executable binding exists.
+
+### Host -> guest callins
+
+1. **Empty:** empty export / `DrawWorld()` control.
+2. **Scalar:** `GameFrame(i32)`, `Update(f32)`.
+3. **Fixed multi-field:** `UnitCreated(4 x i32)`.
+4. **Many args + fixed result:** `UnitPreDamaged(...)->packed f32 pair`.
+5. **Fixed control result:** `AllowUnitCreation(...)->flags`.
+6. **Variable strings:** `AddConsoleLine` (two byte strings + level).
+7. **Fixed record + variable flat list:** `CommandNotify` (command header + `f32[]`).
+8. **Missing export:** verifies optional-dispatch floor.
+9. **Multi-module fan-out:** four-module callin.
+10. **Cache-cold:** `DrawWorld`, `GameFrame`, and empty export after renderer/cache eviction.
+
+The two variable callins use a guest-owned scratch region negotiated once at module binding. Their steady-state Core path should contain one bounded serialization and one unchecked host -> guest call, with no host heap allocation.
+
+## `list<string>` rule
+
+Do **not** benchmark or ship a generic `list<string>` lowering that constructs a host `vector<string>` or performs one allocation per element. A slow generic implementation would only measure an ABI we already know we do not want.
+
+When a real API requires `list<string>`, first implement a reviewed flat representation:
+
+- one packed byte blob;
+- one offset/length descriptor array;
+- caller-owned/reused storage where practical;
+- if NativeInterface requires `const char**`, construct only the pointer table, with no per-element host string ownership.
+
+Then add one representative `list<string>` row. Measure both a small list and a payload large enough for byte-copy cost to dominate, but do not add many near-duplicates.
+
+## Callout iteration counts
+
+Use dependency chains so the compiler/CPU cannot overlap independent calls. Report median/p95/p99 and ns/call for at least:
 
 - 1 call;
 - 10 calls;
 - 100 calls;
 - 10,000 calls;
-- 1,000,000 calls in a synthetic benchmark.
+- 1,000,000 calls for synthetic floor tests.
 
-Measure:
+For list/string tests record payload bytes/elements separately. Report copy cost per byte/element in addition to total latency.
 
-```
-get-unit-def-id(unit)                         scalar i32 -> packed i64
-get-unit-experience(unit)                     scalar i32 -> packed f32/status
-get-unit-position(unit,false,false)            12-byte output
-get-unit-health(unit)                          20-byte output
-get-team-unit-count(team)                      scalar count
-get-team-units(team, pre-sized buffer)         list, one crossing
-get-team-units(team, probe + exact fill)        list, two crossings
-get-unit-def-name(pre-sized byte buffer)        variable bytes
-```
+## Variable callin timing
 
-For list tests record result count separately. Copy cost should be reported per
-element in addition to total call latency.
+The focused runner currently has inner `callin_string` and `callin_command` rows.
 
-## Host -> guest callins
+These are useful diagnostics but not yet strict cross-backend ratios:
 
-Measure cached exports only. No export lookup/type reflection may occur inside
-the timed loop.
+- Core timing includes scratch serialization + unchecked guest call;
+- Lua's central timer begins after its arguments have already been pushed.
 
-```
-GameFrame(i32)
-GameFramePost(i32)
-Update(f32)
-UnitCreated(4 x i32)
-UnitPreDamaged(10 args -> packed f32 pair)
-AllowUnitCreation(8 args -> i32 flags)
-DrawWorld()
-```
+The recorder reserves `callin_string_event` and `callin_command_event` for an identical outer event boundary. Use those outer rows for the actual Lua-vs-Core decision ratio once wired. Keep inner rows as transport diagnostics.
 
-Run an empty handler first, then a handler containing realistic Rust logic.
-This separates runtime boundary cost from guest work.
+## Core transport-ceiling rows
+
+`core_ceiling_*` rows intentionally measure a different question: the practical Core floor when caller-owned storage/probes can be amortized. Do not mix them into high-level API ratios.
+
+Current representative ceiling shapes:
+
+- fixed struct;
+- borrowed string input;
+- borrowed `f32[]` input;
+- reusable string output;
+- reusable flat list output;
+- reusable nested `UnitCommand[]` wire output;
+- reusable spatial list output.
+
+A future flat `list<string>` implementation should get one ceiling row as well.
 
 ## Cache-cold entry
 
-The earlier Component measurements showed a multi-microsecond first call after
-large renderer/cache activity. Core ABI savings cannot be assumed to fix this;
-treat it as a separate working-set experiment.
+The previous Component measurements showed a multi-microsecond first call after renderer/cache activity. Core boundary savings cannot be assumed to eliminate this; treat it separately.
 
-For each runtime/call path, record:
+For each path record:
 
 1. immediate repeated call (hot);
 2. call after touching 64 MiB sequentially;
 3. call after touching 256 MiB sequentially;
-4. call after the actual renderer world-draw workload;
+4. call after actual renderer world-draw work;
 5. immediate second call after each cold case.
 
 Primary callins:
 
 - `DrawWorld`;
-- `GameFrame` as a non-render control;
-- an empty Core export as the absolute runtime-entry control.
+- `GameFrame` as non-render control;
+- empty Core export as runtime-entry control.
 
-Record at least 10,000 samples for synthetic eviction and enough real frames to
-show the distribution. Report p50/p95/p99 and maximum, not only the mean.
+Report p50/p95/p99/max. If renderer-cold Core remains multi-microsecond, profile i-cache, dTLB/iTLB, LLC misses, branches, Wasmtime code/VMContext pages and engine dispatch working set.
 
-If Core remains multi-microsecond only after renderer activity, profile:
+## Memory-access variants
 
-- instruction-cache misses;
-- dTLB/iTLB misses;
-- LLC misses;
-- branch misses;
-- Wasmtime code/VMContext working-set pages;
-- engine callin dispatch working set.
-
-Linux `perf stat`/`perf record` around a deterministic replay is more useful
-here than another generic Wasm benchmark suite.
-
-## Memory access variants
-
-For fixed-output/list calls compare:
+For fixed/list calls compare:
 
 1. synced fixed memory: cached base + cached size;
-2. unsynced growable memory: Wasmtime base/size query each call;
-3. no-copy scalar result when semantically possible.
+2. unsynced growable memory: current Wasmtime base/size query;
+3. scalar no-memory result where semantics permit it.
 
-This directly measures the value of the fixed-memory synced invariant.
+This measures the value of the synced fixed-memory invariant directly.
 
-## Policy-cost variants
+## Performance-cost axes
 
-Temporarily benchmark, but do not necessarily ship, these variations:
+Measure these separately; do not conflate their categories.
 
-- import re-entry/host-work guard enabled vs compiled out;
-- debug invariant checks vs release invariant checks;
-- fuel off vs on;
-- NaN canonicalization off vs on for a floating-point-heavy guest;
-- standard SIMD off vs on;
-- relaxed SIMD remains off for the synced production profile.
+### Sync cost
 
-The goal is to know the price of each safety/determinism property instead of
-removing one based on assumption.
+- NaN canonicalization off/on for FP-heavy guest;
+- standard SIMD on/off if useful as a control;
+- relaxed SIMD remains off for synced production unless deterministic semantics are established;
+- deterministic fuel only if it is intended for synced execution.
+
+### Safety cost
+
+- import re-entry/host-work guard enabled vs compiled-out control;
+- pointer/range/result validation where a comparable safe control can be written;
+- scratch re-entry protection;
+- debug-only invariant checks vs release.
+
+Safety controls are measurements, not a recommendation to ship unsafe paths.
+
+### Visibility cost
+
+- rules/gaia specialized scalar path;
+- UI generated path with visibility context/filtering.
+
+Do not label this a security benchmark. It measures game-information filtering.
+
+### Security cost
+
+Benchmark only defenses that actually concern sandbox/OS escape and can add recurring runtime cost. Load-time import allow-listing, absence of WASI and similar one-time policy checks do not belong in nanosecond hot-path tables.
+
+## Fuel
+
+Measure fuel-disabled and fuel-enabled configurations only if fuel is a realistic production option. Fuel instrumentation affects guest execution, not merely crossing overhead, so include realistic compute workloads in addition to boundary-only tests.
 
 ## Runtime comparison later
 
-Once Spring Core ABI is stable, port this exact matrix to WAMR rather than using
-CoreMark as the decision benchmark. Minimum useful comparison:
+Once the Spring Core ABI is stable, port this exact matrix to WAMR rather than choosing from CoreMark alone. Minimum useful comparison:
 
-- Wasmtime current Core backend;
+- Wasmtime Core;
 - WAMR AOT quick/native entries;
 - WAMR LLVM JIT if appropriate.
 
-The guest `.wasm`, Spring ABI signatures, semantic test inputs and expected
-outputs should be identical. Runtime-specific AOT artifacts are disposable
-cache/build products and must not become the content ABI.
+Guest `.wasm`, Spring ABI signatures, semantic inputs and expected outputs must remain identical. Runtime-specific AOT artifacts are disposable build/cache products.
 
 ## Acceptance guidance
 
-Treat runtime-boundary differences in absolute frame cost. Examples:
+Always translate a nanosecond difference into frame cost:
 
 - 10 ns saved on 100 calls/frame = 1 microsecond/frame;
 - 10 ns saved on 10,000 calls/frame = 100 microseconds/frame;
-- one 5 microsecond cache-cold entry per frame can dominate hundreds of hot
-  scalar crossings.
+- one 5 microsecond cache-cold entry per frame can dominate hundreds of hot scalar crossings.
 
-For that reason, report both calls/frame and total microseconds/frame for at
-least one real game workload before changing runtime solely because of a
-microbenchmark ratio.
+Report both calls/frame and total microseconds/frame for at least one real game workload before changing runtime or adding ABI complexity based on a microbenchmark ratio.
