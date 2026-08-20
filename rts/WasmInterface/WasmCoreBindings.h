@@ -19,6 +19,7 @@ struct HostState {
 	Memory memory;
 	WasmExecutionBudget* budget = nullptr;
 	WasmEnvironment environment = WasmEnvironment::RulesSynced;
+	std::uint32_t maxValueNodes = 1u << 20;
 	bool fixedMemory = false;
 	wasmtime_func_t callbackDispatch{};
 	bool callbackDispatchBound = false;
@@ -76,12 +77,14 @@ class InstanceBindings {
 public:
 	explicit InstanceBindings(NativeInterface* nativeInterface,
 		WasmExecutionBudget* executionBudget = nullptr, bool fixedMemory = false,
-		WasmEnvironment environment = WasmEnvironment::RulesSynced)
+		WasmEnvironment environment = WasmEnvironment::RulesSynced,
+		std::uint32_t maxValueNodes = 1u << 20)
 	{
 		host.native = nativeInterface;
 		host.budget = executionBudget;
 		host.fixedMemory = fixedMemory;
 		host.environment = environment;
+		host.maxValueNodes = maxValueNodes;
 		if (fixedMemory)
 			host.memory.MarkStable();
 	}
