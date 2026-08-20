@@ -47,12 +47,18 @@ inline bool IsEnabled()
 	return enabled;
 }
 
-inline bool IsBackend(std::string_view backend)
+inline const std::string& ConfiguredBackend()
 {
 	static const std::string configured = [] {
 		const char* value = std::getenv("SPRING_NATIVE_BENCHMARK_BACKEND");
 		return value == nullptr ? std::string{} : std::string(value);
 	}();
+	return configured;
+}
+
+inline bool IsBackend(std::string_view backend)
+{
+	const std::string& configured = ConfiguredBackend();
 	if (configured == backend)
 		return true;
 	// Both Wasm alternate hosts are reached through the same engine call sites
@@ -117,7 +123,8 @@ inline bool IsTrackedTest(std::string_view test)
 	if (IsVariant("commandnotify"))
 		return test == "callin_command";
 	if (IsVariant("variable"))
-		return test == "callin_string" || test == "callin_command";
+		return test == "callin_string" || test == "callin_command" ||
+			test == "callin_string_event" || test == "callin_command_event";
 	// Update is dispatched unsynced-only. Its row comes from a dedicated run
 	// against an unsynced guest; recording it elsewhere times an engine path
 	// that reaches no module.
@@ -168,6 +175,18 @@ inline Token Begin(std::string_view backend, std::string_view test)
 		.start = Clock::now(),
 		.active = true,
 	};
+}
+
+inline Token BeginConfigured(std::string_view test)
+{
+	const std::string& backend = ConfiguredBackend();
+	if (backend == "lua")
+		return Begin("lua", test);
+	if (backend == "native")
+		return Begin("native", test);
+	if (backend == "wasm" || backend == "wasm_rust_typed" || backend == "wasm_core")
+		return Begin("wasm", test);
+	return {};
 }
 
 inline void End(Token token)
