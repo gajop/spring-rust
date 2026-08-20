@@ -31,6 +31,7 @@ inline constexpr std::string_view UnitsInfoModule = "spring:units-info";
 inline constexpr std::string_view UnitsQueryModule = "spring:units-query";
 inline constexpr std::string_view UnitDefsModule = "spring:unit-defs";
 inline constexpr std::string_view UnitsCommandsModule = "spring:units-commands";
+inline constexpr std::string_view UnitsPiecesModule = "spring:units-pieces";
 inline constexpr std::string_view UnitControlModule = "spring:unit-control";
 inline constexpr std::string_view TerrainControlModule = "spring:terrain-control";
 inline constexpr std::string_view GfxModule = "spring:gfx";
@@ -92,6 +93,11 @@ inline constexpr ImportDescriptor kImports[] = {
 	{UnitsCommandsModule, "get-unit-command-count", "i32->i64", AllEnvironmentMask},
 	{UnitsCommandsModule, "get-unit-commands", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 
+	// Reviewed flat list<string> result. The descriptor table and packed bytes
+	// are guest-owned; Core never materializes vector<string> or one allocation
+	// per name.
+	{UnitsPiecesModule, "get-unit-script-names-flat", "i32,i32,i32,i32,i32,i32->i32", AllEnvironmentMask},
+
 	{UnitControlModule, "give-order-to-unit", "i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 
 	{TerrainControlModule, "set-height-map", "f32,f32,f32,f32->i64", SyncedEnvironmentMask},
@@ -109,9 +115,6 @@ inline constexpr ImportDescriptor kImports[] = {
 	{RulesParamsModule, "get-unit-rules-param-f32", "i32,i32,i32->i64", AllEnvironmentMask},
 	{TerrainModule, "get-ground-orig-height", "f32,f32->i64", AllEnvironmentMask},
 
-	// Flat list<string> ABI: descriptor table + packed bytes + 8-byte metadata
-	// {required_count, required_bytes}. This deliberately avoids host string
-	// ownership and per-element allocations.
 	{ConfigModule, "get-log-sections-flat", "i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
 
 	{BenchmarkModule, "consume-string", "i32,i32->i64", AllEnvironmentMask},
