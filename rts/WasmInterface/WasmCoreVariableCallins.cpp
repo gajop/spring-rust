@@ -31,6 +31,17 @@ struct BenchmarkScope {
 	spring::benchmark_callins::Token token;
 };
 
+struct ScratchScope {
+	explicit ScratchScope(bool& inUse)
+		: inUse(inUse)
+	{
+		inUse = true;
+	}
+	~ScratchScope() { inUse = false; }
+
+	bool& inUse;
+};
+
 bool AddSize(std::size_t& value, std::size_t amount)
 {
 	if (amount > std::numeric_limits<std::size_t>::max() - value)
@@ -137,6 +148,11 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 		error = "Core AddConsoleLine export is unavailable";
 		return false;
 	}
+	if (scratchInUse) {
+		error = "nested Core variable callin would overwrite guest scratch";
+		return false;
+	}
+	ScratchScope scratchScope(scratchInUse);
 	BenchmarkScope benchmark("AddConsoleLine");
 	const std::string_view message = query.message == nullptr
 		? std::string_view{}
@@ -182,6 +198,11 @@ bool VariableCallinBindings::CommandNotify(wasmtime_context_t* context,
 		error = "Core CommandNotify export is unavailable";
 		return false;
 	}
+	if (scratchInUse) {
+		error = "nested Core variable callin would overwrite guest scratch";
+		return false;
+	}
+	ScratchScope scratchScope(scratchInUse);
 	BenchmarkScope benchmark("CommandNotify");
 	const NativeCallinCommand& command = query.command;
 	if (command.numParams != 0 && command.params == nullptr) {
