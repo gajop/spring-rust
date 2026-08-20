@@ -30,7 +30,7 @@ fn run_transport_ceiling(
     position: [f32; 3],
     scale: f64,
 ) -> spring::Result<()> {
-    // These rows deliberately reuse caller-owned buffers. They measure the
+    // These rows deliberately avoid per-call allocation. They measure the
     // steady-state Core transport path, not the ergonomic owned API's probing,
     // allocation or decoding costs.
     common::measure(
@@ -38,6 +38,28 @@ fn run_transport_ceiling(
         common::scaled_count(100_000, scale),
         || {
             spring::get_unit_health(unit_id)
+                .map(|value| black_box(value))
+                .map(|_| ())
+        },
+    )?;
+
+    const INPUT_STRING: &str = "core-transport-benchmark";
+    common::measure(
+        "core_ceiling_string_in_borrowed",
+        common::scaled_count(100_000, scale),
+        || {
+            spring::benchmark_consume_string(INPUT_STRING)
+                .map(|value| black_box(value))
+                .map(|_| ())
+        },
+    )?;
+
+    const INPUT_FLOATS: [f32; 8] = [0.25, 1.0, -2.0, 4.0, 8.0, 16.0, 32.0, 64.0];
+    common::measure(
+        "core_ceiling_f32_list_in_borrowed",
+        common::scaled_count(100_000, scale),
+        || {
+            spring::benchmark_consume_f32_list(&INPUT_FLOATS)
                 .map(|value| black_box(value))
                 .map(|_| ())
         },
