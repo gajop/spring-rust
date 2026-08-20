@@ -29,6 +29,14 @@ mod raw {
         ) -> i64;
     }
 
+    #[link(wasm_import_module = "spring:benchmark")]
+    extern "C" {
+        #[link_name = "consume-string"]
+        pub fn consume_string(pointer: i32, length: i32) -> i64;
+        #[link_name = "consume-f32-list"]
+        pub fn consume_f32_list(pointer: i32, count: i32) -> i64;
+    }
+
     #[link(wasm_import_module = "spring:rules-params")]
     extern "C" {
         #[link_name = "set-unit-rules-param-f32"]
@@ -84,13 +92,30 @@ fn bytes_parts(value: &[u8]) -> (i32, i32) {
 }
 
 #[inline]
-fn unpack_bool_local(packed: i64) -> Result<bool> {
+fn f32_parts(value: &[f32]) -> (i32, i32) {
+    if value.is_empty() {
+        return (0, 0);
+    }
+    let pointer = value.as_ptr() as usize;
+    debug_assert!(pointer <= u32::MAX as usize);
+    debug_assert!(value.len() <= u32::MAX as usize);
+    (pointer as u32 as i32, value.len() as u32 as i32)
+}
+
+#[inline]
+fn unpack_u32_local(packed: i64) -> Result<u32> {
     let packed = packed as u64;
     let status = (packed >> 32) as u32 as i32;
-    if status != 0 {
-        return Err(ApiError::new(status));
+    if status == 0 {
+        Ok(packed as u32)
+    } else {
+        Err(ApiError::new(status))
     }
-    match packed as u32 {
+}
+
+#[inline]
+fn unpack_bool_local(packed: i64) -> Result<bool> {
+    match unpack_u32_local(packed)? {
         0 => Ok(false),
         1 => Ok(true),
         _ => Err(ApiError::new(ErrorCode::Internal as i32)),
@@ -161,6 +186,36 @@ pub fn send_lua_ui_msg(message: &str, mode: &str) -> Result<bool> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (message, mode);
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+// Benchmark-only wrappers. They intentionally expose a no-allocation borrowed
+// input path so the suite can measure the Core variable-input transport floor.
+#[inline]
+pub fn benchmark_consume_string(value: &str) -> Result<u32> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let (pointer, length) = bytes_parts(value.as_bytes());
+        return unpack_u32_local(unsafe { raw::consume_string(pointer, length) });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = value;
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn benchmark_consume_f32_list(value: &[f32]) -> Result<u32> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let (pointer, count) = f32_parts(value);
+        return unpack_u32_local(unsafe { raw::consume_f32_list(pointer, count) });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = value;
         Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
     }
 }
