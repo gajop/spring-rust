@@ -89,13 +89,14 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		.newDamage = 0.0f,
 		.impulseMult = 1.0f,
 	};
-	AllowUnitCreationResult creationAggregate = {
+	AllowUnitCreationResult creationDefault = {
 		.error = nullptr,
 		.allow = true,
 		.dropOrder = true,
 	};
 	if (nativeResult != nullptr && Is(resultType, "AllowUnitCreationResult"))
-		creationAggregate = *static_cast<const AllowUnitCreationResult*>(nativeResult);
+		creationDefault = *static_cast<const AllowUnitCreationResult*>(nativeResult);
+	AllowUnitCreationResult creationAggregate = creationDefault;
 
 	for (const CoreCallinInvocation& invocation : invocations) {
 		const std::uint32_t environmentBit =
@@ -154,7 +155,11 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 			}
 
 			if (Is(resultType, "AllowUnitCreationResult") && Is(aggregation, "first")) {
-				AllowUnitCreationResult moduleResult = creationAggregate;
+				// `first` chooses the first returned result, but later modules are
+				// still invoked against the engine's original default. Feeding the
+				// first module's return into the next module would make transport
+				// ordering mutate the API input contract.
+				AllowUnitCreationResult moduleResult = creationDefault;
 				if (!DispatchCoreModule(invocation, module.descriptor, name, &moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
