@@ -52,6 +52,8 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
 bool RegisterUnitsQueryImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterUnitsQueryBorrowedImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterUnitDefsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterUnitsCommandsImports(wasmtime_linker_t* linker, HostState* state,
@@ -117,6 +119,8 @@ public:
 			!RegisterFastImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitsQueryImports(linker, &host, error))
+			return false;
+		if (!RegisterUnitsQueryBorrowedImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitDefsImports(linker, &host, error))
 			return false;
