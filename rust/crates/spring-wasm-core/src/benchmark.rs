@@ -1,6 +1,10 @@
-// Benchmark-critical Core-Wasm guest wrappers.  Timer/message functions are
-// instrumentation used by the shared benchmark suite; RulesParams and Terrain
-// are ordinary semantic API calls with a specialized fast lowering.
+// Benchmark-critical Core-Wasm guest wrappers. Timer/message functions are
+// instrumentation used by the shared benchmark suite; RulesParams, Terrain
+// and UnitControl are ordinary semantic API calls with specialized lowering.
+
+#[path = "unit_control.rs"]
+mod unit_control;
+pub use unit_control::*;
 
 use super::{ApiError, ErrorCode, Result};
 
@@ -86,14 +90,10 @@ fn unpack_f32_local(packed: i64) -> Result<f32> {
     }
 }
 
-/// Monotonic engine timer used by the benchmark suite. Host-side NativeInterface
-/// errors trap because there is no meaningful benchmark result after timer
-/// failure.
 #[inline]
 pub fn get_timer_micros() -> Result<u64> {
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: generated zero-argument numeric Core signature.
         return Ok(unsafe { raw::get_timer_micros() } as u64);
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -107,8 +107,6 @@ pub fn send_lua_rules_msg(message: &str) -> Result<bool> {
     #[cfg(target_arch = "wasm32")]
     {
         let (pointer, length) = bytes_parts(message.as_bytes());
-        // SAFETY: the string bytes remain live for the synchronous import and
-        // the host validates the complete range before constructing its C string.
         return unpack_bool_local(unsafe { raw::send_lua_rules_msg(pointer, length) });
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -124,7 +122,6 @@ pub fn send_lua_ui_msg(message: &str, mode: &str) -> Result<bool> {
     {
         let (message_pointer, message_length) = bytes_parts(message.as_bytes());
         let (mode_pointer, mode_length) = bytes_parts(mode.as_bytes());
-        // SAFETY: both byte slices remain live for the synchronous import.
         return unpack_bool_local(unsafe {
             raw::send_lua_ui_msg(
                 message_pointer,
@@ -151,8 +148,6 @@ pub fn set_unit_rules_param_f32(
     #[cfg(target_arch = "wasm32")]
     {
         let (name_pointer, name_length) = bytes_parts(name.as_bytes());
-        // SAFETY: name is copied/validated by the host before the mutating
-        // NativeInterface call is made.
         return unpack_bool_local(unsafe {
             raw::set_unit_rules_param_f32(unit_id, name_pointer, name_length, value, los)
         });
@@ -169,7 +164,6 @@ pub fn get_unit_rules_param_f32(unit_id: i32, name: &str) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
         let (name_pointer, name_length) = bytes_parts(name.as_bytes());
-        // SAFETY: name remains live for the synchronous import.
         return unpack_f32_local(unsafe {
             raw::get_unit_rules_param_f32(unit_id, name_pointer, name_length)
         });
@@ -185,7 +179,6 @@ pub fn get_unit_rules_param_f32(unit_id: i32, name: &str) -> Result<f32> {
 pub fn get_ground_orig_height(x: f32, z: f32) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: generated scalar-only Core signature.
         return unpack_f32_local(unsafe { raw::get_ground_orig_height(x, z) });
     }
     #[cfg(not(target_arch = "wasm32"))]
