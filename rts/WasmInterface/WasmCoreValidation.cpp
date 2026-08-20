@@ -155,8 +155,6 @@ bool ReadLimits(Reader& reader, std::uint64_t configuredMaximum, bool memory,
 		return false;
 	}
 
-	// Bit 0 means a maximum is present. Bit 1 is shared memory. Bit 2 is
-	// memory64 and is deliberately rejected by the wasm32 Spring ABI.
 	const std::uint64_t allowedFlags = memory ? 0x03u : 0x01u;
 	if ((flags & ~allowedFlags) != 0) {
 		error = memory ? "Core Wasm memory64/unsupported memory flags are not allowed" :
@@ -210,8 +208,11 @@ bool ValidateImportSection(Reader& section, WasmEnvironment environment,
 			error = "truncated Core Wasm import";
 			return false;
 		}
-		const ImportDescriptor* descriptor = FindImport(module, name);
-		if (kind != 0 || descriptor == nullptr || !ImportAllowed(module, name, environment)) {
+		const ImportLookup descriptor = LookupImport(module, name);
+		const std::uint32_t environmentBit =
+			1u << static_cast<std::uint32_t>(environment);
+		if (kind != 0 || !descriptor.found ||
+			(descriptor.environmentMask & environmentBit) == 0) {
 			error = "unknown or unavailable Core Wasm import: " + module + "." + name;
 			return false;
 		}
@@ -222,9 +223,9 @@ bool ValidateImportSection(Reader& section, WasmEnvironment environment,
 			return false;
 		}
 		const std::string actualSignature = SignatureString(types[static_cast<std::size_t>(typeIndex)]);
-		if (actualSignature != descriptor->signature) {
+		if (actualSignature != descriptor.signature) {
 			error = "Core Wasm import signature mismatch for " + module + "." + name +
-				": expected " + std::string(descriptor->signature) + ", got " + actualSignature;
+				": expected " + std::string(descriptor.signature) + ", got " + actualSignature;
 			return false;
 		}
 		imports.push_back(module + "." + name);
@@ -261,23 +262,23 @@ bool ValidateMemorySection(Reader& section, const WasmRuntimeConfig& config,
 {
 	std::uint64_t count = 0;
 	if (!section.ReadLeb(count) || count > 1) {
-		error = "Core Wasm supports exactly one linear-memory address space";
+		error = "Core Wasm supports exactly one linear memory";
 		return false;
 	}
-	if (count == 1) {
-		hasMemory = true;
+	hasMemory = count == 1;
+	for (std::uint64_t index = 0; index < count; ++index) {
 		if (!ReadLimits(section, config.maxMemoryPages, true, synced, config, error))
 			return false;
 	}
 	return section.offset == section.bytes.size();
 }
 
-bool ValidateExportSection(Reader& section, const WasmRuntimeConfig& config,
+bool ValidateExportSection(Reader& section, std::vector<std::string>& exports,
 	bool& exportsMemory, std::string& error)
 {
 	std::uint64_t count = 0;
-	if (!section.ReadLeb(count) || count > config.maxExports) {
-		error = "Core Wasm export count exceeds configured maximum";
+	if (!section.ReadLeb(count) || count > 65536) {
+		error = "Core Wasm export count exceeds supported maximum";
 		return false;
 	}
 	for (std::uint64_t index = 0; index < count; ++index) {
@@ -288,8 +289,39 @@ bool ValidateExportSection(Reader& section, const WasmRuntimeConfig& config,
 			error = "truncated Core Wasm export";
 			return false;
 		}
-		if (name == "memory" && kind == 2)
+		if (name == "memory") {
+			if (kind != 2) {
+				error = "Core Wasm export named memory is not a memory";
+				return false;
+			}
 			exportsMemory = true;
+			continue;
+		}
+		if (kind == 0)
+			exports.push_back(name);
+	}
+	return section.offset == section.bytes.size();
+}
+
+bool ValidateCodeSection(Reader& section, const WasmRuntimeConfig& config,
+	std::string& error)
+{
+	std::uint64_t count = 0;
+	if (!section.ReadLeb(count) || count > 65536) {
+		error = "Core Wasm function body count exceeds supported maximum";
+		return false;
+	}
+	for (std::uint64_t index = 0; index < count; ++index) {
+		std::uint64_t bodySize = 0;
+		if (!section.ReadLeb(bodySize) || bodySize > section.bytes.size() - section.offset) {
+			error = "truncated Core Wasm function body";
+			return false;
+		}
+		if (bodySize > config.maxFunctionBodyBytes) {
+			error = "Core Wasm function body exceeds configured maximum";
+			return false;
+		}
+		section.offset += static_cast<std::size_t>(bodySize);
 	}
 	return section.offset == section.bytes.size();
 }
@@ -297,84 +329,75 @@ bool ValidateExportSection(Reader& section, const WasmRuntimeConfig& config,
 } // namespace
 
 WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
-	WasmEnvironment environment, std::string_view interfaceVersion,
+	WasmEnvironment environment, std::uint32_t interfaceVersion,
 	const WasmRuntimeConfig& config)
 {
 	WasmValidationResult result;
-	result.identity.byteSize = bytes.size();
-	result.identity.sha512 = HashModule(bytes);
-
-	if (bytes.size() > config.maxModuleBytes) {
-		result.error = "Core Wasm module exceeds configured byte limit";
+	if (bytes.size() < 8 || !std::equal(bytes.begin(), bytes.begin() + 4,
+			std::array<std::uint8_t, 4>{0x00, 0x61, 0x73, 0x6d}.begin())) {
+		result.error = "not a WebAssembly Core module";
 		return result;
 	}
-	if (!WasmEnvironmentMatrix::IsRuntimeEnabled(environment)) {
-		result.error = "requested Core Wasm execution environment is disabled";
-		return result;
-	}
-	if (interfaceVersion != RECOIL_WASM_INTERFACE_VERSION_NUMBER) {
-		result.error = "unsupported Core Wasm interface version: " +
-			std::string(interfaceVersion);
-		return result;
-	}
-	if (bytes.size() < 8 || bytes[0] != 0x00 || bytes[1] != 'a' ||
-		bytes[2] != 's' || bytes[3] != 'm' || bytes[4] != 0x01 ||
-		bytes[5] != 0x00 || bytes[6] != 0x00 || bytes[7] != 0x00) {
-		result.error = "invalid or non-Core Wasm binary";
+	if (!std::equal(bytes.begin() + 4, bytes.begin() + 8,
+			std::array<std::uint8_t, 4>{0x01, 0x00, 0x00, 0x00}.begin())) {
+		result.error = "unsupported WebAssembly Core version";
 		return result;
 	}
 
-	const bool synced = WasmEnvironmentMatrix::Policy(environment).synced;
+	std::vector<FunctionType> types;
+	std::vector<std::string> imports;
+	std::vector<std::string> exports;
 	bool hasMemory = false;
 	bool exportsMemory = false;
-	std::vector<FunctionType> types;
-	std::span<const std::uint8_t> module(bytes.data(), bytes.size());
-	Reader reader{module.subspan(8)};
-	std::uint32_t sectionCount = 0;
-	while (reader.offset < reader.bytes.size()) {
-		if (++sectionCount > config.maxSections) {
-			result.error = "Core Wasm module has too many sections";
-			return result;
-		}
-		std::uint8_t sectionID = 0;
+	Reader module{bytes};
+	module.offset = 8;
+	while (module.offset < module.bytes.size()) {
+		std::uint8_t sectionId = 0;
 		std::uint64_t sectionSize = 0;
-		if (!reader.ReadByte(sectionID) || !reader.ReadLeb(sectionSize) ||
-			sectionSize > reader.bytes.size() - reader.offset) {
+		if (!module.ReadByte(sectionId) || !module.ReadLeb(sectionSize) ||
+			sectionSize > module.bytes.size() - module.offset) {
 			result.error = "truncated Core Wasm section";
 			return result;
 		}
-		Reader section{reader.bytes.subspan(reader.offset, static_cast<std::size_t>(sectionSize))};
-		reader.offset += static_cast<std::size_t>(sectionSize);
-
-		if (sectionID == 1) {
-			if (!ValidateTypeSection(section, types, result.error))
-				return result;
-		} else if (sectionID == 2) {
-			if (!ValidateImportSection(section, environment, config, types,
-				result.imports, result.error))
-				return result;
-		} else if (sectionID == 4) {
-			if (!ValidateTableSection(section, config, synced, result.error))
-				return result;
-		} else if (sectionID == 5) {
-			if (!ValidateMemorySection(section, config, synced, hasMemory, result.error))
-				return result;
-		} else if (sectionID == 7) {
-			if (!ValidateExportSection(section, config, exportsMemory, result.error))
-				return result;
+		Reader section{module.bytes.subspan(module.offset, static_cast<std::size_t>(sectionSize))};
+		module.offset += static_cast<std::size_t>(sectionSize);
+		bool valid = true;
+		switch (sectionId) {
+			case 0: section.offset = section.bytes.size(); break;
+			case 1: valid = ValidateTypeSection(section, types, result.error); break;
+			case 2: valid = ValidateImportSection(section, environment, config, types, imports, result.error); break;
+			case 3: section.offset = section.bytes.size(); break;
+			case 4: valid = ValidateTableSection(section, config, environment == WasmEnvironment::RulesSynced || environment == WasmEnvironment::GaiaSynced, result.error); break;
+			case 5: valid = ValidateMemorySection(section, config, environment == WasmEnvironment::RulesSynced || environment == WasmEnvironment::GaiaSynced, hasMemory, result.error); break;
+			case 6: section.offset = section.bytes.size(); break;
+			case 7: valid = ValidateExportSection(section, exports, exportsMemory, result.error); break;
+			case 8: section.offset = section.bytes.size(); break;
+			case 9: section.offset = section.bytes.size(); break;
+			case 10: valid = ValidateCodeSection(section, config, result.error); break;
+			case 11: section.offset = section.bytes.size(); break;
+			case 12: section.offset = section.bytes.size(); break;
+			default:
+				result.error = "unsupported Core Wasm section";
+				valid = false;
+				break;
+		}
+		if (!valid || section.offset != section.bytes.size()) {
+			if (result.error.empty())
+				result.error = "Core Wasm section was not fully consumed";
+			return result;
 		}
 	}
 
-	// The Core ABI uses caller-owned buffers and therefore requires a directly
-	// addressable exported memory even if this particular module currently uses
-	// only scalar imports. Keeping this invariant removes a conditional from all
-	// generated aggregate bindings.
 	if (!hasMemory || !exportsMemory) {
-		result.error = "Core Wasm module must define and export linear memory as `memory`";
+		result.error = "Core Wasm module must define and export linear memory as memory";
 		return result;
 	}
-
 	result.valid = true;
+	result.identity.sha512 = HashModule(bytes);
+	result.identity.interfaceVersion = interfaceVersion;
+	result.identity.environment = environment;
+	result.identity.imports = std::move(imports);
+	result.identity.exports = std::move(exports);
 	return result;
 }
 
