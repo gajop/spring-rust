@@ -55,10 +55,28 @@ public:
 	static bool AggregateCallinResult(std::string_view aggregation,
 		const WasmValue& value, bool& haveResult, WasmValue& result,
 		std::string& error);
+
+	// Native-query Core dispatch is the fast path used before a query is turned
+	// into the owned WasmValue tree required by Component Model guests.  The
+	// invocation list preserves the engine's environment ordering and permits a
+	// visibility-filtered query copy for UI without imposing that copy on rules
+	// worlds. `handled` is true only when at least one matching Core export ran.
+	struct CoreCallinInvocation {
+		WasmEnvironment environment;
+		const void* query = nullptr;
+		bool contributesResult = true;
+	};
+	bool DispatchCoreCallin(std::string_view name,
+		const std::vector<CoreCallinInvocation>& invocations,
+		WasmValue* valueResult, void* nativeResult, bool& handled,
+		std::string& error);
+
 	bool DispatchSyncedMessage(std::string_view message, std::string& error);
 
 	std::size_t ModuleCount() const;
 	bool HasModules(WasmEnvironment environment) const;
+	bool HasCoreModules(WasmEnvironment environment) const;
+	bool HasComponentModules(WasmEnvironment environment) const;
 	const WasmRuntime& Runtime() const { return *runtime; }
 	std::vector<std::string> SyncedConfiguration() const;
 
