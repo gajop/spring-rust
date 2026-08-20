@@ -114,8 +114,29 @@ inline constexpr ImportDescriptor kImports[] = {
 	{ProfilingModule, "get-timer-micros", "->i64", AllEnvironmentMask},
 	{ProfilingModule, "get-lua-mem-usage", "i32->i32", UnsyncedEnvironmentMask},
 	{ProfilingModule, "get-synced-gc-info", "i32->i64", UnsyncedEnvironmentMask},
-	{MessagesModule, "send-lua-rules-msg", "i32,i32->i64", AllEnvironmentMask},
+
+	// Message strings are copied into call-scoped NUL-terminated storage before
+	// entering NativeInterface; short values stay on the stack. SendToUnsynced
+	// retains its synced-only semantic policy.
+	{MessagesModule, "echo", "i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "log", "i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-message", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-message-to-player", "i32,i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-message-to-team", "i32,i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-message-to-ally-team", "i32,i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-message-to-spectators", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-public-chat", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-ally-chat", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-spectator-chat", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-private-chat", "i32,i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-commands", "i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-lua-menu-msg", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-skirmish-ai-message", "i32,i32,i32->i64", AllEnvironmentMask},
 	{MessagesModule, "send-lua-ui-msg", "i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-lua-gaia-msg", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-lua-rules-msg", "i32,i32->i64", AllEnvironmentMask},
+	{MessagesModule, "send-to-unsynced", "i32,i32->i64", SyncedEnvironmentMask},
+
 	{RulesParamsModule, "set-unit-rules-param-f32", "i32,i32,i32,f32,i32->i64", SyncedEnvironmentMask},
 	{RulesParamsModule, "get-unit-rules-param-f32", "i32,i32,i32->i64", AllEnvironmentMask},
 	{TerrainModule, "get-ground-orig-height", "f32,f32->i64", AllEnvironmentMask},
