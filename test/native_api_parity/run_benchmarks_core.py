@@ -253,7 +253,16 @@ def _run_core_backend(
                 for row in rows
                 if row.get("test") in expected or row.get("test") == "complete"
             ]
-        base.validate_rows(backend, rows, expected_tests)
+
+        # Core-only transport-ceiling rows deliberately have no peer in the
+        # historical backends. Keep them in the summary/report, but do not let
+        # them weaken or invalidate the established cross-backend row contract.
+        validation_rows = [
+            row
+            for row in rows
+            if not str(row.get("test", "")).startswith("core_ceiling_")
+        ]
+        base.validate_rows(backend, validation_rows, expected_tests)
         return rows
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
@@ -348,6 +357,24 @@ def render_report(summaries: list[dict]) -> str:
                 f"{base.ratio_for_test(test, rows['lua'], rows['wasm_core'])} | "
                 f"{base.ratio_for_test(test, rows['wasm_core'], rows['native'])} | "
                 f"{base.ratio_for_test(test, rows['wasm'], rows['wasm_core'])} |"
+            )
+
+        # These are deliberately absolute Core measurements rather than
+        # cross-backend ratios: buffers are prepared once and reused so the row
+        # exposes steady-state transport cost without owned-API allocation.
+        ceiling = sorted(
+            (
+                (test, row)
+                for test, row in indexed.get("wasm_core", {}).items()
+                if test.startswith("core_ceiling_")
+            ),
+            key=lambda item: item[0],
+        )
+        for test, row in ceiling:
+            value = base.format_timed_metric(row, test)
+            lines.append(
+                f"| `core-ceiling` | {float(summary['scale']):g} | `{test}` | — | — | — | — | "
+                f"{value} | — | — | — | — |"
             )
     lines.append("")
     return "\n".join(lines)
