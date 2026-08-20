@@ -33,14 +33,6 @@ std::vector<std::unique_ptr<WasmCoreHost>>& Hosts()
 	return hosts;
 }
 
-bool KnownCallin(std::string_view name)
-{
-	return name == "GameFrame" || name == "GameFramePost" || name == "Update" ||
-		name == "UnitCreated" || name == "UnitPreDamaged" ||
-		name == "AllowUnitCreation" || name == "AddConsoleLine" ||
-		name == "CommandNotify" || name == "DrawWorld";
-}
-
 } // namespace
 
 struct WasmCoreHost::Backend {
@@ -107,6 +99,20 @@ bool WasmCoreHost::Enabled()
 {
 	static const bool enabled = TruthyEnvironment("SPRING_WASM_CORE_HOST");
 	return enabled;
+}
+
+WasmCoreCallin WasmCoreHost::ResolveCallin(std::string_view name)
+{
+	if (name == "GameFrame") return WasmCoreCallin::GameFrame;
+	if (name == "GameFramePost") return WasmCoreCallin::GameFramePost;
+	if (name == "Update") return WasmCoreCallin::Update;
+	if (name == "UnitCreated") return WasmCoreCallin::UnitCreated;
+	if (name == "UnitPreDamaged") return WasmCoreCallin::UnitPreDamaged;
+	if (name == "AllowUnitCreation") return WasmCoreCallin::AllowUnitCreation;
+	if (name == "AddConsoleLine") return WasmCoreCallin::AddConsoleLine;
+	if (name == "CommandNotify") return WasmCoreCallin::CommandNotify;
+	if (name == "DrawWorld") return WasmCoreCallin::DrawWorld;
+	return WasmCoreCallin::Invalid;
 }
 
 bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>& moduleBytes,
@@ -317,7 +323,7 @@ bool WasmCoreHost::FuelRemainingImpl(std::uint64_t& fuel, std::string& error) co
 		return true;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	if (wasmtime_error_t* fuelError = wasmtime_context_get_fuel(
-			wasmtime_store_context(backend->store), &fuel);
+				wasmtime_store_context(backend->store), &fuel);
 		fuelError != nullptr) {
 		error = "Core Wasm host could not query fuel: " +
 				recoil::wasm::core::ErrorMessage(fuelError);
@@ -351,20 +357,23 @@ bool WasmCoreHost::FuelRemaining(std::string_view moduleName, std::uint64_t& fue
 	return host->FuelRemainingImpl(fuel, error);
 }
 
-bool WasmCoreHost::HasCallin(std::string_view name) const
+bool WasmCoreHost::HasCallin(WasmCoreCallin callin) const
 {
-	if (backend == nullptr || !KnownCallin(name))
+	if (backend == nullptr || callin == WasmCoreCallin::Invalid)
 		return false;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	if (name == "GameFrame") return backend->bindings.HasGameFrame();
-	if (name == "GameFramePost") return backend->bindings.HasGameFramePost();
-	if (name == "Update") return backend->bindings.HasUpdate();
-	if (name == "UnitCreated") return backend->bindings.HasUnitCreated();
-	if (name == "UnitPreDamaged") return backend->bindings.HasUnitPreDamaged();
-	if (name == "AllowUnitCreation") return backend->bindings.HasAllowUnitCreation();
-	if (name == "AddConsoleLine") return backend->variableCallins.HasAddConsoleLine();
-	if (name == "CommandNotify") return backend->variableCallins.HasCommandNotify();
-	if (name == "DrawWorld") return backend->bindings.HasDrawWorld();
+	switch (callin) {
+		case WasmCoreCallin::GameFrame: return backend->bindings.HasGameFrame();
+		case WasmCoreCallin::GameFramePost: return backend->bindings.HasGameFramePost();
+		case WasmCoreCallin::Update: return backend->bindings.HasUpdate();
+		case WasmCoreCallin::UnitCreated: return backend->bindings.HasUnitCreated();
+		case WasmCoreCallin::UnitPreDamaged: return backend->bindings.HasUnitPreDamaged();
+		case WasmCoreCallin::AllowUnitCreation: return backend->bindings.HasAllowUnitCreation();
+		case WasmCoreCallin::AddConsoleLine: return backend->variableCallins.HasAddConsoleLine();
+		case WasmCoreCallin::CommandNotify: return backend->variableCallins.HasCommandNotify();
+		case WasmCoreCallin::DrawWorld: return backend->bindings.HasDrawWorld();
+		case WasmCoreCallin::Invalid: break;
+	}
 #endif
 	return false;
 }
@@ -558,7 +567,7 @@ bool WasmCoreHost::InvokeDrawWorld(std::string& error)
 #endif
 }
 
-bool WasmCoreHost::Invoke(std::string_view name, const void* query, void* result,
+bool WasmCoreHost::Invoke(WasmCoreCallin callin, const void* query, void* result,
 	std::string& error)
 {
 	if (backend == nullptr) {
@@ -569,11 +578,11 @@ bool WasmCoreHost::Invoke(std::string_view name, const void* query, void* result
 		error = backend->faultReason;
 		return false;
 	}
-	if (!KnownCallin(name)) {
-		error = "unsupported Core Wasm callin: " + std::string(name);
+	if (callin == WasmCoreCallin::Invalid) {
+		error = "unsupported Core Wasm callin";
 		return false;
 	}
-	if (!HasCallin(name))
+	if (!HasCallin(callin))
 		return true; // optional export
 	if (!backend->budget.ChargeHost(1)) {
 		error = "Core Wasm callin host-work budget exhausted";
@@ -582,31 +591,25 @@ bool WasmCoreHost::Invoke(std::string_view name, const void* query, void* result
 	}
 
 	bool success = false;
-	if (name == "GameFrame")
-		success = InvokeGameFrame(query, error);
-	else if (name == "GameFramePost")
-		success = InvokeGameFramePost(query, error);
-	else if (name == "Update")
-		success = InvokeUpdate(query, error);
-	else if (name == "UnitCreated")
-		success = InvokeUnitCreated(query, error);
-	else if (name == "UnitPreDamaged")
-		success = InvokeUnitPreDamaged(query, result, error);
-	else if (name == "AllowUnitCreation")
-		success = InvokeAllowUnitCreation(query, result, error);
-	else if (name == "AddConsoleLine")
-		success = InvokeAddConsoleLine(query, result, error);
-	else if (name == "CommandNotify")
-		success = InvokeCommandNotify(query, result, error);
-	else if (name == "DrawWorld")
-		success = InvokeDrawWorld(error);
+	switch (callin) {
+		case WasmCoreCallin::GameFrame: success = InvokeGameFrame(query, error); break;
+		case WasmCoreCallin::GameFramePost: success = InvokeGameFramePost(query, error); break;
+		case WasmCoreCallin::Update: success = InvokeUpdate(query, error); break;
+		case WasmCoreCallin::UnitCreated: success = InvokeUnitCreated(query, error); break;
+		case WasmCoreCallin::UnitPreDamaged: success = InvokeUnitPreDamaged(query, result, error); break;
+		case WasmCoreCallin::AllowUnitCreation: success = InvokeAllowUnitCreation(query, result, error); break;
+		case WasmCoreCallin::AddConsoleLine: success = InvokeAddConsoleLine(query, result, error); break;
+		case WasmCoreCallin::CommandNotify: success = InvokeCommandNotify(query, result, error); break;
+		case WasmCoreCallin::DrawWorld: success = InvokeDrawWorld(error); break;
+		case WasmCoreCallin::Invalid: break;
+	}
 
 	if (!success)
 		Fault(error.empty() ? "Core Wasm callin failed" : error);
 	return success;
 }
 
-bool WasmCoreHost::DispatchModule(std::string_view moduleName, std::string_view name,
+bool WasmCoreHost::DispatchModule(std::string_view moduleName, WasmCoreCallin callin,
 	const void* query, void* result, std::string& error)
 {
 	WasmCoreHost* host = Find(moduleName);
@@ -614,23 +617,35 @@ bool WasmCoreHost::DispatchModule(std::string_view moduleName, std::string_view 
 		error = "Core Wasm module not found: " + std::string(moduleName);
 		return false;
 	}
-	return host->Invoke(name, query, result, error);
+	return host->Invoke(callin, query, result, error);
+}
+
+bool WasmCoreHost::DispatchModule(std::string_view moduleName, std::string_view name,
+	const void* query, void* result, std::string& error)
+{
+	const WasmCoreCallin callin = ResolveCallin(name);
+	if (callin == WasmCoreCallin::Invalid) {
+		error = "unsupported Core Wasm callin: " + std::string(name);
+		return false;
+	}
+	return DispatchModule(moduleName, callin, query, result, error);
 }
 
 bool WasmCoreHost::DispatchEnvironment(WasmEnvironment environment, std::string_view name,
 	const void* query, void* result, std::string& error)
 {
-	if (!KnownCallin(name)) {
+	const WasmCoreCallin callin = ResolveCallin(name);
+	if (callin == WasmCoreCallin::Invalid) {
 		error = "unsupported Core Wasm callin: " + std::string(name);
 		return false;
 	}
 	bool handled = false;
 	for (const auto& host : Hosts()) {
-		if (host == nullptr || host->environment != environment || !host->HasCallin(name))
+		if (host == nullptr || host->environment != environment || !host->HasCallin(callin))
 			continue;
 		handled = true;
 		std::string hostError;
-		if (!host->Invoke(name, query, result, hostError) && error.empty())
+		if (!host->Invoke(callin, query, result, hostError) && error.empty())
 			error = hostError;
 	}
 	return handled;
@@ -639,15 +654,16 @@ bool WasmCoreHost::DispatchEnvironment(WasmEnvironment environment, std::string_
 bool WasmCoreHost::DispatchCallin(std::string_view name, const void* query, void* result,
 	std::string& error)
 {
-	if (!KnownCallin(name))
+	const WasmCoreCallin callin = ResolveCallin(name);
+	if (callin == WasmCoreCallin::Invalid)
 		return false;
 	bool handled = false;
 	for (const auto& host : Hosts()) {
-		if (host == nullptr || !host->HasCallin(name))
+		if (host == nullptr || !host->HasCallin(callin))
 			continue;
 		handled = true;
 		std::string hostError;
-		if (!host->Invoke(name, query, result, hostError) && error.empty())
+		if (!host->Invoke(callin, query, result, hostError) && error.empty())
 			error = hostError;
 	}
 	return handled;
