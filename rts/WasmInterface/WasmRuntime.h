@@ -33,9 +33,6 @@ struct WasmRuntimeConfig {
 	std::uint32_t maxImports = 256;
 	std::uint32_t maxExports = 256;
 	std::uint32_t maxSections = 128;
-	// Bound an individual Core Wasm function body independently of the whole
-	// module size so a pathological single function fails validation early.
-	std::size_t maxFunctionBodyBytes = 16u * 1024u * 1024u;
 	std::uint32_t maxComponentNesting = 16;
 	std::uint32_t maxValueNodes = 1u << 20;
 	// Zero disables Wasmtime's instruction counter. A positive value is a
