@@ -30,6 +30,10 @@ fn main() {
         Ok("unimplemented") => println!("cargo:rustc-cfg=benchmark_callin_unimplemented"),
         Ok("consoleline") => println!("cargo:rustc-cfg=benchmark_callin_consoleline"),
         Ok("commandnotify") => println!("cargo:rustc-cfg=benchmark_callin_commandnotify"),
+        Ok("variable") => {
+            println!("cargo:rustc-cfg=benchmark_callin_consoleline");
+            println!("cargo:rustc-cfg=benchmark_callin_commandnotify");
+        }
         _ => {}
     }
     match env::var("SPRING_BENCHMARK_CONTEXT").as_deref() {
