@@ -3,7 +3,6 @@
 #pragma once
 
 #include <cstdint>
-#include <span>
 #include <string>
 
 #include "NativeInterface/NativeInterface.h"
@@ -173,20 +172,10 @@ public:
 	bool HasAllowUnitCreation() const { return allowUnitCreation.Present(); }
 	bool HasDrawWorld() const { return drawWorld.Present(); }
 
-	// Variable-size callins use one guest-owned scratch region negotiated once
-	// at bind time. Writing payload bytes here does not add another Wasm call.
-	bool HasCallinScratch() const { return callinScratchCapacity != 0; }
-	std::uint32_t CallinScratchCapacity() const { return callinScratchCapacity; }
-	bool WriteCallinScratch(std::span<const std::uint8_t> bytes,
-		std::uint32_t& guestPointer, std::string& error) const;
-
 	HostState& Host() { return host; }
 
 private:
 	HostState host;
-	RawExport callinScratchInfo;
-	std::uint32_t callinScratchOffset = 0;
-	std::uint32_t callinScratchCapacity = 0;
 	I32ToVoidExport gameFrame;
 	I32ToVoidExport gameFramePost;
 	RawExport update;
