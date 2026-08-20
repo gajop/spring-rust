@@ -38,26 +38,10 @@ bool RegisterGeneratedOptionImports(wasmtime_linker_t* linker, HostState* state,
 }
 #endif
 
-#if __has_include("../wasm/generated/WasmCoreGeneratedVariableBindings.h")
-#define RECOIL_WASM_CORE_GENERATED_VARIABLE_BINDINGS 1
-namespace generated {
-bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* state,
-	std::string& error);
-}
-#endif
-
 #if __has_include("../wasm/generated/WasmCoreGeneratedVariableOutputBindings.h")
 #define RECOIL_WASM_CORE_GENERATED_VARIABLE_OUTPUT_BINDINGS 1
 namespace generated {
 bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState* state,
-	std::string& error);
-}
-#endif
-
-#if __has_include("../wasm/generated/WasmCoreGeneratedVariableIoBindings.h")
-#define RECOIL_WASM_CORE_GENERATED_VARIABLE_IO_BINDINGS 1
-namespace generated {
-bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 }
 #endif
@@ -101,9 +85,9 @@ public:
 			return false;
 		}
 
-		// Generated bindings form the broad baseline. Specialized bindings are
-		// registered afterwards and intentionally replace matching generated
-		// definitions when they use a tighter ABI or custom callback semantics.
+		// Compile/register only generated classes accepted by the executable
+		// fast-path registry. Allocation-heavy variable-input renderers remain
+		// codegen scaffolding until they have reviewed low-allocation lowering.
 		wasmtime_linker_allow_shadowing(linker, true);
 #if defined(RECOIL_WASM_CORE_GENERATED_BINDINGS)
 		if (!generated::RegisterGeneratedImports(linker, &host, error))
@@ -113,18 +97,12 @@ public:
 		if (!generated::RegisterGeneratedOptionImports(linker, &host, error))
 			return false;
 #endif
-#if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_BINDINGS)
-		if (!generated::RegisterGeneratedVariableImports(linker, &host, error))
-			return false;
-#endif
 #if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_OUTPUT_BINDINGS)
 		if (!generated::RegisterGeneratedVariableOutputImports(linker, &host, error))
 			return false;
 #endif
-#if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_IO_BINDINGS)
-		if (!generated::RegisterGeneratedVariableIoImports(linker, &host, error))
-			return false;
-#endif
+		// Specialized bindings register afterwards and intentionally shadow a
+		// generated definition when they use a tighter ABI or custom semantics.
 		if (!RegisterFastImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitsQueryImports(linker, &host, error))
