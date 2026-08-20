@@ -14,6 +14,8 @@
 #include "WasmModuleManifest.h"
 #include "WasmRuntime.h"
 
+class WasmCoreHost;
+
 class WasmInterfaceSystem {
 public:
 	explicit WasmInterfaceSystem(WasmHostAdapter* hostAdapter = nullptr,
@@ -57,11 +59,6 @@ public:
 		const WasmValue& value, bool& haveResult, WasmValue& result,
 		std::string& error);
 
-	// Native-query Core dispatch is the fast path used before a query is turned
-	// into the owned WasmValue tree required by Component Model guests.  The
-	// invocation list preserves the engine's environment ordering and permits a
-	// visibility-filtered query copy for UI without imposing that copy on rules
-	// worlds. `handled` is true only when at least one matching Core export ran.
 	struct CoreCallinInvocation {
 		WasmEnvironment environment;
 		const void* query = nullptr;
@@ -72,10 +69,6 @@ public:
 		WasmValue* valueResult, void* nativeResult, bool& handled,
 		std::string& error);
 
-	// The engine owns one live interface system. The alternative typed-host
-	// shim reaches this registered instance so Core callins can retain their
-	// pre-WasmValue fast path while still using the system's sorted module list,
-	// environment selection and aggregation rules.
 	static bool DispatchActiveCoreCallin(std::string_view name, const void* query,
 		void* nativeResult, bool& handled, std::string& error);
 
@@ -92,6 +85,9 @@ private:
 	struct CoreModuleRecord {
 		WasmModuleDescriptor descriptor;
 		WasmModuleIdentity identity;
+		// Resolved lazily on first hot dispatch so LoadModule need not depend on
+		// host internals. Stable until the matching module is unloaded.
+		WasmCoreHost* host = nullptr;
 	};
 
 	class CoreDispatchRegistration {
