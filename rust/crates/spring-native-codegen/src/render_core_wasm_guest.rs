@@ -62,6 +62,14 @@ pub fn render(model: &ApiModel) -> String {
             ) {
                 output.push_str(&render_fixed_output_wrapper(function, plan, &records, 4));
                 output.push('\n');
+            } else if fixed_input_wrapper_eligible(
+                plan,
+                &function.inputs,
+                &function.outputs,
+                &records,
+            ) {
+                output.push_str(&render_fixed_input_wrapper(function, plan, &records, 4));
+                output.push('\n');
             }
         }
         output.push_str("}\n\n");
@@ -133,6 +141,51 @@ mod __core_wire {
             1 => Some(true),
             _ => None,
         }
+    }
+
+    #[inline]
+    pub fn put_u32(bytes: &mut [u8], cursor: &mut usize, value: u32) -> Option<()> {
+        align(bytes, cursor, 4)?;
+        let end = cursor.checked_add(4)?;
+        let target = bytes.get_mut(*cursor..end)?;
+        target.copy_from_slice(&value.to_le_bytes());
+        *cursor = end;
+        Some(())
+    }
+
+    #[inline]
+    pub fn put_i32(bytes: &mut [u8], cursor: &mut usize, value: i32) -> Option<()> {
+        put_u32(bytes, cursor, value as u32)
+    }
+
+    #[inline]
+    pub fn put_u64(bytes: &mut [u8], cursor: &mut usize, value: u64) -> Option<()> {
+        align(bytes, cursor, 8)?;
+        let end = cursor.checked_add(8)?;
+        let target = bytes.get_mut(*cursor..end)?;
+        target.copy_from_slice(&value.to_le_bytes());
+        *cursor = end;
+        Some(())
+    }
+
+    #[inline]
+    pub fn put_i64(bytes: &mut [u8], cursor: &mut usize, value: i64) -> Option<()> {
+        put_u64(bytes, cursor, value as u64)
+    }
+
+    #[inline]
+    pub fn put_f32(bytes: &mut [u8], cursor: &mut usize, value: f32) -> Option<()> {
+        put_u32(bytes, cursor, value.to_bits())
+    }
+
+    #[inline]
+    pub fn put_f64(bytes: &mut [u8], cursor: &mut usize, value: f64) -> Option<()> {
+        put_u64(bytes, cursor, value.to_bits())
+    }
+
+    #[inline]
+    pub fn put_boolean(bytes: &mut [u8], cursor: &mut usize, value: bool) -> Option<()> {
+        put_u32(bytes, cursor, if value { 1 } else { 0 })
     }
 
     #[inline]
@@ -218,6 +271,34 @@ fn fixed_output_wrapper_eligible(
         && matches!(plan.result_strategy, ResultStrategy::FixedOutputBuffer { .. })
         && !outputs.is_empty()
         && outputs.iter().all(|field| fixed_wire_type(&field.ty, records))
+}
+
+fn fixed_input_wrapper_eligible(
+    plan: &FunctionPlan,
+    inputs: &[FieldModel],
+    outputs: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> bool {
+    if plan.source_status != "automatic"
+        || !matches!(plan.input_strategy, InputStrategy::FixedInputBuffer)
+        || !inputs
+            .iter()
+            .all(|field| direct_type(&field.ty) || fixed_wire_type(&field.ty, records))
+        || fixed_input_layout(inputs, records).is_none()
+    {
+        return false;
+    }
+    match plan.result_strategy {
+        ResultStrategy::Status => outputs.is_empty(),
+        ResultStrategy::Packed32 => {
+            outputs.len() == 1
+                && matches!(outputs[0].ty, SemanticType::Scalar { .. } | SemanticType::Enum { .. })
+        }
+        ResultStrategy::FixedOutputBuffer { .. } => {
+            !outputs.is_empty() && outputs.iter().all(|field| fixed_wire_type(&field.ty, records))
+        }
+        ResultStrategy::VariableOutputBuffer | ResultStrategy::Unsupported => false,
+    }
 }
 
 fn render_raw_import(
@@ -329,15 +410,7 @@ fn render_fixed_output_wrapper(
         format!("{direct_args}, output_pointer")
     };
     let return_ty = fixed_output_return_type(&function.outputs, records);
-    let mut decodes = Vec::new();
-    for field in &function.outputs {
-        decodes.push(decode_fixed_value(&field.ty, records, "wire", "cursor"));
-    }
-    let value = if decodes.len() == 1 {
-        decodes.remove(0)
-    } else {
-        format!("({})", decodes.join(", "))
-    };
+    let value = render_fixed_output_decode(&function.outputs, records);
 
     format!(
         "{pad}#[inline]\n\
@@ -371,6 +444,117 @@ fn render_fixed_output_wrapper(
     )
 }
 
+fn render_fixed_input_wrapper(
+    function: &crate::model::FunctionModel,
+    plan: &FunctionPlan,
+    records: &BTreeMap<String, RecordModel>,
+    indent: usize,
+) -> String {
+    let pad = " ".repeat(indent);
+    let fn_ident = rust_ident(&function.name.to_snake_case());
+    let raw_ident = format!("core_{fn_ident}");
+    let params = render_fixed_params(&function.inputs, records);
+    let direct_args = render_direct_args_only(&function.inputs);
+    let (input_bytes, input_alignment) = fixed_input_layout(&function.inputs, records)
+        .expect("eligible fixed-input guest wrapper has an input layout");
+    let mut encode = String::new();
+    for field in function.inputs.iter().filter(|field| !direct_type(&field.ty)) {
+        encode.push_str(&encode_fixed_value(
+            &field.ty,
+            &rust_ident(&field.name.to_snake_case()),
+            records,
+            "input_wire",
+            "input_cursor",
+            indent + 8,
+        ));
+    }
+    let call_prefix = if direct_args.is_empty() {
+        "input_pointer".to_owned()
+    } else {
+        format!("{direct_args}, input_pointer")
+    };
+
+    let (return_ty, call_body) = match plan.result_strategy {
+        ResultStrategy::Status => (
+            "()".to_owned(),
+            format!(
+                "{pad}        // SAFETY: fixed inputs are encoded into this live stack buffer.\n\
+                 {pad}        let status = unsafe {{ raw::{raw_ident}({call_prefix}) }};\n\
+                 {pad}        return if status == 0 {{ Ok(()) }} else {{ Err(ApiError::new(status)) }};\n"
+            ),
+        ),
+        ResultStrategy::Packed32 => {
+            let output = &function.outputs[0];
+            let return_ty = public_rust_type(&output.ty);
+            let decode = decode_packed_value(&output.ty, "packed as u32", &pad);
+            (
+                return_ty,
+                format!(
+                    "{pad}        // SAFETY: fixed inputs are encoded into this live stack buffer.\n\
+                     {pad}        let packed = unsafe {{ raw::{raw_ident}({call_prefix}) }} as u64;\n\
+                     {pad}        let status = (packed >> 32) as u32 as i32;\n\
+                     {pad}        if status != 0 {{\n\
+                     {pad}            return Err(ApiError::new(status));\n\
+                     {pad}        }}\n\
+                     {decode}\n"
+                ),
+            )
+        }
+        ResultStrategy::FixedOutputBuffer { bytes, alignment } => {
+            let return_ty = fixed_output_return_type(&function.outputs, records);
+            let value = render_fixed_output_decode(&function.outputs, records);
+            let call_args = format!("{call_prefix}, output_pointer");
+            (
+                return_ty,
+                format!(
+                    "{pad}        let mut output_wire = [0u8; {bytes}];\n\
+                     {pad}        let output_pointer_usize = output_wire.as_mut_ptr() as usize;\n\
+                     {pad}        debug_assert!(output_pointer_usize <= u32::MAX as usize);\n\
+                     {pad}        let output_pointer = output_pointer_usize as u32 as i32;\n\
+                     {pad}        // SAFETY: input/output pointers reference live stack buffers.\n\
+                     {pad}        let status = unsafe {{ raw::{raw_ident}({call_args}) }};\n\
+                     {pad}        if status != 0 {{\n\
+                     {pad}            return Err(ApiError::new(status));\n\
+                     {pad}        }}\n\
+                     {pad}        let mut cursor = 0usize;\n\
+                     {pad}        let value = {{ let wire = output_wire; {value} }};\n\
+                     {pad}        let wire = &output_wire;\n\
+                     {pad}        if !super::__core_wire::finish(wire, &mut cursor, {alignment}) {{\n\
+                     {pad}            return Err(ApiError::new(ErrorCode::Internal as i32));\n\
+                     {pad}        }}\n\
+                     {pad}        return Ok(value);\n"
+                ),
+            )
+        }
+        ResultStrategy::VariableOutputBuffer | ResultStrategy::Unsupported => return String::new(),
+    };
+
+    format!(
+        "{pad}#[inline]\n\
+         {pad}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
+         {pad}    #[cfg(target_arch = \"wasm32\")]\n\
+         {pad}    {{\n\
+         {pad}        let mut input_wire = [0u8; {input_bytes}];\n\
+         {pad}        let mut input_cursor = 0usize;\n\
+         {encode}\
+         {pad}        if !super::__core_wire::finish(&input_wire, &mut input_cursor, {input_alignment}) {{\n\
+         {pad}            return Err(ApiError::new(ErrorCode::Internal as i32));\n\
+         {pad}        }}\n\
+         {pad}        let input_pointer_usize = input_wire.as_mut_ptr() as usize;\n\
+         {pad}        debug_assert!(input_pointer_usize <= u32::MAX as usize);\n\
+         {pad}        let input_pointer = input_pointer_usize as u32 as i32;\n\
+         {call_body}\
+         {pad}    }}\n\
+         {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
+         {pad}    {{\n\
+         {pad}        let _ = ({unused});\n\
+         {pad}        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))\n\
+         {pad}    }}\n\
+         {pad}}}\n",
+        unused = unused_tuple(&function.inputs),
+    )
+}
+
 fn render_direct_params(inputs: &[FieldModel]) -> String {
     inputs
         .iter()
@@ -385,9 +569,39 @@ fn render_direct_params(inputs: &[FieldModel]) -> String {
         .join(", ")
 }
 
+fn render_fixed_params(
+    inputs: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> String {
+    inputs
+        .iter()
+        .map(|field| {
+            let ty = if direct_type(&field.ty) {
+                public_rust_type(&field.ty)
+            } else {
+                public_fixed_rust_type(&field.ty, records)
+            };
+            format!("{}: {ty}", rust_ident(&field.name.to_snake_case()))
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 fn render_direct_args(inputs: &[FieldModel]) -> String {
     inputs
         .iter()
+        .map(|field| {
+            let name = rust_ident(&field.name.to_snake_case());
+            lower_direct_arg(&field.ty, &name)
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn render_direct_args_only(inputs: &[FieldModel]) -> String {
+    inputs
+        .iter()
+        .filter(|field| direct_type(&field.ty))
         .map(|field| {
             let name = rust_ident(&field.name.to_snake_case());
             lower_direct_arg(&field.ty, &name)
@@ -418,6 +632,21 @@ fn decode_packed_value(ty: &SemanticType, value: &str, pad: &str) -> String {
             format!("{pad}        return Ok(({value}) as {rust});")
         }
         _ => unreachable!(),
+    }
+}
+
+fn render_fixed_output_decode(
+    outputs: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> String {
+    let mut decodes = outputs
+        .iter()
+        .map(|field| decode_fixed_value(&field.ty, records, "wire", "cursor"))
+        .collect::<Vec<_>>();
+    if decodes.len() == 1 {
+        decodes.remove(0)
+    } else {
+        format!("({})", decodes.join(", "))
     }
 }
 
@@ -488,6 +717,75 @@ fn decode_fixed_value(
     }
 }
 
+fn encode_fixed_value(
+    ty: &SemanticType,
+    value: &str,
+    records: &BTreeMap<String, RecordModel>,
+    wire: &str,
+    cursor: &str,
+    indent: usize,
+) -> String {
+    let pad = " ".repeat(indent);
+    let internal = "ApiError::new(ErrorCode::Internal as i32)";
+    match ty {
+        SemanticType::Scalar { name } => {
+            let (method, cast) = match name.as_str() {
+                "bool" => ("put_boolean", String::new()),
+                "f32" => ("put_f32", String::new()),
+                "f64" => ("put_f64", String::new()),
+                "i64" | "isize" => ("put_i64", " as i64".to_owned()),
+                "u64" | "usize" => ("put_u64", " as u64".to_owned()),
+                "i8" | "i16" | "i32" => ("put_i32", " as i32".to_owned()),
+                _ => ("put_u32", " as u32".to_owned()),
+            };
+            format!(
+                "{pad}super::__core_wire::{method}(&mut {wire}, &mut {cursor}, {value}{cast}).ok_or({internal})?;\n"
+            )
+        }
+        SemanticType::Enum { .. } => format!(
+            "{pad}super::__core_wire::put_i32(&mut {wire}, &mut {cursor}, {value} as i32).ok_or({internal})?;\n"
+        ),
+        SemanticType::Handle { .. } => format!(
+            "{pad}super::__core_wire::put_u64(&mut {wire}, &mut {cursor}, {value} as u64).ok_or({internal})?;\n"
+        ),
+        SemanticType::FixedArray { element, length } => (0..*length)
+            .map(|index| {
+                encode_fixed_value(
+                    element,
+                    &format!("{value}[{index}]"),
+                    records,
+                    wire,
+                    cursor,
+                    indent,
+                )
+            })
+            .collect::<String>(),
+        SemanticType::Record { name } => {
+            let mut output = records[name]
+                .fields
+                .iter()
+                .map(|field| {
+                    encode_fixed_value(
+                        &field.ty,
+                        &format!("{value}.{}", rust_ident(&field.name.to_snake_case())),
+                        records,
+                        wire,
+                        cursor,
+                        indent,
+                    )
+                })
+                .collect::<String>();
+            let (_, alignment) = fixed_wire_layout(ty, records)
+                .expect("fixed generated guest record has a wire layout");
+            output.push_str(&format!(
+                "{pad}super::__core_wire::align(&{wire}, &mut {cursor}, {alignment}).ok_or({internal})?;\n"
+            ));
+            output
+        }
+        _ => unreachable!(),
+    }
+}
+
 fn fixed_output_return_type(
     outputs: &[FieldModel],
     records: &BTreeMap<String, RecordModel>,
@@ -512,11 +810,22 @@ fn render_fixed_record_types(
 ) -> String {
     let mut names = BTreeSet::new();
     for (function, plan) in executable {
-        if !fixed_output_wrapper_eligible(plan, &function.inputs, &function.outputs, records) {
-            continue;
+        if fixed_output_wrapper_eligible(plan, &function.inputs, &function.outputs, records) {
+            for field in &function.outputs {
+                collect_record_types(&field.ty, records, &mut names);
+            }
         }
-        for field in &function.outputs {
-            collect_record_types(&field.ty, records, &mut names);
+        if fixed_input_wrapper_eligible(plan, &function.inputs, &function.outputs, records) {
+            for field in &function.inputs {
+                if !direct_type(&field.ty) {
+                    collect_record_types(&field.ty, records, &mut names);
+                }
+            }
+            if matches!(plan.result_strategy, ResultStrategy::FixedOutputBuffer { .. }) {
+                for field in &function.outputs {
+                    collect_record_types(&field.ty, records, &mut names);
+                }
+            }
         }
     }
     if names.is_empty() {
@@ -672,6 +981,22 @@ fn fixed_wire_layout(
             layout_fields(&record.fields, records)
         }
         _ => None,
+    }
+}
+
+fn fixed_input_layout(
+    fields: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<(u32, u32)> {
+    let fixed = fields
+        .iter()
+        .filter(|field| !direct_type(&field.ty))
+        .cloned()
+        .collect::<Vec<_>>();
+    if fixed.is_empty() {
+        None
+    } else {
+        layout_fields(&fixed, records)
     }
 }
 
