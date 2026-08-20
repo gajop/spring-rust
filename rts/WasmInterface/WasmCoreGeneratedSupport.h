@@ -4,7 +4,6 @@
 
 #include <array>
 #include <cstdint>
-#include <memory>
 #include <string>
 #include <string_view>
 
@@ -26,11 +25,13 @@ inline std::int32_t NativeErrorCode(const Error* error)
 class ImportGuard {
 public:
 	ImportGuard(HostState* state, std::uint64_t work)
+		: uiContext(state != nullptr && state->environment == WasmEnvironment::UI)
 	{
 		Initialize(state, work, ownedError);
 	}
 
 	ImportGuard(HostState* state, std::uint64_t work, std::string& error)
+		: uiContext(state != nullptr && state->environment == WasmEnvironment::UI)
 	{
 		Initialize(state, work, error);
 	}
@@ -57,12 +58,6 @@ private:
 			return;
 		}
 
-		// Match the Component adapter's capability boundary. Every NativeInterface
-		// access performed by a Core UI import executes under the thread-local UI
-		// read perspective, while rules/gaia worlds retain their normal access.
-		uiContext = std::make_unique<WasmUiVisibility::ScopedContext>(
-			state->environment == WasmEnvironment::UI);
-
 		budget = state->budget;
 		if (budget == nullptr) {
 			entered = true;
@@ -82,7 +77,9 @@ private:
 		}
 	}
 
-	std::unique_ptr<WasmUiVisibility::ScopedContext> uiContext;
+	// Match the Component adapter's capability boundary without adding a heap
+	// allocation to the hostcall fast path.
+	WasmUiVisibility::ScopedContext uiContext;
 	WasmExecutionBudget* budget = nullptr;
 	bool entered = false;
 	std::string ownedError;
