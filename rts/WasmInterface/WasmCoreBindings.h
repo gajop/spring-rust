@@ -7,6 +7,7 @@
 
 #include "NativeInterface/NativeInterface.h"
 #include "WasmCoreAbi.h"
+#include "WasmEnvironment.h"
 #include "WasmResources.h"
 
 namespace recoil::wasm::core {
@@ -17,6 +18,7 @@ struct HostState {
 	NativeInterface* native = nullptr;
 	Memory memory;
 	WasmExecutionBudget* budget = nullptr;
+	WasmEnvironment environment = WasmEnvironment::RulesSynced;
 	bool fixedMemory = false;
 	wasmtime_func_t callbackDispatch{};
 	bool callbackDispatchBound = false;
@@ -69,11 +71,13 @@ bool BindGuestMemory(HostState& state, wasmtime_context_t* context,
 class InstanceBindings {
 public:
 	explicit InstanceBindings(NativeInterface* nativeInterface,
-		WasmExecutionBudget* executionBudget = nullptr, bool fixedMemory = false)
+		WasmExecutionBudget* executionBudget = nullptr, bool fixedMemory = false,
+		WasmEnvironment environment = WasmEnvironment::RulesSynced)
 	{
 		host.native = nativeInterface;
 		host.budget = executionBudget;
 		host.fixedMemory = fixedMemory;
+		host.environment = environment;
 		if (fixedMemory)
 			host.memory.MarkStable();
 	}
