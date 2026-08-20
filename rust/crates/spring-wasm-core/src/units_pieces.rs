@@ -4,6 +4,8 @@
 // plus one packed byte blob, both caller-owned and reusable.
 
 use super::config::{decode_string_list_result, mut_slice_parts};
+#[cfg(feature = "alloc")]
+use super::config::{StringListBuffer, StringListRequirements};
 use super::{ApiError, ErrorCode, Result, StringListFill, StringRange};
 
 #[cfg(target_arch = "wasm32")]
@@ -59,4 +61,27 @@ pub fn get_unit_script_names_into<'a>(
         let _ = (unit_id, ranges, bytes);
         Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
     }
+}
+
+/// Fill reusable owned storage with unit script piece names.
+///
+/// Storage grows only when required and is retained for subsequent calls. The
+/// completed names remain in the flat descriptor/blob representation; inspect
+/// them through `buffer.view()` without allocating per-string objects.
+#[cfg(feature = "alloc")]
+pub fn fill_unit_script_names(unit_id: i32, buffer: &mut StringListBuffer) -> Result<()> {
+    for _ in 0..3 {
+        match get_unit_script_names_into(unit_id, &mut buffer.ranges, &mut buffer.bytes)? {
+            StringListFill::Complete(view) => {
+                let used = StringListRequirements {
+                    strings: view.len(),
+                    bytes: view.packed_bytes().len(),
+                };
+                buffer.commit(used);
+                return Ok(());
+            }
+            StringListFill::Insufficient(required) => buffer.ensure(required),
+        }
+    }
+    Err(ApiError::new(ErrorCode::BufferOverflow as i32))
 }
