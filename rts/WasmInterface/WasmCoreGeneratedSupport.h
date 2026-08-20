@@ -4,9 +4,11 @@
 
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <string_view>
 
+#include "NativeInterface/WasmUiVisibility.h"
 #include "WasmCoreBindings.h"
 
 namespace recoil::wasm::core::generated {
@@ -54,6 +56,13 @@ private:
 			error = "core Wasm generated host state is null";
 			return;
 		}
+
+		// Match the Component adapter's capability boundary. Every NativeInterface
+		// access performed by a Core UI import executes under the thread-local UI
+		// read perspective, while rules/gaia worlds retain their normal access.
+		uiContext = std::make_unique<WasmUiVisibility::ScopedContext>(
+			state->environment == WasmEnvironment::UI);
+
 		budget = state->budget;
 		if (budget == nullptr) {
 			entered = true;
@@ -73,6 +82,7 @@ private:
 		}
 	}
 
+	std::unique_ptr<WasmUiVisibility::ScopedContext> uiContext;
 	WasmExecutionBudget* budget = nullptr;
 	bool entered = false;
 	std::string ownedError;
