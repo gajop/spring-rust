@@ -463,7 +463,7 @@ fn render_wire_read(
         ),
         SemanticType::Record { name } => {
             let record = &records[name];
-            record
+            let mut output = record
                 .fields
                 .iter()
                 .map(|field| {
@@ -474,7 +474,13 @@ fn render_wire_read(
                         indent,
                     )
                 })
-                .collect::<String>()
+                .collect::<String>();
+            let (_, alignment) = wire_layout(ty, records)
+                .expect("eligible generated Core record must have a wire layout");
+            output.push_str(&format!(
+                "{pad}if (!reader.Align({alignment}u)) return Trap(\"generated Core record alignment overflow\");\n"
+            ));
+            output
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreReadIndex{indent}");
@@ -522,7 +528,7 @@ fn render_wire_write(
         ),
         SemanticType::Record { name } => {
             let record = &records[name];
-            record
+            let mut output = record
                 .fields
                 .iter()
                 .map(|field| {
@@ -533,7 +539,13 @@ fn render_wire_write(
                         indent,
                     )
                 })
-                .collect::<String>()
+                .collect::<String>();
+            let (_, alignment) = wire_layout(ty, records)
+                .expect("eligible generated Core record must have a wire layout");
+            output.push_str(&format!(
+                "{pad}if (!writer.Align({alignment}u)) return Trap(\"generated Core record alignment overflow\");\n"
+            ));
+            output
         }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
