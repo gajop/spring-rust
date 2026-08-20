@@ -10,6 +10,7 @@
 mod benchmark;
 mod config;
 mod messages;
+mod profiling;
 mod rules_params;
 mod terrain;
 mod unit_defs;
@@ -20,6 +21,7 @@ mod units_query_borrowed;
 pub use benchmark::*;
 pub use config::*;
 pub use messages::*;
+pub use profiling::*;
 pub use rules_params::*;
 pub use terrain::*;
 pub use unit_defs::*;
