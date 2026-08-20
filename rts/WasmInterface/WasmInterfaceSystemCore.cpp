@@ -40,9 +40,39 @@ const recoil::wasm::generated::CallinDescriptor* FindCoreCallin(WasmCoreCallin c
 	return slot < index.size() ? index[slot] : nullptr;
 }
 
-bool Is(std::string_view value, const char* expected)
+enum class CoreAggregation : std::uint8_t {
+	Ignore,
+	OrTrue,
+	AndFalse,
+	First,
+	Unsupported,
+};
+
+enum class CoreResultKind : std::uint8_t {
+	None,
+	Bool,
+	Damage,
+	AllowUnitCreation,
+	Unsupported,
+};
+
+CoreAggregation ResolveAggregation(std::string_view value)
 {
-	return value == expected;
+	if (value == "ignore") return CoreAggregation::Ignore;
+	if (value == "or-true") return CoreAggregation::OrTrue;
+	if (value == "and-false") return CoreAggregation::AndFalse;
+	if (value == "first") return CoreAggregation::First;
+	return CoreAggregation::Unsupported;
+}
+
+CoreResultKind ResolveResultKind(std::string_view value, CoreAggregation aggregation)
+{
+	if (aggregation == CoreAggregation::Ignore)
+		return CoreResultKind::None;
+	if (value == "BoolCallinResult") return CoreResultKind::Bool;
+	if (value == "DamageCallinResult") return CoreResultKind::Damage;
+	if (value == "AllowUnitCreationResult") return CoreResultKind::AllowUnitCreation;
+	return CoreResultKind::Unsupported;
 }
 
 bool ResolveCoreDispatchSide(WasmCoreCallin callin, bool& synced)
@@ -197,21 +227,26 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		error = "Core Wasm callin has no generated descriptor: " + std::string(name);
 		return false;
 	}
+	const CoreAggregation aggregation = ResolveAggregation(descriptor->aggregation);
+	const CoreResultKind resultKind = ResolveResultKind(descriptor->result, aggregation);
+	if (aggregation == CoreAggregation::Unsupported || resultKind == CoreResultKind::Unsupported) {
+		error = "native Core aggregation is not implemented for callin " +
+			std::string(name) + " (result " + descriptor->result +
+			", aggregation " + descriptor->aggregation + ")";
+		return false;
+	}
 
-	const std::string_view aggregation = descriptor->aggregation;
-	const std::string_view resultType = descriptor->result;
 	bool haveResult = false;
-
 	BoolCallinResult boolAggregate = {
 		.error = nullptr,
-		.value = Is(aggregation, "and-false"),
+		.value = aggregation == CoreAggregation::AndFalse,
 	};
 	DamageCallinResult damageDefault = {
 		.error = nullptr,
 		.newDamage = 0.0f,
 		.impulseMult = 1.0f,
 	};
-	if (nativeResult != nullptr && Is(resultType, "DamageCallinResult"))
+	if (nativeResult != nullptr && resultKind == CoreResultKind::Damage)
 		damageDefault = *static_cast<const DamageCallinResult*>(nativeResult);
 	DamageCallinResult damageAggregate = damageDefault;
 	AllowUnitCreationResult creationDefault = {
@@ -219,7 +254,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		.allow = true,
 		.dropOrder = true,
 	};
-	if (nativeResult != nullptr && Is(resultType, "AllowUnitCreationResult"))
+	if (nativeResult != nullptr && resultKind == CoreResultKind::AllowUnitCreation)
 		creationDefault = *static_cast<const AllowUnitCreationResult*>(nativeResult);
 	AllowUnitCreationResult creationAggregate = creationDefault;
 
@@ -238,25 +273,25 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 				continue;
 
 			handled = true;
-			if (Is(aggregation, "ignore")) {
+			if (aggregation == CoreAggregation::Ignore) {
 				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
 						callin, name, nullptr, error))
 					return false;
 				continue;
 			}
 
-			if (Is(resultType, "BoolCallinResult") &&
-				(Is(aggregation, "or-true") || Is(aggregation, "and-false"))) {
+			if (resultKind == CoreResultKind::Bool &&
+				(aggregation == CoreAggregation::OrTrue || aggregation == CoreAggregation::AndFalse)) {
 				BoolCallinResult moduleResult = {
 					.error = nullptr,
-					.value = Is(aggregation, "and-false"),
+					.value = aggregation == CoreAggregation::AndFalse,
 				};
 				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
 						callin, name, &moduleResult, error))
 					return false;
 				if (!invocation.contributesResult)
 					continue;
-				if (Is(aggregation, "or-true"))
+				if (aggregation == CoreAggregation::OrTrue)
 					boolAggregate.value = boolAggregate.value || moduleResult.value;
 				else
 					boolAggregate.value = boolAggregate.value && moduleResult.value;
@@ -264,7 +299,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 				continue;
 			}
 
-			if (Is(resultType, "DamageCallinResult") && Is(aggregation, "first")) {
+			if (resultKind == CoreResultKind::Damage && aggregation == CoreAggregation::First) {
 				if (invocation.query == nullptr) {
 					error = "Core UnitPreDamaged dispatch received a null query";
 					return false;
@@ -280,7 +315,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 				continue;
 			}
 
-			if (Is(resultType, "AllowUnitCreationResult") && Is(aggregation, "first")) {
+			if (resultKind == CoreResultKind::AllowUnitCreation &&
+				aggregation == CoreAggregation::First) {
 				AllowUnitCreationResult moduleResult = creationDefault;
 				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
 						callin, name, &moduleResult, error))
@@ -292,9 +328,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 				continue;
 			}
 
-			error = "native Core aggregation is not implemented for callin " +
-				std::string(name) + " (result " + std::string(resultType) +
-				", aggregation " + std::string(aggregation) + ")";
+			error = "Core Wasm callin policy combination is unsupported: " + std::string(name);
 			return false;
 		}
 	}
@@ -302,7 +336,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 	if (!handled || !haveResult)
 		return true;
 
-	if (Is(resultType, "BoolCallinResult")) {
+	if (resultKind == CoreResultKind::Bool) {
 		if (nativeResult != nullptr)
 			*static_cast<BoolCallinResult*>(nativeResult) = boolAggregate;
 		if (valueResult != nullptr) {
@@ -313,7 +347,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		return true;
 	}
 
-	if (Is(resultType, "DamageCallinResult")) {
+	if (resultKind == CoreResultKind::Damage) {
 		if (nativeResult != nullptr)
 			*static_cast<DamageCallinResult*>(nativeResult) = damageAggregate;
 		if (valueResult != nullptr) {
@@ -325,7 +359,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		return true;
 	}
 
-	if (Is(resultType, "AllowUnitCreationResult")) {
+	if (resultKind == CoreResultKind::AllowUnitCreation) {
 		if (nativeResult != nullptr)
 			*static_cast<AllowUnitCreationResult*>(nativeResult) = creationAggregate;
 		if (valueResult != nullptr) {
@@ -337,7 +371,5 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		return true;
 	}
 
-	error = "native Core result conversion is not implemented for callin " +
-		std::string(name);
-	return false;
+	return true;
 }
