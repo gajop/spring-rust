@@ -3,6 +3,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <vector>
@@ -22,7 +23,8 @@ public:
 
 	bool Read(const Memory& memory, std::uint32_t pointer, std::uint32_t length)
 	{
-		if (length > std::numeric_limits<std::size_t>::max() - 1)
+		if (static_cast<std::uint64_t>(length) + 1u >
+			static_cast<std::uint64_t>(std::numeric_limits<std::size_t>::max()))
 			return false;
 
 		if (static_cast<std::size_t>(length) + 1 <= inlineBytes.size()) {
@@ -42,7 +44,6 @@ public:
 	}
 
 	const char* c_str() const { return value == nullptr ? "" : value; }
-	bool UsesHeap() const { return value != nullptr && value == heapBytes.data(); }
 
 private:
 	std::array<char, InlineBytes> inlineBytes{};
