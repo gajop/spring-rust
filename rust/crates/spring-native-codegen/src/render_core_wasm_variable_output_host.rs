@@ -488,7 +488,19 @@ fn render_wire_read(ty: &SemanticType, destination: &str, records: &BTreeMap<Str
         },
         SemanticType::Enum { .. } => scalar_read("I32", "std::int32_t", destination, &pad),
         SemanticType::Handle { .. } => scalar_read("U64", "std::uint64_t", destination, &pad),
-        SemanticType::Record { name } => records[name].fields.iter().map(|field| render_wire_read(&field.ty, &format!("{destination}.{}", field.name), records, indent)).collect::<String>(),
+        SemanticType::Record { name } => {
+            let mut output = records[name]
+                .fields
+                .iter()
+                .map(|field| render_wire_read(&field.ty, &format!("{destination}.{}", field.name), records, indent))
+                .collect::<String>();
+            let (_, alignment) = fixed_wire_layout(ty, records)
+                .expect("eligible variable-output record must have a fixed layout");
+            output.push_str(&format!(
+                "{pad}if (!reader.Align({alignment}u)) return Trap(\"generated Core record alignment overflow\");\n"
+            ));
+            output
+        }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreReadIndex{indent}");
             let nested = render_wire_read(element, &format!("{destination}[{index}]"), records, indent + 1);
@@ -511,7 +523,19 @@ fn render_wire_write(ty: &SemanticType, value: &str, records: &BTreeMap<String, 
         }
         SemanticType::Enum { .. } => format!("{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
         SemanticType::Handle { .. } => format!("{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
-        SemanticType::Record { name } => records[name].fields.iter().map(|field| render_wire_write(&field.ty, &format!("{value}.{}", field.name), records, writer, indent)).collect::<String>(),
+        SemanticType::Record { name } => {
+            let mut output = records[name]
+                .fields
+                .iter()
+                .map(|field| render_wire_write(&field.ty, &format!("{value}.{}", field.name), records, writer, indent))
+                .collect::<String>();
+            let (_, alignment) = fixed_wire_layout(ty, records)
+                .expect("eligible variable-output record must have a fixed layout");
+            output.push_str(&format!(
+                "{pad}if (!{writer}.Align({alignment}u)) return Trap(\"generated Core record alignment overflow\");\n"
+            ));
+            output
+        }
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
             let nested = render_wire_write(element, &format!("{value}[{index}]"), records, writer, indent + 1);
