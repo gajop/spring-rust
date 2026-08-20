@@ -1,6 +1,6 @@
 # Core Wasm benchmark comparison
 
-`run_benchmarks_core.py` is the Core-aware entrypoint for the existing native API parity benchmark. It imports `run_benchmarks.py` and keeps the same fixtures, scales, test names and validation rules, while appending a fifth backend:
+`run_benchmarks_core.py` extends the existing native API parity benchmark with a fifth raw backend while retaining the same fixtures, scales and comparable test rows:
 
 - Lua
 - native C API
@@ -8,7 +8,7 @@
 - typed Rust Component Model host
 - unchecked Core Wasm host
 
-Run the bounded comparison suite with the same engine binaries used by the existing runner:
+Run the bounded suite with the same engine binaries used by the existing runner:
 
 ```bash
 python3 test/native_api_parity/run_benchmarks_core.py \
@@ -17,25 +17,39 @@ python3 test/native_api_parity/run_benchmarks_core.py \
   --spring ./spring
 ```
 
-Individual profiles use the existing flags, for example:
+Individual profiles use the existing flags, for example `--callouts`, `--callins`, `--heightmap`, `--workloads`, `--memory` and `--draw`.
 
-```bash
-python3 test/native_api_parity/run_benchmarks_core.py --callouts \
-  --spring-headless ./spring-headless --spring ./spring
-python3 test/native_api_parity/run_benchmarks_core.py --callins \
-  --spring-headless ./spring-headless --spring ./spring
-python3 test/native_api_parity/run_benchmarks_core.py --heightmap \
-  --spring-headless ./spring-headless --spring ./spring
-python3 test/native_api_parity/run_benchmarks_core.py --workloads \
-  --spring-headless ./spring-headless --spring ./spring
-python3 test/native_api_parity/run_benchmarks_core.py --memory \
-  --spring-headless ./spring-headless --spring ./spring
-python3 test/native_api_parity/run_benchmarks_core.py --draw \
-  --spring-headless ./spring-headless --spring ./spring
-```
+The Core runner builds a raw wasm32 guest for each Component benchmark variant and sets `SPRING_WASM_CORE_HOST=1` only for the Core process. Synced Core guests use fixed memory because synced validation requires memory `min == max`.
 
-The Core runner builds a raw wasm32 guest for each Component benchmark variant and sets `SPRING_WASM_CORE_HOST=1` only for the Core process. Synced Core guests are linked with fixed 16 MiB memory because synced validation requires memory `min == max`.
+Core guest-produced rows use the historical `benchmark_wasm.jsonl` sink while engine-side Core callin timing uses `benchmark_wasm_core.jsonl`. The runner merges both streams and normalizes their backend label to `wasm_core` before applying comparable-row validation.
 
-Core guest-produced benchmark rows use the historical `benchmark_wasm.jsonl` Lua sink while engine-side Core callin timing uses `benchmark_wasm_core.jsonl`. The Core runner merges both streams and normalizes their backend label to `wasm_core` before applying the existing row validation.
+## Comparison ratios
 
-The generated comparison table adds `Wasm (C API, unchecked, Core)` and the `Core vs native` / `Typed vs Core` ratios. Do not populate or commit measured values from a different machine merely to fill the new column; regenerate the table from one complete comparison run.
+Keep Typed Component Model as a raw reference column, but decision ratios are only:
+
+- Lua vs native
+- Lua vs Core
+- Core vs native
+- dynamic Component Model vs Core
+
+Do not add Typed-vs-Core ratios.
+
+## Core transport-ceiling rows
+
+The callout profile also emits `core_ceiling_*` rows. These are Core-only absolute measurements and intentionally do not participate in cross-backend validation or ratios.
+
+They remove avoidable per-call allocation/probing so the report can distinguish Core transport cost from the convenience cost of owned Rust APIs:
+
+- fixed multi-field result
+- borrowed string input
+- borrowed `f32[]` input
+- reused string output buffer
+- reused flat-list output buffer
+- reused nested `UnitCommand[]` wire buffer
+- reused spatial-list output buffer
+
+The borrowed input probes still use the normal unchecked Wasmtime import path, host budget check and guest-memory range validation. They remove host allocation/copy only; they are not an artificial unchecked-memory benchmark.
+
+Add another ceiling row only for a materially different ABI shape. The goal is a representative transport matrix, not a large microbenchmark collection.
+
+Do not populate or commit measured values from a different machine merely to fill the Core column. Regenerate the table from one complete comparison run.
