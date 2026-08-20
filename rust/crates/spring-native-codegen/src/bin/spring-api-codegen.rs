@@ -142,7 +142,8 @@ fn run() -> Result<()> {
 
     // Runtime-neutral Core ABI plan plus executable fixed, option and variable
     // callback subsets. The validator registry is derived only from callbacks
-    // emitted below, never from the broader planning inventory.
+    // that meet the current fast-path policy, never from the broader planning
+    // inventory or allocation-heavy variable-input scaffolding.
     write(
         &arguments.output.join("core-abi.json"),
         &render_core_wasm::render_json(&model)?,
@@ -154,6 +155,10 @@ fn run() -> Result<()> {
     write(
         &arguments.output.join("WasmCoreGeneratedRegistry.h"),
         &render_core_wasm_registry::render(&model),
+    )?;
+    write(
+        &arguments.output.join("core-executable-coverage.json"),
+        &render_core_wasm_registry::render_coverage_json(&model)?,
     )?;
     write(
         &arguments.output.join("WasmCoreGeneratedBindings.h"),
