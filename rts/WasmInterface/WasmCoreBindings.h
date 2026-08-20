@@ -13,11 +13,16 @@ namespace recoil::wasm::core {
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 
+using GuestCallbackDispatch = bool (*)(void* data, std::uint32_t callbackID,
+	std::uint32_t userData, std::string& error);
+
 struct HostState {
 	NativeInterface* native = nullptr;
 	Memory memory;
 	WasmExecutionBudget* budget = nullptr;
 	bool fixedMemory = false;
+	void* callbackData = nullptr;
+	GuestCallbackDispatch dispatchCallback = nullptr;
 };
 
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
@@ -28,6 +33,10 @@ bool RegisterUnitDefsImports(wasmtime_linker_t* linker, HostState* state,
 bool RegisterUnitsCommandsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterUnitControlImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+bool RegisterTerrainControlImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+bool RegisterGfxImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterBenchmarkImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
@@ -42,6 +51,8 @@ public:
 		host.native = nativeInterface;
 		host.budget = executionBudget;
 		host.fixedMemory = fixedMemory;
+		host.callbackData = this;
+		host.dispatchCallback = &InstanceBindings::DispatchCallbackThunk;
 		if (fixedMemory)
 			host.memory.MarkStable();
 	}
@@ -57,6 +68,10 @@ public:
 		if (!RegisterUnitsCommandsImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitControlImports(linker, &host, error))
+			return false;
+		if (!RegisterTerrainControlImports(linker, &host, error))
+			return false;
+		if (!RegisterGfxImports(linker, &host, error))
 			return false;
 		return RegisterBenchmarkImports(linker, &host, error);
 	}
@@ -92,7 +107,14 @@ public:
 	HostState& Host() { return host; }
 
 private:
+	static bool DispatchCallbackThunk(void* data, std::uint32_t callbackID,
+		std::uint32_t userData, std::string& error);
+	bool DispatchCallback(std::uint32_t callbackID, std::uint32_t userData,
+		std::string& error);
+
 	HostState host;
+	wasmtime_context_t* boundContext = nullptr;
+	RawExport callbackDispatch;
 	I32ToVoidExport gameFrame;
 	I32ToVoidExport gameFramePost;
 	RawExport update;
