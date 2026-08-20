@@ -182,8 +182,7 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	const bool success = system->DispatchCoreCallin(callin, name,
 		std::span<const CoreCallinInvocation>(invocations.data(), invocationCount),
 		nullptr, nativeResult, handled, error);
-	if (!synced) {
-		WasmCoreHost::RemoveFaultedUnsynced();
+	if (!synced && WasmCoreHost::RemoveFaultedUnsynced() != 0) {
 		system->coreModules.erase(std::remove_if(system->coreModules.begin(),
 			system->coreModules.end(), [](const CoreModuleRecord& module) {
 				return !WasmCoreHost::HasModule(module.descriptor.name);
@@ -346,8 +345,8 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 			}
 
 			error = "Core Wasm callin policy combination is unsupported: " +
-			std::string(diagnosticName);
-		return false;
+				std::string(diagnosticName);
+			return false;
 		}
 	}
 
