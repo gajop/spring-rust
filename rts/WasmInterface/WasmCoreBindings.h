@@ -55,6 +55,8 @@ bool RegisterUnitDefsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterUnitsCommandsImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterUnitsPiecesImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterUnitControlImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterTerrainControlImports(wasmtime_linker_t* linker, HostState* state,
@@ -112,6 +114,8 @@ public:
 		if (!RegisterUnitDefsImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitsCommandsImports(linker, &host, error))
+			return false;
+		if (!RegisterUnitsPiecesImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitControlImports(linker, &host, error))
 			return false;
