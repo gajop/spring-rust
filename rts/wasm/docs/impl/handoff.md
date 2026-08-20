@@ -4,6 +4,23 @@ Date: 2026-08-20
 
 Core Wasm is the intended production transport. Component Model implementations remain as correctness and benchmark references, but new API work targets Core first.
 
+## Current branch state
+
+The production Core callin path now remains pre-`WasmValue` while using the `WasmInterfaceSystem` module inventory for environment selection, stable module order and result aggregation. The old `WasmCoreHost::DispatchCallin` all-host fan-out remains only as a legacy benchmark seam; the engine's early typed-host path delegates active Core callins to `WasmInterfaceSystem::DispatchActiveCoreCallin`.
+
+Representative variable engine -> guest callins are implemented:
+
+- `AddConsoleLine`: two strings + scalar level.
+- `CommandNotify`: fixed command header + variable `f32[]` params.
+
+They use a guest-owned scratch region negotiated once at bind time and perform one bounded serialization plus one unchecked host -> guest call. The hot path has no host allocation. Nested use of the shared scratch is rejected deterministically rather than corrupting the outer payload.
+
+Core host imports now carry the module's real `WasmEnvironment`. UI modules stay on generated visibility-checked imports; rules/gaia keep the hand-specialized scalar path so the existing absolute Core hostcall floor does not pay a visibility-context swap. Unsynced Core faults are removed and the system's Core descriptor inventory is reconciled immediately; synced faults remain sticky.
+
+Known narrow gap: `NativeInterfaceEventClient::DispatchWasmBoolCallin` does not pass the existing `nativeResult` argument into the early typed/Core path. `AddConsoleLine` and `CommandNotify` therefore execute in Core, but a Core `true` return is not yet propagated to the engine. Fix this at the bool-helper/event-client seam; do not introduce global pending-result state to work around it.
+
+Variable-callin benchmark timing is also not yet a perfect cross-backend boundary: Lua's central timer starts after Lua arguments are pushed, while Core's variable timer includes scratch lowering. Treat the inner rows as diagnostics/conservative-to-Core until an outer identical event boundary is recorded. No new variable-callin performance number is claimed yet.
+
 ## Priority order
 
 Use this order for every design decision:
@@ -23,10 +40,29 @@ Do not call a generic generated path "fast" merely because it is semantically co
 - Scalars/IDs/enums: direct Wasm numeric values where possible.
 - Fixed records/arrays: explicit deterministic wire layouts, never native struct padding.
 - Variable results: caller-owned guest buffers with written/required lengths.
+- Variable callins: one guest-owned scratch region per guest, negotiated at bind time.
 - Callbacks: integer callback IDs and one cached guest callback dispatcher.
 - Rust may be used for generators/guest SDKs; end users and the built engine must not require a Rust toolchain.
 
 Hot Core calls must not route through the generic `WasmValue` transport.
+
+## Production callin dispatch
+
+The fast Core callin path is reached from the existing early `WasmTypedHost` seam before `NativeInterfaceWasmAdapter::SerializeCallinQuery` constructs owned values.
+
+`WasmInterfaceSystem::DispatchActiveCoreCallin` builds at most three environment invocations (rules, gaia, UI) in a fixed stack array and passes a `std::span` to `DispatchCoreCallin`; do not reintroduce a per-call `std::vector` allocation here.
+
+`DispatchCoreCallin` uses generated callin metadata to preserve:
+
+- environment masks;
+- stable module order;
+- `ignore` aggregation;
+- boolean `or-true` / `and-false` aggregation;
+- `first` aggregation for `DamageCallinResult` and `AllowUnitCreationResult`.
+
+For `first`, every module sees the same incoming engine default; the first contributing result is selected without feeding it into later modules as a new input. `UnitPreDamaged` must preserve an incoming `DamageCallinResult` because an earlier engine event client may already have modified damage/impulse values.
+
+Current mixed Core + Component global ordering is not a solved contract. The early Core path still behaves as the selected fast transport for currently supported typed callins. Do not claim cross-transport module ordering until the two module inventories are unified or an explicit ordering design is implemented.
 
 ## Performance rules
 
@@ -40,6 +76,7 @@ Allocation/copy rules:
 - C-string inputs need NUL termination. `WasmCoreGuestInput.h::GuestCString` keeps short strings in inline storage and uses one heap fallback only for long strings.
 - Do not retain guest-memory pointers across guest re-entry or memory growth.
 - Do not remove a defensive copy unless the NativeInterface lifetime/re-entry contract proves the pointer is call-scoped.
+- The ordered engine -> Core dispatcher is allocation-free on its invocation-list hot path.
 
 ### `list<string>`
 
@@ -77,32 +114,44 @@ Reviewed specialized bindings may expose variable-input APIs with a faster ABI a
 
 ## Variable input direction
 
-Benchmark-only imports now measure the achievable Core floor for borrowed string and `f32[]` inputs: one unchecked Wasmtime import, normal budget/range validation, no host allocation and no copy.
+Benchmark-only imports measure the achievable Core floor for borrowed string and `f32[]` inputs: one unchecked Wasmtime import, normal budget/range validation, no host allocation and no copy.
 
 Production zero-copy input should only be enabled where the NativeInterface contract proves that the pointer is consumed synchronously and cannot be retained or used across re-entry. Until that is proven, conservative copies are correct even if benchmark ceiling numbers show a lower possible cost.
 
 ## Variable callins
 
-Current Core callins cover empty/scalar/many-argument/fixed-result cases but not representative variable payloads yet.
+Engine -> guest variable callins use one guest-owned scratch region. Do **not** call a guest allocator/reserve export for every event; that would add a second host -> guest crossing.
 
-For engine -> guest string/list callins, do **not** call a guest allocator/reserve export for every event. That would add a second host->guest crossing.
+Implemented protocol:
 
-Required design:
-
-- Guest optionally exports `spring:callin/scratch-info() -> i64`.
+- Guest optionally exports `spring:callin/scratch-info() -> i64` when it exports a variable callin.
 - Low 32 bits: guest-memory offset; high 32 bits: capacity.
-- Host resolves/calls it once during module binding and validates the entire range once.
-- Variable callin hot path: host serializes into that cached guest-owned scratch region, then performs exactly one callin invocation.
-- Scratch size is guest/module-selected, not an arbitrary mandatory engine constant.
-- Oversize handling is a cold path and may use a separate fallback protocol later.
+- Host resolves/calls it once during module binding and validates the entire range.
+- Hot path: host serializes into the cached guest-owned scratch region, then performs exactly one unchecked callin invocation.
+- Scratch size is guest/module-selected.
+- Oversize payloads currently fail rather than allocating a hidden slow path.
+- Shared scratch has an explicit re-entry guard.
 
-Land the scratch negotiation atomically with the first real variable callin; do not leave unused binding state in the runtime.
+Current representative wire shapes:
 
-Representative real callins suitable for subsequent coverage include `AddConsoleLine` for strings and `AllowCommand`/`CommandNotify` for a nested command containing a variable `float[]`. Avoid starting with `KeyPress`, whose nested strings mix several ABI problems into one measurement.
+- `AddConsoleLine`: 20-byte header containing two offset/length pairs and `level`, followed by message and section bytes.
+- `CommandNotify`: 24-byte fixed command header followed by packed little-endian `f32` params. Little-endian hosts use one bulk `memcpy`; big-endian hosts encode each float explicitly.
+
+The benchmark guest compiles its 4 KiB scratch only for dedicated variable-callin variants so unrelated Core callin/DrawWorld working-set measurements are not contaminated by permanent scratch memory.
+
+## UI visibility and capability boundary
+
+Component callouts establish `WasmUiVisibility::ScopedContext` before reaching NativeInterface. Core must preserve the same capability boundary.
+
+`HostState` carries the module environment. Generated Core imports use `WasmUiVisibility::ConditionalScopedContext`, which installs a UI perspective only for UI modules and is a literal no-op otherwise. `ScopedContext(false)` is not equivalent to a no-op because it can reset an outer restricted perspective to full-read.
+
+The hand-specialized scalar imports remain registered only for non-UI modules. UI retains the generated visibility-checked definitions rather than shadowing them with legacy scalar fast callbacks. This intentionally keeps the rules/gaia absolute hostcall floor separate from the security-checked UI cost.
+
+`UnitCreated` UI delivery is sanitized before Core callin dispatch: invisible teams suppress the UI event; invisible builders are redacted to `-1`. Add equivalent native-query sanitizers as new Core UI callins are enabled; do not rely only on guest -> host import filtering.
 
 ## Benchmark policy
 
-Use `test/native_api_parity/run_benchmarks_core.py`.
+Use `test/native_api_parity/run_benchmarks_core.py` for the established matrix. `test/native_api_parity/run_variable_callins_core.py` is the focused variable-callin runner.
 
 Raw comparable backends remain:
 
@@ -133,7 +182,7 @@ The existing callout suite covers:
 - spatial list query
 - mutating string/scalar call
 
-Existing callins cover:
+Existing fixed callins cover:
 
 - empty
 - GameFrame
@@ -145,6 +194,8 @@ Existing callins cover:
 - four-module fan-out
 
 Other profiles cover heightmap callbacks/regions, realistic workloads, memory behavior and drawing.
+
+The focused variable runner currently records inner `callin_string` / `callin_command` rows. The recorder also reserves `callin_string_event` / `callin_command_event` names for a future identical outer event boundary, but those outer rows are not wired yet. Do not present the inner ratio as strictly apples-to-apples: Lua excludes argument pushing while Core includes scratch lowering.
 
 ### Core transport-ceiling rows
 
@@ -199,6 +250,8 @@ Main runtime files:
 - `rts/WasmInterface/WasmCoreGeneratedSupport.h`
 - `rts/WasmInterface/WasmCoreGuestInput.h`
 - `rts/WasmInterface/WasmCoreWire.h`
+- `rts/WasmInterface/WasmCoreVariableCallins.{h,cpp}`
+- `rts/WasmInterface/WasmInterfaceSystemCore.cpp`
 
 Specialized bindings currently cover benchmark-critical unit queries/info, unit definitions, commands/orders, terrain, Gfx, profiling, RulesParams and messaging.
 
@@ -206,9 +259,18 @@ Synced memory is fixed, so its cached Wasmtime base/size is stable. Unsynced mem
 
 ## Verification state
 
-This work was intentionally prepared without compiling, running codegen, launching the engine or executing benchmarks. The next execution session is an integration/measurement pass; no performance number is claimed yet.
+This branch has been edited and statically audited through the GitHub connector, but this session does not have a usable local engine checkout and no branch CI/workflow run has been observed. The current state is therefore **not build-verified**.
 
 Do not manually edit generated benchmark results. Run the release benchmark suite on an otherwise idle machine before drawing performance conclusions.
+
+Immediate verification order:
+
+1. compile after the ordered `std::span` dispatcher conversion;
+2. run codegen verification;
+3. run the fixed Core callin suite and raw hostcall floor to catch dispatch overhead regressions;
+4. run UI visibility/capability tests;
+5. run the focused variable-callin benchmark, treating inner rows as diagnostic until outer event rows are wired;
+6. rerun cold/warm/64 MiB-trash DrawWorld measurements.
 
 Known carried-over verification items still need retesting in a real build:
 
