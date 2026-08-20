@@ -2,8 +2,8 @@
 //! mirrors only imports accepted by the production fast-path registry; known
 //! allocation-heavy variable-input scaffolding is intentionally excluded.
 
-use heck::ToSnakeCase;
-use std::collections::BTreeMap;
+use heck::{ToSnakeCase, ToUpperCamelCase};
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
 use crate::render_core_wasm::{self, CoreType, FunctionPlan, InputStrategy, ResultStrategy};
@@ -24,6 +24,7 @@ pub fn render(model: &ApiModel) -> String {
          // for advanced use; ordinary guest code should use safe generated or\n\
          // specialized crate APIs. Only production-fast imports appear here.\n\n",
     );
+    output.push_str(WIRE_HELPERS);
 
     for module in &model.modules {
         let executable = module
@@ -42,6 +43,7 @@ pub fn render(model: &ApiModel) -> String {
         let module_ident = rust_ident(&module.name.to_snake_case());
         output.push_str(&format!("pub mod {module_ident} {{\n"));
         output.push_str("    use crate::{ApiError, ErrorCode, Result};\n\n");
+        output.push_str(&render_fixed_record_types(&executable, &records, 4));
         output.push_str("    #[cfg(target_arch = \"wasm32\")]\n    pub mod raw {\n");
         for (function, plan) in &executable {
             output.push_str(&render_raw_import(function, plan, 8));
@@ -52,6 +54,14 @@ pub fn render(model: &ApiModel) -> String {
             if direct_wrapper_eligible(plan, &function.inputs, &function.outputs) {
                 output.push_str(&render_direct_wrapper(function, plan, 4));
                 output.push('\n');
+            } else if fixed_output_wrapper_eligible(
+                plan,
+                &function.inputs,
+                &function.outputs,
+                &records,
+            ) {
+                output.push_str(&render_fixed_output_wrapper(function, plan, &records, 4));
+                output.push('\n');
             }
         }
         output.push_str("}\n\n");
@@ -59,6 +69,79 @@ pub fn render(model: &ApiModel) -> String {
 
     output
 }
+
+const WIRE_HELPERS: &str = r#"#[doc(hidden)]
+mod __core_wire {
+    #[inline]
+    pub fn align(bytes: &[u8], cursor: &mut usize, alignment: usize) -> Option<()> {
+        if alignment == 0 || !alignment.is_power_of_two() {
+            return None;
+        }
+        let aligned = cursor.checked_add(alignment - 1)? & !(alignment - 1);
+        if aligned > bytes.len() {
+            return None;
+        }
+        *cursor = aligned;
+        Some(())
+    }
+
+    #[inline]
+    pub fn u32(bytes: &[u8], cursor: &mut usize) -> Option<u32> {
+        align(bytes, cursor, 4)?;
+        let end = cursor.checked_add(4)?;
+        let slice = bytes.get(*cursor..end)?;
+        *cursor = end;
+        Some(u32::from_le_bytes([slice[0], slice[1], slice[2], slice[3]]))
+    }
+
+    #[inline]
+    pub fn i32(bytes: &[u8], cursor: &mut usize) -> Option<i32> {
+        Some(u32(bytes, cursor)? as i32)
+    }
+
+    #[inline]
+    pub fn u64(bytes: &[u8], cursor: &mut usize) -> Option<u64> {
+        align(bytes, cursor, 8)?;
+        let end = cursor.checked_add(8)?;
+        let slice = bytes.get(*cursor..end)?;
+        *cursor = end;
+        Some(u64::from_le_bytes([
+            slice[0], slice[1], slice[2], slice[3],
+            slice[4], slice[5], slice[6], slice[7],
+        ]))
+    }
+
+    #[inline]
+    pub fn i64(bytes: &[u8], cursor: &mut usize) -> Option<i64> {
+        Some(u64(bytes, cursor)? as i64)
+    }
+
+    #[inline]
+    pub fn f32(bytes: &[u8], cursor: &mut usize) -> Option<f32> {
+        Some(core::primitive::f32::from_bits(u32(bytes, cursor)?))
+    }
+
+    #[inline]
+    pub fn f64(bytes: &[u8], cursor: &mut usize) -> Option<f64> {
+        Some(core::primitive::f64::from_bits(u64(bytes, cursor)?))
+    }
+
+    #[inline]
+    pub fn boolean(bytes: &[u8], cursor: &mut usize) -> Option<bool> {
+        match u32(bytes, cursor)? {
+            0 => Some(false),
+            1 => Some(true),
+            _ => None,
+        }
+    }
+
+    #[inline]
+    pub fn finish(bytes: &[u8], cursor: &mut usize, alignment: usize) -> bool {
+        align(bytes, cursor, alignment).is_some() && *cursor == bytes.len()
+    }
+}
+
+"#;
 
 fn executable(
     plan: &FunctionPlan,
@@ -124,6 +207,19 @@ fn direct_wrapper_eligible(
     }
 }
 
+fn fixed_output_wrapper_eligible(
+    plan: &FunctionPlan,
+    inputs: &[FieldModel],
+    outputs: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> bool {
+    matches!(plan.input_strategy, InputStrategy::Direct)
+        && inputs.iter().all(|field| direct_type(&field.ty))
+        && matches!(plan.result_strategy, ResultStrategy::FixedOutputBuffer { .. })
+        && !outputs.is_empty()
+        && outputs.iter().all(|field| fixed_wire_type(&field.ty, records))
+}
+
 fn render_raw_import(
     function: &crate::model::FunctionModel,
     plan: &FunctionPlan,
@@ -162,27 +258,8 @@ fn render_direct_wrapper(
     let pad = " ".repeat(indent);
     let fn_ident = rust_ident(&function.name.to_snake_case());
     let raw_ident = format!("core_{fn_ident}");
-    let params = function
-        .inputs
-        .iter()
-        .map(|field| {
-            format!(
-                "{}: {}",
-                rust_ident(&field.name.to_snake_case()),
-                public_rust_type(&field.ty)
-            )
-        })
-        .collect::<Vec<_>>()
-        .join(", ");
-    let args = function
-        .inputs
-        .iter()
-        .map(|field| {
-            let name = rust_ident(&field.name.to_snake_case());
-            lower_direct_arg(&field.ty, &name)
-        })
-        .collect::<Vec<_>>()
-        .join(", ");
+    let params = render_direct_params(&function.inputs);
+    let args = render_direct_args(&function.inputs);
 
     match plan.result_strategy {
         ResultStrategy::Status => format!(
@@ -232,6 +309,93 @@ fn render_direct_wrapper(
     }
 }
 
+fn render_fixed_output_wrapper(
+    function: &crate::model::FunctionModel,
+    plan: &FunctionPlan,
+    records: &BTreeMap<String, RecordModel>,
+    indent: usize,
+) -> String {
+    let ResultStrategy::FixedOutputBuffer { bytes, alignment } = plan.result_strategy else {
+        return String::new();
+    };
+    let pad = " ".repeat(indent);
+    let fn_ident = rust_ident(&function.name.to_snake_case());
+    let raw_ident = format!("core_{fn_ident}");
+    let params = render_direct_params(&function.inputs);
+    let direct_args = render_direct_args(&function.inputs);
+    let call_args = if direct_args.is_empty() {
+        "output_pointer".to_owned()
+    } else {
+        format!("{direct_args}, output_pointer")
+    };
+    let return_ty = fixed_output_return_type(&function.outputs, records);
+    let mut decodes = Vec::new();
+    for field in &function.outputs {
+        decodes.push(decode_fixed_value(&field.ty, records, "wire", "cursor"));
+    }
+    let value = if decodes.len() == 1 {
+        decodes.remove(0)
+    } else {
+        format!("({})", decodes.join(", "))
+    };
+
+    format!(
+        "{pad}#[inline]\n\
+         {pad}pub fn {fn_ident}({params}) -> Result<{return_ty}> {{\n\
+         {pad}    #[cfg(target_arch = \"wasm32\")]\n\
+         {pad}    {{\n\
+         {pad}        let mut wire = [0u8; {bytes}];\n\
+         {pad}        let output_pointer_usize = wire.as_mut_ptr() as usize;\n\
+         {pad}        debug_assert!(output_pointer_usize <= u32::MAX as usize);\n\
+         {pad}        let output_pointer = output_pointer_usize as u32 as i32;\n\
+         {pad}        // SAFETY: all semantic arguments are scalar and output_pointer\n\
+         {pad}        // references this live stack buffer for the synchronous import.\n\
+         {pad}        let status = unsafe {{ raw::{raw_ident}({call_args}) }};\n\
+         {pad}        if status != 0 {{\n\
+         {pad}            return Err(ApiError::new(status));\n\
+         {pad}        }}\n\
+         {pad}        let mut cursor = 0usize;\n\
+         {pad}        let value = {value};\n\
+         {pad}        if !super::__core_wire::finish(&wire, &mut cursor, {alignment}) {{\n\
+         {pad}            return Err(ApiError::new(ErrorCode::Internal as i32));\n\
+         {pad}        }}\n\
+         {pad}        return Ok(value);\n\
+         {pad}    }}\n\
+         {pad}    #[cfg(not(target_arch = \"wasm32\"))]\n\
+         {pad}    {{\n\
+         {pad}        let _ = ({unused});\n\
+         {pad}        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))\n\
+         {pad}    }}\n\
+         {pad}}}\n",
+        unused = unused_tuple(&function.inputs),
+    )
+}
+
+fn render_direct_params(inputs: &[FieldModel]) -> String {
+    inputs
+        .iter()
+        .map(|field| {
+            format!(
+                "{}: {}",
+                rust_ident(&field.name.to_snake_case()),
+                public_rust_type(&field.ty)
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn render_direct_args(inputs: &[FieldModel]) -> String {
+    inputs
+        .iter()
+        .map(|field| {
+            let name = rust_ident(&field.name.to_snake_case());
+            lower_direct_arg(&field.ty, &name)
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 fn decode_packed_value(ty: &SemanticType, value: &str, pad: &str) -> String {
     match ty {
         SemanticType::Scalar { name } if name == "bool" => format!(
@@ -254,6 +418,149 @@ fn decode_packed_value(ty: &SemanticType, value: &str, pad: &str) -> String {
             format!("{pad}        return Ok(({value}) as {rust});")
         }
         _ => unreachable!(),
+    }
+}
+
+fn decode_fixed_value(
+    ty: &SemanticType,
+    records: &BTreeMap<String, RecordModel>,
+    wire: &str,
+    cursor: &str,
+) -> String {
+    let internal = "ApiError::new(ErrorCode::Internal as i32)";
+    match ty {
+        SemanticType::Scalar { name } => match name.as_str() {
+            "bool" => format!("super::__core_wire::boolean(&{wire}, &mut {cursor}).ok_or({internal})?"),
+            "f32" => format!("super::__core_wire::f32(&{wire}, &mut {cursor}).ok_or({internal})?"),
+            "f64" => format!("super::__core_wire::f64(&{wire}, &mut {cursor}).ok_or({internal})?"),
+            "i64" | "isize" => {
+                let rust = public_rust_type(ty);
+                format!("super::__core_wire::i64(&{wire}, &mut {cursor}).ok_or({internal})? as {rust}")
+            }
+            "u64" | "usize" => {
+                let rust = public_rust_type(ty);
+                format!("super::__core_wire::u64(&{wire}, &mut {cursor}).ok_or({internal})? as {rust}")
+            }
+            "i8" | "i16" | "i32" => {
+                let rust = public_rust_type(ty);
+                format!("super::__core_wire::i32(&{wire}, &mut {cursor}).ok_or({internal})? as {rust}")
+            }
+            _ => {
+                let rust = public_rust_type(ty);
+                format!("super::__core_wire::u32(&{wire}, &mut {cursor}).ok_or({internal})? as {rust}")
+            }
+        },
+        SemanticType::Enum { .. } => {
+            format!("super::__core_wire::i32(&{wire}, &mut {cursor}).ok_or({internal})?")
+        }
+        SemanticType::Handle { .. } => {
+            format!("super::__core_wire::u64(&{wire}, &mut {cursor}).ok_or({internal})?")
+        }
+        SemanticType::FixedArray { element, length } => {
+            let values = (0..*length)
+                .map(|_| decode_fixed_value(element, records, wire, cursor))
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("[{values}]")
+        }
+        SemanticType::Record { name } => {
+            let record = &records[name];
+            let fields = record
+                .fields
+                .iter()
+                .map(|field| {
+                    format!(
+                        "{}: {}",
+                        rust_ident(&field.name.to_snake_case()),
+                        decode_fixed_value(&field.ty, records, wire, cursor)
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(", ");
+            let (_, alignment) = fixed_wire_layout(ty, records)
+                .expect("fixed generated guest record has a wire layout");
+            format!(
+                "{{ let core_value = {} {{ {fields} }}; super::__core_wire::align(&{wire}, &mut {cursor}, {alignment}).ok_or({internal})?; core_value }}",
+                rust_type_ident(name),
+            )
+        }
+        _ => unreachable!(),
+    }
+}
+
+fn fixed_output_return_type(
+    outputs: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> String {
+    if outputs.len() == 1 {
+        return public_fixed_rust_type(&outputs[0].ty, records);
+    }
+    format!(
+        "({})",
+        outputs
+            .iter()
+            .map(|field| public_fixed_rust_type(&field.ty, records))
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
+}
+
+fn render_fixed_record_types(
+    executable: &[(&crate::model::FunctionModel, &FunctionPlan)],
+    records: &BTreeMap<String, RecordModel>,
+    indent: usize,
+) -> String {
+    let mut names = BTreeSet::new();
+    for (function, plan) in executable {
+        if !fixed_output_wrapper_eligible(plan, &function.inputs, &function.outputs, records) {
+            continue;
+        }
+        for field in &function.outputs {
+            collect_record_types(&field.ty, records, &mut names);
+        }
+    }
+    if names.is_empty() {
+        return String::new();
+    }
+
+    let pad = " ".repeat(indent);
+    let field_pad = " ".repeat(indent + 4);
+    let mut output = String::new();
+    for name in names {
+        let record = &records[&name];
+        output.push_str(&format!(
+            "{pad}#[derive(Debug, Clone, Copy, PartialEq)]\n{pad}pub struct {} {{\n",
+            rust_type_ident(&name),
+        ));
+        for field in &record.fields {
+            output.push_str(&format!(
+                "{field_pad}pub {}: {},\n",
+                rust_ident(&field.name.to_snake_case()),
+                public_fixed_rust_type(&field.ty, records),
+            ));
+        }
+        output.push_str(&format!("{pad}}}\n\n"));
+    }
+    output
+}
+
+fn collect_record_types(
+    ty: &SemanticType,
+    records: &BTreeMap<String, RecordModel>,
+    names: &mut BTreeSet<String>,
+) {
+    match ty {
+        SemanticType::Record { name } => {
+            if names.insert(name.clone()) {
+                if let Some(record) = records.get(name) {
+                    for field in &record.fields {
+                        collect_record_types(&field.ty, records, names);
+                    }
+                }
+            }
+        }
+        SemanticType::FixedArray { element, .. } => collect_record_types(element, records, names),
+        _ => {}
     }
 }
 
@@ -297,6 +604,25 @@ fn public_rust_type(ty: &SemanticType) -> String {
     }
 }
 
+fn public_fixed_rust_type(
+    ty: &SemanticType,
+    records: &BTreeMap<String, RecordModel>,
+) -> String {
+    match ty {
+        SemanticType::Scalar { .. } | SemanticType::Enum { .. } | SemanticType::Handle { .. } => {
+            public_rust_type(ty)
+        }
+        SemanticType::FixedArray { element, length } => {
+            format!("[{}; {length}]", public_fixed_rust_type(element, records))
+        }
+        SemanticType::Record { name } => {
+            debug_assert!(records.contains_key(name));
+            rust_type_ident(name)
+        }
+        _ => panic!("non-fixed type requested for fixed Core wrapper"),
+    }
+}
+
 fn core_rust_type(ty: CoreType) -> &'static str {
     match ty {
         CoreType::I32 => "i32",
@@ -324,6 +650,48 @@ fn fixed_wire_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -
             .is_some_and(|record| record.fields.iter().all(|field| fixed_wire_type(&field.ty, records))),
         _ => false,
     }
+}
+
+fn fixed_wire_layout(
+    ty: &SemanticType,
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<(u32, u32)> {
+    match ty {
+        SemanticType::Scalar { name } => match name.as_str() {
+            "i64" | "u64" | "isize" | "usize" | "f64" => Some((8, 8)),
+            _ => Some((4, 4)),
+        },
+        SemanticType::Enum { .. } => Some((4, 4)),
+        SemanticType::Handle { .. } => Some((8, 8)),
+        SemanticType::FixedArray { element, length } => {
+            let (bytes, alignment) = fixed_wire_layout(element, records)?;
+            Some((bytes.checked_mul(u32::try_from(*length).ok()?)?, alignment))
+        }
+        SemanticType::Record { name } => {
+            let record = records.get(name)?;
+            layout_fields(&record.fields, records)
+        }
+        _ => None,
+    }
+}
+
+fn layout_fields(
+    fields: &[FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<(u32, u32)> {
+    let mut bytes = 0u32;
+    let mut alignment = 1u32;
+    for field in fields {
+        let (field_bytes, field_alignment) = fixed_wire_layout(&field.ty, records)?;
+        bytes = align_up(bytes, field_alignment).checked_add(field_bytes)?;
+        alignment = alignment.max(field_alignment);
+    }
+    Some((align_up(bytes, alignment), alignment))
+}
+
+fn align_up(value: u32, alignment: u32) -> u32 {
+    debug_assert!(alignment.is_power_of_two());
+    (value + alignment - 1) & !(alignment - 1)
 }
 
 fn unused_tuple(inputs: &[FieldModel]) -> String {
@@ -357,6 +725,10 @@ fn rust_ident(value: &str) -> String {
     } else {
         value.to_owned()
     }
+}
+
+fn rust_type_ident(value: &str) -> String {
+    rust_ident(&value.to_upper_camel_case())
 }
 
 fn record_index(model: &ApiModel) -> BTreeMap<String, RecordModel> {
