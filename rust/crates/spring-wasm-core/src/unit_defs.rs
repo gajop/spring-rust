@@ -1,5 +1,7 @@
 // UnitDefs byte-string portion of the Spring Core-Wasm guest SDK.
 
+use super::{ApiError, ErrorCode, Result};
+
 #[cfg(feature = "alloc")]
 extern crate alloc;
 #[cfg(feature = "alloc")]

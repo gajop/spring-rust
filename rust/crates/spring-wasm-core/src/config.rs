@@ -4,6 +4,8 @@
 // blob. The performance API is caller-owned and allocation-free; it never
 // materializes a Vec<String>.
 
+use super::{ApiError, ErrorCode, Result};
+
 #[cfg(feature = "alloc")]
 extern crate alloc;
 #[cfg(feature = "alloc")]

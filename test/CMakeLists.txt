@@ -98,6 +98,29 @@ endmacro()
 ### Wasm interface policy/resource/runtime tests
 	file(GLOB wasm_host_adapter_sources CONFIGURE_DEPENDS
 			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmHostAdapter*.cpp")
+	# WasmInterfaceSystem/WasmTypedHost dispatch into Core, so the test binary
+	# needs the same Core translation units the engine target compiles.
+	file(GLOB wasm_core_sources CONFIGURE_DEPENDS
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmCore*.cpp")
+	# The UnitsPieces binding needs the simulation globals; CoreSimStubs.cpp
+	# supplies a no-op registration in its place.
+	list(REMOVE_ITEM wasm_core_sources
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmCoreUnitsPiecesBindings.cpp")
+	set(wasm_core_sources_with_validation ${wasm_core_sources})
+	# TestWasmModuleManifest.cpp includes WasmCoreValidation.cpp directly so it
+	# can exercise validation without the rest of the Core stack; linking it
+	# again there would be a duplicate definition.
+	list(REMOVE_ITEM wasm_core_sources
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmCoreValidation.cpp")
+	set(wasm_core_generated_sources "")
+	foreach(wasm_core_generated_source
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedOptionBindings.cpp"
+			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedVariableOutputBindings.cpp")
+		if(EXISTS ${wasm_core_generated_source})
+			list(APPEND wasm_core_generated_sources ${wasm_core_generated_source})
+		endif()
+	endforeach()
 	set(test_name WasmInterface)
 	set(test_src
 			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmInterface.cpp"
@@ -109,6 +132,10 @@ endmacro()
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmResources.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModuleManifest.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystem.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystemCore.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/CoreSimStubs.cpp"
+			${wasm_core_sources}
+			${wasm_core_generated_sources}
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmDispatch.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHost.cpp"
@@ -145,6 +172,16 @@ endmacro()
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHost.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHostShims.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystem.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystemCore.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModuleManifest.cpp"
+			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmDispatch.cpp"
+			"${ENGINE_SOURCE_DIR}/NativeInterface/NativeInterfaceWasmAdapter.cpp"
+			"${ENGINE_SOURCE_DIR}/NativeInterface/WasmUiVisibility.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/CoreSimStubs.cpp"
+			${wasm_core_sources_with_validation}
+			${wasm_core_generated_sources}
+			${wasm_host_adapter_sources}
 			"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
 			${test_List_sources}
 			${test_Catch_main}

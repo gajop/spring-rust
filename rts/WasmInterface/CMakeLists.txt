@@ -23,7 +23,6 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreBenchmarkBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreVariableCallins.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreHost.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreHostFastDispatch.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmCoreValidation.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmModule.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmModuleManifest.cpp

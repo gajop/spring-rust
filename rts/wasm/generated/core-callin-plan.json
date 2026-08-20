@@ -1,0 +1,2257 @@
+{
+  "callins": [
+    {
+      "name": "ActiveCommandChanged",
+      "query": "ActiveCommandChangedQuery",
+      "result": "ActiveCommandChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "AddConsoleLine",
+      "query": "AddConsoleLineQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "AllowBuilderHoldFire",
+      "query": "AllowBuilderHoldFireQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "AllowCommand",
+      "query": "UnitCommandQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "AllowDirectUnitControl",
+      "query": "AllowDirectUnitControlQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "AllowFeatureBuildStep",
+      "query": "AllowFeatureBuildStepQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 5
+    },
+    {
+      "name": "AllowFeatureCreation",
+      "query": "AllowFeatureCreationQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 5,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "AllowResourceLevel",
+      "query": "AllowResourceLevelQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "AllowResourceTransfer",
+      "query": "AllowResourceTransferQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "AllowStartPosition",
+      "query": "AllowStartPositionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 36,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 9,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "AllowUnitBuildStep",
+      "query": "AllowUnitBuildStepQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 5
+    },
+    {
+      "name": "AllowUnitCloak",
+      "query": "AllowUnitCloakQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "AllowUnitCreation",
+      "query": "AllowUnitCreationQuery",
+      "result": "AllowUnitCreationResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "fixed-wire",
+      "fixed_query_bytes": 32,
+      "fixed_result_bytes": 8,
+      "numeric_flat_query_values": 8,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "AllowUnitDecloak",
+      "query": "AllowUnitDecloakQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 5
+    },
+    {
+      "name": "AllowUnitKamikaze",
+      "query": "AllowUnitKamikazeQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "AllowUnitTransfer",
+      "query": "AllowUnitTransferQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 5
+    },
+    {
+      "name": "AllowUnitTransport",
+      "query": "AllowUnitTransportQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 6
+    },
+    {
+      "name": "AllowUnitTransportPosition",
+      "query": "AllowUnitTransportPositionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 40,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 10,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "AllowWeaponInterceptTarget",
+      "query": "AllowWeaponInterceptTargetQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "and-false",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "AllowWeaponTarget",
+      "query": "AllowWeaponTargetQuery",
+      "result": "AllowWeaponTargetResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "fixed-wire",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 8,
+      "numeric_flat_query_values": 6
+    },
+    {
+      "name": "AllowWeaponTargetCheck",
+      "query": "AllowWeaponTargetCheckQuery",
+      "result": "IntCallinResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "ArchiveCallin",
+      "query": "SimpleCallinQuery",
+      "result": "ArchiveCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "CollectGarbage",
+      "query": "CollectGarbageQuery",
+      "result": "CollectGarbageResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "CommandFallback",
+      "query": "CommandFallbackQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "CommandNotify",
+      "query": "CommandNotifyQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "DefaultCommand",
+      "query": "DefaultCommandQuery",
+      "result": "DefaultCommandResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "fixed-wire",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 8,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "DownloadFailed",
+      "query": "DownloadFailedQuery",
+      "result": "DownloadFailedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "DownloadFinished",
+      "query": "DownloadFinishedQuery",
+      "result": "DownloadFinishedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "DownloadProgress",
+      "query": "DownloadProgressQuery",
+      "result": "DownloadProgressResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "DownloadQueued",
+      "query": "DownloadQueuedQuery",
+      "result": "DownloadQueuedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "DownloadStarted",
+      "query": "DownloadStartedQuery",
+      "result": "DownloadStartedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "DrawAlphaObjectsLua",
+      "query": "DrawAlphaObjectsLuaQuery",
+      "result": "DrawAlphaObjectsLuaResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "DrawBuildSquare",
+      "query": "DrawBuildSquareQuery",
+      "result": "DrawBuildSquareResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "DrawFeature",
+      "query": "DrawFeatureQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "DrawMaterial",
+      "query": "DrawMaterialQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "DrawObjectsLua",
+      "query": "DrawObjectsLuaQuery",
+      "result": "DrawObjectsLuaResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "DrawProjectile",
+      "query": "DrawProjectileQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "DrawScreen",
+      "query": "DrawScreenQuery",
+      "result": "DrawScreenResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "DrawShield",
+      "query": "DrawShieldQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "DrawUnit",
+      "query": "DrawUnitQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "DrawWorldPreParticles",
+      "query": "DrawWorldPreParticlesQuery",
+      "result": "DrawWorldPreParticlesResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "Explosion",
+      "query": "ExplosionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 6,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "FeatureCreated",
+      "query": "FeatureCreatedQuery",
+      "result": "FeatureCreatedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "FeatureDamaged",
+      "query": "FeatureDamagedQuery",
+      "result": "FeatureDamagedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 36,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 9
+    },
+    {
+      "name": "FeatureDestroyed",
+      "query": "FeatureDestroyedQuery",
+      "result": "FeatureDestroyedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "FeatureMoved",
+      "query": "FeatureMovedQuery",
+      "result": "FeatureMovedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 4,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "FeaturePreDamaged",
+      "query": "FeatureDamagedQuery",
+      "result": "DamageCallinResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "fixed-wire",
+      "fixed_query_bytes": 36,
+      "fixed_result_bytes": 8,
+      "numeric_flat_query_values": 9
+    },
+    {
+      "name": "Float3Callin",
+      "query": "Float3CallinQuery",
+      "result": "Float3CallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "GameFrame",
+      "query": "GameFrameQuery",
+      "result": "GameFrameResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "GameFramePost",
+      "query": "GameFramePostQuery",
+      "result": "GameFramePostResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "GameID",
+      "query": "GameIDQuery",
+      "result": "GameIDResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "GameOver",
+      "query": "GameOverEventQuery",
+      "result": "GameOverEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "GamePaused",
+      "query": "GamePausedQuery",
+      "result": "GamePausedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "GamePreload",
+      "query": "GamePreloadQuery",
+      "result": "GamePreloadResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "empty",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 0,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 0
+    },
+    {
+      "name": "GameProgress",
+      "query": "GameProgressQuery",
+      "result": "GameProgressResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "GameSetup",
+      "query": "GameSetupQuery",
+      "result": "GameSetupResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "fixed-wire",
+      "fixed_result_bytes": 8,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "GameStart",
+      "query": "GameStartQuery",
+      "result": "GameStartResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "empty",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 0,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 0
+    },
+    {
+      "name": "GroupChanged",
+      "query": "GroupChangedQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "HandleLuaCall",
+      "query": "HandleLuaCallQuery",
+      "result": "HandleLuaCallResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "HandleLuaMsg",
+      "query": "HandleLuaMsgQuery",
+      "result": "HandleLuaMsgResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "InitializeNativeModule",
+      "query": "InitializeNativeModuleQuery",
+      "result": "InitializeNativeModuleResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "manual",
+      "fixed_query_bytes": 12,
+      "numeric_flat_query_values": 3,
+      "notes": [
+        "variable/manual result needs reviewed guest-to-host return lowering"
+      ]
+    },
+    {
+      "name": "KeyMapChanged",
+      "query": "SimpleCallinQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "KeyPress",
+      "query": "KeyPressQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "KeyRelease",
+      "query": "KeyReleaseQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "LastMessagePosition",
+      "query": "LastMessagePositionQuery",
+      "result": "LastMessagePositionResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "Load",
+      "query": "SimpleCallinQuery",
+      "result": "ArchiveCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "MapDrawCmd",
+      "query": "MapDrawCmdQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "MiniMapDraw",
+      "query": "MiniMapDrawQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "MiniMapGeometryChanged",
+      "query": "MiniMapGeometryChangedQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 32,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 8
+    },
+    {
+      "name": "MiniMapRotationChanged",
+      "query": "MiniMapRotationChangedQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "MiniMapStateChanged",
+      "query": "MiniMapStateChangedQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "MouseMove",
+      "query": "MouseMoveQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 5
+    },
+    {
+      "name": "MousePress",
+      "query": "MousePressQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "MouseRelease",
+      "query": "MouseReleaseQuery",
+      "result": "MouseReleaseResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "MouseWheel",
+      "query": "MouseWheelQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "MoveCtrlNotify",
+      "query": "MoveCtrlNotifyQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "PlayerAdded",
+      "query": "PlayerAddedQuery",
+      "result": "PlayerAddedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "PlayerChanged",
+      "query": "PlayerChangedQuery",
+      "result": "PlayerChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "PlayerRemoved",
+      "query": "PlayerRemovedQuery",
+      "result": "PlayerRemovedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "Pong",
+      "query": "PongQuery",
+      "result": "PongResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "ProjectileEvent",
+      "query": "ProjectileEventQuery",
+      "result": "ProjectileEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "RectChanged",
+      "query": "RectChangedQuery",
+      "result": "RectChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "RecvFromSynced",
+      "query": "RecvFromSyncedQuery",
+      "result": "RecvFromSyncedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "RenderUnitDestroyed",
+      "query": "RenderUnitDestroyedQuery",
+      "result": "RenderUnitDestroyedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "ResourceExcess",
+      "query": "ResourceExcessQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "Save",
+      "query": "SimpleCallinQuery",
+      "result": "ArchiveCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "ScreenPosition",
+      "query": "ScreenPositionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "ScreenTooltip",
+      "query": "ScreenPositionQuery",
+      "result": "StringCallinResult",
+      "aggregation": "first-non-empty",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "manual",
+      "fixed_query_bytes": 8,
+      "numeric_flat_query_values": 2,
+      "notes": [
+        "variable/manual result needs reviewed guest-to-host return lowering"
+      ]
+    },
+    {
+      "name": "ShieldPreDamaged",
+      "query": "ShieldPreDamagedQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 52,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 13,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "Shutdown",
+      "query": "ShutdownQuery",
+      "result": "ShutdownResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "empty",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 0,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 0
+    },
+    {
+      "name": "SimpleCallin",
+      "query": "SimpleCallinQuery",
+      "result": "SimpleCallinResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "StockpileChanged",
+      "query": "StockpileChangedQuery",
+      "result": "StockpileChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 6
+    },
+    {
+      "name": "SunChanged",
+      "query": "SunChangedQuery",
+      "result": "SunChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "TeamChanged",
+      "query": "TeamChangedQuery",
+      "result": "TeamChangedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "TeamDied",
+      "query": "TeamDiedQuery",
+      "result": "TeamDiedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "TerraformComplete",
+      "query": "TerraformCompleteQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 6
+    },
+    {
+      "name": "TextEditing",
+      "query": "TextEditingQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "TextInput",
+      "query": "TextInputQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "UnitCloakEvent",
+      "query": "UnitCloakEventQuery",
+      "result": "UnitCloakEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "UnitCmdDone",
+      "query": "UnitCmdDoneQuery",
+      "result": "UnitCmdDoneResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "UnitCommand",
+      "query": "UnitCommandQuery",
+      "result": "UnitCommandResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "empty",
+      "fixed_result_bytes": 0,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
+      "name": "UnitConstructionDecayed",
+      "query": "UnitConstructionDecayedQuery",
+      "result": "UnitConstructionDecayedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 6
+    },
+    {
+      "name": "UnitCreated",
+      "query": "UnitCreatedQuery",
+      "result": "UnitCreatedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "UnitDamaged",
+      "query": "UnitDamagedQuery",
+      "result": "UnitDamagedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 40,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 10
+    },
+    {
+      "name": "UnitDestroyed",
+      "query": "UnitDestroyedQuery",
+      "result": "UnitDestroyedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 28,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 7
+    },
+    {
+      "name": "UnitExperience",
+      "query": "UnitExperienceQuery",
+      "result": "UnitExperienceResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 5
+    },
+    {
+      "name": "UnitFeatureCollision",
+      "query": "UnitFeatureCollisionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "UnitFinished",
+      "query": "UnitFinishedQuery",
+      "result": "UnitFinishedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "UnitFromFactory",
+      "query": "UnitFromFactoryQuery",
+      "result": "UnitFromFactoryResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 24,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 6
+    },
+    {
+      "name": "UnitGiven",
+      "query": "UnitGivenQuery",
+      "result": "UnitGivenResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "UnitHarvestStorageFull",
+      "query": "UnitHarvestStorageFullQuery",
+      "result": "UnitHarvestStorageFullResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "UnitIdle",
+      "query": "UnitIdleQuery",
+      "result": "UnitIdleResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "UnitLoaded",
+      "query": "UnitLoadedQuery",
+      "result": "UnitLoadedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 5
+    },
+    {
+      "name": "UnitLosEvent",
+      "query": "UnitLosEventQuery",
+      "result": "UnitLosEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "UnitMoveEvent",
+      "query": "UnitMoveEventQuery",
+      "result": "UnitMoveEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "UnitMovementClassEvent",
+      "query": "UnitMovementClassEventQuery",
+      "result": "UnitMovementClassEventResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "UnitPreDamaged",
+      "query": "UnitDamagedQuery",
+      "result": "DamageCallinResult",
+      "aggregation": "first",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "fixed-wire",
+      "fixed_query_bytes": 40,
+      "fixed_result_bytes": 8,
+      "numeric_flat_query_values": 10
+    },
+    {
+      "name": "UnitReverseBuilt",
+      "query": "UnitReverseBuiltQuery",
+      "result": "UnitReverseBuiltResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 12,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 3
+    },
+    {
+      "name": "UnitSeismicPing",
+      "query": "UnitSeismicPingQuery",
+      "result": "UnitSeismicPingResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 28,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 7,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature"
+      ]
+    },
+    {
+      "name": "UnitStunned",
+      "query": "UnitStunnedQuery",
+      "result": "UnitStunnedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "UnitTaken",
+      "query": "UnitTakenQuery",
+      "result": "UnitTakenResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 16,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 4
+    },
+    {
+      "name": "UnitUnitCollision",
+      "query": "UnitUnitCollisionQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "direct",
+      "fixed_query_bytes": 8,
+      "fixed_result_bytes": 4,
+      "numeric_flat_query_values": 2
+    },
+    {
+      "name": "UnitUnloaded",
+      "query": "UnitUnloadedQuery",
+      "result": "UnitUnloadedResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 20,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 5
+    },
+    {
+      "name": "Update",
+      "query": "UpdateQuery",
+      "result": "UpdateResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 4,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 1
+    },
+    {
+      "name": "ViewResize",
+      "query": "ViewResizeQuery",
+      "result": "ViewResizeResult",
+      "aggregation": "ignore",
+      "environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "direct",
+      "result_strategy": "empty",
+      "fixed_query_bytes": 64,
+      "fixed_result_bytes": 0,
+      "numeric_flat_query_values": 16
+    },
+    {
+      "name": "WorldTooltip",
+      "query": "WorldTooltipQuery",
+      "result": "StringCallinResult",
+      "aggregation": "first-non-empty",
+      "environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "query_strategy": "fixed-wire",
+      "result_strategy": "manual",
+      "fixed_query_bytes": 24,
+      "numeric_flat_query_values": 6,
+      "notes": [
+        "fixed numeric record is a flattening candidate; benchmark before choosing a large signature",
+        "variable/manual result needs reviewed guest-to-host return lowering"
+      ]
+    }
+  ],
+  "by_query_strategy": {
+    "direct": 89,
+    "empty": 3,
+    "fixed-wire": 11,
+    "variable-scratch": 23
+  },
+  "by_result_strategy": {
+    "direct": 43,
+    "empty": 74,
+    "fixed-wire": 6,
+    "manual": 3
+  }
+}

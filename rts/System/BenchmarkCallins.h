@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <limits>
@@ -160,6 +161,18 @@ inline std::string_view EventTestName(std::string_view event)
 	return {};
 }
 
+// Walk a buffer larger than L3 cache so the next callin dispatch starts cold,
+// matching real usage where a full frame of work runs between callins.
+inline void EvictCache()
+{
+	constexpr std::size_t kBytes = 64 * 1024 * 1024;
+	static std::vector<char> buffer(kBytes, 0);
+	volatile char sink = 0;
+	for (std::size_t i = 0; i < kBytes; i += 64)
+		sink = buffer[i];
+	(void)sink;
+}
+
 inline Token Begin(std::string_view backend, std::string_view test)
 {
 	// Lua's generic call wrapper sees source event names. Canonicalize them here
@@ -170,6 +183,7 @@ inline Token Begin(std::string_view backend, std::string_view test)
 		test = eventTest;
 	if (!IsEnabled() || !IsBackend(backend) || !IsTrackedTest(test))
 		return {};
+	EvictCache();
 	return {
 		.test = std::string(test),
 		.start = Clock::now(),
@@ -273,7 +287,7 @@ inline void Flush()
 			 << ",\"spreadNs\":" << spread
 			 << ",\"p99Ns\":" << Percentile(sorted, 0.99) * fanout
 			 << ",\"clockOverheadNs\":" << clockOverhead
-			 << ",\"measurement\":\"actual engine callin boundary; median of per-dispatch samples\"}\n";
+			 << ",\"measurement\":\"engine callin boundary, cold cache; median of per-dispatch samples\"}\n";
 	}
 	file.flush();
 	flushed = true;

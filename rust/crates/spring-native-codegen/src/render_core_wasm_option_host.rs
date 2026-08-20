@@ -240,14 +240,16 @@ fn render_callback(
 ) -> String {
     let callback = callback_name(module_name, &function.name);
     let api_member = native_member(module_name);
+    let api_guard = native_guard(module_name);
     let slot_count = plan.direct_params.len().max(plan.direct_results.len());
     let fixed_input = matches!(plan.input_strategy, InputStrategy::FixedInputBuffer);
     let fixed_output = matches!(plan.result_strategy, ResultStrategy::FixedOutputBuffer { .. });
     let direct_input_count = function.inputs.iter().filter(|field| direct_type(&field.ty)).count();
     let mut body = format!(
-        "wasm_trap_t* {callback}(void* environment, wasmtime_caller_t* caller,\n    wasmtime_val_raw_t* slots, std::size_t slotCount)\n{{\n    auto* state = static_cast<HostState*>(environment);\n    if (state == nullptr || state->native == nullptr || state->native->{api_member} == nullptr ||\n        state->native->{api_member}->{function_name} == nullptr)\n        return Trap(\"{function_name} generated Core binding is unavailable\");\n    if ({slot_count} != 0 && (slots == nullptr || slotCount != {slot_count}))\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n    if ({slot_count} == 0 && slotCount != 0)\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n\n    std::string budgetError;\n    ImportGuard guard(state, {work}u, budgetError);\n    if (!guard.Ok())\n        return Trap(budgetError);\n",
+        "wasm_trap_t* {callback}(void* environment, wasmtime_caller_t* caller,\n    wasmtime_val_raw_t* slots, std::size_t slotCount)\n{{\n    auto* state = static_cast<HostState*>(environment);\n    if (state == nullptr || state->native == nullptr || {api_guard} ||\n        state->native->{api_member}->{function_name} == nullptr)\n        return Trap(\"{function_name} generated Core binding is unavailable\");\n    if ({slot_count} != 0 && (slots == nullptr || slotCount != {slot_count}))\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n    if ({slot_count} == 0 && slotCount != 0)\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n\n    std::string budgetError;\n    ImportGuard guard(state, {work}u, budgetError);\n    if (!guard.Ok())\n        return Trap(budgetError);\n",
         callback = callback,
         api_member = api_member,
+        api_guard = api_guard,
         function_name = function.name,
         slot_count = slot_count,
         work = 1 + plan.direct_params.len(),
@@ -338,7 +340,9 @@ fn render_read_field(
         SemanticType::Option { inner } => {
             let presence = presence_field(field).expect("eligible option has presence metadata");
             let mut output = format!(
-                "{pad}bool corePresent = false;\n{pad}if (!reader.Bool(corePresent)) return Trap(\"generated option presence underflow\");\n{pad}{owner}.{presence} = corePresent;\n"
+                // Scope the presence temporary: a record with several option
+                // fields reads more than one of these into the same function.
+                "{pad}{{\n{pad}    bool corePresent = false;\n{pad}    if (!reader.Bool(corePresent)) return Trap(\"generated option presence underflow\");\n{pad}    {owner}.{presence} = corePresent;\n{pad}}}\n"
             );
             output.push_str(&render_read_type(inner, destination, records, indent));
             output
@@ -534,7 +538,13 @@ fn kind_array(name: &str, kinds: &[CoreType]) -> String {
 }
 
 fn native_member(module: &str) -> String {
-    match module { "camera" => "cameraApi".to_owned(), "sound" => "soundApi".to_owned(), other => other.to_lower_camel_case() }
+    spring_native_codegen::render_host::core_native_member(module)
+        .unwrap_or_else(|| panic!("no NativeInterface member mapped for module {module}"))
+}
+
+fn native_guard(module: &str) -> String {
+    spring_native_codegen::render_host::core_native_guard(module)
+        .unwrap_or_else(|| panic!("no NativeInterface member mapped for module {module}"))
 }
 fn callback_name(module: &str, function: &str) -> String {
     format!("CoreOption_{}_{}", module.to_snake_case(), function.to_snake_case())

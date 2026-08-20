@@ -623,11 +623,16 @@ bool WasmInterfaceSystem::HasModules(WasmEnvironment environment) const
 
 std::vector<std::string> WasmInterfaceSystem::SyncedConfiguration() const
 {
-	std::vector<std::string> result;
+	// Component and Core modules live in two separate lists, so the listing has
+	// to be re-sequenced rather than concatenated. Order by the declared module
+	// order the same way a single-transport load would, and fall back to the
+	// composed text only to break ties deterministically.
+	std::vector<std::pair<int, std::string>> ordered;
 	for (const auto& module : modules) {
 		if (!WasmEnvironmentMatrix::Policy(module->Descriptor().environment).synced)
 			continue;
-		result.push_back(module->Descriptor().name + "|" +
+		ordered.emplace_back(module->Descriptor().order,
+			module->Descriptor().name + "|" +
 			WasmEnvironmentMatrix::Name(module->Descriptor().environment) + "|" +
 			std::to_string(module->Descriptor().order) + "|" + module->Descriptor().archive + "|" +
 			module->Identity().sha512 + "|" +
@@ -637,12 +642,18 @@ std::vector<std::string> WasmInterfaceSystem::SyncedConfiguration() const
 	for (const CoreModuleRecord& module : coreModules) {
 		if (!WasmEnvironmentMatrix::Policy(module.descriptor.environment).synced)
 			continue;
-		result.push_back(module.descriptor.name + "|" +
+		ordered.emplace_back(module.descriptor.order,
+			module.descriptor.name + "|" +
 			WasmEnvironmentMatrix::Name(module.descriptor.environment) + "|" +
 			std::to_string(module.descriptor.order) + "|" + module.descriptor.archive + "|" +
 			module.identity.sha512 + "|" + runtime->ConfigurationIdentity() + "|interface=" +
 			module.descriptor.interfaceVersion + "|abi=core-v1");
 	}
-	std::sort(result.begin(), result.end());
+	std::sort(ordered.begin(), ordered.end());
+
+	std::vector<std::string> result;
+	result.reserve(ordered.size());
+	for (auto& entry : ordered)
+		result.push_back(std::move(entry.second));
 	return result;
 }

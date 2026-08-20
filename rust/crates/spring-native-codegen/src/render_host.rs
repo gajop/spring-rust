@@ -1561,7 +1561,7 @@ fn write_expression(ty: &SemanticType, expression: &str) -> String {
 /// type.  The nested control/rendering tables are intentionally explicit: they
 /// are not top-level fields even though their C headers are separate semantic
 /// modules.
-fn native_api_path(module: &str) -> Option<(&'static str, &'static str)> {
+pub fn native_api_path(module: &str) -> Option<(&'static str, &'static str)> {
     Some(match module {
         "units_query" => ("nativeInterface->unitsQuery", "UnitsQueryApi"),
         "units_info" => ("nativeInterface->unitsInfo", "UnitsInfoApi"),
@@ -1624,6 +1624,31 @@ fn native_api_path(module: &str) -> Option<(&'static str, &'static str)> {
         ),
         _ => return None,
     })
+}
+
+/// Member path under `NativeInterface` for a Core binding, relative to
+/// `state->native->`. Nested groups such as `unit_control` live under a
+/// sub-struct (`syncedCtrl->unit`), so this is not a camel-case of the module
+/// name; it is the same table the Component adapter renders from.
+pub fn core_native_member(module: &str) -> Option<String> {
+    let (path, _) = native_api_path(module)?;
+    Some(path.trim_start_matches("nativeInterface->").to_owned())
+}
+
+/// Progressive null guard for `state->native-><member>`. A nested member needs
+/// its parent checked first, otherwise the sub-struct read dereferences null.
+pub fn core_native_guard(module: &str) -> Option<String> {
+    let member = core_native_member(module)?;
+    let mut prefix = String::new();
+    let mut checks = Vec::new();
+    for segment in member.split("->") {
+        if !prefix.is_empty() {
+            prefix.push_str("->");
+        }
+        prefix.push_str(segment);
+        checks.push(format!("state->native->{prefix} == nullptr"));
+    }
+    Some(checks.join(" || "))
 }
 
 fn environment_mask(environment: &Environment) -> u32 {

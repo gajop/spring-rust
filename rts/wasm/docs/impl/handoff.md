@@ -31,7 +31,6 @@ New runtime pieces under `rts/WasmInterface/` include:
 - `WasmCoreAbi.{h,cpp}` — Wasmtime raw ABI helpers, memory binding, signature checking, unchecked export invocation, packed result helpers.
 - `WasmCoreBindings.{h,cpp}` — instance import registration and fixed callin export binding.
 - `WasmCoreHost.{h,cpp}` — Core module host/runtime ownership.
-- `WasmCoreHostFastDispatch.cpp` — fast host-dispatch support.
 - `WasmCoreValidation.{h,cpp}` — Core import/export validation against the executable registry and environment policy.
 - `WasmCoreRegistry.h` — handwritten executable Core import registry plus optional generated registry fallback.
 - `WasmCoreGeneratedSupport.h` — common import guards, execution-budget handling, UI visibility context, memory resolution, callback support.
@@ -473,6 +472,13 @@ Representative shapes already covered include scalar/fixed calls, string/list ou
 
 Do not update generated benchmark result documents manually. Run the runner on an otherwise idle release build.
 
+**Callin benchmarks must measure cold cache.** A 64 MB cache walk runs before
+each callin dispatch (`BenchmarkCallins.h:EvictCache`). Without it the tight
+benchmark loop keeps the cache warm, giving numbers like 141 ns that never
+occur in real usage, where a full frame of work runs between callins. With cold
+cache, typed Wasm and Lua sim callins both cost about 5 to 6 us. Core rows must
+be measured the same way before they are compared against Lua.
+
 ## 7. Local verification state
 
 The most important fact for takeover: **the latest Core expansion has not been compiled or run in this web session.** GitHub reported no status checks for the current head. Treat source review as useful but not as build verification.
@@ -570,7 +576,6 @@ Core runtime / dispatch:
 - `rts/WasmInterface/WasmCoreAbi.{h,cpp}`
 - `rts/WasmInterface/WasmCoreBindings.{h,cpp}`
 - `rts/WasmInterface/WasmCoreHost.{h,cpp}`
-- `rts/WasmInterface/WasmCoreHostFastDispatch.cpp`
 - `rts/WasmInterface/WasmCoreValidation.{h,cpp}`
 - `rts/WasmInterface/WasmCoreRegistry.h`
 - `rts/WasmInterface/WasmInterfaceSystemCore.cpp`
@@ -639,4 +644,5 @@ Design/reference docs:
 - Do not replace the explicit `GetUnitIsTransporting` boolean with `count != 0`.
 - Do not restore the redundant NativeInterface scratch copy for Core `GetUnitScriptNames`.
 - Do not publish variable-callin inner-timing ratios as apples-to-apples; use the common outer event rows.
+- Do not remove the cold-cache eviction from callin benchmarks; warm-loop numbers are not real-usage numbers.
 - Do not claim the current checkout is verified until it has been regenerated, compiled and tested locally.

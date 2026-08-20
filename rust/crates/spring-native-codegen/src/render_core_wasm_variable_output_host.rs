@@ -303,15 +303,17 @@ fn render_callback(
 ) -> String {
     let callback = callback_name(module_name, &function.name);
     let api_member = native_member(module_name);
+    let api_guard = native_guard(module_name);
     let slot_count = plan.direct_params.len().max(plan.direct_results.len());
     let direct_input_count = function.inputs.iter().filter(|field| direct_type(&field.ty)).count();
     let fixed_input = matches!(plan.input_strategy, InputStrategy::FixedInputBuffer);
     let output_descriptor_index = plan.direct_params.len() - 1;
     let layout = output_layout(&function.outputs, records).expect("eligible output descriptor layout");
     let mut body = format!(
-        "wasm_trap_t* {callback}(void* environment, wasmtime_caller_t* caller,\n    wasmtime_val_raw_t* slots, std::size_t slotCount)\n{{\n    auto* state = static_cast<HostState*>(environment);\n    if (state == nullptr || state->native == nullptr || state->native->{api_member} == nullptr ||\n        state->native->{api_member}->{function_name} == nullptr)\n        return Trap(\"{function_name} generated Core binding is unavailable\");\n    if (slots == nullptr || slotCount != {slot_count})\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n\n    std::string budgetError;\n    ImportGuard guard(state, {work}u, budgetError);\n    if (!guard.Ok())\n        return Trap(budgetError);\n\n    std::string memoryError;\n    if (!EnsureMemory(state, caller, memoryError))\n        return Trap(memoryError);\n    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[{output_index}].i32);\n    std::span<std::uint8_t> outputWire;\n    if (!state->memory.MutableView(outputDescriptor, {descriptor_bytes}u, outputWire)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);\n        return nullptr;\n    }}\n",
+        "wasm_trap_t* {callback}(void* environment, wasmtime_caller_t* caller,\n    wasmtime_val_raw_t* slots, std::size_t slotCount)\n{{\n    auto* state = static_cast<HostState*>(environment);\n    if (state == nullptr || state->native == nullptr || {api_guard} ||\n        state->native->{api_member}->{function_name} == nullptr)\n        return Trap(\"{function_name} generated Core binding is unavailable\");\n    if (slots == nullptr || slotCount != {slot_count})\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n\n    std::string budgetError;\n    ImportGuard guard(state, {work}u, budgetError);\n    if (!guard.Ok())\n        return Trap(budgetError);\n\n    std::string memoryError;\n    if (!EnsureMemory(state, caller, memoryError))\n        return Trap(memoryError);\n    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[{output_index}].i32);\n    std::span<std::uint8_t> outputWire;\n    if (!state->memory.MutableView(outputDescriptor, {descriptor_bytes}u, outputWire)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);\n        return nullptr;\n    }}\n",
         callback = callback,
         api_member = api_member,
+        api_guard = api_guard,
         function_name = function.name,
         slot_count = slot_count,
         work = 1 + plan.direct_params.len(),
@@ -562,7 +564,13 @@ fn kind_array(name: &str, kinds: &[CoreType]) -> String {
 }
 
 fn native_member(module: &str) -> String {
-    match module { "camera"=>"cameraApi".to_owned(), "sound"=>"soundApi".to_owned(), other=>other.to_lower_camel_case() }
+    spring_native_codegen::render_host::core_native_member(module)
+        .unwrap_or_else(|| panic!("no NativeInterface member mapped for module {module}"))
+}
+
+fn native_guard(module: &str) -> String {
+    spring_native_codegen::render_host::core_native_guard(module)
+        .unwrap_or_else(|| panic!("no NativeInterface member mapped for module {module}"))
 }
 fn callback_name(module: &str, function: &str) -> String { format!("CoreVariableOutput_{}_{}", module.to_snake_case(), function.to_snake_case()) }
 fn sanitize(value: &str) -> String { value.chars().map(|c| if c.is_ascii_alphanumeric(){c}else{'_'}).collect() }
