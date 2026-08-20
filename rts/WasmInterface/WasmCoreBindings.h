@@ -13,16 +13,13 @@ namespace recoil::wasm::core {
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 
-using GuestCallbackDispatch = bool (*)(void* data, std::uint32_t callbackID,
-	std::uint32_t userData, std::string& error);
-
 struct HostState {
 	NativeInterface* native = nullptr;
 	Memory memory;
 	WasmExecutionBudget* budget = nullptr;
 	bool fixedMemory = false;
-	void* callbackData = nullptr;
-	GuestCallbackDispatch dispatchCallback = nullptr;
+	wasmtime_func_t callbackDispatch{};
+	bool callbackDispatchBound = false;
 };
 
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
@@ -51,8 +48,6 @@ public:
 		host.native = nativeInterface;
 		host.budget = executionBudget;
 		host.fixedMemory = fixedMemory;
-		host.callbackData = this;
-		host.dispatchCallback = &InstanceBindings::DispatchCallbackThunk;
 		if (fixedMemory)
 			host.memory.MarkStable();
 	}
@@ -107,14 +102,7 @@ public:
 	HostState& Host() { return host; }
 
 private:
-	static bool DispatchCallbackThunk(void* data, std::uint32_t callbackID,
-		std::uint32_t userData, std::string& error);
-	bool DispatchCallback(std::uint32_t callbackID, std::uint32_t userData,
-		std::string& error);
-
 	HostState host;
-	wasmtime_context_t* boundContext = nullptr;
-	RawExport callbackDispatch;
 	I32ToVoidExport gameFrame;
 	I32ToVoidExport gameFramePost;
 	RawExport update;
