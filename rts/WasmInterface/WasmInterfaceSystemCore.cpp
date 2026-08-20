@@ -143,7 +143,7 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 {
 	handled = false;
 	WasmInterfaceSystem* system = ActiveCoreSystem();
-	if (system == nullptr || !WasmCoreHost::AnyActive())
+	if (system == nullptr || system->coreModules.empty())
 		return true;
 
 	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
