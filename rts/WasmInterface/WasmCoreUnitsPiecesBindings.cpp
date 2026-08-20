@@ -7,6 +7,7 @@
 #include <limits>
 #include <span>
 
+#include "NativeInterface/WasmUiVisibility.h"
 #include "WasmCoreGeneratedSupport.h"
 
 namespace recoil::wasm::core {
@@ -47,6 +48,15 @@ wasm_trap_t* GetUnitScriptNames(void* environment, wasmtime_caller_t* caller,
 		return Trap(memoryError);
 
 	const std::int32_t unitID = slots[0].i32;
+	// Piece/script names reveal model/type details. Match the existing
+	// UnitsInfo detail policy: UI may query them only for a typed unit. The
+	// rules/gaia hot path pays only this environment branch; no extra lookup.
+	if (state->environment == WasmEnvironment::UI &&
+		WasmUiVisibility::FindUnit(unitID, WasmUiVisibility::UnitAccess::Typed) == nullptr) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+		return nullptr;
+	}
+
 	const std::uint32_t descriptorPtr = static_cast<std::uint32_t>(slots[1].i32);
 	const std::uint32_t descriptorCapacity = static_cast<std::uint32_t>(slots[2].i32);
 	const std::uint32_t bytesPtr = static_cast<std::uint32_t>(slots[3].i32);
