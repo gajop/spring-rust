@@ -3,14 +3,23 @@
 #include "WasmInterfaceSystem.h"
 
 #include <algorithm>
+#include <array>
+#include <optional>
 #include <string_view>
 #include <unordered_map>
 
+#include "NativeInterface/WasmUiVisibility.h"
 #include "NativeInterface/api/Callins.h"
 #include "WasmCoreHost.h"
 #include "wasm/generated/WasmCallinRegistry.h"
 
 namespace {
+
+WasmInterfaceSystem*& ActiveCoreSystem()
+{
+	static WasmInterfaceSystem* system = nullptr;
+	return system;
+}
 
 const recoil::wasm::generated::CallinDescriptor* FindCoreCallin(std::string_view name)
 {
@@ -31,6 +40,22 @@ bool Is(std::string_view value, const char* expected)
 	return value == expected;
 }
 
+bool ResolveCoreDispatchSide(std::string_view name, bool& synced)
+{
+	if (name == "GameFrame" || name == "GameFramePost" ||
+		name == "UnitCreated" || name == "UnitPreDamaged" ||
+		name == "AllowUnitCreation") {
+		synced = true;
+		return true;
+	}
+	if (name == "Update" || name == "AddConsoleLine" ||
+		name == "CommandNotify" || name == "DrawWorld") {
+		synced = false;
+		return true;
+	}
+	return false;
+}
+
 bool DispatchCoreModule(const WasmInterfaceSystem::CoreCallinInvocation& invocation,
 	const WasmModuleDescriptor& module, std::string_view name, void* result,
 	std::string& error)
@@ -44,6 +69,76 @@ bool DispatchCoreModule(const WasmInterfaceSystem::CoreCallinInvocation& invocat
 }
 
 } // namespace
+
+WasmInterfaceSystem::CoreDispatchRegistration::CoreDispatchRegistration(
+	WasmInterfaceSystem* system)
+	: owner(system)
+	, previous(ActiveCoreSystem())
+{
+	ActiveCoreSystem() = owner;
+}
+
+WasmInterfaceSystem::CoreDispatchRegistration::~CoreDispatchRegistration()
+{
+	if (ActiveCoreSystem() == owner)
+		ActiveCoreSystem() = previous;
+}
+
+bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
+	const void* query, void* nativeResult, bool& handled, std::string& error)
+{
+	handled = false;
+	WasmInterfaceSystem* system = ActiveCoreSystem();
+	if (system == nullptr || !WasmCoreHost::AnyActive())
+		return true;
+
+	bool synced = false;
+	if (!ResolveCoreDispatchSide(name, synced))
+		return true;
+
+	static constexpr std::array<WasmEnvironment, 2> syncedEnvironments{
+		WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced};
+	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
+		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
+
+	std::vector<CoreCallinInvocation> invocations;
+	invocations.reserve(3);
+	const auto& primary = synced ? syncedEnvironments : unsyncedEnvironments;
+	for (const WasmEnvironment environment : primary) {
+		if (system->HasCoreModules(environment))
+			invocations.push_back({environment, query, true});
+	}
+
+	std::optional<UnitCreatedQuery> uiUnitCreated;
+	if (system->HasCoreModules(WasmEnvironment::UI)) {
+		bool includeUi = true;
+		const void* uiQuery = query;
+		if (name == "UnitCreated") {
+			const auto* typed = static_cast<const UnitCreatedQuery*>(query);
+			if (typed == nullptr) {
+				error = "Core UnitCreated dispatch received a null query";
+				return false;
+			}
+			WasmUiVisibility::ScopedContext uiContext(true);
+			includeUi = WasmUiVisibility::IsTeamVisible(typed->unitTeam);
+			if (includeUi) {
+				uiUnitCreated = *typed;
+				if (uiUnitCreated->builderID >= 0 &&
+					WasmUiVisibility::FindUnit(uiUnitCreated->builderID,
+						WasmUiVisibility::UnitAccess::Visible) == nullptr)
+					uiUnitCreated->builderID = -1;
+				uiQuery = &*uiUnitCreated;
+			}
+		}
+		if (includeUi)
+			invocations.push_back({WasmEnvironment::UI, uiQuery, true});
+	}
+
+	if (invocations.empty())
+		return true;
+	return system->DispatchCoreCallin(name, invocations, nullptr, nativeResult,
+		handled, error);
+}
 
 bool WasmInterfaceSystem::HasCoreModules(WasmEnvironment environment) const
 {
@@ -138,15 +233,10 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 			}
 
 			if (Is(resultType, "DamageCallinResult") && Is(aggregation, "first")) {
-				const auto* query = static_cast<const UnitDamagedQuery*>(invocation.query);
-				if (query == nullptr) {
+				if (invocation.query == nullptr) {
 					error = "Core UnitPreDamaged dispatch received a null query";
 					return false;
 				}
-				// As with other `first` callins, every module sees the same engine
-				// input state. An earlier event client may already have modified the
-				// damage pointers, so preserve nativeResult rather than resetting to
-				// query.damage/1.0 for each Core module.
 				DamageCallinResult moduleResult = damageDefault;
 				if (!DispatchCoreModule(invocation, module.descriptor, name, &moduleResult, error))
 					return false;
@@ -158,10 +248,6 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 			}
 
 			if (Is(resultType, "AllowUnitCreationResult") && Is(aggregation, "first")) {
-				// `first` chooses the first returned result, but later modules are
-				// still invoked against the engine's original default. Feeding the
-				// first module's return into the next module would make transport
-				// ordering mutate the API input contract.
 				AllowUnitCreationResult moduleResult = creationDefault;
 				if (!DispatchCoreModule(invocation, module.descriptor, name, &moduleResult, error))
 					return false;
