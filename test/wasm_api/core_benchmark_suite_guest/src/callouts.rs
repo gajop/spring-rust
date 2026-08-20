@@ -101,6 +101,28 @@ fn run_transport_ceiling(
         },
     )?;
 
+    // The fixture seeds this unit with one MOVE command before timing. Probe
+    // the nested command wire size once, then reuse the byte buffer so the
+    // timed row measures only host serialization + one Core crossing.
+    let command_required = match spring::get_unit_commands_into(unit_id, 5, &mut [])? {
+        spring::CommandBufferFill::Complete(bytes)
+        | spring::CommandBufferFill::Insufficient { required: bytes } => bytes,
+    };
+    let mut command_buffer = vec![0u8; command_required.max(1)];
+    common::measure(
+        "core_ceiling_nested_list_out_reuse",
+        common::scaled_count(20_000, scale),
+        || match spring::get_unit_commands_into(unit_id, 5, &mut command_buffer)? {
+            spring::CommandBufferFill::Complete(bytes) => {
+                black_box(&command_buffer[..bytes]);
+                Ok(())
+            }
+            spring::CommandBufferFill::Insufficient { .. } => {
+                Err(spring::ApiError::new(spring::ErrorCode::BufferOverflow as i32))
+            }
+        },
+    )?;
+
     let mut empty_units: [i32; 0] = [];
     let spatial_required = match spring::get_units_in_cylinder_into(
         position[0],
