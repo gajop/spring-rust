@@ -5,6 +5,12 @@ use spring_wasm_core as spring;
 
 mod common;
 
+#[cfg(all(
+    not(any(benchmark_context_unsynced, benchmark_context_ui)),
+    any(benchmark_callin_consoleline, benchmark_callin_commandnotify)
+))]
+mod variable_callins;
+
 #[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
 mod callouts;
 #[cfg(not(any(benchmark_context_unsynced, benchmark_context_ui)))]
