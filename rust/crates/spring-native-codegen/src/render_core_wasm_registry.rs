@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
 use crate::render_core_wasm::{self, FunctionPlan, InputStrategy, ResultStrategy};
 use crate::render_core_wasm_variable_host;
+use crate::render_core_wasm_variable_output_host;
 
 pub fn render(model: &ApiModel) -> String {
     let records = record_index(model);
@@ -26,6 +27,12 @@ pub fn render(model: &ApiModel) -> String {
             };
             if !fixed_executable(plan, &function.inputs, &function.outputs, &records)
                 && !render_core_wasm_variable_host::eligible(
+                    plan,
+                    &function.inputs,
+                    &function.outputs,
+                    &records,
+                )
+                && !render_core_wasm_variable_output_host::eligible(
                     plan,
                     &function.inputs,
                     &function.outputs,
