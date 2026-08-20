@@ -179,7 +179,7 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	if (invocationCount == 0)
 		return true;
 
-	const bool success = system->DispatchCoreCallin(name,
+	const bool success = system->DispatchCoreCallin(callin, name,
 		std::span<const CoreCallinInvocation>(invocations.data(), invocationCount),
 		nullptr, nativeResult, handled, error);
 	if (!synced) {
@@ -213,25 +213,42 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 	WasmValue* valueResult, void* nativeResult, bool& handled,
 	std::string& error)
 {
-	handled = false;
-	if (valueResult != nullptr)
-		*valueResult = WasmValue::Unit();
-
 	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
 	if (callin == WasmCoreCallin::Invalid) {
+		handled = false;
+		if (valueResult != nullptr)
+			*valueResult = WasmValue::Unit();
 		error = "unknown Core Wasm callin: " + std::string(name);
 		return false;
 	}
+	return DispatchCoreCallin(callin, name, invocations, valueResult, nativeResult,
+		handled, error);
+}
+
+bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
+	std::string_view diagnosticName, std::span<const CoreCallinInvocation> invocations,
+	WasmValue* valueResult, void* nativeResult, bool& handled,
+	std::string& error)
+{
+	handled = false;
+	if (valueResult != nullptr)
+		*valueResult = WasmValue::Unit();
+	if (callin == WasmCoreCallin::Invalid) {
+		error = "unknown Core Wasm callin: " + std::string(diagnosticName);
+		return false;
+	}
+
 	const auto* descriptor = FindCoreCallin(callin);
 	if (descriptor == nullptr) {
-		error = "Core Wasm callin has no generated descriptor: " + std::string(name);
+		error = "Core Wasm callin has no generated descriptor: " +
+			std::string(diagnosticName);
 		return false;
 	}
 	const CoreAggregation aggregation = ResolveAggregation(descriptor->aggregation);
 	const CoreResultKind resultKind = ResolveResultKind(descriptor->result, aggregation);
 	if (aggregation == CoreAggregation::Unsupported || resultKind == CoreResultKind::Unsupported) {
 		error = "native Core aggregation is not implemented for callin " +
-			std::string(name) + " (result " + descriptor->result +
+			std::string(diagnosticName) + " (result " + descriptor->result +
 			", aggregation " + descriptor->aggregation + ")";
 		return false;
 	}
@@ -275,7 +292,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 			handled = true;
 			if (aggregation == CoreAggregation::Ignore) {
 				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, name, nullptr, error))
+						callin, diagnosticName, nullptr, error))
 					return false;
 				continue;
 			}
@@ -287,7 +304,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 					.value = aggregation == CoreAggregation::AndFalse,
 				};
 				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, name, &moduleResult, error))
+						callin, diagnosticName, &moduleResult, error))
 					return false;
 				if (!invocation.contributesResult)
 					continue;
@@ -306,7 +323,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 				}
 				DamageCallinResult moduleResult = damageDefault;
 				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, name, &moduleResult, error))
+						callin, diagnosticName, &moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					damageAggregate = moduleResult;
@@ -319,7 +336,7 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 				aggregation == CoreAggregation::First) {
 				AllowUnitCreationResult moduleResult = creationDefault;
 				if (!DispatchCoreModule(invocation, module.host, module.descriptor,
-						callin, name, &moduleResult, error))
+						callin, diagnosticName, &moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
 					creationAggregate = moduleResult;
@@ -328,8 +345,9 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 				continue;
 			}
 
-			error = "Core Wasm callin policy combination is unsupported: " + std::string(name);
-			return false;
+			error = "Core Wasm callin policy combination is unsupported: " +
+			std::string(diagnosticName);
+		return false;
 		}
 	}
 
