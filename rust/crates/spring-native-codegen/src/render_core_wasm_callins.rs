@@ -195,9 +195,12 @@ fn manual_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -> bo
             manual_type(element, records)
         }
         SemanticType::List { element } => manual_type(element, records),
-        SemanticType::Record { name } => records
-            .get(name)
-            .is_none_or(|record| record.fields.iter().any(|field| manual_type(&field.ty, records))),
+        SemanticType::Record { name } => records.get(name).map_or(true, |record| {
+            record
+                .fields
+                .iter()
+                .any(|field| manual_type(&field.ty, records))
+        }),
         SemanticType::Result { ok, error } => {
             ok.as_deref().is_some_and(|ty| manual_type(ty, records))
                 || error.as_deref().is_some_and(|ty| manual_type(ty, records))
