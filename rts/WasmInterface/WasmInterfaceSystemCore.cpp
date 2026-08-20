@@ -84,11 +84,14 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 		.error = nullptr,
 		.value = Is(aggregation, "and-false"),
 	};
-	DamageCallinResult damageAggregate = {
+	DamageCallinResult damageDefault = {
 		.error = nullptr,
 		.newDamage = 0.0f,
 		.impulseMult = 1.0f,
 	};
+	if (nativeResult != nullptr && Is(resultType, "DamageCallinResult"))
+		damageDefault = *static_cast<const DamageCallinResult*>(nativeResult);
+	DamageCallinResult damageAggregate = damageDefault;
 	AllowUnitCreationResult creationDefault = {
 		.error = nullptr,
 		.allow = true,
@@ -140,11 +143,11 @@ bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 					error = "Core UnitPreDamaged dispatch received a null query";
 					return false;
 				}
-				DamageCallinResult moduleResult = {
-					.error = nullptr,
-					.newDamage = query->damage,
-					.impulseMult = 1.0f,
-				};
+				// As with other `first` callins, every module sees the same engine
+				// input state. An earlier event client may already have modified the
+				// damage pointers, so preserve nativeResult rather than resetting to
+				// query.damage/1.0 for each Core module.
+				DamageCallinResult moduleResult = damageDefault;
 				if (!DispatchCoreModule(invocation, module.descriptor, name, &moduleResult, error))
 					return false;
 				if (invocation.contributesResult && !haveResult) {
