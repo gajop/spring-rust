@@ -19,6 +19,8 @@ mod model {
 mod render_core_wasm;
 #[path = "../render_core_wasm_callins.rs"]
 mod render_core_wasm_callins;
+#[path = "../render_core_wasm_guest.rs"]
+mod render_core_wasm_guest;
 #[path = "../render_core_wasm_host.rs"]
 mod render_core_wasm_host;
 #[path = "../render_core_wasm_option_host.rs"]
@@ -243,6 +245,10 @@ fn run() -> Result<()> {
     write(
         &sdk_dir.join("generated.rs"),
         &render_wasm_sdk::render(&model),
+    )?;
+    write(
+        &sdk_dir.join("core_generated.rs"),
+        &render_core_wasm_guest::render(&model),
     )?;
     write(
         &sdk_dir.join("callins.rs"),
