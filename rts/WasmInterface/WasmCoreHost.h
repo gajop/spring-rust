@@ -29,6 +29,11 @@ public:
 	static bool AnyActive(WasmEnvironment environment);
 	static bool HasModule(std::string_view moduleName);
 	static bool ModuleFaulted(std::string_view moduleName);
+	static bool ModuleHasCallin(std::string_view moduleName, std::string_view name)
+	{
+		const WasmCoreHost* host = Find(moduleName);
+		return host != nullptr && host->HasCallin(name);
+	}
 
 	// Production dispatch: invoke exactly one already-ordered module. Missing
 	// optional exports are handled as no-ops; an unknown module/callin fails.
