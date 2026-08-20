@@ -33,10 +33,10 @@ pub fn render_cpp(model: &ApiModel) -> String {
         .into_iter()
         .map(|plan| ((plan.module.clone(), plan.function.clone()), plan))
         .collect::<BTreeMap<_, _>>();
-
     let mut callbacks = String::new();
     let mut registrations = String::new();
     let mut generated_count = 0usize;
+
     for module in &model.modules {
         for function in &module.functions {
             let Some(plan) = plans.get(&(module.name.clone(), function.name.clone())) else {
@@ -62,9 +62,9 @@ pub fn render_cpp(model: &ApiModel) -> String {
 
 #include <bit>
 #include <cstdint>
-#include <cstring>
 #include <limits>
 #include <span>
+#include <string>
 #include <string_view>
 #include <type_traits>
 
@@ -100,6 +100,21 @@ bool WriteCoreU32(std::span<std::uint8_t> bytes, std::size_t offset, std::uint32
     bytes[offset + 1] = static_cast<std::uint8_t>(value >> 8);
     bytes[offset + 2] = static_cast<std::uint8_t>(value >> 16);
     bytes[offset + 3] = static_cast<std::uint8_t>(value >> 24);
+    return true;
+}}
+
+template<typename T>
+bool NormalizeCoreCount(T value, std::uint32_t& output)
+{{
+    using Native = std::remove_cv_t<std::remove_reference_t<T>>;
+    if constexpr (std::numeric_limits<Native>::is_signed) {{
+        if (value < 0)
+            return false;
+    }}
+    const std::uint64_t wide = static_cast<std::uint64_t>(value);
+    if (wide > std::numeric_limits<std::uint32_t>::max())
+        return false;
+    output = static_cast<std::uint32_t>(wide);
     return true;
 }}
 
@@ -139,9 +154,9 @@ pub(crate) fn eligible(
     {
         return false;
     }
-    if inputs
+    if !inputs
         .iter()
-        .any(|field| !direct_type(&field.ty) && !fixed_wire_type(&field.ty, records))
+        .all(|field| direct_type(&field.ty) || fixed_wire_type(&field.ty, records))
     {
         return false;
     }
@@ -171,8 +186,9 @@ fn output_list_element_supported(
     records: &BTreeMap<String, RecordModel>,
 ) -> bool {
     match ty {
-        SemanticType::Scalar { name } if name == "bool" => false,
-        SemanticType::Scalar { .. } | SemanticType::Enum { .. } => true,
+        SemanticType::Scalar { name }
+            if !matches!(name.as_str(), "bool" | "isize" | "usize") => true,
+        SemanticType::Enum { .. } => true,
         SemanticType::Record { .. } => fixed_wire_type(ty, records),
         _ => false,
     }
@@ -197,12 +213,7 @@ fn fixed_wire_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -
         }
         SemanticType::Record { name } => records
             .get(name)
-            .is_some_and(|record| {
-                record
-                    .fields
-                    .iter()
-                    .all(|field| fixed_wire_type(&field.ty, records))
-            }),
+            .is_some_and(|record| record.fields.iter().all(|field| fixed_wire_type(&field.ty, records))),
         _ => false,
     }
 }
@@ -231,22 +242,15 @@ fn fixed_input_layout(
     fields: &[FieldModel],
     records: &BTreeMap<String, RecordModel>,
 ) -> Option<(u32, u32)> {
-    let fields = fields
+    let fixed = fields
         .iter()
         .filter(|field| !direct_type(&field.ty))
         .cloned()
         .collect::<Vec<_>>();
-    if fields.is_empty() {
-        None
-    } else {
-        layout_fields(&fields, records)
-    }
+    if fixed.is_empty() { None } else { layout_fields(&fixed, records) }
 }
 
-fn layout_fields(
-    fields: &[FieldModel],
-    records: &BTreeMap<String, RecordModel>,
-) -> Option<(u32, u32)> {
+fn layout_fields(fields: &[FieldModel], records: &BTreeMap<String, RecordModel>) -> Option<(u32, u32)> {
     let mut bytes = 0u32;
     let mut alignment = 1u32;
     for field in fields {
@@ -260,20 +264,13 @@ fn layout_fields(
 #[derive(Clone, Copy)]
 struct OutputLayout {
     descriptor_bytes: u32,
-    variable_count: usize,
     fixed_offset: u32,
     fixed_bytes: u32,
     fixed_alignment: u32,
 }
 
-fn output_layout(
-    fields: &[FieldModel],
-    records: &BTreeMap<String, RecordModel>,
-) -> Option<OutputLayout> {
-    let variable_count = fields
-        .iter()
-        .filter(|field| variable_output_type(&field.ty))
-        .count();
+fn output_layout(fields: &[FieldModel], records: &BTreeMap<String, RecordModel>) -> Option<OutputLayout> {
+    let variable_count = fields.iter().filter(|field| variable_output_type(&field.ty)).count();
     let header_bytes = u32::try_from(variable_count).ok()?.checked_mul(12)?;
     let fixed = fields
         .iter()
@@ -288,7 +285,6 @@ fn output_layout(
     let fixed_offset = align_up(header_bytes, fixed_alignment);
     Some(OutputLayout {
         descriptor_bytes: fixed_offset.checked_add(fixed_bytes)?,
-        variable_count,
         fixed_offset,
         fixed_bytes,
         fixed_alignment,
@@ -296,7 +292,6 @@ fn output_layout(
 }
 
 fn align_up(value: u32, alignment: u32) -> u32 {
-    debug_assert!(alignment.is_power_of_two());
     (value + alignment - 1) & !(alignment - 1)
 }
 
@@ -309,53 +304,40 @@ fn render_callback(
     let callback = callback_name(module_name, &function.name);
     let api_member = native_member(module_name);
     let slot_count = plan.direct_params.len().max(plan.direct_results.len());
-    let direct_input_count = function
-        .inputs
-        .iter()
-        .filter(|field| direct_type(&field.ty))
-        .count();
+    let direct_input_count = function.inputs.iter().filter(|field| direct_type(&field.ty)).count();
     let fixed_input = matches!(plan.input_strategy, InputStrategy::FixedInputBuffer);
-    let descriptor_index = plan.direct_params.len() - 1;
-    let layout = output_layout(&function.outputs, records).expect("eligible output layout");
-    let mut body = String::new();
-
-    body.push_str(&format!(
-        "wasm_trap_t* {callback}(void* environment, wasmtime_caller_t* caller,\n    wasmtime_val_raw_t* slots, std::size_t slotCount)\n{{\n    auto* state = static_cast<HostState*>(environment);\n    if (state == nullptr || state->native == nullptr || state->native->{api_member} == nullptr ||\n        state->native->{api_member}->{function_name} == nullptr)\n        return Trap(\"{function_name} generated Core binding is unavailable\");\n    if (slots == nullptr || slotCount != {slot_count})\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n\n    std::string budgetError;\n    ImportGuard guard(state, {work}u, budgetError);\n    if (!guard.Ok())\n        return Trap(budgetError);\n\n    std::string memoryError;\n    if (!EnsureMemory(state, caller, memoryError))\n        return Trap(memoryError);\n    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[{descriptor_index}].i32);\n    std::span<std::uint8_t> outputWire;\n    if (!state->memory.MutableView(outputDescriptor, {descriptor_bytes}u, outputWire)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);\n        return nullptr;\n    }}\n",
+    let output_descriptor_index = plan.direct_params.len() - 1;
+    let layout = output_layout(&function.outputs, records).expect("eligible output descriptor layout");
+    let mut body = format!(
+        "wasm_trap_t* {callback}(void* environment, wasmtime_caller_t* caller,\n    wasmtime_val_raw_t* slots, std::size_t slotCount)\n{{\n    auto* state = static_cast<HostState*>(environment);\n    if (state == nullptr || state->native == nullptr || state->native->{api_member} == nullptr ||\n        state->native->{api_member}->{function_name} == nullptr)\n        return Trap(\"{function_name} generated Core binding is unavailable\");\n    if (slots == nullptr || slotCount != {slot_count})\n        return Trap(\"{function_name} generated Core ABI signature mismatch\");\n\n    std::string budgetError;\n    ImportGuard guard(state, {work}u, budgetError);\n    if (!guard.Ok())\n        return Trap(budgetError);\n\n    std::string memoryError;\n    if (!EnsureMemory(state, caller, memoryError))\n        return Trap(memoryError);\n    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[{output_index}].i32);\n    std::span<std::uint8_t> outputWire;\n    if (!state->memory.MutableView(outputDescriptor, {descriptor_bytes}u, outputWire)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);\n        return nullptr;\n    }}\n",
         callback = callback,
         api_member = api_member,
         function_name = function.name,
         slot_count = slot_count,
         work = 1 + plan.direct_params.len(),
-        descriptor_index = descriptor_index,
+        output_index = output_descriptor_index,
         descriptor_bytes = layout.descriptor_bytes,
-    ));
+    );
 
     let mut variable_index = 0usize;
     for field in &function.outputs {
-        if !variable_output_type(&field.ty) {
-            continue;
-        }
+        if !variable_output_type(&field.ty) { continue; }
         let stem = sanitize(&field.name);
         let offset = variable_index * 12;
         body.push_str(&format!(
             "    WireReader {stem}Control(std::span<const std::uint8_t>(outputWire.data() + {offset}u, 12));\n    std::uint32_t {stem}Pointer = 0;\n    std::uint32_t {stem}Capacity = 0;\n    std::uint32_t {stem}IgnoredLength = 0;\n    if (!{stem}Control.U32({stem}Pointer) || !{stem}Control.U32({stem}Capacity) ||\n        !{stem}Control.U32({stem}IgnoredLength) || !{stem}Control.Finish(4)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);\n        return nullptr;\n    }}\n",
-            stem = stem,
-            offset = offset,
+            stem = stem, offset = offset,
         ));
         body.push_str(&render_capacity_validation(field, records, &stem));
         variable_index += 1;
     }
 
     if fixed_input {
-        let (input_bytes, input_alignment) =
-            fixed_input_layout(&function.inputs, records).expect("eligible fixed input layout");
-        let input_index = direct_input_count;
+        let (input_bytes, _) = fixed_input_layout(&function.inputs, records).expect("eligible fixed input layout");
         body.push_str(&format!(
-            "    const std::uint32_t input = static_cast<std::uint32_t>(slots[{input_index}].i32);\n    std::span<const std::uint8_t> inputWire;\n    if (!state->memory.View(input, {input_bytes}u, inputWire)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);\n        return nullptr;\n    }}\n    WireReader reader(inputWire);\n",
-            input_index = input_index,
-            input_bytes = input_bytes,
+            "    const std::uint32_t input = static_cast<std::uint32_t>(slots[{input_index}].i32);\n    std::span<const std::uint8_t> inputWire;\n    if (!state->memory.View(input, {input_bytes}u, inputWire)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n    WireReader reader(inputWire);\n",
+            input_index = direct_input_count, input_bytes = input_bytes,
         ));
-        let _ = input_alignment;
     }
 
     body.push_str(&format!("\n    {} query{{}};\n", function.query));
@@ -369,24 +351,18 @@ fn render_callback(
             ));
             direct_slot += 1;
         } else {
-            body.push_str(&render_wire_read(
-                &field.ty,
-                &format!("query.{}", field.name),
-                records,
-                1,
-            ));
+            body.push_str(&render_wire_read(&field.ty, &format!("query.{}", field.name), records, 1));
         }
     }
     if fixed_input {
-        let (_, input_alignment) =
-            fixed_input_layout(&function.inputs, records).expect("eligible fixed input layout");
+        let (_, input_alignment) = fixed_input_layout(&function.inputs, records).expect("eligible fixed input layout");
         body.push_str(&format!(
-            "    if (!reader.Finish({input_alignment}u)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);\n        return nullptr;\n    }}\n",
+            "    if (!reader.Finish({input_alignment}u)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }}\n"
         ));
     }
 
     body.push_str(&format!(
-        "    {} result{{}};\n    state->native->{api_member}->{function_name}(&query, &result);\n    const std::int32_t errorCode = NativeErrorCode(result.error);\n    if (errorCode != 0) {{\n        slots[0].i32 = errorCode;\n        return nullptr;\n    }}\n\n    bool outputTooSmall = false;\n",
+        "    {} result{{}};\n    state->native->{api_member}->{function_name}(&query, &result);\n    const std::int32_t errorCode = NativeErrorCode(result.error);\n    if (errorCode != 0) {{ slots[0].i32 = errorCode; return nullptr; }}\n    bool outputTooSmall = false;\n",
         function.result,
         api_member = api_member,
         function_name = function.name,
@@ -394,22 +370,17 @@ fn render_callback(
 
     variable_index = 0;
     for field in &function.outputs {
-        if !variable_output_type(&field.ty) {
-            continue;
-        }
+        if !variable_output_type(&field.ty) { continue; }
         let stem = sanitize(&field.name);
         let length_offset = variable_index * 12 + 8;
-        body.push_str(&render_required_length(field, records, &stem));
+        body.push_str(&render_required_length(field, &stem));
         body.push_str(&format!(
-            "    if (!WriteCoreU32(outputWire, {length_offset}u, {stem}Required))\n        return Trap(\"generated Core output descriptor changed unexpectedly\");\n    outputTooSmall = outputTooSmall || {stem}Capacity < {stem}Required;\n",
-            length_offset = length_offset,
-            stem = stem,
+            "    if (!WriteCoreU32(outputWire, {length_offset}u, {stem}Required)) return Trap(\"generated Core output descriptor changed unexpectedly\");\n    outputTooSmall = outputTooSmall || {stem}Capacity < {stem}Required;\n",
+            length_offset = length_offset, stem = stem,
         ));
         variable_index += 1;
     }
-    body.push_str(
-        "    if (outputTooSmall) {\n        slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);\n        return nullptr;\n    }\n",
-    );
+    body.push_str("    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }\n");
 
     for field in &function.outputs {
         if variable_output_type(&field.ty) {
@@ -420,65 +391,46 @@ fn render_callback(
     if layout.fixed_bytes != 0 {
         body.push_str(&format!(
             "    std::span<std::uint8_t> fixedWire = outputWire.subspan({fixed_offset}u, {fixed_bytes}u);\n    WireWriter writer(fixedWire);\n",
-            fixed_offset = layout.fixed_offset,
-            fixed_bytes = layout.fixed_bytes,
+            fixed_offset = layout.fixed_offset, fixed_bytes = layout.fixed_bytes,
         ));
-        for field in function
-            .outputs
-            .iter()
-            .filter(|field| !variable_output_type(&field.ty))
-        {
-            body.push_str(&render_wire_write(
-                &field.ty,
-                &format!("result.{}", field.name),
-                records,
-                "writer",
-                1,
-            ));
+        for field in function.outputs.iter().filter(|field| !variable_output_type(&field.ty)) {
+            body.push_str(&render_wire_write(&field.ty, &format!("result.{}", field.name), records, "writer", 1));
         }
         body.push_str(&format!(
-            "    if (!writer.Finish({alignment}u))\n        return Trap(\"generated Core fixed output layout mismatch\");\n",
+            "    if (!writer.Finish({alignment}u)) return Trap(\"generated Core fixed output layout mismatch\");\n",
             alignment = layout.fixed_alignment,
         ));
     }
-
     body.push_str("    slots[0].i32 = 0;\n    return nullptr;\n}\n");
     body
 }
 
-fn render_capacity_validation(
-    field: &FieldModel,
-    records: &BTreeMap<String, RecordModel>,
-    stem: &str,
-) -> String {
+fn render_capacity_validation(field: &FieldModel, records: &BTreeMap<String, RecordModel>, stem: &str) -> String {
     match &field.ty {
         SemanticType::String | SemanticType::Bytes => format!(
-            "    if (!state->memory.Contains({stem}Pointer, {stem}Capacity)) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);\n        return nullptr;\n    }}\n"
+            "    if (!state->memory.Contains({stem}Pointer, {stem}Capacity)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
         ),
         SemanticType::List { element } => {
-            let (bytes, _) = fixed_wire_layout(element, records).expect("eligible output list element");
+            let (bytes, _) = fixed_wire_layout(element, records).expect("eligible output list element layout");
             format!(
-                "    const std::uint64_t {stem}CapacityBytes = static_cast<std::uint64_t>({stem}Capacity) * {bytes}u;\n    if ({stem}CapacityBytes > std::numeric_limits<std::size_t>::max() ||\n        !state->memory.Contains({stem}Pointer, static_cast<std::size_t>({stem}CapacityBytes))) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);\n        return nullptr;\n    }}\n"
+                "    const std::uint64_t {stem}CapacityBytes = static_cast<std::uint64_t>({stem}Capacity) * {bytes}u;\n    if ({stem}CapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains({stem}Pointer, static_cast<std::size_t>({stem}CapacityBytes))) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }}\n"
             )
         }
         _ => String::new(),
     }
 }
 
-fn render_required_length(
-    field: &FieldModel,
-    _records: &BTreeMap<String, RecordModel>,
-    stem: &str,
-) -> String {
+fn render_required_length(field: &FieldModel, stem: &str) -> String {
     match &field.ty {
         SemanticType::String => format!(
-            "    const std::size_t {stem}RequiredSize = result.{field_name} == nullptr ? 0u : std::char_traits<char>::length(result.{field_name});\n    if ({stem}RequiredSize > std::numeric_limits<std::uint32_t>::max()) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);\n        return nullptr;\n    }}\n    const std::uint32_t {stem}Required = static_cast<std::uint32_t>({stem}RequiredSize);\n",
+            "    const std::size_t {stem}RequiredSize = result.{field_name} == nullptr ? 0u : std::char_traits<char>::length(result.{field_name});\n    if ({stem}RequiredSize > std::numeric_limits<std::uint32_t>::max()) {{ slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }}\n    const std::uint32_t {stem}Required = static_cast<std::uint32_t>({stem}RequiredSize);\n",
             field_name = field.name,
         ),
         SemanticType::Bytes | SemanticType::List { .. } => {
-            let count = count_field(field).expect("eligible variable output has count metadata");
+            let count = count_field(field).expect("eligible variable output count field");
             format!(
-                "    if (static_cast<std::uint64_t>(result.{count}) > std::numeric_limits<std::uint32_t>::max()) {{\n        slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);\n        return nullptr;\n    }}\n    const std::uint32_t {stem}Required = static_cast<std::uint32_t>(result.{count});\n"
+                "    std::uint32_t {stem}Required = 0;\n    if (!NormalizeCoreCount(result.{count}, {stem}Required)) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }}\n    if ({stem}Required != 0 && result.{field_name} == nullptr) {{ slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }}\n",
+                field_name = field.name,
             )
         }
         _ => unreachable!(),
@@ -489,27 +441,14 @@ fn render_variable_copy(field: &FieldModel, records: &BTreeMap<String, RecordMod
     let stem = sanitize(&field.name);
     match &field.ty {
         SemanticType::String | SemanticType::Bytes => format!(
-            "    if ({stem}Required != 0 && !state->memory.Write({stem}Pointer, result.{field_name}, {stem}Required))\n        return Trap(\"generated Core variable output range changed unexpectedly\");\n",
+            "    if ({stem}Required != 0 && !state->memory.Write({stem}Pointer, result.{field_name}, {stem}Required)) return Trap(\"generated Core variable output range changed unexpectedly\");\n",
             field_name = field.name,
         ),
         SemanticType::List { element } => {
-            let (element_bytes, element_alignment) =
-                fixed_wire_layout(element, records).expect("eligible output list element");
-            let count = count_field(field).expect("eligible output list has count metadata");
-            let item_write = render_wire_write(
-                element,
-                &format!("result.{}[coreIndex]", field.name),
-                records,
-                &format!("{stem}Writer"),
-                2,
-            );
+            let (element_bytes, element_alignment) = fixed_wire_layout(element, records).expect("eligible output list element layout");
+            let item_write = render_wire_write(element, &format!("result.{}[coreIndex]", field.name), records, &format!("{stem}Writer"), 2);
             format!(
-                "    if ({stem}Required != 0) {{\n        const std::size_t {stem}Bytes = static_cast<std::size_t>({stem}Required) * {element_bytes}u;\n        std::span<std::uint8_t> {stem}Wire;\n        if (!state->memory.MutableView({stem}Pointer, {stem}Bytes, {stem}Wire))\n            return Trap(\"generated Core variable output range changed unexpectedly\");\n        WireWriter {stem}Writer({stem}Wire);\n        for (std::uint32_t coreIndex = 0; coreIndex < {stem}Required; ++coreIndex) {{\n{item_write}        }}\n        if (!{stem}Writer.Finish({element_alignment}u))\n            return Trap(\"generated Core list output layout mismatch\");\n    }}\n    (void)result.{count};\n",
-                stem = stem,
-                element_bytes = element_bytes,
-                element_alignment = element_alignment,
-                item_write = item_write,
-                count = count,
+                "    if ({stem}Required != 0) {{\n        const std::size_t {stem}Bytes = static_cast<std::size_t>({stem}Required) * {element_bytes}u;\n        std::span<std::uint8_t> {stem}Wire;\n        if (!state->memory.MutableView({stem}Pointer, {stem}Bytes, {stem}Wire)) return Trap(\"generated Core variable output range changed unexpectedly\");\n        WireWriter {stem}Writer({stem}Wire);\n        for (std::uint32_t coreIndex = 0; coreIndex < {stem}Required; ++coreIndex) {{\n{item_write}        }}\n        if (!{stem}Writer.Finish({element_alignment}u)) return Trap(\"generated Core list output layout mismatch\");\n    }}\n"
             )
         }
         _ => unreachable!(),
@@ -517,9 +456,7 @@ fn render_variable_copy(field: &FieldModel, records: &BTreeMap<String, RecordMod
 }
 
 fn native_cast(destination: &str, value: &str) -> String {
-    format!(
-        "static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})"
-    )
+    format!("static_cast<std::remove_cv_t<std::remove_reference_t<decltype({destination})>>>({value})")
 }
 
 fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
@@ -537,30 +474,21 @@ fn query_expr(ty: &SemanticType, slot: usize, destination: &str) -> String {
     }
 }
 
-fn render_wire_read(
-    ty: &SemanticType,
-    destination: &str,
-    records: &BTreeMap<String, RecordModel>,
-    indent: usize,
-) -> String {
+fn render_wire_read(ty: &SemanticType, destination: &str, records: &BTreeMap<String, RecordModel>, indent: usize) -> String {
     let pad = "    ".repeat(indent);
     match ty {
         SemanticType::Scalar { name } => match name.as_str() {
             "bool" => format!("{pad}if (!reader.Bool({destination})) return Trap(\"generated Core wire underflow\");\n"),
             "f32" => format!("{pad}if (!reader.F32({destination})) return Trap(\"generated Core wire underflow\");\n"),
             "f64" => format!("{pad}if (!reader.F64({destination})) return Trap(\"generated Core wire underflow\");\n"),
-            "i64" | "isize" => format!("{pad}{{ std::int64_t coreRaw = 0; if (!reader.I64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw")),
-            "u64" | "usize" => format!("{pad}{{ std::uint64_t coreRaw = 0; if (!reader.U64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw")),
-            "i8" | "i16" | "i32" => format!("{pad}{{ std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw")),
-            _ => format!("{pad}{{ std::uint32_t coreRaw = 0; if (!reader.U32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw")),
+            "i64" | "isize" => scalar_read("I64", "std::int64_t", destination, &pad),
+            "u64" | "usize" => scalar_read("U64", "std::uint64_t", destination, &pad),
+            "i8" | "i16" | "i32" => scalar_read("I32", "std::int32_t", destination, &pad),
+            _ => scalar_read("U32", "std::uint32_t", destination, &pad),
         },
-        SemanticType::Enum { .. } => format!("{pad}{{ std::int32_t coreRaw = 0; if (!reader.I32(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw")),
-        SemanticType::Handle { .. } => format!("{pad}{{ std::uint64_t coreRaw = 0; if (!reader.U64(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw")),
-        SemanticType::Record { name } => records[name]
-            .fields
-            .iter()
-            .map(|field| render_wire_read(&field.ty, &format!("{destination}.{}", field.name), records, indent))
-            .collect::<String>(),
+        SemanticType::Enum { .. } => scalar_read("I32", "std::int32_t", destination, &pad),
+        SemanticType::Handle { .. } => scalar_read("U64", "std::uint64_t", destination, &pad),
+        SemanticType::Record { name } => records[name].fields.iter().map(|field| render_wire_read(&field.ty, &format!("{destination}.{}", field.name), records, indent)).collect::<String>(),
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreReadIndex{indent}");
             let nested = render_wire_read(element, &format!("{destination}[{index}]"), records, indent + 1);
@@ -570,34 +498,20 @@ fn render_wire_read(
     }
 }
 
-fn render_wire_write(
-    ty: &SemanticType,
-    value: &str,
-    records: &BTreeMap<String, RecordModel>,
-    writer: &str,
-    indent: usize,
-) -> String {
+fn scalar_read(method: &str, raw: &str, destination: &str, pad: &str) -> String {
+    format!("{pad}{{ {raw} coreRaw = 0; if (!reader.{method}(coreRaw)) return Trap(\"generated Core wire underflow\"); {destination} = {cast}; }}\n", cast = native_cast(destination, "coreRaw"))
+}
+
+fn render_wire_write(ty: &SemanticType, value: &str, records: &BTreeMap<String, RecordModel>, writer: &str, indent: usize) -> String {
     let pad = "    ".repeat(indent);
     match ty {
         SemanticType::Scalar { name } => {
-            let method = match name.as_str() {
-                "bool" => "Bool",
-                "f32" => "F32",
-                "f64" => "F64",
-                "i64" | "isize" => "I64",
-                "u64" | "usize" => "U64",
-                "i8" | "i16" | "i32" => "I32",
-                _ => "U32",
-            };
+            let method = match name.as_str() { "bool"=>"Bool", "f32"=>"F32", "f64"=>"F64", "i64"|"isize"=>"I64", "u64"|"usize"=>"U64", "i8"|"i16"|"i32"=>"I32", _=>"U32" };
             format!("{pad}if (!{writer}.{method}({value})) return Trap(\"generated Core wire overflow\");\n")
         }
         SemanticType::Enum { .. } => format!("{pad}if (!{writer}.I32(static_cast<std::int32_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
         SemanticType::Handle { .. } => format!("{pad}if (!{writer}.U64(static_cast<std::uint64_t>({value}))) return Trap(\"generated Core wire overflow\");\n"),
-        SemanticType::Record { name } => records[name]
-            .fields
-            .iter()
-            .map(|field| render_wire_write(&field.ty, &format!("{value}.{}", field.name), records, writer, indent))
-            .collect::<String>(),
+        SemanticType::Record { name } => records[name].fields.iter().map(|field| render_wire_write(&field.ty, &format!("{value}.{}", field.name), records, writer, indent)).collect::<String>(),
         SemanticType::FixedArray { element, length } => {
             let index = format!("coreWriteIndex{indent}");
             let nested = render_wire_write(element, &format!("{value}[{index}]"), records, writer, indent + 1);
@@ -608,76 +522,26 @@ fn render_wire_write(
 }
 
 fn count_field(field: &FieldModel) -> Option<String> {
-    field.metadata.iter().find_map(|metadata| {
-        metadata
-            .strip_prefix("count-field:")
-            .map(ToString::to_string)
-    })
+    field.metadata.iter().find_map(|metadata| metadata.strip_prefix("count-field:").map(ToString::to_string))
 }
 
 fn render_registration(plan: &FunctionPlan, callback: &str) -> String {
     let params = kind_array("params", &plan.direct_params);
     let results = kind_array("results", &plan.direct_results);
-    format!(
-        "    {{\n{params}{results}        if (!DefineGeneratedVariableOutput(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {param_count}, results, {result_count}), {callback}, state, error))\n            return false;\n    }}\n",
-        params = params,
-        results = results,
-        module = plan.import_module,
-        name = plan.import_name,
-        param_count = plan.direct_params.len(),
-        result_count = plan.direct_results.len(),
-        callback = callback,
-    )
+    format!("    {{\n{params}{results}        if (!DefineGeneratedVariableOutput(linker, \"{module}\", \"{name}\",\n                MakeFuncType(params, {pc}, results, {rc}), {callback}, state, error))\n            return false;\n    }}\n",
+        params=params, results=results, module=plan.import_module, name=plan.import_name, pc=plan.direct_params.len(), rc=plan.direct_results.len(), callback=callback)
 }
 
 fn kind_array(name: &str, kinds: &[CoreType]) -> String {
-    if kinds.is_empty() {
-        return format!("        const wasm_valkind_t* {name} = nullptr;\n");
-    }
-    format!(
-        "        const wasm_valkind_t {name}[] = {{{}}};\n",
-        kinds
-            .iter()
-            .map(|kind| match kind {
-                CoreType::I32 => "WASM_I32",
-                CoreType::I64 => "WASM_I64",
-                CoreType::F32 => "WASM_F32",
-                CoreType::F64 => "WASM_F64",
-            })
-            .collect::<Vec<_>>()
-            .join(", ")
-    )
+    if kinds.is_empty() { return format!("        const wasm_valkind_t* {name} = nullptr;\n"); }
+    format!("        const wasm_valkind_t {name}[] = {{{}}};\n", kinds.iter().map(|kind| match kind { CoreType::I32=>"WASM_I32", CoreType::I64=>"WASM_I64", CoreType::F32=>"WASM_F32", CoreType::F64=>"WASM_F64" }).collect::<Vec<_>>().join(", "))
 }
 
 fn native_member(module: &str) -> String {
-    match module {
-        "camera" => "cameraApi".to_owned(),
-        "sound" => "soundApi".to_owned(),
-        other => other.to_lower_camel_case(),
-    }
+    match module { "camera"=>"cameraApi".to_owned(), "sound"=>"soundApi".to_owned(), other=>other.to_lower_camel_case() }
 }
-
-fn callback_name(module: &str, function: &str) -> String {
-    format!(
-        "CoreVariableOutput_{}_{}",
-        module.to_snake_case(),
-        function.to_snake_case()
-    )
-}
-
-fn sanitize(value: &str) -> String {
-    value
-        .chars()
-        .map(|character| if character.is_ascii_alphanumeric() { character } else { '_' })
-        .collect()
-}
-
+fn callback_name(module: &str, function: &str) -> String { format!("CoreVariableOutput_{}_{}", module.to_snake_case(), function.to_snake_case()) }
+fn sanitize(value: &str) -> String { value.chars().map(|c| if c.is_ascii_alphanumeric(){c}else{'_'}).collect() }
 fn record_index(model: &ApiModel) -> BTreeMap<String, RecordModel> {
-    let mut records = BTreeMap::new();
-    for module in &model.modules {
-        for record in &module.records {
-            records.entry(record.name.clone()).or_insert_with(|| record.clone());
-        }
-    }
-    records
+    let mut records=BTreeMap::new(); for module in &model.modules { for record in &module.records { records.entry(record.name.clone()).or_insert_with(||record.clone()); } } records
 }
