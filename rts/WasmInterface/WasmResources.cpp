@@ -130,6 +130,10 @@ void WasmExecutionBudget::Reset(std::uint64_t newInstructionFuel,
 	callbackDepth = 0;
 	nonReentrantCallbackDepth = 0;
 	callbackReentry.clear();
+	// Callback depth is hard-capped at MaxCallbackDepth, so reserve the whole
+	// stack once off the callback hot path. EnterCallback must never need to
+	// grow this vector while an engine -> guest -> host callback is in flight.
+	callbackReentry.reserve(MaxCallbackDepth);
 }
 
 bool WasmExecutionBudget::ChargeGuest(std::uint64_t fuel)
