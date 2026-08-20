@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Run the established Lua/native/Component benchmark suite with Core Wasm.
 
-This deliberately layers on run_benchmarks.py instead of duplicating its game
-fixture, process orchestration, validation, or measurement semantics.  The only
-new axis is the raw Core-Wasm guest/host transport and its report column.
+This layers on run_benchmarks.py instead of forking the experiment. Existing
+fixture generation, process options, validation, scales, test names and report
+formatters remain authoritative; this file adds one raw Core-Wasm transport.
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 
 import run_benchmarks as base
 
@@ -39,8 +40,7 @@ CORE_UPDATE = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.update.
 CORE_MEMORY = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.memory.wasm")
 CORE_DRAW = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.draw.wasm")
 
-# Preserve the existing backend ordering and append Core so historical columns
-# do not move when a regenerated table is diffed.
+# Append Core so historical columns retain their order.
 base.BACKENDS = (*base.BACKENDS, "wasm_core")
 
 _ORIGINAL_BUILD_WASM = base.build_wasm
@@ -64,6 +64,9 @@ def core_artifact_for_component(component: Path) -> Path:
 
 
 def build_core_wasm(destination: Path, context: str = "synced_gadget") -> None:
+    # base.main exports the exact selected case/scale/iteration/repeat/callin
+    # variables before invoking build_wasm. Copy that environment verbatim and
+    # only add the world selector used by the Core guest build.rs.
     build_env = os.environ.copy()
     build_env["SPRING_BENCHMARK_CONTEXT"] = context
     base.run_checked(
@@ -92,10 +95,169 @@ def build_wasm_and_core(
     component: Path = base.BENCHMARK_COMPONENT,
     context: str = "synced_gadget",
 ) -> None:
-    # Build the Component artifact exactly as the established runner does, then
-    # build a raw Core module under the same compile-time benchmark profile.
     _ORIGINAL_BUILD_WASM(component, context)
     build_core_wasm(core_artifact_for_component(component), context)
+
+
+def _run_core_backend(
+    root_output: Path,
+    seed: int,
+    timeout: int,
+    spring: Path,
+    scale: float,
+    benchmark_case: str,
+    benchmark_iterations: int,
+    benchmark_repeats: int,
+    expected_tests: tuple[str, ...],
+    *,
+    callin_variant: str,
+    wasm_component: Path,
+    output_name: str | None,
+    wasm_context: str,
+    wasm_module_count: int,
+) -> list[dict]:
+    backend = "wasm_core"
+    selected_module = core_artifact_for_component(wasm_component)
+    if not selected_module.is_file():
+        raise RuntimeError(
+            f"Core Wasm artifact is missing: {selected_module}; rerun without --skip-build"
+        )
+
+    backend_output = root_output / (output_name or backend)
+    backend_output.mkdir(parents=True, exist_ok=True)
+    workdir = Path(tempfile.mkdtemp(prefix="wasm-benchmark-wasm-core-"))
+    try:
+        datadir, _ = base.prepare_datadir(workdir, None, selected_module, wasm_context)
+        if wasm_module_count > 1:
+            wasm_directory = datadir / "games" / "native_api_parity.sdd" / "LuaRules" / "wasm"
+            manifest_lines = [
+                f"module(parity-{index}, LuaRules/wasm/parity.wasm, "
+                f"{base.WASM_ENVIRONMENT_NAMES[wasm_context]}, {index}, 1.0.0)"
+                for index in range(wasm_module_count)
+            ]
+            (wasm_directory / "manifest.txt").write_text(
+                "\n".join(manifest_lines) + "\n", encoding="utf-8"
+            )
+
+        script = backend_output / "script.txt"
+        harness_args = base.make_args(seed, timeout, benchmark_case)
+        base.write_script(
+            script,
+            base.blank_map_name(harness_args, "benchmark"),
+            "benchmark",
+            "benchmark",
+            True,
+            harness_args,
+            seed,
+            wasm_context,
+            selected_module,
+            benchmark_backend=backend,
+            benchmark_repeats=benchmark_repeats,
+            benchmark_scale=scale,
+            benchmark_case=benchmark_case,
+            benchmark_iterations=benchmark_iterations,
+            benchmark_callin_variant=callin_variant,
+        )
+
+        write_dir = backend_output / "write-dir"
+        benchmark_dir = write_dir / "benchmark"
+        benchmark_dir.mkdir(parents=True, exist_ok=True)
+        core_result = benchmark_dir / "benchmark_wasm_core.jsonl"
+        guest_result = benchmark_dir / "benchmark_wasm.jsonl"
+        # The engine-side callin recorder labels Core directly. The fixture's
+        # historical Wasm message sink writes guest-produced rows to the generic
+        # benchmark_wasm.jsonl file. Both belong to this one Core process.
+        core_result.unlink(missing_ok=True)
+        guest_result.unlink(missing_ok=True)
+
+        env = os.environ.copy()
+        env["SPRING_ENABLE_SYNCED_TIMERS"] = "1"
+        data_dirs = [datadir, base.BASE_CONTENT]
+        if base.ENGINE_INSTALL.is_dir():
+            data_dirs.append(base.ENGINE_INSTALL)
+        env["SPRING_DATADIR"] = os.pathsep.join(str(path) for path in data_dirs)
+        env["SPRING_ISOLATED"] = str(datadir)
+        env["SPRING_NATIVE_PARITY_OUTPUT_DIR"] = str(benchmark_dir)
+        env["SPRING_NATIVE_BENCHMARK"] = "1"
+        env["SPRING_NATIVE_MODULE"] = ""
+        env["SPRING_WASM_CORE_HOST"] = "1"
+        env.pop("SPRING_WASM_TYPED_HOST", None)
+        env.pop("SPRING_WASM_TYPED_HOST_LIBRARY", None)
+        env["SPRING_NATIVE_BENCHMARK_SCALE"] = str(scale)
+        env["SPRING_NATIVE_BENCHMARK_CASE"] = benchmark_case
+        env["SPRING_NATIVE_BENCHMARK_ITERATIONS"] = str(benchmark_iterations)
+        env["SPRING_NATIVE_BENCHMARK_REPEATS"] = str(benchmark_repeats)
+        env["SPRING_NATIVE_BENCHMARK_BACKEND"] = backend
+        env["SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT"] = callin_variant
+        env["SPRING_NATIVE_BENCHMARK_MODULES"] = str(wasm_module_count)
+        if benchmark_case in {"callins", "draw"}:
+            env["SPRING_NATIVE_BENCHMARK_CALLINS"] = "1"
+        else:
+            env.pop("SPRING_NATIVE_BENCHMARK_CALLINS", None)
+
+        log_path = backend_output / "spring.log"
+        command = [str(spring)]
+        if wasm_context == "ui":
+            (write_dir / "springsettings.cfg").write_text(
+                "Fullscreen=0\n"
+                "WindowBorderless=0\n"
+                "XResolutionWindowed=1280\n"
+                "YResolutionWindowed=720\n"
+                "UseFontConfigLib=0\n",
+                encoding="utf-8",
+            )
+            command.append("--window")
+        command.extend(["--nocolor", "--write-dir", str(write_dir), str(script)])
+
+        print(f"[{backend}] output: {backend_output}", flush=True)
+        with log_path.open("wb") as log:
+            process = subprocess.Popen(
+                command,
+                cwd=ROOT,
+                env=env,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+            )
+            try:
+                return_code = process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired as exc:
+                process.kill()
+                process.wait()
+                raise RuntimeError(
+                    f"{backend} benchmark timed out after {timeout}s; see {log_path}"
+                ) from exc
+        if return_code != 0:
+            tail = log_path.read_text(encoding="utf-8", errors="replace")[-4000:]
+            raise RuntimeError(f"{backend} benchmark exited {return_code}:\n{tail}")
+
+        result_paths = [core_result, guest_result]
+        if not any(path.is_file() for path in result_paths):
+            raise RuntimeError(f"{backend} benchmark produced no result files in {benchmark_dir}")
+
+        rows: list[dict] = []
+        for path in result_paths:
+            if not path.is_file():
+                continue
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                # Guest rows already use wasm_core, while the fixture is still
+                # free to preserve legacy "wasm" labels. Normalize both here.
+                row["backend"] = backend
+                rows.append(row)
+
+        if benchmark_case == "draw":
+            expected = set(expected_tests)
+            rows = [
+                row
+                for row in rows
+                if row.get("test") in expected or row.get("test") == "complete"
+            ]
+        base.validate_rows(backend, rows, expected_tests)
+        return rows
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
 
 
 def run_backend_with_core(
@@ -117,20 +279,7 @@ def run_backend_with_core(
     wasm_module_count: int = 1,
     load_native_module: bool = True,
 ) -> list[dict]:
-    selected_module = wasm_component
-    if backend == "wasm_core":
-        selected_module = core_artifact_for_component(wasm_component)
-        if not selected_module.is_file():
-            raise RuntimeError(
-                f"Core Wasm artifact is missing: {selected_module}; rerun without --skip-build"
-            )
-
-    previous_core_host = os.environ.get("SPRING_WASM_CORE_HOST")
-    try:
-        if backend == "wasm_core":
-            os.environ["SPRING_WASM_CORE_HOST"] = "1"
-        else:
-            os.environ.pop("SPRING_WASM_CORE_HOST", None)
+    if backend != "wasm_core":
         return _ORIGINAL_RUN_BACKEND(
             backend,
             root_output,
@@ -144,17 +293,28 @@ def run_backend_with_core(
             benchmark_repeats,
             expected_tests,
             callin_variant=callin_variant,
-            wasm_component=selected_module,
+            wasm_component=wasm_component,
             output_name=output_name,
             wasm_context=wasm_context,
             wasm_module_count=wasm_module_count,
             load_native_module=load_native_module,
         )
-    finally:
-        if previous_core_host is None:
-            os.environ.pop("SPRING_WASM_CORE_HOST", None)
-        else:
-            os.environ["SPRING_WASM_CORE_HOST"] = previous_core_host
+    return _run_core_backend(
+        root_output,
+        seed,
+        timeout,
+        spring,
+        scale,
+        benchmark_case,
+        benchmark_iterations,
+        benchmark_repeats,
+        expected_tests,
+        callin_variant=callin_variant,
+        wasm_component=wasm_component,
+        output_name=output_name,
+        wasm_context=wasm_context,
+        wasm_module_count=wasm_module_count,
+    )
 
 
 def render_report(summaries: list[dict]) -> str:
@@ -268,8 +428,6 @@ def run_suite(args) -> int:
     return 0
 
 
-# Patch only the extension seams; base.main continues to own CLI parsing,
-# profile selection, fixture generation, process execution and row validation.
 base.build_wasm = build_wasm_and_core
 base.run_backend = run_backend_with_core
 base.render_report = render_report
