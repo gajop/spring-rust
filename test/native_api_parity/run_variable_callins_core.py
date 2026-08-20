@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Measure representative variable engine->guest callins in Lua and Core Wasm.
 
-This intentionally starts as a focused Lua/Core comparison.  Native and
+This intentionally starts as a focused Lua/Core comparison. Native and
 Component rows should only be added once their timing brackets cover the same
-engine-client boundary; pretending missing instrumentation is comparable would
-be worse than showing a narrow honest table.
+transport work; pretending missing instrumentation is comparable would be
+worse than showing a narrow honest table.
 """
 
 from __future__ import annotations
@@ -28,6 +28,10 @@ CORE_VARIABLE = core.CORE_RAW.with_name(
 VARIABLE_COMPONENT_KEY = base.BENCHMARK_COMPONENT.with_name(
     "recoil_wasm_benchmark_guest.variable-callins.component.wasm"
 )
+# NativeInterface dispatches AddConsoleLine and CommandNotify through the
+# unsynced Wasm worlds. Build and run the representative Core module there;
+# using a synced artifact would silently benchmark a missing consumer.
+VARIABLE_CONTEXT = "unsynced_gadget"
 
 
 def parse_args() -> argparse.Namespace:
@@ -57,7 +61,7 @@ def build_core(scale: float, iterations: int, repeats: int) -> None:
     os.environ["SPRING_BENCHMARK_ITERATIONS"] = str(iterations)
     os.environ["SPRING_BENCHMARK_REPEATS"] = str(repeats)
     os.environ["SPRING_BENCHMARK_CALLIN_VARIANT"] = "variable"
-    core.build_core_wasm(CORE_VARIABLE, "synced_gadget")
+    core.build_core_wasm(CORE_VARIABLE, VARIABLE_CONTEXT)
 
 
 def run(args: argparse.Namespace) -> dict:
@@ -87,7 +91,7 @@ def run(args: argparse.Namespace) -> dict:
         callin_variant="variable",
         wasm_component=base.BENCHMARK_COMPONENT_EMPTY,
         output_name="lua-variable-callins",
-        wasm_context="synced_gadget",
+        wasm_context=VARIABLE_CONTEXT,
         load_native_module=False,
     )
 
@@ -111,7 +115,7 @@ def run(args: argparse.Namespace) -> dict:
             callin_variant="variable",
             wasm_component=VARIABLE_COMPONENT_KEY,
             output_name="wasm-core-variable-callins",
-            wasm_context="synced_gadget",
+            wasm_context=VARIABLE_CONTEXT,
             wasm_module_count=1,
         )
     finally:
@@ -121,6 +125,7 @@ def run(args: argparse.Namespace) -> dict:
         "profile": "variable-callins",
         "scale": args.scale,
         "seed": args.seed,
+        "context": VARIABLE_CONTEXT,
         "tests": list(TESTS),
         "rows": {"lua": lua_rows, "wasm_core": core_rows},
         "output": str(run_root),
