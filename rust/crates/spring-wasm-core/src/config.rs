@@ -4,6 +4,13 @@
 // blob. The performance API is caller-owned and allocation-free; it never
 // materializes a Vec<String>.
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+#[cfg(feature = "alloc")]
+use alloc::vec;
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
+
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 #[repr(C)]
 pub struct StringRange {
@@ -71,6 +78,81 @@ impl<'a> StringListView<'a> {
     #[inline]
     pub fn iter_bytes(&self) -> impl ExactSizeIterator<Item = &'a [u8]> + '_ {
         (0..self.len()).map(move |index| self.get_bytes(index).unwrap_or(&[]))
+    }
+}
+
+/// Reusable owned storage for the flat `list<string>` ABI.
+///
+/// The vectors retain their high-water sizes across fills. After the first
+/// sufficiently large call, repeated calls reuse the same descriptor and byte
+/// buffers and `view()` remains allocation-free.
+#[cfg(feature = "alloc")]
+#[derive(Debug, Default)]
+pub struct StringListBuffer {
+    ranges: Vec<StringRange>,
+    bytes: Vec<u8>,
+    used_strings: usize,
+    used_bytes: usize,
+}
+
+#[cfg(feature = "alloc")]
+impl StringListBuffer {
+    #[inline]
+    pub const fn new() -> Self {
+        Self {
+            ranges: Vec::new(),
+            bytes: Vec::new(),
+            used_strings: 0,
+            used_bytes: 0,
+        }
+    }
+
+    #[inline]
+    pub fn with_sizes(strings: usize, bytes: usize) -> Self {
+        Self {
+            ranges: vec![StringRange::default(); strings],
+            bytes: vec![0; bytes],
+            used_strings: 0,
+            used_bytes: 0,
+        }
+    }
+
+    #[inline]
+    pub fn view(&self) -> StringListView<'_> {
+        StringListView {
+            ranges: &self.ranges[..self.used_strings],
+            bytes: &self.bytes[..self.used_bytes],
+        }
+    }
+
+    #[inline]
+    pub fn storage_sizes(&self) -> StringListRequirements {
+        StringListRequirements {
+            strings: self.ranges.len(),
+            bytes: self.bytes.len(),
+        }
+    }
+
+    #[inline]
+    pub fn clear(&mut self) {
+        self.used_strings = 0;
+        self.used_bytes = 0;
+    }
+
+    #[inline]
+    fn ensure(&mut self, required: StringListRequirements) {
+        if self.ranges.len() < required.strings {
+            self.ranges.resize(required.strings, StringRange::default());
+        }
+        if self.bytes.len() < required.bytes {
+            self.bytes.resize(required.bytes, 0);
+        }
+    }
+
+    #[inline]
+    fn commit(&mut self, required: StringListRequirements) {
+        self.used_strings = required.strings;
+        self.used_bytes = required.bytes;
     }
 }
 
@@ -171,4 +253,26 @@ pub fn get_log_sections_into<'a>(
         let _ = (ranges, bytes);
         Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
     }
+}
+
+/// Fill reusable owned storage with registered log sections.
+///
+/// Storage grows only when the host reports a larger requirement and is then
+/// retained for subsequent calls. Use `buffer.view()` to inspect the result.
+#[cfg(feature = "alloc")]
+pub fn fill_log_sections(buffer: &mut StringListBuffer) -> Result<()> {
+    for _ in 0..3 {
+        match get_log_sections_into(&mut buffer.ranges, &mut buffer.bytes)? {
+            StringListFill::Complete(view) => {
+                let used = StringListRequirements {
+                    strings: view.len(),
+                    bytes: view.packed_bytes().len(),
+                };
+                buffer.commit(used);
+                return Ok(());
+            }
+            StringListFill::Insufficient(required) => buffer.ensure(required),
+        }
+    }
+    Err(ApiError::new(ErrorCode::BufferOverflow as i32))
 }
