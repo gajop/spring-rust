@@ -26,15 +26,13 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/WasmInterfaceSystem.cpp
 )
 
-# Core API codegen writes these translation units into the checked-in generated
-# tree. Keep the engine build usable before the first regeneration, then pick
-# up the generated fixed/option/variable surfaces automatically.
+# Codegen also emits variable-input/combined-I/O scaffolding, but those paths
+# currently allocate/copy host containers and are intentionally not production
+# executable. Compile only generated classes accepted by the fast-path registry.
 foreach(RECOIL_WASM_CORE_GENERATED_SOURCE
 	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedOptionBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedVariableBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedVariableOutputBindings.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmCoreGeneratedVariableIoBindings.cpp
 )
 	if(EXISTS ${RECOIL_WASM_CORE_GENERATED_SOURCE})
 		list(APPEND sources_engine_WasmInterface ${RECOIL_WASM_CORE_GENERATED_SOURCE})
