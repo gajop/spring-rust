@@ -120,7 +120,8 @@ wasm_trap_t* GetLogSections(void* environment, wasmtime_caller_t* caller,
 		const std::uint32_t offset = static_cast<std::uint32_t>(requiredBytes64);
 		requiredBytes64 += length;
 		const std::uint32_t requiredBytes = static_cast<std::uint32_t>(requiredBytes64);
-		const bool itemFits = fits && requiredBytes <= bytesCapacity;
+		const bool itemFits = fits && generated::CheckResultBytes(state, requiredBytes) &&
+			requiredBytes <= bytesCapacity;
 		if (!itemFits) {
 			fits = false;
 			continue;
