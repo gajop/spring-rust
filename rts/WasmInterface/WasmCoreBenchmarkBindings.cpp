@@ -5,10 +5,12 @@
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <string_view>
 
 #include "WasmCoreGeneratedSupport.h"
+#include "WasmCoreGuestInput.h"
 
 namespace recoil::wasm::core {
 
@@ -17,41 +19,6 @@ namespace {
 
 using generated::ImportGuard;
 using generated::Trap;
-
-class GuestCString {
-public:
-	bool Read(HostState* state, wasmtime_caller_t* caller, std::uint32_t pointer,
-		std::uint32_t length)
-	{
-		std::string error;
-		if (!generated::EnsureMemory(state, caller, error))
-			return false;
-
-		if (length < inlineBytes.size()) {
-			if (!state->memory.Read(pointer, inlineBytes.data(), length))
-				return false;
-			inlineBytes[length] = '\0';
-			value = inlineBytes.data();
-			return true;
-		}
-
-		heapBytes.resize(length);
-		if (!state->memory.Read(pointer, heapBytes.data(), length))
-			return false;
-		value = heapBytes.c_str();
-		return true;
-	}
-
-	const char* c_str() const { return value == nullptr ? "" : value; }
-
-private:
-	// Benchmark hot strings (for example "bench") remain allocation-free.
-	// Result/report messages take the fallback path, but those are emitted
-	// outside timed regions.
-	std::array<char, 256> inlineBytes{};
-	std::string heapBytes;
-	const char* value = nullptr;
-};
 
 std::int32_t ErrorCode(const Error* error)
 {
@@ -95,8 +62,14 @@ wasm_trap_t* SendLuaRulesMsg(void* environment, wasmtime_caller_t* caller,
 	if (!guard.Ok())
 		return Trap(guard.Error());
 
-	GuestCString message;
-	if (!message.Read(state, caller, static_cast<std::uint32_t>(slots[0].i32),
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError)) {
+		slots[0].i64 = static_cast<std::int64_t>(
+			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+		return nullptr;
+	}
+	GuestCString<> message;
+	if (!message.Read(state->memory, static_cast<std::uint32_t>(slots[0].i32),
 			static_cast<std::uint32_t>(slots[1].i32))) {
 		slots[0].i64 = static_cast<std::int64_t>(
 			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
@@ -125,11 +98,17 @@ wasm_trap_t* SendLuaUIMsg(void* environment, wasmtime_caller_t* caller,
 	if (!guard.Ok())
 		return Trap(guard.Error());
 
-	GuestCString message;
-	GuestCString mode;
-	if (!message.Read(state, caller, static_cast<std::uint32_t>(slots[0].i32),
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError)) {
+		slots[0].i64 = static_cast<std::int64_t>(
+			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+		return nullptr;
+	}
+	GuestCString<> message;
+	GuestCString<> mode;
+	if (!message.Read(state->memory, static_cast<std::uint32_t>(slots[0].i32),
 			static_cast<std::uint32_t>(slots[1].i32)) ||
-		!mode.Read(state, caller, static_cast<std::uint32_t>(slots[2].i32),
+		!mode.Read(state->memory, static_cast<std::uint32_t>(slots[2].i32),
 			static_cast<std::uint32_t>(slots[3].i32))) {
 		slots[0].i64 = static_cast<std::int64_t>(
 			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
@@ -158,9 +137,15 @@ wasm_trap_t* SetUnitRulesParamF32(void* environment, wasmtime_caller_t* caller,
 	if (!guard.Ok())
 		return Trap(guard.Error());
 
-	GuestCString name;
-	// Validate/copy all guest input before mutating engine state.
-	if (!name.Read(state, caller, static_cast<std::uint32_t>(slots[1].i32),
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError)) {
+		slots[0].i64 = static_cast<std::int64_t>(
+			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+		return nullptr;
+	}
+	GuestCString<> name;
+	// Validate/copy all guest string input before mutating engine state.
+	if (!name.Read(state->memory, static_cast<std::uint32_t>(slots[1].i32),
 			static_cast<std::uint32_t>(slots[2].i32))) {
 		slots[0].i64 = static_cast<std::int64_t>(
 			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
@@ -192,8 +177,14 @@ wasm_trap_t* GetUnitRulesParamF32(void* environment, wasmtime_caller_t* caller,
 	if (!guard.Ok())
 		return Trap(guard.Error());
 
-	GuestCString name;
-	if (!name.Read(state, caller, static_cast<std::uint32_t>(slots[1].i32),
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError)) {
+		slots[0].i64 = static_cast<std::int64_t>(
+			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+		return nullptr;
+	}
+	GuestCString<> name;
+	if (!name.Read(state->memory, static_cast<std::uint32_t>(slots[1].i32),
 			static_cast<std::uint32_t>(slots[2].i32))) {
 		slots[0].i64 = static_cast<std::int64_t>(
 			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
@@ -245,6 +236,61 @@ wasm_trap_t* GetGroundOrigHeight(void* environment, wasmtime_caller_t*,
 	return nullptr;
 }
 
+// Pure transport benchmark. This intentionally does not copy or inspect the
+// payload; it measures the steady-state cost of an unchecked Core import plus
+// the range validation production zero-copy inputs would still require.
+wasm_trap_t* ConsumeString(void* environment, wasmtime_caller_t* caller,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || slots == nullptr || slotCount != 2)
+		return Trap("ConsumeString Core ABI signature mismatch");
+
+	ImportGuard guard(state, 1);
+	if (!guard.Ok())
+		return Trap(guard.Error());
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError))
+		return Trap(memoryError);
+
+	const std::uint32_t pointer = static_cast<std::uint32_t>(slots[0].i32);
+	const std::uint32_t length = static_cast<std::uint32_t>(slots[1].i32);
+	if (!state->memory.Contains(pointer, length)) {
+		slots[0].i64 = static_cast<std::int64_t>(
+			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+		return nullptr;
+	}
+	slots[0].i64 = static_cast<std::int64_t>(PackU32(length, 0));
+	return nullptr;
+}
+
+wasm_trap_t* ConsumeF32List(void* environment, wasmtime_caller_t* caller,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || slots == nullptr || slotCount != 2)
+		return Trap("ConsumeF32List Core ABI signature mismatch");
+
+	ImportGuard guard(state, 1);
+	if (!guard.Ok())
+		return Trap(guard.Error());
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError))
+		return Trap(memoryError);
+
+	const std::uint32_t pointer = static_cast<std::uint32_t>(slots[0].i32);
+	const std::uint32_t count = static_cast<std::uint32_t>(slots[1].i32);
+	const std::uint64_t bytes = static_cast<std::uint64_t>(count) * sizeof(float);
+	if (bytes > std::numeric_limits<std::size_t>::max() ||
+		!state->memory.Contains(pointer, static_cast<std::size_t>(bytes))) {
+		slots[0].i64 = static_cast<std::int64_t>(
+			PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+		return nullptr;
+	}
+	slots[0].i64 = static_cast<std::int64_t>(PackU32(count, 0));
+	return nullptr;
+}
+
 bool Define(wasmtime_linker_t* linker, const char* moduleName, const char* functionName,
 	wasm_functype_t* type, wasmtime_func_unchecked_callback_t callback,
 	HostState* state, std::string& error)
@@ -279,7 +325,11 @@ bool RegisterBenchmarkImports(wasmtime_linker_t* linker, HostState* state,
 	{
 		const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
 		if (!Define(linker, "spring:messages", "send-lua-rules-msg",
-				MakeFuncType(params, 2, i64Result, 1), SendLuaRulesMsg, state, error))
+				MakeFuncType(params, 2, i64Result, 1), SendLuaRulesMsg, state, error) ||
+			!Define(linker, "spring:benchmark", "consume-string",
+				MakeFuncType(params, 2, i64Result, 1), ConsumeString, state, error) ||
+			!Define(linker, "spring:benchmark", "consume-f32-list",
+				MakeFuncType(params, 2, i64Result, 1), ConsumeF32List, state, error))
 			return false;
 	}
 	{
