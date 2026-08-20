@@ -13,6 +13,22 @@
 
 struct NativeInterface;
 
+// Internal numeric dispatch key. String names are resolved once at the outer
+// engine seam; hot per-module Core dispatch must not repeatedly hash/compare
+// callin names before reaching an already-cached Wasmtime export.
+enum class WasmCoreCallin : std::uint8_t {
+	Invalid = 0,
+	GameFrame,
+	GameFramePost,
+	Update,
+	UnitCreated,
+	UnitPreDamaged,
+	AllowUnitCreation,
+	AddConsoleLine,
+	CommandNotify,
+	DrawWorld,
+};
+
 // Native C++ host for the Spring Core-Wasm ABI. Each guest owns a separate
 // Wasmtime store/linker/instance. The public static registry is keyed by the
 // engine module name; production callers should prefer DispatchModule so
@@ -29,14 +45,23 @@ public:
 	static bool AnyActive(WasmEnvironment environment);
 	static bool HasModule(std::string_view moduleName);
 	static bool ModuleFaulted(std::string_view moduleName);
-	static bool ModuleHasCallin(std::string_view moduleName, std::string_view name)
+
+	static WasmCoreCallin ResolveCallin(std::string_view name);
+	static bool ModuleHasCallin(std::string_view moduleName, WasmCoreCallin callin)
 	{
 		const WasmCoreHost* host = Find(moduleName);
-		return host != nullptr && host->HasCallin(name);
+		return host != nullptr && host->HasCallin(callin);
+	}
+	static bool ModuleHasCallin(std::string_view moduleName, std::string_view name)
+	{
+		return ModuleHasCallin(moduleName, ResolveCallin(name));
 	}
 
-	// Production dispatch: invoke exactly one already-ordered module. Missing
-	// optional exports are handled as no-ops; an unknown module/callin fails.
+	// Production dispatch: invoke exactly one already-ordered module. The
+	// numeric overload is the hot path. The string overload is retained for
+	// legacy callers and resolves the name once before dispatch.
+	static bool DispatchModule(std::string_view moduleName, WasmCoreCallin callin,
+		const void* query, void* result, std::string& error);
 	static bool DispatchModule(std::string_view moduleName, std::string_view name,
 		const void* query, void* result, std::string& error);
 
@@ -75,8 +100,8 @@ private:
 		std::unique_ptr<Backend> backend);
 
 	static WasmCoreHost* Find(std::string_view moduleName);
-	bool HasCallin(std::string_view name) const;
-	bool Invoke(std::string_view name, const void* query, void* result, std::string& error);
+	bool HasCallin(WasmCoreCallin callin) const;
+	bool Invoke(WasmCoreCallin callin, const void* query, void* result, std::string& error);
 	bool InvokeGameFrame(const void* query, std::string& error);
 	bool InvokeGameFramePost(const void* query, std::string& error);
 	bool InvokeUpdate(const void* query, std::string& error);
