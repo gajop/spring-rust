@@ -9,8 +9,10 @@
 #include <limits>
 #include <span>
 #include <string_view>
+#include <utility>
 
 #include "NativeInterface/api/Callins.h"
+#include "System/BenchmarkCallins.h"
 
 namespace recoil::wasm::core {
 
@@ -19,6 +21,15 @@ namespace {
 
 constexpr std::size_t ADD_CONSOLE_HEADER_BYTES = 20;
 constexpr std::size_t COMMAND_NOTIFY_HEADER_BYTES = 24;
+
+struct BenchmarkScope {
+	explicit BenchmarkScope(std::string_view event)
+		: token(spring::benchmark_callins::Begin("wasm", event))
+	{}
+	~BenchmarkScope() { spring::benchmark_callins::End(std::move(token)); }
+
+	spring::benchmark_callins::Token token;
+};
 
 bool AddSize(std::size_t& value, std::size_t amount)
 {
@@ -72,8 +83,8 @@ bool VariableCallinBindings::Bind(wasmtime_context_t* context,
 		return true;
 
 	if (!scratchInfo.Resolve(context, instance, "spring:callin/scratch-info",
-			std::char_traits<char>::length("spring:callin/scratch-info"), {}, i64Result,
-			false, error))
+			std::char_traits<char>::length("spring:callin/scratch-info"),
+			std::span<const wasm_valkind_t>{}, i64Result, false, error))
 		return false;
 
 	wasmtime_val_raw_t slot{};
@@ -126,6 +137,7 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 		error = "Core AddConsoleLine export is unavailable";
 		return false;
 	}
+	BenchmarkScope benchmark("AddConsoleLine");
 	const std::string_view message = query.message == nullptr
 		? std::string_view{}
 		: std::string_view(query.message);
@@ -170,6 +182,7 @@ bool VariableCallinBindings::CommandNotify(wasmtime_context_t* context,
 		error = "Core CommandNotify export is unavailable";
 		return false;
 	}
+	BenchmarkScope benchmark("CommandNotify");
 	const NativeCallinCommand& command = query.command;
 	if (command.numParams != 0 && command.params == nullptr) {
 		error = "Core CommandNotify received a null parameter list";
