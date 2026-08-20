@@ -23,6 +23,8 @@ mod render_core_wasm_host;
 mod render_core_wasm_option_host;
 #[path = "../render_core_wasm_variable_host.rs"]
 mod render_core_wasm_variable_host;
+#[path = "../render_core_wasm_variable_io_host.rs"]
+mod render_core_wasm_variable_io_host;
 #[path = "../render_core_wasm_variable_output_host.rs"]
 mod render_core_wasm_variable_output_host;
 #[path = "../render_core_wasm_registry.rs"]
@@ -184,6 +186,14 @@ fn run() -> Result<()> {
     write(
         &arguments.output.join("WasmCoreGeneratedVariableOutputBindings.cpp"),
         &render_core_wasm_variable_output_host::render_cpp(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableIoBindings.h"),
+        &render_core_wasm_variable_io_host::render_header(),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableIoBindings.cpp"),
+        &render_core_wasm_variable_io_host::render_cpp(&model),
     )?;
 
     let wit_dir = arguments.output.join("wit");
