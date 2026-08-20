@@ -271,6 +271,9 @@ int LuaDebugExtra::EmulateNativeApiParityCallins(lua_State* L)
 		float newDamage = 12.0f;
 		float impulseMult = 1.0f;
 		eventHandler.UnitPreDamaged(unit, unit, 12.0f, -1, -1, false, &newDamage, &impulseMult);
+		Command command(CMD_MOVE, SHIFT_KEY, unit->pos);
+		eventHandler.CommandNotify(command);
+		eventHandler.AddConsoleLine("wasm_benchmark_callin", "WasmBenchmark", 3);
 		return 0;
 	}
 
