@@ -102,6 +102,11 @@ inline bool CheckResultBytes(const HostState* state, std::size_t bytes)
 	return state == nullptr || state->budget == nullptr || state->budget->CheckResultSize(bytes);
 }
 
+inline bool CheckResultNodes(const HostState* state, std::size_t nodes)
+{
+	return state == nullptr || nodes <= state->maxValueNodes;
+}
+
 class CallbackGuard {
 public:
 	explicit CallbackGuard(WasmExecutionBudget* executionBudget)
