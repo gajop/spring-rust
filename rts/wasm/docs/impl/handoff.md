@@ -1,301 +1,642 @@
-# Handoff: Core Wasm host and API migration
+# Handoff: Core Wasm production transport
 
 Date: 2026-08-20
 
-Core Wasm is the intended production transport. Component Model implementations remain as correctness and benchmark references, but new API work targets Core first.
+This checkout contains a large Core WebAssembly implementation on top of `rust-wip`. Treat `rust-wip` as the baseline when you need to understand what is new here. The merge base at handoff time was `47c940718231af9659ac23a6d7b960dcd8acf545`; this checkout was 375 commits ahead of that baseline.
 
-## Current branch state
+The intended production direction is Wasmtime + Core WebAssembly. The existing Component Model path remains useful as a correctness/reference implementation and benchmark comparison, but new performance-sensitive work should target Core first.
 
-The production Core callin path remains pre-`WasmValue` while using the `WasmInterfaceSystem` module inventory for environment selection, stable module order and result aggregation. The old `WasmCoreHost::DispatchCallin` all-host fan-out remains only as a legacy/benchmark seam; the engine's early typed-host path delegates active Core callins to `WasmInterfaceSystem::DispatchActiveCoreCallin`.
+The next agent is expected to work locally: compile, regenerate code, run tests, inspect generated diffs, benchmark, and fix anything this web-only development session could not verify.
 
-Representative variable engine -> guest callins are implemented:
+## 1. Design priorities
 
-- `AddConsoleLine`: two strings + scalar level.
-- `CommandNotify`: fixed command header + variable `f32[]` params.
+Keep these concerns separate; do not use one as shorthand for another.
 
-They use a guest-owned scratch region negotiated once at bind time and perform one bounded serialization plus one unchecked host -> guest call. The hot path has no host heap allocation. Nested use of the shared scratch is rejected deterministically rather than corrupting the outer payload.
+1. **Performance** — highest practical Wasmtime/Core performance with mechanically defensible optimizations: typed unchecked calls after validation, minimal crossings, no unnecessary allocation/copying, caller-owned buffers, compact deterministic layouts, and reuse where semantics allow it.
+2. **Sync** — synced simulation must remain deterministic across supported platforms. Nondeterministic host data must not be visible to synced guests.
+3. **Safety** — malformed/trapping guest code must not crash or corrupt the engine. Pointer/count validation, bounds checks, overflow checks, signature validation, result validation, re-entry protection, and fault handling are correctness requirements.
+4. **Security** — guests must not escape the Wasm sandbox or gain ambient OS authority. No arbitrary filesystem, process execution, networking, environment, native FFI, or equivalent authority by default.
+5. **Visibility** — unsynced/UI guests must not observe hidden game state outside the correct player/ally-team perspective. This is a game-information policy, separate from sandbox security.
 
-Core host imports carry the module's real `WasmEnvironment`. UI modules stay on generated visibility-checked imports; rules/gaia keep the hand-specialized scalar path so the absolute Core hostcall floor does not pay a visibility-context swap. Unsynced Core faults are removed and the system's Core descriptor inventory is reconciled immediately; synced faults remain sticky.
+Performance is the first optimization target, but sync and safety are hard correctness constraints. Visibility must be preserved where the NativeInterface API requires it.
 
-Known narrow gap: `NativeInterfaceEventClient::DispatchWasmBoolCallin` does not pass the existing `nativeResult` argument into the early typed/Core path. `AddConsoleLine` and `CommandNotify` therefore execute in Core, but a Core `true` return is not yet propagated to the engine. Fix this at the bool-helper/event-client seam; do not introduce global pending-result state to work around it.
+## 2. What this checkout adds on top of `rust-wip`
 
-Variable-callin benchmark timing is not yet a perfect cross-backend boundary: Lua's central timer starts after Lua arguments are pushed, while Core's variable timer includes scratch lowering. Treat the inner rows as diagnostics/conservative-to-Core until an identical outer event boundary is recorded. No variable-callin performance number is claimed yet.
+The delta is not a small experiment. It adds a complete Core-Wasm runtime direction, code generation, SDK work, specialized production bindings, callin dispatch, validation, benchmarking, and documentation.
 
-## Priority and concern taxonomy
+### 2.1 Core runtime and ABI infrastructure
 
-Keep these concerns separate. Do not use one category name as shorthand for another.
+New runtime pieces under `rts/WasmInterface/` include:
 
-1. **Performance** — highest practical Wasmtime + Core Wasm performance. Take mechanically clear wins: unchecked typed calls, fewer boundary crossings, no unnecessary allocation, no unnecessary copying, caller-owned/reused buffers, compact layouts and batching where semantics naturally support it. Do not add complicated speculative optimizations that require profiling to justify.
-2. **Sync** — synced modules must compute identically across supported platforms. This is deterministic simulation correctness and desync prevention.
-3. **Safety** — guest input or host ABI handling must not crash/corrupt the engine. This covers pointer/count validation, integer-overflow checks, guest-memory bounds, trap handling, invalid result validation, re-entry correctness and similar process-integrity concerns. It applies to synced and unsynced modules alike.
-4. **Security** — guest code must not escape the Wasm sandbox or gain ambient OS authority such as arbitrary filesystem access, process execution, host networking, environment access or similar capabilities. Expensive optional hardening may be configurable if it measurably hurts the hot path; sandbox escape prevention itself is not optional.
-5. **Visibility** — unsynced/UI guests must not see game information hidden from their player/ally-team perspective. This is game-information policy, not sandbox security.
+- `WasmCoreAbi.{h,cpp}` — Wasmtime raw ABI helpers, memory binding, signature checking, unchecked export invocation, packed result helpers.
+- `WasmCoreBindings.{h,cpp}` — instance import registration and fixed callin export binding.
+- `WasmCoreHost.{h,cpp}` — Core module host/runtime ownership.
+- `WasmCoreHostFastDispatch.cpp` — fast host-dispatch support.
+- `WasmCoreValidation.{h,cpp}` — Core import/export validation against the executable registry and environment policy.
+- `WasmCoreRegistry.h` — handwritten executable Core import registry plus optional generated registry fallback.
+- `WasmCoreGeneratedSupport.h` — common import guards, execution-budget handling, UI visibility context, memory resolution, callback support.
+- `WasmCoreGuestInput.h` — validated guest string/input helpers; short C-string inputs use inline storage with heap fallback only for long strings.
+- `WasmCoreWire.h` — deterministic little-endian record reader/writer; native C++ struct padding is never part of the Wasm ABI.
+- `WasmCoreVariableCallins.{h,cpp}` — guest-owned scratch protocol for variable engine->guest callins.
+- `WasmInterfaceSystemCore.cpp` — ordered Core module dispatch and callin aggregation integrated with the existing module system.
 
-Performance is the first design target, but sync correctness and process safety are correctness constraints rather than optional optimizations. Visibility is enforced where the game API requires it. Security refers only to sandbox/OS authority.
+`WasmInterfaceSystem`, `WasmTypedHost`, runtime/resource plumbing, event dispatch, and CMake were modified so Core is a real engine transport rather than an isolated benchmark host.
 
-Do not call a generic generated path "fast" merely because it is semantically correct.
+### 2.2 Production dispatch before `WasmValue`
 
-## Architecture
+Supported Core callins are dispatched before the historical Component/`WasmValue` serialization path.
 
-- Engine/host: C++.
-- Runtime: Wasmtime Core WebAssembly through the C/C++ API.
-- Guest SDK: Rust first, targeting `wasm32-unknown-unknown`.
-- ABI: typed Core imports/exports generated from the shared semantic API model.
-- Scalars/IDs/enums: direct Wasm numeric values where possible.
-- Fixed records/arrays: explicit deterministic wire layouts, never native struct padding.
-- Variable results: caller-owned guest buffers with written/required lengths.
-- Variable callins: one guest-owned scratch region per guest, negotiated at bind time.
-- Callbacks: integer callback IDs and one cached guest callback dispatcher.
-- Rust may be used for generators/guest SDKs; end users and the built engine must not require a Rust toolchain.
+`NativeInterfaceEventClient::DispatchWasmCallin` now:
 
-Hot Core calls must not route through the generic `WasmValue` transport.
+- attempts `WasmInterfaceSystem::DispatchActiveCoreCallin` first;
+- propagates direct native result structs from Core/typed transports;
+- only falls through to Component serialization when Core/typed did not handle the call;
+- tests `HasComponentModules(...)` before paying Component query serialization costs, rather than generic `HasModules(...)` which also includes Core modules.
 
-## Production callin dispatch
+This removed accidental Core-only serialization/copy overhead.
 
-The fast Core callin path is reached from the existing early `WasmTypedHost` seam before `NativeInterfaceWasmAdapter::SerializeCallinQuery` constructs owned values.
+The bool-result seam is fixed. `DispatchWasmBoolCallin` supplies a `BoolCallinResult`, recognizes the direct-result `WasmValue::Unit()` marker, propagates Core `true` results, and retains the old Component record path as fallback. `AddConsoleLine` and `CommandNotify` therefore contribute their boolean results correctly.
 
-`WasmInterfaceSystem::DispatchActiveCoreCallin` builds at most three environment invocations (rules, gaia, UI) in a fixed stack array and passes a `std::span` to `DispatchCoreCallin`; do not reintroduce a per-call `std::vector` allocation here.
+`AllowUnitCreation` and `UnitPreDamaged` also use explicit direct-result handling instead of inferring transport type from whether the old typed host is enabled.
 
-`DispatchCoreCallin` uses generated callin metadata to preserve:
+Legacy native callback-null checks that accidentally prevented Wasm-only implementations from running were removed for:
 
-- environment masks;
-- stable module order;
-- `ignore` aggregation;
-- boolean `or-true` / `and-false` aggregation;
-- `first` aggregation for `DamageCallinResult` and `AllowUnitCreationResult`.
+- `AllowUnitTransportLoad`
+- `AllowUnitTransportUnload`
+- `AllowUnitDecloak`
 
-For `first`, every module sees the same incoming engine default; the first contributing result is selected without feeding it into later modules as a new input. `UnitPreDamaged` must preserve an incoming `DamageCallinResult` because an earlier engine event client may already have modified damage/impulse values. The ordered dispatcher preserves that default, but the per-module host invocation still needs to be checked so it does not reset it before calling the guest.
+### 2.3 Core callin set
 
-Current mixed Core + Component global ordering is not a solved contract. The early Core path behaves as the selected fast transport for currently supported typed callins. Do not claim cross-transport module ordering until the two module inventories are unified or an explicit ordering design is implemented.
+The currently implemented representative callins are:
 
-## Performance rules
+Synced side:
 
-Wasmtime host functions use unchecked typed Core callbacks for reviewed signatures. Keep signatures small and direct. Prefer one typed import/export over generic dispatch-by-name.
+- `GameFrame`
+- `GameFramePost`
+- `UnitCreated`
+- `UnitPreDamaged`
+- `AllowUnitCreation`
 
-Allocation/copy rules:
+Unsynced/UI side:
 
-- Reuse caller-owned guest output buffers on steady-state hot paths.
-- Public owned `Vec`/`String` APIs may allocate for ergonomics, but keep `_into`/borrowed forms available for performance-sensitive code.
-- Do not allocate merely to translate between equivalent scalar/list representations.
-- C-string inputs need NUL termination. `WasmCoreGuestInput.h::GuestCString` keeps short strings in inline storage and uses one heap fallback only for long strings.
-- Do not retain guest-memory pointers across guest re-entry or memory growth.
-- Do not remove a defensive copy unless the NativeInterface lifetime/re-entry contract proves the pointer is call-scoped.
-- The ordered engine -> Core dispatcher is allocation-free on its invocation-list hot path.
-- Keep UI visibility work out of rules/gaia hot imports unless the same filter is actually required there.
+- `Update`
+- `AddConsoleLine`
+- `CommandNotify`
+- `DrawWorld`
 
-### `list<string>`
+The dispatcher preserves environment masks, stable module order, fault policy, and generated aggregation semantics. Boolean `or-true` / `and-false`, `ignore`, and first-contributor result aggregation are implemented. For first-contributor callins, every module sees the same incoming engine default; later modules do not receive an earlier module's result as a new input.
 
-Generic `list<string>` automatic lowering is forbidden for now.
+Core faults are handled differently by environment intentionally: unsynced faulted modules are removed/reconciled from active Core inventory; synced faults remain sticky rather than silently changing deterministic module participation.
 
-The previous generic shape required a `vector<string>`, a `vector<const char*>`, and one string copy/allocation per element. The Core planner marks any function containing `list<string>` as manual so it cannot enter the executable registry accidentally.
+Mixed Core + Component module ordering is **not** a globally specified inter-transport ordering contract. For supported callins, Core currently acts as the selected fast transport and returns before Component dispatch when handled. Do not claim arbitrary mixed-transport stable ordering without designing it explicitly.
 
-A reviewed representation should use flat guest data: packed bytes plus offset/length descriptors. If the NativeInterface requires `const char**`, construct only the minimum pointer table required by that call; do not allocate one host `string` per element.
+### 2.4 Variable callins: one crossing, guest-owned scratch
 
-## Generated API policy
+`AddConsoleLine` and `CommandNotify` are the representative variable engine->guest callins.
 
-Core generation is in `spring-native-codegen`.
+Protocol:
+
+- A guest that exports a variable callin optionally exports `spring:callin/scratch-info() -> i64`.
+- Low 32 bits are guest memory offset; high 32 bits are capacity.
+- Host resolves/calls this once during bind and validates the full range.
+- Hot path serializes into cached guest-owned scratch and performs exactly one unchecked host->guest call.
+- No guest allocator/reserve call is made per event.
+- Oversize payloads fail rather than hiding an allocation-heavy slow path.
+- Shared scratch has an explicit nested/re-entry guard.
+
+Representative payloads:
+
+- `AddConsoleLine`: fixed header containing two offset/length pairs plus level, followed by message/section bytes.
+- `CommandNotify`: fixed command header followed by packed little-endian `f32` parameters.
+
+On little-endian hosts the float list can use a bulk copy; big-endian hosts must encode explicitly.
+
+### 2.5 Identical outer variable-callin benchmark boundary
+
+The old handoff warning about incomparable variable-callin timings is obsolete.
+
+`CEventHandler::AddConsoleLine` and `CEventHandler::CommandNotify` now record outer event timings:
+
+- `callin_string_event`
+- `callin_command_event`
+
+`test/native_api_parity/run_variable_callins_core.py` runs both Lua and Core with four rows:
+
+- inner `callin_string`
+- inner `callin_command`
+- outer `callin_string_event`
+- outer `callin_command_event`
+
+The outer rows start immediately before the common `CEventHandler` event-client dispatch and end immediately after it. Those rows are the valid Lua/Core decision comparison and include backend-specific lowering on both paths.
+
+The inner rows remain diagnostic only because Lua begins after pushing arguments while Core includes scratch lowering.
+
+### 2.6 Memory and wire conventions
+
+Use these conventions consistently:
+
+- Scalars, IDs, small enums/flags: direct Wasm numeric arguments/results where possible.
+- Packed scalar result + error: low 32 bits value/bit pattern, high 32 bits status/error where the existing helper convention applies.
+- Fixed records/arrays: explicit little-endian wire layout into caller-owned guest memory; never `memcpy` native structs across the boundary.
+- `list<i32>` / `list<f32>` results: guest-owned output + capacity; return full required count on overflow; never partially fill a logical result.
+- Variable string results: caller-owned buffers with written/required lengths.
+- `list<string>`: reviewed flat descriptor table + packed byte blob, not `vector<string>` per element.
+- Borrowed variable inputs: only where NativeInterface consumes the data synchronously and cannot retain the pointer across re-entry.
+
+Synced Core memory is fixed/non-growable, so a cached Wasmtime base/size is stable. Unsynced memory helpers refresh base/size when needed.
+
+Do not retain guest-memory pointers across guest re-entry or growth.
+
+### 2.7 Specialized production callouts
+
+Hand-reviewed bindings exist for important APIs where generic lowering is missing, too expensive, or insufficiently proven.
+
+#### Units information / queries
+
+Existing scalar/fixed fast coverage includes representative `UnitsInfo` and `UnitsQuery` reads such as unit def/team/dead/experience, position/velocity/health, validity/counts, nearest-unit queries, separation, and spatial list queries.
+
+Caller-owned list output coverage includes:
+
+- `GetAllUnits`
+- `GetTeamUnits`
+- rectangle/box/sphere/cylinder spatial queries
+
+Borrowed zero-copy list-input coverage was added for:
+
+- `GetTeamUnitsByDefs`
+- `GetUnitArrayCentroid`
+- `GetUnitMapCentroid`
+
+These borrow aligned guest `i32` memory directly on supported little-endian hosts and avoid materializing a host vector. Big-endian hosts return `NotAvailable` rather than silently interpreting Wasm little-endian memory incorrectly.
+
+#### Unit definitions
+
+Reviewed string-result bindings exist for:
+
+- `GetUnitDefName`
+- `GetUnitDefHumanName`
+
+They use caller-owned buffers rather than per-call owned host transport values.
+
+#### Unit commands / control
+
+Core bindings include command count/queue access and synced order mutation paths. Reviewed order imports borrow fixed guest arrays where lifetime semantics permit it.
+
+Important order paths include:
+
+- `GiveOrder`
+- `GiveOrderToUnitMap`
+- `GiveOrderToUnit`
+
+Synced mutating imports remain synced-only.
+
+#### Unit pieces
+
+`GetUnitScriptNames` uses the reviewed flat `list<string>` ABI: descriptor table + packed bytes + required-count/required-byte reporting.
+
+The Core implementation was optimized to read stable model-owned piece names directly (`unit->script->pieces[index]->original->name`) rather than calling the NativeInterface path that first copied names through its 1 KiB thread-local scratch buffer. This removes a redundant copy and second string-length pass for Core while leaving the NativeInterface implementation unchanged for other transports.
+
+#### Terrain control
+
+Reviewed synced-only terrain mutation bindings include:
+
+- `SetHeightMap`
+- `LevelHeightMap`
+- `SetHeightMapFunc` callback path
+
+#### Terrain reads
+
+A checked-in handwritten Core Terrain read group now covers 11 fixed/read APIs directly rather than relying only on generated snapshots:
+
+- `IsPosInMap`
+- `GetGroundHeight`
+- `GetGroundOrigHeight`
+- `GetSmoothMeshHeight`
+- `GetWaterPlaneLevel`
+- `GetWaterLevel`
+- `GetGroundNormal`
+- `GetGroundExtremes`
+- `GetHeightMapSize`
+- `GetGroundBlocked`
+- `GetGrass`
+
+Scalar values use packed results; multi-value outputs use fixed caller-owned buffers.
+
+#### Gfx
+
+Reviewed Core Gfx coverage includes benchmark-critical immediate paths such as `Vertex` and `BeginEnd`. These are unsynced/UI APIs.
+
+#### Profiling
+
+The handwritten Core profiling group now covers fixed forms of:
+
+- `GetTimer`
+- `GetTimerMicros`
+- `DiffTimers`
+- `GetFrameTimer`
+- `GetDrawSeconds`
+- `GetLuaMemUsage`
+- `GetVidMemUsage`
+- `GetSyncedGCInfo`
+
+A sync bug was corrected in the Core executable registry: profiling/timer imports are unsynced/UI-only. `GetTimerMicros` calls `spring_now()` and must not be visible to synced guests even though the semantic generated inventory historically marked it all-environment.
+
+#### Messages
+
+A complete reviewed handwritten Messages group contains 18 imports, including:
+
+- echo/logging
+- general/player/team/ally-team/spectator messages
+- public/ally/spectator/private chat
+- engine commands
+- Lua menu/UI/Gaia/Rules messaging
+- skirmish-AI messaging
+- `SendToUnsynced`
+
+String inputs are validated guest `(ptr,len)` values and converted to call-scoped NUL-terminated storage for the NativeInterface C-string contract. Short strings stay inline; long strings may use one fallback allocation. `SendToUnsynced` retains its synced-only semantic policy.
+
+The Rust SDK has matching `no_std` borrowed-`&str` wrappers for this group.
+
+#### Rules parameters
+
+Reviewed specialized f32-only RulesParams bindings exist for:
+
+- `SetUnitRulesParam` float value form
+- `GetUnitRulesParam` float value form
+
+The purpose is to expose the common scalar case without dragging the full tagged/string RulesParam union through the hot Core ABI.
+
+Setter is synced-only. Getter is available according to normal read policy. Missing parameter returns `NotFound`; non-float value returns `InvalidArgument`; NativeInterface errors are preserved.
+
+#### Config / benchmark imports
+
+Config includes the reviewed flat `GetLogSections` string-list ABI. Benchmark-only imports and transport-ceiling paths exist to measure raw Core shapes independently of semantic parity rows.
+
+### 2.8 Current half-finished UnitsInfo variable batch
+
+This is the immediate incomplete implementation at handoff time.
+
+Host callbacks are implemented in:
+
+- `rts/WasmInterface/WasmCoreUnitsInfoVariableBindings.{h,cpp}`
+
+They are compiled and registered through:
+
+- `rts/WasmInterface/CMakeLists.txt`
+- `rts/WasmInterface/WasmCoreBindings.h`
+
+Implemented callbacks:
+
+1. `get-unit-nano-pieces(unit_id, output, capacity) -> i64`
+   - caller-owned `i32` list output;
+   - standard packed `(count,status)` return.
+
+2. `get-unit-is-transporting(unit_id, output, capacity, state_output) -> i64`
+   - caller-owned transported-unit `i32` list;
+   - separate 4-byte little-endian boolean output preserves NativeInterface `isTransporting` exactly instead of deriving it from `count != 0`;
+   - standard packed `(count,status)` return.
+
+**Still missing:**
+
+- add both signatures to the handwritten executable import registry (`WasmCoreRegistry.h`) with the correct environment mask;
+- add safe Rust guest wrappers, preferably in a small `units_info_variable.rs` module and re-export it from `lib.rs`;
+- decide the wrapper result shape for `GetUnitIsTransporting` so the explicit boolean and `BufferFill`/count status are both preserved;
+- compile/test this batch locally.
+
+Do this before starting another API family.
+
+## 3. Rust Core guest SDK
+
+A new workspace crate exists at:
+
+`rust/crates/spring-wasm-core/`
+
+It is `no_std` first and exposes safe wrappers over the raw Core ABI. Unsafe pointer conversion is contained at the transport boundary.
+
+Current handwritten SDK modules include:
+
+- `benchmark.rs`
+- `config.rs`
+- `messages.rs`
+- `profiling.rs`
+- `rules_params.rs`
+- `terrain.rs`
+- `unit_control.rs`
+- `unit_defs.rs`
+- `units_commands.rs`
+- `units_pieces.rs`
+- `units_query.rs`
+- `units_query_borrowed.rs`
+
+`lib.rs` also contains the basic UnitsInfo scalar/fixed wrappers and callin export macros.
+
+Public ergonomic allocating APIs may exist behind `alloc`, but performance-sensitive APIs should retain `_into`/borrowed forms so callers can reuse memory.
+
+There is also a C Core SDK header at:
+
+`rts/wasm/sdk/core/spring_wasm_core.h`
+
+Rust is the first-class guest SDK direction, but the built engine and end users must not require Rust merely to run Core modules.
+
+## 4. Core code generation
+
+`spring-native-codegen` gained a Core ABI generation pipeline.
 
 Important files:
 
-- `render_core_wasm.rs`: runtime-neutral Core ABI plan.
-- `render_core_wasm_host.rs`: direct/fixed host bindings.
-- `render_core_wasm_option_host.rs`: fixed `option<T>` bindings.
-- `render_core_wasm_variable_host.rs`: variable-input scaffolding.
-- `render_core_wasm_variable_output_host.rs`: caller-owned variable-output bindings.
-- `render_core_wasm_variable_io_host.rs`: combined variable-I/O scaffolding.
-- `render_core_wasm_registry.rs`: executable fast-path registry and coverage report.
+- `render_core_wasm.rs` — Core planning/model inventory.
+- `render_core_wasm_callins.rs` — Core callin planning.
+- `render_core_wasm_host.rs` — direct/fixed host bindings.
+- `render_core_wasm_option_host.rs` — fixed `option<T>` bindings.
+- `render_core_wasm_variable_host.rs` — variable-input scaffolding.
+- `render_core_wasm_variable_output_host.rs` — caller-owned variable-output generation.
+- `render_core_wasm_variable_io_host.rs` — combined variable-I/O scaffolding.
+- `render_core_wasm_registry.rs` — executable Core registry and coverage report.
+- `render_core_wasm_guest.rs` — generated Rust guest bindings.
 
-Generated variable-input and variable-I/O translation units still exist as implementation scaffolding, but their current forms allocate/copy host vectors. They are therefore **not advertised by the generated executable registry**.
+`spring-api-codegen` now emits, among other files:
 
-Generated production-executable classes are currently:
+- `core-abi.json`
+- `core-callin-plan.json`
+- `core-executable-coverage.json`
+- `WasmCoreAbiInventory.h`
+- `WasmCoreGeneratedRegistry.h`
+- generated Core host binding translation units/headers
+- generated Rust `core_generated.rs`
 
-- direct/fixed;
-- fixed option;
-- caller-owned variable output.
+Production policy is deliberately narrower than the broad ABI plan:
 
-Reviewed specialized bindings may expose variable-input APIs with a faster ABI and shadow generated bindings.
+- direct/fixed lowering may be executable;
+- fixed option lowering may be executable;
+- caller-owned variable output may be executable;
+- allocation-heavy generated variable-input/combined-I/O paths remain implementation scaffolding and must not be advertised as the production fast path merely because code can be generated.
 
-`spring-api-codegen` writes `core-executable-coverage.json`. Treat that as the executable fast-path coverage report. `core-abi.json` is a broader planning inventory and must not be interpreted as production parity.
+Reviewed handwritten bindings may shadow generated definitions when they implement a materially faster/safer ABI.
 
-## Variable input direction
+### Important generated-artifact state
 
-Benchmark-only imports measure the achievable Core floor for borrowed string and `f32[]` inputs: one unchecked Wasmtime import, normal range/budget validation, no host allocation and no copy.
+At this handoff, the repository's checked-in `rts/wasm/generated/` directory does **not** contain the new `WasmCoreGenerated*` artifacts or `core-abi.json`/Core coverage files even though the generator emits them and `verify_codegen.py` compares the complete generated output set.
 
-Production zero-copy input should only be enabled where the NativeInterface contract proves that the pointer is consumed synchronously and cannot be retained or used across re-entry. Until that is proven, conservative copies are a safety requirement even if benchmark ceiling numbers show a lower possible cost.
+This web session could not run the generator locally. A desktop agent should resolve this immediately rather than assuming generated Core coverage exists in the build.
 
-## Variable callins
+Recommended local sequence:
 
-Engine -> guest variable callins use one guest-owned scratch region. Do **not** call a guest allocator/reserve export for every event; that would add a second host -> guest crossing.
+```sh
+cargo run --manifest-path rust/Cargo.toml \
+  -p spring-native-codegen \
+  --bin spring-api-codegen -- \
+  --root . \
+  --output rts/wasm/generated \
+  --strict
 
-Implemented protocol:
+git diff -- rts/wasm/generated
+python3 rts/wasm/verify_codegen.py
+```
 
-- Guest optionally exports `spring:callin/scratch-info() -> i64` when it exports a variable callin.
-- Low 32 bits: guest-memory offset; high 32 bits: capacity.
-- Host resolves/calls it once during module binding and validates the entire range.
-- Hot path: host serializes into the cached guest-owned scratch region, then performs exactly one unchecked callin invocation.
-- Scratch size is guest/module-selected.
-- Oversize payloads currently fail instead of hiding an allocation-heavy slow path.
-- Shared scratch has an explicit re-entry guard.
+Inspect the generated diff before committing it. The generated executable registry must agree with what is actually compiled and safe to expose.
 
-Current representative wire shapes:
+CMake conditionally compiles generated direct/fixed, option, and variable-output Core translation units only when those generated files exist. Without checked-in/regenerated files, handwritten coverage is what the local build actually gets.
 
-- `AddConsoleLine`: 20-byte header containing two offset/length pairs and `level`, followed by message and section bytes.
-- `CommandNotify`: 24-byte fixed command header followed by packed little-endian `f32` params. Little-endian hosts use one bulk `memcpy`; big-endian hosts encode each float explicitly.
+## 5. Visibility, sync, safety and security behavior
 
-The benchmark guest compiles its 4 KiB scratch only for dedicated variable-callin variants so unrelated Core callin/DrawWorld working-set measurements are not contaminated by permanent scratch memory.
+### Visibility
 
-## Visibility policy
+`HostState` carries the real `WasmEnvironment`.
 
-Visibility is independent of sandbox security.
+`generated::ImportGuard` uses `WasmUiVisibility::ConditionalScopedContext`:
 
-Component callouts establish `WasmUiVisibility::ScopedContext` before reaching NativeInterface. Core must preserve the same game-information boundary.
+- UI modules install the correct restricted perspective;
+- rules/gaia pay no unnecessary visibility-context save/restore cost.
 
-`HostState` carries the module environment. Generated Core imports use `WasmUiVisibility::ConditionalScopedContext`, which installs a UI perspective only for UI modules and is a literal no-op otherwise. `ScopedContext(false)` is not equivalent to a no-op because it can reset an outer restricted perspective to full-read.
+The oldest specialized scalar `RegisterFastImports` path is intentionally skipped for UI, so it cannot shadow visibility-checked UI definitions. Other reviewed specialized bindings use `ImportGuard`, so UI visibility policy is applied there.
 
-The hand-specialized scalar imports remain registered only for non-UI modules. UI retains the generated visibility-checked definitions rather than shadowing them with legacy scalar fast callbacks. This intentionally keeps the rules/gaia absolute hostcall floor separate from the visibility-filtered UI cost.
+`UnitCreated` UI delivery is sanitized before guest dispatch: hidden teams suppress the event and hidden builder IDs are redacted to `-1`.
 
-`UnitCreated` UI delivery is sanitized before Core callin dispatch: invisible teams suppress the UI event; invisible builders are redacted to `-1`. Add equivalent native-query sanitizers as new Core UI callins are enabled; do not rely only on guest -> host import filtering.
+When adding new UI-visible Core APIs, compare them against the Component/NativeInterface visibility behavior explicitly. Do not assume import-level filtering alone is enough for engine->guest callins.
 
-## Sync policy
+### Sync
 
-Synced Core modules remain restricted:
+Synced Core policy includes:
 
-- deterministic host imports only;
-- no ambient clock/random/network/filesystem/process APIs;
-- no threads/shared memory;
+- deterministic imports only;
 - fixed non-growable memory (`max == min`);
-- no relaxed SIMD unless deterministic semantics are explicitly established;
+- no ambient clocks/random/network/filesystem/process authority;
+- no threads/shared memory;
+- no relaxed SIMD unless deterministic behavior is deliberately established;
 - deterministic floating-point configuration where cross-platform behavior requires it.
 
-If execution interruption becomes simulation-visible, deterministic fuel is preferable to timing-dependent epoch interruption. Do not enable fuel globally merely as sandbox hardening without measuring its execution cost.
+The profiling timer correction described above is an example of enforcing this policy even when a broader generated semantic mask is wrong.
 
-## Safety policy
+If execution interruption becomes simulation-visible, prefer deterministic fuel over timing-dependent epoch interruption. Measure fuel cost before enabling it globally.
 
-Safety means preventing guest/ABI misuse from crashing or corrupting the engine.
+### Safety
 
-Keep:
+Maintain:
 
-- guest pointer/count overflow checks;
-- linear-memory bounds checks;
-- exact import/export signature validation before unchecked calls;
-- result/status validation after unchecked calls;
-- re-entry guards for shared scratch/callback state;
-- validation/copy-before-mutation when an input lifetime is not proven;
-- traps converted into module faults rather than unchecked host failure.
+- exact import/export signature checks before unchecked Wasmtime calls;
+- pointer/count multiplication overflow checks;
+- guest linear-memory bounds checks;
+- deterministic little-endian decoding;
+- result/status validation;
+- re-entry protection for shared scratch/callback state;
+- copy-before-mutation where NativeInterface lifetime is not proven;
+- traps converted to module faults rather than host process failure.
 
-These are not "security" or "visibility" features. They are process correctness requirements.
+### Security
 
-## Security policy
+Core guests should have no WASI or ambient OS capability by default. Imports are an allow-list of engine capabilities. Do not add general filesystem/process/network/environment/native-FFI access.
 
-Security means preventing guest escape into arbitrary OS authority.
+## 6. Benchmark and test infrastructure added
 
-Default Core guests should have no WASI and no imports granting arbitrary:
+Major additions include:
 
-- filesystem access;
-- process creation/command execution;
-- raw host networking;
-- environment-variable access;
-- host clocks/randomness except deliberately designed APIs;
-- native-library loading or arbitrary FFI.
+- `test/native_api_parity/run_benchmarks_core.py`
+- `test/native_api_parity/run_variable_callins_core.py`
+- `test/native_api_parity/CORE_WASM_BENCHMARKS.md`
+- Core benchmark guest crates under `test/wasm_api/`
+- benchmark support in `rts/System/BenchmarkCallins.h`
+- common outer event timing in `rts/System/EventHandler.cpp`
 
-Use a strict import allow-list and rely on Wasmtime's Wasm sandbox for memory/control-flow isolation. If an additional defense adds meaningful recurring hot-path cost, benchmark it and make the hardening profile explicit/configurable where appropriate rather than conflating it with safety or visibility.
+The benchmark matrix keeps raw measurements for:
 
-## Benchmark policy
+- Lua
+- native
+- dynamic Component Model
+- typed Rust Component Model
+- Core Wasm
 
-Use `test/native_api_parity/run_benchmarks_core.py` for the established matrix. `test/native_api_parity/run_variable_callins_core.py` is the focused variable-callin runner.
+Decision ratios are intended for Lua/native/Core/dynamic-CM comparisons. Typed-CM remains a raw reference; do not manufacture a Typed-vs-Core product decision ratio simply because both values exist.
 
-Raw comparable backends remain:
+`core_ceiling_*` rows measure the optimized transport floor for distinct ABI shapes and are intentionally not semantic cross-backend parity rows.
 
-- Lua;
-- native;
-- dynamic Component Model;
-- typed Rust Component Model;
-- Core Wasm.
+Representative shapes already covered include scalar/fixed calls, string/list outputs, reused large lists, nested outputs, spatial queries, borrowed inputs, variable callins, callbacks, draw/cold-warm behavior, and memory-pressure variants.
 
-Decision ratios are only:
+Do not update generated benchmark result documents manually. Run the runner on an otherwise idle release build.
 
-- Lua vs native;
-- Lua vs Core;
-- Core vs native;
-- dynamic Component Model vs Core.
+## 7. Local verification state
 
-Do not add Typed-vs-Core decision ratios. The typed CM raw measurement remains for reference.
+The most important fact for takeover: **the latest Core expansion has not been compiled or run in this web session.** GitHub reported no status checks for the current head. Treat source review as useful but not as build verification.
 
-### Representative comparable API rows
+Run local verification before broadening the API further.
 
-Callouts should cover distinct ABI shapes rather than many near-duplicate APIs:
+### First-pass Rust/codegen checks
 
-- direct scalar;
-- fixed vector/record;
-- string result;
-- flat small list;
-- large/reused list;
-- nested list/record payload;
-- spatial list query;
-- mutating string/scalar call;
-- callback/re-entry path.
+```sh
+cargo fmt --manifest-path rust/Cargo.toml --all --check
+cargo test --manifest-path rust/Cargo.toml --workspace
 
-Callins should cover:
+cargo run --manifest-path rust/Cargo.toml \
+  -p spring-native-codegen \
+  --bin spring-api-codegen -- \
+  --root . \
+  --output rts/wasm/generated \
+  --strict
 
-- empty;
-- scalar (`GameFrame`/`Update`);
-- fixed multi-field record (`UnitCreated`);
-- fixed result (`UnitPreDamaged`, `AllowUnitCreation`);
-- variable string payload (`AddConsoleLine`);
-- fixed record + variable `f32[]` (`CommandNotify`);
-- missing export;
-- multi-module fan-out;
-- cold/warm `DrawWorld`.
+python3 rts/wasm/verify_codegen.py
+```
 
-Other profiles cover heightmap callbacks/regions, realistic workloads, memory behavior and drawing.
+### Engine/ASAN checks
 
-The focused variable runner currently records inner `callin_string` / `callin_command` rows. The recorder reserves `callin_string_event` / `callin_command_event` names for a future identical outer event boundary, but those outer rows are not wired yet. Do not present the inner ratio as strictly apples-to-apples: Lua excludes argument pushing while Core includes scratch lowering.
+The repository's Wasm CI uses:
 
-### Core transport-ceiling rows
+```sh
+./docker-build-v2/build.sh linux -DUSE_ASAN=ON
+./docker-build-v2/build.sh --compile linux -t check
+```
 
-`core_ceiling_*` rows are intentionally excluded from cross-backend validation/ratios because they measure optimized transport floors rather than identical high-level APIs.
+Use the equivalent local build if a faster native build workflow is already configured, but make sure the new C++ files are actually compiled with Wasmtime enabled.
 
-Current ceiling samples include fixed structs, borrowed string/f32-list inputs, reusable string/list/nested-list outputs and reusable spatial-list outputs.
+### Guest/parity checks
 
-These rows answer how close the implementation can get to the practical Core boundary floor when allocation/probing is amortized. Add new rows only for materially different ABI shapes.
+Follow `.github/workflows/wasm.yml` as the canonical current CI recipe. It includes:
 
-## Runtime/build facts
+- Rust workspace tests/formatting;
+- generated artifact verification;
+- ASAN engine build/tests;
+- guest fixture tests;
+- native parity harness;
+- Wasm parity harness;
+- release performance configuration and `wasm-performance` target.
 
-Main runtime files:
+For the focused variable callins, run:
 
-- `rts/WasmInterface/WasmCoreHost.{h,cpp}`
+```sh
+python3 test/native_api_parity/run_variable_callins_core.py \
+  --spring-headless /path/to/spring-headless
+```
+
+Use the outer event rows for Lua/Core decisions. Keep the inner rows diagnostic.
+
+### Historical failures to re-check, not blindly inherit
+
+Earlier local/CI work before the latest web edits had mentioned:
+
+- a `test_WasmAllocator` SIGILL inside JIT guest code;
+- gaia-synced probe/codegen drift.
+
+These may predate or be unrelated to the current changes. Reproduce them locally before treating them as current bugs.
+
+## 8. Immediate takeover order
+
+Do this in order unless a compiler failure forces a smaller detour.
+
+1. **Finish the current UnitsInfo variable batch**: registry signatures + Rust wrappers for nano pieces and transporting units.
+2. **Regenerate Core artifacts** into `rts/wasm/generated`, inspect the full diff, and make `verify_codegen.py` pass.
+3. **Compile the entire Rust workspace and engine with Wasmtime enabled.** Fix compiler/linker errors before adding API coverage.
+4. **Run the existing Wasm/ASAN/parity tests.** Separate sync, safety, security and UI-visibility failures when diagnosing them.
+5. **Run the focused variable-callin benchmark** and confirm the outer event rows behave as expected.
+6. **Run representative Core callout benchmarks**, especially raw fixed/scalar floor, reused list outputs, borrowed inputs, and DrawWorld cold/warm variants.
+7. Only after the above is green, continue expanding reviewed Core API coverage.
+
+## 9. How to choose the next API work
+
+Prefer API families in this order:
+
+- fixed/scalar APIs that generic Core codegen can safely own;
+- caller-owned simple list outputs;
+- borrowed simple list inputs with proven synchronous NativeInterface lifetime;
+- flat string/list-string representations with explicit reviewed layouts;
+- callback/re-entry APIs only with explicit lifetime and nesting behavior;
+- complex nested variable I/O last.
+
+Do not port APIs merely to increase a coverage percentage. The production Core registry should mean "reviewed executable fast path", not "the generator emitted something".
+
+When a generated implementation allocates/copies unnecessarily, either improve the generator for the whole ABI class or use a narrow handwritten binding that makes the performance/lifetime contract explicit.
+
+## 10. Key source map
+
+Core runtime / dispatch:
+
 - `rts/WasmInterface/WasmCoreAbi.{h,cpp}`
+- `rts/WasmInterface/WasmCoreBindings.{h,cpp}`
+- `rts/WasmInterface/WasmCoreHost.{h,cpp}`
+- `rts/WasmInterface/WasmCoreHostFastDispatch.cpp`
 - `rts/WasmInterface/WasmCoreValidation.{h,cpp}`
 - `rts/WasmInterface/WasmCoreRegistry.h`
+- `rts/WasmInterface/WasmInterfaceSystemCore.cpp`
+- `rts/NativeInterface/NativeInterfaceEventClient.cpp`
+
+ABI/support:
+
 - `rts/WasmInterface/WasmCoreGeneratedSupport.h`
 - `rts/WasmInterface/WasmCoreGuestInput.h`
 - `rts/WasmInterface/WasmCoreWire.h`
 - `rts/WasmInterface/WasmCoreVariableCallins.{h,cpp}`
-- `rts/WasmInterface/WasmInterfaceSystemCore.cpp`
 
-Specialized bindings cover benchmark-critical unit queries/info, unit definitions, commands/orders, terrain, Gfx, profiling, RulesParams and messaging.
+Specialized bindings:
 
-Synced memory is fixed, so its cached Wasmtime base/size is stable. Unsynced memory helpers refresh the current base/size when necessary.
+- `WasmCoreUnitsQueryBindings.cpp`
+- `WasmCoreUnitsQueryBorrowedBindings.cpp`
+- `WasmCoreUnitsInfoVariableBindings.cpp`
+- `WasmCoreUnitDefsBindings.cpp`
+- `WasmCoreUnitsCommandsBindings.cpp`
+- `WasmCoreUnitsPiecesBindings.cpp`
+- `WasmCoreUnitControlBindings.cpp`
+- `WasmCoreTerrainControlBindings.cpp`
+- `WasmCoreTerrainReadBindings.cpp`
+- `WasmCoreGfxBindings.cpp`
+- `WasmCoreProfilingBindings.cpp`
+- `WasmCoreMessagesBindings.cpp`
+- `WasmCoreRulesParamsBindings.cpp`
+- `WasmCoreConfigBindings.cpp`
+- `WasmCoreBenchmarkBindings.cpp`
 
-## Verification state
+Codegen:
 
-This branch has been edited and statically audited through the GitHub connector, but this session does not have a usable local engine checkout and no branch CI/workflow run has been observed. The current state is therefore **not build-verified**.
+- `rust/crates/spring-native-codegen/src/render_core_wasm*.rs`
+- `rust/crates/spring-native-codegen/src/bin/spring-api-codegen.rs`
 
-Do not manually edit generated benchmark results. Run the release benchmark suite on an otherwise idle machine before drawing performance conclusions.
+Guest SDK:
 
-Immediate verification order:
+- `rust/crates/spring-wasm-core/`
+- `rts/wasm/sdk/core/spring_wasm_core.h`
 
-1. compile after the ordered `std::span` dispatcher conversion;
-2. run codegen verification;
-3. run the fixed Core callin suite and raw hostcall floor to catch dispatch overhead regressions;
-4. run UI visibility tests separately from sandbox/security tests;
-5. run process-safety/invalid-pointer/trap tests;
-6. run synced cross-platform determinism/hash tests;
-7. run the focused variable-callin benchmark, treating inner rows as diagnostic until outer event rows are wired;
-8. rerun cold/warm/64 MiB-trash DrawWorld measurements.
+Benchmarks/tests:
 
-Known carried-over verification items still need retesting in a real build:
+- `test/native_api_parity/run_benchmarks_core.py`
+- `test/native_api_parity/run_variable_callins_core.py`
+- `test/wasm_api/core_benchmark_guest/`
+- `test/wasm_api/core_benchmark_suite_guest/`
+- `.github/workflows/wasm.yml`
 
-- ASAN/CTest have not been run against this Core expansion.
-- `test_WasmAllocator` previously had a SIGILL inside JIT guest code.
-- `verify_codegen.py` previously reported gaia-synced probe drift predating this work.
+Design/reference docs:
+
+- `rts/wasm/docs/impl/core_abi_contract.md`
+- `rts/wasm/docs/impl/core_fast_abi.md`
+- `rts/wasm/docs/impl/core_benchmark_matrix.md`
+
+## 11. Invariants not to regress
+
+- Core supported callins run before `WasmValue` serialization.
+- Do not reintroduce per-call heap allocation into ordered Core callin fan-out.
+- Do not perform an extra guest allocator call for variable callins.
+- Do not use native C++ struct layout as a wire ABI.
+- Do not expose nondeterministic profiling/timers to synced guests.
+- Do not bypass UI visibility filtering for speed.
+- Do not treat visibility as sandbox security or safety as security.
+- Do not advertise allocation-heavy generated variable-input scaffolding as production-fast coverage.
+- Do not partially fill list results when the caller buffer is too small; report required size and retry.
+- Do not replace the explicit `GetUnitIsTransporting` boolean with `count != 0`.
+- Do not restore the redundant NativeInterface scratch copy for Core `GetUnitScriptNames`.
+- Do not publish variable-callin inner-timing ratios as apples-to-apples; use the common outer event rows.
+- Do not claim the current checkout is verified until it has been regenerated, compiled and tested locally.
