@@ -151,6 +151,18 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	if (!ResolveCoreDispatchSide(callin, synced))
 		return true;
 
+	std::uint32_t coreEnvironmentMask = 0;
+	for (const CoreModuleRecord& module : system->coreModules) {
+		coreEnvironmentMask |=
+			1u << static_cast<std::uint32_t>(module.descriptor.environment);
+	}
+	if (coreEnvironmentMask == 0)
+		return true;
+	const auto hasCoreEnvironment = [coreEnvironmentMask](WasmEnvironment environment) {
+		const std::uint32_t bit = 1u << static_cast<std::uint32_t>(environment);
+		return (coreEnvironmentMask & bit) != 0;
+	};
+
 	static constexpr std::array<WasmEnvironment, 2> syncedEnvironments{
 		WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced};
 	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
@@ -160,12 +172,12 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 	std::size_t invocationCount = 0;
 	const auto& primary = synced ? syncedEnvironments : unsyncedEnvironments;
 	for (const WasmEnvironment environment : primary) {
-		if (system->HasCoreModules(environment))
+		if (hasCoreEnvironment(environment))
 			invocations[invocationCount++] = {environment, query, true};
 	}
 
 	std::optional<UnitCreatedQuery> uiUnitCreated;
-	if (system->HasCoreModules(WasmEnvironment::UI)) {
+	if (hasCoreEnvironment(WasmEnvironment::UI)) {
 		bool includeUi = true;
 		const void* uiQuery = query;
 		if (callin == WasmCoreCallin::UnitCreated) {
