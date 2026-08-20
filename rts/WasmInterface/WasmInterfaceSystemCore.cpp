@@ -136,8 +136,20 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 
 	if (invocations.empty())
 		return true;
-	return system->DispatchCoreCallin(name, invocations, nullptr, nativeResult,
-		handled, error);
+
+	const bool success = system->DispatchCoreCallin(name, invocations, nullptr,
+		nativeResult, handled, error);
+	if (!synced) {
+		// Unsynced faults are isolated/removable. Keep the system's descriptor
+		// inventory in sync with the host registry immediately so a faulted UI or
+		// unsynced gadget cannot remain visible to HasCoreModules/ModuleCount.
+		WasmCoreHost::RemoveFaultedUnsynced();
+		system->coreModules.erase(std::remove_if(system->coreModules.begin(),
+			system->coreModules.end(), [](const CoreModuleRecord& module) {
+				return !WasmCoreHost::HasModule(module.descriptor.name);
+			}), system->coreModules.end());
+	}
+	return success;
 }
 
 bool WasmInterfaceSystem::HasCoreModules(WasmEnvironment environment) const
