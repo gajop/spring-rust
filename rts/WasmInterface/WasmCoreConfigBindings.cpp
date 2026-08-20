@@ -28,6 +28,18 @@ void WriteU32LE(std::uint8_t* output, std::uint32_t value)
 	output[3] = static_cast<std::uint8_t>(value >> 24);
 }
 
+bool RangesOverlap(std::uint32_t firstPtr, std::size_t firstBytes,
+	std::uint32_t secondPtr, std::size_t secondBytes)
+{
+	if (firstBytes == 0 || secondBytes == 0)
+		return false;
+	const std::uint64_t firstBegin = firstPtr;
+	const std::uint64_t secondBegin = secondPtr;
+	const std::uint64_t firstEnd = firstBegin + firstBytes;
+	const std::uint64_t secondEnd = secondBegin + secondBytes;
+	return firstBegin < secondEnd && secondBegin < firstEnd;
+}
+
 wasm_trap_t* GetLogSections(void* environment, wasmtime_caller_t* caller,
 	wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -67,6 +79,12 @@ wasm_trap_t* GetLogSections(void* environment, wasmtime_caller_t* caller,
 		!state->memory.MutableView(bytesPtr, bytesCapacity, bytes) ||
 		!state->memory.MutableView(metaPtr, STRING_LIST_META_BYTES, meta)) {
 		slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+		return nullptr;
+	}
+	if (RangesOverlap(descriptorPtr, descriptorBytes, bytesPtr, bytesCapacity) ||
+		RangesOverlap(descriptorPtr, descriptorBytes, metaPtr, STRING_LIST_META_BYTES) ||
+		RangesOverlap(bytesPtr, bytesCapacity, metaPtr, STRING_LIST_META_BYTES)) {
+		slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
 		return nullptr;
 	}
 
