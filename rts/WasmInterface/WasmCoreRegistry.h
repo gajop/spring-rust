@@ -7,6 +7,11 @@
 
 #include "WasmEnvironment.h"
 
+#if __has_include("../wasm/generated/WasmCoreGeneratedRegistry.h")
+#include "../wasm/generated/WasmCoreGeneratedRegistry.h"
+#define RECOIL_WASM_CORE_GENERATED_REGISTRY 1
+#endif
+
 namespace recoil::wasm::core {
 
 struct ImportDescriptor {
@@ -14,6 +19,12 @@ struct ImportDescriptor {
 	std::string_view name;
 	std::string_view signature;
 	std::uint32_t environmentMask;
+};
+
+struct ImportLookup {
+	std::string_view signature;
+	std::uint32_t environmentMask = 0;
+	bool found = false;
 };
 
 inline constexpr std::string_view UnitsInfoModule = "spring:units-info";
@@ -97,23 +108,27 @@ inline constexpr ImportDescriptor kImports[] = {
 	{TerrainModule, "get-ground-orig-height", "f32,f32->i64", AllEnvironmentMask},
 };
 
-inline const ImportDescriptor* FindImport(std::string_view module, std::string_view name)
+inline ImportLookup LookupImport(std::string_view module, std::string_view name)
 {
 	for (const ImportDescriptor& import : kImports) {
 		if (import.module == module && import.name == name)
-			return &import;
+			return {import.signature, import.environmentMask, true};
 	}
-	return nullptr;
+#if defined(RECOIL_WASM_CORE_GENERATED_REGISTRY)
+	if (const auto* import = generated_registry::Find(module, name); import != nullptr)
+		return {import->signature, import->environmentMask, true};
+#endif
+	return {};
 }
 
 inline bool ImportAllowed(std::string_view module, std::string_view name,
 	WasmEnvironment environment)
 {
-	const ImportDescriptor* import = FindImport(module, name);
-	if (import == nullptr)
+	const ImportLookup import = LookupImport(module, name);
+	if (!import.found)
 		return false;
 	const std::uint32_t bit = 1u << static_cast<std::uint32_t>(environment);
-	return (import->environmentMask & bit) != 0;
+	return (import.environmentMask & bit) != 0;
 }
 
 } // namespace recoil::wasm::core
