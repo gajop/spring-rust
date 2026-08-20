@@ -3,6 +3,7 @@
 #include "WasmCoreValidation.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -329,10 +330,14 @@ bool ValidateCodeSection(Reader& section, const WasmRuntimeConfig& config,
 } // namespace
 
 WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
-	WasmEnvironment environment, std::uint32_t interfaceVersion,
+	WasmEnvironment environment, std::string_view interfaceVersion,
 	const WasmRuntimeConfig& config)
 {
 	WasmValidationResult result;
+	if (interfaceVersion != RECOIL_WASM_INTERFACE_VERSION_NUMBER) {
+		result.error = "unsupported Spring Core ABI interface version";
+		return result;
+	}
 	if (bytes.size() < 8 || !std::equal(bytes.begin(), bytes.begin() + 4,
 			std::array<std::uint8_t, 4>{0x00, 0x61, 0x73, 0x6d}.begin())) {
 		result.error = "not a WebAssembly Core module";
@@ -394,10 +399,8 @@ WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
 	}
 	result.valid = true;
 	result.identity.sha512 = HashModule(bytes);
-	result.identity.interfaceVersion = interfaceVersion;
-	result.identity.environment = environment;
-	result.identity.imports = std::move(imports);
-	result.identity.exports = std::move(exports);
+	result.identity.byteSize = bytes.size();
+	result.imports = std::move(imports);
 	return result;
 }
 
