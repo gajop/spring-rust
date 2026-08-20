@@ -92,6 +92,11 @@ inline constexpr ImportDescriptor kImports[] = {
 
 	{UnitsCommandsModule, "get-unit-command-count", "i32->i64", AllEnvironmentMask},
 	{UnitsCommandsModule, "get-unit-commands", "i32,i32,i32,i32->i64", AllEnvironmentMask},
+	// Synced order callouts borrow aligned guest i32/f32 arrays directly for the
+	// duration of the native call. Synced Core memory is fixed/non-growable, so
+	// these imports need no host vector or copy.
+	{UnitsCommandsModule, "give-order", "i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
+	{UnitsCommandsModule, "give-order-to-unit-map", "i32,i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
 
 	// Reviewed flat list<string> result. The descriptor table and packed bytes
 	// are guest-owned; Core never materializes vector<string> or one allocation
