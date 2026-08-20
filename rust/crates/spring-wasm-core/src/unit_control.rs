@@ -1,5 +1,9 @@
 // UnitControl portion of the Spring Core-Wasm guest SDK.
 
+#[path = "profiling.rs"]
+mod profiling;
+pub use profiling::*;
+
 use super::{ApiError, ErrorCode, Result};
 
 #[cfg(target_arch = "wasm32")]
@@ -38,8 +42,6 @@ pub fn give_order_to_unit(
             debug_assert!(pointer <= u32::MAX as usize);
             (pointer as u32 as i32, params.len() as u32 as i32)
         };
-        // SAFETY: params remain live for the synchronous call. The host checks
-        // and copies the full f32 range before invoking mutating engine code.
         let packed = unsafe {
             raw::give_order_to_unit(
                 unit_id,
