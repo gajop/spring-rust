@@ -11,6 +11,7 @@
 #include "NativeInterface/api/Callins.h"
 #include "System/Log/ILog.h"
 #include "WasmCoreHost.h"
+#include "WasmInterfaceSystem.h"
 
 namespace {
 
@@ -157,8 +158,22 @@ bool WasmTypedHost::AnyActive()
 bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query, void* result,
 	std::string& error)
 {
-	if (WasmCoreHost::AnyActive() && WasmCoreHost::DispatchCallin(name, query, result, error))
-		return true;
+	if (WasmCoreHost::AnyActive()) {
+		bool coreHandled = false;
+		std::string coreError;
+		if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
+				name, query, result, coreHandled, coreError)) {
+			error = coreError.empty() ? "ordered Core Wasm callin dispatch failed" : coreError;
+			// A failing Core callin is still handled: do not fall through and
+			// invoke a second transport for the same engine event.
+			return true;
+		}
+		if (coreHandled) {
+			if (!coreError.empty())
+				error = coreError;
+			return true;
+		}
+	}
 	if (query == nullptr || Hosts().empty())
 		return false;
 
