@@ -38,6 +38,14 @@ bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* stat
 }
 #endif
 
+#if __has_include("../wasm/generated/WasmCoreGeneratedVariableOutputBindings.h")
+#define RECOIL_WASM_CORE_GENERATED_VARIABLE_OUTPUT_BINDINGS 1
+namespace generated {
+bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
+}
+#endif
+
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
 bool RegisterUnitsQueryImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
@@ -87,6 +95,10 @@ public:
 #endif
 #if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_BINDINGS)
 		if (!generated::RegisterGeneratedVariableImports(linker, &host, error))
+			return false;
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_VARIABLE_OUTPUT_BINDINGS)
+		if (!generated::RegisterGeneratedVariableOutputImports(linker, &host, error))
 			return false;
 #endif
 		if (!RegisterFastImports(linker, &host, error))
