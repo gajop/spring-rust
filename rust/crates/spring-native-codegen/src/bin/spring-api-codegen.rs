@@ -17,6 +17,8 @@ mod model {
 }
 #[path = "../render_core_wasm.rs"]
 mod render_core_wasm;
+#[path = "../render_core_wasm_callins.rs"]
+mod render_core_wasm_callins;
 #[path = "../render_core_wasm_host.rs"]
 mod render_core_wasm_host;
 #[path = "../render_core_wasm_option_host.rs"]
@@ -140,13 +142,17 @@ fn run() -> Result<()> {
         &(serde_json::to_string_pretty(&model.callins)? + "\n"),
     )?;
 
-    // Runtime-neutral Core ABI plan plus executable fixed, option and variable
-    // callback subsets. The validator registry is derived only from callbacks
-    // that meet the current fast-path policy, never from the broader planning
-    // inventory or allocation-heavy variable-input scaffolding.
+    // Runtime-neutral Core ABI plans plus executable callback coverage. The
+    // validator registry is derived only from callbacks that meet the current
+    // fast-path policy, never from the broader planning inventory or known
+    // allocation-heavy variable-input scaffolding.
     write(
         &arguments.output.join("core-abi.json"),
         &render_core_wasm::render_json(&model)?,
+    )?;
+    write(
+        &arguments.output.join("core-callin-plan.json"),
+        &render_core_wasm_callins::render_json(&model)?,
     )?;
     write(
         &arguments.output.join("WasmCoreAbiInventory.h"),
@@ -176,6 +182,8 @@ fn run() -> Result<()> {
         &arguments.output.join("WasmCoreGeneratedOptionBindings.cpp"),
         &render_core_wasm_option_host::render_cpp(&model),
     )?;
+    // Keep emitting variable-input/combined-I/O source as implementation
+    // scaffolding even though the production build currently excludes it.
     write(
         &arguments.output.join("WasmCoreGeneratedVariableBindings.h"),
         &render_core_wasm_variable_host::render_header(),
