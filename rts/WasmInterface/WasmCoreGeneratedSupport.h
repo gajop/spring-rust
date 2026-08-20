@@ -97,6 +97,11 @@ inline bool EnsureMemory(HostState* state, wasmtime_caller_t* caller, std::strin
 	return state->memory.BindFromCaller(caller, error);
 }
 
+inline bool CheckResultBytes(const HostState* state, std::size_t bytes)
+{
+	return state == nullptr || state->budget == nullptr || state->budget->CheckResultSize(bytes);
+}
+
 class CallbackGuard {
 public:
 	explicit CallbackGuard(WasmExecutionBudget* executionBudget)
