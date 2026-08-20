@@ -102,6 +102,16 @@ public:
 	bool WriteI32SliceLE(std::uint32_t offset, std::span<const std::int32_t> values) const;
 	bool ReadF32SliceLE(std::uint32_t offset, std::span<float> values) const;
 
+	bool View(std::uint32_t offset, std::size_t bytes,
+		std::span<const std::uint8_t>& view) const
+	{
+		std::uint8_t* base = nullptr;
+		if (!Range(offset, bytes, base))
+			return false;
+		view = std::span<const std::uint8_t>(base, bytes);
+		return true;
+	}
+
 	bool MutableView(std::uint32_t offset, std::size_t bytes,
 		std::span<std::uint8_t>& view) const
 	{
