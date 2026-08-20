@@ -38,6 +38,7 @@ inline constexpr std::string_view ProfilingModule = "spring:profiling";
 inline constexpr std::string_view MessagesModule = "spring:messages";
 inline constexpr std::string_view RulesParamsModule = "spring:rules-params";
 inline constexpr std::string_view TerrainModule = "spring:terrain";
+inline constexpr std::string_view ConfigModule = "spring:config";
 inline constexpr std::string_view BenchmarkModule = "spring:benchmark";
 
 inline constexpr std::string_view GameFrameExport = "spring:callin/game-frame";
@@ -108,8 +109,11 @@ inline constexpr ImportDescriptor kImports[] = {
 	{RulesParamsModule, "get-unit-rules-param-f32", "i32,i32,i32->i64", AllEnvironmentMask},
 	{TerrainModule, "get-ground-orig-height", "f32,f32->i64", AllEnvironmentMask},
 
-	// Benchmark-only imports that expose the best-case variable-input boundary
-	// with normal budget and guest-memory range validation but no allocation.
+	// Flat list<string> ABI: descriptor table + packed bytes + 8-byte metadata
+	// {required_count, required_bytes}. This deliberately avoids host string
+	// ownership and per-element allocations.
+	{ConfigModule, "get-log-sections-flat", "i32,i32,i32,i32,i32->i32", UnsyncedEnvironmentMask},
+
 	{BenchmarkModule, "consume-string", "i32,i32->i64", AllEnvironmentMask},
 	{BenchmarkModule, "consume-f32-list", "i32,i32->i64", AllEnvironmentMask},
 };
