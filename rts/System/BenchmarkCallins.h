@@ -47,18 +47,25 @@ inline bool IsEnabled()
 	return enabled;
 }
 
-inline bool IsBackend(std::string_view backend)
+inline const std::string& ConfiguredBackend()
 {
 	static const std::string configured = [] {
 		const char* value = std::getenv("SPRING_NATIVE_BENCHMARK_BACKEND");
 		return value == nullptr ? std::string{} : std::string(value);
 	}();
+	return configured;
+}
+
+inline bool IsBackend(std::string_view backend)
+{
+	const std::string& configured = ConfiguredBackend();
 	if (configured == backend)
 		return true;
-	// The typed Rust host is a second Wasm transport reached through the same
-	// call sites, so it records the same "wasm" tokens.  The rows are told
-	// apart by the backend label Flush writes, not by the token.
-	return backend == "wasm" && configured == "wasm_rust_typed";
+	// Both Wasm alternate hosts are reached through the same engine call sites
+	// and therefore record the same "wasm" token. Flush labels the row with the
+	// configured transport so Component-typed and Core remain distinct columns.
+	return backend == "wasm" &&
+		(configured == "wasm_rust_typed" || configured == "wasm_core");
 }
 
 inline bool IsCase(std::string_view benchmarkCase)
@@ -111,6 +118,13 @@ inline bool IsTrackedTest(std::string_view test)
 		return test == "callin_unimplemented";
 	if (IsVariant("fourmodules"))
 		return test == "callin_4modules";
+	if (IsVariant("consoleline"))
+		return test == "callin_string";
+	if (IsVariant("commandnotify"))
+		return test == "callin_command";
+	if (IsVariant("variable"))
+		return test == "callin_string" || test == "callin_command" ||
+			test == "callin_string_event" || test == "callin_command_event";
 	// Update is dispatched unsynced-only. Its row comes from a dedicated run
 	// against an unsynced guest; recording it elsewhere times an engine path
 	// that reaches no module.
@@ -139,11 +153,21 @@ inline std::string_view EventTestName(std::string_view event)
 		return "callin_unitpredamaged";
 	if (event == "AllowUnitCreation")
 		return "callin_allowunitcreation";
+	if (event == "AddConsoleLine")
+		return "callin_string";
+	if (event == "CommandNotify")
+		return "callin_command";
 	return {};
 }
 
 inline Token Begin(std::string_view backend, std::string_view test)
 {
+	// Lua's generic call wrapper sees source event names. Canonicalize them here
+	// so new representative callins do not need one-off timing branches in the
+	// large LuaHandle implementation.
+	const std::string_view eventTest = EventTestName(test);
+	if (!eventTest.empty())
+		test = eventTest;
 	if (!IsEnabled() || !IsBackend(backend) || !IsTrackedTest(test))
 		return {};
 	return {
@@ -151,6 +175,18 @@ inline Token Begin(std::string_view backend, std::string_view test)
 		.start = Clock::now(),
 		.active = true,
 	};
+}
+
+inline Token BeginConfigured(std::string_view test)
+{
+	const std::string& backend = ConfiguredBackend();
+	if (backend == "lua")
+		return Begin("lua", test);
+	if (backend == "native")
+		return Begin("native", test);
+	if (backend == "wasm" || backend == "wasm_rust_typed" || backend == "wasm_core")
+		return Begin("wasm", test);
+	return {};
 }
 
 inline void End(Token token)

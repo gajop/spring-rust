@@ -2,14 +2,10 @@
 
 #pragma once
 
-// Typed Rust Wasmtime host, loaded beside the dynamic C API path rather than
-// replacing it: the benchmark table compares the two transports on the same
-// guests in the same run, so both must exist at once.
-//
-// The library is built on the host by test/native_api_parity/run_benchmarks.py
-// and loaded with dlopen, matching how the native benchmark module is loaded.
-// The engine build image has no cargo, so linking it statically is not an
-// option.
+// Alternate Wasm hosts used by the benchmark suite. The Rust typed Component
+// host remains dlopen'd, while the C++ Core host is built into the engine. The
+// public static seam multiplexes both so NativeInterfaceEventClient needs only
+// one fast-path hook.
 
 #include <cstddef>
 #include <cstdint>
@@ -65,8 +61,6 @@ struct SpringTypedShimTable {
 	std::int32_t (*gfx_begin_end)(void*, std::uint32_t, void (*)(void*), void*);
 };
 
-// Selects which world the host instantiates. The three benchmark guests export
-// different callin interfaces, so this is not derivable from the bytes.
 enum class SpringTypedWorld : std::uint8_t {
 	RulesSynced = 0,
 	RulesUnsynced = 1,
@@ -75,9 +69,6 @@ enum class SpringTypedWorld : std::uint8_t {
 
 const SpringTypedShimTable& TypedHostShimTable();
 
-// The dlopen'd library and its resolved entry points, shared by every host.
-// Separated from the hosts themselves so loading four modules opens the library
-// once and each module still gets its own component instance.
 struct SpringTypedHostLibrary {
 	void* handle = nullptr;
 
@@ -98,28 +89,20 @@ struct SpringTypedHostLibrary {
 	std::int32_t (*callinDrawWorld)(void*, char**) = nullptr;
 };
 
-// One host per loaded Wasm module, mirroring how the C API path gives each
-// module its own instance. A callin fans out to all of them, so a four-module
-// run costs four guest entries rather than one reported as four.
 class WasmTypedHost {
 public:
-	// Enabled by SPRING_WASM_TYPED_HOST. Off by default so the C API path is
-	// what every non-benchmark run uses.
+	// True when either benchmark transport is selected. NativeInterfaceEventClient
+	// uses this as the single alternate-host gate.
 	static bool Enabled();
+	// True only for the Rust typed Component host.
+	static bool TypedEnabled();
 
-	// The host is owned by the registry and keyed by module name, so it dies
-	// with the module rather than with the process.
 	static bool Load(std::string moduleName,
 		const std::vector<std::uint8_t>& componentBytes,
 		NativeInterface* nativeInterface, SpringTypedWorld world, std::string& error);
 	static void Unload(std::string_view moduleName);
 	static void UnloadAll();
 	static bool AnyActive();
-
-	// Fans out to every loaded host. Returns false when the callin has no typed
-	// entry point, so the caller can fall back; `query` is the native callin
-	// query struct. Result-carrying callins let the last host win, matching
-	// nothing in particular because the benchmark only fans out a void callin.
 	static bool DispatchCallin(std::string_view name, const void* query, void* result,
 		std::string& error);
 
@@ -132,8 +115,6 @@ private:
 	WasmTypedHost(std::string moduleName, void* host)
 		: moduleName(std::move(moduleName)), host(host) {}
 
-	// Resolved once per engine event rather than once per host, so a
-	// four-module fan-out walks the name chain once.
 	enum class Callin : std::uint8_t {
 		None,
 		GameFrame,

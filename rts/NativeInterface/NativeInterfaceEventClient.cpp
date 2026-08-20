@@ -482,6 +482,26 @@ NativeInterfaceEventClient::NativeInterfaceEventClient(NativeInterface* nativeIn
 bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 	const void* query, bool synced, WasmValue* result, void* nativeResult)
 {
+	// Core is the production transport. Supported Core callins run before the
+	// historical typed transport and before any WasmValue serialization.
+	if (m_wasmSystem != nullptr) {
+		bool coreHandled = false;
+		std::string coreError;
+		if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
+				name, query, nativeResult, coreHandled, coreError)) {
+			if (!coreError.empty()) {
+				LOG_L(L_ERROR, "Core Wasm callin %s failed: %s",
+					std::string(name).c_str(), coreError.c_str());
+			}
+			return false;
+		}
+		if (coreHandled) {
+			if (result != nullptr)
+				*result = WasmValue::Unit();
+			return nativeResult != nullptr;
+		}
+	}
+
 	// The typed Rust host is an alternative transport for the same guests, so
 	// it replaces this dispatch rather than running alongside it.  It handles
 	// only the callins the benchmark table needs and reports false otherwise,
@@ -491,13 +511,25 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 		if (WasmTypedHost::DispatchCallin(name, query, nativeResult, typedError)) {
 			if (!typedError.empty())
 				LOG_L(L_WARNING, "%s", typedError.c_str());
-			// The result, when there is one, went straight into `nativeResult`;
-			// there is no WasmValue to read.
-			return false;
+			// Direct transports write value results into nativeResult. Mark a
+			// supplied WasmValue as Unit so callers can distinguish that case.
+			if (result != nullptr)
+				*result = WasmValue::Unit();
+			return nativeResult != nullptr;
 		}
 	}
 
-	if (m_wasmSystem == nullptr || m_wasmSystem->ModuleCount() == 0)
+	if (m_wasmSystem == nullptr)
+		return false;
+
+	static constexpr std::array<WasmEnvironment, 2> syncedEnvironments{
+		WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced};
+	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
+		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
+	const auto& primaryEnvironments = synced ? syncedEnvironments : unsyncedEnvironments;
+	if (!m_wasmSystem->HasComponentModules(primaryEnvironments[0]) &&
+		!m_wasmSystem->HasComponentModules(primaryEnvironments[1]) &&
+		!m_wasmSystem->HasComponentModules(WasmEnvironment::UI))
 		return false;
 
 	WasmValue value;
@@ -516,20 +548,15 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 	// that are dispatched from the engine's synced path (for example
 	// GameStart). Give it an owned, visibility-filtered copy of the query;
 	// the generated callin environment mask remains authoritative.
-	static constexpr std::array<WasmEnvironment, 2> syncedEnvironments{
-		WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced};
-	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
-		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
 	std::vector<WasmInterfaceSystem::CallinInvocation> invocations;
 	invocations.reserve(3);
-	// An environment with no module needs no query copy at all.
-	for (const WasmEnvironment environment : synced
-		? syncedEnvironments : unsyncedEnvironments) {
-		if (!m_wasmSystem->HasModules(environment))
+	// An environment with no Component module needs no query copy at all.
+	for (const WasmEnvironment environment : primaryEnvironments) {
+		if (!m_wasmSystem->HasComponentModules(environment))
 			continue;
 		invocations.push_back({environment, {value}});
 	}
-	if (m_wasmSystem->HasModules(WasmEnvironment::UI)) {
+	if (m_wasmSystem->HasComponentModules(WasmEnvironment::UI)) {
 		WasmUiVisibility::ScopedContext uiContext(true);
 		WasmValue uiValue = value;
 		// EventHandler discards return values from unsynced Lua clients for
@@ -558,8 +585,18 @@ bool NativeInterfaceEventClient::DispatchWasmBoolCallin(std::string_view name,
 	const void* query, bool synced, bool& result)
 {
 	WasmValue wasmResult;
-	if (!DispatchWasmCallin(name, query, synced, &wasmResult))
+	BoolCallinResult directResult = {.error = nullptr, .value = false};
+	if (!DispatchWasmCallin(name, query, synced, &wasmResult, &directResult))
 		return false;
+	if (wasmResult.IsUnit()) {
+		if (directResult.error != nullptr) {
+			LOG_L(L_WARNING, "Wasm callin %s returned a direct boolean error: %s",
+				std::string(name).c_str(), directResult.error->message);
+			return false;
+		}
+		result = directResult.value;
+		return true;
+	}
 	const auto* record = std::get_if<WasmValueRecord>(&wasmResult.storage);
 	if (record == nullptr) {
 		LOG_L(L_WARNING, "Wasm callin %s returned a non-record boolean result",
@@ -1469,10 +1506,10 @@ std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDe
 	};
 	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_allowunitcreation");
 	WasmValue wasmResult;
-	// The typed Rust host writes here instead of into wasmResult.
-	AllowUnitCreationResult rustResult = {.allow = true, .dropOrder = true};
+	// Core and the typed reference transport write here instead of wasmResult.
+	AllowUnitCreationResult directResult = {.allow = true, .dropOrder = true};
 	const bool hasWasmResult = DispatchWasmCallin("AllowUnitCreation", &query, true,
-		&wasmResult, &rustResult);
+		&wasmResult, &directResult);
 	spring::benchmark_callins::End(wasmToken);
 	bool wasmAllow = true;
 	bool wasmDropOrder = true;
@@ -1480,9 +1517,9 @@ std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDe
 	bool hasWasmFields = wasmRecord != nullptr &&
 		ReadWasmBoolField(*wasmRecord, "allow", wasmAllow) &&
 		ReadWasmBoolField(*wasmRecord, "dropOrder", wasmDropOrder);
-	if (!hasWasmFields && WasmTypedHost::Enabled() && WasmTypedHost::AnyActive()) {
-		wasmAllow = rustResult.allow;
-		wasmDropOrder = rustResult.dropOrder;
+	if (!hasWasmFields && hasWasmResult && wasmResult.IsUnit()) {
+		wasmAllow = directResult.allow;
+		wasmDropOrder = directResult.dropOrder;
 		hasWasmFields = true;
 	}
 	if (m_AllowUnitCreationFuncPtr == nullptr)
@@ -1569,9 +1606,6 @@ bool NativeInterfaceEventClient::AllowUnitTransport(const CUnit* transporter, co
 }
 
 bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter, const CUnit* transportee, const float3& loadPos, bool allowed) {
-	if (m_AllowUnitTransportLoadFuncPtr == nullptr)
-		return allowed;
-
 	AllowUnitTransportPositionQuery query = {
 		.units = {
 			.transporterID = transporter->id,
@@ -1595,9 +1629,6 @@ bool NativeInterfaceEventClient::AllowUnitTransportLoad(const CUnit* transporter
 }
 
 bool NativeInterfaceEventClient::AllowUnitTransportUnload(const CUnit* transporter, const CUnit* transportee, const float3& unloadPos, bool allowed) {
-	if (m_AllowUnitTransportUnloadFuncPtr == nullptr)
-		return allowed;
-
 	AllowUnitTransportPositionQuery query = {
 		.units = {
 			.transporterID = transporter->id,
@@ -1637,9 +1668,6 @@ bool NativeInterfaceEventClient::AllowUnitCloak(const CUnit* unit, const CUnit* 
 }
 
 bool NativeInterfaceEventClient::AllowUnitDecloak(const CUnit* unit, const CSolidObject* object, const CWeapon* weapon) {
-	if (m_AllowUnitDecloakFuncPtr == nullptr)
-		return true;
-
 	AllowUnitDecloakQuery query = {
 		.unitID = unit->id,
 		.hasObject = (object != nullptr),
@@ -2295,13 +2323,13 @@ bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* 
 	};
 	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_unitpredamaged");
 	WasmValue wasmResult;
-	// The typed Rust host writes here instead of into wasmResult.
-	DamageCallinResult rustResult = {
+	// Core and the typed reference transport write here instead of wasmResult.
+	DamageCallinResult directResult = {
 		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
 		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
 	};
 	const bool hasWasmResult = DispatchWasmCallin("UnitPreDamaged", &query, true,
-		&wasmResult, &rustResult);
+		&wasmResult, &directResult);
 	spring::benchmark_callins::End(wasmToken);
 	float wasmDamage = (newDamage != nullptr) ? *newDamage : damage;
 	float wasmImpulse = (impulseMult != nullptr) ? *impulseMult : 1.0f;
@@ -2309,9 +2337,9 @@ bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* 
 	bool hasWasmFields = wasmRecord != nullptr &&
 		ReadWasmFloatField(*wasmRecord, "newDamage", wasmDamage) &&
 		ReadWasmFloatField(*wasmRecord, "impulseMult", wasmImpulse);
-	if (!hasWasmFields && WasmTypedHost::Enabled() && WasmTypedHost::AnyActive()) {
-		wasmDamage = rustResult.newDamage;
-		wasmImpulse = rustResult.impulseMult;
+	if (!hasWasmFields && hasWasmResult && wasmResult.IsUnit()) {
+		wasmDamage = directResult.newDamage;
+		wasmImpulse = directResult.impulseMult;
 		hasWasmFields = true;
 	}
 	if (m_UnitPreDamagedFuncPtr == nullptr) {

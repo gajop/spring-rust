@@ -1,0 +1,14 @@
+[package]
+name = "spring-wasm-core"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[features]
+default = []
+# Enables owned Vec-returning convenience APIs. The zero-allocation `_into`
+# variants remain available in pure no_std builds without this feature.
+alloc = []
+
+[lib]
+path = "src/lib.rs"

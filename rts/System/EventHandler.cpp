@@ -6,6 +6,7 @@
 #include "Lua/LuaCallInCheck.h"
 #include "Lua/LuaOpenGL.h"  // FIXME -- should be moved
 
+#include "System/BenchmarkCallins.h"
 #include "System/Config/ConfigHandler.h"
 #include "System/Platform/Threading.h"
 #include "System/GlobalConfig.h"
@@ -808,7 +809,11 @@ void CEventHandler::MiniMapGeometryChanged(const int2 newPos, const int2 newDim,
 bool CEventHandler::CommandNotify(const Command& cmd)
 {
 	ZoneScoped;
-	return ControlReverseIterateDefTrue(listCommandNotify, &CEventClient::CommandNotify, cmd);
+	const auto token = spring::benchmark_callins::BeginConfigured("callin_command_event");
+	const bool result = ControlReverseIterateDefTrue(
+		listCommandNotify, &CEventClient::CommandNotify, cmd);
+	spring::benchmark_callins::End(token);
+	return result;
 }
 
 bool CEventHandler::KeyMapChanged()
@@ -913,7 +918,9 @@ bool CEventHandler::AddConsoleLine(const std::string& msg, const std::string& se
 	if (listAddConsoleLine.empty())
 		return false;
 
+	const auto token = spring::benchmark_callins::BeginConfigured("callin_string_event");
 	ITERATE_EVENTCLIENTLIST(AddConsoleLine, msg, section, level);
+	spring::benchmark_callins::End(token);
 	return true;
 }
 

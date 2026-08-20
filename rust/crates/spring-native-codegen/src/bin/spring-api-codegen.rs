@@ -12,6 +12,28 @@ use std::{
     path::{Path, PathBuf},
 };
 
+mod model {
+    pub use spring_native_codegen::model::*;
+}
+#[path = "../render_core_wasm.rs"]
+mod render_core_wasm;
+#[path = "../render_core_wasm_callins.rs"]
+mod render_core_wasm_callins;
+#[path = "../render_core_wasm_guest.rs"]
+mod render_core_wasm_guest;
+#[path = "../render_core_wasm_host.rs"]
+mod render_core_wasm_host;
+#[path = "../render_core_wasm_option_host.rs"]
+mod render_core_wasm_option_host;
+#[path = "../render_core_wasm_variable_host.rs"]
+mod render_core_wasm_variable_host;
+#[path = "../render_core_wasm_variable_io_host.rs"]
+mod render_core_wasm_variable_io_host;
+#[path = "../render_core_wasm_variable_output_host.rs"]
+mod render_core_wasm_variable_output_host;
+#[path = "../render_core_wasm_registry.rs"]
+mod render_core_wasm_registry;
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("spring-api-codegen: {error:#}");
@@ -122,6 +144,73 @@ fn run() -> Result<()> {
         &(serde_json::to_string_pretty(&model.callins)? + "\n"),
     )?;
 
+    // Runtime-neutral Core ABI plans plus executable callback coverage. The
+    // validator registry is derived only from callbacks that meet the current
+    // fast-path policy, never from the broader planning inventory or known
+    // allocation-heavy variable-input scaffolding.
+    write(
+        &arguments.output.join("core-abi.json"),
+        &render_core_wasm::render_json(&model)?,
+    )?;
+    write(
+        &arguments.output.join("core-callin-plan.json"),
+        &render_core_wasm_callins::render_json(&model)?,
+    )?;
+    write(
+        &arguments.output.join("WasmCoreAbiInventory.h"),
+        &render_core_wasm::render_inventory_header(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedRegistry.h"),
+        &render_core_wasm_registry::render(&model),
+    )?;
+    write(
+        &arguments.output.join("core-executable-coverage.json"),
+        &render_core_wasm_registry::render_coverage_json(&model)?,
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedBindings.h"),
+        &render_core_wasm_host::render_header(),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedBindings.cpp"),
+        &render_core_wasm_host::render_cpp(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedOptionBindings.h"),
+        &render_core_wasm_option_host::render_header(),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedOptionBindings.cpp"),
+        &render_core_wasm_option_host::render_cpp(&model),
+    )?;
+    // Keep emitting variable-input/combined-I/O source as implementation
+    // scaffolding even though the production build currently excludes it.
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableBindings.h"),
+        &render_core_wasm_variable_host::render_header(),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableBindings.cpp"),
+        &render_core_wasm_variable_host::render_cpp(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableOutputBindings.h"),
+        &render_core_wasm_variable_output_host::render_header(),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableOutputBindings.cpp"),
+        &render_core_wasm_variable_output_host::render_cpp(&model),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableIoBindings.h"),
+        &render_core_wasm_variable_io_host::render_header(),
+    )?;
+    write(
+        &arguments.output.join("WasmCoreGeneratedVariableIoBindings.cpp"),
+        &render_core_wasm_variable_io_host::render_cpp(&model),
+    )?;
+
     let wit_dir = arguments.output.join("wit");
     fs::create_dir_all(&wit_dir)?;
     remove_old_wit_files(&wit_dir)?;
@@ -158,13 +247,24 @@ fn run() -> Result<()> {
         &render_wasm_sdk::render(&model),
     )?;
     write(
+        &sdk_dir.join("core_generated.rs"),
+        &render_core_wasm_guest::render(&model),
+    )?;
+    write(
         &sdk_dir.join("callins.rs"),
         &render_callins::render_rust(&model),
     )?;
 
     let summary = model.summary();
+    let core_summary = render_core_wasm::plan(&model);
     let mut report = serde_json::to_string_pretty(&summary)?;
     report.push('\n');
+    report.push_str(&format!(
+        "\n# core-wasm planning\nautomatic={} manual={} unsupported={}\n",
+        core_summary.automatic_count,
+        core_summary.manual_count,
+        core_summary.unsupported_count,
+    ));
     if let Err(error) = validation {
         report.push_str("\n# report-mode validation findings\n");
         report.push_str(&error.to_string());
@@ -172,8 +272,13 @@ fn run() -> Result<()> {
     }
     write(&arguments.output.join("generation-report.json"), &report)?;
     eprintln!(
-        "generated {} modules / {} functions ({} unsupported)",
-        summary.modules, summary.functions, summary.unsupported
+        "generated {} modules / {} functions ({} unsupported); Core plan: {} automatic / {} manual / {} unsupported",
+        summary.modules,
+        summary.functions,
+        summary.unsupported,
+        core_summary.automatic_count,
+        core_summary.manual_count,
+        core_summary.unsupported_count,
     );
     Ok(())
 }

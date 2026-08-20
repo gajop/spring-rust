@@ -10,6 +10,8 @@
 
 #include "NativeInterface/api/Callins.h"
 #include "System/Log/ILog.h"
+#include "WasmCoreHost.h"
+#include "WasmInterfaceSystem.h"
 
 namespace {
 
@@ -35,9 +37,6 @@ std::vector<std::unique_ptr<WasmTypedHost>>& Hosts()
 	return hosts;
 }
 
-// Opens the library and resolves every entry point once. A missing symbol means
-// the library and this engine were built from different revisions of the C ABI;
-// fail loudly rather than dispatching into a null pointer later.
 bool OpenLibrary(std::string& error)
 {
 	SpringTypedHostLibrary& library = Library();
@@ -87,10 +86,15 @@ bool OpenLibrary(std::string& error)
 
 } // namespace
 
-bool WasmTypedHost::Enabled()
+bool WasmTypedHost::TypedEnabled()
 {
 	static const bool enabled = TruthyEnvironment("SPRING_WASM_TYPED_HOST");
 	return enabled;
+}
+
+bool WasmTypedHost::Enabled()
+{
+	return TypedEnabled() || WasmCoreHost::Enabled();
 }
 
 WasmTypedHost::~WasmTypedHost()
@@ -103,11 +107,11 @@ bool WasmTypedHost::Load(std::string moduleName,
 	const std::vector<std::uint8_t>& componentBytes, NativeInterface* nativeInterface,
 	SpringTypedWorld world, std::string& error)
 {
+	if (!TypedEnabled())
+		return true;
 	if (!OpenLibrary(error))
 		return false;
 
-	// Reloading a module replaces its host rather than accumulating one per
-	// load, matching how the module list treats a duplicate name.
 	Unload(moduleName);
 
 	char* hostError = nullptr;
@@ -128,6 +132,7 @@ bool WasmTypedHost::Load(std::string moduleName,
 
 void WasmTypedHost::Unload(std::string_view moduleName)
 {
+	WasmCoreHost::Unload(moduleName);
 	auto& hosts = Hosts();
 	hosts.erase(std::remove_if(hosts.begin(), hosts.end(), [moduleName](const auto& host) {
 		return host->moduleName == moduleName;
@@ -136,6 +141,7 @@ void WasmTypedHost::Unload(std::string_view moduleName)
 
 void WasmTypedHost::UnloadAll()
 {
+	WasmCoreHost::UnloadAll();
 	Hosts().clear();
 
 	SpringTypedHostLibrary& library = Library();
@@ -146,13 +152,29 @@ void WasmTypedHost::UnloadAll()
 
 bool WasmTypedHost::AnyActive()
 {
-	return !Hosts().empty();
+	return WasmCoreHost::AnyActive() || !Hosts().empty();
 }
 
 bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query, void* result,
 	std::string& error)
 {
-	if (query == nullptr)
+	if (WasmCoreHost::AnyActive()) {
+		bool coreHandled = false;
+		std::string coreError;
+		if (!WasmInterfaceSystem::DispatchActiveCoreCallin(
+				name, query, result, coreHandled, coreError)) {
+			error = coreError.empty() ? "ordered Core Wasm callin dispatch failed" : coreError;
+			// A failing Core callin is still handled: do not fall through and
+			// invoke a second transport for the same engine event.
+			return true;
+		}
+		if (coreHandled) {
+			if (!coreError.empty())
+				error = coreError;
+			return true;
+		}
+	}
+	if (query == nullptr || Hosts().empty())
 		return false;
 
 	const Callin callin = Resolve(name);
@@ -165,16 +187,12 @@ bool WasmTypedHost::DispatchCallin(std::string_view name, const void* query, voi
 		if (!host->Invoke(callin, query, result, hostError))
 			return false;
 		handled = true;
-		// Keep fanning out on failure so one broken module does not silently
-		// hide the others, but report the first error to the caller.
 		if (!hostError.empty() && error.empty())
 			error = hostError;
 	}
 	return handled;
 }
 
-// Deliberately scoped to the callins the benchmark table needs; anything else
-// is not handled here and the caller keeps its existing path.
 WasmTypedHost::Callin WasmTypedHost::Resolve(std::string_view name)
 {
 	if (name == "GameFrame")
@@ -248,7 +266,7 @@ bool WasmTypedHost::Invoke(Callin callin, const void* query, void* result,
 
 	if (hostError != nullptr) {
 		error = std::string("typed Wasm host callin failed: ") + hostError;
-		library.stringFree(hostError);
+		Library().stringFree(hostError);
 		return true;
 	}
 	if (status != 0)
