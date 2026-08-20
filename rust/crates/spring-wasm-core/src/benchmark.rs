@@ -1,10 +1,10 @@
-// Benchmark-critical Core-Wasm guest wrappers. Timer/message functions are
-// instrumentation used by the shared benchmark suite; RulesParams, Terrain,
-// UnitControl and Gfx are ordinary semantic API calls with specialized lowering.
-
-#[path = "unit_control.rs"]
-mod unit_control;
-pub use unit_control::*;
+// Benchmark-critical Core-Wasm guest wrappers.
+//
+// This module only keeps calls that have no other home: the benchmark-only
+// consume imports, terrain mutation, and the immediate Gfx paths. Timer,
+// message, RulesParams and Terrain-read wrappers that once lived here are now
+// in profiling/messages/rules_params/terrain, which validate their inputs; the
+// duplicates here made every one of those names ambiguous through `lib.rs`.
 
 use super::{ApiError, ErrorCode, Result};
 
@@ -12,21 +12,10 @@ use super::{ApiError, ErrorCode, Result};
 mod raw {
     #[link(wasm_import_module = "spring:profiling")]
     extern "C" {
-        #[link_name = "get-timer-micros"]
-        pub fn get_timer_micros() -> i64;
     }
 
     #[link(wasm_import_module = "spring:messages")]
     extern "C" {
-        #[link_name = "send-lua-rules-msg"]
-        pub fn send_lua_rules_msg(pointer: i32, length: i32) -> i64;
-        #[link_name = "send-lua-ui-msg"]
-        pub fn send_lua_ui_msg(
-            message_pointer: i32,
-            message_length: i32,
-            mode_pointer: i32,
-            mode_length: i32,
-        ) -> i64;
     }
 
     #[link(wasm_import_module = "spring:benchmark")]
@@ -39,26 +28,10 @@ mod raw {
 
     #[link(wasm_import_module = "spring:rules-params")]
     extern "C" {
-        #[link_name = "set-unit-rules-param-f32"]
-        pub fn set_unit_rules_param_f32(
-            unit_id: i32,
-            name_pointer: i32,
-            name_length: i32,
-            value: f32,
-            los: i32,
-        ) -> i64;
-        #[link_name = "get-unit-rules-param-f32"]
-        pub fn get_unit_rules_param_f32(
-            unit_id: i32,
-            name_pointer: i32,
-            name_length: i32,
-        ) -> i64;
     }
 
     #[link(wasm_import_module = "spring:terrain")]
     extern "C" {
-        #[link_name = "get-ground-orig-height"]
-        pub fn get_ground_orig_height(x: f32, z: f32) -> i64;
     }
 
     #[link(wasm_import_module = "spring:terrain-control")]
@@ -142,53 +115,8 @@ fn status_result(status: i32) -> Result<()> {
     }
 }
 
-#[inline]
-pub fn get_timer_micros() -> Result<u64> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        return Ok(unsafe { raw::get_timer_micros() } as u64);
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-    }
-}
 
-#[inline]
-pub fn send_lua_rules_msg(message: &str) -> Result<bool> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        let (pointer, length) = bytes_parts(message.as_bytes());
-        return unpack_bool_local(unsafe { raw::send_lua_rules_msg(pointer, length) });
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = message;
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-    }
-}
 
-#[inline]
-pub fn send_lua_ui_msg(message: &str, mode: &str) -> Result<bool> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        let (message_pointer, message_length) = bytes_parts(message.as_bytes());
-        let (mode_pointer, mode_length) = bytes_parts(mode.as_bytes());
-        return unpack_bool_local(unsafe {
-            raw::send_lua_ui_msg(
-                message_pointer,
-                message_length,
-                mode_pointer,
-                mode_length,
-            )
-        });
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = (message, mode);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-    }
-}
 
 // Benchmark-only wrappers. They intentionally expose a no-allocation borrowed
 // input path so the suite can measure the Core variable-input transport floor.
@@ -220,55 +148,8 @@ pub fn benchmark_consume_f32_list(value: &[f32]) -> Result<u32> {
     }
 }
 
-#[inline]
-pub fn set_unit_rules_param_f32(
-    unit_id: i32,
-    name: &str,
-    value: f32,
-    los: i32,
-) -> Result<bool> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        let (name_pointer, name_length) = bytes_parts(name.as_bytes());
-        return unpack_bool_local(unsafe {
-            raw::set_unit_rules_param_f32(unit_id, name_pointer, name_length, value, los)
-        });
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = (unit_id, name, value, los);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-    }
-}
 
-#[inline]
-pub fn get_unit_rules_param_f32(unit_id: i32, name: &str) -> Result<f32> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        let (name_pointer, name_length) = bytes_parts(name.as_bytes());
-        return unpack_f32_local(unsafe {
-            raw::get_unit_rules_param_f32(unit_id, name_pointer, name_length)
-        });
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = (unit_id, name);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-    }
-}
 
-#[inline]
-pub fn get_ground_orig_height(x: f32, z: f32) -> Result<f32> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        return unpack_f32_local(unsafe { raw::get_ground_orig_height(x, z) });
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = (x, z);
-        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
-    }
-}
 
 #[inline]
 pub fn set_height_map(x: f32, z: f32, height: f32, terraform: f32) -> Result<bool> {

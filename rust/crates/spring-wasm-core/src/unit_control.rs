@@ -1,9 +1,5 @@
 // UnitControl portion of the Spring Core-Wasm guest SDK.
 
-#[path = "profiling.rs"]
-mod profiling;
-pub use profiling::*;
-
 use super::{ApiError, ErrorCode, Result};
 
 #[cfg(target_arch = "wasm32")]
