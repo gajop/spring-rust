@@ -51,7 +51,7 @@ struct WasmCoreHost::Backend {
 			runtime.Config().resultBytesLimit)
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 		, bindings(nativeInterface, &budget,
-			WasmEnvironmentMatrix::Policy(environment).synced)
+			WasmEnvironmentMatrix::Policy(environment).synced, environment)
 #endif
 	{
 		(void)nativeInterface;
@@ -320,7 +320,7 @@ bool WasmCoreHost::FuelRemainingImpl(std::uint64_t& fuel, std::string& error) co
 			wasmtime_store_context(backend->store), &fuel);
 		fuelError != nullptr) {
 		error = "Core Wasm host could not query fuel: " +
-			recoil::wasm::core::ErrorMessage(fuelError);
+				recoil::wasm::core::ErrorMessage(fuelError);
 		return false;
 	}
 	return true;
