@@ -50,6 +50,8 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
 #endif
 
 bool RegisterFastImports(wasmtime_linker_t* linker, HostState* state, std::string& error);
+bool RegisterUnitsInfoVariableImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterUnitsQueryImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterUnitsQueryBorrowedImports(wasmtime_linker_t* linker, HostState* state,
@@ -119,6 +121,8 @@ public:
 #endif
 		if (host.environment != WasmEnvironment::UI &&
 			!RegisterFastImports(linker, &host, error))
+			return false;
+		if (!RegisterUnitsInfoVariableImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitsQueryImports(linker, &host, error))
 			return false;
