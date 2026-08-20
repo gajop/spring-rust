@@ -176,6 +176,17 @@ fn plan_function(
     let mut direct_params = Vec::new();
     let input_strategy = classify_inputs(&function.inputs, records, &mut direct_params, &mut notes);
     let (result_strategy, mut direct_results) = classify_outputs(&function.outputs, records, &mut notes);
+    let string_list = function
+        .inputs
+        .iter()
+        .chain(function.outputs.iter())
+        .any(|field| contains_string_list(&field.ty));
+    if string_list {
+        notes.push(
+            "list<string> requires a reviewed flat Core ABI; per-element host allocation is forbidden"
+                .to_owned(),
+        );
+    }
 
     match input_strategy {
         InputStrategy::Direct | InputStrategy::Unsupported => {}
@@ -208,13 +219,34 @@ fn plan_function(
         environment_mask: environment_mask(&function.environments),
         mutating: function.mutating,
         visibility_sensitive: function.visibility_sensitive,
-        source_status: status_name(function.status).to_owned(),
+        source_status: if string_list {
+            "manual".to_owned()
+        } else {
+            status_name(function.status).to_owned()
+        },
         input_strategy,
         result_strategy,
         signature: core_signature(&direct_params, &direct_results),
         direct_params,
         direct_results,
         notes,
+    }
+}
+
+fn contains_string_list(ty: &SemanticType) -> bool {
+    match ty {
+        SemanticType::List { element } => {
+            matches!(element.as_ref(), SemanticType::String) || contains_string_list(element)
+        }
+        SemanticType::FixedArray { element, .. } | SemanticType::Option { inner: element } => {
+            contains_string_list(element)
+        }
+        SemanticType::Result { ok, error } => {
+            ok.as_deref().is_some_and(contains_string_list)
+                || error.as_deref().is_some_and(contains_string_list)
+        }
+        SemanticType::Pointer { pointee, .. } => contains_string_list(pointee),
+        _ => false,
     }
 }
 
