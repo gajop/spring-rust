@@ -21,6 +21,8 @@ inline constexpr std::string_view UnitsQueryModule = "spring:units-query";
 inline constexpr std::string_view UnitDefsModule = "spring:unit-defs";
 inline constexpr std::string_view UnitsCommandsModule = "spring:units-commands";
 inline constexpr std::string_view UnitControlModule = "spring:unit-control";
+inline constexpr std::string_view TerrainControlModule = "spring:terrain-control";
+inline constexpr std::string_view GfxModule = "spring:gfx";
 inline constexpr std::string_view ProfilingModule = "spring:profiling";
 inline constexpr std::string_view MessagesModule = "spring:messages";
 inline constexpr std::string_view RulesParamsModule = "spring:rules-params";
@@ -33,6 +35,7 @@ inline constexpr std::string_view UnitCreatedExport = "spring:callin/unit-create
 inline constexpr std::string_view UnitPreDamagedExport = "spring:callin/unit-pre-damaged";
 inline constexpr std::string_view AllowUnitCreationExport = "spring:callin/allow-unit-creation";
 inline constexpr std::string_view DrawWorldExport = "spring:callin/draw-world";
+inline constexpr std::string_view CallbackDispatchExport = "spring:callback/dispatch";
 
 inline constexpr std::uint32_t AllEnvironmentMask =
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesSynced)) |
@@ -43,6 +46,10 @@ inline constexpr std::uint32_t AllEnvironmentMask =
 inline constexpr std::uint32_t SyncedEnvironmentMask =
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesSynced)) |
 	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaSynced));
+inline constexpr std::uint32_t UnsyncedEnvironmentMask =
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::RulesUnsynced)) |
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::GaiaUnsynced)) |
+	(1u << static_cast<std::uint32_t>(WasmEnvironment::UI));
 
 inline constexpr ImportDescriptor kImports[] = {
 	{UnitsInfoModule, "get-unit-def-id", "i32->i64", AllEnvironmentMask},
@@ -72,9 +79,15 @@ inline constexpr ImportDescriptor kImports[] = {
 	{UnitsCommandsModule, "get-unit-command-count", "i32->i64", AllEnvironmentMask},
 	{UnitsCommandsModule, "get-unit-commands", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 
-	// Input-list mutation: params are copied and little-endian decoded before
-	// NativeInterface is invoked. Capability mask matches generated UnitControl.
 	{UnitControlModule, "give-order-to-unit", "i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
+
+	// Callback-taking calls use a numeric guest callback ID and opaque u32 user
+	// data. The host invokes the cached spring:callback/dispatch(i32,i32) export.
+	{TerrainControlModule, "set-height-map", "f32,f32,f32,f32->i64", SyncedEnvironmentMask},
+	{TerrainControlModule, "level-height-map", "f32,f32,f32,f32,f32->i64", SyncedEnvironmentMask},
+	{TerrainControlModule, "set-height-map-func", "i32,i32->i64", SyncedEnvironmentMask},
+	{GfxModule, "vertex", "f32,f32,f32,f32,i32->i32", UnsyncedEnvironmentMask},
+	{GfxModule, "begin-end", "i32,i32,i32->i32", UnsyncedEnvironmentMask},
 
 	{ProfilingModule, "get-timer-micros", "->i64", AllEnvironmentMask},
 	{MessagesModule, "send-lua-rules-msg", "i32,i32->i64", AllEnvironmentMask},
