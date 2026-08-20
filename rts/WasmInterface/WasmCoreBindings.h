@@ -105,9 +105,12 @@ public:
 		if (!generated::RegisterGeneratedVariableOutputImports(linker, &host, error))
 			return false;
 #endif
-		// Specialized bindings register afterwards and intentionally shadow a
-		// generated definition when they use a tighter ABI or custom semantics.
-		if (!RegisterFastImports(linker, &host, error))
+		// Rules/gaia keep the hand-specialized scalar floor. UI deliberately
+		// retains the generated definitions so every scalar import crosses the
+		// visibility-aware guard rather than shadowing it with a legacy fast
+		// callback that predates per-module read perspectives.
+		if (host.environment != WasmEnvironment::UI &&
+			!RegisterFastImports(linker, &host, error))
 			return false;
 		if (!RegisterUnitsQueryImports(linker, &host, error))
 			return false;
