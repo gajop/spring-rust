@@ -1,6 +1,6 @@
 // Benchmark-critical Core-Wasm guest wrappers. Timer/message functions are
-// instrumentation used by the shared benchmark suite; RulesParams, Terrain
-// and UnitControl are ordinary semantic API calls with specialized lowering.
+// instrumentation used by the shared benchmark suite; RulesParams, Terrain,
+// UnitControl and Gfx are ordinary semantic API calls with specialized lowering.
 
 #[path = "unit_control.rs"]
 mod unit_control;
@@ -52,6 +52,24 @@ mod raw {
         #[link_name = "get-ground-orig-height"]
         pub fn get_ground_orig_height(x: f32, z: f32) -> i64;
     }
+
+    #[link(wasm_import_module = "spring:terrain-control")]
+    extern "C" {
+        #[link_name = "set-height-map"]
+        pub fn set_height_map(x: f32, z: f32, height: f32, terraform: f32) -> i64;
+        #[link_name = "level-height-map"]
+        pub fn level_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> i64;
+        #[link_name = "set-height-map-func"]
+        pub fn set_height_map_func(callback_id: i32, user_data: i32) -> i64;
+    }
+
+    #[link(wasm_import_module = "spring:gfx")]
+    extern "C" {
+        #[link_name = "vertex"]
+        pub fn gfx_vertex(x: f32, y: f32, z: f32, w: f32, count: i32) -> i32;
+        #[link_name = "begin-end"]
+        pub fn gfx_begin_end(primitive: i32, callback_id: i32, user_data: i32) -> i32;
+    }
 }
 
 #[inline]
@@ -85,6 +103,15 @@ fn unpack_f32_local(packed: i64) -> Result<f32> {
     let status = (packed >> 32) as u32 as i32;
     if status == 0 {
         Ok(f32::from_bits(packed as u32))
+    } else {
+        Err(ApiError::new(status))
+    }
+}
+
+#[inline]
+fn status_result(status: i32) -> Result<()> {
+    if status == 0 {
+        Ok(())
     } else {
         Err(ApiError::new(status))
     }
@@ -184,6 +211,75 @@ pub fn get_ground_orig_height(x: f32, z: f32) -> Result<f32> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (x, z);
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn set_height_map(x: f32, z: f32, height: f32, terraform: f32) -> Result<bool> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        return unpack_bool_local(unsafe { raw::set_height_map(x, z, height, terraform) });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (x, z, height, terraform);
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn level_height_map(x1: f32, z1: f32, x2: f32, z2: f32, height: f32) -> Result<bool> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        return unpack_bool_local(unsafe { raw::level_height_map(x1, z1, x2, z2, height) });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (x1, z1, x2, z2, height);
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn set_height_map_func(callback_id: u32, user_data: u32) -> Result<bool> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        return unpack_bool_local(unsafe {
+            raw::set_height_map_func(callback_id as i32, user_data as i32)
+        });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (callback_id, user_data);
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn gfx_vertex(x: f32, y: f32, z: f32, w: f32, count: u32) -> Result<()> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        return status_result(unsafe { raw::gfx_vertex(x, y, z, w, count as i32) });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (x, y, z, w, count);
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+#[inline]
+pub fn gfx_begin_end(primitive: u32, callback_id: u32, user_data: u32) -> Result<()> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        return status_result(unsafe {
+            raw::gfx_begin_end(primitive as i32, callback_id as i32, user_data as i32)
+        });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (primitive, callback_id, user_data);
         Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
     }
 }
