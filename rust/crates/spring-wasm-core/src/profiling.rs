@@ -1,6 +1,6 @@
 // Unsynced profiling helpers used by the benchmark suite.
 
-use super::{ApiError, ErrorCode, Result};
+use crate::{ApiError, ErrorCode, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LuaMemUsage {
@@ -32,8 +32,6 @@ pub fn get_lua_mem_usage() -> Result<LuaMemUsage> {
         let mut values = [0.0f32; 8];
         let pointer = values.as_mut_ptr() as usize;
         debug_assert!(pointer <= u32::MAX as usize);
-        // SAFETY: values owns exactly the 32 writable bytes expected by the
-        // host and remains live for the synchronous call.
         let status = unsafe { raw::get_lua_mem_usage(pointer as u32 as i32) };
         if status != 0 {
             return Err(ApiError::new(status));
@@ -59,7 +57,6 @@ pub fn get_lua_mem_usage() -> Result<LuaMemUsage> {
 pub fn get_synced_gc_info(collect: bool) -> Result<f32> {
     #[cfg(target_arch = "wasm32")]
     {
-        // SAFETY: generated scalar-only Core signature.
         let packed = unsafe { raw::get_synced_gc_info(collect as i32) } as u64;
         let status = (packed >> 32) as u32 as i32;
         if status != 0 {
