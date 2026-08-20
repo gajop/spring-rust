@@ -12,6 +12,14 @@ fn main() {
         println!("cargo:rerun-if-env-changed={name}");
     }
 
+    // Synced Core validation requires min == max. Put the linker contract in
+    // the build script rather than relying on a nested .cargo/config.toml,
+    // because the benchmark runner invokes Cargo from the repository root.
+    // 16 MiB is intentionally roomy for Vec-heavy list/workload benchmarks
+    // while remaining far below the engine's 64 MiB default Core memory cap.
+    println!("cargo:rustc-link-arg=--initial-memory=16777216");
+    println!("cargo:rustc-link-arg=--no-growable-memory");
+
     println!("cargo:rustc-check-cfg=cfg(benchmark_callin_unimplemented)");
     println!("cargo:rustc-check-cfg=cfg(benchmark_context_unsynced)");
     println!("cargo:rustc-check-cfg=cfg(benchmark_context_ui)");
