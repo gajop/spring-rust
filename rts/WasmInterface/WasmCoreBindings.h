@@ -68,6 +68,8 @@ bool RegisterProfilingImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterMessagesImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
+bool RegisterRulesParamsImports(wasmtime_linker_t* linker, HostState* state,
+	std::string& error);
 bool RegisterConfigImports(wasmtime_linker_t* linker, HostState* state,
 	std::string& error);
 bool RegisterBenchmarkImports(wasmtime_linker_t* linker, HostState* state,
@@ -131,6 +133,8 @@ public:
 		if (!RegisterProfilingImports(linker, &host, error))
 			return false;
 		if (!RegisterMessagesImports(linker, &host, error))
+			return false;
+		if (!RegisterRulesParamsImports(linker, &host, error))
 			return false;
 		if (!RegisterConfigImports(linker, &host, error))
 			return false;
