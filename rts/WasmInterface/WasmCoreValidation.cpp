@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "System/Sync/SHA512.hpp"
@@ -274,12 +275,12 @@ bool ValidateMemorySection(Reader& section, const WasmRuntimeConfig& config,
 	return section.offset == section.bytes.size();
 }
 
-bool ValidateExportSection(Reader& section, std::vector<std::string>& exports,
-	bool& exportsMemory, std::string& error)
+bool ValidateExportSection(Reader& section, const WasmRuntimeConfig& config,
+	std::vector<std::string>& exports, bool& exportsMemory, std::string& error)
 {
 	std::uint64_t count = 0;
-	if (!section.ReadLeb(count) || count > 65536) {
-		error = "Core Wasm export count exceeds supported maximum";
+	if (!section.ReadLeb(count) || count > config.maxExports) {
+		error = "Core Wasm export count exceeds configured maximum";
 		return false;
 	}
 	for (std::uint64_t index = 0; index < count; ++index) {
@@ -338,6 +339,10 @@ WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
 		result.error = "unsupported Spring Core ABI interface version";
 		return result;
 	}
+	if (bytes.size() > config.maxModuleBytes) {
+		result.error = "Core Wasm module exceeds configured byte limit";
+		return result;
+	}
 	if (bytes.size() < 8 || !std::equal(bytes.begin(), bytes.begin() + 4,
 			std::array<std::uint8_t, 4>{0x00, 0x61, 0x73, 0x6d}.begin())) {
 		result.error = "not a WebAssembly Core module";
@@ -356,7 +361,12 @@ WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
 	bool exportsMemory = false;
 	Reader module{bytes};
 	module.offset = 8;
+	std::uint32_t sectionCount = 0;
 	while (module.offset < module.bytes.size()) {
+		if (++sectionCount > config.maxSections) {
+			result.error = "Core Wasm section count exceeds configured maximum";
+			return result;
+		}
 		std::uint8_t sectionId = 0;
 		std::uint64_t sectionSize = 0;
 		if (!module.ReadByte(sectionId) || !module.ReadLeb(sectionSize) ||
@@ -375,7 +385,7 @@ WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
 			case 4: valid = ValidateTableSection(section, config, environment == WasmEnvironment::RulesSynced || environment == WasmEnvironment::GaiaSynced, result.error); break;
 			case 5: valid = ValidateMemorySection(section, config, environment == WasmEnvironment::RulesSynced || environment == WasmEnvironment::GaiaSynced, hasMemory, result.error); break;
 			case 6: section.offset = section.bytes.size(); break;
-			case 7: valid = ValidateExportSection(section, exports, exportsMemory, result.error); break;
+			case 7: valid = ValidateExportSection(section, config, exports, exportsMemory, result.error); break;
 			case 8: section.offset = section.bytes.size(); break;
 			case 9: section.offset = section.bytes.size(); break;
 			case 10: valid = ValidateCodeSection(section, config, result.error); break;
