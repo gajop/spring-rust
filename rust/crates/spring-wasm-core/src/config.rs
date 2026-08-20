@@ -276,3 +276,55 @@ pub fn fill_log_sections(buffer: &mut StringListBuffer) -> Result<()> {
     }
     Err(ApiError::new(ErrorCode::BufferOverflow as i32))
 }
+
+#[cfg(all(test, feature = "alloc"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn string_list_buffer_keeps_high_water_storage() {
+        let mut buffer = StringListBuffer::with_sizes(2, 8);
+        buffer.ensure(StringListRequirements {
+            strings: 4,
+            bytes: 16,
+        });
+        buffer.ensure(StringListRequirements {
+            strings: 1,
+            bytes: 3,
+        });
+        assert_eq!(
+            buffer.storage_sizes(),
+            StringListRequirements {
+                strings: 4,
+                bytes: 16,
+            }
+        );
+
+        buffer.ranges[0] = StringRange { offset: 0, len: 5 };
+        buffer.bytes[..5].copy_from_slice(b"hello");
+        buffer.commit(StringListRequirements {
+            strings: 1,
+            bytes: 5,
+        });
+        assert_eq!(buffer.view().get_bytes(0), Some(&b"hello"[..]));
+
+        buffer.clear();
+        assert!(buffer.view().is_empty());
+        assert_eq!(
+            buffer.storage_sizes(),
+            StringListRequirements {
+                strings: 4,
+                bytes: 16,
+            }
+        );
+    }
+
+    #[test]
+    fn string_list_decode_rejects_out_of_range_descriptors() {
+        let mut ranges = [StringRange { offset: 1, len: 2 }];
+        let mut bytes = [0u8; 2];
+        let error = decode_string_list_result(0, [1, 2], &mut ranges, &mut bytes)
+            .expect_err("descriptor must stay inside the used byte blob");
+        assert_eq!(error.code, ErrorCode::Internal as i32);
+    }
+}
