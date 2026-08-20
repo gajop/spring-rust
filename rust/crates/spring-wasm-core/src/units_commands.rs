@@ -39,6 +39,24 @@ mod raw {
             output: i32,
             capacity_bytes: i32,
         ) -> i64;
+        #[link_name = "give-order"]
+        pub fn give_order(
+            cmd_id: i32,
+            params: i32,
+            param_count: i32,
+            options: i32,
+            timeout: i32,
+        ) -> i64;
+        #[link_name = "give-order-to-unit-map"]
+        pub fn give_order_to_unit_map(
+            unit_ids: i32,
+            unit_count: i32,
+            cmd_id: i32,
+            params: i32,
+            param_count: i32,
+            options: i32,
+            timeout: i32,
+        ) -> i64;
     }
 }
 
@@ -54,6 +72,28 @@ fn decode_fill(packed: i64) -> Result<CommandBufferFill> {
     } else {
         Err(ApiError::new(status))
     }
+}
+
+#[inline]
+fn decode_i32(packed: i64) -> Result<i32> {
+    let packed = packed as u64;
+    let status = (packed >> 32) as u32 as i32;
+    if status == 0 {
+        Ok(packed as u32 as i32)
+    } else {
+        Err(ApiError::new(status))
+    }
+}
+
+#[inline]
+fn slice_parts<T>(values: &[T]) -> (i32, i32) {
+    if values.is_empty() {
+        return (0, 0);
+    }
+    let pointer = values.as_ptr() as usize;
+    debug_assert!(pointer <= u32::MAX as usize);
+    debug_assert!(values.len() <= u32::MAX as usize);
+    (pointer as u32 as i32, values.len() as u32 as i32)
 }
 
 #[inline]
@@ -101,6 +141,62 @@ pub fn get_unit_commands_into(
     #[cfg(not(target_arch = "wasm32"))]
     {
         let _ = (unit_id, max_commands, output);
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+/// Issue one command through the UnitsCommands API. The host borrows `params`
+/// directly from fixed synced Core memory for the duration of the call.
+#[inline]
+pub fn give_order(cmd_id: i32, params: &[f32], options: u32, timeout: i32) -> Result<bool> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let (params_ptr, param_count) = slice_parts(params);
+        // SAFETY: `params` is a properly aligned Rust f32 slice and the host
+        // validates the full range before borrowing it synchronously.
+        return decode_i32(unsafe {
+            raw::give_order(cmd_id, params_ptr, param_count, options as i32, timeout)
+        })
+        .map(|value| value != 0);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (cmd_id, params, options, timeout);
+        Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
+    }
+}
+
+/// Issue one command to an explicit set of unit IDs. Both input slices are
+/// borrowed directly by the host; no guest or host allocation is required.
+#[inline]
+pub fn give_order_to_unit_map(
+    unit_ids: &[i32],
+    cmd_id: i32,
+    params: &[f32],
+    options: u32,
+    timeout: i32,
+) -> Result<i32> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let (unit_ids_ptr, unit_count) = slice_parts(unit_ids);
+        let (params_ptr, param_count) = slice_parts(params);
+        // SAFETY: both Rust slices are naturally aligned and live for the full
+        // synchronous host call; the host validates both ranges independently.
+        return decode_i32(unsafe {
+            raw::give_order_to_unit_map(
+                unit_ids_ptr,
+                unit_count,
+                cmd_id,
+                params_ptr,
+                param_count,
+                options as i32,
+                timeout,
+            )
+        });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (unit_ids, cmd_id, params, options, timeout);
         Err(ApiError::new(ErrorCode::UnsupportedHostTarget as i32))
     }
 }
