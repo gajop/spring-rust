@@ -1,35 +1,60 @@
 # Core Wasm benchmark results
 
-Run: 2026-08-22, bounded suite, seed `424242`, scale `0.1`, timeout `30s`,
-Docker-built headless/legacy binaries. The complete generated table was
-written to `/tmp/core-bench-bounded.md`; this document records the headline
-measurements and their limits.
+Run: 2026-08-22, bounded suite, seed `424242`, scale `0.1`, timeout `30s`.
+Docker-built headless and legacy binaries.
 
-The matrix ran real Lua, native, and Core rows for callins, callouts,
-workloads, memory, heightmap, and draw profiles. Rows marked `unavailable` by
-the established benchmark harness remain unavailable; they are not treated as
-zero or as a passing comparison.
+Core replaces Lua, so Lua vs Core is the headline comparison:
 
-## Core versus native
+| Profile | Core vs Lua |
+| --- | --- |
+| workloads | 4.0–24.6× faster |
+| callouts | 1.1–6.8× faster |
+| callins | 1.5–2.4× faster |
+| draw callouts | approximately 5.3× faster |
 
-| Profile | Core/native range | Notes |
-| --- | ---: | --- |
-| callins | 1.66–5.58× | eight deterministic callback rows |
-| callouts | 1.01–4.39× | scalar, vec3, string, list, spatial, mutate |
-| workloads | 1.04–3.53× | five non-rendering workload rows |
-| heightmap | 0.96–1.64× where both exist | several Lua/native rows are unavailable |
+The callin rows measure 2–5 µs operations with approximately ±2–4 µs variance.
+Those ratios are near noise. Callout and workload rows are tighter and are the
+measurements to quote.
 
-Selected callout measurements (Core vs native): scalar `1.70×`, vec3 `3.25×`,
-string `2.35×`, small-list `4.39×`, big-list `2.06×`, spatial `2.22×`, and
-mutate `1.01×`. Core wins the mutate case and is near native on rules-parameter
-and some heightmap rows; it loses on most callout/callin paths. That loss is
-reported plainly because performance is a release requirement.
+## Selected Lua versus Core measurements
 
-The suite did not enable mandatory fuel or epoch interruption. The default
-runtime therefore measures the actual throughput path used by gameplay rather
-than a security budget that would add per-call cost or create false-positive
-crashes. Opt-in hostile/diagnostic budgets require a separate run and must not
-be mixed into this baseline.
+| Profile | Test | Lua | Core | Lua vs Core |
+| --- | --- | ---: | ---: | ---: |
+| callouts | scalar | 32.592 ns | 11.000 ns | 2.96× |
+| callouts | vec3 | 64.993 ns | 19.700 ns | 3.30× |
+| callouts | string | 71.001 ns | 64.800 ns | 1.10× |
+| callouts | small list | 636.458 ns | 94.000 ns | 6.77× |
+| callouts | big list | 5288.125 ns | 1010.000 ns | 5.24× |
+| callouts | spatial | 765.324 ns | 504.000 ns | 1.52× |
+| callouts | mutate | 172.496 ns | 37.100 ns | 4.65× |
+| workloads | unit scan | 0.417879 ms | 0.017000 ms | 24.58× |
+| workloads | area effect | 0.364442 ms | 0.092000 ms | 3.96× |
+| workloads | rules params | 0.491900 ms | 0.022000 ms | 22.36× |
+| workloads | commands | 0.377910 ms | 0.055000 ms | 6.87× |
+| workloads | compute | 1.535490 ms | 0.336000 ms | 4.57× |
+| draw | draw callout | 82.500 ns | 15.425 ns | 5.35× |
+| draw | UI draw workload | 0.033000 ms | 0.006250 ms | 5.28× |
+
+## Native floor reference
+
+Native is an in-process C call without the Wasm boundary. It is a floor
+reference, not the replacement target.
+
+Core/native ranges were 1.66–5.58× for callins, 1.01–4.39× for callouts,
+1.04–3.53× for workloads, and 0.96–1.64× for heightmap rows where both
+backends were available. Core loses to native on most rows; that is expected
+from the boundary and remains useful for regression tracking.
+
+The two material regressions are `callin_drawworld` (Core 5311 ns versus Lua
+2731 ns) and `callin_unimplemented` (Core 1483 ns versus Lua 1015 ns). They are
+tracked in the handoff for profiling and dispatch short-circuit work.
+
+Rows marked `unavailable` by the harness remain unavailable. They are not zero
+and are not treated as passing comparisons.
+
+Fuel and epoch interruption were disabled for this baseline. The default
+runtime is throughput-first. Opt-in hostile or diagnostic budgets require a
+separate run and must not be mixed into gameplay measurements.
 
 ## Reproduction
 

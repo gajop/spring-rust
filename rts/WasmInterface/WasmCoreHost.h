@@ -110,9 +110,13 @@ public:
 			error = "Core Wasm module handle is null";
 			return false;
 		}
-		// Keep UI read visibility active for the whole guest invocation, matching
-		// the Component/WasmValue boundary. All nested Core imports and re-entrant
-		// callbacks then inherit the same thread-local visibility perspective.
+		// Do not construct the UI visibility scope for an unimplemented callin.
+		// This is the negative-case fast path and also keeps its cost independent
+		// of the guest's environment.
+		if (!host->HasCallin(callin))
+			return true;
+		// Keep UI read visibility active for the whole guest invocation. All
+		// nested Core imports and re-entrant callbacks inherit this perspective.
 		WasmUiVisibility::ScopedContext uiContext(host->environment == WasmEnvironment::UI);
 		return host->Invoke(callin, query, result, error);
 	}

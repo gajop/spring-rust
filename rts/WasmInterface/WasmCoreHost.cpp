@@ -130,6 +130,7 @@ struct WasmCoreHost::Backend {
 
 	const WasmRuntime* runtime = nullptr;
 	WasmExecutionBudget budget;
+	std::array<std::uint64_t, (CALLIN_COUNT + 63u) / 64u> implementedCallins{};
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	recoil::wasm::core::InstanceBindings bindings;
 	recoil::wasm::core::VariableCallinBindings variableCallins;
@@ -291,6 +292,38 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		return false;
 	}
 #endif
+	// Resolve export presence once. Callin dispatch is a hot path, while the
+	// module's export set is immutable for its lifetime.
+	auto markCallin = [&backend](std::uint16_t ordinal, bool present) {
+		if (present && ordinal != 0 && ordinal <= CALLIN_COUNT)
+			backend->implementedCallins[ordinal / 64u] |=
+				std::uint64_t{1} << (ordinal % 64u);
+	};
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::GameFrame),
+		backend->bindings.HasGameFrame());
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::GameFramePost),
+		backend->bindings.HasGameFramePost());
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::Update), backend->bindings.HasUpdate());
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::UnitCreated),
+		backend->bindings.HasUnitCreated());
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::UnitPreDamaged),
+		backend->bindings.HasUnitPreDamaged());
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::AllowUnitCreation),
+		backend->bindings.HasAllowUnitCreation());
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::AddConsoleLine),
+		backend->variableCallins.HasAddConsoleLine());
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::CommandNotify),
+		backend->variableCallins.HasCommandNotify());
+	markCallin(static_cast<std::uint16_t>(WasmCoreCallin::DrawWorld),
+		backend->bindings.HasDrawWorld());
+#if defined(RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS)
+	for (std::uint16_t ordinal = 1; ordinal <= CALLIN_COUNT; ++ordinal)
+		markCallin(ordinal, backend->generatedCallins.Has(ordinal));
+#endif
+#if defined(RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS)
+	for (std::uint16_t ordinal = 1; ordinal <= CALLIN_COUNT; ++ordinal)
+		markCallin(ordinal, backend->generatedScratchCallins.Has(ordinal));
+#endif
 #else
 	error = "Wasmtime is unavailable for the Core Wasm host";
 	return false;
@@ -440,30 +473,10 @@ bool WasmCoreHost::HasCallin(WasmCoreCallin callin) const
 {
 	if (backend == nullptr || callin == WasmCoreCallin::Invalid)
 		return false;
-#if defined(RECOIL_WASMTIME_AVAILABLE)
-	switch (callin) {
-		case WasmCoreCallin::GameFrame: return backend->bindings.HasGameFrame();
-		case WasmCoreCallin::GameFramePost: return backend->bindings.HasGameFramePost();
-		case WasmCoreCallin::Update: return backend->bindings.HasUpdate();
-		case WasmCoreCallin::UnitCreated: return backend->bindings.HasUnitCreated();
-		case WasmCoreCallin::UnitPreDamaged: return backend->bindings.HasUnitPreDamaged();
-		case WasmCoreCallin::AllowUnitCreation: return backend->bindings.HasAllowUnitCreation();
-		case WasmCoreCallin::AddConsoleLine: return backend->variableCallins.HasAddConsoleLine();
-		case WasmCoreCallin::CommandNotify: return backend->variableCallins.HasCommandNotify();
-		case WasmCoreCallin::DrawWorld: return backend->bindings.HasDrawWorld();
-		case WasmCoreCallin::Invalid: return false;
-		default: break;
-	}
-#if defined(RECOIL_WASM_CORE_GENERATED_CALLIN_BINDINGS)
-	if (backend->generatedCallins.Has(static_cast<std::uint16_t>(callin)))
-		return true;
-#endif
-#if defined(RECOIL_WASM_CORE_GENERATED_SCRATCH_CALLIN_BINDINGS)
-	if (backend->generatedScratchCallins.Has(static_cast<std::uint16_t>(callin)))
-		return true;
-#endif
-#endif
-	return false;
+	const std::uint16_t ordinal = static_cast<std::uint16_t>(callin);
+	return ordinal <= CALLIN_COUNT &&
+		(backend->implementedCallins[ordinal / 64u] &
+			(std::uint64_t{1} << (ordinal % 64u))) != 0;
 }
 
 bool WasmCoreHost::InvokeGameFrame(const void* query, std::string& error)
