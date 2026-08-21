@@ -30,6 +30,7 @@
     "math_round",
     "math_erf",
     "math_smooth_step",
+    "math_normalize",
     "math_bit_or",
     "math_bit_and",
     "math_bit_xor",
@@ -337,9 +338,9 @@
   "coverage": {
     "source_context": "synced_gadget",
     "source_test_count": 507,
-    "selected_count": 330,
+    "selected_count": 331,
     "selected_kind_counts": {
-      "readonly": 264,
+      "readonly": 265,
       "setter_getter": 66
     },
     "selected_ids": [
@@ -370,6 +371,7 @@
       "math_round",
       "math_erf",
       "math_smooth_step",
+      "math_normalize",
       "math_bit_or",
       "math_bit_and",
       "math_bit_xor",
@@ -681,7 +683,6 @@
         "get_mod_options",
         "get_map_options",
         "get_map_start_positions",
-        "math_normalize",
         "encoding_decode_base64",
         "encoding_encode_base64_default_padding",
         "encoding_encode_base64_padded",

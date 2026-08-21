@@ -13821,10 +13821,49 @@ use crate::Result;
             Ok(value)
         }
 
+        #[cfg(target_arch = "wasm32")]
+        mod __core_math_extra_normalize {
+            #[link(wasm_import_module = "spring:math-extra")]
+            extern "C" {
+                #[link_name = "normalize"]
+                pub fn call(x: f32, y: f32, z: f32, output: i32) -> i32;
+            }
+        }
+
         #[inline]
         pub fn normalize(vec: Float3) -> Result<NormalizeValue> {
-        let _ = (vec);
-        Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+            #[cfg(target_arch = "wasm32")]
+            {
+                let mut output = [0.0f32; 4];
+                let pointer = output.as_mut_ptr() as usize;
+                if pointer > u32::MAX as usize {
+                    return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32));
+                }
+                let status = unsafe {
+                    __core_math_extra_normalize::call(
+                        vec.x,
+                        vec.y,
+                        vec.z,
+                        pointer as u32 as i32,
+                    )
+                };
+                if status != 0 {
+                    return Err(crate::ApiError::new(status));
+                }
+                return Ok(NormalizeValue {
+                    length: output[3],
+                    vec: Float3 {
+                        x: output[0],
+                        y: output[1],
+                        z: output[2],
+                    },
+                });
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = vec;
+                Err(crate::ApiError::new(crate::ErrorCode::UnsupportedHostTarget as i32))
+            }
         }
 
         #[inline]

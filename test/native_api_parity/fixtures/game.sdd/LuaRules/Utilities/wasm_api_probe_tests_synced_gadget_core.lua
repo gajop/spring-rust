@@ -55,6 +55,8 @@ return {
 
 		"math_smooth_step",
 
+		"math_normalize",
+
 		"math_bit_or",
 
 		"math_bit_and",
@@ -711,6 +713,11 @@ return {
 			edge0 = 10,
 			edge1 = 25,
 			x = 17.5,
+		},
+		["math_normalize"] = {
+			x = 5.5,
+			y = 5.5,
+			z = 5.5,
 		},
 		["math_bit_or"] = {
 			a = 512,

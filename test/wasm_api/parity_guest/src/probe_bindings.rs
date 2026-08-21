@@ -34,7 +34,7 @@ pub(crate) mod bindings {
             pub(crate) use spring_wasm_core::owned::los::{Float3, get_closest_valid_position, get_position_los_state, get_radar_error_params, is_pos_in_air_los, is_pos_in_los, is_pos_in_radar, is_unit_in_air_los, is_unit_in_jammer, is_unit_in_los, is_unit_in_radar};
         }
         pub(crate) mod math_extra {
-            pub(crate) use spring_wasm_core::owned::math_extra::{bit_and, bit_bits, bit_inv, bit_or, bit_xor, clamp, diag, erf, hypot, mix, round, sgn, smooth_step};
+            pub(crate) use spring_wasm_core::owned::math_extra::{Float3, bit_and, bit_bits, bit_inv, bit_or, bit_xor, clamp, diag, erf, hypot, mix, normalize, round, sgn, smooth_step};
         }
         pub(crate) mod metal_map {
             pub(crate) use spring_wasm_core::owned::metal_map::{get_metal_amount, get_metal_extraction, get_metal_map_size, set_metal_amount};

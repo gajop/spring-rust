@@ -560,6 +560,18 @@ fn probe_math_smooth_step(fixture: &super::Fixture) -> String {
     format!("WASM_API|math_smooth_step|{fields}")
 }
 
+fn probe_math_normalize(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::math_extra::normalize(crate::bindings::recoil::spring_api::math_extra::Float3 { x: (5.5f32) as f32, y: (5.5f32) as f32, z: (5.5f32) as f32 });
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_f32("x", value.vec.x), encode_f32("y", value.vec.y), encode_f32("z", value.vec.z)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|math_normalize|{fields}")
+}
+
 fn probe_math_bit_or(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::math_extra::bit_or((512u32) as u32, (1024u32) as u32);
     let fields = match result {
@@ -4631,6 +4643,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_math_round(fixture));
     emit(probe_math_erf(fixture));
     emit(probe_math_smooth_step(fixture));
+    emit(probe_math_normalize(fixture));
     emit(probe_math_bit_or(fixture));
     emit(probe_math_bit_and(fixture));
     emit(probe_math_bit_xor(fixture));
