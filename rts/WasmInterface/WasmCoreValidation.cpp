@@ -410,6 +410,10 @@ WasmValidationResult ValidateModule(const std::vector<std::uint8_t>& bytes,
 		result.error = "Core Wasm module must define and export linear memory as memory";
 		return result;
 	}
+	if (std::find(exports.begin(), exports.end(), "SPRING_ENV_MASK") == exports.end()) {
+		result.error = "Core Wasm module must export SPRING_ENV_MASK";
+		return result;
+	}
 	result.valid = true;
 	result.identity.sha512 = HashModule(bytes);
 	result.identity.byteSize = bytes.size();

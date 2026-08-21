@@ -270,6 +270,26 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		return false;
 	}
 	auto* context = wasmtime_store_context(backend->store);
+	recoil::wasm::core::RawExport environmentMarker;
+	const wasm_valkind_t markerResults[] = {WASM_I32};
+	if (!environmentMarker.Resolve(context, backend->instance, "SPRING_ENV_MASK", 15, {},
+			std::span<const wasm_valkind_t>(markerResults, 1), false, error)) {
+		error = "Core Wasm environment marker binding failed: " + error;
+		return false;
+	}
+	wasmtime_val_raw_t markerSlot{};
+	if (!environmentMarker.Call(context, &markerSlot, 1, error)) {
+		error = "Core Wasm environment marker call failed: " + error;
+		return false;
+	}
+	const std::int32_t expectedEnvironmentMask =
+		static_cast<std::int32_t>(1u << static_cast<std::uint32_t>(environment));
+	if (markerSlot.i32 != expectedEnvironmentMask) {
+		error = "Core Wasm environment marker mismatch: manifest=" +
+			std::string(WasmEnvironmentMatrix::Name(environment)) +
+			" guest-mask=" + std::to_string(static_cast<std::uint32_t>(markerSlot.i32));
+		return false;
+	}
 	if (!backend->bindings.Bind(context, backend->instance, error)) {
 		error = "Core Wasm binding failed: " + error;
 		return false;

@@ -320,6 +320,10 @@ fn run() -> Result<()> {
         &render_core_wasm_owned_guest::render(&model),
     )?;
     write(
+        &sdk_dir.join("core_environments.rs"),
+        &render_core_wasm_owned_guest::render_environment_modules(&model),
+    )?;
+    write(
         &sdk_dir.join("core_callins.rs"),
         &render_core_wasm_callin_exec::render_rust(&model),
     )?;

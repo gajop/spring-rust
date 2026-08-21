@@ -7,6 +7,9 @@
 //! layer where wasm32 pointers are passed to host imports as 32-bit linear-
 //! memory offsets. The host validates every offset/length before dereferencing.
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 mod benchmark;
 mod callback;
 mod cob_script;
@@ -56,6 +59,22 @@ pub use vfs::*;
 #[doc(hidden)]
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/core_generated.rs"));
+}
+
+#[cfg(feature = "alloc")]
+pub use generated::{gaia_synced, gaia_unsynced, rules_synced, rules_unsynced, ui};
+
+/// Export the selected guest environment as a small Core-Wasm ABI marker.
+/// Call this once from the crate that chooses one generated environment module.
+#[macro_export]
+macro_rules! export_environment_mask {
+    ($mask:expr) => {
+        #[cfg(target_arch = "wasm32")]
+        #[export_name = "SPRING_ENV_MASK"]
+        pub extern "C" fn __spring_wasm_environment_mask() -> i32 {
+            $mask as i32
+        }
+    };
 }
 
 /// Owned semantic façade for Core guests. The raw/generated namespaces remain
