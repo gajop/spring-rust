@@ -211,7 +211,7 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 		if (includeUi) {
 			// EventHandler discards UI return values for these synced-control
 			// events. The UI callback still runs, but cannot change simulation
-			// aggregation. Keep this identical to the Component path.
+	// aggregation. Keep this identical to the Core path.
 			const bool contributesResult = name != "Explosion" &&
 				name != "UnitUnitCollision" && name != "UnitFeatureCollision";
 			invocations[invocationCount++] = {
@@ -224,7 +224,7 @@ bool WasmInterfaceSystem::DispatchActiveCoreCallin(std::string_view name,
 
 	const bool success = system->DispatchCoreCallin(callin, name,
 		std::span<const CoreCallinInvocation>(invocations.data(), invocationCount),
-		nullptr, nativeResult, handled, error);
+		nativeResult, handled, error);
 	if (!synced && WasmCoreHost::RemoveFaultedUnsynced() != 0) {
 		system->coreModules.erase(std::remove_if(system->coreModules.begin(),
 			system->coreModules.end(), [](const CoreModuleRecord& module) {
@@ -242,39 +242,27 @@ bool WasmInterfaceSystem::HasCoreModules(WasmEnvironment environment) const
 		});
 }
 
-bool WasmInterfaceSystem::HasComponentModules(WasmEnvironment environment) const
-{
-	return std::any_of(modules.begin(), modules.end(),
-		[environment](const std::unique_ptr<WasmModule>& module) {
-			return module->Descriptor().environment == environment;
-		});
-}
-
 bool WasmInterfaceSystem::DispatchCoreCallin(std::string_view name,
 	std::span<const CoreCallinInvocation> invocations,
-	WasmValue* valueResult, void* nativeResult, bool& handled,
+	void* nativeResult, bool& handled,
 	std::string& error)
 {
 	const WasmCoreCallin callin = WasmCoreHost::ResolveCallin(name);
 	if (callin == WasmCoreCallin::Invalid) {
 		handled = false;
-		if (valueResult != nullptr)
-			*valueResult = WasmValue::Unit();
 		error = "unknown Core Wasm callin: " + std::string(name);
 		return false;
 	}
-	return DispatchCoreCallin(callin, name, invocations, valueResult, nativeResult,
+	return DispatchCoreCallin(callin, name, invocations, nativeResult,
 		handled, error);
 }
 
 bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 	std::string_view diagnosticName, std::span<const CoreCallinInvocation> invocations,
-	WasmValue* valueResult, void* nativeResult, bool& handled,
+	void* nativeResult, bool& handled,
 	std::string& error)
 {
 	handled = false;
-	if (valueResult != nullptr)
-		*valueResult = WasmValue::Unit();
 	if (callin == WasmCoreCallin::Invalid) {
 		error = "unknown Core Wasm callin: " + std::string(diagnosticName);
 		return false;
@@ -472,46 +460,24 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 	if (resultKind == CoreResultKind::Bool) {
 		if (nativeResult != nullptr)
 			*static_cast<BoolCallinResult*>(nativeResult) = boolAggregate;
-		if (valueResult != nullptr) {
-			*valueResult = WasmValue::Record({
-				{"value", WasmValue::Bool(boolAggregate.value)},
-			});
-		}
 		return true;
 	}
 
 	if (resultKind == CoreResultKind::Int) {
 		if (nativeResult != nullptr)
 			*static_cast<IntCallinResult*>(nativeResult) = intAggregate;
-		if (valueResult != nullptr) {
-			*valueResult = WasmValue::Record({
-				{"value", WasmValue::I64(intAggregate.value)},
-			});
-		}
 		return true;
 	}
 
 	if (resultKind == CoreResultKind::Damage) {
 		if (nativeResult != nullptr)
 			*static_cast<DamageCallinResult*>(nativeResult) = damageAggregate;
-		if (valueResult != nullptr) {
-			*valueResult = WasmValue::Record({
-				{"newDamage", WasmValue::F64(damageAggregate.newDamage)},
-				{"impulseMult", WasmValue::F64(damageAggregate.impulseMult)},
-			});
-		}
 		return true;
 	}
 
 	if (resultKind == CoreResultKind::AllowUnitCreation) {
 		if (nativeResult != nullptr)
 			*static_cast<AllowUnitCreationResult*>(nativeResult) = creationAggregate;
-		if (valueResult != nullptr) {
-			*valueResult = WasmValue::Record({
-				{"allow", WasmValue::Bool(creationAggregate.allow)},
-				{"dropOrder", WasmValue::Bool(creationAggregate.dropOrder)},
-			});
-		}
 		return true;
 	}
 
@@ -523,14 +489,9 @@ bool WasmInterfaceSystem::DispatchCoreCallin(WasmCoreCallin callin,
 			typedResult->error = nullptr;
 			typedResult->value = storage.c_str();
 		}
-		// Do not construct a WasmValue solely for the production Core path.
-		// NativeInterface consumers use nativeResult; the generic value path can
-		// remain Unit until it has an independent need for string conversion.
 		return true;
 	}
 
-	// OpaqueFirst has already written the first contributing native result in
-	// place. WasmValue conversion is intentionally unavailable for that generic
-	// path; production Core dispatch uses nativeResult directly.
+	// OpaqueFirst has already written the first contributing native result in place.
 	return true;
 }

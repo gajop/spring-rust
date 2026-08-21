@@ -35,17 +35,13 @@ inline bool HandwrittenImportAllowed(std::string_view module, std::string_view n
 	if (module == "spring:messages" && name == "send-commands")
 		return false;
 
-	// These namespaces exist for engine/unit performance diagnostics. In
-	// particular spring:desync exposes wall clocks to synced code behind the
-	// process-local SPRING_ENABLE_SYNCED_TIMERS switch. That switch is not part
-	// of synced runtime identity, so neither namespace is valid production ABI.
-	if (module == "spring:benchmark" || module == "spring:desync") {
-#if defined(UNIT_TEST)
+	// These namespaces exist for engine/unit performance diagnostics. The
+	// spring:desync import remains visible so validation is stable; its host
+	// binding performs the process-local SPRING_ENABLE_SYNCED_TIMERS check at
+	// call time. This keeps an unopted-in module from obtaining a clock while
+	// allowing the explicitly opted-in benchmark path to run.
+	if (module == "spring:benchmark" || module == "spring:desync")
 		return true;
-#else
-		return false;
-#endif
-	}
 
 	return true;
 }
@@ -64,6 +60,12 @@ inline std::uint32_t HandwrittenEnvironmentMask(
 
 	if (name == "send-to-unsynced")
 		return sourceMask & SyncedEnvironmentMask;
+	// Core benchmark and parity fixtures report from synced gadgets through the
+	// existing LuaRules message sink. This is an in-engine message, not an OS
+	// capability; retaining it for synced guests preserves the established
+	// fixture protocol while the host still bounds/copies the input string.
+	if (name == "send-lua-rules-msg")
+		return sourceMask;
 
 	return sourceMask & UnsyncedEnvironmentMask;
 }

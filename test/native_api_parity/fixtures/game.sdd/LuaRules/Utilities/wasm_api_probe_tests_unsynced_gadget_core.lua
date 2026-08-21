@@ -11,6 +11,8 @@ return {
 
 		"get_player_statistics",
 
+		"get_prev_frame_sync_checksum",
+
 		"get_box_selection_by_engine",
 
 		"get_build_facing",
@@ -34,6 +36,14 @@ return {
 		"is_unit_in_view",
 
 		"is_unit_icon",
+
+		"get_visible_units",
+
+		"get_features_in_screen_rectangle",
+
+		"get_render_units",
+
+		"get_render_units_draw_flag_changed",
 
 		"get_game_seconds_interpolated",
 
@@ -91,6 +101,10 @@ return {
 
 		"get_feature_always_update_matrix",
 
+		"get_render_features",
+
+		"get_render_features_draw_flag_changed",
+
 		"custom_palette_color",
 
 		"unit_palette_index",
@@ -122,6 +136,23 @@ return {
 			rotValRng = 15.0,
 			rotVelRng = 7.5,
 			rotAccRng = 4.0,
+		},
+		["get_visible_units"] = {
+			radius = 0,
+			includeIcons = true,
+		},
+		["get_features_in_screen_rectangle"] = {
+			left = 0,
+			top = 0,
+			right = 4096,
+			bottom = 4096,
+		},
+		["get_render_units"] = {
+			drawMask = 0,
+			sendMask = false,
+		},
+		["get_render_units_draw_flag_changed"] = {
+			sendMask = false,
 		},
 		["box_selection_by_engine"] = {
 			enabled = false,
@@ -155,6 +186,13 @@ return {
 		},
 		["get_unit_view_position"] = {
 			midPos = false,
+		},
+		["get_render_features"] = {
+			drawMask = 0,
+			sendMask = false,
+		},
+		["get_render_features_draw_flag_changed"] = {
+			sendMask = false,
 		},
 		["custom_palette_color"] = {
 			index = 4,

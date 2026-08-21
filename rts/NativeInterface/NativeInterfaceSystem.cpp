@@ -14,7 +14,6 @@
 
 #include "NativeInterface.h"
 #include "NativeInterfaceEventClient.h"
-#include "NativeInterfaceWasmAdapter.h"
 #include "NativeModulePath.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Game/GameSetup.h"
@@ -133,7 +132,6 @@ namespace {
 class NativeInterfaceSystem::Impl {
 public:
 	NativeInterface nativeInterface;
-	NativeInterfaceWasmAdapter wasmAdapter{&nativeInterface};
 	std::unique_ptr<SharedLib> sharedLib;
 	std::unique_ptr<NativeInterfaceEventClient> eventClient;
 	std::vector<std::unique_ptr<NativeInterfaceEventClient>> benchmarkEventClients;
@@ -186,7 +184,7 @@ public:
 		nativeInterface.tracing = &TRACING_API;
 		nativeInterface.utils = &UTILS_API;
 		nativeInterface.player = &PLAYER_API;
-		wasmSystem = std::make_unique<WasmInterfaceSystem>(&wasmAdapter,
+		wasmSystem = std::make_unique<WasmInterfaceSystem>(&nativeInterface,
 			WasmRuntimeConfigFromModOptions());
 	}
 

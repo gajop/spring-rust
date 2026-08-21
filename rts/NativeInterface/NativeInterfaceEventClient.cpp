@@ -2,8 +2,6 @@
 
 #include "NativeInterfaceEventClient.h"
 
-#include <array>
-#include <cctype>
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -37,11 +35,8 @@
 #include "System/Platform/SharedLib.h"
 #include "System/Rectangle.h"
 #include "System/float3.h"
-#include "WasmInterface/WasmEnvironment.h"
 #include "WasmInterface/WasmInterfaceSystem.h"
-#include "WasmInterface/WasmTypedHost.h"
 #include "NativeInterface/WasmUiVisibility.h"
-#include "wasm/generated/WasmHostAdapter.h"
 
 #include <SDL_keyboard.h>
 #include <SDL_keycode.h>
@@ -89,362 +84,6 @@ namespace {
 		};
 	}
 
-	std::string ToWitFieldName(std::string_view value)
-	{
-		std::string result;
-		result.reserve(value.size() + value.size() / 3);
-		for (std::size_t index = 0; index < value.size(); ++index) {
-			const unsigned char character = static_cast<unsigned char>(value[index]);
-			const bool uppercase = std::isupper(character) != 0;
-			const bool previousUppercase = index > 0 &&
-				std::isupper(static_cast<unsigned char>(value[index - 1])) != 0;
-			const bool nextLowercase = index + 1 < value.size() &&
-				std::islower(static_cast<unsigned char>(value[index + 1])) != 0;
-			if (uppercase && index != 0 && (!previousUppercase || nextLowercase))
-				result.push_back('-');
-			result.push_back(static_cast<char>(std::tolower(character)));
-		}
-		return result;
-	}
-
-	const WasmValue* FindWasmField(const WasmValueRecord& record, std::string_view name)
-	{
-		const auto iter = record.find(std::string(name));
-		if (iter != record.end())
-			return &iter->second;
-		const std::string witName = ToWitFieldName(name);
-		for (const auto& [fieldName, fieldValue] : record) {
-			if (fieldName == witName)
-				return &fieldValue;
-		}
-		return nullptr;
-	}
-
-	WasmValue* FindWasmField(WasmValueRecord& record, std::string_view name)
-	{
-		auto iter = record.find(std::string(name));
-		if (iter != record.end())
-			return &iter->second;
-		const std::string witName = ToWitFieldName(name);
-		for (auto& [fieldName, fieldValue] : record) {
-			if (fieldName == witName)
-				return &fieldValue;
-		}
-		return nullptr;
-	}
-
-	bool ReadWasmBoolField(const WasmValueRecord& record, std::string_view name, bool& value)
-	{
-		const WasmValue* field = FindWasmField(record, name);
-		const auto* boolean = field == nullptr ? nullptr : std::get_if<bool>(&field->storage);
-		if (boolean == nullptr)
-			return false;
-		value = *boolean;
-		return true;
-	}
-
-	bool ReadWasmFloatField(const WasmValueRecord& record, std::string_view name, float& value)
-	{
-		const WasmValue* field = FindWasmField(record, name);
-		const auto* number = field == nullptr ? nullptr : std::get_if<double>(&field->storage);
-		if (number == nullptr || !std::isfinite(*number) ||
-			*number < -std::numeric_limits<float>::max() ||
-			*number > std::numeric_limits<float>::max())
-			return false;
-		value = static_cast<float>(*number);
-		return true;
-	}
-
-	bool ReadWasmIntField(const WasmValueRecord& record, std::string_view name, int& value)
-	{
-		const WasmValue* field = FindWasmField(record, name);
-		if (field == nullptr)
-			return false;
-		if (const auto* signedValue = std::get_if<std::int64_t>(&field->storage)) {
-			if (*signedValue < std::numeric_limits<int>::min() ||
-				*signedValue > std::numeric_limits<int>::max())
-				return false;
-			value = static_cast<int>(*signedValue);
-			return true;
-		}
-		if (const auto* unsignedValue = std::get_if<std::uint64_t>(&field->storage)) {
-			if (*unsignedValue > static_cast<std::uint64_t>(std::numeric_limits<int>::max()))
-				return false;
-			value = static_cast<int>(*unsignedValue);
-			return true;
-		}
-		return false;
-	}
-
-	const WasmValueRecord* WasmResultRecord(const WasmValue& value)
-	{
-		return std::get_if<WasmValueRecord>(&value.storage);
-	}
-
-	bool SetWasmIntField(WasmValueRecord& record, std::string_view name, int value)
-	{
-		WasmValue* field = FindWasmField(record, name);
-		if (field == nullptr)
-			return false;
-		field->storage = static_cast<std::int64_t>(value);
-		return true;
-	}
-
-	void RedactAttacker(WasmValueRecord& record)
-	{
-		int attackerID = -1;
-		if (!ReadWasmIntField(record, "attackerID", attackerID) || attackerID < 0)
-			return;
-
-		const CUnit* attacker = WasmUiVisibility::FindUnit(
-			attackerID, WasmUiVisibility::UnitAccess::Visible);
-		if (attacker == nullptr) {
-			SetWasmIntField(record, "attackerID", -1);
-			SetWasmIntField(record, "attackerDefID", -1);
-			SetWasmIntField(record, "attackerTeam", -1);
-			return;
-		}
-		if (!WasmUiVisibility::IsUnitTyped(attacker))
-			SetWasmIntField(record, "attackerDefID", -1);
-		else if (const UnitDef* def = WasmUiVisibility::EffectiveUnitDef(attacker))
-			SetWasmIntField(record, "attackerDefID", def->id);
-	}
-
-	// The native event client has full-read access so that it can continue to
-	// serve native modules. Wasm UI modules must receive the same filtered
-	// event stream as CLuaUI; this copy is made after native serialization and
-	// before the value enters the UI world.
-	bool SanitizeUiCallin(std::string_view name, WasmValue& value)
-	{
-		// NativeInterface dispatches legacy callin aliases by their source
-		// spelling, while the generated inventory aggregates them under one
-		// canonical query. Apply the visibility rule to both spellings.
-		if (name == "UnitEnteredLos" || name == "UnitEnteredRadar" ||
-			name == "UnitLeftLos" || name == "UnitLeftRadar")
-			name = "UnitLosEvent";
-		else if (name == "UnitCloaked" || name == "UnitDecloaked")
-			name = "UnitCloakEvent";
-		else if (name == "UnitEnteredAir" || name == "UnitEnteredUnderwater" ||
-			name == "UnitEnteredWater" || name == "UnitLeftAir" ||
-			name == "UnitLeftUnderwater" || name == "UnitLeftWater")
-			name = "UnitMovementClassEvent";
-		else if (name == "UnitArrivedAtGoal" || name == "UnitMoveFailed" ||
-			name == "UnitMoved")
-			name = "UnitMoveEvent";
-
-		auto* record = std::get_if<WasmValueRecord>(&value.storage);
-		if (record == nullptr)
-			return true;
-
-		auto unitTeamVisible = [&]() {
-			int team = -1;
-			return ReadWasmIntField(*record, "unitTeam", team) &&
-				WasmUiVisibility::IsTeamVisible(team);
-		};
-		auto eitherTeamVisible = [&](std::string_view first, std::string_view second) {
-			int firstTeam = -1;
-			int secondTeam = -1;
-			const bool haveFirst = ReadWasmIntField(*record, first, firstTeam);
-			const bool haveSecond = ReadWasmIntField(*record, second, secondTeam);
-			return (haveFirst && WasmUiVisibility::IsTeamVisible(firstTeam)) ||
-				(haveSecond && WasmUiVisibility::IsTeamVisible(secondTeam));
-		};
-		auto visibleUnit = [&](std::string_view field) {
-			int unitID = -1;
-			return ReadWasmIntField(*record, field, unitID) && unitID >= 0 &&
-				WasmUiVisibility::FindUnit(unitID, WasmUiVisibility::UnitAccess::Visible) != nullptr;
-		};
-		auto visiblePosition = [&]() {
-			const WasmValue* positionValue = FindWasmField(*record, "pos");
-			const auto* position = positionValue == nullptr ? nullptr :
-				std::get_if<WasmValueRecord>(&positionValue->storage);
-			if (position == nullptr)
-				return false;
-			float x = 0.0f;
-			float y = 0.0f;
-			float z = 0.0f;
-			return ReadWasmFloatField(*position, "x", x) &&
-				ReadWasmFloatField(*position, "y", y) &&
-				ReadWasmFloatField(*position, "z", z) &&
-				WasmUiVisibility::IsPositionVisible(float3{x, y, z});
-		};
-
-		if (name == "DefaultCommand") {
-			int unitID = -1;
-			int featureID = -1;
-			if (ReadWasmIntField(*record, "unitID", unitID) && unitID >= 0 && !visibleUnit("unitID"))
-				return false;
-			if (ReadWasmIntField(*record, "featureID", featureID) && featureID >= 0 &&
-				WasmUiVisibility::FindFeature(featureID) == nullptr)
-				return false;
-			return true;
-		}
-
-		if (name == "WorldTooltip") {
-			int kind = 0;
-			ReadWasmIntField(*record, "kind", kind);
-			if (kind == 1)
-				return visibleUnit("unitID");
-			if (kind == 2) {
-				int featureID = -1;
-				return ReadWasmIntField(*record, "featureID", featureID) &&
-					WasmUiVisibility::FindFeature(featureID) != nullptr;
-			}
-			if (kind == 0) {
-				int unitID = -1;
-				int featureID = -1;
-				const bool unitOK = !ReadWasmIntField(*record, "unitID", unitID) ||
-					unitID < 0 || visibleUnit("unitID");
-				const bool featureOK = !ReadWasmIntField(*record, "featureID", featureID) ||
-					featureID < 0 || WasmUiVisibility::FindFeature(featureID) != nullptr;
-				return unitOK && featureOK;
-			}
-			return true;
-		}
-
-		if (name == "FeatureCreated" || name == "FeatureDestroyed") {
-			int allyTeam = -1;
-			if (!ReadWasmIntField(*record, "allyTeamID", allyTeam))
-				return false;
-			return allyTeam < 0 || WasmUiVisibility::IsAllyTeamVisible(allyTeam);
-		}
-
-		if (name == "FeatureMoved" || name == "FeatureDamaged") {
-			int featureID = -1;
-			if (!ReadWasmIntField(*record, "featureID", featureID))
-				return false;
-			const CFeature* feature = WasmUiVisibility::FindFeature(featureID);
-			if (feature == nullptr ||
-				(feature->allyteam >= 0 && !WasmUiVisibility::IsAllyTeamVisible(feature->allyteam)))
-				return false;
-			if (name == "FeatureDamaged")
-				RedactAttacker(*record);
-			return true;
-		}
-
-		if (name == "ProjectileCreated" || name == "ProjectileDestroyed" ||
-			name == "ProjectileEvent") {
-			int ownerID = -1;
-			if (!ReadWasmIntField(*record, "ownerID", ownerID) || ownerID < 0)
-				return true;
-			return WasmUiVisibility::FindUnit(ownerID, WasmUiVisibility::UnitAccess::Ally) != nullptr;
-		}
-
-		if (name == "Explosion") {
-			if (!WasmUiVisibility::FullRead() && !visiblePosition())
-				return false;
-			int ownerID = -1;
-			if (ReadWasmIntField(*record, "ownerID", ownerID) && ownerID >= 0 &&
-				WasmUiVisibility::FindUnit(ownerID, WasmUiVisibility::UnitAccess::Visible) == nullptr)
-				SetWasmIntField(*record, "ownerID", -1);
-			int projectileID = -1;
-			if (ReadWasmIntField(*record, "projectileID", projectileID) && projectileID >= 0 &&
-				WasmUiVisibility::FindProjectile(projectileID) == nullptr)
-				SetWasmIntField(*record, "projectileID", -1);
-			return true;
-		}
-
-		if (name == "UnitLosEvent") {
-			int allyTeam = -1;
-			if (!ReadWasmIntField(*record, "allyTeam", allyTeam) ||
-				!WasmUiVisibility::IsAllyTeamVisible(allyTeam))
-				return false;
-			if (!WasmUiVisibility::FullRead()) {
-				SetWasmIntField(*record, "allyTeam", -1);
-				SetWasmIntField(*record, "unitDefID", -1);
-			}
-			return true;
-		}
-
-		if (name == "UnitSeismicPing") {
-			int unitID = -1;
-			int allyTeam = -1;
-			if (!ReadWasmIntField(*record, "unitID", unitID) ||
-				!ReadWasmIntField(*record, "allyTeam", allyTeam) ||
-				!WasmUiVisibility::IsAllyTeamVisible(allyTeam))
-				return false;
-			if (!WasmUiVisibility::FullRead()) {
-				// LuaUI receives radar pings for its ally team, including pings
-				// emitted by enemy units.  It suppresses a ping only when the
-				// source unit is already in LOS, and omits the source identity
-				// for the non-full-read form.
-				const CUnit* unit = WasmUiVisibility::FindUnit(
-					unitID, WasmUiVisibility::UnitAccess::Visible);
-				if (unit != nullptr && WasmUiVisibility::IsUnitInLos(unit))
-					return false;
-				SetWasmIntField(*record, "allyTeam", -1);
-				SetWasmIntField(*record, "unitID", -1);
-				SetWasmIntField(*record, "unitDefID", -1);
-			}
-			return true;
-		}
-
-		if (name == "UnitLoaded" || name == "UnitUnloaded")
-			return eitherTeamVisible("unitTeam", "transportTeam");
-
-		if (name == "UnitTaken") {
-			int team = -1;
-			return ReadWasmIntField(*record, "oldTeam", team) &&
-				WasmUiVisibility::IsTeamVisible(team);
-		}
-		if (name == "UnitGiven") {
-			int team = -1;
-			return ReadWasmIntField(*record, "newTeam", team) &&
-				WasmUiVisibility::IsTeamVisible(team);
-		}
-
-		if (name == "UnitFinished" || name == "UnitReverseBuilt" ||
-			name == "UnitConstructionDecayed" || name == "UnitIdle" ||
-			name == "UnitCommand" || name == "UnitCmdDone" ||
-			name == "UnitStunned" || name == "UnitExperience" ||
-			name == "UnitHarvestStorageFull" || name == "UnitMovementClassEvent" ||
-			name == "UnitCloakEvent" || name == "UnitMoveEvent" ||
-			name == "StockpileChanged")
-			return unitTeamVisible();
-
-		if (name == "UnitDestroyed" || name == "UnitDamaged") {
-			if (!unitTeamVisible())
-				return false;
-			RedactAttacker(*record);
-			return true;
-		}
-
-		if (name == "UnitCreated") {
-			if (!unitTeamVisible())
-				return false;
-			int builderID = -1;
-			if (ReadWasmIntField(*record, "builderID", builderID) && builderID >= 0 &&
-				!visibleUnit("builderID"))
-				SetWasmIntField(*record, "builderID", -1);
-			return true;
-		}
-
-		if (name == "UnitFromFactory") {
-			if (!unitTeamVisible())
-				return false;
-			int factoryID = -1;
-			if (ReadWasmIntField(*record, "factoryID", factoryID) && factoryID >= 0 &&
-				!visibleUnit("factoryID")) {
-				SetWasmIntField(*record, "factoryID", -1);
-				SetWasmIntField(*record, "factoryDefID", -1);
-			}
-			return true;
-		}
-
-		if (name == "RenderUnitDestroyed")
-			return unitTeamVisible();
-
-		if (name == "UnitUnitCollision")
-			return visibleUnit("colliderID") && visibleUnit("collideeID");
-		if (name == "UnitFeatureCollision") {
-			int featureID = -1;
-			return visibleUnit("colliderID") &&
-				ReadWasmIntField(*record, "collideeID", featureID) &&
-				WasmUiVisibility::FindFeature(featureID) != nullptr;
-		}
-
-		return true;
-	}
 
 	class ScopedNativeSyncedCode {
 	public:
@@ -480,10 +119,10 @@ NativeInterfaceEventClient::NativeInterfaceEventClient(NativeInterface* nativeIn
 }
 
 bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
-	const void* query, bool synced, WasmValue* result, void* nativeResult)
+	const void* query, bool synced, void* nativeResult)
 {
-	// Core is the production transport. Supported Core callins run before the
-	// historical typed transport and before any WasmValue serialization.
+	// Core is the sole Wasm transport. Supported Core callins run before the
+	// native module callback so the two implementations can contribute results.
 	if (m_wasmSystem != nullptr) {
 		bool coreHandled = false;
 		std::string coreError;
@@ -496,201 +135,56 @@ bool NativeInterfaceEventClient::DispatchWasmCallin(std::string_view name,
 			return false;
 		}
 		if (coreHandled) {
-			if (result != nullptr)
-				*result = WasmValue::Unit();
-			return nativeResult != nullptr;
+			return true;
 		}
 	}
 
-	// The typed Rust host is an alternative transport for the same guests, so
-	// it replaces this dispatch rather than running alongside it.  It handles
-	// only the callins the benchmark table needs and reports false otherwise,
-	// leaving those on the C API path.
-	if (WasmTypedHost::Enabled() && WasmTypedHost::AnyActive()) {
-		std::string typedError;
-		if (WasmTypedHost::DispatchCallin(name, query, synced, nativeResult, typedError)) {
-			if (!typedError.empty())
-				LOG_L(L_WARNING, "%s", typedError.c_str());
-			// Direct transports write value results into nativeResult. Mark a
-			// supplied WasmValue as Unit so callers can distinguish that case.
-			if (result != nullptr)
-				*result = WasmValue::Unit();
-			return nativeResult != nullptr;
-		}
-	}
-
-	if (m_wasmSystem == nullptr)
-		return false;
-
-	static constexpr std::array<WasmEnvironment, 2> syncedEnvironments{
-		WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced};
-	static constexpr std::array<WasmEnvironment, 2> unsyncedEnvironments{
-		WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced};
-	const auto& primaryEnvironments = synced ? syncedEnvironments : unsyncedEnvironments;
-	if (!m_wasmSystem->HasComponentModules(primaryEnvironments[0]) &&
-		!m_wasmSystem->HasComponentModules(primaryEnvironments[1]) &&
-		!m_wasmSystem->HasComponentModules(WasmEnvironment::UI))
-		return false;
-
-	WasmValue value;
-	std::string conversionError;
-	if (!recoil::wasm::generated::SerializeCallinQuery(name, query, value, conversionError)) {
-		// Manual/opaque callin shapes are intentionally skipped until their
-		// explicit adapter exists. A malformed generated conversion is still
-		// useful diagnostic information and should not be silent.
-		if (conversionError != "native callin query requires an explicit Wasm serializer") {
-			LOG_L(L_WARNING, "Could not serialize native callin %s for Wasm: %s",
-				std::string(name).c_str(), conversionError.c_str());
-		}
-		return false;
-	}
-	// UI is an unsynced environment, but LuaUI also receives lifecycle events
-	// that are dispatched from the engine's synced path (for example
-	// GameStart). Give it an owned, visibility-filtered copy of the query;
-	// the generated callin environment mask remains authoritative.
-	std::vector<WasmInterfaceSystem::CallinInvocation> invocations;
-	invocations.reserve(3);
-	// An environment with no Component module needs no query copy at all.
-	for (const WasmEnvironment environment : primaryEnvironments) {
-		if (!m_wasmSystem->HasComponentModules(environment))
-			continue;
-		invocations.push_back({environment, {value}});
-	}
-	if (m_wasmSystem->HasComponentModules(WasmEnvironment::UI)) {
-		WasmUiVisibility::ScopedContext uiContext(true);
-		WasmValue uiValue = value;
-		// EventHandler discards return values from unsynced Lua clients for
-		// these synced control callins.  Keep dispatching the UI callback for
-		// parity, but do not let it influence the simulation result.
-		const bool uiContributesResult = name != "Explosion" &&
-			name != "UnitUnitCollision" && name != "UnitFeatureCollision";
-		if (SanitizeUiCallin(name, uiValue))
-			invocations.push_back({WasmEnvironment::UI, {std::move(uiValue)}, uiContributesResult});
-	}
-	WasmValue aggregate;
-	std::string error;
-	if (!m_wasmSystem->DispatchCallin(name, invocations, aggregate, error)) {
-		if (!error.empty())
-			LOG_L(L_ERROR, "Wasm callin %s failed: %s", std::string(name).c_str(), error.c_str());
-		return false;
-	}
-	if (aggregate.IsUnit())
-		return false;
-	if (result != nullptr)
-		*result = std::move(aggregate);
-	return true;
+	return false;
 }
 
 bool NativeInterfaceEventClient::DispatchWasmBoolCallin(std::string_view name,
 	const void* query, bool synced, bool& result)
 {
-	WasmValue wasmResult;
 	BoolCallinResult directResult = {.error = nullptr, .value = false};
-	if (!DispatchWasmCallin(name, query, synced, &wasmResult, &directResult))
+	if (!DispatchWasmCallin(name, query, synced, &directResult))
 		return false;
-	if (wasmResult.IsUnit()) {
-		if (directResult.error != nullptr) {
-			LOG_L(L_WARNING, "Wasm callin %s returned a direct boolean error: %s",
-				std::string(name).c_str(), directResult.error->message);
-			return false;
-		}
-		result = directResult.value;
-		return true;
-	}
-	const auto* record = std::get_if<WasmValueRecord>(&wasmResult.storage);
-	if (record == nullptr) {
-		LOG_L(L_WARNING, "Wasm callin %s returned a non-record boolean result",
-			std::string(name).c_str());
+	if (directResult.error != nullptr) {
+		LOG_L(L_WARNING, "Wasm callin %s returned a direct boolean error: %s",
+			std::string(name).c_str(), directResult.error->message);
 		return false;
 	}
-	const auto iter = record->find("value");
-	const auto* value = iter == record->end() ? nullptr :
-		std::get_if<bool>(&iter->second.storage);
-	if (value == nullptr) {
-		LOG_L(L_WARNING, "Wasm callin %s returned an invalid boolean result",
-			std::string(name).c_str());
-		return false;
-	}
-	result = *value;
+	result = directResult.value;
 	return true;
 }
 
 bool NativeInterfaceEventClient::DispatchWasmStringCallin(std::string_view name,
 	const void* query, bool synced, std::string& result)
 {
-	WasmValue wasmResult;
 	StringCallinResult directResult = {.error = nullptr, .value = nullptr};
-	if (!DispatchWasmCallin(name, query, synced, &wasmResult, &directResult))
+	if (!DispatchWasmCallin(name, query, synced, &directResult))
 		return false;
-	if (wasmResult.IsUnit()) {
-		if (directResult.error != nullptr) {
-			LOG_L(L_WARNING, "Wasm callin %s returned a direct string error: %s",
-				std::string(name).c_str(), directResult.error->message);
-			return false;
-		}
-		result = directResult.value == nullptr ? std::string{} : std::string(directResult.value);
-		return true;
-	}
-	const auto* record = std::get_if<WasmValueRecord>(&wasmResult.storage);
-	if (record == nullptr) {
-		LOG_L(L_WARNING, "Wasm callin %s returned a non-record string result",
-			std::string(name).c_str());
+	if (directResult.error != nullptr) {
+		LOG_L(L_WARNING, "Wasm callin %s returned a direct string error: %s",
+			std::string(name).c_str(), directResult.error->message);
 		return false;
 	}
-	const auto iter = record->find("value");
-	const auto* value = iter == record->end() ? nullptr :
-		std::get_if<std::string>(&iter->second.storage);
-	if (value == nullptr) {
-		LOG_L(L_WARNING, "Wasm callin %s returned an invalid string result",
-			std::string(name).c_str());
-		return false;
-	}
-	result = *value;
+	result = directResult.value == nullptr ? std::string{} : std::string(directResult.value);
 	return true;
 }
 
 bool NativeInterfaceEventClient::DispatchWasmIntegerCallin(std::string_view name,
 	const void* query, bool synced, int& result)
 {
-	WasmValue wasmResult;
 	IntCallinResult directResult = {.error = nullptr, .value = 0};
-	if (!DispatchWasmCallin(name, query, synced, &wasmResult, &directResult))
+	if (!DispatchWasmCallin(name, query, synced, &directResult))
 		return false;
-	if (wasmResult.IsUnit()) {
-		if (directResult.error != nullptr) {
-			LOG_L(L_WARNING, "Wasm callin %s returned a direct integer error: %s",
-				std::string(name).c_str(), directResult.error->message);
-			return false;
-		}
-		result = directResult.value;
-		return true;
-	}
-	const auto* record = std::get_if<WasmValueRecord>(&wasmResult.storage);
-	if (record == nullptr) {
-		LOG_L(L_WARNING, "Wasm callin %s returned a non-record integer result",
-			std::string(name).c_str());
+	if (directResult.error != nullptr) {
+		LOG_L(L_WARNING, "Wasm callin %s returned a direct integer error: %s",
+			std::string(name).c_str(), directResult.error->message);
 		return false;
 	}
-	const auto iter = record->find("value");
-	if (iter == record->end()) {
-		LOG_L(L_WARNING, "Wasm callin %s returned an integer result without a value",
-			std::string(name).c_str());
-		return false;
-	}
-	if (const auto* value = std::get_if<std::int64_t>(&iter->second.storage)) {
-		if (*value < std::numeric_limits<int>::min() || *value > std::numeric_limits<int>::max())
-			return false;
-		result = static_cast<int>(*value);
-		return true;
-	}
-	if (const auto* value = std::get_if<std::uint64_t>(&iter->second.storage)) {
-		if (*value > static_cast<std::uint64_t>(std::numeric_limits<int>::max()))
-			return false;
-		result = static_cast<int>(*value);
-		return true;
-	}
-	LOG_L(L_WARNING, "Wasm callin %s returned a non-integer value", std::string(name).c_str());
-	return false;
+	result = directResult.value;
+	return true;
 }
 
 void NativeInterfaceEventClient::LoadSymbols() {
@@ -1525,25 +1019,14 @@ std::pair<bool, bool> NativeInterfaceEventClient::AllowUnitCreation(const UnitDe
 		.buildFacing = (buildInfo != nullptr) ? buildInfo->buildFacing : 0,
 	};
 	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_allowunitcreation");
-	WasmValue wasmResult;
-	// Core and the typed reference transport write here instead of wasmResult.
 	AllowUnitCreationResult directResult = {.allow = true, .dropOrder = true};
 	const bool hasWasmResult = DispatchWasmCallin("AllowUnitCreation", &query, true,
-		&wasmResult, &directResult);
+		&directResult);
 	spring::benchmark_callins::End(wasmToken);
-	bool wasmAllow = true;
-	bool wasmDropOrder = true;
-	const WasmValueRecord* wasmRecord = hasWasmResult ? WasmResultRecord(wasmResult) : nullptr;
-	bool hasWasmFields = wasmRecord != nullptr &&
-		ReadWasmBoolField(*wasmRecord, "allow", wasmAllow) &&
-		ReadWasmBoolField(*wasmRecord, "dropOrder", wasmDropOrder);
-	if (!hasWasmFields && hasWasmResult && wasmResult.IsUnit()) {
-		wasmAllow = directResult.allow;
-		wasmDropOrder = directResult.dropOrder;
-		hasWasmFields = true;
-	}
+	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_AllowUnitCreationFuncPtr == nullptr)
-		return hasWasmFields ? std::pair{wasmAllow, wasmDropOrder} : std::pair{true, true};
+		return hasWasmFields ? std::pair{directResult.allow, directResult.dropOrder} :
+			std::pair{true, true};
 
 	const auto nativeToken = spring::benchmark_callins::Begin("native", "callin_allowunitcreation");
 	AllowUnitCreationResult result = {.allow = true, .dropOrder = true};
@@ -2288,18 +1771,17 @@ bool NativeInterfaceEventClient::AllowWeaponTarget(unsigned int attackerID, unsi
 		.hasTargetPriority = (targetPriority != nullptr),
 		.targetPriority = (targetPriority != nullptr) ? *targetPriority : 0.0f,
 	};
-	WasmValue wasmResult;
-	const bool hasWasmResult = DispatchWasmCallin("AllowWeaponTarget", &query, true, &wasmResult);
-	bool wasmAllowed = true;
-	float wasmPriority = query.targetPriority;
-	const WasmValueRecord* wasmRecord = hasWasmResult ? WasmResultRecord(wasmResult) : nullptr;
-	const bool hasWasmFields = wasmRecord != nullptr &&
-		ReadWasmBoolField(*wasmRecord, "allowed", wasmAllowed) &&
-		ReadWasmFloatField(*wasmRecord, "targetPriority", wasmPriority);
+	AllowWeaponTargetResult directResult = {
+		.allowed = true,
+		.targetPriority = query.targetPriority,
+	};
+	const bool hasWasmResult = DispatchWasmCallin("AllowWeaponTarget", &query, true,
+		&directResult);
+	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_AllowWeaponTargetFuncPtr == nullptr) {
 		if (hasWasmFields && targetPriority != nullptr)
-			*targetPriority = wasmPriority;
-		return hasWasmFields ? wasmAllowed : true;
+			*targetPriority = directResult.targetPriority;
+		return hasWasmFields ? directResult.allowed : true;
 	}
 
 	AllowWeaponTargetResult result = {
@@ -2342,33 +1824,21 @@ bool NativeInterfaceEventClient::UnitPreDamaged(const CUnit* unit, const CUnit* 
 		.attackerTeam = (attacker != nullptr) ? attacker->team : -1,
 	};
 	const auto wasmToken = spring::benchmark_callins::Begin("wasm", "callin_unitpredamaged");
-	WasmValue wasmResult;
-	// Core and the typed reference transport write here instead of wasmResult.
 	DamageCallinResult directResult = {
 		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
 		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
 	};
 	const bool hasWasmResult = DispatchWasmCallin("UnitPreDamaged", &query, true,
-		&wasmResult, &directResult);
+		&directResult);
 	spring::benchmark_callins::End(wasmToken);
-	float wasmDamage = (newDamage != nullptr) ? *newDamage : damage;
-	float wasmImpulse = (impulseMult != nullptr) ? *impulseMult : 1.0f;
-	const WasmValueRecord* wasmRecord = hasWasmResult ? WasmResultRecord(wasmResult) : nullptr;
-	bool hasWasmFields = wasmRecord != nullptr &&
-		ReadWasmFloatField(*wasmRecord, "newDamage", wasmDamage) &&
-		ReadWasmFloatField(*wasmRecord, "impulseMult", wasmImpulse);
-	if (!hasWasmFields && hasWasmResult && wasmResult.IsUnit()) {
-		wasmDamage = directResult.newDamage;
-		wasmImpulse = directResult.impulseMult;
-		hasWasmFields = true;
-	}
+	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_UnitPreDamagedFuncPtr == nullptr) {
 		if (hasWasmFields) {
 			if (newDamage != nullptr)
-				*newDamage = wasmDamage;
+				*newDamage = directResult.newDamage;
 			if (impulseMult != nullptr)
-				*impulseMult = wasmImpulse;
-			return wasmDamage == 0.0f && wasmImpulse == 0.0f;
+				*impulseMult = directResult.impulseMult;
+			return directResult.newDamage == 0.0f && directResult.impulseMult == 0.0f;
 		}
 		return false;
 	}
@@ -2398,21 +1868,20 @@ bool NativeInterfaceEventClient::FeaturePreDamaged(const CFeature* feature, cons
 		.attackerDefID = (attacker != nullptr && attacker->unitDef != nullptr) ? attacker->unitDef->id : -1,
 		.attackerTeam = (attacker != nullptr) ? attacker->team : -1,
 	};
-	WasmValue wasmResult;
-	const bool hasWasmResult = DispatchWasmCallin("FeaturePreDamaged", &query, true, &wasmResult);
-	float wasmDamage = (newDamage != nullptr) ? *newDamage : damage;
-	float wasmImpulse = (impulseMult != nullptr) ? *impulseMult : 1.0f;
-	const WasmValueRecord* wasmRecord = hasWasmResult ? WasmResultRecord(wasmResult) : nullptr;
-	const bool hasWasmFields = wasmRecord != nullptr &&
-		ReadWasmFloatField(*wasmRecord, "newDamage", wasmDamage) &&
-		ReadWasmFloatField(*wasmRecord, "impulseMult", wasmImpulse);
+	DamageCallinResult directResult = {
+		.newDamage = (newDamage != nullptr) ? *newDamage : damage,
+		.impulseMult = (impulseMult != nullptr) ? *impulseMult : 1.0f,
+	};
+	const bool hasWasmResult = DispatchWasmCallin("FeaturePreDamaged", &query, true,
+		&directResult);
+	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_FeaturePreDamagedFuncPtr == nullptr) {
 		if (hasWasmFields) {
 			if (newDamage != nullptr)
-				*newDamage = wasmDamage;
+				*newDamage = directResult.newDamage;
 			if (impulseMult != nullptr)
-				*impulseMult = wasmImpulse;
-			return wasmDamage == 0.0f && wasmImpulse == 0.0f;
+				*impulseMult = directResult.impulseMult;
+			return directResult.newDamage == 0.0f && directResult.impulseMult == 0.0f;
 		}
 		return false;
 	}
@@ -2747,14 +2216,10 @@ bool NativeInterfaceEventClient::DefaultCommand(const CUnit* unit, const CFeatur
 		.featureID = (feature != nullptr) ? feature->id : -1,
 		.currentCommand = cmd
 	};
-	WasmValue wasmResult;
-	const bool hasWasmResult = DispatchWasmCallin("DefaultCommand", &query, false, &wasmResult);
-	bool wasmValue = false;
-	int wasmCommand = cmd;
-	const WasmValueRecord* wasmRecord = hasWasmResult ? WasmResultRecord(wasmResult) : nullptr;
-	const bool hasWasmFields = wasmRecord != nullptr &&
-		ReadWasmBoolField(*wasmRecord, "value", wasmValue) &&
-		ReadWasmIntField(*wasmRecord, "command", wasmCommand);
+	DefaultCommandResult directResult = {.error = nullptr, .value = false, .command = cmd};
+	const bool hasWasmResult = DispatchWasmCallin("DefaultCommand", &query, false,
+		&directResult);
+	const bool hasWasmFields = hasWasmResult && directResult.error == nullptr;
 	if (m_DefaultCommandFuncPtr) {
 		DefaultCommandResult result = {.value = false, .command = cmd};
 		m_DefaultCommandFuncPtr(m_nativeInterface, m_moduleData, &query, &result);
@@ -2762,9 +2227,9 @@ bool NativeInterfaceEventClient::DefaultCommand(const CUnit* unit, const CFeatur
 			cmd = result.command;
 		return result.value;
 	}
-	if (hasWasmFields && wasmValue)
-		cmd = wasmCommand;
-	return hasWasmFields && wasmValue;
+	if (hasWasmFields && directResult.value)
+		cmd = directResult.command;
+	return hasWasmFields && directResult.value;
 }
 
 void NativeInterfaceEventClient::ActiveCommandChanged(const SCommandDescription* cmdDesc) {

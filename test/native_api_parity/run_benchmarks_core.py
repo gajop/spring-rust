@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Run the established Lua/native/Component benchmark suite with Core Wasm.
+"""Run the established Lua/native benchmark suite with Core Wasm.
 
 This layers on run_benchmarks.py instead of forking the experiment. Existing
-fixture generation, process options, validation, scales, test names and report
-formatters remain authoritative; this file adds one raw Core-Wasm transport.
+fixture generation, process options, validation, scales and test names remain
+authoritative; this file supplies the Core-Wasm backend and report.
 """
 
 from __future__ import annotations
@@ -41,11 +41,9 @@ CORE_UPDATE = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.update.
 CORE_MEMORY = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.memory.wasm")
 CORE_DRAW = CORE_RAW.with_name("recoil_wasm_core_benchmark_suite_guest.draw.wasm")
 
-# Append Core so historical raw backend columns retain their order.
-base.BACKENDS = (*base.BACKENDS, "wasm_core")
-
-# The report always shows every backend. base.BACKENDS is narrowed below to the
-# ones this run actually measures; the rest come from the frozen store.
+# The Component and typed transports were retired. Keep the report focused on
+# the two native references and the surviving Core transport.
+base.BACKENDS = ("lua", "native", "wasm_core")
 REPORT_BACKENDS = base.BACKENDS
 
 # Re-running every backend costs far more than re-running the one under work.
@@ -74,7 +72,7 @@ _ORIGINAL_BUILD_WASM = base.build_wasm
 _ORIGINAL_RUN_BACKEND = base.run_backend
 
 
-def core_artifact_for_component(component: Path) -> Path:
+def core_artifact_for_backend(backend_artifact: Path) -> Path:
     mapping = {
         base.BENCHMARK_COMPONENT: CORE_DEFAULT,
         base.BENCHMARK_COMPONENT_EMPTY: CORE_EMPTY,
@@ -85,9 +83,9 @@ def core_artifact_for_component(component: Path) -> Path:
         base.BENCHMARK_COMPONENT_DRAW: CORE_DRAW,
     }
     try:
-        return mapping[Path(component)]
+        return mapping[Path(backend_artifact)]
     except KeyError as error:
-        raise RuntimeError(f"no Core benchmark artifact corresponds to {component}") from error
+        raise RuntimeError(f"no Core benchmark artifact corresponds to {backend_artifact}") from error
 
 
 def build_core_wasm(destination: Path, context: str = "synced_gadget") -> None:
@@ -118,11 +116,10 @@ def build_core_wasm(destination: Path, context: str = "synced_gadget") -> None:
 
 
 def build_wasm_and_core(
-    component: Path = base.BENCHMARK_COMPONENT,
+    backend_artifact: Path = base.BENCHMARK_COMPONENT,
     context: str = "synced_gadget",
 ) -> None:
-    _ORIGINAL_BUILD_WASM(component, context)
-    build_core_wasm(core_artifact_for_component(component), context)
+    build_core_wasm(core_artifact_for_backend(backend_artifact), context)
 
 
 def _run_core_backend(
@@ -137,13 +134,13 @@ def _run_core_backend(
     expected_tests: tuple[str, ...],
     *,
     callin_variant: str,
-    wasm_component: Path,
+    backend_artifact: Path,
     output_name: str | None,
     wasm_context: str,
     wasm_module_count: int,
 ) -> list[dict]:
     backend = "wasm_core"
-    selected_module = core_artifact_for_component(wasm_component)
+    selected_module = core_artifact_for_backend(backend_artifact)
     if not selected_module.is_file():
         raise RuntimeError(
             f"Core Wasm artifact is missing: {selected_module}; rerun without --skip-build"
@@ -308,7 +305,7 @@ def run_backend_with_core(
     benchmark_repeats: int,
     expected_tests: tuple[str, ...],
     callin_variant: str = "empty",
-    wasm_component: Path = base.BENCHMARK_COMPONENT,
+    backend_artifact: Path = base.BENCHMARK_COMPONENT,
     output_name: str | None = None,
     wasm_context: str = "synced_gadget",
     wasm_module_count: int = 1,
@@ -328,7 +325,7 @@ def run_backend_with_core(
             benchmark_repeats,
             expected_tests,
             callin_variant=callin_variant,
-            wasm_component=wasm_component,
+            backend_artifact=backend_artifact,
             output_name=output_name,
             wasm_context=wasm_context,
             wasm_module_count=wasm_module_count,
@@ -345,7 +342,7 @@ def run_backend_with_core(
         benchmark_repeats,
         expected_tests,
         callin_variant=callin_variant,
-        wasm_component=wasm_component,
+        backend_artifact=backend_artifact,
         output_name=output_name,
         wasm_context=wasm_context,
         wasm_module_count=wasm_module_count,
@@ -378,10 +375,9 @@ def render_report(summaries: list[dict]) -> str:
             "",
         ]
     lines += [
-        "| Profile | Scale | Test | Lua | Native | Wasm (C API, dynamic, CM) | "
-        "Wasm (Rust, typed, CM) | Wasm (C API, unchecked, Core) | "
-        "Lua vs native | Lua vs Core | Core vs native | Dynamic vs Core |",
-        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Profile | Scale | Test | Lua | Native | Core | "
+        "Lua vs native | Lua vs Core | Core vs native |",
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for summary in summaries:
         profile = str(summary["profile"])
@@ -401,11 +397,10 @@ def render_report(summaries: list[dict]) -> str:
                 values = [base.format_timed_metric(rows[backend], test) for backend in REPORT_BACKENDS]
             lines.append(
                 f"| `{profile}` | {float(summary['scale']):g} | `{test}` | {values[0]} | "
-                f"{values[1]} | {values[2]} | {values[3]} | {values[4]} | "
+                f"{values[1]} | {values[2]} | "
                 f"{base.ratio_for_test(test, rows['lua'], rows['native'])} | "
                 f"{base.ratio_for_test(test, rows['lua'], rows['wasm_core'])} | "
-                f"{base.ratio_for_test(test, rows['wasm_core'], rows['native'])} | "
-                f"{base.ratio_for_test(test, rows['wasm'], rows['wasm_core'])} |"
+                f"{base.ratio_for_test(test, rows['wasm_core'], rows['native'])} |"
             )
 
     lines.append("")
@@ -438,7 +433,7 @@ def validate_report_shape(report: str) -> None:
         raise RuntimeError("benchmark report has table rows above its header")
 
     expected_separator = (
-        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |"
     )
     if not lines[header_index + 1].startswith(expected_separator):
         raise RuntimeError("benchmark report has an unexpected Core-aware table separator")
@@ -532,6 +527,8 @@ def engine_version() -> str:
 
 
 base.build_wasm = build_wasm_and_core
+# The retired typed transport is not part of the Core benchmark matrix.
+base.build_typed_host = lambda: None
 base.run_backend = run_backend_with_core
 base.render_report = render_report
 base.validate_report_shape = validate_report_shape

@@ -5,7 +5,7 @@ use spring_native_codegen::{
     annotations, callins, extract_api_version,
     manifest::API_DEFINITIONS,
     model::{ApiModel, ValidationMode},
-    render_callins, render_host, render_signatures, render_wasm_sdk, render_wit, CodeGenerator,
+    render_core_native, CodeGenerator,
 };
 use std::{
     env, fs,
@@ -121,13 +121,6 @@ fn run() -> Result<()> {
     let validation = model.validate(ValidationMode::Report);
     if arguments.strict {
         model.validate(ValidationMode::Strict)?;
-        let adapter_errors = render_host::native_adapter_coverage_errors(&model);
-        if !adapter_errors.is_empty() {
-            return Err(anyhow!(
-                "native Wasm adapter coverage is incomplete:\n{}",
-                adapter_errors.join("\n")
-            ));
-        }
         if arguments.only.is_none() {
             let core_callin_errors = render_core_wasm_callin_coverage::coverage_errors(&model)?;
             if !core_callin_errors.is_empty() {
@@ -153,32 +146,11 @@ fn run() -> Result<()> {
     )?;
     write(
         &arguments.output.join("WasmCalloutRegistry.h"),
-        &render_host::render_registry(&model),
+        &render_core_native::render_registry(&model),
     )?;
-    write(
-        &arguments.output.join("WasmHostAdapter.h"),
-        &render_host::render_native_adapter_header(),
-    )?;
-    write(
-        &arguments.output.join("WasmHostAdapterSupport.h"),
-        &render_host::render_native_adapter_support(&model),
-    )?;
-    remove_old_adapter_translation_units(&arguments.output)?;
-    write(
-        &arguments.output.join("WasmHostAdapter.cpp"),
-        &render_host::render_native_adapter_common(&model),
-    )?;
-    for module in &model.modules {
-        write(
-            &arguments
-                .output
-                .join(render_host::adapter_module_filename(&module.name)),
-            &render_host::render_native_adapter_module(&model, module),
-        )?;
-    }
     write(
         &arguments.output.join("WasmCallinRegistry.h"),
-        &render_host::render_callin_registry(&model),
+        &render_core_native::render_callin_registry(&model),
     )?;
     write(
         &arguments.output.join("callins.json"),
@@ -321,41 +293,8 @@ fn run() -> Result<()> {
         &render_core_wasm_variable_io_host::render_cpp(&model),
     )?;
 
-    let wit_dir = arguments.output.join("wit");
-    fs::create_dir_all(&wit_dir)?;
-    remove_old_wit_files(&wit_dir)?;
-    for module in &model.modules {
-        for (name, variant) in render_wit::interface_variants(module) {
-            write(
-                &wit_dir.join(format!("{}.wit", name)),
-                &render_wit::render_module(&variant),
-            )?;
-        }
-    }
-    for environment in spring_native_codegen::Environment::ALL {
-        write(
-            &wit_dir.join(format!("{}.wit", environment.as_str())),
-            &render_wit::render_world(&model, environment),
-        )?;
-        write(
-            &wit_dir.join(format!("callins-{}.wit", environment.as_str())),
-            &render_callins::render_wit(&model, environment),
-        )?;
-    }
-
-    render_wit::validate_world_graph(&model)?;
-    let signature = render_signatures::round_trip(&model, &root, &arguments.output)?;
-    write(
-        &arguments.output.join("signatures.json"),
-        &(serde_json::to_string_pretty(&signature)? + "\n"),
-    )?;
-
     let sdk_dir = arguments.output.join("sdk");
     fs::create_dir_all(&sdk_dir)?;
-    write(
-        &sdk_dir.join("generated.rs"),
-        &render_wasm_sdk::render(&model),
-    )?;
     write(
         &sdk_dir.join("core_generated.rs"),
         &render_core_wasm_guest::render(&model),
@@ -388,10 +327,6 @@ fn run() -> Result<()> {
         &sdk_dir.join("core_callins_scratch.rs"),
         &render_core_wasm_callin_scratch::render_rust(&model),
     )?;
-    write(
-        &sdk_dir.join("callins.rs"),
-        &render_callins::render_rust(&model),
-    )?;
 
     let summary = model.summary();
     let core_summary = render_core_wasm::plan(&model);
@@ -421,33 +356,6 @@ fn run() -> Result<()> {
 
 fn write(path: &Path, content: &str) -> Result<()> {
     fs::write(path, content).with_context(|| format!("writing {}", path.display()))
-}
-
-fn remove_old_adapter_translation_units(output: &Path) -> Result<()> {
-    for entry in fs::read_dir(output)? {
-        let entry = entry?;
-        let path = entry.path();
-        let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
-            continue;
-        };
-        let is_adapter = name == "WasmHostAdapter.cpp"
-            || (name.starts_with("WasmHostAdapter_") && name.ends_with(".cpp"));
-        if is_adapter && path.is_file() {
-            fs::remove_file(&path).with_context(|| format!("removing stale {}", path.display()))?;
-        }
-    }
-    Ok(())
-}
-
-fn remove_old_wit_files(output: &Path) -> Result<()> {
-    for entry in fs::read_dir(output)? {
-        let entry = entry?;
-        let path = entry.path();
-        if path.extension().and_then(|extension| extension.to_str()) == Some("wit") {
-            fs::remove_file(&path).with_context(|| format!("removing stale {}", path.display()))?;
-        }
-    }
-    Ok(())
 }
 
 struct Arguments {

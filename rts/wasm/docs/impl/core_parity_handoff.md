@@ -3,7 +3,7 @@
 Date: 2026-08-22
 Repo: `beyond-all-reason/RecoilEngine`
 Branch: `rust-wip`
-Head observed: `ad61a703ae`
+Head observed: `rust-wip` Core purge in progress
 
 Read this with `rts/wasm/docs/impl/web_agent_handoff.md`. This handoff records
 the implementation and verification state reached here; generated files must
@@ -12,9 +12,8 @@ be reproduced with the commands below rather than edited by hand.
 ## 0. Outcome
 
 Core transport parity is operational for the runtime-enabled simulation
-contexts. The guest now uses a generated owned semantic façade over the raw
-Core ABI, the probe generator can emit Core or Component guests, and the
-harness selects transport-specific artifacts and manifests.
+contexts. The guest uses a generated owned semantic façade over the raw Core
+ABI, and the parity guest/harness are now Core-only after the Component purge.
 
 The environment matrix has five independent fields:
 `{environment, name, synced, runtimeEnabled, permitsSimulationMutation}`.
@@ -32,9 +31,9 @@ with their read-only policy and host/callin rules.
 | Core parity plan | 1288/1288 mapped; 0 blocked; 0 unmapped |
 | Core callout coverage | 1354 total; 1291 generated; 63 reviewed handwritten |
 | Core callouts with an oracle | 681; without an oracle 673 |
-| synced Core fixture | pass: 307 selected, 0 mismatches, 0 vacuous results |
-| Gaia-synced Core fixture | pass: 307 selected, 0 mismatches, 0 vacuous results |
-| unsynced Core fixtures | pending full oracle runs; the environments are runtime-enabled but read-only |
+| synced Core fixture | pass: 330 selected, 0 mismatches, 0 vacuous results |
+| Gaia-synced Core fixture | pass: 330 selected, 0 mismatches, 0 vacuous results |
+| unsynced/UI Core fixtures | graphics-backed runs are environment-blocked in this headless session; no green result is claimed |
 | `cargo fmt --manifest-path rust/Cargo.toml --all --check` | pass |
 | Python syntax and `git diff --check` | pass |
 
@@ -75,9 +74,9 @@ core,core_ui
 
 The harness writes dedicated Core artifacts such as
 `recoil_wasm_parity_guest.synced_gadget.core.wasm` and
-`wasm_api_probe_tests_synced_gadget_core.lua`; Component artifacts keep their
-historical names. This prevents one transport build from overwriting the
-other transport's checked-in probe source.
+`wasm_api_probe_tests_synced_gadget_core.lua`. The old Component artifacts and
+guest crates are deleted; each Core context has its own module, manifest, and
+Lua output.
 
 `WasmRuntimeConfig::maxImports` is 2048. A complete generated Core context can
 legitimately declare several hundred imports, while the fixed bound still
@@ -94,7 +93,7 @@ manifest therefore accounts for three distinct decisions:
 3. ordinary probe eligibility (rendering, native-only, deferred, and similar
    fixture rules).
 
-For the synced and Gaia-synced contexts the current Core manifest contains 307
+For the synced and Gaia-synced contexts the current Core manifest contains 330
 selected cases from 507 canonical source rows. The remaining rows are visible
 in `coverage.excluded`, including 186 `core_owned_unsupported` rows and seven
 `core_policy` rows, with the ordinary deferred/rendering/output exclusions
@@ -102,7 +101,7 @@ accounted for separately. No unsupported façade entry is allowed to appear as
 a passing Wasm observation.
 
 The broader plan remains useful for transport inventory and future adapter
-work. It scans only the canonical Component manifests; the separate
+work. It scans the canonical API metadata; the separate
 `.core.json` files are execution selections, not additional oracle cases. Its
 current summary is:
 
@@ -119,15 +118,16 @@ core_executable_callouts_without_oracle 673
 missing_callouts_blocking_oracle_tests  0
 ```
 
-The difference between the plan's 1288 mapped cases and the 307-case runtime
+The difference between the plan's 1288 mapped cases and the 330-case runtime
 oracle is intentional: the plan describes raw Core registry coverage across
 contexts, while the oracle describes the currently generated owned semantic
-surface in the contexts already run. The three remaining contexts must be run
-and reported; they must not be represented by empty or skipped results.
+surface in the contexts already run. The graphics-backed contexts were
+attempted with bounded runs and are recorded as environment-blocked here; they
+must not be represented by empty or skipped results.
 
 ## 3. Verified commands
 
-Regenerate the checked-in/default Component probe:
+Regenerate the Core parity probe:
 
 ```sh
 python3 test/wasm_api/parity_guest/generate_probe.py \
@@ -194,7 +194,10 @@ python3 rts/wasm/verify_codegen.py
 ## 4. Remaining work
 
 The remaining `core_owned_unsupported` rows are not hidden transport failures;
-they are explicit adapter work. The main groups are dynamic/recursive output
+they are explicit adapter work. The generated owned façade currently contains
+574 `UnsupportedHostTarget` fallback entries; this is the present coverage
+ceiling for semantic convenience wrappers, not a Core transport ceiling. The
+main groups are dynamic/recursive output
 decoders, variable-input descriptors, command and piece record lists, rules and
 configuration string/list APIs, and mutating control callouts. Extend the
 generator from the shared Core field walk, reduce the manifest exclusions, and
@@ -206,11 +209,26 @@ contexts. Those environments are runtime-enabled, but
 record the policy error as the expected native/Wasm result. Do not turn
 missing observations into success.
 
-Component Model removal is not part of this completed handoff. Keep the
-Component path until the owned Core façade covers the intended API surface and
-the runtime policy has an approved five-context plan.
+The Component Model removal is complete in the source tree. Do not restore its
+transport or generated WIT/adapter files to hide an owned-façade gap; extend
+the Core emitter, regenerate, and rerun the non-vacuous probes instead.
 
-## 5. Assumptions and review notes
+## 5. Performance and safety policy
+
+The default runtime is throughput-first. Fuel and epoch interruption are opt-in
+diagnostic/untrusted-module controls; enabling them for ordinary gameplay is
+not acceptable if the result is a steady-state slowdown or false-positive
+crash. The default fuel budget is zero. Pointer/range validation, fixed synced
+memory validation, trap conversion, import capability checks, and UI visibility
+filtering remain correctness and containment invariants.
+
+The bounded callout run measured Core versus the native module at 1.70x, 3.25x,
+2.35x, 4.39x, 2.06x, 2.22x, and 1.01x across scalar, vec3, string, small-list,
+big-list, spatial, and mutate cases respectively. The full bounded-suite result
+is recorded in `core_benchmark_results.md`; no single favorable callout is a
+headline claim.
+
+## 6. Assumptions and review notes
 
 - Core pointer values are valid only on `wasm32`; non-wasm façade calls return
   `UnsupportedHostTarget`.

@@ -307,10 +307,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "spring-wasm"
-version = "0.1.0"
-
-[[package]]
 name = "spring-wasm-core"
 version = "0.1.0"
 

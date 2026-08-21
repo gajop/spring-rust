@@ -8,6 +8,17 @@
 #include <vector>
 
 #include "WasmEnvironment.h"
+#include "WasmRuntime.h"
+
+struct WasmModuleDescriptor {
+	std::string name;
+	std::string source;
+	WasmEnvironment environment = WasmEnvironment::RulesSynced;
+	std::uint32_t order = 0;
+	std::string interfaceVersion = std::string(RECOIL_WASM_INTERFACE_VERSION_NUMBER);
+	std::vector<std::uint8_t> bytes;
+	std::string archive;
+};
 
 // A deliberately small, archive-friendly declaration format.  The engine's
 // VFS layer can provide the bytes later without changing this metadata parser:

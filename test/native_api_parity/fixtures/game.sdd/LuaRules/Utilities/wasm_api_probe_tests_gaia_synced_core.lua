@@ -91,6 +91,8 @@ return {
 
 		"unit_max_range",
 
+		"unit_position",
+
 		"unit_def_id",
 
 		"unit_team",
@@ -177,6 +179,8 @@ return {
 
 		"get_unit_in_build_stance",
 
+		"get_unit_nano_pieces_count",
+
 		"get_unit_transporter",
 
 		"get_unit_command_count",
@@ -205,6 +209,8 @@ return {
 
 		"get_factory_command_count",
 
+		"get_real_build_queue",
+
 		"get_closest_enemy_unit",
 
 		"get_model_root_piece",
@@ -231,6 +237,8 @@ return {
 
 		"get_unit_script_piece",
 
+		"get_all_projectiles",
+
 		"get_position_los_state",
 
 		"radar_error_params",
@@ -243,7 +251,11 @@ return {
 
 		"get_player_controlled_unit",
 
+		"get_team_lua_ai",
+
 		"unit_harvest_storage",
+
+		"get_unit_tooltip",
 
 		"unit_physical_state_bit",
 
@@ -273,6 +285,8 @@ return {
 
 		"unit_storage_fixed_getter",
 
+		"unit_is_transporting_fixed_shape",
+
 		"unit_pos_error_params_fixed_shape",
 
 		"unit_flanking_fixed_shape",
@@ -286,6 +300,10 @@ return {
 		"feature_resources",
 
 		"get_feature_separation",
+
+		"get_features_in_rectangle",
+
+		"get_features_in_cylinder",
 
 		"feature_reclaim",
 
@@ -302,6 +320,8 @@ return {
 		"feature_no_select",
 
 		"valid_feature_id",
+
+		"get_all_features",
 
 		"get_feature_def_id",
 
@@ -325,7 +345,11 @@ return {
 
 		"get_smooth_mesh_height",
 
+		"get_water_plane_level",
+
 		"get_water_level",
+
+		"get_ground_extremes",
 
 		"get_ground_blocked",
 
@@ -383,6 +407,8 @@ return {
 
 		"is_pos_in_air_los",
 
+		"get_unit_def_ids",
+
 		"get_unit_def_count",
 
 		"valid_unit_def_id",
@@ -399,17 +425,25 @@ return {
 
 		"get_unit_def_speed",
 
+		"get_feature_def_ids",
+
 		"get_feature_def_count",
 
 		"valid_feature_def_id",
 
 		"get_feature_def_idby_name",
 
+		"get_feature_def_name",
+
 		"get_feature_def_metal",
 
 		"get_feature_def_energy",
 
+		"get_weapon_def_ids",
+
 		"get_weapon_def_count",
+
+		"get_weapon_def_name",
 
 		"valid_weapon_def_id",
 
@@ -430,6 +464,16 @@ return {
 		"get_ally_team_start_box",
 
 		"get_team_start_position",
+
+		"get_team_list",
+
+		"get_ally_team_list",
+
+		"get_player_list",
+
+		"get_player_list_in_team",
+
+		"get_player_list_in_ally_team",
 
 		"are_teams_allied",
 
@@ -607,6 +651,8 @@ return {
 
 		"spawn_sfx",
 
+		"path_node_costs",
+
 		"get_cobscript_id_non_cob",
 
 		"create_unit_wreck_cleanup",
@@ -731,6 +777,11 @@ return {
 		},
 		["unit_max_range"] = {
 			maxRange = 650.0,
+		},
+		["unit_position"] = {
+			x = 1024.0,
+			y = 128.0,
+			z = 1024.0,
 		},
 		["unit_velocity"] = {
 			x = 1.0,
@@ -883,6 +934,10 @@ return {
 		["get_unit_script_piece"] = {
 			scriptNum = 0,
 		},
+		["get_all_projectiles"] = {
+			synced = true,
+			weapon = true,
+		},
 		["get_position_los_state"] = {
 			x = 1024.0,
 			y = 128.0,
@@ -980,6 +1035,18 @@ return {
 		},
 		["get_feature_separation"] = {
 			positional = false,
+		},
+		["get_features_in_rectangle"] = {
+			minX = 0,
+			minZ = 0,
+			maxX = 99999,
+			maxZ = 99999,
+		},
+		["get_features_in_cylinder"] = {
+			x = 1024,
+			z = 1024,
+			radius = 99999,
+			height = 99999,
 		},
 		["feature_reclaim"] = {
 			reclaimLeft = 0.5,
@@ -1185,6 +1252,9 @@ return {
 			testTerrain = true,
 			testObjects = true,
 			centerOnly = false,
+		},
+		["get_player_list"] = {
+			active = false,
 		},
 		["are_players_allied"] = {
 			playerID1 = 0,
@@ -1614,6 +1684,15 @@ return {
 			x = 1024.0,
 			y = 128.0,
 			z = 1024.0,
+		},
+		["path_node_costs"] = {
+			overlayIndex = 7,
+			sizeX = 2,
+			sizeZ = 2,
+			costIndex = 0,
+			nodeX = 0,
+			nodeZ = 0,
+			cost = 17.25,
 		},
 		["get_cobscript_id_non_cob"] = {
 			funcName = "NativeApiParityMissingCobFunction",

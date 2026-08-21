@@ -48,14 +48,6 @@ WASM_PARITY_CORE = (
     / "release"
     / "recoil_wasm_parity_guest.wasm"
 )
-WASM_PARITY_MODULE = (
-    ROOT
-    / "test"
-    / "wasm_api"
-    / "parity_guest"
-    / "target"
-    / "recoil_wasm_parity_guest.component.wasm"
-)
 WASM_PARITY_CORE_MODULE = (
     ROOT
     / "test"
@@ -68,13 +60,6 @@ WASM_PARITY_CORE_MODULE = (
 )
 WASM_PROBE_GENERATOR = ROOT / "test" / "wasm_api" / "parity_guest" / "generate_probe.py"
 WASM_CONTEXTS = ("synced_gadget", "unsynced_gadget", "gaia_synced", "gaia_unsynced", "ui")
-WASM_CONTEXT_MODULES = {
-	"synced_gadget": WASM_PARITY_MODULE,
-	"unsynced_gadget": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.unsynced_gadget.component.wasm",
-	"gaia_synced": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.gaia_synced.component.wasm",
-	"gaia_unsynced": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.gaia_unsynced.component.wasm",
-	"ui": ROOT / "test" / "wasm_api" / "parity_guest" / "target" / "recoil_wasm_parity_guest.ui.component.wasm",
-}
 WASM_CONTEXT_CORE_MODULES = {
 	context: WASM_PARITY_CORE_MODULE.with_name(
 		f"recoil_wasm_parity_guest.{context}.core.wasm"
@@ -135,7 +120,7 @@ WASM_PROBE_MANIFEST = ROOT / "test" / "wasm_api" / "parity_guest" / "probe_manif
 WASM_VACUITY_THRESHOLD = 0.05
 
 # Gaia parity injects these two map options only to tell the blank-map
-# generator which manifest and component to load.  They are harness controls,
+# generator which manifest and Core module to load.  They are harness controls,
 # not public map options: Spring.GetMapOptions already hides them, while the
 # native Game.get_map_options view sees the raw map-generator options.
 GAIA_HARNESS_MAP_OPTION_KEYS = frozenset({
@@ -354,8 +339,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--wasm-transport",
-        choices=("component", "core"),
-        default="component",
+        choices=("core",),
+        default="core",
         help="Wasm transport used by --mode wasm",
     )
     return parser.parse_args()
@@ -382,19 +367,16 @@ CORE_CONTEXT_FEATURES = {
 
 
 def ensure_wasm_built(
-	skip: bool, transport: str = "component", context: str = "synced_gadget"
+	skip: bool, transport: str = "core", context: str = "synced_gadget"
 ) -> None:
 	if skip:
-		modules = WASM_CONTEXT_CORE_MODULES if transport == "core" else WASM_CONTEXT_MODULES
-		manifests = WASM_CONTEXT_CORE_MANIFESTS if transport == "core" else WASM_CONTEXT_MANIFESTS
-		missing = [modules[context], manifests[context]]
+		missing = [WASM_CONTEXT_CORE_MODULES[context], WASM_CONTEXT_CORE_MANIFESTS[context]]
 		if context.startswith("gaia_"):
 			missing.append(WASM_CONTEXT_MAP_MANIFESTS[context])
-		if transport == "core":
-			missing.append(WASM_CONTEXT_CORE_LUA_OUTPUTS[context])
+		missing.append(WASM_CONTEXT_CORE_LUA_OUTPUTS[context])
 		missing = [path for path in missing if not path.is_file()]
 		if missing:
-			raise RuntimeError("missing Wasm parity components: " + ", ".join(map(str, missing)))
+			raise RuntimeError("missing Core Wasm parity artifacts: " + ", ".join(map(str, missing)))
 		return
 
 	installed_targets = subprocess.run(
@@ -408,15 +390,10 @@ def ensure_wasm_built(
 		subprocess.run(["rustup", "target", "add", "wasm32-unknown-unknown"], cwd=ROOT, check=True)
 	build_context = context
 	generator_args = ["python3", str(WASM_PROBE_GENERATOR), "--context", build_context]
-	if transport == "core":
-		generator_args.extend(["--transport", "core"])
-	lua_output = (
-		WASM_CONTEXT_CORE_LUA_OUTPUTS[build_context]
-		if transport == "core"
-		else WASM_CONTEXT_LUA_OUTPUTS[build_context]
-	)
+	generator_args.extend(["--transport", "core"])
+	lua_output = WASM_CONTEXT_CORE_LUA_OUTPUTS[build_context]
 	generator_args.extend(["--lua-output", str(lua_output)])
-	manifests = WASM_CONTEXT_CORE_MANIFESTS if transport == "core" else WASM_CONTEXT_MANIFESTS
+	manifests = WASM_CONTEXT_CORE_MANIFESTS
 	generator_args.extend(["--manifest-output", str(manifests[build_context])])
 	subprocess.run(generator_args, cwd=ROOT, check=True)
 	build_args = [
@@ -428,39 +405,10 @@ def ensure_wasm_built(
 		"wasm32-unknown-unknown",
 		"--release",
 	]
-	if transport == "core":
-		build_args.extend(["--features", f"core,{CORE_CONTEXT_FEATURES[build_context]}"])
-	subprocess.run(build_args, cwd=ROOT, check=True)
-	if transport == "core":
-		core_module = WASM_CONTEXT_CORE_MODULES[build_context]
-		core_module.parent.mkdir(parents=True, exist_ok=True)
-		shutil.copy2(WASM_PARITY_CORE, core_module)
-		return
-	component = WASM_CONTEXT_MODULES[build_context]
-	component.parent.mkdir(parents=True, exist_ok=True)
-	subprocess.run(
-		[
-			"cargo",
-			"run",
-			"--manifest-path",
-			str(WASM_PARITY_CRATE),
-			"--bin",
-			"componentize",
-			"--release",
-			"--",
-			str(WASM_PARITY_CORE),
-			str(component),
-		],
-		cwd=ROOT,
-		check=True,
-	)
-	if not component.is_file():
-		raise RuntimeError(f"Wasm parity component was not produced: {component}")
-	if build_context.startswith("gaia_"):
-		WASM_CONTEXT_MAP_MANIFESTS[build_context].write_text(
-			f"module(parity, LuaGaia/wasm/parity.wasm, {WASM_ENVIRONMENT_NAMES[build_context]}, 0, 1.0.0)\n",
-			encoding="utf-8",
-		)
+	subprocess.run(build_args + ["--features", f"core,{CORE_CONTEXT_FEATURES[build_context]}"], cwd=ROOT, check=True)
+	core_module = WASM_CONTEXT_CORE_MODULES[build_context]
+	core_module.parent.mkdir(parents=True, exist_ok=True)
+	shutil.copy2(WASM_PARITY_CORE, core_module)
 
 
 def link_or_copy(src: Path, dst: Path) -> None:
@@ -481,7 +429,7 @@ def prepare_datadir(
     map_arg: str | None,
     wasm_module: Path | None = None,
     wasm_context: str = "synced_gadget",
-    wasm_transport: str = "component",
+    wasm_transport: str = "core",
 ) -> tuple[Path, str | None]:
     datadir = workdir / "data"
     games = datadir / "games"
@@ -541,7 +489,7 @@ def write_script(
     wasm_context: str,
 	wasm_module: Path | None,
 	wasm_role: str = "combined",
-	wasm_transport: str = "component",
+	wasm_transport: str = "core",
 	benchmark_backend: str = "",
     benchmark_repeats: int = 5,
     benchmark_scale: float = 1.0,
@@ -675,7 +623,7 @@ def run_spring(
     output_dir: Path,
     run_mode: str,
     wasm_context: str = "synced_gadget",
-    wasm_transport: str = "component",
+    wasm_transport: str = "core",
 ) -> int:
     env = os.environ.copy()
     result_dir = output_dir / "write-dir" / "native_api_parity"
@@ -890,10 +838,10 @@ def compare_wasm_details(
     wasm_context: str = "synced_gadget",
     args: argparse.Namespace | None = None,
 ) -> dict:
-    """Compare the Component Model fixture's host observation to Lua.
+    """Compare the Core fixture's host observation to Lua.
 
     The fixture deliberately uses the same synced query on both sides: Lua
-    records the reference value, while the Wasm component obtains it through
+    records the reference value, while the Wasm guest obtains it through
     the generated units-query import and reports it through the normal
     LuaRules message boundary.  The stable semantic fields include explicit
     floating-point edge-case and deterministic RNG signatures; the player ID
@@ -933,9 +881,7 @@ def compare_wasm_details(
         print("Wasm host observation does not match the Lua reference")
 
     manifest_path = (
-        WASM_PROBE_MANIFEST
-        if args is None or args.wasm_transport == "component"
-        else WASM_CONTEXT_CORE_MANIFESTS[wasm_context]
+        WASM_CONTEXT_CORE_MANIFESTS[wasm_context]
     )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest_ids = list(manifest["tests"])
@@ -2391,14 +2337,14 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
             "",
             "## Wasm Typed API Probe",
             "",
-            f"- Deterministic Component observation: `{'pass' if compare_info['deterministic_ok'] else 'FAIL'}`",
+            f"- Deterministic Core observation: `{'pass' if compare_info['deterministic_ok'] else 'FAIL'}`",
             f"- Generated {compare_info['wasm_context']} read-only probes: `{compare_info['api_expected_count']}`",
             f"- Lua reference rows: `{compare_info['api_lua_count']}`",
             f"- Wasm result rows: `{compare_info['api_wasm_count']}`",
             f"- Fixture discovery: `{'pass' if compare_info['fixture_status_ok'] else 'FAIL'}`",
             f"- Vacuous Wasm rows: `{compare_info['vacuous_count']}/{compare_info['api_expected_count']}` "
             f"({compare_info['vacuous_fraction']:.2%}; threshold {compare_info['vacuity_threshold']:.2%})",
-            f"- Typed API result parity: `{'pass' if compare_info['api_ok'] else 'FAIL'}`",
+            f"- Core API result parity: `{'pass' if compare_info['api_ok'] else 'FAIL'}`",
         ])
         if compare_info["api_missing_lua"] or compare_info["api_missing_wasm"]:
             lines.extend([
@@ -2684,7 +2630,7 @@ def run_one(
     wasm_module: Path | None = None,
     wasm_context: str = "synced_gadget",
     wasm_role: str = "combined",
-    wasm_transport: str = "component",
+    wasm_transport: str = "core",
 ) -> Path:
     run_output = base_output / run_mode
     run_output.mkdir(parents=True, exist_ok=True)
@@ -2813,11 +2759,7 @@ def main() -> int:
             base_output,
             "wasm_guest",
             test_seed,
-            (
-                WASM_CONTEXT_CORE_MODULES[args.wasm_context]
-                if args.wasm_transport == "core"
-                else WASM_CONTEXT_MODULES[args.wasm_context]
-            ),
+            WASM_CONTEXT_CORE_MODULES[args.wasm_context],
             args.wasm_context,
             "guest",
             args.wasm_transport,

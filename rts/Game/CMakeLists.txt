@@ -1,8 +1,6 @@
 
 # This list was created using this *nix shell command:
 # > find . -name "*.cpp" | sort
-file(GLOB sources_engine_wasm_host_adapter CONFIGURE_DEPENDS
-		"${CMAKE_CURRENT_SOURCE_DIR}/../wasm/generated/WasmHostAdapter*.cpp")
 make_global_var(sources_engine_Game
 		"${CMAKE_CURRENT_SOURCE_DIR}/Action.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/AviVideoCapturing.cpp"
@@ -91,7 +89,6 @@ make_global_var(sources_engine_Game
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/NativeInterfaceEventClient.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/NativeModulePath.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/NativeInterfaceSystem.cpp"
-		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/NativeInterfaceWasmAdapter.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../NativeInterface/WasmUiVisibility.cpp"
 		${sources_engine_wasm_host_adapter}
 		"${CMAKE_CURRENT_SOURCE_DIR}/SelectedUnitsHandler.cpp"

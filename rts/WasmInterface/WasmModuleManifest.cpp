@@ -54,7 +54,7 @@ namespace {
 	bool IsInterfaceVersion(std::string_view version)
 	{
 		// Keep the package format deliberately strict.  The runtime currently
-		// exposes one semver-like Component interface, so accepting a range or a
+		// exposes one semver-like Core interface, so accepting a range or a
 		// partially specified version would make synced compatibility ambiguous.
 		if (version.size() > 32 || version.empty())
 			return false;

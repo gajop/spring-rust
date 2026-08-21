@@ -1192,12 +1192,12 @@ fn kind_array(name: &str, kinds: &[CoreType]) -> String {
 }
 
 fn native_member(module: &str) -> String {
-    spring_native_codegen::render_host::core_native_member(module)
+    spring_native_codegen::render_core_native::core_native_member(module)
         .unwrap_or_else(|| panic!("no NativeInterface member mapped for module {module}"))
 }
 
 fn native_guard(module: &str) -> String {
-    spring_native_codegen::render_host::core_native_guard(module)
+    spring_native_codegen::render_core_native::core_native_guard(module)
         .unwrap_or_else(|| panic!("no NativeInterface member mapped for module {module}"))
 }
 

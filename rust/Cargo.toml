@@ -4,7 +4,6 @@ members = [
     "crates/spring-native-codegen",
     "crates/spring-api-codegen",
     "crates/spring-native",
-    "crates/spring-wasm",
     "crates/spring-wasm-core",
 ]
 resolver = "2"

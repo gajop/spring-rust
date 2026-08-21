@@ -221,7 +221,6 @@ pub(crate) fn callback_error() -> i32 { CALLBACK_ERROR.load(Ordering::Relaxed) }
 
 pub(crate) fn callback_return_marker() -> &'static str {
     match CALLBACK_MODE.load(Ordering::Relaxed) {
-        4 => "native_api_parity_call_as_team_nil",
         _ => "",
     }
 }
@@ -229,117 +228,8 @@ pub(crate) fn callback_return_marker() -> &'static str {
 pub(crate) fn callback_1(_user_data: u32) {
     CALLBACK_CALLED.store(1, Ordering::Relaxed);
     match CALLBACK_MODE.load(Ordering::Relaxed) {
-        1 => {
-            match crate::bindings::recoil::spring_api::terrain_control::add_height_map(
-                f32::from_bits(callback_argument(0)), f32::from_bits(callback_argument(1)), f32::from_bits(callback_argument(2))
-            ) {
-                Ok(_) => {},
-                Err(error) => CALLBACK_ERROR.store(error.code, Ordering::Relaxed),
-            }
-        }
-        2 => {
-            match crate::bindings::recoil::spring_api::terrain_control::add_original_height_map(
-                f32::from_bits(callback_argument(0)), f32::from_bits(callback_argument(1)), f32::from_bits(callback_argument(2))
-            ) {
-                Ok(_) => {},
-                Err(error) => CALLBACK_ERROR.store(error.code, Ordering::Relaxed),
-            }
-        }
-        3 => {
-            match crate::bindings::recoil::spring_api::terrain_control::add_smooth_mesh(
-                f32::from_bits(callback_argument(0)), f32::from_bits(callback_argument(1)), f32::from_bits(callback_argument(2))
-            ) {
-                Ok(_) => {},
-                Err(error) => CALLBACK_ERROR.store(error.code, Ordering::Relaxed),
-            }
-        }
-        4 => {
-            CALLBACK_TEAM.store(CALLBACK_EXPECTED_TEAM.load(Ordering::Relaxed), Ordering::Relaxed);
-            CALLBACK_RETURN_COUNT.store(2, Ordering::Relaxed);
-            CALLBACK_RETURN_FLAG.store(1, Ordering::Relaxed);
-        }
-        5 => {
-            match crate::bindings::recoil::spring_api::terrain_control::set_height_map(
-                f32::from_bits(callback_argument(0)), f32::from_bits(callback_argument(1)), f32::from_bits(callback_argument(2)), f32::from_bits(callback_argument(3))
-            ) {
-                Ok(_) => {},
-                Err(error) => CALLBACK_ERROR.store(error.code, Ordering::Relaxed),
-            }
-        }
-        6 => {
-            match crate::bindings::recoil::spring_api::terrain_control::set_original_height_map(
-                f32::from_bits(callback_argument(0)), f32::from_bits(callback_argument(1)), f32::from_bits(callback_argument(2)), f32::from_bits(callback_argument(3))
-            ) {
-                Ok(_) => {},
-                Err(error) => CALLBACK_ERROR.store(error.code, Ordering::Relaxed),
-            }
-        }
-        7 => {
-            match crate::bindings::recoil::spring_api::terrain_control::set_smooth_mesh(
-                f32::from_bits(callback_argument(0)), f32::from_bits(callback_argument(1)), f32::from_bits(callback_argument(2)), f32::from_bits(callback_argument(3))
-            ) {
-                Ok(_) => {},
-                Err(error) => CALLBACK_ERROR.store(error.code, Ordering::Relaxed),
-            }
-        }
         _ => {},
     }
-}
-
-fn encode_game_start_position_list(field: &str, values: &[crate::bindings::recoil::spring_api::game::StartPosition]) -> String {
-    let encoded = values
-        .iter()
-        .map(|value| {
-            vec![format!("teamID:i:{}", value.team_id), format!("x:f:{:.9}", value.pos.x), format!("y:f:{:.9}", value.pos.y), format!("z:f:{:.9}", value.pos.z)].join(",")
-        })
-        .collect::<Vec<_>>()
-        .join(";");
-    format!("{field}|lr|{encoded}")
-}
-
-fn encode_tracing_trace_ray_hit_list(field: &str, values: &[crate::bindings::recoil::spring_api::tracing::TraceRayHit]) -> String {
-    let encoded = values
-        .iter()
-        .map(|value| {
-            vec![format!("hitLength:f:{:.9}", value.hit_length), format!("objectID:i:{}", value.object_id), format!("objectType:i:{}", value.object_type)].join(",")
-        })
-        .collect::<Vec<_>>()
-        .join(";");
-    format!("{field}|lr|{encoded}")
-}
-
-fn encode_units_pieces_piece_map_entry_list(field: &str, values: &[crate::bindings::recoil::spring_api::units_pieces::PieceMapEntry]) -> String {
-    let encoded = values
-        .iter()
-        .map(|value| {
-            vec![format!("name:s:{}", encode_string_bytes(&value.name)), format!("pieceNum:i:{}", value.piece_num)].join(",")
-        })
-        .collect::<Vec<_>>()
-        .join(";");
-    format!("{field}|lr|{encoded}")
-}
-
-fn encode_units_query_team_units_by_def_list(field: &str, values: &[crate::bindings::recoil::spring_api::units_query::TeamUnitsByDef]) -> String {
-    let encoded = values
-        .iter()
-        .map(|value| {
-            let units = value.units.iter().map(ToString::to_string).collect::<Vec<_>>().join(",");
-            format!("unitDefID:i:{},unitIDs:li:{}", value.unit_def_id, units)
-        })
-        .collect::<Vec<_>>()
-        .join(";");
-    format!("{field}|lr|{encoded}")
-}
-
-fn encode_units_query_unit_def_count_list(field: &str, values: &[crate::bindings::recoil::spring_api::units_query::UnitDefCount]) -> String {
-    let encoded = values
-        .iter()
-        .map(|value| {
-            vec![format!("unitDefID:i:{}", value.unit_def_id), format!("count:i:{}", value.count)].join(",")
-        })
-        .collect::<Vec<_>>()
-        .join(";");
-    format!("{field}|lr|{encoded}")
 }
 
 fn probe_game_frame(fixture: &super::Fixture) -> String {
@@ -558,66 +448,6 @@ fn probe_get_vector_from_heading(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_vector_from_heading|{fields}")
 }
 
-fn probe_get_mod_option(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::game::get_mod_option(&"native_api_parity_cases");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value.value), encode_bool("exists", value.exists)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_mod_option|{fields}")
-}
-
-fn probe_get_map_option(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::game::get_map_option(&"blank_map_height");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value.value), encode_bool("exists", value.exists)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_map_option|{fields}")
-}
-
-fn probe_get_mod_options(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::game::get_mod_options(0u8);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("keys", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_mod_options|{fields}")
-}
-
-fn probe_get_map_options(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::game::get_map_options(0u8);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("keys", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_map_options|{fields}")
-}
-
-fn probe_get_map_start_positions(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::game::get_map_start_positions(0u8);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_game_start_position_list("positions", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_map_start_positions|{fields}")
-}
-
 fn probe_global_los(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::team_control::set_global_los((fixture.ally_team_id) as i32, false) {
         Ok(_) => {},
@@ -730,18 +560,6 @@ fn probe_math_smooth_step(fixture: &super::Fixture) -> String {
     format!("WASM_API|math_smooth_step|{fields}")
 }
 
-fn probe_math_normalize(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::math_extra::normalize(crate::bindings::recoil::spring_api::math_extra::Float3 { x: (5.5f32) as f32, y: (5.5f32) as f32, z: (5.5f32) as f32 });
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("x", value.vec.x), encode_f32("y", value.vec.y), encode_f32("z", value.vec.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|math_normalize|{fields}")
-}
-
 fn probe_math_bit_or(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::math_extra::bit_or((512u32) as u32, (1024u32) as u32);
     let fields = match result {
@@ -802,42 +620,6 @@ fn probe_math_bit_bits(fixture: &super::Fixture) -> String {
     format!("WASM_API|math_bit_bits|{fields}")
 }
 
-fn probe_encoding_decode_base64(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::encoding::decode_base64(&"SGVsbG8=");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bytes("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|encoding_decode_base64|{fields}")
-}
-
-fn probe_encoding_encode_base64_default_padding(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::encoding::encode_base64(&("Hello").as_bytes().to_vec(), true);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|encoding_encode_base64_default_padding|{fields}")
-}
-
-fn probe_encoding_encode_base64_padded(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::encoding::encode_base64(&("Hello").as_bytes().to_vec(), false);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|encoding_encode_base64_padded|{fields}")
-}
-
 fn probe_encoding_is_valid_base64(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::encoding::is_valid_base64(&"SGVsbG8=");
     let fields = match result {
@@ -862,30 +644,6 @@ fn probe_encoding_is_invalid_base64(fixture: &super::Fixture) -> String {
     format!("WASM_API|encoding_is_invalid_base64|{fields}")
 }
 
-fn probe_encoding_decode_base64_url(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::encoding::decode_base64_url(&"SGVsbG8");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bytes("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|encoding_decode_base64_url|{fields}")
-}
-
-fn probe_encoding_encode_base64_url(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::encoding::encode_base64_url(&("Hello").as_bytes().to_vec());
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|encoding_encode_base64_url|{fields}")
-}
-
 fn probe_encoding_is_valid_base64_url(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::encoding::is_valid_base64_url(&"SGVsbG8-_");
     let fields = match result {
@@ -896,427 +654,6 @@ fn probe_encoding_is_valid_base64_url(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|encoding_is_valid_base64_url|{fields}")
-}
-
-fn probe_call_as_team(fixture: &super::Fixture) -> String {
-    prepare_callback(4u32, 0i32, [0u32, 0u32, 0u32, 0u32]);
-    let sequence_called = match crate::bindings::recoil::spring_api::system_control::call_as_team((0i32) as i32, 1, 0) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|call_as_team|__error|i|{}", error.code),
-    };
-    if !sequence_called { return format!("WASM_API|call_as_team|__error|i|{}", -1); }
-    if callback_error() != 0 {
-        return format!("WASM_API|call_as_team|__error|i|{}", callback_error());
-    }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("callbackCalled", callback_called()), encode_i32("callbackTeam", callback_team()), encode_u32("returnCount", callback_return_count()), encode_string("returnMarker", &callback_return_marker()), encode_bool("returnFlag", callback_return_flag())];
-        output_fields.join("|")
-    };
-    format!("WASM_API|call_as_team|{fields}")
-}
-
-fn probe_vfs_file_exists(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::file_exists(&"LuaRules/Gadgets/native_api_parity.lua");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("exists", value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_file_exists|{fields}")
-}
-
-fn probe_vfs_missing_file_exists(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::file_exists(&"LuaRules/Gadgets/does_not_exist.lua");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("exists", value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_missing_file_exists|{fields}")
-}
-
-fn probe_vfs_file_size(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::get_file_size(&"LuaRules/Gadgets/native_api_parity.lua");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("size", value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_file_size|{fields}")
-}
-
-fn probe_vfs_file_info(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::get_file_info(&"LuaRules/Gadgets/native_api_parity.lua");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("size", value.info.size), encode_bool("exists", value.exists)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_file_info|{fields}")
-}
-
-fn probe_vfs_read_file(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::read_file(&"LuaRules/Gadgets/native_api_parity.lua");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("size", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_read_file|{fields}")
-}
-
-fn probe_vfs_read_file_as_string(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::read_file_as_string(&"LuaRules/Gadgets/native_api_parity.lua");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("size", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_read_file_as_string|{fields}")
-}
-
-fn probe_vfs_list_dir_count(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::list_dir(&"LuaRules/Gadgets/", &"*", &"", false);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("count", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_list_dir_count|{fields}")
-}
-
-fn probe_vfs_is_directory(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::is_directory(&"LuaRules/");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("isDirectory", value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_is_directory|{fields}")
-}
-
-fn probe_vfs_missing_is_directory(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::is_directory(&"does/not/exist/");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("isDirectory", value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_missing_is_directory|{fields}")
-}
-
-fn probe_vfs_pack_u8(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::pack_u8(&vec![0u8, 1u8, 127u8, 255u8]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_pack_u8|{fields}")
-}
-
-fn probe_vfs_pack_u16(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::pack_u16(&vec![0u16, 1u16, 256u16, 65535u16]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_pack_u16|{fields}")
-}
-
-fn probe_vfs_pack_u32(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::pack_u32(&vec![0u32, 1u32, 65536u32, 16777215u32]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_pack_u32|{fields}")
-}
-
-fn probe_vfs_pack_s8(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::pack_s8(&vec![-128i8, -1i8, 0i8, 127i8]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_pack_s8|{fields}")
-}
-
-fn probe_vfs_pack_s16(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::pack_s16(&vec![-32768i16, -1i16, 0i16, 32767i16]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_pack_s16|{fields}")
-}
-
-fn probe_vfs_pack_s32(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::pack_s32(&vec![-2147483648i32, -1i32, 0i32, 16777215i32]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_pack_s32|{fields}")
-}
-
-fn probe_vfs_pack_f32(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::pack_f32(&vec![-1.25f32, 0f32, 3.5f32, 100.125f32]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_pack_f32|{fields}")
-}
-
-fn probe_vfs_unpack_u8(fixture: &super::Fixture) -> String {
-    let local_packed = match crate::bindings::recoil::spring_api::vfs::pack_u8(&vec![10u8, 20u8, 30u8, 40u8]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|vfs_unpack_u8|__error|i|{}", error.code),
-    };
-    let result = crate::bindings::recoil::spring_api::vfs::unpack_u8(&local_packed, ((2u32) - 1) as u32, (2u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("values", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_unpack_u8|{fields}")
-}
-
-fn probe_vfs_unpack_u16(fixture: &super::Fixture) -> String {
-    let local_packed = match crate::bindings::recoil::spring_api::vfs::pack_u16(&vec![1000u16, 2000u16, 3000u16, 4000u16]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|vfs_unpack_u16|__error|i|{}", error.code),
-    };
-    let result = crate::bindings::recoil::spring_api::vfs::unpack_u16(&local_packed, ((3u32) - 1) as u32, (2u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("values", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_unpack_u16|{fields}")
-}
-
-fn probe_vfs_unpack_u32(fixture: &super::Fixture) -> String {
-    let local_packed = match crate::bindings::recoil::spring_api::vfs::pack_u32(&vec![100000u32, 200000u32, 300000u32]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|vfs_unpack_u32|__error|i|{}", error.code),
-    };
-    let result = crate::bindings::recoil::spring_api::vfs::unpack_u32(&local_packed, ((5u32) - 1) as u32, (2u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("values", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_unpack_u32|{fields}")
-}
-
-fn probe_vfs_unpack_s8(fixture: &super::Fixture) -> String {
-    let local_packed = match crate::bindings::recoil::spring_api::vfs::pack_s8(&vec![-40i8, -20i8, 20i8, 40i8]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|vfs_unpack_s8|__error|i|{}", error.code),
-    };
-    let result = crate::bindings::recoil::spring_api::vfs::unpack_s8(&local_packed, ((2u32) - 1) as u32, (2u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("values", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_unpack_s8|{fields}")
-}
-
-fn probe_vfs_unpack_s16(fixture: &super::Fixture) -> String {
-    let local_packed = match crate::bindings::recoil::spring_api::vfs::pack_s16(&vec![-30000i16, -1000i16, 1000i16, 30000i16]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|vfs_unpack_s16|__error|i|{}", error.code),
-    };
-    let result = crate::bindings::recoil::spring_api::vfs::unpack_s16(&local_packed, ((3u32) - 1) as u32, (2u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("values", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_unpack_s16|{fields}")
-}
-
-fn probe_vfs_unpack_s32(fixture: &super::Fixture) -> String {
-    let local_packed = match crate::bindings::recoil::spring_api::vfs::pack_s32(&vec![-300000i32, -1000i32, 1000i32, 300000i32]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|vfs_unpack_s32|__error|i|{}", error.code),
-    };
-    let result = crate::bindings::recoil::spring_api::vfs::unpack_s32(&local_packed, ((5u32) - 1) as u32, (2u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("values", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_unpack_s32|{fields}")
-}
-
-fn probe_vfs_unpack_f32(fixture: &super::Fixture) -> String {
-    let local_packed = match crate::bindings::recoil::spring_api::vfs::pack_f32(&vec![1.5f32, 2.5f32, 3.5f32]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|vfs_unpack_f32|__error|i|{}", error.code),
-    };
-    let result = crate::bindings::recoil::spring_api::vfs::unpack_f32(&local_packed, ((5u32) - 1) as u32, (2u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("values", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_unpack_f32|{fields}")
-}
-
-fn probe_vfs_zlib_compress(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::zlib_compress(&("Native API parity compression payload").as_bytes().to_vec());
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_zlib_compress|{fields}")
-}
-
-fn probe_vfs_zlib_decompress(fixture: &super::Fixture) -> String {
-    let local_compressed = match crate::bindings::recoil::spring_api::vfs::zlib_compress(&("Native API parity decompression payload").as_bytes().to_vec()) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|vfs_zlib_decompress|__error|i|{}", error.code),
-    };
-    let result = crate::bindings::recoil::spring_api::vfs::zlib_decompress(&local_compressed);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_hex_bytes("hex", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_zlib_decompress|{fields}")
-}
-
-fn probe_vfs_calculate_hash_md5(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::calculate_hash(&("Native API parity hash payload").as_bytes().to_vec(), (0i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("hash", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_calculate_hash_md5|{fields}")
-}
-
-fn probe_vfs_calculate_hash_sha512(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::vfs::calculate_hash(&("Native API parity hash payload").as_bytes().to_vec(), (1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("hash", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|vfs_calculate_hash_sha512|{fields}")
-}
-
-fn probe_trace_ray_ground_in_direction(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::tracing::trace_ray_ground_in_direction(crate::bindings::recoil::spring_api::tracing::Float3 { x: (1024f32) as f32, y: (256f32) as f32, z: (1024f32) as f32 }, crate::bindings::recoil::spring_api::tracing::Float3 { x: (0f32) as f32, y: (-1f32) as f32, z: (0f32) as f32 }, crate::bindings::recoil::spring_api::tracing::TraceRayGroundInDirectionOptions { length: Some((512f32) as f32), test_water: Some(false) });
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("rayLength", value.hit_length), encode_f32("posX", value.hit_pos.x), encode_f32("posY", value.hit_pos.y), encode_f32("posZ", value.hit_pos.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|trace_ray_ground_in_direction|{fields}")
-}
-
-fn probe_trace_ray_ground_between_positions(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::tracing::trace_ray_ground_between_positions(crate::bindings::recoil::spring_api::tracing::Float3 { x: (1024f32) as f32, y: (256f32) as f32, z: (1024f32) as f32 }, crate::bindings::recoil::spring_api::tracing::Float3 { x: (1024f32) as f32, y: (-256f32) as f32, z: (1024f32) as f32 }, crate::bindings::recoil::spring_api::tracing::TraceRayGroundBetweenPositionsOptions { test_water: Some(false) });
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("rayLength", value.hit_length), encode_f32("posX", value.hit_pos.x), encode_f32("posY", value.hit_pos.y), encode_f32("posZ", value.hit_pos.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|trace_ray_ground_between_positions|{fields}")
-}
-
-fn probe_trace_ray_in_direction(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::tracing::trace_ray_in_direction(crate::bindings::recoil::spring_api::tracing::Float3 { x: (0f32) as f32, y: (256f32) as f32, z: (0f32) as f32 }, crate::bindings::recoil::spring_api::tracing::Float3 { x: (1f32) as f32, y: (0f32) as f32, z: (0f32) as f32 }, crate::bindings::recoil::spring_api::tracing::TraceRayInDirectionOptions { max_length: Some((512f32) as f32) }, &"both");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_tracing_trace_ray_hit_list("hits", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|trace_ray_in_direction|{fields}")
-}
-
-fn probe_trace_ray_between_positions(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::tracing::trace_ray_between_positions(crate::bindings::recoil::spring_api::tracing::Float3 { x: (0f32) as f32, y: (256f32) as f32, z: (0f32) as f32 }, crate::bindings::recoil::spring_api::tracing::Float3 { x: (512f32) as f32, y: (256f32) as f32, z: (0f32) as f32 }, &"both");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_tracing_trace_ray_hit_list("hits", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|trace_ray_between_positions|{fields}")
 }
 
 fn probe_unit_health(fixture: &super::Fixture) -> String {
@@ -1763,78 +1100,6 @@ fn probe_get_team_units(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_team_units|{fields}")
 }
 
-fn probe_get_team_units_by_defs(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_team_units_by_defs((fixture.team_id) as i32, &vec![(fixture.unit_def_id) as i32]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("unitIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_team_units_by_defs|{fields}")
-}
-
-fn probe_get_units_in_rectangle(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_units_in_rectangle((0f32) as f32, (0f32) as f32, (99999f32) as f32, (99999f32) as f32, (-1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("unitIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_units_in_rectangle|{fields}")
-}
-
-fn probe_get_units_in_box(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_units_in_box((0f32) as f32, (-99999f32) as f32, (0f32) as f32, (99999f32) as f32, (99999f32) as f32, (99999f32) as f32, (-1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("unitIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_units_in_box|{fields}")
-}
-
-fn probe_get_units_in_sphere(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_units_in_sphere((1024f32) as f32, (96f32) as f32, (1024f32) as f32, (99999f32) as f32, (-1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("unitIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_units_in_sphere|{fields}")
-}
-
-fn probe_get_units_in_cylinder(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_units_in_cylinder((1024f32) as f32, (1024f32) as f32, (99999f32) as f32, (-1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("unitIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_units_in_cylinder|{fields}")
-}
-
-fn probe_get_unit_separation(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_unit_separation((fixture.unit_id) as i32, (fixture.unit_id) as i32, crate::bindings::recoil::spring_api::units_query::GetUnitSeparationOptions { positional: true, check_map: false });
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("separation", value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_separation|{fields}")
-}
-
 fn probe_get_team_max_units(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::teams::get_team_max_units((fixture.team_id) as i32);
     let fields = match result {
@@ -1845,22 +1110,6 @@ fn probe_get_team_max_units(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_team_max_units|{fields}")
-}
-
-fn probe_unit_rules_param(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::rules_params::set_unit_rules_param((fixture.unit_id) as i32, &"native_api_parity_unit_rules_param", &crate::bindings::recoil::spring_api::rules_params::RulesParamValue { type_: crate::bindings::recoil::spring_api::rules_params::RulesParamType::RulesparamTypeFloat, bool_value: false, float_value: 455.0f32, string_value: "".to_string() }, (32i32) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|unit_rules_param|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::rules_params::get_unit_rules_param((fixture.unit_id) as i32, &"native_api_parity_unit_rules_param");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("value", value.value.float_value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|unit_rules_param|{fields}")
 }
 
 fn probe_get_unit_cost_table(fixture: &super::Fixture) -> String {
@@ -1901,18 +1150,6 @@ fn probe_get_unit_states(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_unit_states|{fields}")
-}
-
-fn probe_get_unit_sensor_radius(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_info::get_unit_sensor_radius((fixture.unit_id) as i32, &"los");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("radius", value.los)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_sensor_radius|{fields}")
 }
 
 fn probe_get_unit_feature_separation(fixture: &super::Fixture) -> String {
@@ -2055,22 +1292,6 @@ fn probe_unit_height_after_set(fixture: &super::Fixture) -> String {
     format!("WASM_API|unit_height_after_set|{fields}")
 }
 
-fn probe_unit_sensor_radius(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::unit_control::set_unit_sensor_radius((fixture.unit_id) as i32, &"los", (288i32) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|unit_sensor_radius|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::units_info::get_unit_sensor_radius((fixture.unit_id) as i32, &"los");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("radius", value.los)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|unit_sensor_radius|{fields}")
-}
-
 fn probe_unit_cloak(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::unit_control::set_unit_cloak((fixture.unit_id) as i32, crate::bindings::recoil::spring_api::unit_control::NumberOrBool { number: 0.0f32, boolean: false, use_boolean: true }, crate::bindings::recoil::spring_api::unit_control::NumberOrBool { number: 0.0f32, boolean: false, use_boolean: true }) {
         Ok(_) => {},
@@ -2103,18 +1324,6 @@ fn probe_unit_direction_after_set(fixture: &super::Fixture) -> String {
     format!("WASM_API|unit_direction_after_set|{fields}")
 }
 
-fn probe_get_team_units_counts(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_team_units_counts((fixture.team_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_units_query_unit_def_count_list("counts", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_team_units_counts|{fields}")
-}
-
 fn probe_unit_add_damage(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::unit_control::set_unit_health((fixture.unit_id) as i32, crate::bindings::recoil::spring_api::unit_control::UnitHealthValue { health: 800.0f32, capture: 0.0f32, paralyze: 0.0f32, build: 1.0f32, use_amounts: true }) {
         Ok(_) => {},
@@ -2145,18 +1354,6 @@ fn probe_get_unit_nearest_ally(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_unit_nearest_ally|{fields}")
-}
-
-fn probe_get_unit_nearest_enemy(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_unit_nearest_enemy((fixture.unit_id) as i32, (4096f32) as f32, crate::bindings::recoil::spring_api::units_query::GetUnitNearestEnemyOptions { use_los: false, sphere_dist_test: false, check_sight_dist: false });
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("unitIDResult", value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_nearest_enemy|{fields}")
 }
 
 fn probe_get_unit_is_building(fixture: &super::Fixture) -> String {
@@ -2219,30 +1416,6 @@ fn probe_get_unit_transporter(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_unit_transporter|{fields}")
 }
 
-fn probe_get_unit_last_attacker(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_info::get_unit_last_attacker((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("hasAttacker", value.is_some())];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_last_attacker|{fields}")
-}
-
-fn probe_get_unit_shield_state(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_info::get_unit_shield_state((fixture.unit_id) as i32, (1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("hasShield", value.is_some())];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_shield_state|{fields}")
-}
-
 fn probe_get_unit_command_count(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::units_commands::get_unit_command_count((fixture.unit_id) as i32);
     let fields = match result {
@@ -2255,42 +1428,6 @@ fn probe_get_unit_command_count(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_unit_command_count|{fields}")
 }
 
-fn probe_get_unit_commands(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_commands::get_unit_commands((fixture.unit_id) as i32, (999u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("count", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_commands|{fields}")
-}
-
-fn probe_get_command_queue(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_commands::get_command_queue((fixture.unit_id) as i32, (999u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("count", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_command_queue|{fields}")
-}
-
-fn probe_get_unit_current_command(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_commands::get_unit_current_command((fixture.unit_id) as i32, (1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("hasCommand", value.is_some())];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_current_command|{fields}")
-}
-
 fn probe_find_unit_cmd_desc_missing(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::units_commands::find_unit_cmd_desc((fixture.unit_id) as i32, (-999999i32) as i32);
     let fields = match result {
@@ -2301,18 +1438,6 @@ fn probe_find_unit_cmd_desc_missing(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|find_unit_cmd_desc_missing|{fields}")
-}
-
-fn probe_get_unit_weapon_state(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_weapons::get_unit_weapon_state((fixture.unit_id) as i32, (1i32) as i32, &"range");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("value", value.range)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_weapon_state|{fields}")
 }
 
 fn probe_get_unit_weapon_can_fire(fixture: &super::Fixture) -> String {
@@ -2337,18 +1462,6 @@ fn probe_get_unit_weapon_test_range(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_unit_weapon_test_range|{fields}")
-}
-
-fn probe_get_unit_weapon_damages(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_weapons::get_unit_weapon_damages((fixture.unit_id) as i32, (1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("value", value.paralyze_damage_time)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_weapon_damages|{fields}")
 }
 
 fn probe_get_feature_piece_collision_volume_data(fixture: &super::Fixture) -> String {
@@ -2385,30 +1498,6 @@ fn probe_get_unit_move_def_id(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_unit_move_def_id|{fields}")
-}
-
-fn probe_get_unit_move_type_data(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::move_ctrl::get_unit_move_type_data((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("moveTypeName", &value.name), encode_f32("maxSpeed", value.max_speed), encode_f32("maxWantedSpeed", value.max_wanted_speed), encode_f32("goalx", value.goal_x), encode_f32("goaly", value.goal_y), encode_f32("goalz", value.goal_z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_move_type_data|{fields}")
-}
-
-fn probe_get_unit_estimated_path(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::move_ctrl::get_unit_estimated_path((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("count", value.waypoints.len() as u32), encode_numeric_list("starts", &value.starts)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_estimated_path|{fields}")
 }
 
 fn probe_get_unit_weapon_vectors(fixture: &super::Fixture) -> String {
@@ -2483,42 +1572,6 @@ fn probe_get_factory_command_count(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_factory_command_count|{fields}")
 }
 
-fn probe_get_factory_commands(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_commands::get_factory_commands((fixture.unit_id) as i32, (0u32) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("count", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_factory_commands|{fields}")
-}
-
-fn probe_get_factory_counts(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_commands::get_factory_counts((fixture.unit_id) as i32, (-1i32) as i32, false);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("entryCount", value.counts.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_factory_counts|{fields}")
-}
-
-fn probe_get_full_build_queue(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_commands::get_full_build_queue((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("count", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_full_build_queue|{fields}")
-}
-
 fn probe_get_real_build_queue(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::units_commands::get_real_build_queue((fixture.unit_id) as i32);
     let fields = match result {
@@ -2541,78 +1594,6 @@ fn probe_get_closest_enemy_unit(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_closest_enemy_unit|{fields}")
-}
-
-fn probe_get_units_in_planes(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_units_in_planes(&crate::bindings::recoil::spring_api::units_query::PlanesQuery { planes: vec![crate::bindings::recoil::spring_api::units_query::Float4 { x: 1f32, y: 0f32, z: 0f32, w: -100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: -1f32, y: 0f32, z: 0f32, w: 100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: 0f32, y: 1f32, z: 0f32, w: -100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: 0f32, y: -1f32, z: 0f32, w: 100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: 0f32, y: 0f32, z: 1f32, w: -100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: 0f32, y: 0f32, z: -1f32, w: 100000f32 }], plane_count: (vec![crate::bindings::recoil::spring_api::units_query::Float4 { x: 1f32, y: 0f32, z: 0f32, w: -100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: -1f32, y: 0f32, z: 0f32, w: 100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: 0f32, y: 1f32, z: 0f32, w: -100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: 0f32, y: -1f32, z: 0f32, w: 100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: 0f32, y: 0f32, z: 1f32, w: -100000f32 }, crate::bindings::recoil::spring_api::units_query::Float4 { x: 0f32, y: 0f32, z: -1f32, w: 100000f32 }].len() as u32) }, (0i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("unitIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_units_in_planes|{fields}")
-}
-
-fn probe_get_unit_script_names(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_unit_script_names((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("names", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_script_names|{fields}")
-}
-
-fn probe_get_unit_piece_list(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_unit_piece_list((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("names", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_piece_list|{fields}")
-}
-
-fn probe_get_feature_piece_list(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_feature_piece_list((fixture.feature_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("names", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_feature_piece_list|{fields}")
-}
-
-fn probe_get_unit_piece_map(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_unit_piece_map((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_units_pieces_piece_map_entry_list("pieces", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_piece_map|{fields}")
-}
-
-fn probe_get_feature_piece_map(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_feature_piece_map((fixture.feature_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_units_pieces_piece_map_entry_list("pieces", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_feature_piece_map|{fields}")
 }
 
 fn probe_get_model_root_piece(fixture: &super::Fixture) -> String {
@@ -2649,30 +1630,6 @@ fn probe_get_feature_root_piece(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_feature_root_piece|{fields}")
-}
-
-fn probe_get_model_piece_list(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_model_piece_list(&"fir_tree_small.s3o");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("names", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_model_piece_list|{fields}")
-}
-
-fn probe_get_model_piece_map(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_model_piece_map(&"fir_tree_small.s3o");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_units_pieces_piece_map_entry_list("pieces", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_model_piece_map|{fields}")
 }
 
 fn probe_get_unit_piece_position(fixture: &super::Fixture) -> String {
@@ -2771,30 +1728,6 @@ fn probe_get_feature_piece_matrix(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_feature_piece_matrix|{fields}")
 }
 
-fn probe_get_unit_piece_info(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_unit_piece_info((fixture.unit_id) as i32, (1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("exists", value.exists), encode_string("pieceName", &value.info.name), encode_string("parent", &value.info.parent), encode_string_list("children", &value.info.children), encode_bool("isEmpty", value.info.is_empty), encode_f32("minX", value.info.min.x), encode_f32("minY", value.info.min.y), encode_f32("minZ", value.info.min.z), encode_f32("maxX", value.info.max.x), encode_f32("maxY", value.info.max.y), encode_f32("maxZ", value.info.max.z), encode_f32("offsetX", value.info.offset.x), encode_f32("offsetY", value.info.offset.y), encode_f32("offsetZ", value.info.offset.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_piece_info|{fields}")
-}
-
-fn probe_get_feature_piece_info(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_pieces::get_feature_piece_info((fixture.feature_id) as i32, (1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("exists", value.exists), encode_string("pieceName", &value.info.name), encode_string("parent", &value.info.parent), encode_string_list("children", &value.info.children), encode_bool("isEmpty", value.info.is_empty), encode_f32("minX", value.info.min.x), encode_f32("minY", value.info.min.y), encode_f32("minZ", value.info.min.z), encode_f32("maxX", value.info.max.x), encode_f32("maxY", value.info.max.y), encode_f32("maxZ", value.info.max.z), encode_f32("offsetX", value.info.offset.x), encode_f32("offsetY", value.info.offset.y), encode_f32("offsetZ", value.info.offset.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_feature_piece_info|{fields}")
-}
-
 fn probe_get_unit_script_piece(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::units_pieces::get_unit_script_piece((fixture.unit_id) as i32, (0i32) as i32);
     let fields = match result {
@@ -2817,30 +1750,6 @@ fn probe_get_all_projectiles(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_all_projectiles|{fields}")
-}
-
-fn probe_get_projectiles_in_rectangle(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectiles_in_rectangle((0f32) as f32, (0f32) as f32, (99999f32) as f32, (99999f32) as f32, crate::bindings::recoil::spring_api::projectiles::GetProjectilesInRectangleOptions { exclude_weapon_projectiles: true, exclude_piece_projectiles: true });
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("projectileIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_projectiles_in_rectangle|{fields}")
-}
-
-fn probe_get_projectiles_in_sphere(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectiles_in_sphere(crate::bindings::recoil::spring_api::projectiles::Float3 { x: (1024.0f32) as f32, y: (128.0f32) as f32, z: (1024.0f32) as f32 }, (2048f32) as f32, crate::bindings::recoil::spring_api::projectiles::GetProjectilesInSphereOptions { exclude_weapon_projectiles: true, exclude_piece_projectiles: true });
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("projectileIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_projectiles_in_sphere|{fields}")
 }
 
 fn probe_get_position_los_state(fixture: &super::Fixture) -> String {
@@ -2891,38 +1800,6 @@ fn probe_unit_los_state(fixture: &super::Fixture) -> String {
     format!("WASM_API|unit_los_state|{fields}")
 }
 
-fn probe_unit_build_distance(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::unit_control::set_unit_build_params((fixture.unit_id) as i32, &"buildDistance", crate::bindings::recoil::spring_api::unit_control::NumberOrBool { number: 288.0f32, boolean: false, use_boolean: false }) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|unit_build_distance|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::units_info::get_unit_build_params((fixture.unit_id) as i32, &"buildDistance");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("hasValue", value.is_some()), encode_optional_f32("value", value.as_ref().map(|value| value.number))];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|unit_build_distance|{fields}")
-}
-
-fn probe_unit_build_range3d(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::unit_control::set_unit_build_params((fixture.unit_id) as i32, &"buildRange3D", crate::bindings::recoil::spring_api::unit_control::NumberOrBool { number: 0.0f32, boolean: true, use_boolean: true }) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|unit_build_range3d|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::units_info::get_unit_build_params((fixture.unit_id) as i32, &"buildRange3D");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("hasValue", value.is_some()), encode_optional_bool("enabled", value.as_ref().map(|value| value.boolean))];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|unit_build_range3d|{fields}")
-}
-
 fn probe_get_unit_worker_task(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::units_info::get_unit_worker_task((fixture.unit_id) as i32);
     let fields = match result {
@@ -2935,18 +1812,6 @@ fn probe_get_unit_worker_task(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_unit_worker_task|{fields}")
 }
 
-fn probe_get_ally_team_info(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::teams::get_ally_team_info((fixture.ally_team_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("keys", &value.keys), encode_u32("count", value.keys.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_ally_team_info|{fields}")
-}
-
 fn probe_get_unit_def_dimensions(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::utils::get_unit_def_dimensions((fixture.unit_def_id) as i32);
     let fields = match result {
@@ -2957,22 +1822,6 @@ fn probe_get_unit_def_dimensions(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_unit_def_dimensions|{fields}")
-}
-
-fn probe_map_square_terrain_type(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::terrain_control::set_map_square_terrain_type((1024i32) as i32, (1024i32) as i32, (1i32) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|map_square_terrain_type|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::terrain::get_ground_info((1024.0f32) as f32, (1024.0f32) as f32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("terrainTypeIndex", value.terrain_type_index)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|map_square_terrain_type|{fields}")
 }
 
 fn probe_get_player_controlled_unit(fixture: &super::Fixture) -> String {
@@ -2999,18 +1848,6 @@ fn probe_get_team_lua_ai(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_team_lua_ai|{fields}")
 }
 
-fn probe_get_unit_cmd_descs(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_commands::get_unit_cmd_descs((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("count", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_cmd_descs|{fields}")
-}
-
 fn probe_unit_harvest_storage(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::unit_control::set_unit_harvest_storage((fixture.unit_id) as i32, (50.5f32) as f32, (200.0f32) as f32, (50.5f32) as f32, (200.0f32) as f32) {
         Ok(_) => {},
@@ -3025,30 +1862,6 @@ fn probe_unit_harvest_storage(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|unit_harvest_storage|{fields}")
-}
-
-fn probe_get_unit_array_centroid(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_unit_array_centroid(&vec![(fixture.unit_id) as i32]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("x", value.x), encode_f32("y", value.y), encode_f32("z", value.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_array_centroid|{fields}")
-}
-
-fn probe_get_unit_map_centroid(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_unit_map_centroid(&vec![(fixture.unit_id) as i32]);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("x", value.x), encode_f32("y", value.y), encode_f32("z", value.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_map_centroid|{fields}")
 }
 
 fn probe_get_unit_tooltip(fixture: &super::Fixture) -> String {
@@ -3109,30 +1922,6 @@ fn probe_feature_smoke_time(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|feature_smoke_time|{fields}")
-}
-
-fn probe_side_data_by_name(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::game::get_side_data(&"arm");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("normalizedSideName", &value.side_name), encode_string("startUnit", &value.start_unit), encode_string("caseName", &value.case_name)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|side_data_by_name|{fields}")
-}
-
-fn probe_side_data_by_index(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::game::get_side_data_by_index(((1u32) - 1) as u32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("normalizedSideName", &value.side_name), encode_string("startUnit", &value.start_unit), encode_string("caseName", &value.case_name)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|side_data_by_index|{fields}")
 }
 
 fn probe_side_data_count(fixture: &super::Fixture) -> String {
@@ -3224,18 +2013,6 @@ fn probe_get_team_unit_stats(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_team_unit_stats|{fields}")
 }
 
-fn probe_get_team_units_sorted(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_query::get_team_units_sorted((fixture.team_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_units_query_team_units_by_def_list("groups", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_team_units_sorted|{fields}")
-}
-
 fn probe_unit_buildee_radius(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::unit_control::set_unit_buildee_radius((fixture.unit_id) as i32, (50.0f32) as f32) {
         Ok(_) => {},
@@ -3278,18 +2055,6 @@ fn probe_get_feature_blocking(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_feature_blocking|{fields}")
-}
-
-fn probe_unit_stockpile_fixed_shape(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_info::get_unit_stockpile((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("hasStockpile", value.is_some()), encode_optional_u32("stockpile", value.as_ref().map(|value| value.stockpile)), encode_optional_u32("stockpileQueueSize", value.as_ref().map(|value| value.stockpile_queue_size)), encode_optional_f32("buildPercent", value.as_ref().map(|value| value.build_percent))];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|unit_stockpile_fixed_shape|{fields}")
 }
 
 fn probe_unit_storage_fixed_getter(fixture: &super::Fixture) -> String {
@@ -3342,45 +2107,6 @@ fn probe_unit_flanking_fixed_shape(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|unit_flanking_fixed_shape|{fields}")
-}
-
-fn probe_unit_last_attacked_piece_fixed_shape(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::units_info::get_unit_last_attacked_piece((fixture.unit_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("wasHit", value.was_hit), encode_string("pieceName", &value.name), encode_i32("frame", value.frame)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|unit_last_attacked_piece_fixed_shape|{fields}")
-}
-
-fn probe_feature_last_attacked_piece_fixed_shape(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::features::get_feature_last_attacked_piece((fixture.feature_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("wasHit", value.was_hit), encode_string("pieceName", &value.name), encode_i32("frame", value.frame)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|feature_last_attacked_piece_fixed_shape|{fields}")
-}
-
-fn probe_get_ai_info_fixed_shape(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::teams::get_ai_info((fixture.team_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let mut output_fields: Vec<String> = vec![encode_bool("hasAI", value.is_ai), encode_u32("optionCount", value.info.options.len() as u32)];
-            if value.is_ai {
-                output_fields.extend([encode_i32("skirmishAIID", value.info.skirmish_aiid), encode_string("name", &value.info.name), encode_i32("hostingPlayerID", value.info.hosting_player_id), encode_string("shortName", &value.info.short_name), encode_string("version", &value.info.version)]);
-            }
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_ai_info_fixed_shape|{fields}")
 }
 
 fn probe_feature_health(fixture: &super::Fixture) -> String {
@@ -3475,18 +2201,6 @@ fn probe_get_features_in_rectangle(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_features_in_rectangle|{fields}")
 }
 
-fn probe_get_features_in_sphere(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::features::get_features_in_sphere(crate::bindings::recoil::spring_api::features::Float3 { x: (1024f32) as f32, y: (96f32) as f32, z: (1024f32) as f32 }, (99999f32) as f32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_numeric_list("featureIDs", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_features_in_sphere|{fields}")
-}
-
 fn probe_get_features_in_cylinder(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::features::get_features_in_cylinder((1024f32) as f32, (1024f32) as f32, (99999f32) as f32, (99999f32) as f32);
     let fields = match result {
@@ -3513,22 +2227,6 @@ fn probe_feature_reclaim(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|feature_reclaim|{fields}")
-}
-
-fn probe_feature_resurrect(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::feature_control::set_feature_resurrect((fixture.feature_id) as i32, &crate::bindings::recoil::spring_api::feature_control::DefRef { name: "".to_string(), id: fixture.unit_def_id }, (1i32) as i32, (0.5f32) as f32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|feature_resurrect|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::features::get_feature_resurrect((fixture.feature_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("unitDef", &value.resurrect.resurrect_as), encode_i32("facing", value.resurrect.facing_dir)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|feature_resurrect|{fields}")
 }
 
 fn probe_feature_position(fixture: &super::Fixture) -> String {
@@ -3597,23 +2295,6 @@ fn probe_feature_velocity(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|feature_velocity|{fields}")
-}
-
-fn probe_feature_direction(fixture: &super::Fixture) -> String {
-    let sequence_updated = match crate::bindings::recoil::spring_api::feature_control::set_feature_direction((fixture.feature_id) as i32, crate::bindings::recoil::spring_api::feature_control::Float3 { x: 0.0f32, y: 0.0f32, z: 1.0f32 }, crate::bindings::recoil::spring_api::feature_control::Float3 { x: 1.0f32, y: 0.0f32, z: 0.0f32 }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|feature_direction|__error|i|{}", error.code),
-    };
-    if !sequence_updated { return format!("WASM_API|feature_direction|__error|i|{}", -1); }
-    let sequence_direction = match crate::bindings::recoil::spring_api::features::get_feature_direction((fixture.feature_id) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|feature_direction|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_f32("frontX", sequence_direction.x), encode_f32("frontY", sequence_direction.y), encode_f32("frontZ", sequence_direction.z)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|feature_direction|{fields}")
 }
 
 fn probe_feature_no_select(fixture: &super::Fixture) -> String {
@@ -3690,22 +2371,6 @@ fn probe_get_feature_ally_team(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_feature_ally_team|{fields}")
-}
-
-fn probe_feature_rules_param(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::rules_params::set_feature_rules_param((fixture.feature_id) as i32, &"native_api_parity_feature_rules_param", &crate::bindings::recoil::spring_api::rules_params::RulesParamValue { type_: crate::bindings::recoil::spring_api::rules_params::RulesParamType::RulesparamTypeFloat, bool_value: false, float_value: 455.0f32, string_value: "".to_string() }, (32i32) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|feature_rules_param|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::rules_params::get_feature_rules_param((fixture.feature_id) as i32, &"native_api_parity_feature_rules_param");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("value", value.value.float_value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|feature_rules_param|{fields}")
 }
 
 fn probe_get_feature_collision_volume_data(fixture: &super::Fixture) -> String {
@@ -3786,26 +2451,6 @@ fn probe_feature_add_damage(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|feature_add_damage|{fields}")
-}
-
-fn probe_ground_height(fixture: &super::Fixture) -> String {
-    prepare_callback(5u32, 0i32, [((1024.0f32) as f32).to_bits(), ((1024.0f32) as f32).to_bits(), ((112f32) as f32).to_bits(), ((0.5f32) as f32).to_bits()]);
-    let sequence_registered = match crate::bindings::recoil::spring_api::terrain_control::set_height_map_func(1, 0) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|ground_height|__error|i|{}", error.code),
-    };
-    let sequence_height = match crate::bindings::recoil::spring_api::terrain::get_ground_height((1024.0f32) as f32, (1024.0f32) as f32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|ground_height|__error|i|{}", error.code),
-    };
-    if callback_error() != 0 {
-        return format!("WASM_API|ground_height|__error|i|{}", callback_error());
-    }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_f32("height", sequence_height)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|ground_height|{fields}")
 }
 
 fn probe_ground_orig_height(fixture: &super::Fixture) -> String {
@@ -3916,30 +2561,6 @@ fn probe_is_pos_in_map(fixture: &super::Fixture) -> String {
     format!("WASM_API|is_pos_in_map|{fields}")
 }
 
-fn probe_get_ground_info(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::terrain::get_ground_info((1024.0f32) as f32, (1024.0f32) as f32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("terrainTypeIndex", value.terrain_type_index), encode_string("terrainTypeName", &value.terrain_type_name), encode_f32("metalExtraction", value.metal_extraction), encode_f32("hardness", value.hardness), encode_f32("tankSpeed", value.tank_speed), encode_f32("kbotSpeed", value.kbot_speed), encode_f32("hoverSpeed", value.hover_speed), encode_f32("shipSpeed", value.ship_speed), encode_bool("receiveTracks", value.receive_tracks)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_ground_info|{fields}")
-}
-
-fn probe_get_terrain_type_data(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::terrain::get_terrain_type_data((0i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("terrainTypeIndex", value.index), encode_string("terrainTypeName", &value.name), encode_f32("hardness", value.hardness), encode_f32("tankSpeed", value.tank_speed), encode_f32("kbotSpeed", value.kbot_speed), encode_f32("hoverSpeed", value.hover_speed), encode_f32("shipSpeed", value.ship_speed), encode_bool("receiveTracks", value.receive_tracks)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_terrain_type_data|{fields}")
-}
-
 fn probe_get_metal_map_size(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::metal_map::get_metal_map_size(0u8);
     let fields = match result {
@@ -4006,22 +2627,6 @@ fn probe_wind(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|wind|{fields}")
-}
-
-fn probe_terrain_type_data(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::terrain_control::set_terrain_type_data((0i32) as i32, (1.25f32) as f32, (1.25f32) as f32, (1.25f32) as f32, (1.25f32) as f32, (1.75f32) as f32, false, &"native_api_parity_terrain") {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|terrain_type_data|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::terrain::get_terrain_type_data((0i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("terrainTypeIndex", value.index), encode_string("terrainTypeName", &value.name), encode_f32("hardness", value.hardness), encode_f32("tankSpeed", value.tank_speed), encode_f32("kbotSpeed", value.kbot_speed), encode_f32("hoverSpeed", value.hover_speed), encode_f32("shipSpeed", value.ship_speed), encode_bool("receiveTracks", value.receive_tracks)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|terrain_type_data|{fields}")
 }
 
 fn probe_terrain_add_grass(fixture: &super::Fixture) -> String {
@@ -4400,30 +3005,6 @@ fn probe_get_unit_def_idby_name(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_unit_def_idby_name|{fields}")
 }
 
-fn probe_get_unit_def_name(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_defs::get_unit_def_name((fixture.unit_def_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_def_name|{fields}")
-}
-
-fn probe_get_unit_def_human_name(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_defs::get_unit_def_human_name((fixture.unit_def_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_def_human_name|{fields}")
-}
-
 fn probe_get_unit_def_health(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::unit_defs::get_unit_def_health((fixture.unit_def_id) as i32);
     let fields = match result {
@@ -4482,42 +3063,6 @@ fn probe_get_unit_def_speed(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_unit_def_speed|{fields}")
-}
-
-fn probe_get_unit_def_custom_param(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_defs::get_unit_def_custom_param((fixture.unit_def_id) as i32, &"native_api_parity_unit");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_def_custom_param|{fields}")
-}
-
-fn probe_get_unit_def_custom_param_keys(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_defs::get_unit_def_custom_param_keys((fixture.unit_def_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("keys", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_def_custom_param_keys|{fields}")
-}
-
-fn probe_get_unit_def_by_id(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_defs::get_unit_def_by_id((fixture.unit_def_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("exists", value.exists), encode_i32("id", value.basic.id), encode_string("nameValue", &value.basic.name), encode_string("humanName", &value.basic.human_name), encode_f32("metalCost", value.costs.metal_cost), encode_f32("health", value.health.health)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_unit_def_by_id|{fields}")
 }
 
 fn probe_get_feature_def_ids(fixture: &super::Fixture) -> String {
@@ -4604,42 +3149,6 @@ fn probe_get_feature_def_energy(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_feature_def_energy|{fields}")
 }
 
-fn probe_get_feature_def_custom_param(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::feature_defs::get_feature_def_custom_param((fixture.feature_def_id) as i32, &"native_api_parity_feature");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_feature_def_custom_param|{fields}")
-}
-
-fn probe_get_feature_def_custom_param_keys(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::feature_defs::get_feature_def_custom_param_keys((fixture.feature_def_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("keys", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_feature_def_custom_param_keys|{fields}")
-}
-
-fn probe_get_feature_def_by_id(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::feature_defs::get_feature_def_by_id((fixture.feature_def_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("exists", value.exists), encode_i32("id", value.info.id), encode_string("nameValue", &value.info.name), encode_f32("metal", value.info.metal), encode_f32("energy", value.info.energy)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_feature_def_by_id|{fields}")
-}
-
 fn probe_get_weapon_def_ids(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::weapon_defs::get_weapon_def_i_ds(0u8);
     let fields = match result {
@@ -4722,42 +3231,6 @@ fn probe_get_weapon_def_damage(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_weapon_def_damage|{fields}")
-}
-
-fn probe_get_weapon_def_custom_param(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::weapon_defs::get_weapon_def_custom_param((fixture.weapon_def_id) as i32, &"native_api_parity_weapon");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("value", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_weapon_def_custom_param|{fields}")
-}
-
-fn probe_get_weapon_def_custom_param_keys(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::weapon_defs::get_weapon_def_custom_param_keys((fixture.weapon_def_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string_list("keys", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_weapon_def_custom_param_keys|{fields}")
-}
-
-fn probe_get_weapon_def_by_id(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::weapon_defs::get_weapon_def_by_id((fixture.weapon_def_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("exists", value.exists), encode_i32("id", value.info.id), encode_string("nameValue", &value.info.name), encode_f32("range", value.info.range), encode_f32("damage", value.info.damage)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_weapon_def_by_id|{fields}")
 }
 
 fn probe_get_cegid(fixture: &super::Fixture) -> String {
@@ -4892,30 +3365,6 @@ fn probe_get_player_list_in_ally_team(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_player_list_in_ally_team|{fields}")
 }
 
-fn probe_get_team_info(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::teams::get_team_info((fixture.team_id) as i32, false);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("teamID", value.team_id), encode_i32("leaderID", value.leader_id), encode_bool("isDead", value.is_dead), encode_string("side", &value.side), encode_i32("allyTeamID", value.ally_team_id)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_team_info|{fields}")
-}
-
-fn probe_get_player_info(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::teams::get_player_info((0i32) as i32, false);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("pingTime", value.ping_time), encode_f32("cpuUsage", value.cpu_usage)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_player_info|{fields}")
-}
-
 fn probe_are_teams_allied(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::teams::are_teams_allied((fixture.team_id) as i32, (fixture.team_id) as i32);
     let fields = match result {
@@ -4952,82 +3401,6 @@ fn probe_get_team_ally_team_id(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_team_ally_team_id|{fields}")
 }
 
-fn probe_game_rules_param(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::rules_params::set_game_rules_param(&"native_api_parity_game_rules_param", &crate::bindings::recoil::spring_api::rules_params::RulesParamValue { type_: crate::bindings::recoil::spring_api::rules_params::RulesParamType::RulesparamTypeFloat, bool_value: false, float_value: 455.0f32, string_value: "".to_string() }, (32i32) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|game_rules_param|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::rules_params::get_game_rules_param(&"native_api_parity_game_rules_param");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("value", value.value.float_value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|game_rules_param|{fields}")
-}
-
-fn probe_team_resource(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::team_control::set_team_resource((fixture.team_id) as i32, &"metal", (500.0f32) as f32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|team_resource|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::teams::get_team_resources((fixture.team_id) as i32, &"metal");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("currentLevel", value.metal_current), encode_f32("storage", value.metal_storage)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|team_resource|{fields}")
-}
-
-fn probe_team_rules_param(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::rules_params::set_team_rules_param((fixture.team_id) as i32, &"native_api_parity_team_rules_param", &crate::bindings::recoil::spring_api::rules_params::RulesParamValue { type_: crate::bindings::recoil::spring_api::rules_params::RulesParamType::RulesparamTypeFloat, bool_value: false, float_value: 455.0f32, string_value: "".to_string() }, (32i32) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|team_rules_param|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::rules_params::get_team_rules_param((fixture.team_id) as i32, &"native_api_parity_team_rules_param");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("value", value.value.float_value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|team_rules_param|{fields}")
-}
-
-fn probe_player_rules_param(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::rules_params::set_player_rules_param((0i32) as i32, &"native_api_parity_player_rules_param", &crate::bindings::recoil::spring_api::rules_params::RulesParamValue { type_: crate::bindings::recoil::spring_api::rules_params::RulesParamType::RulesparamTypeFloat, bool_value: false, float_value: 455.0f32, string_value: "".to_string() }, (32i32) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|player_rules_param|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::rules_params::get_player_rules_param((0i32) as i32, &"native_api_parity_player_rules_param");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("value", value.value.float_value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|player_rules_param|{fields}")
-}
-
-fn probe_get_team_resource_stats(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::teams::get_team_resource_stats((0i32) as i32, &"metal");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("used", value.metal_current), encode_f32("produced", value.metal_storage), encode_f32("excessed", value.metal_pull), encode_f32("received", value.metal_income), encode_f32("sent", value.metal_expense)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_team_resource_stats|{fields}")
-}
-
 fn probe_ally_team_start_box(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::team_control::set_ally_team_start_box((fixture.ally_team_id) as i32, (350.0f32) as f32, (350.0f32) as f32, (1400.0f32) as f32, (1400.0f32) as f32) {
         Ok(_) => {},
@@ -5062,70 +3435,6 @@ fn probe_team_start_position(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|team_start_position|{fields}")
-}
-
-fn probe_team_add_resource(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::team_control::set_team_resource((fixture.team_id) as i32, &"metal", (200.0f32) as f32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|team_add_resource|__error|i|{}", error.code),
-    }
-    match crate::bindings::recoil::spring_api::team_control::add_team_resource((fixture.team_id) as i32, &"metal", (50.0f32) as f32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|team_add_resource|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::teams::get_team_resources((fixture.team_id) as i32, &"metal");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("currentLevel", value.metal_current), encode_f32("storage", value.metal_storage)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|team_add_resource|{fields}")
-}
-
-fn probe_team_use_resource(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::team_control::set_team_resource((fixture.team_id) as i32, &"metal", (500.0f32) as f32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|team_use_resource|__error|i|{}", error.code),
-    }
-    match crate::bindings::recoil::spring_api::team_control::use_team_resource((fixture.team_id) as i32, &"metal", (75.0f32) as f32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|team_use_resource|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::teams::get_team_resources((fixture.team_id) as i32, &"metal");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("currentLevel", value.metal_current), encode_f32("storage", value.metal_storage)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|team_use_resource|{fields}")
-}
-
-fn probe_get_team_damage_stats(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unsynced_read::get_team_damage_stats((fixture.team_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageDealt", value.damage_dealt), encode_f32("damageReceived", value.damage_received)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_team_damage_stats|{fields}")
-}
-
-fn probe_get_team_stats_history(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::teams::get_team_stats_history((fixture.team_id) as i32, (1i32) as i32, (1i32) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_u32("count", value.len() as u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_team_stats_history|{fields}")
 }
 
 fn probe_unit_add_impulse(fixture: &super::Fixture) -> String {
@@ -5210,18 +3519,6 @@ fn probe_unit_set_build_speed(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|unit_set_build_speed|{fields}")
-}
-
-fn probe_unit_set_flanking(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_control::set_unit_flanking((fixture.unit_id) as i32, &"dir", crate::bindings::recoil::spring_api::unit_control::Float3 { x: 0.0f32, y: 1.0f32, z: 0.0f32 });
-    let fields = match result {
-        Ok(_value) => {
-            let output_fields: Vec<String> = vec![encode_u32("returnCount", 0u32)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|unit_set_flanking|{fields}")
 }
 
 fn probe_unit_set_mid_and_aim_pos(fixture: &super::Fixture) -> String {
@@ -5854,186 +4151,6 @@ fn probe_projectile_def_id(fixture: &super::Fixture) -> String {
     format!("WASM_API|projectile_def_id|{fields}")
 }
 
-fn probe_piece_projectile_params(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_piece_projectile_params((fixture.piece_projectile_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("explFlags", value.params.expl_flags), encode_f32("spinAngle", value.params.spin_angle), encode_f32("spinSpeed", value.params.spin_speed), encode_f32("spinX", value.params.spin_vec.x), encode_f32("spinY", value.params.spin_vec.y), encode_f32("spinZ", value.params.spin_vec.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|piece_projectile_params|{fields}")
-}
-
-fn probe_projectile_damage_armor(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"0");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.damages.get(0).copied().unwrap_or_default())];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_armor|{fields}")
-}
-
-fn probe_projectile_damage_paralyze(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"paralyzeDamageTime");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.paralyze_damage_time)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_paralyze|{fields}")
-}
-
-fn probe_projectile_damage_impulse_factor(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"impulseFactor");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.impulse_factor)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_impulse_factor|{fields}")
-}
-
-fn probe_projectile_damage_impulse_boost(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"impulseBoost");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.impulse_boost)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_impulse_boost|{fields}")
-}
-
-fn probe_projectile_damage_crater_mult(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"craterMult");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.crater_mult)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_crater_mult|{fields}")
-}
-
-fn probe_projectile_damage_crater_boost(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"craterBoost");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.crater_boost)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_crater_boost|{fields}")
-}
-
-fn probe_projectile_damage_dyn_exp(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"dynDamageExp");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.dyn_damage_exp)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_dyn_exp|{fields}")
-}
-
-fn probe_projectile_damage_dyn_min(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"dynDamageMin");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.dyn_damage_min)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_dyn_min|{fields}")
-}
-
-fn probe_projectile_damage_dyn_range(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"dynDamageRange");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.dyn_damage_range)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_dyn_range|{fields}")
-}
-
-fn probe_projectile_damage_dyn_inverted(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"dynDamageInverted");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("damageValue", value.dyn_damage_inverted)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_dyn_inverted|{fields}")
-}
-
-fn probe_projectile_damage_crater_aoe(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"craterAreaOfEffect");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.crater_area_of_effect)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_crater_aoe|{fields}")
-}
-
-fn probe_projectile_damage_damage_aoe(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"damageAreaOfEffect");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.damage_area_of_effect)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_damage_aoe|{fields}")
-}
-
-fn probe_projectile_damage_edge_effectiveness(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"edgeEffectiveness");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.edge_effectiveness)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_edge_effectiveness|{fields}")
-}
-
-fn probe_projectile_damage_explosion_speed(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"explosionSpeed");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.explosion_speed)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_explosion_speed|{fields}")
-}
-
 fn probe_projectile_position_after_set(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::projectile_control::set_projectile_position((fixture.projectile_id) as i32, crate::bindings::recoil::spring_api::projectile_control::Float3 { x: (1024.0f32) as f32, y: (128.0f32) as f32, z: (1024.0f32) as f32 }) {
         Ok(_) => {},
@@ -6128,38 +4245,6 @@ fn probe_projectile_ttl_after_set(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|projectile_ttl_after_set|{fields}")
-}
-
-fn probe_projectile_damage_after_set(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::projectile_control::set_projectile_damages((fixture.projectile_id) as i32, (0i32) as i32, &"impulseFactor", (4.25f32) as f32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|projectile_damage_after_set|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::projectiles::get_projectile_damages((fixture.projectile_id) as i32, &"impulseFactor");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("damageValue", value.impulse_factor)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|projectile_damage_after_set|{fields}")
-}
-
-fn probe_piece_projectile_params_after_set(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::projectile_control::set_piece_projectile_params((fixture.piece_projectile_id) as i32, (66i32) as i32, (0.75f32) as f32, (2.5f32) as f32, crate::bindings::recoil::spring_api::projectile_control::Float3 { x: 0.0f32, y: 1.0f32, z: 0.0f32 }) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|piece_projectile_params_after_set|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::projectiles::get_piece_projectile_params((fixture.piece_projectile_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("explFlags", value.params.expl_flags), encode_f32("spinAngle", value.params.spin_angle), encode_f32("spinSpeed", value.params.spin_speed), encode_f32("spinX", value.params.spin_vec.x), encode_f32("spinY", value.params.spin_vec.y), encode_f32("spinZ", value.params.spin_vec.z)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|piece_projectile_params_after_set|{fields}")
 }
 
 fn probe_projectile_set_always_visible(fixture: &super::Fixture) -> String {
@@ -6258,82 +4343,6 @@ fn probe_projectile_delete(fixture: &super::Fixture) -> String {
     format!("WASM_API|projectile_delete|{fields}")
 }
 
-fn probe_add_height_map(fixture: &super::Fixture) -> String {
-    prepare_callback(1u32, 0i32, [((1600f32) as f32).to_bits(), ((1600f32) as f32).to_bits(), ((2f32) as f32).to_bits(), 0u32]);
-    let sequence_registered = match crate::bindings::recoil::spring_api::terrain_control::set_height_map_func(1, 0) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|add_height_map|__error|i|{}", error.code),
-    };
-    let sequence_height = match crate::bindings::recoil::spring_api::terrain::get_ground_height((1600f32) as f32, (1600f32) as f32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|add_height_map|__error|i|{}", error.code),
-    };
-    if callback_error() != 0 {
-        return format!("WASM_API|add_height_map|__error|i|{}", callback_error());
-    }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_f32("height", sequence_height)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|add_height_map|{fields}")
-}
-
-fn probe_add_original_height_map(fixture: &super::Fixture) -> String {
-    prepare_callback(2u32, 0i32, [((1600f32) as f32).to_bits(), ((1600f32) as f32).to_bits(), ((2f32) as f32).to_bits(), 0u32]);
-    let sequence_registered = match crate::bindings::recoil::spring_api::terrain_control::set_original_height_map_func(1, 0) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|add_original_height_map|__error|i|{}", error.code),
-    };
-    let sequence_height = match crate::bindings::recoil::spring_api::terrain::get_ground_orig_height((1600f32) as f32, (1600f32) as f32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|add_original_height_map|__error|i|{}", error.code),
-    };
-    if callback_error() != 0 {
-        return format!("WASM_API|add_original_height_map|__error|i|{}", callback_error());
-    }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_f32("height", sequence_height)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|add_original_height_map|{fields}")
-}
-
-fn probe_add_smooth_mesh(fixture: &super::Fixture) -> String {
-    prepare_callback(3u32, 0i32, [((1600f32) as f32).to_bits(), ((1600f32) as f32).to_bits(), ((2f32) as f32).to_bits(), 0u32]);
-    let sequence_registered = match crate::bindings::recoil::spring_api::terrain_control::set_smooth_mesh_func(1, 0) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|add_smooth_mesh|__error|i|{}", error.code),
-    };
-    let sequence_height = match crate::bindings::recoil::spring_api::terrain::get_smooth_mesh_height((1600f32) as f32, (1600f32) as f32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|add_smooth_mesh|__error|i|{}", error.code),
-    };
-    if callback_error() != 0 {
-        return format!("WASM_API|add_smooth_mesh|__error|i|{}", callback_error());
-    }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_f32("height", sequence_height)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|add_smooth_mesh|{fields}")
-}
-
-fn probe_add_team_resource_excess_stats(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::team_control::add_team_resource_excess_stats((fixture.team_id) as i32, &"metal", (3f32) as f32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|add_team_resource_excess_stats|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::teams::get_team_resource_stats((fixture.team_id) as i32, &"metal");
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_f32("used", value.metal_current), encode_f32("produced", value.metal_storage), encode_f32("excessed", value.metal_pull), encode_f32("received", value.metal_income), encode_f32("sent", value.metal_expense)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|add_team_resource_excess_stats|{fields}")
-}
-
 fn probe_set_ally(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::team_control::set_ally((0i32) as i32, (0i32) as i32, true) {
         Ok(_) => {},
@@ -6348,22 +4357,6 @@ fn probe_set_ally(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|set_ally|{fields}")
-}
-
-fn probe_assign_player_to_team(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::team_control::assign_player_to_team((0i32) as i32, (0i32) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|assign_player_to_team|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::teams::get_player_info((0i32) as i32, false);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("teamID", value.team_id), encode_i32("allyTeamID", value.ally_team_id)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|assign_player_to_team|{fields}")
 }
 
 fn probe_set_cheating_enabled(fixture: &super::Fixture) -> String {
@@ -6478,18 +4471,6 @@ fn probe_transfer_team_max_units(fixture: &super::Fixture) -> String {
     format!("WASM_API|transfer_team_max_units|{fields}")
 }
 
-fn probe_get_piece_projectile_name(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unsynced_read::get_piece_projectile_name((fixture.piece_projectile_id) as i32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_string("name", &value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|get_piece_projectile_name|{fields}")
-}
-
 fn probe_spawn_explosion(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::effects_control::spawn_explosion(crate::bindings::recoil::spring_api::effects_control::Float3 { x: 1024.0f32, y: 128.0f32, z: 1024.0f32 }, crate::bindings::recoil::spring_api::effects_control::Float3 { x: 0.0f32, y: 1.0f32, z: 0.0f32 }, crate::bindings::recoil::spring_api::effects_control::NativeExplosionParams { damages: 1f32, weapon_def_id: -1i32, owner_id: -1i32, hit_unit_id: -1i32, hit_feature_id: -1i32, crater_area_of_effect: 0f32, damage_area_of_effect: 0f32, edge_effectiveness: 0f32, explosion_speed: 0f32, gfx_mod: 0f32, impact_only: false, ignore_owner: false, damage_ground: false, projectile_id: -1i32 });
     let fields = match result {
@@ -6500,18 +4481,6 @@ fn probe_spawn_explosion(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|spawn_explosion|{fields}")
-}
-
-fn probe_spawn_ceg(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::effects_control::spawn_ceg(&crate::bindings::recoil::spring_api::effects_control::DefRef { name: "native_api_parity_missing_ceg".to_string(), id: -1i32 }, crate::bindings::recoil::spring_api::effects_control::Float3 { x: 1024.0f32, y: 128.0f32, z: 1024.0f32 }, crate::bindings::recoil::spring_api::effects_control::Float3 { x: 0.0f32, y: 1.0f32, z: 0.0f32 }, (0f32) as f32, (0f32) as f32, (1f32) as f32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("success", value.success), encode_i32("cegID", value.ceg_id)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|spawn_ceg|{fields}")
 }
 
 fn probe_spawn_sfx(fixture: &super::Fixture) -> String {
@@ -6562,173 +4531,6 @@ fn probe_path_node_costs(fixture: &super::Fixture) -> String {
     format!("WASM_API|path_node_costs|{fields}")
 }
 
-fn probe_request_path(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::path_finder::request_path((0u32) as u32, Some("KBOT1"), crate::bindings::recoil::spring_api::path_finder::Float3 { x: 900f32, y: 96f32, z: 900f32 }, crate::bindings::recoil::spring_api::path_finder::Float3 { x: 1120f32, y: 96f32, z: 1120f32 }, (8f32) as f32);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("valid", (value != 0 as u32))];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|request_path|{fields}")
-}
-
-fn probe_unit_cmd_desc_lifecycle(fixture: &super::Fixture) -> String {
-    let sequence_inserted = match crate::bindings::recoil::spring_api::unit_control::insert_unit_cmd_desc((fixture.unit_id) as i32, (-1i32) as i32, &crate::bindings::recoil::spring_api::unit_control::NativeCommandDescription { id: 34567i32, type_: 21i32, queueing: false, hidden: false, disabled: false, show_unique: false, only_texture: false, name: "Native parity command".to_string(), action: "native_api_parity_cmd".to_string(), iconname: "".to_string(), mouseicon: "".to_string(), tooltip: "Native parity command".to_string(), params: vec!["native_api_parity".to_string()] }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_cmd_desc_lifecycle|__error|i|{}", error.code),
-    };
-    if !sequence_inserted { return format!("WASM_API|unit_cmd_desc_lifecycle|__error|i|{}", -1); }
-    let sequence_found = match crate::bindings::recoil::spring_api::units_commands::find_unit_cmd_desc((fixture.unit_id) as i32, (34567i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_cmd_desc_lifecycle|__error|i|{}", error.code),
-    };
-    let sequence_edited = match crate::bindings::recoil::spring_api::unit_control::edit_unit_cmd_desc((fixture.unit_id) as i32, (sequence_found.cmd_index) as u32, &crate::bindings::recoil::spring_api::unit_control::NativeCommandDescription { id: 34567i32, type_: 21i32, queueing: false, hidden: false, disabled: false, show_unique: false, only_texture: false, name: "Native parity command".to_string(), action: "native_api_parity_cmd_edited".to_string(), iconname: "".to_string(), mouseicon: "".to_string(), tooltip: "Native parity command".to_string(), params: vec!["native_api_parity".to_string()] }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_cmd_desc_lifecycle|__error|i|{}", error.code),
-    };
-    if !sequence_edited { return format!("WASM_API|unit_cmd_desc_lifecycle|__error|i|{}", -1); }
-    let sequence_removed = match crate::bindings::recoil::spring_api::unit_control::remove_unit_cmd_desc((fixture.unit_id) as i32, (sequence_found.cmd_index) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_cmd_desc_lifecycle|__error|i|{}", error.code),
-    };
-    if !sequence_removed { return format!("WASM_API|unit_cmd_desc_lifecycle|__error|i|{}", -1); }
-    let sequence_after = match crate::bindings::recoil::spring_api::units_commands::find_unit_cmd_desc((fixture.unit_id) as i32, (34567i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_cmd_desc_lifecycle|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", !sequence_after.found)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|unit_cmd_desc_lifecycle|{fields}")
-}
-
-fn probe_set_original_height_map(fixture: &super::Fixture) -> String {
-    prepare_callback(6u32, 0i32, [((1600f32) as f32).to_bits(), ((1600f32) as f32).to_bits(), ((106f32) as f32).to_bits(), ((0.5f32) as f32).to_bits()]);
-    let sequence_registered = match crate::bindings::recoil::spring_api::terrain_control::set_original_height_map_func(1, 0) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|set_original_height_map|__error|i|{}", error.code),
-    };
-    let sequence_height = match crate::bindings::recoil::spring_api::terrain::get_ground_orig_height((1600f32) as f32, (1600f32) as f32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|set_original_height_map|__error|i|{}", error.code),
-    };
-    if callback_error() != 0 {
-        return format!("WASM_API|set_original_height_map|__error|i|{}", callback_error());
-    }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_f32("height", sequence_height)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|set_original_height_map|{fields}")
-}
-
-fn probe_set_smooth_mesh(fixture: &super::Fixture) -> String {
-    prepare_callback(7u32, 0i32, [((1600f32) as f32).to_bits(), ((1600f32) as f32).to_bits(), ((106f32) as f32).to_bits(), ((0.5f32) as f32).to_bits()]);
-    let sequence_registered = match crate::bindings::recoil::spring_api::terrain_control::set_smooth_mesh_func(1, 0) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|set_smooth_mesh|__error|i|{}", error.code),
-    };
-    let sequence_height = match crate::bindings::recoil::spring_api::terrain::get_smooth_mesh_height((1600f32) as f32, (1600f32) as f32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|set_smooth_mesh|__error|i|{}", error.code),
-    };
-    if callback_error() != 0 {
-        return format!("WASM_API|set_smooth_mesh|__error|i|{}", callback_error());
-    }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_f32("height", sequence_height)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|set_smooth_mesh|{fields}")
-}
-
-fn probe_give_order_to_unit_synced(fixture: &super::Fixture) -> String {
-    let sequence_success = match crate::bindings::recoil::spring_api::unit_control::give_order_to_unit((fixture.unit_id) as i32, (0i32) as i32, &vec![], (0u32) as u32, (0i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|give_order_to_unit_synced|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", sequence_success)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|give_order_to_unit_synced|{fields}")
-}
-
-fn probe_give_order_to_unit_array_synced(fixture: &super::Fixture) -> String {
-    let sequence_success = match crate::bindings::recoil::spring_api::units_commands::give_order_to_unit_map(&vec![fixture.unit_id], (0i32) as i32, &vec![], (0u32) as u32, (0i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|give_order_to_unit_array_synced|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", sequence_success > 0)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|give_order_to_unit_array_synced|{fields}")
-}
-
-fn probe_give_order_to_unit_map_synced(fixture: &super::Fixture) -> String {
-    let sequence_success = match crate::bindings::recoil::spring_api::unit_control::give_order_array_to_unit_array(&vec![fixture.unit_id], &vec![crate::bindings::recoil::spring_api::unit_control::NativeCommand { cmd_id: 0i32, params: vec![], options: 0u32, timeout: 0i32 }], false) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|give_order_to_unit_map_synced|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", sequence_success > 0)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|give_order_to_unit_map_synced|{fields}")
-}
-
-fn probe_give_order_array_to_unit_synced(fixture: &super::Fixture) -> String {
-    let sequence_success = match crate::bindings::recoil::spring_api::unit_control::give_order_array_to_unit((fixture.unit_id) as i32, &vec![crate::bindings::recoil::spring_api::unit_control::NativeCommand { cmd_id: 0i32, params: vec![], options: 0u32, timeout: 0i32 }]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|give_order_array_to_unit_synced|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", sequence_success)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|give_order_array_to_unit_synced|{fields}")
-}
-
-fn probe_give_order_array_to_unit_map_synced(fixture: &super::Fixture) -> String {
-    let sequence_success = match crate::bindings::recoil::spring_api::unit_control::give_order_array_to_unit_array(&vec![fixture.unit_id], &vec![crate::bindings::recoil::spring_api::unit_control::NativeCommand { cmd_id: 0i32, params: vec![], options: 0u32, timeout: 0i32 }], false) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|give_order_array_to_unit_map_synced|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", sequence_success > 0)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|give_order_array_to_unit_map_synced|{fields}")
-}
-
-fn probe_give_order_array_to_unit_array_synced_pairwise(fixture: &super::Fixture) -> String {
-    let sequence_success = match crate::bindings::recoil::spring_api::unit_control::give_order_array_to_unit_array(&vec![fixture.unit_id], &vec![crate::bindings::recoil::spring_api::unit_control::NativeCommand { cmd_id: 0i32, params: vec![], options: 0u32, timeout: 0i32 }], true) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|give_order_array_to_unit_array_synced_pairwise|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", sequence_success > 0)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|give_order_array_to_unit_array_synced_pairwise|{fields}")
-}
-
-fn probe_give_order_array_to_unit_array_synced_broadcast(fixture: &super::Fixture) -> String {
-    let sequence_success = match crate::bindings::recoil::spring_api::unit_control::give_order_array_to_unit_array(&vec![fixture.unit_id], &vec![crate::bindings::recoil::spring_api::unit_control::NativeCommand { cmd_id: 0i32, params: vec![], options: 0u32, timeout: 0i32 }], false) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|give_order_array_to_unit_array_synced_broadcast|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", sequence_success > 0)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|give_order_array_to_unit_array_synced_broadcast|{fields}")
-}
-
 fn probe_get_cobscript_id_non_cob(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::cob_script::get_cob_script_id((fixture.unit_id) as i32, &"NativeApiParityMissingCobFunction");
     let fields = match result {
@@ -6739,153 +4541,6 @@ fn probe_get_cobscript_id_non_cob(fixture: &super::Fixture) -> String {
         Err(error) => format!("__error|i|{}", error.code),
     };
     format!("WASM_API|get_cobscript_id_non_cob|{fields}")
-}
-
-fn probe_call_cobscript_non_cob(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::cob_script::call_cob_script((fixture.unit_id) as i32, &crate::bindings::recoil::spring_api::cob_script::CobFunctionRef { name: "NativeApiParityMissingCobFunction".to_string(), id: 0i32 }, (0u32) as u32, &vec![]);
-    let fields = match result {
-        Ok(_value) => "__unexpected_value|b|1".to_string(),
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|call_cobscript_non_cob|{fields}")
-}
-
-fn probe_create_unit_cleanup(fixture: &super::Fixture) -> String {
-    let sequence_created_unit = match crate::bindings::recoil::spring_api::unit_control::create_unit(&crate::bindings::recoil::spring_api::unit_control::DefRef { name: "native_api_test_unit".to_string(), id: fixture.unit_def_id }, crate::bindings::recoil::spring_api::unit_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, crate::bindings::recoil::spring_api::unit_control::CreateUnitOptions { build: false, flatten_ground: false, unit_id: -1i32, builder_id: -1i32 }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|create_unit_cleanup|__error|i|{}", error.code),
-    };
-    let sequence_created = match crate::bindings::recoil::spring_api::units_query::valid_unit_id((sequence_created_unit) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|create_unit_cleanup|__error|i|{}", error.code),
-    };
-    if !sequence_created { return format!("WASM_API|create_unit_cleanup|__error|i|{}", -1); }
-    let sequence_destroyed = match crate::bindings::recoil::spring_api::unit_control::destroy_unit((sequence_created_unit) as i32, crate::bindings::recoil::spring_api::unit_control::DestroyUnitOptions { selfd: false, reclaimed: true, attacker_id: -1i32, recycle_id: true }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|create_unit_cleanup|__error|i|{}", error.code),
-    };
-    if !sequence_destroyed { return format!("WASM_API|create_unit_cleanup|__error|i|{}", -1); }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("created", sequence_created)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|create_unit_cleanup|{fields}")
-}
-
-fn probe_destroy_unit(fixture: &super::Fixture) -> String {
-    let sequence_created_unit = match crate::bindings::recoil::spring_api::unit_control::create_unit(&crate::bindings::recoil::spring_api::unit_control::DefRef { name: "native_api_test_unit".to_string(), id: fixture.unit_def_id }, crate::bindings::recoil::spring_api::unit_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, crate::bindings::recoil::spring_api::unit_control::CreateUnitOptions { build: false, flatten_ground: false, unit_id: -1i32, builder_id: -1i32 }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|destroy_unit|__error|i|{}", error.code),
-    };
-    let sequence_destroyed = match crate::bindings::recoil::spring_api::unit_control::destroy_unit((sequence_created_unit) as i32, crate::bindings::recoil::spring_api::unit_control::DestroyUnitOptions { selfd: false, reclaimed: true, attacker_id: -1i32, recycle_id: true }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|destroy_unit|__error|i|{}", error.code),
-    };
-    if !sequence_destroyed { return format!("WASM_API|destroy_unit|__error|i|{}", -1); }
-    let sequence_valid = match crate::bindings::recoil::spring_api::units_query::valid_unit_id((sequence_created_unit) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|destroy_unit|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("destroyed", !sequence_valid)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|destroy_unit|{fields}")
-}
-
-fn probe_transfer_unit(fixture: &super::Fixture) -> String {
-    let sequence_created_unit = match crate::bindings::recoil::spring_api::unit_control::create_unit(&crate::bindings::recoil::spring_api::unit_control::DefRef { name: "native_api_test_unit".to_string(), id: fixture.unit_def_id }, crate::bindings::recoil::spring_api::unit_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, crate::bindings::recoil::spring_api::unit_control::CreateUnitOptions { build: false, flatten_ground: false, unit_id: -1i32, builder_id: -1i32 }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|transfer_unit|__error|i|{}", error.code),
-    };
-    let sequence_success = match crate::bindings::recoil::spring_api::unit_control::transfer_unit((sequence_created_unit) as i32, (fixture.team_id) as i32, true, false) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|transfer_unit|__error|i|{}", error.code),
-    };
-    if !sequence_success { return format!("WASM_API|transfer_unit|__error|i|{}", -1); }
-    let sequence_team_after = match crate::bindings::recoil::spring_api::units_info::get_unit_team((sequence_created_unit) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|transfer_unit|__error|i|{}", error.code),
-    };
-    let sequence_destroyed = match crate::bindings::recoil::spring_api::unit_control::destroy_unit((sequence_created_unit) as i32, crate::bindings::recoil::spring_api::unit_control::DestroyUnitOptions { selfd: false, reclaimed: true, attacker_id: -1i32, recycle_id: true }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|transfer_unit|__error|i|{}", error.code),
-    };
-    if !sequence_destroyed { return format!("WASM_API|transfer_unit|__error|i|{}", -1); }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("success", sequence_success), encode_i32("teamAfter", sequence_team_after)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|transfer_unit|{fields}")
-}
-
-fn probe_create_feature_cleanup(fixture: &super::Fixture) -> String {
-    let sequence_created_feature = match crate::bindings::recoil::spring_api::feature_control::create_feature(&crate::bindings::recoil::spring_api::feature_control::DefRef { name: "native_api_test_feature".to_string(), id: fixture.feature_def_id }, crate::bindings::recoil::spring_api::feature_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, (-1i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|create_feature_cleanup|__error|i|{}", error.code),
-    };
-    let sequence_created = match crate::bindings::recoil::spring_api::features::valid_feature_id((sequence_created_feature) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|create_feature_cleanup|__error|i|{}", error.code),
-    };
-    if sequence_created {
-        let sequence_destroyed = match crate::bindings::recoil::spring_api::feature_control::destroy_feature((sequence_created_feature) as i32) {
-            Ok(value) => value,
-            Err(error) => return format!("WASM_API|create_feature_cleanup|__error|i|{}", error.code),
-        };
-    }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("created", sequence_created)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|create_feature_cleanup|{fields}")
-}
-
-fn probe_destroy_feature(fixture: &super::Fixture) -> String {
-    let sequence_created_feature = match crate::bindings::recoil::spring_api::feature_control::create_feature(&crate::bindings::recoil::spring_api::feature_control::DefRef { name: "native_api_test_feature".to_string(), id: fixture.feature_def_id }, crate::bindings::recoil::spring_api::feature_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, (-1i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|destroy_feature|__error|i|{}", error.code),
-    };
-    let sequence_destroyed = match crate::bindings::recoil::spring_api::feature_control::destroy_feature((sequence_created_feature) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|destroy_feature|__error|i|{}", error.code),
-    };
-    if !sequence_destroyed { return format!("WASM_API|destroy_feature|__error|i|{}", -1); }
-    let sequence_valid = match crate::bindings::recoil::spring_api::features::valid_feature_id((sequence_created_feature) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|destroy_feature|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("destroyed", !sequence_valid)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|destroy_feature|{fields}")
-}
-
-fn probe_transfer_feature(fixture: &super::Fixture) -> String {
-    let sequence_created_feature = match crate::bindings::recoil::spring_api::feature_control::create_feature(&crate::bindings::recoil::spring_api::feature_control::DefRef { name: "native_api_test_feature".to_string(), id: fixture.feature_def_id }, crate::bindings::recoil::spring_api::feature_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, (-1i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|transfer_feature|__error|i|{}", error.code),
-    };
-    let sequence_transferred = match crate::bindings::recoil::spring_api::feature_control::transfer_feature((sequence_created_feature) as i32, (fixture.team_id) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|transfer_feature|__error|i|{}", error.code),
-    };
-    if !sequence_transferred { return format!("WASM_API|transfer_feature|__error|i|{}", -1); }
-    let sequence_team_after = match crate::bindings::recoil::spring_api::features::get_feature_team((sequence_created_feature) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|transfer_feature|__error|i|{}", error.code),
-    };
-    let sequence_destroyed = match crate::bindings::recoil::spring_api::feature_control::destroy_feature((sequence_created_feature) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|transfer_feature|__error|i|{}", error.code),
-    };
-    if !sequence_destroyed { return format!("WASM_API|transfer_feature|__error|i|{}", -1); }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_i32("teamAfter", sequence_team_after)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|transfer_feature|{fields}")
 }
 
 fn probe_create_unit_wreck_cleanup(fixture: &super::Fixture) -> String {
@@ -6932,121 +4587,6 @@ fn probe_create_feature_wreck_cleanup(fixture: &super::Fixture) -> String {
     format!("WASM_API|create_feature_wreck_cleanup|{fields}")
 }
 
-fn probe_unit_attach(fixture: &super::Fixture) -> String {
-    let sequence_passenger = match crate::bindings::recoil::spring_api::unit_control::create_unit(&crate::bindings::recoil::spring_api::unit_control::DefRef { name: "native_api_test_unit".to_string(), id: fixture.unit_def_id }, crate::bindings::recoil::spring_api::unit_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, crate::bindings::recoil::spring_api::unit_control::CreateUnitOptions { build: false, flatten_ground: false, unit_id: -1i32, builder_id: -1i32 }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_attach|__error|i|{}", error.code),
-    };
-    let sequence_attached = match crate::bindings::recoil::spring_api::unit_control::unit_attach((fixture.unit_id) as i32, (sequence_passenger) as i32, (0i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_attach|__error|i|{}", error.code),
-    };
-    let sequence_transporter = match crate::bindings::recoil::spring_api::units_info::get_unit_transporter((sequence_passenger) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_attach|__error|i|{}", error.code),
-    };
-    let sequence_detached = match crate::bindings::recoil::spring_api::unit_control::unit_detach((sequence_passenger) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_attach|__error|i|{}", error.code),
-    };
-    let sequence_destroyed = match crate::bindings::recoil::spring_api::unit_control::destroy_unit((sequence_passenger) as i32, crate::bindings::recoil::spring_api::unit_control::DestroyUnitOptions { selfd: false, reclaimed: true, attacker_id: -1i32, recycle_id: true }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_attach|__error|i|{}", error.code),
-    };
-    if !sequence_destroyed { return format!("WASM_API|unit_attach|__error|i|{}", -1); }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("attached", sequence_attached)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|unit_attach|{fields}")
-}
-
-fn probe_unit_detach(fixture: &super::Fixture) -> String {
-    let sequence_passenger = match crate::bindings::recoil::spring_api::unit_control::create_unit(&crate::bindings::recoil::spring_api::unit_control::DefRef { name: "native_api_test_unit".to_string(), id: fixture.unit_def_id }, crate::bindings::recoil::spring_api::unit_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, crate::bindings::recoil::spring_api::unit_control::CreateUnitOptions { build: false, flatten_ground: false, unit_id: -1i32, builder_id: -1i32 }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach|__error|i|{}", error.code),
-    };
-    let sequence_attached = match crate::bindings::recoil::spring_api::unit_control::unit_attach((fixture.unit_id) as i32, (sequence_passenger) as i32, (0i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach|__error|i|{}", error.code),
-    };
-    let sequence_detached = match crate::bindings::recoil::spring_api::unit_control::unit_detach((sequence_passenger) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach|__error|i|{}", error.code),
-    };
-    let sequence_transporter = match crate::bindings::recoil::spring_api::units_info::get_unit_transporter((sequence_passenger) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach|__error|i|{}", error.code),
-    };
-    let sequence_destroyed = match crate::bindings::recoil::spring_api::unit_control::destroy_unit((sequence_passenger) as i32, crate::bindings::recoil::spring_api::unit_control::DestroyUnitOptions { selfd: false, reclaimed: true, attacker_id: -1i32, recycle_id: true }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach|__error|i|{}", error.code),
-    };
-    if !sequence_destroyed { return format!("WASM_API|unit_detach|__error|i|{}", -1); }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("detached", sequence_detached)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|unit_detach|{fields}")
-}
-
-fn probe_unit_detach_from_air(fixture: &super::Fixture) -> String {
-    let sequence_passenger = match crate::bindings::recoil::spring_api::unit_control::create_unit(&crate::bindings::recoil::spring_api::unit_control::DefRef { name: "native_api_test_unit".to_string(), id: fixture.unit_def_id }, crate::bindings::recoil::spring_api::unit_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (0i32) as i32, (fixture.team_id) as i32, crate::bindings::recoil::spring_api::unit_control::CreateUnitOptions { build: false, flatten_ground: false, unit_id: -1i32, builder_id: -1i32 }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach_from_air|__error|i|{}", error.code),
-    };
-    let sequence_attached = match crate::bindings::recoil::spring_api::unit_control::unit_attach((fixture.unit_id) as i32, (sequence_passenger) as i32, (0i32) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach_from_air|__error|i|{}", error.code),
-    };
-    let sequence_detached = match crate::bindings::recoil::spring_api::unit_control::unit_detach_from_air((sequence_passenger) as i32, crate::bindings::recoil::spring_api::unit_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach_from_air|__error|i|{}", error.code),
-    };
-    let sequence_transporter = match crate::bindings::recoil::spring_api::units_info::get_unit_transporter((sequence_passenger) as i32) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach_from_air|__error|i|{}", error.code),
-    };
-    let sequence_destroyed = match crate::bindings::recoil::spring_api::unit_control::destroy_unit((sequence_passenger) as i32, crate::bindings::recoil::spring_api::unit_control::DestroyUnitOptions { selfd: false, reclaimed: true, attacker_id: -1i32, recycle_id: true }) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|unit_detach_from_air|__error|i|{}", error.code),
-    };
-    if !sequence_destroyed { return format!("WASM_API|unit_detach_from_air|__error|i|{}", -1); }
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("detached", sequence_detached)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|unit_detach_from_air|{fields}")
-}
-
-fn probe_bugger_off(fixture: &super::Fixture) -> String {
-    let sequence_called = match crate::bindings::recoil::spring_api::unit_control::bugger_off(crate::bindings::recoil::spring_api::unit_control::Float3 { x: fixture.ground_x, y: 96f32, z: fixture.ground_z }, (128f32) as f32, (fixture.team_id) as i32, crate::bindings::recoil::spring_api::unit_control::BuggerOffOptions { spherical: true, forced: true, exclude_unit_id: -1i32 }, &vec![]) {
-        Ok(value) => value,
-        Err(error) => return format!("WASM_API|bugger_off|__error|i|{}", error.code),
-    };
-    let fields = {
-        let output_fields: Vec<String> = vec![encode_bool("called", sequence_called)];
-        output_fields.join("|")
-    };
-    format!("WASM_API|bugger_off|{fields}")
-}
-
-fn probe_kill_team(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::team_control::kill_team((fixture.team_id) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|kill_team|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::teams::get_team_info((fixture.team_id) as i32, false);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("isDead", value.is_dead)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|kill_team|{fields}")
-}
-
 fn probe_game_over(fixture: &super::Fixture) -> String {
     match crate::bindings::recoil::spring_api::team_control::game_over(&vec![0i32]) {
         Ok(_) => {},
@@ -7082,11 +4622,6 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_global_los(fixture));
     emit(probe_get_wind(fixture));
     emit(probe_get_vector_from_heading(fixture));
-    emit(probe_get_mod_option(fixture));
-    emit(probe_get_map_option(fixture));
-    emit(probe_get_mod_options(fixture));
-    emit(probe_get_map_options(fixture));
-    emit(probe_get_map_start_positions(fixture));
     emit(probe_global_los(fixture));
     emit(probe_math_hypot(fixture));
     emit(probe_math_diag(fixture));
@@ -7096,52 +4631,14 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_math_round(fixture));
     emit(probe_math_erf(fixture));
     emit(probe_math_smooth_step(fixture));
-    emit(probe_math_normalize(fixture));
     emit(probe_math_bit_or(fixture));
     emit(probe_math_bit_and(fixture));
     emit(probe_math_bit_xor(fixture));
     emit(probe_math_bit_inv(fixture));
     emit(probe_math_bit_bits(fixture));
-    emit(probe_encoding_decode_base64(fixture));
-    emit(probe_encoding_encode_base64_default_padding(fixture));
-    emit(probe_encoding_encode_base64_padded(fixture));
     emit(probe_encoding_is_valid_base64(fixture));
     emit(probe_encoding_is_invalid_base64(fixture));
-    emit(probe_encoding_decode_base64_url(fixture));
-    emit(probe_encoding_encode_base64_url(fixture));
     emit(probe_encoding_is_valid_base64_url(fixture));
-    emit(probe_call_as_team(fixture));
-    emit(probe_vfs_file_exists(fixture));
-    emit(probe_vfs_missing_file_exists(fixture));
-    emit(probe_vfs_file_size(fixture));
-    emit(probe_vfs_file_info(fixture));
-    emit(probe_vfs_read_file(fixture));
-    emit(probe_vfs_read_file_as_string(fixture));
-    emit(probe_vfs_list_dir_count(fixture));
-    emit(probe_vfs_is_directory(fixture));
-    emit(probe_vfs_missing_is_directory(fixture));
-    emit(probe_vfs_pack_u8(fixture));
-    emit(probe_vfs_pack_u16(fixture));
-    emit(probe_vfs_pack_u32(fixture));
-    emit(probe_vfs_pack_s8(fixture));
-    emit(probe_vfs_pack_s16(fixture));
-    emit(probe_vfs_pack_s32(fixture));
-    emit(probe_vfs_pack_f32(fixture));
-    emit(probe_vfs_unpack_u8(fixture));
-    emit(probe_vfs_unpack_u16(fixture));
-    emit(probe_vfs_unpack_u32(fixture));
-    emit(probe_vfs_unpack_s8(fixture));
-    emit(probe_vfs_unpack_s16(fixture));
-    emit(probe_vfs_unpack_s32(fixture));
-    emit(probe_vfs_unpack_f32(fixture));
-    emit(probe_vfs_zlib_compress(fixture));
-    emit(probe_vfs_zlib_decompress(fixture));
-    emit(probe_vfs_calculate_hash_md5(fixture));
-    emit(probe_vfs_calculate_hash_sha512(fixture));
-    emit(probe_trace_ray_ground_in_direction(fixture));
-    emit(probe_trace_ray_ground_between_positions(fixture));
-    emit(probe_trace_ray_in_direction(fixture));
-    emit(probe_trace_ray_between_positions(fixture));
     emit(probe_unit_health(fixture));
     emit(probe_unit_max_health(fixture));
     emit(probe_unit_experience(fixture));
@@ -7175,18 +4672,10 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_team_unit_count(fixture));
     emit(probe_get_team_unit_def_count(fixture));
     emit(probe_get_team_units(fixture));
-    emit(probe_get_team_units_by_defs(fixture));
-    emit(probe_get_units_in_rectangle(fixture));
-    emit(probe_get_units_in_box(fixture));
-    emit(probe_get_units_in_sphere(fixture));
-    emit(probe_get_units_in_cylinder(fixture));
-    emit(probe_get_unit_separation(fixture));
     emit(probe_get_team_max_units(fixture));
-    emit(probe_unit_rules_param(fixture));
     emit(probe_get_unit_cost_table(fixture));
     emit(probe_unit_metal_extraction(fixture));
     emit(probe_get_unit_states(fixture));
-    emit(probe_get_unit_sensor_radius(fixture));
     emit(probe_get_unit_feature_separation(fixture));
     emit(probe_get_unit_leaves_ghost(fixture));
     emit(probe_get_unit_self_dtime(fixture));
@@ -7197,56 +4686,33 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_unit_collision_volume_data(fixture));
     emit(probe_unit_radius_after_set(fixture));
     emit(probe_unit_height_after_set(fixture));
-    emit(probe_unit_sensor_radius(fixture));
     emit(probe_unit_cloak(fixture));
     emit(probe_unit_direction_after_set(fixture));
-    emit(probe_get_team_units_counts(fixture));
     emit(probe_unit_add_damage(fixture));
     emit(probe_get_unit_nearest_ally(fixture));
-    emit(probe_get_unit_nearest_enemy(fixture));
     emit(probe_get_unit_is_building(fixture));
     emit(probe_get_unit_effective_build_range(fixture));
     emit(probe_get_unit_in_build_stance(fixture));
     emit(probe_get_unit_nano_pieces_count(fixture));
     emit(probe_get_unit_transporter(fixture));
-    emit(probe_get_unit_last_attacker(fixture));
-    emit(probe_get_unit_shield_state(fixture));
     emit(probe_get_unit_command_count(fixture));
-    emit(probe_get_unit_commands(fixture));
-    emit(probe_get_command_queue(fixture));
-    emit(probe_get_unit_current_command(fixture));
     emit(probe_find_unit_cmd_desc_missing(fixture));
-    emit(probe_get_unit_weapon_state(fixture));
     emit(probe_get_unit_weapon_can_fire(fixture));
     emit(probe_get_unit_weapon_test_range(fixture));
-    emit(probe_get_unit_weapon_damages(fixture));
     emit(probe_get_feature_piece_collision_volume_data(fixture));
     emit(probe_get_unit_current_build_power(fixture));
     emit(probe_get_unit_move_def_id(fixture));
-    emit(probe_get_unit_move_type_data(fixture));
-    emit(probe_get_unit_estimated_path(fixture));
     emit(probe_get_unit_weapon_vectors(fixture));
     emit(probe_get_unit_weapon_target(fixture));
     emit(probe_get_unit_weapon_try_target(fixture));
     emit(probe_get_unit_weapon_test_target(fixture));
     emit(probe_get_unit_weapon_have_free_line_of_fire(fixture));
     emit(probe_get_factory_command_count(fixture));
-    emit(probe_get_factory_commands(fixture));
-    emit(probe_get_factory_counts(fixture));
-    emit(probe_get_full_build_queue(fixture));
     emit(probe_get_real_build_queue(fixture));
     emit(probe_get_closest_enemy_unit(fixture));
-    emit(probe_get_units_in_planes(fixture));
-    emit(probe_get_unit_script_names(fixture));
-    emit(probe_get_unit_piece_list(fixture));
-    emit(probe_get_feature_piece_list(fixture));
-    emit(probe_get_unit_piece_map(fixture));
-    emit(probe_get_feature_piece_map(fixture));
     emit(probe_get_model_root_piece(fixture));
     emit(probe_get_unit_root_piece(fixture));
     emit(probe_get_feature_root_piece(fixture));
-    emit(probe_get_model_piece_list(fixture));
-    emit(probe_get_model_piece_map(fixture));
     emit(probe_get_unit_piece_position(fixture));
     emit(probe_get_unit_piece_direction(fixture));
     emit(probe_get_unit_piece_pos_dir(fixture));
@@ -7255,33 +4721,20 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_feature_piece_direction(fixture));
     emit(probe_get_feature_piece_pos_dir(fixture));
     emit(probe_get_feature_piece_matrix(fixture));
-    emit(probe_get_unit_piece_info(fixture));
-    emit(probe_get_feature_piece_info(fixture));
     emit(probe_get_unit_script_piece(fixture));
     emit(probe_get_all_projectiles(fixture));
-    emit(probe_get_projectiles_in_rectangle(fixture));
-    emit(probe_get_projectiles_in_sphere(fixture));
     emit(probe_get_position_los_state(fixture));
     emit(probe_radar_error_params(fixture));
     emit(probe_unit_los_state(fixture));
-    emit(probe_unit_build_distance(fixture));
-    emit(probe_unit_build_range3d(fixture));
     emit(probe_get_unit_worker_task(fixture));
-    emit(probe_get_ally_team_info(fixture));
     emit(probe_get_unit_def_dimensions(fixture));
-    emit(probe_map_square_terrain_type(fixture));
     emit(probe_get_player_controlled_unit(fixture));
     emit(probe_get_team_lua_ai(fixture));
-    emit(probe_get_unit_cmd_descs(fixture));
     emit(probe_unit_harvest_storage(fixture));
-    emit(probe_get_unit_array_centroid(fixture));
-    emit(probe_get_unit_map_centroid(fixture));
     emit(probe_get_unit_tooltip(fixture));
     emit(probe_unit_physical_state_bit(fixture));
     emit(probe_feature_fire_time(fixture));
     emit(probe_feature_smoke_time(fixture));
-    emit(probe_side_data_by_name(fixture));
-    emit(probe_side_data_by_index(fixture));
     emit(probe_side_data_count(fixture));
     emit(probe_closest_valid_position(fixture));
     emit(probe_closest_build_pos(fixture));
@@ -7289,47 +4742,37 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_unit_rotation(fixture));
     emit(probe_feature_rotation(fixture));
     emit(probe_get_team_unit_stats(fixture));
-    emit(probe_get_team_units_sorted(fixture));
     emit(probe_unit_buildee_radius(fixture));
     emit(probe_unit_blocking(fixture));
     emit(probe_get_feature_blocking(fixture));
-    emit(probe_unit_stockpile_fixed_shape(fixture));
     emit(probe_unit_storage_fixed_getter(fixture));
     emit(probe_unit_is_transporting_fixed_shape(fixture));
     emit(probe_unit_pos_error_params_fixed_shape(fixture));
     emit(probe_unit_flanking_fixed_shape(fixture));
-    emit(probe_unit_last_attacked_piece_fixed_shape(fixture));
-    emit(probe_feature_last_attacked_piece_fixed_shape(fixture));
-    emit(probe_get_ai_info_fixed_shape(fixture));
     emit(probe_feature_health(fixture));
     emit(probe_feature_max_health(fixture));
     emit(probe_feature_mass(fixture));
     emit(probe_feature_resources(fixture));
     emit(probe_get_feature_separation(fixture));
     emit(probe_get_features_in_rectangle(fixture));
-    emit(probe_get_features_in_sphere(fixture));
     emit(probe_get_features_in_cylinder(fixture));
     emit(probe_feature_reclaim(fixture));
-    emit(probe_feature_resurrect(fixture));
     emit(probe_feature_position(fixture));
     emit(probe_feature_height(fixture));
     emit(probe_feature_radius(fixture));
     emit(probe_feature_heading(fixture));
     emit(probe_feature_velocity(fixture));
-    emit(probe_feature_direction(fixture));
     emit(probe_feature_no_select(fixture));
     emit(probe_valid_feature_id(fixture));
     emit(probe_get_all_features(fixture));
     emit(probe_get_feature_def_id(fixture));
     emit(probe_get_feature_team(fixture));
     emit(probe_get_feature_ally_team(fixture));
-    emit(probe_feature_rules_param(fixture));
     emit(probe_get_feature_collision_volume_data(fixture));
     emit(probe_feature_collision_volume_data(fixture));
     emit(probe_feature_radius_after_set(fixture));
     emit(probe_feature_height_after_set(fixture));
     emit(probe_feature_add_damage(fixture));
-    emit(probe_ground_height(fixture));
     emit(probe_ground_orig_height(fixture));
     emit(probe_ground_normal(fixture));
     emit(probe_get_smooth_mesh_height(fixture));
@@ -7339,14 +4782,11 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_ground_blocked(fixture));
     emit(probe_get_grass(fixture));
     emit(probe_is_pos_in_map(fixture));
-    emit(probe_get_ground_info(fixture));
-    emit(probe_get_terrain_type_data(fixture));
     emit(probe_get_metal_map_size(fixture));
     emit(probe_get_metal_amount(fixture));
     emit(probe_get_metal_extraction(fixture));
     emit(probe_metal_amount(fixture));
     emit(probe_wind(fixture));
-    emit(probe_terrain_type_data(fixture));
     emit(probe_terrain_add_grass(fixture));
     emit(probe_terrain_remove_grass(fixture));
     emit(probe_terrain_level_height_map(fixture));
@@ -7371,16 +4811,11 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_unit_def_count(fixture));
     emit(probe_valid_unit_def_id(fixture));
     emit(probe_get_unit_def_idby_name(fixture));
-    emit(probe_get_unit_def_name(fixture));
-    emit(probe_get_unit_def_human_name(fixture));
     emit(probe_get_unit_def_health(fixture));
     emit(probe_get_unit_def_metal_cost(fixture));
     emit(probe_get_unit_def_energy_cost(fixture));
     emit(probe_get_unit_def_build_time(fixture));
     emit(probe_get_unit_def_speed(fixture));
-    emit(probe_get_unit_def_custom_param(fixture));
-    emit(probe_get_unit_def_custom_param_keys(fixture));
-    emit(probe_get_unit_def_by_id(fixture));
     emit(probe_get_feature_def_ids(fixture));
     emit(probe_get_feature_def_count(fixture));
     emit(probe_valid_feature_def_id(fixture));
@@ -7388,9 +4823,6 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_feature_def_name(fixture));
     emit(probe_get_feature_def_metal(fixture));
     emit(probe_get_feature_def_energy(fixture));
-    emit(probe_get_feature_def_custom_param(fixture));
-    emit(probe_get_feature_def_custom_param_keys(fixture));
-    emit(probe_get_feature_def_by_id(fixture));
     emit(probe_get_weapon_def_ids(fixture));
     emit(probe_get_weapon_def_count(fixture));
     emit(probe_get_weapon_def_name(fixture));
@@ -7398,9 +4830,6 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_weapon_def_id(fixture));
     emit(probe_get_weapon_def_range(fixture));
     emit(probe_get_weapon_def_damage(fixture));
-    emit(probe_get_weapon_def_custom_param(fixture));
-    emit(probe_get_weapon_def_custom_param_keys(fixture));
-    emit(probe_get_weapon_def_by_id(fixture));
     emit(probe_get_cegid(fixture));
     emit(probe_pos2_build_pos(fixture));
     emit(probe_test_move_order(fixture));
@@ -7412,22 +4841,11 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_player_list(fixture));
     emit(probe_get_player_list_in_team(fixture));
     emit(probe_get_player_list_in_ally_team(fixture));
-    emit(probe_get_team_info(fixture));
-    emit(probe_get_player_info(fixture));
     emit(probe_are_teams_allied(fixture));
     emit(probe_are_players_allied(fixture));
     emit(probe_get_team_ally_team_id(fixture));
-    emit(probe_game_rules_param(fixture));
-    emit(probe_team_resource(fixture));
-    emit(probe_team_rules_param(fixture));
-    emit(probe_player_rules_param(fixture));
-    emit(probe_get_team_resource_stats(fixture));
     emit(probe_ally_team_start_box(fixture));
     emit(probe_team_start_position(fixture));
-    emit(probe_team_add_resource(fixture));
-    emit(probe_team_use_resource(fixture));
-    emit(probe_get_team_damage_stats(fixture));
-    emit(probe_get_team_stats_history(fixture));
     emit(probe_unit_add_impulse(fixture));
     emit(probe_unit_add_seismic_ping(fixture));
     emit(probe_unit_add_resource(fixture));
@@ -7435,7 +4853,6 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_unit_clear_goal(fixture));
     emit(probe_unit_force_collision_update(fixture));
     emit(probe_unit_set_build_speed(fixture));
-    emit(probe_unit_set_flanking(fixture));
     emit(probe_unit_set_mid_and_aim_pos(fixture));
     emit(probe_unit_set_move_goal(fixture));
     emit(probe_unit_set_physics(fixture));
@@ -7489,29 +4906,12 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_projectile_ally_team(fixture));
     emit(probe_projectile_type(fixture));
     emit(probe_projectile_def_id(fixture));
-    emit(probe_piece_projectile_params(fixture));
-    emit(probe_projectile_damage_armor(fixture));
-    emit(probe_projectile_damage_paralyze(fixture));
-    emit(probe_projectile_damage_impulse_factor(fixture));
-    emit(probe_projectile_damage_impulse_boost(fixture));
-    emit(probe_projectile_damage_crater_mult(fixture));
-    emit(probe_projectile_damage_crater_boost(fixture));
-    emit(probe_projectile_damage_dyn_exp(fixture));
-    emit(probe_projectile_damage_dyn_min(fixture));
-    emit(probe_projectile_damage_dyn_range(fixture));
-    emit(probe_projectile_damage_dyn_inverted(fixture));
-    emit(probe_projectile_damage_crater_aoe(fixture));
-    emit(probe_projectile_damage_damage_aoe(fixture));
-    emit(probe_projectile_damage_edge_effectiveness(fixture));
-    emit(probe_projectile_damage_explosion_speed(fixture));
     emit(probe_projectile_position_after_set(fixture));
     emit(probe_projectile_velocity_after_set(fixture));
     emit(probe_projectile_gravity_after_set(fixture));
     emit(probe_projectile_target_after_set(fixture));
     emit(probe_projectile_intercepted_after_set(fixture));
     emit(probe_projectile_ttl_after_set(fixture));
-    emit(probe_projectile_damage_after_set(fixture));
-    emit(probe_piece_projectile_params_after_set(fixture));
     emit(probe_projectile_set_always_visible(fixture));
     emit(probe_projectile_set_use_air_los(fixture));
     emit(probe_projectile_set_move_control(fixture));
@@ -7519,12 +4919,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_projectile_set_ceg(fixture));
     emit(probe_projectile_collision(fixture));
     emit(probe_projectile_delete(fixture));
-    emit(probe_add_height_map(fixture));
-    emit(probe_add_original_height_map(fixture));
-    emit(probe_add_smooth_mesh(fixture));
-    emit(probe_add_team_resource_excess_stats(fixture));
     emit(probe_set_ally(fixture));
-    emit(probe_assign_player_to_team(fixture));
     emit(probe_set_cheating_enabled(fixture));
     emit(probe_set_god_mode(fixture));
     emit(probe_set_experience_grade(fixture));
@@ -7532,36 +4927,11 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_set_player_ready_state(fixture));
     emit(probe_set_square_building_mask(fixture));
     emit(probe_transfer_team_max_units(fixture));
-    emit(probe_get_piece_projectile_name(fixture));
     emit(probe_spawn_explosion(fixture));
-    emit(probe_spawn_ceg(fixture));
     emit(probe_spawn_sfx(fixture));
     emit(probe_path_node_costs(fixture));
-    emit(probe_request_path(fixture));
-    emit(probe_unit_cmd_desc_lifecycle(fixture));
-    emit(probe_set_original_height_map(fixture));
-    emit(probe_set_smooth_mesh(fixture));
-    emit(probe_give_order_to_unit_synced(fixture));
-    emit(probe_give_order_to_unit_array_synced(fixture));
-    emit(probe_give_order_to_unit_map_synced(fixture));
-    emit(probe_give_order_array_to_unit_synced(fixture));
-    emit(probe_give_order_array_to_unit_map_synced(fixture));
-    emit(probe_give_order_array_to_unit_array_synced_pairwise(fixture));
-    emit(probe_give_order_array_to_unit_array_synced_broadcast(fixture));
     emit(probe_get_cobscript_id_non_cob(fixture));
-    emit(probe_call_cobscript_non_cob(fixture));
-    emit(probe_create_unit_cleanup(fixture));
-    emit(probe_destroy_unit(fixture));
-    emit(probe_transfer_unit(fixture));
-    emit(probe_create_feature_cleanup(fixture));
-    emit(probe_destroy_feature(fixture));
-    emit(probe_transfer_feature(fixture));
     emit(probe_create_unit_wreck_cleanup(fixture));
     emit(probe_create_feature_wreck_cleanup(fixture));
-    emit(probe_unit_attach(fixture));
-    emit(probe_unit_detach(fixture));
-    emit(probe_unit_detach_from_air(fixture));
-    emit(probe_bugger_off(fixture));
-    emit(probe_kill_team(fixture));
     emit(probe_game_over(fixture));
 }

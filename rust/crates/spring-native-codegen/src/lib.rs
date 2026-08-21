@@ -11,11 +11,7 @@ pub mod callins;
 pub mod lua_loader;
 pub mod manifest;
 pub mod model;
-pub mod render_callins;
-pub mod render_host;
-pub mod render_signatures;
-pub mod render_wasm_sdk;
-pub mod render_wit;
+pub mod render_core_native;
 
 pub use model::{ApiModel, ApiModule, Environment, FunctionModel, LoweringStatus, SemanticType};
 

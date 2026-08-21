@@ -1,8 +1,0 @@
-[package]
-name = "recoil-wasm-api-fixture"
-version = "0.1.0"
-edition = "2021"
-publish = false
-
-[dependencies]
-spring-wasm = { path = "../../../rust/crates/spring-wasm" }

@@ -10,16 +10,16 @@
 #include <string_view>
 #include <vector>
 
-#include "WasmDispatch.h"
 #include "WasmModuleManifest.h"
 #include "WasmRuntime.h"
 
+struct NativeInterface;
 class WasmCoreHost;
 enum class WasmCoreCallin : std::uint16_t;
 
 class WasmInterfaceSystem {
 public:
-	explicit WasmInterfaceSystem(WasmHostAdapter* hostAdapter = nullptr,
+	explicit WasmInterfaceSystem(NativeInterface* nativeInterface,
 		WasmRuntimeConfig runtimeConfig = {});
 	~WasmInterfaceSystem();
 
@@ -39,56 +39,24 @@ public:
 	void UnloadAll();
 	void Update();
 
-	bool DispatchCallin(const WasmCallinEvent& event, WasmEnvironment environment,
-		std::string& error);
-	bool DispatchCallin(std::string_view name, const std::vector<WasmValue>& arguments,
-		WasmEnvironment environment, std::string& error);
-	bool DispatchCallin(std::string_view name, const std::vector<WasmValue>& arguments,
-		WasmEnvironment environment, WasmValue& result, std::string& error);
-	bool DispatchCallin(std::string_view name, const std::vector<WasmValue>& arguments,
-		const std::vector<WasmEnvironment>& environments, WasmValue& result,
-		std::string& error);
-	struct CallinInvocation {
-		WasmEnvironment environment;
-		std::vector<WasmValue> arguments;
-		bool contributesResult = true;
-	};
-	bool DispatchCallin(std::string_view name,
-		const std::vector<CallinInvocation>& invocations, WasmValue& result,
-		std::string& error);
-	static bool AggregateCallinResult(std::string_view aggregation,
-		const WasmValue& value, bool& haveResult, WasmValue& result,
-		std::string& error);
-
+	static bool DispatchActiveCoreCallin(std::string_view name, const void* query,
+		bool synced, void* nativeResult, bool& handled, std::string& error);
 	struct CoreCallinInvocation {
 		WasmEnvironment environment;
 		const void* query = nullptr;
 		bool contributesResult = true;
 	};
 	bool DispatchCoreCallin(std::string_view name,
-		std::span<const CoreCallinInvocation> invocations,
-		WasmValue* valueResult, void* nativeResult, bool& handled,
-		std::string& error);
-	// Internal hot overload: the outer event seam has already resolved the
-	// string to the compact callin ID, so do not resolve it again.
+		std::span<const CoreCallinInvocation> invocations, void* nativeResult,
+		bool& handled, std::string& error);
 	bool DispatchCoreCallin(WasmCoreCallin callin, std::string_view diagnosticName,
-		std::span<const CoreCallinInvocation> invocations,
-		WasmValue* valueResult, void* nativeResult, bool& handled,
-		std::string& error);
-
-	// The NativeInterface event seam already knows whether this dispatch is on
-	// the synced or unsynced side. Pass that fact through instead of inferring it
-	// from a small hardcoded callin-name set; many generated callins are valid on
-	// both sides.
-	static bool DispatchActiveCoreCallin(std::string_view name, const void* query,
-		bool synced, void* nativeResult, bool& handled, std::string& error);
-
+		std::span<const CoreCallinInvocation> invocations, void* nativeResult,
+		bool& handled, std::string& error);
 	bool DispatchSyncedMessage(std::string_view message, std::string& error);
 
 	std::size_t ModuleCount() const;
 	bool HasModules(WasmEnvironment environment) const;
 	bool HasCoreModules(WasmEnvironment environment) const;
-	bool HasComponentModules(WasmEnvironment environment) const;
 	const WasmRuntime& Runtime() const { return *runtime; }
 	std::vector<std::string> SyncedConfiguration() const;
 
@@ -110,12 +78,8 @@ private:
 		WasmInterfaceSystem* previous = nullptr;
 	};
 
-	void FaultSyncedModules(WasmEnvironment environment, std::string_view reason);
-
 	std::unique_ptr<WasmRuntime> runtime;
-	WasmHostAdapter* hostAdapter = nullptr;
-	std::vector<std::unique_ptr<WasmModule>> modules;
+	NativeInterface* nativeInterface = nullptr;
 	std::vector<CoreModuleRecord> coreModules;
-	WasmInstanceID nextInstanceID = 1;
 	CoreDispatchRegistration coreDispatchRegistration{this};
 };

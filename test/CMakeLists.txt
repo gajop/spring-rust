@@ -95,119 +95,19 @@ macro (add_spring_test target sources libraries flags)
 endmacro()
 
 ################################################################################
-### Wasm interface policy/resource/runtime tests
-	file(GLOB wasm_host_adapter_sources CONFIGURE_DEPENDS
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmHostAdapter*.cpp")
-	# WasmInterfaceSystem/WasmTypedHost dispatch into Core, so the test binary
-	# needs the same Core translation units the engine target compiles.
-	file(GLOB wasm_core_sources CONFIGURE_DEPENDS
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmCore*.cpp")
-	# The UnitsPieces binding needs the simulation globals; CoreSimStubs.cpp
-	# supplies a no-op registration in its place.
-	list(REMOVE_ITEM wasm_core_sources
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmCoreUnitsPiecesBindings.cpp")
-	set(wasm_core_sources_with_validation ${wasm_core_sources})
-	# TestWasmModuleManifest.cpp includes WasmCoreValidation.cpp directly so it
-	# can exercise validation without the rest of the Core stack; linking it
-	# again there would be a duplicate definition.
-	list(REMOVE_ITEM wasm_core_sources
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmCoreValidation.cpp")
-	set(wasm_core_generated_sources "")
-	foreach(wasm_core_generated_source
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedOptionBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedVariableOutputBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedDynamicOutputBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedDynamicInputBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedVariableBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedBorrowedBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedVariableIoBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedCallinBindings.cpp"
-			"${ENGINE_SOURCE_DIR}/wasm/generated/WasmCoreGeneratedScratchCallinBindings.cpp")
-		if(EXISTS ${wasm_core_generated_source})
-			list(APPEND wasm_core_generated_sources ${wasm_core_generated_source})
-		endif()
-	endforeach()
-	set(test_name WasmInterface)
-	set(test_src
-			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmInterface.cpp"
-			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmInterfaceSystem.cpp"
-			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmModuleManifest.cpp"
-			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmHostAdapter.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmEnvironment.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModule.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmResources.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModuleManifest.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystem.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystemCore.cpp"
-			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/CoreSimStubs.cpp"
-			${wasm_core_sources}
-			${wasm_core_generated_sources}
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmDispatch.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHost.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHostShims.cpp"
-			"${ENGINE_SOURCE_DIR}/NativeInterface/NativeInterfaceWasmAdapter.cpp"
-			"${ENGINE_SOURCE_DIR}/NativeInterface/WasmUiVisibility.cpp"
-			${wasm_host_adapter_sources}
-			"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
-			${test_List_sources}
-			${test_Catch_main}
-		)
-	set(test_libs recoil-wasmtime)
-	add_spring_test(${test_name} "${test_src}" "${test_libs}" "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
-	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
-	# Keep the frame-budget benchmark independently runnable in a non-ASAN
-	# build.  The normal check target intentionally uses ASAN, where allocator
-	# instrumentation makes timing gates informational; this target is the
-	# explicit performance gate used by CI after a release build.
-	add_custom_target(wasm-performance
-		${CMAKE_CTEST_COMMAND} --output-on-failure -R testWasmInterface
-		DEPENDS test_${test_name})
+### Wasm Core interface policy/resource/runtime tests
 
-	# Keep each hostile canonical-allocator scenario in its own process.
-	# Wasmtime's native trap machinery is process-global, and these tests
-	# deliberately trap or exhaust fuel from a guest allocator while lowering a
-	# host result; isolating them avoids coupling that signal boundary to
-	# unrelated test stores.
-	set(test_name WasmAllocator)
+	set(test_name WasmModuleManifest)
 	set(test_src
-			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmAllocator.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmModuleManifest.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmEnvironment.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModule.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmResources.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmRuntime.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHost.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmTypedHostShims.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystem.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmInterfaceSystemCore.cpp"
 			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmModuleManifest.cpp"
-			"${ENGINE_SOURCE_DIR}/WasmInterface/WasmDispatch.cpp"
-			"${ENGINE_SOURCE_DIR}/NativeInterface/NativeInterfaceWasmAdapter.cpp"
-			"${ENGINE_SOURCE_DIR}/NativeInterface/WasmUiVisibility.cpp"
-			"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/CoreSimStubs.cpp"
-			${wasm_core_sources_with_validation}
-			${wasm_core_generated_sources}
-			${wasm_host_adapter_sources}
 			"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
 			${test_List_sources}
 			${test_Catch_main}
 		)
-	set(test_libs recoil-wasmtime)
-	add_executable(test_${test_name} ${test_src})
-	target_link_libraries(test_${test_name} ${test_libs} ${test_common_libraries})
-	set_target_properties(test_${test_name} PROPERTIES
-		COMPILE_FLAGS "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
-	add_dependencies(tests test_${test_name})
-	add_dependencies(check test_${test_name})
-	add_dependencies(install-tests test_${test_name})
+	add_spring_test(${test_name} "${test_src}" "recoil-wasmtime" "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
 	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
-	add_test(NAME testWasmAllocatorReentry COMMAND test_${test_name}
-		"Wasm canonical allocator cannot re-enter a Spring import")
-	add_test(NAME testWasmAllocatorTrap COMMAND test_${test_name}
-		"Wasm canonical allocator trap faults the Component call")
-	add_test(NAME testWasmAllocatorFuel COMMAND test_${test_name}
-		"Wasm canonical allocator burns fuel under the Component guard")
 
 ################################################################################
 ### UDPListener

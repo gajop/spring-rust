@@ -25,7 +25,6 @@ PROBE_CONTEXTS = (
     "ui",
 )
 PROBE_ARTIFACTS = (
-    "wit/parity.wit",
     "src/probe_generated.rs",
     "src/probe_bindings.rs",
     "src/probe_context.rs",
@@ -62,14 +61,14 @@ def compare_files(expected: Path, actual: Path, label: str) -> list[str]:
 
 def checked_probe_path(root: Path, context: str, relative: str) -> Path:
     if relative == "wasm_api_probe_tests.lua":
-        suffix = "" if context == "synced_gadget" else f"_{context}"
+        suffix = "_core" if context == "synced_gadget" else f"_{context}_core"
         return (
             root
             / "test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities"
             / f"wasm_api_probe_tests{suffix}.lua"
         )
     if relative == "probe_manifest.json":
-        suffix = "" if context == "synced_gadget" else f"_{context}"
+        suffix = "_synced_gadget.core" if context == "synced_gadget" else f"_{context}.core"
         return root / "test/wasm_api/parity_guest" / f"probe_manifest{suffix}.json"
     return root / "test/wasm_api/parity_guest" / relative
 
@@ -93,6 +92,8 @@ def generate_probe(
         str(model),
         "--context",
         context,
+        "--transport",
+        "core",
         "--output-root",
         str(output_root),
         "--lua-output",
@@ -318,9 +319,9 @@ def main() -> int:
 
             probe_differences = []
             # Every context is generated twice so the complete probe surface,
-            # including context-specific Rust/WIT projections, participates in
-            # the reproducibility gate. Only the historical synced source files
-            # are checked in; other contexts retain manifests and Lua fixtures.
+            # including context-specific Rust projections, participates in the
+            # reproducibility gate. Only the synced source files are checked in;
+            # other contexts retain manifests and Lua fixtures.
             for relative in PROBE_ARTIFACTS:
                 first = generated_probe_path(first_root, relative)
                 second = generated_probe_path(second_root, relative)

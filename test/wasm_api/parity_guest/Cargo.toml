@@ -16,10 +16,4 @@ core_gaia_unsynced = []
 core_ui = []
 
 [dependencies]
-wit-component = "0.254.0"
-wit-bindgen = "0.60.0"
 spring-wasm-core = { path = "../../../rust/crates/spring-wasm-core", features = ["alloc"] }
-
-[[bin]]
-name = "componentize"
-path = "src/bin/componentize.rs"

@@ -12,23 +12,26 @@ Two problems to fix: files in the thousands of lines, and flat directories with
 ## Current execution status
 
 This plan is being executed after the Core parity phase. The Core transport
-implementation and its runtime-enabled parity gates are complete; the
-Component transport is still retained as the oracle and has not yet reached
-the deletion phase described below.
+implementation and its runtime-enabled parity gates are complete. The
+Component transport purge is now landed in the working tree; the remaining
+work is Core-output sharding, package layout, and verification records.
 
 - [x] Core parity handoff and enabled-context verification.
 - [x] Legacy codegen wrappers now share a `ModuleSpec` table and one generic
   generation path in `spring-native-codegen/src/lib.rs`.
 - [x] Extract the shared Core wire/input lowering module.
-- [ ] Delete the Component Model transport and its dead fixtures.
+- [x] Delete the Component Model transport and its dead fixtures.
+- [x] Put the surviving Core parity generator behind a `probe/` package entry
+      while preserving the existing CLI path and generated output.
 - [ ] Shard the surviving generated Core outputs.
-- [ ] Finish the handwritten and Python package layout refactors.
+- [ ] Finish the semantic Python module split and any move-only handwritten
+      directory layout changes.
 
 The wrapper-table change is intentionally output-neutral: it preserves all 54
 public `generate_*` entry points and is covered by the existing codegen test
 and strict regeneration gates. The remaining items stay ordered by the
-dependency rule in §0; no Component-only code is being reorganized before its
-deletion decision is implemented.
+dependency rule in §0. Component-only files are no longer being reorganized;
+they are deleted as one purge.
 
 The shared-wire slice is also output-neutral. The former
 `render_core_wasm_variable_io_host.rs` is now 537 lines (from 1,017), and
@@ -55,15 +58,18 @@ work. Skip these entirely:
 
 | Path | LOC | Fate |
 | --- | --- | --- |
-| `test/engine/WasmInterface/Component*Fixture.h` (7 files) | 13,374 | delete |
-| `rts/WasmInterface/WasmModule.cpp` component half | ~1,800 of 2,854 | delete |
-| `rts/wasm/generated/wit/` (85 files) | ~30,000 | delete |
-| `rts/wasm/generated/sdk/generated.rs` | 86,631 | delete |
-| `test/wasm_api/{value,allocator,aggregation,parity,benchmark}_guest` | ~15,000 | delete or port |
+| `test/engine/WasmInterface/Component*Fixture.h` (8 files) | deleted | purge |
+| `rts/WasmInterface/{WasmHost,WasmModule,WasmDispatch,WasmTypedHost}.*` | deleted | purge |
+| `rts/wasm/generated/wit/` and `sdk/{generated,callins}.rs` | deleted | purge |
+| `rts/wasm/generated/WasmHostAdapter*.{cpp,h}` (58 adapter TUs) | deleted | purge |
+| `test/wasm_api/{value,allocator,aggregation,guest,benchmark}_guest` | deleted | purge |
+| `test/wasm_api/parity_guest` | retained and ported | Core-only oracle |
 
 Everything below therefore assumes: **Phase 3 (Core parity) → Phase 4 (delete
-Component Model) → this refactor.** The one exception is §1, which is worth
-doing before Phase 3 because Phase 3 adds more code to exactly those files.
+Component Model) → this refactor.** The deletion includes the 58 generated
+`WasmHostAdapter*.cpp/.h` translation units; they are not a keep-list for the
+surviving Core tree. `native_api_path` remains the Core native-registry path
+and must not be removed as a misleading Component reference.
 
 ## 1. The codegen crate — do this first
 
@@ -76,7 +82,6 @@ named `render_core_wasm_*`.
 src/
   model/          model.rs, annotations.rs, manifest.rs, lua_loader.rs, callin_semantics.rs
   render/
-    component/    render_host.rs, render_wit.rs, render_wasm_sdk.rs, render_signatures.rs, render_callins.rs
     core/
       host/       fixed, option, variable, variable_output, variable_io, borrowed,
                   dynamic_input, dynamic_output
@@ -87,8 +92,9 @@ src/
                   render_core_wasm_variable_io_host.rs
 ```
 
-Note `render/component/` becomes a delete-in-one-step directory after Phase 4 —
-that is a feature of this layout, not a coincidence.
+The former `render/component/` contents are deleted with the purge. The
+surviving renderer is Core-only; `render_core_native.rs` owns the native
+registry path.
 
 **`lib.rs` (2,449 → target ~200).** It is ~60 near-identical `generate_*`
 functions (`generate_units_query`, `generate_teams`, …), each ~15 lines of the
@@ -102,7 +108,9 @@ import (`input_field_supported`, `input_descriptor_layout`, `render_wire_read`,
 `fixed_wire_layout`, …). Split those out into `render/core/shared/wire.rs`
 first — every other core-host split gets easier once that dependency is named.
 
-**`render_host.rs` (1,688)** is Component Model; leave it, it dies in Phase 4.
+The former Component renderers (`render_host.rs`, `render_wit.rs`,
+`render_wasm_sdk.rs`, `render_signatures.rs`, and `render_callins.rs`) are
+deleted. `render_core_native.rs` is the surviving registry renderer.
 
 **Target:** no renderer over ~600 lines. The natural seam inside each is
 `plan()` (classify + compute layout) vs `emit()` (produce text); most of these
@@ -117,16 +125,16 @@ review. Worst:
 
 | File | LOC |
 | --- | --- |
-| `sdk/generated.rs` | 86,631 (Component; dies Phase 4) |
+| `sdk/core_owned.rs` | 64,049 (survives; façade gap is tracked explicitly) |
 | `sdk/core_owned.rs` | 64,049 |
 | `WasmCoreGeneratedBindings.cpp` | 34,263 |
 | `sdk/core_generated.rs` | 26,235 |
 | `WasmCoreGeneratedBorrowedBindings.cpp` | 15,093 |
 | `WasmCoreGeneratedVariableBindings.cpp` | 13,994 |
 
-**The pattern already exists in this repo.** `WasmHostAdapter_*.cpp` is sharded
-per API module (55 files, largest 9.5k). The Core binding emitters just never
-adopted it. Change each `WasmCoreGenerated*Bindings.cpp` emitter in
+The old `WasmHostAdapter_*.cpp` pattern was part of the deleted Component
+transport (58 translation units, including headers and support glue). Apply
+the same per-module idea to the surviving Core binding emitters in
 `bin/spring-api-codegen.rs` to write one TU per API module, and the Rust SDK
 emitters to write one `.rs` per module with a generated `mod.rs`.
 
@@ -136,7 +144,7 @@ emitters to write one `.rs` per module with a generated `mod.rs`.
 rts/wasm/generated/
   meta/       model.json, signatures.json, callins.json, core-abi.json, coverage/plan JSONs
   host/
-    adapter/  WasmHostAdapter_*.cpp  (55 files, already sharded)
+    adapter/  (deleted with the Component transport)
     core/
       fixed/ option/ variable/ variable_output/ variable_io/ borrowed/
       dynamic_input/ dynamic_output/ callins/     ← each: one .cpp per API module
@@ -144,7 +152,7 @@ rts/wasm/generated/
               WasmCoreAbiInventory.h
   sdk/
     core/     one .rs per API module per transport class, + mod.rs
-  wit/        (unchanged; deleted in Phase 4)
+  wit/        (deleted with the Component transport)
 ```
 
 Consequences to handle in the same change: the CMake `foreach` list becomes a
@@ -152,42 +160,35 @@ Consequences to handle in the same change: the CMake `foreach` list becomes a
 `WasmCoreRegistry.h`'s `LookupImport` path both need the new locations; the
 generated-registry drift guard's regexes need re-anchoring.
 
-**Do the sharding after Phase 4**, so you shard 30 fewer files and skip the
-Component ones entirely. But **land the per-module split of
-`WasmCoreGeneratedBindings.cpp` (34k) before Phase 3** — Phase 3 grows it.
+Do the sharding now that the purge is complete: only surviving Core generated
+outputs are in scope. The per-module split of
+`WasmCoreGeneratedBindings.cpp` remains the first generated-output task.
 
 Sizing target: no generated file over ~2,000 lines. Per-module sharding gets
 `core_owned.rs` from 64k to ~1.2k average.
 
-## 3. Hand-written C++ — `rts/WasmInterface/` (80 flat files)
+## 3. Hand-written C++ — `rts/WasmInterface/` (Core-only remainder)
 
-The file *sizes* here are mostly fine (only `WasmModule.cpp` is over 1k, and
-two-thirds of it is Component). The *directory* is the problem: 80 files, 45 of
-them `WasmCore*`.
+The Component/typed system and adapter sources are deleted. The remaining
+runtime, Core host, manifest, and system files are intentionally kept in their
+existing flat layout until a move-only directory change is worthwhile.
 
 ```
 rts/WasmInterface/
-  runtime/     WasmRuntime, WasmEnvironment, WasmHost, WasmResources,
-               WasmModuleManifest, WasmDispatch
-  component/   the Component half of WasmModule.cpp, extracted first  ← delete Phase 4
+  runtime/     WasmRuntime, WasmEnvironment, WasmResources,
+               WasmModuleManifest
   core/
     host/      WasmCoreHost, WasmCoreAbi, WasmCoreValidation, WasmCoreWire.h,
                WasmCoreGuestInput.h, WasmCoreRegistry.h, WasmCoreRegistryPolicy.h,
                WasmCoreUiCallinFilter.h
     bindings/  the 22 WasmCore*Bindings.cpp/.h pairs (5,736 LOC total — sizes
                are fine, they just need a home)
-  system/      WasmInterfaceSystem, WasmInterfaceSystemCore, WasmTypedHost,
-               WasmTypedHostShims
+  system/      WasmInterfaceSystem, WasmInterfaceSystemCore
 ```
 
-**`WasmModule.cpp` (2,854).** Split along the transport line — that split is
-already latent in the file (`EncodeComponentString`, `LiftComponentValue`,
-`CollectComponentExports`, `CheckComponentValueBudget`, … are all Component;
-`ParseNativeApiError`, `WasmtimeErrorMessage`, `WasmTrapMessage` are shared).
-Move Component into `component/WasmComponentModule.cpp`, shared helpers into
-`runtime/WasmtimeError.h`. What remains of the core path is ~600 lines and
-needs no further work. Doing the split *before* Phase 4 turns the Phase 4
-deletion into `rm -r component/`.
+`WasmModule.cpp`, the typed host, and the generated adapter layer are no longer
+part of this tree. `WasmRuntime` and `WasmResources` remain shared runtime
+infrastructure because their validation and lifecycle code is used by Core.
 
 `WasmRuntime.cpp` (807), `WasmCoreHost.cpp` (776), `WasmInterfaceSystem.cpp`
 (659), `WasmTypedHostShims.cpp` (616), `WasmInterfaceSystemCore.cpp` (536),
@@ -197,10 +198,10 @@ unreadable.
 
 ## 4. Python tooling
 
-`test/wasm_api/parity_guest/generate_probe.py` is **3,850 lines and ~80
-top-level functions** — by far the worst hand-written file in the project, and
-Phase 3 makes it worse (it needs a `--transport core` mode, and its
-`extract_probe_dependencies` bug currently strands 288 tests).
+The active CLI remains `test/wasm_api/parity_guest/generate_probe.py`, a
+compatibility entry point for `probe/core.py`. Its active CLI is Core-only and
+the package entry preserves generated probe output byte-for-byte. The semantic
+module split remains independent of the transport purge.
 
 Make it a package before Phase 3 touches it:
 
@@ -214,13 +215,15 @@ test/wasm_api/parity_guest/probe/
                   find_candidate, default_expression   (~700 lines; the real core)
   projection.py   output_projection, projection_record_path, sequence_output_projection
   render/
-    wit.py        render_wit + render_type_record/enum
+    core.py       Core probe body and manifest emission
     guest.py      probe body emission
     callbacks.py  callback_entries + argument expressions
 ```
 
-`test/wasm_api/` itself is a flat mix of 8 guest crates, 5 scripts, 2 JSON and
-some stray `.wat`/`.wast`. Group into `guests/`, `tools/`, `data/`.
+`test/wasm_api/` now retains only the Core parity guest and Core benchmark
+guest; the deleted Component guest crates are not to be recreated. Grouping
+the surviving fixtures into `guests/`, `tools/`, and `data/` remains optional
+until the package split is landed.
 
 `rts/wasm/verify_codegen.py` and `generate_core_abi_surface.py` (513) are fine
 as single files.
@@ -232,17 +235,13 @@ the shape the rest of the project should look like.
 
 ## 6. Suggested sequencing
 
-1. **Current safe slice:** finish the codegen crate module tree around the
-   completed `ModuleSpec` and shared-wire seams (§1), without reorganizing
-   Component-only code.
-2. **After the Component deletion decision:** shard surviving generated Core
-   bindings and split `WasmModule.cpp` along the Component seam (§2–3).
-3. **Phase 3 is complete.** Make and verify the **Phase 4** decision (delete
-   the Component Model) before touching the Component-only offenders; that
-   deletion removes roughly 16k LOC for free.
-4. **After Phase 4:** package `generate_probe.py`, then complete the generated
-   output tree, `rts/WasmInterface/` directory tree, and `test/wasm_api/`
-   grouping (§2–4).
+1. **Completed:** land Core parity, the shared-wire seams, and the Core-only
+   native registry path.
+2. **Completed:** delete the Component transport, its WIT/SDK output, the 58
+   generated adapter TUs, and the obsolete guest fixtures.
+3. Shard surviving generated Core bindings and SDK output (§2).
+4. Package `generate_probe.py`, then make any move-only `rts/WasmInterface/`
+   and `test/wasm_api/` directory changes (§3–4).
 
 ## 7. Ground rules
 

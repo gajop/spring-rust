@@ -98,7 +98,6 @@ public:
 	bool CanDeserializeAot(std::string_view moduleHash, std::string_view runtimeConfigHash) const;
 
 private:
-	friend class WasmModule;
 	friend class WasmCoreHost;
 
 	struct BackendState;

@@ -309,7 +309,7 @@ fn run_generated_probe(current_frame: i32) {
     let fixture = match discover_fixture() {
         Ok(fixture) => fixture,
         Err(reason) => {
-            // Component callbacks can run before the synced fixture's
+            // Core callbacks can run before the synced fixture's
             // projectile has entered the query-visible list. Keep the
             // discovery boundary retryable for the first few simulation
             // frames; recording that scheduling race as a terminal result

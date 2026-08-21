@@ -7,11 +7,17 @@ return {
 
 		"get_mouse_state",
 
+		"get_mouse_cursor",
+
 		"is_above_mini_map",
 
 		"get_key_code",
 
 		"get_key_state",
+
+		"get_pressed_keys",
+
+		"get_pressed_scans",
 
 		"get_active_page",
 
@@ -21,11 +27,35 @@ return {
 
 		"is_user_writing",
 
+		"get_current_tooltip",
+
+		"get_units_in_screen_rectangle",
+
+		"get_selected_units",
+
 		"get_selected_units_count",
+
+		"get_selected_units_sorted",
 
 		"get_selected_group",
 
+		"get_group_list",
+
 		"unit_group",
+
+		"select_unit",
+
+		"deselect_unit",
+
+		"select_unit_array",
+
+		"deselect_unit_array",
+
+		"select_unit_map",
+
+		"deselect_unit_map",
+
+		"get_group_units",
 
 		"get_group_units_count",
 
@@ -36,6 +66,12 @@ return {
 		"ui_visibility_radar_los",
 
 		"ui_visibility_radar_state",
+
+		"ui_visibility_radar_position",
+
+		"ui_visibility_radar_mid_position",
+
+		"ui_visibility_radar_aim_position",
 
 		"ui_visibility_radar_base_position",
 
@@ -58,7 +94,35 @@ return {
 		["get_mouse_start_position"] = {
 			button = 1,
 		},
+		["get_units_in_screen_rectangle"] = {
+			left = 0,
+			top = 0,
+			right = 4096,
+			bottom = 4096,
+			allegiance = -1,
+		},
 		["unit_group"] = {
+			groupID = 0,
+		},
+		["select_unit"] = {
+			append = false,
+		},
+		["deselect_unit"] = {
+			append = false,
+		},
+		["select_unit_array"] = {
+			append = false,
+		},
+		["deselect_unit_array"] = {
+			append = false,
+		},
+		["select_unit_map"] = {
+			append = false,
+		},
+		["deselect_unit_map"] = {
+			append = false,
+		},
+		["get_group_units"] = {
 			groupID = 0,
 		},
 		["get_group_units_count"] = {
@@ -66,6 +130,18 @@ return {
 		},
 		["ui_visibility_radar_state"] = {
 			raw = false,
+		},
+		["ui_visibility_radar_position"] = {
+			midPos = false,
+			aimPos = false,
+		},
+		["ui_visibility_radar_mid_position"] = {
+			midPos = true,
+			aimPos = false,
+		},
+		["ui_visibility_radar_aim_position"] = {
+			midPos = false,
+			aimPos = true,
 		},
 		["ui_visibility_radar_view_position"] = {
 			midPos = false,

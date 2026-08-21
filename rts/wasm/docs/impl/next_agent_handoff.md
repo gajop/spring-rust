@@ -12,11 +12,9 @@ earlier ones land.
 
 ## 0. Before anything: commit and push
 
-The working tree has ~44 uncommitted files spanning Phase 3 parity and the
-first refactor step, and `rust-wip` **exists only in this working copy** —
-nothing is pushed, and the old remote branches were deleted. Commit the current
-state in coherent chunks and push the branch before starting §2. Everything
-below is a large mechanical diff; you want a restore point.
+The purge/parity work is now in the working tree and must be committed and
+pushed in coherent chunks before any further refactor work. Keep the generated
+Core artifacts reproducible with `verify_codegen.py` after each commit.
 
 ## 1. Correction: unsynced and UI are NOT disabled
 
@@ -74,17 +72,18 @@ Needs actual surgery — these files survive:
 `WasmValue` is the spine. Killing that type is what makes the deletion
 propagate; the rest is mechanical.
 
-**Keep** (shared infrastructure that merely mentions components today):
+**Keep** (shared runtime infrastructure):
 `WasmRuntime`, `WasmModuleManifest`, `WasmResources`, `WasmEnvironment`,
-`WasmInterfaceSystem`. Also **keep `native_api_path` in `render_host.rs`** —
-the Core renderers depend on it; move it somewhere Core-owned before deleting
-the file.
+`WasmInterfaceSystem`. The former `native_api_path` is now owned by
+`render_core_native.rs`; do not reintroduce `render_host.rs`.
 
 Also drop the `wasm` and `wasm_rust_typed` columns from
 `run_benchmarks_core.py` and their frozen baselines.
 
-**Done when:** engine builds, `-t check` green, and both Core parity contexts
-still pass at their current numbers (307 each, 0 mismatches).
+**Done:** the engine builds, Component files are purged, and both headless Core
+parity contexts pass at 330 selected cases each with 0 mismatches and 0
+vacuous rows. Graphics-backed contexts are bounded and recorded as display
+environment blockers, not as green results.
 
 ## 3. Close the owned-façade gap
 
@@ -101,14 +100,20 @@ Extend `render_core_wasm_owned_guest.rs` from the shared Core field walk,
 group by group, then reduce the manifest exclusions and rerun. Smallest group
 first. This is generator work — never hand-edit `core_owned.rs`.
 
-**Done when:** the `UnsupportedHostTarget` count is materially down and the
-selected-case count has risen (see §4).
+The generator’s coverage parser was corrected so a valid `wasm32` branch is
+not mistaken for an unsupported wrapper merely because the non-Wasm fallback
+contains `UnsupportedHostTarget`. This raised synced/Gaia-synced depth from
+307 to 330 without manufacturing results.
+
+**Current status:** the 574 literal fallback entries remain an explicit façade
+worklist; unconditional entries are excluded from parity, while valid Wasm
+branches are now eligible. Further façade reduction remains measurable work.
 
 ## 4. Finish parity coverage
 
 Two separate gaps:
 
-**Depth.** Synced currently selects **307 of 507** source tests. Find out what
+**Depth.** Synced currently selects **330 of 507** source tests. Find out what
 the other 200 are — genuinely inapplicable, or excluded by manifest because of
 §3 holes. Drive the number up as §3 lands.
 
@@ -130,7 +135,10 @@ rather than silently no-op'd. Verify rejection is actually observable.
 **Do not manufacture a green run by treating missing observations as success.**
 The harness reports "vacuous results" for a reason; 0 vacuous is part of pass.
 
-**Done when:** all five contexts run, 0 mismatches, 0 vacuous.
+**Current status:** synced and Gaia-synced pass 330/330 with 0 vacuous. The
+unsynced gadget, Gaia-unsynced, and UI runs reach the graphics-backed process
+but time out in this no-display session before producing a report; their
+outputs are preserved as blocked diagnostics. No empty result is counted green.
 
 ## 5. Prove the performance claim
 
@@ -149,7 +157,7 @@ python3 test/native_api_parity/run_benchmarks_core.py \
 Ratios that matter (per `CORE_WASM_BENCHMARKS.md`): Lua vs native, Lua vs Core,
 Core vs native. After §2 the CM columns are gone, so re-freeze baselines.
 
-**Done when:** a short results doc states, in numbers, how Core compares to Lua
+**Done:** [core_benchmark_results.md](core_benchmark_results.md) states, in numbers, how Core compares to Lua
 and to the native C API across callouts, callins, heightmap, workloads, memory
 and draw. If Core is not winning, say so plainly — that is the finding, and it
 matters more than any amount of green tests.
@@ -162,7 +170,7 @@ Priorities #3 and #4, never systematically addressed. Known pieces exist —
 `min == max` memory — but there is no document saying what a hostile guest
 can and cannot reach.
 
-Produce one. Enumerate: memory limits, fuel/epoch interruption, callback
+**Done:** [core_security_review.md](core_security_review.md) enumerates memory limits, fuel/epoch interruption, callback
 reentrancy, pointer/length validation on every variable-input descriptor, what
 happens on trap, and what the guest can reach toward the OS (it should be
 nothing — confirm no WASI). Note gaps; fix the cheap ones.
@@ -178,8 +186,10 @@ unsynced-UI visibility.
 by §2:
 
 - generated-output per-module sharding + directory tree (§2 of that plan)
-- `rts/WasmInterface/` directory tree (§3)
-- `generate_probe.py` → package (§4)
+- `rts/WasmInterface/` directory tree (§3), if a move-only change is still
+  worthwhile after the generated split
+- semantic `generate_probe.py` module split (§4); its Core `probe/` package
+  entry and compatibility CLI now exist
 - `test/wasm_api/` grouping
 
 **Correction to that plan:** its §2/§3 keep the 58 `WasmHostAdapter*` TUs alive
