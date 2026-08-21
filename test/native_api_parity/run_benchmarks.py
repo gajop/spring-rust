@@ -72,16 +72,6 @@ BENCHMARK_COMPONENT_DRAW = BENCHMARK_COMPONENT.with_name(
 BENCHMARK_COMPONENT_UPDATE = BENCHMARK_COMPONENT.with_name(
     "recoil_wasm_benchmark_guest.update.component.wasm"
 )
-TYPED_HOST_CRATE = ROOT / "rust" / "crates" / "spring-wasm-typed-host" / "Cargo.toml"
-TYPED_HOST_LIBRARY = (
-    ROOT
-    / "rust"
-    / "crates"
-    / "spring-wasm-typed-host"
-    / "target"
-    / "release"
-    / "libspring_wasm_typed_host.so"
-)
 BENCHMARK_STAMP = (
     ROOT
     / "test"
@@ -91,12 +81,9 @@ BENCHMARK_STAMP = (
     / "benchmark-profile.json"
 )
 
-# Both Wasm backends run the same component bytes over the Component Model;
-# they differ only in how the host binds to it.  "wasm" is Wasmtime's dynamic C
-# API, "wasm_rust_typed" its Rust static bindings.  The name spells out all
-# three axes because native modules are usually written in Rust too, so "rust"
-# alone would name the wrong difference.
-BACKENDS = ("lua", "native", "wasm", "wasm_rust_typed")
+# The Core runner replaces this matrix with the surviving Lua/native/Core
+# backends. Keep the base module importable for fixture and process helpers.
+BACKENDS = ("lua", "native")
 CALLOUT_TESTS = (
     "callout_scalar",
     "callout_vec3",
@@ -220,14 +207,8 @@ def build_native() -> None:
 
 
 def build_typed_host() -> None:
-    """The engine build image has no cargo, so the typed Rust host is built
-    here and loaded with dlopen, the same way the native module is."""
-    run_checked(
-        ["cargo", "build", "--manifest-path", str(TYPED_HOST_CRATE), "--release"],
-        cwd=ROOT,
-    )
-    if not TYPED_HOST_LIBRARY.is_file():
-        raise RuntimeError(f"Rust Wasm host was not produced: {TYPED_HOST_LIBRARY}")
+    """Retired typed-host hook kept for the Core wrapper's monkey patch."""
+    return None
 
 
 def prepare_benchmark_context(context: str) -> None:
