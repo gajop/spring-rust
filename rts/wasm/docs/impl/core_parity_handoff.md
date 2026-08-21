@@ -3,7 +3,7 @@
 Date: 2026-08-22
 Repo: `beyond-all-reason/RecoilEngine`
 Branch: `rust-wip`
-Head observed: `4e5b9e50e40d`
+Head observed: `ad61a703ae`
 
 Read this with `rts/wasm/docs/impl/web_agent_handoff.md`. This handoff records
 the implementation and verification state reached here; generated files must
@@ -16,10 +16,14 @@ contexts. The guest now uses a generated owned semantic façade over the raw
 Core ABI, the probe generator can emit Core or Component guests, and the
 harness selects transport-specific artifacts and manifests.
 
-The runtime policy is important: `rules-synced` and `gaia-synced` are enabled;
-`rules-unsynced`, `gaia-unsynced`, and `ui` are currently runtime-disabled in
-`rts/WasmInterface/WasmEnvironment.cpp`. Those three contexts cannot produce a
-Core oracle until that policy is deliberately changed.
+The environment matrix has five independent fields:
+`{environment, name, synced, runtimeEnabled, permitsSimulationMutation}`.
+The previous handoff misread `synced` as `runtimeEnabled` and therefore called
+three environments disabled. In `rts/WasmInterface/WasmEnvironment.cpp`, all
+five environments have `runtimeEnabled == true`; only `rules-synced` and
+`gaia-synced` have `synced == true`, and only those two permit simulation
+mutation. Unsynced and UI contexts are runtime-enabled but must be validated
+with their read-only policy and host/callin rules.
 
 | check | result |
 | --- | --- |
@@ -30,7 +34,7 @@ Core oracle until that policy is deliberately changed.
 | Core callouts with an oracle | 681; without an oracle 673 |
 | synced Core fixture | pass: 307 selected, 0 mismatches, 0 vacuous results |
 | Gaia-synced Core fixture | pass: 307 selected, 0 mismatches, 0 vacuous results |
-| unsynced Core fixture | guest built; no oracle because runtime policy disables the environment |
+| unsynced Core fixtures | pending full oracle runs; the environments are runtime-enabled but read-only |
 | `cargo fmt --manifest-path rust/Cargo.toml --all --check` | pass |
 | Python syntax and `git diff --check` | pass |
 
@@ -118,7 +122,8 @@ missing_callouts_blocking_oracle_tests  0
 The difference between the plan's 1288 mapped cases and the 307-case runtime
 oracle is intentional: the plan describes raw Core registry coverage across
 contexts, while the oracle describes the currently generated owned semantic
-surface and runtime-enabled environments.
+surface in the contexts already run. The three remaining contexts must be run
+and reported; they must not be represented by empty or skipped results.
 
 ## 3. Verified commands
 
@@ -147,7 +152,9 @@ RUSTFLAGS='-C link-arg=--initial-memory=67108864 -C link-arg=--max-memory=671088
   --features core,core_rules_synced
 ```
 
-Run the enabled-context oracle:
+Run the five-context Core oracle. The unsynced and UI runs are expected to
+exercise the same owned façade under a non-mutating environment policy; a
+missing or vacuous result is a failure to validate, not a pass.
 
 ```sh
 python3 test/native_api_parity/run_harness.py \
@@ -158,6 +165,21 @@ python3 test/native_api_parity/run_harness.py \
 python3 test/native_api_parity/run_harness.py \
   --spring-headless build-amd64-linux/install/spring-headless \
   --mode wasm --wasm-context gaia_synced --wasm-transport core \
+  --skip-native-build --skip-wasm-build --skip-callin-compare
+
+python3 test/native_api_parity/run_harness.py \
+  --spring-headless build-amd64-linux/install/spring-headless \
+  --mode wasm --wasm-context unsynced_gadget --wasm-transport core \
+  --skip-native-build --skip-wasm-build --skip-callin-compare
+
+python3 test/native_api_parity/run_harness.py \
+  --spring-headless build-amd64-linux/install/spring-headless \
+  --mode wasm --wasm-context gaia_unsynced --wasm-transport core \
+  --skip-native-build --skip-wasm-build --skip-callin-compare
+
+python3 test/native_api_parity/run_harness.py \
+  --spring-headless build-amd64-linux/install/spring-headless \
+  --mode wasm --wasm-context ui --wasm-transport core \
   --skip-native-build --skip-wasm-build --skip-callin-compare
 ```
 
@@ -174,15 +196,15 @@ python3 rts/wasm/verify_codegen.py
 The remaining `core_owned_unsupported` rows are not hidden transport failures;
 they are explicit adapter work. The main groups are dynamic/recursive output
 decoders, variable-input descriptors, command and piece record lists, rules and
-configuration string/list APIs, and mutating control callouts. The next change
-should extend the generator from the shared Core field walk, then reduce the
-manifest exclusions and rerun both enabled contexts.
+configuration string/list APIs, and mutating control callouts. Extend the
+generator from the shared Core field walk, reduce the manifest exclusions, and
+rerun all five contexts.
 
-Before enabling `rules-unsynced`, `gaia-unsynced`, or `ui`, make an explicit
-runtime-policy decision and add the corresponding host/callin validation. The
-current environment matrix intentionally rejects those declarations, so a
-green run must not be manufactured by treating missing observations as
-success.
+The policy correction does not make mutating APIs valid in unsynced or UI
+contexts. Those environments are runtime-enabled, but
+`permitsSimulationMutation == false`; probes must either use read-only cases or
+record the policy error as the expected native/Wasm result. Do not turn
+missing observations into success.
 
 Component Model removal is not part of this completed handoff. Keep the
 Component path until the owned Core façade covers the intended API surface and
