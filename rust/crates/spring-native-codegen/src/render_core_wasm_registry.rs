@@ -82,6 +82,17 @@ pub fn render(model: &ApiModel) -> String {
     output
 }
 
+/// Whether the production Core capability policy permits a generated or
+/// reviewed transport to be exposed through the semantic guest façade.
+///
+/// The broad ABI plan intentionally includes diagnostic and future transport
+/// coverage.  The owned façade is the production-facing surface, so it must
+/// not turn a merely lowerable function into an import that validation will
+/// reject or that policy deliberately withholds.
+pub(crate) fn production_core_import_allowed(module: &str, function: &str) -> bool {
+    production_import_allowed(module, function)
+}
+
 #[derive(Serialize)]
 struct CoverageEntry {
     module: String,
@@ -334,6 +345,8 @@ fn handwritten_signature_owner(module: &str, function: &str) -> bool {
             | ("terrain", "GetHeightMapSize")
             | ("terrain", "GetWaterPlaneLevel")
             | ("terrain", "IsPosInMap")
+            | ("units_info", "GetUnitIsTransporting")
+            | ("units_info", "GetUnitNanoPieces")
             | ("unit_control", "GiveOrderToUnit")
             | ("unit_defs", "GetUnitDefHumanName")
             | ("unit_defs", "GetUnitDefName")

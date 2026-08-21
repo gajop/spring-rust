@@ -150,7 +150,7 @@ fn reviewed_manual_variable_result(plan: &FunctionPlan) -> bool {
             .any(|note| note.contains("reviewed mutating variable-size"))
 }
 
-pub(crate) fn eligible(
+pub fn eligible(
     plan: &FunctionPlan,
     inputs: &[FieldModel],
     outputs: &[FieldModel],

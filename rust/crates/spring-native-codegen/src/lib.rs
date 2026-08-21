@@ -24,817 +24,317 @@ pub struct ApiConfig<'a> {
     pub wrapper_struct: &'a str,
 }
 
-pub fn generate_units_query(
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ModuleSpec {
+    pub api_struct: &'static str,
+    pub wrapper_struct: &'static str,
+}
+
+/// Legacy native generator modules retained as a data table so all
+/// wrapper entry points share one generation path.
+pub const MODULE_SPECS: &[ModuleSpec] = &[
+    ModuleSpec {
+        api_struct: "UnitsQueryApi",
+        wrapper_struct: "UnitsQuery",
+    },
+    ModuleSpec {
+        api_struct: "UnitsInfoApi",
+        wrapper_struct: "UnitsInfo",
+    },
+    ModuleSpec {
+        api_struct: "TeamsApi",
+        wrapper_struct: "Teams",
+    },
+    ModuleSpec {
+        api_struct: "UnitsWeaponsApi",
+        wrapper_struct: "UnitsWeapons",
+    },
+    ModuleSpec {
+        api_struct: "UnitsCommandsApi",
+        wrapper_struct: "UnitsCommands",
+    },
+    ModuleSpec {
+        api_struct: "UnitsPiecesApi",
+        wrapper_struct: "UnitsPieces",
+    },
+    ModuleSpec {
+        api_struct: "FeaturesApi",
+        wrapper_struct: "Features",
+    },
+    ModuleSpec {
+        api_struct: "ProjectilesApi",
+        wrapper_struct: "Projectiles",
+    },
+    ModuleSpec {
+        api_struct: "LOSApi",
+        wrapper_struct: "Los",
+    },
+    ModuleSpec {
+        api_struct: "UnitDefsApi",
+        wrapper_struct: "UnitDefs",
+    },
+    ModuleSpec {
+        api_struct: "FeatureDefsApi",
+        wrapper_struct: "FeatureDefs",
+    },
+    ModuleSpec {
+        api_struct: "WeaponDefsApi",
+        wrapper_struct: "WeaponDefs",
+    },
+    ModuleSpec {
+        api_struct: "GameApi",
+        wrapper_struct: "Game",
+    },
+    ModuleSpec {
+        api_struct: "TerrainApi",
+        wrapper_struct: "Terrain",
+    },
+    ModuleSpec {
+        api_struct: "PlayerApi",
+        wrapper_struct: "Player",
+    },
+    ModuleSpec {
+        api_struct: "MathExtraApi",
+        wrapper_struct: "MathExtra",
+    },
+    ModuleSpec {
+        api_struct: "EncodingApi",
+        wrapper_struct: "Encoding",
+    },
+    ModuleSpec {
+        api_struct: "MetalMapApi",
+        wrapper_struct: "MetalMap",
+    },
+    ModuleSpec {
+        api_struct: "PathFinderApi",
+        wrapper_struct: "PathFinder",
+    },
+    ModuleSpec {
+        api_struct: "PlatformApi",
+        wrapper_struct: "Platform",
+    },
+    ModuleSpec {
+        api_struct: "RulesParamsApi",
+        wrapper_struct: "RulesParams",
+    },
+    ModuleSpec {
+        api_struct: "MoveCtrlApi",
+        wrapper_struct: "MoveCtrl",
+    },
+    ModuleSpec {
+        api_struct: "SyncedCtrlApi",
+        wrapper_struct: "SyncedCtrl",
+    },
+    ModuleSpec {
+        api_struct: "CameraApi",
+        wrapper_struct: "Camera",
+    },
+    ModuleSpec {
+        api_struct: "InputApi",
+        wrapper_struct: "Input",
+    },
+    ModuleSpec {
+        api_struct: "DebugInputApi",
+        wrapper_struct: "DebugInput",
+    },
+    ModuleSpec {
+        api_struct: "DisplayApi",
+        wrapper_struct: "Display",
+    },
+    ModuleSpec {
+        api_struct: "SelectionApi",
+        wrapper_struct: "Selection",
+    },
+    ModuleSpec {
+        api_struct: "VFSApi",
+        wrapper_struct: "Vfs",
+    },
+    ModuleSpec {
+        api_struct: "RmlUiApi",
+        wrapper_struct: "RmlUi",
+    },
+    ModuleSpec {
+        api_struct: "SoundApi",
+        wrapper_struct: "Sound",
+    },
+    ModuleSpec {
+        api_struct: "MessagesApi",
+        wrapper_struct: "Messages",
+    },
+    ModuleSpec {
+        api_struct: "ConfigApi",
+        wrapper_struct: "Config",
+    },
+    ModuleSpec {
+        api_struct: "TracingApi",
+        wrapper_struct: "Tracing",
+    },
+    ModuleSpec {
+        api_struct: "LightsApi",
+        wrapper_struct: "Lights",
+    },
+    ModuleSpec {
+        api_struct: "GfxApi",
+        wrapper_struct: "Gfx",
+    },
+    ModuleSpec {
+        api_struct: "UtilsApi",
+        wrapper_struct: "Utils",
+    },
+    ModuleSpec {
+        api_struct: "IconsApi",
+        wrapper_struct: "Icons",
+    },
+    ModuleSpec {
+        api_struct: "MarkersApi",
+        wrapper_struct: "Markers",
+    },
+    ModuleSpec {
+        api_struct: "GroundDecalsApi",
+        wrapper_struct: "GroundDecals",
+    },
+    ModuleSpec {
+        api_struct: "SystemControlApi",
+        wrapper_struct: "SystemControl",
+    },
+    ModuleSpec {
+        api_struct: "ProfilingApi",
+        wrapper_struct: "Profiling",
+    },
+    ModuleSpec {
+        api_struct: "MemoryApi",
+        wrapper_struct: "Memory",
+    },
+    ModuleSpec {
+        api_struct: "UnsyncedCtrlApi",
+        wrapper_struct: "UnsyncedCtrl",
+    },
+    ModuleSpec {
+        api_struct: "TeamControlApi",
+        wrapper_struct: "TeamControl",
+    },
+    ModuleSpec {
+        api_struct: "UnitControlApi",
+        wrapper_struct: "UnitControl",
+    },
+    ModuleSpec {
+        api_struct: "FeatureControlApi",
+        wrapper_struct: "FeatureControl",
+    },
+    ModuleSpec {
+        api_struct: "TerrainControlApi",
+        wrapper_struct: "TerrainControl",
+    },
+    ModuleSpec {
+        api_struct: "ProjectileControlApi",
+        wrapper_struct: "ProjectileControl",
+    },
+    ModuleSpec {
+        api_struct: "EffectsControlApi",
+        wrapper_struct: "EffectsControl",
+    },
+    ModuleSpec {
+        api_struct: "GameConfigApi",
+        wrapper_struct: "GameConfig",
+    },
+    ModuleSpec {
+        api_struct: "COBScriptApi",
+        wrapper_struct: "CobScript",
+    },
+    ModuleSpec {
+        api_struct: "UnsyncedReadApi",
+        wrapper_struct: "UnsyncedRead",
+    },
+    ModuleSpec {
+        api_struct: "UnitRenderingApi",
+        wrapper_struct: "UnitRendering",
+    },
+];
+
+fn generate_module(
     codegen: &CodeGenerator,
     header: &Path,
     include_dirs: &[PathBuf],
+    spec: ModuleSpec,
 ) -> Result<String> {
     codegen.generate_api(
         header,
         include_dirs,
         ApiConfig {
-            api_struct: "UnitsQueryApi",
-            wrapper_struct: "UnitsQuery",
+            api_struct: spec.api_struct,
+            wrapper_struct: spec.wrapper_struct,
         },
     )
 }
 
-pub fn generate_units_info(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnitsInfoApi",
-            wrapper_struct: "UnitsInfo",
-        },
-    )
+macro_rules! legacy_generators {
+    ($(($name:ident, $index:expr)),* $(,)?) => {
+        $(pub fn $name(
+            codegen: &CodeGenerator,
+            header: &Path,
+            include_dirs: &[PathBuf],
+        ) -> Result<String> {
+            generate_module(codegen, header, include_dirs, MODULE_SPECS[$index])
+        })*
+    };
 }
 
-pub fn generate_teams(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "TeamsApi",
-            wrapper_struct: "Teams",
-        },
-    )
+legacy_generators! {
+    (generate_units_query, 0),
+    (generate_units_info, 1),
+    (generate_teams, 2),
+    (generate_units_weapons, 3),
+    (generate_units_commands, 4),
+    (generate_units_pieces, 5),
+    (generate_features, 6),
+    (generate_projectiles, 7),
+    (generate_los, 8),
+    (generate_unit_defs, 9),
+    (generate_feature_defs, 10),
+    (generate_weapon_defs, 11),
+    (generate_game, 12),
+    (generate_terrain, 13),
+    (generate_player, 14),
+    (generate_math_extra, 15),
+    (generate_encoding, 16),
+    (generate_metal_map, 17),
+    (generate_path_finder, 18),
+    (generate_platform, 19),
+    (generate_rules_params, 20),
+    (generate_move_ctrl, 21),
+    (generate_synced_ctrl, 22),
+    (generate_camera, 23),
+    (generate_input, 24),
+    (generate_debug_input, 25),
+    (generate_display, 26),
+    (generate_selection, 27),
+    (generate_vfs, 28),
+    (generate_rml_ui, 29),
+    (generate_sound, 30),
+    (generate_messages, 31),
+    (generate_config, 32),
+    (generate_tracing, 33),
+    (generate_lights, 34),
+    (generate_gfx, 35),
+    (generate_utils, 36),
+    (generate_icons, 37),
+    (generate_markers, 38),
+    (generate_ground_decals, 39),
+    (generate_system_control, 40),
+    (generate_profiling, 41),
+    (generate_memory, 42),
+    (generate_unsynced_ctrl, 43),
+    (generate_team_control, 44),
+    (generate_unit_control, 45),
+    (generate_feature_control, 46),
+    (generate_terrain_control, 47),
+    (generate_projectile_control, 48),
+    (generate_effects_control, 49),
+    (generate_game_config, 50),
+    (generate_cob_script, 51),
+    (generate_unsynced_read, 52),
+    (generate_unit_rendering, 53),
 }
-
-pub fn generate_units_weapons(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnitsWeaponsApi",
-            wrapper_struct: "UnitsWeapons",
-        },
-    )
-}
-
-pub fn generate_units_commands(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnitsCommandsApi",
-            wrapper_struct: "UnitsCommands",
-        },
-    )
-}
-
-pub fn generate_units_pieces(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnitsPiecesApi",
-            wrapper_struct: "UnitsPieces",
-        },
-    )
-}
-
-pub fn generate_features(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "FeaturesApi",
-            wrapper_struct: "Features",
-        },
-    )
-}
-
-pub fn generate_projectiles(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "ProjectilesApi",
-            wrapper_struct: "Projectiles",
-        },
-    )
-}
-
-pub fn generate_los(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "LOSApi",
-            wrapper_struct: "Los",
-        },
-    )
-}
-
-pub fn generate_unit_defs(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnitDefsApi",
-            wrapper_struct: "UnitDefs",
-        },
-    )
-}
-
-pub fn generate_feature_defs(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "FeatureDefsApi",
-            wrapper_struct: "FeatureDefs",
-        },
-    )
-}
-
-pub fn generate_weapon_defs(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "WeaponDefsApi",
-            wrapper_struct: "WeaponDefs",
-        },
-    )
-}
-
-pub fn generate_game(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "GameApi",
-            wrapper_struct: "Game",
-        },
-    )
-}
-
-pub fn generate_terrain(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "TerrainApi",
-            wrapper_struct: "Terrain",
-        },
-    )
-}
-
-pub fn generate_player(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "PlayerApi",
-            wrapper_struct: "Player",
-        },
-    )
-}
-
-pub fn generate_math_extra(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "MathExtraApi",
-            wrapper_struct: "MathExtra",
-        },
-    )
-}
-
-pub fn generate_encoding(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "EncodingApi",
-            wrapper_struct: "Encoding",
-        },
-    )
-}
-
-pub fn generate_metal_map(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "MetalMapApi",
-            wrapper_struct: "MetalMap",
-        },
-    )
-}
-
-pub fn generate_path_finder(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "PathFinderApi",
-            wrapper_struct: "PathFinder",
-        },
-    )
-}
-
-pub fn generate_platform(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "PlatformApi",
-            wrapper_struct: "Platform",
-        },
-    )
-}
-
-pub fn generate_rules_params(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "RulesParamsApi",
-            wrapper_struct: "RulesParams",
-        },
-    )
-}
-
-pub fn generate_move_ctrl(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "MoveCtrlApi",
-            wrapper_struct: "MoveCtrl",
-        },
-    )
-}
-
-pub fn generate_synced_ctrl(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "SyncedCtrlApi",
-            wrapper_struct: "SyncedCtrl",
-        },
-    )
-}
-
-pub fn generate_camera(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "CameraApi",
-            wrapper_struct: "Camera",
-        },
-    )
-}
-
-pub fn generate_input(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "InputApi",
-            wrapper_struct: "Input",
-        },
-    )
-}
-
-pub fn generate_debug_input(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "DebugInputApi",
-            wrapper_struct: "DebugInput",
-        },
-    )
-}
-
-pub fn generate_display(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "DisplayApi",
-            wrapper_struct: "Display",
-        },
-    )
-}
-
-pub fn generate_selection(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "SelectionApi",
-            wrapper_struct: "Selection",
-        },
-    )
-}
-
-pub fn generate_vfs(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "VFSApi",
-            wrapper_struct: "Vfs",
-        },
-    )
-}
-
-pub fn generate_rml_ui(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "RmlUiApi",
-            wrapper_struct: "RmlUi",
-        },
-    )
-}
-
-pub fn generate_sound(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "SoundApi",
-            wrapper_struct: "Sound",
-        },
-    )
-}
-
-pub fn generate_messages(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "MessagesApi",
-            wrapper_struct: "Messages",
-        },
-    )
-}
-
-pub fn generate_config(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "ConfigApi",
-            wrapper_struct: "Config",
-        },
-    )
-}
-
-pub fn generate_tracing(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "TracingApi",
-            wrapper_struct: "Tracing",
-        },
-    )
-}
-
-pub fn generate_lights(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "LightsApi",
-            wrapper_struct: "Lights",
-        },
-    )
-}
-
-pub fn generate_gfx(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "GfxApi",
-            wrapper_struct: "Gfx",
-        },
-    )
-}
-
-pub fn generate_utils(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UtilsApi",
-            wrapper_struct: "Utils",
-        },
-    )
-}
-
-pub fn generate_icons(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "IconsApi",
-            wrapper_struct: "Icons",
-        },
-    )
-}
-
-pub fn generate_markers(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "MarkersApi",
-            wrapper_struct: "Markers",
-        },
-    )
-}
-
-pub fn generate_ground_decals(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "GroundDecalsApi",
-            wrapper_struct: "GroundDecals",
-        },
-    )
-}
-
-pub fn generate_system_control(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "SystemControlApi",
-            wrapper_struct: "SystemControl",
-        },
-    )
-}
-
-pub fn generate_profiling(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "ProfilingApi",
-            wrapper_struct: "Profiling",
-        },
-    )
-}
-
-pub fn generate_memory(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "MemoryApi",
-            wrapper_struct: "Memory",
-        },
-    )
-}
-
-pub fn generate_unsynced_ctrl(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnsyncedCtrlApi",
-            wrapper_struct: "UnsyncedCtrl",
-        },
-    )
-}
-
-// SyncedCtrl sub-APIs
-pub fn generate_team_control(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "TeamControlApi",
-            wrapper_struct: "TeamControl",
-        },
-    )
-}
-
-pub fn generate_unit_control(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnitControlApi",
-            wrapper_struct: "UnitControl",
-        },
-    )
-}
-
-pub fn generate_feature_control(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "FeatureControlApi",
-            wrapper_struct: "FeatureControl",
-        },
-    )
-}
-
-pub fn generate_terrain_control(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "TerrainControlApi",
-            wrapper_struct: "TerrainControl",
-        },
-    )
-}
-
-pub fn generate_projectile_control(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "ProjectileControlApi",
-            wrapper_struct: "ProjectileControl",
-        },
-    )
-}
-
-pub fn generate_effects_control(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "EffectsControlApi",
-            wrapper_struct: "EffectsControl",
-        },
-    )
-}
-
-pub fn generate_game_config(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "GameConfigApi",
-            wrapper_struct: "GameConfig",
-        },
-    )
-}
-
-pub fn generate_cob_script(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "COBScriptApi",
-            wrapper_struct: "CobScript",
-        },
-    )
-}
-
-pub fn generate_unsynced_read(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnsyncedReadApi",
-            wrapper_struct: "UnsyncedRead",
-        },
-    )
-}
-
-pub fn generate_unit_rendering(
-    codegen: &CodeGenerator,
-    header: &Path,
-    include_dirs: &[PathBuf],
-) -> Result<String> {
-    codegen.generate_api(
-        header,
-        include_dirs,
-        ApiConfig {
-            api_struct: "UnitRenderingApi",
-            wrapper_struct: "UnitRendering",
-        },
-    )
-}
-
 pub struct CodeGenerator {
     clang: Clang,
     lua_loaders: lua_loader::LuaLoaderMatrix,

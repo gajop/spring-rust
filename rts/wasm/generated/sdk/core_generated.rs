@@ -4,6 +4,9 @@
 // for advanced use; ordinary guest code should use safe generated or
 // specialized crate APIs. Only production-fast imports appear here.
 
+extern crate alloc;
+use alloc::{string::String, vec::Vec};
+
 #[doc(hidden)]
 mod __core_wire {
     #[inline]
@@ -686,11 +689,6 @@ pub mod units_info {
         }
         #[link(wasm_import_module = "spring:units-info")]
         extern "C" {
-            #[link_name = "get-unit-is-transporting"]
-            pub fn core_get_unit_is_transporting(p0: i32, p1: i32) -> i32;
-        }
-        #[link(wasm_import_module = "spring:units-info")]
-        extern "C" {
             #[link_name = "get-unit-last-attacker"]
             pub fn core_get_unit_last_attacker(p0: i32, p1: i32) -> i32;
         }
@@ -713,11 +711,6 @@ pub mod units_info {
         extern "C" {
             #[link_name = "get-unit-move-def-id"]
             pub fn core_get_unit_move_def_id(p0: i32) -> i64;
-        }
-        #[link(wasm_import_module = "spring:units-info")]
-        extern "C" {
-            #[link_name = "get-unit-nano-pieces"]
-            pub fn core_get_unit_nano_pieces(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:units-info")]
         extern "C" {

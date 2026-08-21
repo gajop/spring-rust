@@ -181,7 +181,12 @@ fn discover_fixture() -> Result<Fixture, String> {
             aim_pos: false,
         },
     )
-    .map_err(|error| format!("get-unit-position:{}", error.code))?;
+    .map_err(|error| {
+        format!(
+            "get-unit-position:{}:unit={}:candidates={:?}",
+            error.code, unit_id, unit_candidates
+        )
+    })?;
 
     let weapon_def_name = weapon_defs::get_weapon_def_name(weapon_def_id)
         .map_err(|error| format!("get-weapon-def-name:{}", error.code))?;
@@ -254,19 +259,47 @@ fn send_determinism(frame: i32) -> Result<(), SpringError> {
         deterministic_fp_signature(),
         deterministic_rng_signature(frame, count),
     );
-    messages::send_lua_rules_msg(&message).map_err(|error| SpringError { code: error.code })?;
+    send_parity_message(&message)?;
+    Ok(())
+}
+
+#[cfg(all(feature = "core", any(feature = "core_rules_synced", feature = "core_gaia_synced")))]
+fn send_parity_message(message: &str) -> Result<(), SpringError> {
+    messages::send_to_unsynced(message).map_err(|error| SpringError { code: error.code })?;
+    Ok(())
+}
+
+#[cfg(all(feature = "core", any(feature = "core_rules_unsynced", feature = "core_gaia_unsynced", feature = "core_ui")))]
+fn send_parity_message(message: &str) -> Result<(), SpringError> {
+    messages::send_lua_rules_msg(message).map_err(|error| SpringError { code: error.code })?;
+    Ok(())
+}
+
+#[cfg(all(feature = "core", not(any(
+    feature = "core_rules_synced",
+    feature = "core_rules_unsynced",
+    feature = "core_gaia_synced",
+    feature = "core_gaia_unsynced",
+    feature = "core_ui",
+))))]
+fn send_parity_message(message: &str) -> Result<(), SpringError> {
+    messages::send_to_unsynced(message).map_err(|error| SpringError { code: error.code })?;
+    Ok(())
+}
+
+#[cfg(not(feature = "core"))]
+fn send_parity_message(message: &str) -> Result<(), SpringError> {
+    messages::send_lua_rules_msg(message).map_err(|error| SpringError { code: error.code })?;
     #[cfg(parity_is_synced)]
-    {
-        messages::send_to_unsynced("native_api_wasm_direct_probe")
-            .map_err(|error| SpringError { code: error.code })?;
-    }
+    messages::send_to_unsynced("native_api_wasm_direct_probe")
+        .map_err(|error| SpringError { code: error.code })?;
     Ok(())
 }
 
 fn send_fixture_status(status: &str, detail: &str) {
     let safe_detail = detail.replace('|', "_");
     let message = format!("WASM_API_STATUS|fixture|{status}|{safe_detail}");
-    let _ = messages::send_lua_rules_msg(&message);
+    let _ = send_parity_message(&message);
 }
 
 fn run_generated_probe(current_frame: i32) {
@@ -315,7 +348,7 @@ fn run_generated_probe(current_frame: i32) {
     );
     send_fixture_status("ready", &fixture_detail);
     generated::run(&fixture, |message| {
-        let _ = messages::send_lua_rules_msg(&message);
+        let _ = send_parity_message(&message);
     });
     PROBE_RAN.store(true, Ordering::Release);
 }
@@ -325,7 +358,7 @@ impl Guest for ParityGuest {
     fn recv_from_synced(query: RecvFromSyncedQuery) -> Result<(), SpringError> {
         let message = query.message.replace('|', "_");
         let marker = format!("WASM_DIRECT_SYNCED|{}|{}", query.message_length, message);
-        let _ = messages::send_lua_rules_msg(&marker);
+        let _ = send_parity_message(&marker);
         Ok(())
     }
 
@@ -388,4 +421,27 @@ impl bindings::Guest for ParityGuest {
     }
 }
 
+#[cfg(not(feature = "core"))]
 bindings::export!(ParityGuest with_types_in bindings);
+
+#[cfg(feature = "core")]
+fn core_game_frame(frame: i32) {
+    let _ = <ParityGuest as Guest>::game_frame(GameFrameQuery { game_frame: frame });
+}
+
+#[cfg(feature = "core")]
+fn core_game_frame_post(frame: i32) {
+    let _ = <ParityGuest as Guest>::game_frame_post(GameFrameQuery { game_frame: frame });
+}
+
+#[cfg(feature = "core")]
+fn core_update(delta_seconds: f32) {
+    let _ = <ParityGuest as Guest>::update(UpdateQuery { delta_seconds });
+}
+
+#[cfg(feature = "core")]
+spring_wasm_core::export_game_frame!(core_game_frame);
+#[cfg(feature = "core")]
+spring_wasm_core::export_game_frame_post!(core_game_frame_post);
+#[cfg(feature = "core")]
+spring_wasm_core::export_update!(core_update);

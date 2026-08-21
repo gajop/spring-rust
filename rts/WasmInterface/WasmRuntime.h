@@ -30,7 +30,10 @@ struct WasmRuntimeConfig {
 	std::uint32_t maxMemoryPages = 1024;
 	std::uint32_t maxTableElements = 1u << 20;
 	std::uint32_t maxResources = 1u << 16;
-	std::uint32_t maxImports = 256;
+	// A complete generated Core API context can legitimately import several
+	// hundred semantic callouts.  Keep headroom for the full inventory while
+	// retaining a fixed validation bound for untrusted modules.
+	std::uint32_t maxImports = 2048;
 	std::uint32_t maxExports = 256;
 	std::uint32_t maxSections = 128;
 	// Fixed validation guard, not a game/runtime setting: changing it requires

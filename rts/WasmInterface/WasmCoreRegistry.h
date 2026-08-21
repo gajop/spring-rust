@@ -80,6 +80,8 @@ inline constexpr ImportDescriptor kImports[] = {
 	{UnitsInfoModule, "get-unit-position", "i32,i32,i32->i32", AllEnvironmentMask},
 	{UnitsInfoModule, "get-unit-velocity", "i32,i32->i32", AllEnvironmentMask},
 	{UnitsInfoModule, "get-unit-health", "i32,i32->i32", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-nano-pieces", "i32,i32,i32->i64", AllEnvironmentMask},
+	{UnitsInfoModule, "get-unit-is-transporting", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 
 	{UnitsQueryModule, "valid-unit-id", "i32->i64", AllEnvironmentMask},
 	{UnitsQueryModule, "get-all-units", "i32,i32->i64", AllEnvironmentMask},

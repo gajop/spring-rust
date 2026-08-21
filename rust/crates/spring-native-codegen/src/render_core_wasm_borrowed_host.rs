@@ -129,7 +129,7 @@ static_assert({count}u >= 0u, "generated borrowed Core callback count");
 /// Production eligibility for the allocation-free borrowed variable-input class.
 /// This intentionally rejects callbacks/opaque/manual APIs, list<string>, bool
 /// lists, pointer-sized lists and record lists.
-pub(crate) fn eligible(
+pub fn eligible(
     plan: &FunctionPlan,
     inputs: &[FieldModel],
     outputs: &[FieldModel],

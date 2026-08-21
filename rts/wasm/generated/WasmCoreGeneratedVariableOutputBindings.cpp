@@ -329,136 +329,6 @@ wasm_trap_t* CoreVariableOutput_units_query_get_units_in_planes(void* environmen
     return nullptr;
 }
 
-wasm_trap_t* CoreVariableOutput_units_info_get_unit_is_transporting(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->unitsInfo == nullptr ||
-        state->native->unitsInfo->GetUnitIsTransporting == nullptr)
-        return Trap("GetUnitIsTransporting generated Core binding is unavailable");
-    if (slots == nullptr || slotCount != 2)
-        return Trap("GetUnitIsTransporting generated Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 3u, budgetError);
-    if (!guard.Ok())
-        return Trap(budgetError);
-
-    std::string memoryError;
-    if (!EnsureMemory(state, caller, memoryError))
-        return Trap(memoryError);
-    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputDescriptor, 16u, outputWire)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
-        return nullptr;
-    }
-    WireReader unitIDsControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
-    std::uint32_t unitIDsPointer = 0;
-    std::uint32_t unitIDsCapacity = 0;
-    std::uint32_t unitIDsIgnoredLength = 0;
-    if (!unitIDsControl.U32(unitIDsPointer) || !unitIDsControl.U32(unitIDsCapacity) ||
-        !unitIDsControl.U32(unitIDsIgnoredLength) || !unitIDsControl.Finish(4)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
-        return nullptr;
-    }
-    const std::uint64_t unitIDsCapacityBytes = static_cast<std::uint64_t>(unitIDsCapacity) * 4u;
-    if (unitIDsCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(unitIDsPointer, static_cast<std::size_t>(unitIDsCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-
-    GetUnitIsTransportingQuery query{};
-    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
-    GetUnitIsTransportingResult result{};
-    state->native->unitsInfo->GetUnitIsTransporting(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
-    bool outputTooSmall = false;
-    std::uint32_t unitIDsRequired = 0;
-    if (!NormalizeCoreCount(result.count, unitIDsRequired)) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
-    if (unitIDsRequired != 0 && result.unitIDs == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
-    if (!WriteCoreU32(outputWire, 8u, unitIDsRequired)) return Trap("generated Core output descriptor changed unexpectedly");
-    outputTooSmall = outputTooSmall || unitIDsCapacity < unitIDsRequired;
-    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
-    if (unitIDsRequired != 0) {
-        const std::size_t unitIDsBytes = static_cast<std::size_t>(unitIDsRequired) * 4u;
-        std::span<std::uint8_t> unitIDsWire;
-        if (!state->memory.MutableView(unitIDsPointer, unitIDsBytes, unitIDsWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter unitIDsWriter(unitIDsWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < unitIDsRequired; ++coreIndex) {
-        if (!unitIDsWriter.I32(result.unitIDs[coreIndex])) return Trap("generated Core wire overflow");
-        }
-        if (!unitIDsWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
-    }
-    std::span<std::uint8_t> fixedWire = outputWire.subspan(12u, 4u);
-    WireWriter writer(fixedWire);
-    if (!writer.Bool(result.isTransporting)) return Trap("generated Core wire overflow");
-    if (!writer.Finish(4u)) return Trap("generated Core fixed output layout mismatch");
-    slots[0].i32 = 0;
-    return nullptr;
-}
-
-wasm_trap_t* CoreVariableOutput_units_info_get_unit_nano_pieces(void* environment, wasmtime_caller_t* caller,
-    wasmtime_val_raw_t* slots, std::size_t slotCount)
-{
-    auto* state = static_cast<HostState*>(environment);
-    if (state == nullptr || state->native == nullptr || state->native->unitsInfo == nullptr ||
-        state->native->unitsInfo->GetUnitNanoPieces == nullptr)
-        return Trap("GetUnitNanoPieces generated Core binding is unavailable");
-    if (slots == nullptr || slotCount != 2)
-        return Trap("GetUnitNanoPieces generated Core ABI signature mismatch");
-
-    std::string budgetError;
-    ImportGuard guard(state, 3u, budgetError);
-    if (!guard.Ok())
-        return Trap(budgetError);
-
-    std::string memoryError;
-    if (!EnsureMemory(state, caller, memoryError))
-        return Trap(memoryError);
-    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
-    std::span<std::uint8_t> outputWire;
-    if (!state->memory.MutableView(outputDescriptor, 12u, outputWire)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
-        return nullptr;
-    }
-    WireReader piecesControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
-    std::uint32_t piecesPointer = 0;
-    std::uint32_t piecesCapacity = 0;
-    std::uint32_t piecesIgnoredLength = 0;
-    if (!piecesControl.U32(piecesPointer) || !piecesControl.U32(piecesCapacity) ||
-        !piecesControl.U32(piecesIgnoredLength) || !piecesControl.Finish(4)) {
-        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
-        return nullptr;
-    }
-    const std::uint64_t piecesCapacityBytes = static_cast<std::uint64_t>(piecesCapacity) * 4u;
-    if (piecesCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(piecesPointer, static_cast<std::size_t>(piecesCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
-
-    GetUnitNanoPiecesQuery query{};
-    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
-    GetUnitNanoPiecesResult result{};
-    state->native->unitsInfo->GetUnitNanoPieces(&query, &result);
-    const std::int32_t errorCode = NativeErrorCode(result.error);
-    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
-    bool outputTooSmall = false;
-    std::uint32_t piecesRequired = 0;
-    if (!NormalizeCoreCount(result.count, piecesRequired)) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
-    if (piecesRequired != 0 && result.pieces == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
-    if (!WriteCoreU32(outputWire, 8u, piecesRequired)) return Trap("generated Core output descriptor changed unexpectedly");
-    outputTooSmall = outputTooSmall || piecesCapacity < piecesRequired;
-    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
-    if (piecesRequired != 0) {
-        const std::size_t piecesBytes = static_cast<std::size_t>(piecesRequired) * 4u;
-        std::span<std::uint8_t> piecesWire;
-        if (!state->memory.MutableView(piecesPointer, piecesBytes, piecesWire)) return Trap("generated Core variable output range changed unexpectedly");
-        WireWriter piecesWriter(piecesWire);
-        for (std::uint32_t coreIndex = 0; coreIndex < piecesRequired; ++coreIndex) {
-        if (!piecesWriter.I32(result.pieces[coreIndex])) return Trap("generated Core wire overflow");
-        }
-        if (!piecesWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
-    }
-    slots[0].i32 = 0;
-    return nullptr;
-}
-
 wasm_trap_t* CoreVariableOutput_units_info_get_unit_tooltip(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -5813,20 +5683,6 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedVariableOutput(linker, "spring:units-info", "get-unit-is-transporting",
-                MakeFuncType(params, 2, results, 1), CoreVariableOutput_units_info_get_unit_is_transporting, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
-        if (!DefineGeneratedVariableOutput(linker, "spring:units-info", "get-unit-nano-pieces",
-                MakeFuncType(params, 2, results, 1), CoreVariableOutput_units_info_get_unit_nano_pieces, state, error))
-            return false;
-    }
-    {
-        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
-        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedVariableOutput(linker, "spring:units-info", "get-unit-tooltip",
                 MakeFuncType(params, 2, results, 1), CoreVariableOutput_units_info_get_unit_tooltip, state, error))
             return false;
@@ -6430,6 +6286,6 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
     return true;
 }
 
-static_assert(92 >= 0, "generated variable-output Core callback count");
+static_assert(90 >= 0, "generated variable-output Core callback count");
 
 } // namespace recoil::wasm::core::generated

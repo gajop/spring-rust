@@ -126,6 +126,7 @@ dependencies = [
 name = "recoil-wasm-parity-guest"
 version = "0.1.0"
 dependencies = [
+ "spring-wasm-core",
  "wit-bindgen",
  "wit-component",
 ]
@@ -177,6 +178,10 @@ dependencies = [
  "serde_core",
  "zmij",
 ]
+
+[[package]]
+name = "spring-wasm-core"
+version = "0.1.0"
 
 [[package]]
 name = "syn"

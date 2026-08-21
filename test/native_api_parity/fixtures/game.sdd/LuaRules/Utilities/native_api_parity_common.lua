@@ -78,6 +78,149 @@ function M.setTestName(payload, name)
 	return payload
 end
 
+-- Decode the one-string wire format used by Core guests.  Component guests
+-- reach the same payload decoder through LuaRules:RecvLuaMsg, while Core
+-- guests arrive at the unsynced gadget through RecvFromSynced.
+function M.decodeWasmMessage(message)
+	local parts = {}
+	for part in string.gmatch(message .. "|", "(.-)|") do
+		parts[#parts + 1] = part
+	end
+	if parts[1] == "WASM_API" then
+		local fields = {}
+		local status = "pass"
+		local errorCode
+		local index = 3
+		while index <= #parts - 2 do
+			local field = parts[index]
+			local kind = parts[index + 1]
+			local encoded = parts[index + 2]
+			if field == "__error" then
+				status = "error"
+				errorCode = tonumber(encoded)
+			else
+				local value
+				if kind == "b" then
+					value = encoded == "1"
+				elseif kind == "i" or kind == "f" then
+					value = tonumber(encoded)
+				elseif kind == "s" then
+					local bytes = {}
+					for byteIndex = 1, #encoded, 2 do
+						bytes[#bytes + 1] = string.char(tonumber(encoded:sub(byteIndex, byteIndex + 1), 16))
+					end
+					value = table.concat(bytes)
+				elseif kind == "o" then
+					local optionKind, present, optionEncoded = encoded:match("^([^:]+):([01]):(.*)$")
+					if optionKind == nil then
+						status = "error"
+					elseif present == "0" then
+						value = nil
+					elseif optionKind == "b" then
+						value = optionEncoded == "1"
+					elseif optionKind == "i" or optionKind == "f" then
+						value = tonumber(optionEncoded)
+					elseif optionKind == "s" then
+						local bytes = {}
+						for byteIndex = 1, #optionEncoded, 2 do
+							bytes[#bytes + 1] = string.char(tonumber(optionEncoded:sub(byteIndex, byteIndex + 1), 16))
+						end
+						value = table.concat(bytes)
+					else
+						status = "error"
+					end
+				elseif kind == "ln" or kind == "lb" or kind == "ls" then
+					value = {}
+					if encoded ~= "" then
+						for item in string.gmatch(encoded, "[^,]+") do
+							if kind == "ln" then
+								value[#value + 1] = tonumber(item)
+							elseif kind == "lb" then
+								value[#value + 1] = item == "1"
+							else
+								local bytes = {}
+								for byteIndex = 1, #item, 2 do
+									bytes[#bytes + 1] = string.char(tonumber(item:sub(byteIndex, byteIndex + 1), 16))
+								end
+								value[#value + 1] = table.concat(bytes)
+							end
+						end
+					end
+				elseif kind == "lr" then
+					value = {}
+					for itemEncoded in string.gmatch(encoded, "[^;]+") do
+						local item = {}
+						for fieldName, fieldKind, fieldEncoded in string.gmatch(itemEncoded, "([^,:]+):([^,:]+):([^,]*)") do
+							if fieldKind == "b" then
+								item[fieldName] = fieldEncoded == "1"
+							elseif fieldKind == "i" or fieldKind == "f" then
+								item[fieldName] = tonumber(fieldEncoded)
+							elseif fieldKind == "s" then
+								local bytes = {}
+								for byteIndex = 1, #fieldEncoded, 2 do
+									bytes[#bytes + 1] = string.char(tonumber(fieldEncoded:sub(byteIndex, byteIndex + 1), 16))
+								end
+								item[fieldName] = table.concat(bytes)
+							elseif fieldKind == "li" then
+								item[fieldName] = {}
+								for unitID in string.gmatch(fieldEncoded, "[^,]+") do
+									item[fieldName][#item[fieldName] + 1] = tonumber(unitID)
+								end
+							end
+						end
+						value[#value + 1] = item
+					end
+				else
+					status = "error"
+				end
+				fields[field] = value
+			end
+			index = index + 3
+		end
+		return {
+			source = "wasm-api",
+			testName = parts[2],
+			status = status,
+			errorCode = errorCode,
+			fields = fields,
+		}
+	end
+	if parts[1] == "WASM_API_STATUS" then
+		return {
+			source = "wasm-status",
+			testName = parts[2] or "fixture",
+			status = parts[3] == "ready" and "pass" or "error",
+			reason = parts[4] or "",
+		}
+	end
+	if parts[1] == "WASM_DIRECT_SYNCED" then
+		local messageLength = tonumber(parts[2])
+		local directMessage = parts[3] or ""
+		return {
+			source = "wasm-direct",
+			testName = "send_to_unsynced/recv_from_synced",
+			status = messageLength ~= nil
+				and directMessage == "native_api_wasm_direct_probe"
+				and messageLength == #directMessage and "pass" or "fail",
+			messageLength = messageLength,
+			message = directMessage,
+		}
+	end
+	local frame, teamUnitCount, fpEdgeSignature, rngSignature = message:match(
+		"^WASM_PARITY|([%-0-9]+)|([%-0-9]+)|([^|]+)|([^|]+)$"
+	)
+	if frame == nil then
+		return nil
+	end
+	return {
+		source = "wasm",
+		frame = tonumber(frame),
+		teamUnitCount = tonumber(teamUnitCount),
+		fpEdgeSignature = fpEdgeSignature,
+		rngSignature = rngSignature,
+	}
+end
+
 function M.springFunctionInventory()
 	local names = {}
 	for name, value in pairs(Spring) do

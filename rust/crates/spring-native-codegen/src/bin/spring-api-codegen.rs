@@ -43,6 +43,8 @@ mod render_core_wasm_guest;
 mod render_core_wasm_host;
 #[path = "../render_core_wasm_option_host.rs"]
 mod render_core_wasm_option_host;
+#[path = "../render_core_wasm_owned_guest.rs"]
+mod render_core_wasm_owned_guest;
 #[path = "../render_core_wasm_registry.rs"]
 mod render_core_wasm_registry;
 #[path = "../render_core_wasm_variable_guest.rs"]
@@ -53,6 +55,8 @@ mod render_core_wasm_variable_host;
 mod render_core_wasm_variable_io_host;
 #[path = "../render_core_wasm_variable_output_host.rs"]
 mod render_core_wasm_variable_output_host;
+#[path = "../render/core/shared/wire.rs"]
+mod render_core_wasm_wire;
 
 fn main() {
     if let Err(error) = run() {
@@ -371,6 +375,10 @@ fn run() -> Result<()> {
     write(
         &sdk_dir.join("core_dynamic_output.rs"),
         &render_core_wasm_dynamic_output_guest::render(&model),
+    )?;
+    write(
+        &sdk_dir.join("core_owned.rs"),
+        &render_core_wasm_owned_guest::render(&model),
     )?;
     write(
         &sdk_dir.join("core_callins.rs"),

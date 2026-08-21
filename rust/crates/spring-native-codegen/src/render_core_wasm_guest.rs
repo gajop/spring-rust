@@ -25,6 +25,7 @@ pub fn render(model: &ApiModel) -> String {
          // for advanced use; ordinary guest code should use safe generated or\n\
          // specialized crate APIs. Only production-fast imports appear here.\n\n",
     );
+    output.push_str("extern crate alloc;\nuse alloc::{string::String, vec::Vec};\n\n");
     output.push_str(WIRE_HELPERS);
 
     for module in &model.modules {
@@ -209,7 +210,7 @@ fn executable(
         || render_core_wasm_variable_io_host::eligible(plan, inputs, outputs, records)
 }
 
-fn fixed_executable(
+pub(crate) fn fixed_executable(
     plan: &FunctionPlan,
     inputs: &[FieldModel],
     outputs: &[FieldModel],

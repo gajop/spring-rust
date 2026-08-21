@@ -7,13 +7,13 @@
     "dynamic-output-caller-owned": 89,
     "fixed": 813,
     "fixed-option": 13,
-    "handwritten-reviewed": 61,
+    "handwritten-reviewed": 63,
     "variable-input-adapted": 4,
     "variable-input-borrowed": 192,
     "variable-input-borrowed-mixed-fixed": 16,
     "variable-input-nested-adapted": 22,
     "variable-io-borrowed-input-caller-owned-output": 52,
-    "variable-output-caller-owned": 92
+    "variable-output-caller-owned": 90
   },
   "executable": [
     {
@@ -721,7 +721,7 @@
       "function": "GetUnitIsTransporting",
       "import_module": "spring:units-info",
       "import_name": "get-unit-is-transporting",
-      "class": "variable-output-caller-owned",
+      "class": "handwritten-reviewed",
       "verified": false,
       "production_import_allowed": true,
       "production_process_safe": true,
@@ -819,7 +819,7 @@
       "function": "GetUnitNanoPieces",
       "import_module": "spring:units-info",
       "import_name": "get-unit-nano-pieces",
-      "class": "variable-output-caller-owned",
+      "class": "handwritten-reviewed",
       "verified": false,
       "production_import_allowed": true,
       "production_process_safe": true,

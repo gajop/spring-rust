@@ -45,6 +45,11 @@ fn main() {
     );
     append_generated(
         &mut contents,
+        &generated_dir.join("core_owned.rs"),
+        "owned semantic Core callout SDK",
+    );
+    append_generated(
+        &mut contents,
         &generated_dir.join("core_callins.rs"),
         "Core numeric callin SDK",
     );

@@ -122,10 +122,12 @@ if tostring(parityOptions.native_api_parity_mode or "") == "benchmark" then
 	return
 end
 local wasmContext = tostring(parityOptions.native_api_parity_wasm_context or "synced_gadget")
+local wasmTransport = tostring(parityOptions.native_api_parity_wasm_transport or "component")
+local wasmSpecSuffix = wasmTransport == "core" and "_core" or ""
 local wasmRole = tostring(parityOptions.native_api_parity_wasm_role or "combined")
 local WasmProbeSpec
 if wasmContext == "ui" then
-	WasmProbeSpec = VFS.Include("LuaRules/Utilities/wasm_api_probe_tests_ui.lua")
+	WasmProbeSpec = VFS.Include("LuaRules/Utilities/wasm_api_probe_tests_ui" .. wasmSpecSuffix .. ".lua")
 end
 local outputPath = Common.outputDir() .. "/widget.jsonl"
 local sentInventory = false

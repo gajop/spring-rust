@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import re
 import argparse
+from functools import lru_cache
 from pathlib import Path
 
 
@@ -1946,9 +1947,10 @@ def select_tests(
     records: dict[str, dict],
     context: str = "synced_gadget",
     include_rendering: bool = False,
+    transport: str = "component",
 ) -> list[tuple[dict, str, str, dict, list[str]]]:
     selected, _coverage = select_tests_with_coverage(
-        functions, records, context, include_rendering
+        functions, records, context, include_rendering, transport
     )
     return selected
 
@@ -1966,7 +1968,111 @@ SELECTION_EXCLUSION_REASONS = {
     "unsupported_output",
     "unresolved_args",
     "unresolved_sequence",
+    "core_policy",
+    "core_owned_unsupported",
 }
+
+CORE_CONTEXT_BITS = {
+    "synced_gadget": 1 << 0,
+    "unsynced_gadget": 1 << 1,
+    "gaia_synced": 1 << 2,
+    "gaia_unsynced": 1 << 3,
+    "ui": 1 << 4,
+}
+
+# These probes require a semantic adapter beyond the raw Core import.  Keep
+# them explicit until the corresponding record/option adapters are generated;
+# they must not be reported as a passing Core observation.
+CORE_OWNED_UNSUPPORTED_TESTS = frozenset(
+    {
+        "feature_direction",
+        "get_unit_nearest_enemy",
+        "get_unit_separation",
+        "unit_last_attacked_piece_fixed_shape",
+    }
+)
+
+
+@lru_cache(maxsize=1)
+def core_import_coverage() -> dict[tuple[str, str], dict]:
+    coverage_path = ROOT / "rts" / "wasm" / "generated" / "core-executable-coverage.json"
+    entries = json.loads(coverage_path.read_text(encoding="utf-8"))
+    return {
+        (entry["module"], entry["function"]): entry
+        for key in ("executable", "pending")
+        for entry in entries.get(key, [])
+    }
+
+
+@lru_cache(maxsize=1)
+def core_owned_unsupported() -> frozenset[tuple[str, str]]:
+    """Read the generated owned façade's explicit unsupported entries.
+
+    Core registry coverage describes imports that the engine can expose.  The
+    parity guest calls the semantic owned façade, which may still be waiting
+    for a decoder or input adapter.  Keep those rows visible in the manifest
+    rather than recording a misleading successful process with an unsupported
+    sentinel.
+    """
+    source_path = ROOT / "rts" / "wasm" / "generated" / "sdk" / "core_owned.rs"
+    if not source_path.is_file():
+        return frozenset()
+    source = source_path.read_text(encoding="utf-8")
+    module_starts = list(re.finditer(r"^    pub mod ([a-z0-9_]+) \{\n", source, re.MULTILINE))
+    unsupported: set[tuple[str, str]] = set()
+    for index, module_match in enumerate(module_starts):
+        end = module_starts[index + 1].start() if index + 1 < len(module_starts) else len(source)
+        module_source = source[module_match.end():end]
+        for function_match in re.finditer(
+            r"pub fn ([a-z0-9_]+)\([^\n]*\) -> [^{]+ \{\n(?P<body>.*?)\n        \}",
+            module_source,
+            re.DOTALL,
+        ):
+            if "UnsupportedHostTarget" in function_match.group("body"):
+                unsupported.add((module_match.group(1), function_match.group(1)))
+    return frozenset(unsupported)
+
+
+def core_import_allowed(module: str, function: dict, context: str) -> bool:
+    function_name = snake(function.get("name", ""))
+    if (module, function_name) in core_owned_unsupported():
+        return False
+    entry = core_import_coverage().get((module, function.get("name")))
+    if entry is None:
+        return False
+    return bool(
+        entry.get("production_import_allowed")
+        and entry.get("production_process_safe")
+        and entry.get("production_environment_mask", 0) & CORE_CONTEXT_BITS[context]
+    )
+
+
+def core_test_policy_allows(
+    test: dict,
+    module: str,
+    function: dict,
+    context: str,
+    functions: dict[tuple[str, str], dict],
+    records: dict[str, dict],
+) -> bool:
+    if test.get("id") in CORE_OWNED_UNSUPPORTED_TESTS:
+        return False
+    targets = [(module, function)]
+    for sequence_module, _name, sequence_function, _args, _bind in (
+        wasm_sequence_operations(test, functions, records) or []
+    ):
+        targets.append((sequence_module, sequence_function))
+    for setter_module, _name, setter_function, _args in (
+        wasm_set_operations(test, functions, records) or []
+    ):
+        targets.append((setter_module, setter_function))
+    callback = test.get("wasm_callback")
+    if callback and callback.get("call"):
+        callback_target = runtime_call_target(callback["call"], functions)
+        if callback_target is None:
+            return False
+        targets.append((callback_target[0], callback_target[2]))
+    return all(core_import_allowed(target_module, target_function, context) for target_module, target_function in targets)
 
 
 def select_tests_with_coverage(
@@ -1974,6 +2080,7 @@ def select_tests_with_coverage(
     records: dict[str, dict],
     context: str = "synced_gadget",
     include_rendering: bool = False,
+    transport: str = "component",
 ) -> tuple[
     list[tuple[dict, str, str, dict, list[str]]],
     dict,
@@ -2062,6 +2169,32 @@ def select_tests_with_coverage(
                         reason = "unresolved_args"
                     else:
                         selected_entry = (test, module, function_name, function, arguments)
+
+        if selected_entry is not None and transport == "core":
+            selected_test, selected_module, _, selected_function, _ = selected_entry
+            if not core_test_policy_allows(
+                selected_test,
+                selected_module,
+                selected_function,
+                context,
+                functions,
+                records,
+            ):
+                selected_entry = None
+                reason = (
+                    "core_owned_unsupported"
+                    if selected_test.get("id") in CORE_OWNED_UNSUPPORTED_TESTS
+                    else (
+                        "core_owned_unsupported"
+                        if any(
+                            target in core_owned_unsupported()
+                            for target in [
+                                (selected_module, snake(selected_function.get("name", "")))
+                            ]
+                        )
+                        else "core_policy"
+                    )
+                )
 
         if selected_entry is not None:
             selected.append(selected_entry)
@@ -3454,8 +3587,14 @@ def render_lua_probe_spec(
     return "\n".join(lines)
 
 
-def render_bindings(context: str) -> str:
-    """Generate the context-specific wit-bindgen façade used by the guest."""
+def render_bindings(
+    context: str,
+    transport: str = "component",
+    referenced_sources: tuple[str, ...] = (),
+) -> str:
+    """Generate the context-specific binding façade used by the guest."""
+    if transport == "core":
+        return render_core_bindings(referenced_sources)
     world = CONTEXT_WORLD[context]
     callin_module = f"callins_{snake(world.replace('-', '_'))}"
     synced_message_import = (
@@ -3485,6 +3624,138 @@ def render_bindings(context: str) -> str:
     )
 
 
+def render_core_bindings(referenced_sources: tuple[str, ...] = ()) -> str:
+    """Render the plain Core-Wasm binding and callin façade.
+
+    Core guests have no WIT world and therefore cannot use wit-bindgen's
+    generated `Guest` traits.  Keep the probe body unchanged by providing the
+    same module/type path and a small callin shim at this seam.
+    """
+    references: dict[str, set[str]] = {}
+    reference_pattern = re.compile(
+        r"(?:crate::)?bindings::recoil::spring_api::([A-Za-z0-9_]+)::([A-Za-z0-9_]+)"
+    )
+    for source in referenced_sources:
+        for module, name in reference_pattern.findall(source):
+            references.setdefault(module, set()).add(name)
+    # Fixture discovery runs before the generated probe list and therefore
+    # needs these semantic helpers even when Core policy excludes every test
+    # that would otherwise reference one of them.
+    references.setdefault("projectiles", set()).update(
+        {
+            "get_all_projectiles",
+            "GetAllProjectilesOptions",
+            "get_projectile_owner_id",
+            "get_projectile_type",
+            "get_projectile_def_id",
+        }
+    )
+    references.setdefault("feature_defs", set()).add("get_feature_def_id_by_name")
+    references.setdefault("features", set()).update(
+        {"get_all_features", "get_feature_def_id"}
+    )
+    references.setdefault("game", set()).add("get_game_frame")
+    references.setdefault("unit_defs", set()).update(
+        {"get_unit_def_id_by_name", "get_unit_def_name"}
+    )
+    references.setdefault("teams", set()).add("get_player_list_in_team")
+    references.setdefault("units_info", set()).update(
+        {
+            "get_unit_position",
+            "GetUnitPositionOptions",
+            "get_unit_def_id",
+            "get_unit_team",
+            "get_unit_ally_team",
+        }
+    )
+    references.setdefault("units_query", set()).update(
+        {"get_all_units", "get_team_unit_count"}
+    )
+    references.setdefault("weapon_defs", set()).add("get_weapon_def_name")
+    module_lines = []
+    module_lines.extend(
+        [
+            "        pub(crate) mod messages {",
+            "            pub(crate) use spring_wasm_core::owned::messages::{send_lua_rules_msg, send_to_unsynced};",
+            "        }",
+        ]
+    )
+    for module in sorted(references):
+        if module == "messages":
+            continue
+        names = ", ".join(sorted(references[module]))
+        module_lines.extend(
+            [
+                f"        pub(crate) mod {module} {{",
+                f"            pub(crate) use spring_wasm_core::owned::{module}::{{{names}}};",
+                "        }",
+            ]
+        )
+    api_modules = "\n".join(module_lines)
+    return """// @generated by generate_probe.py; do not edit.
+
+pub(crate) mod bindings {
+    pub(crate) mod recoil {
+        pub(crate) mod spring_api {
+__API_MODULES__
+        }
+    }
+
+    pub(crate) trait Guest {
+        fn callback_1(user_data: u32);
+    }
+
+    macro_rules! export {
+        ($guest:ident with_types_in $bindings:ident) => {
+            #[cfg(target_arch = "wasm32")]
+            #[export_name = "spring:callin/game-frame"]
+            pub extern "C" fn __spring_core_game_frame(frame: i32) {
+                let _ = <$guest as crate::callin::Guest>::game_frame(
+                    crate::callin::GameFrameQuery { game_frame: frame },
+                );
+            }
+
+            #[cfg(target_arch = "wasm32")]
+            #[export_name = "spring:callin/game-frame-post"]
+            pub extern "C" fn __spring_core_game_frame_post(frame: i32) {
+                let _ = <$guest as crate::callin::Guest>::game_frame_post(
+                    crate::callin::GameFrameQuery { game_frame: frame },
+                );
+            }
+
+            #[cfg(target_arch = "wasm32")]
+            #[export_name = "spring:callin/update"]
+            pub extern "C" fn __spring_core_update(delta_seconds: f32) {
+                let _ = <$guest as crate::callin::Guest>::update(
+                    crate::callin::UpdateQuery { delta_seconds },
+                );
+            }
+        };
+    }
+}
+
+pub(crate) mod callin {
+    #[derive(Clone, Copy)]
+    pub(crate) struct GameFrameQuery { pub game_frame: i32 }
+    pub(crate) struct GameFrameResult { pub unused: u8 }
+    #[derive(Clone, Copy)]
+    pub(crate) struct UpdateQuery { pub delta_seconds: f32 }
+    pub(crate) struct UpdateResult { pub unused: u8 }
+    pub(crate) struct SpringError { pub code: i32 }
+    pub(crate) struct RecvFromSyncedQuery {
+        pub message: std::string::String,
+        pub message_length: u32,
+    }
+
+    pub(crate) trait Guest {
+        fn game_frame(query: GameFrameQuery) -> Result<GameFrameResult, SpringError>;
+        fn game_frame_post(query: GameFrameQuery) -> Result<GameFrameResult, SpringError>;
+        fn update(query: UpdateQuery) -> Result<UpdateResult, SpringError>;
+        #[cfg(parity_has_synced_message)]
+        fn recv_from_synced(query: RecvFromSyncedQuery) -> Result<(), SpringError>;
+    }
+}
+""".replace("__API_MODULES__", api_modules)
 def render_context(context: str) -> str:
     wait_for_fixture = context in {"unsynced_gadget", "gaia_unsynced", "ui"}
     lines = [
@@ -3665,6 +3936,12 @@ def main() -> None:
         help="execution environment for the generated component world",
     )
     parser.add_argument(
+        "--transport",
+        choices=("component", "core"),
+        default="component",
+        help="guest transport; Core emits a plain Core-Wasm module",
+    )
+    parser.add_argument(
         "--model",
         type=Path,
         default=MODEL_PATH,
@@ -3682,7 +3959,7 @@ def main() -> None:
 
     functions, records, _, enums = load_model(args.model.resolve())
     selected, coverage = select_tests_with_coverage(
-        functions, records, args.context, args.include_rendering
+        functions, records, args.context, args.include_rendering, args.transport
     )
     if not selected:
         raise SystemExit("the Wasm parity probe selected no tests")
@@ -3713,8 +3990,19 @@ def main() -> None:
         render_wit(selected, records, functions, enums, args.context), encoding="utf-8"
     )
     rust_path.write_text(render_rust(selected, records, functions), encoding="utf-8")
-    bindings_path.write_text(render_bindings(args.context), encoding="utf-8")
-    context_path.write_text(render_context(args.context), encoding="utf-8")
+    context_source = render_context(args.context)
+    lib_source = (ROOT / "test" / "wasm_api" / "parity_guest" / "src" / "lib.rs").read_text(
+        encoding="utf-8"
+    )
+    bindings_path.write_text(
+        render_bindings(
+            args.context,
+            args.transport,
+            (rust_path.read_text(encoding="utf-8"), context_source, lib_source),
+        ),
+        encoding="utf-8",
+    )
+    context_path.write_text(context_source, encoding="utf-8")
     ids = [test["id"] for test, *_ in selected]
     manifest_path.write_text(
         json.dumps(

@@ -15,17 +15,19 @@ end
 if not gadgetHandler:IsSyncedCode() then
 	local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 	local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
-	local wasmContext = tostring((Spring.GetModOptions() or {}).native_api_parity_wasm_context or "synced_gadget")
+	local parityOptions = Spring.GetModOptions() or {}
+	local wasmContext = tostring(parityOptions.native_api_parity_wasm_context or "synced_gadget")
+	local wasmTransport = tostring(parityOptions.native_api_parity_wasm_transport or "component")
+	local wasmSpecSuffix = wasmTransport == "core" and "_core" or ""
 	local wasmSpecPath = wasmContext == "synced_gadget"
-		and "LuaRules/Utilities/wasm_api_probe_tests.lua"
-		or "LuaRules/Utilities/wasm_api_probe_tests_" .. wasmContext .. ".lua"
+		and "LuaRules/Utilities/wasm_api_probe_tests" .. wasmSpecSuffix .. ".lua"
+		or "LuaRules/Utilities/wasm_api_probe_tests_" .. wasmContext .. wasmSpecSuffix .. ".lua"
 	local WasmProbeSpec = VFS.Include(wasmSpecPath)
 	local sentInventory = false
 	local dynamicTimeReferenceSent = false
 	local ranGeneratedTests = false
 	local fixtureIDs = {}
 	local groundDecalID
-	local parityOptions = Spring.GetModOptions() or {}
 	local processTest = tostring(parityOptions.native_api_parity_process_test or "")
 	local processStage = tostring(parityOptions.native_api_parity_process_stage or "initial")
 	local wasmRole = tostring(parityOptions.native_api_parity_wasm_role or "combined")
@@ -551,6 +553,16 @@ if not gadgetHandler:IsSyncedCode() then
 				end
 				forward("wasm", Common.encode(payload))
 			end
+		elseif type(name) == "string" and name:sub(1, 5) == "WASM_" then
+			-- Core synced guests arrive here through the one-string
+			-- SendToUnsynced capability; RecvLuaMsg belongs to the synced
+			-- gadget and is not available on this unsynced handle.
+			local payload = Common.decodeWasmMessage(name)
+			if payload ~= nil then
+				payload.frame = payload.frame or (Spring.GetGameFrame and Spring.GetGameFrame() or 0)
+				payload.playerID = payload.playerID or 0
+				forward("wasm", Common.encode(payload))
+			end
 		end
 	end
 
@@ -634,10 +646,13 @@ end
 local Common = VFS.Include("LuaRules/Utilities/native_api_parity_common.lua")
 local GeneratedTests = VFS.Include("LuaRules/Utilities/generated_api_tests.lua")
 local LuaScriptSurfaceTests = VFS.Include("LuaRules/Utilities/lua_script_surface_tests.lua")
-local wasmContext = tostring((Spring.GetModOptions() or {}).native_api_parity_wasm_context or "synced_gadget")
+local parityOptions = Spring.GetModOptions() or {}
+local wasmContext = tostring(parityOptions.native_api_parity_wasm_context or "synced_gadget")
+local wasmTransport = tostring(parityOptions.native_api_parity_wasm_transport or "component")
+local wasmSpecSuffix = wasmTransport == "core" and "_core" or ""
 local wasmSpecPath = wasmContext == "synced_gadget"
-	and "LuaRules/Utilities/wasm_api_probe_tests.lua"
-	or "LuaRules/Utilities/wasm_api_probe_tests_" .. wasmContext .. ".lua"
+	and "LuaRules/Utilities/wasm_api_probe_tests" .. wasmSpecSuffix .. ".lua"
+	 or "LuaRules/Utilities/wasm_api_probe_tests_" .. wasmContext .. wasmSpecSuffix .. ".lua"
 local WasmProbeSpec = VFS.Include(wasmSpecPath)
 local WasmProbeTests = WasmProbeSpec.tests or WasmProbeSpec
 local WasmProbeValues = WasmProbeSpec.values or {}

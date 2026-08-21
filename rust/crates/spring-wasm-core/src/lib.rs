@@ -58,6 +58,12 @@ pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/core_generated.rs"));
 }
 
+/// Owned semantic façade for Core guests. The raw/generated namespaces remain
+/// available for allocation-free callers; parity and application code can use
+/// this stable surface when the `alloc` feature is enabled.
+#[cfg(feature = "alloc")]
+pub use generated::owned;
+
 pub const ABI_VERSION: u32 = 1;
 pub const POSITION_MID: u32 = 1 << 0;
 pub const POSITION_AIM: u32 = 1 << 1;
